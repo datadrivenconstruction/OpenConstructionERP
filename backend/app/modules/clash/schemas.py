@@ -169,8 +169,7 @@ class ClashRunCreate(BaseModel):
     description: str | None = Field(
         default=None,
         max_length=2000,
-        description="Free-text note so a run is identifiable in history "
-        "(scope, intent, reviewer). Optional.",
+        description="Free-text note so a run is identifiable in history (scope, intent, reviewer). Optional.",
     )
     model_ids: list[uuid.UUID] = Field(
         ...,
@@ -192,11 +191,15 @@ class ClashRunCreate(BaseModel):
         "same file'). Skipped — has no effect — on a single-model run.",
     )
     tolerance_m: float = Field(
-        default=0.01, ge=0.0, le=10.0,
+        default=0.01,
+        ge=0.0,
+        le=10.0,
         description="Hard-clash interpenetration threshold in metres.",
     )
     clearance_m: float = Field(
-        default=0.0, ge=0.0, le=50.0,
+        default=0.0,
+        ge=0.0,
+        le=50.0,
         description="Proximity threshold in metres (0 disables the soft pass).",
     )
     mode: str = Field(
@@ -286,9 +289,7 @@ class ClashCategoriesResponse(BaseModel):
     group_by: str = "type"
     groups: list[ClashCategoryItem] = Field(default_factory=list)
     available_group_by: list[str] = Field(default_factory=list)
-    available_properties: list[ClashPropertyFacet] = Field(
-        default_factory=list
-    )
+    available_properties: list[ClashPropertyFacet] = Field(default_factory=list)
     element_types: list[ClashCategoryItem] = Field(default_factory=list)
     disciplines: list[ClashCategoryItem] = Field(default_factory=list)
 

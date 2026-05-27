@@ -42,20 +42,22 @@ D = Decimal
     ],
 )
 def test_classify_line_match(
-    ordered: Decimal, received: Decimal, invoiced: Decimal, expected: str,
+    ordered: Decimal,
+    received: Decimal,
+    invoiced: Decimal,
+    expected: str,
 ) -> None:
     """Pin the matrix of (ordered, received, invoiced) → status tag."""
-    assert (
-        ProcurementService._classify_line_match(ordered, received, invoiced)
-        == expected
-    )
+    assert ProcurementService._classify_line_match(ordered, received, invoiced) == expected
 
 
 def test_over_invoiced_outranks_over_received() -> None:
     """Precedence: an over-invoiced line is reported even if it is also
     over-received — overpaying is the more urgent finance concern."""
     tag = ProcurementService._classify_line_match(
-        D("100"), D("200"), D("300"),
+        D("100"),
+        D("200"),
+        D("300"),
     )
     assert tag == "over_invoiced"
 
@@ -64,6 +66,8 @@ def test_zero_invoice_with_positive_receipt_is_partial() -> None:
     """A line that has been received in full but not yet invoiced is
     'partial', not 'ok' — the three-way match is not closed."""
     tag = ProcurementService._classify_line_match(
-        D("50"), D("50"), D("0"),
+        D("50"),
+        D("50"),
+        D("0"),
     )
     assert tag == "partial"

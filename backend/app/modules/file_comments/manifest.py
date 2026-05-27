@@ -15,8 +15,7 @@ manifest = ModuleManifest(
     version="1.0.0",
     display_name="File Comments",
     description=(
-        "Threaded comments + PDF markup pins across all file kinds, with "
-        "@mention extraction and resolve workflow."
+        "Threaded comments + PDF markup pins across all file kinds, with @mention extraction and resolve workflow."
     ),
     author="OpenEstimate Core Team",
     category="core",

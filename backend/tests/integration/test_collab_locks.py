@@ -37,9 +37,7 @@ async def collab_client():
             yield ac
 
 
-async def _register_and_login(
-    client: AsyncClient, suffix: str
-) -> dict[str, str]:
+async def _register_and_login(client: AsyncClient, suffix: str) -> dict[str, str]:
     unique = uuid.uuid4().hex[:8]
     email = f"collab-{suffix}-{unique}@test.io"
     password = f"Collab{unique}9"
@@ -94,9 +92,7 @@ def _new_entity_id() -> str:
 
 
 @pytest.mark.asyncio
-async def test_acquire_grants_when_free(
-    collab_client: AsyncClient, alice: dict[str, str]
-) -> None:
+async def test_acquire_grants_when_free(collab_client: AsyncClient, alice: dict[str, str]) -> None:
     entity_id = _new_entity_id()
     resp = await collab_client.post(
         "/api/v1/collaboration_locks/",
@@ -149,9 +145,7 @@ async def test_acquire_returns_409_when_held_by_other(
 
 
 @pytest.mark.asyncio
-async def test_holder_can_reacquire_idempotently(
-    collab_client: AsyncClient, alice: dict[str, str]
-) -> None:
+async def test_holder_can_reacquire_idempotently(collab_client: AsyncClient, alice: dict[str, str]) -> None:
     entity_id = _new_entity_id()
     first = await collab_client.post(
         "/api/v1/collaboration_locks/",
@@ -179,9 +173,7 @@ async def test_holder_can_reacquire_idempotently(
 
 
 @pytest.mark.asyncio
-async def test_heartbeat_extends_expiry(
-    collab_client: AsyncClient, alice: dict[str, str]
-) -> None:
+async def test_heartbeat_extends_expiry(collab_client: AsyncClient, alice: dict[str, str]) -> None:
     entity_id = _new_entity_id()
     acq = await collab_client.post(
         "/api/v1/collaboration_locks/",
@@ -234,9 +226,7 @@ async def test_heartbeat_rejects_non_holder(
 
 
 @pytest.mark.asyncio
-async def test_release_removes_lock(
-    collab_client: AsyncClient, alice: dict[str, str]
-) -> None:
+async def test_release_removes_lock(collab_client: AsyncClient, alice: dict[str, str]) -> None:
     entity_id = _new_entity_id()
     acq = await collab_client.post(
         "/api/v1/collaboration_locks/",
@@ -293,9 +283,7 @@ async def test_release_rejects_non_holder(
 
 
 @pytest.mark.asyncio
-async def test_unknown_entity_type_rejected(
-    collab_client: AsyncClient, alice: dict[str, str]
-) -> None:
+async def test_unknown_entity_type_rejected(collab_client: AsyncClient, alice: dict[str, str]) -> None:
     resp = await collab_client.post(
         "/api/v1/collaboration_locks/",
         json={
@@ -310,9 +298,7 @@ async def test_unknown_entity_type_rejected(
 
 
 @pytest.mark.asyncio
-async def test_get_entity_returns_none_when_free(
-    collab_client: AsyncClient, alice: dict[str, str]
-) -> None:
+async def test_get_entity_returns_none_when_free(collab_client: AsyncClient, alice: dict[str, str]) -> None:
     probe = await collab_client.get(
         "/api/v1/collaboration_locks/entity/",
         params={
@@ -326,9 +312,7 @@ async def test_get_entity_returns_none_when_free(
 
 
 @pytest.mark.asyncio
-async def test_get_entity_returns_holder_info(
-    collab_client: AsyncClient, alice: dict[str, str]
-) -> None:
+async def test_get_entity_returns_holder_info(collab_client: AsyncClient, alice: dict[str, str]) -> None:
     entity_id = _new_entity_id()
     acq = await collab_client.post(
         "/api/v1/collaboration_locks/",
@@ -354,9 +338,7 @@ async def test_get_entity_returns_holder_info(
 
 
 @pytest.mark.asyncio
-async def test_list_my_locks_contains_held_lock(
-    collab_client: AsyncClient, alice: dict[str, str]
-) -> None:
+async def test_list_my_locks_contains_held_lock(collab_client: AsyncClient, alice: dict[str, str]) -> None:
     entity_id = _new_entity_id()
     acq = await collab_client.post(
         "/api/v1/collaboration_locks/",
@@ -409,9 +391,7 @@ async def test_expired_lock_can_be_stolen(
 
     # Backdate the expiry so the row looks stale to the next caller.
     async with async_session_factory() as sess:
-        stmt = select(CollabLock).where(
-            CollabLock.entity_id == uuid.UUID(entity_id)
-        )
+        stmt = select(CollabLock).where(CollabLock.entity_id == uuid.UUID(entity_id))
         row = (await sess.execute(stmt)).scalar_one()
         row.expires_at = datetime.now(UTC) - timedelta(seconds=5)
         await sess.commit()
@@ -431,9 +411,7 @@ async def test_expired_lock_can_be_stolen(
 
 
 @pytest.mark.asyncio
-async def test_sweeper_removes_expired_rows(
-    collab_client: AsyncClient, alice: dict[str, str]
-) -> None:
+async def test_sweeper_removes_expired_rows(collab_client: AsyncClient, alice: dict[str, str]) -> None:
     """Forge an expired row, invoke ``_sweep_once`` directly, verify
     the row is gone."""
     from sqlalchemy import select
@@ -471,9 +449,7 @@ async def test_sweeper_removes_expired_rows(
 
 
 @pytest.mark.asyncio
-async def test_release_missing_lock_is_idempotent(
-    collab_client: AsyncClient, alice: dict[str, str]
-) -> None:
+async def test_release_missing_lock_is_idempotent(collab_client: AsyncClient, alice: dict[str, str]) -> None:
     # Release a lock that never existed — should silently 204.
     rel = await collab_client.delete(
         f"/api/v1/collaboration_locks/{uuid.uuid4()}/",

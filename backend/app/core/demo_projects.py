@@ -1964,9 +1964,9 @@ DEMO_TEMPLATES: dict[str, DemoTemplate] = {t.demo_id: t for t in [_BERLIN, _LOND
 # operators consistently asked us to drop it from the default workspace.
 DEFAULT_DEMO_IDS: tuple[str, ...] = (
     "residential-berlin",  # residential — DACH DIN 276, EUR
-    "warehouse-dubai",     # industrial / infrastructure — AED
-    "school-paris",        # small renovation / education fit-out — FR EUR
-    "medical-us",          # international healthcare — US MasterFormat, USD
+    "warehouse-dubai",  # industrial / infrastructure — AED
+    "school-paris",  # small renovation / education fit-out — FR EUR
+    "medical-us",  # international healthcare — US MasterFormat, USD
 )
 
 # Catalog info for the marketplace / frontend
@@ -6092,8 +6092,7 @@ async def _seed_module_data(
             {
                 "title": "Curtain wall water ingress — Level 5 transom",
                 "description": (
-                    "Water staining at transom-mullion junction Level 5,"
-                    " south elevation (per INS-003 mock-up failure)."
+                    "Water staining at transom-mullion junction Level 5, south elevation (per INS-003 mock-up failure)."
                 ),
                 "priority": "high",
                 "status": "open",
@@ -6225,8 +6224,7 @@ async def _seed_module_data(
             {
                 "title": "Dock leveller hydraulic leak — Dock 5",
                 "description": (
-                    "Hydraulic fluid leak on dock leveller 5."
-                    " Leveller operational but needs seal replacement."
+                    "Hydraulic fluid leak on dock leveller 5. Leveller operational but needs seal replacement."
                 ),
                 "priority": "low",
                 "status": "resolved",
@@ -6809,9 +6807,7 @@ async def install_demo_project(
     # ── 0. Duplicate check ────────────────────────────────────────────
     existing_rows = (await session.execute(select(Project))).scalars().all()
     existing_demo = [
-        p
-        for p in existing_rows
-        if isinstance(p.metadata_, dict) and p.metadata_.get("demo_id") == demo_id
+        p for p in existing_rows if isinstance(p.metadata_, dict) and p.metadata_.get("demo_id") == demo_id
     ]
 
     if existing_demo and not force_reinstall:

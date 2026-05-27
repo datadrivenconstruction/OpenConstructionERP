@@ -124,8 +124,7 @@ class CDEStateMachine:
         min_role = gate["min_role"]
         if _role_rank(user_role) < _role_rank(min_role):
             return False, (
-                f"Insufficient role: {user_role!r} cannot pass gate {gate['gate']}. "
-                f"Minimum required: {min_role!r}"
+                f"Insufficient role: {user_role!r} cannot pass gate {gate['gate']}. Minimum required: {min_role!r}"
             )
 
         return True, "ok"

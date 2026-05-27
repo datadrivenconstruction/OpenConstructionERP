@@ -54,6 +54,4 @@ def test_takeoff_measurement_scale_pixels_per_unit_remains_float() -> None:
     from app.modules.takeoff.models import TakeoffMeasurement
 
     col = TakeoffMeasurement.__table__.c["scale_pixels_per_unit"]
-    assert isinstance(col.type, sa.Float), (
-        "scale_pixels_per_unit should remain Float — see model docstring"
-    )
+    assert isinstance(col.type, sa.Float), "scale_pixels_per_unit should remain Float — see model docstring"

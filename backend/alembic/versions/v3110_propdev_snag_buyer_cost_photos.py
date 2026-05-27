@@ -38,7 +38,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3110_propdev_snag_buyer_cost_photos"
 down_revision: Union[str, Sequence[str], None] = "v3109_costmodel_geo_merge"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -53,7 +52,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -61,7 +62,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -72,9 +75,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     if not _has_table(inspector, _TABLE):
         # Fresh install — create_all already populated everything.
@@ -86,13 +87,7 @@ def upgrade() -> None:
     add_photos = not _has_column(inspector, _TABLE, "photos")
     add_link = not _has_column(inspector, _TABLE, "linked_punch_item_id")
 
-    needs_any = (
-        add_buyer_id
-        or add_category
-        or add_cost_impact
-        or add_photos
-        or add_link
-    )
+    needs_any = add_buyer_id or add_category or add_cost_impact or add_photos or add_link
 
     if needs_any:
         with op.batch_alter_table(_TABLE) as batch:

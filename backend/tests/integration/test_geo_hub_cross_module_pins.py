@@ -17,7 +17,7 @@ from __future__ import annotations
 import os
 import tempfile
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # ── Per-module SQLite isolation (must run BEFORE app imports) ──────────────
@@ -67,11 +67,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -87,7 +83,9 @@ async def _register(client: AsyncClient, label: str) -> tuple[str, str]:
 
 
 async def _login(
-    client: AsyncClient, email: str, password: str,
+    client: AsyncClient,
+    email: str,
+    password: str,
 ) -> dict[str, str]:
     res = await client.post(
         "/api/v1/users/auth/login",
@@ -202,7 +200,10 @@ class TestHSEPins:
 
     @pytest.mark.asyncio
     async def test_hse_pin_cross_tenant_returns_404(
-        self, http_client, tenant_a, tenant_b,
+        self,
+        http_client,
+        tenant_a,
+        tenant_b,
     ):
         res = await http_client.get(
             f"/api/v1/geo-hub/projects/{tenant_a['project_id']}/hse-pins",
@@ -268,7 +269,10 @@ class TestPunchlistPins:
 
     @pytest.mark.asyncio
     async def test_punchlist_pin_cross_tenant_returns_404(
-        self, http_client, tenant_a, tenant_b,
+        self,
+        http_client,
+        tenant_a,
+        tenant_b,
     ):
         res = await http_client.get(
             f"/api/v1/geo-hub/projects/{tenant_a['project_id']}/punchlist-pins",
@@ -291,7 +295,7 @@ class TestDiaryPhotoPins:
         from app.database import async_session_factory
         from app.modules.daily_diary.models import DiaryPhoto
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         async with async_session_factory() as s:
             await s.execute(
@@ -345,7 +349,10 @@ class TestDiaryPhotoPins:
 
     @pytest.mark.asyncio
     async def test_diary_photo_pin_cross_tenant_returns_404(
-        self, http_client, tenant_a, tenant_b,
+        self,
+        http_client,
+        tenant_a,
+        tenant_b,
     ):
         res = await http_client.get(
             f"/api/v1/geo-hub/projects/{tenant_a['project_id']}/diary-photo-pins",

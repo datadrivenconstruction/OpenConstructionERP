@@ -165,10 +165,7 @@ class TenderingService:
             if new_status not in allowed:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail=(
-                        f"Illegal package transition: "
-                        f"{package.status!r} → {new_status!r}"
-                    ),
+                    detail=(f"Illegal package transition: {package.status!r} → {new_status!r}"),
                 )
             # Stamp lifecycle timestamps into metadata (no schema column
             # exists; metadata_ is the extensible store per the data model).
@@ -276,8 +273,7 @@ class TenderingService:
         # string so the persisted JSON value matches the wire contract.
         if "line_items" in fields and fields["line_items"] is not None:
             fields["line_items"] = [
-                item.model_dump(mode="json") if hasattr(item, "model_dump") else item
-                for item in fields["line_items"]
+                item.model_dump(mode="json") if hasattr(item, "model_dump") else item for item in fields["line_items"]
             ]
 
         if not fields:
@@ -364,13 +360,9 @@ class TenderingService:
                 bid_ccy_counts[c] = bid_ccy_counts.get(c, 0) + 1
         baseline_currency = ""
         if budget_positions:
-            baseline_currency = (
-                getattr(budget_positions[0], "currency", "") or ""
-            ).strip().upper()
+            baseline_currency = (getattr(budget_positions[0], "currency", "") or "").strip().upper()
         if not baseline_currency and bid_ccy_counts:
-            baseline_currency = max(
-                bid_ccy_counts.items(), key=lambda kv: (kv[1], kv[0])
-            )[0]
+            baseline_currency = max(bid_ccy_counts.items(), key=lambda kv: (kv[1], kv[0]))[0]
 
         def _bid_currency(bid: TenderBid) -> str:
             return (bid.currency or "").strip().upper()
@@ -390,9 +382,7 @@ class TenderingService:
                     bid_rate = _to_decimal(matching.get("unit_rate", 0))
                     bid_total = _to_decimal(matching.get("total", 0))
                     if budget_rate > 0 and _same_currency(bid):
-                        deviation = (
-                            (bid_rate - budget_rate) / budget_rate * Decimal("100")
-                        )
+                        deviation = (bid_rate - budget_rate) / budget_rate * Decimal("100")
                         dev_val = round(float(deviation), 1)
                     else:
                         dev_val = 0.0
@@ -435,9 +425,7 @@ class TenderingService:
         for bid in bids:
             total = _to_decimal(bid.total_amount)
             if budget_total > 0 and _same_currency(bid):
-                deviation = (
-                    (total - budget_total) / budget_total * Decimal("100")
-                )
+                deviation = (total - budget_total) / budget_total * Decimal("100")
                 dev_val = round(float(deviation), 1)
             else:
                 dev_val = 0.0
@@ -511,10 +499,7 @@ class TenderingService:
         if bid.status in _NON_AWARDABLE_BID_STATES:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    f"Bid is {bid.status!r} and cannot be awarded "
-                    f"(disqualified bids are not eligible)"
-                ),
+                detail=(f"Bid is {bid.status!r} and cannot be awarded (disqualified bids are not eligible)"),
             )
 
         # ── Currency-mismatch guard ────────────────────────────────────────
@@ -529,11 +514,7 @@ class TenderingService:
 
         project_repo = ProjectRepository(self.session)
         project = await project_repo.get_by_id(package.project_id)
-        project_currency = (
-            (getattr(project, "currency", "") or "").strip().upper()
-            if project is not None
-            else ""
-        )
+        project_currency = (getattr(project, "currency", "") or "").strip().upper() if project is not None else ""
         if project_currency:
             offenders: list[dict[str, str]] = []
             bid_ccy = (bid.currency or "").strip().upper()
@@ -597,9 +578,7 @@ class TenderingService:
             qty = _to_decimal(pos.quantity)
             new_total = qty * rate
             await self.session.execute(
-                update(Position)
-                .where(Position.id == pos.id)
-                .values(unit_rate=str(rate), total=str(new_total))
+                update(Position).where(Position.id == pos.id).values(unit_rate=str(rate), total=str(new_total))
             )
             updated += 1
 
@@ -613,9 +592,7 @@ class TenderingService:
 
         # Flip statuses — package: awarded, winning bid: accepted,
         # every competing bid: rejected (a closed tender has one winner).
-        await self.repo.update_package_fields(
-            package_id, status="awarded", metadata_=meta
-        )
+        await self.repo.update_package_fields(package_id, status="awarded", metadata_=meta)
         all_bids = await self.repo.list_bids_for_package(package_id)
         for other in all_bids:
             if other.id == bid_id:
@@ -684,9 +661,7 @@ class TenderingService:
         # currency cohort (the currency carried by the most bids).
         ccy_counts: dict[str, int] = {}
         for b in bids:
-            ccy_counts[_norm_ccy(b.currency)] = (
-                ccy_counts.get(_norm_ccy(b.currency), 0) + 1
-            )
+            ccy_counts[_norm_ccy(b.currency)] = ccy_counts.get(_norm_ccy(b.currency), 0) + 1
         dominant_ccy = max(ccy_counts.items(), key=lambda kv: (kv[1], kv[0]))[0]
 
         # Vendor rollup — Decimal sums, and a vendor that bid in more than
@@ -714,11 +689,7 @@ class TenderingService:
             BidVendorEntry(
                 company_name=str(v["company_name"]),
                 total=_round2(v["total"]),
-                currency=(
-                    next(iter(v["currencies"]))
-                    if len(v["currencies"]) == 1
-                    else ""
-                ),
+                currency=(next(iter(v["currencies"])) if len(v["currencies"]) == 1 else ""),
                 bid_count=int(v["bid_count"]),
             )
             for v in sorted(
@@ -728,11 +699,7 @@ class TenderingService:
         ]
 
         # Cohort restricted to the dominant currency for spread/outliers.
-        cohort = [
-            (b, _to_decimal(b.total_amount))
-            for b in bids
-            if _norm_ccy(b.currency) == dominant_ccy
-        ]
+        cohort = [(b, _to_decimal(b.total_amount)) for b in bids if _norm_ccy(b.currency) == dominant_ccy]
         totals: list[Decimal] = [t for _, t in cohort]
         sorted_totals = sorted(totals)
 
@@ -747,9 +714,7 @@ class TenderingService:
         p75 = _pct(sorted_totals, 0.75)
         n = len(totals)
         mean = sum(totals, Decimal("0")) / Decimal(n)
-        variance = sum(
-            ((t - mean) ** 2 for t in totals), Decimal("0")
-        ) / Decimal(n)
+        variance = sum(((t - mean) ** 2 for t in totals), Decimal("0")) / Decimal(n)
         std = variance.sqrt()
 
         spread = BidSpread(

@@ -204,9 +204,7 @@ async def index_file(
         payload = payload_override
         mime = mime_override or ""
     else:
-        payload, mime, _name = await _fetch_file_payload(
-            session, project_id, kind, file_id
-        )
+        payload, mime, _name = await _fetch_file_payload(session, project_id, kind, file_id)
 
     extraction = extract_text(payload, mime)
     return await _upsert_index_row(session, project_id, kind, file_id, extraction)
@@ -336,9 +334,7 @@ async def search_content(
 
     hits: list[SearchHit] = []
     for row in rows:
-        name = await _resolve_canonical_name(
-            session, project_id, row.file_kind, row.file_id
-        )
+        name = await _resolve_canonical_name(session, project_id, row.file_kind, row.file_id)
         snippet = _build_snippet(row.content_text, q)
         hits.append(
             SearchHit(
@@ -465,6 +461,7 @@ async def _search_by_filename(
     case-insensitive substring match on each kind's name attribute.
     """
     import importlib
+
     from sqlalchemy import func
 
     needle = f"%{q.lower()}%"
@@ -485,12 +482,7 @@ async def _search_by_filename(
         name_attr = getattr(Cls, spec[3], None)
         if name_attr is None:
             continue
-        stmt = (
-            select(Cls)
-            .where(Cls.project_id == project_id)
-            .where(func.lower(name_attr).like(needle))
-            .limit(limit)
-        )
+        stmt = select(Cls).where(Cls.project_id == project_id).where(func.lower(name_attr).like(needle)).limit(limit)
         result = await session.execute(stmt)
         for row in result.scalars().all():
             name = getattr(row, spec[3], None) or f"{k}/{row.id}"
@@ -539,9 +531,7 @@ async def reindex_project(
                 await index_file(session, project_id, kind, str(row.id))
                 indexed += 1
             except Exception:
-                logger.exception(
-                    "Reindex failed for kind=%s file_id=%s", kind, row.id
-                )
+                logger.exception("Reindex failed for kind=%s file_id=%s", kind, row.id)
                 errors += 1
                 continue
 

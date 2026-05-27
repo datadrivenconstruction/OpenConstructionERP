@@ -54,9 +54,7 @@ async def seed_equipment_demo(session: AsyncSession) -> dict[str, int]:
     Idempotent: returns zeros for an already-seeded DB (checked via
     presence of equipment codes ``EQ-0001``).
     """
-    existing = await session.execute(
-        select(Equipment).where(Equipment.code == "EQ-0001")
-    )
+    existing = await session.execute(select(Equipment).where(Equipment.code == "EQ-0001"))
     if existing.scalar_one_or_none() is not None:
         logger.info("Equipment demo already seeded — skipping")
         return {
@@ -178,21 +176,13 @@ async def seed_equipment_demo(session: AsyncSession) -> dict[str, int]:
                 trigger_type=trigger_type,
                 trigger_threshold=Decimal(threshold),
                 description=f"Routine {trigger_type} service",
-                last_completed_at=(
-                    today - timedelta(days=rng.randint(30, 300))
-                ).isoformat(),
+                last_completed_at=(today - timedelta(days=rng.randint(30, 300))).isoformat(),
                 last_completed_meter=Decimal(int(e.hour_meter) - rng.randint(100, 1000))
                 if trigger_type == "hours"
                 else None,
-                next_due_meter=(
-                    Decimal(int(e.hour_meter) + rng.randint(20, 80))
-                    if trigger_type == "hours"
-                    else None
-                ),
+                next_due_meter=(Decimal(int(e.hour_meter) + rng.randint(20, 80)) if trigger_type == "hours" else None),
                 next_due_date=(
-                    (today + timedelta(days=rng.randint(5, 60))).isoformat()
-                    if trigger_type == "date"
-                    else None
+                    (today + timedelta(days=rng.randint(5, 60))).isoformat() if trigger_type == "date" else None
                 ),
                 active=True,
             )

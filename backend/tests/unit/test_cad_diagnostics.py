@@ -7,13 +7,11 @@ Revit 2024 but installed converter is 18.x") instead of the generic
 
 from __future__ import annotations
 
-import struct
 from pathlib import Path
 
 import pytest
 
 from app.modules.boq import cad_import
-
 
 # ── read_rvt_revit_version ────────────────────────────────────────────────
 
@@ -26,10 +24,9 @@ def _write_ole_with_basicfileinfo(path: Path, *, format_year: str, build: str) -
     We don't build a fully-valid CFB — just enough that the magic-byte
     sniff passes and the UTF-16 scan locates the Format/Build lines.
     """
-    blob = (
-        f"Format: {format_year}\r\n"
-        f"Revit Build: (Autodesk Revit {format_year} (ENU)) {build}\r\n"
-    ).encode("utf-16-le")
+    blob = (f"Format: {format_year}\r\nRevit Build: (Autodesk Revit {format_year} (ENU)) {build}\r\n").encode(
+        "utf-16-le"
+    )
     # OLE magic + 504 bytes of padding to get past the header, then blob.
     payload = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + (b"\x00" * 504) + blob
     path.write_bytes(payload)
@@ -86,9 +83,7 @@ def test_detect_converter_version_no_binary(monkeypatch: pytest.MonkeyPatch) -> 
     assert info == {"version": None, "source": None, "binary_path": None}
 
 
-def test_detect_converter_version_dpkg_success(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_detect_converter_version_dpkg_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     fake_bin = tmp_path / "RvtExporter"
     fake_bin.write_bytes(b"x" * 2048)
     monkeypatch.setattr(cad_import, "find_converter", lambda _ext: fake_bin)

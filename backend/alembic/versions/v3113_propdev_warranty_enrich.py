@@ -36,7 +36,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3113_propdev_warranty_enrich"
 down_revision: Union[str, Sequence[str], None] = "v3112_bootstrap_missing_tables"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -51,7 +50,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -59,7 +60,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -70,9 +73,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     if not _has_table(inspector, _TABLE):
         # Fresh install — create_all already populated everything.
@@ -86,15 +87,17 @@ def upgrade() -> None:
     add_sla = not _has_column(inspector, _TABLE, "sla_deadline")
     add_resolution = not _has_column(inspector, _TABLE, "resolution_notes")
 
-    needs_any = any([
-        add_handover,
-        add_source_snag,
-        add_assigned,
-        add_severity,
-        add_photos,
-        add_sla,
-        add_resolution,
-    ])
+    needs_any = any(
+        [
+            add_handover,
+            add_source_snag,
+            add_assigned,
+            add_severity,
+            add_photos,
+            add_sla,
+            add_resolution,
+        ]
+    )
 
     if needs_any:
         with op.batch_alter_table(_TABLE) as batch:
@@ -147,9 +150,7 @@ def upgrade() -> None:
         ),
         ("ix_oe_property_dev_warranty_claim_severity", "severity"),
     ):
-        if _has_column(inspector, _TABLE, col) and not _has_index(
-            inspector, _TABLE, name
-        ):
+        if _has_column(inspector, _TABLE, col) and not _has_index(inspector, _TABLE, name):
             op.create_index(name, _TABLE, [col])
 
 

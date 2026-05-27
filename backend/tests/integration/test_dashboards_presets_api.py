@@ -63,7 +63,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -140,7 +142,9 @@ def _set_acting_user(user_id: uuid.UUID, tenant_id: str | None = None) -> None:
 
 @pytest.mark.asyncio
 async def test_create_private_preset_happy_path(
-    client: AsyncClient, user_a: uuid.UUID, project_id: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.post(
@@ -167,7 +171,9 @@ async def test_create_private_preset_happy_path(
 
 @pytest.mark.asyncio
 async def test_create_with_shared_promotes_to_collection(
-    client: AsyncClient, user_a: uuid.UUID, project_id: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.post(
@@ -188,7 +194,9 @@ async def test_create_with_shared_promotes_to_collection(
 
 @pytest.mark.asyncio
 async def test_owner_lists_own_presets(
-    client: AsyncClient, user_a: uuid.UUID, project_id: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     for name in ("First", "Second"):
@@ -250,7 +258,9 @@ async def test_non_owner_only_sees_shared_collections(
 
 @pytest.mark.asyncio
 async def test_get_other_users_private_preset_404s(
-    client: AsyncClient, user_a: uuid.UUID, user_b: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    user_b: uuid.UUID,
     project_id: uuid.UUID,
 ) -> None:
     tenant = "shared-tenant"
@@ -272,7 +282,9 @@ async def test_get_other_users_private_preset_404s(
 
 @pytest.mark.asyncio
 async def test_owner_can_patch_name(
-    client: AsyncClient, user_a: uuid.UUID, project_id: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     create = await client.post(
@@ -323,7 +335,9 @@ async def test_non_owner_patch_forbidden(
 
 @pytest.mark.asyncio
 async def test_owner_can_delete(
-    client: AsyncClient, user_a: uuid.UUID, project_id: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     create = await client.post(
@@ -342,7 +356,9 @@ async def test_owner_can_delete(
 
 @pytest.mark.asyncio
 async def test_share_endpoint_toggles_flag(
-    client: AsyncClient, user_a: uuid.UUID, project_id: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     create = await client.post(
@@ -367,7 +383,9 @@ async def test_share_endpoint_toggles_flag(
 
 @pytest.mark.asyncio
 async def test_create_with_empty_name_rejected(
-    client: AsyncClient, user_a: uuid.UUID, project_id: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.post(

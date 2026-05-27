@@ -205,7 +205,9 @@ class PermissionRegistry:
         self._permissions[permission] = min_role
         logger.info(
             "Permission min_role updated: %s %s → %s",
-            permission, previous.value, min_role.value,
+            permission,
+            previous.value,
+            min_role.value,
         )
         return previous
 
@@ -310,7 +312,7 @@ def register_field_role_permissions() -> None:
     permission check returns False — by design.
     """
     # Intentionally empty. See module docstring above.
-    return None
+    return
 
 
 def register_core_permissions() -> None:

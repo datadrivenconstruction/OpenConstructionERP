@@ -205,9 +205,7 @@ def _parse_gaeb(xml_bytes: bytes) -> ET.Element:
 
 
 @pytest.mark.asyncio
-async def test_x84_export_roundtrip_preserves_positions(
-    shared_client: AsyncClient, shared_auth: dict
-) -> None:
+async def test_x84_export_roundtrip_preserves_positions(shared_client: AsyncClient, shared_auth: dict) -> None:
     """Export X84 → re-import the X84 file → every original position present."""
     client = shared_client
     auth = shared_auth
@@ -220,9 +218,7 @@ async def test_x84_export_roundtrip_preserves_positions(
             "quantity": 240.0,
             "unit_rate": 165.50,
             "metadata": {
-                "alt_markup_reason": (
-                    "Substitute precast panels reduces site curing time by 9 days."
-                ),
+                "alt_markup_reason": ("Substitute precast panels reduces site curing time by 9 days."),
                 "alt_parent_ref": "01.001",
                 "alt_recommended": True,
             },
@@ -252,9 +248,7 @@ async def test_x84_export_roundtrip_preserves_positions(
             },
         },
     ]
-    _, boq_id = await _make_boq_with_positions(
-        client, auth, position_specs=position_specs
-    )
+    _, boq_id = await _make_boq_with_positions(client, auth, position_specs=position_specs)
 
     # ── Export X84 ─────────────────────────────────────────────────────────
     resp = await client.get(
@@ -279,14 +273,10 @@ async def test_x84_export_roundtrip_preserves_positions(
 
     # Every position carries a BoQBkUp element (alternate-bid marker).
     items = root.findall(f".//{GNS}Item")
-    assert len(items) == len(position_specs), (
-        f"Expected {len(position_specs)} Item elements, got {len(items)}"
-    )
+    assert len(items) == len(position_specs), f"Expected {len(position_specs)} Item elements, got {len(items)}"
     for item in items:
         bkup = item.find(f"{GNS}BoQBkUp")
-        assert bkup is not None, (
-            f"Item {item.get('ID')!r} missing <BoQBkUp> — X84 alternate marker"
-        )
+        assert bkup is not None, f"Item {item.get('ID')!r} missing <BoQBkUp> — X84 alternate marker"
 
     # BoQBkUpRef present on the first two positions, absent on the third.
     items_by_id = {item.get("ID"): item for item in items}
@@ -297,15 +287,9 @@ async def test_x84_export_roundtrip_preserves_positions(
     )
 
     # Award/Recommendation lists positions with alt_recommended=True (01.001, 01.003).
-    recommended = root.findall(
-        f".//{GNS}Award/{GNS}Recommendation/{GNS}RecommendedItem"
-    )
-    recommended_ordinals = {
-        (r.find(f"{GNS}RNoPart").text or "").strip() for r in recommended
-    }
-    assert recommended_ordinals == {"01.001", "01.003"}, (
-        f"Recommendation block mismatch: {recommended_ordinals}"
-    )
+    recommended = root.findall(f".//{GNS}Award/{GNS}Recommendation/{GNS}RecommendedItem")
+    recommended_ordinals = {(r.find(f"{GNS}RNoPart").text or "").strip() for r in recommended}
+    assert recommended_ordinals == {"01.001", "01.003"}, f"Recommendation block mismatch: {recommended_ordinals}"
 
     # ── Re-import the X84 file into a fresh BOQ ────────────────────────────
     proj_resp = await client.post(
@@ -349,20 +333,15 @@ async def test_x84_export_roundtrip_preserves_positions(
     )
 
     # ── Verify imported positions match the originals ──────────────────────
-    detail = await client.get(
-        f"/api/v1/boq/boqs/{reimport_boq_id}", headers=auth
-    )
+    detail = await client.get(f"/api/v1/boq/boqs/{reimport_boq_id}", headers=auth)
     assert detail.status_code == 200
-    imported_positions = [
-        p for p in detail.json()["positions"] if p["unit"] != ""
-    ]
+    imported_positions = [p for p in detail.json()["positions"] if p["unit"] != ""]
     imported_by_ordinal = {p["ordinal"]: p for p in imported_positions}
 
     for spec in position_specs:
         got = imported_by_ordinal.get(spec["ordinal"])
         assert got is not None, (
-            f"Ordinal {spec['ordinal']} missing after re-import; "
-            f"found ordinals: {sorted(imported_by_ordinal)}"
+            f"Ordinal {spec['ordinal']} missing after re-import; found ordinals: {sorted(imported_by_ordinal)}"
         )
         # Description matches verbatim (whitespace-stripped by the importer).
         assert got["description"].strip() == spec["description"].strip(), (
@@ -381,9 +360,7 @@ async def test_x84_export_roundtrip_preserves_positions(
 
 
 @pytest.mark.asyncio
-async def test_x84_export_no_alternates_still_valid(
-    shared_client: AsyncClient, shared_auth: dict
-) -> None:
+async def test_x84_export_no_alternates_still_valid(shared_client: AsyncClient, shared_auth: dict) -> None:
     """A BOQ with no alternate metadata still exports as a valid X84 document.
 
     Every position is still treated as an alternate row (since the document
@@ -402,9 +379,7 @@ async def test_x84_export_no_alternates_still_valid(
             "unit_rate": 25.00,
         },
     ]
-    _, boq_id = await _make_boq_with_positions(
-        client, auth, position_specs=position_specs
-    )
+    _, boq_id = await _make_boq_with_positions(client, auth, position_specs=position_specs)
 
     resp = await client.get(
         f"/api/v1/boq/boqs/{boq_id}/export/gaeb",
@@ -428,9 +403,7 @@ async def test_x84_export_no_alternates_still_valid(
     assert items[0].find(f"{GNS}BoQBkUpRef") is None
 
     rec = root.find(f".//{GNS}Award/{GNS}Recommendation")
-    assert rec is None, (
-        "Empty Recommendation block must be omitted when no alternate is recommended"
-    )
+    assert rec is None, "Empty Recommendation block must be omitted when no alternate is recommended"
 
     # Document round-trips through stdlib ET as well (no namespace/encoding traps).
     et_root = ET.fromstring(resp.content)
@@ -443,9 +416,7 @@ async def test_x84_export_no_alternates_still_valid(
 
 
 @pytest.mark.asyncio
-async def test_x83_default_unaffected_by_x84_changes(
-    shared_client: AsyncClient, shared_auth: dict
-) -> None:
+async def test_x83_default_unaffected_by_x84_changes(shared_client: AsyncClient, shared_auth: dict) -> None:
     """The default phase (no ``?format=`` param) still emits DP=83 and no BoQBkUp.
 
     Guards against an accidental regression where the X84 plumbing leaks
@@ -469,9 +440,7 @@ async def test_x83_default_unaffected_by_x84_changes(
             },
         },
     ]
-    _, boq_id = await _make_boq_with_positions(
-        client, auth, position_specs=position_specs
-    )
+    _, boq_id = await _make_boq_with_positions(client, auth, position_specs=position_specs)
 
     resp = await client.get(
         f"/api/v1/boq/boqs/{boq_id}/export/gaeb",
@@ -482,14 +451,10 @@ async def test_x83_default_unaffected_by_x84_changes(
 
     root = _parse_gaeb(resp.content)
     dp = root.find(f".//{GNS}Award/{GNS}DP")
-    assert dp is not None and dp.text == "83", (
-        f"Default phase must be DP=83, got DP={dp.text!r}"
-    )
+    assert dp is not None and dp.text == "83", f"Default phase must be DP=83, got DP={dp.text!r}"
 
     items = root.findall(f".//{GNS}Item")
     assert len(items) == 1
-    assert items[0].find(f"{GNS}BoQBkUp") is None, (
-        "BoQBkUp must not leak into an X83 export"
-    )
+    assert items[0].find(f"{GNS}BoQBkUp") is None, "BoQBkUp must not leak into an X83 export"
     assert items[0].find(f"{GNS}BoQBkUpRef") is None
     assert root.find(f".//{GNS}Award/{GNS}Recommendation") is None

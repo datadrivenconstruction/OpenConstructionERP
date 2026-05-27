@@ -35,6 +35,7 @@ async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
     except Exception:
         _logger_ev.debug("Event publish skipped: %s", name)
 
+
 _RFI_RESPONSE_DUE_DAYS = 14
 
 # BUG-RFI-STATS-UNBOUNDED: ``get_stats`` previously ran a
@@ -282,19 +283,13 @@ class RFIService:
         # the caller learns what they tried to do.
         if "assigned_to" in fields:
             old_assigned_s = str(rfi.assigned_to) if rfi.assigned_to else None
-            requested_s = (
-                str(fields["assigned_to"])
-                if fields["assigned_to"] is not None
-                else None
-            )
+            requested_s = str(fields["assigned_to"]) if fields["assigned_to"] is not None else None
             if requested_s != old_assigned_s:
                 role = (actor_role or "").lower()
                 if role and role not in _ASSIGNER_ROLES:
                     raise HTTPException(
                         status_code=status.HTTP_403_FORBIDDEN,
-                        detail=(
-                            "Only managers or admins may (re)assign an RFI."
-                        ),
+                        detail=("Only managers or admins may (re)assign an RFI."),
                     )
 
         # Validate status transition if status is being changed
@@ -326,9 +321,7 @@ class RFIService:
             ):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail=(
-                        "Only managers or admins may reopen an answered RFI."
-                    ),
+                    detail=("Only managers or admins may reopen an answered RFI."),
                 )
 
         # When status transitions to 'open' and no response_due_date is set,
@@ -336,9 +329,7 @@ class RFIService:
         new_status = fields.get("status")
         if new_status == "open" and not rfi.response_due_date:
             if "response_due_date" not in fields or fields["response_due_date"] is None:
-                fields["response_due_date"] = _add_business_days(
-                    datetime.now(UTC), _RFI_RESPONSE_DUE_DAYS
-                )
+                fields["response_due_date"] = _add_business_days(datetime.now(UTC), _RFI_RESPONSE_DUE_DAYS)
 
         # Auto-update ball_in_court when assigned_to changes
         if "assigned_to" in fields and "ball_in_court" not in fields:
@@ -374,10 +365,7 @@ class RFIService:
             logger.info("rfi.updated", extra=log_extra)
 
         # Fire rfi.assigned when assigned_to changes to a new user
-        if (
-            new_assigned is not None
-            and str(new_assigned) != old_assigned
-        ):
+        if new_assigned is not None and str(new_assigned) != old_assigned:
             await _safe_publish(
                 "rfi.assigned",
                 {
@@ -392,9 +380,7 @@ class RFIService:
 
         return fresh or rfi
 
-    async def delete_rfi(
-        self, rfi_id: uuid.UUID, *, actor_id: str | None = None
-    ) -> None:
+    async def delete_rfi(self, rfi_id: uuid.UUID, *, actor_id: str | None = None) -> None:
         rfi = await self.get_rfi(rfi_id)
         project_id_s = str(rfi.project_id)
         await self.repo.delete(rfi_id)
@@ -443,11 +429,7 @@ class RFIService:
         # log entry. We now constrain the transition to the single
         # value ``_RFI_STATUS_TRANSITIONS`` permits as a source for
         # ``answered`` (``open``).
-        allowed_source_for_answer = {
-            src
-            for src, targets in _RFI_STATUS_TRANSITIONS.items()
-            if "answered" in targets
-        }
+        allowed_source_for_answer = {src for src, targets in _RFI_STATUS_TRANSITIONS.items() if "answered" in targets}
         if rfi.status not in allowed_source_for_answer:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -465,10 +447,7 @@ class RFIService:
             if role not in _ESCALATION_ROLES:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail=(
-                        "Only the assignee or an admin/manager may answer "
-                        "this RFI."
-                    ),
+                    detail=("Only the assignee or an admin/manager may answer this RFI."),
                 )
 
         # Snapshot attrs before update_fields.
@@ -652,10 +631,7 @@ class RFIService:
         # overdue / impact counts on the most recent slice) and large
         # tenants get sub-second p99 instead of a full table scan.
         base = (
-            select(RFI)
-            .where(RFI.project_id == project_id)
-            .order_by(RFI.created_at.desc())
-            .limit(_RFI_STATS_SCAN_CAP)
+            select(RFI).where(RFI.project_id == project_id).order_by(RFI.created_at.desc()).limit(_RFI_STATS_SCAN_CAP)
         )
         result = await self.session.execute(base)
         rfis = list(result.scalars().all())

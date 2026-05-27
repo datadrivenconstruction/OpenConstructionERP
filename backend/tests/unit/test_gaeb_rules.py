@@ -107,9 +107,7 @@ class TestGAEBEinheitspreisSanity:
     @pytest.mark.asyncio
     async def test_pass_positive_rate(self) -> None:
         rule = GAEBEinheitspreisSanity()
-        positions = [
-            {"id": "p1", "ordinal": "012.01.0010", "unit": "m2", "unit_rate": 42.50}
-        ]
+        positions = [{"id": "p1", "ordinal": "012.01.0010", "unit": "m2", "unit_rate": 42.50}]
         results = await rule.validate(_ctx(positions))
         assert len(results) == 1
         assert results[0].passed
@@ -119,9 +117,7 @@ class TestGAEBEinheitspreisSanity:
     @pytest.mark.asyncio
     async def test_fail_on_zero_rate(self) -> None:
         rule = GAEBEinheitspreisSanity()
-        positions = [
-            {"id": "p1", "ordinal": "012.01.0010", "unit": "m2", "unit_rate": 0}
-        ]
+        positions = [{"id": "p1", "ordinal": "012.01.0010", "unit": "m2", "unit_rate": 0}]
         results = await rule.validate(_ctx(positions))
         assert not results[0].passed
         assert results[0].severity == Severity.ERROR
@@ -131,9 +127,7 @@ class TestGAEBEinheitspreisSanity:
     @pytest.mark.asyncio
     async def test_fail_on_negative_rate(self) -> None:
         rule = GAEBEinheitspreisSanity()
-        positions = [
-            {"id": "p1", "ordinal": "012.01.0010", "unit": "m3", "unit_rate": -1.0}
-        ]
+        positions = [{"id": "p1", "ordinal": "012.01.0010", "unit": "m3", "unit_rate": -1.0}]
         results = await rule.validate(_ctx(positions))
         assert not results[0].passed
         assert results[0].severity == Severity.ERROR
@@ -141,9 +135,7 @@ class TestGAEBEinheitspreisSanity:
     @pytest.mark.asyncio
     async def test_lump_sum_skipped(self) -> None:
         rule = GAEBEinheitspreisSanity()
-        positions = [
-            {"id": "p1", "ordinal": "012.01.0010", "unit": "lsum", "unit_rate": 0}
-        ]
+        positions = [{"id": "p1", "ordinal": "012.01.0010", "unit": "lsum", "unit_rate": 0}]
         results = await rule.validate(_ctx(positions))
         assert results == []
 
@@ -348,6 +340,4 @@ class TestGAEBRuleSetIntegration:
         assert report.has_errors
         assert report.has_warnings
         error_messages = "\n".join(r.message for r in report.errors)
-        assert "Einheitspreis" in error_messages, (
-            f"expected German Einheitspreis message, got: {error_messages}"
-        )
+        assert "Einheitspreis" in error_messages, f"expected German Einheitspreis message, got: {error_messages}"

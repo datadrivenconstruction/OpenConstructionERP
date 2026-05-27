@@ -315,9 +315,7 @@ def upgrade() -> None:
             sa.Column(
                 "lost_reason_code",
                 sa.String(64),
-                sa.ForeignKey(
-                    "oe_crm_win_loss_reason.code", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_crm_win_loss_reason.code", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column("notes", sa.Text(), nullable=False, server_default=""),
@@ -411,9 +409,7 @@ def upgrade() -> None:
                 sa.ForeignKey("oe_users_user.id", ondelete="SET NULL"),
                 nullable=True,
             ),
-            sa.Column(
-                "duration_in_previous_seconds", sa.Integer(), nullable=True
-            ),
+            sa.Column("duration_in_previous_seconds", sa.Integer(), nullable=True),
         )
 
     # ── oe_crm_activity ─────────────────────────────────────────────────
@@ -446,17 +442,13 @@ def upgrade() -> None:
                 sa.ForeignKey("oe_crm_lead.id", ondelete="CASCADE"),
                 nullable=True,
             ),
-            sa.Column(
-                "kind", sa.String(32), nullable=False, server_default="note"
-            ),
+            sa.Column("kind", sa.String(32), nullable=False, server_default="note"),
             sa.Column("subject", sa.String(500), nullable=False, server_default=""),
             sa.Column("body", sa.Text(), nullable=False, server_default=""),
             sa.Column("due_at", sa.String(40), nullable=True),
             sa.Column("completed_at", sa.String(40), nullable=True),
             sa.Column("outcome", sa.String(32), nullable=True),
-            sa.Column(
-                "external_calendar_event_id", sa.String(255), nullable=True
-            ),
+            sa.Column("external_calendar_event_id", sa.String(255), nullable=True),
         )
 
     # ── oe_crm_forecast ─────────────────────────────────────────────────

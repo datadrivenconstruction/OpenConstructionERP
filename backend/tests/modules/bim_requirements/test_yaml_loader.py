@@ -106,11 +106,7 @@ def test_mep_clearance_is_set_vs_set() -> None:
 def test_rejects_python_object_apply_tag() -> None:
     """Refuse the classic ``!!python/object/apply`` code-execution vector."""
     malicious = (
-        "schema_version: '1.0'\n"
-        "pack:\n"
-        "  id: bad\n"
-        "  name: bad\n"
-        "rules: !!python/object/apply:os.system ['echo pwned']\n"
+        "schema_version: '1.0'\npack:\n  id: bad\n  name: bad\nrules: !!python/object/apply:os.system ['echo pwned']\n"
     )
     with pytest.raises(RulePackParseError) as exc:
         load_rule_pack("<inline>", text=malicious)
@@ -119,14 +115,7 @@ def test_rejects_python_object_apply_tag() -> None:
 
 def test_rejects_python_name_tag() -> None:
     """Refuse the ``!!python/name`` variant as well."""
-    malicious = (
-        "schema_version: '1.0'\n"
-        "pack:\n"
-        "  id: bad\n"
-        "  name: bad\n"
-        "rules:\n"
-        "  - !!python/name:os.system\n"
-    )
+    malicious = "schema_version: '1.0'\npack:\n  id: bad\n  name: bad\nrules:\n  - !!python/name:os.system\n"
     with pytest.raises(RulePackParseError):
         load_rule_pack("<inline>", text=malicious)
 
@@ -245,7 +234,7 @@ def test_yaml_syntax_error_reports_line_number() -> None:
     """Broken YAML must come back with a line number, not a bare exception."""
     broken = (
         "schema_version: '1.0'\n"
-        "pack: { id: bad, name: bad,\n"   # unterminated mapping
+        "pack: { id: bad, name: bad,\n"  # unterminated mapping
         "rules: []\n"
     )
     with pytest.raises(RulePackParseError) as exc:

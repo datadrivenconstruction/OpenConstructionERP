@@ -24,17 +24,33 @@ def test_match_search_log_has_required_columns() -> None:
     expects to query against must be a real column, not a JSON dive."""
     cols = {c.key for c in MatchSearchLog.__table__.columns}
     expected = {
-        "id", "created_at", "updated_at",
-        "project_id", "session_id", "group_id",
-        "catalog_id", "collection_name",
-        "core_query", "hard_filters", "soft_boosts",
-        "hits_count", "relax_tier_used",
-        "top_score", "top_confidence_band",
-        "bge_rerank_used", "llm_rerank_used",
-        "took_ms", "status", "metadata",
+        "id",
+        "created_at",
+        "updated_at",
+        "project_id",
+        "session_id",
+        "group_id",
+        "catalog_id",
+        "collection_name",
+        "core_query",
+        "hard_filters",
+        "soft_boosts",
+        "hits_count",
+        "relax_tier_used",
+        "top_score",
+        "top_confidence_band",
+        "bge_rerank_used",
+        "llm_rerank_used",
+        "took_ms",
+        "status",
+        "metadata",
         # v2936 — user-feedback + envelope-context columns (MAPPING_PROCESS §10).
-        "picked_rank", "picked_rate_code", "picked_at",
-        "source_type", "ifc_class", "country",
+        "picked_rank",
+        "picked_rate_code",
+        "picked_at",
+        "source_type",
+        "ifc_class",
+        "country",
     }
     assert expected.issubset(cols), f"missing columns: {expected - cols}"
 
@@ -94,7 +110,8 @@ def test_match_search_log_project_fk_cascades_on_delete() -> None:
     """Project deletion cascades to its analytics rows — they're
     project-scoped data, no value once the project is gone."""
     project_fk = next(
-        fk for c in MatchSearchLog.__table__.columns
+        fk
+        for c in MatchSearchLog.__table__.columns
         for fk in c.foreign_keys
         if fk.column.table.name == "oe_projects_project"
     )

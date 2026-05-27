@@ -20,7 +20,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3099_subs"
 down_revision: Union[str, Sequence[str], None] = "v3098"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -38,7 +37,9 @@ def _has_index(inspector: sa.engine.reflection.Inspector, table: str, name: str)
 
 
 def _has_columns(
-    inspector: sa.engine.reflection.Inspector, table: str, cols: list[str],
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    cols: list[str],
 ) -> bool:
     if table not in inspector.get_table_names():
         return False
@@ -55,7 +56,9 @@ def upgrade() -> None:
         and not _has_index(inspector, _TABLE, _INDEX)
     ):
         op.create_index(
-            _INDEX, _TABLE, ["tenant_id", "tax_id"],
+            _INDEX,
+            _TABLE,
+            ["tenant_id", "tax_id"],
             unique=False,
             sqlite_where=sa.text("tax_id IS NOT NULL"),
         )

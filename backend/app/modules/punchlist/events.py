@@ -77,7 +77,8 @@ def _coerce_uuid(value: Any) -> uuid.UUID | None:
 
 
 async def _resolve_project_id(
-    session: Any, handover_id: uuid.UUID,
+    session: Any,
+    handover_id: uuid.UUID,
 ) -> uuid.UUID | None:
     """Walk handover -> plot -> development -> project_id.
 
@@ -134,8 +135,7 @@ async def _on_snag_created(event: Event) -> None:
             project_id = await _resolve_project_id(session, handover_id)
             if project_id is None:
                 logger.info(
-                    "snag bridge: cannot resolve project_id for handover %s, "
-                    "skipping punchlist creation",
+                    "snag bridge: cannot resolve project_id for handover %s, skipping punchlist creation",
                     handover_id,
                 )
                 return
@@ -173,7 +173,9 @@ async def _on_snag_created(event: Event) -> None:
             await session.commit()
             logger.info(
                 "snag bridge: created punchlist %s for snag %s (project %s)",
-                punch.id, snag_id, project_id,
+                punch.id,
+                snag_id,
+                project_id,
             )
     except Exception:
         logger.exception("snag bridge: unexpected error, swallowed")

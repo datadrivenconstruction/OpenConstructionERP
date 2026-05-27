@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -159,12 +158,8 @@ async def test_create_inspection_empty_checklist_ok() -> None:
 async def test_list_inspections_project_scoped() -> None:
     service = _make_service()
     pid = uuid.uuid4()
-    await service.create_inspection(
-        InspectionCreate(project_id=pid, inspection_type="mep", title="MEP Check")
-    )
-    await service.create_inspection(
-        InspectionCreate(project_id=uuid.uuid4(), inspection_type="mep", title="Other")
-    )
+    await service.create_inspection(InspectionCreate(project_id=pid, inspection_type="mep", title="MEP Check"))
+    await service.create_inspection(InspectionCreate(project_id=uuid.uuid4(), inspection_type="mep", title="Other"))
 
     rows, total = await service.list_inspections(pid)
     assert total == 1
@@ -287,9 +282,7 @@ async def test_update_completed_inspection_raises_400() -> None:
     inspection.status = "completed"
 
     with pytest.raises(HTTPException) as exc_info:
-        await service.update_inspection(
-            inspection.id, InspectionUpdate(title="New Title")
-        )
+        await service.update_inspection(inspection.id, InspectionUpdate(title="New Title"))
     assert exc_info.value.status_code == 400
 
 
@@ -307,9 +300,7 @@ async def test_update_invalid_status_transition_raises_400() -> None:
     )
     # scheduled -> completed is NOT allowed (must go through in_progress)
     with pytest.raises(HTTPException) as exc_info:
-        await service.update_inspection(
-            inspection.id, InspectionUpdate(status="completed")
-        )
+        await service.update_inspection(inspection.id, InspectionUpdate(status="completed"))
     assert exc_info.value.status_code == 400
 
 

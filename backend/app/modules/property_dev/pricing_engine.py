@@ -391,9 +391,7 @@ def compute_quote_pure(
             continue
         pct = Decimal(str(getattr(rule, "adjustment_pct", 0) or 0))
         fixed_raw = getattr(rule, "adjustment_fixed", None)
-        fixed = (
-            Decimal(str(fixed_raw)) if fixed_raw is not None else None
-        )
+        fixed = Decimal(str(fixed_raw)) if fixed_raw is not None else None
         delta = Decimal("0")
         if pct != 0:
             delta += subtotal * (pct / Decimal("100"))

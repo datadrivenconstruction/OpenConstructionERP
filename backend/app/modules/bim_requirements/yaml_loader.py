@@ -43,10 +43,21 @@ MAX_REGEX_LENGTH: int = 256
 """Longest regex pattern accepted in a predicate. Anything beyond this is
 treated as a denial-of-service hazard (ReDoS) and rejected at load time."""
 
-VALID_OPERATORS: frozenset[str] = frozenset({
-    "eq", "neq", "gt", "gte", "lt", "lte",
-    "in", "contains", "regex", "exists", "between",
-})
+VALID_OPERATORS: frozenset[str] = frozenset(
+    {
+        "eq",
+        "neq",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "in",
+        "contains",
+        "regex",
+        "exists",
+        "between",
+    }
+)
 
 VALID_SEVERITIES: frozenset[str] = frozenset({"error", "warning", "info"})
 
@@ -104,10 +115,7 @@ class Predicate(BaseModel):
     @classmethod
     def _check_op(cls, v: str) -> str:
         if v not in VALID_OPERATORS:
-            raise ValueError(
-                f"Unknown operator '{v}'. "
-                f"Valid: {', '.join(sorted(VALID_OPERATORS))}."
-            )
+            raise ValueError(f"Unknown operator '{v}'. Valid: {', '.join(sorted(VALID_OPERATORS))}.")
         return v
 
     @model_validator(mode="after")
@@ -119,9 +127,7 @@ class Predicate(BaseModel):
             return self
         if op == "between":
             if not (isinstance(v, list) and len(v) == 2):
-                raise ValueError(
-                    "Operator 'between' requires value to be a 2-element list [min, max]."
-                )
+                raise ValueError("Operator 'between' requires value to be a 2-element list [min, max].")
             return self
         if op == "in":
             if not isinstance(v, list):
@@ -212,33 +218,23 @@ class Rule(BaseModel):
     @classmethod
     def _check_severity(cls, v: str) -> str:
         if v not in VALID_SEVERITIES:
-            raise ValueError(
-                f"Unknown severity '{v}'. "
-                f"Valid: {', '.join(sorted(VALID_SEVERITIES))}."
-            )
+            raise ValueError(f"Unknown severity '{v}'. Valid: {', '.join(sorted(VALID_SEVERITIES))}.")
         return v
 
     @field_validator("rule_type")
     @classmethod
     def _check_rule_type(cls, v: str) -> str:
         if v not in VALID_RULE_TYPES:
-            raise ValueError(
-                f"Unknown rule_type '{v}'. "
-                f"Valid: {', '.join(sorted(VALID_RULE_TYPES))}."
-            )
+            raise ValueError(f"Unknown rule_type '{v}'. Valid: {', '.join(sorted(VALID_RULE_TYPES))}.")
         return v
 
     @model_validator(mode="after")
     def _rule_type_matches_assertion(self) -> Rule:
         is_set_vs_set = isinstance(self.assertion, SetVsSetAssertion)
         if self.rule_type == "set_vs_set" and not is_set_vs_set:
-            raise ValueError(
-                "rule_type='set_vs_set' requires assertion.set_vs_set to be set."
-            )
+            raise ValueError("rule_type='set_vs_set' requires assertion.set_vs_set to be set.")
         if self.rule_type == "property" and is_set_vs_set:
-            raise ValueError(
-                "assertion.set_vs_set is only valid when rule_type='set_vs_set'."
-            )
+            raise ValueError("assertion.set_vs_set is only valid when rule_type='set_vs_set'.")
         return self
 
 
@@ -277,10 +273,7 @@ class RulePack(BaseModel):
     @classmethod
     def _check_schema_version(cls, v: str) -> str:
         if v != SCHEMA_VERSION:
-            raise ValueError(
-                f"Unsupported schema_version '{v}'. "
-                f"This loader understands '{SCHEMA_VERSION}'."
-            )
+            raise ValueError(f"Unsupported schema_version '{v}'. This loader understands '{SCHEMA_VERSION}'.")
         return v
 
     @model_validator(mode="after")
@@ -345,9 +338,7 @@ def load_rule_pack(source: str | Path, *, text: str | None = None) -> RulePack:
         try:
             text = path.read_text(encoding="utf-8")
         except OSError as exc:
-            raise RulePackParseError(
-                f"Cannot read rule pack file: {exc}", path=path
-            ) from exc
+            raise RulePackParseError(f"Cannot read rule pack file: {exc}", path=path) from exc
 
     try:
         raw = yaml.load(text, Loader=_StrictSafeLoader)  # noqa: S506 — strict subclass
@@ -356,9 +347,7 @@ def load_rule_pack(source: str | Path, *, text: str | None = None) -> RulePack:
         if hasattr(exc, "problem_mark") and exc.problem_mark is not None:
             # PyYAML marks are 0-indexed; humans count from 1.
             line = exc.problem_mark.line + 1
-        raise RulePackParseError(
-            f"YAML syntax error: {exc}", path=path, line=line
-        ) from exc
+        raise RulePackParseError(f"YAML syntax error: {exc}", path=path, line=line) from exc
 
     if not isinstance(raw, dict):
         raise RulePackParseError(
@@ -383,9 +372,7 @@ def load_all_packs(root: str | Path) -> list[RulePack]:
     """
     root_path = Path(root)
     if not root_path.is_dir():
-        raise RulePackParseError(
-            f"Rule-pack root '{root_path}' does not exist or is not a directory."
-        )
+        raise RulePackParseError(f"Rule-pack root '{root_path}' does not exist or is not a directory.")
     packs: list[RulePack] = []
     for entry in sorted(root_path.iterdir()):
         if entry.suffix.lower() not in {".yaml", ".yml"}:

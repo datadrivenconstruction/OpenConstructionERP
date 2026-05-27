@@ -47,7 +47,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -88,11 +87,7 @@ async def _force_role_active(email: str, *, role: str = "admin") -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -128,7 +123,9 @@ async def _register_and_login(
 async def owner_auth(http_client):
     """Admin caller — owns the project the IDOR test guards."""
     uid, _email, headers = await _register_and_login(
-        http_client, tag="owner", role="admin",
+        http_client,
+        tag="owner",
+        role="admin",
     )
     return uid, headers
 
@@ -138,7 +135,9 @@ async def attacker_auth(http_client):
     """Second admin caller — owns a different project, sees the first one
     via guessed UUID (the IDOR vector)."""
     uid, _email, headers = await _register_and_login(
-        http_client, tag="attacker", role="admin",
+        http_client,
+        tag="attacker",
+        role="admin",
     )
     return uid, headers
 
@@ -147,7 +146,9 @@ async def attacker_auth(http_client):
 async def viewer_auth(http_client):
     """A non-privileged viewer (no ``costs.update`` permission)."""
     uid, _email, headers = await _register_and_login(
-        http_client, tag="viewer", role="viewer",
+        http_client,
+        tag="viewer",
+        role="viewer",
     )
     return uid, headers
 
@@ -201,7 +202,9 @@ async def seeded_cost_item():
 
 @pytest.mark.asyncio
 async def test_idor_vector_v3_status_unrelated_project(
-    http_client, attacker_auth, owner_project_id,
+    http_client,
+    attacker_auth,
+    owner_project_id,
 ):
     """Attacker queries ``/vector/v3-status/?project_id=<owner's>`` —
     response MUST NOT contain the owner's bound catalogue / language.
@@ -222,32 +225,27 @@ async def test_idor_vector_v3_status_unrelated_project(
     assert resp.status_code == 200, resp.text
     body = resp.json()
     mismatch = body.get("language_mismatch")
-    assert mismatch is not None, (
-        "language_mismatch block is missing — endpoint contract changed"
-    )
+    assert mismatch is not None, "language_mismatch block is missing — endpoint contract changed"
     # IDOR: bound_catalogue / bound_language / project_region MUST be
     # empty or sentinel; the attacker has no right to see them.
     assert mismatch.get("status") in {"unknown", None}, (
-        f"LEAK: attacker saw status={mismatch.get('status')!r} "
-        f"for unrelated project {owner_project_id}: {mismatch!r}"
+        f"LEAK: attacker saw status={mismatch.get('status')!r} for unrelated project {owner_project_id}: {mismatch!r}"
     )
     assert not mismatch.get("bound_catalogue"), (
-        f"LEAK: bound_catalogue={mismatch.get('bound_catalogue')!r} "
-        f"surfaced for an unrelated project"
+        f"LEAK: bound_catalogue={mismatch.get('bound_catalogue')!r} surfaced for an unrelated project"
     )
     assert not mismatch.get("bound_language"), (
-        f"LEAK: bound_language={mismatch.get('bound_language')!r} "
-        f"surfaced for an unrelated project"
+        f"LEAK: bound_language={mismatch.get('bound_language')!r} surfaced for an unrelated project"
     )
     assert not mismatch.get("project_region"), (
-        f"LEAK: project_region={mismatch.get('project_region')!r} "
-        f"surfaced for an unrelated project"
+        f"LEAK: project_region={mismatch.get('project_region')!r} surfaced for an unrelated project"
     )
 
 
 @pytest.mark.asyncio
 async def test_idor_vector_v3_status_unknown_uuid_does_not_404(
-    http_client, attacker_auth,
+    http_client,
+    attacker_auth,
 ):
     """A guessed-but-nonexistent UUID must also return 200 with sentinel
     diagnostics — confirms we treat 'project missing' and 'access denied'
@@ -260,9 +258,7 @@ async def test_idor_vector_v3_status_unknown_uuid_does_not_404(
     )
     assert resp.status_code == 200, resp.text
     mismatch = resp.json().get("language_mismatch", {})
-    assert not mismatch.get("project_region"), (
-        "leaked project_region for a non-existent project UUID"
-    )
+    assert not mismatch.get("project_region"), "leaked project_region for a non-existent project UUID"
 
 
 # ── Test (b): Decimal money round-trip ─────────────────────────────────────
@@ -270,7 +266,9 @@ async def test_idor_vector_v3_status_unknown_uuid_does_not_404(
 
 @pytest.mark.asyncio
 async def test_money_is_decimal_string_in_response(
-    http_client, owner_auth, seeded_cost_item,
+    http_client,
+    owner_auth,
+    seeded_cost_item,
 ):
     """``199.99`` must come back as the string ``"199.99"`` — proves
     Pydantic v2 PlainSerializer keeps the value out of JSON's float
@@ -284,18 +282,15 @@ async def test_money_is_decimal_string_in_response(
     assert resp.status_code == 200, resp.text
     body = resp.json()
     rate = body["rate"]
-    assert isinstance(rate, str), (
-        f"rate must be a JSON string (Decimal-safe), got {type(rate).__name__}={rate!r}"
-    )
+    assert isinstance(rate, str), f"rate must be a JSON string (Decimal-safe), got {type(rate).__name__}={rate!r}"
     # Exact equality — no float drift.
-    assert Decimal(rate) == Decimal("199.99"), (
-        f"rate round-trip drifted: input=199.99 output={rate!r}"
-    )
+    assert Decimal(rate) == Decimal("199.99"), f"rate round-trip drifted: input=199.99 output={rate!r}"
 
 
 @pytest.mark.asyncio
 async def test_create_accepts_high_precision_decimal_string(
-    http_client, owner_auth,
+    http_client,
+    owner_auth,
 ):
     """The create endpoint must accept a Decimal-string body and
     persist it without truncation."""
@@ -321,7 +316,8 @@ async def test_create_accepts_high_precision_decimal_string(
 
 @pytest.mark.asyncio
 async def test_regional_adjust_returns_decimal_strings(
-    http_client, owner_auth,
+    http_client,
+    owner_auth,
 ):
     """``GET /regional-adjust/`` should emit ``base_rate`` /
     ``factor_applied`` / ``adjusted_rate`` as strings — the math is
@@ -340,9 +336,7 @@ async def test_regional_adjust_returns_decimal_strings(
     body = resp.json()
     for key in ("base_rate", "factor_applied", "adjusted_rate"):
         val = body[key]
-        assert isinstance(val, str), (
-            f"{key} must be a Decimal string, got {type(val).__name__}={val!r}"
-        )
+        assert isinstance(val, str), f"{key} must be a Decimal string, got {type(val).__name__}={val!r}"
     # No index row exists → factor is 1.0 baseline, adjusted == base.
     assert Decimal(body["adjusted_rate"]) == Decimal(body["base_rate"])
     assert Decimal(body["factor_applied"]) == Decimal("1")
@@ -353,7 +347,8 @@ async def test_regional_adjust_returns_decimal_strings(
 
 @pytest.mark.asyncio
 async def test_upload_rejects_wrong_magic_bytes_xlsx(
-    http_client, owner_auth,
+    http_client,
+    owner_auth,
 ):
     """An ``.xlsx`` whose content is actually a PDF must 415 — not 400,
     not 200 with a swallowed parse error."""
@@ -370,14 +365,13 @@ async def test_upload_rejects_wrong_magic_bytes_xlsx(
         },
         headers=headers,
     )
-    assert resp.status_code == 415, (
-        f"expected 415 Unsupported Media Type, got {resp.status_code}: {resp.text!r}"
-    )
+    assert resp.status_code == 415, f"expected 415 Unsupported Media Type, got {resp.status_code}: {resp.text!r}"
 
 
 @pytest.mark.asyncio
 async def test_upload_rejects_binary_renamed_to_csv(
-    http_client, owner_auth,
+    http_client,
+    owner_auth,
 ):
     """A binary (NUL bytes) renamed to ``.csv`` must 415."""
     _uid, headers = owner_auth
@@ -390,14 +384,13 @@ async def test_upload_rejects_binary_renamed_to_csv(
         },
         headers=headers,
     )
-    assert resp.status_code == 415, (
-        f"expected 415, got {resp.status_code}: {resp.text!r}"
-    )
+    assert resp.status_code == 415, f"expected 415, got {resp.status_code}: {resp.text!r}"
 
 
 @pytest.mark.asyncio
 async def test_upload_rejects_oversize_payload(
-    http_client, owner_auth,
+    http_client,
+    owner_auth,
 ):
     """A payload above the 25 MB cap must 413 — protects the parser
     from being handed an arbitrary-size blob to chew on."""
@@ -421,10 +414,7 @@ async def test_upload_accepts_valid_csv(http_client, owner_auth):
     """Sanity: a real CSV still flows through — guarantees the gate
     isn't accidentally rejecting legitimate uploads."""
     _uid, headers = owner_auth
-    csv_bytes = (
-        b"code,description,unit,rate,currency\n"
-        b"R7-CSV-1,R7 csv test row,m2,12.34,EUR\n"
-    )
+    csv_bytes = b"code,description,unit,rate,currency\nR7-CSV-1,R7 csv test row,m2,12.34,EUR\n"
     resp = await http_client.post(
         "/api/v1/costs/import/file/",
         files={"file": ("good.csv", csv_bytes, "text/csv")},
@@ -440,7 +430,9 @@ async def test_upload_accepts_valid_csv(http_client, owner_auth):
 
 @pytest.mark.asyncio
 async def test_viewer_denied_patch_rbac(
-    http_client, viewer_auth, seeded_cost_item,
+    http_client,
+    viewer_auth,
+    seeded_cost_item,
 ):
     """A viewer (lowest role) must NOT be able to PATCH a cost item.
     The RBAC gate uses ``RequirePermission('costs.update')`` which maps
@@ -452,8 +444,7 @@ async def test_viewer_denied_patch_rbac(
         headers=headers,
     )
     assert resp.status_code in (401, 403), (
-        f"LEAK: viewer was able to PATCH cost item "
-        f"(status {resp.status_code}): {resp.text!r}"
+        f"LEAK: viewer was able to PATCH cost item (status {resp.status_code}): {resp.text!r}"
     )
 
     # Confirm the row is unchanged.
@@ -463,6 +454,4 @@ async def test_viewer_denied_patch_rbac(
     async with async_session_factory() as s:
         row = await s.get(CostItem, uuid.UUID(seeded_cost_item))
         assert row is not None
-        assert row.description != "viewer-injected", (
-            "PATCH actually mutated the row despite RBAC denial"
-        )
+        assert row.description != "viewer-injected", "PATCH actually mutated the row despite RBAC denial"

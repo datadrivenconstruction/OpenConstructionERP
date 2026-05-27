@@ -37,10 +37,7 @@ def _attach_opencde(router_module) -> None:
 
         main_router = getattr(router_module, "router", None)
         if main_router is None:
-            logger.debug(
-                "BCF router.py loaded without a `router` attribute; OpenCDE "
-                "sub-router was NOT mounted"
-            )
+            logger.debug("BCF router.py loaded without a `router` attribute; OpenCDE sub-router was NOT mounted")
             return
         # Idempotent — guard against double-mount when the loader reloads.
         if getattr(main_router, _INSTALLED_FLAG, False):

@@ -185,15 +185,9 @@ def _remap_row(row: dict[str, Any], mapping: dict[str, str]) -> dict[str, Any]:
         if isinstance(v, str) and v in mapping:
             out[k] = mapping[v]
         elif isinstance(v, list):
-            out[k] = [
-                mapping[item] if isinstance(item, str) and item in mapping else item
-                for item in v
-            ]
+            out[k] = [mapping[item] if isinstance(item, str) and item in mapping else item for item in v]
         elif isinstance(v, dict):
-            out[k] = {
-                kk: (mapping[vv] if isinstance(vv, str) and vv in mapping else vv)
-                for kk, vv in v.items()
-            }
+            out[k] = {kk: (mapping[vv] if isinstance(vv, str) and vv in mapping else vv) for kk, vv in v.items()}
         else:
             out[k] = v
     return out
@@ -288,9 +282,9 @@ def _extract_attachments(
     warnings: list[str] = []
     written = 0
     names = [
-        n for n in zf.namelist()
-        if n.startswith("attachments/") and not n.endswith("/")
-        and n != "attachments/index.json"
+        n
+        for n in zf.namelist()
+        if n.startswith("attachments/") and not n.endswith("/") and n != "attachments/index.json"
     ]
     for arc in names:
         target = _target_path_for_attachment(arc, project_id, id_remap)
@@ -413,7 +407,9 @@ def _all_table_defs() -> list[tuple[str, str, str, bool]]:
 
 
 async def _existing_ids(
-    session: AsyncSession, cls: type, ids: list[Any],
+    session: AsyncSession,
+    cls: type,
+    ids: list[Any],
 ) -> set[Any]:
     if not ids:
         return set()
@@ -422,7 +418,8 @@ async def _existing_ids(
 
 
 async def _delete_project_rows(
-    session: AsyncSession, project_id: str,
+    session: AsyncSession,
+    project_id: str,
 ) -> None:
     """Wipe every bundle-managed row for ``project_id`` (replace mode)."""
     # Reverse FK-order to delete children first.
@@ -485,7 +482,7 @@ async def import_bundle(
     for entry in zf.namelist():
         if not entry.startswith("tables/") or not entry.endswith(".json"):
             continue
-        key = entry[len("tables/"):-len(".json")]
+        key = entry[len("tables/") : -len(".json")]
         try:
             table_data[key] = json.loads(zf.read(entry))
         except json.JSONDecodeError:
@@ -496,7 +493,9 @@ async def import_bundle(
     if mode == "new_project":
         effective_project_id = str(uuid.uuid4())
         id_remap = _build_uuid_map(
-            table_data, effective_project_id, source_project_id,
+            table_data,
+            effective_project_id,
+            source_project_id,
         )
     else:
         effective_project_id = str(target_project_id)
@@ -574,7 +573,9 @@ async def import_bundle(
 
     # 6. Extract attachments to the right roots.
     attachment_count, attach_warnings = _extract_attachments(
-        zf, effective_project_id, id_remap,
+        zf,
+        effective_project_id,
+        id_remap,
     )
     warnings.extend(attach_warnings)
 

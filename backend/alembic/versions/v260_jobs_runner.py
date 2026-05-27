@@ -10,6 +10,7 @@ Revision ID: v260_jobs_runner
 Revises: v250_dashboards_snapshot
 Create Date: 2026-04-25
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

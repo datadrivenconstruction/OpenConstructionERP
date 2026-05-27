@@ -17,11 +17,7 @@ class MoCRepository:
         self.session = session
 
     async def next_code(self, project_id: uuid.UUID) -> str:
-        count = (
-            await self.session.execute(
-                select(func.count()).where(MoCEntry.project_id == project_id)
-            )
-        ).scalar_one()
+        count = (await self.session.execute(select(func.count()).where(MoCEntry.project_id == project_id))).scalar_one()
         return f"MOC-{count + 1:04d}"
 
     async def create(self, entry: MoCEntry) -> MoCEntry:
@@ -44,16 +40,8 @@ class MoCRepository:
         base = select(MoCEntry).where(MoCEntry.project_id == project_id)
         if status is not None:
             base = base.where(MoCEntry.status == status)
-        count = (
-            await self.session.execute(
-                select(func.count()).select_from(base.subquery())
-            )
-        ).scalar_one()
-        stmt = (
-            base.order_by(MoCEntry.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        count = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        stmt = base.order_by(MoCEntry.created_at.desc()).offset(offset).limit(limit)
         rows = list((await self.session.execute(stmt)).scalars().all())
         return rows, count
 
@@ -88,9 +76,7 @@ class MoCImpactRepository:
         return await self.session.get(MoCImpact, impact_id)
 
     async def list_for_entry(self, entry_id: uuid.UUID) -> list[MoCImpact]:
-        result = await self.session.execute(
-            select(MoCImpact).where(MoCImpact.moc_entry_id == entry_id)
-        )
+        result = await self.session.execute(select(MoCImpact).where(MoCImpact.moc_entry_id == entry_id))
         return list(result.scalars().all())
 
     async def update_fields(self, impact_id: uuid.UUID, **fields: object) -> None:

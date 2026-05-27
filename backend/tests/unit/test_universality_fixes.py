@@ -42,18 +42,18 @@ from app.core.match_service.boosts.region import (
         # Single-country regions that the *old* hand-curated table missed.
         # Each of these has a row in REGION_LANGUAGE; the auto-derivation
         # must surface them without a manual map edit.
-        ("HR", ("HR_",)),               # Croatia — Zagreb
+        ("HR", ("HR_",)),  # Croatia — Zagreb
         ("HR_ZAGREB", ("HR_ZAGREB",)),  # full COUNTRY_CITY pin
-        ("IE", ("IE_",)),               # Ireland — Dublin
-        ("SV", ("SV_",)),               # Sweden — Stockholm  (REGION_LANGUAGE uses SV)
-        ("LT", ("LT_",)),               # Lithuania — Vilnius
-        ("ID", ("ID_",)),               # Indonesia — Jakarta
-        ("TH", ("TH_",)),               # Thailand — Bangkok
-        ("VN", ("VN_",)),               # Vietnam — Hanoi
-        ("KR", ("KR_",)),               # Korea — Seoul
-        ("SA", ("SA_",)),               # Saudi Arabia
-        ("HI", ("HI_",)),               # India / Hindi catalogue prefix
-        ("NG", ("NG_",)),               # Nigeria — Lagos
+        ("IE", ("IE_",)),  # Ireland — Dublin
+        ("SV", ("SV_",)),  # Sweden — Stockholm  (REGION_LANGUAGE uses SV)
+        ("LT", ("LT_",)),  # Lithuania — Vilnius
+        ("ID", ("ID_",)),  # Indonesia — Jakarta
+        ("TH", ("TH_",)),  # Thailand — Bangkok
+        ("VN", ("VN_",)),  # Vietnam — Hanoi
+        ("KR", ("KR_",)),  # Korea — Seoul
+        ("SA", ("SA_",)),  # Saudi Arabia
+        ("HI", ("HI_",)),  # India / Hindi catalogue prefix
+        ("NG", ("NG_",)),  # Nigeria — Lagos
     ],
 )
 def test_region_prefix_derived_from_REGION_LANGUAGE(region_input, must_resolve_to_prefix):
@@ -89,6 +89,7 @@ def test_new_aliases_iberia_scandinavia_gulf_latam():
         ("latam", "MX_"),
         ("benelux", "NL_"),
     ]:
+
         class _Settings:
             class project:
                 pass
@@ -96,9 +97,7 @@ def test_new_aliases_iberia_scandinavia_gulf_latam():
         _Settings.project.region = alias  # type: ignore[attr-defined]
         prefixes = _project_region_prefixes(_Settings())
         assert prefixes, f"{alias!r} resolved to empty"
-        assert expected_first in prefixes, (
-            f"{alias!r} should include {expected_first!r}, got {prefixes!r}"
-        )
+        assert expected_first in prefixes, f"{alias!r} should include {expected_first!r}, got {prefixes!r}"
 
 
 def test_auto_table_covers_REGION_LANGUAGE_completely():
@@ -190,9 +189,7 @@ def test_material_bucket_resolves_across_scripts(text: str, expected_bucket: str
     from app.modules.match_elements.service import _normalise_material_class
 
     bucket = _normalise_material_class(text)
-    assert bucket == expected_bucket, (
-        f"{text!r} → {bucket!r}, expected {expected_bucket!r}"
-    )
+    assert bucket == expected_bucket, f"{text!r} → {bucket!r}, expected {expected_bucket!r}"
 
 
 def test_material_bucket_returns_none_for_ambiguous():
@@ -294,7 +291,7 @@ def test_classifier_hint_dict_includes_all_present_standards():
         ("LATAM", "masterformat"),
         ("BR", "masterformat"),
         ("MX", "masterformat"),
-        ("ES", "bc3"),           # Spain — native BC3 standard
+        ("ES", "bc3"),  # Spain — native BC3 standard
         ("PT", "masterformat"),
         ("ASIA_PAC", "masterformat"),
         # ── CIS — GESN family via Russia anchor ─────────────────────
@@ -308,22 +305,22 @@ def test_classifier_hint_dict_includes_all_present_standards():
         ("JP", "sekisan"),
         ("CN", "gb50500"),
         ("KR", "kbim"),
-        ("IN", "nrm"),         # India — RICS heritage
-        ("HI", "nrm"),         # India Hindi region — same default
-        ("HK", "nrm"),         # ex-British, RICS heritage
-        ("SG", "nrm"),         # ex-British, RICS heritage
-        ("MY", "nrm"),         # ex-British, RICS heritage
-        ("AU", "nrm"),         # Australia — AIQS RICS-aligned
-        ("NZ", "nrm"),         # New Zealand — NZIQS
+        ("IN", "nrm"),  # India — RICS heritage
+        ("HI", "nrm"),  # India Hindi region — same default
+        ("HK", "nrm"),  # ex-British, RICS heritage
+        ("SG", "nrm"),  # ex-British, RICS heritage
+        ("MY", "nrm"),  # ex-British, RICS heritage
+        ("AU", "nrm"),  # Australia — AIQS RICS-aligned
+        ("NZ", "nrm"),  # New Zealand — NZIQS
         # ── Gulf English-language tendering ─────────────────────────
         ("AE", "masterformat"),
         ("SA", "masterformat"),
         ("QA", "masterformat"),
         ("GULF", "masterformat"),
         # ── Romance — native standards ──────────────────────────────
-        ("FR", "untec"),        # France — UNTEC
-        ("IT", "voci"),         # Italy — VOCI
-        ("NL", "din276"),       # Benelux clusters to DACH/DIN-276
+        ("FR", "untec"),  # France — UNTEC
+        ("IT", "voci"),  # Italy — VOCI
+        ("NL", "din276"),  # Benelux clusters to DACH/DIN-276
         ("BE", "din276"),
         ("BENELUX", "din276"),
         # ── Latin America extras ────────────────────────────────────
@@ -358,9 +355,7 @@ def test_classification_order_prefers_region_native_standard(region, expected_he
     from app.modules.match_elements.service import _resolve_classification_order
 
     order = _resolve_classification_order(None, region)
-    assert order[0] == expected_head, (
-        f"region {region!r}: expected {expected_head!r} first, got {order!r}"
-    )
+    assert order[0] == expected_head, f"region {region!r}: expected {expected_head!r} first, got {order!r}"
 
 
 def test_classification_order_explicit_choice_beats_region():
@@ -532,8 +527,7 @@ def test_unit_boost_normalises_locale_aliases(locale_unit, canonical):
     from app.core.match_service.boosts.unit import _normalise_unit
 
     assert _normalise_unit(locale_unit) == canonical, (
-        f"locale unit {locale_unit!r} should normalise to {canonical!r}, "
-        f"got {_normalise_unit(locale_unit)!r}"
+        f"locale unit {locale_unit!r} should normalise to {canonical!r}, got {_normalise_unit(locale_unit)!r}"
     )
 
 
@@ -612,9 +606,7 @@ def test_language_family_aliases_resolve_correctly(alias, expected_member):
             region = alias
 
     prefixes = _project_region_prefixes(_Settings())
-    assert expected_member in prefixes, (
-        f"alias {alias!r} should include {expected_member!r}, got {prefixes!r}"
-    )
+    assert expected_member in prefixes, f"alias {alias!r} should include {expected_member!r}, got {prefixes!r}"
 
 
 def test_bare_country_codes_stay_single_country():
@@ -626,15 +618,14 @@ def test_bare_country_codes_stay_single_country():
     """
 
     for bare in ("ES", "PT", "FR", "DE", "RU", "TR"):
+
         class _Settings:
             class project:
                 region = bare
 
         prefixes = _project_region_prefixes(_Settings())
         # Single-country = exactly one prefix tuple, matching the bare code.
-        assert prefixes == (f"{bare}_",), (
-            f"bare {bare!r} should stay single-country, got {prefixes!r}"
-        )
+        assert prefixes == (f"{bare}_",), f"bare {bare!r} should stay single-country, got {prefixes!r}"
 
 
 # ── Confidence + auto-confirm thresholds env-overridable ─────────────
@@ -663,11 +654,12 @@ def test_confidence_and_auto_confirm_thresholds_are_env_overridable(
     monkeypatch.setenv("MATCH_AUTO_CONFIRM_DEFAULT", "0.92")
 
     from app.core.match_service import config as cfg
+
     importlib.reload(cfg)
 
-    assert cfg.CONFIDENCE_HIGH_THRESHOLD == pytest.approx(0.81)
-    assert cfg.CONFIDENCE_MEDIUM_THRESHOLD == pytest.approx(0.65)
-    assert cfg.DEFAULT_AUTO_CONFIRM_THRESHOLD == pytest.approx(0.92)
+    assert pytest.approx(0.81) == cfg.CONFIDENCE_HIGH_THRESHOLD
+    assert pytest.approx(0.65) == cfg.CONFIDENCE_MEDIUM_THRESHOLD
+    assert pytest.approx(0.92) == cfg.DEFAULT_AUTO_CONFIRM_THRESHOLD
 
     # Restore default constants for downstream tests in this run.
     monkeypatch.delenv("MATCH_CONFIDENCE_HIGH", raising=False)
@@ -753,9 +745,7 @@ def test_envelope_helpers_preserve_explicit_language():
             description="бетонная стена",
             category="wall",
         )
-        assert env.source_lang == lang.lower(), (
-            f"language {lang!r}: got {env.source_lang!r}"
-        )
+        assert env.source_lang == lang.lower(), f"language {lang!r}: got {env.source_lang!r}"
 
 
 # ── Match-defaults are env-overridable ──────────────────────────────
@@ -798,7 +788,7 @@ def test_match_default_constants_match_canonical_values():
     # Default values when no env overrides set in the test runner.
     # Both are documented in CLAUDE.md as v2.8.0 calibration.
     assert MATCH_DEFAULT_TARGET_LANGUAGE == "en"
-    assert MATCH_DEFAULT_AUTO_LINK_THRESHOLD == pytest.approx(0.85)
+    assert pytest.approx(0.85) == MATCH_DEFAULT_AUTO_LINK_THRESHOLD
 
 
 def test_bulk_confirm_threshold_uses_central_default():
@@ -844,9 +834,7 @@ def test_match_result_currency_passthrough_is_empty_when_unknown():
 
     from app.modules.costs.matcher import _to_match_result
 
-    item_no_currency = SimpleNamespace(
-        id="abc", code="C-200", description="x", unit="m3", rate="185.0", currency=""
-    )
+    item_no_currency = SimpleNamespace(id="abc", code="C-200", description="x", unit="m3", rate="185.0", currency="")
     res = _to_match_result(item_no_currency, score=0.9, channel="vector")
     assert res.currency == ""
 

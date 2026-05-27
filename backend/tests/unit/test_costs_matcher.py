@@ -169,9 +169,7 @@ async def test_whitespace_query_returns_empty_list(stub_candidates: list[Any]) -
 
 @pytest.mark.asyncio
 async def test_exact_phrase_match_ranks_first(stub_candidates: list[Any]) -> None:
-    results = await match_cwicr_items(
-        session=None, query="reinforced concrete wall", top_k=5
-    )
+    results = await match_cwicr_items(session=None, query="reinforced concrete wall", top_k=5)
     assert results, "matcher must return at least one row"
     assert results[0].code == "CWICR-001"
     # All scores must be valid 0..1 floats.
@@ -183,9 +181,7 @@ async def test_exact_phrase_match_ranks_first(stub_candidates: list[Any]) -> Non
 @pytest.mark.asyncio
 async def test_fuzzy_typo_still_matches(stub_candidates: list[Any]) -> None:
     """A small typo (`reinforcd` → `reinforced`) shouldn't kill the match."""
-    results = await match_cwicr_items(
-        session=None, query="reinforcd concrete wall", top_k=3
-    )
+    results = await match_cwicr_items(session=None, query="reinforcd concrete wall", top_k=3)
     assert results
     # The reinforced-concrete row should still surface in the top 3.
     assert any(r.code == "CWICR-001" for r in results)
@@ -194,9 +190,7 @@ async def test_fuzzy_typo_still_matches(stub_candidates: list[Any]) -> None:
 @pytest.mark.asyncio
 async def test_score_monotonicity(stub_candidates: list[Any]) -> None:
     """Results must come back sorted by score descending."""
-    results = await match_cwicr_items(
-        session=None, query="concrete wall formwork", top_k=10
-    )
+    results = await match_cwicr_items(session=None, query="concrete wall formwork", top_k=10)
     assert len(results) >= 2
     scores = [r.score for r in results]
     assert scores == sorted(scores, reverse=True), f"not sorted: {scores}"
@@ -216,12 +210,8 @@ async def test_unit_match_bonus_lifts_correct_row(
     """
     # Description has extra qualifiers so the token_set_ratio is < 1.0,
     # leaving room for the unit bonus to break ties.
-    twin_m3 = _mk_item(
-        code="TWIN-M3", description="Brick wall 24cm clay reinforced", unit="m3"
-    )
-    twin_m2 = _mk_item(
-        code="TWIN-M2", description="Brick wall 24cm clay reinforced", unit="m2"
-    )
+    twin_m3 = _mk_item(code="TWIN-M3", description="Brick wall 24cm clay reinforced", unit="m3")
+    twin_m2 = _mk_item(code="TWIN-M2", description="Brick wall 24cm clay reinforced", unit="m2")
 
     async def _fake_load(*_a: Any, **_kw: Any) -> list[Any]:
         return [matcher_mod._Candidate(item=twin_m3), matcher_mod._Candidate(item=twin_m2)]
@@ -267,12 +257,8 @@ async def test_lang_match_bonus_applies(
 
     # Slightly imperfect query so token_set_ratio is < 1.0 — leaves
     # headroom for the lang bonus to lift the score visibly.
-    res_with = await match_cwicr_items(
-        session=None, query="concrte wall", lang="de", top_k=2
-    )
-    res_without = await match_cwicr_items(
-        session=None, query="concrte wall", top_k=2
-    )
+    res_with = await match_cwicr_items(session=None, query="concrte wall", lang="de", top_k=2)
+    res_without = await match_cwicr_items(session=None, query="concrte wall", top_k=2)
     assert res_with
     assert res_without
 
@@ -305,18 +291,14 @@ async def test_unit_bonus_does_not_exceed_one(stub_candidates: list[Any]) -> Non
 
 @pytest.mark.asyncio
 async def test_top_k_respected(stub_candidates: list[Any]) -> None:
-    results = await match_cwicr_items(
-        session=None, query="concrete wall formwork rebar", top_k=2
-    )
+    results = await match_cwicr_items(session=None, query="concrete wall formwork rebar", top_k=2)
     assert len(results) <= 2
 
 
 @pytest.mark.asyncio
 async def test_top_k_clamped_to_max(stub_candidates: list[Any]) -> None:
     """Asking for top_k > 50 must be silently clamped, not crash."""
-    results = await match_cwicr_items(
-        session=None, query="wall", top_k=10_000
-    )
+    results = await match_cwicr_items(session=None, query="wall", top_k=10_000)
     # We only have 5 stubbed rows; we just need to confirm it didn't blow up.
     assert len(results) <= 50
 
@@ -338,9 +320,7 @@ async def test_semantic_deps_missing_falls_back_to_lexical(
     # Reset the global one-shot warning so we can assert it fires.
     monkeypatch.setattr(matcher_mod, "_warned_missing_semantic_deps", False)
 
-    results = await match_cwicr_items(
-        session=None, query="concrete wall", mode="hybrid", top_k=3
-    )
+    results = await match_cwicr_items(session=None, query="concrete wall", mode="hybrid", top_k=3)
     assert results, "matcher must NOT return empty when semantic fails"
     # Every result must be marked as the lexical channel.
     assert all(r.source == "lexical" for r in results)
@@ -358,9 +338,7 @@ async def test_semantic_only_mode_falls_back_when_deps_missing(
     )
     monkeypatch.setattr(matcher_mod, "_warned_missing_semantic_deps", False)
 
-    results = await match_cwicr_items(
-        session=None, query="concrete wall", mode="semantic", top_k=3
-    )
+    results = await match_cwicr_items(session=None, query="concrete wall", mode="semantic", top_k=3)
     assert results
     assert all(r.source == "lexical" for r in results)
 
@@ -394,9 +372,7 @@ async def test_semantic_mode_uses_encoder_when_available(
 
     monkeypatch.setattr(matcher_mod, "_load_sentence_encoder", lambda: _fake_encoder)
 
-    results = await match_cwicr_items(
-        session=None, query="reinforced concrete", mode="semantic", top_k=3
-    )
+    results = await match_cwicr_items(session=None, query="reinforced concrete", mode="semantic", top_k=3)
     assert results
     assert results[0].source == "semantic"
     # The reinforced-concrete row should win.

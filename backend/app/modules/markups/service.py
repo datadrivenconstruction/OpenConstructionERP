@@ -264,11 +264,7 @@ class MarkupsService:
         from app.core.audit_log import log_activity as _log_activity
 
         new_status = fields.get("status")
-        action = (
-            "status_changed"
-            if new_status is not None and new_status != prior_status
-            else "updated"
-        )
+        action = "status_changed" if new_status is not None and new_status != prior_status else "updated"
         await _log_activity(
             self.session,
             actor_id=None,  # router caller knows the actor; service stays neutral

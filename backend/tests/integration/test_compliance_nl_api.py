@@ -50,7 +50,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -121,7 +123,8 @@ def _set_acting_user(user_id: uuid.UUID, tenant_id: str | None = None) -> None:
 
 @pytest.mark.asyncio
 async def test_from_nl_pattern_match_returns_yaml(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.post(
@@ -140,7 +143,8 @@ async def test_from_nl_pattern_match_returns_yaml(
 
 @pytest.mark.asyncio
 async def test_from_nl_no_match_returns_suggestions(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.post(
@@ -157,7 +161,8 @@ async def test_from_nl_no_match_returns_suggestions(
 
 @pytest.mark.asyncio
 async def test_from_nl_use_ai_without_api_key_does_not_crash(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     """AI must be optional — a request with use_ai=True and no API key
     should still respond with the deterministic outcome (pattern match
@@ -180,7 +185,8 @@ async def test_from_nl_use_ai_without_api_key_does_not_crash(
 
 @pytest.mark.asyncio
 async def test_from_nl_empty_text_rejected_by_pydantic(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.post(
@@ -193,7 +199,8 @@ async def test_from_nl_empty_text_rejected_by_pydantic(
 
 @pytest.mark.asyncio
 async def test_list_nl_patterns_returns_catalogue(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.get("/api/v1/compliance/dsl/nl-patterns")
@@ -207,7 +214,8 @@ async def test_list_nl_patterns_returns_catalogue(
 
 @pytest.mark.asyncio
 async def test_from_nl_to_compile_round_trip(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     """End-to-end: NL → DSL → compile/save should succeed."""
     _set_acting_user(user_a)
@@ -235,7 +243,8 @@ async def test_from_nl_to_compile_round_trip(
 
 @pytest.mark.asyncio
 async def test_from_nl_de_lang_alias(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.post(

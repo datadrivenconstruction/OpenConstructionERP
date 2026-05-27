@@ -31,8 +31,6 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.database import Base
-from app.modules.assemblies.schemas import AssemblyCreate, ApplyToBOQRequest, ComponentCreate
-from app.modules.assemblies.service import AssemblyService
 
 # ── Fixture helpers ───────────────────────────────────────────────────────────
 
@@ -85,6 +83,7 @@ async def session():
 
 # ── Helper: create a minimal single-component assembly ────────────────────────
 
+
 async def _make_assembly(
     session: AsyncSession,
     *,
@@ -120,6 +119,7 @@ async def _make_assembly(
 
 # ── TEST 1: cross-tenant IDOR — wrong owner gets 404 ─────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_idor_wrong_owner_returns_404(session):
     """Tenant B cannot read an assembly owned by Tenant A via the ownership
@@ -138,6 +138,7 @@ async def test_idor_wrong_owner_returns_404(session):
 
 # ── TEST 2: correct owner can read own assembly ───────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_correct_owner_can_read_assembly(session):
     """Tenant A can read their own assembly without raising."""
@@ -150,6 +151,7 @@ async def test_correct_owner_can_read_assembly(session):
 
 # ── TEST 3: global library assembly (owner_id=None) is 404 for regular users ──
 
+
 @pytest.mark.asyncio
 async def test_global_library_assembly_returns_404_for_regular_user(session):
     """Global (library) assemblies with owner_id=None are treated as
@@ -158,9 +160,7 @@ async def test_global_library_assembly_returns_404_for_regular_user(session):
     """
     from app.modules.assemblies.router import _verify_assembly_owner
 
-    lib_id = await _make_assembly(
-        session, code="LIB-GLOBAL", owner_id=None, is_template=True
-    )
+    lib_id = await _make_assembly(session, code="LIB-GLOBAL", owner_id=None, is_template=True)
 
     with pytest.raises(HTTPException) as exc_info:
         await _verify_assembly_owner(session, lib_id, str(TENANT_A), payload=None)
@@ -169,6 +169,7 @@ async def test_global_library_assembly_returns_404_for_regular_user(session):
 
 
 # ── TEST 4: admin role bypasses ownership check for tenant assembly ────────────
+
 
 @pytest.mark.asyncio
 async def test_admin_bypasses_ownership_check_for_tenant_assembly(session):
@@ -181,29 +182,25 @@ async def test_admin_bypasses_ownership_check_for_tenant_assembly(session):
     admin_payload = {"role": "admin", "sub": str(TENANT_A)}
 
     # Must not raise
-    await _verify_assembly_owner(
-        session, asm_id, str(TENANT_A), payload=admin_payload
-    )
+    await _verify_assembly_owner(session, asm_id, str(TENANT_A), payload=admin_payload)
 
 
 # ── TEST 5: admin bypasses ownership check for global library assembly ─────────
+
 
 @pytest.mark.asyncio
 async def test_admin_can_read_global_library_assembly(session):
     """Admin role bypasses the gate even for owner_id=None global assemblies."""
     from app.modules.assemblies.router import _verify_assembly_owner
 
-    lib_id = await _make_assembly(
-        session, code="LIB-ADM", owner_id=None, is_template=True
-    )
+    lib_id = await _make_assembly(session, code="LIB-ADM", owner_id=None, is_template=True)
     admin_payload = {"role": "admin"}
     # Must not raise
-    await _verify_assembly_owner(
-        session, lib_id, str(TENANT_A), payload=admin_payload
-    )
+    await _verify_assembly_owner(session, lib_id, str(TENANT_A), payload=admin_payload)
 
 
 # ── TEST 6: apply-to-boq blocked when user does not own the target BOQ ────────
+
 
 @pytest.mark.asyncio
 async def test_apply_to_boq_owner_check_blocks_wrong_tenant(session):
@@ -219,13 +216,12 @@ async def test_apply_to_boq_owner_check_blocks_wrong_tenant(session):
     await session.flush()
 
     with pytest.raises(HTTPException) as exc_info:
-        await _verify_target_boq_owner(
-            session, boq_b.id, str(TENANT_A), payload=None
-        )
+        await _verify_target_boq_owner(session, boq_b.id, str(TENANT_A), payload=None)
     assert exc_info.value.status_code == 404
 
 
 # ── TEST 7: apply-to-boq allowed when user owns the target BOQ ────────────────
+
 
 @pytest.mark.asyncio
 async def test_apply_to_boq_owner_check_allows_correct_tenant(session):
@@ -240,12 +236,11 @@ async def test_apply_to_boq_owner_check_allows_correct_tenant(session):
     await session.flush()
 
     # Must not raise
-    await _verify_target_boq_owner(
-        session, boq_a.id, str(TENANT_A), payload=None
-    )
+    await _verify_target_boq_owner(session, boq_a.id, str(TENANT_A), payload=None)
 
 
 # ── TEST 8: admin can apply across tenant BOQs ────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_apply_to_boq_admin_bypasses_boq_owner_check(session):
@@ -259,12 +254,11 @@ async def test_apply_to_boq_admin_bypasses_boq_owner_check(session):
 
     admin_payload = {"role": "admin"}
     # Must not raise
-    await _verify_target_boq_owner(
-        session, boq_b.id, str(TENANT_A), payload=admin_payload
-    )
+    await _verify_target_boq_owner(session, boq_b.id, str(TENANT_A), payload=admin_payload)
 
 
 # ── TEST 9: global library vs custom split — is_template gate ─────────────────
+
 
 @pytest.mark.asyncio
 async def test_global_library_not_writable_by_regular_user(session):
@@ -275,9 +269,7 @@ async def test_global_library_not_writable_by_regular_user(session):
     """
     from app.modules.assemblies.router import _verify_assembly_owner
 
-    lib_id = await _make_assembly(
-        session, code="LIB-WRITE", owner_id=None, is_template=True
-    )
+    lib_id = await _make_assembly(session, code="LIB-WRITE", owner_id=None, is_template=True)
 
     with pytest.raises(HTTPException) as exc_info:
         # A regular user (TENANT_A) tries to verify ownership before a PATCH
@@ -289,6 +281,7 @@ async def test_global_library_not_writable_by_regular_user(session):
 
 
 # ── TEST 10: service-layer IDOR — get_assembly is owner-agnostic, gate is at router ──
+
 
 @pytest.mark.asyncio
 async def test_service_get_assembly_is_agnostic_gate_is_router(session):

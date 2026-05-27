@@ -10,7 +10,6 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 # ── Filter snapshot ──────────────────────────────────────────────────────────
 #
 # Open-shape on purpose: every key is optional and the file-manager UI

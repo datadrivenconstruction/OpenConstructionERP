@@ -55,9 +55,8 @@ def _order_to_response(order: object) -> ChangeOrderResponse:
         items = list(order.items)  # type: ignore[attr-defined]
     except Exception as exc:
         import logging
-        logging.getLogger(__name__).debug(
-            "ChangeOrder items not loaded for response: %s", exc
-        )
+
+        logging.getLogger(__name__).debug("ChangeOrder items not loaded for response: %s", exc)
         items = []
     return ChangeOrderResponse(
         id=order.id,  # type: ignore[attr-defined]
@@ -78,12 +77,8 @@ def _order_to_response(order: object) -> ChangeOrderResponse:
         created_at=order.created_at,  # type: ignore[attr-defined]
         updated_at=order.updated_at,  # type: ignore[attr-defined]
         item_count=len(items),
-        linked_po_ids=[
-            str(x) for x in (getattr(order, "linked_po_ids", None) or [])
-        ],
-        linked_rfi_ids=[
-            str(x) for x in (getattr(order, "linked_rfi_ids", None) or [])
-        ],
+        linked_po_ids=[str(x) for x in (getattr(order, "linked_po_ids", None) or [])],
+        linked_rfi_ids=[str(x) for x in (getattr(order, "linked_rfi_ids", None) or [])],
         current_approval_step=getattr(order, "current_approval_step", None),
     )
 
@@ -113,12 +108,8 @@ def _order_to_with_items(order: object) -> ChangeOrderWithItems:
         created_at=order.created_at,  # type: ignore[attr-defined]
         updated_at=order.updated_at,  # type: ignore[attr-defined]
         item_count=len(items),
-        linked_po_ids=[
-            str(x) for x in (getattr(order, "linked_po_ids", None) or [])
-        ],
-        linked_rfi_ids=[
-            str(x) for x in (getattr(order, "linked_rfi_ids", None) or [])
-        ],
+        linked_po_ids=[str(x) for x in (getattr(order, "linked_po_ids", None) or [])],
+        linked_rfi_ids=[str(x) for x in (getattr(order, "linked_rfi_ids", None) or [])],
         current_approval_step=getattr(order, "current_approval_step", None),
         items=[
             ChangeOrderItemResponse(
@@ -250,9 +241,7 @@ async def list_change_orders(
         )
     else:
         await verify_project_access(project_id, str(user_id), session)
-        orders, _ = await service.list_orders(
-            project_id, offset=offset, limit=limit, status_filter=status_filter
-        )
+        orders, _ = await service.list_orders(project_id, offset=offset, limit=limit, status_filter=status_filter)
     return [_order_to_response(o) for o in orders]
 
 
@@ -451,9 +440,7 @@ async def start_approval_chain(
     """
     existing = await service.get_order(order_id)
     await verify_project_access(existing.project_id, str(user_id), session)
-    rows = await service.start_approval_chain(
-        order_id, list(data.approver_user_ids)
-    )
+    rows = await service.start_approval_chain(order_id, list(data.approver_user_ids))
     return [_approval_to_response(r) for r in rows]
 
 
@@ -478,9 +465,7 @@ async def advance_approval(
     """
     existing = await service.get_order(order_id)
     await verify_project_access(existing.project_id, str(user_id), session)
-    row = await service.advance_approval(
-        order_id, str(user_id), data.decision, data.comments
-    )
+    row = await service.advance_approval(order_id, str(user_id), data.decision, data.comments)
     return _approval_to_response(row)
 
 

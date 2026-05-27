@@ -122,7 +122,4 @@ class StateTransition(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<StateTransition {self.from_state}->{self.to_state} "
-            f"container={self.container_id}>"
-        )
+        return f"<StateTransition {self.from_state}->{self.to_state} container={self.container_id}>"

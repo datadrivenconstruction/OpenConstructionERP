@@ -115,22 +115,14 @@ async def _on_cost_item_updated(event: Event) -> None:
             # sum the component totals × bid_factor.  This must
             # match the logic in service._recalculate_total.
             if affected_assembly_ids:
-                asm_stmt = select(Assembly).where(
-                    Assembly.id.in_(affected_assembly_ids)
-                )
-                assemblies = list(
-                    (await session.execute(asm_stmt)).scalars().all()
-                )
+                asm_stmt = select(Assembly).where(Assembly.id.in_(affected_assembly_ids))
+                assemblies = list((await session.execute(asm_stmt)).scalars().all())
                 # Refetch ALL components per assembly so the recompute
                 # sees the full picture, not only the ones touched by
                 # this specific cost item.
                 for assembly in assemblies:
-                    full_stmt = select(Component).where(
-                        Component.assembly_id == assembly.id
-                    )
-                    full_components = list(
-                        (await session.execute(full_stmt)).scalars().all()
-                    )
+                    full_stmt = select(Component).where(Component.assembly_id == assembly.id)
+                    full_components = list((await session.execute(full_stmt)).scalars().all())
                     component_sum = sum(
                         (_safe_decimal(c.total) for c in full_components),
                         Decimal("0"),
@@ -170,9 +162,7 @@ async def _recalc_assemblies(session, assembly_ids: set[uuid.UUID]) -> None:
     for assembly in assemblies:
         full_stmt = select(Component).where(Component.assembly_id == assembly.id)
         full_components = list((await session.execute(full_stmt)).scalars().all())
-        component_sum = sum(
-            (_safe_decimal(c.total) for c in full_components), Decimal("0")
-        )
+        component_sum = sum((_safe_decimal(c.total) for c in full_components), Decimal("0"))
         bid_factor = _safe_decimal(assembly.bid_factor, "1.0")
         assembly.total_rate = str(component_sum * bid_factor)
     await session.flush()
@@ -231,21 +221,15 @@ async def _on_catalog_resource_updated(event: Event) -> None:
                     res_id = uuid.UUID(str(raw_id))
                 except (ValueError, AttributeError):
                     return
-                comp_stmt = select(Component).where(
-                    Component.catalog_resource_id == res_id
-                )
+                comp_stmt = select(Component).where(Component.catalog_resource_id == res_id)
             elif scoped_ids:
                 # Bulk adjust-prices — only the resources that were
                 # actually re-priced. Keeps the blast radius tight
                 # instead of re-walking every catalog-linked component.
-                comp_stmt = select(Component).where(
-                    Component.catalog_resource_id.in_(scoped_ids)
-                )
+                comp_stmt = select(Component).where(Component.catalog_resource_id.in_(scoped_ids))
             else:
                 # Bulk price adjust — every catalog-linked component.
-                comp_stmt = select(Component).where(
-                    Component.catalog_resource_id.isnot(None)
-                )
+                comp_stmt = select(Component).where(Component.catalog_resource_id.isnot(None))
 
             components = list((await session.execute(comp_stmt)).scalars().all())
             if not components:
@@ -264,18 +248,12 @@ async def _on_catalog_resource_updated(event: Event) -> None:
                 if cr_id is None:
                     continue
                 if cr_id not in price_cache:
-                    if (
-                        raw_id
-                        and event_price is not None
-                        and str(cr_id) == str(raw_id)
-                    ):
+                    if raw_id and event_price is not None and str(cr_id) == str(raw_id):
                         price_cache[cr_id] = _safe_decimal(event_price)
                     else:
                         resource = await session.get(CatalogResource, cr_id)
                         price_cache[cr_id] = _safe_decimal(
-                            getattr(resource, "base_price", "0")
-                            if resource is not None
-                            else "0"
+                            getattr(resource, "base_price", "0") if resource is not None else "0"
                         )
                 new_price = price_cache[cr_id]
                 comp.unit_cost = str(new_price)
@@ -293,8 +271,7 @@ async def _on_catalog_resource_updated(event: Event) -> None:
                 "across %d assembly(s) after catalog resource %s changed",
                 len(components),
                 len(affected_assembly_ids),
-                raw_id
-                or (f"(bulk: {len(scoped_ids)} ids)" if scoped_ids else "(bulk)"),
+                raw_id or (f"(bulk: {len(scoped_ids)} ids)" if scoped_ids else "(bulk)"),
             )
     except Exception:
         logger.warning(
@@ -315,14 +292,7 @@ def register_assemblies_subscribers() -> None:
     # propagated to assemblies. The singular names are kept as
     # additional subscriptions in case a single-edit publisher is added
     # later (the handler already understands the single-resource shape).
-    event_bus.subscribe(
-        "catalog.resources.updated", _on_catalog_resource_updated
-    )
+    event_bus.subscribe("catalog.resources.updated", _on_catalog_resource_updated)
     event_bus.subscribe("catalog.resource.updated", _on_catalog_resource_updated)
-    event_bus.subscribe(
-        "catalog.resource.price_adjusted", _on_catalog_resource_updated
-    )
-    logger.info(
-        "Assemblies: subscribed to costs.item.updated + "
-        "catalog.resources.updated (+ legacy singular names)"
-    )
+    event_bus.subscribe("catalog.resource.price_adjusted", _on_catalog_resource_updated)
+    logger.info("Assemblies: subscribed to costs.item.updated + catalog.resources.updated (+ legacy singular names)")

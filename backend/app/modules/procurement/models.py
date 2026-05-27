@@ -25,7 +25,9 @@ class PurchaseOrder(Base):
     __tablename__ = "oe_procurement_po"
     __table_args__ = (
         UniqueConstraint(
-            "project_id", "po_number", name="uq_procurement_po_project_number",
+            "project_id",
+            "po_number",
+            name="uq_procurement_po_project_number",
         ),
     )
 
@@ -173,9 +175,7 @@ class MaterialRequisition(Base):
     """
 
     __tablename__ = "oe_procurement_requisition"
-    __table_args__ = (
-        Index("ix_req_project_status", "project_id", "status"),
-    )
+    __table_args__ = (Index("ix_req_project_status", "project_id", "status"),)
 
     project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
     requester_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
@@ -232,12 +232,8 @@ class MaterialRequisitionItem(Base):
     quantity_received: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     quantity_consumed: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     # Money fields as Decimal-strings (R7 money sweep)
-    unit_cost: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
-    extended_cost: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
+    unit_cost: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
+    extended_cost: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
     currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="")
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 

@@ -34,7 +34,6 @@ from app.modules.compliance_docs.service import (
     recompute_status,
 )
 
-
 # ── Helpers / stubs ───────────────────────────────────────────────────────
 
 
@@ -89,17 +88,20 @@ class _StubRepo:
         return rows
 
     async def list_expiring_soon(
-        self, project_id: uuid.UUID, *, limit: int = 50,
+        self,
+        project_id: uuid.UUID,
+        *,
+        limit: int = 50,
     ) -> list[Any]:
         rows = [
-            r for r in self.rows.values()
-            if r.project_id == project_id
-            and r.status in ("expiring_soon", "expired")
+            r for r in self.rows.values() if r.project_id == project_id and r.status in ("expiring_soon", "expired")
         ]
         return rows[:limit]
 
     async def update_fields(
-        self, doc_id: uuid.UUID, **fields: Any,
+        self,
+        doc_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
         obj = self.rows.get(doc_id)
         if obj is None:
@@ -145,10 +147,7 @@ def test_recompute_status_flips_to_expiring_soon_on_boundary() -> None:
     """Exactly ``notify_days_before`` days out already counts as expiring."""
     today = datetime(2026, 1, 1, tzinfo=UTC).date()
     expires = today + timedelta(days=30)
-    assert (
-        recompute_status(today, expires, notify_days_before=30)
-        == "expiring_soon"
-    )
+    assert recompute_status(today, expires, notify_days_before=30) == "expiring_soon"
 
 
 def test_recompute_status_flips_to_expired_after_due_date() -> None:
@@ -161,12 +160,24 @@ def test_recompute_status_preserves_terminal_manual_states() -> None:
     """``cancelled`` / ``void`` must never auto-flip back to ``active``."""
     today = datetime(2026, 1, 1, tzinfo=UTC).date()
     expires = today + timedelta(days=500)
-    assert recompute_status(
-        today, expires, notify_days_before=30, current_status="cancelled",
-    ) == "cancelled"
-    assert recompute_status(
-        today, expires, notify_days_before=30, current_status="void",
-    ) == "void"
+    assert (
+        recompute_status(
+            today,
+            expires,
+            notify_days_before=30,
+            current_status="cancelled",
+        )
+        == "cancelled"
+    )
+    assert (
+        recompute_status(
+            today,
+            expires,
+            notify_days_before=30,
+            current_status="void",
+        )
+        == "void"
+    )
 
 
 # ── Create + state transition + event publish ────────────────────────────
@@ -309,7 +320,8 @@ async def test_update_doc_within_same_alert_bucket_does_not_respam() -> None:
 
     # Touch the notes; status stays ``expiring_soon`` → no extra alert.
     await service.update_doc(
-        created.id, ComplianceDocUpdate(notes="Renewal in progress"),
+        created.id,
+        ComplianceDocUpdate(notes="Renewal in progress"),
     )
     await asyncio.sleep(0)
     assert len(received) == 1
@@ -359,7 +371,9 @@ def test_magic_byte_gate_accepts_real_pdf_blob() -> None:
 
     pdf_head = b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n"
     detected = require_signature(
-        pdf_head, _ALLOWED_ATTACHMENT_TYPES, filename="evidence.pdf",
+        pdf_head,
+        _ALLOWED_ATTACHMENT_TYPES,
+        filename="evidence.pdf",
     )
     assert detected == "pdf"
 
@@ -373,7 +387,9 @@ def test_magic_byte_gate_rejects_disguised_executable() -> None:
     mz_head = b"MZ\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00\xff\xff\x00\x00"
     with pytest.raises(FileSignatureMismatch):
         require_signature(
-            mz_head, _ALLOWED_ATTACHMENT_TYPES, filename="invoice.pdf",
+            mz_head,
+            _ALLOWED_ATTACHMENT_TYPES,
+            filename="invoice.pdf",
         )
 
 

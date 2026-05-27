@@ -41,7 +41,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3113_propdev_plot_extra_fields"
 down_revision: Union[str, Sequence[str], None] = "v3112_bootstrap_missing_tables"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -56,7 +55,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -66,35 +67,75 @@ def _has_column(
 # Column definitions: (name, factory). The factory takes no args and
 # returns a fresh ``sa.Column`` — fresh because batch_alter_table reuses
 # the column objects across SQLite passes.
-def _column_specs() -> list[tuple[str, "sa.Column[object]"]]:
+def _column_specs() -> list[tuple[str, sa.Column[object]]]:
     return [
-        ("house_type_label", sa.Column(
-            "house_type_label", sa.String(120), nullable=True,
-        )),
-        ("view_type", sa.Column(
-            "view_type", sa.String(40), nullable=True,
-        )),
-        ("balcony_area_m2", sa.Column(
-            "balcony_area_m2", sa.Numeric(18, 2), nullable=True,
-        )),
-        ("storage_area_m2", sa.Column(
-            "storage_area_m2", sa.Numeric(18, 2), nullable=True,
-        )),
-        ("bedrooms", sa.Column(
-            "bedrooms", sa.Integer(),
-            nullable=False, server_default="0",
-        )),
-        ("bathrooms", sa.Column(
-            "bathrooms", sa.Integer(),
-            nullable=False, server_default="0",
-        )),
-        ("parking_spaces", sa.Column(
-            "parking_spaces", sa.Integer(),
-            nullable=False, server_default="0",
-        )),
-        ("sun_exposure_hours", sa.Column(
-            "sun_exposure_hours", sa.Numeric(4, 2), nullable=True,
-        )),
+        (
+            "house_type_label",
+            sa.Column(
+                "house_type_label",
+                sa.String(120),
+                nullable=True,
+            ),
+        ),
+        (
+            "view_type",
+            sa.Column(
+                "view_type",
+                sa.String(40),
+                nullable=True,
+            ),
+        ),
+        (
+            "balcony_area_m2",
+            sa.Column(
+                "balcony_area_m2",
+                sa.Numeric(18, 2),
+                nullable=True,
+            ),
+        ),
+        (
+            "storage_area_m2",
+            sa.Column(
+                "storage_area_m2",
+                sa.Numeric(18, 2),
+                nullable=True,
+            ),
+        ),
+        (
+            "bedrooms",
+            sa.Column(
+                "bedrooms",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
+            ),
+        ),
+        (
+            "bathrooms",
+            sa.Column(
+                "bathrooms",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
+            ),
+        ),
+        (
+            "parking_spaces",
+            sa.Column(
+                "parking_spaces",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
+            ),
+        ),
+        (
+            "sun_exposure_hours",
+            sa.Column(
+                "sun_exposure_hours",
+                sa.Numeric(4, 2),
+                nullable=True,
+            ),
+        ),
     ]
 
 
@@ -106,11 +147,7 @@ def upgrade() -> None:
         # Fresh install — create_all already populated everything.
         return
 
-    missing = [
-        (name, col)
-        for (name, col) in _column_specs()
-        if not _has_column(inspector, _TABLE, name)
-    ]
+    missing = [(name, col) for (name, col) in _column_specs() if not _has_column(inspector, _TABLE, name)]
     if not missing:
         return
 
@@ -126,11 +163,7 @@ def downgrade() -> None:
     if not _has_table(inspector, _TABLE):
         return
 
-    to_drop = [
-        name
-        for (name, _col) in _column_specs()
-        if _has_column(inspector, _TABLE, name)
-    ]
+    to_drop = [name for (name, _col) in _column_specs() if _has_column(inspector, _TABLE, name)]
     if not to_drop:
         return
 

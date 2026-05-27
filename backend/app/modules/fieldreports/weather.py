@@ -68,8 +68,22 @@ async def fetch_weather(lat: float, lon: float, api_key: str | None = None) -> d
 def _degrees_to_compass(degrees: float) -> str:
     """‌⁠‍Convert wind direction in degrees to a 16-point compass label."""
     dirs = [
-        "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-        "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
+        "N",
+        "NNE",
+        "NE",
+        "ENE",
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+        "W",
+        "WNW",
+        "NW",
+        "NNW",
     ]
     idx = round(degrees / 22.5) % 16
     return dirs[idx]

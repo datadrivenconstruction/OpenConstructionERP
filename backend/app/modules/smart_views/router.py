@@ -19,6 +19,7 @@ import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, Field
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.smart_views.schemas import (
@@ -30,7 +31,6 @@ from app.modules.smart_views.schemas import (
     SmartViewUpdate,
 )
 from app.modules.smart_views.service import SmartViewService
-from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -120,9 +120,7 @@ async def update_smart_view(
     service: SmartViewService = Depends(_get_service),
 ) -> SmartViewResponse:
     """Partial-update a SmartView (authoring user only)."""
-    return await service.update_view(
-        view_id, payload, user_id=_user_uuid(user_id)
-    )
+    return await service.update_view(view_id, payload, user_id=_user_uuid(user_id))
 
 
 @router.delete(
@@ -151,9 +149,7 @@ async def evaluate_smart_view(
     service: SmartViewService = Depends(_get_service),
 ) -> SmartViewEvaluateResponse:
     """Evaluate a SmartView against a specific BIM model's elements."""
-    return await service.evaluate(
-        view_id, model_id, user_id=_user_uuid(user_id)
-    )
+    return await service.evaluate(view_id, model_id, user_id=_user_uuid(user_id))
 
 
 # ── Presets ────────────────────────────────────────────────────────────

@@ -27,7 +27,6 @@ from typing import Any, ClassVar, Literal
 
 from app.core.file_signature import detect as detect_signature
 from app.modules.boq.importers._base import (
-    BOQImporter,
     ImportedBOQ,
     ImportedPosition,
     ImporterParseError,
@@ -133,9 +132,7 @@ _COLUMN_ALIASES: dict[str, frozenset[str]] = {
             "цена",
         }
     ),
-    "total": frozenset(
-        {"total", "amount", "gesamt", "gesamtpreis", "importe", "subtotal", "стоимость"}
-    ),
+    "total": frozenset({"total", "amount", "gesamt", "gesamtpreis", "importe", "subtotal", "стоимость"}),
     "classification": frozenset(
         {
             "classification",
@@ -200,21 +197,15 @@ _NRM_CODE_RE = re.compile(r"^(\d{1,2}\.){1,3}\d{1,2}$")
 
 # NRM element header text e.g. ``"Element 2 — Substructure"``,
 # ``"Group element 2.6 — External walls"``.
-_NRM_HEADER_RE = re.compile(
-    r"^(group\s+)?element\s+(\d{1,2}(?:\.\d{1,2})*)\b", re.IGNORECASE
-)
+_NRM_HEADER_RE = re.compile(r"^(group\s+)?element\s+(\d{1,2}(?:\.\d{1,2})*)\b", re.IGNORECASE)
 
 # MasterFormat: ``XX XX XX`` or ``XX.XX.XX`` or ``XX-XX-XX`` (2-2-2 digits).
 # Sub-codes ``XX XX XX.XX`` are allowed.
-_MASTERFORMAT_CODE_RE = re.compile(
-    r"^(\d{2})[\s.\-](\d{2})[\s.\-](\d{2})(?:\.(\d{2}))?$"
-)
+_MASTERFORMAT_CODE_RE = re.compile(r"^(\d{2})[\s.\-](\d{2})[\s.\-](\d{2})(?:\.(\d{2}))?$")
 
 # MasterFormat division header text e.g. ``"Division 03 — Concrete"``,
 # ``"03 30 00 Cast-in-Place Concrete"``.
-_MASTERFORMAT_HEADER_RE = re.compile(
-    r"^division\s+(\d{2})\b", re.IGNORECASE
-)
+_MASTERFORMAT_HEADER_RE = re.compile(r"^division\s+(\d{2})\b", re.IGNORECASE)
 
 
 def _infer_classification(
@@ -387,11 +378,7 @@ def _rows_to_positions(
 
     # Pre-compute a median unit rate across the file so we can warn on
     # any single position that's >10× above (likely a tampered export).
-    rate_samples = sorted(
-        v
-        for v in (safe_float(r.get("unit_rate"), default=0.0) for r in rows)
-        if v > 0
-    )
+    rate_samples = sorted(v for v in (safe_float(r.get("unit_rate"), default=0.0) for r in rows) if v > 0)
     median_rate = rate_samples[len(rate_samples) // 2] if rate_samples else 0.0
 
     for row_idx, row in enumerate(rows, start=2):
@@ -443,9 +430,7 @@ def _rows_to_positions(
             # Section detection: a row with a description but no unit /
             # quantity / rate is a section header from our own exporter.
             is_section_row = (
-                not unit_raw
-                and (quantity_raw in (None, "", 0, 0.0))
-                and (unit_rate_raw in (None, "", 0, 0.0))
+                not unit_raw and (quantity_raw in (None, "", 0, 0.0)) and (unit_rate_raw in (None, "", 0, 0.0))
             )
             if is_section_row:
                 result.positions.append(
@@ -583,18 +568,14 @@ class ExcelImporter:
                 rows = _parse_rows_from_csv(content)
                 source_format = "csv"
             else:
-                raise ImporterParseError(
-                    f"Unsupported spreadsheet format: detected {fmt!r}"
-                )
+                raise ImporterParseError(f"Unsupported spreadsheet format: detected {fmt!r}")
         except ImporterParseError:
             raise
         except Exception as exc:  # noqa: BLE001
             raise ImporterParseError(f"Could not parse spreadsheet: {exc}") from exc
 
         if not rows:
-            raise ImporterParseError(
-                "No data rows found. Check that the first row contains column headers."
-            )
+            raise ImporterParseError("No data rows found. Check that the first row contains column headers.")
 
         result = _rows_to_positions(rows)
         result.source_format = source_format

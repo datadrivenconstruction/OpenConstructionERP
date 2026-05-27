@@ -56,8 +56,8 @@ CURRENCY_FALLBACK = "EUR"
 
 async def resolve_template_currency(
     *,
-    session: "AsyncSession",
-    project_id: "_uuid_mod.UUID | None" = None,
+    session: AsyncSession,
+    project_id: _uuid_mod.UUID | None = None,
     override_currency: str | None = None,
     tenant_currency: str | None = None,
     require_resolved: bool = False,
@@ -102,11 +102,7 @@ async def resolve_template_currency(
 
             from app.modules.projects.models import Project
 
-            row = (
-                await session.execute(
-                    select(Project.currency).where(Project.id == project_id)
-                )
-            ).scalar_one_or_none()
+            row = (await session.execute(select(Project.currency).where(Project.id == project_id))).scalar_one_or_none()
             if row and isinstance(row, str) and row.strip():
                 return row.strip().upper()
         except Exception:

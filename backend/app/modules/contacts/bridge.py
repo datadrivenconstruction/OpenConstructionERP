@@ -162,16 +162,10 @@ async def _find_contact_by_email(
     if not email:
         return None
     normalised = email.lower()
-    stmt = (
-        select(Contact)
-        .where(Contact.primary_email == normalised)
-        .where(Contact.is_active.is_(True))
-    )
+    stmt = select(Contact).where(Contact.primary_email == normalised).where(Contact.is_active.is_(True))
     if tenant_id is not None:
         owner = str(tenant_id)
-        stmt = stmt.where(
-            or_(Contact.tenant_id == owner, Contact.created_by == owner)
-        )
+        stmt = stmt.where(or_(Contact.tenant_id == owner, Contact.created_by == owner))
     stmt = stmt.order_by(Contact.created_at.desc()).limit(1)
     result = await session.execute(stmt)
     return result.scalar_one_or_none()
@@ -210,11 +204,7 @@ async def ensure_contact_for_person(
     never commits.
     """
     normalised_email = (email or "").strip().lower() or None
-    contact = (
-        await _find_contact_by_email(session, normalised_email, tenant_id=tenant_id)
-        if normalised_email
-        else None
-    )
+    contact = await _find_contact_by_email(session, normalised_email, tenant_id=tenant_id) if normalised_email else None
 
     if contact is None:
         first, last = _split_full_name(full_name)
@@ -225,11 +215,7 @@ async def ensure_contact_for_person(
             primary_email=normalised_email,
             primary_phone=(phone or None),
             module_tags=[module_tag],
-            custom_properties=(
-                {module_tag.split("_", 1)[0]: custom_properties}
-                if custom_properties
-                else {}
-            ),
+            custom_properties=({module_tag.split("_", 1)[0]: custom_properties} if custom_properties else {}),
             tenant_id=tenant_id,
             created_by=tenant_id,
         )
@@ -237,9 +223,7 @@ async def ensure_contact_for_person(
         # Flush so ``contact.id`` is populated for the immediate FK
         # assignment the caller will perform.
         await session.flush()
-        logger.info(
-            "Contact bridge: created contact %s for %s tag", contact.id, module_tag
-        )
+        logger.info("Contact bridge: created contact %s for %s tag", contact.id, module_tag)
         return contact
 
     # Existing contact — append the tag idempotently and update phone/
@@ -277,7 +261,7 @@ async def ensure_contact_for_person(
 
 async def ensure_contact_for_lead(
     session: AsyncSession,
-    lead: "Lead",
+    lead: Lead,
     *,
     tenant_id: str | None,
 ) -> Contact:
@@ -302,7 +286,7 @@ async def ensure_contact_for_lead(
 
 async def ensure_contact_for_buyer(
     session: AsyncSession,
-    buyer: "Buyer",
+    buyer: Buyer,
     *,
     tenant_id: str | None,
 ) -> Contact:
@@ -327,7 +311,7 @@ async def ensure_contact_for_buyer(
 
 async def mirror_lead_fields_to_contact(
     session: AsyncSession,
-    lead: "Lead",
+    lead: Lead,
 ) -> Contact | None:
     """Mirror Lead canonical fields (name/email/phone) back to the Contact.
 
@@ -368,7 +352,7 @@ async def mirror_lead_fields_to_contact(
 
 async def mirror_buyer_fields_to_contact(
     session: AsyncSession,
-    buyer: "Buyer",
+    buyer: Buyer,
 ) -> Contact | None:
     """Mirror Buyer canonical fields (name/email/phone) back to the Contact."""
     if buyer.contact_id is None:
@@ -436,35 +420,27 @@ async def list_module_rows_for_contact(
         "property_dev_leads": [
             {
                 "id": str(lead.id),
-                "development_id": (
-                    str(lead.development_id) if lead.development_id else None
-                ),
+                "development_id": (str(lead.development_id) if lead.development_id else None),
                 "source": lead.source,
                 "status": lead.status,
                 "lead_score": float(lead.lead_score or 0),
                 "full_name": lead.full_name,
                 "email": lead.email,
-                "created_at": (
-                    lead.created_at.isoformat() if lead.created_at else None
-                ),
+                "created_at": (lead.created_at.isoformat() if lead.created_at else None),
             }
             for lead in leads
         ],
         "property_dev_buyers": [
             {
                 "id": str(b.id),
-                "development_id": (
-                    str(b.development_id) if b.development_id else None
-                ),
+                "development_id": (str(b.development_id) if b.development_id else None),
                 "plot_id": str(b.plot_id) if b.plot_id else None,
                 "status": b.status,
                 "contract_value": float(b.contract_value or 0),
                 "currency": b.currency,
                 "full_name": b.full_name,
                 "email": b.email,
-                "created_at": (
-                    b.created_at.isoformat() if b.created_at else None
-                ),
+                "created_at": (b.created_at.isoformat() if b.created_at else None),
             }
             for b in buyers
         ],

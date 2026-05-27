@@ -67,7 +67,6 @@ from app.modules.file_distribution.service import (  # noqa: E402
 from app.modules.projects.models import Project  # noqa: E402
 from app.modules.users.models import User  # noqa: E402
 
-
 # ── DB fixture ─────────────────────────────────────────────────────────────
 
 
@@ -75,7 +74,8 @@ from app.modules.users.models import User  # noqa: E402
 async def db_session() -> AsyncSession:
     db_path = _TMP_DIR / f"dist-{uuid.uuid4().hex[:8]}.db"
     engine = create_async_engine(
-        f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False,
+        f"sqlite+aiosqlite:///{db_path.as_posix()}",
+        echo=False,
     )
     async with engine.begin() as conn:
         await conn.run_sync(
@@ -96,7 +96,9 @@ async def db_session() -> AsyncSession:
 
 
 async def _seed_user_and_project(
-    session, *, project_name: str = "Dist Project",
+    session,
+    *,
+    project_name: str = "Dist Project",
 ) -> tuple[uuid.UUID, uuid.UUID]:
     user = User(
         email=f"dist-{uuid.uuid4().hex[:8]}@test.io",
@@ -259,10 +261,12 @@ async def test_subscribe_rejects_unknown_notify_event(db_session):
 @pytest.mark.asyncio
 async def test_search_finds_documents_across_projects(db_session):
     user_id, project_a = await _seed_user_and_project(
-        db_session, project_name="Project Alpha",
+        db_session,
+        project_name="Project Alpha",
     )
     _, project_b = await _seed_user_and_project(
-        db_session, project_name="Project Beta",
+        db_session,
+        project_name="Project Beta",
     )
 
     db_session.add(
@@ -327,7 +331,8 @@ async def test_search_falls_back_when_file_search_absent(db_session, monkeypatch
     """If the optional file_search module can't be probed, we still
     return canonical_name matches and flag used_content_index=False."""
     user_id, project_id = await _seed_user_and_project(
-        db_session, project_name="Fallback Project",
+        db_session,
+        project_name="Fallback Project",
     )
     db_session.add(
         Document(
@@ -364,7 +369,8 @@ async def test_search_falls_back_when_file_search_absent(db_session, monkeypatch
 @pytest.mark.asyncio
 async def test_search_empty_query_returns_no_hits(db_session):
     _, project_id = await _seed_user_and_project(
-        db_session, project_name="Empty Q Project",
+        db_session,
+        project_name="Empty Q Project",
     )
     svc = CrossProjectSearchService(db_session)
     svc._content_index_available = False

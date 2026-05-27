@@ -40,7 +40,6 @@ from typing import Any
 
 import pytest
 
-
 # ── Stub repositories shared by these tests ──────────────────────────────
 
 
@@ -322,7 +321,9 @@ async def test_release_retention_rejects_duplicate_event() -> None:
     )
     with pytest.raises(HTTPException) as exc:
         await svc.release_retention(
-            contract_id, "substantial_completion", actor_id="qs",
+            contract_id,
+            "substantial_completion",
+            actor_id="qs",
         )
     assert exc.value.status_code == 409
     # Structured error payload — caller code keys off ``error`` not the prose.
@@ -352,7 +353,9 @@ async def test_release_retention_allows_distinct_event() -> None:
         },
     )
     result = await svc.release_retention(
-        contract_id, "punch_list_complete", actor_id="qs",
+        contract_id,
+        "punch_list_complete",
+        actor_id="qs",
     )
     assert result["event"] == "punch_list_complete"
     # default schedule: punch_list_complete = 50 % of (held - already_released)
@@ -504,7 +507,9 @@ async def test_release_retention_after_full_release_is_zero() -> None:
         },
     )
     result = await svc.release_retention(
-        contract_id, "defects_liability_end", actor_id="qs",
+        contract_id,
+        "defects_liability_end",
+        actor_id="qs",
     )
     # Everything's already gone — nothing left to release.
     assert Decimal(result["amount_released"]) == Decimal("0")

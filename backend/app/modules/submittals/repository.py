@@ -26,8 +26,12 @@ class SubmittalRepository:
         submittal_type: str | None = None,
     ) -> int:
         """Single-query count — used by list responses to avoid N+1."""
-        base = select(func.count()).select_from(Submittal).where(
-            Submittal.project_id == project_id,
+        base = (
+            select(func.count())
+            .select_from(Submittal)
+            .where(
+                Submittal.project_id == project_id,
+            )
         )
         if status is not None:
             base = base.where(Submittal.status == status)
@@ -63,20 +67,17 @@ class SubmittalRepository:
         from sqlalchemy import cast
         from sqlalchemy.sql import func as sqlfunc
 
-        stmt = (
-            select(
-                sqlfunc.coalesce(
-                    sqlfunc.max(
-                        cast(
-                            func.substr(Submittal.submittal_number, 5),
-                            SAInteger,
-                        )
-                    ),
-                    0,
-                )
+        stmt = select(
+            sqlfunc.coalesce(
+                sqlfunc.max(
+                    cast(
+                        func.substr(Submittal.submittal_number, 5),
+                        SAInteger,
+                    )
+                ),
+                0,
             )
-            .where(Submittal.project_id == project_id)
-        )
+        ).where(Submittal.project_id == project_id)
         max_num = (await self.session.execute(stmt)).scalar_one()
         return f"SUB-{max_num + 1:03d}"
 

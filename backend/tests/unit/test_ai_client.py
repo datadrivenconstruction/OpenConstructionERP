@@ -135,15 +135,8 @@ class TestExtractOpenAIMessageText:
         assert _extract_openai_message_text("openai", data) == "Part one. Part two."
 
     def test_falls_back_to_reasoning_when_content_empty(self):
-        data = {
-            "choices": [
-                {"message": {"content": None, "reasoning": "Chain of thought answer"}}
-            ]
-        }
-        assert (
-            _extract_openai_message_text("openrouter", data)
-            == "Chain of thought answer"
-        )
+        data = {"choices": [{"message": {"content": None, "reasoning": "Chain of thought answer"}}]}
+        assert _extract_openai_message_text("openrouter", data) == "Chain of thought answer"
 
     def test_in_body_error_without_choices_raises(self):
         data = {"error": {"message": "insufficient credits"}}
@@ -155,11 +148,7 @@ class TestExtractOpenAIMessageText:
             _extract_openai_message_text("openrouter", {"choices": []})
 
     def test_empty_message_raises_with_finish_reason(self):
-        data = {
-            "choices": [
-                {"message": {"content": ""}, "finish_reason": "content_filter"}
-            ]
-        }
+        data = {"choices": [{"message": {"content": ""}, "finish_reason": "content_filter"}]}
         with pytest.raises(ValueError, match="content_filter"):
             _extract_openai_message_text("openrouter", data)
 
@@ -370,18 +359,14 @@ class TestModelErrorSurfacing:
     # ── Issue #148 — auto-recovery from renamed/retired model slugs ──────────
 
     @pytest.mark.asyncio
-    async def test_issue_148_openrouter_model_error_auto_recovers(
-        self, monkeypatch
-    ):
+    async def test_issue_148_openrouter_model_error_auto_recovers(self, monkeypatch):
         """A rejected OpenRouter slug must transparently fall back to
         ``openrouter/auto`` and return a normal answer — the chat keeps
         working without the user touching Settings."""
         from app.modules.ai import ai_client
 
         seen: list[str | None] = []
-        req = httpx.Request(
-            "POST", "https://openrouter.ai/api/v1/chat/completions"
-        )
+        req = httpx.Request("POST", "https://openrouter.ai/api/v1/chat/completions")
 
         async def fake_compat(
             provider,
@@ -419,16 +404,12 @@ class TestModelErrorSurfacing:
         assert "openrouter/auto" in seen
 
     @pytest.mark.asyncio
-    async def test_issue_148_all_fallbacks_fail_raises_actionable(
-        self, monkeypatch
-    ):
+    async def test_issue_148_all_fallbacks_fail_raises_actionable(self, monkeypatch):
         """When every fallback also fails, the actionable error is still
         raised (and says the automatic fallbacks were attempted)."""
         from app.modules.ai import ai_client
 
-        req = httpx.Request(
-            "POST", "https://openrouter.ai/api/v1/chat/completions"
-        )
+        req = httpx.Request("POST", "https://openrouter.ai/api/v1/chat/completions")
 
         async def always_bad(*args, **kwargs):
             resp = httpx.Response(
@@ -458,17 +439,11 @@ class TestModelErrorSurfacing:
         is never returned (no infinite same-model retry)."""
         from app.modules.ai import ai_client
 
-        fbs = ai_client.fallback_models_for(
-            "openrouter", "anthropic/claude-sonnet-4"
-        )
+        fbs = ai_client.fallback_models_for("openrouter", "anthropic/claude-sonnet-4")
         assert fbs[0] == "openrouter/auto"
         assert "anthropic/claude-sonnet-4" not in fbs
         # If the auto-router itself was the failing id, it is skipped.
-        assert "openrouter/auto" not in ai_client.fallback_models_for(
-            "openrouter", "openrouter/auto"
-        )
+        assert "openrouter/auto" not in ai_client.fallback_models_for("openrouter", "openrouter/auto")
         # A provider with no special fallback still offers its built-in
         # default (helps when a user override is the stale id).
-        assert ai_client.fallback_models_for("openai", "gpt-stale") == [
-            ai_client.default_model_for("openai")
-        ]
+        assert ai_client.fallback_models_for("openai", "gpt-stale") == [ai_client.default_model_for("openai")]

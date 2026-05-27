@@ -39,9 +39,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi import HTTPException
 
-from app.modules.documents.service import DocumentService
 from app.modules.documents.schemas import DocumentUpdate
-
+from app.modules.documents.service import DocumentService
 
 # ── Minimal Document stub ─────────────────────────────────────────────────
 
@@ -98,9 +97,9 @@ async def test_old_version_still_retrievable_after_reupload() -> None:
 
     # Stub the repo to return v1 when queried by v1.id.
     svc.repo = AsyncMock()
-    svc.repo.get_by_id = AsyncMock(side_effect=lambda doc_id: (
-        v1 if doc_id == v1.id else (v2 if doc_id == v2.id else None)
-    ))
+    svc.repo.get_by_id = AsyncMock(
+        side_effect=lambda doc_id: (v1 if doc_id == v1.id else (v2 if doc_id == v2.id else None))
+    )
 
     # Both versions must be retrievable.
     fetched_v1 = await svc.get_document(v1.id)
@@ -203,7 +202,7 @@ def test_only_latest_version_is_current() -> None:
     """In a version chain, only the newest version should be current."""
     v1 = _make_doc(version=1, is_current_revision=False)
     v2 = _make_doc(version=2, is_current_revision=False, parent_document_id=v1.id)
-    v3 = _make_doc(version=3, is_current_revision=True,  parent_document_id=v2.id)
+    v3 = _make_doc(version=3, is_current_revision=True, parent_document_id=v2.id)
 
     versions = [v1, v2, v3]
     current = [v for v in versions if v.is_current_revision]
@@ -241,8 +240,8 @@ def test_dms_content_search_not_implemented_in_service_layer() -> None:
 
     # Verify that list_documents accepts a ``search`` keyword for name search.
     import inspect
+
     sig = inspect.signature(DocumentService.list_documents)
     assert "search" in sig.parameters, (
-        "DocumentService.list_documents must accept a 'search' parameter "
-        "for filename substring search."
+        "DocumentService.list_documents must accept a 'search' parameter for filename substring search."
     )

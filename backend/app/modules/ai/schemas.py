@@ -29,6 +29,7 @@ def _serialise_money(v: Decimal | None) -> str | None:
         return "0"
     return format(v, "f")
 
+
 # ── AI Settings schemas ──────────────────────────────────────────────────────
 
 

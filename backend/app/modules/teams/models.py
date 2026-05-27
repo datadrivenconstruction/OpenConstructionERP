@@ -28,15 +28,9 @@ class Team(Base):
     name_translations: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=True
     )
-    sort_order: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
-    is_default: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1"
-    )
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -60,9 +54,7 @@ class TeamMembership(Base):
     """‌⁠‍Association between a user and a team."""
 
     __tablename__ = "oe_teams_membership"
-    __table_args__ = (
-        UniqueConstraint("team_id", "user_id", name="uq_teams_membership_team_user"),
-    )
+    __table_args__ = (UniqueConstraint("team_id", "user_id", name="uq_teams_membership_team_user"),)
 
     team_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -76,9 +68,7 @@ class TeamMembership(Base):
         nullable=False,
         index=True,
     )
-    role: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="member", server_default="member"
-    )
+    role: Mapped[str] = mapped_column(String(50), nullable=False, default="member", server_default="member")
 
     # Relationships
     team: Mapped[Team] = relationship(back_populates="memberships")
@@ -111,7 +101,4 @@ class EntityVisibility(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<EntityVisibility {self.entity_type}/{self.entity_id} "
-            f"→ team={self.team_id}>"
-        )
+        return f"<EntityVisibility {self.entity_type}/{self.entity_id} → team={self.team_id}>"

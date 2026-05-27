@@ -109,18 +109,12 @@ def create_vector_routes(
     endpoints this factory replaces.
     """
     if (model is None) == (loader is None):
-        raise ValueError(
-            "create_vector_routes: supply exactly one of 'model' or 'loader'"
-        )
+        raise ValueError("create_vector_routes: supply exactly one of 'model' or 'loader'")
 
     sub = APIRouter()
 
-    read_deps = (
-        [Depends(RequirePermission(read_permission))] if read_permission else []
-    )
-    write_deps = (
-        [Depends(RequirePermission(write_permission))] if write_permission else []
-    )
+    read_deps = [Depends(RequirePermission(read_permission))] if read_permission else []
+    write_deps = [Depends(RequirePermission(write_permission))] if write_permission else []
 
     @sub.get("/vector/status/", dependencies=read_deps)
     async def vector_status(_user_id: CurrentUserId) -> dict[str, Any]:

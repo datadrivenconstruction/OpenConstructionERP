@@ -238,9 +238,9 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     positions = [p for p in boq_full["positions"] if p["unit"] != ""]
 
     expected_totals = {
-        "01.001": 44.30 * 185.00,   # 8195.50
-        "01.002": 120.0 * 42.50,    # 5100.00
-        "01.003": 3200.0 * 1.85,    # 5920.00
+        "01.001": 44.30 * 185.00,  # 8195.50
+        "01.002": 120.0 * 42.50,  # 5100.00
+        "01.003": 3200.0 * 1.85,  # 5920.00
     }
 
     for pos in positions:
@@ -319,9 +319,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     assert abs(direct_cost - expected_grand) < 0.01
     assert net_total >= direct_cost, "Net total should be >= direct cost"
     # BOQ auto-applies default regional markups on creation, plus our 3 custom markups
-    assert len(structured["markups"]) >= 3, (
-        f"Expected at least 3 markups, got {len(structured['markups'])}"
-    )
+    assert len(structured["markups"]) >= 3, f"Expected at least 3 markups, got {len(structured['markups'])}"
     # Verify our specific markups exist
     markup_names = {m["name"] for m in structured["markups"]}
     assert "Site Overhead (BGK)" in markup_names
@@ -333,10 +331,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
 
     resp = await client.get(f"/api/v1/boq/boqs/{boq_id}/export/excel", headers=auth)
     assert resp.status_code == 200
-    assert (
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        in resp.headers.get("content-type", "")
-    )
+    assert "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" in resp.headers.get("content-type", "")
 
     from openpyxl import load_workbook
 
@@ -395,9 +390,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     # The CSV trailer carries a provenance footer + a frozen-FX appendix
     # after Grand Total, so locate the Grand Total row by its label rather
     # than assuming it is the last row.
-    grand_row = next(
-        (r for r in rows if len(r) > 1 and "Grand Total" in r[1]), None
-    )
+    grand_row = next((r for r in rows if len(r) > 1 and "Grand Total" in r[1]), None)
     assert grand_row is not None, "Grand Total row not found in CSV export"
 
     # ── Step 10: Export to GAEB XML -- verify valid XML ──────────────────
@@ -454,9 +447,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
         },
         headers=auth,
     )
-    assert resp.status_code == 409, (
-        f"Adding position to locked BOQ should return 409, got {resp.status_code}"
-    )
+    assert resp.status_code == 409, f"Adding position to locked BOQ should return 409, got {resp.status_code}"
 
     # Attempt to add a markup -- should fail with 409
     resp = await client.post(
@@ -469,9 +460,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
         },
         headers=auth,
     )
-    assert resp.status_code == 409, (
-        f"Adding markup to locked BOQ should return 409, got {resp.status_code}"
-    )
+    assert resp.status_code == 409, f"Adding markup to locked BOQ should return 409, got {resp.status_code}"
 
     # ── Step 12: Create revision -- verify new BOQ created ───────────────
     # Note: create-revision uses duplicate_boq which can trigger
@@ -505,9 +494,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     resp = await client.get(f"/api/v1/boq/boqs/{revision_id}", headers=auth)
     assert resp.status_code == 200
     rev_boq = resp.json()
-    assert len(rev_boq["positions"]) >= 4, (
-        f"Revision should have copied positions, got {len(rev_boq['positions'])}"
-    )
+    assert len(rev_boq["positions"]) >= 4, f"Revision should have copied positions, got {len(rev_boq['positions'])}"
 
     # ── Step 13: Import positions from Excel ─────────────────────────────
 
@@ -539,9 +526,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     )
     assert resp.status_code == 200, f"Import failed: {resp.text}"
     result = resp.json()
-    assert result.get("imported", 0) >= 3, (
-        f"Expected at least 3 imported positions, got {result}"
-    )
+    assert result.get("imported", 0) >= 3, f"Expected at least 3 imported positions, got {result}"
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -620,9 +605,7 @@ async def test_export_data_integrity(shared_client: AsyncClient, shared_auth: di
     rows = list(csv_mod.reader(io.StringIO(resp.text)))
     # Grand Total is no longer the last row (provenance footer + frozen-FX
     # appendix follow it) — find it by label.
-    grand_row = next(
-        (r for r in rows if len(r) > 5 and "Grand Total" in r[1]), None
-    )
+    grand_row = next((r for r in rows if len(r) > 5 and "Grand Total" in r[1]), None)
     assert grand_row is not None, "Grand Total row not found in CSV export"
     csv_total = float(grand_row[5])
     assert abs(csv_total - structured_grand) < 0.01, (
@@ -730,9 +713,7 @@ async def test_excel_export_quality(shared_client: AsyncClient, shared_auth: dic
         for col_idx in (4, 5, 6):  # Qty, Rate, Total
             cell = ws.cell(row=row_idx, column=col_idx)
             if cell.value is not None and isinstance(cell.value, (int, float)):
-                assert cell.number_format != "General", (
-                    f"Cell ({row_idx},{col_idx}) should have number formatting"
-                )
+                assert cell.number_format != "General", f"Cell ({row_idx},{col_idx}) should have number formatting"
                 break  # Just check first numeric row
         else:
             continue

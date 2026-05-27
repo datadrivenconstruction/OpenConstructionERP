@@ -81,9 +81,7 @@ async def client(app_instance):
         yield ac
 
 
-async def _register_admin(
-    client: AsyncClient, tag: str
-) -> tuple[dict[str, str], str]:
+async def _register_admin(client: AsyncClient, tag: str) -> tuple[dict[str, str], str]:
     from tests.integration._auth_helpers import promote_to_admin
 
     suffix = uuid.uuid4().hex[:8]
@@ -126,9 +124,7 @@ async def project_id(client: AsyncClient, auth: dict[str, str]) -> str:
     return resp.json()["id"]
 
 
-async def _create_topic(
-    client: AsyncClient, auth: dict[str, str], project_id: str, **overrides
-) -> dict:
+async def _create_topic(client: AsyncClient, auth: dict[str, str], project_id: str, **overrides) -> dict:
     payload = {
         "topic_type": "Issue",
         "topic_status": "Open",
@@ -151,9 +147,7 @@ async def _create_topic(
 
 
 @pytest.mark.asyncio
-async def test_list_projects_happy(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_list_projects_happy(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     resp = await client.get(f"{_API}/projects", headers=auth)
     assert resp.status_code == 200, resp.text
     body = resp.json()
@@ -165,12 +159,8 @@ async def test_list_projects_happy(
 
 
 @pytest.mark.asyncio
-async def test_get_single_project(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
-    resp = await client.get(
-        f"{_API}/projects/{project_id}", headers=auth
-    )
+async def test_get_single_project(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
+    resp = await client.get(f"{_API}/projects/{project_id}", headers=auth)
     assert resp.status_code == 200
     body = resp.json()
     assert body["project_id"] == project_id
@@ -181,12 +171,8 @@ async def test_get_single_project(
 
 
 @pytest.mark.asyncio
-async def test_get_extensions(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
-    resp = await client.get(
-        f"{_API}/projects/{project_id}/extensions", headers=auth
-    )
+async def test_get_extensions(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
+    resp = await client.get(f"{_API}/projects/{project_id}/extensions", headers=auth)
     assert resp.status_code == 200
     body = resp.json()
     assert "topic_type" in body
@@ -199,9 +185,7 @@ async def test_get_extensions(
 
 
 @pytest.mark.asyncio
-async def test_create_topic_uses_caller_as_author(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_create_topic_uses_caller_as_author(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id, title="Created by me")
     # creation_author must be present and non-empty.
     assert topic["creation_author"]
@@ -213,13 +197,9 @@ async def test_create_topic_uses_caller_as_author(
 
 
 @pytest.mark.asyncio
-async def test_list_topics_returns_envelope(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_list_topics_returns_envelope(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     await _create_topic(client, auth, project_id, title="A list test topic")
-    resp = await client.get(
-        f"{_API}/projects/{project_id}/topics", headers=auth
-    )
+    resp = await client.get(f"{_API}/projects/{project_id}/topics", headers=auth)
     assert resp.status_code == 200
     body = resp.json()
     assert "items" in body
@@ -231,13 +211,9 @@ async def test_list_topics_returns_envelope(
 
 
 @pytest.mark.asyncio
-async def test_get_topic_returns_etag(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_get_topic_returns_etag(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id)
-    resp = await client.get(
-        f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth
-    )
+    resp = await client.get(f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth)
     assert resp.status_code == 200
     assert "etag" in {k.lower() for k in resp.headers.keys()}
     assert resp.json()["guid"] == topic["guid"]
@@ -247,9 +223,7 @@ async def test_get_topic_returns_etag(
 
 
 @pytest.mark.asyncio
-async def test_put_topic_bumps_modified(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_put_topic_bumps_modified(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id)
     original_modified = topic["modified_date"]
     import asyncio
@@ -271,9 +245,7 @@ async def test_put_topic_bumps_modified(
 
 
 @pytest.mark.asyncio
-async def test_etag_stale_if_match_returns_412(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_etag_stale_if_match_returns_412(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id)
     stale_etag = '"deadbeef0000000000000000000000000000aaaa"'
     resp = await client.put(
@@ -288,13 +260,9 @@ async def test_etag_stale_if_match_returns_412(
 
 
 @pytest.mark.asyncio
-async def test_etag_fresh_if_match_succeeds(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_etag_fresh_if_match_succeeds(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id)
-    get_resp = await client.get(
-        f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth
-    )
+    get_resp = await client.get(f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth)
     etag = get_resp.headers["etag"]
     resp = await client.put(
         f"{_API}/projects/{project_id}/topics/{topic['guid']}",
@@ -308,17 +276,11 @@ async def test_etag_fresh_if_match_succeeds(
 
 
 @pytest.mark.asyncio
-async def test_delete_topic_204_then_404(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_delete_topic_204_then_404(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id, title="Delete me")
-    del_resp = await client.delete(
-        f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth
-    )
+    del_resp = await client.delete(f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth)
     assert del_resp.status_code == 204
-    get_resp = await client.get(
-        f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth
-    )
+    get_resp = await client.get(f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth)
     assert get_resp.status_code == 404
 
 
@@ -326,9 +288,7 @@ async def test_delete_topic_204_then_404(
 
 
 @pytest.mark.asyncio
-async def test_post_comment(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_post_comment(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id)
     resp = await client.post(
         f"{_API}/projects/{project_id}/topics/{topic['guid']}/comments",
@@ -345,9 +305,7 @@ async def test_post_comment(
 
 
 @pytest.mark.asyncio
-async def test_post_comment_reply_chain(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_post_comment_reply_chain(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id)
     first = await client.post(
         f"{_API}/projects/{project_id}/topics/{topic['guid']}/comments",
@@ -369,9 +327,7 @@ async def test_post_comment_reply_chain(
 
 
 @pytest.mark.asyncio
-async def test_list_comments(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_list_comments(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id)
     await client.post(
         f"{_API}/projects/{project_id}/topics/{topic['guid']}/comments",
@@ -396,9 +352,7 @@ async def test_list_comments(
 
 
 @pytest.mark.asyncio
-async def test_post_viewpoint(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_post_viewpoint(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id)
     body = {
         "perspective_camera": {
@@ -430,9 +384,7 @@ async def test_post_viewpoint(
 
 
 @pytest.mark.asyncio
-async def test_list_viewpoints(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_list_viewpoints(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id)
     await client.post(
         f"{_API}/projects/{project_id}/topics/{topic['guid']}/viewpoints",
@@ -452,9 +404,7 @@ async def test_list_viewpoints(
 
 
 @pytest.mark.asyncio
-async def test_get_snapshot_returns_png(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_get_snapshot_returns_png(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id)
     vp_resp = await client.post(
         f"{_API}/projects/{project_id}/topics/{topic['guid']}/viewpoints",
@@ -478,9 +428,7 @@ async def test_get_snapshot_returns_png(
 
 
 @pytest.mark.asyncio
-async def test_current_user(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_current_user(client: AsyncClient, auth: dict[str, str]) -> None:
     resp = await client.get(f"{_API}/current-user", headers=auth)
     assert resp.status_code == 200
     body = resp.json()
@@ -492,9 +440,7 @@ async def test_current_user(
 
 
 @pytest.mark.asyncio
-async def test_missing_token_401(
-    client: AsyncClient, project_id: str
-) -> None:
+async def test_missing_token_401(client: AsyncClient, project_id: str) -> None:
     resp = await client.get(f"{_API}/projects/{project_id}/topics")
     assert resp.status_code in (401, 403)
 
@@ -503,9 +449,7 @@ async def test_missing_token_401(
 
 
 @pytest.mark.asyncio
-async def test_wrong_project_blocked(
-    client: AsyncClient, project_id: str
-) -> None:
+async def test_wrong_project_blocked(client: AsyncClient, project_id: str) -> None:
     other_headers, _ = await _register_admin(client, "second-owner-idor")
     # other_headers is also admin → can read. Make a viewer instead.
     from sqlalchemy import update
@@ -527,9 +471,7 @@ async def test_wrong_project_blocked(
     )
     assert reg.status_code in (200, 201)
     async with async_session_factory() as session:
-        await session.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await session.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await session.commit()
     login = await client.post(
         "/api/v1/users/auth/login",
@@ -538,9 +480,7 @@ async def test_wrong_project_blocked(
     token = login.json().get("access_token", "")
     assert token
     headers = {"Authorization": f"Bearer {token}"}
-    resp = await client.get(
-        f"{_API}/projects/{project_id}/topics", headers=headers
-    )
+    resp = await client.get(f"{_API}/projects/{project_id}/topics", headers=headers)
     assert resp.status_code in (403, 404)
 
 
@@ -548,9 +488,7 @@ async def test_wrong_project_blocked(
 
 
 @pytest.mark.asyncio
-async def test_invalid_uuid_422(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_invalid_uuid_422(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     resp = await client.get(
         f"{_API}/projects/{project_id}/topics/not-a-real-uuid",
         headers=auth,
@@ -562,9 +500,7 @@ async def test_invalid_uuid_422(
 
 
 @pytest.mark.asyncio
-async def test_malformed_json_422(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_malformed_json_422(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     resp = await client.post(
         f"{_API}/projects/{project_id}/topics",
         content=b"{ not valid json",
@@ -577,9 +513,7 @@ async def test_malformed_json_422(
 
 
 @pytest.mark.asyncio
-async def test_odata_filter_topic_status(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_odata_filter_topic_status(client: AsyncClient, auth: dict[str, str]) -> None:
     # Fresh isolated project so the count is predictable.
     proj_resp = await client.post(
         "/api/v1/projects/",
@@ -589,9 +523,7 @@ async def test_odata_filter_topic_status(
     pid = proj_resp.json()["id"]
     await _create_topic(client, auth, pid, title="A1", topic_status="Open")
     await _create_topic(client, auth, pid, title="A2", topic_status="Open")
-    await _create_topic(
-        client, auth, pid, title="B1", topic_status="In Progress"
-    )
+    await _create_topic(client, auth, pid, title="B1", topic_status="In Progress")
 
     resp = await client.get(
         f"{_API}/projects/{pid}/topics",
@@ -623,13 +555,9 @@ async def test_503_when_clash_issue_unavailable(
     from app.modules.bcf import opencde_service
 
     async def boom(*args, **kwargs):
-        raise opencde_service.FeatureUnavailableError(
-            "Clash storage table missing"
-        )
+        raise opencde_service.FeatureUnavailableError("Clash storage table missing")
 
-    monkeypatch.setattr(
-        opencde_service.OpenCDEService, "list_projects", boom
-    )
+    monkeypatch.setattr(opencde_service.OpenCDEService, "list_projects", boom)
     resp = await client.get(f"{_API}/projects", headers=auth)
     assert resp.status_code == 503, resp.text
     assert "Clash storage table missing" in resp.text

@@ -22,7 +22,6 @@ from app.modules.costs.query_builder import (
     unit_type_for,
 )
 
-
 # ── unit_dim_for ─────────────────────────────────────────────────────────
 
 
@@ -345,8 +344,13 @@ def test_search_plan_routes_pset_booleans_to_hard_filters_only_when_true() -> No
     "definitely not external" flag, so a False predicate would
     over-narrow."""
     env_t = ElementEnvelope(
-        source="bim", category="wall", description="Wall", unit_hint="m3",
-        is_external=True, is_loadbearing=True, is_structural=True,
+        source="bim",
+        category="wall",
+        description="Wall",
+        unit_hint="m3",
+        is_external=True,
+        is_loadbearing=True,
+        is_structural=True,
     )
     plan = build_search_plan(env_t)
     assert plan.hard_filters.get("is_external") is True
@@ -354,8 +358,13 @@ def test_search_plan_routes_pset_booleans_to_hard_filters_only_when_true() -> No
     assert plan.hard_filters.get("is_structural") is True
 
     env_f = ElementEnvelope(
-        source="bim", category="wall", description="Wall", unit_hint="m3",
-        is_external=False, is_loadbearing=False, is_structural=False,
+        source="bim",
+        category="wall",
+        description="Wall",
+        unit_hint="m3",
+        is_external=False,
+        is_loadbearing=False,
+        is_structural=False,
     )
     plan_f = build_search_plan(env_f)
     assert "is_external" not in plan_f.hard_filters
@@ -363,7 +372,10 @@ def test_search_plan_routes_pset_booleans_to_hard_filters_only_when_true() -> No
     assert "is_structural" not in plan_f.hard_filters
 
     env_n = ElementEnvelope(
-        source="bim", category="wall", description="Wall", unit_hint="m3",
+        source="bim",
+        category="wall",
+        description="Wall",
+        unit_hint="m3",
     )
     plan_n = build_search_plan(env_n)
     assert "is_external" not in plan_n.hard_filters
@@ -441,7 +453,7 @@ def test_build_query_back_compat_still_works() -> None:
         category="wall",
         description="Wall",
         unit_hint="m3",
-        ifc_class="IfcWall",       # would be hard in SearchPlan
+        ifc_class="IfcWall",  # would be hard in SearchPlan
         ost_category="OST_Walls",  # would be soft in SearchPlan
     )
     payload = build_query(env)

@@ -13,7 +13,6 @@ never touch the network. RBAC + auth gates are exercised end-to-end.
 
 from __future__ import annotations
 
-import uuid
 from decimal import Decimal
 
 import pytest
@@ -32,8 +31,10 @@ def _berlin_suggestions(count: int = 3) -> list[SuggestionResult]:
                 lon=Decimal(f"13.405{i}"),
                 country_code="de",
                 bbox=(
-                    Decimal("52.0"), Decimal("13.0"),
-                    Decimal("53.0"), Decimal("14.0"),
+                    Decimal("52.0"),
+                    Decimal("13.0"),
+                    Decimal("53.0"),
+                    Decimal("14.0"),
                 ),
                 addresstype="city" if i == 0 else "road",
                 osm_type="relation",
@@ -65,7 +66,9 @@ def patch_suggest_empty(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_suggest_returns_dropdown_rows(
-    http_client, tenant_a, patch_suggest_ok,
+    http_client,
+    tenant_a,
+    patch_suggest_ok,
 ):
     res = await http_client.get(
         "/api/v1/geo-hub/geocode/suggest?q=Berlin",
@@ -85,7 +88,9 @@ async def test_suggest_returns_dropdown_rows(
 
 @pytest.mark.asyncio
 async def test_suggest_respects_limit_param(
-    http_client, tenant_a, patch_suggest_ok,
+    http_client,
+    tenant_a,
+    patch_suggest_ok,
 ):
     res = await http_client.get(
         "/api/v1/geo-hub/geocode/suggest?q=Berlin&limit=2",
@@ -97,7 +102,9 @@ async def test_suggest_respects_limit_param(
 
 @pytest.mark.asyncio
 async def test_suggest_caps_limit_at_10(
-    http_client, tenant_a, patch_suggest_ok,
+    http_client,
+    tenant_a,
+    patch_suggest_ok,
 ):
     res = await http_client.get(
         "/api/v1/geo-hub/geocode/suggest?q=Berlin&limit=999",
@@ -125,7 +132,10 @@ async def test_suggest_requires_auth(http_client, patch_suggest_ok):
 
 @pytest.mark.asyncio
 async def test_suggest_returns_empty_when_geocoder_disabled(
-    http_client, tenant_a, monkeypatch, patch_suggest_ok,
+    http_client,
+    tenant_a,
+    monkeypatch,
+    patch_suggest_ok,
 ):
     monkeypatch.setenv("OE_GEOCODER_DISABLED", "true")
     res = await http_client.get(
@@ -141,7 +151,9 @@ async def test_suggest_returns_empty_when_geocoder_disabled(
 
 @pytest.mark.asyncio
 async def test_suggest_returns_empty_on_failure(
-    http_client, tenant_a, patch_suggest_empty,
+    http_client,
+    tenant_a,
+    patch_suggest_empty,
 ):
     res = await http_client.get(
         "/api/v1/geo-hub/geocode/suggest?q=Atlantis",
@@ -216,7 +228,8 @@ async def test_cache_purge_requires_admin(http_client, tenant_b):
 
 @pytest.mark.asyncio
 async def test_cache_purge_default_30_days_only_sweeps_stale(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     fresh = "purge" + "f" * 60
     stale = "purge" + "s" * 60
@@ -234,7 +247,8 @@ async def test_cache_purge_default_30_days_only_sweeps_stale(
 
 @pytest.mark.asyncio
 async def test_cache_purge_zero_days_flushes_everything(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     await _seed_cache_row("purgeall" + "x" * 56, days_old=0)
     res = await http_client.delete(
@@ -256,7 +270,8 @@ async def test_cache_purge_zero_days_flushes_everything(
 
 @pytest.mark.asyncio
 async def test_cache_purge_rejects_negative_days(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     res = await http_client.delete(
         "/api/v1/geo-hub/geocode/cache?older_than_days=-5",
@@ -271,7 +286,8 @@ async def test_cache_purge_rejects_negative_days(
 
 @pytest.mark.asyncio
 async def test_anchored_projects_returns_project_type_and_status(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     """Pin layer must include project_type + status for icon rendering."""
     res = await http_client.get(
@@ -323,7 +339,8 @@ async def test_suggest_addresses_parses_top_n_results(monkeypatch):
             200,
             json=[
                 {
-                    "lat": "52.52", "lon": "13.405",
+                    "lat": "52.52",
+                    "lon": "13.405",
                     "display_name": "Berlin, Germany",
                     "addresstype": "city",
                     "osm_type": "relation",
@@ -331,7 +348,8 @@ async def test_suggest_addresses_parses_top_n_results(monkeypatch):
                     "boundingbox": ["52.3", "52.7", "13.0", "13.8"],
                 },
                 {
-                    "lat": "52.4", "lon": "13.5",
+                    "lat": "52.4",
+                    "lon": "13.5",
                     "display_name": "Berlin Schönefeld, Germany",
                     "addresstype": "town",
                     "osm_type": "relation",
@@ -348,6 +366,8 @@ async def test_suggest_addresses_parses_top_n_results(monkeypatch):
     assert out[0].display_name.startswith("Berlin,")
     assert out[0].country_code == "de"
     assert out[0].bbox == (
-        Decimal("52.3"), Decimal("13.0"),
-        Decimal("52.7"), Decimal("13.8"),
+        Decimal("52.3"),
+        Decimal("13.0"),
+        Decimal("52.7"),
+        Decimal("13.8"),
     )

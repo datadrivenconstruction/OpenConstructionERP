@@ -95,17 +95,13 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
     return name in inspector.get_table_names()
 
 
-def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str
-) -> bool:
+def _has_index(inspector: sa.engine.reflection.Inspector, table: str, index: str) -> bool:
     if not _has_table(inspector, table):
         return False
     return any(ix["name"] == index for ix in inspector.get_indexes(table))
 
 
-def _create_index_idempotent(
-    name: str, table: str, cols: list[str], *, unique: bool = False
-) -> None:
+def _create_index_idempotent(name: str, table: str, cols: list[str], *, unique: bool = False) -> None:
     """Create an index, swallowing OperationalError for already-existing entries.
 
     ``Base.metadata.create_all`` (run at app startup for SQLite) may have
@@ -123,9 +119,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── oe_resources_resource ────────────────────────────────────────
     if not _has_table(inspector, "oe_resources_resource"):
@@ -168,9 +162,7 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column("currency", sa.String(3), nullable=False, server_default=""),
-            sa.Column(
-                "status", sa.String(32), nullable=False, server_default="active"
-            ),
+            sa.Column("status", sa.String(32), nullable=False, server_default="active"),
             sa.Column("avatar_url", sa.String(1024), nullable=True),
             sa.Column("notes", sa.Text(), nullable=False, server_default=""),
             sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
@@ -211,9 +203,7 @@ def upgrade() -> None:
             ),
             sa.Column("code", sa.String(64), nullable=False),
             sa.Column("name", sa.String(255), nullable=False),
-            sa.Column(
-                "category", sa.String(32), nullable=False, server_default="trade"
-            ),
+            sa.Column("category", sa.String(32), nullable=False, server_default="trade"),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
             sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
         )
@@ -247,9 +237,7 @@ def upgrade() -> None:
                 sa.ForeignKey("oe_resources_skill.id", ondelete="CASCADE"),
                 nullable=False,
             ),
-            sa.Column(
-                "level", sa.String(16), nullable=False, server_default="competent"
-            ),
+            sa.Column("level", sa.String(16), nullable=False, server_default="competent"),
             sa.Column("acquired_at", sa.String(20), nullable=True),
             sa.Column("expires_at", sa.String(20), nullable=True),
             sa.Column("notes", sa.Text(), nullable=False, server_default=""),
@@ -285,9 +273,7 @@ def upgrade() -> None:
             sa.Column("issue_date", sa.String(20), nullable=True),
             sa.Column("valid_until", sa.String(20), nullable=True),
             sa.Column("document_url", sa.String(1024), nullable=True),
-            sa.Column(
-                "status", sa.String(16), nullable=False, server_default="valid"
-            ),
+            sa.Column("status", sa.String(16), nullable=False, server_default="valid"),
             sa.Column("notes", sa.Text(), nullable=False, server_default=""),
             sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
         )
@@ -372,9 +358,7 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="100",
             ),
-            sa.Column(
-                "status", sa.String(16), nullable=False, server_default="proposed"
-            ),
+            sa.Column("status", sa.String(16), nullable=False, server_default="proposed"),
             sa.Column(
                 "cost_rate",
                 sa.Numeric(18, 4),
@@ -413,18 +397,12 @@ def upgrade() -> None:
             sa.Column("requested_by", sa.String(36), nullable=True),
             sa.Column("title", sa.String(500), nullable=False),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
-            sa.Column(
-                "required_skills", sa.JSON(), nullable=False, server_default="[]"
-            ),
+            sa.Column("required_skills", sa.JSON(), nullable=False, server_default="[]"),
             sa.Column("start_at", sa.DateTime(timezone=True), nullable=False),
             sa.Column("end_at", sa.DateTime(timezone=True), nullable=False),
             sa.Column("quantity", sa.Integer(), nullable=False, server_default="1"),
-            sa.Column(
-                "priority", sa.String(16), nullable=False, server_default="med"
-            ),
-            sa.Column(
-                "status", sa.String(16), nullable=False, server_default="open"
-            ),
+            sa.Column("priority", sa.String(16), nullable=False, server_default="med"),
+            sa.Column("status", sa.String(16), nullable=False, server_default="open"),
             sa.Column(
                 "fulfilled_assignment_id",
                 guid_type,
@@ -463,9 +441,7 @@ def upgrade() -> None:
                 sa.ForeignKey("oe_resources_resource.id", ondelete="CASCADE"),
                 nullable=False,
             ),
-            sa.Column(
-                "link_type", sa.String(32), nullable=False, server_default="buddy"
-            ),
+            sa.Column("link_type", sa.String(32), nullable=False, server_default="buddy"),
             sa.Column("notes", sa.Text(), nullable=False, server_default=""),
             sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
         )

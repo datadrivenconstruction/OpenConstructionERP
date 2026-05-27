@@ -93,10 +93,13 @@ class TestBimAutoClassifierHint:
 
     def test_bim_unknown_category_no_hint(self) -> None:
         """Category outside coarse map → no hint at all (None, not empty)."""
-        envelope = build_envelope("bim", {
-            "category": "Unobtanium",
-            "properties": {"material": "concrete"},
-        })
+        envelope = build_envelope(
+            "bim",
+            {
+                "category": "Unobtanium",
+                "properties": {"material": "concrete"},
+            },
+        )
         assert envelope.classifier_hint is None
 
     def test_bim_fire_rated_door_routes_to_steel_variant(self) -> None:
@@ -121,10 +124,13 @@ class TestClassifierBoostHonoursAutoHint:
 
     def test_classifier_boost_full_match_on_auto_hint(self) -> None:
         # Build envelope through the extractor (auto-hint path).
-        envelope = build_envelope("bim", {
-            "category": "wall",
-            "properties": {"material": "Concrete C30/37"},
-        })
+        envelope = build_envelope(
+            "bim",
+            {
+                "category": "wall",
+                "properties": {"material": "Concrete C30/37"},
+            },
+        )
         assert envelope.classifier_hint is not None
         hint_code = envelope.classifier_hint["din276"]
 
@@ -142,10 +148,13 @@ class TestClassifierBoostHonoursAutoHint:
 
     def test_classifier_boost_group_match_on_auto_hint(self) -> None:
         """Auto-hint ``330.10`` rewards a candidate with ``330.10.020``."""
-        envelope = build_envelope("bim", {
-            "category": "wall",
-            "properties": {"material": "Concrete C30/37"},
-        })
+        envelope = build_envelope(
+            "bim",
+            {
+                "category": "wall",
+                "properties": {"material": "Concrete C30/37"},
+            },
+        )
         # Auto-hint resolves to ``330.10`` — a CWICR-style 3-level code
         # ``330.10.020`` shares the group.
         candidate = MatchCandidate(
@@ -164,10 +173,13 @@ class TestClassifierBoostHonoursAutoHint:
 
     def test_classifier_boost_no_match_when_codes_diverge(self) -> None:
         """Auto-hint for masonry must NOT reward a concrete candidate."""
-        envelope = build_envelope("bim", {
-            "category": "wall",
-            "properties": {"material": "Brick masonry"},
-        })
+        envelope = build_envelope(
+            "bim",
+            {
+                "category": "wall",
+                "properties": {"material": "Brick masonry"},
+            },
+        )
         candidate = MatchCandidate(
             code="X-003",
             classification={"din276": "330.10.020"},  # concrete
@@ -181,10 +193,13 @@ class TestClassifierBoostHonoursAutoHint:
 
     def test_classifier_boost_other_classifier_setting_no_op(self) -> None:
         """Settings.classifier='masterformat' uses MF hint, not DIN."""
-        envelope = build_envelope("bim", {
-            "category": "wall",
-            "properties": {"material": "Concrete C30/37"},
-        })
+        envelope = build_envelope(
+            "bim",
+            {
+                "category": "wall",
+                "properties": {"material": "Concrete C30/37"},
+            },
+        )
         # Auto-hint includes all three standards.
         assert envelope.classifier_hint["masterformat"] == "03 30 00"
 
@@ -207,51 +222,66 @@ class TestPdfDwgCoarseHint:
     """PDF/DWG rarely have material info — coarse category-only hint."""
 
     def test_pdf_extractor_coarse_hint_from_category(self) -> None:
-        envelope = build_envelope("pdf", {
-            "description": "Wandanstrich Dispersionsfarbe weiss",
-            "category": "wall",
-            "unit": "m2",
-            "quantity": 220.0,
-            "language": "de",
-        })
+        envelope = build_envelope(
+            "pdf",
+            {
+                "description": "Wandanstrich Dispersionsfarbe weiss",
+                "category": "wall",
+                "unit": "m2",
+                "quantity": 220.0,
+                "language": "de",
+            },
+        )
         # No material → coarse "330" only (not 330.10).
         assert envelope.classifier_hint is not None
         assert envelope.classifier_hint["din276"] == "330"
 
     def test_pdf_extractor_no_category_no_hint(self) -> None:
-        envelope = build_envelope("pdf", {
-            "description": "Dispersionsfarbe weiss",
-            "unit": "m2",
-            "language": "de",
-        })
+        envelope = build_envelope(
+            "pdf",
+            {
+                "description": "Dispersionsfarbe weiss",
+                "unit": "m2",
+                "language": "de",
+            },
+        )
         assert envelope.classifier_hint is None
 
     def test_pdf_explicit_classification_preserved(self) -> None:
         """PDF extractor honours upstream classification (legacy behaviour)."""
-        envelope = build_envelope("pdf", {
-            "description": "Wandanstrich",
-            "category": "wall",
-            "classification": {"din276": "363.10.010"},  # specific paint code
-            "language": "de",
-        })
+        envelope = build_envelope(
+            "pdf",
+            {
+                "description": "Wandanstrich",
+                "category": "wall",
+                "classification": {"din276": "363.10.010"},  # specific paint code
+                "language": "de",
+            },
+        )
         assert envelope.classifier_hint == {"din276": "363.10.010"}
 
     def test_dwg_extractor_coarse_hint_from_layer_category(self) -> None:
         # DWG extractor derives category from the AIA layer code.
-        envelope = build_envelope("dwg", {
-            "description": "Drywall partition, double-sided 12.5 mm gypsum",
-            "layer": "A-WALL-PRTN",
-            "language": "en",
-        })
+        envelope = build_envelope(
+            "dwg",
+            {
+                "description": "Drywall partition, double-sided 12.5 mm gypsum",
+                "layer": "A-WALL-PRTN",
+                "language": "en",
+            },
+        )
         assert envelope.category == "wall"  # derived from layer
         # Coarse hint emitted (no material to refine on).
         assert envelope.classifier_hint is not None
         assert envelope.classifier_hint["din276"] == "330"
 
     def test_dwg_unknown_layer_unknown_category_no_hint(self) -> None:
-        envelope = build_envelope("dwg", {
-            "description": "x",
-            "layer": "S-EXOTIC-XXX",
-        })
+        envelope = build_envelope(
+            "dwg",
+            {
+                "description": "x",
+                "layer": "S-EXOTIC-XXX",
+            },
+        )
         # Category resolves to "exotic" — not in coarse map, no hint.
         assert envelope.classifier_hint is None

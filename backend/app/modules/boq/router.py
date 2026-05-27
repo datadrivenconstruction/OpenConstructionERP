@@ -64,7 +64,10 @@ import zipfile
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
+
+if TYPE_CHECKING:
+    from app.modules.boq.importers import ImportedBOQ
 
 from fastapi import (
     APIRouter,
@@ -204,7 +207,9 @@ async def _verify_boq_owner(
     project_repo = ProjectRepository(session)
     project = await project_repo.get_by_id(boq.project_id)
     if project is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale())
+        )
     if str(project.owner_id) != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -229,7 +234,9 @@ async def _verify_project_owner_for_boq(
     project_repo = ProjectRepository(session)
     project = await project_repo.get_by_id(project_id)
     if project is None or project.status == "archived":
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale())
+        )
     if is_admin:
         return
     if str(project.owner_id) != user_id:
@@ -1737,7 +1744,9 @@ async def get_position(
     # IDOR guard: load position → derive boq_id → verify ownership chain
     existing = await service.position_repo.get_by_id(position_id)
     if existing is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
+        )
     await _verify_boq_owner(session, existing.boq_id, user_id, payload)
     return await _position_to_response_with_links(service, existing)
 
@@ -1760,7 +1769,9 @@ async def update_position(
     # IDOR guard: load position → derive boq_id → verify ownership chain
     existing = await service.position_repo.get_by_id(position_id)
     if existing is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
+        )
     await _verify_boq_owner(session, existing.boq_id, user_id, payload)
     # Pass actor_id through so the audit log records who made the change
     # (BUG-AUDIT01).  Without it the service falls back to anonymous and
@@ -1810,9 +1821,7 @@ async def bulk_update_positions(
     """
     await _verify_boq_owner(session, boq_id, user_id, payload)
     try:
-        return await service.bulk_update_positions(
-            boq_id, data, actor_id=user_id
-        )
+        return await service.bulk_update_positions(boq_id, data, actor_id=user_id)
     except HTTPException:
         raise
     except ValueError as exc:
@@ -1863,9 +1872,7 @@ async def restore_position_field(
     # Re-read the freshest log so we can echo the restore entry id.
     new_log_id: uuid.UUID | None = None
     try:
-        recent, _total = await service.activity_repo.list_for_boq(
-            boq_id, offset=0, limit=1
-        )
+        recent, _total = await service.activity_repo.list_for_boq(boq_id, offset=0, limit=1)
         if recent and recent[0].action == "position.field_restored":
             new_log_id = recent[0].id
     except Exception:  # noqa: BLE001 — informational only
@@ -1923,7 +1930,9 @@ async def repick_resource_variant(
     # IDOR guard: load position → derive boq_id → verify ownership chain.
     existing = await service.position_repo.get_by_id(position_id)
     if existing is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
+        )
     await _verify_boq_owner(session, existing.boq_id, user_id, payload)
 
     position = await service.repick_resource_variant(
@@ -1959,7 +1968,9 @@ async def list_position_links(
     """
     existing = await service.position_repo.get_by_id(position_id)
     if existing is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
+        )
     await _verify_boq_owner(session, existing.boq_id, user_id, payload)
     return await service.list_links(position_id)
 
@@ -1986,7 +1997,9 @@ async def unlink_position(
     """
     existing = await service.position_repo.get_by_id(position_id)
     if existing is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
+        )
     await _verify_boq_owner(session, existing.boq_id, user_id, payload)
     position = await service.unlink_position(position_id, actor_id=user_id)
     return await _position_to_response_with_links(service, position)
@@ -2013,7 +2026,9 @@ async def delete_position(
     # IDOR guard: load position → derive boq_id → verify ownership chain
     existing = await service.position_repo.get_by_id(position_id)
     if existing is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
+        )
     await _verify_boq_owner(session, existing.boq_id, user_id, payload)
     await _log_activity(
         service,
@@ -2270,18 +2285,13 @@ async def create_quantity_link(
             detail=translate("errors.position_not_found", locale=get_locale()),
         )
     await _verify_boq_owner(session, existing.boq_id, user_id, payload)
-    link = await service.create_quantity_link(
-        position_id, data, created_by=user_id
-    )
+    link = await service.create_quantity_link(position_id, data, created_by=user_id)
     await _log_activity(
         service,
         user_id=user_id,
         action="quantity_link_created",
         target_type="position",
-        description=(
-            f"Bound {data.quantity_field} → quantity from "
-            f"{len(data.element_stable_ids)} model element(s)"
-        ),
+        description=(f"Bound {data.quantity_field} → quantity from {len(data.element_stable_ids)} model element(s)"),
         boq_id=existing.boq_id,
         target_id=position_id,
     )
@@ -2312,9 +2322,7 @@ async def delete_quantity_link(
     await _verify_boq_owner(session, existing.boq_id, user_id, payload)
     link = await service.quantity_link_repo.get_by_id(link_id)
     if link is None or link.position_id != position_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Quantity link not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quantity link not found")
     await service.delete_quantity_link(link_id)
 
 
@@ -2362,17 +2370,13 @@ async def apply_quantity_links(
     origin is auditable and never silently overwritten.
     """
     await _verify_boq_owner(session, boq_id, user_id, payload)
-    result = await service.apply_quantity_links(
-        boq_id, data.link_ids, applied_by=user_id
-    )
+    result = await service.apply_quantity_links(boq_id, data.link_ids, applied_by=user_id)
     await _log_activity(
         service,
         user_id=user_id,
         action="quantity_link_applied",
         target_type="boq",
-        description=(
-            f"Applied {result.applied} model-driven quantity update(s)"
-        ),
+        description=(f"Applied {result.applied} model-driven quantity update(s)"),
         boq_id=boq_id,
     )
     return result
@@ -3143,17 +3147,11 @@ async def export_boq_csv(
             _fmt_number(getattr(pos, "total", 0.0)),
             neutralise_formula(_row_currency(pos)),
             neutralise_formula(_get_classification_code(classification)),
-            neutralise_formula(
-                _json.dumps(classification, ensure_ascii=False) if classification else ""
-            ),
+            neutralise_formula(_json.dumps(classification, ensure_ascii=False) if classification else ""),
             neutralise_formula(getattr(pos, "source", "") or ""),
-            _fmt_number(getattr(pos, "confidence", None))
-            if getattr(pos, "confidence", None) is not None
-            else "",
+            _fmt_number(getattr(pos, "confidence", None)) if getattr(pos, "confidence", None) is not None else "",
             neutralise_formula(getattr(pos, "wbs_code", "") or getattr(pos, "wbs_id", "") or ""),
-            neutralise_formula(
-                ",".join(str(x) for x in cad_ids) if isinstance(cad_ids, list) else ""
-            ),
+            neutralise_formula(",".join(str(x) for x in cad_ids) if isinstance(cad_ids, list) else ""),
             neutralise_formula(_json.dumps(metadata_, ensure_ascii=False) if metadata_ else ""),
         ]
 
@@ -3210,9 +3208,7 @@ async def export_boq_csv(
 
     # Markup rows — markup.name is user-controlled.
     for markup in structured.markups:
-        writer.writerow(
-            _total_row(neutralise_formula(f"  {markup.name}"), markup.amount)
-        )
+        writer.writerow(_total_row(neutralise_formula(f"  {markup.name}"), markup.amount))
 
     # Grand total row (includes markups)
     writer.writerow(_total_row("Grand Total", structured.grand_total))
@@ -3222,9 +3218,7 @@ async def export_boq_csv(
     # of base per 1 unit of the listed foreign currency.
     if fx_map:
         writer.writerow([""] * 14)
-        writer.writerow(
-            ["", "FX Rates (frozen at export)", "", "", "", "", "", "", "", "", "", "", "", ""]
-        )
+        writer.writerow(["", "FX Rates (frozen at export)", "", "", "", "", "", "", "", "", "", "", "", ""])
         writer.writerow(
             [
                 "",
@@ -3269,10 +3263,9 @@ async def export_boq_csv(
     # Description column). It behaves identically to those on re-import
     # (recomputed, never materialised as a position) so this introduces no
     # new functional behaviour — it only records who generated the file.
-    _xtok_csv = bytes(
-        b ^ 0x55
-        for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
-    ).decode("ascii")
+    _xtok_csv = bytes(b ^ 0x55 for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63").decode(
+        "ascii"
+    )
     writer.writerow([""] * 14)
     writer.writerow(
         [
@@ -3455,12 +3448,8 @@ async def export_boq_excel(
             current_section_id = str(pos.id)
             for c in range(1, len(headers) + 1):
                 ws.cell(row=current_row, column=c).fill = gray_fill
-            ws.cell(
-                row=current_row, column=1, value=neutralise_formula(pos.ordinal)
-            ).font = section_font
-            desc_cell = ws.cell(
-                row=current_row, column=2, value=neutralise_formula(pos.description)
-            )
+            ws.cell(row=current_row, column=1, value=neutralise_formula(pos.ordinal)).font = section_font
+            desc_cell = ws.cell(row=current_row, column=2, value=neutralise_formula(pos.description))
             desc_cell.font = section_font
             desc_cell.fill = gray_fill
             current_row += 1
@@ -3515,9 +3504,7 @@ async def export_boq_excel(
         ws.cell(
             row=current_row,
             column=9,
-            value=neutralise_formula(
-                _json.dumps(classification_, ensure_ascii=False) if classification_ else ""
-            ),
+            value=neutralise_formula(_json.dumps(classification_, ensure_ascii=False) if classification_ else ""),
         )
         ws.cell(
             row=current_row,
@@ -3529,23 +3516,17 @@ async def export_boq_excel(
         ws.cell(
             row=current_row,
             column=12,
-            value=neutralise_formula(
-                getattr(pos, "wbs_code", "") or getattr(pos, "wbs_id", "") or ""
-            ),
+            value=neutralise_formula(getattr(pos, "wbs_code", "") or getattr(pos, "wbs_id", "") or ""),
         )
         ws.cell(
             row=current_row,
             column=13,
-            value=neutralise_formula(
-                ",".join(str(x) for x in cad_ids) if isinstance(cad_ids, list) else ""
-            ),
+            value=neutralise_formula(",".join(str(x) for x in cad_ids) if isinstance(cad_ids, list) else ""),
         )
         ws.cell(
             row=current_row,
             column=14,
-            value=neutralise_formula(
-                _json.dumps(pos_meta_raw, ensure_ascii=False) if pos_meta_raw else ""
-            ),
+            value=neutralise_formula(_json.dumps(pos_meta_raw, ensure_ascii=False) if pos_meta_raw else ""),
         )
 
         # ── Custom column values ─────────────────────────────────────────
@@ -3553,9 +3534,7 @@ async def export_boq_excel(
         # neutralised before being written. ``number`` columns are recast
         # to ``float`` below, so they bypass ``neutralise_formula``.
         if custom_columns:
-            custom_fields = (
-                pos_meta_raw.get("custom_fields", {}) if isinstance(pos_meta_raw, dict) else {}
-            )
+            custom_fields = pos_meta_raw.get("custom_fields", {}) if isinstance(pos_meta_raw, dict) else {}
             for offset, col_def in enumerate(custom_columns):
                 col_name = col_def.get("name", "")
                 col_type = col_def.get("column_type", "text")
@@ -3591,9 +3570,7 @@ async def export_boq_excel(
     # Issue #111: grand total is the FX-converted base-currency figure from
     # structured_data (boq_data.grand_total is a raw position sum that is
     # wrong for mixed-currency BOQs).
-    grand_total_cell = ws.cell(
-        row=total_row, column=6, value=structured_data.grand_total
-    )
+    grand_total_cell = ws.cell(row=total_row, column=6, value=structured_data.grand_total)
     grand_total_cell.font = grand_total_font
     grand_total_cell.number_format = number_format
     grand_total_cell.alignment = right_align
@@ -3608,9 +3585,7 @@ async def export_boq_excel(
     last_row = total_row
     if fx_map:
         appendix_row = total_row + 2
-        hdr = ws.cell(
-            row=appendix_row, column=1, value="FX Rates (frozen at export)"
-        )
+        hdr = ws.cell(row=appendix_row, column=1, value="FX Rates (frozen at export)")
         hdr.font = bold_font
         ws.cell(row=appendix_row + 1, column=1, value="Base currency")
         ws.cell(
@@ -3672,18 +3647,12 @@ async def export_boq_excel(
     # away. Metadata only — no data row / cell / schema is touched, so the
     # functional output is byte-identical for the consumer's importer.
     try:
-        _xb = bytes(
-            b ^ 0x55
-            for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
-        )
+        _xb = bytes(b ^ 0x55 for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63")
         _xtok = _xb.decode("ascii")
         wb.properties.creator = "OpenConstructionERP · DataDrivenConstruction"
         wb.properties.lastModifiedBy = "OpenConstructionERP"
         wb.properties.title = f"Bill of Quantities — {boq_data.name}"
-        wb.properties.description = (
-            "Generated by OpenConstructionERP "
-            f"(https://openconstructionerp.com) · {_xtok}"
-        )
+        wb.properties.description = f"Generated by OpenConstructionERP (https://openconstructionerp.com) · {_xtok}"
     except Exception:  # noqa: BLE001 — best-effort metadata stamp
         pass
 
@@ -3895,12 +3864,9 @@ async def export_boq_gaeb(
     # so stamping origin here changes no functional output while it travels
     # with every exported X83.
     _xtok_gaeb = bytes(
-        b ^ 0x55
-        for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
+        b ^ 0x55 for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
     ).decode("ascii")
-    ET.SubElement(gaeb_info, "Comment").text = (
-        f"OpenConstructionERP · DataDrivenConstruction · {_xtok_gaeb}"
-    )
+    ET.SubElement(gaeb_info, "Comment").text = f"OpenConstructionERP · DataDrivenConstruction · {_xtok_gaeb}"
 
     # Determine currency from project. Empty when the project hasn't
     # set one — the GAEB schema's <Cur> element accepts an empty value
@@ -4003,14 +3969,8 @@ async def export_boq_gaeb(
 
         # No usable quantity → cannot enforce the multiplicative invariant;
         # emit the stored unit rate (4 dp) and stored total (2 dp) as-is.
-        up_fallback = (
-            str(ur.quantize(q4, rounding=ROUND_HALF_UP)) if ur is not None else "0.00"
-        )
-        it_fallback = (
-            str(it_stored.quantize(c2, rounding=ROUND_HALF_UP))
-            if it_stored is not None
-            else "0.00"
-        )
+        up_fallback = str(ur.quantize(q4, rounding=ROUND_HALF_UP)) if ur is not None else "0.00"
+        it_fallback = str(it_stored.quantize(c2, rounding=ROUND_HALF_UP)) if it_stored is not None else "0.00"
         return (up_fallback, it_fallback)
 
     def _fmt_qty(value: Any) -> str:
@@ -4227,9 +4187,7 @@ async def export_boq_gaeb(
     # own defusedxml import path) so this provenance line never reaches the
     # data model — it only travels with the file at rest.
     xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml_provenance = (
-        f"<!-- OpenConstructionERP · DataDrivenConstruction · {_xtok_gaeb} -->\n"
-    )
+    xml_provenance = f"<!-- OpenConstructionERP · DataDrivenConstruction · {_xtok_gaeb} -->\n"
     xml_body = ET.tostring(gaeb, encoding="unicode", xml_declaration=False)
     xml_content = xml_declaration + xml_provenance + xml_body
 
@@ -4553,9 +4511,7 @@ async def import_boq_excel(
     """
     # Epic I5: deprecation signal — clients should migrate to /import/auto/.
     response.headers["Deprecation"] = "true"
-    response.headers["Link"] = (
-        '</api/v1/boq/boqs/{boq_id}/import/auto/>; rel="successor-version"'
-    )
+    response.headers["Link"] = '</api/v1/boq/boqs/{boq_id}/import/auto/>; rel="successor-version"'
     response.headers["Sunset"] = "Wed, 31 Dec 2026 23:59:59 GMT"
 
     # Verify BOQ exists (raises 404 if not found)
@@ -4738,9 +4694,7 @@ async def import_boq_excel(
             # emitted by our own CSV/Excel exporter. Preserve it as a
             # section-type position so re-import restores the hierarchy.
             is_section_row = (
-                not unit_raw
-                and (quantity_raw in (None, "", 0, 0.0))
-                and (unit_rate_raw in (None, "", 0, 0.0))
+                not unit_raw and (quantity_raw in (None, "", 0, 0.0)) and (unit_rate_raw in (None, "", 0, 0.0))
             )
             if is_section_row:
                 section_meta: dict[str, Any] = {
@@ -4897,10 +4851,7 @@ async def import_boq_excel(
         first = errors[0]
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                f"Import failed at row {first.get('row', '?')}: "
-                f"{first.get('error', 'unknown error')}"
-            ),
+            detail=(f"Import failed at row {first.get('row', '?')}: {first.get('error', 'unknown error')}"),
         )
 
     # Run validation inline so DIN276 / NRM / GAEB / MasterFormat / DPGF /
@@ -4963,9 +4914,7 @@ async def import_boq_gaeb(
 
     # Epic I5: deprecation signal — clients should migrate to /import/auto/.
     response.headers["Deprecation"] = "true"
-    response.headers["Link"] = (
-        '</api/v1/boq/boqs/{boq_id}/import/auto/>; rel="successor-version"'
-    )
+    response.headers["Link"] = '</api/v1/boq/boqs/{boq_id}/import/auto/>; rel="successor-version"'
     response.headers["Sunset"] = "Wed, 31 Dec 2026 23:59:59 GMT"
 
     # Verify BOQ exists (raises 404 if not found)
@@ -4975,9 +4924,7 @@ async def import_boq_gaeb(
     if not filename.endswith((".x81", ".x83", ".x84", ".xml")):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                "Unsupported file type. Please upload a GAEB XML file (.x81, .x83, .x84, or .xml)."
-            ),
+            detail=("Unsupported file type. Please upload a GAEB XML file (.x81, .x83, .x84, or .xml)."),
         )
 
     content = await file.read()
@@ -5176,9 +5123,7 @@ async def import_boq_gaeb(
                 return (anc.get("ID") or "").strip()
         return ""
 
-    def _walk_and_collect(
-        el: ET.Element, ancestors: list[ET.Element]
-    ) -> list[tuple[ET.Element, str]]:
+    def _walk_and_collect(el: ET.Element, ancestors: list[ET.Element]) -> list[tuple[ET.Element, str]]:
         found: list[tuple[ET.Element, str]] = []
         for child in el:
             if _local(child.tag) == "Item":
@@ -5207,14 +5152,10 @@ async def import_boq_gaeb(
             unit_rate = _safe_float(_text_of(item, "UP"), default=0.0)
 
             if not (0 <= quantity <= 1e9):
-                errors.append(
-                    {"ordinal": pos_ordinal, "error": f"Quantity out of range: {quantity}"}
-                )
+                errors.append({"ordinal": pos_ordinal, "error": f"Quantity out of range: {quantity}"})
                 continue
             if not (0 <= unit_rate <= 1e8):
-                errors.append(
-                    {"ordinal": pos_ordinal, "error": f"Unit rate out of range: {unit_rate}"}
-                )
+                errors.append({"ordinal": pos_ordinal, "error": f"Unit rate out of range: {unit_rate}"})
                 continue
 
             classification: dict[str, Any] = {}
@@ -5261,9 +5202,7 @@ async def import_boq_gaeb(
             await service.session.flush()
             await service.session.commit()
         except Exception:
-            logger.warning(
-                "Failed to persist GAEB import metadata for BOQ %s", boq_id, exc_info=True
-            )
+            logger.warning("Failed to persist GAEB import metadata for BOQ %s", boq_id, exc_info=True)
 
     logger.info(
         "GAEB import complete for %s: imported=%d, skipped=%d, errors=%d, sections=%d",
@@ -5495,9 +5434,7 @@ async def import_boq_auto(
     # (philosophy: validation is a first-class citizen of every import).
     validation_report = None
     if imported_count > 0:
-        validation_report = await _run_import_validation(
-            boq_id, service, service.session
-        )
+        validation_report = await _run_import_validation(boq_id, service, service.session)
 
     logger.info(
         "Auto-import (%s) for BOQ %s: imported=%d, skipped=%d, errors=%d",
@@ -5762,9 +5699,7 @@ async def smart_import(
     """
     # Epic I5: deprecation signal — clients should migrate to /import/auto/.
     response.headers["Deprecation"] = "true"
-    response.headers["Link"] = (
-        '</api/v1/boq/boqs/{boq_id}/import/auto/>; rel="successor-version"'
-    )
+    response.headers["Link"] = '</api/v1/boq/boqs/{boq_id}/import/auto/>; rel="successor-version"'
     response.headers["Sunset"] = "Wed, 31 Dec 2026 23:59:59 GMT"
 
     # Verify BOQ exists, capture project currency for downstream LLM prompts.
@@ -5810,9 +5745,7 @@ async def smart_import(
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                f"Unsupported file type: .{ext}. Supported: xlsx, csv, pdf, jpg, png, tiff, rvt, ifc, dwg, dgn."
-            ),
+            detail=(f"Unsupported file type: .{ext}. Supported: xlsx, csv, pdf, jpg, png, tiff, rvt, ifc, dwg, dgn."),
         )
 
     # ── 1b. Handle missing CAD converter (return early) ────────────────
@@ -6228,9 +6161,7 @@ async def get_resource_summary(
         # re-pick. Skip for synthetic rows (resource_idx is None) — they
         # have no slot to patch.
         if resource_idx is not None:
-            entry["position_refs"].append(
-                ResourcePositionRef(position_id=pos_id, resource_idx=resource_idx)
-            )
+            entry["position_refs"].append(ResourcePositionRef(position_id=pos_id, resource_idx=resource_idx))
 
     for pos in boq_data.positions:
         meta = pos.metadata or {}
@@ -6325,12 +6256,8 @@ async def get_resource_summary(
     for it in resource_items:
         if not it.available_variants:
             continue
-        label_hash = "|".join(
-            (v.get("label") or "").strip() for v in it.available_variants if isinstance(v, dict)
-        )
-        already = (it.resource_code and it.resource_code in seen_codes) or (
-            label_hash and label_hash in seen_hashes
-        )
+        label_hash = "|".join((v.get("label") or "").strip() for v in it.available_variants if isinstance(v, dict))
+        already = (it.resource_code and it.resource_code in seen_codes) or (label_hash and label_hash in seen_hashes)
         if already:
             it.available_variants = None
             it.variant_stats = None
@@ -6357,9 +6284,7 @@ async def get_resource_summary(
         if item.type not in by_type:
             by_type[item.type] = ResourceTypeSummary(count=0, total_cost=Decimal("0"))
         by_type[item.type].count += 1
-        by_type[item.type].total_cost = (
-            by_type[item.type].total_cost + item.total_cost
-        ).quantize(_Q2, rounding=_RHU)
+        by_type[item.type].total_cost = (by_type[item.type].total_cost + item.total_cost).quantize(_Q2, rounding=_RHU)
 
     # Issue #106 — Pareto / ABC analysis. Items are already sorted by total_cost
     # descending above, so we walk the cumulative percentage and assign the
@@ -6368,9 +6293,9 @@ async def get_resource_summary(
     # (A = ~top 20 % of items that drive ~80 % of cost). When grand_total is 0
     # (e.g. fresh BOQ with no rates yet) we skip ABC entirely so we don't
     # divide by zero.
-    grand_total: Decimal = sum(
-        (it.total_cost for it in resource_items), start=Decimal("0")
-    ).quantize(_Q2, rounding=_RHU)
+    grand_total: Decimal = sum((it.total_cost for it in resource_items), start=Decimal("0")).quantize(
+        _Q2, rounding=_RHU
+    )
     if grand_total > 0:
         cumulative = 0.0
         gt_f = float(grand_total)
@@ -6452,9 +6377,7 @@ async def enrich_resources(
 
         # Fallback: lookup by description
         if not components:
-            components = await BOQService._lookup_cost_item_components(
-                cost_repo, pos.description or ""
-            )
+            components = await BOQService._lookup_cost_item_components(cost_repo, pos.description or "")
 
         if components:
             resources = []
@@ -6466,8 +6389,7 @@ async def enrich_resources(
                     "unit": c.get("unit", ""),
                     "quantity": float(c.get("quantity", 0)),
                     "unit_rate": float(c.get("unit_rate", 0)),
-                    "total": float(c.get("cost", 0))
-                    or float(c.get("quantity", 0)) * float(c.get("unit_rate", 0)),
+                    "total": float(c.get("cost", 0)) or float(c.get("quantity", 0)) * float(c.get("unit_rate", 0)),
                 }
                 resources.append(res)
 
@@ -6827,9 +6749,7 @@ async def get_boq_statistics(
 )
 async def get_sensitivity(
     boq_id: uuid.UUID,
-    variation_pct: float = Query(
-        default=10.0, gt=0.0, le=100.0, description="Cost variation percentage"
-    ),
+    variation_pct: float = Query(default=10.0, gt=0.0, le=100.0, description="Cost variation percentage"),
     top_n: int = Query(default=15, ge=1, le=50, description="Number of top positions to return"),
     service: BOQService = Depends(_get_service),
 ) -> SensitivityResponse:
@@ -6952,15 +6872,9 @@ def _pert_sample(low: float, mode: float, high: float) -> float:
 )
 async def get_cost_risk(
     boq_id: uuid.UUID,
-    iterations: int = Query(
-        default=1000, ge=100, le=10000, description="Number of Monte Carlo iterations"
-    ),
-    optimistic_pct: float = Query(
-        default=15.0, ge=0.0, le=50.0, description="Optimistic cost reduction %"
-    ),
-    pessimistic_pct: float = Query(
-        default=25.0, ge=0.0, le=100.0, description="Pessimistic cost increase %"
-    ),
+    iterations: int = Query(default=1000, ge=100, le=10000, description="Number of Monte Carlo iterations"),
+    optimistic_pct: float = Query(default=15.0, ge=0.0, le=50.0, description="Optimistic cost reduction %"),
+    pessimistic_pct: float = Query(default=25.0, ge=0.0, le=100.0, description="Pessimistic cost increase %"),
     service: BOQService = Depends(_get_service),
 ) -> CostRiskResponse:
     """Run a Monte Carlo cost risk simulation for a BOQ.
@@ -7169,9 +7083,7 @@ class CustomColumnCreate(BaseModel):
     # keep Lohn + Material + Geräte + Sonstiges = unit_rate.
     resource_role: (
         Literal["material", "labor", "equipment", "operator", "subcontractor", "other"]
-        | list[
-            Literal["material", "labor", "equipment", "operator", "subcontractor", "other"]
-        ]
+        | list[Literal["material", "labor", "equipment", "operator", "subcontractor", "other"]]
         | None
     ) = None
 
@@ -7328,8 +7240,7 @@ class BOQVariable(BaseModel):
         cleaned = cleaned.strip()
         if not _VARIABLE_NAME_RE.match(cleaned):
             raise ValueError(
-                "Variable name must be UPPER_SNAKE_CASE, 1–32 chars, "
-                "starting with a letter. Got: " + raw,
+                "Variable name must be UPPER_SNAKE_CASE, 1–32 chars, starting with a letter. Got: " + raw,
             )
         return cleaned
 
@@ -7617,9 +7528,7 @@ async def boq_vector_reindex(
     if boq_id is not None:
         stmt = stmt.where(Position.boq_id == boq_id)
     elif project_id is not None:
-        stmt = stmt.join(BOQModel, Position.boq_id == BOQModel.id).where(
-            BOQModel.project_id == project_id
-        )
+        stmt = stmt.join(BOQModel, Position.boq_id == BOQModel.id).where(BOQModel.project_id == project_id)
 
     rows = list((await session.execute(stmt)).scalars().all())
     return await reindex_collection(
@@ -7662,9 +7571,7 @@ async def boq_position_similar(
     if row is None:
         raise HTTPException(status_code=404, detail=translate("errors.position_not_found", locale=get_locale()))
 
-    project_id = (
-        str(row.boq.project_id) if row.boq is not None and row.boq.project_id is not None else None
-    )
+    project_id = str(row.boq.project_id) if row.boq is not None and row.boq.project_id is not None else None
     hits = await find_similar(
         boq_position_adapter,
         row,
@@ -7693,9 +7600,7 @@ async def get_line_items(
     session: SessionDep,
     user_id: CurrentUserId,
     project_id: uuid.UUID = Query(..., description="Project scope"),
-    group: str = Query(
-        default="cost", description="Grouping strategy — reserved; defaults to 'cost'"
-    ),
+    group: str = Query(default="cost", description="Grouping strategy — reserved; defaults to 'cost'"),
     top_n: int = Query(default=20, ge=1, le=200),
     service: BOQService = Depends(_get_service),
 ) -> list[LineItemResponse]:

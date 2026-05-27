@@ -229,9 +229,7 @@ async def test_apply_template_returns_components_with_costs(
         query = raw.get("cost_match_query", "")
         factor = float(raw.get("factor", 0.0))
         comp_unit = raw.get("unit", "")
-        matches = await match_cwicr_items(
-            session, query, unit=comp_unit or None, top_k=1, source="cwicr"
-        )
+        matches = await match_cwicr_items(session, query, unit=comp_unit or None, top_k=1, source="cwicr")
         unit_rate = 0.0
         if matches:
             # MatchResult is a flat pydantic model; the rate is exposed
@@ -281,9 +279,7 @@ async def test_apply_template_quantity_scaling(session: AsyncSession) -> None:
         for raw in tpl.components or []:
             query = raw.get("cost_match_query", "")
             factor = float(raw.get("factor", 0.0))
-            matches = await match_cwicr_items(
-                session, query, top_k=1, source="cwicr"
-            )
+            matches = await match_cwicr_items(session, query, top_k=1, source="cwicr")
             if not matches:
                 continue
             rate = float(matches[0].unit_rate or 0.0)
@@ -316,9 +312,5 @@ async def test_template_translations_present_for_de_ru_es(
     for t in items:
         translations = t.name_translations or {}
         for lang in ("de", "ru", "es"):
-            assert lang in translations, (
-                f"Template {t.name!r} missing {lang} translation"
-            )
-            assert translations[lang], (
-                f"Template {t.name!r} has empty {lang} translation"
-            )
+            assert lang in translations, f"Template {t.name!r} missing {lang} translation"
+            assert translations[lang], f"Template {t.name!r} has empty {lang} translation"

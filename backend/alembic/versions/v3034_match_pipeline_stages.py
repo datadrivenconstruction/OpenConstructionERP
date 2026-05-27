@@ -68,8 +68,8 @@ _SYSTEM_PROMPTS = [
             "  - MEAN  (continuous attribute — temperature, dimension scalar...)\n"
             "  - FIRST (discrete label — material name, family name, level...)\n\n"
             "Return JSON: "
-            "[{{\"column\":\"<name>\",\"agg\":\"SUM|MEAN|FIRST\","
-            "\"why\":\"<one-sentence rationale>\"}}]"
+            '[{{"column":"<name>","agg":"SUM|MEAN|FIRST",'
+            '"why":"<one-sentence rationale>"}}]'
         ),
     },
     {
@@ -90,10 +90,10 @@ _SYSTEM_PROMPTS = [
         "user_template": (
             "Element rows:\n\n{rows}\n\n"
             "For each row, output: "
-            "{{\"element_id\":\"<id>\","
-            "\"is_building_product\":true|false,"
-            "\"trade\":\"architectural|structural|mep|civil|spatial|other\","
-            "\"why\":\"<short rationale>\"}}\n\n"
+            '{{"element_id":"<id>",'
+            '"is_building_product":true|false,'
+            '"trade":"architectural|structural|mep|civil|spatial|other",'
+            '"why":"<short rationale>"}}\n\n'
             "Return a JSON array."
         ),
     },
@@ -118,12 +118,12 @@ _SYSTEM_PROMPTS = [
             "Available attribute keys (with sample value counts):\n\n"
             "{attribute_summary}\n\n"
             "Return a JSON object with: "
-            "{{\"group_by\":[\"<key1>\",\"<key2>\",...],"
-            "\"why\":\"<rationale>\"}}\n\n"
+            '{{"group_by":["<key1>","<key2>",...],'
+            '"why":"<rationale>"}}\n\n'
             "Defaults to fall back on if no clear winner:\n"
-            "  - RVT: [\"category\", \"type_name\"]\n"
-            "  - IFC: [\"ifc_class\", \"predefined_type\"]\n"
-            "  - DWG: [\"layer\", \"block_name\"]"
+            '  - RVT: ["category", "type_name"]\n'
+            '  - IFC: ["ifc_class", "predefined_type"]\n'
+            '  - DWG: ["layer", "block_name"]'
         ),
     },
     {
@@ -140,7 +140,7 @@ _SYSTEM_PROMPTS = [
             "You are an AI cost agent for a construction estimator. You "
             "receive one group of BIM elements and a shortlist of cost-"
             "database candidates retrieved by vector search. Pick the best "
-            "match, or say \"NO_MATCH\" when nothing in the shortlist is "
+            'match, or say "NO_MATCH" when nothing in the shortlist is '
             "a real fit. Never invent a code that is not in the shortlist."
         ),
         "user_template": (
@@ -153,9 +153,9 @@ _SYSTEM_PROMPTS = [
             "  Rolled-up quantity: {quantity} {unit}\n\n"
             "Candidates (from CWICR vector search):\n{candidates}\n\n"
             "Return JSON: "
-            "{{\"picked_code\":\"<code>|NO_MATCH\","
-            "\"confidence\":<0..1>,"
-            "\"why\":\"<one-sentence rationale>\"}}"
+            '{{"picked_code":"<code>|NO_MATCH",'
+            '"confidence":<0..1>,'
+            '"why":"<one-sentence rationale>"}}'
         ),
     },
 ]
@@ -190,7 +190,8 @@ def upgrade() -> None:
                 "session_id",
                 sa.String(length=36),
                 sa.ForeignKey(
-                    "oe_match_elements_session.id", ondelete="CASCADE",
+                    "oe_match_elements_session.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -202,25 +203,39 @@ def upgrade() -> None:
                 server_default="pending",
             ),
             sa.Column(
-                "inputs", sa.JSON(), nullable=False, server_default="{}",
+                "inputs",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column(
-                "output", sa.JSON(), nullable=False, server_default="{}",
+                "output",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column("error", sa.Text(), nullable=True),
             sa.Column("took_ms", sa.Integer(), nullable=True),
             sa.Column(
-                "prompt_template_id", sa.String(length=36), nullable=True,
+                "prompt_template_id",
+                sa.String(length=36),
+                nullable=True,
             ),
             sa.Column("llm_provider", sa.String(length=64), nullable=True),
             sa.Column(
-                "started_at", sa.DateTime(timezone=True), nullable=True,
+                "started_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
-                "finished_at", sa.DateTime(timezone=True), nullable=True,
+                "finished_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.UniqueConstraint(
-                "session_id", "stage_name", name="uq_match_stage_session_name",
+                "session_id",
+                "stage_name",
+                name="uq_match_stage_session_name",
             ),
         )
         op.create_index(
@@ -262,7 +277,9 @@ def upgrade() -> None:
             ),
             sa.Column("user_template", sa.Text(), nullable=False),
             sa.Column(
-                "allowed_providers", sa.String(length=512), nullable=True,
+                "allowed_providers",
+                sa.String(length=512),
+                nullable=True,
             ),
             sa.Column(
                 "version",
@@ -278,13 +295,20 @@ def upgrade() -> None:
             ),
             sa.Column("created_by", sa.String(length=36), nullable=True),
             sa.Column(
-                "forked_from_id", sa.String(length=36), nullable=True,
+                "forked_from_id",
+                sa.String(length=36),
+                nullable=True,
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
-                "key", "name", "created_by",
+                "key",
+                "name",
+                "created_by",
                 name="uq_match_prompt_owner_name",
             ),
         )
@@ -352,7 +376,8 @@ def downgrade() -> None:
         ):
             try:
                 op.drop_index(
-                    idx, table_name="oe_match_elements_prompt_template",
+                    idx,
+                    table_name="oe_match_elements_prompt_template",
                 )
             except Exception:  # noqa: BLE001 — idempotent drop
                 pass

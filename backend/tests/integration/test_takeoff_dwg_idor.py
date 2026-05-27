@@ -29,7 +29,6 @@ from httpx import ASGITransport, AsyncClient
 
 from app.main import create_app
 
-
 # ── Fixtures ────────────────────────────────────────────────────────────────
 
 
@@ -49,7 +48,10 @@ async def client():
 
 
 async def _register_user(
-    client: AsyncClient, *, admin: bool, role: str | None = None,
+    client: AsyncClient,
+    *,
+    admin: bool,
+    role: str | None = None,
 ) -> tuple[dict[str, str], str]:
     """Register a fresh user with a specific role (or admin), return
     ``(Bearer headers, user_id)``.
@@ -80,9 +82,7 @@ async def _register_user(
     effective_role = "admin" if admin else (role or "manager")
     async with async_session_factory() as session:
         await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role=effective_role, is_active=True),
+            sa_update(User).where(User.email == email.lower()).values(role=effective_role, is_active=True),
         )
         await session.commit()
 
@@ -151,7 +151,10 @@ async def _seed_drawing_directly(project_id: str, *, created_by: str = "") -> st
 
 
 async def _seed_annotation_directly(
-    project_id: str, drawing_id: str, *, created_by: str = "",
+    project_id: str,
+    drawing_id: str,
+    *,
+    created_by: str = "",
 ) -> str:
     from app.database import async_session_factory
     from app.modules.dwg_takeoff.models import DwgAnnotation

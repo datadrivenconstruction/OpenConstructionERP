@@ -55,9 +55,7 @@ async def _index_requirement(event: Event) -> None:
     try:
         async with async_session_factory() as session:
             stmt = (
-                select(Requirement)
-                .options(selectinload(Requirement.requirement_set))
-                .where(Requirement.id == req_id)
+                select(Requirement).options(selectinload(Requirement.requirement_set)).where(Requirement.id == req_id)
             )
             row = (await session.execute(stmt)).scalar_one_or_none()
             if row is None:
@@ -74,9 +72,7 @@ async def _index_requirement(event: Event) -> None:
                 project_id=project_id,
             )
     except Exception:
-        logger.debug(
-            "Requirements vector index failed for %s", rid_raw, exc_info=True
-        )
+        logger.debug("Requirements vector index failed for %s", rid_raw, exc_info=True)
 
 
 async def _delete_requirement_vector(event: Event) -> None:
@@ -87,9 +83,7 @@ async def _delete_requirement_vector(event: Event) -> None:
     try:
         await vector_delete_one(requirement_vector_adapter, str(rid_raw))
     except Exception:
-        logger.debug(
-            "Requirements vector delete failed for %s", rid_raw, exc_info=True
-        )
+        logger.debug("Requirements vector delete failed for %s", rid_raw, exc_info=True)
 
 
 # Wrappers that match the EventBus handler signature (Event → awaitable).
@@ -116,6 +110,4 @@ async def _on_requirement_deleted(event: Event) -> None:
 event_bus.subscribe("requirements.requirement.created", _on_requirement_created)
 event_bus.subscribe("requirements.requirement.updated", _on_requirement_updated)
 event_bus.subscribe("requirements.requirement.deleted", _on_requirement_deleted)
-event_bus.subscribe(
-    "requirements.requirement.linked_bim", _on_requirement_linked_bim
-)
+event_bus.subscribe("requirements.requirement.linked_bim", _on_requirement_linked_bim)

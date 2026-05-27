@@ -23,7 +23,9 @@ class ContainerRepository:
         return await self.session.get(DocumentContainer, container_id)
 
     async def get_by_code_and_project(
-        self, project_id: uuid.UUID, container_code: str,
+        self,
+        project_id: uuid.UUID,
+        container_code: str,
     ) -> DocumentContainer | None:
         """Get container by code within a project (uniqueness check)."""
         stmt = select(DocumentContainer).where(
@@ -66,11 +68,7 @@ class ContainerRepository:
 
     async def update_fields(self, container_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on a container."""
-        stmt = (
-            update(DocumentContainer)
-            .where(DocumentContainer.id == container_id)
-            .values(**fields)
-        )
+        stmt = update(DocumentContainer).where(DocumentContainer.id == container_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()
@@ -82,9 +80,7 @@ class ContainerRepository:
         """
         # Total count
         total_stmt = (
-            select(func.count())
-            .select_from(DocumentContainer)
-            .where(DocumentContainer.project_id == project_id)
+            select(func.count()).select_from(DocumentContainer).where(DocumentContainer.project_id == project_id)
         )
         total = (await self.session.execute(total_stmt)).scalar_one()
 
@@ -152,9 +148,7 @@ class RevisionRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = (
-            base.order_by(DocumentRevision.revision_number.desc()).offset(offset).limit(limit)
-        )
+        stmt = base.order_by(DocumentRevision.revision_number.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         items = list(result.scalars().all())
 
@@ -162,9 +156,8 @@ class RevisionRepository:
 
     async def next_revision_number(self, container_id: uuid.UUID) -> int:
         """Get the next revision number for a container."""
-        stmt = (
-            select(func.coalesce(func.max(DocumentRevision.revision_number), 0))
-            .where(DocumentRevision.container_id == container_id)
+        stmt = select(func.coalesce(func.max(DocumentRevision.revision_number), 0)).where(
+            DocumentRevision.container_id == container_id
         )
         current_max = (await self.session.execute(stmt)).scalar_one()
         return current_max + 1
@@ -177,11 +170,7 @@ class RevisionRepository:
 
     async def update_fields(self, revision_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on a revision."""
-        stmt = (
-            update(DocumentRevision)
-            .where(DocumentRevision.id == revision_id)
-            .values(**fields)
-        )
+        stmt = update(DocumentRevision).where(DocumentRevision.id == revision_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()

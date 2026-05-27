@@ -39,7 +39,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -86,14 +85,14 @@ async def _activate_user(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
 
 async def _activate_and_relogin(
-    client: AsyncClient, email: str, password: str,
+    client: AsyncClient,
+    email: str,
+    password: str,
 ) -> dict[str, str]:
     await _activate_user(email)
     resp = await client.post(
@@ -158,8 +157,7 @@ async def two_chat_tenants(http_client):
         await s.commit()
 
     return {
-        "a": {"user_id": a_uid, "headers": a_headers, "session_id": str(session_id),
-              "message_id": str(message_id)},
+        "a": {"user_id": a_uid, "headers": a_headers, "session_id": str(session_id), "message_id": str(message_id)},
         "b": {"user_id": b_uid, "headers": b_headers},
     }
 
@@ -169,7 +167,8 @@ async def two_chat_tenants(http_client):
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_read_messages_in_tenant_a_session(
-    http_client, two_chat_tenants,
+    http_client,
+    two_chat_tenants,
 ):
     """``GET /erp_chat/sessions/{session_id}/messages/`` must not leak A's data."""
     a = two_chat_tenants["a"]
@@ -185,9 +184,7 @@ async def test_tenant_b_cannot_read_messages_in_tenant_a_session(
     assert resp.status_code in (200, 404), resp.text
     if resp.status_code == 200:
         body = resp.json()
-        assert body == [], (
-            f"LEAK: tenant B got tenant A's chat messages: {body!r}"
-        )
+        assert body == [], f"LEAK: tenant B got tenant A's chat messages: {body!r}"
 
 
 @pytest.mark.asyncio
@@ -201,8 +198,7 @@ async def test_tenant_b_cannot_delete_tenant_a_session(http_client, two_chat_ten
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B was able to DELETE tenant A's chat session "
-        f"(status {resp.status_code}). Body: {resp.text!r}"
+        f"LEAK: tenant B was able to DELETE tenant A's chat session (status {resp.status_code}). Body: {resp.text!r}"
     )
 
     # Confirm the row still exists from A's side — the service has to
@@ -212,14 +208,13 @@ async def test_tenant_b_cannot_delete_tenant_a_session(http_client, two_chat_ten
 
     async with async_session_factory() as s:
         still_there = await s.get(ChatSession, uuid.UUID(a["session_id"]))
-        assert still_there is not None, (
-            "tenant A's chat session disappeared after B's DELETE attempt"
-        )
+        assert still_there is not None, "tenant A's chat session disappeared after B's DELETE attempt"
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_get_similar_for_tenant_a_message(
-    http_client, two_chat_tenants,
+    http_client,
+    two_chat_tenants,
 ):
     """``GET /erp_chat/messages/{message_id}/similar/`` must 404 on cross-tenant."""
     a = two_chat_tenants["a"]
@@ -240,7 +235,8 @@ async def test_tenant_b_cannot_get_similar_for_tenant_a_message(
 
 @pytest.mark.asyncio
 async def test_tenant_a_can_still_get_similar_for_own_message(
-    http_client, two_chat_tenants,
+    http_client,
+    two_chat_tenants,
 ):
     """Regression: the IDOR fix must not break A's access to their OWN messages.
 
@@ -273,12 +269,11 @@ async def test_tenant_b_session_list_excludes_tenant_a(http_client, two_chat_ten
     b = two_chat_tenants["b"]
 
     resp = await http_client.get(
-        "/api/v1/erp_chat/sessions/", headers=b["headers"],
+        "/api/v1/erp_chat/sessions/",
+        headers=b["headers"],
     )
     assert resp.status_code == 200, resp.text
     body = resp.json()
     items = body.get("items", []) if isinstance(body, dict) else body
     leaked = [s for s in items if s.get("id") == a["session_id"]]
-    assert leaked == [], (
-        f"LEAK: tenant B's chat session list contains tenant A's session: {leaked!r}"
-    )
+    assert leaked == [], f"LEAK: tenant B's chat session list contains tenant A's session: {leaked!r}"

@@ -129,22 +129,22 @@ def _ft_to_m(x: float) -> float:
 
 def _m2_to_ft2(x: float) -> float:
     """Square metres to square feet."""
-    return x * (_FT_PER_M ** 2)
+    return x * (_FT_PER_M**2)
 
 
 def _ft2_to_m2(x: float) -> float:
     """Square feet to square metres."""
-    return x * (_M_PER_FT ** 2)
+    return x * (_M_PER_FT**2)
 
 
 def _m3_to_ft3(x: float) -> float:
     """Cubic metres to cubic feet."""
-    return x * (_FT_PER_M ** 3)
+    return x * (_FT_PER_M**3)
 
 
 def _ft3_to_m3(x: float) -> float:
     """Cubic feet to cubic metres."""
-    return x * (_M_PER_FT ** 3)
+    return x * (_M_PER_FT**3)
 
 
 def _kg_to_lb(x: float) -> float:
@@ -179,10 +179,10 @@ def _convert(value: float, from_unit: str, to_unit: str) -> float:
         ("m", "mm"): 1000.0,
         ("m", "ft"): _FT_PER_M,
         ("ft", "m"): _M_PER_FT,
-        ("m2", "ft2"): _FT_PER_M ** 2,
-        ("ft2", "m2"): _M_PER_FT ** 2,
-        ("m3", "ft3"): _FT_PER_M ** 3,
-        ("ft3", "m3"): _M_PER_FT ** 3,
+        ("m2", "ft2"): _FT_PER_M**2,
+        ("ft2", "m2"): _M_PER_FT**2,
+        ("m3", "ft3"): _FT_PER_M**3,
+        ("ft3", "m3"): _M_PER_FT**3,
         ("kg", "lb"): _LB_PER_KG,
         ("lb", "kg"): _KG_PER_LB,
         ("kg", "t"): 0.001,
@@ -297,9 +297,7 @@ def evaluate_formula(
 
     elapsed_ms = (time.monotonic() - started_at) * 1000.0
     if elapsed_ms > timeout_ms:
-        raise FormulaTimeoutError(
-            f"formula exceeded {timeout_ms} ms cap (took {elapsed_ms:.1f} ms)"
-        )
+        raise FormulaTimeoutError(f"formula exceeded {timeout_ms} ms cap (took {elapsed_ms:.1f} ms)")
     return result
 
 

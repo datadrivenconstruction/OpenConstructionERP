@@ -56,9 +56,7 @@ async def _on_safety_incident_created(event: Event) -> None:
         "severity": severity,
         # Heuristic likelihood/impact mapping for risk-matrix consumers
         "likelihood": "occurred",
-        "impact": (
-            "severe" if severity in {"high", "critical", "fatality"} else "moderate"
-        ),
+        "impact": ("severe" if severity in {"high", "critical", "fatality"} else "moderate"),
     }
     try:
         event_bus.publish_detached(
@@ -110,7 +108,8 @@ async def _on_capa_completed(event: Event) -> None:
         )
     except Exception:
         logger.debug(
-            "hse_advanced: kpi_recompute on capa_completed failed", exc_info=True,
+            "hse_advanced: kpi_recompute on capa_completed failed",
+            exc_info=True,
         )
 
 
@@ -130,9 +129,7 @@ async def _on_qms_ncr_safety_check(event: Event) -> None:
         return
     title = (data.get("title") or "").lower()
     severity = (data.get("severity") or "").lower()
-    is_safety = (
-        severity in {"critical", "major"} and "safety" in title
-    ) or severity in {"critical"}
+    is_safety = (severity in {"critical", "major"} and "safety" in title) or severity in {"critical"}
     if not is_safety:
         return
     try:
@@ -149,7 +146,8 @@ async def _on_qms_ncr_safety_check(event: Event) -> None:
         )
     except Exception:
         logger.debug(
-            "hse_advanced: if_safety_related emit failed", exc_info=True,
+            "hse_advanced: if_safety_related emit failed",
+            exc_info=True,
         )
 
 

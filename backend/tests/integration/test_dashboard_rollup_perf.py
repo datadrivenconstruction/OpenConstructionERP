@@ -28,22 +28,23 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app.database import Base
 
-
 # ── Model registration ─────────────────────────────────────────────────────
 
+
 def _register_models() -> None:
-    import app.modules.users.models  # noqa: F401
-    import app.modules.projects.models  # noqa: F401
     import app.modules.boq.models  # noqa: F401
-    import app.modules.validation.models  # noqa: F401
-    import app.modules.safety.models  # noqa: F401
-    import app.modules.procurement.models  # noqa: F401
-    import app.modules.finance.models  # noqa: F401
     import app.modules.changeorders.models  # noqa: F401
     import app.modules.daily_diary.models  # noqa: F401
+    import app.modules.finance.models  # noqa: F401
+    import app.modules.procurement.models  # noqa: F401
+    import app.modules.projects.models  # noqa: F401
+    import app.modules.safety.models  # noqa: F401
+    import app.modules.users.models  # noqa: F401
+    import app.modules.validation.models  # noqa: F401
 
 
 # ── Query counter ─────────────────────────────────────────────────────────
+
 
 class _QueryCounter:
     """Listens to SQLAlchemy sync-engine events to count SQL statements."""
@@ -80,11 +81,11 @@ async def perf_session():
 
     # Seed data
     async with factory() as session:
-        from app.modules.users.models import User
-        from app.modules.projects.models import Project
         from app.modules.boq.models import BOQ, Position
-        from app.modules.validation.models import ValidationReport
+        from app.modules.projects.models import Project
         from app.modules.safety.models import SafetyIncident
+        from app.modules.users.models import User
+        from app.modules.validation.models import ValidationReport
 
         owner = User(
             id=uuid.uuid4(),
@@ -119,39 +120,45 @@ async def perf_session():
                 )
                 session.add(boq)
                 await session.flush()
-                session.add(Position(
-                    boq_id=boq.id,
-                    ordinal=f"{j + 1:02d}",
-                    description="Concrete walls",
-                    unit="m3",
-                    quantity="100",
-                    unit_rate="250",
-                    total="25000",
-                ))
+                session.add(
+                    Position(
+                        boq_id=boq.id,
+                        ordinal=f"{j + 1:02d}",
+                        description="Concrete walls",
+                        unit="m3",
+                        quantity="100",
+                        unit_rate="250",
+                        total="25000",
+                    )
+                )
 
             # Validation report
-            session.add(ValidationReport(
-                id=uuid.uuid4(),
-                project_id=p.id,
-                target_type="boq",
-                target_id=str(uuid.uuid4()),
-                rule_set="boq_quality",
-                status="passed",
-                score="0.95",
-            ))
+            session.add(
+                ValidationReport(
+                    id=uuid.uuid4(),
+                    project_id=p.id,
+                    target_type="boq",
+                    target_id=str(uuid.uuid4()),
+                    rule_set="boq_quality",
+                    status="passed",
+                    score="0.95",
+                )
+            )
 
             # Safety incident
-            session.add(SafetyIncident(
-                id=uuid.uuid4(),
-                project_id=p.id,
-                incident_number=f"INC-{i:03d}",
-                title=f"Near miss #{i}",
-                description="Scaffolding near miss during concrete pour",
-                incident_date="2026-05-01",
-                incident_type="near_miss",
-                severity="minor",
-                osha_recordable=False,
-            ))
+            session.add(
+                SafetyIncident(
+                    id=uuid.uuid4(),
+                    project_id=p.id,
+                    incident_number=f"INC-{i:03d}",
+                    title=f"Near miss #{i}",
+                    description="Scaffolding near miss during concrete pour",
+                    incident_date="2026-05-01",
+                    incident_type="near_miss",
+                    severity="minor",
+                    osha_recordable=False,
+                )
+            )
 
         await session.commit()
         yield session, projects, owner.id
@@ -166,11 +173,12 @@ async def perf_session():
 
 # ── Performance assertions ─────────────────────────────────────────────────
 
+
 class TestRollupPerformance:
     @pytest.mark.asyncio
     async def test_rollup_50_projects_under_2s(self, perf_session) -> None:
         """Full 10-widget rollup across 50 projects must complete in < 2 s."""
-        from app.modules.dashboard.service import compute_rollup, KNOWN_WIDGETS
+        from app.modules.dashboard.service import KNOWN_WIDGETS, compute_rollup
 
         session, projects, _owner_id = perf_session
 
@@ -190,7 +198,8 @@ class TestRollupPerformance:
 
     @pytest.mark.asyncio
     async def test_query_count_constant_with_50_projects(
-        self, perf_session,
+        self,
+        perf_session,
     ) -> None:
         """Query count must be O(1) — constant regardless of project count.
 
@@ -203,7 +212,7 @@ class TestRollupPerformance:
         Because aiosqlite wraps a sync sqlite3 connection, we intercept at
         the sync layer via the ``aiosqlite`` engine's sync engine.
         """
-        from app.modules.dashboard.service import compute_rollup, KNOWN_WIDGETS
+        from app.modules.dashboard.service import KNOWN_WIDGETS, compute_rollup
 
         session, projects, _owner_id = perf_session
         widgets = sorted(KNOWN_WIDGETS)
@@ -239,14 +248,12 @@ class TestRollupPerformance:
         )
 
         # Report for CI output.
-        print(
-            f"\n[perf] queries: 1-project={count_1_project}, "
-            f"50-projects={count_50_projects}"
-        )
+        print(f"\n[perf] queries: 1-project={count_1_project}, 50-projects={count_50_projects}")
 
     @pytest.mark.asyncio
     async def test_accessible_projects_single_query(
-        self, perf_session,
+        self,
+        perf_session,
     ) -> None:
         """accessible_projects uses at most 2 DB calls (admin check + project select)."""
         from app.modules.dashboard.service import accessible_projects
@@ -297,7 +304,8 @@ class TestRollupPerformance:
 
     @pytest.mark.asyncio
     async def test_schedule_critical_single_query_with_activities(
-        self, perf_session,
+        self,
+        perf_session,
     ) -> None:
         """compute_schedule_critical issues 1 query when activities exist (scalar subquery).
 
@@ -323,6 +331,4 @@ class TestRollupPerformance:
 
         # No schedule data seeded → falls back to COUNT query → 2 queries total.
         # With schedule data seeded it would be 1. Either way must be <= 2.
-        assert q_count <= 2, (
-            f"compute_schedule_critical issued {q_count} queries — expected ≤ 2."
-        )
+        assert q_count <= 2, f"compute_schedule_critical issued {q_count} queries — expected ≤ 2."

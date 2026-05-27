@@ -69,10 +69,7 @@ class RFQRepository:
 
     async def next_rfq_number(self, project_id: uuid.UUID) -> str:
         """Generate the next RFQ number using MAX to avoid collisions after deletions."""
-        stmt = (
-            select(func.max(RFQ.rfq_number))
-            .where(RFQ.project_id == project_id)
-        )
+        stmt = select(func.max(RFQ.rfq_number)).where(RFQ.project_id == project_id)
         max_number = (await self.session.execute(stmt)).scalar_one()
         if max_number is None:
             return "RFQ-001"

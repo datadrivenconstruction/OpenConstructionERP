@@ -82,11 +82,7 @@ async def auth(client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     token = ""
@@ -111,9 +107,7 @@ async def auth(client: AsyncClient) -> dict[str, str]:
 # ── Helpers ───────────────────────────────────────────────────────────────
 
 
-async def _create_project(
-    client: AsyncClient, auth: dict[str, str], **extra
-) -> str:
+async def _create_project(client: AsyncClient, auth: dict[str, str], **extra) -> str:
     body = {
         "name": f"QLink {uuid.uuid4().hex[:6]}",
         "description": "Feature 1+2 integration",
@@ -125,9 +119,7 @@ async def _create_project(
     return resp.json()["id"]
 
 
-async def _create_boq(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> str:
+async def _create_boq(client: AsyncClient, auth: dict[str, str], project_id: str) -> str:
     resp = await client.post(
         "/api/v1/boq/boqs/",
         json={
@@ -141,14 +133,10 @@ async def _create_boq(
     return resp.json()["id"]
 
 
-async def _add_position(
-    client: AsyncClient, auth: dict[str, str], boq_id: str, **body
-):
+async def _add_position(client: AsyncClient, auth: dict[str, str], boq_id: str, **body):
     payload = {"boq_id": boq_id, "unit": "m3", "quantity": 0.0}
     payload.update(body)
-    resp = await client.post(
-        f"/api/v1/boq/boqs/{boq_id}/positions/", json=payload, headers=auth
-    )
+    resp = await client.post(f"/api/v1/boq/boqs/{boq_id}/positions/", json=payload, headers=auth)
     assert resp.status_code == 201, f"Add position failed: {resp.text}"
     return resp.json()
 
@@ -197,9 +185,7 @@ async def _create_model_with_elements(
 
 
 @pytest.mark.asyncio
-async def test_quantity_link_create_refresh_stale_apply_provenance(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_quantity_link_create_refresh_stale_apply_provenance(client: AsyncClient, auth: dict[str, str]) -> None:
     """Full lifecycle: bind → revise model → refresh→stale → confirm→apply."""
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
@@ -222,10 +208,8 @@ async def test_quantity_link_create_refresh_stale_apply_provenance(
         project_id,
         version="1",
         elements=[
-            {"stable_id": "S1", "element_type": "slab",
-             "quantities": {"area_m2": 30.0, "volume_m3": 6.0}},
-            {"stable_id": "S2", "element_type": "slab",
-             "quantities": {"area_m2": 20.0, "volume_m3": 4.0}},
+            {"stable_id": "S1", "element_type": "slab", "quantities": {"area_m2": 30.0, "volume_m3": 6.0}},
+            {"stable_id": "S2", "element_type": "slab", "quantities": {"area_m2": 20.0, "volume_m3": 4.0}},
         ],
     )
 
@@ -248,15 +232,11 @@ async def test_quantity_link_create_refresh_stale_apply_provenance(
 
     # Quantity unchanged on create (propose-only).
     p = await client.get(f"/api/v1/boq/boqs/{boq_id}", headers=auth)
-    cur_qty = next(
-        x["quantity"] for x in p.json()["positions"] if x["id"] == pos_id
-    )
+    cur_qty = next(x["quantity"] for x in p.json()["positions"] if x["id"] == pos_id)
     assert str(cur_qty) in ("10", "10.0", "10.0000")
 
     # List links for the position.
-    listed = await client.get(
-        f"/api/v1/boq/positions/{pos_id}/quantity-links/", headers=auth
-    )
+    listed = await client.get(f"/api/v1/boq/positions/{pos_id}/quantity-links/", headers=auth)
     assert listed.status_code == 200
     assert len(listed.json()) == 1
 
@@ -269,17 +249,13 @@ async def test_quantity_link_create_refresh_stale_apply_provenance(
         version="2",
         parent_model_id=model_v1,
         elements=[
-            {"stable_id": "S1", "element_type": "slab",
-             "quantities": {"area_m2": 35.0, "volume_m3": 7.0}},
-            {"stable_id": "S2", "element_type": "slab",
-             "quantities": {"area_m2": 25.0, "volume_m3": 5.0}},
+            {"stable_id": "S1", "element_type": "slab", "quantities": {"area_m2": 35.0, "volume_m3": 7.0}},
+            {"stable_id": "S2", "element_type": "slab", "quantities": {"area_m2": 25.0, "volume_m3": 5.0}},
         ],
     )
 
     # Refresh — must resolve the latest version and flag stale.
-    refresh = await client.post(
-        f"/api/v1/boq/boqs/{boq_id}/quantity-links/refresh/", headers=auth
-    )
+    refresh = await client.post(f"/api/v1/boq/boqs/{boq_id}/quantity-links/refresh/", headers=auth)
     assert refresh.status_code == 200, refresh.text
     rbody = refresh.json()
     assert rbody["checked"] == 1
@@ -294,9 +270,7 @@ async def test_quantity_link_create_refresh_stale_apply_provenance(
 
     # Refresh again is read-only (no mutation) — still stale, qty still 10.
     p2 = await client.get(f"/api/v1/boq/boqs/{boq_id}", headers=auth)
-    cur_qty2 = next(
-        x["quantity"] for x in p2.json()["positions"] if x["id"] == pos_id
-    )
+    cur_qty2 = next(x["quantity"] for x in p2.json()["positions"] if x["id"] == pos_id)
     assert float(cur_qty2) == 10.0
 
     # Confirm/apply only the chosen link.
@@ -313,9 +287,7 @@ async def test_quantity_link_create_refresh_stale_apply_provenance(
 
     # Position quantity now 60, total recomputed exactly (60 * 185 = 11100).
     p3 = await client.get(f"/api/v1/boq/boqs/{boq_id}", headers=auth)
-    applied_pos = next(
-        x for x in p3.json()["positions"] if x["id"] == pos_id
-    )
+    applied_pos = next(x for x in p3.json()["positions"] if x["id"] == pos_id)
     assert float(applied_pos["quantity"]) == 60.0
     assert float(applied_pos["total"]) == 60.0 * 185.0
     prov = applied_pos["metadata"]["model_quantity_pull"]
@@ -326,19 +298,29 @@ async def test_quantity_link_create_refresh_stale_apply_provenance(
 
 
 @pytest.mark.asyncio
-async def test_apply_is_gated_to_listed_links_only(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_apply_is_gated_to_listed_links_only(client: AsyncClient, auth: dict[str, str]) -> None:
     """Only links named in the confirm payload are written."""
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
     pos_a = await _add_position(
-        client, auth, boq_id, ordinal="A", description="A", unit="m2",
-        quantity=1.0, unit_rate=10.0,
+        client,
+        auth,
+        boq_id,
+        ordinal="A",
+        description="A",
+        unit="m2",
+        quantity=1.0,
+        unit_rate=10.0,
     )
     pos_b = await _add_position(
-        client, auth, boq_id, ordinal="B", description="B", unit="m2",
-        quantity=1.0, unit_rate=10.0,
+        client,
+        auth,
+        boq_id,
+        ordinal="B",
+        description="B",
+        unit="m2",
+        quantity=1.0,
+        unit_rate=10.0,
     )
     model = await _create_model_with_elements(
         client,
@@ -350,16 +332,16 @@ async def test_apply_is_gated_to_listed_links_only(
             {"stable_id": "EB", "quantities": {"area_m2": 9.0}},
         ],
     )
-    la = (await client.post(
-        f"/api/v1/boq/positions/{pos_a['id']}/quantity-links/",
-        json={"model_id": model, "element_stable_ids": ["EA"],
-              "quantity_field": "area_m2"},
-        headers=auth,
-    )).json()
+    la = (
+        await client.post(
+            f"/api/v1/boq/positions/{pos_a['id']}/quantity-links/",
+            json={"model_id": model, "element_stable_ids": ["EA"], "quantity_field": "area_m2"},
+            headers=auth,
+        )
+    ).json()
     await client.post(
         f"/api/v1/boq/positions/{pos_b['id']}/quantity-links/",
-        json={"model_id": model, "element_stable_ids": ["EB"],
-              "quantity_field": "area_m2"},
+        json={"model_id": model, "element_stable_ids": ["EB"], "quantity_field": "area_m2"},
         headers=auth,
     )
 
@@ -379,37 +361,41 @@ async def test_apply_is_gated_to_listed_links_only(
 
 
 @pytest.mark.asyncio
-async def test_delete_quantity_link_keeps_position_quantity(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_delete_quantity_link_keeps_position_quantity(client: AsyncClient, auth: dict[str, str]) -> None:
     """Deleting a link stops tracking but never reverts the quantity."""
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
     pos = await _add_position(
-        client, auth, boq_id, ordinal="01", description="d", unit="m3",
-        quantity=42.0, unit_rate=5.0,
+        client,
+        auth,
+        boq_id,
+        ordinal="01",
+        description="d",
+        unit="m3",
+        quantity=42.0,
+        unit_rate=5.0,
     )
     model = await _create_model_with_elements(
         client,
         auth,
-        project_id, version="1",
+        project_id,
+        version="1",
         elements=[{"stable_id": "X", "quantities": {"volume_m3": 99.0}}],
     )
-    link = (await client.post(
-        f"/api/v1/boq/positions/{pos['id']}/quantity-links/",
-        json={"model_id": model, "element_stable_ids": ["X"],
-              "quantity_field": "volume_m3"},
-        headers=auth,
-    )).json()
+    link = (
+        await client.post(
+            f"/api/v1/boq/positions/{pos['id']}/quantity-links/",
+            json={"model_id": model, "element_stable_ids": ["X"], "quantity_field": "volume_m3"},
+            headers=auth,
+        )
+    ).json()
 
     d = await client.delete(
         f"/api/v1/boq/positions/{pos['id']}/quantity-links/{link['id']}",
         headers=auth,
     )
     assert d.status_code == 204
-    listed = await client.get(
-        f"/api/v1/boq/positions/{pos['id']}/quantity-links/", headers=auth
-    )
+    listed = await client.get(f"/api/v1/boq/positions/{pos['id']}/quantity-links/", headers=auth)
     assert listed.json() == []
     p = await client.get(f"/api/v1/boq/boqs/{boq_id}", headers=auth)
     q = next(x["quantity"] for x in p.json()["positions"] if x["id"] == pos["id"])
@@ -417,32 +403,43 @@ async def test_delete_quantity_link_keeps_position_quantity(
 
 
 @pytest.mark.asyncio
-async def test_quantity_link_count_aggregation(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_quantity_link_count_aggregation(client: AsyncClient, auth: dict[str, str]) -> None:
     """``count`` aggregation returns the number of resolved elements."""
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
     pos = await _add_position(
-        client, auth, boq_id, ordinal="D", description="Doors", unit="pcs",
-        quantity=0.0, unit_rate=350.0,
+        client,
+        auth,
+        boq_id,
+        ordinal="D",
+        description="Doors",
+        unit="pcs",
+        quantity=0.0,
+        unit_rate=350.0,
     )
     model = await _create_model_with_elements(
         client,
         auth,
-        project_id, version="1",
+        project_id,
+        version="1",
         elements=[
             {"stable_id": "D1", "element_type": "door", "quantities": {}},
             {"stable_id": "D2", "element_type": "door", "quantities": {}},
             {"stable_id": "D3", "element_type": "door", "quantities": {}},
         ],
     )
-    link = (await client.post(
-        f"/api/v1/boq/positions/{pos['id']}/quantity-links/",
-        json={"model_id": model, "element_stable_ids": ["D1", "D2", "D3"],
-              "quantity_field": "count", "aggregation": "count"},
-        headers=auth,
-    )).json()
+    link = (
+        await client.post(
+            f"/api/v1/boq/positions/{pos['id']}/quantity-links/",
+            json={
+                "model_id": model,
+                "element_stable_ids": ["D1", "D2", "D3"],
+                "quantity_field": "count",
+                "aggregation": "count",
+            },
+            headers=auth,
+        )
+    ).json()
     apply = await client.post(
         f"/api/v1/boq/boqs/{boq_id}/quantity-links/apply/",
         json={"link_ids": [link["id"]]},
@@ -460,38 +457,52 @@ async def test_quantity_link_count_aggregation(
 
 
 @pytest.mark.asyncio
-async def test_compare_classifies_added_removed_qty_rate(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_compare_classifies_added_removed_qty_rate(client: AsyncClient, auth: dict[str, str]) -> None:
     """Compare a baseline to a revision and classify every line."""
     project_id = await _create_project(client, auth)
     base = await _create_boq(client, auth, project_id)
 
     # Baseline lines, paired by reference_code.
     await _add_position(
-        client, auth, base, ordinal="01", reference_code="R-100",
-        description="Concrete", unit="m3", quantity=10.0, unit_rate=185.0,
+        client,
+        auth,
+        base,
+        ordinal="01",
+        reference_code="R-100",
+        description="Concrete",
+        unit="m3",
+        quantity=10.0,
+        unit_rate=185.0,
     )
     await _add_position(
-        client, auth, base, ordinal="02", reference_code="R-200",
-        description="Formwork", unit="m2", quantity=100.0, unit_rate=42.0,
+        client,
+        auth,
+        base,
+        ordinal="02",
+        reference_code="R-200",
+        description="Formwork",
+        unit="m2",
+        quantity=100.0,
+        unit_rate=42.0,
     )
     await _add_position(
-        client, auth, base, ordinal="03", reference_code="R-300",
-        description="Rebar (removed in revision)", unit="kg",
-        quantity=3000.0, unit_rate=1.85,
+        client,
+        auth,
+        base,
+        ordinal="03",
+        reference_code="R-300",
+        description="Rebar (removed in revision)",
+        unit="kg",
+        quantity=3000.0,
+        unit_rate=1.85,
     )
 
     # Revision: clone via create-revision then mutate.
-    rev_r = await client.post(
-        f"/api/v1/boq/boqs/{base}/create-revision/", headers=auth
-    )
+    rev_r = await client.post(f"/api/v1/boq/boqs/{base}/create-revision/", headers=auth)
     assert rev_r.status_code == 201, rev_r.text
     rev = rev_r.json()["id"]
 
-    rev_boq = (await client.get(
-        f"/api/v1/boq/boqs/{rev}", headers=auth
-    )).json()
+    rev_boq = (await client.get(f"/api/v1/boq/boqs/{rev}", headers=auth)).json()
     by_rc = {p["reference_code"]: p for p in rev_boq["positions"]}
 
     # qty change on R-100
@@ -507,18 +518,21 @@ async def test_compare_classifies_added_removed_qty_rate(
         headers=auth,
     )
     # remove R-300 from revision
-    await client.delete(
-        f"/api/v1/boq/positions/{by_rc['R-300']['id']}", headers=auth
-    )
+    await client.delete(f"/api/v1/boq/positions/{by_rc['R-300']['id']}", headers=auth)
     # add a brand-new line to the revision
     await _add_position(
-        client, auth, rev, ordinal="04", reference_code="R-400",
-        description="New scope", unit="m2", quantity=50.0, unit_rate=20.0,
+        client,
+        auth,
+        rev,
+        ordinal="04",
+        reference_code="R-400",
+        description="New scope",
+        unit="m2",
+        quantity=50.0,
+        unit_rate=20.0,
     )
 
-    cmp_r = await client.get(
-        f"/api/v1/boq/boqs/{base}/compare/{rev}", headers=auth
-    )
+    cmp_r = await client.get(f"/api/v1/boq/boqs/{base}/compare/{rev}", headers=auth)
     assert cmp_r.status_code == 200, cmp_r.text
     body = cmp_r.json()
     by_key = {r["match_key"]: r for r in body["rows"]}
@@ -543,9 +557,7 @@ async def test_compare_classifies_added_removed_qty_rate(
 
 
 @pytest.mark.asyncio
-async def test_compare_multicurrency_rebases_into_base(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_compare_multicurrency_rebases_into_base(client: AsyncClient, auth: dict[str, str]) -> None:
     """Foreign-currency position totals rebase to base before the delta.
 
     Project base = EUR with a USD FX rate of 0.90 (0.90 EUR per 1 USD).
@@ -562,22 +574,32 @@ async def test_compare_multicurrency_rebases_into_base(
 
     # Base BOQ: one EUR line (1000) + one USD line (1000 USD).
     await _add_position(
-        client, auth, base, ordinal="01", reference_code="R-EUR",
-        description="EUR line", unit="m2", quantity=10.0, unit_rate=100.0,
+        client,
+        auth,
+        base,
+        ordinal="01",
+        reference_code="R-EUR",
+        description="EUR line",
+        unit="m2",
+        quantity=10.0,
+        unit_rate=100.0,
         metadata={"currency": "EUR"},
     )
     await _add_position(
-        client, auth, base, ordinal="02", reference_code="R-USD",
-        description="USD line", unit="m2", quantity=10.0, unit_rate=100.0,
+        client,
+        auth,
+        base,
+        ordinal="02",
+        reference_code="R-USD",
+        description="USD line",
+        unit="m2",
+        quantity=10.0,
+        unit_rate=100.0,
         metadata={"currency": "USD"},
     )
 
-    rev = (await client.post(
-        f"/api/v1/boq/boqs/{base}/create-revision/", headers=auth
-    )).json()["id"]
-    rev_boq = (await client.get(
-        f"/api/v1/boq/boqs/{rev}", headers=auth
-    )).json()
+    rev = (await client.post(f"/api/v1/boq/boqs/{base}/create-revision/", headers=auth)).json()["id"]
+    rev_boq = (await client.get(f"/api/v1/boq/boqs/{rev}", headers=auth)).json()
     by_rc = {p["reference_code"]: p for p in rev_boq["positions"]}
 
     # Bump the USD line qty 10 → 20 (total 1000 USD → 2000 USD).
@@ -587,9 +609,7 @@ async def test_compare_multicurrency_rebases_into_base(
         headers=auth,
     )
 
-    cmp_r = await client.get(
-        f"/api/v1/boq/boqs/{base}/compare/{rev}", headers=auth
-    )
+    cmp_r = await client.get(f"/api/v1/boq/boqs/{base}/compare/{rev}", headers=auth)
     assert cmp_r.status_code == 200, cmp_r.text
     body = cmp_r.json()
     s = body["summary"]
@@ -610,14 +630,10 @@ async def test_compare_multicurrency_rebases_into_base(
 
 
 @pytest.mark.asyncio
-async def test_compare_404_on_unknown_boq(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_compare_404_on_unknown_boq(client: AsyncClient, auth: dict[str, str]) -> None:
     """Comparing against a non-existent BOQ is a clean 404."""
     project_id = await _create_project(client, auth)
     base = await _create_boq(client, auth, project_id)
     missing = uuid.uuid4()
-    r = await client.get(
-        f"/api/v1/boq/boqs/{base}/compare/{missing}", headers=auth
-    )
+    r = await client.get(f"/api/v1/boq/boqs/{base}/compare/{missing}", headers=auth)
     assert r.status_code == 404

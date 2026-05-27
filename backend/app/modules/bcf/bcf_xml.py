@@ -71,13 +71,9 @@ SUPPORTED_VERSIONS: tuple[str, ...] = ("2.1", "3.0")
 # ``.bcfzip`` members, which every conformant XML parser (incl. this
 # module's own ElementTree-based reader) discards — so it is purely an
 # at-rest provenance stamp with zero effect on parsed/round-tripped data.
-_BCF_ORIGIN = (
-    "OpenConstructionERP · DataDrivenConstruction · "
-    + bytes(
-        b ^ 0x55
-        for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
-    ).decode("ascii")
-)
+_BCF_ORIGIN = "OpenConstructionERP · DataDrivenConstruction · " + bytes(
+    b ^ 0x55 for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
+).decode("ascii")
 
 # Hard ceilings so a hostile zip can't exhaust memory before we validate it.
 _MAX_ENTRIES = 5000
@@ -553,9 +549,7 @@ def _parse_markup(raw: bytes, version: str) -> ParsedTopic:
 
     topic = ParsedTopic(guid=guid)
     topic.topic_type = topic_el.get("TopicType") or _txt(topic_el, "TopicType")
-    topic.topic_status = (
-        topic_el.get("TopicStatus") or _txt(topic_el, "TopicStatus") or "Open"
-    )
+    topic.topic_status = topic_el.get("TopicStatus") or _txt(topic_el, "TopicStatus") or "Open"
     topic.title = _txt(topic_el, "Title") or ""
     topic.priority = _txt(topic_el, "Priority")
     idx_raw = _txt(topic_el, "Index") or topic_el.get("ServerAssignedId")
@@ -564,16 +558,8 @@ def _parse_markup(raw: bytes, version: str) -> ParsedTopic:
             topic.index = int(idx_raw)
         except ValueError:
             topic.index = None
-    topic.labels = [
-        el.text.strip()
-        for el in topic_el.findall("Labels")
-        if el.text and el.text.strip()
-    ]
-    topic.reference_links = [
-        el.text.strip()
-        for el in topic_el.findall("ReferenceLink")
-        if el.text and el.text.strip()
-    ]
+    topic.labels = [el.text.strip() for el in topic_el.findall("Labels") if el.text and el.text.strip()]
+    topic.reference_links = [el.text.strip() for el in topic_el.findall("ReferenceLink") if el.text and el.text.strip()]
     topic.creation_author = _txt(topic_el, "CreationAuthor")
     topic.creation_date = _parse_dt(_txt(topic_el, "CreationDate"))
     topic.modified_author = _txt(topic_el, "ModifiedAuthor")
@@ -664,9 +650,7 @@ def build_bcfzip(
         ValueError: if ``version`` is not supported.
     """
     if version not in SUPPORTED_VERSIONS:
-        raise ValueError(
-            f"Unsupported BCF version {version!r}; expected one of {SUPPORTED_VERSIONS}"
-        )
+        raise ValueError(f"Unsupported BCF version {version!r}; expected one of {SUPPORTED_VERSIONS}")
 
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -817,9 +801,7 @@ def parse_bcfzip(data: bytes, *, forced_version: str | None = None) -> ParseResu
             try:
                 topic = _parse_markup(zf.read(markup_name), version)
             except BCFParseError as exc:
-                issues.append(
-                    ImportIssue("error", "markup_invalid", str(exc), markup_name)
-                )
+                issues.append(ImportIssue("error", "markup_invalid", str(exc), markup_name))
                 continue
             except ET.ParseError as exc:
                 issues.append(
@@ -859,11 +841,7 @@ def parse_bcfzip(data: bytes, *, forced_version: str | None = None) -> ParseResu
                         )
                     )
                 if vp.snapshot_filename:
-                    snap_path = (
-                        f"{topic_dir}/{vp.snapshot_filename}"
-                        if topic_dir
-                        else vp.snapshot_filename
-                    )
+                    snap_path = f"{topic_dir}/{vp.snapshot_filename}" if topic_dir else vp.snapshot_filename
                     if snap_path in names:
                         vp.snapshot_bytes = zf.read(snap_path)
                     else:

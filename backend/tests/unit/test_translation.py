@@ -65,8 +65,11 @@ class TestLookup:
             ],
         )
         hit = await lookup_phrase(
-            "Concrete C30/37 Wall", "en", "de",
-            dictionary="muse", root=str(lookup_root),
+            "Concrete C30/37 Wall",
+            "en",
+            "de",
+            dictionary="muse",
+            root=str(lookup_root),
         )
         assert hit is not None
         translated, conf = hit
@@ -74,9 +77,7 @@ class TestLookup:
         assert translated == "Stahlbetonwand C30/37"
         assert conf >= 0.95
 
-    async def test_per_token_fallback_preserves_codes(
-        self, lookup_root: Path
-    ) -> None:
+    async def test_per_token_fallback_preserves_codes(self, lookup_root: Path) -> None:
         _write_muse(
             lookup_root,
             "en",
@@ -87,8 +88,11 @@ class TestLookup:
             ],
         )
         hit = await lookup_phrase(
-            "Concrete C30/37 Wall", "en", "de",
-            dictionary="muse", root=str(lookup_root),
+            "Concrete C30/37 Wall",
+            "en",
+            "de",
+            dictionary="muse",
+            root=str(lookup_root),
         )
         assert hit is not None
         translated, conf = hit
@@ -108,16 +112,22 @@ class TestLookup:
         )
         # Only 1 of 4 lexical tokens hit → coverage 0.25 < 0.5 → miss.
         hit = await lookup_phrase(
-            "thick reinforced concrete partition", "en", "de",
-            dictionary="muse", root=str(lookup_root),
+            "thick reinforced concrete partition",
+            "en",
+            "de",
+            dictionary="muse",
+            root=str(lookup_root),
         )
         assert hit is None
 
     async def test_missing_file_returns_none(self, lookup_root: Path) -> None:
         # No file written → lookup is a clean miss, not an exception.
         hit = await lookup_phrase(
-            "anything", "en", "fr",
-            dictionary="muse", root=str(lookup_root),
+            "anything",
+            "en",
+            "fr",
+            dictionary="muse",
+            root=str(lookup_root),
         )
         assert hit is None
 
@@ -127,15 +137,14 @@ class TestLookup:
 
 @pytest.mark.asyncio
 class TestCascade:
-    async def test_short_circuits_on_muse_hit(
-        self, lookup_root: Path, cache_path: str
-    ) -> None:
+    async def test_short_circuits_on_muse_hit(self, lookup_root: Path, cache_path: str) -> None:
         _write_muse(
             lookup_root,
             "en",
             "bg",
             [("concrete wall", "Бетонна стена")],
         )
+
         # Patch the LLM tier to an explosion — if cascade reaches it the
         # test fails immediately. Proves Tier 1 short-circuits.
         async def _explode(*args, **kwargs):  # noqa: ANN001, ANN002
@@ -155,9 +164,7 @@ class TestCascade:
         assert result.tier_used == TierUsed.LOOKUP_MUSE
         assert "Бетонна" in result.translated
 
-    async def test_same_language_short_circuits_to_fallback(
-        self, lookup_root: Path, cache_path: str
-    ) -> None:
+    async def test_same_language_short_circuits_to_fallback(self, lookup_root: Path, cache_path: str) -> None:
         result = await translate(
             "Concrete Wall",
             source_lang="en",
@@ -171,9 +178,7 @@ class TestCascade:
         # in the target language).
         assert result.confidence == 1.0
 
-    async def test_fallback_returns_original_text(
-        self, lookup_root: Path, cache_path: str
-    ) -> None:
+    async def test_fallback_returns_original_text(self, lookup_root: Path, cache_path: str) -> None:
         # No MUSE/IATE files, no LLM, no settings — must fall through to fallback.
         result = await translate(
             "Reinforced Slab",
@@ -186,9 +191,7 @@ class TestCascade:
         assert result.translated == "Reinforced Slab"
         assert result.confidence == 0.0
 
-    async def test_llm_tier_used_when_lookup_misses(
-        self, lookup_root: Path, cache_path: str
-    ) -> None:
+    async def test_llm_tier_used_when_lookup_misses(self, lookup_root: Path, cache_path: str) -> None:
         async def _fake_llm(text, src, tgt, *, domain, user_settings):  # noqa: ANN001
             return ("Стоманобетонна плоча", 0.0001, 0.9)
 
@@ -209,9 +212,7 @@ class TestCascade:
         assert result.cost_usd is not None
         assert result.confidence >= 0.7
 
-    async def test_cache_hit_on_second_call(
-        self, lookup_root: Path, cache_path: str
-    ) -> None:
+    async def test_cache_hit_on_second_call(self, lookup_root: Path, cache_path: str) -> None:
         calls: list[tuple] = []
 
         async def _fake_llm(text, src, tgt, *, domain, user_settings):  # noqa: ANN001
@@ -255,9 +256,7 @@ class TestCascade:
         # Same call count — second translate didn't reach the LLM.
         assert len(calls) == 1
 
-    async def test_cache_isolated_per_temp_db(
-        self, tmp_path: Path, lookup_root: Path
-    ) -> None:
+    async def test_cache_isolated_per_temp_db(self, tmp_path: Path, lookup_root: Path) -> None:
         """Verify temp-DB isolation: two paths = two independent caches."""
         cache_a = str(tmp_path / "a.db")
         cache_b = str(tmp_path / "b.db")

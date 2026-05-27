@@ -26,15 +26,14 @@ from app.database import Base
 from app.modules.schedule.models import Activity, Schedule
 from app.modules.schedule.service_4d import ScheduleDashboardService
 
-
 PROJECT_ID = uuid.uuid4()
 
 
 def _register_minimal_models() -> None:
     """Pull FK-target modules into Base.metadata before create_all."""
-    import app.modules.users.models  # noqa: F401
     import app.modules.projects.models  # noqa: F401
     import app.modules.schedule.models  # noqa: F401
+    import app.modules.users.models  # noqa: F401
 
 
 async def _seed_project(session: AsyncSession, project_id: uuid.UUID) -> None:

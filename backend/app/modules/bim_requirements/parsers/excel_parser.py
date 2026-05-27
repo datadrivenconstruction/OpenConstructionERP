@@ -287,9 +287,7 @@ class ExcelCSVParser(BaseRequirementParser):
             elif isinstance(source, (str, bytes)):
                 rows = self._read_csv_string(source)
             else:
-                result.errors.append(
-                    {"row": 0, "field": "source", "msg": "Unsupported source type"}
-                )
+                result.errors.append({"row": 0, "field": "source", "msg": "Unsupported source type"})
                 return result
         except Exception as exc:
             result.errors.append({"row": 0, "field": "file", "msg": f"Cannot read file: {exc}"})
@@ -304,9 +302,7 @@ class ExcelCSVParser(BaseRequirementParser):
         data_rows = rows[1:]
 
         if not data_rows:
-            result.warnings.append(
-                {"row": 0, "field": "data", "msg": "File has headers but no data rows"}
-            )
+            result.warnings.append({"row": 0, "field": "data", "msg": "File has headers but no data rows"})
             return result
 
         # Auto-map columns
@@ -333,9 +329,7 @@ class ExcelCSVParser(BaseRequirementParser):
                 if req:
                     result.requirements.append(req)
             except Exception as exc:
-                result.errors.append(
-                    {"row": row_idx, "field": "", "msg": f"Error parsing row: {exc}"}
-                )
+                result.errors.append({"row": row_idx, "field": "", "msg": f"Error parsing row: {exc}"})
 
         logger.info(
             "Excel/CSV parsed: %d requirements from %d rows, %d errors",
@@ -508,9 +502,7 @@ class ExcelCSVParser(BaseRequirementParser):
             for cv in values["constraint"]:
                 constraint_def.update(_parse_constraint_value(cv))
         if "cardinality" in values:
-            constraint_def["cardinality"] = self._normalize_cardinality(
-                values["cardinality"][0]
-            )
+            constraint_def["cardinality"] = self._normalize_cardinality(values["cardinality"][0])
         if "datatype" in values:
             constraint_def["datatype"] = _normalize_datatype(values["datatype"][0])
         if "unit" in values:

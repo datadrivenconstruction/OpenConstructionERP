@@ -57,7 +57,6 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-
 # ─────────────────────────────────────────────────────────────────────────
 # Per-test fixtures — fresh tempfile SQLite DB, never the prod one
 # ─────────────────────────────────────────────────────────────────────────
@@ -149,9 +148,7 @@ async def seeded_boq(session_factory):
 # ─────────────────────────────────────────────────────────────────────────
 
 
-async def _bulk_insert_chain(
-    session: AsyncSession, boq_id: uuid.UUID, n: int
-) -> list[uuid.UUID]:
+async def _bulk_insert_chain(session: AsyncSession, boq_id: uuid.UUID, n: int) -> list[uuid.UUID]:
     """Insert ``n`` positions in a single linear chain. Returns ids in order."""
     from app.modules.boq.models import Position
 
@@ -295,10 +292,7 @@ async def _has_cycle(session: AsyncSession, boq_id: uuid.UUID) -> bool:
 
     from app.modules.boq.models import Position
 
-    rows = (
-        (await session.execute(select(Position.id, Position.parent_id).where(Position.boq_id == boq_id)))
-        .all()
-    )
+    rows = (await session.execute(select(Position.id, Position.parent_id).where(Position.boq_id == boq_id))).all()
     parent_of: dict[uuid.UUID, uuid.UUID | None] = {row.id: row.parent_id for row in rows}
     cap = len(parent_of) + 1
     for start in parent_of:
@@ -322,9 +316,7 @@ async def _has_cycle(session: AsyncSession, boq_id: uuid.UUID) -> bool:
 
 
 @pytest.mark.asyncio
-async def test_long_chain_root_to_leaf_cycle_rejected_fast(
-    session_factory, seeded_boq
-) -> None:
+async def test_long_chain_root_to_leaf_cycle_rejected_fast(session_factory, seeded_boq) -> None:
     """A 1 000-node chain: pointing the root's parent at the tail leaf
     must reject within the linear-walk budget. The descendant walk has
     to traverse the entire chain to find the leaf, so this is the
@@ -347,7 +339,7 @@ async def test_long_chain_root_to_leaf_cycle_rejected_fast(
     elapsed = time.perf_counter() - t0
 
     assert accepted is False, "Cycle attempt should reject"
-    assert ("cycle" in reason.lower() or "descendant" in reason.lower()), reason
+    assert "cycle" in reason.lower() or "descendant" in reason.lower(), reason
     # 5 s ceiling on a 1k chain ≈ 5 ms / node. The current walker is
     # O(n) with one async round-trip per level; SQLite + aiosqlite on
     # Windows clocks ~2-3 ms per call. An O(n²) regression on 1 000
@@ -360,9 +352,7 @@ async def test_long_chain_root_to_leaf_cycle_rejected_fast(
 
 
 @pytest.mark.asyncio
-async def test_long_chain_legal_reparent_succeeds(
-    session_factory, seeded_boq
-) -> None:
+async def test_long_chain_legal_reparent_succeeds(session_factory, seeded_boq) -> None:
     """In the same 1 000-node chain, moving the *leaf* under a sibling
     of the root (= a brand-new top-level position) is a legal move —
     the leaf has zero descendants, so the descendant walk terminates
@@ -406,9 +396,7 @@ async def test_long_chain_legal_reparent_succeeds(
 
 
 @pytest.mark.asyncio
-async def test_balanced_tree_leaf_to_root_legal(
-    session_factory, seeded_boq
-) -> None:
+async def test_balanced_tree_leaf_to_root_legal(session_factory, seeded_boq) -> None:
     """8×3 balanced tree (~9 841 positions). Re-parenting a leaf under
     the root is legal — leaves have no descendants, no cycle possible.
     """
@@ -424,9 +412,7 @@ async def test_balanced_tree_leaf_to_root_legal(
 
 
 @pytest.mark.asyncio
-async def test_balanced_tree_root_to_leaf_rejected(
-    session_factory, seeded_boq
-) -> None:
+async def test_balanced_tree_root_to_leaf_rejected(session_factory, seeded_boq) -> None:
     """Same tree: pointing the root's parent at any leaf must reject —
     every leaf is a transitive descendant of the root. The walk must
     terminate cleanly even on a ~10k-node tree.
@@ -442,7 +428,7 @@ async def test_balanced_tree_root_to_leaf_rejected(
     elapsed = time.perf_counter() - t0
 
     assert accepted is False, "Root-under-descendant must reject"
-    assert ("cycle" in reason.lower() or "descendant" in reason.lower()), reason
+    assert "cycle" in reason.lower() or "descendant" in reason.lower(), reason
     # Even on ~10k positions, the walk is O(tree size) and should be
     # well under 5 s. (We stay generous here because tree-walk fan-out
     # involves more child queries than the chain case.)
@@ -458,9 +444,7 @@ async def test_balanced_tree_root_to_leaf_rejected(
 
 
 @pytest.mark.asyncio
-async def test_concurrent_cycle_attempts_leave_zero_cycles(
-    session_factory, seeded_boq
-) -> None:
+async def test_concurrent_cycle_attempts_leave_zero_cycles(session_factory, seeded_boq) -> None:
     """10 concurrent reparent attempts, each trying to introduce a
     *different* cycle on the same small chain. Every attempt is
     expected to reject (they all point an ancestor at one of its own
@@ -515,9 +499,7 @@ async def test_concurrent_cycle_attempts_leave_zero_cycles(
     for r in results:
         assert not isinstance(r, BaseException), f"Unexpected raw exception: {r!r}"
     accepted = [r for r in results if r == "accepted"]
-    assert accepted == [], (
-        f"Some concurrent cycle attempts were accepted: {accepted!r}"
-    )
+    assert accepted == [], f"Some concurrent cycle attempts were accepted: {accepted!r}"
 
     # Final invariant: the DB itself contains no cycles, regardless of
     # which interleaving the asyncio scheduler chose.
@@ -529,9 +511,7 @@ async def test_concurrent_cycle_attempts_leave_zero_cycles(
 
 
 @pytest.mark.asyncio
-async def test_concurrent_legal_reparents_all_succeed(
-    session_factory, seeded_boq
-) -> None:
+async def test_concurrent_legal_reparents_all_succeed(session_factory, seeded_boq) -> None:
     """Sanity counterpart to the cycle test: 10 concurrent *legal*
     reparents all succeed. Catches the case where a paranoid lock or
     overzealous validation accidentally serialises legitimate writes.
@@ -632,6 +612,4 @@ async def test_concurrent_legal_reparents_all_succeed(
     assert not bad, f"Legal concurrent reparents wrongly rejected: {bad!r}"
 
     async with session_factory() as session:
-        assert not await _has_cycle(session, boq_id), (
-            "Legal reparents somehow introduced a cycle"
-        )
+        assert not await _has_cycle(session, boq_id), "Legal reparents somehow introduced a cycle"

@@ -228,11 +228,7 @@ class _StubNotifRepo(_BaseStubRepo):
         return rows[offset : offset + limit], len(rows)
 
     async def unread_count(self, portal_user_id: uuid.UUID) -> int:
-        return sum(
-            1
-            for r in self.rows.values()
-            if r.portal_user_id == portal_user_id and r.read_at is None
-        )
+        return sum(1 for r in self.rows.values() if r.portal_user_id == portal_user_id and r.read_at is None)
 
     async def update_fields(self, notif_id: uuid.UUID, **fields: Any) -> None:
         row = self.rows.get(notif_id)
@@ -307,6 +303,7 @@ def test_constant_time_equals() -> None:
 
 def test_portal_roles_schema_constant() -> None:
     import re
+
     pattern = re.compile(PORTAL_ROLES)
     for role in (
         "client",
@@ -351,10 +348,12 @@ async def test_invite_idempotent_on_existing_email() -> None:
     svc = _make_service()
     with _patch_bus():
         u1, t1, _ = await svc.invite_portal_user(
-            email="bob@example.com", role="investor",
+            email="bob@example.com",
+            role="investor",
         )
         u2, t2, _ = await svc.invite_portal_user(
-            email="bob@example.com", role="investor",
+            email="bob@example.com",
+            role="investor",
         )
     assert u1.id == u2.id
     assert t1 != t2  # fresh magic link issued
@@ -366,7 +365,8 @@ async def test_invite_lowercases_email() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="MIXED@Example.COM", role="client",
+            email="MIXED@Example.COM",
+            role="client",
         )
     assert user.email == "mixed@example.com"
 
@@ -379,7 +379,8 @@ async def test_consume_magic_link_success() -> None:
     svc = _make_service()
     with _patch_bus():
         user, plain, _ = await svc.invite_portal_user(
-            email="carl@example.com", role="consultant",
+            email="carl@example.com",
+            role="consultant",
         )
         user2, sess, session_plain, sess_expires = await svc.consume_magic_link(
             plain,
@@ -400,7 +401,8 @@ async def test_consume_magic_link_expired() -> None:
     svc = _make_service()
     with _patch_bus():
         _, plain, _ = await svc.invite_portal_user(
-            email="dora@example.com", role="client",
+            email="dora@example.com",
+            role="client",
         )
     # Force expiry on the only link.
     link = list(svc.magic_repo.rows.values())[0]
@@ -418,7 +420,8 @@ async def test_consume_magic_link_already_consumed() -> None:
     svc = _make_service()
     with _patch_bus():
         _, plain, _ = await svc.invite_portal_user(
-            email="erin@example.com", role="supplier",
+            email="erin@example.com",
+            role="supplier",
         )
         await svc.consume_magic_link(plain)
         from fastapi import HTTPException
@@ -433,7 +436,8 @@ async def test_consume_magic_link_wrong_purpose() -> None:
     svc = _make_service()
     with _patch_bus():
         _, plain, _ = await svc.invite_portal_user(
-            email="finn@example.com", role="subcontractor",
+            email="finn@example.com",
+            role="subcontractor",
         )
     from fastapi import HTTPException
 
@@ -460,7 +464,8 @@ async def test_verify_session_valid_and_touches_last_seen() -> None:
     svc = _make_service()
     with _patch_bus():
         _, plain, _ = await svc.invite_portal_user(
-            email="gina@example.com", role="client",
+            email="gina@example.com",
+            role="client",
         )
         _, sess, session_plain, _ = await svc.consume_magic_link(plain)
 
@@ -476,7 +481,8 @@ async def test_verify_session_revoked_returns_none() -> None:
     svc = _make_service()
     with _patch_bus():
         _, plain, _ = await svc.invite_portal_user(
-            email="hank@example.com", role="client",
+            email="hank@example.com",
+            role="client",
         )
         _, sess, session_plain, _ = await svc.consume_magic_link(plain)
 
@@ -490,7 +496,8 @@ async def test_verify_session_expired_returns_none() -> None:
     svc = _make_service()
     with _patch_bus():
         _, plain, _ = await svc.invite_portal_user(
-            email="iris@example.com", role="client",
+            email="iris@example.com",
+            role="client",
         )
         _, sess, session_plain, _ = await svc.consume_magic_link(plain)
     # Force expiry on the only session.
@@ -510,11 +517,13 @@ async def test_revoke_all_for_user() -> None:
     svc = _make_service()
     with _patch_bus():
         _, plain, _ = await svc.invite_portal_user(
-            email="jane@example.com", role="client",
+            email="jane@example.com",
+            role="client",
         )
         _, sess1, p1, _ = await svc.consume_magic_link(plain)
         _, plain2, _ = await svc.invite_portal_user(
-            email="jane@example.com", role="client",
+            email="jane@example.com",
+            role="client",
         )
         _, sess2, p2, _ = await svc.consume_magic_link(plain2)
 
@@ -532,11 +541,16 @@ async def test_grant_access_creates_rule() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="kim@example.com", role="client",
+            email="kim@example.com",
+            role="client",
         )
     resource_id = uuid.uuid4()
     rule = await svc.grant_access(
-        user.id, "project", resource_id, "view", granted_by="admin",
+        user.id,
+        "project",
+        resource_id,
+        "view",
+        granted_by="admin",
     )
     assert rule.portal_user_id == user.id
     assert rule.resource_id == resource_id
@@ -548,7 +562,8 @@ async def test_grant_access_idempotent_updates_permission() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="leo@example.com", role="client",
+            email="leo@example.com",
+            role="client",
         )
     rid = uuid.uuid4()
     r1 = await svc.grant_access(user.id, "project", rid, "view")
@@ -563,7 +578,8 @@ async def test_revoke_access_removes_rule() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="mia@example.com", role="client",
+            email="mia@example.com",
+            role="client",
         )
     rid = uuid.uuid4()
     await svc.grant_access(user.id, "project", rid, "view")
@@ -576,7 +592,8 @@ async def test_enforce_rls_true_when_rule_present() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="nick@example.com", role="client",
+            email="nick@example.com",
+            role="client",
         )
     rid = uuid.uuid4()
     await svc.grant_access(user.id, "project", rid, "comment")
@@ -592,7 +609,8 @@ async def test_enforce_rls_false_without_rule() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="oli@example.com", role="client",
+            email="oli@example.com",
+            role="client",
         )
     assert await svc.enforce_rls(user.id, "project", uuid.uuid4(), "view") is False
 
@@ -602,11 +620,15 @@ async def test_enforce_rls_expired_rule_denied() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="pat@example.com", role="client",
+            email="pat@example.com",
+            role="client",
         )
     rid = uuid.uuid4()
     await svc.grant_access(
-        user.id, "project", rid, "view",
+        user.id,
+        "project",
+        rid,
+        "view",
         expires_at=now_utc() - timedelta(seconds=1),
     )
     assert await svc.enforce_rls(user.id, "project", rid, "view") is False
@@ -621,10 +643,12 @@ async def test_list_access_rules_admin_lists_all_and_filters() -> None:
     svc = _make_service()
     with _patch_bus():
         ua, _, _ = await svc.invite_portal_user(
-            email="aa@example.com", role="client",
+            email="aa@example.com",
+            role="client",
         )
         ub, _, _ = await svc.invite_portal_user(
-            email="bb@example.com", role="subcontractor",
+            email="bb@example.com",
+            role="subcontractor",
         )
     pa, pb = uuid.uuid4(), uuid.uuid4()
     doc = uuid.uuid4()
@@ -652,7 +676,8 @@ async def test_list_access_rules_pagination() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="page@example.com", role="client",
+            email="page@example.com",
+            role="client",
         )
     for _ in range(5):
         await svc.grant_access(user.id, "project", uuid.uuid4(), "view")
@@ -672,27 +697,48 @@ async def test_enforce_rls_is_per_user_no_cross_tenant_read() -> None:
     svc = _make_service()
     with _patch_bus():
         sub_a, _, _ = await svc.invite_portal_user(
-            email="sub-a@example.com", role="subcontractor",
+            email="sub-a@example.com",
+            role="subcontractor",
         )
         sub_b, _, _ = await svc.invite_portal_user(
-            email="sub-b@example.com", role="subcontractor",
+            email="sub-b@example.com",
+            role="subcontractor",
         )
     package = uuid.uuid4()
     await svc.grant_access(sub_a.id, "subcontract", package, "submit")
 
-    assert await svc.enforce_rls(
-        sub_a.id, "subcontract", package, "submit",
-    ) is True
+    assert (
+        await svc.enforce_rls(
+            sub_a.id,
+            "subcontract",
+            package,
+            "submit",
+        )
+        is True
+    )
     # B has no rule on A's package — must be denied at every permission level.
-    assert await svc.enforce_rls(
-        sub_b.id, "subcontract", package, "view",
-    ) is False
-    assert await svc.enforce_rls(
-        sub_b.id, "subcontract", package, "submit",
-    ) is False
+    assert (
+        await svc.enforce_rls(
+            sub_b.id,
+            "subcontract",
+            package,
+            "view",
+        )
+        is False
+    )
+    assert (
+        await svc.enforce_rls(
+            sub_b.id,
+            "subcontract",
+            package,
+            "submit",
+        )
+        is False
+    )
     # And B sees none of A's accessible resources.
     assert package not in await svc.list_accessible_resources(
-        sub_b.id, "subcontract",
+        sub_b.id,
+        "subcontract",
     )
 
 
@@ -701,14 +747,18 @@ async def test_list_accessible_resources_filters_expired() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="quinn@example.com", role="client",
+            email="quinn@example.com",
+            role="client",
         )
     live = uuid.uuid4()
     dead = uuid.uuid4()
     other_type = uuid.uuid4()
     await svc.grant_access(user.id, "project", live, "view")
     await svc.grant_access(
-        user.id, "project", dead, "view",
+        user.id,
+        "project",
+        dead,
+        "view",
         expires_at=now_utc() - timedelta(seconds=1),
     )
     await svc.grant_access(user.id, "contract", other_type, "view")
@@ -727,7 +777,8 @@ async def test_notify_creates_notification() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="rita@example.com", role="client",
+            email="rita@example.com",
+            role="client",
         )
         notif = await svc.notify(
             user.id,
@@ -758,8 +809,11 @@ async def test_notify_emits_event() -> None:
         user_repo = svc.user_repo
         # Bypass full invite to avoid extra event noise.
         from app.modules.portal.models import PortalUser
+
         u = PortalUser(
-            email="sam@example.com", full_name="", portal_role="client",
+            email="sam@example.com",
+            full_name="",
+            portal_role="client",
         )
         await user_repo.create(u)
         await svc.notify(u.id, kind="general", title="hi")
@@ -773,10 +827,12 @@ async def test_mark_notification_read_owner_only() -> None:
     svc = _make_service()
     with _patch_bus():
         user_a, _, _ = await svc.invite_portal_user(
-            email="tia@example.com", role="client",
+            email="tia@example.com",
+            role="client",
         )
         user_b, _, _ = await svc.invite_portal_user(
-            email="ula@example.com", role="client",
+            email="ula@example.com",
+            role="client",
         )
         notif = await svc.notify(user_a.id, kind="general", title="hello")
 
@@ -795,7 +851,8 @@ async def test_list_notifications_returns_unread_count() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="vic@example.com", role="client",
+            email="vic@example.com",
+            role="client",
         )
         await svc.notify(user.id, kind="general", title="n1")
         n2 = await svc.notify(user.id, kind="general", title="n2")
@@ -816,14 +873,23 @@ async def test_record_document_access_appends() -> None:
     svc = _make_service()
     with _patch_bus():
         user, _, _ = await svc.invite_portal_user(
-            email="will@example.com", role="client",
+            email="will@example.com",
+            role="client",
         )
     doc_id = uuid.uuid4()
     await svc.record_document_access(
-        user.id, "document", doc_id, "view", ip_address="1.2.3.4",
+        user.id,
+        "document",
+        doc_id,
+        "view",
+        ip_address="1.2.3.4",
     )
     await svc.record_document_access(
-        user.id, "document", doc_id, "download", ip_address="1.2.3.4",
+        user.id,
+        "document",
+        doc_id,
+        "download",
+        ip_address="1.2.3.4",
     )
     items, total = await svc.list_document_access(portal_user_id=user.id)
     assert total == 2
@@ -871,7 +937,8 @@ async def test_request_magic_link_returns_token_for_known_email() -> None:
     svc = _make_service()
     with _patch_bus():
         await svc.invite_portal_user(
-            email="active@example.com", role="client",
+            email="active@example.com",
+            role="client",
         )
         # mark active so request_magic_link returns the link
         u = await svc.user_repo.get_by_email("active@example.com")

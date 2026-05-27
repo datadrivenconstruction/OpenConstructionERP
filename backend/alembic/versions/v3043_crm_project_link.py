@@ -42,9 +42,7 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
     return name in inspector.get_table_names()
 
 
-def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str
-) -> bool:
+def _has_column(inspector: sa.engine.reflection.Inspector, table: str, column: str) -> bool:
     return any(c["name"] == column for c in inspector.get_columns(table))
 
 
@@ -70,7 +68,5 @@ def downgrade() -> None:
     """Drop oe_crm_opportunity.project_id."""
     bind = op.get_bind()
     inspector = sa.inspect(bind)
-    if _has_table(inspector, _TABLE) and _has_column(
-        inspector, _TABLE, _COLUMN
-    ):
+    if _has_table(inspector, _TABLE) and _has_column(inspector, _TABLE, _COLUMN):
         op.drop_column(_TABLE, _COLUMN)

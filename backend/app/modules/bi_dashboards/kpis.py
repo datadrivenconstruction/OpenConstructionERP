@@ -133,9 +133,9 @@ class EVMSnapshot:
     """
 
     bac: Decimal = Decimal("0")  # Budget at completion
-    pv: Decimal = Decimal("0")   # Planned value (BCWS)
-    ev: Decimal = Decimal("0")   # Earned value (BCWP)
-    ac: Decimal = Decimal("0")   # Actual cost (ACWP)
+    pv: Decimal = Decimal("0")  # Planned value (BCWS)
+    ev: Decimal = Decimal("0")  # Earned value (BCWP)
+    ac: Decimal = Decimal("0")  # Actual cost (ACWP)
     record_count: int = 0
     breakdown: dict[str, Any] = field(default_factory=dict)
 
@@ -321,10 +321,7 @@ async def sv_kpi(
     unit="currency",
     category="financial",
     source_modules=["finance", "tasks", "projects"],
-    description=(
-        "AC + (BAC - EV) / (CPI * SPI) — assumes both perf indices persist "
-        "(common in construction)."
-    ),
+    description=("AC + (BAC - EV) / (CPI * SPI) — assumes both perf indices persist (common in construction)."),
 )
 async def eac_kpi(
     session: AsyncSession,
@@ -457,8 +454,7 @@ async def procurement_savings_kpi(
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             budgeted += _to_decimal(
-                getattr(row, "budgeted_amount", None)
-                or getattr(row, "budget", 0),
+                getattr(row, "budgeted_amount", None) or getattr(row, "budget", 0),
             )
             actual += _to_decimal(getattr(row, "total_amount", 0))
             count += 1
@@ -469,7 +465,9 @@ async def procurement_savings_kpi(
 
     if budgeted <= 0:
         return KPIComputation(
-            value=Decimal("0"), unit="percent", source_record_count=count,
+            value=Decimal("0"),
+            unit="percent",
+            source_record_count=count,
         )
     pct = (budgeted - actual) / budgeted * Decimal("100")
     return KPIComputation(
@@ -520,8 +518,7 @@ async def change_order_ratio_kpi(
             proj = await session.get(Project, project_id)
             if proj is not None:
                 contract_value = _to_decimal(
-                    getattr(proj, "contract_value", None)
-                    or getattr(proj, "budget", 0),
+                    getattr(proj, "contract_value", None) or getattr(proj, "budget", 0),
                 )
     except ImportError:
         pass
@@ -530,7 +527,9 @@ async def change_order_ratio_kpi(
 
     if contract_value <= 0:
         return KPIComputation(
-            value=Decimal("0"), unit="percent", source_record_count=count,
+            value=Decimal("0"),
+            unit="percent",
+            source_record_count=count,
         )
     pct = co_value / contract_value * Decimal("100")
     return KPIComputation(
@@ -579,7 +578,9 @@ async def cash_in_30d_kpi(
     except Exception:
         logger.debug("cash_in_30d: probe failed", exc_info=True)
     return KPIComputation(
-        value=total, unit="currency", source_record_count=count,
+        value=total,
+        unit="currency",
+        source_record_count=count,
     )
 
 
@@ -616,7 +617,9 @@ async def cash_out_30d_kpi(
     except Exception:
         logger.debug("cash_out_30d: probe failed", exc_info=True)
     return KPIComputation(
-        value=total, unit="currency", source_record_count=count,
+        value=total,
+        unit="currency",
+        source_record_count=count,
     )
 
 
@@ -644,10 +647,14 @@ async def dso_kpi(
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             issued = getattr(row, "issue_date", None) or getattr(
-                row, "issued_at", None,
+                row,
+                "issued_at",
+                None,
             )
             paid_at = getattr(row, "paid_at", None) or getattr(
-                row, "paid_date", None,
+                row,
+                "paid_date",
+                None,
             )
             if issued is None or paid_at is None:
                 continue
@@ -668,7 +675,9 @@ async def dso_kpi(
 
     avg = _safe_div(total_days, Decimal(count)) if count > 0 else Decimal("0")
     return KPIComputation(
-        value=avg, unit="days", source_record_count=count,
+        value=avg,
+        unit="days",
+        source_record_count=count,
     )
 
 
@@ -710,7 +719,9 @@ async def first_pass_yield_kpi(
 
     if total == 0:
         return KPIComputation(
-            value=Decimal("0"), unit="percent", source_record_count=0,
+            value=Decimal("0"),
+            unit="percent",
+            source_record_count=0,
         )
     pct = Decimal(passed) / Decimal(total) * Decimal("100")
     return KPIComputation(
@@ -745,8 +756,7 @@ async def copq_kpi(
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             total += _to_decimal(
-                getattr(row, "cost_impact", None)
-                or getattr(row, "cost", 0),
+                getattr(row, "cost_impact", None) or getattr(row, "cost", 0),
             )
             count += 1
     except ImportError:
@@ -754,7 +764,9 @@ async def copq_kpi(
     except Exception:
         logger.debug("copq: probe failed", exc_info=True)
     return KPIComputation(
-        value=total, unit="currency", source_record_count=count,
+        value=total,
+        unit="currency",
+        source_record_count=count,
     )
 
 
@@ -792,7 +804,9 @@ async def punch_close_rate_kpi(
 
     if total == 0:
         return KPIComputation(
-            value=Decimal("0"), unit="percent", source_record_count=0,
+            value=Decimal("0"),
+            unit="percent",
+            source_record_count=0,
         )
     pct = Decimal(closed) / Decimal(total) * Decimal("100")
     return KPIComputation(
@@ -827,10 +841,14 @@ async def rfi_close_avg_days_kpi(
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             opened = getattr(row, "created_at", None) or getattr(
-                row, "opened_at", None,
+                row,
+                "opened_at",
+                None,
             )
             closed = getattr(row, "closed_at", None) or getattr(
-                row, "responded_at", None,
+                row,
+                "responded_at",
+                None,
             )
             if opened is None or closed is None:
                 continue
@@ -887,8 +905,12 @@ async def safety_trir_kpi(
             # Recordable = not "first_aid_only"
             severity = (getattr(row, "severity", "") or "").lower()
             if severity in (
-                "minor", "major", "fatal", "lost_time",
-                "recordable", "medical_treatment",
+                "minor",
+                "major",
+                "fatal",
+                "lost_time",
+                "recordable",
+                "medical_treatment",
             ):
                 incidents += 1
         # Try to find actual hours-worked records — gracefully fall back
@@ -912,10 +934,7 @@ async def safety_trir_kpi(
     except Exception:
         logger.debug("safety_trir: probe failed", exc_info=True)
 
-    trir = (
-        Decimal(incidents) * Decimal("200000") / hours_worked
-        if hours_worked > 0 else Decimal("0")
-    )
+    trir = Decimal(incidents) * Decimal("200000") / hours_worked if hours_worked > 0 else Decimal("0")
     return KPIComputation(
         value=trir,
         unit="ratio",
@@ -957,8 +976,7 @@ async def embodied_carbon_per_m2_kpi(
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             total_emissions += _to_decimal(
-                getattr(row, "scope3_kgco2e", None)
-                or getattr(row, "kgco2e", 0),
+                getattr(row, "scope3_kgco2e", None) or getattr(row, "kgco2e", 0),
             )
             count += 1
     except ImportError:
@@ -973,8 +991,7 @@ async def embodied_carbon_per_m2_kpi(
             proj = await session.get(Project, project_id)
             if proj is not None:
                 project_area = _to_decimal(
-                    getattr(proj, "gross_floor_area_m2", None)
-                    or getattr(proj, "area_m2", 0),
+                    getattr(proj, "gross_floor_area_m2", None) or getattr(proj, "area_m2", 0),
                 )
     except ImportError:
         pass
@@ -1022,8 +1039,7 @@ async def equipment_utilization_kpi(
         for row in rows:
             used += _to_decimal(getattr(row, "hours_used", 0))
             available += _to_decimal(
-                getattr(row, "hours_available", None)
-                or getattr(row, "total_hours", 0),
+                getattr(row, "hours_available", None) or getattr(row, "total_hours", 0),
             )
             count += 1
     except ImportError:
@@ -1033,7 +1049,9 @@ async def equipment_utilization_kpi(
 
     if available <= 0:
         return KPIComputation(
-            value=Decimal("0"), unit="percent", source_record_count=count,
+            value=Decimal("0"),
+            unit="percent",
+            source_record_count=count,
         )
     pct = used / available * Decimal("100")
     return KPIComputation(
@@ -1118,13 +1136,17 @@ async def bid_win_rate_kpi(
             continue
         except Exception:
             logger.debug(
-                "bid_win_rate: %s probe failed", module_path, exc_info=True,
+                "bid_win_rate: %s probe failed",
+                module_path,
+                exc_info=True,
             )
             continue
 
     if total == 0:
         return KPIComputation(
-            value=Decimal("0"), unit="percent", source_record_count=0,
+            value=Decimal("0"),
+            unit="percent",
+            source_record_count=0,
         )
     pct = Decimal(won) / Decimal(total) * Decimal("100")
     return KPIComputation(
@@ -1163,7 +1185,9 @@ async def project_count_active_kpi(
         logger.debug("project_count_active: probe failed", exc_info=True)
 
     return KPIComputation(
-        value=Decimal(count), unit="count", source_record_count=count,
+        value=Decimal(count),
+        unit="count",
+        source_record_count=count,
     )
 
 
@@ -1384,8 +1408,7 @@ async def benchmark(
     project_values.sort()
     n = len(project_values)
     median = (
-        (project_values[n // 2 - 1] + project_values[n // 2]) / Decimal("2")
-        if n % 2 == 0 else project_values[n // 2]
+        (project_values[n // 2 - 1] + project_values[n // 2]) / Decimal("2") if n % 2 == 0 else project_values[n // 2]
     )
     rank = sum(1 for v in project_values if v <= target_value)
     percentile = Decimal(rank) * Decimal("100") / Decimal(n)

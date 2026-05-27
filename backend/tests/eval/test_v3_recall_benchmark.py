@@ -57,10 +57,7 @@ def _live_infra_available() -> bool:
     return (
         os.environ.get("MATCH_BACKEND") == "qdrant"
         and bool(os.environ.get("CWICR_PARQUET_ROOT"))
-        and (
-            bool(os.environ.get("CWICR_QDRANT_URL"))
-            or bool(os.environ.get("CWICR_QDRANT_PATH"))
-        )
+        and (bool(os.environ.get("CWICR_QDRANT_URL")) or bool(os.environ.get("CWICR_QDRANT_PATH")))
     )
 
 

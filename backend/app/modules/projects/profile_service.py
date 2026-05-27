@@ -48,6 +48,7 @@ def discover_module_names() -> tuple[str, ...]:
     if not found:
         # Defensive fallback — union every preset's modules.
         from app.modules.projects.profile_presets import ALWAYS_ON
+
         found = set(ALWAYS_ON)
         for p in PRESETS.values():
             found |= set(p["modules"])
@@ -130,7 +131,8 @@ def _to_profile_read(row: ProjectProfile) -> schemas.ProjectProfileRead:
 
 
 async def _result(
-    db: AsyncSession, project_id: uuid.UUID,
+    db: AsyncSession,
+    project_id: uuid.UUID,
 ) -> schemas.ProjectProfileResult:
     prof = (
         await db.execute(
@@ -140,12 +142,16 @@ async def _result(
         )
     ).scalar_one()
     mods = (
-        await db.execute(
-            select(ProjectModule)
-            .where(ProjectModule.project_id == project_id)
-            .order_by(ProjectModule.ordinal.is_(None), ProjectModule.ordinal)
+        (
+            await db.execute(
+                select(ProjectModule)
+                .where(ProjectModule.project_id == project_id)
+                .order_by(ProjectModule.ordinal.is_(None), ProjectModule.ordinal)
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     enabled = [m for m in mods if m.enabled]
     return schemas.ProjectProfileResult(
         profile=_to_profile_read(prof),
@@ -205,16 +211,16 @@ async def apply_profile(
         object.__setattr__(a, "enabled", bool(on))
         object.__setattr__(a, "source", "manual")
         object.__setattr__(
-            a, "why", "Manually enabled" if on else "Manually disabled",
+            a,
+            "why",
+            "Manually enabled" if on else "Manually disabled",
         )
 
     ordinals = assign_ordinals(assignments)
 
     # Replace the project's module rows wholesale — simplest correct
     # semantics; the table is tiny (≤88 rows/project).
-    await db.execute(
-        delete(ProjectModule).where(ProjectModule.project_id == project_id)
-    )
+    await db.execute(delete(ProjectModule).where(ProjectModule.project_id == project_id))
     now = datetime.now(UTC)
     for a in assignments:
         db.add(
@@ -236,7 +242,8 @@ async def apply_profile(
 
 
 async def get_profile(
-    db: AsyncSession, project_id: uuid.UUID,
+    db: AsyncSession,
+    project_id: uuid.UUID,
 ) -> schemas.ProjectProfileResult | None:
     prof = (
         await db.execute(
@@ -251,7 +258,8 @@ async def get_profile(
 
 
 async def recompute(
-    db: AsyncSession, project_id: uuid.UUID,
+    db: AsyncSession,
+    project_id: uuid.UUID,
 ) -> schemas.ProjectProfileResult:
     """Re-run scoring with the stored profile (after a module is added
     to the platform, or weights are recalibrated)."""
@@ -281,7 +289,9 @@ async def recompute(
 
 
 async def set_focus_mode(
-    db: AsyncSession, project_id: uuid.UUID, enabled: bool,
+    db: AsyncSession,
+    project_id: uuid.UUID,
+    enabled: bool,
 ) -> schemas.ProjectProfileResult:
     prof = (
         await db.execute(
@@ -307,7 +317,8 @@ async def set_focus_mode(
 
 
 async def ensure_default_profile(
-    db: AsyncSession, project_id: uuid.UUID,
+    db: AsyncSession,
+    project_id: uuid.UUID,
 ) -> schemas.ProjectProfileResult:
     """Retrofit path (doc §3.6 / user: "applying the wizard to an old
     project"). Existing projects get a ``custom`` profile with

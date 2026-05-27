@@ -29,7 +29,6 @@ import pytest
 from app.modules.costmodel.schemas import SnapshotCreate
 from app.modules.costmodel.service import CostModelService
 
-
 # ── Stub repositories (mirrors test_costmodel_service.py) ─────────────────
 
 
@@ -50,9 +49,7 @@ class _StubSnapshotRepo:
         matches = [s for s in self.rows.values() if s.project_id == project_id]
         return matches[-1] if matches else None
 
-    async def get_for_project_period(
-        self, project_id: uuid.UUID, period: str
-    ) -> Any:
+    async def get_for_project_period(self, project_id: uuid.UUID, period: str) -> Any:
         for snap in self.rows.values():
             if snap.project_id == project_id and snap.period == period:
                 return snap
@@ -116,9 +113,7 @@ class _StubBudgetRepo:
             rows = [r for r in rows if r.category == category]
         return rows, len(rows)
 
-    async def existing_position_ids(
-        self, project_id: uuid.UUID
-    ) -> set[uuid.UUID]:
+    async def existing_position_ids(self, project_id: uuid.UUID) -> set[uuid.UUID]:
         return {
             r.boq_position_id
             for r in self.rows.values()
@@ -128,16 +123,12 @@ class _StubBudgetRepo:
     async def aggregate_by_project(self, project_id: uuid.UUID) -> dict[str, str]:
         return dict(self._aggregate)
 
-    async def aggregate_by_category(
-        self, project_id: uuid.UUID
-    ) -> list[dict[str, str]]:
+    async def aggregate_by_category(self, project_id: uuid.UUID) -> list[dict[str, str]]:
         return list(self._by_category)
 
 
 class _StubCashflowRepo:
-    async def list_for_project(
-        self, project_id: uuid.UUID, *, limit: int = 1000
-    ) -> tuple[list[Any], int]:
+    async def list_for_project(self, project_id: uuid.UUID, *, limit: int = 1000) -> tuple[list[Any], int]:
         return [], 0
 
     async def bulk_create(self, entries: list[Any]) -> list[Any]:
@@ -191,9 +182,7 @@ async def test_generate_budget_is_idempotent_per_boq_position(
     class _PositionRepo:
         def __init__(self, *_args: Any, **_kwargs: Any) -> None: ...
 
-        async def list_for_boq(
-            self, boq_id: uuid.UUID, *, limit: int = 10000
-        ) -> tuple[list[Any], int]:
+        async def list_for_boq(self, boq_id: uuid.UUID, *, limit: int = 10000) -> tuple[list[Any], int]:
             return positions, len(positions)
 
     from app.modules.boq import repository as boq_repo_mod
@@ -291,9 +280,7 @@ async def test_aggregate_by_project_converts_foreign_currency_lines(
 
     repo = BudgetLineRepository(_FakeSession())  # type: ignore[arg-type]
 
-    async def _fake_list_lines_currency_aware(
-        _self: Any, _pid: uuid.UUID
-    ) -> list[Any]:
+    async def _fake_list_lines_currency_aware(_self: Any, _pid: uuid.UUID) -> list[Any]:
         return [eur_line, usd_line]
 
     monkeypatch.setattr(
@@ -378,9 +365,7 @@ async def test_evm_tcpi_none_when_bac_equals_ac(
     class _EmptySchedRepo:
         def __init__(self, *_a: Any, **_kw: Any) -> None: ...
 
-        async def list_for_project(
-            self, _pid: uuid.UUID, *, limit: int = 50
-        ) -> tuple[list[Any], int]:
+        async def list_for_project(self, _pid: uuid.UUID, *, limit: int = 50) -> tuple[list[Any], int]:
             return [], 0
 
     class _EmptyActivityRepo:

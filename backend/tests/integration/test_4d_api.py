@@ -38,16 +38,15 @@ from sqlalchemy.ext.asyncio import (
 from app.database import Base
 from app.dependencies import get_current_user_id, get_session
 
-
 PROJECT_ID = uuid.uuid4()
 TEST_USER_ID = str(uuid.uuid4())
 
 
 def _register_minimal_models() -> None:
     """Pull FK-target modules into Base.metadata before create_all."""
-    import app.modules.users.models  # noqa: F401
     import app.modules.projects.models  # noqa: F401
     import app.modules.schedule.models  # noqa: F401
+    import app.modules.users.models  # noqa: F401
 
 
 async def _seed_project(session: AsyncSession, project_id: uuid.UUID) -> None:
@@ -61,9 +60,7 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID) -> None:
     )
     session.add(owner)
     await session.flush()
-    session.add(
-        Project(id=project_id, name="4D API Test Project", owner_id=owner.id)
-    )
+    session.add(Project(id=project_id, name="4D API Test Project", owner_id=owner.id))
     await session.flush()
 
 
@@ -181,13 +178,9 @@ SAMPLE_CSV = (
 
 
 @pytest.mark.asyncio
-async def test_import_csv_creates_activities(
-    client: AsyncClient, schedule_id: str
-):
+async def test_import_csv_creates_activities(client: AsyncClient, schedule_id: str):
     files = {"file": ("schedule.csv", io.BytesIO(SAMPLE_CSV.encode()), "text/csv")}
-    resp = await client.post(
-        f"/api/v2/schedules/{schedule_id}/import", files=files
-    )
+    resp = await client.post(f"/api/v2/schedules/{schedule_id}/import", files=files)
     assert resp.status_code == 201, resp.text
     body = resp.json()
     assert body["activities_created"] == 3
@@ -195,9 +188,7 @@ async def test_import_csv_creates_activities(
 
 
 @pytest.mark.asyncio
-async def test_create_eac_schedule_link_runs_dry_run(
-    client: AsyncClient, schedule_id: str, temp_engine_and_factory
-):
+async def test_create_eac_schedule_link_runs_dry_run(client: AsyncClient, schedule_id: str, temp_engine_and_factory):
     # Seed an activity directly so we have a task_id to link to.
     _engine, factory, _ = temp_engine_and_factory
     from app.modules.schedule.models import Activity
@@ -244,9 +235,7 @@ async def test_create_eac_schedule_link_runs_dry_run(
 
 
 @pytest.mark.asyncio
-async def test_create_link_requires_rule_or_predicate(
-    client: AsyncClient, schedule_id: str, temp_engine_and_factory
-):
+async def test_create_link_requires_rule_or_predicate(client: AsyncClient, schedule_id: str, temp_engine_and_factory):
     """Body must carry either rule_id or predicate_json — 422 otherwise."""
     _engine, factory, _ = temp_engine_and_factory
     from app.modules.schedule.models import Activity
@@ -273,9 +262,7 @@ async def test_create_link_requires_rule_or_predicate(
 
 
 @pytest.mark.asyncio
-async def test_record_progress_and_history(
-    client: AsyncClient, schedule_id: str, temp_engine_and_factory
-):
+async def test_record_progress_and_history(client: AsyncClient, schedule_id: str, temp_engine_and_factory):
     _engine, factory, _ = temp_engine_and_factory
     from app.modules.schedule.models import Activity
 
@@ -308,9 +295,7 @@ async def test_record_progress_and_history(
     )
     assert r2.status_code == 201
 
-    history = await client.get(
-        f"/api/v2/schedules/tasks/{task_id}/progress-history"
-    )
+    history = await client.get(f"/api/v2/schedules/tasks/{task_id}/progress-history")
     assert history.status_code == 200
     items = history.json()
     assert len(items) == 2
@@ -318,9 +303,7 @@ async def test_record_progress_and_history(
 
 
 @pytest.mark.asyncio
-async def test_snapshot_returns_status_map(
-    client: AsyncClient, schedule_id: str, temp_engine_and_factory
-):
+async def test_snapshot_returns_status_map(client: AsyncClient, schedule_id: str, temp_engine_and_factory):
     _engine, factory, _ = temp_engine_and_factory
     from app.modules.schedule.models import Activity, EacScheduleLink
 
@@ -378,9 +361,7 @@ async def test_snapshot_returns_status_map(
 
 
 @pytest.mark.asyncio
-async def test_dashboard_returns_evm_payload(
-    client: AsyncClient, schedule_id: str, temp_engine_and_factory
-):
+async def test_dashboard_returns_evm_payload(client: AsyncClient, schedule_id: str, temp_engine_and_factory):
     _engine, factory, _ = temp_engine_and_factory
     from app.modules.schedule.models import Activity
 

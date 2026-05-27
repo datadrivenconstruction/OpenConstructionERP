@@ -48,49 +48,36 @@ _TEMPLATES: dict[str, str] = {
     # ── BOQ ──────────────────────────────────────────────────────────
     "notifications.boq.created.title": "BOQ created",
     "notifications.boq.created.body": "Your bill of quantities '{boq_name}' was saved.",
-
     # ── Meetings ─────────────────────────────────────────────────────
     "notifications.meeting.action_assigned.title": "Action item assigned to you",
     "notifications.meeting.action_assigned.body": "From meeting {meeting_number}: {description}",
-
     # ── CDE ──────────────────────────────────────────────────────────
     "notifications.cde.state_transitioned.title": "Document state changed",
     "notifications.cde.state_transitioned.body": "Container moved to '{new_state}'.",
-
     # ── RFIs ─────────────────────────────────────────────────────────
     "notifications.rfi.assigned.title": "RFI assigned to you",
     "notifications.rfi.assigned.body": "{code} — {title}",
-
     "notifications.rfi.responded.title": "RFI answered",
     "notifications.rfi.responded.body": "Your request {code} ({title}) has a response.",
-
     # ── Risks ────────────────────────────────────────────────────────
     "notifications.risk.assigned.title": "Risk assigned to you",
     "notifications.risk.assigned.body": "{code} — {title}",
-
     # ── Submittals ───────────────────────────────────────────────────
     "notifications.submittal.submitted.title": "Submittal awaiting review",
     "notifications.submittal.submitted.body": "{code} — {title}",
-
     "notifications.submittal.approved.title": "Submittal approved",
     "notifications.submittal.approved.body": "{code} — {title}",
-
     "notifications.submittal.rejected.title": "Submittal rejected",
     "notifications.submittal.rejected.body": "{code} ({title}). Reason: {reason}",
-
     "notifications.submittal.revise_resubmit.title": "Submittal needs revision",
     "notifications.submittal.revise_resubmit.body": "{code} ({title}). Reason: {reason}",
-
     # ── Transmittals ─────────────────────────────────────────────────
     "notifications.transmittal.issued.title": "Transmittal issued to you",
     "notifications.transmittal.issued.body": "{code} — {title}",
-
     "notifications.transmittal.acknowledged.title": "Transmittal acknowledged",
     "notifications.transmittal.acknowledged.body": "Recipient confirmed {code} ({title}).",
-
     "notifications.transmittal.responded.title": "Transmittal answered",
     "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
-
     # ── Singular-namespace keys (event_handlers.py — Wave 5+) ────────
     # These use the `notification.<event>_(title|body)` convention,
     # distinct from the older `notifications.<module>.<event>.(title|body)`
@@ -98,32 +85,23 @@ _TEMPLATES: dict[str, str] = {
     # subscribers are migrated.
     "notification.rfi_assigned_title": "RFI assigned to you",
     "notification.rfi_assigned_body": "RFI {rfi_number} — {subject}",
-
     "notification.task_assigned_title": "New task assigned",
     "notification.task_assigned_body": "{task_title}",
-
     "notification.invoice_approved_title": "Invoice approved",
     "notification.invoice_approved_body": "Invoice {invoice_number} — {amount_total} {currency_code}",
-
     "notification.inspection_scheduled_title": "Inspection scheduled",
     "notification.inspection_scheduled_body": "{inspection_number} — {title} on {inspection_date}",
-
     "notification.submittal_status_changed_title": "Submittal status changed",
     "notification.submittal_status_changed_body": "{submittal_number} ({title}) — {new_status}",
-
     "notification.meeting_scheduled_title": "Meeting scheduled",
     "notification.meeting_scheduled_body": "{title} on {meeting_date}",
-
     "notification.ncr_created_title": "Non-conformance raised",
     "notification.ncr_created_body": "NCR {ncr_number} — {title} ({severity})",
-
     "notification.document_uploaded_title": "Document uploaded",
     "notification.document_uploaded_body": "{document_name}",
-
     # ── File comments (Epic B / B1) ──────────────────────────────────
     "notifications.file_comments.mention.title": "You were mentioned in a comment",
-    "notifications.file_comments.mention.body": "\"{excerpt}\"",
-
+    "notifications.file_comments.mention.body": '"{excerpt}"',
     # ── Digests (Epic B / B3) ────────────────────────────────────────
     "notifications.digest.title": "Notification digest",
     "notifications.digest.body": "You have {count} new updates on the {channel} channel.",
@@ -145,26 +123,21 @@ _TYPE_TO_ICON: dict[str, str] = {
     # Generic
     "info": "info",
     "system": "system",
-
     # Assignments — a person now owes something
     "task_assigned": "warning",
     "rfi_assigned": "warning",
     "risk_assigned": "warning",
     "transmittal_issued": "warning",
     "submittal_submitted": "warning",
-
     # Approvals / acknowledgements — positive
     "submittal_approved": "success",
     "transmittal_acknowledged": "success",
-
     # Rejections / errors — negative
     "submittal_rejected": "error",
     "submittal_revise_resubmit": "error",
-
     # Responses — neutral inbound
     "rfi_responded": "info",
     "transmittal_responded": "info",
-
     # File comment mention (Epic B / B1)
     "file_comment_mention": "info",
 }
@@ -203,7 +176,9 @@ def render(key: str | None, context: dict[str, Any] | None = None) -> str:
         # the un-interpolated template so the user sees readable text
         # instead of a half-substituted string.
         logger.debug(
-            "notifications.templates: interpolation failed for key=%r: %s", key, exc,
+            "notifications.templates: interpolation failed for key=%r: %s",
+            key,
+            exc,
         )
         return template
 

@@ -91,9 +91,7 @@ async def match_envelope(
     Returns:
         :class:`MatchResponse` (always — never raises for normal input).
     """
-    project_uuid = (
-        project_id if isinstance(project_id, uuid.UUID) else uuid.UUID(str(project_id))
-    )
+    project_uuid = project_id if isinstance(project_id, uuid.UUID) else uuid.UUID(str(project_id))
     request = MatchRequest(
         envelope=envelope,
         project_id=project_uuid,

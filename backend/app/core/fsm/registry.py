@@ -52,9 +52,7 @@ async def _publish_status_event(ctx: dict[str, Any], *, event_name: str) -> None
 
         entity = ctx.get("entity")
         ent_id = getattr(entity, "id", None) if entity is not None else None
-        project_id = (
-            getattr(entity, "project_id", None) if entity is not None else None
-        )
+        project_id = getattr(entity, "project_id", None) if entity is not None else None
         payload = {
             "entity_id": str(ent_id) if ent_id is not None else None,
             "project_id": str(project_id) if project_id is not None else None,

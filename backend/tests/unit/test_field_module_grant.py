@@ -127,14 +127,24 @@ async def test_grant_revoke_blocks_subsequent_access(db_session) -> None:
         ),
         granted_by=owner.id,
     )
-    assert await svc.check_module_grant(
-        field_user.id, project.id, "field_diary",
-    ) is True
+    assert (
+        await svc.check_module_grant(
+            field_user.id,
+            project.id,
+            "field_diary",
+        )
+        is True
+    )
 
     await svc.revoke_grant(grant.id)
-    assert await svc.check_module_grant(
-        field_user.id, project.id, "field_diary",
-    ) is False
+    assert (
+        await svc.check_module_grant(
+            field_user.id,
+            project.id,
+            "field_diary",
+        )
+        is False
+    )
 
     # And a fresh grant can be issued AFTER revoking the previous one.
     fresh = await svc.create_grant(
@@ -166,9 +176,14 @@ async def test_grant_expiry_blocks_access(db_session) -> None:
         ),
         granted_by=owner.id,
     )
-    assert await svc.check_module_grant(
-        field_user.id, project.id, "field_diary",
-    ) is False
+    assert (
+        await svc.check_module_grant(
+            field_user.id,
+            project.id,
+            "field_diary",
+        )
+        is False
+    )
 
 
 @pytest.mark.asyncio
@@ -185,9 +200,14 @@ async def test_field_module_grant_independent_from_rbac(db_session) -> None:
     svc = FieldDiaryService(db_session)
 
     # Without a grant: blocked.
-    assert await svc.check_module_grant(
-        field_user.id, project.id, "field_diary",
-    ) is False
+    assert (
+        await svc.check_module_grant(
+            field_user.id,
+            project.id,
+            "field_diary",
+        )
+        is False
+    )
 
     # Issue grant.
     await svc.create_grant(
@@ -200,9 +220,14 @@ async def test_field_module_grant_independent_from_rbac(db_session) -> None:
     )
 
     # With a grant: allowed — even though the user role is "viewer".
-    assert await svc.check_module_grant(
-        field_user.id, project.id, "field_diary",
-    ) is True
+    assert (
+        await svc.check_module_grant(
+            field_user.id,
+            project.id,
+            "field_diary",
+        )
+        is True
+    )
 
 
 @pytest.mark.asyncio
@@ -221,12 +246,22 @@ async def test_grant_scopes_per_module_key(db_session) -> None:
         ),
         granted_by=owner.id,
     )
-    assert await svc.check_module_grant(
-        field_user.id, project.id, "field_diary",
-    ) is True
-    assert await svc.check_module_grant(
-        field_user.id, project.id, "field_timesheet",
-    ) is False
+    assert (
+        await svc.check_module_grant(
+            field_user.id,
+            project.id,
+            "field_diary",
+        )
+        is True
+    )
+    assert (
+        await svc.check_module_grant(
+            field_user.id,
+            project.id,
+            "field_timesheet",
+        )
+        is False
+    )
 
 
 @pytest.mark.asyncio
@@ -247,7 +282,9 @@ async def test_grant_repo_lookup_uses_lookup_index(db_session) -> None:
     )
     # Direct repo call (covered by service tests too — kept for explicitness).
     grant = await svc.grant_repo.get_active(
-        field_user.id, project.id, "field_diary",
+        field_user.id,
+        project.id,
+        "field_diary",
     )
     assert grant is not None
     assert isinstance(grant, FieldModuleGrant)

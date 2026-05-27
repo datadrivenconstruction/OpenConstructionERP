@@ -16,13 +16,11 @@ The helper under test is imported directly from the router module.
 
 from __future__ import annotations
 
-import types
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi import HTTPException
-
 
 # ---------------------------------------------------------------------------
 # Minimal TakeoffDocument stub

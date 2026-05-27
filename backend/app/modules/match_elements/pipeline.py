@@ -194,8 +194,8 @@ SYSTEM_PROMPT_SEEDS: list[dict[str, str]] = [
             "  - MEAN  (continuous attribute — temperature, dimension...)\n"
             "  - FIRST (discrete label — material name, family, level...)\n\n"
             "Return JSON: "
-            "[{{\"column\":\"<name>\",\"agg\":\"SUM|MEAN|FIRST\","
-            "\"why\":\"<one-sentence rationale>\"}}]"
+            '[{{"column":"<name>","agg":"SUM|MEAN|FIRST",'
+            '"why":"<one-sentence rationale>"}}]'
         ),
     },
     {
@@ -216,10 +216,10 @@ SYSTEM_PROMPT_SEEDS: list[dict[str, str]] = [
         "user_template": (
             "Element rows:\n\n{rows}\n\n"
             "For each row, output: "
-            "{{\"element_id\":\"<id>\","
-            "\"is_building_product\":true|false,"
-            "\"trade\":\"architectural|structural|mep|civil|spatial|other\","
-            "\"why\":\"<short rationale>\"}}\n\n"
+            '{{"element_id":"<id>",'
+            '"is_building_product":true|false,'
+            '"trade":"architectural|structural|mep|civil|spatial|other",'
+            '"why":"<short rationale>"}}\n\n'
             "Return a JSON array."
         ),
     },
@@ -242,26 +242,25 @@ SYSTEM_PROMPT_SEEDS: list[dict[str, str]] = [
             "Available attribute keys (with sample value counts):\n\n"
             "{attribute_summary}\n\n"
             "Return a JSON object with: "
-            "{{\"group_by\":[\"<key1>\",\"<key2>\",...],"
-            "\"why\":\"<rationale>\"}}\n\n"
+            '{{"group_by":["<key1>","<key2>",...],'
+            '"why":"<rationale>"}}\n\n'
             "Defaults to fall back on:\n"
-            "  - RVT: [\"category\", \"type_name\"]\n"
-            "  - IFC: [\"ifc_class\", \"predefined_type\"]\n"
-            "  - DWG: [\"layer\", \"block_name\"]"
+            '  - RVT: ["category", "type_name"]\n'
+            '  - IFC: ["ifc_class", "predefined_type"]\n'
+            '  - DWG: ["layer", "block_name"]'
         ),
     },
     {
         "key": "match.cost_agent",
         "name": "AI cost agent",
         "description": (
-            "Picks the best cost-database row for a single match group "
-            "from a shortlist of vector-search candidates."
+            "Picks the best cost-database row for a single match group from a shortlist of vector-search candidates."
         ),
         "system_prompt": (
             "You are an AI cost agent for a construction estimator. You "
             "receive one group of BIM elements and a shortlist of cost-"
             "database candidates retrieved by vector search. Pick the best "
-            "match, or say \"NO_MATCH\" when nothing in the shortlist is a "
+            'match, or say "NO_MATCH" when nothing in the shortlist is a '
             "real fit. Never invent a code that is not in the shortlist."
         ),
         "user_template": (
@@ -274,9 +273,9 @@ SYSTEM_PROMPT_SEEDS: list[dict[str, str]] = [
             "  Rolled-up quantity: {quantity} {unit}\n\n"
             "Candidates (from CWICR vector search):\n{candidates}\n\n"
             "Return JSON: "
-            "{{\"picked_code\":\"<code>|NO_MATCH\","
-            "\"confidence\":<0..1>,"
-            "\"why\":\"<one-sentence rationale>\"}}"
+            '{{"picked_code":"<code>|NO_MATCH",'
+            '"confidence":<0..1>,'
+            '"why":"<one-sentence rationale>"}}'
         ),
     },
 ]
@@ -294,26 +293,30 @@ async def ensure_system_prompts(db: AsyncSession) -> int:
     for spec in SYSTEM_PROMPT_SEEDS:
         exists = (
             await db.execute(
-                select(MatchPromptTemplate.id).where(
+                select(MatchPromptTemplate.id)
+                .where(
                     MatchPromptTemplate.key == spec["key"],
                     MatchPromptTemplate.name == spec["name"],
                     MatchPromptTemplate.created_by.is_(None),
-                ).limit(1)
+                )
+                .limit(1)
             )
         ).scalar_one_or_none()
         if exists is not None:
             continue
-        db.add(MatchPromptTemplate(
-            key=spec["key"],
-            name=spec["name"],
-            description=spec["description"],
-            system_prompt=spec["system_prompt"],
-            user_template=spec["user_template"],
-            version=1,
-            is_system=True,
-            created_by=None,
-            metadata_={"source": "n8n_workflow_v6"},
-        ))
+        db.add(
+            MatchPromptTemplate(
+                key=spec["key"],
+                name=spec["name"],
+                description=spec["description"],
+                system_prompt=spec["system_prompt"],
+                user_template=spec["user_template"],
+                version=1,
+                is_system=True,
+                created_by=None,
+                metadata_={"source": "n8n_workflow_v6"},
+            )
+        )
         inserted += 1
     if inserted:
         # Commit so a read-only GET (which otherwise never commits) still
@@ -392,12 +395,16 @@ async def list_stages(
     """
 
     rows = (
-        await db.execute(
-            select(MatchStageState).where(
-                MatchStageState.session_id == session_id,
+        (
+            await db.execute(
+                select(MatchStageState).where(
+                    MatchStageState.session_id == session_id,
+                )
             )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     by_name = {row.stage_name: row for row in rows}
 
     out: list[dict[str, Any]] = []
@@ -405,45 +412,47 @@ async def list_stages(
         meta = STAGE_META[name]
         row = by_name.get(name)
         if row is None:
-            out.append({
+            out.append(
+                {
+                    "stage_name": name,
+                    "title": meta["title"],
+                    "subtitle": meta["subtitle"],
+                    "explainer": meta["explainer"],
+                    "uses_llm": meta["uses_llm"],
+                    "prompt_key": meta["prompt_key"],
+                    "status": "pending",
+                    "inputs": {},
+                    "output": {},
+                    "error": None,
+                    "took_ms": None,
+                    "prompt_template_id": None,
+                    "llm_provider": None,
+                    "started_at": None,
+                    "finished_at": None,
+                    "updated_at": None,
+                }
+            )
+            continue
+        out.append(
+            {
                 "stage_name": name,
                 "title": meta["title"],
                 "subtitle": meta["subtitle"],
                 "explainer": meta["explainer"],
                 "uses_llm": meta["uses_llm"],
                 "prompt_key": meta["prompt_key"],
-                "status": "pending",
-                "inputs": {},
-                "output": {},
-                "error": None,
-                "took_ms": None,
-                "prompt_template_id": None,
-                "llm_provider": None,
-                "started_at": None,
-                "finished_at": None,
-                "updated_at": None,
-            })
-            continue
-        out.append({
-            "stage_name": name,
-            "title": meta["title"],
-            "subtitle": meta["subtitle"],
-            "explainer": meta["explainer"],
-            "uses_llm": meta["uses_llm"],
-            "prompt_key": meta["prompt_key"],
-            "status": row.status,
-            "inputs": dict(row.inputs or {}),
-            "output": dict(row.output or {}),
-            "error": row.error,
-            "took_ms": row.took_ms,
-            "prompt_template_id": (
-                str(row.prompt_template_id) if row.prompt_template_id else None
-            ),
-            "llm_provider": row.llm_provider,
-            "started_at": row.started_at,
-            "finished_at": row.finished_at,
-            "updated_at": row.updated_at,
-        })
+                "status": row.status,
+                "inputs": dict(row.inputs or {}),
+                "output": dict(row.output or {}),
+                "error": row.error,
+                "took_ms": row.took_ms,
+                "prompt_template_id": (str(row.prompt_template_id) if row.prompt_template_id else None),
+                "llm_provider": row.llm_provider,
+                "started_at": row.started_at,
+                "finished_at": row.finished_at,
+                "updated_at": row.updated_at,
+            }
+        )
     return out
 
 
@@ -503,7 +512,8 @@ async def run_stage(
     except Exception as exc:  # noqa: BLE001 — surface error to UI
         logger.exception(
             "match_elements.pipeline: stage %s failed for session %s",
-            stage_name, session_id,
+            stage_name,
+            session_id,
         )
         final_status = "error"
         final_error = str(exc)
@@ -527,7 +537,7 @@ async def run_stage(
     if final_status == "done":
         # Mark downstream done-stages stale so the UI flags the gap.
         idx = STAGE_NAMES.index(stage_name)
-        for downstream in STAGE_NAMES[idx + 1:]:
+        for downstream in STAGE_NAMES[idx + 1 :]:
             ds = await _get_or_create_stage(db, session_id, downstream)
             if ds.status == "done":
                 ds.status = "stale"
@@ -560,24 +570,22 @@ async def _run_convert(
         one = await db.get(BIMModel, session.bim_model_id)
         models = [one] if one is not None else []
     else:
-        models = (
-            (await db.execute(
-                select(BIMModel).where(BIMModel.project_id == session.project_id)
-            )).scalars().all()
-        )
+        models = (await db.execute(select(BIMModel).where(BIMModel.project_id == session.project_id))).scalars().all()
 
     rows: list[dict[str, Any]] = []
     total = 0
     for m in models:
         n = int(m.element_count or 0)
         total += n
-        rows.append({
-            "model_id": str(m.id),
-            "filename": m.name,
-            "format": m.model_format,
-            "status": m.status,
-            "element_count": n,
-        })
+        rows.append(
+            {
+                "model_id": str(m.id),
+                "filename": m.name,
+                "format": m.model_format,
+                "status": m.status,
+                "element_count": n,
+            }
+        )
 
     return {
         "source": session.source,
@@ -599,13 +607,17 @@ async def _run_load(
     await service.rebuild_groups(db, session.id)
 
     sample_rows = (
-        await db.execute(
-            select(MatchGroup)
-            .where(MatchGroup.session_id == session.id)
-            .order_by(MatchGroup.element_count.desc())
-            .limit(5)
+        (
+            await db.execute(
+                select(MatchGroup)
+                .where(MatchGroup.session_id == session.id)
+                .order_by(MatchGroup.element_count.desc())
+                .limit(5)
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     samples = [
         {
             "group_key": r.group_key,
@@ -615,25 +627,18 @@ async def _run_load(
         for r in sample_rows
     ]
     total_groups = (
-        await db.execute(
-            select(func.count())
-            .select_from(MatchGroup)
-            .where(MatchGroup.session_id == session.id)
-        )
+        await db.execute(select(func.count()).select_from(MatchGroup).where(MatchGroup.session_id == session.id))
     ).scalar_one()
     total_elements = (
         await db.execute(
-            select(func.coalesce(func.sum(MatchGroup.element_count), 0))
-            .where(MatchGroup.session_id == session.id)
+            select(func.coalesce(func.sum(MatchGroup.element_count), 0)).where(MatchGroup.session_id == session.id)
         )
     ).scalar_one()
     return {
         "group_count": total_groups,
         "element_count": total_elements,
         "samples": samples,
-        "summary": (
-            f"{total_elements} elements loaded → {total_groups} groups"
-        ),
+        "summary": (f"{total_elements} elements loaded → {total_groups} groups"),
     }
 
 
@@ -648,11 +653,7 @@ async def _run_schema(
     # kicks in only when the user explicitly hits "Re-run with prompt"
     # in the UI; the prompt body is stored on the stage row and the
     # provider is wired via app.core.llm (out of scope for this stub).
-    groups = (
-        await db.execute(
-            select(MatchGroup).where(MatchGroup.session_id == session.id)
-        )
-    ).scalars().all()
+    groups = (await db.execute(select(MatchGroup).where(MatchGroup.session_id == session.id))).scalars().all()
 
     keys: Counter[str] = Counter()
     for g in groups:
@@ -671,18 +672,17 @@ async def _run_schema(
             agg = "MEAN"
         else:
             agg = "FIRST"
-        classified.append({
-            "column": key,
-            "agg": agg,
-            "occurrence": freq,
-        })
+        classified.append(
+            {
+                "column": key,
+                "agg": agg,
+                "occurrence": freq,
+            }
+        )
     return {
         "columns": classified,
         "llm_used": False,
-        "summary": (
-            f"{len(classified)} columns classified "
-            f"({sum(1 for c in classified if c['agg'] == 'SUM')} SUM)"
-        ),
+        "summary": (f"{len(classified)} columns classified ({sum(1 for c in classified if c['agg'] == 'SUM')} SUM)"),
     }
 
 
@@ -709,10 +709,7 @@ async def _run_filter(
         "excluded_categories": list(session.excluded_categories or []),
         "kept_groups": kept,
         "status_breakdown": by_status,
-        "summary": (
-            f"{kept} groups survived "
-            f"({len(session.excluded_categories or [])} category exclusions)"
-        ),
+        "summary": (f"{kept} groups survived ({len(session.excluded_categories or [])} category exclusions)"),
     }
 
 
@@ -738,10 +735,13 @@ async def _run_group(
         # surfaces the error on the stage card instead.
         service = get_service()
         adapter = service._adapter(  # noqa: SLF001 — pipeline lives next to the service
-            session.source, db, session,
+            session.source,
+            db,
+            session,
         )
         available_keys = await adapter.list_attribute_keys(
-            session.project_id, session.bim_model_id,
+            session.project_id,
+            session.bim_model_id,
         )
         available_set = {str(k) for k in available_keys}
         # ``list_attribute_keys`` returns the adapter's per-row keys.
@@ -758,11 +758,7 @@ async def _run_group(
             "material",
             "trade",
         }
-        bad = [
-            k for k in new_group_by
-            if str(k) not in available_set
-            and str(k) not in structural_group_keys
-        ]
+        bad = [k for k in new_group_by if str(k) not in available_set and str(k) not in structural_group_keys]
         if bad:
             # Raise a structured error — ``run_stage`` catches Exception
             # and stamps ``str(exc)`` into ``stage.error`` while flipping
@@ -778,13 +774,17 @@ async def _run_group(
         await service.rebuild_groups(db, session.id)
 
     groups = (
-        await db.execute(
-            select(MatchGroup)
-            .where(MatchGroup.session_id == session.id)
-            .order_by(MatchGroup.element_count.desc())
-            .limit(10)
+        (
+            await db.execute(
+                select(MatchGroup)
+                .where(MatchGroup.session_id == session.id)
+                .order_by(MatchGroup.element_count.desc())
+                .limit(10)
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     return {
         "group_by": list(session.group_by or []),
         "top_groups": [
@@ -794,9 +794,7 @@ async def _run_group(
             }
             for g in groups
         ],
-        "summary": (
-            f"Grouped by {', '.join(session.group_by or []) or '∅'}"
-        ),
+        "summary": (f"Grouped by {', '.join(session.group_by or []) or '∅'}"),
     }
 
 
@@ -810,13 +808,17 @@ async def _run_match(
     # set; without it the stage runs vector-only (today's behaviour).
     service = get_service()
     unmatched = (
-        await db.execute(
-            select(MatchGroup)
-            .where(MatchGroup.session_id == session.id)
-            .where(MatchGroup.status.in_(("unmatched", "tbd", "stale")))
-            .order_by(MatchGroup.element_count.desc())
+        (
+            await db.execute(
+                select(MatchGroup)
+                .where(MatchGroup.session_id == session.id)
+                .where(MatchGroup.status.in_(("unmatched", "tbd", "stale")))
+                .order_by(MatchGroup.element_count.desc())
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     keys = [g.group_key for g in unmatched]
     if not keys:
         return {
@@ -851,10 +853,7 @@ async def _run_match(
         "confirmed": confirmed,
         "suggested": suggested,
         "method": method,
-        "summary": (
-            f"Matched {len(summaries)} groups · "
-            f"{confirmed} confirmed · {suggested} suggested"
-        ),
+        "summary": (f"Matched {len(summaries)} groups · {confirmed} confirmed · {suggested} suggested"),
     }
 
 

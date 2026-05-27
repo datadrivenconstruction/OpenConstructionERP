@@ -202,8 +202,9 @@ def test_pct_boundary_values_accepted() -> None:
 @pytest.mark.asyncio
 async def test_service_double_check_rejects_out_of_range() -> None:
     """Service layer raises 422 even if Pydantic is somehow bypassed."""
-    from fastapi import HTTPException
     from types import SimpleNamespace
+
+    from fastapi import HTTPException
 
     svc = _make_service()
     # Craft a schema object that bypasses Pydantic (direct construction)
@@ -277,12 +278,8 @@ async def test_s_curve_merges_actual_and_planned() -> None:
         )
 
     # Add a plan for W01 and W03 (no plan for W02)
-    await svc.upsert_plan_point(
-        ProgressPlanCreate(project_id=PROJECT_ID, period_label="2026-W01", planned_pct=30.0)
-    )
-    await svc.upsert_plan_point(
-        ProgressPlanCreate(project_id=PROJECT_ID, period_label="2026-W03", planned_pct=80.0)
-    )
+    await svc.upsert_plan_point(ProgressPlanCreate(project_id=PROJECT_ID, period_label="2026-W01", planned_pct=30.0))
+    await svc.upsert_plan_point(ProgressPlanCreate(project_id=PROJECT_ID, period_label="2026-W03", planned_pct=80.0))
 
     result = await svc.get_s_curve(PROJECT_ID)
     assert len(result.points) == 3  # W01, W02, W03
@@ -392,6 +389,7 @@ def test_geo_lon_below_minus_180_rejected() -> None:
 async def test_service_geo_validation_lat_out_of_range() -> None:
     """Service-layer _validate_geo raises 422 for lat out of range."""
     from fastapi import HTTPException
+
     from app.modules.progress.service import _validate_geo
 
     with pytest.raises(HTTPException) as exc_info:
@@ -403,6 +401,7 @@ async def test_service_geo_validation_lat_out_of_range() -> None:
 async def test_service_geo_validation_lon_out_of_range() -> None:
     """Service-layer _validate_geo raises 422 for lon out of range."""
     from fastapi import HTTPException
+
     from app.modules.progress.service import _validate_geo
 
     with pytest.raises(HTTPException) as exc_info:
@@ -418,12 +417,8 @@ async def test_plan_upsert_updates_existing_point() -> None:
     """Upserting the same (project, period) twice updates rather than creates."""
     svc = _make_service()
 
-    data1 = ProgressPlanCreate(
-        project_id=PROJECT_ID, period_label="2026-W05", planned_pct=40.0
-    )
-    data2 = ProgressPlanCreate(
-        project_id=PROJECT_ID, period_label="2026-W05", planned_pct=50.0
-    )
+    data1 = ProgressPlanCreate(project_id=PROJECT_ID, period_label="2026-W05", planned_pct=40.0)
+    data2 = ProgressPlanCreate(project_id=PROJECT_ID, period_label="2026-W05", planned_pct=50.0)
 
     await svc.upsert_plan_point(data1)
     await svc.upsert_plan_point(data2)
@@ -442,11 +437,7 @@ async def test_cumulative_response_has_correct_running_total() -> None:
     svc = _make_service()
 
     for period, pct in [("W01", 10.0), ("W02", 40.0), ("W03", 80.0)]:
-        await svc.record_entry(
-            ProgressEntryCreate(
-                project_id=PROJECT_ID, period_label=period, percent_complete=pct
-            )
-        )
+        await svc.record_entry(ProgressEntryCreate(project_id=PROJECT_ID, period_label=period, percent_complete=pct))
 
     result = await svc.get_cumulative(PROJECT_ID)
     assert result.current_cumulative_pct == 80.0

@@ -5,6 +5,7 @@ Run this after the main seeder created the projects + started uploads.
 It picks up the projects by name, waits for any still-processing models,
 creates the BOQ + sections + positions, and links a few BIM elements.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -50,7 +51,9 @@ async def main() -> None:
 
             # Skip if BOQ already exists for idempotency.
             bq_r = await client.get(
-                "/api/v1/boq/boqs/", params={"project_id": pid}, headers=headers,
+                "/api/v1/boq/boqs/",
+                params={"project_id": pid},
+                headers=headers,
             )
             existing_boqs: list[dict] = []
             if bq_r.status_code == 200:
@@ -65,7 +68,9 @@ async def main() -> None:
 
             # Find a ready BIM model for this project.
             models_r = await client.get(
-                "/api/v1/bim_hub/", params={"project_id": pid}, headers=headers,
+                "/api/v1/bim_hub/",
+                params={"project_id": pid},
+                headers=headers,
             )
             models_r.raise_for_status()
             items = models_r.json()

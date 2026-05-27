@@ -16,17 +16,16 @@ from typing import Any
 
 import pytest
 
-# ── Import all regional pack configs ──────────────────────────────────────────
-
-from app.modules.dach_pack.config import PACK_CONFIG as DACH_CFG
-from app.modules.uk_pack.config import PACK_CONFIG as UK_CFG
-from app.modules.us_pack.config import PACK_CONFIG as US_CFG
-from app.modules.middle_east_pack.config import PACK_CONFIG as ME_CFG
 from app.modules.asia_pac_pack.config import PACK_CONFIG as APAC_CFG
+
+# ── Import all regional pack configs ──────────────────────────────────────────
+from app.modules.dach_pack.config import PACK_CONFIG as DACH_CFG
 from app.modules.india_pack.config import PACK_CONFIG as IN_CFG
 from app.modules.latam_pack.config import PACK_CONFIG as LATAM_CFG
+from app.modules.middle_east_pack.config import PACK_CONFIG as ME_CFG
 from app.modules.russia_pack.config import PACK_CONFIG as RU_CFG
-
+from app.modules.uk_pack.config import PACK_CONFIG as UK_CFG
+from app.modules.us_pack.config import PACK_CONFIG as US_CFG
 
 # ── Registry of all packs ─────────────────────────────────────────────────────
 
@@ -44,14 +43,14 @@ _PACKS: list[tuple[str, dict[str, Any]]] = [
 # Expected countries per pack — used to check coverage is not accidentally
 # reduced (missing a country is silent until a consumer queries it).
 _EXPECTED_COUNTRIES: dict[str, set[str]] = {
-    "DACH":  {"DE", "AT", "CH"},
-    "UK":    {"GB"},
-    "US":    set(),        # No federal VAT — vat_rates is empty
-    "ME":    {"AE", "SA", "BH", "OM", "QA", "KW"},
-    "APAC":  {"AU", "NZ", "JP", "SG"},
-    "IN":    {"IN"},
+    "DACH": {"DE", "AT", "CH"},
+    "UK": {"GB"},
+    "US": set(),  # No federal VAT — vat_rates is empty
+    "ME": {"AE", "SA", "BH", "OM", "QA", "KW"},
+    "APAC": {"AU", "NZ", "JP", "SG"},
+    "IN": {"IN"},
     "LATAM": {"MX", "AR", "CL", "CO", "PE"},
-    "RU":    {"RU"},
+    "RU": {"RU"},
 }
 
 # Packs where vat_rates is intentionally empty (no federal VAT)
@@ -88,19 +87,16 @@ class TestUSPackIsEmpty:
 
     def test_us_vat_rates_is_empty(self) -> None:
         assert _vat_rates(US_CFG) == {}, (
-            "US vat_rates should be {} (no federal VAT). "
-            "Per-state sales tax examples belong in tax_rules."
+            "US vat_rates should be {} (no federal VAT). Per-state sales tax examples belong in tax_rules."
         )
 
 
 class TestPackVatRatesStructure:
     """For packs with non-empty vat_rates, validate every entry."""
 
-    @pytest.mark.parametrize("pack_name,config", [
-        (name, cfg)
-        for name, cfg in _PACKS
-        if name not in _PACKS_WITH_NO_VAT
-    ])
+    @pytest.mark.parametrize(
+        "pack_name,config", [(name, cfg) for name, cfg in _PACKS if name not in _PACKS_WITH_NO_VAT]
+    )
     def test_every_country_has_standard_key(self, pack_name: str, config: dict[str, Any]) -> None:
         vat_rates = _vat_rates(config)
         for country, rates in vat_rates.items():
@@ -109,11 +105,9 @@ class TestPackVatRatesStructure:
                 f"in vat_rates. Got keys: {sorted(rates.keys())}"
             )
 
-    @pytest.mark.parametrize("pack_name,config", [
-        (name, cfg)
-        for name, cfg in _PACKS
-        if name not in _PACKS_WITH_NO_VAT
-    ])
+    @pytest.mark.parametrize(
+        "pack_name,config", [(name, cfg) for name, cfg in _PACKS if name not in _PACKS_WITH_NO_VAT]
+    )
     def test_all_rates_are_decimal(self, pack_name: str, config: dict[str, Any]) -> None:
         vat_rates = _vat_rates(config)
         for country, rates in vat_rates.items():
@@ -124,11 +118,9 @@ class TestPackVatRatesStructure:
                     "Store rates as Decimal('0.19'), not 0.19 (float) or '0.19' (str)."
                 )
 
-    @pytest.mark.parametrize("pack_name,config", [
-        (name, cfg)
-        for name, cfg in _PACKS
-        if name not in _PACKS_WITH_NO_VAT
-    ])
+    @pytest.mark.parametrize(
+        "pack_name,config", [(name, cfg) for name, cfg in _PACKS if name not in _PACKS_WITH_NO_VAT]
+    )
     def test_all_rates_in_valid_range(self, pack_name: str, config: dict[str, Any]) -> None:
         vat_rates = _vat_rates(config)
         for country, rates in vat_rates.items():

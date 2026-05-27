@@ -80,18 +80,8 @@ def export(db_path: str, out_path: Path = SNAPSHOT_PATH) -> dict:
     pids = SHOWCASE_PIDS
     qp = ",".join("?" * len(pids))
 
-    boq_ids = [
-        r[0]
-        for r in cur.execute(
-            f"SELECT id FROM oe_boq_boq WHERE project_id IN ({qp})", pids
-        )
-    ]
-    model_ids = [
-        r[0]
-        for r in cur.execute(
-            f"SELECT id FROM oe_bim_model WHERE project_id IN ({qp})", pids
-        )
-    ]
+    boq_ids = [r[0] for r in cur.execute(f"SELECT id FROM oe_boq_boq WHERE project_id IN ({qp})", pids)]
+    model_ids = [r[0] for r in cur.execute(f"SELECT id FROM oe_bim_model WHERE project_id IN ({qp})", pids)]
     sched_ids = [
         r[0]
         for r in cur.execute(
@@ -117,10 +107,7 @@ def export(db_path: str, out_path: Path = SNAPSHOT_PATH) -> dict:
 
     tables = [
         r[0]
-        for r in cur.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' "
-            "AND name LIKE 'oe_%' ORDER BY name"
-        )
+        for r in cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'oe_%' ORDER BY name")
     ]
 
     payload_tables: list[dict] = []
@@ -159,12 +146,7 @@ def export(db_path: str, out_path: Path = SNAPSHOT_PATH) -> dict:
             continue
 
         sel = ",".join(f'"{c}"' for c in cols)
-        rows = [
-            [_enc(row[c]) for c in cols]
-            for row in cur.execute(
-                f"SELECT {sel} FROM {t} WHERE {where}", params
-            )
-        ]
+        rows = [[_enc(row[c]) for c in cols] for row in cur.execute(f"SELECT {sel} FROM {t} WHERE {where}", params)]
         if not rows:
             # keep table out of the artifact entirely when empty for the 7
             continue
@@ -214,17 +196,14 @@ def export(db_path: str, out_path: Path = SNAPSHOT_PATH) -> dict:
 
 def main() -> int:
     root = Path(__file__).resolve().parents[3]
-    db = sys.argv[1] if len(sys.argv) > 1 else str(
-        root / "backend" / "openestimate.db"
-    )
+    db = sys.argv[1] if len(sys.argv) > 1 else str(root / "backend" / "openestimate.db")
     if not Path(db).exists():
         print(f"!! db not found: {db}")
         return 2
     s = export(db)
     print(json.dumps(s, ensure_ascii=False, indent=2))
     mb = s["bytes_gz"] / 1048576
-    print(f"\nSnapshot written: {s['rows']} rows / {s['tables']} tables "
-          f"-> {mb:.2f} MB gz")
+    print(f"\nSnapshot written: {s['rows']} rows / {s['tables']} tables -> {mb:.2f} MB gz")
     return 0
 
 

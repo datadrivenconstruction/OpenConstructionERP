@@ -72,11 +72,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -242,13 +238,13 @@ async def test_tax_quote_de_berlin_via_governing_law(http_client, tenant_a):
     ids = await _seed_spa(
         http_client,
         tenant_a["headers"],
-        governing_law="DE-BE",       # ISO 3166-2 — engine splits to DE / BE.
+        governing_law="DE-BE",  # ISO 3166-2 — engine splits to DE / BE.
         total_value="500000.00",
         currency="EUR",
     )
     res = await http_client.post(
         f"/api/v1/property-dev/sales-contracts/{ids['spa_id']}/tax-quote",
-        json={},                      # Empty body — engine must resolve.
+        json={},  # Empty body — engine must resolve.
         headers=tenant_a["headers"],
     )
     assert res.status_code == 200, res.text
@@ -366,9 +362,7 @@ async def test_tax_quote_sg_with_absd_foreigner(http_client, tenant_a):
 
 
 @pytest.mark.asyncio
-async def test_tax_quote_cross_tenant_idor_blocked(
-    http_client, tenant_a, tenant_b
-):
+async def test_tax_quote_cross_tenant_idor_blocked(http_client, tenant_a, tenant_b):
     ids = await _seed_spa(
         http_client,
         tenant_a["headers"],
@@ -406,9 +400,7 @@ async def test_tax_quote_viewer_can_read(http_client, tenant_a, viewer_user):
 
 
 @pytest.mark.asyncio
-async def test_tax_quote_unsupported_jurisdiction_422(
-    http_client, tenant_a
-):
+async def test_tax_quote_unsupported_jurisdiction_422(http_client, tenant_a):
     ids = await _seed_spa(
         http_client,
         tenant_a["headers"],

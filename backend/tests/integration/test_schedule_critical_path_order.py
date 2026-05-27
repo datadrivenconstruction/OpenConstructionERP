@@ -71,11 +71,7 @@ async def _register_login_admin(client: AsyncClient) -> dict[str, str]:
     assert reg.status_code in (200, 201), reg.text
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await s.commit()
 
     login = await client.post(

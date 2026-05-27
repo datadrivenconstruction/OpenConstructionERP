@@ -16,6 +16,7 @@ import tempfile
 import uuid
 from decimal import Decimal
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 import pytest_asyncio
@@ -23,22 +24,26 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app.database import Base
 
+if TYPE_CHECKING:
+    from app.modules.projects.models import Project
 
 # ── Model registration (must precede create_all) ───────────────────────────
 
+
 def _register_models() -> None:
-    import app.modules.users.models  # noqa: F401
-    import app.modules.projects.models  # noqa: F401
     import app.modules.boq.models  # noqa: F401
-    import app.modules.validation.models  # noqa: F401
-    import app.modules.safety.models  # noqa: F401
-    import app.modules.procurement.models  # noqa: F401
-    import app.modules.finance.models  # noqa: F401
     import app.modules.changeorders.models  # noqa: F401
     import app.modules.daily_diary.models  # noqa: F401
+    import app.modules.finance.models  # noqa: F401
+    import app.modules.procurement.models  # noqa: F401
+    import app.modules.projects.models  # noqa: F401
+    import app.modules.safety.models  # noqa: F401
+    import app.modules.users.models  # noqa: F401
+    import app.modules.validation.models  # noqa: F401
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────────
+
 
 @pytest_asyncio.fixture
 async def session():
@@ -86,7 +91,7 @@ async def _make_project(
     *,
     name: str = "Test Project",
     status: str = "active",
-) -> "Project":
+) -> Project:
     from app.modules.projects.models import Project
 
     p = Project(
@@ -102,6 +107,7 @@ async def _make_project(
 
 
 # ── Empty-state tests ──────────────────────────────────────────────────────
+
 
 class TestEmptyState:
     """All compute_* functions must return sensible zero-state, never crash."""
@@ -186,6 +192,7 @@ class TestEmptyState:
 
 # ── Aggregate-value tests ─────────────────────────────────────────────────
 
+
 class TestBOQSummaryAggregate:
     """compute_boq_summary sums correctly from fixture data."""
 
@@ -203,19 +210,40 @@ class TestBOQSummaryAggregate:
         await session.flush()
 
         # boq1: 2 positions totalling 1 000 EUR
-        session.add(Position(
-            boq_id=boq1.id, ordinal="01", description="Item A",
-            unit="m2", quantity="10", unit_rate="50", total="500",
-        ))
-        session.add(Position(
-            boq_id=boq1.id, ordinal="02", description="Item B",
-            unit="m2", quantity="10", unit_rate="50", total="500",
-        ))
+        session.add(
+            Position(
+                boq_id=boq1.id,
+                ordinal="01",
+                description="Item A",
+                unit="m2",
+                quantity="10",
+                unit_rate="50",
+                total="500",
+            )
+        )
+        session.add(
+            Position(
+                boq_id=boq1.id,
+                ordinal="02",
+                description="Item B",
+                unit="m2",
+                quantity="10",
+                unit_rate="50",
+                total="500",
+            )
+        )
         # boq2: 1 position, 250 EUR, zero quantity → missing_qty flag
-        session.add(Position(
-            boq_id=boq2.id, ordinal="01", description="Item C",
-            unit="m3", quantity="0", unit_rate="250", total="0",
-        ))
+        session.add(
+            Position(
+                boq_id=boq2.id,
+                ordinal="01",
+                description="Item C",
+                unit="m3",
+                quantity="0",
+                unit_rate="250",
+                total="0",
+            )
+        )
         await session.commit()
 
         result = await compute_boq_summary(session, [project])
@@ -250,23 +278,35 @@ class TestValidationScoreAggregate:
 
     @pytest.mark.asyncio
     async def test_average_score(self, session: AsyncSession) -> None:
-        from app.modules.validation.models import ValidationReport
         from app.modules.dashboard.service import compute_validation_score
+        from app.modules.validation.models import ValidationReport
 
         uid = await _make_user(session)
         p1 = await _make_project(session, uid, name="P1")
         p2 = await _make_project(session, uid, name="P2")
 
-        session.add(ValidationReport(
-            id=uuid.uuid4(), project_id=p1.id,
-            target_type="boq", target_id=str(uuid.uuid4()),
-            rule_set="boq_quality", status="passed", score="0.9",
-        ))
-        session.add(ValidationReport(
-            id=uuid.uuid4(), project_id=p2.id,
-            target_type="boq", target_id=str(uuid.uuid4()),
-            rule_set="boq_quality", status="warnings", score="0.7",
-        ))
+        session.add(
+            ValidationReport(
+                id=uuid.uuid4(),
+                project_id=p1.id,
+                target_type="boq",
+                target_id=str(uuid.uuid4()),
+                rule_set="boq_quality",
+                status="passed",
+                score="0.9",
+            )
+        )
+        session.add(
+            ValidationReport(
+                id=uuid.uuid4(),
+                project_id=p2.id,
+                target_type="boq",
+                target_id=str(uuid.uuid4()),
+                rule_set="boq_quality",
+                status="warnings",
+                score="0.7",
+            )
+        )
         await session.commit()
 
         result = await compute_validation_score(session, [p1, p2])
@@ -290,26 +330,38 @@ class TestHSEScorecardAggregate:
 
     @pytest.mark.asyncio
     async def test_near_miss_and_recordable(self, session: AsyncSession) -> None:
-        from app.modules.safety.models import SafetyIncident
         from app.modules.dashboard.service import compute_hse_scorecard
+        from app.modules.safety.models import SafetyIncident
 
         uid = await _make_user(session)
         project = await _make_project(session, uid)
 
-        session.add(SafetyIncident(
-            id=uuid.uuid4(), project_id=project.id,
-            incident_number="INC-001",
-            incident_date="2026-05-10", incident_type="near_miss",
-            title="Near miss event", description="Scaffolding near miss",
-            severity="minor", osha_recordable=False,
-        ))
-        session.add(SafetyIncident(
-            id=uuid.uuid4(), project_id=project.id,
-            incident_number="INC-002",
-            incident_date="2026-05-15", incident_type="incident",
-            title="Recordable incident", description="Worker injured",
-            severity="major", osha_recordable=True,
-        ))
+        session.add(
+            SafetyIncident(
+                id=uuid.uuid4(),
+                project_id=project.id,
+                incident_number="INC-001",
+                incident_date="2026-05-10",
+                incident_type="near_miss",
+                title="Near miss event",
+                description="Scaffolding near miss",
+                severity="minor",
+                osha_recordable=False,
+            )
+        )
+        session.add(
+            SafetyIncident(
+                id=uuid.uuid4(),
+                project_id=project.id,
+                incident_number="INC-002",
+                incident_date="2026-05-15",
+                incident_type="incident",
+                title="Recordable incident",
+                description="Worker injured",
+                severity="major",
+                osha_recordable=True,
+            )
+        )
         await session.commit()
 
         result = await compute_hse_scorecard(session, [project])
@@ -319,6 +371,7 @@ class TestHSEScorecardAggregate:
 
 
 # ── Permission-filtering tests ─────────────────────────────────────────────
+
 
 class TestPermissionFiltering:
     """accessible_projects filters by owner — IDOR-safe boundary."""
@@ -383,12 +436,15 @@ class TestPermissionFiltering:
 
         # uid_a requests p_b's ID — must be dropped silently.
         projects = await accessible_projects(
-            session, str(uid_a), requested_ids=[p_b.id],
+            session,
+            str(uid_a),
+            requested_ids=[p_b.id],
         )
         assert projects == []
 
 
 # ── Dispatcher tests ───────────────────────────────────────────────────────
+
 
 class TestDispatcher:
     @pytest.mark.asyncio
@@ -400,7 +456,9 @@ class TestDispatcher:
         await session.commit()
 
         result = await compute_rollup(
-            session, [project], ["boq_summary", "this_does_not_exist"],
+            session,
+            [project],
+            ["boq_summary", "this_does_not_exist"],
         )
         assert "boq_summary" in result
         assert "this_does_not_exist" not in result
@@ -430,6 +488,7 @@ class TestDispatcher:
 
 # ── Widget config schema validation ───────────────────────────────────────
 
+
 class TestWidgetConfigValidation:
     """WidgetConfigItem validates widget config — 422 path in Pydantic."""
 
@@ -445,6 +504,7 @@ class TestWidgetConfigValidation:
 
     def test_unknown_widget_id_rejected(self) -> None:
         from pydantic import ValidationError
+
         from app.modules.dashboard.schemas import WidgetConfigItem
 
         with pytest.raises(ValidationError, match="Unknown widget_id"):
@@ -452,6 +512,7 @@ class TestWidgetConfigValidation:
 
     def test_unknown_config_key_rejected(self) -> None:
         from pydantic import ValidationError
+
         from app.modules.dashboard.schemas import WidgetConfigItem
 
         with pytest.raises(ValidationError, match="Unknown config key"):
@@ -462,6 +523,7 @@ class TestWidgetConfigValidation:
 
     def test_wrong_value_type_rejected(self) -> None:
         from pydantic import ValidationError
+
         from app.modules.dashboard.schemas import WidgetConfigItem
 
         with pytest.raises(ValidationError, match="must be bool"):
@@ -472,6 +534,7 @@ class TestWidgetConfigValidation:
 
     def test_int_out_of_bounds_rejected(self) -> None:
         from pydantic import ValidationError
+
         from app.modules.dashboard.schemas import WidgetConfigItem
 
         with pytest.raises(ValidationError, match="between 1 and 500"):
@@ -482,6 +545,7 @@ class TestWidgetConfigValidation:
 
     def test_float_out_of_bounds_rejected(self) -> None:
         from pydantic import ValidationError
+
         from app.modules.dashboard.schemas import WidgetConfigItem
 
         with pytest.raises(ValidationError, match="between 0"):
@@ -494,9 +558,15 @@ class TestWidgetConfigValidation:
         from app.modules.dashboard.schemas import WidgetConfigItem
 
         for widget_id in [
-            "boq_summary", "validation_score", "clash_health",
-            "schedule_critical", "risk_top", "hse_scorecard",
-            "procurement_pipeline", "budget_variance", "change_orders",
+            "boq_summary",
+            "validation_score",
+            "clash_health",
+            "schedule_critical",
+            "risk_top",
+            "hse_scorecard",
+            "procurement_pipeline",
+            "budget_variance",
+            "change_orders",
             "weather_site",
         ]:
             item = WidgetConfigItem(widget_id=widget_id, config={})
@@ -504,6 +574,7 @@ class TestWidgetConfigValidation:
 
     def test_rollup_request_bad_config_raises_validation_error(self) -> None:
         from pydantic import ValidationError
+
         from app.modules.dashboard.schemas import RollupRequest
 
         with pytest.raises(ValidationError):

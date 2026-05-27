@@ -389,9 +389,7 @@ async def preview_yaml(
         await verify_project_access(model.project_id, str(user_id), session)
 
         elem_repo = BIMElementRepository(session)
-        elements, _total = await elem_repo.list_for_model(
-            body.model_id, offset=0, limit=50_000
-        )
+        elements, _total = await elem_repo.list_for_model(body.model_id, offset=0, limit=50_000)
         # Convert ORM rows to plain dicts the runtime can consume.
         plain: list[dict] = [
             {

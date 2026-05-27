@@ -111,10 +111,10 @@ async def _seed_run(
     project_id_: str,
     element_specs: list[
         tuple[
-            str,                            # stable id suffix
-            tuple[float, float, float],     # box origin
-            tuple[float, float, float],     # box size
-            str,                            # discipline
+            str,  # stable id suffix
+            tuple[float, float, float],  # box origin
+            tuple[float, float, float],  # box size
+            str,  # discipline
         ]
     ],
     *,
@@ -156,8 +156,12 @@ async def _seed_run(
                 element_type="Generic",
                 discipline=g.discipline,
                 bounding_box={
-                    "min_x": g.aabb[0], "min_y": g.aabb[1], "min_z": g.aabb[2],
-                    "max_x": g.aabb[3], "max_y": g.aabb[4], "max_z": g.aabb[5],
+                    "min_x": g.aabb[0],
+                    "min_y": g.aabb[1],
+                    "min_z": g.aabb[2],
+                    "max_x": g.aabb[3],
+                    "max_y": g.aabb[4],
+                    "max_z": g.aabb[5],
                 },
             )
             session.add(el)
@@ -208,9 +212,7 @@ def _packed_cluster_specs(base_x: float = 0.0) -> list[tuple]:
     ]
 
 
-def _separated_pair_specs(
-    n_pairs: int, base_x: float, da: str = "Structural", db: str = "Mechanical"
-) -> list[tuple]:
+def _separated_pair_specs(n_pairs: int, base_x: float, da: str = "Structural", db: str = "Mechanical") -> list[tuple]:
     """N well-separated (A, B) cross-discipline pairs.
 
     Pairs are 10 m apart on Y and ``i * 100 m`` apart on X so each pair
@@ -231,12 +233,12 @@ def _separated_pair_specs(
 
 
 @pytest.mark.asyncio
-async def test_clusters_endpoint_returns_persisted_clusters(
-    client: AsyncClient, auth, project_id, monkeypatch
-):
+async def test_clusters_endpoint_returns_persisted_clusters(client: AsyncClient, auth, project_id, monkeypatch):
     """Engine produces clusters; endpoint surfaces them with shape + size."""
     _model_id, run_id, results = await _seed_run(
-        project_id, _packed_cluster_specs(base_x=0.0), monkeypatch=monkeypatch,
+        project_id,
+        _packed_cluster_specs(base_x=0.0),
+        monkeypatch=monkeypatch,
     )
     # Two pairs packed tight on Y → four cross-discipline clashes (Sx ×
     # My for x,y in {0,1}), all centroids within 0.6 m of one another →
@@ -264,9 +266,7 @@ async def test_clusters_endpoint_returns_persisted_clusters(
 
 
 @pytest.mark.asyncio
-async def test_rule_suggestions_surfaced_from_fp_history(
-    client: AsyncClient, auth, project_id, monkeypatch
-):
+async def test_rule_suggestions_surfaced_from_fp_history(client: AsyncClient, auth, project_id, monkeypatch):
     """Three FPs on the same pair → one rule suggestion."""
     _model_id, run_id, results = await _seed_run(
         project_id,
@@ -305,9 +305,7 @@ async def test_rule_suggestions_surfaced_from_fp_history(
 
 
 @pytest.mark.asyncio
-async def test_apply_rule_suggestion_modifies_run_and_reevaluates(
-    client: AsyncClient, auth, project_id, monkeypatch
-):
+async def test_apply_rule_suggestion_modifies_run_and_reevaluates(client: AsyncClient, auth, project_id, monkeypatch):
     """Apply suggestion → run.rules grows + sub-tolerance clashes flip to ignored."""
     _model_id, run_id, results = await _seed_run(
         project_id,
@@ -343,7 +341,8 @@ async def test_apply_rule_suggestion_modifies_run_and_reevaluates(
     rules_body = rules.json()
     assert len(rules_body) == 1
     assert {rules_body[0]["discipline_a"], rules_body[0]["discipline_b"]} == {
-        "Structural", "Mechanical",
+        "Structural",
+        "Mechanical",
     }
     assert rules_body[0]["tolerance_m"] == 0.5
     assert rules_body[0]["enabled"] is True
@@ -369,9 +368,7 @@ async def test_apply_rule_suggestion_modifies_run_and_reevaluates(
 
 
 @pytest.mark.asyncio
-async def test_patch_rules_enforces_size_cap(
-    client: AsyncClient, auth, project_id, monkeypatch
-):
+async def test_patch_rules_enforces_size_cap(client: AsyncClient, auth, project_id, monkeypatch):
     """Pydantic ``max_length=500`` rejects oversized payloads with 422."""
     _model_id, run_id, _results = await _seed_run(
         project_id,
@@ -420,9 +417,7 @@ async def test_patch_rules_enforces_size_cap(
 
 
 @pytest.mark.asyncio
-async def test_kpi_endpoint_returns_aggregated_dashboard_payload(
-    client: AsyncClient, auth, project_id, monkeypatch
-):
+async def test_kpi_endpoint_returns_aggregated_dashboard_payload(client: AsyncClient, auth, project_id, monkeypatch):
     """KPI endpoint shape: totals, histograms, top pairs, MTTR slot."""
     _model_id, run_id, results = await _seed_run(
         project_id,

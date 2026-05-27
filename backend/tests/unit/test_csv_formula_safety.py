@@ -18,7 +18,6 @@ import pytest
 
 from app.core.csv_safety import neutralise_formula
 
-
 # ── Padding the dangerous-prefix characters ────────────────────────────
 
 
@@ -45,7 +44,7 @@ def test_neutralise_formula_pads_tab() -> None:
 
 
 def test_neutralise_formula_pads_carriage_return() -> None:
-    assert neutralise_formula("\r=HYPERLINK(\"http://evil\")") == "'\r=HYPERLINK(\"http://evil\")"
+    assert neutralise_formula('\r=HYPERLINK("http://evil")') == '\'\r=HYPERLINK("http://evil")'
 
 
 def test_neutralise_formula_pads_real_world_rce_payload() -> None:

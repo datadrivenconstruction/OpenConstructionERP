@@ -12,7 +12,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
-
 # Pragmatic email regex — RFC 5322 is impractical to validate at the
 # schema layer, so we apply the same shape check the frontend ``type=email``
 # input uses (HTML5 living standard). Empty string stays valid because the
@@ -34,6 +33,7 @@ def _serialise_money(v: Decimal | None) -> str | None:
     if not v.is_finite():
         return "0"
     return format(v, "f")
+
 
 # ── Package schemas ──────────────────────────────────────────────────────────
 

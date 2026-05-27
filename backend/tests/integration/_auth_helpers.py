@@ -28,18 +28,12 @@ async def promote_to_admin(email: str) -> None:
     from sqlalchemy import select
 
     async with async_session_factory() as session:
-        await session.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
         # Defensive: confirm the row actually got updated. A miss here
         # (rowcount = 0) means the prior register call hit a different
         # session/engine — usually a test-isolation bug.
-        result = await session.execute(
-            select(User.is_active, User.role).where(User.email == email.lower())
-        )
+        result = await session.execute(select(User.is_active, User.role).where(User.email == email.lower()))
         row = result.first()
         if row is None:
             raise RuntimeError(

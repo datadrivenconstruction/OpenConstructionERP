@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import io
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 import pytest_asyncio
@@ -65,11 +65,7 @@ async def _register_admin(client: AsyncClient) -> tuple[dict[str, str], str]:
     assert reg.status_code == 201, reg.text
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     resp = await client.post(
@@ -270,12 +266,10 @@ async def test_expired_link_returns_404(
     from app.database import async_session_factory
     from app.modules.documents.share_models import DocumentShareLink
 
-    past = datetime.now(tz=timezone.utc) - timedelta(days=2)
+    past = datetime.now(tz=UTC) - timedelta(days=2)
     async with async_session_factory() as session:
         await session.execute(
-            sa_update(DocumentShareLink)
-            .where(DocumentShareLink.token == token)
-            .values(expires_at=past)
+            sa_update(DocumentShareLink).where(DocumentShareLink.token == token).values(expires_at=past)
         )
         await session.commit()
 
@@ -377,11 +371,7 @@ async def test_non_owner_cannot_revoke_share_link(
     # Promote to editor so `documents.update` permission is held — the
     # 403 we care about must come from project-access, NOT a missing role.
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="editor", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="editor", is_active=True))
         await session.commit()
     login = await client.post(
         "/api/v1/users/auth/login",

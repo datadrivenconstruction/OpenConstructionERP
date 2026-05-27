@@ -65,10 +65,7 @@ def classify_certainty(frequency: int, age_days: int) -> CertaintyBand:
     Returns:
         ``"green"`` / ``"yellow"`` / ``"red"``.
     """
-    if (
-        frequency >= CERTAINTY_GREEN_MIN_FREQUENCY
-        and age_days < CERTAINTY_GREEN_MAX_AGE_DAYS
-    ):
+    if frequency >= CERTAINTY_GREEN_MIN_FREQUENCY and age_days < CERTAINTY_GREEN_MAX_AGE_DAYS:
         return "green"
     in_yellow_freq = CERTAINTY_YELLOW_MIN_FREQUENCY <= frequency < CERTAINTY_GREEN_MIN_FREQUENCY
     in_yellow_age = CERTAINTY_GREEN_MAX_AGE_DAYS <= age_days <= CERTAINTY_YELLOW_MAX_AGE_DAYS
@@ -170,19 +167,13 @@ class RegionalIndexService:
         Round-7: returns ``Decimal`` so the multiply is exact (no float
         intermediates). Pydantic schemas serialise to strings on the wire.
         """
-        base = (
-            base_rate if isinstance(base_rate, Decimal) else Decimal(str(base_rate))
-        )
+        base = base_rate if isinstance(base_rate, Decimal) else Decimal(str(base_rate))
         if base < 0:
             base = Decimal("0")
-        row = await self.latest_for_region_category(
-            region_code, category, subcategory=subcategory
-        )
+        row = await self.latest_for_region_category(region_code, category, subcategory=subcategory)
         if row is None:
             return base, Decimal("1"), "baseline", None
-        factor: Decimal = (
-            row.factor if isinstance(row.factor, Decimal) else Decimal(str(row.factor))
-        )
+        factor: Decimal = row.factor if isinstance(row.factor, Decimal) else Decimal(str(row.factor))
         # Guard against an absurd 0-or-negative factor leaking from a
         # bad seed; the badge UI assumes ``factor > 0``.
         if factor <= 0:
@@ -217,11 +208,7 @@ class CostUsageRecorder:
         via the ``str()`` round-trip so float imprecision never leaks into
         the persisted ledger entry.
         """
-        amount = (
-            unit_rate_at_use
-            if isinstance(unit_rate_at_use, Decimal)
-            else Decimal(str(unit_rate_at_use))
-        )
+        amount = unit_rate_at_use if isinstance(unit_rate_at_use, Decimal) else Decimal(str(unit_rate_at_use))
         row = CostItemUsage(
             cost_item_id=cost_item_id,
             project_id=project_id,
@@ -255,12 +242,8 @@ class CostCertaintyService:
         if item is None:
             raise LookupError(f"CostItem {cost_item_id!s} not found")
 
-        freq_stmt = select(func.count(CostItemUsage.id)).where(
-            CostItemUsage.cost_item_id == cost_item_id
-        )
-        last_stmt = select(func.max(CostItemUsage.used_at)).where(
-            CostItemUsage.cost_item_id == cost_item_id
-        )
+        freq_stmt = select(func.count(CostItemUsage.id)).where(CostItemUsage.cost_item_id == cost_item_id)
+        last_stmt = select(func.max(CostItemUsage.used_at)).where(CostItemUsage.cost_item_id == cost_item_id)
         frequency = int((await self.session.execute(freq_stmt)).scalar_one() or 0)
         last_used = (await self.session.execute(last_stmt)).scalar_one_or_none()
 

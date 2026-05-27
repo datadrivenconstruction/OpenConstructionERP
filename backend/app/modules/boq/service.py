@@ -22,9 +22,12 @@ import uuid
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from types import SimpleNamespace
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import HTTPException, status
+
+if TYPE_CHECKING:
+    from app.modules.boq.schemas import PositionLinksResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -203,9 +206,7 @@ def _stamp_resource_variant_snapshots(
         # the project is in another currency. The variant_snapshot reader
         # tolerates empty currency and renders the rate as a bare number.
         currency = (
-            resource_currency
-            if isinstance(resource_currency, str) and resource_currency
-            else (position_currency or "")
+            resource_currency if isinstance(resource_currency, str) and resource_currency else (position_currency or "")
         )
 
         resource["variant_snapshot"] = {
@@ -1238,9 +1239,7 @@ def _leaf_total_base_with_resources(
     resources = meta.get("resources") if isinstance(meta, dict) else None
 
     has_priced_resources = (
-        isinstance(resources, list)
-        and len(resources) > 0
-        and any(isinstance(r, dict) for r in resources)
+        isinstance(resources, list) and len(resources) > 0 and any(isinstance(r, dict) for r in resources)
     )
     if has_priced_resources:
         # If NONE of the resources carries a foreign currency the
@@ -1249,16 +1248,12 @@ def _leaf_total_base_with_resources(
         # avoids a float roundtrip through the resource sum).
         base = (base_currency or "").strip().upper()
         any_foreign = any(
-            isinstance(r, dict)
-            and str(r.get("currency") or "").strip().upper() not in ("", base)
-            for r in resources
+            isinstance(r, dict) and str(r.get("currency") or "").strip().upper() not in ("", base) for r in resources
         )
         if not any_foreign:
             return _position_total_in_base(
                 getattr(pos, "total", "0"),
-                _position_currency(pos)
-                if hasattr(pos, "metadata_") or hasattr(pos, "metadata")
-                else "",
+                _position_currency(pos) if hasattr(pos, "metadata_") or hasattr(pos, "metadata") else "",
                 fx_rates_map,
                 base_currency,
             )
@@ -1266,9 +1261,7 @@ def _leaf_total_base_with_resources(
         # currencies, then scaled by the position quantity (resources
         # are per-unit norms — same convention update_position uses to
         # build unit_rate then total).
-        per_unit_base = _to_decimal(
-            str(_resource_total_in_base(resources, fx_rates_map, base_currency))
-        )
+        per_unit_base = _to_decimal(str(_resource_total_in_base(resources, fx_rates_map, base_currency)))
         qty = _to_decimal(getattr(pos, "quantity", "0"))
         return per_unit_base * qty
 
@@ -2009,9 +2002,7 @@ class BOQService:
             candidate = _generate_internal_reference_code()
             if project_id is None:
                 return candidate
-            if not await self.position_repo.reference_code_exists_in_project(
-                project_id, candidate
-            ):
+            if not await self.position_repo.reference_code_exists_in_project(project_id, candidate):
                 return candidate
         # Astronomically unlikely fallthrough — append more entropy.
         return f"{_generate_internal_reference_code()}{uuid.uuid4().hex[:4].upper()}"[:64]
@@ -2078,11 +2069,7 @@ class BOQService:
             ordinal=ordinal,
             description=source.description,
             unit=source.unit,
-            quantity=(
-                _quantize_money_str(quantity)
-                if quantity is not None
-                else source.quantity
-            ),
+            quantity=(_quantize_money_str(quantity) if quantity is not None else source.quantity),
             unit_rate=source.unit_rate,
             total=_compute_total(
                 quantity if quantity is not None else source.quantity,
@@ -2125,14 +2112,10 @@ class BOQService:
                     quantity=child.quantity,
                     unit_rate=child.unit_rate,
                     total=child.total,
-                    classification=(
-                        dict(child.classification) if child.classification else {}
-                    ),
+                    classification=(dict(child.classification) if child.classification else {}),
                     source=child.source,
                     confidence=child.confidence,
-                    cad_element_ids=(
-                        list(child.cad_element_ids) if child.cad_element_ids else []
-                    ),
+                    cad_element_ids=(list(child.cad_element_ids) if child.cad_element_ids else []),
                     validation_status="pending",
                     metadata_=_child_meta,
                     sort_order=max_order,
@@ -2246,9 +2229,7 @@ class BOQService:
 
             row = (
                 await self.session.execute(
-                    select(Project.currency)
-                    .join(BOQ, BOQ.project_id == Project.id)
-                    .where(BOQ.id == boq_id),
+                    select(Project.currency).join(BOQ, BOQ.project_id == Project.id).where(BOQ.id == boq_id),
                 )
             ).first()
         except Exception:  # noqa: BLE001 — never break a write on this lookup
@@ -2434,9 +2415,11 @@ class BOQService:
         link_mode = getattr(data, "link_mode", None)
         project_id = await self.position_repo.project_id_for_boq(data.boq_id)
         if supplied_code and link_mode != "standalone":
-            master = await self.position_repo.find_master_by_reference_code(
-                project_id, supplied_code
-            ) if project_id is not None else None
+            master = (
+                await self.position_repo.find_master_by_reference_code(project_id, supplied_code)
+                if project_id is not None
+                else None
+            )
             if master is not None and str(master.boq_id) and master.id is not None:
                 return await self._create_reused_position(
                     data=data,
@@ -2528,9 +2511,7 @@ class BOQService:
         if data.after_position_id is not None:
             anchor = await self.position_repo.get_by_id(data.after_position_id)
             if anchor is not None and anchor.boq_id == data.boq_id:
-                await self.position_repo.shift_sort_order_after(
-                    data.boq_id, int(anchor.sort_order)
-                )
+                await self.position_repo.shift_sort_order_after(data.boq_id, int(anchor.sort_order))
                 new_sort_order = int(anchor.sort_order) + 1
         elif data.parent_id is not None:
             # ── Issue #149: keep the partida INSIDE the clicked section ──────
@@ -2547,28 +2528,14 @@ class BOQService:
             # legacy interleaving created before this fix.
             parent_pos = await self.position_repo.get_by_id(data.parent_id)
             if parent_pos is not None and parent_pos.boq_id == data.boq_id:
-                direct_children = await self.position_repo.list_children(
-                    data.parent_id
-                )
-                leaf_so = [
-                    int(c.sort_order)
-                    for c in direct_children
-                    if not _is_section(c)
-                ]
-                sub_so = [
-                    int(c.sort_order)
-                    for c in direct_children
-                    if _is_section(c)
-                ]
-                anchor_so = (
-                    max(leaf_so) if leaf_so else int(parent_pos.sort_order)
-                )
+                direct_children = await self.position_repo.list_children(data.parent_id)
+                leaf_so = [int(c.sort_order) for c in direct_children if not _is_section(c)]
+                sub_so = [int(c.sort_order) for c in direct_children if _is_section(c)]
+                anchor_so = max(leaf_so) if leaf_so else int(parent_pos.sort_order)
                 if sub_so:
                     anchor_so = min(anchor_so, min(sub_so) - 1)
                 anchor_so = max(anchor_so, int(parent_pos.sort_order))
-                await self.position_repo.shift_sort_order_after(
-                    data.boq_id, anchor_so
-                )
+                await self.position_repo.shift_sort_order_after(data.boq_id, anchor_so)
                 new_sort_order = anchor_so + 1
 
         # BUG-B-014: non-blocking boq_quality duplicate-content check.
@@ -2587,9 +2554,7 @@ class BOQService:
         # link_mode='standalone' which intentionally re-uses the literal
         # code without linking); otherwise stamp a stable internal code so
         # the position is always referenceable.
-        resolved_reference_code = await self._resolve_create_reference_code(
-            project_id, supplied_code or None
-        )
+        resolved_reference_code = await self._resolve_create_reference_code(project_id, supplied_code or None)
 
         position = Position(
             boq_id=data.boq_id,
@@ -2608,11 +2573,7 @@ class BOQService:
             metadata_=merged_metadata,
             # BUG-B-013 (cost-item unit/currency) + BUG-B-014 (duplicate
             # content) both surface on the validation traffic-light.
-            validation_status=(
-                "warnings"
-                if (_cost_compat_warned or _dup_ordinal is not None)
-                else "pending"
-            ),
+            validation_status=("warnings" if (_cost_compat_warned or _dup_ordinal is not None) else "pending"),
             sort_order=new_sort_order,
             reference_code=resolved_reference_code,
             # Standalone: no link group yet. The first reuse promotes this
@@ -2690,9 +2651,7 @@ class BOQService:
                 # Master may currently be a bare 'master' (group existed) —
                 # nothing to do. If it lost its role, restore it.
                 if master_link_role != "master":
-                    await self.position_repo.update_fields(
-                        master_id, link_role="master"
-                    )
+                    await self.position_repo.update_fields(master_id, link_role="master")
             else:
                 # Promote the standalone owner to master + open a group.
                 link_group_id = uuid.uuid4()
@@ -2824,9 +2783,7 @@ class BOQService:
             Position.boq_id == boq_id,
             Position.ordinal.in_(seen_ordinals),
         )
-        existing_ordinals = {
-            row[0] for row in (await self.session.execute(existing_stmt)).all()
-        }
+        existing_ordinals = {row[0] for row in (await self.session.execute(existing_stmt)).all()}
         if existing_ordinals:
             sample = next(iter(existing_ordinals))
             raise HTTPException(
@@ -2852,9 +2809,7 @@ class BOQService:
             # Issue #136: deep-nesting cap also guards the bulk path.
             await self._validate_nesting_depth(new_parent_id=data.parent_id)
 
-            merged_metadata: dict[str, Any] = (
-                dict(data.metadata) if isinstance(data.metadata, dict) else {}
-            )
+            merged_metadata: dict[str, Any] = dict(data.metadata) if isinstance(data.metadata, dict) else {}
             if data.cost_item_id is not None:
                 if cost_repo is None:
                     cost_repo = CostItemRepository(self.session)
@@ -2862,10 +2817,7 @@ class BOQService:
                 if cost_item is None or not getattr(cost_item, "is_active", False):
                     raise HTTPException(
                         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                        detail=(
-                            f"cost_item_id {data.cost_item_id} does not "
-                            f"reference an active CostItem"
-                        ),
+                        detail=(f"cost_item_id {data.cost_item_id} does not reference an active CostItem"),
                     )
                 merged_metadata["cost_item_id"] = str(data.cost_item_id)
                 _bulk_cost_warned = _stamp_cost_item_compat(
@@ -2877,11 +2829,7 @@ class BOQService:
             else:
                 _bulk_cost_warned = False
 
-            currency_hint = (
-                merged_metadata.get("currency")
-                if isinstance(merged_metadata, dict)
-                else None
-            )
+            currency_hint = merged_metadata.get("currency") if isinstance(merged_metadata, dict) else None
             _stamp_variant_snapshot(
                 merged_metadata,
                 unit_rate=data.unit_rate,
@@ -2904,9 +2852,7 @@ class BOQService:
                     total=_compute_total(data.quantity, data.unit_rate),
                     classification=data.classification,
                     source=data.source,
-                    confidence=(
-                        str(data.confidence) if data.confidence is not None else None
-                    ),
+                    confidence=(str(data.confidence) if data.confidence is not None else None),
                     cad_element_ids=data.cad_element_ids,
                     metadata_=merged_metadata,
                     validation_status="warnings" if _bulk_cost_warned else "pending",
@@ -3059,9 +3005,7 @@ class BOQService:
         # propagate-from-master / unlink-instance). Snapshot the *requested*
         # keys now, before the metadata/cost-item merge logic mutates
         # ``fields`` and adds derived keys (total/version/validation_status).
-        _requested_def_fields: set[str] = {
-            k for k in fields if k in _LINK_UNLINK_TRIGGER_FIELDS
-        }
+        _requested_def_fields: set[str] = {k for k in fields if k in _LINK_UNLINK_TRIGGER_FIELDS}
         if "metadata" in fields:
             _requested_def_fields.add("metadata_")
 
@@ -3106,12 +3050,15 @@ class BOQService:
             # ``data.unit`` (if the same patch changes the unit) takes
             # precedence over the stored unit.
             _new_unit = fields.get("unit", position.unit)
-            if _stamp_cost_item_compat(
-                base_meta,
-                cost_item=cost_item,
-                position_unit=_new_unit,
-                project_currency=await self._resolve_project_currency(position.boq_id),
-            ) and "validation_status" not in fields:
+            if (
+                _stamp_cost_item_compat(
+                    base_meta,
+                    cost_item=cost_item,
+                    position_unit=_new_unit,
+                    project_currency=await self._resolve_project_currency(position.boq_id),
+                )
+                and "validation_status" not in fields
+            ):
                 fields["validation_status"] = "warnings"
             fields["metadata"] = base_meta
 
@@ -3145,16 +3092,10 @@ class BOQService:
         # resource definition edit can be diffed + propagated afterwards.
         _res_before: list[dict[str, Any]] | None = None
         if "metadata" in fields:
-            _existing_meta = (
-                position.metadata_
-                if isinstance(position.metadata_, dict)
-                else {}
-            )
+            _existing_meta = position.metadata_ if isinstance(position.metadata_, dict) else {}
             _rb = _existing_meta.get("resources")
             if isinstance(_rb, list):
-                _res_before = [
-                    dict(r) if isinstance(r, dict) else {} for r in _rb
-                ]
+                _res_before = [dict(r) if isinstance(r, dict) else {} for r in _rb]
 
         # If ordinal is being changed, check uniqueness within the BOQ
         if "ordinal" in fields and fields["ordinal"] != position.ordinal:
@@ -3261,8 +3202,7 @@ class BOQService:
                 _q = None
             if _q is not None and _q > Decimal("1e15"):
                 raise ValueError(
-                    "Position total exceeds reasonable limit. "
-                    "Check quantity and unit rate.",
+                    "Position total exceeds reasonable limit. Check quantity and unit rate.",
                 )
             # Pass raw string values straight through — ``_compute_total`` now
             # uses Decimal and handles strings directly, so we avoid the
@@ -3339,9 +3279,7 @@ class BOQService:
             # check inside ``_stamp_resource_variant_snapshots`` can compare
             # against them. Without this seeding, every metadata patch would
             # bump ``captured_at`` on resources whose pick is unchanged.
-            existing_resources = (
-                existing_meta.get("resources") if isinstance(existing_meta, dict) else None
-            )
+            existing_resources = existing_meta.get("resources") if isinstance(existing_meta, dict) else None
             incoming_resources = fields["metadata_"].get("resources")
             if isinstance(existing_resources, list) and isinstance(incoming_resources, list):
                 # Match by code+name pair to survive reorder; positional fall-
@@ -3392,9 +3330,7 @@ class BOQService:
             if "metadata_" in fields and isinstance(fields["metadata_"], dict):
                 _dup_meta = fields["metadata_"]
             else:
-                _existing = (
-                    position.metadata_ if isinstance(position.metadata_, dict) else {}
-                )
+                _existing = position.metadata_ if isinstance(position.metadata_, dict) else {}
                 _dup_meta = dict(_existing)
             _had_marker = any(
                 str(w).startswith(_DUPLICATE_WARNING_PREFIX)
@@ -3438,11 +3374,7 @@ class BOQService:
             for _df in _requested_def_fields:
                 if _df == "metadata_":
                     _new_meta = fields.get("metadata_")
-                    _old_meta = (
-                        position.metadata_
-                        if isinstance(position.metadata_, dict)
-                        else {}
-                    )
+                    _old_meta = position.metadata_ if isinstance(position.metadata_, dict) else {}
                     if isinstance(_new_meta, dict) and _new_meta != _old_meta:
                         _changed_def = True
                 else:
@@ -3452,12 +3384,8 @@ class BOQService:
                 # Count the OTHER positions still sharing the code so the
                 # warning is actionable.
                 try:
-                    _grp = await self.position_repo.list_link_group(
-                        _link_group_before
-                    )
-                    _unlink_siblings_remaining = max(
-                        0, len([p for p in _grp if p.id != position_id]) - 0
-                    )
+                    _grp = await self.position_repo.list_link_group(_link_group_before)
+                    _unlink_siblings_remaining = max(0, len([p for p in _grp if p.id != position_id]) - 0)
                 except Exception:  # noqa: BLE001 — advisory count only
                     _unlink_siblings_remaining = 0
                 fields["link_group_id"] = None
@@ -3468,11 +3396,7 @@ class BOQService:
                 if "metadata_" in fields and isinstance(fields["metadata_"], dict):
                     _warn_meta = fields["metadata_"]
                 else:
-                    _existing_wm = (
-                        position.metadata_
-                        if isinstance(position.metadata_, dict)
-                        else {}
-                    )
+                    _existing_wm = position.metadata_ if isinstance(position.metadata_, dict) else {}
                     _warn_meta = dict(_existing_wm)
                 _code_label = _ref_code_before or "(internal)"
                 _msg = (
@@ -3533,12 +3457,7 @@ class BOQService:
         # recomputed, the position-changed event fires per instance, and
         # ONE audit entry records the fan-out.
         _propagated_count = 0
-        if (
-            _link_role_before == "master"
-            and _link_group_before is not None
-            and not _did_unlink_instance
-            and fields
-        ):
+        if _link_role_before == "master" and _link_group_before is not None and not _did_unlink_instance and fields:
             # Resolve the definition fields whose persisted value changed.
             _changed_def_payload: dict[str, Any] = {}
             for _df in _LINK_DEFINITION_FIELDS:
@@ -3547,10 +3466,7 @@ class BOQService:
                 _new = getattr(position, _df, None)
                 _changed_def_payload[_df] = _new
             # Metadata sub-structure (resources / assembly) propagates too.
-            _propagate_meta = (
-                "metadata_" in _requested_def_fields
-                and isinstance(position.metadata_, dict)
-            )
+            _propagate_meta = "metadata_" in _requested_def_fields and isinstance(position.metadata_, dict)
             if _changed_def_payload or _propagate_meta:
                 try:
                     # ``repo.update_fields`` ends in ``session.expire_all()``,
@@ -3561,14 +3477,8 @@ class BOQService:
                     # metadata once here and each instance's fields at the
                     # top of its iteration, then only touch locals after the
                     # per-instance write.
-                    _master_meta_snapshot = (
-                        position.metadata_
-                        if isinstance(position.metadata_, dict)
-                        else {}
-                    )
-                    group = await self.position_repo.list_link_group(
-                        _link_group_before
-                    )
+                    _master_meta_snapshot = position.metadata_ if isinstance(position.metadata_, dict) else {}
+                    group = await self.position_repo.list_link_group(_link_group_before)
                     # Snapshot EVERY group member into plain values BEFORE
                     # the first per-instance write. ``update_fields`` ends in
                     # ``session.expire_all()``, so reading another (not-yet-
@@ -3586,11 +3496,7 @@ class BOQService:
                             "quantity": g.quantity,
                             "unit_rate": g.unit_rate,
                             "version": int(g.version or 0),
-                            "meta": (
-                                dict(g.metadata_)
-                                if isinstance(g.metadata_, dict)
-                                else {}
-                            ),
+                            "meta": (dict(g.metadata_) if isinstance(g.metadata_, dict) else {}),
                         }
                         for g in group
                     ]
@@ -3602,9 +3508,7 @@ class BOQService:
                     # definition. Legacy groups predating #132 carry no
                     # ``_link_src`` anywhere; they keep the original
                     # group-flat behaviour so existing links never regress.
-                    _group_has_src = any(
-                        "_link_src" in s["meta"] for s in _grp_snap
-                    )
+                    _group_has_src = any("_link_src" in s["meta"] for s in _grp_snap)
                     affected_boqs: set[uuid.UUID] = set()
                     for _snap in _grp_snap:
                         _inst_id = _snap["id"]
@@ -3624,29 +3528,21 @@ class BOQService:
                         # ROOTS that mirror THIS master root. Instance
                         # children (``_link_src`` = their own master child)
                         # are handled by the master-child pass below.
-                        if _group_has_src and str(
-                            _inst_meta.get("_link_src")
-                        ) != str(position_id):
+                        if _group_has_src and str(_inst_meta.get("_link_src")) != str(position_id):
                             continue
                         inst_fields: dict[str, Any] = {}
                         for k, v in _changed_def_payload.items():
                             if k == "classification":
-                                inst_fields[k] = (
-                                    dict(v) if isinstance(v, dict) else v
-                                )
+                                inst_fields[k] = dict(v) if isinstance(v, dict) else v
                             elif k == "cad_element_ids":
-                                inst_fields[k] = (
-                                    list(v) if isinstance(v, list) else v
-                                )
+                                inst_fields[k] = list(v) if isinstance(v, list) else v
                             else:
                                 inst_fields[k] = v
                         if _propagate_meta:
                             # Carry the master's reusable sub-structure but
                             # preserve each instance's own per-instance
                             # quantity-bound markers (BIM/PDF/DWG sources).
-                            inst_meta = _copy_definition_metadata(
-                                _master_meta_snapshot
-                            )
+                            inst_meta = _copy_definition_metadata(_master_meta_snapshot)
                             for _k in _LINK_INSTANCE_ONLY_META_KEYS:
                                 if _k in _inst_meta:
                                     inst_meta[_k] = _inst_meta[_k]
@@ -3654,13 +3550,9 @@ class BOQService:
                         # Recompute the instance total against ITS OWN
                         # quantity and the (possibly new) unit_rate.
                         _eff_rate = inst_fields.get("unit_rate", _inst_unit_rate)
-                        inst_fields["total"] = _compute_total(
-                            _inst_quantity, _eff_rate
-                        )
+                        inst_fields["total"] = _compute_total(_inst_quantity, _eff_rate)
                         inst_fields["version"] = _inst_version + 1
-                        await self.position_repo.update_fields(
-                            _inst_id, **inst_fields
-                        )
+                        await self.position_repo.update_fields(_inst_id, **inst_fields)
                         affected_boqs.add(_inst_boq_id)
                         _propagated_count += 1
                         await _safe_publish(
@@ -3719,8 +3611,7 @@ class BOQService:
                             )
                 except Exception:  # noqa: BLE001 — never break the master PATCH
                     logger.exception(
-                        "Linked-position propagation failed for master %s "
-                        "(group=%s)",
+                        "Linked-position propagation failed for master %s (group=%s)",
                         position_id,
                         _link_group_before,
                     )
@@ -3737,12 +3628,7 @@ class BOQService:
         # (``metadata._link_src == position_id``). Quantities / ordinals
         # never propagate (CLAUDE.md). Instance-side direct edits still
         # diverge+unlink via the block far above — unchanged.
-        if (
-            _link_role_before is None
-            and not _did_unlink_instance
-            and fields
-            and _requested_def_fields
-        ):
+        if _link_role_before is None and not _did_unlink_instance and fields and _requested_def_fields:
             try:
                 # Snapshot the edited node's post-write definition BEFORE any
                 # per-instance update_fields() (each ends in expire_all();
@@ -3751,15 +3637,8 @@ class BOQService:
                 for _df in _LINK_DEFINITION_FIELDS:
                     if _df in _requested_def_fields:
                         _mc_changed[_df] = getattr(position, _df, None)
-                _mc_prop_meta = (
-                    "metadata_" in _requested_def_fields
-                    and isinstance(position.metadata_, dict)
-                )
-                _mc_meta_snapshot = (
-                    position.metadata_
-                    if isinstance(position.metadata_, dict)
-                    else {}
-                )
+                _mc_prop_meta = "metadata_" in _requested_def_fields and isinstance(position.metadata_, dict)
+                _mc_meta_snapshot = position.metadata_ if isinstance(position.metadata_, dict) else {}
                 if _mc_changed or _mc_prop_meta:
                     # Walk parent chain to the subtree root (depth-capped —
                     # a cycle would otherwise loop forever).
@@ -3785,9 +3664,7 @@ class BOQService:
                         # later for the activity-log (MissingGreenlet).
                         _mc_root_group_id = _root_node.link_group_id
                         _mc_root_code = _root_node.reference_code
-                        _mc_group = await self.position_repo.list_link_group(
-                            _mc_root_group_id
-                        )
+                        _mc_group = await self.position_repo.list_link_group(_mc_root_group_id)
                         # Pre-snapshot the whole group before any write —
                         # update_fields() → expire_all() would otherwise make
                         # a later iteration's ORM read lazy-load on the async
@@ -3801,11 +3678,7 @@ class BOQService:
                                 "quantity": _c.quantity,
                                 "unit_rate": _c.unit_rate,
                                 "version": int(_c.version or 0),
-                                "meta": (
-                                    dict(_c.metadata_)
-                                    if isinstance(_c.metadata_, dict)
-                                    else {}
-                                ),
+                                "meta": (dict(_c.metadata_) if isinstance(_c.metadata_, dict) else {}),
                             }
                             for _c in _mc_group
                         ]
@@ -3825,26 +3698,18 @@ class BOQService:
                                 continue
                             # Per-node correspondence: only the instance
                             # children cloned from THIS master child.
-                            if str(_ci_meta.get("_link_src")) != str(
-                                position_id
-                            ):
+                            if str(_ci_meta.get("_link_src")) != str(position_id):
                                 continue
                             _ci_fields: dict[str, Any] = {}
                             for k, v in _mc_changed.items():
                                 if k == "classification":
-                                    _ci_fields[k] = (
-                                        dict(v) if isinstance(v, dict) else v
-                                    )
+                                    _ci_fields[k] = dict(v) if isinstance(v, dict) else v
                                 elif k == "cad_element_ids":
-                                    _ci_fields[k] = (
-                                        list(v) if isinstance(v, list) else v
-                                    )
+                                    _ci_fields[k] = list(v) if isinstance(v, list) else v
                                 else:
                                     _ci_fields[k] = v
                             if _mc_prop_meta:
-                                _ci_new_meta = _copy_definition_metadata(
-                                    _mc_meta_snapshot
-                                )
+                                _ci_new_meta = _copy_definition_metadata(_mc_meta_snapshot)
                                 # Preserve the instance child's own
                                 # per-instance keys — crucially ``_link_src``
                                 # so the correspondence survives the copy.
@@ -3852,16 +3717,10 @@ class BOQService:
                                     if _k in _ci_meta:
                                         _ci_new_meta[_k] = _ci_meta[_k]
                                 _ci_fields["metadata_"] = _ci_new_meta
-                            _ci_rate = _ci_fields.get(
-                                "unit_rate", _ci_unit_rate
-                            )
-                            _ci_fields["total"] = _compute_total(
-                                _ci_quantity, _ci_rate
-                            )
+                            _ci_rate = _ci_fields.get("unit_rate", _ci_unit_rate)
+                            _ci_fields["total"] = _compute_total(_ci_quantity, _ci_rate)
                             _ci_fields["version"] = _ci_version + 1
-                            await self.position_repo.update_fields(
-                                _ci_id, **_ci_fields
-                            )
+                            await self.position_repo.update_fields(_ci_id, **_ci_fields)
                             _mc_affected.add(_ci_boq_id)
                             _propagated_count += 1
                             await _safe_publish(
@@ -3870,9 +3729,7 @@ class BOQService:
                                     "position_id": str(_ci_id),
                                     "boq_id": str(_ci_boq_id),
                                     "ordinal": _ci_ordinal,
-                                    "changes": {
-                                        "propagated_from": str(position_id)
-                                    },
+                                    "changes": {"propagated_from": str(position_id)},
                                     "kind": "linked_master_child_propagation",
                                 },
                                 source_module="oe_boq",
@@ -3908,15 +3765,12 @@ class BOQService:
                                     },
                                     metadata_={
                                         "reference_code": _mc_root_code,
-                                        "link_group_id": str(
-                                            _mc_root_group_id
-                                        ),
+                                        "link_group_id": str(_mc_root_group_id),
                                     },
                                 )
                             except Exception:  # noqa: BLE001 — best-effort
                                 logger.debug(
-                                    "Activity-log for master-child "
-                                    "propagation failed",
+                                    "Activity-log for master-child propagation failed",
                                     exc_info=True,
                                 )
             except Exception:  # noqa: BLE001 — never break the child PATCH
@@ -4010,20 +3864,13 @@ class BOQService:
                 # propagation helper runs per-instance ``update_fields``
                 # (expire_all) and the async engine cannot lazy-refresh
                 # ``position.metadata_`` afterwards (MissingGreenlet).
-                _res_after = [
-                    dict(r) if isinstance(r, dict) else r
-                    for r in _res_after_raw
-                ]
-                _res_delta = self._resource_def_changed(
-                    _res_before, _res_after
-                )
+                _res_after = [dict(r) if isinstance(r, dict) else r for r in _res_after_raw]
+                _res_delta = self._resource_def_changed(_res_before, _res_after)
                 if _res_delta:
-                    _resource_propagated = (
-                        await self._propagate_resource_definitions(
-                            editor_position=position,
-                            changed_by_code=_res_delta,
-                            actor_id=actor_id,
-                        )
+                    _resource_propagated = await self._propagate_resource_definitions(
+                        editor_position=position,
+                        changed_by_code=_res_delta,
+                        actor_id=actor_id,
                     )
                     # Per-instance writes above expired ``position``;
                     # re-hydrate it so the response serialisation
@@ -4112,16 +3959,12 @@ class BOQService:
                 elif payload.rate_factor is not None:
                     current = _to_decimal(row.unit_rate, default=Decimal("0"))
                     new_rate = current * Decimal(str(payload.rate_factor))
-                    update_data = PositionUpdate(
-                        unit_rate=float(_quantize_money(new_rate))
-                    )
+                    update_data = PositionUpdate(unit_rate=float(_quantize_money(new_rate)))
                 else:
                     # quantity_factor branch (validator guarantees one is set)
                     current_q = _to_decimal(row.quantity, default=Decimal("0"))
                     new_q = current_q * Decimal(str(payload.quantity_factor))
-                    update_data = PositionUpdate(
-                        quantity=float(_quantize_money(new_q))
-                    )
+                    update_data = PositionUpdate(quantity=float(_quantize_money(new_q)))
                 await self.update_position(pid, update_data, actor_id=actor_id)
                 updated += 1
             except HTTPException:
@@ -4144,10 +3987,7 @@ class BOQService:
                     user_id=actor_id,
                     action=f"position.bulk_{kind}",
                     target_type="boq",
-                    description=(
-                        f"Bulk {kind} on {updated} position(s) "
-                        f"(skipped {len(failed_ids)})"
-                    ),
+                    description=(f"Bulk {kind} on {updated} position(s) (skipped {len(failed_ids)})"),
                     project_id=boq.project_id,
                     boq_id=boq_id,
                     target_id=None,
@@ -4211,9 +4051,7 @@ class BOQService:
             )
         await self._ensure_not_locked(position.boq_id)
 
-        source: BOQActivityLog | None = await self.session.get(
-            BOQActivityLog, log_id
-        )
+        source: BOQActivityLog | None = await self.session.get(BOQActivityLog, log_id)
         if source is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -4222,10 +4060,7 @@ class BOQService:
         if source.target_id != position_id:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
-                    f"Log entry {log_id} targets a different position "
-                    f"({source.target_id})"
-                ),
+                detail=(f"Log entry {log_id} targets a different position ({source.target_id})"),
             )
         changes = source.changes if isinstance(source.changes, dict) else {}
         if field not in changes:
@@ -4242,9 +4077,7 @@ class BOQService:
         payload_kwargs: dict[str, Any] = {}
         if field in {"quantity", "unit_rate", "confidence"}:
             try:
-                payload_kwargs[field] = (
-                    None if value is None or value == "" else float(value)
-                )
+                payload_kwargs[field] = None if value is None or value == "" else float(value)
             except (TypeError, ValueError) as exc:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -4253,23 +4086,17 @@ class BOQService:
         elif field in {"classification", "metadata", "cad_element_ids"}:
             payload_kwargs[field] = value
         else:
-            payload_kwargs[field] = (
-                None if value is None else str(value)
-            )
+            payload_kwargs[field] = None if value is None else str(value)
 
         try:
             update_data = PositionUpdate(**payload_kwargs)
         except Exception as exc:  # noqa: BLE001 — schema rejections → 422
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
-                    f"Cannot restore field '{field}': {exc!s}"
-                ),
+                detail=(f"Cannot restore field '{field}': {exc!s}"),
             ) from exc
 
-        updated = await self.update_position(
-            position_id, update_data, actor_id=actor_id
-        )
+        updated = await self.update_position(position_id, update_data, actor_id=actor_id)
 
         # Standalone audit row so the restore itself is greppable in the
         # activity feed (``update_position`` already wrote a generic
@@ -4281,10 +4108,7 @@ class BOQService:
                     user_id=actor_id,
                     action="position.field_restored",
                     target_type="position",
-                    description=(
-                        f"Restored field '{field}' on position "
-                        f"{updated.ordinal} from log {log_id}"
-                    ),
+                    description=(f"Restored field '{field}' on position {updated.ordinal} from log {log_id}"),
                     project_id=boq.project_id,
                     boq_id=position.boq_id,
                     target_id=position_id,
@@ -4353,17 +4177,12 @@ class BOQService:
         if resource_idx < 0 or resource_idx >= len(resources_raw):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
-                    f"resource_idx {resource_idx} is out of range "
-                    f"(position has {len(resources_raw)} resource(s))"
-                ),
+                detail=(f"resource_idx {resource_idx} is out of range (position has {len(resources_raw)} resource(s))"),
             )
 
         # Deep-copy the resources so the in-memory ORM dict isn't mutated
         # before we explicitly persist it.
-        resources: list[dict[str, Any]] = [
-            dict(r) if isinstance(r, dict) else {} for r in resources_raw
-        ]
+        resources: list[dict[str, Any]] = [dict(r) if isinstance(r, dict) else {} for r in resources_raw]
         target_resource = resources[resource_idx]
         if not isinstance(target_resource, dict):
             raise HTTPException(
@@ -4467,9 +4286,7 @@ class BOQService:
         new_total = _compute_total(position.quantity, str(new_unit_rate))
 
         # Snapshot before for audit diff.
-        before_meta = (
-            dict(position.metadata_) if isinstance(position.metadata_, dict) else {}
-        )
+        before_meta = dict(position.metadata_) if isinstance(position.metadata_, dict) else {}
         before_unit_rate = position.unit_rate
         before_total = position.total
 
@@ -4551,9 +4368,7 @@ class BOQService:
                     },
                 )
             except Exception:  # noqa: BLE001 — best-effort, never break PATCH
-                logger.debug(
-                    "Activity-log write for resource_variant_repick failed", exc_info=True
-                )
+                logger.debug("Activity-log write for resource_variant_repick failed", exc_info=True)
 
         return position
 
@@ -4623,17 +4438,13 @@ class BOQService:
                 group = await self.position_repo.list_link_group(_del_link_group)
                 # Survivors = group members not in the delete set (cascade
                 # may have removed instances too).
-                survivors = [
-                    p for p in group if str(p.id) not in _deleted_ids_set
-                ]
+                survivors = [p for p in group if str(p.id) not in _deleted_ids_set]
                 if survivors:
                     # list_link_group is ordered oldest-first → promote head.
                     # Capture the id before the first update_fields()
                     # expires every ORM instance (incl. ``new_master``).
                     _promote_id = survivors[0].id
-                    await self.position_repo.update_fields(
-                        _promote_id, link_role="master"
-                    )
+                    await self.position_repo.update_fields(_promote_id, link_role="master")
                     if len(survivors) == 1:
                         # Only one left — collapse to a standalone owner so
                         # we don't keep a one-member group around.
@@ -4643,8 +4454,7 @@ class BOQService:
                             link_group_id=None,
                         )
                     logger.info(
-                        "Promoted position %s to master of group %s "
-                        "(old master %s deleted)",
+                        "Promoted position %s to master of group %s (old master %s deleted)",
                         _promote_id,
                         _del_link_group,
                         position_id,
@@ -4661,9 +4471,7 @@ class BOQService:
         # Clean up Activity references to deleted positions so the schedule
         # module doesn't retain dead IDs in Activity.boq_position_ids JSON arrays.
         if deleted_position_ids:
-            await self._scrub_activity_position_refs(
-                _del_position_boq_id, deleted_position_ids
-            )
+            await self._scrub_activity_position_refs(_del_position_boq_id, deleted_position_ids)
 
         for pid_str in deleted_position_ids:
             await _safe_publish(
@@ -5039,8 +4847,7 @@ class BOQService:
                 # Per-unit norm: unit_rate = Σ(r.qty × r.rate), NO division
                 # by position quantity (mirrors update_position).
                 total_resource_cost = sum(
-                    float(r.get("quantity", 0) or 0) * float(r.get("unit_rate", 0) or 0)
-                    for r in resources
+                    float(r.get("quantity", 0) or 0) * float(r.get("unit_rate", 0) or 0) for r in resources
                 )
                 if total_resource_cost > 0:
                     new_unit_rate = _quantize_money_str(str(total_resource_cost))
@@ -5228,15 +5035,11 @@ class BOQService:
         # when the legacy ``<ordinal>.1`` collides.
         _base_ordinal = f"{source.ordinal}.1"
         if await self.position_repo.ordinal_exists(source.boq_id, _base_ordinal):
-            _dup_ordinal = await self._next_free_ordinal(
-                source.boq_id, source.ordinal
-            )
+            _dup_ordinal = await self._next_free_ordinal(source.boq_id, source.ordinal)
         else:
             _dup_ordinal = _base_ordinal
         _project_id = await self.position_repo.project_id_for_boq(source.boq_id)
-        _fresh_code = await self._resolve_create_reference_code(
-            _project_id, None
-        )
+        _fresh_code = await self._resolve_create_reference_code(_project_id, None)
         new_position = await self._clone_subtree(
             source,
             boq_id=source.boq_id,
@@ -5326,13 +5129,9 @@ class BOQService:
                 if survivors:
                     new_master = survivors[0]
                     if len(survivors) == 1:
-                        await self.position_repo.update_fields(
-                            new_master.id, link_role=None, link_group_id=None
-                        )
+                        await self.position_repo.update_fields(new_master.id, link_role=None, link_group_id=None)
                     else:
-                        await self.position_repo.update_fields(
-                            new_master.id, link_role="master"
-                        )
+                        await self.position_repo.update_fields(new_master.id, link_role="master")
             except Exception:  # noqa: BLE001 — never block the unlink
                 logger.exception(
                     "Survivor-promotion failed unlinking master %s",
@@ -5376,10 +5175,7 @@ class BOQService:
                     user_id=actor_id,
                     action="position.unlinked",
                     target_type="position",
-                    description=(
-                        f"Unlinked position {_pos_ordinal} from code "
-                        f"'{_pos_ref_code}'"
-                    ),
+                    description=(f"Unlinked position {_pos_ordinal} from code '{_pos_ref_code}'"),
                     project_id=_proj_id,
                     boq_id=_pos_boq_id,
                     target_id=position_id,
@@ -5429,17 +5225,11 @@ class BOQService:
             # project under different (e.g. copy) rows — surface every row
             # in the project carrying the same code so the UI can show
             # "this code is used N times".
-            project_id = await self.position_repo.project_id_for_boq(
-                position.boq_id
-            )
+            project_id = await self.position_repo.project_id_for_boq(position.boq_id)
             if ref_code and project_id is not None:
-                master = await self.position_repo.find_master_by_reference_code(
-                    project_id, ref_code
-                )
+                master = await self.position_repo.find_master_by_reference_code(project_id, ref_code)
                 if master is not None and master.link_group_id is not None:
-                    members_src = await self.position_repo.list_link_group(
-                        master.link_group_id
-                    )
+                    members_src = await self.position_repo.list_link_group(master.link_group_id)
                     group_id = master.link_group_id
                     for m in members_src:
                         if getattr(m, "link_role", None) == "master":
@@ -5463,9 +5253,7 @@ class BOQService:
             )
 
         members = [_info(p) for p in members_src]
-        instance_count = sum(
-            1 for p in members_src if getattr(p, "link_role", None) == "instance"
-        )
+        instance_count = sum(1 for p in members_src if getattr(p, "link_role", None) == "instance")
         return PositionLinksResponse(
             reference_code=ref_code,
             link_group_id=group_id,
@@ -5615,9 +5403,7 @@ class BOQService:
         if not changed_by_code:
             return 0
         try:
-            project_id = await self.position_repo.project_id_for_boq(
-                editor_position.boq_id
-            )
+            project_id = await self.position_repo.project_id_for_boq(editor_position.boq_id)
             if project_id is None:
                 return 0
             # Capture editor identity NOW — per-instance ``update_fields``
@@ -5641,11 +5427,7 @@ class BOQService:
                     "ordinal": p.ordinal,
                     "quantity": p.quantity,
                     "version": int(p.version or 0),
-                    "meta": (
-                        dict(p.metadata_)
-                        if isinstance(p.metadata_, dict)
-                        else {}
-                    ),
+                    "meta": (dict(p.metadata_) if isinstance(p.metadata_, dict) else {}),
                 }
                 for p in positions
             ]
@@ -5655,9 +5437,7 @@ class BOQService:
                 if not isinstance(res, list):
                     return False
                 return any(
-                    isinstance(rr, dict)
-                    and str(rr.get("code") or "").strip().casefold()
-                    == code.casefold()
+                    isinstance(rr, dict) and str(rr.get("code") or "").strip().casefold() == code.casefold()
                     for rr in res
                 )
 
@@ -5685,9 +5465,7 @@ class BOQService:
                 res_raw = meta.get("resources")
                 if not isinstance(res_raw, list):
                     continue
-                new_res: list[Any] = [
-                    dict(r) if isinstance(r, dict) else r for r in res_raw
-                ]
+                new_res: list[Any] = [dict(r) if isinstance(r, dict) else r for r in res_raw]
                 touched = False
                 for r in new_res:
                     if not isinstance(r, dict):
@@ -5723,8 +5501,7 @@ class BOQService:
                 for r in new_res:
                     if isinstance(r, dict):
                         roll += _str_to_float(r.get("total")) or (
-                            _str_to_float(r.get("quantity"))
-                            * _str_to_float(r.get("unit_rate"))
+                            _str_to_float(r.get("quantity")) * _str_to_float(r.get("unit_rate"))
                         )
                 derived_rate = _quantize_money_str(round(roll, 4))
                 new_total = _compute_total(s["quantity"], derived_rate)
@@ -5743,9 +5520,7 @@ class BOQService:
                         "position_id": str(s["id"]),
                         "boq_id": str(s["boq_id"]),
                         "ordinal": s["ordinal"],
-                        "changes": {
-                            "resource_code_propagation": sorted(owned_codes)
-                        },
+                        "changes": {"resource_code_propagation": sorted(owned_codes)},
                         "kind": "linked_resource_propagation",
                     },
                     source_module="oe_boq",
@@ -6935,11 +6710,7 @@ class BOQService:
         seen: set[uuid.UUID] = set()
         while current_id not in seen:
             seen.add(current_id)
-            row = (
-                await self.session.execute(
-                    select(BIMModel.version).where(BIMModel.id == current_id)
-                )
-            ).first()
+            row = (await self.session.execute(select(BIMModel.version).where(BIMModel.id == current_id))).first()
             if row is not None and row[0]:
                 version = str(row[0])
             successor = (
@@ -7050,15 +6821,9 @@ class BOQService:
 
         from app.modules.bim_hub.models import BIMModel
 
-        model = (
-            await self.session.execute(
-                select(BIMModel).where(BIMModel.id == data.model_id)
-            )
-        ).scalar_one_or_none()
+        model = (await self.session.execute(select(BIMModel).where(BIMModel.id == data.model_id))).scalar_one_or_none()
         if model is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="BIM model not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BIM model not found")
         if model.project_id != boq.project_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -7089,9 +6854,7 @@ class BOQService:
         )
         return QuantityLinkResponse.model_validate(link)
 
-    async def list_quantity_links(
-        self, position_id: uuid.UUID
-    ) -> list[QuantityLinkResponse]:
+    async def list_quantity_links(self, position_id: uuid.UUID) -> list[QuantityLinkResponse]:
         """List every quantity link bound to a single position."""
         links = await self.quantity_link_repo.list_for_position(position_id)
         return [QuantityLinkResponse.model_validate(link) for link in links]
@@ -7104,14 +6867,10 @@ class BOQService:
         """
         link = await self.quantity_link_repo.get_by_id(link_id)
         if link is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Quantity link not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quantity link not found")
         await self.quantity_link_repo.delete(link_id)
 
-    async def refresh_quantity_links(
-        self, boq_id: uuid.UUID
-    ) -> QuantityLinkRefreshResponse:
+    async def refresh_quantity_links(self, boq_id: uuid.UUID) -> QuantityLinkRefreshResponse:
         """Re-pull every link in a BOQ against the latest model version.
 
         For each link: resolve the model's newest revision, recompute the
@@ -7160,9 +6919,7 @@ class BOQService:
                 await self.quantity_link_repo.delete(snap["id"])
                 continue
 
-            latest_model_id, latest_version = await self._resolve_latest_model_id(
-                snap["model_id"]
-            )
+            latest_model_id, latest_version = await self._resolve_latest_model_id(snap["model_id"])
             new_qty, contributing, missing = await self._compute_link_quantity(
                 model_id=latest_model_id,
                 stable_ids=snap["element_stable_ids"],
@@ -7176,9 +6933,7 @@ class BOQService:
 
             if not contributing and missing:
                 new_status = "broken"
-                message = (
-                    "No bound elements resolve in the latest model version"
-                )
+                message = "No bound elements resolve in the latest model version"
             elif changed:
                 new_status = "stale"
                 message = "Source element quantities changed"
@@ -7195,9 +6950,7 @@ class BOQService:
                 snap["id"],
                 status=new_status,
                 last_pulled_at=now_iso,
-                source_model_version=(
-                    latest_version or snap["source_model_version"]
-                ),
+                source_model_version=(latest_version or snap["source_model_version"]),
             )
             if new_status == "stale":
                 stale_count += 1
@@ -7356,9 +7109,7 @@ class BOQService:
                 )
                 continue
 
-            latest_model_id, latest_version = await self._resolve_latest_model_id(
-                snap["model_id"]
-            )
+            latest_model_id, latest_version = await self._resolve_latest_model_id(snap["model_id"])
             new_qty, contributing, missing = await self._compute_link_quantity(
                 model_id=latest_model_id,
                 stable_ids=snap["element_stable_ids"],
@@ -7423,9 +7174,7 @@ class BOQService:
                 last_applied_quantity=new_qty_str,
                 last_applied_at=now_iso,
                 applied_by=applied_by,
-                source_model_version=(
-                    latest_version or snap["source_model_version"]
-                ),
+                source_model_version=(latest_version or snap["source_model_version"]),
             )
             applied += 1
             results.append(
@@ -7524,16 +7273,12 @@ class BOQService:
             if b is not None:
                 # Issue #111 (skolodi) — resource-currency-aware so a
                 # base-budget diff converts USD-resource positions too.
-                b_total_base = _leaf_total_base_with_resources(
-                    b, base_fx_map, base_fx_ccy
-                )
+                b_total_base = _leaf_total_base_with_resources(b, base_fx_map, base_fx_ccy)
                 old_dc_base += b_total_base
             else:
                 b_total_base = Decimal("0")
             if o is not None:
-                o_total_base = _leaf_total_base_with_resources(
-                    o, other_fx_map, other_fx_ccy
-                )
+                o_total_base = _leaf_total_base_with_resources(o, other_fx_map, other_fx_ccy)
                 new_dc_base += o_total_base
             else:
                 o_total_base = Decimal("0")
@@ -7600,8 +7345,7 @@ class BOQService:
                 ComparePositionRow(
                     change_type=change_type,
                     match_key=key,
-                    reference_code=getattr(o, "reference_code", None)
-                    or getattr(b, "reference_code", None),
+                    reference_code=getattr(o, "reference_code", None) or getattr(b, "reference_code", None),
                     ordinal=o.ordinal,
                     description=o.description,
                     unit=o.unit,
@@ -7614,17 +7358,13 @@ class BOQService:
                     old_total_base=_quantize_money_str(b_total_base),
                     new_total_base=_quantize_money_str(o_total_base),
                     currency=_position_currency(o),
-                    total_delta_base=_quantize_money_str(
-                        o_total_base - b_total_base
-                    ),
+                    total_delta_base=_quantize_money_str(o_total_base - b_total_base),
                 )
             )
 
         summary.old_direct_cost_base = _quantize_money_str(old_dc_base)
         summary.new_direct_cost_base = _quantize_money_str(new_dc_base)
-        summary.direct_cost_delta_base = _quantize_money_str(
-            new_dc_base - old_dc_base
-        )
+        summary.direct_cost_delta_base = _quantize_money_str(new_dc_base - old_dc_base)
 
         return BOQCompareResponse(
             base_boq_id=base_boq_id,

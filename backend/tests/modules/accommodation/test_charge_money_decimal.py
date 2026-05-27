@@ -92,9 +92,7 @@ async def test_charge_amount_round_trips_exactly(
     assert lst.status_code == 200
     charges = lst.json()
     total = sum(Decimal(str(c["amount"])) for c in charges)
-    assert total == Decimal("0.30"), (
-        f"expected exact 0.30, got {total!r} — float coercion suspected"
-    )
+    assert total == Decimal("0.30"), f"expected exact 0.30, got {total!r} — float coercion suspected"
 
 
 @pytest.mark.asyncio
@@ -182,12 +180,6 @@ async def test_persisted_amount_is_decimal_type(
     from app.modules.accommodation.models import Charge
 
     async with async_session_factory() as sess:
-        row = (
-            await sess.execute(
-                select(Charge).where(Charge.id == uuid.UUID(charge_id))
-            )
-        ).scalar_one()
-        assert isinstance(row.amount, Decimal), (
-            f"expected Decimal, got {type(row.amount).__name__}"
-        )
+        row = (await sess.execute(select(Charge).where(Charge.id == uuid.UUID(charge_id)))).scalar_one()
+        assert isinstance(row.amount, Decimal), f"expected Decimal, got {type(row.amount).__name__}"
         assert row.amount == Decimal("42.42")

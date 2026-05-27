@@ -79,11 +79,7 @@ async def _force_activate_and_set_role(email: str, role: str = "admin") -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await session.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await session.commit()
 
 
@@ -126,9 +122,7 @@ async def test_get_tour_state_empty_for_new_user(client):
 
     resp = await client.get("/api/v1/users/me/tour-state/", headers=headers)
 
-    assert resp.status_code == 200, (
-        f"Expected 200 but got {resp.status_code}: {resp.text!r}"
-    )
+    assert resp.status_code == 200, f"Expected 200 but got {resp.status_code}: {resp.text!r}"
     body = resp.json()
     assert body == {"tours": {}}
 
@@ -161,9 +155,7 @@ async def test_put_then_get_tour_state_round_trip(client):
     assert put_resp.status_code == 200, put_resp.text
     assert put_resp.json() == payload
 
-    get_resp = await client.get(
-        "/api/v1/users/me/tour-state/", headers=headers
-    )
+    get_resp = await client.get("/api/v1/users/me/tour-state/", headers=headers)
     assert get_resp.status_code == 200
     assert get_resp.json() == payload
 
@@ -236,19 +228,13 @@ async def test_user_a_write_does_not_affect_user_b(client):
         },
     )
 
-    resp_b = await client.get(
-        "/api/v1/users/me/tour-state/", headers=headers_b
-    )
+    resp_b = await client.get("/api/v1/users/me/tour-state/", headers=headers_b)
     assert resp_b.status_code == 200
     assert resp_b.json() == {"tours": {}}
 
-    resp_a = await client.get(
-        "/api/v1/users/me/tour-state/", headers=headers_a
-    )
+    resp_a = await client.get("/api/v1/users/me/tour-state/", headers=headers_a)
     body_a = resp_a.json()
-    assert body_a["tours"]["dashboard"]["dismissed_at"] == (
-        "2026-05-24T10:00:00+00:00"
-    )
+    assert body_a["tours"]["dashboard"]["dismissed_at"] == ("2026-05-24T10:00:00+00:00")
 
 
 # ── Unknown tour ids dropped ────────────────────────────────────────────────

@@ -105,9 +105,7 @@ async def fetch_distinct_values(
     """
     column = column.strip()
     if not column or not _VALID_COLUMN_RE.match(column):
-        raise ColumnNotFoundError(
-            f"Column name '{column}' contains invalid characters."
-        )
+        raise ColumnNotFoundError(f"Column name '{column}' contains invalid characters.")
     limit = max(1, min(limit, _MAX_LIMIT))
     overscan_limit = limit * _OVERSCAN_FACTOR
 
@@ -121,13 +119,22 @@ async def fetch_distinct_values(
     # 2 — fetch candidates via DuckDB. Empty query → top-N by frequency.
     if query.strip():
         rows = await _fetch_with_filter(
-            pool, snapshot_id, project_id, column,
-            query=query, limit=overscan_limit, is_top_level=is_top_level,
+            pool,
+            snapshot_id,
+            project_id,
+            column,
+            query=query,
+            limit=overscan_limit,
+            is_top_level=is_top_level,
         )
     else:
         rows = await _fetch_top_by_frequency(
-            pool, snapshot_id, project_id, column,
-            limit=overscan_limit, is_top_level=is_top_level,
+            pool,
+            snapshot_id,
+            project_id,
+            column,
+            limit=overscan_limit,
+            is_top_level=is_top_level,
         )
 
     if not rows:
@@ -154,14 +161,13 @@ async def _ensure_column_exists(
 ) -> None:
     if is_top_level:
         rows = await pool.execute(
-            snapshot_id, project_id,
+            snapshot_id,
+            project_id,
             "SELECT column_name FROM information_schema.columns WHERE table_name = 'entities'",
         )
         names = {str(r[0]) for r in rows}
         if column not in names:
-            raise ColumnNotFoundError(
-                f"Column '{column}' is not in this snapshot's schema."
-            )
+            raise ColumnNotFoundError(f"Column '{column}' is not in this snapshot's schema.")
         return
 
     # Flattened attribute — pyarrow writes the per-row dicts as a STRUCT
@@ -169,9 +175,7 @@ async def _ensure_column_exists(
     # vary. We try both accessors; either a binder error or a zero-row
     # result means "not present".
     if not await _attributes_key_present(pool, snapshot_id, project_id, column):
-        raise ColumnNotFoundError(
-            f"Column '{column}' is not present in any row's attributes."
-        )
+        raise ColumnNotFoundError(f"Column '{column}' is not present in any row's attributes.")
 
 
 async def _attributes_key_present(
@@ -192,7 +196,8 @@ async def _attributes_key_present(
     # 1 — try MAP-style accessor (works when pyarrow wrote a MAP column).
     try:
         rows = await pool.execute(
-            snapshot_id, project_id,
+            snapshot_id,
+            project_id,
             "SELECT 1 FROM entities WHERE attributes[?] IS NOT NULL LIMIT 1",
             [column],
         )
@@ -205,7 +210,8 @@ async def _attributes_key_present(
     key = _safe_key(column)
     try:
         rows = await pool.execute(
-            snapshot_id, project_id,
+            snapshot_id,
+            project_id,
             f'SELECT 1 FROM entities WHERE attributes."{key}" IS NOT NULL LIMIT 1',
         )
         if rows:
@@ -232,7 +238,7 @@ async def _fetch_with_filter(
             f'SELECT CAST("{_safe_key(column)}" AS VARCHAR) AS v, COUNT(*) AS c '
             f'FROM entities WHERE "{_safe_key(column)}" IS NOT NULL '
             f'AND CAST("{_safe_key(column)}" AS VARCHAR) ILIKE ? '
-            f'GROUP BY 1 ORDER BY c DESC, v ASC LIMIT ?'
+            f"GROUP BY 1 ORDER BY c DESC, v ASC LIMIT ?"
         )
         return await pool.execute(snapshot_id, project_id, sql, [pattern, limit])
     sql = (
@@ -243,7 +249,10 @@ async def _fetch_with_filter(
     )
     try:
         return await pool.execute(
-            snapshot_id, project_id, sql, [column, column, column, pattern, limit],
+            snapshot_id,
+            project_id,
+            sql,
+            [column, column, column, pattern, limit],
         )
     except Exception:
         # Fallback for struct attributes (DuckDB raises BinderException
@@ -254,7 +263,7 @@ async def _fetch_with_filter(
             f'SELECT CAST(attributes."{key}" AS VARCHAR) AS v, COUNT(*) AS c '
             f'FROM entities WHERE attributes."{key}" IS NOT NULL '
             f'AND CAST(attributes."{key}" AS VARCHAR) ILIKE ? '
-            f'GROUP BY 1 ORDER BY c DESC, v ASC LIMIT ?'
+            f"GROUP BY 1 ORDER BY c DESC, v ASC LIMIT ?"
         )
         return await pool.execute(snapshot_id, project_id, sql, [pattern, limit])
 
@@ -272,7 +281,7 @@ async def _fetch_top_by_frequency(
         sql = (
             f'SELECT CAST("{_safe_key(column)}" AS VARCHAR) AS v, COUNT(*) AS c '
             f'FROM entities WHERE "{_safe_key(column)}" IS NOT NULL '
-            f'GROUP BY 1 ORDER BY c DESC, v ASC LIMIT ?'
+            f"GROUP BY 1 ORDER BY c DESC, v ASC LIMIT ?"
         )
         return await pool.execute(snapshot_id, project_id, sql, [limit])
     sql = (
@@ -282,14 +291,17 @@ async def _fetch_top_by_frequency(
     )
     try:
         return await pool.execute(
-            snapshot_id, project_id, sql, [column, column, limit],
+            snapshot_id,
+            project_id,
+            sql,
+            [column, column, limit],
         )
     except Exception:
         key = _safe_key(column)
         sql = (
             f'SELECT CAST(attributes."{key}" AS VARCHAR) AS v, COUNT(*) AS c '
             f'FROM entities WHERE attributes."{key}" IS NOT NULL '
-            f'GROUP BY 1 ORDER BY c DESC, v ASC LIMIT ?'
+            f"GROUP BY 1 ORDER BY c DESC, v ASC LIMIT ?"
         )
         return await pool.execute(snapshot_id, project_id, sql, [limit])
 
@@ -318,9 +330,14 @@ def fetch_distinct_values_from_dataframe(
     if column in df.columns:
         series = df[column].dropna().astype(str)
     elif "attributes" in df.columns:
-        series = df["attributes"].apply(
-            lambda d: d.get(column) if isinstance(d, dict) else None,
-        ).dropna().astype(str)
+        series = (
+            df["attributes"]
+            .apply(
+                lambda d: d.get(column) if isinstance(d, dict) else None,
+            )
+            .dropna()
+            .astype(str)
+        )
         if series.empty:
             raise ColumnNotFoundError(f"Column '{column}' not in schema.")
     else:
@@ -343,7 +360,8 @@ def fetch_distinct_values_from_dataframe(
 
 
 def _rerank_with_rapidfuzz(
-    candidates: list[ValueMatch], query: str,
+    candidates: list[ValueMatch],
+    query: str,
 ) -> list[ValueMatch]:
     """Re-order ``candidates`` so close lexicographic matches lead.
 

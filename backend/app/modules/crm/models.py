@@ -50,24 +50,12 @@ class PipelineStage(Base):
 
     code: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    display_order: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
-    default_probability_percent: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
-    is_final: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
-    is_won: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
-    is_lost: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
-    color: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="", server_default=""
-    )
+    display_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    default_probability_percent: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    is_final: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    is_won: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    is_lost: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    color: Mapped[str] = mapped_column(String(16), nullable=False, default="", server_default="")
 
     def __repr__(self) -> str:
         return f"<PipelineStage {self.code}>"
@@ -86,12 +74,8 @@ class WinLossReason(Base):
         default="other",
         server_default="other",
     )
-    is_win_reason: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
-    is_loss_reason: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1"
-    )
+    is_win_reason: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    is_loss_reason: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
 
     def __repr__(self) -> str:
         return f"<WinLossReason {self.code} ({self.category})>"
@@ -127,16 +111,12 @@ class Account(Base):
 
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     industry: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    size_category: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="sme", server_default="sme"
-    )
+    size_category: Mapped[str] = mapped_column(String(32), nullable=False, default="sme", server_default="sme")
     country: Mapped[str | None] = mapped_column(String(64), nullable=True)
     website: Mapped[str | None] = mapped_column(String(500), nullable=True)
     # NOTE: plain UUID — no SQLAlchemy FK to oe_contacts_contact (see header).
     primary_contact_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
-    description: Mapped[str] = mapped_column(
-        Text, nullable=False, default="", server_default=""
-    )
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     status: Mapped[str] = mapped_column(
         String(32),
         nullable=False,
@@ -187,9 +167,7 @@ class Lead(Base):
     contact_name: Mapped[str] = mapped_column(String(255), nullable=False)
     contact_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     contact_phone: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    source: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="inbound", server_default="inbound"
-    )
+    source: Mapped[str] = mapped_column(String(32), nullable=False, default="inbound", server_default="inbound")
     status: Mapped[str] = mapped_column(
         String(32),
         nullable=False,
@@ -203,9 +181,7 @@ class Lead(Base):
         nullable=True,
         index=True,
     )
-    qualification_notes: Mapped[str] = mapped_column(
-        Text, nullable=False, default="", server_default=""
-    )
+    qualification_notes: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     qualified_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     converted_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     converted_opportunity_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -230,19 +206,13 @@ class Opportunity(Base):
         index=True,
     )
     title: Mapped[str] = mapped_column(String(500), nullable=False)
-    description: Mapped[str] = mapped_column(
-        Text, nullable=False, default="", server_default=""
-    )
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     estimated_value: Mapped[Decimal] = mapped_column(
         Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0"
     )
-    currency: Mapped[str] = mapped_column(
-        String(8), nullable=False, default="", server_default=""
-    )
+    currency: Mapped[str] = mapped_column(String(8), nullable=False, default="", server_default="")
     expected_close_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    probability_percent: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
+    probability_percent: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     stage_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey("oe_crm_pipeline_stage.id", ondelete="RESTRICT"),
@@ -252,9 +222,7 @@ class Opportunity(Base):
     weighted_value: Mapped[Decimal] = mapped_column(
         Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0"
     )
-    source: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="inbound", server_default="inbound"
-    )
+    source: Mapped[str] = mapped_column(String(32), nullable=False, default="inbound", server_default="inbound")
     owner_user_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
@@ -275,9 +243,7 @@ class Opportunity(Base):
         ForeignKey("oe_crm_win_loss_reason.code", ondelete="SET NULL"),
         nullable=True,
     )
-    notes: Mapped[str] = mapped_column(
-        Text, nullable=False, default="", server_default=""
-    )
+    notes: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     # NOTE: plain UUID — no SQLAlchemy FK to oe_contacts_contact (see header).
     # The CRM does NOT own contacts: this points at a row in the shared
     # Contacts directory (``oe_contacts_contact``). People/companies are
@@ -325,9 +291,7 @@ class OpportunityStageHistory(Base):
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
         nullable=True,
     )
-    duration_in_previous_seconds: Mapped[int | None] = mapped_column(
-        Integer, nullable=True
-    )
+    duration_in_previous_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     def __repr__(self) -> str:
         return f"<OpportunityStageHistory opp={self.opportunity_id} → {self.to_stage_id}>"
@@ -367,19 +331,13 @@ class CrmActivity(Base):
         nullable=True,
         index=True,
     )
-    kind: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="note", server_default="note"
-    )
+    kind: Mapped[str] = mapped_column(String(32), nullable=False, default="note", server_default="note")
     subject: Mapped[str] = mapped_column(String(500), nullable=False, default="")
-    body: Mapped[str] = mapped_column(
-        Text, nullable=False, default="", server_default=""
-    )
+    body: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     due_at: Mapped[str | None] = mapped_column(String(40), nullable=True, index=True)
     completed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     outcome: Mapped[str | None] = mapped_column(String(32), nullable=True)
-    external_calendar_event_id: Mapped[str | None] = mapped_column(
-        String(255), nullable=True
-    )
+    external_calendar_event_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     def __repr__(self) -> str:
         return f"<Activity {self.kind} '{self.subject[:40]}'>"
@@ -402,9 +360,7 @@ class Forecast(Base):
     weighted_value: Mapped[Decimal] = mapped_column(
         Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0"
     )
-    won_value: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0"
-    )
+    won_value: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0")
     committed_value: Mapped[Decimal] = mapped_column(
         Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0"
     )

@@ -64,8 +64,7 @@ class SmtpEmailBackend(EmailBackend):
             # look healthy while users never received reset emails
             # (observed during the v2.3.1 audit).
             logger.warning(
-                "[email:smtp] dropping message to %s — SMTP not configured "
-                "(set SMTP_HOST to enable the smtp backend)",
+                "[email:smtp] dropping message to %s — SMTP not configured (set SMTP_HOST to enable the smtp backend)",
                 message.to,
             )
             return DeliveryResult.failure(self.name, reason="smtp not configured")
@@ -125,7 +124,5 @@ class SmtpEmailBackend(EmailBackend):
             return DeliveryResult.failure(self.name, reason=f"smtp error: {type(exc).__name__}")
         except OSError as exc:
             # Network-level: DNS failure, connection refused, timeout.
-            logger.exception(
-                "[email:smtp] network error delivering to %s: %s", message.to, exc
-            )
+            logger.exception("[email:smtp] network error delivering to %s: %s", message.to, exc)
             return DeliveryResult.failure(self.name, reason=f"network error: {type(exc).__name__}")

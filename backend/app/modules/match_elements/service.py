@@ -31,12 +31,12 @@ from typing import Any
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.i18n import get_locale
 from app.core.match_service.config import (
     CONFIDENCE_HIGH_THRESHOLD,
     CONFIDENCE_MEDIUM_THRESHOLD,
     DEFAULT_AUTO_CONFIRM_THRESHOLD,
 )
-from app.core.i18n import get_locale
 from app.core.match_service.envelope import (
     ElementEnvelope,
     MatchCandidate,
@@ -95,9 +95,7 @@ def _to_session_read(row: MatchSession) -> schemas.SessionRead:
         group_by=list(row.group_by or []),
         filters=dict(row.filters or {}),
         excluded_categories=list(row.excluded_categories or []),
-        auto_confirm_threshold=_to_decimal(
-            row.auto_confirm_threshold, DEFAULT_AUTO_CONFIRM_THRESHOLD
-        ),
+        auto_confirm_threshold=_to_decimal(row.auto_confirm_threshold, DEFAULT_AUTO_CONFIRM_THRESHOLD),
         use_net_quantities=row.use_net_quantities,
         catalogue_id=cat_id,
         is_archived=bool(getattr(row, "is_archived", False) or False),
@@ -119,7 +117,8 @@ def _ifc_class_from_group_key(group_key: str) -> str | None:
 
 
 def _human_group_label(
-    group_key: str, sample_attrs: dict[str, Any] | None,
+    group_key: str,
+    sample_attrs: dict[str, Any] | None,
 ) -> str:
     """‌⁠‍Render a group_key into a human-readable single-line label.
 
@@ -370,8 +369,7 @@ def _derive_standards_from_catalogues() -> tuple[tuple[str, ...], dict[str, str]
         )
     except Exception as exc:  # pragma: no cover — defensive
         logger.warning(
-            "match_elements: CWICR catalogue import failed (%s); "
-            "falling back to hardcoded standards",
+            "match_elements: CWICR catalogue import failed (%s); falling back to hardcoded standards",
             exc,
         )
         return _FALLBACK_STANDARDS, dict(_FALLBACK_REGION_TO_STANDARD)
@@ -427,9 +425,7 @@ def _derive_standards_from_catalogues() -> tuple[tuple[str, ...], dict[str, str]
     return tuple(standards), region_to_standard
 
 
-_KNOWN_CLASSIFICATION_STANDARDS, _REGION_PREFERRED_STANDARD = (
-    _derive_standards_from_catalogues()
-)
+_KNOWN_CLASSIFICATION_STANDARDS, _REGION_PREFERRED_STANDARD = _derive_standards_from_catalogues()
 
 
 def _resolve_classification_order(
@@ -502,34 +498,34 @@ def _aggregate_quantities(elements: list[SourceElement]) -> dict[str, float]:
 # own default. Stem matching ("IfcWallStandardCase" → "IfcWall") keeps
 # the table compact.
 _IFC_NATURAL_UNIT: dict[str, str] = {
-    "IfcWall":        "m3",
-    "IfcSlab":        "m2",
-    "IfcRoof":        "m2",
-    "IfcCovering":    "m2",
-    "IfcCeiling":     "m2",
+    "IfcWall": "m3",
+    "IfcSlab": "m2",
+    "IfcRoof": "m2",
+    "IfcCovering": "m2",
+    "IfcCeiling": "m2",
     "IfcCurtainWall": "m2",
-    "IfcSpace":       "m2",
-    "IfcBeam":        "m",
-    "IfcColumn":      "m",
-    "IfcMember":      "m",
-    "IfcPlate":       "m2",
-    "IfcFooting":     "m3",
-    "IfcPile":        "m",
-    "IfcRamp":        "m2",
-    "IfcRailing":     "m",
-    "IfcStair":       "pcs",
+    "IfcSpace": "m2",
+    "IfcBeam": "m",
+    "IfcColumn": "m",
+    "IfcMember": "m",
+    "IfcPlate": "m2",
+    "IfcFooting": "m3",
+    "IfcPile": "m",
+    "IfcRamp": "m2",
+    "IfcRailing": "m",
+    "IfcStair": "pcs",
     "IfcStairFlight": "m2",
-    "IfcDoor":        "pcs",
-    "IfcWindow":      "pcs",
-    "IfcOpeningElement":   "pcs",
-    "IfcFurniture":        "pcs",
+    "IfcDoor": "pcs",
+    "IfcWindow": "pcs",
+    "IfcOpeningElement": "pcs",
+    "IfcFurniture": "pcs",
     "IfcFurnishingElement": "pcs",
-    "IfcReinforcingBar":   "kg",
-    "IfcPipeSegment":      "m",
-    "IfcDuctSegment":      "m",
-    "IfcCableSegment":     "m",
+    "IfcReinforcingBar": "kg",
+    "IfcPipeSegment": "m",
+    "IfcDuctSegment": "m",
+    "IfcCableSegment": "m",
     "IfcCableCarrierSegment": "m",
-    "IfcChimney":          "pcs",
+    "IfcChimney": "pcs",
 }
 
 
@@ -643,26 +639,60 @@ def _split_unit_multiplier(unit: str | None) -> tuple[float, str]:
 # units as "no dimension" and lets pcs×volume mismatches through.
 _UNIT_LOCALE_MAP: dict[str, str] = {
     # Russian / Bulgarian Cyrillic
-    "м": "m", "м.": "m", "м2": "m2", "м²": "m2", "м3": "m3", "м³": "m3",
-    "пог.м": "m", "пог. м": "m", "п.м": "m", "пм": "m",
-    "т": "t", "кг": "kg", "г": "kg",
-    "шт": "pcs", "шт.": "pcs", "штук": "pcs",
-    "брой": "pcs", "броя": "pcs", "бр": "pcs", "бр.": "pcs",
-    "стык": "pcs", "комплект": "lsum", "компл": "lsum", "компл.": "lsum",
+    "м": "m",
+    "м.": "m",
+    "м2": "m2",
+    "м²": "m2",
+    "м3": "m3",
+    "м³": "m3",
+    "пог.м": "m",
+    "пог. м": "m",
+    "п.м": "m",
+    "пм": "m",
+    "т": "t",
+    "кг": "kg",
+    "г": "kg",
+    "шт": "pcs",
+    "шт.": "pcs",
+    "штук": "pcs",
+    "брой": "pcs",
+    "броя": "pcs",
+    "бр": "pcs",
+    "бр.": "pcs",
+    "стык": "pcs",
+    "комплект": "lsum",
+    "компл": "lsum",
+    "компл.": "lsum",
     "комплектен": "lsum",
     "свързване": "pcs",  # connection
     # German
-    "stk": "pcs", "stk.": "pcs", "stück": "pcs", "st": "pcs",
-    "tn": "t", "tonne": "t",
+    "stk": "pcs",
+    "stk.": "pcs",
+    "stück": "pcs",
+    "st": "pcs",
+    "tn": "t",
+    "tonne": "t",
     # French / Spanish / Italian
-    "ud": "pcs", "ud.": "pcs", "u": "pcs", "uni": "pcs",
-    "ml": "m", "lm": "m",
+    "ud": "pcs",
+    "ud.": "pcs",
+    "u": "pcs",
+    "uni": "pcs",
+    "ml": "m",
+    "lm": "m",
     # English variants
-    "ea": "pcs", "each": "pcs", "no": "pcs", "no.": "pcs", "nr": "pcs",
+    "ea": "pcs",
+    "each": "pcs",
+    "no": "pcs",
+    "no.": "pcs",
+    "nr": "pcs",
     "lf": "m",  # linear foot — close enough for dim
-    "sf": "m2", "sq.ft": "m2", "sqft": "m2",
-    "cy": "m3", "cuyd": "m3",
-    "lsum": "lsum", "ls": "lsum",
+    "sf": "m2",
+    "sq.ft": "m2",
+    "sqft": "m2",
+    "cy": "m3",
+    "cuyd": "m3",
+    "lsum": "lsum",
+    "ls": "lsum",
 }
 
 
@@ -712,11 +742,8 @@ async def _record_pick_to_search_log(
     if session_id is None:
         return
 
-    stmt = (
-        select(MatchSearchLog)
-        .where(
-            MatchSearchLog.session_id == session_id,
-        )
+    stmt = select(MatchSearchLog).where(
+        MatchSearchLog.session_id == session_id,
     )
     if group_id is not None:
         stmt = stmt.where(MatchSearchLog.group_id == group_id)
@@ -733,7 +760,7 @@ async def _record_pick_to_search_log(
         # Nothing to backfill — mute and move on.
         return
 
-    log_row.picked_rate_code = (picked_rate_code or None)
+    log_row.picked_rate_code = picked_rate_code or None
     log_row.picked_rank = picked_rank
     log_row.picked_at = picked_at
 
@@ -899,9 +926,7 @@ def _envelope_from_group(
         classifier_hint_parts["masterformat"] = ifc_meta.masterformat_hint
     if ifc_meta.nrm_hint:
         classifier_hint_parts["nrm"] = ifc_meta.nrm_hint
-    classifier_hint: dict[str, str] | None = (
-        classifier_hint_parts or None
-    )
+    classifier_hint: dict[str, str] | None = classifier_hint_parts or None
 
     # ── v3 ProjectItem-equivalent structured fields ──────────────────
     # Populated when the upstream BIM/Revit extractor knows the value.
@@ -1003,129 +1028,266 @@ _MATERIAL_BUCKETS: tuple[tuple[str, tuple[str, ...]], ...] = (
         "concrete",
         (
             # English / Latin
-            "concrete", "c30/", "c25/", "c40/", "c20/", "c35/",
+            "concrete",
+            "c30/",
+            "c25/",
+            "c40/",
+            "c20/",
+            "c35/",
             # German / Dutch / Nordic
-            "beton", "stahlbeton", "betong",
+            "beton",
+            "stahlbeton",
+            "betong",
             # Romance
-            "béton", "calcestruzzo", "hormigón", "concreto", "betón",
+            "béton",
+            "calcestruzzo",
+            "hormigón",
+            "concreto",
+            "betón",
             # Slavic
-            "бетон", "betonu", "betonová",
+            "бетон",
+            "betonu",
+            "betonová",
             # CJK
-            "混凝土", "钢筋混凝土", "コンクリート", "鉄筋コンクリート", "콘크리트",
+            "混凝土",
+            "钢筋混凝土",
+            "コンクリート",
+            "鉄筋コンクリート",
+            "콘크리트",
             # MENA / Indic
-            "خرسانة", "خرسانه", "beton ",  # Turkish "beton" (intentional trailing space)
+            "خرسانة",
+            "خرسانه",
+            "beton ",  # Turkish "beton" (intentional trailing space)
             "कंक्रीट",
             # Vietnamese / Indonesian / Thai
-            "bê tông", "beton ", "คอนกรีต",
+            "bê tông",
+            "beton ",
+            "คอนกรีต",
         ),
     ),
     (
         "steel",
         (
-            "steel", "stahl", "acero", "aço", "acciaio", "acier",
-            "сталь", "stal", "ocel",
-            "rebar", "iron", "eisen", "fer ",
+            "steel",
+            "stahl",
+            "acero",
+            "aço",
+            "acciaio",
+            "acier",
+            "сталь",
+            "stal",
+            "ocel",
+            "rebar",
+            "iron",
+            "eisen",
+            "fer ",
             # Steel grades — European, US, Indian, Brazilian, Japanese, Chinese
-            "s235", "s355", "s275", "s420", "s460",
-            "grade 40", "grade 60", "grade 75",
-            "fe415", "fe500", "fe550",  # Indian
-            "ca-50", "ca-25",            # Brazilian
-            "sd295", "sd345", "sd390", "sd490",  # Japanese
-            "hrb335", "hrb400", "hrb500",        # Chinese GB
+            "s235",
+            "s355",
+            "s275",
+            "s420",
+            "s460",
+            "grade 40",
+            "grade 60",
+            "grade 75",
+            "fe415",
+            "fe500",
+            "fe550",  # Indian
+            "ca-50",
+            "ca-25",  # Brazilian
+            "sd295",
+            "sd345",
+            "sd390",
+            "sd490",  # Japanese
+            "hrb335",
+            "hrb400",
+            "hrb500",  # Chinese GB
             # CJK
-            "钢", "钢筋", "鋼", "鉄筋", "강", "철근",
+            "钢",
+            "钢筋",
+            "鋼",
+            "鉄筋",
+            "강",
+            "철근",
             # MENA
-            "فولاذ", "حديد",
+            "فولاذ",
+            "حديد",
         ),
     ),
     (
         "wood",
         (
-            "wood", "timber", "lumber", "plywood",
-            "holz", "hout", "trä",
-            "madera", "madeira", "legno", "bois",
-            "дерев", "древ", "drewno", "dřevo",
+            "wood",
+            "timber",
+            "lumber",
+            "plywood",
+            "holz",
+            "hout",
+            "trä",
+            "madera",
+            "madeira",
+            "legno",
+            "bois",
+            "дерев",
+            "древ",
+            "drewno",
+            "dřevo",
             # CJK
-            "木材", "木", "木造", "목재", "목조",
+            "木材",
+            "木",
+            "木造",
+            "목재",
+            "목조",
             # MENA / Indic
-            "خشب", "लकड़ी",
+            "خشب",
+            "लकड़ी",
         ),
     ),
     (
         "masonry",
         (
-            "brick", "block", "masonry",
-            "ziegel", "mauer", "mauerwerk",
-            "ladrillo", "tijolo", "mattone", "brique",
-            "кирпич", "блок", "cegła",
+            "brick",
+            "block",
+            "masonry",
+            "ziegel",
+            "mauer",
+            "mauerwerk",
+            "ladrillo",
+            "tijolo",
+            "mattone",
+            "brique",
+            "кирпич",
+            "блок",
+            "cegła",
             # CJK
-            "砖", "煉瓦", "벽돌", "조적",
+            "砖",
+            "煉瓦",
+            "벽돌",
+            "조적",
             # MENA / Indic
-            "طوب", "ईंट",
+            "طوب",
+            "ईंट",
         ),
     ),
     (
         "glass",
         (
-            "glass", "glazing",
-            "glas", "verre", "vidrio", "vidro", "vetro",
-            "стекл", "szkło", "sklo",
+            "glass",
+            "glazing",
+            "glas",
+            "verre",
+            "vidrio",
+            "vidro",
+            "vetro",
+            "стекл",
+            "szkło",
+            "sklo",
             # CJK
-            "玻璃", "ガラス", "유리",
+            "玻璃",
+            "ガラス",
+            "유리",
             # MENA / Indic
-            "زجاج", "कांच",
+            "زجاج",
+            "कांच",
         ),
     ),
     (
         "aluminum",
         (
-            "aluminum", "aluminium", "alu",
-            "aluminio", "alumínio", "alluminio",
+            "aluminum",
+            "aluminium",
+            "alu",
+            "aluminio",
+            "alumínio",
+            "alluminio",
             "алюмин",
             # CJK
-            "铝", "アルミニウム", "アルミ", "알루미늄",
+            "铝",
+            "アルミニウム",
+            "アルミ",
+            "알루미늄",
             # MENA / Indic
-            "ألومنيوم", "एल्यूमीनियम",
+            "ألومنيوم",
+            "एल्यूमीनियम",
         ),
     ),
     (
         "ceramic",
         (
-            "ceramic", "tile", "porcelain",
-            "fliese", "kachel", "tegel",
-            "azulejo", "azulejos", "carrelage", "piastrella",
-            "плитка", "керам",
+            "ceramic",
+            "tile",
+            "porcelain",
+            "fliese",
+            "kachel",
+            "tegel",
+            "azulejo",
+            "azulejos",
+            "carrelage",
+            "piastrella",
+            "плитка",
+            "керам",
             # CJK
-            "瓷砖", "陶瓷", "タイル", "타일", "도자기",
+            "瓷砖",
+            "陶瓷",
+            "タイル",
+            "타일",
+            "도자기",
             # MENA / Indic
-            "بلاط", "टाइल",
+            "بلاط",
+            "टाइल",
         ),
     ),
     (
         "plaster",
         (
-            "plaster", "drywall", "gypsum",
-            "putz", "stuck", "gips",
-            "yeso", "gesso", "plâtre",
-            "штукат", "гипс", "tynk", "omítka",
+            "plaster",
+            "drywall",
+            "gypsum",
+            "putz",
+            "stuck",
+            "gips",
+            "yeso",
+            "gesso",
+            "plâtre",
+            "штукат",
+            "гипс",
+            "tynk",
+            "omítka",
             # CJK
-            "石膏", "灰泥", "プラスター", "石膏ボード",
+            "石膏",
+            "灰泥",
+            "プラスター",
+            "石膏ボード",
             # MENA / Indic
-            "جص", "प्लास्टर",
+            "جص",
+            "प्लास्टर",
         ),
     ),
     (
         "insulation",
         (
-            "insulation", "foam", "wool",
-            "dämm", "isolier", "isolatie",
-            "aislamiento", "isolamento", "isolation",
-            "теплоизол", "утепл", "izolac",
-            "polystyr", "mineral", "minera",
+            "insulation",
+            "foam",
+            "wool",
+            "dämm",
+            "isolier",
+            "isolatie",
+            "aislamiento",
+            "isolamento",
+            "isolation",
+            "теплоизол",
+            "утепл",
+            "izolac",
+            "polystyr",
+            "mineral",
+            "minera",
             # CJK
-            "保温", "断熱", "단열",
+            "保温",
+            "断熱",
+            "단열",
             # MENA / Indic
-            "عزل", "इन्सुलेशन",
+            "عزل",
+            "इन्सुलेशन",
         ),
     ),
 )
@@ -1187,8 +1349,7 @@ class MatchElementsService:
         if source == "image":
             return ImageSourceAdapter(db, match_session)
         raise NotImplementedError(
-            f"Source '{source}' not yet supported "
-            "(BIM/DWG/Text/BoQ/Image live; PDF still pending)."
+            f"Source '{source}' not yet supported (BIM/DWG/Text/BoQ/Image live; PDF still pending)."
         )
 
     def _matcher(self, name: str, db: AsyncSession):
@@ -1199,14 +1360,12 @@ class MatchElementsService:
                 "The standalone lexical matcher was removed in v3. Sparse "
                 "matching is now fused into the vector matcher via the "
                 "BAAI/bge-m3 sparse vector and RRF re-ranking — call with "
-                "method=\"vector\" instead."
+                'method="vector" instead.'
             )
         if name == "resources":
             return ResourcesMatcher(db)
         if name == "llm":
-            raise NotImplementedError(
-                "LLM matcher deferred to Phase A.5+ — use method=\"vector\"."
-            )
+            raise NotImplementedError('LLM matcher deferred to Phase A.5+ — use method="vector".')
         raise ValueError(f"Unknown matcher: {name}")
 
     # ── Sessions ──────────────────────────────────────────────────────
@@ -1230,7 +1389,8 @@ class MatchElementsService:
         except Exception as exc:  # noqa: BLE001 — best-effort
             logger.info(
                 "match_elements: auto-bind catalogue skipped for %s: %s",
-                spec.project_id, exc,
+                spec.project_id,
+                exc,
             )
 
         # Default group-by — source-aware:
@@ -1312,21 +1472,27 @@ class MatchElementsService:
         return _to_session_read(row)
 
     async def get_session(
-        self, db: AsyncSession, session_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
     ) -> schemas.SessionRead:
         row = await db.get(MatchSession, session_id)
         if row is None:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail=translate("errors.session_not_found", locale=get_locale()))
         return _to_session_read(row)
 
     async def update_session(
-        self, db: AsyncSession, session_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
         patch: schemas.SessionUpdate,
     ) -> schemas.SessionRead:
         row = await db.get(MatchSession, session_id)
         if row is None:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail=translate("errors.session_not_found", locale=get_locale()))
         # Track whether the patch changed anything that affects grouping —
         # group_by, scope filters, excluded categories, BIM model binding,
@@ -1384,7 +1550,9 @@ class MatchElementsService:
         return _to_session_read(row)
 
     async def touch_session(
-        self, db: AsyncSession, session_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
     ) -> None:
         """Bump ``last_active_at`` so the resume picker reflects activity."""
         row = await db.get(MatchSession, session_id)
@@ -1539,7 +1707,9 @@ class MatchElementsService:
     # ── Group rebuild (reads source, groups, persists) ───────────────
 
     async def rebuild_groups(
-        self, db: AsyncSession, session_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
     ) -> int:
         """Re-read source elements, recompute groups, replace existing
         unmatched/suggested groups. Confirmed and applied groups are kept
@@ -1547,6 +1717,7 @@ class MatchElementsService:
         sess = await db.get(MatchSession, session_id)
         if sess is None:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail=translate("errors.session_not_found", locale=get_locale()))
 
         adapter = self._adapter(sess.source, db, sess)
@@ -1579,15 +1750,17 @@ class MatchElementsService:
         # query naturally scopes to the survivor set (typically a
         # small minority of total groups even on huge sessions).
         existing = (
-            await db.execute(
-                select(MatchGroup).where(
-                    MatchGroup.session_id == session_id,
-                    MatchGroup.status.in_(
-                        ["confirmed", "overridden", "applied", "tbd"]
-                    ),
+            (
+                await db.execute(
+                    select(MatchGroup).where(
+                        MatchGroup.session_id == session_id,
+                        MatchGroup.status.in_(["confirmed", "overridden", "applied", "tbd"]),
+                    )
                 )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         existing_keys = {row.group_key: row for row in existing}
 
         for key, members in bucket.items():
@@ -1608,7 +1781,8 @@ class MatchElementsService:
                 # in apply_to_boq.
                 if not existing_row.chosen_unit:
                     existing_row.chosen_unit = _pick_unit(
-                        qty, ifc_class=_ifc_class_from_group_key(key),
+                        qty,
+                        ifc_class=_ifc_class_from_group_key(key),
                     )
                 continue
             row = MatchGroup(
@@ -1627,14 +1801,17 @@ class MatchElementsService:
         return len(bucket)
 
     async def list_groups(
-        self, db: AsyncSession, session_id: uuid.UUID,
-        status: str | None = None, limit: int = 200, offset: int = 0,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
+        status: str | None = None,
+        limit: int = 200,
+        offset: int = 0,
     ) -> schemas.GroupListResponse:
         # Auto-rebuild if no groups yet (first hit on a fresh session).
-        n = (await db.execute(
-            select(func.count(MatchGroup.id))
-            .where(MatchGroup.session_id == session_id)
-        )).scalar_one()
+        n = (
+            await db.execute(select(func.count(MatchGroup.id)).where(MatchGroup.session_id == session_id))
+        ).scalar_one()
         if n == 0:
             await self.rebuild_groups(db, session_id)
 
@@ -1653,10 +1830,7 @@ class MatchElementsService:
             .where(MatchGroup.session_id == session_id)
             .group_by(MatchGroup.status)
         )
-        summary = {
-            row[0]: int(row[1])
-            for row in (await db.execute(summary_stmt)).all()
-        }
+        summary = {row[0]: int(row[1]) for row in (await db.execute(summary_stmt)).all()}
 
         # Bulk-load element names for the up-to-3 sample-name preview per
         # group. One IN-query for the whole page beats N queries; the
@@ -1747,21 +1921,24 @@ class MatchElementsService:
                     suggested_unit_rate=top.unit_rate if top else None,
                     suggested_currency=top.currency if top else None,
                     sample_names=[
-                        names_by_id[str(eid)]
-                        for eid in (r.element_ids or [])[:3]
-                        if str(eid) in names_by_id
+                        names_by_id[str(eid)] for eid in (r.element_ids or [])[:3] if str(eid) in names_by_id
                     ],
                 )
             )
         return schemas.GroupListResponse(
-            session_id=session_id, total=int(total), groups=groups,
+            session_id=session_id,
+            total=int(total),
+            groups=groups,
             summary=summary,
             confidence_high_threshold=CONFIDENCE_HIGH_THRESHOLD,
             confidence_medium_threshold=CONFIDENCE_MEDIUM_THRESHOLD,
         )
 
     async def get_group_detail(
-        self, db: AsyncSession, session_id: uuid.UUID, group_key: str,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
+        group_key: str,
     ) -> schemas.GroupDetail:
         stmt = select(MatchGroup).where(
             MatchGroup.session_id == session_id,
@@ -1770,13 +1947,12 @@ class MatchElementsService:
         row = (await db.execute(stmt)).scalar_one_or_none()
         if row is None:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail=translate("errors.group_not_found", locale=get_locale()))
         # Deserialize methods JSON into MatchCandidate lists.
         methods_typed: dict[str, list[MatchCandidate]] = {}
         for name, raw_list in (row.methods or {}).items():
-            methods_typed[name] = [
-                MatchCandidate(**item) for item in (raw_list or [])
-            ]
+            methods_typed[name] = [MatchCandidate(**item) for item in (raw_list or [])]
         ifc_class = _ifc_class_from_group_key(row.group_key)
         meta = ifc_labels.lookup(ifc_class) if ifc_class else ifc_labels.lookup(None)
         qty = dict(row.quantities or {})
@@ -1886,7 +2062,9 @@ class MatchElementsService:
         cls._progress[key] = progress
 
     async def get_progress(
-        self, db: AsyncSession, session_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
     ) -> dict[str, Any]:
         """Read the latest progress snapshot for a match session.
 
@@ -1917,12 +2095,15 @@ class MatchElementsService:
         }
 
     async def run_match(
-        self, db: AsyncSession, session_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
         spec: schemas.RunMatchRequest,
     ) -> list[schemas.GroupSummary]:
         sess = await db.get(MatchSession, session_id)
         if sess is None:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail=translate("errors.session_not_found", locale=get_locale()))
 
         # Stamp the initial progress snapshot before any work begins —
@@ -1931,6 +2112,7 @@ class MatchElementsService:
         # the timeline even while we're still doing the project-context
         # fetch. Wrapped in a flush so the next poll sees the change.
         import time as _time  # noqa: PLC0415 — local import keeps top-of-file clean
+
         run_started = _time.perf_counter()
         started_iso = datetime.now(UTC).isoformat()
         self._write_progress(
@@ -1955,9 +2137,7 @@ class MatchElementsService:
             project_currency = (getattr(proj, "currency", "") or "").strip().upper()
             project_region = (getattr(proj, "region", "") or "").strip().upper()
 
-        threshold = _to_decimal(
-            sess.auto_confirm_threshold, DEFAULT_AUTO_CONFIRM_THRESHOLD
-        )
+        threshold = _to_decimal(sess.auto_confirm_threshold, DEFAULT_AUTO_CONFIRM_THRESHOLD)
 
         # Auto-bind catalogue late: existing sessions created before this
         # check landed don't trigger the create_session path again, so we
@@ -1970,12 +2150,14 @@ class MatchElementsService:
                 )
 
                 bound_catalogue_id = await auto_bind_dominant_catalogue(
-                    db, sess.project_id,
+                    db,
+                    sess.project_id,
                 )
             except Exception as exc:  # noqa: BLE001
                 logger.info(
                     "match_elements: late auto-bind skipped for %s: %s",
-                    sess.project_id, exc,
+                    sess.project_id,
+                    exc,
                 )
 
             # Stale-binding short-circuit: when ``auto_bind`` returns
@@ -2007,9 +2189,11 @@ class MatchElementsService:
             from app.core.match_service.ranker_qdrant import (  # noqa: PLC0415
                 _resolve_catalog_status,
             )
+
             try:
                 _cat_status, _sql_cnt, _vec_cnt = await _resolve_catalog_status(
-                    db, bound_catalogue_id,
+                    db,
+                    bound_catalogue_id,
                 )
             except Exception:  # noqa: BLE001
                 _cat_status, _sql_cnt, _vec_cnt = "ok", rows_in_bound, 1
@@ -2018,8 +2202,11 @@ class MatchElementsService:
                     "match_elements.run_match: bound catalogue has no "
                     "data — session=%s project=%s catalogue=%r "
                     "sql=%d vec=%d",
-                    session_id, sess.project_id,
-                    bound_catalogue_id, rows_in_bound, _vec_cnt,
+                    session_id,
+                    sess.project_id,
+                    bound_catalogue_id,
+                    rows_in_bound,
+                    _vec_cnt,
                 )
                 self._write_progress(
                     session_id,
@@ -2031,16 +2218,16 @@ class MatchElementsService:
                     status="done",
                     error=f"no_catalogue_rows:{bound_catalogue_id or 'none'}",
                 )
-                total_ms = int(
-                    (_time.perf_counter() - run_started) * 1000
-                )
+                total_ms = int((_time.perf_counter() - run_started) * 1000)
                 logger.info(
                     "match_elements.run_match: session=%s method=%s "
                     "elements=0 groups_total=0 groups_with_candidates=0 "
                     "candidates=0 catalogue=%r status=no_catalogue_rows "
                     "total_ms=%d",
-                    session_id, spec.method,
-                    bound_catalogue_id, total_ms,
+                    session_id,
+                    spec.method,
+                    bound_catalogue_id,
+                    total_ms,
                 )
                 return []
 
@@ -2049,8 +2236,10 @@ class MatchElementsService:
                     "match_elements.run_match: bound catalogue has no "
                     "vectors — session=%s project=%s catalogue=%r "
                     "sql=%d vec=0",
-                    session_id, sess.project_id,
-                    bound_catalogue_id, _sql_cnt,
+                    session_id,
+                    sess.project_id,
+                    bound_catalogue_id,
+                    _sql_cnt,
                 )
                 self._write_progress(
                     session_id,
@@ -2062,16 +2251,16 @@ class MatchElementsService:
                     status="done",
                     error=f"catalog_not_vectorized:{bound_catalogue_id}",
                 )
-                total_ms = int(
-                    (_time.perf_counter() - run_started) * 1000
-                )
+                total_ms = int((_time.perf_counter() - run_started) * 1000)
                 logger.info(
                     "match_elements.run_match: session=%s method=%s "
                     "elements=0 groups_total=0 groups_with_candidates=0 "
                     "candidates=0 catalogue=%r status=catalog_not_vectorized "
                     "total_ms=%d",
-                    session_id, spec.method,
-                    bound_catalogue_id, total_ms,
+                    session_id,
+                    spec.method,
+                    bound_catalogue_id,
+                    total_ms,
                 )
                 return []
 
@@ -2111,10 +2300,9 @@ class MatchElementsService:
         # points are now consistent. Idempotent on subsequent runs
         # because rebuild_groups preserves confirmed/applied rows and
         # only re-derives unmatched/suggested ones.
-        existing_group_count = (await db.execute(
-            select(func.count(MatchGroup.id))
-            .where(MatchGroup.session_id == session_id)
-        )).scalar_one()
+        existing_group_count = (
+            await db.execute(select(func.count(MatchGroup.id)).where(MatchGroup.session_id == session_id))
+        ).scalar_one()
         if existing_group_count == 0:
             await self.rebuild_groups(db, session_id)
 
@@ -2124,8 +2312,7 @@ class MatchElementsService:
             stmt = stmt.where(MatchGroup.group_key.in_(target_keys))
         else:
             stmt = (
-                stmt
-                .where(MatchGroup.status.in_(["unmatched", "suggested"]))
+                stmt.where(MatchGroup.status.in_(["unmatched", "suggested"]))
                 .order_by(MatchGroup.element_count.desc())
                 .limit(spec.max_groups)
             )
@@ -2156,9 +2343,7 @@ class MatchElementsService:
         # amplification on big sessions.
         flush_every = 1 if groups_total <= 20 else 4
         for idx, grow in enumerate(rows):
-            members = [
-                by_id[eid] for eid in (grow.element_ids or []) if eid in by_id
-            ]
+            members = [by_id[eid] for eid in (grow.element_ids or []) if eid in by_id]
             if not members:
                 continue
             try:
@@ -2180,7 +2365,8 @@ class MatchElementsService:
                 # regresses.
                 logger.warning(
                     "run_match: skip group %s — envelope build failed: %s",
-                    grow.group_key, exc,
+                    grow.group_key,
+                    exc,
                 )
                 continue
             try:
@@ -2193,7 +2379,9 @@ class MatchElementsService:
             except Exception as exc:  # noqa: BLE001 — log + degrade per group
                 logger.warning(
                     "Matcher %s failed for group %s: %s",
-                    spec.method, grow.group_key, exc,
+                    spec.method,
+                    grow.group_key,
+                    exc,
                 )
                 candidates = []
 
@@ -2208,17 +2396,11 @@ class MatchElementsService:
 
             # Auto-confirm if top candidate >= threshold AND group not
             # already confirmed.
-            if (
-                candidates
-                and grow.status in ("unmatched", "suggested")
-                and candidates[0].score >= threshold
-            ):
+            if candidates and grow.status in ("unmatched", "suggested") and candidates[0].score >= threshold:
                 top = candidates[0]
                 # MatchCandidate now carries a real CostItem.id end-to-end,
                 # so apply_to_boq can read the rate without a second lookup.
-                grow.chosen_candidate_id = (
-                    uuid.UUID(top.id) if top.id else None
-                )
+                grow.chosen_candidate_id = uuid.UUID(top.id) if top.id else None
                 grow.chosen_method = "auto"
                 grow.confidence = f"{top.score:.4f}"
                 grow.status = "confirmed"
@@ -2256,9 +2438,7 @@ class MatchElementsService:
                     suggested_description=top.description if top else None,
                     suggested_unit_rate=top.unit_rate if top else None,
                     suggested_currency=top.currency if top else None,
-                    sample_names=[
-                        m.name for m in members[:3] if m.name
-                    ],
+                    sample_names=[m.name for m in members[:3] if m.name],
                 )
             )
 
@@ -2338,7 +2518,9 @@ class MatchElementsService:
     # ── Confirm ───────────────────────────────────────────────────────
 
     async def confirm(
-        self, db: AsyncSession, session_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
         spec: schemas.ConfirmMatchRequest,
         confirmed_by: uuid.UUID | None,
     ) -> schemas.GroupDetail:
@@ -2349,6 +2531,7 @@ class MatchElementsService:
         row = (await db.execute(stmt)).scalar_one_or_none()
         if row is None:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail=translate("errors.group_not_found", locale=get_locale()))
         # candidate_id is now properly nullable both in the schema and the
         # FK column. None means "manual override / no library row" — the
@@ -2357,9 +2540,7 @@ class MatchElementsService:
         cid = spec.candidate_id
         row.chosen_candidate_id = cid
         row.chosen_method = spec.method
-        row.confidence = (
-            f"{spec.confidence:.4f}" if spec.confidence is not None else row.confidence
-        )
+        row.confidence = f"{spec.confidence:.4f}" if spec.confidence is not None else row.confidence
         row.status = "confirmed"
         row.confirmed_by = confirmed_by
         confirmed_at = datetime.now(UTC)
@@ -2374,7 +2555,9 @@ class MatchElementsService:
         # side-effect.
         try:
             picked_rank, picked_code_from_methods = _derive_picked_rank_and_code(
-                row.methods, chosen_method=spec.method, chosen_candidate_id=cid,
+                row.methods,
+                chosen_method=spec.method,
+                chosen_candidate_id=cid,
             )
             await _record_pick_to_search_log(
                 db,
@@ -2391,11 +2574,13 @@ class MatchElementsService:
         # Cross-project library — write a template row when requested.
         # Only meaningful when we have a real cost-item id to link to.
         if spec.save_to_template_library and row.signature and cid is not None:
-            existing = (await db.execute(
-                select(MatchTemplate).where(
-                    MatchTemplate.signature == row.signature,
+            existing = (
+                await db.execute(
+                    select(MatchTemplate).where(
+                        MatchTemplate.signature == row.signature,
+                    )
                 )
-            )).scalar_one_or_none()
+            ).scalar_one_or_none()
             if existing is None:
                 sess = await db.get(MatchSession, session_id)
                 tmpl = MatchTemplate(
@@ -2403,10 +2588,7 @@ class MatchElementsService:
                     signature=row.signature,
                     label=row.group_key,
                     cwicr_position_id=cid,
-                    source_fields=list(
-                        row.signature_fields
-                        or (sess.group_by if sess else []) or []
-                    ),
+                    source_fields=list(row.signature_fields or (sess.group_by if sess else []) or []),
                     use_count=1,
                     last_used_at=datetime.now(UTC),
                     created_by=confirmed_by,
@@ -2425,7 +2607,9 @@ class MatchElementsService:
         return await self.get_group_detail(db, session_id, spec.group_key)
 
     async def bulk_confirm(
-        self, db: AsyncSession, session_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
         spec: schemas.BulkConfirmRequest,
         confirmed_by: uuid.UUID | None,
     ) -> int:
@@ -2478,22 +2662,28 @@ class MatchElementsService:
     # ── Attributes / categories (drives the chip-bars) ────────────────
 
     async def list_attribute_keys(
-        self, db: AsyncSession, session_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
     ) -> list[schemas.AttributeKey]:
         sess = await db.get(MatchSession, session_id)
         if sess is None:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail=translate("errors.session_not_found", locale=get_locale()))
         adapter = self._adapter(sess.source, db, sess)
         keys = await adapter.list_attribute_keys(sess.project_id, sess.bim_model_id)
         return [schemas.AttributeKey(key=k, sample_values=[]) for k in keys]
 
     async def list_categories(
-        self, db: AsyncSession, session_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
     ) -> list[schemas.CategoryCount]:
         sess = await db.get(MatchSession, session_id)
         if sess is None:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail=translate("errors.session_not_found", locale=get_locale()))
         adapter = self._adapter(sess.source, db, sess)
         cats = await adapter.list_categories(sess.project_id, sess.bim_model_id)
@@ -2514,7 +2704,9 @@ class MatchElementsService:
     # ── Templates ─────────────────────────────────────────────────────
 
     async def list_templates(
-        self, db: AsyncSession, tenant_id: uuid.UUID | None,
+        self,
+        db: AsyncSession,
+        tenant_id: uuid.UUID | None,
     ) -> list[schemas.TemplateRead]:
         stmt = select(MatchTemplate)
         if tenant_id is not None:
@@ -2524,7 +2716,9 @@ class MatchElementsService:
         return [schemas.TemplateRead.model_validate(r) for r in rows]
 
     async def lookup_templates(
-        self, db: AsyncSession, tenant_id: uuid.UUID | None,
+        self,
+        db: AsyncSession,
+        tenant_id: uuid.UUID | None,
         signatures: list[str],
     ) -> schemas.TemplateLookupResponse:
         if not signatures:
@@ -2536,14 +2730,13 @@ class MatchElementsService:
             stmt = stmt.where(MatchTemplate.tenant_id == tenant_id)
         rows = (await db.execute(stmt)).scalars().all()
         return schemas.TemplateLookupResponse(
-            matches={
-                r.signature: schemas.TemplateRead.model_validate(r)
-                for r in rows
-            },
+            matches={r.signature: schemas.TemplateRead.model_validate(r) for r in rows},
         )
 
     async def delete_template(
-        self, db: AsyncSession, template_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        template_id: uuid.UUID,
     ) -> None:
         await db.execute(
             delete(MatchTemplate).where(MatchTemplate.id == template_id),
@@ -2552,19 +2745,28 @@ class MatchElementsService:
     # ── Stubs (Phase A.5b/A.9/A.12) ───────────────────────────────────
 
     async def split_group(
-        self, db: AsyncSession, session_id: uuid.UUID, group_key: str,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
+        group_key: str,
         spec: schemas.GroupSplitRequest,
     ) -> schemas.GroupDetail:
         raise NotImplementedError("split_group — Phase A.5b")
 
     async def merge_groups(
-        self, db: AsyncSession, session_id: uuid.UUID, group_key: str,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
+        group_key: str,
         spec: schemas.GroupMergeRequest,
     ) -> schemas.GroupDetail:
         raise NotImplementedError("merge_groups — Phase A.5b")
 
     async def skip_group(
-        self, db: AsyncSession, session_id: uuid.UUID, group_key: str,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
+        group_key: str,
     ) -> schemas.GroupDetail:
         stmt = select(MatchGroup).where(
             MatchGroup.session_id == session_id,
@@ -2573,14 +2775,18 @@ class MatchElementsService:
         row = (await db.execute(stmt)).scalar_one_or_none()
         if row is None:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail=translate("errors.group_not_found", locale=get_locale()))
         row.status = "skipped"
         await db.flush()
         return await self.get_group_detail(db, session_id, group_key)
 
     async def apply_to_boq(
-        self, db: AsyncSession, session_id: uuid.UUID,
-        spec: schemas.ApplyToBoqRequest, applied_by: uuid.UUID | None,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
+        spec: schemas.ApplyToBoqRequest,
+        applied_by: uuid.UUID | None,
     ) -> schemas.ApplyToBoqResponse:
         """Apply confirmed groups to a project's BOQ.
 
@@ -2625,11 +2831,7 @@ class MatchElementsService:
         # ── 1. Resolve target BOQ ────────────────────────────────────
         boq_id = spec.target_boq_id
         if boq_id is None:
-            stmt = (
-                select(BOQ)
-                .where(BOQ.project_id == sess.project_id)
-                .order_by(BOQ.created_at.asc())
-            )
+            stmt = select(BOQ).where(BOQ.project_id == sess.project_id).order_by(BOQ.created_at.asc())
             existing_boq = (await db.execute(stmt)).scalars().first()
             if existing_boq is None:
                 if spec.dry_run:
@@ -2638,16 +2840,12 @@ class MatchElementsService:
                     # Name the new BOQ after the project + source so a
                     # workspace with N projects doesn't end up with N
                     # rows literally named "BOQ from BIM matches".
-                    project_label = (
-                        getattr(project, "name", None)
-                        or f"Project {str(sess.project_id)[:8]}"
-                    )
+                    project_label = getattr(project, "name", None) or f"Project {str(sess.project_id)[:8]}"
                     new_boq = BOQ(
                         project_id=sess.project_id,
                         name=f"{project_label} — {sess.source.upper()}",
                         description=(
-                            f"Auto-created by Match Elements module "
-                            f"(session {str(sess.id)[:8]}, source={sess.source})"
+                            f"Auto-created by Match Elements module (session {str(sess.id)[:8]}, source={sess.source})"
                         ),
                         status="draft",
                     )
@@ -2685,9 +2883,10 @@ class MatchElementsService:
         max_ord = 0
         if boq_id is not None and not spec.dry_run:
             from sqlalchemy import func as sa_func
-            existing_positions = (await db.execute(
-                select(sa_func.count(Position.id)).where(Position.boq_id == boq_id)
-            )).scalar_one()
+
+            existing_positions = (
+                await db.execute(select(sa_func.count(Position.id)).where(Position.boq_id == boq_id))
+            ).scalar_one()
             max_ord = int(existing_positions or 0)
 
         from app.core.match_service.boosts.unit import (
@@ -2700,9 +2899,7 @@ class MatchElementsService:
             qty = _quantity_for_unit(g.quantities or {}, unit)
             ci = cost_items.get(g.chosen_candidate_id) if g.chosen_candidate_id else None
 
-            description = (
-                ci.description if ci else g.group_key
-            )
+            description = ci.description if ci else g.group_key
             # CWICR catalogues sometimes encode a multiplier into the
             # unit string ("100 м3 @ 5,311,861.57 EUR" → 53,118.62
             # EUR/m3). Strip the leading numeric so qty × rate stays
@@ -2720,10 +2917,7 @@ class MatchElementsService:
             # german / spanish units onto the canonical set first so the
             # gate fires for catalogues that don't use latin codes.
             env_unit_canon = _normalise_unit_cross_locale(unit) or _normalise_unit(unit)
-            cand_unit_canon = (
-                _normalise_unit_cross_locale(position_unit)
-                or _normalise_unit(position_unit)
-            )
+            cand_unit_canon = _normalise_unit_cross_locale(position_unit) or _normalise_unit(position_unit)
             env_dim = _DIMENSION_GROUP.get(env_unit_canon, "")
             cand_dim = _DIMENSION_GROUP.get(cand_unit_canon, "")
             if env_dim and cand_dim and env_dim != cand_dim:
@@ -2745,9 +2939,7 @@ class MatchElementsService:
                 for std in preferred_order:
                     code = classification.get(std)
                     if code:
-                        section_path.append(
-                            f"{_CLASSIFICATION_STANDARD_LABELS[std]} {code}"
-                        )
+                        section_path.append(f"{_CLASSIFICATION_STANDARD_LABELS[std]} {code}")
                         break
 
             # Build resource previews from CostItem.components when present.
@@ -2759,20 +2951,11 @@ class MatchElementsService:
                     factor = float(comp.get("factor", 1.0) or 1.0)
                     resource_previews.append(
                         schemas.ApplyResourcePreview(
-                            description=str(
-                                comp.get("description")
-                                or comp.get("name")
-                                or comp.get("code")
-                                or ""
-                            ),
+                            description=str(comp.get("description") or comp.get("name") or comp.get("code") or ""),
                             factor=factor,
                             quantity=factor * qty,
                             unit=str(comp.get("unit") or ""),
-                            unit_rate=float(
-                                comp.get("unit_rate")
-                                or comp.get("rate")
-                                or 0
-                            ),
+                            unit_rate=float(comp.get("unit_rate") or comp.get("rate") or 0),
                         )
                     )
 
@@ -2803,9 +2986,7 @@ class MatchElementsService:
                 if ci:
                     metadata["cost_item_id"] = str(ci.id)
                 if resource_previews:
-                    metadata["match_components"] = [
-                        rp.model_dump(mode="json") for rp in resource_previews
-                    ]
+                    metadata["match_components"] = [rp.model_dump(mode="json") for rp in resource_previews]
 
                 pos = Position(
                     boq_id=boq_id,
@@ -2867,9 +3048,7 @@ class MatchElementsService:
         # In dry_run mode positions_created stays at 0 (nothing was
         # written). Surface the would-be count so the UI can render
         # "47 positions will be created" accurately.
-        reported_positions_created = (
-            positions_created if not spec.dry_run else len(positions_preview)
-        )
+        reported_positions_created = positions_created if not spec.dry_run else len(positions_preview)
         return schemas.ApplyToBoqResponse(
             dry_run=spec.dry_run,
             boq_id=boq_id,
@@ -2880,7 +3059,9 @@ class MatchElementsService:
         )
 
     async def no_match(
-        self, db: AsyncSession, session_id: uuid.UUID,
+        self,
+        db: AsyncSession,
+        session_id: uuid.UUID,
         spec: schemas.NoMatchRequest,
     ) -> schemas.GroupDetail:
         stmt = select(MatchGroup).where(
@@ -2890,6 +3071,7 @@ class MatchElementsService:
         row = (await db.execute(stmt)).scalar_one_or_none()
         if row is None:
             from fastapi import HTTPException
+
             raise HTTPException(status_code=404, detail=translate("errors.group_not_found", locale=get_locale()))
         if spec.action == "tbd":
             row.status = "tbd"

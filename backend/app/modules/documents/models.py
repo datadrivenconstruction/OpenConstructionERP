@@ -63,19 +63,29 @@ class Document(Base):
 
     # ── Phase 17: CDE / revision-chain fields (all nullable for backward compat) ──
     cde_state: Mapped[str | None] = mapped_column(
-        String(50), nullable=True, default=None,
+        String(50),
+        nullable=True,
+        default=None,
     )  # wip / shared / published / archived
     suitability_code: Mapped[str | None] = mapped_column(
-        String(10), nullable=True, default=None,
+        String(10),
+        nullable=True,
+        default=None,
     )  # S0-S5
     revision_code: Mapped[str | None] = mapped_column(
-        String(20), nullable=True, default=None,
+        String(20),
+        nullable=True,
+        default=None,
     )  # P.01.01 / C.01
     drawing_number: Mapped[str | None] = mapped_column(
-        String(100), nullable=True, default=None,
+        String(100),
+        nullable=True,
+        default=None,
     )
     is_current_revision: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=True,
+        Boolean,
+        nullable=True,
+        default=True,
     )
     parent_document_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
@@ -85,10 +95,14 @@ class Document(Base):
         index=True,
     )
     security_classification: Mapped[str | None] = mapped_column(
-        String(50), nullable=True, default=None,
+        String(50),
+        nullable=True,
+        default=None,
     )
     discipline: Mapped[str | None] = mapped_column(
-        String(50), nullable=True, default=None,
+        String(50),
+        nullable=True,
+        default=None,
     )  # architectural / structural / mechanical / electrical / plumbing / civil
 
     # Relationships
@@ -226,9 +240,7 @@ class DocumentBIMLink(Base):
     document: Mapped[Document] = relationship(back_populates="bim_links")
 
     def __repr__(self) -> str:
-        return (
-            f"<DocumentBIMLink doc={self.document_id} elem={self.bim_element_id}>"
-        )
+        return f"<DocumentBIMLink doc={self.document_id} elem={self.bim_element_id}>"
 
 
 # ── Side-effect re-export ─────────────────────────────────────────────────

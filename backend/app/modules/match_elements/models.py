@@ -60,21 +60,31 @@ class MatchSession(Base):
     # Multi-model projects (arch + struct + MEP) need this so a session
     # can stay focused on one discipline.
     bim_model_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
     source: Mapped[str] = mapped_column(String(20), nullable=False, default="bim")
     name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     # Active group-by attribute keys, ordered. e.g. ["ifc_class","type_name","material"]
     group_by: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     # Element-level filters before group-by. e.g. {"ifc_class":["IfcWall"],"level":["L01"]}
     filters: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     # IfcCategories chip-excluded from estimation scope.
     excluded_categories: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     # 0.95 = safety-net DB default. The runtime default is
     # ``DEFAULT_AUTO_CONFIRM_THRESHOLD`` from the match-service config,
@@ -84,27 +94,39 @@ class MatchSession(Base):
     # when a row is inserted without going through the schema path
     # (raw SQL backfill, alembic data migration).
     auto_confirm_threshold: Mapped[str] = mapped_column(
-        String(10), nullable=False, default="0.95", server_default="0.95",
+        String(10),
+        nullable=False,
+        default="0.95",
+        server_default="0.95",
     )
     # When true, wall/slab/column volumes deduct IfcOpeningElement voids.
     use_net_quantities: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1",
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="1",
     )
     # Single CWICR catalogue when project has multiple language variants.
     # Null = match against all attached active CWICR catalogues.
     catalogue_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     # Bumped by the touch endpoint and confirm/match writes so the resume
     # picker can sort by recent activity. Nullable for legacy rows.
     last_active_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     # User-archived sessions hide from the resume picker but stay in DB
     # so applied BOQ positions keep their backlinks.
     is_archived: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
     # v3-P10b: User-picked construction stage that pins the SearchPlan's
     # ``construction_stage`` hard filter. Null = no stage pin (default —
@@ -113,10 +135,15 @@ class MatchSession(Base):
     # "13_Sitework"); enforced by the schema validator, not the column
     # type, so tomorrow's 14th stage doesn't need a migration.
     construction_stage: Mapped[str | None] = mapped_column(
-        String(32), nullable=True,
+        String(32),
+        nullable=True,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     groups: Mapped[list[MatchGroup]] = relationship(
@@ -156,50 +183,74 @@ class MatchGroup(Base):
     signature: Mapped[str | None] = mapped_column(String(64), nullable=True)
     # IDs from the source-adapter universe (BIMElement.id stringified, etc.).
     element_ids: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     element_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     # Rolled-up quantities for the whole group, per unit type. Always carries
     # ``volume_m3``, ``area_m2``, ``length_m``, ``count`` plus
     # ``gross_volume_m3`` / ``net_volume_m3`` when the source has openings.
     quantities: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     # Override of the auto-picked unit (m3 / m2 / m / pcs).
     chosen_unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
     # Per-method candidates: {"vector":[{candidate_id,confidence,...},...],
     # "lexical":[...], "llm":[...]}. Cached to avoid re-running matchers.
     methods: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     chosen_candidate_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
     chosen_method: Mapped[str | None] = mapped_column(String(20), nullable=True)
     confidence: Mapped[str | None] = mapped_column(String(10), nullable=True)
     # unmatched | suggested | confirmed | overridden | skipped | tbd | applied
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="unmatched", server_default="unmatched",
+        String(20),
+        nullable=False,
+        default="unmatched",
+        server_default="unmatched",
     )
     # Set to the Position.id once apply-to-BOQ writes the row.
     boq_position_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
     # Optional override of which attribute fields to consider when computing
     # the cross-project signature (default = session.group_by). Lets the user
     # decide "this match was about wall material only — ignore thickness".
     signature_fields: Mapped[list | None] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=True,
+        JSON,
+        nullable=True,
     )
     confirmed_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     confirmed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     session: Mapped[MatchSession] = relationship(back_populates="groups")
@@ -220,14 +271,18 @@ class MatchTemplate(Base):
     __tablename__ = "oe_match_elements_template"
     __table_args__ = (
         UniqueConstraint(
-            "tenant_id", "signature", name="uq_match_template_tenant_signature",
+            "tenant_id",
+            "signature",
+            name="uq_match_template_tenant_signature",
         ),
         Index("ix_match_template_tenant", "tenant_id"),
         Index("ix_match_template_signature", "signature"),
     )
 
     tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
     signature: Mapped[str] = mapped_column(String(64), nullable=False)
     # Human-readable label for the library UI ("IfcWall · Stahlbeton · 240mm").
@@ -242,17 +297,28 @@ class MatchTemplate(Base):
     # Stored so the UI can explain "this template was created from
     # ifc_class+material+thickness on Project A".
     source_fields: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     use_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=1, server_default="1",
+        Integer,
+        nullable=False,
+        default=1,
+        server_default="1",
     )
     last_used_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:
@@ -322,34 +388,57 @@ class MatchSearchLog(Base):
     # The ``core_query`` from the SearchPlan, truncated for storage.
     core_query: Mapped[str | None] = mapped_column(String(2000), nullable=True)
     hard_filters: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     soft_boosts: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     # Counters
     hits_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     relax_tier_used: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     top_score: Mapped[float | None] = mapped_column(nullable=True)
     top_confidence_band: Mapped[str | None] = mapped_column(
-        String(16), nullable=True,
+        String(16),
+        nullable=True,
     )
     bge_rerank_used: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
     llm_rerank_used: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
     took_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
     status: Mapped[str | None] = mapped_column(String(32), nullable=True)
     # Free-form metadata bag for future analytics dimensions without a
     # migration (e.g., translation_used, abstract_substituted_count).
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     # ── v2936 — user-feedback columns (MAPPING_PROCESS.md §10) ───────
@@ -359,7 +448,8 @@ class MatchSearchLog(Base):
     picked_rank: Mapped[int | None] = mapped_column(Integer, nullable=True)
     picked_rate_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
     picked_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     # ── v2936 — envelope-context columns ────────────────────────────
     # Populated by ranker_qdrant._write_search_log() at INSERT time.
@@ -413,20 +503,29 @@ class MatchStageState(Base):
     stage_name: Mapped[str] = mapped_column(String(32), nullable=False)
     # pending | running | done | error | skipped
     status: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="pending", server_default="pending",
+        String(16),
+        nullable=False,
+        default="pending",
+        server_default="pending",
     )
     # Stage-specific knobs (group_by override, filter expression, prompt
     # template id, LLM provider/model, threshold...). Default = inherited
     # from session config.
     inputs: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     # Stage output envelope — never the raw payload, just a small preview:
     # element_count, sample rows, top-N scores, summary metrics. Used by
     # the StageCard to render the "what happened" panel without a second
     # roundtrip.
     output: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     # Last error message when status == "error", or NULL otherwise.
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -434,24 +533,24 @@ class MatchStageState(Base):
     # ``oe_match_elements_prompt_template.id`` when the stage uses an LLM
     # prompt. NULL for non-LLM stages (load, schema, group, rollup).
     prompt_template_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
     # LLM provider/model — only set when prompt_template_id is set. e.g.
     # ``"anthropic/claude-sonnet-4-6"``, ``"openai/gpt-4o"``,
     # ``"local/ollama-mistral"``.
     llm_provider: Mapped[str | None] = mapped_column(String(64), nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     finished_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<MatchStageState session={self.session_id} "
-            f"stage={self.stage_name} status={self.status}>"
-        )
+        return f"<MatchStageState session={self.session_id} stage={self.stage_name} status={self.status}>"
 
 
 class MatchPromptTemplate(Base):
@@ -495,21 +594,28 @@ class MatchPromptTemplate(Base):
     # ``"anthropic/claude-sonnet-4-6,openai/gpt-4o"``.
     allowed_providers: Mapped[str | None] = mapped_column(String(512), nullable=True)
     version: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=1, server_default="1",
+        Integer,
+        nullable=False,
+        default=1,
+        server_default="1",
     )
     is_system: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     # Forked-from pointer so the UI can show "edited from system prompt
     # header_aggregation_v1". NULL on system rows and freshly-typed ones.
     forked_from_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<MatchPromptTemplate key={self.key} name={self.name} "
-            f"v{self.version} system={self.is_system}>"
-        )
+        return f"<MatchPromptTemplate key={self.key} name={self.name} v{self.version} system={self.is_system}>"

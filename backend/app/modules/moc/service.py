@@ -110,7 +110,9 @@ async def _write_audit(
     except Exception:
         logger.warning(
             "ActivityLog write skipped for moc_entry %s (%s -> %s)",
-            entry_id, from_status, to_status,
+            entry_id,
+            from_status,
+            to_status,
             exc_info=True,
         )
 
@@ -125,9 +127,7 @@ class MoCService:
 
     # ── Create ────────────────────────────────────────────────────────────
 
-    async def create_entry(
-        self, data: MoCEntryCreate, user_id: str | None = None
-    ) -> MoCEntry:
+    async def create_entry(self, data: MoCEntryCreate, user_id: str | None = None) -> MoCEntry:
         """Create a new MoC entry in 'proposed' status."""
         code = await self.repo.next_code(data.project_id)
         now = _now_iso()
@@ -180,15 +180,11 @@ class MoCService:
         limit: int = 50,
         status: str | None = None,
     ) -> tuple[list[MoCEntry], int]:
-        return await self.repo.list_for_project(
-            project_id, offset=offset, limit=limit, status=status
-        )
+        return await self.repo.list_for_project(project_id, offset=offset, limit=limit, status=status)
 
     # ── Update ────────────────────────────────────────────────────────────
 
-    async def update_entry(
-        self, entry_id: uuid.UUID, data: MoCEntryUpdate
-    ) -> MoCEntry:
+    async def update_entry(self, entry_id: uuid.UUID, data: MoCEntryUpdate) -> MoCEntry:
         entry = await self.get_entry(entry_id)
         if entry.status in {"implemented", "declined"}:
             raise HTTPException(
@@ -292,15 +288,16 @@ class MoCService:
         )
         logger.info(
             "MoC entry %s: %s -> %s by %s",
-            entry.code, from_status, to_status, user_id,
+            entry.code,
+            from_status,
+            to_status,
+            user_id,
         )
         return entry
 
     # ── Impact lines ──────────────────────────────────────────────────────
 
-    async def add_impact(
-        self, entry_id: uuid.UUID, data: MoCImpactCreate
-    ) -> MoCImpact:
+    async def add_impact(self, entry_id: uuid.UUID, data: MoCImpactCreate) -> MoCImpact:
         await self.get_entry(entry_id)  # 404 guard
         impact = MoCImpact(
             moc_entry_id=entry_id,
@@ -323,9 +320,7 @@ class MoCService:
             )
         return row
 
-    async def update_impact(
-        self, impact_id: uuid.UUID, data: MoCImpactUpdate
-    ) -> MoCImpact:
+    async def update_impact(self, impact_id: uuid.UUID, data: MoCImpactUpdate) -> MoCImpact:
         impact = await self.get_impact(impact_id)
         fields = data.model_dump(exclude_unset=True)
         if "cost_impact" in fields and fields["cost_impact"] is not None:

@@ -61,9 +61,7 @@ class Accommodation(Base):
         nullable=False,
         index=True,
     )
-    name: Mapped[str] = mapped_column(
-        String(255), nullable=False, default="", server_default=""
-    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
     # Free-form at the DB layer; enforced as enum in the Pydantic schemas.
     kind: Mapped[str] = mapped_column(
         String(20),
@@ -81,19 +79,13 @@ class Accommodation(Base):
     # GUID and look the row up at query time only when the module is
     # available.
     bim_model_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
-    property_dev_block_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
-    capacity_total: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
+    property_dev_block_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    capacity_total: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     # Soft-delete tombstone — set by DELETE handler instead of dropping
     # the row. List queries filter on ``deleted_at IS NULL``.
-    deleted_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -116,39 +108,36 @@ class Room(Base):
     __tablename__ = "oe_accommodation_room"
     __table_args__ = (
         UniqueConstraint(
-            "accommodation_id", "label",
+            "accommodation_id",
+            "label",
             name="uq_oe_accommodation_room_accom_label",
         ),
         Index(
             "ix_oe_accommodation_room_status",
-            "accommodation_id", "status",
+            "accommodation_id",
+            "status",
         ),
     )
 
     accommodation_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey(
-            "oe_accommodation_accommodation.id", ondelete="CASCADE",
+            "oe_accommodation_accommodation.id",
+            ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
     )
     label: Mapped[str] = mapped_column(String(120), nullable=False)
-    capacity: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=1, server_default="1"
-    )
+    capacity: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
     # Canonical-format element id (string — DDC cad2data emits opaque
     # IDs that aren't necessarily UUIDs). Optional, only populated when
     # the room maps to a CAD/BIM element.
     bim_element_id: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    base_rate: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0"
-    )
+    base_rate: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0")
     # Empty default — service layer fills in from accommodation/project at
     # write time rather than hard-coding EUR (v3 DB-level EUR-default kill).
-    base_rate_currency: Mapped[str] = mapped_column(
-        String(3), nullable=False, default="", server_default=""
-    )
+    base_rate_currency: Mapped[str] = mapped_column(String(3), nullable=False, default="", server_default="")
     # NOTE: no ``index=True`` here — the composite index declared in
     # ``__table_args__`` above covers ``(accommodation_id, status)``
     # which is the only access pattern. A separate single-column
@@ -252,13 +241,9 @@ class Charge(Base):
         server_default="extra",
     )
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    amount: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0"
-    )
+    amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0")
     # Service layer fills in from parent room/accommodation if blank.
-    currency: Mapped[str] = mapped_column(
-        String(3), nullable=False, default="", server_default=""
-    )
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, default="", server_default="")
     period_start: Mapped[datetime | None] = mapped_column(Date, nullable=True)
     period_end: Mapped[datetime | None] = mapped_column(Date, nullable=True)
     status: Mapped[str] = mapped_column(

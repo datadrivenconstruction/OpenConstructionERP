@@ -85,7 +85,8 @@ async def db_session() -> AsyncIterator:
 
 async def _make_user(session) -> str:
     user = User(
-        email=f"u{uuid.uuid4().hex[:8]}@example.com", hashed_password="x",
+        email=f"u{uuid.uuid4().hex[:8]}@example.com",
+        hashed_password="x",
     )
     session.add(user)
     await session.flush()
@@ -130,13 +131,18 @@ def _build_app(db_session, *, caller_id: str) -> FastAPI:
 class TestLienWaiverUpload:
     @pytest.mark.asyncio
     async def test_real_pdf_is_stored(
-        self, db_session, tmp_path, monkeypatch,
+        self,
+        db_session,
+        tmp_path,
+        monkeypatch,
     ) -> None:
         """Happy path — PDF body persists with a server-derived filename."""
         from app.modules.subcontractors import router as subs_router_mod
 
         monkeypatch.setattr(
-            subs_router_mod, "LIEN_WAIVERS_DIR", tmp_path / "waivers",
+            subs_router_mod,
+            "LIEN_WAIVERS_DIR",
+            tmp_path / "waivers",
         )
 
         caller = await _make_user(db_session)
@@ -174,7 +180,10 @@ class TestLienWaiverUpload:
 
     @pytest.mark.asyncio
     async def test_unknown_binary_disguised_as_pdf_returns_415(
-        self, db_session, tmp_path, monkeypatch,
+        self,
+        db_session,
+        tmp_path,
+        monkeypatch,
     ) -> None:
         """A blob whose magic bytes don't match any allowed signature
         must be rejected even though the filename / Content-Type claim
@@ -212,12 +221,17 @@ class TestLienWaiverUpload:
 
     @pytest.mark.asyncio
     async def test_empty_body_returns_422(
-        self, db_session, tmp_path, monkeypatch,
+        self,
+        db_session,
+        tmp_path,
+        monkeypatch,
     ) -> None:
         from app.modules.subcontractors import router as subs_router_mod
 
         monkeypatch.setattr(
-            subs_router_mod, "LIEN_WAIVERS_DIR", tmp_path / "waivers",
+            subs_router_mod,
+            "LIEN_WAIVERS_DIR",
+            tmp_path / "waivers",
         )
 
         caller = await _make_user(db_session)
@@ -238,12 +252,17 @@ class TestLienWaiverUpload:
 
     @pytest.mark.asyncio
     async def test_bad_waiver_type_returns_422(
-        self, db_session, tmp_path, monkeypatch,
+        self,
+        db_session,
+        tmp_path,
+        monkeypatch,
     ) -> None:
         from app.modules.subcontractors import router as subs_router_mod
 
         monkeypatch.setattr(
-            subs_router_mod, "LIEN_WAIVERS_DIR", tmp_path / "waivers",
+            subs_router_mod,
+            "LIEN_WAIVERS_DIR",
+            tmp_path / "waivers",
         )
 
         caller = await _make_user(db_session)
@@ -265,12 +284,17 @@ class TestLienWaiverUpload:
 
     @pytest.mark.asyncio
     async def test_nonexistent_subcontractor_returns_404(
-        self, db_session, tmp_path, monkeypatch,
+        self,
+        db_session,
+        tmp_path,
+        monkeypatch,
     ) -> None:
         from app.modules.subcontractors import router as subs_router_mod
 
         monkeypatch.setattr(
-            subs_router_mod, "LIEN_WAIVERS_DIR", tmp_path / "waivers",
+            subs_router_mod,
+            "LIEN_WAIVERS_DIR",
+            tmp_path / "waivers",
         )
 
         caller = await _make_user(db_session)
@@ -292,12 +316,17 @@ class TestLienWaiverUpload:
 
     @pytest.mark.asyncio
     async def test_list_after_upload_returns_row(
-        self, db_session, tmp_path, monkeypatch,
+        self,
+        db_session,
+        tmp_path,
+        monkeypatch,
     ) -> None:
         from app.modules.subcontractors import router as subs_router_mod
 
         monkeypatch.setattr(
-            subs_router_mod, "LIEN_WAIVERS_DIR", tmp_path / "waivers",
+            subs_router_mod,
+            "LIEN_WAIVERS_DIR",
+            tmp_path / "waivers",
         )
 
         caller = await _make_user(db_session)

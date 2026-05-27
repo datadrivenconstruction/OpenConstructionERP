@@ -121,7 +121,9 @@ async def write_parquet(
     await store.put(key, payload)
     logger.debug(
         "dashboards.snapshot_storage.write_parquet kind=%s key=%s bytes=%d",
-        kind, key, len(payload),
+        kind,
+        key,
+        len(payload),
     )
     return key
 

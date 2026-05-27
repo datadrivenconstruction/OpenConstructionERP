@@ -61,9 +61,7 @@ logger = logging.getLogger(__name__)
 
 opencde_router = APIRouter(tags=["BCF OpenCDE 3.0"])
 
-_UUID_RE = re.compile(
-    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-)
+_UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 
 
 def _validate_guid(guid: str) -> str:
@@ -135,9 +133,7 @@ async def list_projects(
     """List projects the caller can access (OpenCDE Project[])."""
     service = OpenCDEService(session)
     try:
-        return await service.list_projects(
-            user_id=payload["sub"], role=payload.get("role", "viewer")
-        )
+        return await service.list_projects(user_id=payload["sub"], role=payload.get("role", "viewer"))
     except OpenCDEServiceError as exc:
         raise _service_error_to_http(exc) from exc
 
@@ -156,13 +152,9 @@ async def get_project(
     session: SessionDep,
 ) -> BCFProject:
     """Single OpenCDE Project record."""
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     try:
-        return await OpenCDEService(session).get_project(
-            project_id, role=payload.get("role", "viewer")
-        )
+        return await OpenCDEService(session).get_project(project_id, role=payload.get("role", "viewer"))
     except OpenCDEServiceError as exc:
         raise _service_error_to_http(exc) from exc
 
@@ -185,13 +177,9 @@ async def get_project_extensions(
     the file-based exporter emits — keeps the REST surface and the
     .bcfzip codec consistent for round-trips through Revit / Archicad.
     """
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     return {
-        "topic_type": [
-            "Clash", "Issue", "Comment", "Request for Information", "Remark"
-        ],
+        "topic_type": ["Clash", "Issue", "Comment", "Request for Information", "Remark"],
         "topic_status": ["Open", "In Progress", "Closed"],
         "topic_label": [],
         "snippet_type": [],
@@ -231,9 +219,7 @@ async def list_topics(
     skip: Annotated[int, Query(alias="$skip", ge=0)] = 0,
 ) -> TopicListResponse:
     """List topics, with OData $filter / $orderby / $top / $skip."""
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     service = OpenCDEService(session)
     try:
         items, total = await service.list_topics(
@@ -267,9 +253,7 @@ async def create_topic(
     response: Response,
 ) -> BCFTopicResponse:
     """Create a topic; ``creation_author`` is filled from the caller."""
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     try:
         topic_dto, topic = await OpenCDEService(session).create_topic(
             project_id,
@@ -302,9 +286,7 @@ async def get_topic(
 ) -> BCFTopicResponse:
     """Single topic — sets ``ETag`` for use with subsequent PUT/DELETE."""
     topic_guid = _validate_guid(topic_guid)
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     try:
         topic_dto, topic = await OpenCDEService(session).get_topic(
             project_id, topic_guid, role=payload.get("role", "viewer")
@@ -334,9 +316,7 @@ async def update_topic(
 ) -> BCFTopicResponse:
     """PUT — full or partial update; supports If-Match for stale-write check."""
     topic_guid = _validate_guid(topic_guid)
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     try:
         topic_dto, topic = await OpenCDEService(session).update_topic(
             project_id,
@@ -372,13 +352,9 @@ async def delete_topic(
 ) -> None:
     """DELETE — If-Match supported."""
     topic_guid = _validate_guid(topic_guid)
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     try:
-        await OpenCDEService(session).delete_topic(
-            project_id, topic_guid, if_match=if_match
-        )
+        await OpenCDEService(session).delete_topic(project_id, topic_guid, if_match=if_match)
     except OpenCDEServiceError as exc:
         raise _service_error_to_http(exc) from exc
     response.headers.update(_NO_STORE)
@@ -400,13 +376,9 @@ async def list_comments(
 ) -> CommentListResponse:
     """List comments on a topic, oldest first."""
     topic_guid = _validate_guid(topic_guid)
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     try:
-        items = await OpenCDEService(session).list_comments(
-            project_id, topic_guid, role=payload.get("role", "viewer")
-        )
+        items = await OpenCDEService(session).list_comments(project_id, topic_guid, role=payload.get("role", "viewer"))
     except OpenCDEServiceError as exc:
         raise _service_error_to_http(exc) from exc
     return CommentListResponse(items=items)
@@ -431,9 +403,7 @@ async def create_comment(
 ) -> BCFCommentResponse:
     """Append a comment; reply chain captured via ``reply_to_comment_guid``."""
     topic_guid = _validate_guid(topic_guid)
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     try:
         result = await OpenCDEService(session).create_comment(
             project_id,
@@ -465,13 +435,9 @@ async def list_viewpoints(
 ) -> ViewpointListResponse:
     """List viewpoints on a topic."""
     topic_guid = _validate_guid(topic_guid)
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     try:
-        items = await OpenCDEService(session).list_viewpoints(
-            project_id, topic_guid
-        )
+        items = await OpenCDEService(session).list_viewpoints(project_id, topic_guid)
     except OpenCDEServiceError as exc:
         raise _service_error_to_http(exc) from exc
     return ViewpointListResponse(items=items)
@@ -496,13 +462,9 @@ async def create_viewpoint(
 ) -> ViewpointResponse:
     """Create a viewpoint; body is JSON, NOT XML."""
     topic_guid = _validate_guid(topic_guid)
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     try:
-        result = await OpenCDEService(session).create_viewpoint(
-            project_id, topic_guid, body, user_id=payload["sub"]
-        )
+        result = await OpenCDEService(session).create_viewpoint(project_id, topic_guid, body, user_id=payload["sub"])
     except OpenCDEServiceError as exc:
         raise _service_error_to_http(exc) from exc
     response.headers.update(_NO_STORE)
@@ -530,13 +492,9 @@ async def get_viewpoint_snapshot(
     """Stream the viewpoint's snapshot PNG."""
     topic_guid = _validate_guid(topic_guid)
     viewpoint_guid = _validate_guid(viewpoint_guid)
-    await _project_owned_by_caller(
-        session, project_id, payload["sub"], payload.get("role", "viewer")
-    )
+    await _project_owned_by_caller(session, project_id, payload["sub"], payload.get("role", "viewer"))
     try:
-        png = await OpenCDEService(session).get_snapshot_png(
-            project_id, topic_guid, viewpoint_guid
-        )
+        png = await OpenCDEService(session).get_snapshot_png(project_id, topic_guid, viewpoint_guid)
     except OpenCDEServiceError as exc:
         raise _service_error_to_http(exc) from exc
     return Response(content=png, media_type="image/png")
@@ -558,11 +516,5 @@ async def get_current_user(
     from app.modules.users.models import User
 
     user = await session.get(User, uuid.UUID(str(payload["sub"])))
-    name = (
-        getattr(user, "full_name", None)
-        or getattr(user, "email", None)
-        or str(payload["sub"])
-    )
+    name = getattr(user, "full_name", None) or getattr(user, "email", None) or str(payload["sub"])
     return CurrentUser(id=str(payload["sub"]), name=name)
-
-

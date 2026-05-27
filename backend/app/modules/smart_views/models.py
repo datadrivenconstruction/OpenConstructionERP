@@ -117,11 +117,7 @@ class SmartView(Base):
     # ``itsdangerous`` URL-safe signed string — its payload is the
     # view UUID, so a stolen token still cannot point at a different
     # view (signature mismatch on tamper).
-    share_token: Mapped[str | None] = mapped_column(
-        String(255), nullable=True, default=None
-    )
+    share_token: Mapped[str | None] = mapped_column(String(255), nullable=True, default=None)
 
     def __repr__(self) -> str:  # pragma: no cover — debug only
-        return (
-            f"<SmartView {self.name!r} scope={self.scope_type}:{self.scope_id}>"
-        )
+        return f"<SmartView {self.name!r} scope={self.scope_type}:{self.scope_id}>"

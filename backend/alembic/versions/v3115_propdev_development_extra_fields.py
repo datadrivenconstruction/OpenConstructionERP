@@ -52,7 +52,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3115_propdev_development_extra_fields"
 down_revision: Union[str, Sequence[str], None] = "v3114_propdev_house_type_catalogue"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -67,7 +66,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -76,51 +77,106 @@ def _has_column(
 
 # Column definitions: (name, factory). batch_alter_table consumes the
 # Column objects so we build a fresh list per call.
-def _column_specs() -> list[tuple[str, "sa.Column[object]"]]:
+def _column_specs() -> list[tuple[str, sa.Column[object]]]:
     return [
         ("description", sa.Column("description", sa.Text(), nullable=True)),
-        ("dev_type", sa.Column(
-            "dev_type", sa.String(40),
-            nullable=False, server_default="residential",
-        )),
+        (
+            "dev_type",
+            sa.Column(
+                "dev_type",
+                sa.String(40),
+                nullable=False,
+                server_default="residential",
+            ),
+        ),
         ("country_code", sa.Column("country_code", sa.String(2), nullable=True)),
         ("latitude", sa.Column("latitude", sa.Numeric(10, 7), nullable=True)),
         ("longitude", sa.Column("longitude", sa.Numeric(10, 7), nullable=True)),
-        ("total_area_m2", sa.Column(
-            "total_area_m2", sa.Numeric(18, 2),
-            nullable=False, server_default="0",
-        )),
-        ("total_floors", sa.Column(
-            "total_floors", sa.Integer(),
-            nullable=False, server_default="0",
-        )),
+        (
+            "total_area_m2",
+            sa.Column(
+                "total_area_m2",
+                sa.Numeric(18, 2),
+                nullable=False,
+                server_default="0",
+            ),
+        ),
+        (
+            "total_floors",
+            sa.Column(
+                "total_floors",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
+            ),
+        ),
         ("start_date", sa.Column("start_date", sa.String(20), nullable=True)),
-        ("sales_target_amount", sa.Column(
-            "sales_target_amount", sa.Numeric(18, 2),
-            nullable=False, server_default="0",
-        )),
-        ("currency", sa.Column(
-            "currency", sa.String(8),
-            nullable=False, server_default="",
-        )),
-        ("developer_name", sa.Column(
-            "developer_name", sa.String(255), nullable=True,
-        )),
-        ("architect_name", sa.Column(
-            "architect_name", sa.String(255), nullable=True,
-        )),
-        ("general_contractor_name", sa.Column(
-            "general_contractor_name", sa.String(255), nullable=True,
-        )),
-        ("cover_image_url", sa.Column(
-            "cover_image_url", sa.String(1024), nullable=True,
-        )),
-        ("brochure_url", sa.Column(
-            "brochure_url", sa.String(1024), nullable=True,
-        )),
-        ("website_url", sa.Column(
-            "website_url", sa.String(1024), nullable=True,
-        )),
+        (
+            "sales_target_amount",
+            sa.Column(
+                "sales_target_amount",
+                sa.Numeric(18, 2),
+                nullable=False,
+                server_default="0",
+            ),
+        ),
+        (
+            "currency",
+            sa.Column(
+                "currency",
+                sa.String(8),
+                nullable=False,
+                server_default="",
+            ),
+        ),
+        (
+            "developer_name",
+            sa.Column(
+                "developer_name",
+                sa.String(255),
+                nullable=True,
+            ),
+        ),
+        (
+            "architect_name",
+            sa.Column(
+                "architect_name",
+                sa.String(255),
+                nullable=True,
+            ),
+        ),
+        (
+            "general_contractor_name",
+            sa.Column(
+                "general_contractor_name",
+                sa.String(255),
+                nullable=True,
+            ),
+        ),
+        (
+            "cover_image_url",
+            sa.Column(
+                "cover_image_url",
+                sa.String(1024),
+                nullable=True,
+            ),
+        ),
+        (
+            "brochure_url",
+            sa.Column(
+                "brochure_url",
+                sa.String(1024),
+                nullable=True,
+            ),
+        ),
+        (
+            "website_url",
+            sa.Column(
+                "website_url",
+                sa.String(1024),
+                nullable=True,
+            ),
+        ),
     ]
 
 
@@ -132,11 +188,7 @@ def upgrade() -> None:
         # Fresh install — create_all already populated everything.
         return
 
-    missing = [
-        (name, col)
-        for (name, col) in _column_specs()
-        if not _has_column(inspector, _TABLE, name)
-    ]
+    missing = [(name, col) for (name, col) in _column_specs() if not _has_column(inspector, _TABLE, name)]
     if not missing:
         return
 
@@ -147,9 +199,7 @@ def upgrade() -> None:
     # Add an index on country_code (drives the house-type catalogue +
     # tax-engine country lookup; both run on every plot create).
     inspector = sa.inspect(bind)
-    existing_indexes = {
-        idx["name"] for idx in inspector.get_indexes(_TABLE)
-    }
+    existing_indexes = {idx["name"] for idx in inspector.get_indexes(_TABLE)}
     if "ix_oe_property_dev_development_country_code" not in existing_indexes:
         op.create_index(
             "ix_oe_property_dev_development_country_code",
@@ -165,19 +215,14 @@ def downgrade() -> None:
     if not _has_table(inspector, _TABLE):
         return
 
-    existing_indexes = {
-        idx["name"] for idx in inspector.get_indexes(_TABLE)
-    }
+    existing_indexes = {idx["name"] for idx in inspector.get_indexes(_TABLE)}
     if "ix_oe_property_dev_development_country_code" in existing_indexes:
         op.drop_index(
-            "ix_oe_property_dev_development_country_code", table_name=_TABLE,
+            "ix_oe_property_dev_development_country_code",
+            table_name=_TABLE,
         )
 
-    to_drop = [
-        name
-        for (name, _col) in _column_specs()
-        if _has_column(inspector, _TABLE, name)
-    ]
+    to_drop = [name for (name, _col) in _column_specs() if _has_column(inspector, _TABLE, name)]
     if not to_drop:
         return
 

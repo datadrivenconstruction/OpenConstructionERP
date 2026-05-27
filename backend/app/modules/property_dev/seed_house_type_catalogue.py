@@ -18,11 +18,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.property_dev.models import PropertyDevHouseType
 
-
 # Country → [(code, name, description, area_typical_m2, floors_typical), ...]
-_SEED_PRESETS: dict[
-    str, list[tuple[str, str, str | None, Decimal | None, int | None]]
-] = {
+_SEED_PRESETS: dict[str, list[tuple[str, str, str | None, Decimal | None, int | None]]] = {
     "DE": [
         ("HOUSE_DETACHED", "Einfamilienhaus", "Freistehendes Einfamilienhaus", Decimal("160"), 2),
         ("HOUSE_SEMI", "Doppelhaushälfte", "Halbes Haus an Brandmauer", Decimal("130"), 2),

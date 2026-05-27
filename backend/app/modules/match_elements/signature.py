@@ -36,7 +36,8 @@ _WS_RE = re.compile(r"\s+")
 # lookbehind enforces a preceding digit so "240mm" / "1.5kg" / "3t"
 # still collapse while "IfcFurnishingElement" stays intact.
 _UNIT_SUFFIX_RE = re.compile(
-    r"(?<=\d)\s*(mm|cm|m|m2|m3|kg|t|stk|pcs)\b", flags=re.IGNORECASE,
+    r"(?<=\d)\s*(mm|cm|m|m2|m3|kg|t|stk|pcs)\b",
+    flags=re.IGNORECASE,
 )
 
 
@@ -55,7 +56,8 @@ def _normalize_value(value: Any) -> str:
 
 
 def normalize_signature(
-    fields: list[str], values: dict[str, Any],
+    fields: list[str],
+    values: dict[str, Any],
 ) -> tuple[str, str]:
     """‌⁠‍Compute (label, sha1_hex) for a group.
 

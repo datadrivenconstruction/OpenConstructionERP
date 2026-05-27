@@ -139,9 +139,7 @@ def _coerce_number(text: str) -> int | float | str:
     except ValueError:
         pass
     # Strip optional surrounding quotes from user input.
-    if (text.startswith("'") and text.endswith("'")) or (
-        text.startswith('"') and text.endswith('"')
-    ):
+    if (text.startswith("'") and text.endswith("'")) or (text.startswith('"') and text.endswith('"')):
         text = text[1:-1]
     return f"'{text}'"
 
@@ -490,7 +488,8 @@ def _translate_to_en(text: str, lang: str) -> str:
 
 
 def _try_patterns(
-    text: str, lang: str,
+    text: str,
+    lang: str,
 ) -> tuple[_Pattern, dict[str, Any]] | None:
     """Run the deterministic pattern table; return match + dict.
 
@@ -567,11 +566,7 @@ async def _ai_fallback(
     if ai_caller is None:
         return None
 
-    user_prompt = (
-        f"User language: {lang}\n"
-        f"User rule: {text}\n\n"
-        f"Return the YAML rule definition only."
-    )
+    user_prompt = f"User language: {lang}\nUser rule: {text}\n\nReturn the YAML rule definition only."
     try:
         raw = await ai_caller(_AI_SYSTEM_PROMPT, user_prompt)
     except Exception as exc:  # broad — providers raise diverse errors
@@ -670,7 +665,9 @@ async def parse_nl_to_dsl(
             parse_definition(dsl)
         except DSLError as exc:
             logger.warning(
-                "NL pattern '%s' produced invalid DSL: %s", pat.pattern_id, exc,
+                "NL pattern '%s' produced invalid DSL: %s",
+                pat.pattern_id,
+                exc,
             )
         else:
             return NlBuildResult(
@@ -683,7 +680,9 @@ async def parse_nl_to_dsl(
     # 2. AI fallback — only if requested and a caller was injected.
     if use_ai and ai_caller is not None:
         ai_result = await _ai_fallback(
-            stripped, lang=lang_norm, ai_caller=ai_caller,
+            stripped,
+            lang=lang_norm,
+            ai_caller=ai_caller,
         )
         if ai_result is not None:
             data, ai_errors = ai_result
@@ -698,7 +697,8 @@ async def parse_nl_to_dsl(
             return NlBuildResult(
                 used_method="ai",
                 confidence=0.0,
-                errors=ai_errors or [
+                errors=ai_errors
+                or [
                     "AI response could not be parsed as a DSL document.",
                 ],
                 suggestions=_default_suggestions(),

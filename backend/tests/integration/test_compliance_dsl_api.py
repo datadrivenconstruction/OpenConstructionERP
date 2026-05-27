@@ -48,7 +48,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -134,7 +136,8 @@ def _make_dsl(suffix: str = "alpha") -> str:
 
 @pytest.mark.asyncio
 async def test_validate_syntax_happy_path(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.post(
@@ -150,7 +153,8 @@ async def test_validate_syntax_happy_path(
 
 @pytest.mark.asyncio
 async def test_validate_syntax_rejects_bad_doc(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.post(
@@ -165,7 +169,8 @@ async def test_validate_syntax_rejects_bad_doc(
 
 @pytest.mark.asyncio
 async def test_compile_persists_and_returns_rule(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.post(
@@ -182,7 +187,8 @@ async def test_compile_persists_and_returns_rule(
 
 @pytest.mark.asyncio
 async def test_compile_duplicate_rule_id_returns_409(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     payload = {"definition_yaml": _make_dsl("dup"), "activate": True}
@@ -194,7 +200,8 @@ async def test_compile_duplicate_rule_id_returns_409(
 
 @pytest.mark.asyncio
 async def test_compile_invalid_dsl_returns_422(
-    client: AsyncClient, user_a: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     resp = await client.post(
@@ -206,7 +213,9 @@ async def test_compile_invalid_dsl_returns_422(
 
 @pytest.mark.asyncio
 async def test_list_rules_returns_only_caller_tenant(
-    client: AsyncClient, user_a: uuid.UUID, user_b: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    user_b: uuid.UUID,
 ) -> None:
     # User A creates one rule.
     _set_acting_user(user_a)
@@ -233,7 +242,9 @@ async def test_list_rules_returns_only_caller_tenant(
 
 @pytest.mark.asyncio
 async def test_get_rule_returns_404_for_other_tenant(
-    client: AsyncClient, user_a: uuid.UUID, user_b: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    user_b: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     create = await client.post(
@@ -249,7 +260,9 @@ async def test_get_rule_returns_404_for_other_tenant(
 
 @pytest.mark.asyncio
 async def test_delete_rule_owner_only(
-    client: AsyncClient, user_a: uuid.UUID, user_b: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    user_b: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     create = await client.post(

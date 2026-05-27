@@ -7,16 +7,13 @@ relies on a developer's outer shell having ``QA_RESET_ALLOWED`` set.
 
 from __future__ import annotations
 
-import os
 from contextlib import asynccontextmanager
-from contextvars import copy_context
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 from app.main import create_app
-
 
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
@@ -42,7 +39,7 @@ def gate_env(monkeypatch):
     """Open the env-var gate for the test, restore on exit."""
     monkeypatch.setenv("QA_RESET_ALLOWED", "1")
     monkeypatch.setenv("QA_RESET_TOKEN", "test-token-xyz")
-    yield
+    return
     # monkeypatch undoes both keys automatically.
 
 
@@ -113,9 +110,7 @@ async def test_gate_production_hostname_rejects(gate_env):
     async with lifespan_ctx():
         transport = ASGITransport(app=app)
         # Use a hostname without any safe substring (no localhost/staging/test/qa/dev).
-        async with AsyncClient(
-            transport=transport, base_url="http://app.openestimator.io"
-        ) as ac:
+        async with AsyncClient(transport=transport, base_url="http://app.openestimator.io") as ac:
             res = await ac.post(
                 "/api/v1/admin/qa-reset",
                 json={"tenant": "demo", "confirm_token": "test-token-xyz"},
@@ -173,11 +168,7 @@ async def test_audit_log_entry_written(client, gate_env):
     from app.database import async_session_factory
 
     async with async_session_factory() as session:
-        rows = (
-            await session.execute(
-                select(AuditEntry).where(AuditEntry.action == "qa_reset")
-            )
-        ).scalars().all()
+        rows = (await session.execute(select(AuditEntry).where(AuditEntry.action == "qa_reset"))).scalars().all()
     assert len(rows) >= 1
     latest = rows[-1]
     assert latest.entity_type == "tenant"

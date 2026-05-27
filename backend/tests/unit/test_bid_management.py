@@ -147,9 +147,7 @@ class _StubLineRepo(_StubRepo):
 
 
 class _StubInvitationRepo(_StubRepo):
-    async def list_for_package(
-        self, package_id: uuid.UUID, *, status: str | None = None
-    ) -> list[Any]:
+    async def list_for_package(self, package_id: uuid.UUID, *, status: str | None = None) -> list[Any]:
         rows = [r for r in self.rows.values() if r.package_id == package_id]
         if status:
             rows = [r for r in rows if r.status == status]
@@ -157,10 +155,7 @@ class _StubInvitationRepo(_StubRepo):
 
     async def invitations_pending(self, package_id: uuid.UUID) -> list[Any]:
         return [
-            r
-            for r in self.rows.values()
-            if r.package_id == package_id
-            and r.status in ("pending", "sent", "opened")
+            r for r in self.rows.values() if r.package_id == package_id and r.status in ("pending", "sent", "opened")
         ]
 
 
@@ -304,9 +299,7 @@ def test_completeness_ignores_optional_lines() -> None:
 # ── validate_submission_pre_open ──────────────────────────────────────────
 
 
-def _package(
-    deadline: datetime | None = None, currency: str = "EUR"
-) -> Any:
+def _package(deadline: datetime | None = None, currency: str = "EUR") -> Any:
     return SimpleNamespace(
         submission_deadline=deadline.isoformat() if deadline else None,
         currency=currency,
@@ -330,9 +323,7 @@ def test_validate_pre_open_ok() -> None:
     sub = _submission(sub_time)
     pkg_lines = [_line(l1)]
     sub_lines = [_sub_line(l1, "1000")]
-    is_valid, errors = validate_submission_pre_open(
-        sub, pkg, sub_lines, pkg_lines, now=now
-    )
+    is_valid, errors = validate_submission_pre_open(sub, pkg, sub_lines, pkg_lines, now=now)
     assert is_valid is True
     assert errors == []
 
@@ -346,9 +337,7 @@ def test_validate_pre_open_after_deadline() -> None:
     sub = _submission(sub_time)
     pkg_lines = [_line(l1)]
     sub_lines = [_sub_line(l1, "1000")]
-    is_valid, errors = validate_submission_pre_open(
-        sub, pkg, sub_lines, pkg_lines, now=now
-    )
+    is_valid, errors = validate_submission_pre_open(sub, pkg, sub_lines, pkg_lines, now=now)
     assert is_valid is False
     assert "submission_after_deadline" in errors
 
@@ -361,9 +350,7 @@ def test_validate_pre_open_missing_mandatory() -> None:
     sub = _submission(now)
     pkg_lines = [_line(l1, "A"), _line(l2, "B")]
     sub_lines = [_sub_line(l1, "500")]  # missing l2
-    is_valid, errors = validate_submission_pre_open(
-        sub, pkg, sub_lines, pkg_lines, now=now
-    )
+    is_valid, errors = validate_submission_pre_open(sub, pkg, sub_lines, pkg_lines, now=now)
     assert is_valid is False
     assert any("missing_mandatory_line:B" in e for e in errors)
 
@@ -376,9 +363,7 @@ def test_validate_pre_open_currency_mismatch() -> None:
     sub = _submission(now, currency="USD")
     pkg_lines = [_line(l1)]
     sub_lines = [_sub_line(l1, "1000")]
-    is_valid, errors = validate_submission_pre_open(
-        sub, pkg, sub_lines, pkg_lines, now=now
-    )
+    is_valid, errors = validate_submission_pre_open(sub, pkg, sub_lines, pkg_lines, now=now)
     assert is_valid is False
     assert "currency_mismatch" in errors
 
@@ -401,9 +386,7 @@ def test_validate_late_submission_within_grace() -> None:
 
 
 def test_normalize_no_exclusions() -> None:
-    sub = SimpleNamespace(
-        total_amount=Decimal("1000"), exclusions=[], qualifications=[]
-    )
+    sub = SimpleNamespace(total_amount=Decimal("1000"), exclusions=[], qualifications=[])
     assert normalize_submission_for_leveling(sub, _package()) == Decimal("1000.00")
 
 
@@ -598,17 +581,12 @@ async def test_create_package_duplicate_code_raises() -> None:
 async def test_publish_package_transitions_and_emits() -> None:
     svc = _make_service()
     publish_mock = AsyncMock()
-    with patch(
-        "app.modules.bid_management.service.event_bus.publish_detached", publish_mock
-    ):
+    with patch("app.modules.bid_management.service.event_bus.publish_detached", publish_mock):
         pkg = await svc.create_package(_pkg_data(), user_id="u1")
         published = await svc.publish_package(pkg.id, user_id="u1")
     assert published.status == "published"
     assert published.published_at is not None
-    assert any(
-        call.args[0] == "bid_management.package.published"
-        for call in publish_mock.call_args_list
-    )
+    assert any(call.args[0] == "bid_management.package.published" for call in publish_mock.call_args_list)
 
 
 @pytest.mark.asyncio
@@ -632,9 +610,7 @@ async def test_open_bids_flips_invitations_and_emits() -> None:
     svc = _make_service()
     now = datetime.now(UTC)
     with patch("app.modules.bid_management.service.event_bus.publish_detached"):
-        pkg = await svc.create_package(
-            _pkg_data(code="BP-OB"), user_id="u1"
-        )
+        pkg = await svc.create_package(_pkg_data(code="BP-OB"), user_id="u1")
         # Manually set deadline + status
         pkg.submission_deadline = (now - timedelta(hours=1)).isoformat()
         pkg.status = "published"
@@ -646,19 +622,14 @@ async def test_open_bids_flips_invitations_and_emits() -> None:
         await svc.invitation_repo.create(inv)
 
     publish_mock = AsyncMock()
-    with patch(
-        "app.modules.bid_management.service.event_bus.publish_detached", publish_mock
-    ):
+    with patch("app.modules.bid_management.service.event_bus.publish_detached", publish_mock):
         opened = await svc.open_bids(pkg.id, now=now)
 
     assert opened.status == "open"
     # Invitation with no submission and past-deadline -> expired
     assert inv.status == "expired"
     # Event emitted
-    assert any(
-        call.args[0] == "bid_management.bids.opened"
-        for call in publish_mock.call_args_list
-    )
+    assert any(call.args[0] == "bid_management.bids.opened" for call in publish_mock.call_args_list)
 
 
 # ── Service: disqualify_bidder ────────────────────────────────────────────
@@ -668,22 +639,15 @@ async def test_open_bids_flips_invitations_and_emits() -> None:
 async def test_disqualify_bidder_flips_status_and_emits() -> None:
     svc = _make_service()
     publish_mock = AsyncMock()
-    with patch(
-        "app.modules.bid_management.service.event_bus.publish_detached", publish_mock
-    ):
+    with patch("app.modules.bid_management.service.event_bus.publish_detached", publish_mock):
         from app.modules.bid_management.models import Bidder
 
-        bidder = Bidder(
-            package_id=uuid.uuid4(), company_name="X Co", status="active"
-        )
+        bidder = Bidder(package_id=uuid.uuid4(), company_name="X Co", status="active")
         await svc.bidder_repo.create(bidder)
         disqualified = await svc.disqualify_bidder(bidder.id, reason="Doc missing")
     assert disqualified.status == "disqualified"
     assert disqualified.disqualification_reason == "Doc missing"
-    assert any(
-        call.args[0] == "bid_management.bidder.disqualified"
-        for call in publish_mock.call_args_list
-    )
+    assert any(call.args[0] == "bid_management.bidder.disqualified" for call in publish_mock.call_args_list)
 
 
 # ── Service: award_package + auto-reject others ───────────────────────────
@@ -693,26 +657,19 @@ async def test_disqualify_bidder_flips_status_and_emits() -> None:
 async def test_award_package_emits_and_auto_rejects_others() -> None:
     svc = _make_service()
     publish_mock = AsyncMock()
-    with patch(
-        "app.modules.bid_management.service.event_bus.publish_detached", publish_mock
-    ):
+    with patch("app.modules.bid_management.service.event_bus.publish_detached", publish_mock):
         pkg = await svc.create_package(_pkg_data(code="BP-AW"), user_id="u1")
         pkg.status = "closed"
 
         from app.modules.bid_management.models import Bidder
 
-        winner = Bidder(
-            package_id=pkg.id, company_name="Winner", status="active"
-        )
-        loser1 = Bidder(
-            package_id=pkg.id, company_name="Loser 1", status="active"
-        )
-        loser2 = Bidder(
-            package_id=pkg.id, company_name="Loser 2", status="active"
-        )
+        winner = Bidder(package_id=pkg.id, company_name="Winner", status="active")
+        loser1 = Bidder(package_id=pkg.id, company_name="Loser 1", status="active")
+        loser2 = Bidder(package_id=pkg.id, company_name="Loser 2", status="active")
         # A disqualified bidder must NOT receive an auto-rejection.
         disq = Bidder(
-            package_id=pkg.id, company_name="Disqualified Co",
+            package_id=pkg.id,
+            company_name="Disqualified Co",
             status="disqualified",
         )
         for b in (winner, loser1, loser2, disq):
@@ -739,10 +696,7 @@ async def test_award_package_emits_and_auto_rejects_others() -> None:
     assert disq.id not in bidder_ids_rejected
     assert bidder_ids_rejected == {loser1.id, loser2.id}
     # Event emitted
-    assert any(
-        call.args[0] == "bid_management.package.awarded"
-        for call in publish_mock.call_args_list
-    )
+    assert any(call.args[0] == "bid_management.package.awarded" for call in publish_mock.call_args_list)
 
 
 @pytest.mark.asyncio
@@ -779,9 +733,7 @@ async def test_award_rejects_bidder_from_other_package() -> None:
         pkg = await svc.create_package(_pkg_data(code="BP-X1"), user_id="u1")
         pkg.status = "closed"
         # Bidder belongs to a *different* package.
-        stray = Bidder(
-            package_id=uuid.uuid4(), company_name="Stray", status="active"
-        )
+        stray = Bidder(package_id=uuid.uuid4(), company_name="Stray", status="active")
         await svc.bidder_repo.create(stray)
         award_data = BidAwardCreate(
             package_id=pkg.id,
@@ -803,9 +755,7 @@ async def test_award_rejects_disqualified_bidder() -> None:
     with patch("app.modules.bid_management.service.event_bus.publish_detached"):
         pkg = await svc.create_package(_pkg_data(code="BP-X2"), user_id="u1")
         pkg.status = "closed"
-        b = Bidder(
-            package_id=pkg.id, company_name="DQ", status="disqualified"
-        )
+        b = Bidder(package_id=pkg.id, company_name="DQ", status="disqualified")
         await svc.bidder_repo.create(b)
         award_data = BidAwardCreate(
             package_id=pkg.id,
@@ -828,14 +778,10 @@ async def test_update_package_cannot_change_status() -> None:
     with patch("app.modules.bid_management.service.event_bus.publish_detached"):
         pkg = await svc.create_package(_pkg_data(code="BP-PS"), user_id="u1")
         with pytest.raises(HTTPException) as exc:
-            await svc.update_package(
-                pkg.id, BidPackageUpdate(status="awarded")
-            )
+            await svc.update_package(pkg.id, BidPackageUpdate(status="awarded"))
     assert exc.value.status_code == 409
     # Non-status fields still update fine.
-    updated = await svc.update_package(
-        pkg.id, BidPackageUpdate(title="Renamed")
-    )
+    updated = await svc.update_package(pkg.id, BidPackageUpdate(title="Renamed"))
     assert updated.title == "Renamed"
     assert updated.status == "draft"
 
@@ -854,13 +800,12 @@ async def test_submission_locked_after_award() -> None:
 
     with patch("app.modules.bid_management.service.event_bus.publish_detached"):
         pkg = await svc.create_package(_pkg_data(code="BP-LK"), user_id="u1")
-        inv = BidInvitation(
-            package_id=pkg.id, invitee_email="a@b.com", status="opened"
-        )
+        inv = BidInvitation(package_id=pkg.id, invitee_email="a@b.com", status="opened")
         await svc.invitation_repo.create(inv)
         # R7 bidder-impersonation guard: bidder must belong to the same
         # package as the invitation, so seed an in-package bidder first.
         from app.modules.bid_management.models import Bidder
+
         bidder = Bidder(package_id=pkg.id, company_name="LK Co")
         await svc.bidder_repo.create(bidder)
         sub = await svc.record_submission(
@@ -872,15 +817,11 @@ async def test_submission_locked_after_award() -> None:
             )
         )
         # Editable while draft.
-        await svc.update_submission(
-            sub.id, BidSubmissionUpdate(total_amount=Decimal("1100"))
-        )
+        await svc.update_submission(sub.id, BidSubmissionUpdate(total_amount=Decimal("1100")))
         # Lock once package is awarded.
         pkg.status = "awarded"
         with pytest.raises(HTTPException) as exc:
-            await svc.update_submission(
-                sub.id, BidSubmissionUpdate(total_amount=Decimal("9999"))
-            )
+            await svc.update_submission(sub.id, BidSubmissionUpdate(total_amount=Decimal("9999")))
     assert exc.value.status_code == 409
 
 
@@ -915,23 +856,16 @@ async def test_send_invitations_emits_event() -> None:
     from app.modules.bid_management.models import BidInvitation
 
     pkg_id = uuid.uuid4()
-    inv = BidInvitation(
-        package_id=pkg_id, invitee_email="a@b.com", status="pending"
-    )
+    inv = BidInvitation(package_id=pkg_id, invitee_email="a@b.com", status="pending")
     await svc.invitation_repo.create(inv)
 
     publish_mock = AsyncMock()
-    with patch(
-        "app.modules.bid_management.service.event_bus.publish_detached", publish_mock
-    ):
+    with patch("app.modules.bid_management.service.event_bus.publish_detached", publish_mock):
         count = await svc.send_invitations(pkg_id)
 
     assert count == 1
     assert inv.status == "sent"
-    assert any(
-        call.args[0] == "bid_management.invitation.sent"
-        for call in publish_mock.call_args_list
-    )
+    assert any(call.args[0] == "bid_management.invitation.sent" for call in publish_mock.call_args_list)
 
 
 # ── Service: record_submission emits event ────────────────────────────────
@@ -950,6 +884,7 @@ async def test_record_submission_emits_event() -> None:
     # R7 bidder-impersonation guard: bidder must belong to the same
     # package as the invitation; seed one explicitly.
     from app.modules.bid_management.models import Bidder
+
     bidder = Bidder(package_id=pkg_id, company_name="XY Co")
     await svc.bidder_repo.create(bidder)
 
@@ -960,16 +895,11 @@ async def test_record_submission_emits_event() -> None:
         total_amount=Decimal("5000"),
         currency="EUR",
     )
-    with patch(
-        "app.modules.bid_management.service.event_bus.publish_detached", publish_mock
-    ):
+    with patch("app.modules.bid_management.service.event_bus.publish_detached", publish_mock):
         sub = await svc.record_submission(data)
 
     assert sub.invitation_id == inv.id
-    assert any(
-        call.args[0] == "bid_management.submission.received"
-        for call in publish_mock.call_args_list
-    )
+    assert any(call.args[0] == "bid_management.submission.received" for call in publish_mock.call_args_list)
     # Invitation status flipped to 'submitted'
     assert inv.status == "submitted"
 
@@ -1002,28 +932,14 @@ def test_permissions_registered() -> None:
 
     register_bid_management_permissions()
     # Spot-check a representative permission per role tier
-    assert permission_registry.role_has_permission(
-        Role.VIEWER, "bid_management.read"
-    )
-    assert permission_registry.role_has_permission(
-        Role.EDITOR, "bid_management.create"
-    )
-    assert permission_registry.role_has_permission(
-        Role.EDITOR, "bid_management.compute_leveling"
-    )
-    assert permission_registry.role_has_permission(
-        Role.MANAGER, "bid_management.publish"
-    )
-    assert permission_registry.role_has_permission(
-        Role.MANAGER, "bid_management.award"
-    )
-    assert permission_registry.role_has_permission(
-        Role.MANAGER, "bid_management.cancel"
-    )
+    assert permission_registry.role_has_permission(Role.VIEWER, "bid_management.read")
+    assert permission_registry.role_has_permission(Role.EDITOR, "bid_management.create")
+    assert permission_registry.role_has_permission(Role.EDITOR, "bid_management.compute_leveling")
+    assert permission_registry.role_has_permission(Role.MANAGER, "bid_management.publish")
+    assert permission_registry.role_has_permission(Role.MANAGER, "bid_management.award")
+    assert permission_registry.role_has_permission(Role.MANAGER, "bid_management.cancel")
     # Viewer cannot publish
-    assert not permission_registry.role_has_permission(
-        Role.VIEWER, "bid_management.publish"
-    )
+    assert not permission_registry.role_has_permission(Role.VIEWER, "bid_management.publish")
 
 
 # ── Outlier detection (±σ) ──────────────────────────────────────────────
@@ -1038,7 +954,7 @@ def test_detect_bid_outliers_flags_low_and_high() -> None:
         SimpleNamespace(id="b2", total_amount=Decimal("110000")),
         SimpleNamespace(id="b3", total_amount=Decimal("105000")),
         SimpleNamespace(id="b4", total_amount=Decimal("108000")),
-        SimpleNamespace(id="b5", total_amount=Decimal("50000")),   # low
+        SimpleNamespace(id="b5", total_amount=Decimal("50000")),  # low
         SimpleNamespace(id="b6", total_amount=Decimal("180000")),  # high
     ]
     out = detect_bid_outliers(bids, sigma_threshold=Decimal("1"))

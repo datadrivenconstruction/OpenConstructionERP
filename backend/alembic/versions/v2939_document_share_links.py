@@ -42,7 +42,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -55,9 +57,7 @@ def upgrade() -> None:
     is_sqlite = bind.dialect.name == "sqlite"
     # Mirror the GUID() TypeDecorator behaviour: VARCHAR(36) on SQLite,
     # native UUID on PostgreSQL. Matches the activity table pattern.
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     if not _has_table(inspector, _TABLE):
         op.create_table(

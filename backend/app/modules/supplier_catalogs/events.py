@@ -108,7 +108,8 @@ async def _on_material_added(event: Event) -> None:
         )
     except Exception:
         _logger.debug(
-            "supplier_catalogs: vector_reindex emit failed", exc_info=True,
+            "supplier_catalogs: vector_reindex emit failed",
+            exc_info=True,
         )
 
     try:
@@ -125,7 +126,8 @@ async def _on_material_added(event: Event) -> None:
         )
     except Exception:
         _logger.debug(
-            "supplier_catalogs: kpi_recompute emit failed", exc_info=True,
+            "supplier_catalogs: kpi_recompute emit failed",
+            exc_info=True,
         )
 
 
@@ -151,7 +153,8 @@ async def _on_vendor_rated(event: Event) -> None:
         )
     except Exception:
         _logger.debug(
-            "supplier_catalogs: vendor_rated kpi_recompute failed", exc_info=True,
+            "supplier_catalogs: vendor_rated kpi_recompute failed",
+            exc_info=True,
         )
 
 

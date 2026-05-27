@@ -215,9 +215,7 @@ def _id_block(
     fields: dict[str, str],
 ) -> Table:
     """Build a 2-column label/value block (used for prestador and tomador)."""
-    rows: list[list[Paragraph]] = [
-        [_safe_para(title, styles["section"]), _safe_para("", styles["section"])]
-    ]
+    rows: list[list[Paragraph]] = [[_safe_para(title, styles["section"]), _safe_para("", styles["section"])]]
     for label, value in fields.items():
         rows.append(
             [

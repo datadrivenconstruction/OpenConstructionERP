@@ -9,7 +9,6 @@ import json
 import sys
 import urllib.request
 
-
 BASE = "http://localhost:8000"
 
 

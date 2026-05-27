@@ -26,7 +26,6 @@ from __future__ import annotations
 import os
 import tempfile
 import uuid
-from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -35,17 +34,13 @@ _TMP_DB = _TMP_DIR / "bcf_roundtrip.db"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}"
 os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 
-import pytest  # noqa: E402
 
 from app.modules.bcf.bcf_xml import (  # noqa: E402
-    BCFParseError,
     ParsedComment,
     ParsedTopic,
-    ParsedViewpoint,
     build_bcfzip,
     parse_bcfzip,
 )
-
 
 # ── Fixture BCF archive helpers ────────────────────────────────────────────
 
@@ -83,9 +78,7 @@ def _make_comment(text: str, author: str = "user@example.com") -> ParsedComment:
     )
 
 
-def _build_and_parse(
-    topics: list[ParsedTopic], version: str = "2.1"
-) -> list[ParsedTopic]:
+def _build_and_parse(topics: list[ParsedTopic], version: str = "2.1") -> list[ParsedTopic]:
     """Build a bcfzip from topics, immediately parse it back."""
     raw = build_bcfzip(
         version=version,
@@ -152,10 +145,7 @@ def test_bcf_30_simple_roundtrip():
 
 def test_bcf_multi_topic_roundtrip():
     """Five topics; all GUIDs present in parsed output, none duplicated."""
-    originals = [
-        _make_topic(title=f"Clash {i}", topic_status="Open")
-        for i in range(5)
-    ]
+    originals = [_make_topic(title=f"Clash {i}", topic_status="Open") for i in range(5)]
     parsed = _build_and_parse(originals, version="2.1")
 
     original_guids = {t.guid for t in originals}
@@ -179,10 +169,7 @@ def test_bcf_encoding_umlauts_and_cyrillic_roundtrip():
     non-ASCII characters.
     """
     german_text = "Kollision: Stahl-Träger ↔ Lüftungskanal (Ü-Bogen/Wärmeäußerer)"
-    cyrillic_text = (
-        "Пересечение: несущая стена ↔ трубопровод — "
-        "необходимо устранить до следующего запуска"
-    )
+    cyrillic_text = "Пересечение: несущая стена ↔ трубопровод — необходимо устранить до следующего запуска"
     mixed_desc = f"{german_text}\n{cyrillic_text}"
 
     original = _make_topic(
@@ -203,30 +190,20 @@ def test_bcf_encoding_umlauts_and_cyrillic_roundtrip():
     rt = parsed_topics[0]
 
     # Title
-    assert rt.title == german_text, (
-        f"Title mangled.\nExpected: {german_text!r}\nGot:      {rt.title!r}"
-    )
+    assert rt.title == german_text, f"Title mangled.\nExpected: {german_text!r}\nGot:      {rt.title!r}"
     # Description
     assert rt.description is not None
-    assert german_text in rt.description, (
-        f"German text missing from description.\nGot: {rt.description!r}"
-    )
-    assert cyrillic_text in rt.description, (
-        f"Cyrillic text missing from description.\nGot: {rt.description!r}"
-    )
+    assert german_text in rt.description, f"German text missing from description.\nGot: {rt.description!r}"
+    assert cyrillic_text in rt.description, f"Cyrillic text missing from description.\nGot: {rt.description!r}"
     # Comments
     assert len(rt.comments) >= 1
     comment_texts = [c.comment for c in rt.comments]
     assert any("Dachgeschoß" in t for t in comment_texts), (
         f"'Dachgeschoß' missing from parsed comments: {comment_texts!r}"
     )
-    assert any(cyrillic_text in t for t in comment_texts), (
-        f"Cyrillic comment text missing: {comment_texts!r}"
-    )
+    assert any(cyrillic_text in t for t in comment_texts), f"Cyrillic comment text missing: {comment_texts!r}"
     # Assigned-to
-    assert rt.assigned_to == "müller@bau-gmbh.de", (
-        f"Assigned-to mangled: {rt.assigned_to!r}"
-    )
+    assert rt.assigned_to == "müller@bau-gmbh.de", f"Assigned-to mangled: {rt.assigned_to!r}"
 
 
 # ── Test 5: Clash-description signature recovery ──────────────────────────
@@ -234,7 +211,7 @@ def test_bcf_encoding_umlauts_and_cyrillic_roundtrip():
 
 def test_bcf_clash_signature_recovery_from_description():
     """_signature_from_description recovers the canonical clash signature."""
-    from app.modules.clash.service import _signature_from_description, _signature
+    from app.modules.clash.service import _signature, _signature_from_description
 
     a_sid = "GUID-WALL-001"
     b_sid = "GUID-PIPE-002"
@@ -249,14 +226,12 @@ def test_bcf_clash_signature_recovery_from_description():
         f"Penetration: 0.05 m · Clearance gap: 0.0 m"
     )
     recovered = _signature_from_description(desc)
-    assert recovered == expected_sig, (
-        f"Signature mismatch.\nExpected: {expected_sig!r}\nGot:      {recovered!r}"
-    )
+    assert recovered == expected_sig, f"Signature mismatch.\nExpected: {expected_sig!r}\nGot:      {recovered!r}"
 
 
 def test_bcf_clearance_clash_signature_recovery():
     """_signature_from_description works for clearance clashes too."""
-    from app.modules.clash.service import _signature_from_description, _signature
+    from app.modules.clash.service import _signature, _signature_from_description
 
     a_sid = "ELEM-A"
     b_sid = "ELEM-B"
@@ -270,9 +245,7 @@ def test_bcf_clearance_clash_signature_recovery():
         f"Penetration: 0.0 m · Clearance gap: 0.03 m"
     )
     recovered = _signature_from_description(desc)
-    assert recovered == expected_sig, (
-        f"Clearance signature mismatch: expected {expected_sig!r}, got {recovered!r}"
-    )
+    assert recovered == expected_sig, f"Clearance signature mismatch: expected {expected_sig!r}, got {recovered!r}"
 
 
 def test_bcf_signature_recovery_fails_gracefully_on_garbage():
@@ -287,8 +260,9 @@ def test_bcf_signature_recovery_fails_gracefully_on_garbage():
 # ── Test 6: DB-backed round-trip via service ──────────────────────────────
 
 
-import pytest_asyncio  # noqa: E402
 from collections.abc import AsyncIterator  # noqa: E402
+
+import pytest_asyncio  # noqa: E402
 
 
 @pytest_asyncio.fixture(scope="module")
@@ -379,9 +353,7 @@ async def _seed_project_and_run(
     return user.id, project.id, run.id
 
 
-async def test_bcf_clash_import_patches_status_and_comment(
-    app_factory, db_session
-):
+async def test_bcf_clash_import_patches_status_and_comment(app_factory, db_session):
     """Build a BCF archive for one clash result, re-import it.
 
     After import the clash row must reflect the BCF topic's status
@@ -390,7 +362,7 @@ async def test_bcf_clash_import_patches_status_and_comment(
     from sqlalchemy import select
 
     from app.modules.clash.models import ClashResult
-    from app.modules.clash.service import ClashService, _signature
+    from app.modules.clash.service import ClashService
 
     _user_id, project_id, run_id = await _seed_project_and_run(db_session)
 
@@ -436,9 +408,7 @@ async def test_bcf_clash_import_patches_status_and_comment(
 
     # Round-trip import via ClashService.
     svc = ClashService(db_session)
-    matched, unmatched, errors = await svc.import_bcf(
-        project_id, run_id, raw_bcf, actor="test-actor"
-    )
+    matched, unmatched, errors = await svc.import_bcf(project_id, run_id, raw_bcf, actor="test-actor")
 
     assert errors == 0, f"BCF parse errors: {errors}"
     assert matched == 1, f"Expected 1 matched topic, got matched={matched} unmatched={unmatched}"
@@ -446,13 +416,7 @@ async def test_bcf_clash_import_patches_status_and_comment(
 
     # Re-fetch and verify the row was patched.
     await db_session.refresh(result)
-    assert result.status == "resolved", (
-        f"Status not patched: expected 'resolved', got {result.status!r}"
-    )
-    assert result.assigned_to == "koordinator@test.io", (
-        f"assigned_to not patched: {result.assigned_to!r}"
-    )
+    assert result.status == "resolved", f"Status not patched: expected 'resolved', got {result.status!r}"
+    assert result.assigned_to == "koordinator@test.io", f"assigned_to not patched: {result.assigned_to!r}"
     comment_texts = [c.get("text", "") for c in (result.comments or [])]
-    assert any("Fixed in revised model" in t for t in comment_texts), (
-        f"BCF comment not imported: {comment_texts}"
-    )
+    assert any("Fixed in revised model" in t for t in comment_texts), f"BCF comment not imported: {comment_texts}"

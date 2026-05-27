@@ -186,8 +186,9 @@ async def get_timeline(
     — so the frontend AuditLogPage can render a cross-module timeline
     without union-querying two tables.
     """
-    from app.core.audit_log import ActivityLog
     from sqlalchemy import select
+
+    from app.core.audit_log import ActivityLog
 
     stmt = select(ActivityLog)
     if entity_type is not None:
@@ -203,11 +204,7 @@ async def get_timeline(
             stmt = stmt.where(ActivityLog.actor_id == _uuid.UUID(actor_id))
         except (ValueError, AttributeError):
             return []
-    stmt = (
-        stmt.order_by(ActivityLog.created_at.desc())
-        .offset(offset)
-        .limit(limit)
-    )
+    stmt = stmt.order_by(ActivityLog.created_at.desc()).offset(offset).limit(limit)
     rows = list((await session.execute(stmt)).scalars().all())
     return [_activity_to_dict(r) for r in rows]
 
@@ -228,10 +225,7 @@ class RedactActorRequest(BaseModel):
     actor_id: str = Field(..., description="UUID of the actor to redact")
     confirm: str | None = Field(
         default=None,
-        description=(
-            "Echoes back the ``confirm`` token returned by a preview "
-            "call. Required when ``commit=True``."
-        ),
+        description=("Echoes back the ``confirm`` token returned by a preview call. Required when ``commit=True``."),
     )
     commit: bool = Field(
         default=False,
@@ -266,17 +260,15 @@ async def redact_actor(
             detail="Invalid actor_id — must be a UUID",
         ) from exc
 
-    from app.core.audit_log import ActivityLog
-
     # Always count first so the response shape is identical between
     # preview and commit — the frontend hides ``preview`` vs ``redacted``
     # under the same key.
-    from sqlalchemy import func, select as _select
+    from sqlalchemy import func
+    from sqlalchemy import select as _select
 
-    count_stmt = (
-        _select(func.count(ActivityLog.id))
-        .where(ActivityLog.actor_id == actor_uuid)
-    )
+    from app.core.audit_log import ActivityLog
+
+    count_stmt = _select(func.count(ActivityLog.id)).where(ActivityLog.actor_id == actor_uuid)
     affected = int((await session.execute(count_stmt)).scalar() or 0)
 
     confirm_token = f"yes-{actor_uuid}"
@@ -292,10 +284,7 @@ async def redact_actor(
     if body.confirm != confirm_token:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                "Confirmation token mismatch. POST again without "
-                "``commit`` to retrieve the current token."
-            ),
+            detail=("Confirmation token mismatch. POST again without ``commit`` to retrieve the current token."),
         )
 
     redact_stmt = (
@@ -308,7 +297,9 @@ async def redact_actor(
     redacted = int(result.rowcount or affected)
     logger.warning(
         "GDPR redact-actor: actor_id=%s rows=%d by admin=%s",
-        actor_uuid, redacted, _user_id,
+        actor_uuid,
+        redacted,
+        _user_id,
     )
     return {
         "preview": affected,

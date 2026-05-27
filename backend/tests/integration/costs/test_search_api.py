@@ -163,11 +163,7 @@ async def auth_headers(http_client):
     assert reg.status_code in (200, 201), f"register failed: {reg.text}"
 
     async with async_session_factory() as s:
-        await s.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await s.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await s.commit()
 
     login = await http_client.post(
@@ -184,9 +180,7 @@ async def auth_headers(http_client):
 
 @pytest.mark.asyncio
 async def test_first_page_returns_total_and_next_cursor(http_client, auth_headers):
-    resp = await http_client.get(
-        "/api/v1/costs/", params={"limit": 5}, headers=auth_headers
-    )
+    resp = await http_client.get("/api/v1/costs/", params={"limit": 5}, headers=auth_headers)
     assert resp.status_code == 200, resp.text
     body = resp.json()
 
@@ -209,9 +203,7 @@ async def test_cursor_pagination_walks_all_rows(http_client, auth_headers):
         if cursor:
             params["cursor"] = cursor
 
-        resp = await http_client.get(
-            "/api/v1/costs/", params=params, headers=auth_headers
-        )
+        resp = await http_client.get("/api/v1/costs/", params=params, headers=auth_headers)
         assert resp.status_code == 200, resp.text
         body = resp.json()
 
@@ -310,9 +302,7 @@ async def test_region_filter_changes_results(http_client, auth_headers):
     ).json()
     assert de["total"] == 15
     assert gb["total"] == 5
-    assert {it["code"] for it in de["items"]}.isdisjoint(
-        {it["code"] for it in gb["items"]}
-    )
+    assert {it["code"] for it in de["items"]}.isdisjoint({it["code"] for it in gb["items"]})
 
 
 # ── Category tree ─────────────────────────────────────────────────────────
@@ -376,9 +366,7 @@ async def test_category_tree_count_rollup(http_client, auth_headers):
 
 @pytest.mark.asyncio
 async def test_category_tree_no_region_aggregates_all(http_client, auth_headers):
-    resp = await http_client.get(
-        "/api/v1/costs/category-tree/", headers=auth_headers
-    )
+    resp = await http_client.get("/api/v1/costs/category-tree/", headers=auth_headers)
     assert resp.status_code == 200
     tree = resp.json()
     total_rows = sum(n["count"] for n in tree)

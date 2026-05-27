@@ -70,9 +70,7 @@ class MoneyType(TypeDecorator):
             return dialect.type_descriptor(Numeric(self.precision, self.scale))
         return dialect.type_descriptor(String(50))
 
-    def process_bind_param(
-        self, value: Decimal | str | int | float | None, dialect: Any
-    ) -> Decimal | str | None:
+    def process_bind_param(self, value: Decimal | str | int | float | None, dialect: Any) -> Decimal | str | None:
         if value is None:
             return None
         try:
@@ -85,9 +83,7 @@ class MoneyType(TypeDecorator):
         # SQLite: canonical string form (no scientific notation, no trailing junk).
         return format(normalised, "f")
 
-    def process_result_value(
-        self, value: Decimal | str | None, dialect: Any
-    ) -> Decimal | None:
+    def process_result_value(self, value: Decimal | str | None, dialect: Any) -> Decimal | None:
         if value is None:
             return None
         if isinstance(value, Decimal):
@@ -130,9 +126,7 @@ class SafeDate(TypeDecorator):
             return date.fromisoformat(head)
         raise ValueError(f"SafeDate: cannot coerce {value!r} to date")
 
-    def process_bind_param(
-        self, value: date | datetime | str | None, dialect: Any
-    ) -> date | str | None:
+    def process_bind_param(self, value: date | datetime | str | None, dialect: Any) -> date | str | None:
         if value is None:
             return None
         normalised = self._to_date(value)
@@ -140,9 +134,7 @@ class SafeDate(TypeDecorator):
             return normalised
         return normalised.isoformat()
 
-    def process_result_value(
-        self, value: date | str | None, dialect: Any
-    ) -> date | None:
+    def process_result_value(self, value: date | str | None, dialect: Any) -> date | None:
         if value is None:
             return None
         if isinstance(value, date) and not isinstance(value, datetime):

@@ -87,9 +87,7 @@ async def preflight_auth(preflight_client: AsyncClient) -> dict[str, str]:
 
 
 @pytest_asyncio.fixture(scope="module")
-async def preflight_project(
-    preflight_client: AsyncClient, preflight_auth: dict[str, str]
-) -> str:
+async def preflight_project(preflight_client: AsyncClient, preflight_auth: dict[str, str]) -> str:
     resp = await preflight_client.post(
         "/api/v1/projects/",
         json={
@@ -135,9 +133,7 @@ async def _upload(
         files={"file": (filename, io.BytesIO(content), "application/octet-stream")},
         headers=auth,
     )
-    assert resp.status_code in (200, 201), (
-        f"Upload failed ({resp.status_code}): {resp.text}"
-    )
+    assert resp.status_code in (200, 201), f"Upload failed ({resp.status_code}): {resp.text}"
     return resp.json()
 
 
@@ -217,9 +213,7 @@ class TestBimUploadConverterPreflight:
         import app.modules.boq.cad_import as cad_import_mod
 
         fake_exe = Path("/fake/RvtExporter.exe")
-        monkeypatch.setattr(
-            cad_import_mod, "find_converter", lambda _ext: fake_exe
-        )
+        monkeypatch.setattr(cad_import_mod, "find_converter", lambda _ext: fake_exe)
 
         body = await _upload(
             preflight_client,

@@ -71,7 +71,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -79,7 +81,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False

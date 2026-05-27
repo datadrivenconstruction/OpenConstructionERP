@@ -62,10 +62,10 @@ async def seed_qms(
 
     item_specs = [
         ("Formwork inspection", "hold", "GC", 2),
-        ("Rebar inspection",    "hold", "GC", 2),
-        ("Pre-pour clean-up",   "witness", "GC", 1),
-        ("Slump test",          "witness", "QC", 1),
-        ("Cube sampling",       "review", "lab", 1),
+        ("Rebar inspection", "hold", "GC", 2),
+        ("Pre-pour clean-up", "witness", "GC", 1),
+        ("Slump test", "witness", "QC", 1),
+        ("Cube sampling", "review", "lab", 1),
     ]
     items: list[ITPItem] = []
     for seq, (name, kind, role, sigs) in enumerate(item_specs, start=10):
@@ -87,24 +87,36 @@ async def seed_qms(
 
     # 2) Inspections — 1 passed / 1 failed / 1 conditional
     insp_passed = QMSInspection(
-        itp_item_id=items[0].id, project_id=project_id,
-        location_ref="Grid A1-A4", inspector_user_id=None,
-        scheduled_at=_now_iso(), performed_at=_now_iso(),
-        status="passed", notes="All formwork ties correctly torqued.",
+        itp_item_id=items[0].id,
+        project_id=project_id,
+        location_ref="Grid A1-A4",
+        inspector_user_id=None,
+        scheduled_at=_now_iso(),
+        performed_at=_now_iso(),
+        status="passed",
+        notes="All formwork ties correctly torqued.",
         photos_json=[],
     )
     insp_failed = QMSInspection(
-        itp_item_id=items[1].id, project_id=project_id,
-        location_ref="Grid A1-A4", inspector_user_id=None,
-        scheduled_at=_now_iso(), performed_at=_now_iso(),
-        status="failed", notes="Cover blocks below 25mm in section.",
+        itp_item_id=items[1].id,
+        project_id=project_id,
+        location_ref="Grid A1-A4",
+        inspector_user_id=None,
+        scheduled_at=_now_iso(),
+        performed_at=_now_iso(),
+        status="failed",
+        notes="Cover blocks below 25mm in section.",
         photos_json=[],
     )
     insp_cond = QMSInspection(
-        itp_item_id=items[2].id, project_id=project_id,
-        location_ref="Grid A1-A4", inspector_user_id=None,
-        scheduled_at=_now_iso(), performed_at=None,
-        status="conditional", notes="Awaiting re-cleanup of joint surface.",
+        itp_item_id=items[2].id,
+        project_id=project_id,
+        location_ref="Grid A1-A4",
+        inspector_user_id=None,
+        scheduled_at=_now_iso(),
+        performed_at=None,
+        status="conditional",
+        notes="Awaiting re-cleanup of joint surface.",
         photos_json=[],
     )
     session.add_all([insp_passed, insp_failed, insp_cond])
@@ -112,15 +124,20 @@ async def seed_qms(
 
     # 3) NCRs — 1 open, 1 escalated to variation
     ncr_open = QMSNCR(
-        project_id=project_id, raised_at=_now_iso(),
+        project_id=project_id,
+        raised_at=_now_iso(),
         title="Cover below spec",
         description="Rebar cover < 25mm in slab section A2.",
-        severity="major", root_cause=None, status="open",
-        cost_impact_currency="", cost_impact_amount=None,
+        severity="major",
+        root_cause=None,
+        status="open",
+        cost_impact_currency="",
+        cost_impact_amount=None,
         linked_inspection_id=insp_failed.id,
     )
     ncr_var = QMSNCR(
-        project_id=project_id, raised_at=_now_iso(),
+        project_id=project_id,
+        raised_at=_now_iso(),
         title="Concrete strength below 28-day target",
         description="Cube test 23MPa vs spec 30MPa — remediation required.",
         severity="critical",
@@ -135,26 +152,34 @@ async def seed_qms(
 
     # 4) Punch items — eight across the lifecycle
     punch_specs = [
-        ("Wall paint scuff in lobby",       "open",                 "minor",      "finishes"),
-        ("Door latch sticks 03-12",         "assigned",             "minor",      "architectural"),
-        ("HVAC noise in 04-08",             "in_progress",          "major",      "mechanical"),
-        ("Outlet misalignment 02-04",       "ready_for_inspection", "minor",      "electrical"),
-        ("Crack in slab corner",            "rejected",             "major",      "structure"),
-        ("Window seal gap 05-10",           "open",                 "minor",      "finishes"),
-        ("Door hinge stiff 02-15",          "open",                 "minor",      "architectural"),
-        ("Closeout: rework verified",       "closed",               "minor",      "finishes"),
+        ("Wall paint scuff in lobby", "open", "minor", "finishes"),
+        ("Door latch sticks 03-12", "assigned", "minor", "architectural"),
+        ("HVAC noise in 04-08", "in_progress", "major", "mechanical"),
+        ("Outlet misalignment 02-04", "ready_for_inspection", "minor", "electrical"),
+        ("Crack in slab corner", "rejected", "major", "structure"),
+        ("Window seal gap 05-10", "open", "minor", "finishes"),
+        ("Door hinge stiff 02-15", "open", "minor", "architectural"),
+        ("Closeout: rework verified", "closed", "minor", "finishes"),
     ]
     punches: list[QMSPunchItem] = []
     for title, st, sev, cat in punch_specs:
         punches.append(
             QMSPunchItem(
-                project_id=project_id, raised_at=_now_iso(),
-                title=title, description=None,
-                room_ref=None, drawing_ref=None, bim_element_ref=None,
-                status=st, severity=sev, assigned_to=None,
+                project_id=project_id,
+                raised_at=_now_iso(),
+                title=title,
+                description=None,
+                room_ref=None,
+                drawing_ref=None,
+                bim_element_ref=None,
+                status=st,
+                severity=sev,
+                assigned_to=None,
                 due_date=None,
                 closed_at=_now_iso() if st == "closed" else None,
-                photos_json=[], source="manual", category=cat,
+                photos_json=[],
+                source="manual",
+                category=cat,
             )
         )
     session.add_all(punches)
@@ -162,8 +187,10 @@ async def seed_qms(
 
     # 5) Audit + 3 findings
     audit = QMSAudit(
-        project_id=project_id, audit_type="internal",
-        planned_date=_now_iso(), performed_at=_now_iso(),
+        project_id=project_id,
+        audit_type="internal",
+        planned_date=_now_iso(),
+        performed_at=_now_iso(),
         auditor_user_id=None,
         audit_scope="QMS process audit Q2",
         standard_ref="ISO 9001:2015",
@@ -175,8 +202,8 @@ async def seed_qms(
 
     finding_specs = [
         ("observation", "8.5.1", "Record retention period inconsistent"),
-        ("minor",       "9.2",   "Internal audit interval drifted"),
-        ("major",       "8.7",   "Non-conforming output controls weak"),
+        ("minor", "9.2", "Internal audit interval drifted"),
+        ("major", "8.7", "Non-conforming output controls weak"),
     ]
     findings: list[QMSAuditFinding] = []
     for ft, clause, desc in finding_specs:

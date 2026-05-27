@@ -20,7 +20,6 @@ from __future__ import annotations
 
 from typing import Sequence, Union
 
-
 # revision identifiers, used by Alembic.
 revision: str = "v3070_merge_files_waves"
 down_revision: Union[str, Sequence[str], None] = (

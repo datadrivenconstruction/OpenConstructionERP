@@ -88,21 +88,15 @@ def upgrade() -> None:
             sa.Column("file_id", sa.String(length=64), nullable=False),
             sa.Column("version_number", sa.Integer(), nullable=False),
             sa.Column("canonical_name", sa.String(length=255), nullable=False),
-            sa.Column(
-                "previous_version_id", sa.String(length=36), nullable=True
-            ),
+            sa.Column("previous_version_id", sa.String(length=36), nullable=True),
             sa.Column(
                 "is_current",
                 sa.Boolean(),
                 nullable=False,
                 server_default=sa.text("1"),
             ),
-            sa.Column(
-                "superseded_at", sa.DateTime(timezone=True), nullable=True
-            ),
-            sa.Column(
-                "superseded_by_id", sa.String(length=36), nullable=True
-            ),
+            sa.Column("superseded_at", sa.DateTime(timezone=True), nullable=True),
+            sa.Column("superseded_by_id", sa.String(length=36), nullable=True),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column(
                 "uploaded_by_id",
@@ -110,19 +104,13 @@ def upgrade() -> None:
                 sa.ForeignKey("oe_users_user.id", ondelete="SET NULL"),
                 nullable=True,
             ),
-            sa.Column(
-                "uploaded_at", sa.DateTime(timezone=True), nullable=False
-            ),
-            sa.Column(
-                "file_size", sa.Integer(), nullable=False, server_default="0"
-            ),
+            sa.Column("uploaded_at", sa.DateTime(timezone=True), nullable=False),
+            sa.Column("file_size", sa.Integer(), nullable=False, server_default="0"),
             sa.Column("checksum", sa.String(length=64), nullable=True),
         )
 
     existing_version_idx = (
-        {ix["name"] for ix in inspector.get_indexes(_VERSION)}
-        if _has_table(inspector, _VERSION)
-        else set()
+        {ix["name"] for ix in inspector.get_indexes(_VERSION)} if _has_table(inspector, _VERSION) else set()
     )
     if _VERSION_CHAIN_IDX not in existing_version_idx:
         op.create_index(
@@ -164,12 +152,8 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="",
             ),
-            sa.Column(
-                "payload_json", sa.JSON(), nullable=False, server_default="{}"
-            ),
-            sa.Column(
-                "trashed_at", sa.DateTime(timezone=True), nullable=False
-            ),
+            sa.Column("payload_json", sa.JSON(), nullable=False, server_default="{}"),
+            sa.Column("trashed_at", sa.DateTime(timezone=True), nullable=False),
             sa.Column(
                 "trashed_by_id",
                 sa.String(length=36),
@@ -182,9 +166,7 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="30",
             ),
-            sa.Column(
-                "restored_at", sa.DateTime(timezone=True), nullable=True
-            ),
+            sa.Column("restored_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column(
                 "restored_by_id",
                 sa.String(length=36),
@@ -192,24 +174,16 @@ def upgrade() -> None:
                 nullable=True,
             ),
             sa.Column("purged_at", sa.DateTime(timezone=True), nullable=True),
-            sa.Column(
-                "restore_token", sa.String(length=64), nullable=False
-            ),
+            sa.Column("restore_token", sa.String(length=64), nullable=False),
         )
 
     existing_trash_idx = (
-        {ix["name"] for ix in inspector.get_indexes(_TRASH)}
-        if _has_table(inspector, _TRASH)
-        else set()
+        {ix["name"] for ix in inspector.get_indexes(_TRASH)} if _has_table(inspector, _TRASH) else set()
     )
     if _TRASH_PROJECT_IDX not in existing_trash_idx:
-        op.create_index(
-            _TRASH_PROJECT_IDX, _TRASH, ["project_id", "trashed_at"]
-        )
+        op.create_index(_TRASH_PROJECT_IDX, _TRASH, ["project_id", "trashed_at"])
     if _TRASH_ORIGIN_IDX not in existing_trash_idx:
-        op.create_index(
-            _TRASH_ORIGIN_IDX, _TRASH, ["original_kind", "original_id"]
-        )
+        op.create_index(_TRASH_ORIGIN_IDX, _TRASH, ["original_kind", "original_id"])
 
 
 def downgrade() -> None:

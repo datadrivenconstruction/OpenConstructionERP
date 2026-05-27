@@ -176,9 +176,7 @@ def test_migration_v3122_is_on_disk():
     """Sanity: the partial-unique-index migration file exists."""
     import importlib.util
 
-    spec = importlib.util.find_spec(
-        "alembic"
-    )
+    spec = importlib.util.find_spec("alembic")
     assert spec is not None
     # The migration filename is part of the contract — keep it stable.
     from pathlib import Path

@@ -209,12 +209,7 @@ def test_dunder_in_field_path_rejected() -> None:
 def test_yaml_python_tag_safe_load() -> None:
     """``!!python/object`` must NOT instantiate Python classes — yaml.safe_load
     rejects it and the parser surfaces a syntax error."""
-    hostile = (
-        "rule_id: custom.x\n"
-        "name: X\n"
-        "expression:\n"
-        "  assert: !!python/object/new:os.system [echo pwned]\n"
-    )
+    hostile = "rule_id: custom.x\nname: X\nexpression:\n  assert: !!python/object/new:os.system [echo pwned]\n"
     with pytest.raises(DSLSyntaxError):
         parse_definition(hostile)
 

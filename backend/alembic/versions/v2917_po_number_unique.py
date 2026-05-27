@@ -61,9 +61,7 @@ def _dedupe_existing(bind: sa.engine.Connection) -> None:
         seen[key] += 1
         new_number = f"{row.po_number}-{seen[key]}"
         bind.execute(
-            sa.text(
-                "UPDATE oe_procurement_po SET po_number = :new WHERE id = :rid"
-            ),
+            sa.text("UPDATE oe_procurement_po SET po_number = :new WHERE id = :rid"),
             {"new": new_number, "rid": row.id},
         )
 

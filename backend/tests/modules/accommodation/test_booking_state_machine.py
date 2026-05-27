@@ -59,8 +59,11 @@ async def test_reject_booking_on_maintenance_room(
 ):
     _, header = admin_auth
     room_id = await _make_room(
-        client, header, project_id,
-        label="SM-MAINT", room_status="maintenance",
+        client,
+        header,
+        project_id,
+        label="SM-MAINT",
+        room_status="maintenance",
     )
 
     resp = await client.post(
@@ -169,7 +172,11 @@ async def test_open_ended_booking_allowed(
     """Worker-camp residency frequently has no check-out date."""
     _, header = admin_auth
     room_id = await _make_room(
-        client, header, project_id, kind="worker_camp", label="SM-CAMP",
+        client,
+        header,
+        project_id,
+        kind="worker_camp",
+        label="SM-CAMP",
     )
 
     resp = await client.post(

@@ -143,9 +143,7 @@ def upgrade() -> None:
             ),
         )
         op.create_index(RULESET_TENANT_IX, RULESET_TABLE, ["tenant_id"])
-        op.create_index(
-            RULESET_TENANT_KIND_IX, RULESET_TABLE, ["tenant_id", "kind"]
-        )
+        op.create_index(RULESET_TENANT_KIND_IX, RULESET_TABLE, ["tenant_id", "kind"])
         op.create_index(
             RULESET_TENANT_PROJECT_IX,
             RULESET_TABLE,
@@ -185,20 +183,12 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="[]",
             ),
-            sa.Column(
-                "version", sa.Integer, nullable=False, server_default="1"
-            ),
-            sa.Column(
-                "is_active", sa.Boolean, nullable=False, server_default="1"
-            ),
+            sa.Column("version", sa.Integer, nullable=False, server_default="1"),
+            sa.Column("is_active", sa.Boolean, nullable=False, server_default="1"),
             sa.Column("tenant_id", sa.String(length=36), nullable=False),
             sa.Column("project_id", sa.String(length=36), nullable=True),
-            sa.Column(
-                "created_by_user_id", sa.String(length=36), nullable=True
-            ),
-            sa.Column(
-                "updated_by_user_id", sa.String(length=36), nullable=True
-            ),
+            sa.Column("created_by_user_id", sa.String(length=36), nullable=True),
+            sa.Column("updated_by_user_id", sa.String(length=36), nullable=True),
             sa.Column(
                 "created_at",
                 sa.DateTime(timezone=True),
@@ -216,9 +206,7 @@ def upgrade() -> None:
         op.create_index(RULE_TENANT_IX, RULE_TABLE, ["tenant_id"])
         op.create_index(RULE_PROJECT_IX, RULE_TABLE, ["project_id"])
         op.create_index(RULE_RULESET_IX, RULE_TABLE, ["ruleset_id"])
-        op.create_index(
-            RULE_TENANT_ACTIVE_IX, RULE_TABLE, ["tenant_id", "is_active"]
-        )
+        op.create_index(RULE_TENANT_ACTIVE_IX, RULE_TABLE, ["tenant_id", "is_active"])
         op.create_index(
             RULE_RULESET_ACTIVE_IX,
             RULE_TABLE,
@@ -236,9 +224,7 @@ def upgrade() -> None:
                 sa.ForeignKey(f"{RULESET_TABLE}.id", ondelete="CASCADE"),
                 nullable=False,
             ),
-            sa.Column(
-                "model_version_id", sa.String(length=36), nullable=True
-            ),
+            sa.Column("model_version_id", sa.String(length=36), nullable=True),
             sa.Column(
                 "started_at",
                 sa.DateTime(timezone=True),
@@ -297,9 +283,7 @@ def upgrade() -> None:
         )
         op.create_index(RUN_TENANT_IX, RUN_TABLE, ["tenant_id"])
         op.create_index(RUN_RULESET_IX, RUN_TABLE, ["ruleset_id"])
-        op.create_index(
-            RUN_TENANT_STATUS_IX, RUN_TABLE, ["tenant_id", "status"]
-        )
+        op.create_index(RUN_TENANT_STATUS_IX, RUN_TABLE, ["tenant_id", "status"])
         op.create_index(
             RUN_RULESET_STARTED_IX,
             RUN_TABLE,
@@ -342,17 +326,13 @@ def upgrade() -> None:
                 server_default=sa.func.now(),
             ),
         )
-        op.create_index(
-            RUN_RESULT_RUN_IX, RUN_RESULT_ITEM_TABLE, ["run_id"]
-        )
+        op.create_index(RUN_RESULT_RUN_IX, RUN_RESULT_ITEM_TABLE, ["run_id"])
         op.create_index(
             RUN_RESULT_RUN_RULE_IX,
             RUN_RESULT_ITEM_TABLE,
             ["run_id", "rule_id"],
         )
-        op.create_index(
-            RUN_RESULT_TENANT_IX, RUN_RESULT_ITEM_TABLE, ["tenant_id"]
-        )
+        op.create_index(RUN_RESULT_TENANT_IX, RUN_RESULT_ITEM_TABLE, ["tenant_id"])
 
     # ── Global variable ─────────────────────────────────────────────
     if not _table_exists(GLOBAL_VARIABLE_TABLE):
@@ -362,9 +342,7 @@ def upgrade() -> None:
             sa.Column("scope", sa.String(length=16), nullable=False),
             sa.Column("scope_id", sa.String(length=36), nullable=False),
             sa.Column("name", sa.String(length=128), nullable=False),
-            sa.Column(
-                "value_type", sa.String(length=16), nullable=False
-            ),
+            sa.Column("value_type", sa.String(length=16), nullable=False),
             sa.Column(
                 "value_json",
                 sa.JSON,
@@ -372,9 +350,7 @@ def upgrade() -> None:
                 server_default="{}",
             ),
             sa.Column("description", sa.Text, nullable=True),
-            sa.Column(
-                "is_locked", sa.Boolean, nullable=False, server_default="0"
-            ),
+            sa.Column("is_locked", sa.Boolean, nullable=False, server_default="0"),
             sa.Column("tenant_id", sa.String(length=36), nullable=False),
             sa.Column(
                 "created_at",
@@ -388,13 +364,9 @@ def upgrade() -> None:
                 nullable=False,
                 server_default=sa.func.now(),
             ),
-            sa.UniqueConstraint(
-                "scope", "scope_id", "name", name=GLOBAL_VAR_UQ
-            ),
+            sa.UniqueConstraint("scope", "scope_id", "name", name=GLOBAL_VAR_UQ),
         )
-        op.create_index(
-            GLOBAL_VAR_TENANT_IX, GLOBAL_VARIABLE_TABLE, ["tenant_id"]
-        )
+        op.create_index(GLOBAL_VAR_TENANT_IX, GLOBAL_VARIABLE_TABLE, ["tenant_id"])
 
     # ── Rule version ────────────────────────────────────────────────
     if not _table_exists(RULE_VERSION_TABLE):
@@ -415,9 +387,7 @@ def upgrade() -> None:
                 server_default="{}",
             ),
             sa.Column("formula", sa.Text, nullable=True),
-            sa.Column(
-                "changed_by_user_id", sa.String(length=36), nullable=True
-            ),
+            sa.Column("changed_by_user_id", sa.String(length=36), nullable=True),
             sa.Column(
                 "changed_at",
                 sa.DateTime(timezone=True),
@@ -438,16 +408,10 @@ def upgrade() -> None:
                 nullable=False,
                 server_default=sa.func.now(),
             ),
-            sa.UniqueConstraint(
-                "rule_id", "version_number", name=RULE_VERSION_UQ
-            ),
+            sa.UniqueConstraint("rule_id", "version_number", name=RULE_VERSION_UQ),
         )
-        op.create_index(
-            RULE_VERSION_RULE_IX, RULE_VERSION_TABLE, ["rule_id"]
-        )
-        op.create_index(
-            RULE_VERSION_TENANT_IX, RULE_VERSION_TABLE, ["tenant_id"]
-        )
+        op.create_index(RULE_VERSION_RULE_IX, RULE_VERSION_TABLE, ["rule_id"])
+        op.create_index(RULE_VERSION_TENANT_IX, RULE_VERSION_TABLE, ["tenant_id"])
 
 
 def downgrade() -> None:

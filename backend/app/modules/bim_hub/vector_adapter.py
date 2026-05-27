@@ -50,29 +50,18 @@ class BIMElementVectorAdapter:
 
         properties = getattr(row, "properties", None) or {}
         if isinstance(properties, dict):
-            material = (
-                properties.get("material")
-                or properties.get("Material")
-                or properties.get("material_name")
-            )
+            material = properties.get("material") or properties.get("Material") or properties.get("material_name")
             if material:
                 parts.append(f"material={material}")
 
             family = properties.get("family") or properties.get("Family")
             if family:
                 parts.append(f"family={family}")
-            family_type = (
-                properties.get("type")
-                or properties.get("Type")
-                or properties.get("family_type")
-            )
+            family_type = properties.get("type") or properties.get("Type") or properties.get("family_type")
             if family_type:
                 parts.append(f"type={family_type}")
 
-            classification = (
-                properties.get("classification")
-                or properties.get("Classification")
-            )
+            classification = properties.get("classification") or properties.get("Classification")
             if isinstance(classification, dict):
                 for key, value in classification.items():
                     if value is None or value == "":

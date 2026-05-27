@@ -33,7 +33,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -71,11 +70,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -121,10 +116,7 @@ async def seeded(http_client):
     headers = await _login(http_client, email, meta["_password"])
 
     async with async_session_factory() as s:
-        owner = (
-            (await s.execute(select(User).where(User.email == email.lower())))
-            .scalar_one()
-        )
+        owner = (await s.execute(select(User).where(User.email == email.lower()))).scalar_one()
 
         proj = Project(
             name=f"SnagDeep-{uuid.uuid4().hex[:6]}",
@@ -251,10 +243,7 @@ async def test_create_snag_invalid_category_rejected(http_client, seeded):
 # Minimal valid JPEG (FF D8 FF E0 + JFIF header + EOI). Enough for the
 # signature gate to accept; not a real image but the magic-byte
 # validator only inspects the leading bytes.
-_VALID_JPEG = (
-    b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00"
-    b"\xff\xd9"
-)
+_VALID_JPEG = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9"
 _NOT_AN_IMAGE = b"<svg xmlns='http://www.w3.org/2000/svg'><rect/></svg>"
 
 
@@ -309,11 +298,7 @@ async def test_upload_snag_photo_idor(http_client, seeded):
 
     email, meta = await _register(http_client, "snag-other")
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role="manager", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role="manager", is_active=True))
         await s.commit()
     other_headers = await _login(http_client, email, meta["_password"])
 

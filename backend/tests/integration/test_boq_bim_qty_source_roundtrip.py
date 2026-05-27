@@ -56,11 +56,7 @@ async def auth_headers(shared_client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     login = await shared_client.post(
@@ -123,9 +119,7 @@ async def test_bim_picker_preserves_bim_qty_source_through_patch(
         f"PATCH response stripped bim_qty_source: metadata={body['metadata']}"
     )
 
-    get = await shared_client.get(
-        f"/api/v1/boq/positions/{position_id}", headers=auth_headers
-    )
+    get = await shared_client.get(f"/api/v1/boq/positions/{position_id}", headers=auth_headers)
     assert get.status_code == 200, get.text
     fresh = get.json()
     assert fresh["metadata"].get("bim_qty_source") == "BIM: Wall / Area", (
@@ -174,8 +168,7 @@ async def test_manual_quantity_edit_strips_existing_bim_qty_source(
     assert patch.status_code == 200, patch.text
     body = patch.json()
     assert "bim_qty_source" not in body["metadata"], (
-        "Pure quantity edit must strip existing bim_qty_source — got: "
-        f"{body['metadata']}"
+        f"Pure quantity edit must strip existing bim_qty_source — got: {body['metadata']}"
     )
 
 
@@ -222,9 +215,9 @@ async def test_pdf_picker_preserves_pdf_measurement_source(
     )
     assert patch.status_code == 200, patch.text
     body = patch.json()
-    assert (
-        body["metadata"].get("pdf_measurement_source") == "Takeoff: Area (page 3)"
-    ), f"PATCH response stripped pdf_measurement_source: metadata={body['metadata']}"
+    assert body["metadata"].get("pdf_measurement_source") == "Takeoff: Area (page 3)", (
+        f"PATCH response stripped pdf_measurement_source: metadata={body['metadata']}"
+    )
 
 
 @pytest.mark.asyncio
@@ -269,14 +262,12 @@ async def test_dwg_picker_preserves_dwg_annotation_source(
     )
     assert patch.status_code == 200, patch.text
     body = patch.json()
-    assert (
-        body["metadata"].get("dwg_annotation_source") == "DWG: Slab outline"
-    ), f"PATCH response stripped dwg_annotation_source: metadata={body['metadata']}"
-
-    get = await shared_client.get(
-        f"/api/v1/boq/positions/{position_id}", headers=auth_headers
+    assert body["metadata"].get("dwg_annotation_source") == "DWG: Slab outline", (
+        f"PATCH response stripped dwg_annotation_source: metadata={body['metadata']}"
     )
+
+    get = await shared_client.get(f"/api/v1/boq/positions/{position_id}", headers=auth_headers)
     fresh = get.json()
-    assert (
-        fresh["metadata"].get("dwg_annotation_source") == "DWG: Slab outline"
-    ), f"GET after PATCH lost dwg_annotation_source: metadata={fresh['metadata']}"
+    assert fresh["metadata"].get("dwg_annotation_source") == "DWG: Slab outline", (
+        f"GET after PATCH lost dwg_annotation_source: metadata={fresh['metadata']}"
+    )

@@ -80,13 +80,11 @@ _REGION_CURRENCY_FALLBACK: dict[str, str] = {
 class CostItemCreate(BaseModel):
     """‌⁠‍Create a new cost item."""
 
-    code: str = Field(
-        ..., min_length=1, max_length=100, description="Unique cost item code / rate code"
-    )
+    code: str = Field(..., min_length=1, max_length=100, description="Unique cost item code / rate code")
     description: str = Field(default="", description="Cost item description text")
     descriptions: dict[str, str] = Field(
         default_factory=dict,
-        description="Localized descriptions keyed by locale (e.g. {\"en\": \"...\", \"de\": \"...\"})",
+        description='Localized descriptions keyed by locale (e.g. {"en": "...", "de": "..."})',
     )
     unit: str = Field(
         ...,
@@ -95,23 +93,17 @@ class CostItemCreate(BaseModel):
         description="Unit of measurement (m, m2, m3, kg, pcs, hr, etc.)",
     )
     rate: DecimalMoney = Field(..., ge=0, description="Unit rate (must be >= 0)")
-    currency: str = Field(
-        default="", max_length=10, description="ISO 4217 currency code (empty when unknown)"
-    )
-    source: str = Field(
-        default="cwicr", max_length=50, description="Data source (e.g. cwicr, rsmeans, manual)"
-    )
+    currency: str = Field(default="", max_length=10, description="ISO 4217 currency code (empty when unknown)")
+    source: str = Field(default="cwicr", max_length=50, description="Data source (e.g. cwicr, rsmeans, manual)")
     classification: dict[str, str] = Field(
         default_factory=dict,
-        description="Classification codes (e.g. {\"din276\": \"330\", \"masterformat\": \"03 30 00\"})",
+        description='Classification codes (e.g. {"din276": "330", "masterformat": "03 30 00"})',
     )
     components: list[dict[str, Any]] = Field(
         default_factory=list, description="Assembly components (labor, material, equipment breakdown)"
     )
     tags: list[str] = Field(default_factory=list, description="Searchable tags")
-    region: str | None = Field(
-        default=None, max_length=50, description="Regional identifier (e.g. DACH, UK, US)"
-    )
+    region: str | None = Field(default=None, max_length=50, description="Regional identifier (e.g. DACH, UK, US)")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Arbitrary metadata")
 
 
@@ -182,8 +174,7 @@ class CostItemResponse(BaseModel):
             normalized = self.region.strip().upper()
             if not _REGION_FORMAT_RE.match(normalized):
                 logger.warning(
-                    "Cost row uses non-canonical region tag %r "
-                    "(expected ``XX_CITY``); currency falls back to EUR.",
+                    "Cost row uses non-canonical region tag %r (expected ``XX_CITY``); currency falls back to EUR.",
                     normalized,
                 )
             else:
@@ -195,8 +186,7 @@ class CostItemResponse(BaseModel):
                     self.__dict__["currency"] = mapped
                 else:
                     logger.warning(
-                        "Unknown region %r — no entry in "
-                        "_REGION_CURRENCY_FALLBACK; currency falls back to EUR.",
+                        "Unknown region %r — no entry in _REGION_CURRENCY_FALLBACK; currency falls back to EUR.",
                         normalized,
                     )
         return self
@@ -398,16 +388,12 @@ class CostSuggestion(BaseModel):
     code: str = Field(..., description="CWICR rate code / cost item code")
     description: str = Field(..., description="Human-readable description")
     unit: str = Field(..., description="Unit of measurement")
-    unit_rate: DecimalMoney | str = Field(
-        ..., description="Unit rate (Decimal-string if parseable, else raw string)"
-    )
+    unit_rate: DecimalMoney | str = Field(..., description="Unit rate (Decimal-string if parseable, else raw string)")
     classification: dict[str, str] = Field(
         default_factory=dict,
         description="Classification codes forwarded from the CostItem",
     )
-    score: float = Field(
-        ..., ge=0.0, le=1.0, description="Relevance score 0..1 (higher = better)"
-    )
+    score: float = Field(..., ge=0.0, le=1.0, description="Relevance score 0..1 (higher = better)")
     match_reasons: list[str] = Field(
         default_factory=list,
         description="Short human-readable strings explaining why this matched",
@@ -449,16 +435,12 @@ class CwicrMatchRequest(BaseModel):
         max_length=10,
         description="Optional language hint (ISO-639-1: en, de, ru, fr, ...)",
     )
-    top_k: int = Field(
-        default=10, ge=1, le=50, description="Maximum number of matches to return"
-    )
+    top_k: int = Field(default=10, ge=1, le=50, description="Maximum number of matches to return")
     mode: str = Field(
         default="lexical",
         description="Matcher mode: lexical | semantic | hybrid",
     )
-    region: str | None = Field(
-        default=None, max_length=50, description="Restrict to a single region"
-    )
+    region: str | None = Field(default=None, max_length=50, description="Restrict to a single region")
 
 
 class CwicrMatchFromPositionRequest(BaseModel):
@@ -522,10 +504,7 @@ class RegionalAdjustResponse(BaseModel):
     source: str
     effective_date: date | None = Field(
         default=None,
-        description=(
-            "Date of the index row used. ``None`` when no row matched "
-            "and the baseline factor was applied."
-        ),
+        description=("Date of the index row used. ``None`` when no row matched and the baseline factor was applied."),
     )
 
 
@@ -541,9 +520,7 @@ class CertaintyBadge(BaseModel):
     """
 
     cost_item_id: UUID
-    frequency: int = Field(
-        ..., ge=0, description="Total recorded uses across all projects."
-    )
+    frequency: int = Field(..., ge=0, description="Total recorded uses across all projects.")
     age_days: int = Field(
         ...,
         ge=0,
@@ -552,9 +529,7 @@ class CertaintyBadge(BaseModel):
             "the item has never been used — that's the red threshold."
         ),
     )
-    source: str = Field(
-        ..., description="Underlying CostItem.source (cwicr, rsmeans, manual, …)"
-    )
+    source: str = Field(..., description="Underlying CostItem.source (cwicr, rsmeans, manual, …)")
     confidence_badge: Literal["green", "yellow", "red"]
     last_used_at: datetime | None = Field(
         default=None,
@@ -573,6 +548,4 @@ class RecordUsageRequest(BaseModel):
 
     project_id: UUID
     context: Literal["boq", "assembly", "tender"] = "boq"
-    unit_rate_at_use: DecimalMoney = Field(
-        ..., ge=0, description="Rate as it was at the moment of apply."
-    )
+    unit_rate_at_use: DecimalMoney = Field(..., ge=0, description="Rate as it was at the moment of apply.")

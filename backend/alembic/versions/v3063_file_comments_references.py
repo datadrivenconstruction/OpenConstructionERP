@@ -71,9 +71,7 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
     return name in inspector.get_table_names()
 
 
-def _index_names(
-    inspector: sa.engine.reflection.Inspector, table: str
-) -> set[str]:
+def _index_names(inspector: sa.engine.reflection.Inspector, table: str) -> set[str]:
     if not _has_table(inspector, table):
         return set()
     return {ix["name"] for ix in inspector.get_indexes(table)}
@@ -103,9 +101,7 @@ def upgrade() -> None:
             sa.Column(
                 "project_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column("file_kind", sa.String(length=32), nullable=False),
@@ -137,9 +133,7 @@ def upgrade() -> None:
                 nullable=False,
                 server_default=sa.text("0"),
             ),
-            sa.Column(
-                "resolved_at", sa.DateTime(timezone=True), nullable=True
-            ),
+            sa.Column("resolved_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column(
                 "resolved_by_id",
                 sa.String(length=36),
@@ -189,9 +183,7 @@ def upgrade() -> None:
                 sa.ForeignKey("oe_users_user.id", ondelete="CASCADE"),
                 nullable=False,
             ),
-            sa.Column(
-                "notified_at", sa.DateTime(timezone=True), nullable=True
-            ),
+            sa.Column("notified_at", sa.DateTime(timezone=True), nullable=True),
             sa.UniqueConstraint(
                 "comment_id",
                 "mentioned_user_id",
@@ -232,9 +224,7 @@ def upgrade() -> None:
             sa.Column(
                 "project_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column(
@@ -274,9 +264,7 @@ def upgrade() -> None:
 
     existing_idx = _index_names(inspector, _VIOLATION)
     if _VIOLATION_PROJECT_IDX not in existing_idx:
-        op.create_index(
-            _VIOLATION_PROJECT_IDX, _VIOLATION, ["project_id"]
-        )
+        op.create_index(_VIOLATION_PROJECT_IDX, _VIOLATION, ["project_id"])
     if _VIOLATION_PROJECT_ACK_IDX not in existing_idx:
         op.create_index(
             _VIOLATION_PROJECT_ACK_IDX,
@@ -304,16 +292,12 @@ def upgrade() -> None:
             sa.Column(
                 "project_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column("file_kind", sa.String(length=32), nullable=False),
             sa.Column("file_id", sa.String(length=255), nullable=False),
-            sa.Column(
-                "target_type", sa.String(length=64), nullable=False
-            ),
+            sa.Column("target_type", sa.String(length=64), nullable=False),
             sa.Column("target_id", sa.String(length=255), nullable=False),
             sa.Column(
                 "relation",
@@ -321,9 +305,7 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="references",
             ),
-            sa.Column(
-                "target_label", sa.String(length=255), nullable=True
-            ),
+            sa.Column("target_label", sa.String(length=255), nullable=True),
             sa.Column(
                 "created_by_id",
                 sa.String(length=36),
@@ -342,13 +324,9 @@ def upgrade() -> None:
 
     existing_idx = _index_names(inspector, _REFERENCE)
     if _REFERENCE_PROJECT_IDX not in existing_idx:
-        op.create_index(
-            _REFERENCE_PROJECT_IDX, _REFERENCE, ["project_id"]
-        )
+        op.create_index(_REFERENCE_PROJECT_IDX, _REFERENCE, ["project_id"])
     if _REFERENCE_FILE_IDX not in existing_idx:
-        op.create_index(
-            _REFERENCE_FILE_IDX, _REFERENCE, ["file_kind", "file_id"]
-        )
+        op.create_index(_REFERENCE_FILE_IDX, _REFERENCE, ["file_kind", "file_id"])
     if _REFERENCE_TARGET_IDX not in existing_idx:
         op.create_index(
             _REFERENCE_TARGET_IDX,

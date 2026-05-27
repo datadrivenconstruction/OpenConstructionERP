@@ -23,8 +23,6 @@ bug is marked ``xfail`` with a reason and documented in the report.
 from __future__ import annotations
 
 import asyncio
-import io
-import sys
 import tempfile
 import uuid
 from collections.abc import AsyncGenerator
@@ -51,6 +49,7 @@ from sqlalchemy.ext.asyncio import (
 def _bypass_catalog_gate(monkeypatch):
     """v2.8.2 — see ``test_match_service``. These edge-case tests target
     the post-gate ranker behaviour, not catalogue binding."""
+
     async def _ok(*_args, **_kwargs):
         return "ok", 1, 1
 
@@ -82,7 +81,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
     yield engine, factory, tmp_db
     await engine.dispose()
@@ -252,11 +253,16 @@ class TestVectorAdapterEdges:
         # Even when vector backend is "available", these rows should not
         # produce any successful upserts. Mock the encoder so we can be
         # sure no encode call leaks through.
-        with patch.object(
-            vector_adapter, "_vector_available", return_value=True,
-        ), patch(
-            "app.core.vector.encode_texts_async",
-            new=AsyncMock(return_value=[]),
+        with (
+            patch.object(
+                vector_adapter,
+                "_vector_available",
+                return_value=True,
+            ),
+            patch(
+                "app.core.vector.encode_texts_async",
+                new=AsyncMock(return_value=[]),
+            ),
         ):
             result = await vector_adapter.upsert(rows)
         assert result == 0
@@ -267,11 +273,16 @@ class TestVectorAdapterEdges:
         from app.modules.costs import vector_adapter
 
         rows = [_make_cost_row(), _make_cost_row()]
-        with patch.object(
-            vector_adapter, "_vector_available", return_value=True,
-        ), patch(
-            "app.core.vector.encode_texts_async",
-            new=AsyncMock(return_value=[[0.1, 0.2]]),  # only 1 vector for 2 rows
+        with (
+            patch.object(
+                vector_adapter,
+                "_vector_available",
+                return_value=True,
+            ),
+            patch(
+                "app.core.vector.encode_texts_async",
+                new=AsyncMock(return_value=[[0.1, 0.2]]),  # only 1 vector for 2 rows
+            ),
         ):
             result = await vector_adapter.upsert(rows)
         assert result == 0
@@ -282,11 +293,16 @@ class TestVectorAdapterEdges:
         from app.modules.costs import vector_adapter
 
         rows = [_make_cost_row()]
-        with patch.object(
-            vector_adapter, "_vector_available", return_value=True,
-        ), patch(
-            "app.core.vector.encode_texts_async",
-            new=AsyncMock(side_effect=RuntimeError("model load failed")),
+        with (
+            patch.object(
+                vector_adapter,
+                "_vector_available",
+                return_value=True,
+            ),
+            patch(
+                "app.core.vector.encode_texts_async",
+                new=AsyncMock(side_effect=RuntimeError("model load failed")),
+            ),
         ):
             result = await vector_adapter.upsert(rows)
         assert result == 0
@@ -302,23 +318,33 @@ class TestVectorAdapterEdges:
 
         raw_hits = [
             {
-                "id": "a", "score": 0.9, "text": "concrete wall",
+                "id": "a",
+                "score": 0.9,
+                "text": "concrete wall",
                 "payload": {"region_code": "DE_BERLIN", "language": "de", "source": "cwicr"},
             },
             {
-                "id": "b", "score": 0.8, "text": "concrete wall",
+                "id": "b",
+                "score": 0.8,
+                "text": "concrete wall",
                 "payload": {"region_code": "GB_LONDON", "language": "en", "source": "cwicr"},
             },
         ]
 
-        with patch.object(
-            vector_adapter, "_vector_available", return_value=True,
-        ), patch(
-            "app.core.vector.encode_texts_async",
-            new=AsyncMock(return_value=[[0.0] * 384]),
-        ), patch(
-            "app.core.vector.vector_search_collection",
-            return_value=raw_hits,
+        with (
+            patch.object(
+                vector_adapter,
+                "_vector_available",
+                return_value=True,
+            ),
+            patch(
+                "app.core.vector.encode_texts_async",
+                new=AsyncMock(return_value=[[0.0] * 384]),
+            ),
+            patch(
+                "app.core.vector.vector_search_collection",
+                return_value=raw_hits,
+            ),
         ):
             hits = await vector_adapter.search("concrete", region="DE_BERLIN", limit=10)
         assert len(hits) == 1
@@ -344,7 +370,8 @@ class TestTranslationEdges:
 
     @pytest.mark.asyncio
     async def test_empty_text_returns_fallback_immediately(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """Empty input — no I/O, no LLM call, just fallback.
 
@@ -353,7 +380,9 @@ class TestTranslationEdges:
         from app.core.translation import TierUsed, translate
 
         result = await translate(
-            "", "en", "de",
+            "",
+            "en",
+            "de",
             cache_db_path=str(tmp_path / "cache.db"),
             lookup_root=str(tmp_path),
         )
@@ -367,7 +396,9 @@ class TestTranslationEdges:
         from app.core.translation import TierUsed, translate
 
         result = await translate(
-            "Concrete wall", "EN", "en",
+            "Concrete wall",
+            "EN",
+            "en",
             cache_db_path=str(tmp_path / "cache.db"),
             lookup_root=str(tmp_path),
         )
@@ -412,21 +443,30 @@ class TestTranslationEdges:
 
     @pytest.mark.asyncio
     async def test_cache_upsert_keeps_higher_confidence(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """Conflicting upsert keeps the higher-confidence translation."""
         from app.core.translation.cache import TranslationCache
 
         cache = TranslationCache(str(tmp_path / "cache.db"))
         await cache.upsert(
-            text="x", translated_text="low",
-            source_lang="en", target_lang="de",
-            domain="construction", tier_used="llm", confidence=0.6,
+            text="x",
+            translated_text="low",
+            source_lang="en",
+            target_lang="de",
+            domain="construction",
+            tier_used="llm",
+            confidence=0.6,
         )
         await cache.upsert(
-            text="x", translated_text="high",
-            source_lang="en", target_lang="de",
-            domain="construction", tier_used="llm", confidence=0.9,
+            text="x",
+            translated_text="high",
+            source_lang="en",
+            target_lang="de",
+            domain="construction",
+            tier_used="llm",
+            confidence=0.9,
         )
         hit = await cache.get("x", "en", "de", "construction")
         assert hit is not None
@@ -434,9 +474,13 @@ class TestTranslationEdges:
         assert hit["confidence"] == pytest.approx(0.9)
         # Lower-conf upsert *after* higher should NOT overwrite.
         await cache.upsert(
-            text="x", translated_text="lower-still",
-            source_lang="en", target_lang="de",
-            domain="construction", tier_used="llm", confidence=0.4,
+            text="x",
+            translated_text="lower-still",
+            source_lang="en",
+            target_lang="de",
+            domain="construction",
+            tier_used="llm",
+            confidence=0.4,
         )
         hit2 = await cache.get("x", "en", "de", "construction")
         assert hit2 is not None
@@ -444,7 +488,8 @@ class TestTranslationEdges:
 
     @pytest.mark.asyncio
     async def test_lookup_skips_malformed_tsv_lines(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """TSV lines without a tab separator are silently skipped.
 
@@ -477,7 +522,9 @@ class TestTranslationEdges:
         from app.core.translation.lookup import lookup_phrase
 
         result = await lookup_phrase(
-            "wall", "en", "de",
+            "wall",
+            "en",
+            "de",
             dictionary="muse",
             root=str(tmp_path / "no_such_dir"),
         )
@@ -514,7 +561,9 @@ class TestTranslationEdges:
         # outright. So we test threshold gating differently — verify that
         # high default gates a borderline hit.
         result = await translate(
-            "Concrete wall here", "en", "de",
+            "Concrete wall here",
+            "en",
+            "de",
             cache_db_path=str(tmp_path / "cache.db"),
             lookup_root=str(tmp_path),
         )
@@ -524,7 +573,8 @@ class TestTranslationEdges:
 
     @pytest.mark.asyncio
     async def test_llm_failure_falls_through_to_fallback(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """LLM exception → cascade returns FALLBACK, never raises."""
         from app.core.translation import TierUsed, translate
@@ -537,7 +587,9 @@ class TestTranslationEdges:
             new=_raising_llm,
         ):
             result = await translate(
-                "wall", "en", "de",
+                "wall",
+                "en",
+                "de",
                 user_settings=SimpleNamespace(),
                 cache_db_path=str(tmp_path / "cache.db"),
                 lookup_root=str(tmp_path),
@@ -547,7 +599,8 @@ class TestTranslationEdges:
 
     @pytest.mark.asyncio
     async def test_concurrent_translate_calls_share_cache(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """N concurrent translate() calls produce one cache write per (text+langs+domain).
 
@@ -677,7 +730,9 @@ class TestMatchSettingsEdges:
 
     @pytest.mark.asyncio
     async def test_patch_with_empty_body_is_noop(
-        self, settings_client: AsyncClient, settings_project_owned_by,
+        self,
+        settings_client: AsyncClient,
+        settings_project_owned_by,
     ) -> None:
         """PATCH ``{}`` is a valid request that changes nothing.
 
@@ -696,7 +751,9 @@ class TestMatchSettingsEdges:
 
     @pytest.mark.asyncio
     async def test_patch_unknown_fields_silently_ignored(
-        self, settings_client: AsyncClient, settings_project_owned_by,
+        self,
+        settings_client: AsyncClient,
+        settings_project_owned_by,
     ) -> None:
         """Unknown PATCH fields don't 422 (model_config extra is the default).
 
@@ -715,7 +772,9 @@ class TestMatchSettingsEdges:
 
     @pytest.mark.asyncio
     async def test_patch_invalid_target_language_format(
-        self, settings_client: AsyncClient, settings_project_owned_by,
+        self,
+        settings_client: AsyncClient,
+        settings_project_owned_by,
     ) -> None:
         """Non-2-letter codes rejected by validator → 422."""
         user_id, project_id = await settings_project_owned_by()
@@ -729,7 +788,9 @@ class TestMatchSettingsEdges:
 
     @pytest.mark.asyncio
     async def test_patch_sources_enabled_subset_of_known(
-        self, settings_client: AsyncClient, settings_project_owned_by,
+        self,
+        settings_client: AsyncClient,
+        settings_project_owned_by,
     ) -> None:
         """Unknown sources rejected via _validate_sources."""
         user_id, project_id = await settings_project_owned_by()
@@ -793,31 +854,41 @@ class TestMatchSettingsEdges:
 @pytest.fixture
 def patch_zero_hits(monkeypatch):
     """Patch cost_vector.search to return no hits."""
+
     async def _stub(query: str, *, limit: int, **kwargs: Any):
         return []
 
     from app.modules.costs import vector_adapter
+
     monkeypatch.setattr(vector_adapter, "search", _stub)
 
 
 @pytest.fixture
 def patch_one_hit(monkeypatch):
     async def _stub(query: str, *, limit: int, **kwargs: Any):
-        return [{
-            "id": "h1",
-            "score": 0.5,
-            "text": "x",
-            "payload": {
-                "code": "111.111.111", "description": "x",
-                "unit": "m2", "unit_cost": 10.0,
-                "currency": "EUR", "region_code": "DE_BERLIN",
-                "source": "cwicr", "language": "de",
-                "classification_din276": "111", "classification_nrm": "",
-                "classification_masterformat": "",
-            },
-        }]
+        return [
+            {
+                "id": "h1",
+                "score": 0.5,
+                "text": "x",
+                "payload": {
+                    "code": "111.111.111",
+                    "description": "x",
+                    "unit": "m2",
+                    "unit_cost": 10.0,
+                    "currency": "EUR",
+                    "region_code": "DE_BERLIN",
+                    "source": "cwicr",
+                    "language": "de",
+                    "classification_din276": "111",
+                    "classification_nrm": "",
+                    "classification_masterformat": "",
+                },
+            }
+        ]
 
     from app.modules.costs import vector_adapter
+
     monkeypatch.setattr(vector_adapter, "search", _stub)
 
 
@@ -840,7 +911,8 @@ class TestMatchServiceEdges:
 
         _engine, factory, _tmp = temp_engine_and_factory
         envelope = ElementEnvelope(
-            source="bim", category="wall",
+            source="bim",
+            category="wall",
             description="Stahlbetonwand",
             source_lang="de",
         )
@@ -853,7 +925,10 @@ class TestMatchServiceEdges:
 
     @pytest.mark.asyncio
     async def test_empty_query_text_returns_empty(
-        self, temp_engine_and_factory, project_id: uuid.UUID, patch_one_hit,
+        self,
+        temp_engine_and_factory,
+        project_id: uuid.UUID,
+        patch_one_hit,
     ) -> None:
         """Envelope with no description/category/properties → empty result, no search."""
         from app.core.match_service import ElementEnvelope, MatchRequest, rank
@@ -867,14 +942,19 @@ class TestMatchServiceEdges:
 
     @pytest.mark.asyncio
     async def test_top_k_one(
-        self, temp_engine_and_factory, project_id: uuid.UUID, patch_one_hit,
+        self,
+        temp_engine_and_factory,
+        project_id: uuid.UUID,
+        patch_one_hit,
     ) -> None:
         """top_k=1 returns at most 1 candidate."""
         from app.core.match_service import ElementEnvelope, MatchRequest, rank
 
         _engine, factory, _tmp = temp_engine_and_factory
         envelope = ElementEnvelope(
-            source="bim", description="wall", source_lang="en",
+            source="bim",
+            description="wall",
+            source_lang="en",
         )
         async with factory() as session:
             request = MatchRequest(envelope=envelope, project_id=project_id, top_k=1)
@@ -917,7 +997,8 @@ class TestMatchServiceEdges:
         from app.core.match_service.envelope import ElementEnvelope, MatchCandidate
 
         envelope = ElementEnvelope(
-            source="bim", description="x",
+            source="bim",
+            description="x",
             classifier_hint={"din276": "330"},
         )
         candidate = MatchCandidate(code="x", classification={"din276": "330"})
@@ -935,7 +1016,8 @@ class TestMatchServiceEdges:
         from app.core.match_service.envelope import ElementEnvelope, MatchCandidate
 
         envelope = ElementEnvelope(
-            source="bim", description="x",
+            source="bim",
+            description="x",
             classifier_hint={"din276": "330"},
         )
         candidate = MatchCandidate(code="x", classification={"din276": "330"})
@@ -953,7 +1035,9 @@ class TestMatchServiceEdges:
         from app.core.match_service.envelope import ElementEnvelope, MatchCandidate
 
         envelope = ElementEnvelope(
-            source="bim", description="x", unit_hint="m²",
+            source="bim",
+            description="x",
+            unit_hint="m²",
         )
         candidate = MatchCandidate(code="x", unit="m2")
         deltas = unit_boost.boost(envelope, candidate, None)
@@ -966,7 +1050,8 @@ class TestMatchServiceEdges:
         from app.core.match_service.envelope import ElementEnvelope, MatchCandidate
 
         envelope = ElementEnvelope(
-            source="bim", description="x",
+            source="bim",
+            description="x",
             quantities={"area_m2": 10.0},  # implies m2
         )
         candidate = MatchCandidate(code="x", unit="m2")
@@ -980,7 +1065,9 @@ class TestMatchServiceEdges:
         from app.core.match_service.envelope import ElementEnvelope, MatchCandidate
 
         envelope = ElementEnvelope(
-            source="bim", description="x", unit_hint="m",
+            source="bim",
+            description="x",
+            unit_hint="m",
         )
         candidate = MatchCandidate(code="x", unit="lm")
         deltas = unit_boost.boost(envelope, candidate, None)
@@ -989,7 +1076,10 @@ class TestMatchServiceEdges:
 
     @pytest.mark.asyncio
     async def test_match_element_with_invalid_uuid_uses_sentinel_project(
-        self, temp_engine_and_factory, project_id, patch_zero_hits,
+        self,
+        temp_engine_and_factory,
+        project_id,
+        patch_zero_hits,
     ) -> None:
         """Garbage project_id falls back to the sentinel UUID and returns gracefully.
 
@@ -1011,13 +1101,15 @@ class TestMatchServiceEdges:
                 db=session,
             )
         assert results == [], (
-            "expected graceful fallback to empty candidate list when "
-            "project does not exist (sentinel UUID FK case)"
+            "expected graceful fallback to empty candidate list when project does not exist (sentinel UUID FK case)"
         )
 
     @pytest.mark.asyncio
     async def test_match_element_promotes_flat_properties(
-        self, temp_engine_and_factory, project_id, patch_zero_hits,
+        self,
+        temp_engine_and_factory,
+        project_id,
+        patch_zero_hits,
     ) -> None:
         """Eval-harness flat shape (material at root) gets promoted to properties."""
         from app.core.match_service import match_element
@@ -1040,7 +1132,8 @@ class TestMatchServiceEdges:
 
     @pytest.mark.asyncio
     async def test_record_feedback_with_nonexistent_project(
-        self, temp_engine_and_factory,
+        self,
+        temp_engine_and_factory,
     ) -> None:
         """Feedback for an unknown project_id is swallowed (audit best-effort)."""
         from app.core.match_service import (
@@ -1102,7 +1195,8 @@ class TestEvalHarnessEdges:
 
     @pytest.mark.asyncio
     async def test_runner_aggregates_with_match_fn_exception(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """Match function raising → entry recorded with error, not run abort.
 
@@ -1137,7 +1231,8 @@ class TestEvalHarnessEdges:
 
     @pytest.mark.asyncio
     async def test_runner_with_malformed_yaml_raises(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """Top-level dict (not list) yaml raises a clear ValueError."""
         from tests.eval.runner import run_eval
@@ -1173,7 +1268,8 @@ class TestEvalHarnessEdges:
 
     @pytest.mark.asyncio
     async def test_judge_cost_cap_falls_back(
-        self, monkeypatch: pytest.MonkeyPatch,
+        self,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Cumulative cost over cap → automatic rule-based fallback."""
         import tests.eval.judge as judge_mod
@@ -1243,18 +1339,26 @@ class TestEvalHarnessEdges:
 
     def test_aggregate_metrics_per_source_rollup(self) -> None:
         """Per-source rollup includes every source that appeared in entries."""
-        from tests.eval.runner import _aggregate_metrics, EntryResult
+        from tests.eval.runner import EntryResult, _aggregate_metrics
 
         entries = [
             EntryResult(
-                id="b1", source="bim", candidates=[],
-                top_1_correct=True, top_5_recall=True,
-                reciprocal_rank=1.0, took_ms=0,
+                id="b1",
+                source="bim",
+                candidates=[],
+                top_1_correct=True,
+                top_5_recall=True,
+                reciprocal_rank=1.0,
+                took_ms=0,
             ),
             EntryResult(
-                id="p1", source="pdf", candidates=[],
-                top_1_correct=False, top_5_recall=True,
-                reciprocal_rank=0.5, took_ms=0,
+                id="p1",
+                source="pdf",
+                candidates=[],
+                top_1_correct=False,
+                top_5_recall=True,
+                reciprocal_rank=0.5,
+                took_ms=0,
             ),
         ]
         metrics = _aggregate_metrics(entries)
@@ -1290,56 +1394,71 @@ class TestExtractorEdges:
         """Non-numeric ``measurement_value`` is silently ignored."""
         from app.core.match_service.extractors import build_envelope
 
-        env = build_envelope("pdf", {
-            "description": "wall",
-            "measurement_value": "approximately twelve meters",
-            "measurement_unit": "m",
-        })
+        env = build_envelope(
+            "pdf",
+            {
+                "description": "wall",
+                "measurement_value": "approximately twelve meters",
+                "measurement_unit": "m",
+            },
+        )
         # Garbage value didn't make it into quantities.
         assert "length_m" not in env.quantities
 
     def test_photo_extractor_skips_garbage_estimated_quantities(self) -> None:
         from app.core.match_service.extractors import build_envelope
 
-        env = build_envelope("photo", {
-            "description": "wall photo",
-            "estimated_area_m2": "unknown",
-            "estimated_length_m": None,
-            "estimated_quantity": "",
-        })
+        env = build_envelope(
+            "photo",
+            {
+                "description": "wall photo",
+                "estimated_area_m2": "unknown",
+                "estimated_length_m": None,
+                "estimated_quantity": "",
+            },
+        )
         assert env.quantities == {}
 
     def test_dwg_layer_to_category_mapping(self) -> None:
         """AIA layer codes map to known categories."""
         from app.core.match_service.extractors import build_envelope
 
-        env = build_envelope("dwg", {
-            "description": "interior wall",
-            "layer": "A-WALL-PRTN",
-        })
+        env = build_envelope(
+            "dwg",
+            {
+                "description": "interior wall",
+                "layer": "A-WALL-PRTN",
+            },
+        )
         assert env.category == "wall"
 
     def test_dwg_unknown_layer_returns_lowercase_major(self) -> None:
         from app.core.match_service.extractors import build_envelope
 
-        env = build_envelope("dwg", {
-            "description": "x",
-            "layer": "S-EXOTIC-XXX",
-        })
+        env = build_envelope(
+            "dwg",
+            {
+                "description": "x",
+                "layer": "S-EXOTIC-XXX",
+            },
+        )
         assert env.category == "exotic"
 
     def test_bim_extractor_synthesizes_description_from_properties(self) -> None:
         """Even if description is empty, BIM extractor synthesizes from category+material."""
         from app.core.match_service.extractors import build_envelope
 
-        env = build_envelope("bim", {
-            "category": "wall",
-            "properties": {
-                "material": "Concrete C30/37",
-                "fire_rating": "F90",
+        env = build_envelope(
+            "bim",
+            {
+                "category": "wall",
+                "properties": {
+                    "material": "Concrete C30/37",
+                    "fire_rating": "F90",
+                },
+                "geometry": {"thickness_m": 0.24},
             },
-            "geometry": {"thickness_m": 0.24},
-        })
+        )
         assert "wall" in env.description
         assert "C30/37" in env.description
         assert "thickness 0.24m" in env.description
@@ -1494,22 +1613,42 @@ class TestRegionBoostPrefixes:
         )
 
         envelope = ElementEnvelope(
-            source="bim", source_lang="en", category="wall",
+            source="bim",
+            source_lang="en",
+            category="wall",
             description="Concrete wall",
         )
         settings = SimpleNamespace(project=SimpleNamespace(region="DE_BERLIN"))
 
         matching = MatchCandidate(
-            code="x", description="x", unit="m2", unit_rate=1.0, currency="EUR",
-            score=0.7, vector_score=0.7, boosts_applied={},
-            confidence_band="medium", region_code="DE_BERLIN", source="cwicr",
-            language="de", classification={},
+            code="x",
+            description="x",
+            unit="m2",
+            unit_rate=1.0,
+            currency="EUR",
+            score=0.7,
+            vector_score=0.7,
+            boosts_applied={},
+            confidence_band="medium",
+            region_code="DE_BERLIN",
+            source="cwicr",
+            language="de",
+            classification={},
         )
         non_matching = MatchCandidate(
-            code="y", description="y", unit="m2", unit_rate=1.0, currency="EUR",
-            score=0.7, vector_score=0.7, boosts_applied={},
-            confidence_band="medium", region_code="GB_LONDON", source="cwicr",
-            language="en", classification={},
+            code="y",
+            description="y",
+            unit="m2",
+            unit_rate=1.0,
+            currency="EUR",
+            score=0.7,
+            vector_score=0.7,
+            boosts_applied={},
+            confidence_band="medium",
+            region_code="GB_LONDON",
+            source="cwicr",
+            language="en",
+            classification={},
         )
 
         delta_match = boost(envelope, matching, settings)

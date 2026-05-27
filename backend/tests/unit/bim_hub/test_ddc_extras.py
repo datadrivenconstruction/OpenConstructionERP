@@ -132,12 +132,12 @@ def test_property_set_diff_added_removed_modified() -> None:
     left = {
         "Pset_WallCommon": {
             "FireRating": "F90",  # modified -> F120
-            "IsExternal": True,   # removed
+            "IsExternal": True,  # removed
         }
     }
     right = {
         "Pset_WallCommon": {
-            "FireRating": "F120",   # modified
+            "FireRating": "F120",  # modified
             "AcousticRating": "DnT,w 53 dB",  # added
         }
     }
@@ -212,10 +212,7 @@ def _layered_wall(layers: list[tuple[str, float]]) -> dict[str, object]:
         "category": "wall",
         "properties": {
             "material": "ExteriorWallType_A",
-            "material_layers": [
-                {"material": name, "thickness": thickness}
-                for name, thickness in layers
-            ],
+            "material_layers": [{"material": name, "thickness": thickness} for name, thickness in layers],
         },
     }
 
@@ -259,9 +256,7 @@ def test_material_signature_simple_element() -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    "change_type", ["added", "removed", "modified"]
-)
+@pytest.mark.parametrize("change_type", ["added", "removed", "modified"])
 def test_property_change_dataclass_surface(change_type: str) -> None:
     """PropertyChange instances are frozen dataclasses with the right fields."""
     pc = PropertyChange(

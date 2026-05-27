@@ -55,7 +55,8 @@ def _on_snapshot_refreshed(event):  # type: ignore[no-untyped-def]
             async with async_session_factory() as session:
                 repo = DashboardPresetRepository(session)
                 moved = await repo.mark_stale_for_snapshot(
-                    snapshot_id, tenant_id=tenant_id,
+                    snapshot_id,
+                    tenant_id=tenant_id,
                 )
                 if moved:
                     await session.commit()
@@ -88,7 +89,8 @@ def register_subscribers() -> None:
     if _SUBSCRIBERS_REGISTERED:
         return
     event_bus.subscribe(
-        event_taxonomy.SNAPSHOT_REFRESHED, _on_snapshot_refreshed,
+        event_taxonomy.SNAPSHOT_REFRESHED,
+        _on_snapshot_refreshed,
     )
     _SUBSCRIBERS_REGISTERED = True
 

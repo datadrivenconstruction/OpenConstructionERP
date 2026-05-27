@@ -184,9 +184,7 @@ def _verify_local_upload_token(token: str) -> dict[str, object] | None:
         body_b64, sig_hex = token.split(".", 1)
     except ValueError:
         return None
-    expected = hmac.new(
-        _local_upload_token_secret(), body_b64.encode("ascii"), hashlib.sha256
-    ).hexdigest()
+    expected = hmac.new(_local_upload_token_secret(), body_b64.encode("ascii"), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(sig_hex, expected):
         return None
     try:
@@ -403,9 +401,7 @@ class StorageBackend(ABC):
         :class:`NotImplementedError`.
         """
         _ = (key, content_type)
-        raise NotImplementedError(
-            f"{type(self).__name__} does not support multipart uploads"
-        )
+        raise NotImplementedError(f"{type(self).__name__} does not support multipart uploads")
 
     async def upload_part(
         self,
@@ -421,9 +417,7 @@ class StorageBackend(ABC):
         legitimately use shorter parts.
         """
         _ = (session, part_number, data)
-        raise NotImplementedError(
-            f"{type(self).__name__} does not support multipart uploads"
-        )
+        raise NotImplementedError(f"{type(self).__name__} does not support multipart uploads")
 
     async def complete_multipart(
         self,
@@ -441,16 +435,12 @@ class StorageBackend(ABC):
         caller can retry.
         """
         _ = (session, parts)
-        raise NotImplementedError(
-            f"{type(self).__name__} does not support multipart uploads"
-        )
+        raise NotImplementedError(f"{type(self).__name__} does not support multipart uploads")
 
     async def abort_multipart(self, session: MultipartSession) -> None:
         """Cancel a multipart upload and release any staged parts."""
         _ = session
-        raise NotImplementedError(
-            f"{type(self).__name__} does not support multipart uploads"
-        )
+        raise NotImplementedError(f"{type(self).__name__} does not support multipart uploads")
 
     async def presigned_put_url(
         self,
@@ -466,9 +456,7 @@ class StorageBackend(ABC):
         the two shipped implementations.
         """
         _ = (key, content_type, expires_seconds)
-        raise NotImplementedError(
-            f"{type(self).__name__} does not support presigned PUT URLs"
-        )
+        raise NotImplementedError(f"{type(self).__name__} does not support presigned PUT URLs")
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -606,11 +594,7 @@ class LocalStorageBackend(StorageBackend):
         50-row page would otherwise issue 150+ individual file stats.
         """
         normalised = _normalise_key(prefix) if prefix else ""
-        root = (
-            self.base_dir
-            if not normalised
-            else self.base_dir.joinpath(*normalised.split("/"))
-        )
+        root = self.base_dir if not normalised else self.base_dir.joinpath(*normalised.split("/"))
 
         def _walk() -> list[tuple[str, int]]:
             if not root.is_dir():
@@ -721,9 +705,7 @@ class LocalStorageBackend(StorageBackend):
         data: bytes,
     ) -> PartInfo:
         if session.backend != "local":
-            raise ValueError(
-                f"Cannot upload local part for session backed by {session.backend!r}"
-            )
+            raise ValueError(f"Cannot upload local part for session backed by {session.backend!r}")
         path = self._part_path(session.upload_id, part_number)
         # SHA-256 of the chunk doubles as etag and lets the resumed
         # session detect duplicate uploads.
@@ -747,9 +729,7 @@ class LocalStorageBackend(StorageBackend):
         parts: list[PartInfo],
     ) -> StorageObject:
         if session.backend != "local":
-            raise ValueError(
-                f"Cannot complete local upload for session backed by {session.backend!r}"
-            )
+            raise ValueError(f"Cannot complete local upload for session backed by {session.backend!r}")
         if not parts:
             raise ValueError("complete_multipart requires at least one part")
         # Sort by part_number so callers can pass parts out-of-order
@@ -760,8 +740,7 @@ class LocalStorageBackend(StorageBackend):
         expected_numbers = list(range(1, len(ordered) + 1))
         if [p.part_number for p in ordered] != expected_numbers:
             raise ValueError(
-                f"Multipart parts must be contiguous starting at 1, "
-                f"got {[p.part_number for p in ordered]}"
+                f"Multipart parts must be contiguous starting at 1, got {[p.part_number for p in ordered]}"
             )
 
         staging = self._multipart_dir(session.upload_id)
@@ -777,9 +756,7 @@ class LocalStorageBackend(StorageBackend):
             # Streaming concat into a temp file under the target's parent
             # so the final rename is atomic and on the same filesystem.
             target.parent.mkdir(parents=True, exist_ok=True)
-            tmp = target.with_suffix(
-                target.suffix + f".multipart-{session.upload_id}.tmp"
-            )
+            tmp = target.with_suffix(target.suffix + f".multipart-{session.upload_id}.tmp")
             sha = hashlib.sha256()
             md5 = hashlib.md5(usedforsecurity=False)  # noqa: S324  (etag only)
             total = 0
@@ -788,10 +765,7 @@ class LocalStorageBackend(StorageBackend):
                 for part in ordered:
                     part_path = self._part_path(session.upload_id, part.part_number)
                     if not part_path.is_file():
-                        raise FileNotFoundError(
-                            f"Missing part {part.part_number} for upload "
-                            f"{session.upload_id!r}"
-                        )
+                        raise FileNotFoundError(f"Missing part {part.part_number} for upload {session.upload_id!r}")
                     with part_path.open("rb") as part_in:
                         while True:
                             buf = part_in.read(chunk_size)
@@ -824,9 +798,7 @@ class LocalStorageBackend(StorageBackend):
 
     async def abort_multipart(self, session: MultipartSession) -> None:
         if session.backend != "local":
-            raise ValueError(
-                f"Cannot abort local upload for session backed by {session.backend!r}"
-            )
+            raise ValueError(f"Cannot abort local upload for session backed by {session.backend!r}")
         staging = self._multipart_dir(session.upload_id)
 
         def _remove() -> None:
@@ -1140,9 +1112,7 @@ class S3StorageBackend(StorageBackend):
         data: bytes,
     ) -> PartInfo:
         if session.backend != "s3":
-            raise ValueError(
-                f"Cannot upload S3 part for session backed by {session.backend!r}"
-            )
+            raise ValueError(f"Cannot upload S3 part for session backed by {session.backend!r}")
         if part_number < 1:
             raise ValueError(f"part_number must be >= 1, got {part_number}")
         async with self._client_ctx() as client:  # type: ignore[attr-defined]
@@ -1165,17 +1135,12 @@ class S3StorageBackend(StorageBackend):
         parts: list[PartInfo],
     ) -> StorageObject:
         if session.backend != "s3":
-            raise ValueError(
-                f"Cannot complete S3 upload for session backed by {session.backend!r}"
-            )
+            raise ValueError(f"Cannot complete S3 upload for session backed by {session.backend!r}")
         if not parts:
             raise ValueError("complete_multipart requires at least one part")
         ordered = sorted(parts, key=lambda p: p.part_number)
         multipart_payload = {
-            "Parts": [
-                {"ETag": f'"{p.etag.strip(chr(34))}"', "PartNumber": p.part_number}
-                for p in ordered
-            ],
+            "Parts": [{"ETag": f'"{p.etag.strip(chr(34))}"', "PartNumber": p.part_number} for p in ordered],
         }
         async with self._client_ctx() as client:  # type: ignore[attr-defined]
             resp = await client.complete_multipart_upload(
@@ -1200,9 +1165,7 @@ class S3StorageBackend(StorageBackend):
 
     async def abort_multipart(self, session: MultipartSession) -> None:
         if session.backend != "s3":
-            raise ValueError(
-                f"Cannot abort S3 upload for session backed by {session.backend!r}"
-            )
+            raise ValueError(f"Cannot abort S3 upload for session backed by {session.backend!r}")
         async with self._client_ctx() as client:  # type: ignore[attr-defined]
             await client.abort_multipart_upload(
                 Bucket=self._bucket,
@@ -1223,8 +1186,7 @@ class S3StorageBackend(StorageBackend):
             from botocore.config import Config
         except ImportError as exc:  # pragma: no cover - aioboto3 pulls boto3 in
             raise ImportError(
-                "S3StorageBackend.presigned_put_url requires boto3 "
-                "(installed transitively via aioboto3)"
+                "S3StorageBackend.presigned_put_url requires boto3 (installed transitively via aioboto3)"
             ) from exc
 
         cfg = Config(signature_version="s3v4", region_name=self._region or None)

@@ -36,24 +36,34 @@ class ComplianceDSLRule(Base):
     __tablename__ = "oe_compliance_dsl_rule"
 
     tenant_id: Mapped[str | None] = mapped_column(
-        String(36), nullable=True, index=True,
+        String(36),
+        nullable=True,
+        index=True,
     )
     rule_id: Mapped[str] = mapped_column(
-        String(200), nullable=False, index=True,
+        String(200),
+        nullable=False,
+        index=True,
     )
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     severity: Mapped[str] = mapped_column(String(32), nullable=False)
     standard: Mapped[str] = mapped_column(
-        String(64), nullable=False, default="custom",
+        String(64),
+        nullable=False,
+        default="custom",
     )
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Original YAML/JSON the user submitted — re-parsed on every load.
     definition_yaml: Mapped[str] = mapped_column(Text, nullable=False)
     owner_user_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True,
+        GUID(),
+        nullable=False,
+        index=True,
     )
     is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True,
+        Boolean,
+        nullable=False,
+        default=True,
     )
 
     __table_args__ = (
@@ -62,7 +72,8 @@ class ComplianceDSLRule(Base):
         # other ``tenant_id IS NULL`` rows. SQLite treats every NULL as
         # distinct so this constraint behaves correctly there too.
         UniqueConstraint(
-            "tenant_id", "rule_id",
+            "tenant_id",
+            "rule_id",
             name="uq_oe_compliance_dsl_rule_tenant_rule_id",
         ),
     )

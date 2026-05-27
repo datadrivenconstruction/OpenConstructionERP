@@ -54,6 +54,7 @@ async def _safe_audit(
     except Exception:
         _logger_audit.debug("Audit log write skipped for %s %s", action, entity_type)
 
+
 # ── Allowed task status transitions ───────────────────────────────────────────
 
 _TASK_STATUS_TRANSITIONS: dict[str, set[str]] = {
@@ -214,11 +215,7 @@ class TaskService:
 
         from app.modules.users.models import User
 
-        rows = (
-            await self.session.execute(
-                select(User.id, User.full_name, User.email).where(User.id.in_(ids))
-            )
-        ).all()
+        rows = (await self.session.execute(select(User.id, User.full_name, User.email).where(User.id.in_(ids)))).all()
         names: dict[str, str] = {}
         for uid, full_name, email in rows:
             label = (full_name or "").strip() or (email or "")
@@ -335,20 +332,11 @@ class TaskService:
             # project-scoped when possible so we don't pull the entire table.
             result = await self.session.execute(stmt)
             all_tasks = list(result.scalars().all())
-            tasks = [
-                t
-                for t in all_tasks
-                if t.bim_element_ids
-                and element_id in [str(x) for x in t.bim_element_ids]
-            ]
+            tasks = [t for t in all_tasks if t.bim_element_ids and element_id in [str(x) for x in t.bim_element_ids]]
 
         # Respect private task visibility
         if current_user_id is not None:
-            tasks = [
-                t
-                for t in tasks
-                if not t.is_private or (t.created_by == current_user_id)
-            ]
+            tasks = [t for t in tasks if not t.is_private or (t.created_by == current_user_id)]
         else:
             tasks = [t for t in tasks if not t.is_private]
 
@@ -389,8 +377,7 @@ class TaskService:
             fields["metadata_"] = fields.pop("metadata")
         if "checklist" in fields and fields["checklist"] is not None:
             fields["checklist"] = [
-                entry.model_dump() if hasattr(entry, "model_dump") else entry
-                for entry in fields["checklist"]
+                entry.model_dump() if hasattr(entry, "model_dump") else entry for entry in fields["checklist"]
             ]
 
         # Validate dependency change: prevent self-reference and cycles
@@ -465,10 +452,7 @@ class TaskService:
         )
 
         # Fire task.assigned when responsible_id changes to a new user
-        if (
-            new_responsible is not None
-            and str(new_responsible) != old_responsible
-        ):
+        if new_responsible is not None and str(new_responsible) != old_responsible:
             await _safe_publish(
                 "task.assigned",
                 {
@@ -610,26 +594,16 @@ class TaskService:
                 stmt = stmt.where(Task.is_private == False)  # noqa: E712
             return stmt
 
-        total = (
-            await self.session.execute(
-                _scoped(select(func.count(Task.id)))
-            )
-        ).scalar_one()
+        total = (await self.session.execute(_scoped(select(func.count(Task.id))))).scalar_one()
 
         status_rows = (
-            await self.session.execute(
-                _scoped(select(Task.status, func.count())).group_by(Task.status)
-            )
+            await self.session.execute(_scoped(select(Task.status, func.count())).group_by(Task.status))
         ).all()
         type_rows = (
-            await self.session.execute(
-                _scoped(select(Task.task_type, func.count())).group_by(Task.task_type)
-            )
+            await self.session.execute(_scoped(select(Task.task_type, func.count())).group_by(Task.task_type))
         ).all()
         priority_rows = (
-            await self.session.execute(
-                _scoped(select(Task.priority, func.count())).group_by(Task.priority)
-            )
+            await self.session.execute(_scoped(select(Task.priority, func.count())).group_by(Task.priority))
         ).all()
 
         by_status: dict[str, int] = {r[0]: r[1] for r in status_rows}
@@ -650,9 +624,7 @@ class TaskService:
         # Walk only the JSON column for non-completed tasks to compute
         # average checklist progress.
         checklist_rows = (
-            await self.session.execute(
-                _scoped(select(Task.checklist)).where(Task.status != "completed")
-            )
+            await self.session.execute(_scoped(select(Task.checklist)).where(Task.status != "completed"))
         ).all()
 
         checklist_progress_values: list[float] = []
@@ -662,16 +634,12 @@ class TaskService:
             total_items = len(checklist)
             if total_items == 0:
                 continue
-            done = sum(
-                1 for c in checklist if isinstance(c, dict) and c.get("completed")
-            )
+            done = sum(1 for c in checklist if isinstance(c, dict) and c.get("completed"))
             checklist_progress_values.append(done / total_items * 100)
 
         avg_checklist_progress: float | None = None
         if checklist_progress_values:
-            avg_checklist_progress = round(
-                sum(checklist_progress_values) / len(checklist_progress_values), 1
-            )
+            avg_checklist_progress = round(sum(checklist_progress_values) / len(checklist_progress_values), 1)
 
         return TaskStatsResponse(
             total=total,

@@ -81,9 +81,7 @@ async def retry_auth(retry_client: AsyncClient) -> dict[str, str]:
 
 
 @pytest_asyncio.fixture(scope="module")
-async def retry_project(
-    retry_client: AsyncClient, retry_auth: dict[str, str]
-) -> str:
+async def retry_project(retry_client: AsyncClient, retry_auth: dict[str, str]) -> str:
     resp = await retry_client.post(
         "/api/v1/projects/",
         json={
@@ -115,9 +113,7 @@ _MINIMAL_IFC = (
 )
 
 
-async def _upload_ifc(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> str:
+async def _upload_ifc(client: AsyncClient, auth: dict[str, str], project_id: str) -> str:
     """Upload a minimal IFC and return the resulting model_id."""
     resp = await client.post(
         "/api/v1/bim_hub/upload-cad/",
@@ -145,7 +141,8 @@ class TestBimRetryEndpoint:
     ) -> None:
         bogus = str(uuid.uuid4())
         resp = await retry_client.post(
-            f"/api/v1/bim_hub/{bogus}/retry/", headers=retry_auth,
+            f"/api/v1/bim_hub/{bogus}/retry/",
+            headers=retry_auth,
         )
         assert resp.status_code == 404, resp.text
 
@@ -166,7 +163,8 @@ class TestBimRetryEndpoint:
         # model and we want to test the missing-blob branch specifically.
         for _ in range(20):
             r = await retry_client.get(
-                f"/api/v1/bim_hub/{model_id}", headers=retry_auth,
+                f"/api/v1/bim_hub/{model_id}",
+                headers=retry_auth,
             )
             if r.status_code == 200 and r.json().get("status") != "processing":
                 break
@@ -184,7 +182,8 @@ class TestBimRetryEndpoint:
         monkeypatch.setattr(backend, "exists", fake_exists)
         try:
             resp = await retry_client.post(
-                f"/api/v1/bim_hub/{model_id}/retry/", headers=retry_auth,
+                f"/api/v1/bim_hub/{model_id}/retry/",
+                headers=retry_auth,
             )
             assert resp.status_code == 404, resp.text
             assert "re-upload" in (resp.json().get("detail") or "").lower()
@@ -203,17 +202,17 @@ class TestBimRetryEndpoint:
 
         for _ in range(30):
             r = await retry_client.get(
-                f"/api/v1/bim_hub/{model_id}", headers=retry_auth,
+                f"/api/v1/bim_hub/{model_id}",
+                headers=retry_auth,
             )
-            if r.status_code == 200 and r.json().get("status") in (
-                "error", "needs_converter", "ready"
-            ):
+            if r.status_code == 200 and r.json().get("status") in ("error", "needs_converter", "ready"):
                 break
             await asyncio.sleep(0.25)
 
         before = (
             await retry_client.get(
-                f"/api/v1/bim_hub/{model_id}", headers=retry_auth,
+                f"/api/v1/bim_hub/{model_id}",
+                headers=retry_auth,
             )
         ).json()
         # If the empty IFC happens to land in "ready" (e.g. the text
@@ -222,7 +221,8 @@ class TestBimRetryEndpoint:
         # valid.
         if before["status"] == "ready":
             resp = await retry_client.post(
-                f"/api/v1/bim_hub/{model_id}/retry/", headers=retry_auth,
+                f"/api/v1/bim_hub/{model_id}/retry/",
+                headers=retry_auth,
             )
             assert resp.status_code == 202, resp.text
             assert resp.json()["status"] == "noop"
@@ -236,7 +236,8 @@ class TestBimRetryEndpoint:
         before_updated_at = before.get("updated_at", "")
 
         resp = await retry_client.post(
-            f"/api/v1/bim_hub/{model_id}/retry/", headers=retry_auth,
+            f"/api/v1/bim_hub/{model_id}/retry/",
+            headers=retry_auth,
         )
         assert resp.status_code == 202, resp.text
         body = resp.json()
@@ -246,12 +247,11 @@ class TestBimRetryEndpoint:
         # Wait for the worker to finish a second pass.
         for _ in range(30):
             r = await retry_client.get(
-                f"/api/v1/bim_hub/{model_id}", headers=retry_auth,
+                f"/api/v1/bim_hub/{model_id}",
+                headers=retry_auth,
             )
             snap = r.json()
-            if snap.get("updated_at", "") > before_updated_at and snap.get(
-                "status"
-            ) != "processing":
+            if snap.get("updated_at", "") > before_updated_at and snap.get("status") != "processing":
                 break
             await asyncio.sleep(0.25)
 

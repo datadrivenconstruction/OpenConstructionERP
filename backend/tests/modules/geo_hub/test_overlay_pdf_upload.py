@@ -8,7 +8,9 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_pdf_upload_generates_raster_and_default_corners(
-    http_client, tenant_a, tiny_pdf,
+    http_client,
+    tenant_a,
+    tiny_pdf,
 ):
     files = {"file": ("plan.pdf", tiny_pdf, "application/pdf")}
     res = await http_client.post(

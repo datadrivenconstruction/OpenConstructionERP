@@ -250,10 +250,7 @@ class SupplierCatalogsService:
         if new_status not in allowed:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    f"Illegal vendor status transition "
-                    f"'{vendor.status}' → '{new_status}'"
-                ),
+                detail=(f"Illegal vendor status transition '{vendor.status}' → '{new_status}'"),
             )
         await self.vendors.update(vendor_id, status=new_status)
         await _safe_publish(
@@ -375,9 +372,7 @@ class SupplierCatalogsService:
                 "manufacturer": created.manufacturer or "",
                 "mpn": created.mpn or "",
                 "unit_of_measure": created.unit_of_measure,
-                "category_id": (
-                    str(created.category_id) if created.category_id else None
-                ),
+                "category_id": (str(created.category_id) if created.category_id else None),
                 "description": (created.description or "")[:500],
             },
         )
@@ -588,7 +583,9 @@ class SupplierCatalogsService:
     ) -> PurchaseRequisition:
         pr = await self.prs.get(pr_id)
         if pr is None:
-            raise HTTPException(status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale())
+            )
         if pr.status != "draft":
             raise HTTPException(
                 status_code=400,
@@ -617,7 +614,9 @@ class SupplierCatalogsService:
     ) -> PurchaseRequisition:
         pr = await self.prs.get(pr_id)
         if pr is None:
-            raise HTTPException(status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale())
+            )
         if pr.status != "approval_pending":
             raise HTTPException(
                 status_code=400,
@@ -661,7 +660,9 @@ class SupplierCatalogsService:
     ) -> PurchaseRequisition:
         pr = await self.prs.get(pr_id)
         if pr is None:
-            raise HTTPException(status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale())
+            )
         if pr.status not in ("approval_pending", "draft"):
             raise HTTPException(
                 status_code=400,
@@ -690,7 +691,9 @@ class SupplierCatalogsService:
     ) -> PurchaseOrder:
         pr = await self.prs.get(pr_id)
         if pr is None:
-            raise HTTPException(status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale())
+            )
         if pr.status != "approved":
             raise HTTPException(
                 status_code=400,
@@ -837,7 +840,9 @@ class SupplierCatalogsService:
     ) -> PurchaseOrder:
         po = await self.pos.get(po_id)
         if po is None:
-            raise HTTPException(status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale())
+            )
         if po.status != "draft":
             raise HTTPException(
                 status_code=400,
@@ -862,7 +867,9 @@ class SupplierCatalogsService:
     async def acknowledge_po(self, po_id: uuid.UUID) -> PurchaseOrder:
         po = await self.pos.get(po_id)
         if po is None:
-            raise HTTPException(status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale())
+            )
         if po.status != "sent":
             raise HTTPException(
                 status_code=400,
@@ -880,7 +887,9 @@ class SupplierCatalogsService:
     async def close_po(self, po_id: uuid.UUID) -> PurchaseOrder:
         po = await self.pos.get(po_id)
         if po is None:
-            raise HTTPException(status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale())
+            )
         if po.status in ("closed", "cancelled"):
             raise HTTPException(
                 status_code=400,
@@ -915,7 +924,9 @@ class SupplierCatalogsService:
         """
         po = await self.pos.get(data.po_id)
         if po is None:
-            raise HTTPException(status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale())
+            )
         if po.status not in ("sent", "acknowledged", "partial"):
             raise HTTPException(
                 status_code=400,
@@ -1186,9 +1197,8 @@ class SupplierCatalogsService:
         # Resolve tolerance profile. Vendor-bound profile takes precedence
         # over the tenant default but loses to an explicit override.
         vendor = await self.vendors.get(invoice.vendor_id)
-        resolved_profile_name = (
-            tolerance_profile_name
-            or (vendor.tolerance_profile_name if vendor is not None else None)
+        resolved_profile_name = tolerance_profile_name or (
+            vendor.tolerance_profile_name if vendor is not None else None
         )
         profile = await self._resolve_tolerance(
             profile_name=resolved_profile_name,
@@ -1203,10 +1213,12 @@ class SupplierCatalogsService:
 
         # ── Quantity variance ──────────────────────────────────────
         total_ordered = sum(
-            (line.ordered_qty for line in po.lines), Decimal("0"),
+            (line.ordered_qty for line in po.lines),
+            Decimal("0"),
         )
         total_received = sum(
-            (line.received_qty for line in po.lines), Decimal("0"),
+            (line.received_qty for line in po.lines),
+            Decimal("0"),
         )
         qty_var = total_ordered - total_received
         has_confirmed_gr = any(gr.status == "posted" for gr in po.receipts)
@@ -1215,14 +1227,8 @@ class SupplierCatalogsService:
         else:
             qty_exception = False
         # Apply qty tolerance percentage to *received* vs ordered shortfall
-        if (
-            not qty_exception
-            and total_ordered > 0
-            and profile.qty_tolerance_pct > 0
-        ):
-            allowed_short = (
-                total_ordered * profile.qty_tolerance_pct / Decimal("100")
-            )
+        if not qty_exception and total_ordered > 0 and profile.qty_tolerance_pct > 0:
+            allowed_short = total_ordered * profile.qty_tolerance_pct / Decimal("100")
             shortfall = total_ordered - total_received
             if shortfall > allowed_short:
                 qty_exception = True
@@ -1230,11 +1236,7 @@ class SupplierCatalogsService:
         # ── Period variance (delivery vs PO.expected_delivery) ────
         period_exception = False
         period_delta_days: int | None = None
-        if (
-            po.expected_delivery
-            and has_confirmed_gr
-            and profile.period_tolerance_days >= 0
-        ):
+        if po.expected_delivery and has_confirmed_gr and profile.period_tolerance_days >= 0:
             try:
                 expected = datetime.fromisoformat(po.expected_delivery).date()
                 latest_gr = max(
@@ -1260,25 +1262,16 @@ class SupplierCatalogsService:
         if inv_lines:
             po_lines_by_id = {pl.id: pl for pl in po.lines}
             for il in inv_lines:
-                po_line = (
-                    po_lines_by_id.get(il.po_line_id)
-                    if il.po_line_id else None
-                )
+                po_line = po_lines_by_id.get(il.po_line_id) if il.po_line_id else None
                 line_price_var: Decimal | None = None
                 line_qty_var: Decimal | None = None
                 status_str = "no_po_line"
                 if po_line is not None:
                     line_price_var = il.unit_price - po_line.unit_price
                     line_qty_var = il.quantity - po_line.received_qty
-                    pl_tol_pct = (
-                        po_line.unit_price * profile.price_tolerance_pct
-                        / Decimal("100")
-                    )
+                    pl_tol_pct = po_line.unit_price * profile.price_tolerance_pct / Decimal("100")
                     pl_tol = max(pl_tol_pct, profile.price_tolerance_abs)
-                    status_str = (
-                        "ok"
-                        if abs(line_price_var) <= pl_tol else "price_variance"
-                    )
+                    status_str = "ok" if abs(line_price_var) <= pl_tol else "price_variance"
                 line_results.append(
                     {
                         "invoice_line_id": str(il.id),
@@ -1286,18 +1279,10 @@ class SupplierCatalogsService:
                         "description": il.description,
                         "invoice_qty": str(il.quantity),
                         "invoice_unit_price": str(il.unit_price),
-                        "po_unit_price": (
-                            str(po_line.unit_price) if po_line else None
-                        ),
-                        "received_qty": (
-                            str(po_line.received_qty) if po_line else None
-                        ),
-                        "price_variance": (
-                            str(line_price_var) if line_price_var is not None else None
-                        ),
-                        "qty_variance": (
-                            str(line_qty_var) if line_qty_var is not None else None
-                        ),
+                        "po_unit_price": (str(po_line.unit_price) if po_line else None),
+                        "received_qty": (str(po_line.received_qty) if po_line else None),
+                        "price_variance": (str(line_price_var) if line_price_var is not None else None),
+                        "qty_variance": (str(line_qty_var) if line_qty_var is not None else None),
                         "status": status_str,
                     },
                 )
@@ -1306,20 +1291,17 @@ class SupplierCatalogsService:
             reasons = []
             if price_exception:
                 reasons.append(
-                    f"price variance {price_var} exceeds tolerance "
-                    f"{price_tol} ({profile.price_tolerance_pct}%)",
+                    f"price variance {price_var} exceeds tolerance {price_tol} ({profile.price_tolerance_pct}%)",
                 )
             if qty_exception:
                 reasons.append(
                     "no goods received yet"
                     if not has_confirmed_gr
-                    else f"received qty {total_received} below tolerance "
-                         f"vs ordered {total_ordered}",
+                    else f"received qty {total_received} below tolerance vs ordered {total_ordered}",
                 )
             if period_exception:
                 reasons.append(
-                    f"delivery {period_delta_days}d outside ±"
-                    f"{profile.period_tolerance_days}d tolerance",
+                    f"delivery {period_delta_days}d outside ±{profile.period_tolerance_days}d tolerance",
                 )
             reason = "; ".join(reasons)
             await self.invoices.update(
@@ -1367,7 +1349,8 @@ class SupplierCatalogsService:
 
         # Auto-match
         first_gr = next(
-            (gr for gr in po.receipts if gr.status == "posted"), None,
+            (gr for gr in po.receipts if gr.status == "posted"),
+            None,
         )
         await self.invoices.update(
             invoice_id,
@@ -1667,7 +1650,9 @@ class SupplierCatalogsService:
         )
 
     async def validate_commodity_code(
-        self, scheme: str, code: str,
+        self,
+        scheme: str,
+        code: str,
     ) -> bool:
         """Return True if (scheme, code) exists and is active."""
         cc = await self.commodity_codes.get_by_code(scheme, code)
@@ -1676,7 +1661,8 @@ class SupplierCatalogsService:
     # ── Tolerance profiles ────────────────────────────────────────────────────
 
     async def create_tolerance_profile(
-        self, data: TolerianceProfileCreate,
+        self,
+        data: TolerianceProfileCreate,
     ) -> TolerianceProfile:
         existing = await self.tolerance_profiles.get_by_name(data.name)
         if existing is not None:
@@ -1689,7 +1675,8 @@ class SupplierCatalogsService:
             current_default = await self.tolerance_profiles.get_default()
             if current_default is not None:
                 await self.tolerance_profiles.update(
-                    current_default.id, is_default=False,
+                    current_default.id,
+                    is_default=False,
                 )
         profile = TolerianceProfile(
             name=data.name,
@@ -1716,7 +1703,8 @@ class SupplierCatalogsService:
             current = await self.tolerance_profiles.get_default()
             if current is not None and current.id != profile_id:
                 await self.tolerance_profiles.update(
-                    current.id, is_default=False,
+                    current.id,
+                    is_default=False,
                 )
         if updates:
             await self.tolerance_profiles.update(profile_id, **updates)
@@ -1753,15 +1741,18 @@ class SupplierCatalogsService:
         if vendor is None:
             raise HTTPException(status_code=404, detail=translate("errors.vendor_not_found", locale=get_locale()))
         valid_types = {
-            "w9", "vat_cert", "gst", "trn", "coi", "iso", "other",
+            "w9",
+            "vat_cert",
+            "gst",
+            "trn",
+            "coi",
+            "iso",
+            "other",
         }
         if data.doc_type not in valid_types:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    f"Invalid doc_type '{data.doc_type}'. "
-                    f"Allowed: {sorted(valid_types)}"
-                ),
+                detail=(f"Invalid doc_type '{data.doc_type}'. Allowed: {sorted(valid_types)}"),
             )
         doc = KYCDocument(
             vendor_id=vendor_id,
@@ -1781,21 +1772,22 @@ class SupplierCatalogsService:
             {
                 "vendor_id": str(vendor_id),
                 "doc_type": data.doc_type,
-                "expires_on": (
-                    data.expires_on.isoformat() if data.expires_on else None
-                ),
+                "expires_on": (data.expires_on.isoformat() if data.expires_on else None),
                 "actor_id": user_id,
             },
         )
         return doc
 
     async def list_kyc_for_vendor(
-        self, vendor_id: uuid.UUID,
+        self,
+        vendor_id: uuid.UUID,
     ) -> list[KYCDocument]:
         return await self.kyc_docs.list_for_vendor(vendor_id)
 
     async def check_kyc_expiry(
-        self, *, days_ahead: int = 30,
+        self,
+        *,
+        days_ahead: int = 30,
     ) -> dict[str, int]:
         """Scan all KYC docs; emit ``KYC_DOC_EXPIRING`` or ``KYC_DOC_EXPIRED``.
 
@@ -1860,17 +1852,16 @@ class SupplierCatalogsService:
             raise HTTPException(status_code=404, detail=translate("errors.vendor_not_found", locale=get_locale()))
         if data.period_start > data.period_end:
             raise HTTPException(
-                status_code=400, detail="period_start > period_end",
+                status_code=400,
+                detail="period_start > period_end",
             )
 
         weights = data.weights or ScorecardWeights()
-        weight_sum = (
-            weights.delivery + weights.quality
-            + weights.price + weights.esg
-        )
+        weight_sum = weights.delivery + weights.quality + weights.price + weights.esg
         if weight_sum <= 0:
             raise HTTPException(
-                status_code=400, detail="Sum of weights must be > 0",
+                status_code=400,
+                detail="Sum of weights must be > 0",
             )
 
         # 1. Delivery score — fraction of GRs that arrived on or before expected
@@ -1907,14 +1898,8 @@ class SupplierCatalogsService:
                     except (ValueError, TypeError):
                         pass
 
-        delivery_score = (
-            (Decimal(on_time) * Decimal("100") / Decimal(total_grs))
-            if total_grs > 0 else Decimal("0")
-        )
-        quality_score = (
-            (accepted_sum * Decimal("100") / received_sum)
-            if received_sum > 0 else Decimal("0")
-        )
+        delivery_score = (Decimal(on_time) * Decimal("100") / Decimal(total_grs)) if total_grs > 0 else Decimal("0")
+        quality_score = (accepted_sum * Decimal("100") / received_sum) if received_sum > 0 else Decimal("0")
 
         # 2. Price score — vendor avg unit_price vs cheapest competing vendor
         # For each catalog item the vendor prices, compute the ratio
@@ -1939,8 +1924,7 @@ class SupplierCatalogsService:
             .group_by(_CE.catalog_item_id)
         )
         vendor_min: dict[uuid.UUID, Decimal] = {
-            row[0]: row[1]
-            for row in (await self.session.execute(vendor_min_stmt)).all()
+            row[0]: row[1] for row in (await self.session.execute(vendor_min_stmt)).all()
         }
 
         market_min: dict[uuid.UUID, Decimal] = {}
@@ -1956,10 +1940,7 @@ class SupplierCatalogsService:
                 .where(_CE.catalog_item_id.in_(list(vendor_min.keys())))
                 .group_by(_CE.catalog_item_id)
             )
-            market_min = {
-                row[0]: row[1]
-                for row in (await self.session.execute(market_min_stmt)).all()
-            }
+            market_min = {row[0]: row[1] for row in (await self.session.execute(market_min_stmt)).all()}
 
         sample_count = 0
         ratio_sum = Decimal("0")
@@ -1970,18 +1951,13 @@ class SupplierCatalogsService:
             ratio = Decimal(cheapest) / Decimal(this_price)  # 1.0 if cheapest
             ratio_sum += ratio
             sample_count += 1
-        price_score = (
-            (ratio_sum * Decimal("100") / Decimal(sample_count))
-            if sample_count > 0 else Decimal("0")
-        )
+        price_score = (ratio_sum * Decimal("100") / Decimal(sample_count)) if sample_count > 0 else Decimal("0")
 
         # 3. ESG score — based on KYC documents in good standing
         kyc_docs = await self.kyc_docs.list_for_vendor(vendor_id)
         active_docs = [d for d in kyc_docs if d.status == "active"]
         iso_present = any(d.doc_type == "iso" for d in active_docs)
-        tax_doc_present = any(
-            d.doc_type in ("w9", "vat_cert", "gst", "trn") for d in active_docs
-        )
+        tax_doc_present = any(d.doc_type in ("w9", "vat_cert", "gst", "trn") for d in active_docs)
         coi_present = any(d.doc_type == "coi" for d in active_docs)
         esg_components = sum(
             [
@@ -2041,7 +2017,10 @@ class SupplierCatalogsService:
         return sc
 
     async def list_scorecards(
-        self, vendor_id: uuid.UUID, *, limit: int = 24,
+        self,
+        vendor_id: uuid.UUID,
+        *,
+        limit: int = 24,
     ) -> list[VendorScorecard]:
         return await self.scorecards.list_for_vendor(vendor_id, limit=limit)
 
@@ -2076,9 +2055,7 @@ class SupplierCatalogsService:
             from sqlalchemy import select as _select
 
             stmt = _select(Vendor).where(Vendor.tax_id == parsed.supplier_vat)
-            vendor = (
-                await self.session.execute(stmt)
-            ).scalar_one_or_none()
+            vendor = (await self.session.execute(stmt)).scalar_one_or_none()
         if vendor is None and parsed.supplier_name:
             from sqlalchemy import func as _func
             from sqlalchemy import select as _select
@@ -2086,16 +2063,12 @@ class SupplierCatalogsService:
             stmt = _select(Vendor).where(
                 _func.lower(Vendor.name) == parsed.supplier_name.lower(),
             )
-            vendor = (
-                await self.session.execute(stmt)
-            ).scalar_one_or_none()
+            vendor = (await self.session.execute(stmt)).scalar_one_or_none()
         if vendor is None:
             raise HTTPException(
                 status_code=404,
                 detail=(
-                    "Vendor not found. Onboard supplier "
-                    f"'{parsed.supplier_name}' "
-                    f"(VAT={parsed.supplier_vat}) first."
+                    f"Vendor not found. Onboard supplier '{parsed.supplier_name}' (VAT={parsed.supplier_vat}) first."
                 ),
             )
 
@@ -2116,9 +2089,7 @@ class SupplierCatalogsService:
             VendorInvoice.number == parsed.invoice_id,
             VendorInvoice.vendor_id == vendor.id,
         )
-        existing = (
-            await self.session.execute(existing_stmt)
-        ).scalar_one_or_none()
+        existing = (await self.session.execute(existing_stmt)).scalar_one_or_none()
         if existing is not None:
             return PeppolIngestResult(
                 invoice_id=existing.id,

@@ -147,26 +147,20 @@ def _override_payload(
     "target_status",
     ["active", "reviewed", "approved", "resolved", "ignored"],
 )
-async def test_valid_status_transitions_accepted(
-    app_factory, db_session, target_status
-):
+async def test_valid_status_transitions_accepted(app_factory, db_session, target_status):
     """Every canonical clash status is accepted by the PATCH endpoint."""
     app = app_factory
     user_id, project_id, run_id, result_id = await _seed_run_and_result(db_session)
 
     _override_payload(app, user_id, role="editor", perms=["clash.update"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.patch(
-                f"/api/v1/clash/projects/{project_id}/runs/{run_id}"
-                f"/results/{result_id}",
+                f"/api/v1/clash/projects/{project_id}/runs/{run_id}/results/{result_id}",
                 json={"status": target_status},
             )
         assert resp.status_code == 200, (
-            f"Expected 200 for status='{target_status}', "
-            f"got {resp.status_code}: {resp.text}"
+            f"Expected 200 for status='{target_status}', got {resp.status_code}: {resp.text}"
         )
         body = resp.json()
         assert body["status"] == target_status, (
@@ -183,17 +177,12 @@ async def test_invalid_status_rejected_422(app_factory, db_session):
 
     _override_payload(app, user_id, role="editor", perms=["clash.update"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.patch(
-                f"/api/v1/clash/projects/{project_id}/runs/{run_id}"
-                f"/results/{result_id}",
+                f"/api/v1/clash/projects/{project_id}/runs/{run_id}/results/{result_id}",
                 json={"status": "totally_not_a_real_status"},
             )
-        assert resp.status_code == 422, (
-            f"Expected 422 for invalid status, got {resp.status_code}: {resp.text}"
-        )
+        assert resp.status_code == 422, f"Expected 422 for invalid status, got {resp.status_code}: {resp.text}"
     finally:
         app.dependency_overrides.clear()
 
@@ -205,20 +194,16 @@ async def test_new_status_accepted(app_factory, db_session):
 
     _override_payload(app, user_id, role="editor", perms=["clash.update"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # First move away from 'new'
             resp1 = await client.patch(
-                f"/api/v1/clash/projects/{project_id}/runs/{run_id}"
-                f"/results/{result_id}",
+                f"/api/v1/clash/projects/{project_id}/runs/{run_id}/results/{result_id}",
                 json={"status": "active"},
             )
             assert resp1.status_code == 200
             # Then flip back to 'new' (reopened-style)
             resp2 = await client.patch(
-                f"/api/v1/clash/projects/{project_id}/runs/{run_id}"
-                f"/results/{result_id}",
+                f"/api/v1/clash/projects/{project_id}/runs/{run_id}/results/{result_id}",
                 json={"status": "new"},
             )
         assert resp2.status_code == 200, resp2.text
@@ -230,24 +215,17 @@ async def test_new_status_accepted(app_factory, db_session):
 # ── FSM: severity enum enforcement ────────────────────────────────────────
 
 
-@pytest.mark.parametrize(
-    "valid_severity", ["critical", "high", "medium", "low"]
-)
-async def test_valid_severity_accepted(
-    app_factory, db_session, valid_severity
-):
+@pytest.mark.parametrize("valid_severity", ["critical", "high", "medium", "low"])
+async def test_valid_severity_accepted(app_factory, db_session, valid_severity):
     """All four severity values are accepted by the PATCH endpoint."""
     app = app_factory
     user_id, project_id, run_id, result_id = await _seed_run_and_result(db_session)
 
     _override_payload(app, user_id, role="editor", perms=["clash.update"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.patch(
-                f"/api/v1/clash/projects/{project_id}/runs/{run_id}"
-                f"/results/{result_id}",
+                f"/api/v1/clash/projects/{project_id}/runs/{run_id}/results/{result_id}",
                 json={"severity": valid_severity},
             )
         assert resp.status_code == 200, (
@@ -265,40 +243,28 @@ async def test_invalid_severity_rejected_422(app_factory, db_session):
 
     _override_payload(app, user_id, role="editor", perms=["clash.update"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.patch(
-                f"/api/v1/clash/projects/{project_id}/runs/{run_id}"
-                f"/results/{result_id}",
+                f"/api/v1/clash/projects/{project_id}/runs/{run_id}/results/{result_id}",
                 json={"severity": "extreme"},
             )
-        assert resp.status_code == 422, (
-            f"Expected 422 for invalid severity, got {resp.status_code}: {resp.text}"
-        )
+        assert resp.status_code == 422, f"Expected 422 for invalid severity, got {resp.status_code}: {resp.text}"
     finally:
         app.dependency_overrides.clear()
 
 
-async def test_severity_filter_on_results_list_rejects_invalid(
-    app_factory, db_session
-):
+async def test_severity_filter_on_results_list_rejects_invalid(app_factory, db_session):
     """Results list with invalid severity filter → 422."""
     app = app_factory
     user_id, project_id, run_id, _result_id = await _seed_run_and_result(db_session)
 
     _override_payload(app, user_id, role="editor", perms=["clash.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get(
-                f"/api/v1/clash/projects/{project_id}/runs/{run_id}/results"
-                "?severity=catastrophic",
+                f"/api/v1/clash/projects/{project_id}/runs/{run_id}/results?severity=catastrophic",
             )
-        assert resp.status_code == 422, (
-            f"Expected 422 for invalid severity filter, got {resp.status_code}"
-        )
+        assert resp.status_code == 422, f"Expected 422 for invalid severity filter, got {resp.status_code}"
     finally:
         app.dependency_overrides.clear()
 
@@ -308,10 +274,11 @@ async def test_severity_filter_on_results_list_rejects_invalid(
 
 async def test_federated_clash_run_stores_multiple_model_ids(db_session):
     """ClashRun.model_ids can hold multiple UUIDs (JSON list column)."""
+    from sqlalchemy import select
+
     from app.modules.clash.models import ClashRun
     from app.modules.projects.models import Project
     from app.modules.users.models import User
-    from sqlalchemy import select
 
     user = User(
         email=f"fed-{uuid.uuid4().hex[:8]}@test.io",
@@ -341,15 +308,9 @@ async def test_federated_clash_run_stores_multiple_model_ids(db_session):
     await db_session.commit()
     await db_session.refresh(run)
 
-    persisted = (
-        await db_session.execute(
-            select(ClashRun).where(ClashRun.id == run.id)
-        )
-    ).scalar_one()
+    persisted = (await db_session.execute(select(ClashRun).where(ClashRun.id == run.id))).scalar_one()
 
-    assert len(persisted.model_ids) == 3, (
-        f"Expected 3 model_ids, got {len(persisted.model_ids)}: {persisted.model_ids}"
-    )
+    assert len(persisted.model_ids) == 3, f"Expected 3 model_ids, got {len(persisted.model_ids)}: {persisted.model_ids}"
     persisted_strs = [str(m) for m in persisted.model_ids]
     for mid in (str(model_a), str(model_b), str(model_c)):
         assert mid in persisted_strs, f"model_id {mid} missing from persisted model_ids"
@@ -357,10 +318,11 @@ async def test_federated_clash_run_stores_multiple_model_ids(db_session):
 
 async def test_federated_clash_result_stores_cross_model_pair(db_session):
     """ClashResult.a_model_id != b_model_id → cross-model clash is first-class."""
+    from sqlalchemy import select
+
     from app.modules.clash.models import ClashResult, ClashRun
     from app.modules.projects.models import Project
     from app.modules.users.models import User
-    from sqlalchemy import select
 
     user = User(
         email=f"cross-{uuid.uuid4().hex[:8]}@test.io",
@@ -398,8 +360,8 @@ async def test_federated_clash_result_stores_cross_model_pair(db_session):
         b_name="HVAC Duct (Model B)",
         a_discipline="Structural",
         b_discipline="Mechanical",
-        a_model_id=model_a,    # ← element from model A
-        b_model_id=model_b,    # ← element from model B (cross-model)
+        a_model_id=model_a,  # ← element from model A
+        b_model_id=model_b,  # ← element from model B (cross-model)
         clash_type="hard",
         penetration_m=0.08,
         distance_m=0.0,
@@ -413,25 +375,20 @@ async def test_federated_clash_result_stores_cross_model_pair(db_session):
     await db_session.commit()
     await db_session.refresh(cross_result)
 
-    row = (
-        await db_session.execute(
-            select(ClashResult).where(ClashResult.id == cross_result.id)
-        )
-    ).scalar_one()
+    row = (await db_session.execute(select(ClashResult).where(ClashResult.id == cross_result.id))).scalar_one()
 
     assert str(row.a_model_id) == str(model_a), "a_model_id not persisted correctly"
     assert str(row.b_model_id) == str(model_b), "b_model_id not persisted correctly"
-    assert str(row.a_model_id) != str(row.b_model_id), (
-        "a_model_id and b_model_id must differ for a cross-model clash"
-    )
+    assert str(row.a_model_id) != str(row.b_model_id), "a_model_id and b_model_id must differ for a cross-model clash"
 
 
 async def test_ignore_same_model_flag_persisted(db_session):
     """ClashRun.ignore_same_model=True is persisted and readable."""
+    from sqlalchemy import select
+
     from app.modules.clash.models import ClashRun
     from app.modules.projects.models import Project
     from app.modules.users.models import User
-    from sqlalchemy import select
 
     user = User(
         email=f"ignore-{uuid.uuid4().hex[:8]}@test.io",
@@ -458,15 +415,9 @@ async def test_ignore_same_model_flag_persisted(db_session):
     await db_session.commit()
     await db_session.refresh(run)
 
-    row = (
-        await db_session.execute(
-            select(ClashRun).where(ClashRun.id == run.id)
-        )
-    ).scalar_one()
+    row = (await db_session.execute(select(ClashRun).where(ClashRun.id == run.id))).scalar_one()
 
-    assert row.ignore_same_model is True, (
-        f"ignore_same_model flag not persisted: got {row.ignore_same_model!r}"
-    )
+    assert row.ignore_same_model is True, f"ignore_same_model flag not persisted: got {row.ignore_same_model!r}"
 
 
 # ── Pure unit: CLASH_STATUSES + CLASH_SEVERITIES constants ────────────────

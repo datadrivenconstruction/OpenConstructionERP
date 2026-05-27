@@ -48,7 +48,8 @@ def local_backend(tmp_path: Path) -> LocalStorageBackend:
 
 @pytest_asyncio.fixture
 async def client(
-    local_backend: LocalStorageBackend, monkeypatch: pytest.MonkeyPatch,
+    local_backend: LocalStorageBackend,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     """Minimal FastAPI app with the uploads router mounted.
 
@@ -73,7 +74,8 @@ async def client(
 
 
 async def test_local_upload_with_valid_token_writes_blob(
-    client: AsyncClient, local_backend: LocalStorageBackend,
+    client: AsyncClient,
+    local_backend: LocalStorageBackend,
 ) -> None:
     """A valid presigned URL + 50 KiB body → blob lands at the keyed path."""
     key = "test/blob.bin"
@@ -108,10 +110,12 @@ async def test_local_upload_with_valid_token_writes_blob(
 
 
 async def test_local_upload_with_tampered_token_returns_403(
-    client: AsyncClient, local_backend: LocalStorageBackend,
+    client: AsyncClient,
+    local_backend: LocalStorageBackend,
 ) -> None:
     presigned = await local_backend.presigned_put_url(
-        key="tampered/blob.bin", expires_seconds=600,
+        key="tampered/blob.bin",
+        expires_seconds=600,
     )
     token = presigned.url.rsplit("/", 1)[-1]
     # Flip a byte inside the HMAC suffix.
@@ -133,14 +137,16 @@ async def test_local_upload_with_tampered_token_returns_403(
 
 
 async def test_local_upload_with_expired_token_returns_403(
-    client: AsyncClient, local_backend: LocalStorageBackend,
+    client: AsyncClient,
+    local_backend: LocalStorageBackend,
 ) -> None:
     """``expires_seconds=-1`` mints a token whose ``expires_at`` is already
     in the past — the verifier must reject it on the same backend that
     signed it.
     """
     presigned = await local_backend.presigned_put_url(
-        key="expired/blob.bin", expires_seconds=-1,
+        key="expired/blob.bin",
+        expires_seconds=-1,
     )
     token = presigned.url.rsplit("/", 1)[-1]
 
@@ -156,7 +162,8 @@ async def test_local_upload_with_expired_token_returns_403(
 
 
 async def test_local_upload_with_part_number_writes_part(
-    client: AsyncClient, local_backend: LocalStorageBackend,
+    client: AsyncClient,
+    local_backend: LocalStorageBackend,
 ) -> None:
     """A token carrying ``upload_id`` + ``part_number`` lands the body in
     the multipart staging dir, not at the canonical key.
@@ -178,7 +185,8 @@ async def test_local_upload_with_part_number_writes_part(
 
     chunk = b"\xab" * (4 * 1024)  # 4 KiB
     resp = await client.put(
-        f"/api/v1/uploads/local/{token}", content=chunk,
+        f"/api/v1/uploads/local/{token}",
+        content=chunk,
     )
     assert resp.status_code == 200, resp.text
     body = resp.json()
@@ -187,9 +195,7 @@ async def test_local_upload_with_part_number_writes_part(
     assert body["etag"]
 
     # The part landed in the staging dir, not at the canonical key.
-    staging_part = (
-        local_backend.base_dir / ".multipart" / session.upload_id / "part-00001"
-    )
+    staging_part = local_backend.base_dir / ".multipart" / session.upload_id / "part-00001"
     assert staging_part.is_file()
     assert staging_part.read_bytes() == chunk
     # Canonical key not yet written — that's complete_multipart's job.
@@ -200,7 +206,8 @@ async def test_local_upload_with_part_number_writes_part(
 
 
 async def test_local_upload_route_returns_400_when_s3_backend_active(
-    monkeypatch: pytest.MonkeyPatch, local_backend: LocalStorageBackend,
+    monkeypatch: pytest.MonkeyPatch,
+    local_backend: LocalStorageBackend,
 ) -> None:
     """When the active backend is anything other than LocalStorageBackend
     the route refuses with 400 — the matching S3 backend mints true
@@ -225,11 +232,7 @@ async def test_local_upload_route_returns_400_when_s3_backend_active(
         # Token shape is irrelevant — the route must short-circuit before
         # it gets verified. Use a syntactically valid token to make sure
         # we're not just catching a ValueError on the split.
-        body_b64 = (
-            base64.urlsafe_b64encode(json.dumps({"key": "x"}).encode())
-            .rstrip(b"=")
-            .decode()
-        )
+        body_b64 = base64.urlsafe_b64encode(json.dumps({"key": "x"}).encode()).rstrip(b"=").decode()
         bogus_token = f"{body_b64}.deadbeef"
         resp = await ac.put(
             f"/api/v1/uploads/local/{bogus_token}",

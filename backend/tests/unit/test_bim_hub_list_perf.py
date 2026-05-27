@@ -27,7 +27,6 @@ from app.core import storage as storage_module
 from app.core.storage import LocalStorageBackend, StorageBackend
 from app.modules.bim_hub import file_storage as bim_file_storage
 
-
 # ──────────────────────────────────────────────────────────────────────────
 # Fake counting backend — counts every method invocation so the test can
 # assert the bulk path issues *exactly one* list_prefix call and zero
@@ -90,11 +89,7 @@ class CountingStorageBackend(StorageBackend):
 
     async def list_prefix(self, prefix: str) -> list[tuple[str, int]]:
         self.calls["list_prefix"] += 1
-        return [
-            (key, len(blob))
-            for key, blob in self._blobs.items()
-            if key.startswith(prefix)
-        ]
+        return [(key, len(blob)) for key, blob in self._blobs.items() if key.startswith(prefix)]
 
 
 @pytest.fixture
@@ -108,12 +103,16 @@ def counting_backend(monkeypatch: pytest.MonkeyPatch) -> CountingStorageBackend:
     real_get = storage_module.get_storage_backend
     real_get.cache_clear()
     monkeypatch.setattr(
-        storage_module, "get_storage_backend", lambda: backend,
+        storage_module,
+        "get_storage_backend",
+        lambda: backend,
     )
     # ``bim_file_storage`` calls ``_backend()`` which itself calls
     # ``get_storage_backend()`` — make sure we patch the symbol it sees.
     monkeypatch.setattr(
-        bim_file_storage, "get_storage_backend", lambda: backend,
+        bim_file_storage,
+        "get_storage_backend",
+        lambda: backend,
     )
     yield backend
     # monkeypatch's own teardown restores the original symbol; just
@@ -172,7 +171,7 @@ async def test_bulk_summary_issues_single_list_prefix_call(
 
     # Reset call counters after the seed writes — only probes from the
     # summary call count toward the budget.
-    counting_backend.calls = {k: 0 for k in counting_backend.calls}
+    counting_backend.calls = dict.fromkeys(counting_backend.calls, 0)
 
     summary = await bim_file_storage.bulk_model_storage_summary(project_id)
 
@@ -205,16 +204,17 @@ async def test_bulk_summary_one_call_regardless_of_page_size(
     for page_size in (10, 50, 150):
         # Wipe the backend between page sizes.
         counting_backend._blobs.clear()
-        counting_backend.calls = {k: 0 for k in counting_backend.calls}
+        counting_backend.calls = dict.fromkeys(counting_backend.calls, 0)
 
         project_id = uuid.uuid4()
         for _ in range(page_size):
             mid = uuid.uuid4()
             await counting_backend.put(
-                f"bim/{project_id}/{mid}/geometry.glb", b"glb",
+                f"bim/{project_id}/{mid}/geometry.glb",
+                b"glb",
             )
         # Reset again after the put fan-out.
-        counting_backend.calls = {k: 0 for k in counting_backend.calls}
+        counting_backend.calls = dict.fromkeys(counting_backend.calls, 0)
 
         summary = await bim_file_storage.bulk_model_storage_summary(project_id)
         assert len(summary) == page_size
@@ -282,16 +282,19 @@ async def test_bulk_summary_separates_artifacts_from_originals(
     project_id = uuid.uuid4()
     model_id = uuid.uuid4()
     await counting_backend.put(
-        f"bim/{project_id}/{model_id}/geometry.glb", b"X" * 100,
+        f"bim/{project_id}/{model_id}/geometry.glb",
+        b"X" * 100,
     )
     await counting_backend.put(
-        f"bim/{project_id}/{model_id}/thumb.png", b"Y" * 30,
+        f"bim/{project_id}/{model_id}/thumb.png",
+        b"Y" * 30,
     )
     await counting_backend.put(
-        f"bim/{project_id}/{model_id}/original.ifc", b"Z" * 200,
+        f"bim/{project_id}/{model_id}/original.ifc",
+        b"Z" * 200,
     )
 
-    counting_backend.calls = {k: 0 for k in counting_backend.calls}
+    counting_backend.calls = dict.fromkeys(counting_backend.calls, 0)
     summary = await bim_file_storage.bulk_model_storage_summary(project_id)
 
     info = summary[str(model_id)]

@@ -101,7 +101,9 @@ def _get_service(session: SessionDep) -> BidManagementService:
 
 
 async def _verify_package_access(
-    session, package_id: uuid.UUID, user_id: str,
+    session,
+    package_id: uuid.UUID,
+    user_id: str,
 ) -> BidPackage:
     pkg = await session.get(BidPackage, package_id)
     if pkg is None:
@@ -111,7 +113,9 @@ async def _verify_package_access(
 
 
 async def _verify_invitation_access(
-    session, invitation_id: uuid.UUID, user_id: str,
+    session,
+    invitation_id: uuid.UUID,
+    user_id: str,
 ) -> BidInvitation:
     inv = await session.get(BidInvitation, invitation_id)
     if inv is None:
@@ -121,7 +125,9 @@ async def _verify_invitation_access(
 
 
 async def _verify_submission_access(
-    session, submission_id: uuid.UUID, user_id: str,
+    session,
+    submission_id: uuid.UUID,
+    user_id: str,
 ) -> BidSubmission:
     sub = await session.get(BidSubmission, submission_id)
     if sub is None:
@@ -131,7 +137,9 @@ async def _verify_submission_access(
 
 
 async def _verify_comparison_access(
-    session, comparison_id: uuid.UUID, user_id: str,
+    session,
+    comparison_id: uuid.UUID,
+    user_id: str,
 ) -> BidComparison:
     cmp_ = await session.get(BidComparison, comparison_id)
     if cmp_ is None:
@@ -155,9 +163,7 @@ async def list_packages(
 ) -> list[BidPackageResponse]:
     await verify_project_access(project_id, user_id, session)
     svc = BidManagementService(session)
-    rows, _total = await svc.list_packages(
-        project_id, offset=offset, limit=limit, status_filter=status_filter
-    )
+    rows, _total = await svc.list_packages(project_id, offset=offset, limit=limit, status_filter=status_filter)
     return [BidPackageResponse.model_validate(r) for r in rows]
 
 
@@ -280,9 +286,7 @@ async def award_package(
     return BidAwardResponse.model_validate(award)
 
 
-@router.get(
-    "/bid-packages/{package_id}/dashboard", response_model=BidPackageDashboard
-)
+@router.get("/bid-packages/{package_id}/dashboard", response_model=BidPackageDashboard)
 async def package_dashboard(
     package_id: uuid.UUID,
     session: SessionDep,
@@ -294,9 +298,7 @@ async def package_dashboard(
     return BidPackageDashboard(**(await svc.package_dashboard(package_id)))
 
 
-@router.get(
-    "/bid-packages/{package_id}/analytics", response_model=SubmissionAnalyticsResponse
-)
+@router.get("/bid-packages/{package_id}/analytics", response_model=SubmissionAnalyticsResponse)
 async def package_analytics(
     package_id: uuid.UUID,
     session: SessionDep,
@@ -448,9 +450,7 @@ async def bulk_create_lines(
     return [BidPackageLineItemResponse.model_validate(r) for r in rows]
 
 
-@router.patch(
-    "/bid-package-line-items/{line_id}", response_model=BidPackageLineItemResponse
-)
+@router.patch("/bid-package-line-items/{line_id}", response_model=BidPackageLineItemResponse)
 async def update_line_item(
     line_id: uuid.UUID,
     data: BidPackageLineItemUpdate,
@@ -573,9 +573,7 @@ async def list_invitations(
 ) -> list[BidInvitationResponse]:
     await _verify_package_access(session, package_id, user_id)
     svc = BidManagementService(session)
-    rows = await svc.invitation_repo.list_for_package(
-        package_id, status=status_filter
-    )
+    rows = await svc.invitation_repo.list_for_package(package_id, status=status_filter)
     return [BidInvitationResponse.model_validate(r) for r in rows]
 
 
@@ -631,9 +629,7 @@ async def resend_invitation(
     return BidInvitationResponse.model_validate(inv)
 
 
-@router.post(
-    "/invitations/{invitation_id}/mark-opened", response_model=BidInvitationResponse
-)
+@router.post("/invitations/{invitation_id}/mark-opened", response_model=BidInvitationResponse)
 async def mark_invitation_opened(
     invitation_id: uuid.UUID,
     session: SessionDep,
@@ -715,9 +711,7 @@ async def delete_submission(
     await svc.delete_submission(submission_id)
 
 
-@router.post(
-    "/submissions/{submission_id}/withdraw", response_model=BidSubmissionResponse
-)
+@router.post("/submissions/{submission_id}/withdraw", response_model=BidSubmissionResponse)
 async def withdraw_submission(
     submission_id: uuid.UUID,
     session: SessionDep,
@@ -733,9 +727,7 @@ async def withdraw_submission(
 # ── Submission lines ──────────────────────────────────────────────────────
 
 
-@router.get(
-    "/submission-lines/", response_model=list[BidSubmissionLineResponse]
-)
+@router.get("/submission-lines/", response_model=list[BidSubmissionLineResponse])
 async def list_submission_lines(
     session: SessionDep,
     user_id: CurrentUserId,
@@ -748,9 +740,7 @@ async def list_submission_lines(
     return [BidSubmissionLineResponse.model_validate(r) for r in rows]
 
 
-@router.post(
-    "/submission-lines/", response_model=BidSubmissionLineResponse, status_code=201
-)
+@router.post("/submission-lines/", response_model=BidSubmissionLineResponse, status_code=201)
 async def create_submission_line(
     data: BidSubmissionLineCreate,
     session: SessionDep,
@@ -780,9 +770,7 @@ async def bulk_create_submission_lines(
     return [BidSubmissionLineResponse.model_validate(r) for r in rows]
 
 
-@router.patch(
-    "/submission-lines/{line_id}", response_model=BidSubmissionLineResponse
-)
+@router.patch("/submission-lines/{line_id}", response_model=BidSubmissionLineResponse)
 async def update_submission_line(
     line_id: uuid.UUID,
     data: BidSubmissionLineUpdate,
@@ -1057,9 +1045,7 @@ async def delete_rejection(
     await svc.delete_rejection(rejection_id)
 
 
-@router.post(
-    "/rejections/{rejection_id}/notify", response_model=BidRejectionResponse
-)
+@router.post("/rejections/{rejection_id}/notify", response_model=BidRejectionResponse)
 async def notify_rejection(
     rejection_id: uuid.UUID,
     session: SessionDep,

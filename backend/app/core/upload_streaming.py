@@ -30,6 +30,7 @@ The context manager removes the temp file on exit IF it still exists
 moves the file out from under us, which is fine — ``unlink`` no-ops on
 a missing path.
 """
+
 from __future__ import annotations
 
 import contextlib

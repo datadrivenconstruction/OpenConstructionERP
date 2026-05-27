@@ -507,8 +507,7 @@ def _build_cover_page(
             Paragraph(
                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Prepared by: "
-                + html.escape(prepared_by, quote=True),
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Prepared by: " + html.escape(prepared_by, quote=True),
                 styles["subtitle"],
             )
         )
@@ -1108,11 +1107,7 @@ def generate_boq_pdf_simple(
             break
 
     net_total_d = Decimal(str(boq_data.net_total))
-    vat_amount = (
-        net_total_d * Decimal(str(vat_rate)) / Decimal("100")
-        if vat_rate > 0
-        else Decimal("0")
-    )
+    vat_amount = net_total_d * Decimal(str(vat_rate)) / Decimal("100") if vat_rate > 0 else Decimal("0")
     gross_total = net_total_d + vat_amount
 
     cost_rows.append(

@@ -531,15 +531,11 @@ async def test_per_resource_mixed_variant_default_and_plain(
     assert resources[1]["variant_snapshot"]["source"] == "default_mean"
     assert resources[1]["variant_snapshot"]["label"] == "average"
     assert resources[1]["variant_snapshot"]["rate"] == 1.40
-    assert "variant_snapshot" not in resources[2], (
-        "Plain resource should not carry a snapshot"
-    )
+    assert "variant_snapshot" not in resources[2], "Plain resource should not carry a snapshot"
 
 
 @pytest.mark.asyncio
-async def test_per_resource_snapshot_is_idempotent(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_per_resource_snapshot_is_idempotent(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """A no-op metadata patch must preserve each resource's captured_at."""
     client, auth = shared_client, shared_auth
     project_id = await _create_project(client, auth)
@@ -948,9 +944,7 @@ async def test_repick_endpoint_rejects_resource_without_cached_variants(
 
 
 @pytest.mark.asyncio
-async def test_repick_endpoint_unauthorized(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_repick_endpoint_unauthorized(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """Unauthorised callers (no Bearer token) are rejected with 401/403."""
     client, auth = shared_client, shared_auth
     project_id = await _create_project(client, auth)

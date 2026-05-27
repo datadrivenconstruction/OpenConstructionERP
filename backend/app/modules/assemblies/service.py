@@ -42,6 +42,7 @@ async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
     except Exception:
         _logger_ev.debug("Event publish skipped: %s", name)
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -480,10 +481,7 @@ class AssemblyService:
 
                 project_repo = ProjectRepository(self.session)
                 target_project = await project_repo.get_by_id(new_pid)
-                if (
-                    target_project is None
-                    or str(getattr(target_project, "owner_id", "")) != str(caller_user_id)
-                ):
+                if target_project is None or str(getattr(target_project, "owner_id", "")) != str(caller_user_id):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail=translate("errors.project_not_found", locale=get_locale()),
@@ -854,11 +852,7 @@ class AssemblyService:
             project = None
             project_currency = ""
 
-        if (
-            asm_currency
-            and project_currency
-            and asm_currency != project_currency
-        ):
+        if asm_currency and project_currency and asm_currency != project_currency:
             # Project ``fx_rates`` projected to {CODE: "<base units per 1
             # unit of foreign currency>"} — same convention the BOQ
             # resource rollup uses, so foreign→base is multiplication.
@@ -983,9 +977,7 @@ class AssemblyService:
             res_type = comp.resource_type or _infer_legacy(comp.description or "")
             comp_total = _str_to_float(comp.total) * fx_mult_f
             try:
-                breakdown_totals[res_type] = breakdown_totals.get(
-                    res_type, Decimal("0")
-                ) + Decimal(str(comp_total))
+                breakdown_totals[res_type] = breakdown_totals.get(res_type, Decimal("0")) + Decimal(str(comp_total))
             except (InvalidOperation, ValueError):
                 pass
 
@@ -1034,9 +1026,7 @@ class AssemblyService:
                 # When converted, the position now holds project-currency
                 # values, so its currency IS the project currency. When
                 # not converted it stays in the assembly's own currency.
-                "currency": (
-                    project_currency if currency_converted else assembly.currency
-                ),
+                "currency": (project_currency if currency_converted else assembly.currency),
                 "resources": resources,
                 # Standard key the BOQ UI reads to render the M/L/E
                 # mini-badge — see ``backend/app/modules/boq/models.py``
@@ -1046,16 +1036,8 @@ class AssemblyService:
                 # assembly currency differed from the project's — a
                 # ``currency_converted`` record (FX applied) or a
                 # non-blocking ``currency_mismatch`` flag (Issue #128).
-                **(
-                    {"currency_converted": currency_converted}
-                    if currency_converted
-                    else {}
-                ),
-                **(
-                    {"currency_mismatch": currency_warning}
-                    if currency_warning
-                    else {}
-                ),
+                **({"currency_converted": currency_converted} if currency_converted else {}),
+                **({"currency_mismatch": currency_warning} if currency_warning else {}),
             },
         )
 
@@ -1224,7 +1206,9 @@ class AssemblyService:
     # ── Reorder ──────────────────────────────────────────────────────────
 
     async def reorder_components(
-        self, assembly_id: uuid.UUID, component_ids: list[uuid.UUID],
+        self,
+        assembly_id: uuid.UUID,
+        component_ids: list[uuid.UUID],
     ) -> None:
         """Reorder components within an assembly.
 
@@ -1254,7 +1238,9 @@ class AssemblyService:
             await self.component_repo.update_fields(cid, sort_order=idx)
 
         logger.info(
-            "Reordered %d components in assembly %s", len(component_ids), assembly_id,
+            "Reordered %d components in assembly %s",
+            len(component_ids),
+            assembly_id,
         )
 
     # ── Export / Import ──────────────────────────────────────────────────
@@ -1279,16 +1265,18 @@ class AssemblyService:
 
         export_components = []
         for comp in components:
-            export_components.append({
-                "description": comp.description,
-                "resource_type": comp.resource_type,
-                "factor": _str_to_float(comp.factor),
-                "quantity": _str_to_float(comp.quantity),
-                "unit": comp.unit,
-                "unit_cost": _str_to_float(comp.unit_cost),
-                "sort_order": comp.sort_order,
-                "metadata": dict(comp.metadata_) if comp.metadata_ else {},
-            })
+            export_components.append(
+                {
+                    "description": comp.description,
+                    "resource_type": comp.resource_type,
+                    "factor": _str_to_float(comp.factor),
+                    "quantity": _str_to_float(comp.quantity),
+                    "unit": comp.unit,
+                    "unit_cost": _str_to_float(comp.unit_cost),
+                    "sort_order": comp.sort_order,
+                    "metadata": dict(comp.metadata_) if comp.metadata_ else {},
+                }
+            )
 
         return {
             "code": assembly.code,
@@ -1305,7 +1293,9 @@ class AssemblyService:
         }
 
     async def import_assembly(
-        self, data: AssemblyExport, owner_id: str | None = None,
+        self,
+        data: AssemblyExport,
+        owner_id: str | None = None,
     ) -> Assembly:
         """Import an assembly from an exported JSON payload.
 
@@ -1332,24 +1322,12 @@ class AssemblyService:
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                     detail=f"components[{idx}]: expected an object",
                 )
-            factor_dec = _parse_import_decimal(
-                comp_data.get("factor", 1.0), "factor", idx
-            )
-            quantity_dec = _parse_import_decimal(
-                comp_data.get("quantity", 1.0), "quantity", idx
-            )
-            unit_cost_dec = _parse_import_decimal(
-                comp_data.get("unit_cost", 0.0), "unit_cost", idx
-            )
+            factor_dec = _parse_import_decimal(comp_data.get("factor", 1.0), "factor", idx)
+            quantity_dec = _parse_import_decimal(comp_data.get("quantity", 1.0), "quantity", idx)
+            unit_cost_dec = _parse_import_decimal(comp_data.get("unit_cost", 0.0), "unit_cost", idx)
             res_type_raw = comp_data.get("resource_type")
-            res_type = (
-                str(res_type_raw).lower()
-                if isinstance(res_type_raw, str) and res_type_raw
-                else None
-            )
-            comp_meta = comp_data.get("metadata") if isinstance(
-                comp_data.get("metadata"), dict
-            ) else {}
+            res_type = str(res_type_raw).lower() if isinstance(res_type_raw, str) and res_type_raw else None
+            comp_meta = comp_data.get("metadata") if isinstance(comp_data.get("metadata"), dict) else {}
             sort_raw = comp_data.get("sort_order", idx)
             parsed_components.append(
                 {
@@ -1449,7 +1427,9 @@ class AssemblyService:
     # ── Tags ─────────────────────────────────────────────────────────────
 
     async def update_tags(
-        self, assembly_id: uuid.UUID, tags: list[str],
+        self,
+        assembly_id: uuid.UUID,
+        tags: list[str],
     ) -> Assembly:
         """Update tags on an assembly.
 
@@ -1483,7 +1463,8 @@ class AssemblyService:
     # ── Usage counts ─────────────────────────────────────────────────────
 
     async def get_usage_counts(
-        self, assembly_ids: list[uuid.UUID],
+        self,
+        assembly_ids: list[uuid.UUID],
     ) -> dict[str, int]:
         """Get BOQ position usage counts for a list of assemblies.
 

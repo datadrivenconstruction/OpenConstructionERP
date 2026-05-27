@@ -30,7 +30,6 @@ from app.modules.match_elements.sources.text_adapter import (
     _coerce_text_input,
 )
 
-
 # ── Helpers ─────────────────────────────────────────────────────────────
 
 
@@ -99,18 +98,20 @@ class TestCoerceTextInput:
 class TestTextAdapter:
     def test_no_session_returns_empty(self):
         adapter = TextAdapter(session=None, match_session=None)
-        assert _run(adapter.list_attribute_keys(PROJECT_ID)) == [
-            "category", "ifc_class", "raw_text"
-        ]
+        assert _run(adapter.list_attribute_keys(PROJECT_ID)) == ["category", "ifc_class", "raw_text"]
         assert _run(adapter.list_categories(PROJECT_ID)) == []
         assert _run(adapter.iter_elements(project_id=PROJECT_ID)) == []
 
     def test_iter_elements_plain_strings(self):
-        sess = _fake_session({"text_inputs": [
-            "Stahlbetonwand C30/37, d=240mm",
-            "ленточный фундамент 800x600",
-            "concrete slab 200mm",
-        ]})
+        sess = _fake_session(
+            {
+                "text_inputs": [
+                    "Stahlbetonwand C30/37, d=240mm",
+                    "ленточный фундамент 800x600",
+                    "concrete slab 200mm",
+                ]
+            }
+        )
         adapter = TextAdapter(session=None, match_session=sess)
         elements = _run(adapter.iter_elements(project_id=PROJECT_ID))
         assert len(elements) == 3
@@ -121,10 +122,14 @@ class TestTextAdapter:
         assert all(e.quantities == {"count": 1.0} for e in elements)
 
     def test_iter_elements_with_dict_inputs(self):
-        sess = _fake_session({"text_inputs": [
-            {"raw_text": "wall", "project_country": "DE", "category": "Wall"},
-            {"text": "slab", "category": "Floor"},
-        ]})
+        sess = _fake_session(
+            {
+                "text_inputs": [
+                    {"raw_text": "wall", "project_country": "DE", "category": "Wall"},
+                    {"text": "slab", "category": "Floor"},
+                ]
+            }
+        )
         adapter = TextAdapter(session=None, match_session=sess)
         elements = _run(adapter.iter_elements(project_id=PROJECT_ID))
         assert len(elements) == 2
@@ -140,38 +145,54 @@ class TestTextAdapter:
         assert elements[0].attributes["raw_text"] == "valid"
 
     def test_excluded_categories_filter(self):
-        sess = _fake_session({"text_inputs": [
-            {"raw_text": "wall", "category": "Wall"},
-            {"raw_text": "floor", "category": "Floor"},
-        ]})
+        sess = _fake_session(
+            {
+                "text_inputs": [
+                    {"raw_text": "wall", "category": "Wall"},
+                    {"raw_text": "floor", "category": "Floor"},
+                ]
+            }
+        )
         adapter = TextAdapter(session=None, match_session=sess)
-        elements = _run(adapter.iter_elements(
-            project_id=PROJECT_ID,
-            excluded_categories=["Floor"],
-        ))
+        elements = _run(
+            adapter.iter_elements(
+                project_id=PROJECT_ID,
+                excluded_categories=["Floor"],
+            )
+        )
         assert len(elements) == 1
         assert elements[0].category == "Wall"
 
     def test_filters_attribute_match(self):
-        sess = _fake_session({"text_inputs": [
-            {"raw_text": "wall A", "category": "Wall", "project_country": "DE"},
-            {"raw_text": "wall B", "category": "Wall", "project_country": "BR"},
-        ]})
+        sess = _fake_session(
+            {
+                "text_inputs": [
+                    {"raw_text": "wall A", "category": "Wall", "project_country": "DE"},
+                    {"raw_text": "wall B", "category": "Wall", "project_country": "BR"},
+                ]
+            }
+        )
         adapter = TextAdapter(session=None, match_session=sess)
-        elements = _run(adapter.iter_elements(
-            project_id=PROJECT_ID,
-            filters={"project_country": ["DE"]},
-        ))
+        elements = _run(
+            adapter.iter_elements(
+                project_id=PROJECT_ID,
+                filters={"project_country": ["DE"]},
+            )
+        )
         assert len(elements) == 1
         assert elements[0].attributes["project_country"] == "DE"
 
     def test_list_categories_groups_correctly(self):
-        sess = _fake_session({"text_inputs": [
-            {"raw_text": "a", "category": "Wall"},
-            {"raw_text": "b", "category": "Wall"},
-            {"raw_text": "c", "category": "Floor"},
-            {"raw_text": "d"},  # defaults to "Text"
-        ]})
+        sess = _fake_session(
+            {
+                "text_inputs": [
+                    {"raw_text": "a", "category": "Wall"},
+                    {"raw_text": "b", "category": "Wall"},
+                    {"raw_text": "c", "category": "Floor"},
+                    {"raw_text": "d"},  # defaults to "Text"
+                ]
+            }
+        )
         adapter = TextAdapter(session=None, match_session=sess)
         cats = _run(adapter.list_categories(PROJECT_ID))
         assert dict(cats) == {"Wall": 2, "Floor": 1, "Text": 1}
@@ -266,10 +287,14 @@ class TestBoqAdapter:
         assert _run(adapter.list_categories(PROJECT_ID)) == []
 
     def test_iter_elements_basic(self):
-        sess = _fake_session({"boq_rows": [
-            {"description": "Concrete wall C30/37", "qty": 25.0, "unit": "m3"},
-            {"description": "Plaster work", "qty": 100, "unit": "m2"},
-        ]})
+        sess = _fake_session(
+            {
+                "boq_rows": [
+                    {"description": "Concrete wall C30/37", "qty": 25.0, "unit": "m3"},
+                    {"description": "Plaster work", "qty": 100, "unit": "m2"},
+                ]
+            }
+        )
         adapter = BoqAdapter(session=None, match_session=sess)
         elements = _run(adapter.iter_elements(project_id=PROJECT_ID))
         assert len(elements) == 2
@@ -278,11 +303,15 @@ class TestBoqAdapter:
         assert elements[0].attributes["description"] == "Concrete wall C30/37"
 
     def test_exact_code_shortcut(self):
-        sess = _fake_session({"boq_rows": [
-            {"description": "Wall", "qty": 5, "unit": "m3", "code": "FER46-001-1"},
-            {"description": "Slab", "qty": 10, "unit": "m3", "rate_code": "FER46-002"},
-            {"description": "No code", "qty": 1, "unit": "m"},
-        ]})
+        sess = _fake_session(
+            {
+                "boq_rows": [
+                    {"description": "Wall", "qty": 5, "unit": "m3", "code": "FER46-001-1"},
+                    {"description": "Slab", "qty": 10, "unit": "m3", "rate_code": "FER46-002"},
+                    {"description": "No code", "qty": 1, "unit": "m"},
+                ]
+            }
+        )
         adapter = BoqAdapter(session=None, match_session=sess)
         elements = _run(adapter.iter_elements(project_id=PROJECT_ID))
         assert elements[0].attributes["exact_code"] == "FER46-001-1"
@@ -290,53 +319,77 @@ class TestBoqAdapter:
         assert "exact_code" not in elements[2].attributes
 
     def test_category_grouping(self):
-        sess = _fake_session({"boq_rows": [
-            {"description": "a", "qty": 1, "unit": "m", "category": "Walls"},
-            {"description": "b", "qty": 1, "unit": "m", "section": "Floors"},
-            {"description": "c", "qty": 1, "unit": "m"},  # default → "BoQ"
-        ]})
+        sess = _fake_session(
+            {
+                "boq_rows": [
+                    {"description": "a", "qty": 1, "unit": "m", "category": "Walls"},
+                    {"description": "b", "qty": 1, "unit": "m", "section": "Floors"},
+                    {"description": "c", "qty": 1, "unit": "m"},  # default → "BoQ"
+                ]
+            }
+        )
         adapter = BoqAdapter(session=None, match_session=sess)
         cats = dict(_run(adapter.list_categories(PROJECT_ID)))
         assert cats == {"Walls": 1, "Floors": 1, "BoQ": 1}
 
     def test_filters_apply(self):
-        sess = _fake_session({"boq_rows": [
-            {"description": "DE row", "qty": 1, "unit": "m", "source_lang": "de"},
-            {"description": "RU row", "qty": 1, "unit": "m", "source_lang": "ru"},
-        ]})
+        sess = _fake_session(
+            {
+                "boq_rows": [
+                    {"description": "DE row", "qty": 1, "unit": "m", "source_lang": "de"},
+                    {"description": "RU row", "qty": 1, "unit": "m", "source_lang": "ru"},
+                ]
+            }
+        )
         adapter = BoqAdapter(session=None, match_session=sess)
-        elements = _run(adapter.iter_elements(
-            project_id=PROJECT_ID,
-            filters={"source_lang": ["de"]},
-        ))
+        elements = _run(
+            adapter.iter_elements(
+                project_id=PROJECT_ID,
+                filters={"source_lang": ["de"]},
+            )
+        )
         assert len(elements) == 1
         assert elements[0].attributes["source_lang"] == "de"
 
     def test_excluded_categories(self):
-        sess = _fake_session({"boq_rows": [
-            {"description": "Keep", "qty": 1, "unit": "m", "category": "Walls"},
-            {"description": "Drop", "qty": 1, "unit": "m", "category": "Site"},
-        ]})
+        sess = _fake_session(
+            {
+                "boq_rows": [
+                    {"description": "Keep", "qty": 1, "unit": "m", "category": "Walls"},
+                    {"description": "Drop", "qty": 1, "unit": "m", "category": "Site"},
+                ]
+            }
+        )
         adapter = BoqAdapter(session=None, match_session=sess)
-        elements = _run(adapter.iter_elements(
-            project_id=PROJECT_ID,
-            excluded_categories=["Site"],
-        ))
+        elements = _run(
+            adapter.iter_elements(
+                project_id=PROJECT_ID,
+                excluded_categories=["Site"],
+            )
+        )
         assert len(elements) == 1
         assert elements[0].attributes["description"] == "Keep"
 
     def test_string_qty_with_decimal_comma(self):
-        sess = _fake_session({"boq_rows": [
-            {"description": "Comma decimal", "qty": "12,5", "unit": "m3"},
-        ]})
+        sess = _fake_session(
+            {
+                "boq_rows": [
+                    {"description": "Comma decimal", "qty": "12,5", "unit": "m3"},
+                ]
+            }
+        )
         adapter = BoqAdapter(session=None, match_session=sess)
         elements = _run(adapter.iter_elements(project_id=PROJECT_ID))
         assert elements[0].quantities["volume_m3"] == 12.5
 
     def test_list_attribute_keys_drops_qty(self):
-        sess = _fake_session({"boq_rows": [
-            {"description": "x", "qty": 1, "unit": "m3", "supplier": "Acme"},
-        ]})
+        sess = _fake_session(
+            {
+                "boq_rows": [
+                    {"description": "x", "qty": 1, "unit": "m3", "supplier": "Acme"},
+                ]
+            }
+        )
         adapter = BoqAdapter(session=None, match_session=sess)
         keys = _run(adapter.list_attribute_keys(PROJECT_ID))
         # qty/quantity must not appear — they're quantities, not group-by.
@@ -348,12 +401,16 @@ class TestBoqAdapter:
         assert "unit" in keys
 
     def test_malformed_rows_are_skipped(self):
-        sess = _fake_session({"boq_rows": [
-            {"description": "good", "qty": 1, "unit": "m3"},
-            "not-a-dict",
-            None,
-            42,
-        ]})
+        sess = _fake_session(
+            {
+                "boq_rows": [
+                    {"description": "good", "qty": 1, "unit": "m3"},
+                    "not-a-dict",
+                    None,
+                    42,
+                ]
+            }
+        )
         adapter = BoqAdapter(session=None, match_session=sess)
         elements = _run(adapter.iter_elements(project_id=PROJECT_ID))
         assert len(elements) == 1
@@ -365,10 +422,14 @@ class TestBoqAdapter:
         # and eliminated every CWICR candidate row (see
         # ``match_elements_three_filter_bugs`` memory). Verify the
         # synthetic label is no longer mirrored.
-        sess = _fake_session({"boq_rows": [
-            {"description": "x", "qty": 1, "unit": "m3", "category": "Wall"},
-            {"description": "y", "qty": 1, "unit": "m3"},  # default "BoQ" cat
-        ]})
+        sess = _fake_session(
+            {
+                "boq_rows": [
+                    {"description": "x", "qty": 1, "unit": "m3", "category": "Wall"},
+                    {"description": "y", "qty": 1, "unit": "m3"},  # default "BoQ" cat
+                ]
+            }
+        )
         adapter = BoqAdapter(session=None, match_session=sess)
         elements = _run(adapter.iter_elements(project_id=PROJECT_ID))
         # category still surfaces verbatim — it just doesn't masquerade
@@ -383,27 +444,31 @@ class TestBoqAdapter:
         # estimator exported a pre-classified BoQ from a BIM tool), the
         # adapter MUST forward it so the downstream Qdrant filter narrows
         # to the right element family.
-        sess = _fake_session({"boq_rows": [
+        sess = _fake_session(
             {
-                "description": "Cast-in-place concrete wall",
-                "qty": 25,
-                "unit": "m3",
-                "ifc_class": "IfcWall",
-            },
-            {
-                "description": "Pre-cast slab",
-                "qty": 100,
-                "unit": "m2",
-                "ifc_class": "IfcSlab",
-                "category": "Floors",
-            },
-            {
-                "description": "garbage value should be rejected",
-                "qty": 1,
-                "unit": "m",
-                "ifc_class": "BoQ",  # not Ifc-prefixed → rejected
-            },
-        ]})
+                "boq_rows": [
+                    {
+                        "description": "Cast-in-place concrete wall",
+                        "qty": 25,
+                        "unit": "m3",
+                        "ifc_class": "IfcWall",
+                    },
+                    {
+                        "description": "Pre-cast slab",
+                        "qty": 100,
+                        "unit": "m2",
+                        "ifc_class": "IfcSlab",
+                        "category": "Floors",
+                    },
+                    {
+                        "description": "garbage value should be rejected",
+                        "qty": 1,
+                        "unit": "m",
+                        "ifc_class": "BoQ",  # not Ifc-prefixed → rejected
+                    },
+                ]
+            }
+        )
         adapter = BoqAdapter(session=None, match_session=sess)
         elements = _run(adapter.iter_elements(project_id=PROJECT_ID))
         assert elements[0].attributes["ifc_class"] == "IfcWall"

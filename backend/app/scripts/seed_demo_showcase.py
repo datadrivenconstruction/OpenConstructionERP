@@ -22,6 +22,7 @@ Usage:
 Assumes the backend is running on http://localhost:8000 and that an admin
 user already exists (or will be registered). Safe to re-run.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -48,9 +49,7 @@ ADMIN_PASSWORD = "OpenEstimate2026"
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 _default_cad = REPO_ROOT / "data" / "cad2data" / "Sample_Projects" / "test"
-CAD_SOURCE_DIR = pathlib.Path(
-    os.environ.get("OE_CAD_SAMPLES_DIR", str(_default_cad))
-)
+CAD_SOURCE_DIR = pathlib.Path(os.environ.get("OE_CAD_SAMPLES_DIR", str(_default_cad)))
 BIM_DATA_DIR = REPO_ROOT / "backend" / "data" / "bim"
 
 # Upload poll settings
@@ -97,19 +96,19 @@ DEMO_PROJECTS = [
         ],
         "positions": [
             # (section_index, ordinal, description, unit, qty, rate)
-            (0, "310.001", "Aushub Baugrube für Bodenplatte, inkl. Abtransport",  "m3",  185.0, 42.50),
-            (1, "320.001", "Stahlbeton-Bodenplatte C25/30 d=25 cm, bewehrt",      "m3",   48.5, 385.00),
-            (1, "320.002", "Sauberkeitsschicht C12/15 d=5 cm",                     "m2",  194.0,  18.50),
-            (2, "330.001", "Außenwand Stahlbeton C30/37 d=24 cm, Sichtbeton",      "m3",   34.2, 520.00),
-            (2, "330.002", "WDVS Mineralwolle d=16 cm, silikonharzgebunden",       "m2",  285.0,  62.00),
-            (2, "330.003", "Kunststofffenster Dreifachverglasung, Uw 0,9",          "m2",   42.5, 780.00),
-            (3, "340.001", "Trockenbauwand GKB d=12,5 mm doppelt beplankt",         "m2",  168.0,  58.00),
-            (3, "340.002", "Kalksandstein-Wand KS-XL d=17,5 cm",                    "m2",   92.0,  74.00),
-            (4, "350.001", "Stahlbetondecke d=20 cm, bewehrt, inkl. Schalung",      "m2",  420.0, 105.00),
-            (4, "350.002", "Trittschalldämmung d=3 cm + Zementestrich d=5 cm",      "m2",  420.0,  48.00),
-            (5, "360.001", "Flachdach Aufbau Warmdach, Gefälle 2%",                 "m2",  220.0, 145.00),
-            (5, "360.002", "Dachabdichtung EPDM 1,5 mm, 2-lagig",                   "m2",  220.0,  72.00),
-            (6, "370.001", "Innentüren Röhrenspan furniert, Zarge",                 "pcs",  24.0, 385.00),
+            (0, "310.001", "Aushub Baugrube für Bodenplatte, inkl. Abtransport", "m3", 185.0, 42.50),
+            (1, "320.001", "Stahlbeton-Bodenplatte C25/30 d=25 cm, bewehrt", "m3", 48.5, 385.00),
+            (1, "320.002", "Sauberkeitsschicht C12/15 d=5 cm", "m2", 194.0, 18.50),
+            (2, "330.001", "Außenwand Stahlbeton C30/37 d=24 cm, Sichtbeton", "m3", 34.2, 520.00),
+            (2, "330.002", "WDVS Mineralwolle d=16 cm, silikonharzgebunden", "m2", 285.0, 62.00),
+            (2, "330.003", "Kunststofffenster Dreifachverglasung, Uw 0,9", "m2", 42.5, 780.00),
+            (3, "340.001", "Trockenbauwand GKB d=12,5 mm doppelt beplankt", "m2", 168.0, 58.00),
+            (3, "340.002", "Kalksandstein-Wand KS-XL d=17,5 cm", "m2", 92.0, 74.00),
+            (4, "350.001", "Stahlbetondecke d=20 cm, bewehrt, inkl. Schalung", "m2", 420.0, 105.00),
+            (4, "350.002", "Trittschalldämmung d=3 cm + Zementestrich d=5 cm", "m2", 420.0, 48.00),
+            (5, "360.001", "Flachdach Aufbau Warmdach, Gefälle 2%", "m2", 220.0, 145.00),
+            (5, "360.002", "Dachabdichtung EPDM 1,5 mm, 2-lagig", "m2", 220.0, 72.00),
+            (6, "370.001", "Innentüren Röhrenspan furniert, Zarge", "pcs", 24.0, 385.00),
         ],
     },
     {
@@ -148,20 +147,20 @@ DEMO_PROJECTS = [
             ("09", "Division 09 — Finishes"),
         ],
         "positions": [
-            (0, "03 30 00.01", "Cast-in-place concrete slab, 6\" thick, 4000 psi",     "sf",  4200.0,  14.50),
-            (0, "03 30 00.02", "Concrete foundation wall, 12\" thick, rebar #5 @12\"", "cy",    62.0, 485.00),
-            (0, "03 31 00.01", "Structural concrete columns, 18\"x18\", 5000 psi",      "cy",    18.5, 625.00),
-            (1, "04 22 00.01", "CMU wall, 8\" nominal, reinforced, grouted",            "sf",  2800.0,  12.75),
-            (2, "05 12 00.01", "Structural steel beams, W14x22, shop-primed",           "ton",    24.2, 3850.00),
-            (2, "05 12 00.02", "Structural steel columns, W12x65, base plates",         "ton",    12.8, 4200.00),
-            (2, "05 31 00.01", "Steel floor deck, 3\" composite, 18 gauge",             "sf",  3900.0,   4.85),
-            (3, "06 10 00.01", "Wood framing, interior stud walls 2x6 @16\"",           "sf",  1650.0,   8.25),
-            (4, "08 11 13.01", "Hollow metal doors 3'-0\" x 7'-0\", 18 gauge",           "ea",     22.0, 685.00),
-            (4, "08 50 00.01", "Aluminum curtain wall, thermally broken, 1\" IG",        "sf",  1450.0, 125.00),
-            (4, "08 50 00.02", "Storefront glazing, single door + sidelight",            "ea",      6.0, 4850.00),
-            (5, "09 29 00.01", "Gypsum board, 5/8\" Type X, taped & finished",            "sf",  6800.0,   4.20),
-            (5, "09 68 00.01", "Carpet tile, nylon, glue-down installation",              "sf",  4200.0,   6.95),
-            (5, "09 91 23.01", "Interior paint, eggshell, 2 coats on primed GWB",         "sf",  6800.0,   1.85),
+            (0, "03 30 00.01", 'Cast-in-place concrete slab, 6" thick, 4000 psi', "sf", 4200.0, 14.50),
+            (0, "03 30 00.02", 'Concrete foundation wall, 12" thick, rebar #5 @12"', "cy", 62.0, 485.00),
+            (0, "03 31 00.01", 'Structural concrete columns, 18"x18", 5000 psi', "cy", 18.5, 625.00),
+            (1, "04 22 00.01", 'CMU wall, 8" nominal, reinforced, grouted', "sf", 2800.0, 12.75),
+            (2, "05 12 00.01", "Structural steel beams, W14x22, shop-primed", "ton", 24.2, 3850.00),
+            (2, "05 12 00.02", "Structural steel columns, W12x65, base plates", "ton", 12.8, 4200.00),
+            (2, "05 31 00.01", 'Steel floor deck, 3" composite, 18 gauge', "sf", 3900.0, 4.85),
+            (3, "06 10 00.01", 'Wood framing, interior stud walls 2x6 @16"', "sf", 1650.0, 8.25),
+            (4, "08 11 13.01", "Hollow metal doors 3'-0\" x 7'-0\", 18 gauge", "ea", 22.0, 685.00),
+            (4, "08 50 00.01", 'Aluminum curtain wall, thermally broken, 1" IG', "sf", 1450.0, 125.00),
+            (4, "08 50 00.02", "Storefront glazing, single door + sidelight", "ea", 6.0, 4850.00),
+            (5, "09 29 00.01", 'Gypsum board, 5/8" Type X, taped & finished', "sf", 6800.0, 4.20),
+            (5, "09 68 00.01", "Carpet tile, nylon, glue-down installation", "sf", 4200.0, 6.95),
+            (5, "09 91 23.01", "Interior paint, eggshell, 2 coats on primed GWB", "sf", 6800.0, 1.85),
         ],
     },
     {
@@ -199,27 +198,28 @@ DEMO_PROJECTS = [
             ("06", "Capítulo 06 — Urbanización"),
         ],
         "positions": [
-            (0, "01.001", "Excavación a cielo abierto en terreno compacto",          "m3",  620.0,  9.80),
-            (0, "01.002", "Relleno y compactación con material seleccionado",         "m3",  380.0, 15.40),
-            (1, "02.001", "Sub-base granular ZA-25, e=20 cm, compactada",              "m2",  580.0, 12.20),
-            (1, "02.002", "Mezcla bituminosa AC16 surf D, e=5 cm",                     "m2",  580.0, 18.50),
-            (1, "02.003", "Bordillo prefabricado de hormigón 15x25 cm",                "m",   420.0, 16.80),
-            (2, "03.001", "Hormigón armado HA-30 en pilares, incluido encofrado",      "m3",   28.4, 285.00),
-            (2, "03.002", "Forjado reticular canto 30 cm, incluida armadura",          "m2",  340.0,  98.00),
-            (3, "04.001", "Fábrica de ladrillo perforado de 1/2 pie, mortero M-7,5",   "m2",  285.0,  52.00),
-            (3, "04.002", "Aislamiento XPS e=8 cm en cerramiento exterior",            "m2",  285.0,  18.50),
-            (3, "04.003", "Ventana aluminio lacado RPT, vidrio bajo emisivo",          "m2",   48.0, 320.00),
-            (4, "05.001", "Alicatado cerámico en baños, 20x20 cm",                     "m2",   96.0,  38.50),
-            (4, "05.002", "Pavimento de baldosa de gres porcelánico 60x60",            "m2",  310.0,  42.00),
-            (4, "05.003", "Pintura plástica lisa sobre enlucido, 2 manos",              "m2",  720.0,   8.20),
-            (5, "06.001", "Farola viaria LED 40 W, columna 6 m, cimentación",           "ea",    12.0, 685.00),
-            (5, "06.002", "Jardinería: pradera y arbolado de alineación",               "m2",  240.0,  22.00),
+            (0, "01.001", "Excavación a cielo abierto en terreno compacto", "m3", 620.0, 9.80),
+            (0, "01.002", "Relleno y compactación con material seleccionado", "m3", 380.0, 15.40),
+            (1, "02.001", "Sub-base granular ZA-25, e=20 cm, compactada", "m2", 580.0, 12.20),
+            (1, "02.002", "Mezcla bituminosa AC16 surf D, e=5 cm", "m2", 580.0, 18.50),
+            (1, "02.003", "Bordillo prefabricado de hormigón 15x25 cm", "m", 420.0, 16.80),
+            (2, "03.001", "Hormigón armado HA-30 en pilares, incluido encofrado", "m3", 28.4, 285.00),
+            (2, "03.002", "Forjado reticular canto 30 cm, incluida armadura", "m2", 340.0, 98.00),
+            (3, "04.001", "Fábrica de ladrillo perforado de 1/2 pie, mortero M-7,5", "m2", 285.0, 52.00),
+            (3, "04.002", "Aislamiento XPS e=8 cm en cerramiento exterior", "m2", 285.0, 18.50),
+            (3, "04.003", "Ventana aluminio lacado RPT, vidrio bajo emisivo", "m2", 48.0, 320.00),
+            (4, "05.001", "Alicatado cerámico en baños, 20x20 cm", "m2", 96.0, 38.50),
+            (4, "05.002", "Pavimento de baldosa de gres porcelánico 60x60", "m2", 310.0, 42.00),
+            (4, "05.003", "Pintura plástica lisa sobre enlucido, 2 manos", "m2", 720.0, 8.20),
+            (5, "06.001", "Farola viaria LED 40 W, columna 6 m, cimentación", "ea", 12.0, 685.00),
+            (5, "06.002", "Jardinería: pradera y arbolado de alineación", "m2", 240.0, 22.00),
         ],
     },
 ]
 
 
 # ── HTTP helpers ───────────────────────────────────────────────────────────
+
 
 async def login_or_register(client: httpx.AsyncClient) -> dict[str, str]:
     """‌⁠‍Return auth headers; register the admin if login fails."""
@@ -310,7 +310,9 @@ def wipe_orphan_bim_files() -> int:
 
 
 async def create_project(
-    client: httpx.AsyncClient, headers: dict, spec: dict,
+    client: httpx.AsyncClient,
+    headers: dict,
+    spec: dict,
 ) -> dict:
     r = await client.post("/api/v1/projects/", json=spec, headers=headers)
     r.raise_for_status()
@@ -318,7 +320,10 @@ async def create_project(
 
 
 async def upload_cad(
-    client: httpx.AsyncClient, headers: dict, project_id: str, file_path: pathlib.Path,
+    client: httpx.AsyncClient,
+    headers: dict,
+    project_id: str,
+    file_path: pathlib.Path,
 ) -> dict:
     """Upload a single CAD file. Returns the response body verbatim."""
     with file_path.open("rb") as f:
@@ -341,7 +346,10 @@ async def upload_cad(
 
 
 async def wait_for_model_ready(
-    client: httpx.AsyncClient, headers: dict, project_id: str, model_id: str,
+    client: httpx.AsyncClient,
+    headers: dict,
+    project_id: str,
+    model_id: str,
     label: str,
 ) -> str:
     """Poll the model until status in {'ready','error','converter_required'}.
@@ -369,8 +377,12 @@ async def wait_for_model_ready(
         # binary is not on PATH — we record it and move on rather than wait
         # for a conversion that will never happen.
         if st in (
-            "ready", "error", "converter_required",
-            "needs_converter", "failed", "conversion_failed",
+            "ready",
+            "error",
+            "converter_required",
+            "needs_converter",
+            "failed",
+            "conversion_failed",
         ):
             return st
         await asyncio.sleep(MODEL_POLL_INTERVAL_S)
@@ -378,7 +390,10 @@ async def wait_for_model_ready(
 
 
 async def seed_boq(
-    client: httpx.AsyncClient, headers: dict, project: dict, spec: dict,
+    client: httpx.AsyncClient,
+    headers: dict,
+    project: dict,
+    spec: dict,
 ) -> dict:
     """Create BOQ + sections + positions for a project."""
     boq_r = await client.post(
@@ -427,8 +442,10 @@ async def seed_boq(
 
 
 async def link_bim_sample(
-    client: httpx.AsyncClient, headers: dict,
-    boq_id: str, model_id: str,
+    client: httpx.AsyncClient,
+    headers: dict,
+    boq_id: str,
+    model_id: str,
 ) -> int:
     """Link up to 3 BIM elements of each of {Walls, Floors, Roofs, Doors}
     to the first few BOQ positions to give the link panel real data."""
@@ -485,6 +502,7 @@ async def link_bim_sample(
 
 # ── Main orchestration ─────────────────────────────────────────────────────
 
+
 async def main() -> None:
     if not CAD_SOURCE_DIR.exists():
         sys.exit(f"CAD source directory not found: {CAD_SOURCE_DIR}")
@@ -529,7 +547,7 @@ async def main() -> None:
                 if not path.exists():
                     print(f"      !! missing file: {fname}")
                     continue
-                print(f"      >> {spec['key']:2}  {fname:50} ({path.stat().st_size/1_048_576:.1f} MB)")
+                print(f"      >> {spec['key']:2}  {fname:50} ({path.stat().st_size / 1_048_576:.1f} MB)")
                 resp = await upload_cad(client, headers, p["id"], path)
                 if resp.get("status") == "converter_required":
                     print(f"         !! converter not installed for {fname} -- skipping")

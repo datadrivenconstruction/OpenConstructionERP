@@ -77,11 +77,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -320,9 +316,7 @@ async def test_update_buyer_basic_fields(http_client, tenant_a):
 
 
 @pytest.mark.asyncio
-async def test_update_buyer_role_gate(
-    http_client, tenant_a, viewer_user, manager_user
-):
+async def test_update_buyer_role_gate(http_client, tenant_a, viewer_user, manager_user):
     """VIEWER → 403; MANAGER (not owner) → 404 (IDOR closure); admin (owner) → 200.
 
     Owner-based scoping means even a MANAGER who didn't create the
@@ -403,9 +397,7 @@ async def test_update_buyer_idor(http_client, tenant_a, tenant_b):
         json={"full_name": "Attacker"},
         headers=tenant_b["headers"],
     )
-    assert res.status_code == 404, (
-        f"IDOR LEAK: tenant B got {res.status_code} for A's buyer: {res.text}"
-    )
+    assert res.status_code == 404, f"IDOR LEAK: tenant B got {res.status_code} for A's buyer: {res.text}"
     # And as a sanity-check, the buyer's name on disk must be unchanged.
     own = await http_client.get(
         f"/api/v1/property-dev/buyers/{bid}",

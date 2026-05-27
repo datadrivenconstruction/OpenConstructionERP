@@ -31,7 +31,6 @@ from app.core.permissions import (
 )
 from app.database import Base
 from app.dependencies import (
-    SessionDep,
     get_current_user_payload,
     get_session,
 )
@@ -42,9 +41,7 @@ from app.modules.admin.permissions_router import _build_matrix_payload, router
 def fresh_registry(monkeypatch):
     """Swap the global registry for a clean instance for this test only."""
     clean = PermissionRegistry()
-    monkeypatch.setattr(
-        "app.modules.admin.permissions_router.permission_registry", clean
-    )
+    monkeypatch.setattr("app.modules.admin.permissions_router.permission_registry", clean)
     return clean
 
 
@@ -187,9 +184,7 @@ class TestPermissionsMatrixEdit:
 
         # Audit log carries the before/after.
         async with sessionmaker() as session:
-            entries = (await session.execute(
-                __import__("sqlalchemy").select(AuditEntry)
-            )).scalars().all()
+            entries = (await session.execute(__import__("sqlalchemy").select(AuditEntry))).scalars().all()
         keys = [e.entity_id for e in entries]
         assert "projects.create" in keys
         update = next(e for e in entries if e.entity_id == "projects.create")
@@ -257,11 +252,15 @@ class TestPermissionsMatrixEdit:
 
         # Audit log carries one preset_applied row with the full diff.
         async with sessionmaker() as session:
-            preset_entries = (await session.execute(
-                __import__("sqlalchemy")
-                .select(AuditEntry)
-                .where(AuditEntry.action == "preset_applied")
-            )).scalars().all()
+            preset_entries = (
+                (
+                    await session.execute(
+                        __import__("sqlalchemy").select(AuditEntry).where(AuditEntry.action == "preset_applied")
+                    )
+                )
+                .scalars()
+                .all()
+            )
         assert len(preset_entries) == 1
         assert preset_entries[0].entity_id == "viewer-default"
         assert preset_entries[0].details["preset"] == "viewer-default"

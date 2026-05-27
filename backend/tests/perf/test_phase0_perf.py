@@ -15,24 +15,19 @@ block a release pipeline.
 
 from __future__ import annotations
 
-import asyncio
 import tempfile
 import time
 import uuid
-from collections.abc import AsyncGenerator
 from pathlib import Path
 from typing import Any
 
 import pytest
 import pytest_asyncio
-from fastapi import FastAPI
-from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
-
 
 # ── Shared fixtures ──────────────────────────────────────────────────────────
 
@@ -41,6 +36,7 @@ from sqlalchemy.ext.asyncio import (
 def _bypass_catalog_gate(monkeypatch):
     """v2.8.2 — short-circuit the catalogue gate so the perf tests measure
     the ranker's hot path, not a one-line early return."""
+
     async def _ok(*_args, **_kwargs):
         return "ok", 1, 1
 
@@ -68,7 +64,9 @@ async def engine_factory():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
     yield engine, factory, tmp_db
     await engine.dispose()
@@ -120,7 +118,9 @@ _TIMEOUT_MS_PER_TEST = 5_000  # if any test exceeds this, skip rather than fail
 
 @pytest.mark.asyncio
 async def test_match_element_typical_under_500ms(
-    engine_factory, project_uuid, monkeypatch,
+    engine_factory,
+    project_uuid,
+    monkeypatch,
 ) -> None:
     """match_element with mocked vector search must complete in < 500 ms.
 
@@ -138,11 +138,15 @@ async def test_match_element_typical_under_500ms(
             "payload": {
                 "code": f"330.10.0{i:02d}",
                 "description": f"hit {i}",
-                "unit": "m2", "unit_cost": 100.0 + i,
-                "currency": "EUR", "region_code": "DE_BERLIN",
-                "source": "cwicr", "language": "de",
+                "unit": "m2",
+                "unit_cost": 100.0 + i,
+                "currency": "EUR",
+                "region_code": "DE_BERLIN",
+                "source": "cwicr",
+                "language": "de",
                 "classification_din276": f"330.10.0{i:02d}",
-                "classification_nrm": "", "classification_masterformat": "",
+                "classification_nrm": "",
+                "classification_masterformat": "",
             },
         }
         for i in range(30)
@@ -195,14 +199,18 @@ async def test_translation_fallback_under_50ms(tmp_path: Path) -> None:
     # Warm up — schema initialisation amortises across runs in the same
     # cache file.
     await translate(
-        "Concrete wall", "en", "de",
+        "Concrete wall",
+        "en",
+        "de",
         cache_db_path=str(tmp_path / "cache.db"),
         lookup_root=str(tmp_path),
     )
 
     started = time.perf_counter()
     result = await translate(
-        "Concrete wall section type B", "en", "de",
+        "Concrete wall section type B",
+        "en",
+        "de",
         cache_db_path=str(tmp_path / "cache.db"),
         lookup_root=str(tmp_path),
     )
@@ -218,7 +226,8 @@ async def test_translation_fallback_under_50ms(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_match_settings_get_under_100ms(
-    engine_factory, project_uuid,
+    engine_factory,
+    project_uuid,
 ) -> None:
     """MatchProjectSettings lazy-init GET completes in < 100 ms.
 

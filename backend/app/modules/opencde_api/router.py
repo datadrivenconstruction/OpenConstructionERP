@@ -218,9 +218,7 @@ async def bcf_create_comment(
     service: OpenCDEService = Depends(_get_service),
 ) -> BCFComment:
     """Create a new BCF comment on a topic."""
-    return await service.create_comment(
-        project_id, topic_guid, data, uuid.UUID(user_id)
-    )
+    return await service.create_comment(project_id, topic_guid, data, uuid.UUID(user_id))
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -255,6 +253,4 @@ async def bcf_create_viewpoint(
     service: OpenCDEService = Depends(_get_service),
 ) -> BCFViewpoint:
     """Create a new BCF viewpoint for a topic."""
-    return await service.create_viewpoint(
-        project_id, topic_guid, data, uuid.UUID(user_id)
-    )
+    return await service.create_viewpoint(project_id, topic_guid, data, uuid.UUID(user_id))

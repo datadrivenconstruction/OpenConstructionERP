@@ -274,9 +274,7 @@ class EacRunRulesetRequest(BaseModel):
         max_length=100_000,
         description="Inline canonical elements (overrides model_id when set)",
     )
-    triggered_by: Literal[
-        "manual", "scheduled", "webhook", "auto_on_upload"
-    ] = "manual"
+    triggered_by: Literal["manual", "scheduled", "webhook", "auto_on_upload"] = "manual"
 
 
 class EacRunRead(_ApiBase):
@@ -384,9 +382,7 @@ class EacRunRerunRequest(BaseModel):
         max_length=100_000,
         description="Inline canonical elements to evaluate against",
     )
-    triggered_by: Literal[
-        "manual", "scheduled", "webhook", "auto_on_upload"
-    ] = "manual"
+    triggered_by: Literal["manual", "scheduled", "webhook", "auto_on_upload"] = "manual"
 
 
 class EacRunDiffResponse(BaseModel):

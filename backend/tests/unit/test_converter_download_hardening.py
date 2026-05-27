@@ -55,9 +55,7 @@ def _minimal_pe(pe_off: int = 0x80) -> bytes:
 
 def test_allows_raw_githubusercontent() -> None:
     """The canonical blob-download host must be allowed."""
-    _check_download_url_allowed(
-        "https://raw.githubusercontent.com/org/repo/main/file.exe"
-    )
+    _check_download_url_allowed("https://raw.githubusercontent.com/org/repo/main/file.exe")
 
 
 def test_allows_github_com() -> None:
@@ -67,17 +65,13 @@ def test_allows_github_com() -> None:
 
 def test_allows_blob_cdn() -> None:
     """objects.githubusercontent.com is GitHub's >5MB blob CDN."""
-    _check_download_url_allowed(
-        "https://objects.githubusercontent.com/abc/def"
-    )
+    _check_download_url_allowed("https://objects.githubusercontent.com/abc/def")
 
 
 def test_rejects_attacker_cdn() -> None:
     """Any non-GitHub host must be rejected — closes the substitution attack."""
     with pytest.raises(RuntimeError, match="not on the converter allow-list"):
-        _check_download_url_allowed(
-            "https://attacker.example.com/poisoned.exe"
-        )
+        _check_download_url_allowed("https://attacker.example.com/poisoned.exe")
 
 
 def test_rejects_lookalike_subdomain() -> None:
@@ -88,9 +82,7 @@ def test_rejects_lookalike_subdomain() -> None:
     apply here, but pin it explicitly.
     """
     with pytest.raises(RuntimeError):
-        _check_download_url_allowed(
-            "https://raw.githubusercontent.com.evil.tld/file.exe"
-        )
+        _check_download_url_allowed("https://raw.githubusercontent.com.evil.tld/file.exe")
 
 
 def test_rejects_file_scheme() -> None:
@@ -127,7 +119,7 @@ class _FakeResponse:
     def read(self, size: int = -1) -> bytes:
         return self._body.read(size)
 
-    def __enter__(self) -> "_FakeResponse":
+    def __enter__(self) -> _FakeResponse:
         return self
 
     def __exit__(self, *_exc: object) -> None:
@@ -144,9 +136,7 @@ def test_size_cap_constant_is_reasonable() -> None:
     assert 256 * 1024 * 1024 <= _MAX_DOWNLOAD_BYTES <= 2 * 1024 * 1024 * 1024
 
 
-def test_streaming_cap_rejects_oversized_content_length(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_streaming_cap_rejects_oversized_content_length(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """Declared Content-Length above the cap must be rejected pre-stream."""
     import urllib.request
 
@@ -193,9 +183,7 @@ def test_streaming_cap_rejects_oversized_body_when_content_length_lies(
         )
 
 
-def test_streaming_writes_small_body_through(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_streaming_writes_small_body_through(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """Happy path — a 1 KB blob is downloaded and persisted verbatim."""
     import urllib.request
 
@@ -269,9 +257,7 @@ def test_verify_rejects_e_lfanew_past_eof(tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="symlink rights differ on Windows")
-def test_pre_existing_symlink_at_target_is_replaced(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_pre_existing_symlink_at_target_is_replaced(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """A symlink already at the install path must NOT be followed.
 
     We plant a symlink pointing at a sentinel file, then download a

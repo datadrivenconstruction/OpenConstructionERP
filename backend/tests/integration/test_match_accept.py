@@ -57,7 +57,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -184,7 +186,9 @@ def _make_candidate(
 class TestAcceptMatchHappyPath:
     @pytest.mark.asyncio
     async def test_creates_new_boq_position_with_matched_cost_item(
-        self, temp_engine_and_factory, project_and_boq,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
     ) -> None:
         _engine, factory, _tmp = temp_engine_and_factory
         project_id, boq_id, user_id = project_and_boq
@@ -234,7 +238,9 @@ class TestAcceptMatchHappyPath:
 
     @pytest.mark.asyncio
     async def test_audit_entry_written(
-        self, temp_engine_and_factory, project_and_boq,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
     ) -> None:
         _engine, factory, _tmp = temp_engine_and_factory
         project_id, boq_id, user_id = project_and_boq
@@ -265,13 +271,17 @@ class TestAcceptMatchHappyPath:
 
         async with factory() as session:
             entries = (
-                await session.execute(
-                    select(AuditEntry).where(
-                        AuditEntry.action == "match_feedback",
-                        AuditEntry.entity_id == str(project_id),
-                    ),
+                (
+                    await session.execute(
+                        select(AuditEntry).where(
+                            AuditEntry.action == "match_feedback",
+                            AuditEntry.entity_id == str(project_id),
+                        ),
+                    )
                 )
-            ).scalars().all()
+                .scalars()
+                .all()
+            )
             assert len(entries) == 1
             row = entries[0]
             assert row.details["accepted"]["code"] == "330.10.020"
@@ -279,7 +289,9 @@ class TestAcceptMatchHappyPath:
 
     @pytest.mark.asyncio
     async def test_updates_existing_position_when_id_provided(
-        self, temp_engine_and_factory, project_and_boq,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
     ) -> None:
         _engine, factory, _tmp = temp_engine_and_factory
         project_id, boq_id, user_id = project_and_boq
@@ -340,7 +352,9 @@ class TestAcceptMatchHappyPath:
 
     @pytest.mark.asyncio
     async def test_quantity_override_wins_over_envelope(
-        self, temp_engine_and_factory, project_and_boq,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
     ) -> None:
         _engine, factory, _tmp = temp_engine_and_factory
         project_id, boq_id, user_id = project_and_boq
@@ -392,7 +406,11 @@ class TestQuantityInferenceOrder:
         ],
     )
     async def test_quantity_inference(
-        self, temp_engine_and_factory, project_and_boq, quantities, expected,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
+        quantities,
+        expected,
     ) -> None:
         _engine, factory, _tmp = temp_engine_and_factory
         project_id, boq_id, user_id = project_and_boq
@@ -430,7 +448,9 @@ class TestQuantityInferenceOrder:
 class TestBIMLink:
     @pytest.mark.asyncio
     async def test_bim_element_link_created_when_element_exists(
-        self, temp_engine_and_factory, project_and_boq,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
     ) -> None:
         engine, factory, _tmp = temp_engine_and_factory
         project_id, boq_id, user_id = project_and_boq
@@ -439,6 +459,7 @@ class TestBIMLink:
         # is created; create a minimal BIMModel + BIMElement.
         import app.modules.bim_hub.models  # noqa: F401
         from app.database import Base
+
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
@@ -501,18 +522,24 @@ class TestBIMLink:
 
         async with factory() as session:
             links = (
-                await session.execute(
-                    select(BOQElementLink).where(
-                        BOQElementLink.boq_position_id == result["position_id"],
-                    ),
+                (
+                    await session.execute(
+                        select(BOQElementLink).where(
+                            BOQElementLink.boq_position_id == result["position_id"],
+                        ),
+                    )
                 )
-            ).scalars().all()
+                .scalars()
+                .all()
+            )
             assert len(links) == 1
             assert str(links[0].bim_element_id) == str(elem_id)
 
     @pytest.mark.asyncio
     async def test_bim_link_skipped_for_unknown_element_id(
-        self, temp_engine_and_factory, project_and_boq,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
     ) -> None:
         """Position still created; BIM link best-effort returns False."""
         _engine, factory, _tmp = temp_engine_and_factory
@@ -548,7 +575,9 @@ class TestBIMLink:
 class TestErrorPaths:
     @pytest.mark.asyncio
     async def test_permission_denied_for_non_member(
-        self, temp_engine_and_factory, project_and_boq,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
     ) -> None:
         _engine, factory, _tmp = temp_engine_and_factory
         project_id, boq_id, _user_id = project_and_boq
@@ -578,7 +607,9 @@ class TestErrorPaths:
 
     @pytest.mark.asyncio
     async def test_boq_id_mismatch_with_project(
-        self, temp_engine_and_factory, project_and_boq,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
     ) -> None:
         _engine, factory, _tmp = temp_engine_and_factory
         project_id, _boq_id, user_id = project_and_boq
@@ -644,7 +675,9 @@ class TestErrorPaths:
 
     @pytest.mark.asyncio
     async def test_existing_position_id_not_found(
-        self, temp_engine_and_factory, project_and_boq,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
     ) -> None:
         _engine, factory, _tmp = temp_engine_and_factory
         project_id, boq_id, user_id = project_and_boq
@@ -678,7 +711,9 @@ class TestCatalogIndependence:
 
     @pytest.mark.asyncio
     async def test_accept_succeeds_for_unknown_catalog_code(
-        self, temp_engine_and_factory, project_and_boq,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
     ) -> None:
         _engine, factory, _tmp = temp_engine_and_factory
         project_id, boq_id, user_id = project_and_boq
@@ -717,7 +752,9 @@ class TestAdminRoleBypass:
 
     @pytest.mark.asyncio
     async def test_admin_can_accept_against_other_owner(
-        self, temp_engine_and_factory, project_and_boq,
+        self,
+        temp_engine_and_factory,
+        project_and_boq,
     ) -> None:
         _engine, factory, _tmp = temp_engine_and_factory
         project_id, boq_id, _owner_id = project_and_boq

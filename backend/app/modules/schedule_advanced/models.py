@@ -63,7 +63,10 @@ class MasterSchedule(Base):
     planned_start: Mapped[date | None] = mapped_column(Date, nullable=True)
     planned_finish: Mapped[date | None] = mapped_column(Date, nullable=True)
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="active", server_default="active",
+        String(32),
+        nullable=False,
+        default="active",
+        server_default="active",
     )
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
@@ -88,7 +91,8 @@ class PhasePlan(Base):
     master_schedule_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey(
-            "oe_schedule_advanced_master_schedule.id", ondelete="CASCADE",
+            "oe_schedule_advanced_master_schedule.id",
+            ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
@@ -105,7 +109,8 @@ class PhasePlan(Base):
         server_default="in_planning",
     )
     pull_session_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     facilitator_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
@@ -133,7 +138,8 @@ class LookAheadPlan(Base):
     master_schedule_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey(
-            "oe_schedule_advanced_master_schedule.id", ondelete="CASCADE",
+            "oe_schedule_advanced_master_schedule.id",
+            ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
@@ -141,13 +147,20 @@ class LookAheadPlan(Base):
     period_start: Mapped[date] = mapped_column(Date, nullable=False)
     period_end: Mapped[date] = mapped_column(Date, nullable=False)
     window_weeks: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=6, server_default="6",
+        Integer,
+        nullable=False,
+        default=6,
+        server_default="6",
     )
     generated_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="draft", server_default="draft",
+        String(32),
+        nullable=False,
+        default="draft",
+        server_default="draft",
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug only
@@ -169,7 +182,8 @@ class Constraint(Base):
     look_ahead_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey(
-            "oe_schedule_advanced_look_ahead.id", ondelete="SET NULL",
+            "oe_schedule_advanced_look_ahead.id",
+            ondelete="SET NULL",
         ),
         nullable=True,
         index=True,
@@ -185,7 +199,8 @@ class Constraint(Base):
     )
     target_clear_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     cleared_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     cleared_by: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
@@ -193,7 +208,11 @@ class Constraint(Base):
         nullable=True,
     )
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="open", server_default="open", index=True,
+        String(32),
+        nullable=False,
+        default="open",
+        server_default="open",
+        index=True,
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug only
@@ -215,7 +234,8 @@ class WeeklyWorkPlan(Base):
     master_schedule_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey(
-            "oe_schedule_advanced_master_schedule.id", ondelete="CASCADE",
+            "oe_schedule_advanced_master_schedule.id",
+            ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
@@ -223,7 +243,8 @@ class WeeklyWorkPlan(Base):
     week_start_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     week_end_date: Mapped[date] = mapped_column(Date, nullable=False)
     generated_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     facilitator_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
@@ -231,10 +252,14 @@ class WeeklyWorkPlan(Base):
         nullable=True,
     )
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="draft", server_default="draft",
+        String(32),
+        nullable=False,
+        default="draft",
+        server_default="draft",
     )
     ppc_percent: Mapped[Decimal | None] = mapped_column(
-        Numeric(5, 2), nullable=True,
+        Numeric(5, 2),
+        nullable=True,
     )
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
 
@@ -257,7 +282,8 @@ class Commitment(Base):
     week_plan_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey(
-            "oe_schedule_advanced_weekly_plan.id", ondelete="CASCADE",
+            "oe_schedule_advanced_weekly_plan.id",
+            ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
@@ -265,13 +291,20 @@ class Commitment(Base):
     task_ref: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
     worker_or_crew: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
     promised_qty: Mapped[Decimal] = mapped_column(
-        Numeric(15, 3), nullable=False, default=Decimal("0"), server_default="0",
+        Numeric(15, 3),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
     )
     unit: Mapped[str] = mapped_column(String(32), nullable=False, default="", server_default="")
     planned_start: Mapped[date | None] = mapped_column(Date, nullable=True)
     planned_finish: Mapped[date | None] = mapped_column(Date, nullable=True)
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="planned", server_default="planned", index=True,
+        String(32),
+        nullable=False,
+        default="planned",
+        server_default="planned",
+        index=True,
     )
     made_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
@@ -279,13 +312,16 @@ class Commitment(Base):
         nullable=True,
     )
     made_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     actual_qty: Mapped[Decimal | None] = mapped_column(
-        Numeric(15, 3), nullable=True,
+        Numeric(15, 3),
+        nullable=True,
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug only
@@ -307,7 +343,8 @@ class ReasonForNonCompletion(Base):
     commitment_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey(
-            "oe_schedule_advanced_commitment.id", ondelete="CASCADE",
+            "oe_schedule_advanced_commitment.id",
+            ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
@@ -315,7 +352,8 @@ class ReasonForNonCompletion(Base):
     category: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     recorded_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     recorded_by: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
@@ -323,7 +361,10 @@ class ReasonForNonCompletion(Base):
         nullable=True,
     )
     root_cause_notes: Mapped[str] = mapped_column(
-        Text, nullable=False, default="", server_default="",
+        Text,
+        nullable=False,
+        default="",
+        server_default="",
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug only
@@ -346,14 +387,16 @@ class Baseline(Base):
     master_schedule_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey(
-            "oe_schedule_advanced_master_schedule.id", ondelete="CASCADE",
+            "oe_schedule_advanced_master_schedule.id",
+            ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     captured_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     captured_by: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
@@ -361,11 +404,17 @@ class Baseline(Base):
         nullable=True,
     )
     snapshot: Mapped[dict | list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="active", server_default="active",
+        String(32),
+        nullable=False,
+        default="active",
+        server_default="active",
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug only
@@ -388,7 +437,8 @@ class BaselineDelta(Base):
     baseline_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey(
-            "oe_schedule_advanced_baseline.id", ondelete="CASCADE",
+            "oe_schedule_advanced_baseline.id",
+            ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
@@ -396,7 +446,8 @@ class BaselineDelta(Base):
     current_master_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey(
-            "oe_schedule_advanced_master_schedule.id", ondelete="CASCADE",
+            "oe_schedule_advanced_master_schedule.id",
+            ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
@@ -407,10 +458,14 @@ class BaselineDelta(Base):
     planned_finish_baseline: Mapped[date | None] = mapped_column(Date, nullable=True)
     planned_finish_current: Mapped[date | None] = mapped_column(Date, nullable=True)
     schedule_variance_days: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     computed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug only
@@ -438,19 +493,34 @@ class Calendar(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     work_days: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[0, 1, 2, 3, 4]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[0, 1, 2, 3, 4]",
     )
     work_hours_per_day: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2), nullable=False, default=Decimal("8"), server_default="8",
+        Numeric(5, 2),
+        nullable=False,
+        default=Decimal("8"),
+        server_default="8",
     )
     holidays: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     special_shifts: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     is_default: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug only

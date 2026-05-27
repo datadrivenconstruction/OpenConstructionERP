@@ -99,9 +99,7 @@ class FormatClassifier:
 
             content = path.read_text(encoding="utf-8")
             data = json.loads(content)
-            if isinstance(data, dict) and (
-                "concept_tree" in data or "elements" in data
-            ):
+            if isinstance(data, dict) and ("concept_tree" in data or "elements" in data):
                 return "BIMQ"
         except Exception:
             logger.debug("Could not inspect JSON for classification", exc_info=True)

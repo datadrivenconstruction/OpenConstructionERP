@@ -116,7 +116,4 @@ class JobRun(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<JobRun id={self.id} kind={self.kind} "
-            f"status={self.status} progress={self.progress_percent}%>"
-        )
+        return f"<JobRun id={self.id} kind={self.kind} status={self.status} progress={self.progress_percent}%>"

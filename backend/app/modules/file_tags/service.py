@@ -46,9 +46,7 @@ _DEFAULT_TAGS: list[tuple[str, str, str]] = [
 
 async def _to_response(session: AsyncSession, tag: FileTag) -> TagResponse:
     """Build a TagResponse including the assignment count."""
-    count_stmt = select(func.count(FileTagAssignment.id)).where(
-        FileTagAssignment.tag_id == tag.id
-    )
+    count_stmt = select(func.count(FileTagAssignment.id)).where(FileTagAssignment.tag_id == tag.id)
     count = int((await session.execute(count_stmt)).scalar_one_or_none() or 0)
     return TagResponse(
         id=tag.id,
@@ -204,8 +202,11 @@ async def assign_tag(
 
     if not file_ids:
         return TagAssignmentResponse(
-            tag_id=tag_id, file_kind=file_kind,
-            requested=0, changed=0, already_done=0,
+            tag_id=tag_id,
+            file_kind=file_kind,
+            requested=0,
+            changed=0,
+            already_done=0,
         )
 
     # Load existing assignments for this (tag, kind) to dedupe.
@@ -214,9 +215,7 @@ async def assign_tag(
         FileTagAssignment.file_kind == file_kind,
         FileTagAssignment.file_id.in_(file_ids),
     )
-    existing_ids: set[str] = {
-        row for row in (await session.execute(existing_stmt)).scalars().all()
-    }
+    existing_ids: set[str] = {row for row in (await session.execute(existing_stmt)).scalars().all()}
     to_create = [fid for fid in file_ids if fid not in existing_ids]
     now = datetime.now(UTC)
     for fid in to_create:
@@ -235,9 +234,7 @@ async def assign_tag(
         # Race window with a parallel writer — recount what's there and
         # treat duplicates as "already done" rather than 500ing.
         await session.rollback()
-        existing_ids = {
-            row for row in (await session.execute(existing_stmt)).scalars().all()
-        }
+        existing_ids = {row for row in (await session.execute(existing_stmt)).scalars().all()}
         to_create = [fid for fid in file_ids if fid not in existing_ids]
     return TagAssignmentResponse(
         tag_id=tag_id,
@@ -264,8 +261,11 @@ async def unassign_tag(
         raise ValueError(f"Tag {tag_id} not found in project {project_id}")
     if not file_ids:
         return TagAssignmentResponse(
-            tag_id=tag_id, file_kind=file_kind,
-            requested=0, changed=0, already_done=0,
+            tag_id=tag_id,
+            file_kind=file_kind,
+            requested=0,
+            changed=0,
+            already_done=0,
         )
 
     stmt = delete(FileTagAssignment).where(

@@ -126,9 +126,7 @@ async def _record_schedule_progress(event: Event) -> None:
                     )
                     continue
 
-                act_md: dict[str, Any] = (
-                    activity.metadata_ if isinstance(activity.metadata_, dict) else {}
-                )
+                act_md: dict[str, Any] = activity.metadata_ if isinstance(activity.metadata_, dict) else {}
                 accepted_reports = act_md.get("field_report_progress") or []
                 if not isinstance(accepted_reports, list):
                     accepted_reports = []
@@ -149,7 +147,9 @@ async def _record_schedule_progress(event: Event) -> None:
                 except (LookupError, ValueError) as exc:
                     logger.warning(
                         "fieldreports.report.submitted: record() rejected task=%s pct=%s: %s",
-                        task_id, pct, exc,
+                        task_id,
+                        pct,
+                        exc,
                     )
                     continue
 
@@ -162,7 +162,9 @@ async def _record_schedule_progress(event: Event) -> None:
             await session.commit()
             logger.info(
                 "Field report progress applied: report=%s recorded=%d skipped_idempotent=%d",
-                report_id_raw, recorded, skipped_idempotent,
+                report_id_raw,
+                recorded,
+                skipped_idempotent,
             )
     except Exception:
         logger.exception(

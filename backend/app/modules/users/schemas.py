@@ -12,6 +12,7 @@ def _sanitize_name(name: str) -> str:
     """‌⁠‍Strip HTML tags from a name to prevent XSS."""
     return re.sub(r"<[^>]+>", "", name).strip()
 
+
 # A small set of common/leaked passwords to reject outright. Cheap defence
 # against the most embarrassing weak passwords without bringing in a 100k+
 # entry breach corpus. Stored lowercase for case-insensitive matching.
@@ -123,9 +124,7 @@ class UserCreate(BaseModel):
         pattern=r"^(admin|manager|editor|viewer)$",
         description="User role. Must be one of: admin, manager, editor, viewer",
     )
-    locale: str = Field(
-        default="en", max_length=10, description="Preferred locale code (e.g. en, de, fr)"
-    )
+    locale: str = Field(default="en", max_length=10, description="Preferred locale code (e.g. en, de, fr)")
     company: str = Field(
         default="",
         max_length=255,

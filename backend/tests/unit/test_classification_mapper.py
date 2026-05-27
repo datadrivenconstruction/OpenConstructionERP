@@ -67,10 +67,7 @@ class TestEnrichCoarseFallback:
     def test_no_material_returns_coarse(self) -> None:
         assert enrich_classification("Walls") == "330"
         assert enrich_classification("Walls", standard="nrm") == "2.5"
-        assert (
-            enrich_classification("Walls", standard="masterformat")
-            == "04 00 00"
-        )
+        assert enrich_classification("Walls", standard="masterformat") == "04 00 00"
 
     def test_unknown_category_returns_none(self) -> None:
         assert enrich_classification("Unobtanium", material="concrete") is None
@@ -79,7 +76,8 @@ class TestEnrichCoarseFallback:
         # Material string completely outside the synonym vocabulary —
         # extracted code must still be the coarse 3-digit fallback.
         result = enrich_classification(
-            "Walls", material="Unobtanium DXG-7 alloy",
+            "Walls",
+            material="Unobtanium DXG-7 alloy",
         )
         assert result == "330"
 
@@ -122,9 +120,7 @@ class TestMaterialAwareDin276:
         ],
     )
     def test_refinement(self, category: str, material: str, expected: str) -> None:
-        assert (
-            enrich_classification(category, material=material) == expected
-        )
+        assert enrich_classification(category, material=material) == expected
 
 
 # ── Synonym folding ───────────────────────────────────────────────────────
@@ -142,9 +138,7 @@ class TestSynonymFolding:
             "Concrete C30/37",
             "Stahlbeton C25/30",
         ):
-            assert (
-                enrich_classification("Walls", material=material) == "330.10"
-            ), f"failed for material={material!r}"
+            assert enrich_classification("Walls", material=material) == "330.10", f"failed for material={material!r}"
 
     def test_masonry_synonyms_all_map_to_331_10(self) -> None:
         for material in (
@@ -154,21 +148,15 @@ class TestSynonymFolding:
             "Kalksandstein KS 12-1.4",
             "Ziegel",
         ):
-            assert (
-                enrich_classification("Walls", material=material) == "331.10"
-            ), f"failed for material={material!r}"
+            assert enrich_classification("Walls", material=material) == "331.10", f"failed for material={material!r}"
 
     def test_timber_synonyms_all_map_to_331_40(self) -> None:
         for material in ("timber", "Holz", "wood", "Solid wood"):
-            assert (
-                enrich_classification("Walls", material=material) == "331.40"
-            ), f"failed for material={material!r}"
+            assert enrich_classification("Walls", material=material) == "331.40", f"failed for material={material!r}"
 
     def test_steel_synonyms_all_map_to_340_20_for_columns(self) -> None:
         for material in ("steel", "Stahl", "Structural steel S235", "IPE240"):
-            assert (
-                enrich_classification("Columns", material=material) == "340.20"
-            ), f"failed for material={material!r}"
+            assert enrich_classification("Columns", material=material) == "340.20", f"failed for material={material!r}"
 
     def test_drywall_synonyms_all_map_to_331_30(self) -> None:
         for material in (
@@ -178,9 +166,7 @@ class TestSynonymFolding:
             "Plasterboard",
             "metal stud",
         ):
-            assert (
-                enrich_classification("Walls", material=material) == "331.30"
-            ), f"failed for material={material!r}"
+            assert enrich_classification("Walls", material=material) == "331.30", f"failed for material={material!r}"
 
 
 # ── Fire-rated doors prefer steel ─────────────────────────────────────────
@@ -193,7 +179,8 @@ class TestFireRatedDoors:
     def test_wood_door_no_fire_rating_uses_timber_variant(self) -> None:
         assert (
             enrich_classification(
-                "Doors", material="Solid wood interior door",
+                "Doors",
+                material="Solid wood interior door",
             )
             == "344.10"
         )
@@ -249,7 +236,9 @@ class TestMaterialAwareNrm:
     def test_concrete_wall_resolves_to_2_5_1(self) -> None:
         assert (
             enrich_classification(
-                "Walls", material="Concrete", standard="nrm",
+                "Walls",
+                material="Concrete",
+                standard="nrm",
             )
             == "2.5.1"
         )
@@ -257,7 +246,9 @@ class TestMaterialAwareNrm:
     def test_masonry_wall_resolves_to_2_5_2(self) -> None:
         assert (
             enrich_classification(
-                "Walls", material="Brick", standard="nrm",
+                "Walls",
+                material="Brick",
+                standard="nrm",
             )
             == "2.5.2"
         )
@@ -265,7 +256,9 @@ class TestMaterialAwareNrm:
     def test_drywall_resolves_to_internal_partitions_2_7_1(self) -> None:
         assert (
             enrich_classification(
-                "Walls", material="Drywall", standard="nrm",
+                "Walls",
+                material="Drywall",
+                standard="nrm",
             )
             == "2.7.1"
         )
@@ -273,7 +266,9 @@ class TestMaterialAwareNrm:
     def test_unknown_material_falls_back_to_coarse_2_5(self) -> None:
         assert (
             enrich_classification(
-                "Walls", material="Unobtanium", standard="nrm",
+                "Walls",
+                material="Unobtanium",
+                standard="nrm",
             )
             == "2.5"
         )
@@ -298,7 +293,9 @@ class TestMaterialAwareMasterFormat:
     def test_concrete_wall_resolves_to_03_30_00(self) -> None:
         assert (
             enrich_classification(
-                "Walls", material="Concrete", standard="masterformat",
+                "Walls",
+                material="Concrete",
+                standard="masterformat",
             )
             == "03 30 00"
         )
@@ -306,7 +303,9 @@ class TestMaterialAwareMasterFormat:
     def test_brick_masonry_wall_resolves_to_04_22_00(self) -> None:
         assert (
             enrich_classification(
-                "Walls", material="Brick", standard="masterformat",
+                "Walls",
+                material="Brick",
+                standard="masterformat",
             )
             == "04 22 00"
         )
@@ -314,7 +313,9 @@ class TestMaterialAwareMasterFormat:
     def test_drywall_resolves_to_09_21_00(self) -> None:
         assert (
             enrich_classification(
-                "Walls", material="Drywall", standard="masterformat",
+                "Walls",
+                material="Drywall",
+                standard="masterformat",
             )
             == "09 21 00"
         )
@@ -322,7 +323,9 @@ class TestMaterialAwareMasterFormat:
     def test_steel_columns_resolves_to_05_12_00(self) -> None:
         assert (
             enrich_classification(
-                "Columns", material="Steel", standard="masterformat",
+                "Columns",
+                material="Steel",
+                standard="masterformat",
             )
             == "05 12 00"
         )
@@ -330,7 +333,9 @@ class TestMaterialAwareMasterFormat:
     def test_wood_doors_resolves_to_08_14_00(self) -> None:
         assert (
             enrich_classification(
-                "Doors", material="Wood", standard="masterformat",
+                "Doors",
+                material="Wood",
+                standard="masterformat",
             )
             == "08 14 00"
         )
@@ -338,7 +343,9 @@ class TestMaterialAwareMasterFormat:
     def test_unknown_material_falls_back_to_coarse(self) -> None:
         assert (
             enrich_classification(
-                "Walls", material="Unobtanium", standard="masterformat",
+                "Walls",
+                material="Unobtanium",
+                standard="masterformat",
             )
             == "04 00 00"
         )
@@ -358,20 +365,24 @@ class TestMapElementsToClassification:
         assert elements[0]["classification"] == {"din276": "330"}
 
     def test_deep_when_material_present(self) -> None:
-        elements = [{
-            "id": "e1",
-            "category": "Walls",
-            "properties": {"material": "Stahlbeton C30/37"},
-        }]
+        elements = [
+            {
+                "id": "e1",
+                "category": "Walls",
+                "properties": {"material": "Stahlbeton C30/37"},
+            }
+        ]
         map_elements_to_classification(elements, standard="din276")
         assert elements[0]["classification"]["din276"] == "330.10"
 
     def test_preserves_existing_other_standard_classifications(self) -> None:
-        elements = [{
-            "id": "e1",
-            "category": "Walls",
-            "classification": {"masterformat": "04 00 00"},
-        }]
+        elements = [
+            {
+                "id": "e1",
+                "category": "Walls",
+                "classification": {"masterformat": "04 00 00"},
+            }
+        ]
         map_elements_to_classification(elements, standard="din276")
         assert elements[0]["classification"]["din276"] == "330"
         assert elements[0]["classification"]["masterformat"] == "04 00 00"
@@ -383,21 +394,22 @@ class TestMapElementsToClassification:
         assert "classification" not in elements[0]
 
     def test_fire_rating_routes_to_steel_door(self) -> None:
-        elements = [{
-            "id": "e1",
-            "category": "Doors",
-            "properties": {
-                "material": "Solid wood interior door",
-                "fire_rating": "F90",
-            },
-        }]
+        elements = [
+            {
+                "id": "e1",
+                "category": "Doors",
+                "properties": {
+                    "material": "Solid wood interior door",
+                    "fire_rating": "F90",
+                },
+            }
+        ]
         map_elements_to_classification(elements, standard="din276")
         assert elements[0]["classification"]["din276"] == "344.20"
 
     def test_alias_function_enrich_elements_classification(self) -> None:
         """``enrich_elements_classification`` is an alias of ``map_…``."""
-        elements = [{"id": "e1", "category": "Walls",
-                     "properties": {"material": "Concrete"}}]
+        elements = [{"id": "e1", "category": "Walls", "properties": {"material": "Concrete"}}]
         result = enrich_elements_classification(elements, "din276")
         assert result[0]["classification"]["din276"] == "330.10"
 

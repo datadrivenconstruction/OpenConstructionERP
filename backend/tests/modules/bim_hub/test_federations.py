@@ -186,9 +186,7 @@ async def test_add_model_to_federation(session: AsyncSession) -> None:
     """``add_federation_member`` binds an existing BIMModel via the link table."""
     project_id: uuid.UUID = session.info["project_a_id"]
     service = BIMHubService(session)
-    federation = await service.create_federation(
-        FederationCreate(project_id=project_id, name="Coord-1")
-    )
+    federation = await service.create_federation(FederationCreate(project_id=project_id, name="Coord-1"))
     model = await _seed_bim_model(session, project_id, name="ARCH-01")
 
     member = await service.add_federation_member(
@@ -229,15 +227,9 @@ async def test_list_federations_filtered_by_project(session: AsyncSession) -> No
     project_b: uuid.UUID = session.info["project_b_id"]
     service = BIMHubService(session)
 
-    await service.create_federation(
-        FederationCreate(project_id=project_a, name="A1")
-    )
-    await service.create_federation(
-        FederationCreate(project_id=project_a, name="A2")
-    )
-    await service.create_federation(
-        FederationCreate(project_id=project_b, name="B1")
-    )
+    await service.create_federation(FederationCreate(project_id=project_a, name="A1"))
+    await service.create_federation(FederationCreate(project_id=project_a, name="A2"))
+    await service.create_federation(FederationCreate(project_id=project_b, name="B1"))
     await session.commit()
 
     items_a, total_a = await service.list_federations(project_a)
@@ -262,9 +254,7 @@ async def test_federation_detail_returns_models_ordered_by_z(
     """The detail response orders ``members`` by ``z_order`` ascending."""
     project_id: uuid.UUID = session.info["project_a_id"]
     service = BIMHubService(session)
-    federation = await service.create_federation(
-        FederationCreate(project_id=project_id, name="ZSort")
-    )
+    federation = await service.create_federation(FederationCreate(project_id=project_id, name="ZSort"))
     m_top = await _seed_bim_model(session, project_id, name="MEP")
     m_mid = await _seed_bim_model(session, project_id, name="STRUCT")
     m_bot = await _seed_bim_model(session, project_id, name="ARCH")
@@ -290,7 +280,9 @@ async def test_federation_detail_returns_models_ordered_by_z(
     assert z_orders == sorted(z_orders) == [0, 2, 5]
     # And the bim_model ids line up with the expected order.
     assert [m.bim_model_id for m in full.members] == [
-        m_bot.id, m_mid.id, m_top.id,
+        m_bot.id,
+        m_mid.id,
+        m_top.id,
     ]
 
 
@@ -312,9 +304,7 @@ async def test_cannot_access_other_project_federation(
     owner_a: str = session.info["owner_a_id"]
 
     service = BIMHubService(session)
-    fed_b = await service.create_federation(
-        FederationCreate(project_id=project_b, name="B-private")
-    )
+    fed_b = await service.create_federation(FederationCreate(project_id=project_b, name="B-private"))
     await session.commit()
 
     # The federation exists and we can load it directly — the *guard*
@@ -352,23 +342,21 @@ async def test_delete_cascades_member_links(session: AsyncSession) -> None:
     """
     project_id: uuid.UUID = session.info["project_a_id"]
     service = BIMHubService(session)
-    federation = await service.create_federation(
-        FederationCreate(project_id=project_id, name="ToDelete")
-    )
+    federation = await service.create_federation(FederationCreate(project_id=project_id, name="ToDelete"))
     m_one = await _seed_bim_model(session, project_id, name="M1")
     m_two = await _seed_bim_model(session, project_id, name="M2")
     await service.add_federation_member(
-        federation.id, FederationModelAdd(bim_model_id=m_one.id, z_order=0),
+        federation.id,
+        FederationModelAdd(bim_model_id=m_one.id, z_order=0),
     )
     await service.add_federation_member(
-        federation.id, FederationModelAdd(bim_model_id=m_two.id, z_order=1),
+        federation.id,
+        FederationModelAdd(bim_model_id=m_two.id, z_order=1),
     )
     await session.commit()
 
     # Pre-state: 2 link rows for this federation.
-    link_stmt = select(BIMFederationModel).where(
-        BIMFederationModel.federation_id == federation.id
-    )
+    link_stmt = select(BIMFederationModel).where(BIMFederationModel.federation_id == federation.id)
     pre_links = (await session.execute(link_stmt)).scalars().all()
     assert len(pre_links) == 2
 

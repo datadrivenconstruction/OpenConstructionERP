@@ -89,14 +89,17 @@ async def test_generate_recommendations_uses_mocked_llm(caplog) -> None:
 
     fake_response = "1. Fill the 8 zero-price items.\n2. Validate against DIN276."
 
-    with patch.object(
-        advisor,
-        "_resolve_provider",
-        new=AsyncMock(return_value=("anthropic", "fake-key", "claude-test")),
-    ), patch(
-        "app.modules.ai.ai_client.call_ai",
-        new=AsyncMock(return_value=(fake_response, 1234)),
-    ) as mock_call:
+    with (
+        patch.object(
+            advisor,
+            "_resolve_provider",
+            new=AsyncMock(return_value=("anthropic", "fake-key", "claude-test")),
+        ),
+        patch(
+            "app.modules.ai.ai_client.call_ai",
+            new=AsyncMock(return_value=(fake_response, 1234)),
+        ) as mock_call,
+    ):
         with caplog.at_level(logging.INFO, logger="app.modules.project_intelligence.advisor"):
             text = await advisor.generate_recommendations(
                 session=session,  # type: ignore[arg-type]
@@ -112,9 +115,7 @@ async def test_generate_recommendations_uses_mocked_llm(caplog) -> None:
 
     # Cost / outcome observability — exactly one llm_call record, ok outcome,
     # tokens echoed through, provider/model present.
-    cost_records = [
-        r for r in caplog.records if r.getMessage() == "project_intelligence.llm_call"
-    ]
+    cost_records = [r for r in caplog.records if r.getMessage() == "project_intelligence.llm_call"]
     assert len(cost_records) == 1, "expected exactly one structured cost log"
     rec = cost_records[0]
     assert rec.operation == "recommendations"
@@ -136,19 +137,26 @@ async def test_generate_recommendations_cache_debounces_llm() -> None:
 
     advisor._llm_cache.clear()
 
-    with patch.object(
-        advisor,
-        "_resolve_provider",
-        new=AsyncMock(return_value=("anthropic", "fake-key", "claude-test")),
-    ), patch(
-        "app.modules.ai.ai_client.call_ai",
-        new=AsyncMock(return_value=("cached body", 100)),
-    ) as mock_call:
+    with (
+        patch.object(
+            advisor,
+            "_resolve_provider",
+            new=AsyncMock(return_value=("anthropic", "fake-key", "claude-test")),
+        ),
+        patch(
+            "app.modules.ai.ai_client.call_ai",
+            new=AsyncMock(return_value=("cached body", 100)),
+        ) as mock_call,
+    ):
         first = await advisor.generate_recommendations(
-            session=session, state=state, score=score,  # type: ignore[arg-type]
+            session=session,
+            state=state,
+            score=score,  # type: ignore[arg-type]
         )
         second = await advisor.generate_recommendations(
-            session=session, state=state, score=score,  # type: ignore[arg-type]
+            session=session,
+            state=state,
+            score=score,  # type: ignore[arg-type]
         )
 
     assert first == second == "cached body"
@@ -164,14 +172,21 @@ async def test_generate_recommendations_no_provider_falls_back() -> None:
     score = _make_score()
     session = SimpleNamespace()
 
-    with patch.object(
-        advisor, "_resolve_provider", new=AsyncMock(return_value=None),
-    ), patch(
-        "app.modules.ai.ai_client.call_ai",
-        new=AsyncMock(side_effect=AssertionError("must not be called")),
+    with (
+        patch.object(
+            advisor,
+            "_resolve_provider",
+            new=AsyncMock(return_value=None),
+        ),
+        patch(
+            "app.modules.ai.ai_client.call_ai",
+            new=AsyncMock(side_effect=AssertionError("must not be called")),
+        ),
     ):
         text = await advisor.generate_recommendations(
-            session=session, state=state, score=score,  # type: ignore[arg-type]
+            session=session,
+            state=state,
+            score=score,  # type: ignore[arg-type]
         )
 
     assert "Acme Tower" in text
@@ -211,12 +226,15 @@ async def test_verify_project_access_blocks_cross_project() -> None:
     other_id = "intruder-user"
     project_id = uuid.uuid4()
 
-    with patch(
-        "app.modules.projects.repository.ProjectRepository",
-        new=lambda _s: _StubRepo(_StubProject(owner_id=owner_id)),
-    ), patch(
-        "app.modules.users.repository.UserRepository",
-        new=lambda _s: _StubRepo(_StubUser(role="user")),
+    with (
+        patch(
+            "app.modules.projects.repository.ProjectRepository",
+            new=lambda _s: _StubRepo(_StubProject(owner_id=owner_id)),
+        ),
+        patch(
+            "app.modules.users.repository.UserRepository",
+            new=lambda _s: _StubRepo(_StubUser(role="user")),
+        ),
     ):
         with pytest.raises(HTTPException) as exc_info:
             await pi_router._verify_project_access(
@@ -236,12 +254,15 @@ async def test_verify_project_access_allows_owner() -> None:
     owner_id = "owner-user"
     project_id = uuid.uuid4()
 
-    with patch(
-        "app.modules.projects.repository.ProjectRepository",
-        new=lambda _s: _StubRepo(_StubProject(owner_id=owner_id)),
-    ), patch(
-        "app.modules.users.repository.UserRepository",
-        new=lambda _s: _StubRepo(_StubUser(role="user")),
+    with (
+        patch(
+            "app.modules.projects.repository.ProjectRepository",
+            new=lambda _s: _StubRepo(_StubProject(owner_id=owner_id)),
+        ),
+        patch(
+            "app.modules.users.repository.UserRepository",
+            new=lambda _s: _StubRepo(_StubUser(role="user")),
+        ),
     ):
         # Should NOT raise
         await pi_router._verify_project_access(
@@ -273,12 +294,15 @@ async def test_verify_project_access_admin_bypass() -> None:
 
     project_id = uuid.uuid4()
 
-    with patch(
-        "app.modules.projects.repository.ProjectRepository",
-        new=lambda _s: _StubRepo(_StubProject(owner_id="someone-else")),
-    ), patch(
-        "app.modules.users.repository.UserRepository",
-        new=lambda _s: _StubRepo(_StubUser(role="admin")),
+    with (
+        patch(
+            "app.modules.projects.repository.ProjectRepository",
+            new=lambda _s: _StubRepo(_StubProject(owner_id="someone-else")),
+        ),
+        patch(
+            "app.modules.users.repository.UserRepository",
+            new=lambda _s: _StubRepo(_StubUser(role="admin")),
+        ),
     ):
         await pi_router._verify_project_access(
             session=SimpleNamespace(),  # type: ignore[arg-type]

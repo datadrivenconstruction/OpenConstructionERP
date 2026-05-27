@@ -10,13 +10,12 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any
 
 import pytest
 
-from app.modules.procurement.schemas import GRCreate, GRItemCreate, POCreate, POItemCreate, POUpdate
+from app.modules.procurement.schemas import GRCreate, POCreate, POItemCreate, POUpdate
 from app.modules.procurement.service import (
     ProcurementService,
     _compute_po_total,
@@ -382,7 +381,10 @@ def _make_po_namespace_for_match(
     """Build a minimal PO/GR/item graph for ``_validate_3way_match`` tests."""
     po_item_id = uuid.uuid4()
     po_item = SimpleNamespace(
-        id=po_item_id, description="Cement", quantity="100", sort_order=0,
+        id=po_item_id,
+        description="Cement",
+        quantity="100",
+        sort_order=0,
     )
     goods_receipts: list[Any] = []
     if gr_status is not None:
@@ -390,7 +392,9 @@ def _make_po_namespace_for_match(
         gr = SimpleNamespace(status=gr_status, items=[gr_item])
         goods_receipts = [gr]
     po = SimpleNamespace(
-        items=[po_item], goods_receipts=goods_receipts, po_number="PO-X",
+        items=[po_item],
+        goods_receipts=goods_receipts,
+        po_number="PO-X",
     )
     return po, po_item_id
 
@@ -400,12 +404,14 @@ def test_validate_3way_match_draft_only_returns_no_confirmed_grs_reason() -> Non
     from app.modules.procurement.service import _validate_3way_match
 
     po, po_item_id = _make_po_namespace_for_match(gr_status="draft")
-    proposed = [{
-        "ordinal": 0,
-        "po_item_id": po_item_id,
-        "quantity": "100",
-        "description": "Cement",
-    }]
+    proposed = [
+        {
+            "ordinal": 0,
+            "po_item_id": po_item_id,
+            "quantity": "100",
+            "description": "Cement",
+        }
+    ]
 
     violations = _validate_3way_match(po, proposed)
 
@@ -422,12 +428,14 @@ def test_validate_3way_match_no_grs_returns_no_confirmed_grs_reason() -> None:
     from app.modules.procurement.service import _validate_3way_match
 
     po, po_item_id = _make_po_namespace_for_match(gr_status=None)
-    proposed = [{
-        "ordinal": 0,
-        "po_item_id": po_item_id,
-        "quantity": "50",
-        "description": "Cement",
-    }]
+    proposed = [
+        {
+            "ordinal": 0,
+            "po_item_id": po_item_id,
+            "quantity": "50",
+            "description": "Cement",
+        }
+    ]
 
     violations = _validate_3way_match(po, proposed)
 
@@ -443,12 +451,14 @@ def test_validate_3way_match_confirmed_sufficient_returns_empty() -> None:
     from app.modules.procurement.service import _validate_3way_match
 
     po, po_item_id = _make_po_namespace_for_match(gr_status="confirmed")
-    proposed = [{
-        "ordinal": 0,
-        "po_item_id": po_item_id,
-        "quantity": "100",
-        "description": "Cement",
-    }]
+    proposed = [
+        {
+            "ordinal": 0,
+            "po_item_id": po_item_id,
+            "quantity": "100",
+            "description": "Cement",
+        }
+    ]
 
     violations = _validate_3way_match(po, proposed)
 
@@ -462,18 +472,23 @@ def test_validate_3way_match_over_invoice_reason_qty_exceeds() -> None:
     # Confirmed GR receives only 50, but invoice asks for 100.
     po_item_id = uuid.uuid4()
     po_item = SimpleNamespace(
-        id=po_item_id, description="Cement", quantity="100", sort_order=0,
+        id=po_item_id,
+        description="Cement",
+        quantity="100",
+        sort_order=0,
     )
     gr_item = SimpleNamespace(po_item_id=po_item_id, quantity_received="50")
     gr = SimpleNamespace(status="confirmed", items=[gr_item])
     po = SimpleNamespace(items=[po_item], goods_receipts=[gr], po_number="PO-X")
 
-    proposed = [{
-        "ordinal": 0,
-        "po_item_id": po_item_id,
-        "quantity": "100",
-        "description": "Cement",
-    }]
+    proposed = [
+        {
+            "ordinal": 0,
+            "po_item_id": po_item_id,
+            "quantity": "100",
+            "description": "Cement",
+        }
+    ]
 
     violations = _validate_3way_match(po, proposed)
 

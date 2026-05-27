@@ -157,15 +157,22 @@ async def list_contracts(
         await verify_project_access(project_id, user_id, session)
     if customer_id is not None:
         items, _ = await service.contract_repo.list_for_customer(
-            customer_id, offset=offset, limit=limit, status=status_filter,
+            customer_id,
+            offset=offset,
+            limit=limit,
+            status=status_filter,
         )
     elif project_id is not None:
         items, _ = await service.contract_repo.list_for_project(
-            project_id, offset=offset, limit=limit,
+            project_id,
+            offset=offset,
+            limit=limit,
         )
     else:
         items, _ = await service.contract_repo.list_all(
-            offset=offset, limit=limit, status=status_filter,
+            offset=offset,
+            limit=limit,
+            status=status_filter,
         )
     return [ServiceContractResponse.model_validate(it) for it in items]
 
@@ -276,7 +283,10 @@ async def list_assets(
     """List service assets under a contract."""
     await _verify_contract_project(contract_id, user_id, session, service)
     items, _ = await service.asset_repo.list_for_contract(
-        contract_id, offset=offset, limit=limit, status=status_filter,
+        contract_id,
+        offset=offset,
+        limit=limit,
+        status=status_filter,
     )
     return [ServiceAssetResponse.model_validate(it) for it in items]
 
@@ -374,7 +384,9 @@ async def list_tickets(
         )
     elif project_id is not None:
         items, _ = await service.ticket_repo.list_for_project(
-            project_id, offset=offset, limit=limit,
+            project_id,
+            offset=offset,
+            limit=limit,
         )
     else:
         # No contract/project scope ⇒ tenant-wide dispatcher view. Previously
@@ -442,7 +454,9 @@ async def update_ticket(
         await _verify_contract_project(existing.contract_id, user_id, session, service)
     has_dispatch = _payload_has_permission(payload, "service.dispatch")
     ticket = await service.update_ticket(
-        ticket_id, data, has_dispatch_permission=has_dispatch,
+        ticket_id,
+        data,
+        has_dispatch_permission=has_dispatch,
     )
     return ServiceTicketResponse.model_validate(ticket)
 
@@ -526,7 +540,10 @@ async def list_work_orders(
 ) -> list[WorkOrderResponse]:
     """List work orders."""
     items, _ = await service.work_order_repo.list_all(
-        offset=offset, limit=limit, status=status_filter, technician_id=technician_id,
+        offset=offset,
+        limit=limit,
+        status=status_filter,
+        technician_id=technician_id,
     )
     return [WorkOrderResponse.model_validate(it) for it in items]
 
@@ -744,7 +761,10 @@ async def list_recurring_schedules(
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)
     items, _ = await service.recurring_repo.list_for_project(
-        project_id, offset=offset, limit=limit, enabled=enabled,
+        project_id,
+        offset=offset,
+        limit=limit,
+        enabled=enabled,
     )
     return [RecurringScheduleResponse.model_validate(it) for it in items]
 
@@ -846,7 +866,9 @@ async def materialize_recurring_schedule(
     if existing is not None and existing.project_id is not None:
         await verify_project_access(existing.project_id, user_id, session)
     return await service.materialize_recurring(
-        schedule_id, force=force, user_id=user_id,
+        schedule_id,
+        force=force,
+        user_id=user_id,
     )
 
 
@@ -864,7 +886,9 @@ async def list_slas(
 ) -> list[SLADefinitionResponse]:
     """List SLA definitions."""
     items, _ = await service.sla_repo.list_all(
-        offset=offset, limit=limit, active_only=active_only,
+        offset=offset,
+        limit=limit,
+        active_only=active_only,
     )
     return [SLADefinitionResponse.model_validate(it) for it in items]
 
@@ -995,7 +1019,10 @@ async def list_checklists(
 ) -> list[AssetChecklistResponse]:
     """List inspection-checklist templates."""
     items, _ = await service.checklist_repo.list_all(
-        offset=offset, limit=limit, asset_type=asset_type, active_only=active_only,
+        offset=offset,
+        limit=limit,
+        asset_type=asset_type,
+        active_only=active_only,
     )
     return [AssetChecklistResponse.model_validate(it) for it in items]
 

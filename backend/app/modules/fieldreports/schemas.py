@@ -35,14 +35,9 @@ def _check_signature_data(value: str | None) -> str | None:
     if value is None or value == "":
         return value
     if len(value) > _SIGNATURE_MAX_LEN:
-        raise ValueError(
-            f"signature_data exceeds maximum size ({_SIGNATURE_MAX_LEN} bytes)"
-        )
+        raise ValueError(f"signature_data exceeds maximum size ({_SIGNATURE_MAX_LEN} bytes)")
     if not value.startswith("data:image/"):
-        raise ValueError(
-            "signature_data must be a base64-encoded image data URI "
-            "(data:image/png;base64,...)"
-        )
+        raise ValueError("signature_data must be a base64-encoded image data URI (data:image/png;base64,...)")
     # Cheap allow-list of the MIME types signature pads actually emit.
     head = value[:64].lower()
     allowed_prefixes = (
@@ -53,10 +48,7 @@ def _check_signature_data(value: str | None) -> str | None:
         "data:image/svg+xml",
     )
     if not any(head.startswith(p) for p in allowed_prefixes):
-        raise ValueError(
-            "signature_data MIME type is not allowed; "
-            "use png / jpeg / webp / svg+xml"
-        )
+        raise ValueError("signature_data MIME type is not allowed; use png / jpeg / webp / svg+xml")
     return value
 
 

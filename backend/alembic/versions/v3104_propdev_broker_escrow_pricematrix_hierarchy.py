@@ -36,7 +36,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3104_propdev_broker_escrow_pricematrix_hierarchy"
 down_revision: Union[str, Sequence[str], None] = "v3102_round5_merge"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -51,7 +50,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -59,7 +60,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -90,9 +93,7 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── Phase ───────────────────────────────────────────────────────────
     if not _has_table(inspector, "oe_property_dev_phase"):
@@ -104,7 +105,8 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
                 "development_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_development.id", ondelete="CASCADE",
+                    "oe_property_dev_development.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -114,13 +116,20 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
             sa.Column("planned_start", sa.String(20), nullable=True),
             sa.Column("planned_end", sa.String(20), nullable=True),
             sa.Column(
-                "status", sa.String(40), nullable=False, server_default="planned",
+                "status",
+                sa.String(40),
+                nullable=False,
+                server_default="planned",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
-                "development_id", "code",
+                "development_id",
+                "code",
                 name="uq_oe_property_dev_phase_dev_code",
             ),
         )
@@ -145,28 +154,42 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
                 "phase_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_phase.id", ondelete="CASCADE",
+                    "oe_property_dev_phase.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column("code", sa.String(50), nullable=False),
             sa.Column("name", sa.String(255), nullable=False, server_default=""),
             sa.Column(
-                "levels_count", sa.Integer(), nullable=False, server_default="1",
+                "levels_count",
+                sa.Integer(),
+                nullable=False,
+                server_default="1",
             ),
             sa.Column(
-                "units_per_level", sa.Integer(), nullable=False, server_default="1",
+                "units_per_level",
+                sa.Integer(),
+                nullable=False,
+                server_default="1",
             ),
             sa.Column("orientation", sa.String(16), nullable=True),
             sa.Column("geo_coordinates", sa.JSON(), nullable=True),
             sa.Column(
-                "status", sa.String(40), nullable=False, server_default="planned",
+                "status",
+                sa.String(40),
+                nullable=False,
+                server_default="planned",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
-                "phase_id", "code",
+                "phase_id",
+                "code",
                 name="uq_oe_property_dev_block_phase_code",
             ),
         )
@@ -190,13 +213,22 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
             sa.Column("tenant_id", guid, nullable=True),
             sa.Column("name", sa.String(255), nullable=False, server_default=""),
             sa.Column(
-                "license_number", sa.String(120), nullable=False, server_default="",
+                "license_number",
+                sa.String(120),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "jurisdiction", sa.String(16), nullable=False, server_default="",
+                "jurisdiction",
+                sa.String(16),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "contact_email", sa.String(255), nullable=False, server_default="",
+                "contact_email",
+                sa.String(255),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("contact_phone", sa.String(40), nullable=True),
             sa.Column(
@@ -206,19 +238,31 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
                 server_default="0",
             ),
             sa.Column(
-                "kyc_status", sa.String(20), nullable=False, server_default="pending",
+                "kyc_status",
+                sa.String(20),
+                nullable=False,
+                server_default="pending",
             ),
             sa.Column(
-                "kyc_verified_at", sa.DateTime(timezone=True), nullable=True,
+                "kyc_verified_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
-                "active", sa.Boolean(), nullable=False, server_default=sa.text("1"),
+                "active",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.text("1"),
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
-                "tenant_id", "license_number",
+                "tenant_id",
+                "license_number",
                 name="uq_oe_property_dev_broker_tenant_license",
             ),
         )
@@ -258,7 +302,8 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
                 "broker_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_broker.id", ondelete="CASCADE",
+                    "oe_property_dev_broker.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -266,41 +311,66 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
                 "development_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_development.id", ondelete="CASCADE",
+                    "oe_property_dev_development.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=True,
             ),
             sa.Column("specific_plot_ids", sa.JSON(), nullable=True),
             sa.Column(
-                "structure_type", sa.String(20), nullable=False, server_default="percent",
+                "structure_type",
+                sa.String(20),
+                nullable=False,
+                server_default="percent",
             ),
             sa.Column(
-                "structure", sa.JSON(), nullable=False, server_default="{}",
+                "structure",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column(
-                "accrual_trigger", sa.String(40), nullable=False,
+                "accrual_trigger",
+                sa.String(40),
+                nullable=False,
                 server_default="spa_signed",
             ),
             sa.Column(
-                "payout_terms", sa.String(20), nullable=False,
+                "payout_terms",
+                sa.String(20),
+                nullable=False,
                 server_default="net30",
             ),
             sa.Column(
-                "withholding_tax_pct", sa.Numeric(5, 2), nullable=False,
+                "withholding_tax_pct",
+                sa.Numeric(5, 2),
+                nullable=False,
                 server_default="0",
             ),
             sa.Column(
-                "currency", sa.String(8), nullable=False, server_default="",
+                "currency",
+                sa.String(8),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "effective_from", sa.String(20), nullable=False, server_default="",
+                "effective_from",
+                sa.String(20),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("effective_to", sa.String(20), nullable=True),
             sa.Column(
-                "status", sa.String(20), nullable=False, server_default="draft",
+                "status",
+                sa.String(20),
+                nullable=False,
+                server_default="draft",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         op.create_index(
@@ -343,48 +413,77 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
                 "broker_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_broker.id", ondelete="CASCADE",
+                    "oe_property_dev_broker.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "trigger_event", sa.String(40), nullable=False, server_default="",
+                "trigger_event",
+                sa.String(40),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "trigger_entity_type", sa.String(40), nullable=False,
+                "trigger_entity_type",
+                sa.String(40),
+                nullable=False,
                 server_default="",
             ),
             sa.Column("trigger_entity_id", guid, nullable=True),
             sa.Column(
-                "base_amount", sa.Numeric(15, 2), nullable=False, server_default="0",
-            ),
-            sa.Column(
-                "commission_amount", sa.Numeric(15, 2), nullable=False,
+                "base_amount",
+                sa.Numeric(15, 2),
+                nullable=False,
                 server_default="0",
             ),
             sa.Column(
-                "currency", sa.String(8), nullable=False, server_default="",
+                "commission_amount",
+                sa.Numeric(15, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "state", sa.String(20), nullable=False, server_default="accrued",
+                "currency",
+                sa.String(8),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "accrued_at", sa.DateTime(timezone=True), nullable=True,
+                "state",
+                sa.String(20),
+                nullable=False,
+                server_default="accrued",
             ),
             sa.Column(
-                "approved_at", sa.DateTime(timezone=True), nullable=True,
+                "accrued_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
+            ),
+            sa.Column(
+                "approved_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column("paid_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("payment_ref", sa.String(255), nullable=True),
             sa.Column(
-                "withholding_amount", sa.Numeric(15, 2), nullable=False,
+                "withholding_amount",
+                sa.Numeric(15, 2),
+                nullable=False,
                 server_default="0",
             ),
             sa.Column(
-                "net_payable", sa.Numeric(15, 2), nullable=False, server_default="0",
+                "net_payable",
+                sa.Numeric(15, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         op.create_index(
@@ -423,39 +522,65 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
                 "development_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_development.id", ondelete="CASCADE",
+                    "oe_property_dev_development.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "regulator_ref", sa.String(40), nullable=False, server_default="other",
+                "regulator_ref",
+                sa.String(40),
+                nullable=False,
+                server_default="other",
             ),
             sa.Column(
-                "regulator_account_number", sa.String(120), nullable=False,
+                "regulator_account_number",
+                sa.String(120),
+                nullable=False,
                 server_default="",
             ),
             sa.Column(
-                "bank_name", sa.String(255), nullable=False, server_default="",
+                "bank_name",
+                sa.String(255),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("iban", sa.String(40), nullable=False, server_default=""),
             sa.Column(
-                "swift_bic", sa.String(16), nullable=False, server_default="",
+                "swift_bic",
+                sa.String(16),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "currency", sa.String(8), nullable=False, server_default="",
+                "currency",
+                sa.String(8),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "opened_at", sa.String(20), nullable=False, server_default="",
+                "opened_at",
+                sa.String(20),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("closed_at", sa.String(20), nullable=True),
             sa.Column(
-                "is_active", sa.Boolean(), nullable=False, server_default=sa.text("1"),
+                "is_active",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.text("1"),
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
-                "development_id", "currency", "regulator_ref",
+                "development_id",
+                "currency",
+                "regulator_ref",
                 name="uq_oe_property_dev_escrow_dev_ccy_reg",
             ),
         )
@@ -491,35 +616,60 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
                 nullable=False,
             ),
             sa.Column(
-                "direction", sa.String(8), nullable=False, server_default="credit",
+                "direction",
+                sa.String(8),
+                nullable=False,
+                server_default="credit",
             ),
             sa.Column(
-                "amount", sa.Numeric(15, 2), nullable=False, server_default="0",
+                "amount",
+                sa.Numeric(15, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "currency", sa.String(8), nullable=False, server_default="",
+                "currency",
+                sa.String(8),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "source_type", sa.String(40), nullable=False, server_default="instalment",
+                "source_type",
+                sa.String(40),
+                nullable=False,
+                server_default="instalment",
             ),
             sa.Column("source_instalment_id", guid, nullable=True),
             sa.Column(
-                "source_reference", sa.String(255), nullable=False, server_default="",
+                "source_reference",
+                sa.String(255),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("bank_reference", sa.String(255), nullable=True),
             sa.Column(
-                "transaction_date", sa.String(20), nullable=False, server_default="",
+                "transaction_date",
+                sa.String(20),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "reconciliation_state", sa.String(20), nullable=False,
+                "reconciliation_state",
+                sa.String(20),
+                nullable=False,
                 server_default="unreconciled",
             ),
             sa.Column(
-                "reconciled_at", sa.DateTime(timezone=True), nullable=True,
+                "reconciled_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column("reconciled_by_user_id", guid, nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         op.create_index(
@@ -558,33 +708,54 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
                 "development_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_development.id", ondelete="CASCADE",
+                    "oe_property_dev_development.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column("name", sa.String(255), nullable=False, server_default=""),
             sa.Column(
-                "base_price_per_m2", sa.Numeric(15, 2), nullable=False,
+                "base_price_per_m2",
+                sa.Numeric(15, 2),
+                nullable=False,
                 server_default="0",
             ),
             sa.Column(
-                "currency", sa.String(8), nullable=False, server_default="",
+                "currency",
+                sa.String(8),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "effective_from", sa.String(20), nullable=False, server_default="",
+                "effective_from",
+                sa.String(20),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("effective_to", sa.String(20), nullable=True),
             sa.Column(
-                "rules", sa.JSON(), nullable=False, server_default="[]",
+                "rules",
+                sa.JSON(),
+                nullable=False,
+                server_default="[]",
             ),
             sa.Column(
-                "status", sa.String(20), nullable=False, server_default="draft",
+                "status",
+                sa.String(20),
+                nullable=False,
+                server_default="draft",
             ),
             sa.Column(
-                "version", sa.Integer(), nullable=False, server_default="1",
+                "version",
+                sa.Integer(),
+                nullable=False,
+                server_default="1",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         op.create_index(
@@ -610,28 +781,17 @@ def upgrade() -> None:  # noqa: C901 — sequential CREATE TABLEs, easier flat.
             if not _has_column(inspector, plot_table, "block_id"):
                 batch_op.add_column(sa.Column("block_id", guid, nullable=True))
             if not _has_column(inspector, plot_table, "level_in_block"):
-                batch_op.add_column(
-                    sa.Column("level_in_block", sa.Integer(), nullable=True)
-                )
+                batch_op.add_column(sa.Column("level_in_block", sa.Integer(), nullable=True))
             if not _has_column(inspector, plot_table, "position_on_floor"):
-                batch_op.add_column(
-                    sa.Column(
-                        "position_on_floor", sa.String(40), nullable=True
-                    )
-                )
+                batch_op.add_column(sa.Column("position_on_floor", sa.String(40), nullable=True))
             if not _has_column(inspector, plot_table, "computed_price"):
-                batch_op.add_column(
-                    sa.Column(
-                        "computed_price", sa.Numeric(18, 2), nullable=True
-                    )
-                )
+                batch_op.add_column(sa.Column("computed_price", sa.Numeric(18, 2), nullable=True))
         # Refresh inspector cache after batch_alter — SQLAlchemy reuses the
         # old reflection until next inspect() call. Re-create the inspector
         # so the index guard below sees the freshly-added column.
         inspector = sa.inspect(op.get_bind())
-        if (
-            _has_column(inspector, plot_table, "block_id")
-            and not _has_index(inspector, plot_table, "ix_oe_property_dev_plot_block_id")
+        if _has_column(inspector, plot_table, "block_id") and not _has_index(
+            inspector, plot_table, "ix_oe_property_dev_plot_block_id"
         ):
             op.create_index(
                 "ix_oe_property_dev_plot_block_id",

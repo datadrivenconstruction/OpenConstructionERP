@@ -38,7 +38,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── App + DB fixtures ──────────────────────────────────────────────────────
 
 
@@ -199,9 +198,7 @@ async def _run_rule(rule, session, dev_id):
 
 
 @pytest.mark.asyncio
-async def test_rule_escrow_account_required_fails_without_account(
-    session, seeded_dev
-):
+async def test_rule_escrow_account_required_fails_without_account(session, seeded_dev):
     """RERA jurisdiction without an EscrowAccount → ERROR."""
     from app.core.validation.rules import PropDevEscrowAccountRequired
 
@@ -215,9 +212,7 @@ async def test_rule_escrow_account_required_fails_without_account(
 
 
 @pytest.mark.asyncio
-async def test_rule_escrow_account_required_passes_with_active_account(
-    session, seeded_dev
-):
+async def test_rule_escrow_account_required_passes_with_active_account(session, seeded_dev):
     """Adding an active EscrowAccount makes the rule pass."""
     import uuid as _uuid
 
@@ -277,9 +272,7 @@ async def test_rule_escrow_iban_valid_fails_bad_checksum(session, seeded_dev):
 
 
 @pytest.mark.asyncio
-async def test_rule_escrow_iban_valid_passes_with_valid_iban(
-    session, seeded_dev
-):
+async def test_rule_escrow_iban_valid_passes_with_valid_iban(session, seeded_dev):
     """A structurally valid German IBAN passes the check."""
     import uuid as _uuid
 
@@ -311,9 +304,7 @@ async def test_rule_escrow_iban_valid_passes_with_valid_iban(
 
 
 @pytest.mark.asyncio
-async def test_rule_escrow_balance_reconciled_flags_drift(
-    session, seeded_dev
-):
+async def test_rule_escrow_balance_reconciled_flags_drift(session, seeded_dev):
     """Declared ledger far from transaction sum → WARNING."""
     import uuid as _uuid
 
@@ -352,9 +343,7 @@ async def test_rule_escrow_balance_reconciled_flags_drift(
 
 
 @pytest.mark.asyncio
-async def test_rule_escrow_balance_reconciled_passes_when_matches(
-    session, seeded_dev
-):
+async def test_rule_escrow_balance_reconciled_passes_when_matches(session, seeded_dev):
     """Declared ledger matches transaction sum → pass."""
     import uuid as _uuid
 
@@ -424,9 +413,7 @@ async def seeded_spa(session, seeded_dev):
 
 
 @pytest.mark.asyncio
-async def test_rule_party_ownership_passes_when_summing_100(
-    session, seeded_dev, seeded_spa
-):
+async def test_rule_party_ownership_passes_when_summing_100(session, seeded_dev, seeded_spa):
     """Two parties at 60+40 sum to 100% → pass."""
     import uuid as _uuid
 
@@ -472,9 +459,7 @@ async def test_rule_party_ownership_passes_when_summing_100(
 
 
 @pytest.mark.asyncio
-async def test_rule_party_ownership_fails_when_not_summing_100(
-    session, seeded_dev, seeded_spa
-):
+async def test_rule_party_ownership_fails_when_not_summing_100(session, seeded_dev, seeded_spa):
     """A single party at 80% triggers ERROR."""
     import uuid as _uuid
 
@@ -506,9 +491,7 @@ async def test_rule_party_ownership_fails_when_not_summing_100(
 
 
 @pytest.mark.asyncio
-async def test_rule_instalments_sum_passes_when_matching(
-    session, seeded_dev, seeded_spa
-):
+async def test_rule_instalments_sum_passes_when_matching(session, seeded_dev, seeded_spa):
     """Two instalments at 250k each sum to contract.total_value=500k → pass."""
     import uuid as _uuid
 
@@ -550,9 +533,7 @@ async def test_rule_instalments_sum_passes_when_matching(
 
 
 @pytest.mark.asyncio
-async def test_rule_instalments_sum_fails_on_mismatch(
-    session, seeded_dev, seeded_spa
-):
+async def test_rule_instalments_sum_fails_on_mismatch(session, seeded_dev, seeded_spa):
     """Instalments summing to less than contract value → ERROR."""
     import uuid as _uuid
 
@@ -592,9 +573,7 @@ async def test_rule_instalments_sum_fails_on_mismatch(
 
 
 @pytest.mark.asyncio
-async def test_rule_reservation_expiry_passes_when_in_future(
-    session, seeded_dev
-):
+async def test_rule_reservation_expiry_passes_when_in_future(session, seeded_dev):
     """Active reservation expiring next year → pass."""
     import uuid as _uuid
 
@@ -652,9 +631,7 @@ async def test_rule_reservation_expiry_fails_when_past(session, seeded_dev):
 
 
 @pytest.mark.asyncio
-async def test_rule_commission_passes_with_valid_percent(
-    session, seeded_dev
-):
+async def test_rule_commission_passes_with_valid_percent(session, seeded_dev):
     """A 2.5% percent commission is in range."""
     import uuid as _uuid
 
@@ -694,9 +671,7 @@ async def test_rule_commission_passes_with_valid_percent(
 
 
 @pytest.mark.asyncio
-async def test_rule_commission_fails_with_excessive_percent(
-    session, seeded_dev
-):
+async def test_rule_commission_fails_with_excessive_percent(session, seeded_dev):
     """A 25% percent commission is outside the 0.1%-15% band."""
     import uuid as _uuid
 
@@ -741,9 +716,7 @@ async def test_rule_commission_fails_with_excessive_percent(
 
 
 @pytest.mark.asyncio
-async def test_rule_price_matrix_passes_with_valid_modifiers(
-    session, seeded_dev
-):
+async def test_rule_price_matrix_passes_with_valid_modifiers(session, seeded_dev):
     """A matrix with multipliers in range passes."""
     import uuid as _uuid
 
@@ -772,9 +745,7 @@ async def test_rule_price_matrix_passes_with_valid_modifiers(
 
 
 @pytest.mark.asyncio
-async def test_rule_price_matrix_fails_with_out_of_range_modifier(
-    session, seeded_dev
-):
+async def test_rule_price_matrix_fails_with_out_of_range_modifier(session, seeded_dev):
     """A multiplier of 5.0 (out of [-0.5, 2.0]) triggers WARNING."""
     import uuid as _uuid
 
@@ -848,9 +819,7 @@ async def test_rules_noop_silently_without_session_or_dev_id():
 
 
 @pytest.mark.asyncio
-async def test_regulator_report_rera_generates_pdf_and_json(
-    session, seeded_dev
-):
+async def test_regulator_report_rera_generates_pdf_and_json(session, seeded_dev):
     """RERA report has %PDF magic and parseable JSON payload."""
     from app.modules.property_dev.regulatory import (
         generate_regulator_report_rera,
@@ -866,18 +835,14 @@ async def test_regulator_report_rera_generates_pdf_and_json(
 
 
 @pytest.mark.asyncio
-async def test_regulator_report_maharera_generates_pdf_and_xml(
-    session, seeded_dev
-):
+async def test_regulator_report_maharera_generates_pdf_and_xml(session, seeded_dev):
     """MAHARERA report has %PDF magic and parseable XML payload."""
     from app.modules.property_dev.regulatory import (
         generate_regulator_report_maharera,
     )
 
     dev = seeded_dev["development"]
-    report = await generate_regulator_report_maharera(
-        session, dev.id, "2026-Q2"
-    )
+    report = await generate_regulator_report_maharera(session, dev.id, "2026-Q2")
     assert report.pdf_bytes.startswith(b"%PDF")
     assert report.payload_format == "xml"
     root = ET.fromstring(report.payload_bytes)
@@ -885,9 +850,7 @@ async def test_regulator_report_maharera_generates_pdf_and_xml(
 
 
 @pytest.mark.asyncio
-async def test_regulator_report_214fz_generates_pdf_and_xml(
-    session, seeded_dev
-):
+async def test_regulator_report_214fz_generates_pdf_and_xml(session, seeded_dev):
     """214-FZ report has %PDF magic and parseable XML payload."""
     from app.modules.property_dev.regulatory import (
         generate_regulator_report_214fz,
@@ -902,9 +865,7 @@ async def test_regulator_report_214fz_generates_pdf_and_xml(
 
 
 @pytest.mark.asyncio
-async def test_regulator_report_cma_generates_pdf_and_json(
-    session, seeded_dev
-):
+async def test_regulator_report_cma_generates_pdf_and_json(session, seeded_dev):
     """CMA report has %PDF magic and parseable JSON payload."""
     from app.modules.property_dev.regulatory import (
         generate_regulator_report_cma,
@@ -928,14 +889,15 @@ async def test_regulator_report_invalid_quarter_raises(session, seeded_dev):
     dev = seeded_dev["development"]
     with pytest.raises(ValueError, match="Invalid quarter"):
         await generate_regulator_report(
-            session, dev_id=dev.id, regulator="RERA", quarter="bad",
+            session,
+            dev_id=dev.id,
+            regulator="RERA",
+            quarter="bad",
         )
 
 
 @pytest.mark.asyncio
-async def test_regulator_report_includes_escrow_from_table(
-    session, seeded_dev
-):
+async def test_regulator_report_includes_escrow_from_table(session, seeded_dev):
     """Generated report carries the active EscrowAccount rows (not metadata)."""
     import uuid as _uuid
 
@@ -962,9 +924,7 @@ async def test_regulator_report_includes_escrow_from_table(
     report = await generate_regulator_report_rera(session, dev.id, "2026-Q2")
     payload = json.loads(report.payload_bytes.decode("utf-8"))
     accounts = payload["submission"]["escrow"]["accounts"]
-    assert any(
-        a["account_no"] == "ESC-AE-123" for a in accounts
-    ), "EscrowAccount row should appear in payload"
+    assert any(a["account_no"] == "ESC-AE-123" for a in accounts), "EscrowAccount row should appear in payload"
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -973,9 +933,7 @@ async def test_regulator_report_includes_escrow_from_table(
 
 
 @pytest.mark.asyncio
-async def test_subscriber_crm_lead_qualified_creates_buyer(
-    session, seeded_dev
-):
+async def test_subscriber_crm_lead_qualified_creates_buyer(session, seeded_dev):
     """``crm.lead.qualified`` with dev_focused=True auto-creates Buyer."""
     from sqlalchemy import func, select
 
@@ -1022,9 +980,7 @@ async def test_subscriber_crm_lead_qualified_creates_buyer(
 
 
 @pytest.mark.asyncio
-async def test_subscriber_portal_buyer_signup_wires_portal_id(
-    session, seeded_dev
-):
+async def test_subscriber_portal_buyer_signup_wires_portal_id(session, seeded_dev):
     """``portal.buyer_signup.completed`` stamps Buyer.portal_user_id."""
     from app.core.events import Event
     from app.modules.property_dev.events import _on_portal_buyer_signup
@@ -1047,9 +1003,7 @@ async def test_subscriber_portal_buyer_signup_wires_portal_id(
 
 
 @pytest.mark.asyncio
-async def test_subscriber_finance_invoice_created_records_ref(
-    session, seeded_dev
-):
+async def test_subscriber_finance_invoice_created_records_ref(session, seeded_dev):
     """``finance.invoice.created`` appends to Buyer.metadata.invoice_refs."""
     from app.core.events import Event
     from app.modules.property_dev.events import _on_finance_invoice_created
@@ -1112,9 +1066,7 @@ async def test_compliance_dashboard_requires_auth(client, seeded_dev):
 
 
 @pytest.mark.asyncio
-async def test_compliance_dashboard_404_for_unknown_dev(
-    client, auth_headers
-):
+async def test_compliance_dashboard_404_for_unknown_dev(client, auth_headers):
     """Unknown UUID → 404 development_not_found."""
     resp = await client.get(
         "/api/v1/property-dev/compliance/dashboard",
@@ -1125,9 +1077,7 @@ async def test_compliance_dashboard_404_for_unknown_dev(
 
 
 @pytest.mark.asyncio
-async def test_compliance_dashboard_returns_results(
-    client, seeded_dev, auth_headers
-):
+async def test_compliance_dashboard_returns_results(client, seeded_dev, auth_headers):
     """Authed call returns a populated dashboard."""
     dev = seeded_dev["development"]
     resp = await client.get(
@@ -1144,9 +1094,7 @@ async def test_compliance_dashboard_returns_results(
 
 
 @pytest.mark.asyncio
-async def test_compliance_regulator_reports_422_on_unknown_regulator(
-    client, seeded_dev, auth_headers
-):
+async def test_compliance_regulator_reports_422_on_unknown_regulator(client, seeded_dev, auth_headers):
     """Unknown regulator code returns 422."""
     dev = seeded_dev["development"]
     resp = await client.get(
@@ -1162,9 +1110,7 @@ async def test_compliance_regulator_reports_422_on_unknown_regulator(
 
 
 @pytest.mark.asyncio
-async def test_compliance_regulator_reports_returns_pdf(
-    client, seeded_dev, auth_headers
-):
+async def test_compliance_regulator_reports_returns_pdf(client, seeded_dev, auth_headers):
     """as=pdf returns application/pdf bytes starting with %PDF."""
     dev = seeded_dev["development"]
     resp = await client.get(

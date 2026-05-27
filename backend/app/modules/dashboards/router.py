@@ -802,14 +802,21 @@ async def post_preset_sync_check(
     )
     try:
         row = await service.get(
-            preset_id, owner_id=user_id, tenant_id=tenant_id,
+            preset_id,
+            owner_id=user_id,
+            tenant_id=tenant_id,
         )
     except PresetError as exc:
         _raise_preset_http(exc, locale)
 
-    snapshot_id = (row.config_json or {}).get("snapshot_id") if isinstance(
-        row.config_json, dict,
-    ) else None
+    snapshot_id = (
+        (row.config_json or {}).get("snapshot_id")
+        if isinstance(
+            row.config_json,
+            dict,
+        )
+        else None
+    )
 
     report = await _build_sync_report(
         preset_id=preset_id,
@@ -851,7 +858,9 @@ async def post_preset_sync_heal(
     )
     try:
         row = await service.get(
-            preset_id, owner_id=user_id, tenant_id=tenant_id,
+            preset_id,
+            owner_id=user_id,
+            tenant_id=tenant_id,
         )
     except PresetError as exc:
         _raise_preset_http(exc, locale)
@@ -862,9 +871,14 @@ async def post_preset_sync_heal(
             detail=messages.translate("preset.access_denied", locale=locale),
         )
 
-    snapshot_id = (row.config_json or {}).get("snapshot_id") if isinstance(
-        row.config_json, dict,
-    ) else None
+    snapshot_id = (
+        (row.config_json or {}).get("snapshot_id")
+        if isinstance(
+            row.config_json,
+            dict,
+        )
+        else None
+    )
 
     report = await _build_sync_report(
         preset_id=preset_id,
@@ -887,7 +901,10 @@ async def post_preset_sync_heal(
 
 
 async def _build_sync_report(
-    *, preset_id: uuid.UUID, config: dict, snapshot_id: object,
+    *,
+    preset_id: uuid.UUID,
+    config: dict,
+    snapshot_id: object,
 ) -> SyncReport:
     """Internal helper: load the snapshot's current meta (best-effort)
     then run the probe."""
@@ -897,7 +914,9 @@ async def _build_sync_report(
         # No snapshot referenced — the preset is trivially in-sync but
         # we still hand back an empty report so the UI badge updates.
         return probe.run(
-            config, _empty_meta(), preset_id=str(preset_id),
+            config,
+            _empty_meta(),
+            preset_id=str(preset_id),
         )
 
     pool = get_duckdb_pool()
@@ -918,7 +937,9 @@ async def _build_sync_report(
         project_id = config.get("project_id")
         if not project_id:
             return probe.run(
-                config, _empty_meta(), preset_id=str(preset_id),
+                config,
+                _empty_meta(),
+                preset_id=str(preset_id),
             )
         meta = await load_current_meta(
             pool=pool,
@@ -929,12 +950,15 @@ async def _build_sync_report(
         return probe.run(config, meta, preset_id=str(preset_id))
     except Exception:
         return probe.run(
-            config, _empty_meta(), preset_id=str(preset_id),
+            config,
+            _empty_meta(),
+            preset_id=str(preset_id),
         )
 
 
 def _empty_meta():
     from app.modules.dashboards.sync_protocol import SnapshotMeta
+
     return SnapshotMeta()
 
 
@@ -949,9 +973,7 @@ def _report_to_schema(report: SyncReport) -> SyncReportOut:
         is_in_sync=report.is_in_sync,
         column_renames=[SyncIssueOut(**i.to_dict()) for i in report.column_renames],
         dropped_columns=[SyncIssueOut(**i.to_dict()) for i in report.dropped_columns],
-        dropped_filter_values=[
-            SyncIssueOut(**i.to_dict()) for i in report.dropped_filter_values
-        ],
+        dropped_filter_values=[SyncIssueOut(**i.to_dict()) for i in report.dropped_filter_values],
         dtype_changes=[SyncIssueOut(**i.to_dict()) for i in report.dtype_changes],
     )
 
@@ -1411,7 +1433,9 @@ async def get_snapshot_diff(
         columns_removed=list(diff.columns_removed),
         columns_changed=[
             SnapshotDiffColumnChangeOut(
-                name=c.name, a_dtype=c.a_dtype, b_dtype=c.b_dtype,
+                name=c.name,
+                a_dtype=c.a_dtype,
+                b_dtype=c.b_dtype,
             )
             for c in diff.columns_changed
         ],

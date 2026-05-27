@@ -15,13 +15,12 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Literal
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 from app.modules.property_dev.schemas import _serialize_money_string
-
 
 # ── Issuance (internal, JWT-authed) ─────────────────────────────────────
 
@@ -147,14 +146,15 @@ class PortalInstalmentRow(BaseModel):
     amount: Decimal = Decimal("0")
     amount_paid: Decimal = Decimal("0")
     amount_outstanding: Decimal = Decimal("0")
-    status: Literal[
-        "pending", "due", "overdue", "paid", "waived", "cancelled"
-    ] = "pending"
+    status: Literal["pending", "due", "overdue", "paid", "waived", "cancelled"] = "pending"
     paid_at: datetime | None = None
     currency: str = ""
 
     @field_serializer(
-        "amount", "amount_paid", "amount_outstanding", when_used="json",
+        "amount",
+        "amount_paid",
+        "amount_outstanding",
+        when_used="json",
     )
     @classmethod
     def _ser_money(cls, v: Decimal) -> str:

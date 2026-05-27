@@ -51,41 +51,25 @@ def test_uk_sdlt_zero_band_400k_standard() -> None:
 
 def test_uk_sdlt_first_home_under_425k_zero() -> None:
     # First-time-buyer relief: 0 % up to £425k.
-    assert (
-        compute_stamp_duty(
-            Decimal("400000"), "GB", is_first_home=True
-        )
-        == Decimal("0.00")
-    )
+    assert compute_stamp_duty(Decimal("400000"), "GB", is_first_home=True) == Decimal("0.00")
 
 
 def test_uk_sdlt_first_home_500k_partial_relief() -> None:
     # First-time-buyer: 0 % up to 425k + 5 % on 425k-500k = 3750.
-    assert (
-        compute_stamp_duty(
-            Decimal("500000"), "GB", is_first_home=True
-        )
-        == Decimal("3750.00")
-    )
+    assert compute_stamp_duty(Decimal("500000"), "GB", is_first_home=True) == Decimal("3750.00")
 
 
 def test_uk_sdlt_first_home_above_625k_falls_back_to_standard() -> None:
     # Above £625k the relief disappears entirely.
     # 0 (250k) + 5% × 675k (33750) + 10% × 75k (7500) = 41250.
-    assert (
-        compute_stamp_duty(Decimal("1000000"), "GB", is_first_home=True)
-        == compute_stamp_duty(Decimal("1000000"), "GB")
+    assert compute_stamp_duty(Decimal("1000000"), "GB", is_first_home=True) == compute_stamp_duty(
+        Decimal("1000000"), "GB"
     )
 
 
 def test_uk_sdlt_additional_property_3pct_surcharge() -> None:
     # Standard 400k = 7500; +3 % × 400k = 12000 → 19500.
-    assert (
-        compute_stamp_duty(
-            Decimal("400000"), "GB", is_additional_property=True
-        )
-        == Decimal("19500.00")
-    )
+    assert compute_stamp_duty(Decimal("400000"), "GB", is_additional_property=True) == Decimal("19500.00")
 
 
 def test_uk_sdlt_top_band_above_1_5m() -> None:
@@ -104,26 +88,17 @@ def test_uk_sdlt_zero_at_or_below_250k() -> None:
 
 def test_de_grunderwerbsteuer_bw_5pct() -> None:
     # Baden-Württemberg = 5 %.
-    assert (
-        compute_stamp_duty(Decimal("500000"), "DE", region_subcode="BW")
-        == Decimal("25000.00")
-    )
+    assert compute_stamp_duty(Decimal("500000"), "DE", region_subcode="BW") == Decimal("25000.00")
 
 
 def test_de_grunderwerbsteuer_by_lowest() -> None:
     # Bayern = 3.5 % — lowest in DE.
-    assert (
-        compute_stamp_duty(Decimal("500000"), "DE", region_subcode="BY")
-        == Decimal("17500.00")
-    )
+    assert compute_stamp_duty(Decimal("500000"), "DE", region_subcode="BY") == Decimal("17500.00")
 
 
 def test_de_grunderwerbsteuer_nw_6_5pct() -> None:
     # NRW = 6.5 % — common DE state.
-    assert (
-        compute_stamp_duty(Decimal("500000"), "DE", region_subcode="NW")
-        == Decimal("32500.00")
-    )
+    assert compute_stamp_duty(Decimal("500000"), "DE", region_subcode="NW") == Decimal("32500.00")
 
 
 def test_de_missing_state_raises() -> None:
@@ -142,24 +117,16 @@ def test_de_unknown_state_raises() -> None:
 
 
 def test_ae_dubai_transfer_fee_4pct() -> None:
-    assert (
-        compute_transfer_fee(Decimal("1000000"), "AE", emirate="dubai")
-        == Decimal("40000.00")
-    )
+    assert compute_transfer_fee(Decimal("1000000"), "AE", emirate="dubai") == Decimal("40000.00")
 
 
 def test_ae_abu_dhabi_transfer_fee_2pct() -> None:
-    assert (
-        compute_transfer_fee(Decimal("1000000"), "AE", emirate="abu_dhabi")
-        == Decimal("20000.00")
-    )
+    assert compute_transfer_fee(Decimal("1000000"), "AE", emirate="abu_dhabi") == Decimal("20000.00")
 
 
 def test_ae_first_residential_sale_zero_rated_vat() -> None:
     # Zero-rated VAT class returns 0 even on a 5M purchase.
-    assert compute_vat(Decimal("5000000"), "AE", rate_class="zero_rated") == Decimal(
-        "0.00"
-    )
+    assert compute_vat(Decimal("5000000"), "AE", rate_class="zero_rated") == Decimal("0.00")
 
 
 def test_ae_standard_vat_5pct() -> None:
@@ -176,50 +143,28 @@ def test_ae_unknown_emirate_raises() -> None:
 
 def test_in_affordable_gst_1pct() -> None:
     # 50 Lakh × 1 % = 50,000.
-    assert (
-        compute_vat(Decimal("5000000"), "IN", rate_class="affordable")
-        == Decimal("50000.00")
-    )
+    assert compute_vat(Decimal("5000000"), "IN", rate_class="affordable") == Decimal("50000.00")
 
 
 def test_in_premium_gst_5pct() -> None:
     # 1 Cr × 5 % = 5,00,000.
-    assert (
-        compute_vat(Decimal("10000000"), "IN", rate_class="premium")
-        == Decimal("500000.00")
-    )
+    assert compute_vat(Decimal("10000000"), "IN", rate_class="premium") == Decimal("500000.00")
 
 
 def test_in_commercial_gst_12pct() -> None:
-    assert (
-        compute_vat(Decimal("10000000"), "IN", rate_class="commercial")
-        == Decimal("1200000.00")
-    )
+    assert compute_vat(Decimal("10000000"), "IN", rate_class="commercial") == Decimal("1200000.00")
 
 
 def test_in_state_stamp_duty_maharashtra_6pct() -> None:
-    assert (
-        compute_stamp_duty(
-            Decimal("10000000"), "IN", region_subcode="MH"
-        )
-        == Decimal("600000.00")
-    )
+    assert compute_stamp_duty(Decimal("10000000"), "IN", region_subcode="MH") == Decimal("600000.00")
 
 
 def test_in_state_stamp_duty_karnataka_5pct() -> None:
-    assert (
-        compute_stamp_duty(
-            Decimal("10000000"), "IN", region_subcode="KA"
-        )
-        == Decimal("500000.00")
-    )
+    assert compute_stamp_duty(Decimal("10000000"), "IN", region_subcode="KA") == Decimal("500000.00")
 
 
 def test_in_registration_fee_1pct() -> None:
-    assert (
-        compute_registration_fee(Decimal("10000000"), "IN")
-        == Decimal("100000.00")
-    )
+    assert compute_registration_fee(Decimal("10000000"), "IN") == Decimal("100000.00")
 
 
 # ── 5. RU — escrow flag + flat state duty ───────────────────────────────
@@ -255,24 +200,15 @@ def test_sg_bsd_180k_first_band_only() -> None:
 
 
 def test_sg_absd_foreign_buyer_60pct() -> None:
-    assert (
-        compute_absd(Decimal("1000000"), "SG", buyer_profile="foreigner")
-        == Decimal("600000.00")
-    )
+    assert compute_absd(Decimal("1000000"), "SG", buyer_profile="foreigner") == Decimal("600000.00")
 
 
 def test_sg_absd_sc_second_20pct() -> None:
-    assert (
-        compute_absd(Decimal("1000000"), "SG", buyer_profile="sc_second")
-        == Decimal("200000.00")
-    )
+    assert compute_absd(Decimal("1000000"), "SG", buyer_profile="sc_second") == Decimal("200000.00")
 
 
 def test_sg_absd_sc_first_zero() -> None:
-    assert (
-        compute_absd(Decimal("1000000"), "SG", buyer_profile="sc_first")
-        == Decimal("0.00")
-    )
+    assert compute_absd(Decimal("1000000"), "SG", buyer_profile="sc_first") == Decimal("0.00")
 
 
 def test_sg_absd_unknown_profile_raises() -> None:
@@ -285,36 +221,22 @@ def test_sg_absd_unknown_profile_raises() -> None:
 
 def test_uk_late_interest_30d_100k_at_7_5_pct() -> None:
     # 100,000 × 0.075 × 30/365 = 616.4383... → 616.44.
-    assert (
-        compute_late_interest(Decimal("100000"), "GB", days_overdue=30)
-        == Decimal("616.44")
-    )
+    assert compute_late_interest(Decimal("100000"), "GB", days_overdue=30) == Decimal("616.44")
 
 
 def test_de_late_interest_30d_100k_at_6_12pct() -> None:
     # 100,000 × 0.0612 × 30/365 = 503.0136... → 503.01.
-    assert (
-        compute_late_interest(Decimal("100000"), "DE", days_overdue=30)
-        == Decimal("503.01")
-    )
+    assert compute_late_interest(Decimal("100000"), "DE", days_overdue=30) == Decimal("503.01")
 
 
 def test_late_interest_zero_when_not_overdue() -> None:
-    assert (
-        compute_late_interest(Decimal("100000"), "GB", days_overdue=0)
-        == Decimal("0.00")
-    )
-    assert (
-        compute_late_interest(Decimal("100000"), "GB", days_overdue=-5)
-        == Decimal("0.00")
-    )
+    assert compute_late_interest(Decimal("100000"), "GB", days_overdue=0) == Decimal("0.00")
+    assert compute_late_interest(Decimal("100000"), "GB", days_overdue=-5) == Decimal("0.00")
 
 
 def test_late_interest_from_dates() -> None:
     # Same answer via due_date + paid_date as via days_overdue.
-    via_days = compute_late_interest(
-        Decimal("50000"), "DE", days_overdue=60
-    )
+    via_days = compute_late_interest(Decimal("50000"), "DE", days_overdue=60)
     via_dates = compute_late_interest(
         Decimal("50000"),
         "DE",
@@ -330,34 +252,25 @@ def test_late_interest_from_dates() -> None:
 def test_vat_effective_from_before_band_change_returns_zero() -> None:
     # GB VAT standard band has effective_from 2011-01-04. A contract
     # signed before that date should return 0 (no band yet in force).
-    assert (
-        compute_vat(
-            Decimal("100000"),
-            "GB",
-            effective_on=date(2010, 12, 31),
-        )
-        == Decimal("0.00")
-    )
+    assert compute_vat(
+        Decimal("100000"),
+        "GB",
+        effective_on=date(2010, 12, 31),
+    ) == Decimal("0.00")
 
 
 def test_vat_effective_from_on_or_after_uses_current_rate() -> None:
     # On the effective date itself the rate is active.
-    assert (
-        compute_vat(
-            Decimal("100000"),
-            "GB",
-            effective_on=date(2011, 1, 4),
-        )
-        == Decimal("20000.00")
-    )
-    assert (
-        compute_vat(
-            Decimal("100000"),
-            "GB",
-            effective_on=date(2025, 6, 1),
-        )
-        == Decimal("20000.00")
-    )
+    assert compute_vat(
+        Decimal("100000"),
+        "GB",
+        effective_on=date(2011, 1, 4),
+    ) == Decimal("20000.00")
+    assert compute_vat(
+        Decimal("100000"),
+        "GB",
+        effective_on=date(2025, 6, 1),
+    ) == Decimal("20000.00")
 
 
 # ── 9. Unsupported jurisdiction handling ────────────────────────────────
@@ -399,9 +312,7 @@ def test_net_from_gross_roundtrip_with_de_19pct() -> None:
 
 def test_net_from_gross_zero_rate_class_returns_gross() -> None:
     # Zero-rated → no VAT subtracted.
-    assert net_from_gross(
-        Decimal("1000.00"), "AE", rate_class="zero_rated"
-    ) == Decimal("1000.00")
+    assert net_from_gross(Decimal("1000.00"), "AE", rate_class="zero_rated") == Decimal("1000.00")
 
 
 # ── 11. AU state-specific bands ─────────────────────────────────────────
@@ -410,17 +321,13 @@ def test_net_from_gross_zero_rate_class_returns_gross() -> None:
 def test_au_nsw_stamp_duty_300k() -> None:
     # NSW bands: 1.25%×17k (212.5) + 1.5%×19k (285) + 1.75%×61k (1067.5)
     # + 3.5%×203k (7105) = 8670.
-    result = compute_stamp_duty(
-        Decimal("300000"), "AU", region_subcode="NSW"
-    )
+    result = compute_stamp_duty(Decimal("300000"), "AU", region_subcode="NSW")
     assert result == Decimal("8670.00")
 
 
 def test_au_vic_stamp_duty_500k() -> None:
     # VIC bands: 1.4%×25k (350) + 2.4%×105k (2520) + 5.5%×370k (20350) = 23220.
-    result = compute_stamp_duty(
-        Decimal("500000"), "AU", region_subcode="VIC"
-    )
+    result = compute_stamp_duty(Decimal("500000"), "AU", region_subcode="VIC")
     assert result == Decimal("23220.00")
 
 
@@ -433,21 +340,11 @@ def test_au_missing_state_raises() -> None:
 
 
 def test_us_ny_transfer_tax_0_4pct() -> None:
-    assert (
-        compute_stamp_duty(
-            Decimal("1000000"), "US", region_subcode="NY"
-        )
-        == Decimal("4000.00")
-    )
+    assert compute_stamp_duty(Decimal("1000000"), "US", region_subcode="NY") == Decimal("4000.00")
 
 
 def test_us_texas_no_transfer_tax() -> None:
-    assert (
-        compute_stamp_duty(
-            Decimal("1000000"), "US", region_subcode="TX"
-        )
-        == Decimal("0.00")
-    )
+    assert compute_stamp_duty(Decimal("1000000"), "US", region_subcode="TX") == Decimal("0.00")
 
 
 # ── 13. compute_total_taxes_for_contract — high-level integration ───────
@@ -477,7 +374,7 @@ def test_total_taxes_de_berlin_full_chain() -> None:
         "DE",
         region_subcode="BE",
     )
-    assert quote["vat"] == Decimal("95000.00")              # 19 % VAT
+    assert quote["vat"] == Decimal("95000.00")  # 19 % VAT
     # Berlin Grunderwerbsteuer = 6 % on net price (500k × 6%).
     assert quote["stamp_duty"] == Decimal("30000.00")
     # 7500 notary (1.5 %) — registration fallback.
@@ -510,9 +407,7 @@ def test_total_taxes_with_overdue_instalments_accrues_late_interest() -> None:
     )
     # 100k × 6.12 % × 60/365 = 1006.0274 → 1006.03.
     assert quote["late_interest"] == Decimal("1006.03")
-    assert any(
-        "Late interest" in line["line"] for line in quote["breakdown"]
-    )
+    assert any("Late interest" in line["line"] for line in quote["breakdown"])
 
 
 def test_total_taxes_currency_passthrough() -> None:

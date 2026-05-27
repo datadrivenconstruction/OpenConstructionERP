@@ -28,16 +28,13 @@ from __future__ import annotations
 
 import asyncio
 import io
-import time
 import uuid
-import zipfile
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 from app.main import create_app
-
 
 # ── Module-scoped fixtures (shared client + admin auth) ─────────────────────
 
@@ -131,9 +128,7 @@ async def _create_boq(client: AsyncClient, auth: dict[str, str]) -> str:
     return resp.json()["id"]
 
 
-async def _add_minimal_position(
-    client: AsyncClient, auth: dict[str, str], boq_id: str
-) -> None:
+async def _add_minimal_position(client: AsyncClient, auth: dict[str, str], boq_id: str) -> None:
     """Add one trivial position so an export call has data to render."""
     resp = await client.post(
         f"/api/v1/boq/boqs/{boq_id}/positions/",
@@ -173,9 +168,7 @@ async def test_export_pdf_no_trailing_slash_succeeds(
         headers=shared_auth,
         follow_redirects=True,
     )
-    assert resp.status_code == 200, (
-        f"Bare /export/pdf returned {resp.status_code}: {resp.text[:200]}"
-    )
+    assert resp.status_code == 200, f"Bare /export/pdf returned {resp.status_code}: {resp.text[:200]}"
     assert resp.headers.get("content-type", "").startswith("application/pdf")
 
     # And the slashed form keeps working — no regression.
@@ -201,9 +194,7 @@ async def test_export_csv_excel_gaeb_no_slash_aliases(
             headers=shared_auth,
             follow_redirects=True,
         )
-        assert resp.status_code == 200, (
-            f"Bare /export/{fmt} returned {resp.status_code}: {resp.text[:200]}"
-        )
+        assert resp.status_code == 200, f"Bare /export/{fmt} returned {resp.status_code}: {resp.text[:200]}"
 
 
 # ── BUG-IMPORT02 ─────────────────────────────────────────────────────────────
@@ -219,19 +210,14 @@ async def test_import_invalid_quantity_returns_helpful_error(
     boq_id = await _create_boq(shared_client, shared_auth)
 
     # Header on row 1, bad row on row 2.
-    csv_body = (
-        "Pos,Description,Unit,Quantity,Unit Rate\n"
-        "01,Concrete C30/37,m3,foo,120\n"
-    ).encode("utf-8")
+    csv_body = b"Pos,Description,Unit,Quantity,Unit Rate\n01,Concrete C30/37,m3,foo,120\n"
 
     resp = await shared_client.post(
         f"/api/v1/boq/boqs/{boq_id}/import/excel/",
         files={"file": ("bad.csv", csv_body, "text/csv")},
         headers=shared_auth,
     )
-    assert resp.status_code == 400, (
-        f"Expected 400 for non-numeric quantity, got {resp.status_code}: {resp.text}"
-    )
+    assert resp.status_code == 400, f"Expected 400 for non-numeric quantity, got {resp.status_code}: {resp.text}"
     detail = resp.json().get("detail", "")
     # Error message must reference the row number so the user can locate
     # the bad cell. ``2`` is the data-row index (header is row 1).
@@ -277,15 +263,13 @@ async def test_upload_exe_renamed_to_xlsx_rejected(
         },
         headers=shared_auth,
     )
-    assert resp.status_code == 400, (
-        f"PE-as-xlsx must be rejected, got {resp.status_code}: {resp.text}"
-    )
+    assert resp.status_code == 400, f"PE-as-xlsx must be rejected, got {resp.status_code}: {resp.text}"
     detail = resp.json().get("detail", "").lower()
     # Either the magic-byte mismatch or the generic "could not parse"
     # message is acceptable — both surface a 400, never a 500.
-    assert any(
-        s in detail for s in ("does not match", "could not parse", "format")
-    ), f"Unexpected error message: {detail!r}"
+    assert any(s in detail for s in ("does not match", "could not parse", "format")), (
+        f"Unexpected error message: {detail!r}"
+    )
 
 
 # ── BUG-UPLOAD02 ─────────────────────────────────────────────────────────────
@@ -315,9 +299,7 @@ async def test_upload_corrupt_xlsx_returns_400_not_500(
         },
         headers=shared_auth,
     )
-    assert resp.status_code == 400, (
-        f"Corrupt xlsx must yield 400, got {resp.status_code}: {resp.text[:300]}"
-    )
+    assert resp.status_code == 400, f"Corrupt xlsx must yield 400, got {resp.status_code}: {resp.text[:300]}"
     detail = resp.json().get("detail", "")
     # The response body must NOT contain a traceback or library
     # internals — those leak file paths and stack frames.
@@ -365,8 +347,7 @@ async def test_upload_does_not_block_event_loop(
     # And the calls must wrap the actual parse helpers — not some
     # unrelated work.
     assert "asyncio.to_thread(\n" in src or "asyncio.to_thread(_parse_rows" in src, (
-        "asyncio.to_thread call did not appear to wrap a parse helper. "
-        f"Source:\n{src[:500]}"
+        f"asyncio.to_thread call did not appear to wrap a parse helper. Source:\n{src[:500]}"
     )
 
     # Live sanity: parsing a moderate file via the threaded path must

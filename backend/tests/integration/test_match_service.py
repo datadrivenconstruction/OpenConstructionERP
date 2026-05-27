@@ -49,6 +49,7 @@ def _bypass_catalog_gate(monkeypatch):
     written for; the binding itself is exercised in
     ``test_match_catalog_binding``.
     """
+
     async def _ok(*_args, **_kwargs):
         return "ok", 1, 1
 
@@ -80,7 +81,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -282,7 +285,10 @@ def patch_vector_search(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_bim_to_envelope_to_ranked_candidates(
-    temp_engine_and_factory, project_id, patch_vector_search, monkeypatch,
+    temp_engine_and_factory,
+    project_id,
+    patch_vector_search,
+    monkeypatch,
 ) -> None:
     """BIM element flows through vector search → boosts → final ranking.
 
@@ -346,7 +352,9 @@ async def test_bim_to_envelope_to_ranked_candidates(
 
 @pytest.mark.asyncio
 async def test_translation_skipped_when_languages_match(
-    temp_engine_and_factory, project_id, patch_vector_search,
+    temp_engine_and_factory,
+    project_id,
+    patch_vector_search,
 ) -> None:
     """No translation fires when source_lang == target_language."""
     _engine, factory, _tmp = temp_engine_and_factory
@@ -368,7 +376,9 @@ async def test_translation_skipped_when_languages_match(
 
 @pytest.mark.asyncio
 async def test_auto_link_only_when_threshold_and_enabled(
-    temp_engine_and_factory, project_id, patch_vector_search,
+    temp_engine_and_factory,
+    project_id,
+    patch_vector_search,
 ) -> None:
     """Auto-link populates only when both gates pass."""
     _engine, factory, _tmp = temp_engine_and_factory
@@ -421,7 +431,10 @@ async def test_auto_link_only_when_threshold_and_enabled(
 
 @pytest.mark.asyncio
 async def test_reranker_off_by_default(
-    temp_engine_and_factory, project_id, patch_vector_search, monkeypatch,
+    temp_engine_and_factory,
+    project_id,
+    patch_vector_search,
+    monkeypatch,
 ) -> None:
     """The LLM reranker only runs when use_reranker=True."""
     _engine, factory, _tmp = temp_engine_and_factory
@@ -434,7 +447,8 @@ async def test_reranker_off_by_default(
         return args[0] if args else kwargs.get("candidates", []), 0.0
 
     monkeypatch.setattr(
-        "app.core.match_service.reranker_ai.rerank_top_k", _spy,
+        "app.core.match_service.reranker_ai.rerank_top_k",
+        _spy,
     )
 
     envelope = ElementEnvelope(
@@ -596,7 +610,9 @@ def test_unknown_source_raises() -> None:
 
 @pytest.mark.asyncio
 async def test_match_element_returns_dicts_with_code_and_unit_rate(
-    temp_engine_and_factory, project_id, patch_vector_search,
+    temp_engine_and_factory,
+    project_id,
+    patch_vector_search,
 ) -> None:
     """Eval contract: ``async match_element(element_info, top_k) -> list[dict]``."""
     _engine, factory, _tmp = temp_engine_and_factory
@@ -625,7 +641,8 @@ async def test_match_element_returns_dicts_with_code_and_unit_rate(
 
 @pytest.mark.asyncio
 async def test_record_feedback_writes_audit_entry(
-    temp_engine_and_factory, project_id,
+    temp_engine_and_factory,
+    project_id,
 ) -> None:
     """Feedback persists an AuditEntry with kind=match_feedback."""
     _engine, factory, _tmp = temp_engine_and_factory
@@ -654,11 +671,7 @@ async def test_record_feedback_writes_audit_entry(
 
         from app.core.audit import AuditEntry
 
-        rows = (
-            await session.execute(
-                select(AuditEntry).where(AuditEntry.action == "match_feedback")
-            )
-        ).scalars().all()
+        rows = (await session.execute(select(AuditEntry).where(AuditEntry.action == "match_feedback"))).scalars().all()
         assert len(rows) == 1
         details = rows[0].details
         assert details["accepted"]["code"] == "330.10.020"
@@ -671,7 +684,9 @@ async def test_record_feedback_writes_audit_entry(
 
 @pytest.mark.asyncio
 async def test_match_envelope_direct_entrypoint(
-    temp_engine_and_factory, project_id, patch_vector_search,
+    temp_engine_and_factory,
+    project_id,
+    patch_vector_search,
 ) -> None:
     _engine, factory, _tmp = temp_engine_and_factory
     envelope = ElementEnvelope(
@@ -683,7 +698,10 @@ async def test_match_envelope_direct_entrypoint(
     )
     async with factory() as session:
         response = await match_envelope(
-            envelope, project_id=project_id, top_k=3, db=session,
+            envelope,
+            project_id=project_id,
+            top_k=3,
+            db=session,
         )
     assert response.candidates
     assert response.took_ms >= 0

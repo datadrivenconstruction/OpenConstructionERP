@@ -37,13 +37,15 @@ def test_crm_win_opportunity_requires_manager_or_higher():
     _ensure_registered()
     assert (
         permission_registry.role_has_permission(
-            Role.MANAGER.value, "crm.win_opportunity",
+            Role.MANAGER.value,
+            "crm.win_opportunity",
         )
         is True
     )
     assert (
         permission_registry.role_has_permission(
-            Role.ADMIN.value, "crm.win_opportunity",
+            Role.ADMIN.value,
+            "crm.win_opportunity",
         )
         is True
     )
@@ -53,13 +55,15 @@ def test_crm_win_opportunity_denied_for_editor_and_below():
     _ensure_registered()
     assert (
         permission_registry.role_has_permission(
-            Role.EDITOR.value, "crm.win_opportunity",
+            Role.EDITOR.value,
+            "crm.win_opportunity",
         )
         is False
     )
     assert (
         permission_registry.role_has_permission(
-            Role.VIEWER.value, "crm.win_opportunity",
+            Role.VIEWER.value,
+            "crm.win_opportunity",
         )
         is False
     )
@@ -73,19 +77,22 @@ def test_crm_forget_requires_admin():
     _ensure_registered()
     assert (
         permission_registry.role_has_permission(
-            Role.ADMIN.value, "crm.forget",
+            Role.ADMIN.value,
+            "crm.forget",
         )
         is True
     )
     assert (
         permission_registry.role_has_permission(
-            Role.MANAGER.value, "crm.forget",
+            Role.MANAGER.value,
+            "crm.forget",
         )
         is False
     )
     assert (
         permission_registry.role_has_permission(
-            Role.EDITOR.value, "crm.forget",
+            Role.EDITOR.value,
+            "crm.forget",
         )
         is False
     )
@@ -96,13 +103,15 @@ def test_crm_compute_forecast_requires_manager():
     _ensure_registered()
     assert (
         permission_registry.role_has_permission(
-            Role.MANAGER.value, "crm.compute_forecast",
+            Role.MANAGER.value,
+            "crm.compute_forecast",
         )
         is True
     )
     assert (
         permission_registry.role_has_permission(
-            Role.EDITOR.value, "crm.compute_forecast",
+            Role.EDITOR.value,
+            "crm.compute_forecast",
         )
         is False
     )
@@ -113,7 +122,8 @@ def test_crm_lose_opportunity_kept_editor_level():
     _ensure_registered()
     assert (
         permission_registry.role_has_permission(
-            Role.EDITOR.value, "crm.lose_opportunity",
+            Role.EDITOR.value,
+            "crm.lose_opportunity",
         )
         is True
     )

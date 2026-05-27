@@ -41,9 +41,9 @@ logger = logging.getLogger(__name__)
 # Default cadences.  Pulled from the schedule registration block below
 # rather than from settings so a quick override only needs a code edit
 # in one place; environment-driven overrides can be added later.
-_EMAIL_DIGEST_INTERVAL_SEC = 5 * 60       # 5 minutes
-_INAPP_DIGEST_INTERVAL_SEC = 5 * 60       # 5 minutes
-_CLEANUP_INTERVAL_SEC = 24 * 60 * 60      # 24 hours
+_EMAIL_DIGEST_INTERVAL_SEC = 5 * 60  # 5 minutes
+_INAPP_DIGEST_INTERVAL_SEC = 5 * 60  # 5 minutes
+_CLEANUP_INTERVAL_SEC = 24 * 60 * 60  # 24 hours
 _CLEANUP_RETENTION_DAYS = 90
 
 
@@ -104,7 +104,8 @@ async def cleanup_old_notifications(retention_days: int = _CLEANUP_RETENTION_DAY
     if count:
         logger.info(
             "notification_worker: cleaned up %d notifications older than %d days",
-            count, retention_days,
+            count,
+            retention_days,
         )
     return count
 
@@ -134,7 +135,7 @@ async def _run_periodically(
             await asyncio.wait_for(shutdown.wait(), timeout=interval_sec)
             # If wait returned without timeout, shutdown was requested.
             return
-        except asyncio.TimeoutError:
+        except TimeoutError:
             pass
         try:
             await coro_factory()
@@ -159,9 +160,7 @@ def start_scheduler() -> None:
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:
-        logger.warning(
-            "notification_worker: no running loop, scheduler will start lazily"
-        )
+        logger.warning("notification_worker: no running loop, scheduler will start lazily")
         return
 
     _SHUTDOWN_EVENT = asyncio.Event()

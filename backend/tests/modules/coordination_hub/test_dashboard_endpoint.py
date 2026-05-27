@@ -191,9 +191,7 @@ def _invalidate_cache() -> None:
 
 
 @pytest.mark.asyncio
-async def test_dashboard_returns_200_with_zero_when_empty(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_dashboard_returns_200_with_zero_when_empty(client: AsyncClient, auth: dict[str, str], project_id: str):
     _invalidate_cache()
     resp = await client.get(
         f"/api/v1/coordination/projects/{project_id}/dashboard",
@@ -211,9 +209,7 @@ async def test_dashboard_returns_200_with_zero_when_empty(
 
 
 @pytest.mark.asyncio
-async def test_dashboard_counts_federations_correctly(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_dashboard_counts_federations_correctly(client: AsyncClient, auth: dict[str, str], project_id: str):
     _invalidate_cache()
     await _seed_federation(project_id, name="Fed F1")
     await _seed_federation(project_id, name="Fed F2")
@@ -227,9 +223,7 @@ async def test_dashboard_counts_federations_correctly(
 
 
 @pytest.mark.asyncio
-async def test_dashboard_counts_open_vs_resolved_clashes(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_dashboard_counts_open_vs_resolved_clashes(client: AsyncClient, auth: dict[str, str], project_id: str):
     _invalidate_cache()
     await _seed_clash(project_id, status_="new")
     await _seed_clash(project_id, status_="resolved")
@@ -245,9 +239,7 @@ async def test_dashboard_counts_open_vs_resolved_clashes(
 
 
 @pytest.mark.asyncio
-async def test_dashboard_currency_comes_from_project(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_dashboard_currency_comes_from_project(client: AsyncClient, auth: dict[str, str], project_id: str):
     """Edit project currency → next dashboard call surfaces the change."""
     from sqlalchemy import update
 
@@ -255,11 +247,7 @@ async def test_dashboard_currency_comes_from_project(
     from app.modules.projects.models import Project
 
     async with async_session_factory() as session:
-        await session.execute(
-            update(Project)
-            .where(Project.id == uuid.UUID(project_id))
-            .values(currency="USD")
-        )
+        await session.execute(update(Project).where(Project.id == uuid.UUID(project_id)).values(currency="USD"))
         await session.commit()
     _invalidate_cache()
     resp = await client.get(
@@ -271,19 +259,13 @@ async def test_dashboard_currency_comes_from_project(
 
     # Restore for downstream tests.
     async with async_session_factory() as session:
-        await session.execute(
-            update(Project)
-            .where(Project.id == uuid.UUID(project_id))
-            .values(currency="EUR")
-        )
+        await session.execute(update(Project).where(Project.id == uuid.UUID(project_id)).values(currency="EUR"))
         await session.commit()
     _invalidate_cache()
 
 
 @pytest.mark.asyncio
-async def test_dashboard_404_when_project_missing(
-    client: AsyncClient, auth: dict[str, str]
-):
+async def test_dashboard_404_when_project_missing(client: AsyncClient, auth: dict[str, str]):
     bogus = uuid.uuid4()
     resp = await client.get(
         f"/api/v1/coordination/projects/{bogus}/dashboard",
@@ -293,20 +275,14 @@ async def test_dashboard_404_when_project_missing(
 
 
 @pytest.mark.asyncio
-async def test_dashboard_401_when_unauthenticated(
-    client: AsyncClient, project_id: str
-):
-    resp = await client.get(
-        f"/api/v1/coordination/projects/{project_id}/dashboard"
-    )
+async def test_dashboard_401_when_unauthenticated(client: AsyncClient, project_id: str):
+    resp = await client.get(f"/api/v1/coordination/projects/{project_id}/dashboard")
     # Unauthed → 401 from the auth layer.
     assert resp.status_code in (401, 403)
 
 
 @pytest.mark.asyncio
-async def test_dashboard_blocks_other_users_project(
-    client: AsyncClient, project_id: str
-):
+async def test_dashboard_blocks_other_users_project(client: AsyncClient, project_id: str):
     """A different VIEWER without admin can't reach this project."""
     # Register a plain viewer (post-promote intentionally skipped).
     tag = uuid.uuid4().hex[:8]
@@ -329,9 +305,7 @@ async def test_dashboard_blocks_other_users_project(
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            update(User).where(User.email == email).values(is_active=True)
-        )
+        await session.execute(update(User).where(User.email == email).values(is_active=True))
         await session.commit()
     login = await client.post(
         "/api/v1/users/auth/login",
@@ -351,9 +325,7 @@ async def test_dashboard_blocks_other_users_project(
 
 
 @pytest.mark.asyncio
-async def test_dashboard_last_run_at_set_after_clash_run(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_dashboard_last_run_at_set_after_clash_run(client: AsyncClient, auth: dict[str, str], project_id: str):
     """``clashes.last_run_at`` is non-null once a completed run exists."""
     _invalidate_cache()
     from datetime import datetime
@@ -382,9 +354,7 @@ async def test_dashboard_last_run_at_set_after_clash_run(
 
 
 @pytest.mark.asyncio
-async def test_trade_matrix_endpoint_returns_cells(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_trade_matrix_endpoint_returns_cells(client: AsyncClient, auth: dict[str, str], project_id: str):
     _invalidate_cache()
     await _seed_clash(project_id, a_disc="Architectural", b_disc="Structural")
     await _seed_clash(project_id, a_disc="Mechanical", b_disc="Structural")
@@ -399,16 +369,11 @@ async def test_trade_matrix_endpoint_returns_cells(
     assert len(body["trades"]) == 6
     # Cells include at least one (arch, struct) entry.
     pairs = {(c["row"], c["col"]) for c in body["cells"]}
-    assert any(
-        (r, c) in pairs
-        for r, c in [("arch", "struct"), ("mep", "struct")]
-    )
+    assert any((r, c) in pairs for r, c in [("arch", "struct"), ("mep", "struct")])
 
 
 @pytest.mark.asyncio
-async def test_timeline_endpoint_returns_events(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_timeline_endpoint_returns_events(client: AsyncClient, auth: dict[str, str], project_id: str):
     _invalidate_cache()
     await _seed_federation(project_id, name="Timeline Fed")
     resp = await client.get(
@@ -424,9 +389,7 @@ async def test_timeline_endpoint_returns_events(
 
 
 @pytest.mark.asyncio
-async def test_timeline_endpoint_validates_days(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_timeline_endpoint_validates_days(client: AsyncClient, auth: dict[str, str], project_id: str):
     """``days=0`` is rejected (ge=1)."""
     resp = await client.get(
         f"/api/v1/coordination/projects/{project_id}/timeline?days=0",

@@ -224,11 +224,7 @@ async def encode_texts_async(texts: list[str]) -> list[list[float]]:
         # one OTHER call is in flight (so this one would otherwise
         # serialise behind it). With ``inflight == 1`` we're alone —
         # encode inline.
-        if (
-            _pool_mod is not None
-            and _pool_mod._pool is not None
-            and _pool_mod._inflight > 1
-        ):
+        if _pool_mod is not None and _pool_mod._pool is not None and _pool_mod._inflight > 1:
             try:
                 pooled = await _pool_mod.encode_texts_pooled(texts)
                 if pooled is not None:
@@ -818,9 +814,7 @@ def vector_index_collection(collection_name: str, items: list[dict]) -> int:
                 "module": it.get("module", ""),
                 **payload_dict,
             }
-            points.append(
-                PointStruct(id=it["id"], vector=it["vector"], payload=qdrant_payload)
-            )
+            points.append(PointStruct(id=it["id"], vector=it["vector"], payload=qdrant_payload))
         client.upsert(collection_name, points=points)
         return len(points)
 
@@ -850,13 +844,9 @@ def vector_search_collection(
 
         must_clauses: list[Any] = []
         if project_id:
-            must_clauses.append(
-                FieldCondition(key="project_id", match=MatchValue(value=project_id))
-            )
+            must_clauses.append(FieldCondition(key="project_id", match=MatchValue(value=project_id)))
         if tenant_id:
-            must_clauses.append(
-                FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id))
-            )
+            must_clauses.append(FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id)))
         search_filter = Filter(must=must_clauses) if must_clauses else None
         try:
             results = client.search(
@@ -886,9 +876,7 @@ def vector_search_collection(
             mod = str(raw_payload.get("module") or "")
             # Build the user-facing payload without the reserved keys, but
             # without touching the qdrant-owned dict.
-            user_payload = {
-                k: v for k, v in raw_payload.items() if k not in _RESERVED
-            }
+            user_payload = {k: v for k, v in raw_payload.items() if k not in _RESERVED}
             out.append(
                 {
                     "id": str(h.id),
@@ -955,7 +943,8 @@ def vector_count_collection(collection_name: str) -> int:
 
 
 def vector_count_with_payload_substring(
-    collection_name: str, substring: str,
+    collection_name: str,
+    substring: str,
 ) -> int:
     """Count vectors whose stringified payload contains ``substring``.
 
@@ -974,6 +963,7 @@ def vector_count_with_payload_substring(
     # expression. The whitelist is intentionally tight — every legitimate
     # CWICR id matches it (e.g. ``RU_STPETERSBURG``, ``USA_USD``).
     import re  # noqa: PLC0415
+
     if not re.fullmatch(r"[A-Z0-9_]{1,32}", substring):
         return 0
     if _backend() == "qdrant":

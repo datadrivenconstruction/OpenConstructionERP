@@ -148,7 +148,9 @@ def _publish_generated(
     )
     _log_failures(
         event_bus.publish(
-            event.name, event.data, source_module=SOURCE_MODULE,
+            event.name,
+            event.data,
+            source_module=SOURCE_MODULE,
         ),
         name=f"{SOURCE_MODULE}.nl_rule_generated",
     )

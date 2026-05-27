@@ -7,7 +7,8 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_non_pdf_bytes_with_pdf_extension_rejected(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     fake = b"not a pdf at all, just some bytes pretending to be one"
     files = {"file": ("fake.pdf", fake, "application/pdf")}
@@ -22,7 +23,8 @@ async def test_non_pdf_bytes_with_pdf_extension_rejected(
 
 @pytest.mark.asyncio
 async def test_non_image_bytes_with_png_extension_rejected(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     fake = b"clearly not a png" + b"\x00" * 32
     files = {"file": ("fake.png", fake, "image/png")}

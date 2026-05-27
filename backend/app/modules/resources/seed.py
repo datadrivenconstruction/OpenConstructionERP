@@ -36,14 +36,44 @@ def _make_resources(rng: random.Random) -> list[Resource]:
     resources: list[Resource] = []
     # 50 people
     first_names = [
-        "Anna", "Bob", "Carlos", "Dmitri", "Eva", "Felix", "Gao", "Hana",
-        "Igor", "Julia", "Karl", "Liu", "Mateo", "Nadia", "Oleg", "Pia",
-        "Quinn", "Ravi", "Sofia", "Tariq", "Uma", "Viktor", "Wei", "Xenia",
-        "Yusuf", "Zhang",
+        "Anna",
+        "Bob",
+        "Carlos",
+        "Dmitri",
+        "Eva",
+        "Felix",
+        "Gao",
+        "Hana",
+        "Igor",
+        "Julia",
+        "Karl",
+        "Liu",
+        "Mateo",
+        "Nadia",
+        "Oleg",
+        "Pia",
+        "Quinn",
+        "Ravi",
+        "Sofia",
+        "Tariq",
+        "Uma",
+        "Viktor",
+        "Wei",
+        "Xenia",
+        "Yusuf",
+        "Zhang",
     ]
     last_names = [
-        "Schmidt", "Müller", "Rossi", "Garcia", "Jones", "Yamamoto",
-        "Petrov", "Khan", "Singh", "Silva",
+        "Schmidt",
+        "Müller",
+        "Rossi",
+        "Garcia",
+        "Jones",
+        "Yamamoto",
+        "Petrov",
+        "Khan",
+        "Singh",
+        "Silva",
     ]
     for i in range(50):
         fn = first_names[i % len(first_names)]
@@ -129,15 +159,19 @@ def _make_skills() -> list[Skill]:
     ]
 
 
-def _make_certifications(
-    rng: random.Random, resources: Sequence[Resource]
-) -> list[Certification]:
+def _make_certifications(rng: random.Random, resources: Sequence[Resource]) -> list[Certification]:
     """‌⁠‍15 certifications spread across persons."""
     persons = [r for r in resources if r.resource_type == "person"]
     cert_types = [
-        "Crane Operator", "Excavator Operator", "First Aid", "Welding Class A",
-        "Scaffolding Inspector", "Confined Space Entry", "Forklift Operator",
-        "Working at Heights", "Hot Work Permit",
+        "Crane Operator",
+        "Excavator Operator",
+        "First Aid",
+        "Welding Class A",
+        "Scaffolding Inspector",
+        "Confined Space Entry",
+        "Forklift Operator",
+        "Working at Heights",
+        "Hot Work Permit",
     ]
     out: list[Certification] = []
     for i in range(15):
@@ -241,9 +275,7 @@ def _make_requests(
     return out
 
 
-def _make_links(
-    rng: random.Random, resources: Sequence[Resource]
-) -> list[ResourceLink]:
+def _make_links(rng: random.Random, resources: Sequence[Resource]) -> list[ResourceLink]:
     persons = [r for r in resources if r.resource_type == "person"]
     equipment = [r for r in resources if r.resource_type == "equipment"]
     out: list[ResourceLink] = []

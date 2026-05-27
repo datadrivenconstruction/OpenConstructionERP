@@ -385,10 +385,7 @@ class BCFReader:
         # Hard size cap before we even open the archive — prevents
         # zip-bomb headers from making us touch a multi-GB payload.
         if len(raw) > self.max_total_bytes:
-            raise BCFSecurityError(
-                f"BCF archive is {len(raw)} bytes, exceeds cap "
-                f"{self.max_total_bytes}"
-            )
+            raise BCFSecurityError(f"BCF archive is {len(raw)} bytes, exceeds cap {self.max_total_bytes}")
 
         try:
             zf = zipfile.ZipFile(io.BytesIO(raw))
@@ -405,9 +402,7 @@ class BCFReader:
             version = self._read_version(zf, lower_names)
             if not version.startswith("3"):
                 # 3.0 only — the sibling 2.1 reader lives in bcf_xml.py.
-                raise BCFFormatError(
-                    f"Reader supports BCF 3.x only; got {version!r}"
-                )
+                raise BCFFormatError(f"Reader supports BCF 3.x only; got {version!r}")
 
             # ── project.bcfp (optional) ─────────────────────────────
             project = self._read_project(zf, lower_names)
@@ -436,29 +431,20 @@ class BCFReader:
         """
         infos = zf.infolist()
         if len(infos) > self.max_entries:
-            raise BCFSecurityError(
-                f"BCF archive has {len(infos)} entries (cap {self.max_entries})"
-            )
+            raise BCFSecurityError(f"BCF archive has {len(infos)} entries (cap {self.max_entries})")
         total = 0
         for info in infos:
             if _is_unsafe_zip_path(info.filename):
-                raise BCFSecurityError(
-                    f"Unsafe zip entry path: {info.filename!r}"
-                )
+                raise BCFSecurityError(f"Unsafe zip entry path: {info.filename!r}")
             total += info.file_size
             if total > self.max_total_bytes:
-                raise BCFSecurityError(
-                    f"BCF archive uncompressed size exceeds cap "
-                    f"({total} > {self.max_total_bytes})"
-                )
+                raise BCFSecurityError(f"BCF archive uncompressed size exceeds cap ({total} > {self.max_total_bytes})")
 
     def _parse_xml(self, raw: bytes):
         """Defused XML parse — disables DTD / external entities."""
         return ET.fromstring(raw)
 
-    def _read_version(
-        self, zf: zipfile.ZipFile, lower_names: dict[str, str]
-    ) -> str:
+    def _read_version(self, zf: zipfile.ZipFile, lower_names: dict[str, str]) -> str:
         """Read ``bcf.version`` → VersionId string."""
         key = lower_names.get("bcf.version")
         if key is None:
@@ -476,9 +462,7 @@ class BCFReader:
             raise BCFFormatError("bcf.version has no VersionId attribute")
         return vid
 
-    def _read_project(
-        self, zf: zipfile.ZipFile, lower_names: dict[str, str]
-    ) -> ParsedProject | None:
+    def _read_project(self, zf: zipfile.ZipFile, lower_names: dict[str, str]) -> ParsedProject | None:
         """Read ``project.bcfp`` — both ProjectInfo and ProjectExtension layouts."""
         key = lower_names.get("project.bcfp")
         if key is None:
@@ -499,9 +483,7 @@ class BCFReader:
             return None
         return ParsedProject(project_id=pid, name=name)
 
-    def _read_extensions(
-        self, zf: zipfile.ZipFile, lower_names: dict[str, str]
-    ) -> ParsedExtensions:
+    def _read_extensions(self, zf: zipfile.ZipFile, lower_names: dict[str, str]) -> ParsedExtensions:
         """Read ``extensions.xml`` enum lists."""
         key = lower_names.get("extensions.xml")
         if key is None:
@@ -524,14 +506,9 @@ class BCFReader:
             snippet_types=_enum("SnippetTypes", "SnippetType"),
         )
 
-    def _read_topics(
-        self, zf: zipfile.ZipFile, names: list[str]
-    ) -> list[ParsedTopic]:
+    def _read_topics(self, zf: zipfile.ZipFile, names: list[str]) -> list[ParsedTopic]:
         """Read every ``markup.bcf`` + its sibling .bcfv / .png files."""
-        markup_names = [
-            n for n in names
-            if n.lower().endswith("markup.bcf")
-        ]
+        markup_names = [n for n in names if n.lower().endswith("markup.bcf")]
         topics: list[ParsedTopic] = []
         for markup_name in markup_names:
             topic_dir = markup_name.rsplit("/", 1)[0] if "/" in markup_name else ""
@@ -549,10 +526,11 @@ class BCFReader:
     ) -> ParsedTopic | None:
         """Decode a single Topic. Resilient: a bad XML body → parse_error."""
         # Read viewpoints + snapshots that live next to this markup.
-        siblings = [
-            n for n in names
-            if topic_dir and n.startswith(f"{topic_dir}/") and n != markup_name
-        ] if topic_dir else [n for n in names if "/" not in n and n != markup_name]
+        siblings = (
+            [n for n in names if topic_dir and n.startswith(f"{topic_dir}/") and n != markup_name]
+            if topic_dir
+            else [n for n in names if "/" not in n and n != markup_name]
+        )
 
         snapshots: dict[str, bytes] = {}
         bcfv_blobs: dict[str, bytes] = {}
@@ -591,10 +569,7 @@ class BCFReader:
                 title="",
                 creation_date=datetime(1970, 1, 1, tzinfo=UTC),
                 creation_author="",
-                parse_error=(
-                    f"markup.bcf is not well-formed XML "
-                    f"({markup_name}): {exc}"
-                ),
+                parse_error=(f"markup.bcf is not well-formed XML ({markup_name}): {exc}"),
                 snapshots=snapshots,
             )
 
@@ -607,9 +582,7 @@ class BCFReader:
                 title="",
                 creation_date=datetime(1970, 1, 1, tzinfo=UTC),
                 creation_author="",
-                parse_error=(
-                    f"markup.bcf has no <Topic> element ({markup_name})"
-                ),
+                parse_error=(f"markup.bcf has no <Topic> element ({markup_name})"),
                 snapshots=snapshots,
             )
 
@@ -631,16 +604,8 @@ class BCFReader:
         title = (_text_or_none(topic_el, "Title") or "").strip()
         creation_date = _parse_dt(_text_or_none(topic_el, "CreationDate"))
         creation_author = _text_or_none(topic_el, "CreationAuthor") or ""
-        topic_type = (
-            topic_el.get("TopicType")
-            or _text_or_none(topic_el, "TopicType")
-            or ""
-        )
-        topic_status = (
-            topic_el.get("TopicStatus")
-            or _text_or_none(topic_el, "TopicStatus")
-            or ""
-        )
+        topic_type = topic_el.get("TopicType") or _text_or_none(topic_el, "TopicType") or ""
+        topic_status = topic_el.get("TopicStatus") or _text_or_none(topic_el, "TopicStatus") or ""
         missing: list[str] = []
         if not title:
             missing.append("Title")
@@ -660,10 +625,7 @@ class BCFReader:
                 title=title,
                 creation_date=creation_date or datetime(1970, 1, 1, tzinfo=UTC),
                 creation_author=creation_author,
-                parse_error=(
-                    f"Topic {guid} missing required field(s): "
-                    f"{', '.join(missing)} (in {markup_name})"
-                ),
+                parse_error=(f"Topic {guid} missing required field(s): {', '.join(missing)} (in {markup_name})"),
                 snapshots=snapshots,
             )
 
@@ -681,23 +643,17 @@ class BCFReader:
         labels_container = topic_el.find("Labels")
         if labels_container is not None:
             labels = tuple(
-                (lab.text or "").strip()
-                for lab in labels_container.findall("Label")
-                if lab.text and lab.text.strip()
+                (lab.text or "").strip() for lab in labels_container.findall("Label") if lab.text and lab.text.strip()
             )
         else:
             # 2.1-style fallback: repeated <Labels>val</Labels> siblings.
             labels = tuple(
-                (lab.text or "").strip()
-                for lab in topic_el.findall("Labels")
-                if lab.text and lab.text.strip()
+                (lab.text or "").strip() for lab in topic_el.findall("Labels") if lab.text and lab.text.strip()
             )
 
         # ── reference links ──
         reference_links = tuple(
-            (rl.text or "").strip()
-            for rl in topic_el.findall("ReferenceLink")
-            if rl.text and rl.text.strip()
+            (rl.text or "").strip() for rl in topic_el.findall("ReferenceLink") if rl.text and rl.text.strip()
         )
 
         # ── comments ──
@@ -753,9 +709,7 @@ class BCFReader:
                 seen_guids.add(guid)
             vp_ref_el = c_el.find("Viewpoint")
             vp_guid = (
-                _normalize_guid(vp_ref_el.get("Guid"))
-                if vp_ref_el is not None and vp_ref_el.get("Guid")
-                else None
+                _normalize_guid(vp_ref_el.get("Guid")) if vp_ref_el is not None and vp_ref_el.get("Guid") else None
             )
             out.append(
                 ParsedComment(
@@ -764,9 +718,7 @@ class BCFReader:
                     author=_text_or_none(c_el, "Author"),
                     comment=(_text_or_none(c_el, "Comment") or ""),
                     viewpoint_guid=vp_guid,
-                    modified_date=_parse_dt(
-                        _text_or_none(c_el, "ModifiedDate")
-                    ),
+                    modified_date=_parse_dt(_text_or_none(c_el, "ModifiedDate")),
                     modified_author=_text_or_none(c_el, "ModifiedAuthor"),
                     status=_text_or_none(c_el, "Status"),
                 )
@@ -795,18 +747,14 @@ class BCFReader:
                 guid = _normalize_guid(vp_el.get("Guid"))
                 if not guid:
                     continue
-                bcfv_ref = (
-                    _text_or_none(vp_el, "Viewpoint") or f"{guid}.bcfv"
-                ).lower()
+                bcfv_ref = (_text_or_none(vp_el, "Viewpoint") or f"{guid}.bcfv").lower()
                 blob = bcfv_blobs.get(bcfv_ref)
                 vp = self._parse_viewpoint_blob(guid, blob)
                 if vp is not None:
                     out.append(vp)
         return tuple(out)
 
-    def _parse_viewpoint_blob(
-        self, guid: str, blob: bytes | None
-    ) -> ParsedViewpoint | None:
+    def _parse_viewpoint_blob(self, guid: str, blob: bytes | None) -> ParsedViewpoint | None:
         """Decode one .bcfv file into a :class:`ParsedViewpoint`.
 
         Missing / unreadable .bcfv → return a viewpoint with the guid
@@ -878,9 +826,7 @@ class BCFReader:
             clipping_planes=tuple(clipping),
         )
 
-    def _decode_components(
-        self, root
-    ) -> tuple[bool, list[str], list[str], list[str]]:
+    def _decode_components(self, root) -> tuple[bool, list[str], list[str], list[str]]:
         """Decode Visibility + Selection per BCF 3.0 components.xsd.
 
         Visibility rule (inverse of :func:`writer._build_visinfo_xml`):

@@ -51,7 +51,9 @@ def _has_table(inspector: sa.engine.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.Inspector, table: str, column: str,
+    inspector: sa.engine.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     try:
         return column in {c["name"] for c in inspector.get_columns(table)}
@@ -110,7 +112,10 @@ def upgrade() -> None:
             sa.Column("parent_code", sa.String(32), nullable=True),
             sa.Column("level", sa.Integer(), nullable=False, server_default="1"),
             sa.Column(
-                "active", sa.Boolean(), nullable=False, server_default="1",
+                "active",
+                sa.Boolean(),
+                nullable=False,
+                server_default="1",
             ),
             sa.Column(
                 "created_at",
@@ -304,7 +309,10 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column(
-                "inputs_json", sa.JSON(), nullable=False, server_default="{}",
+                "inputs_json",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column(
                 "weights_json",
@@ -313,7 +321,9 @@ def upgrade() -> None:
                 server_default="{}",
             ),
             sa.Column(
-                "computed_at", sa.DateTime(timezone=True), nullable=False,
+                "computed_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
             ),
             sa.Column(
                 "created_at",
@@ -489,11 +499,15 @@ def upgrade() -> None:
             "oe_bi_dashboards_report_run",
             sa.Column("id", sa.String(36), primary_key=True),
             sa.Column(
-                "report_definition_id", sa.String(36), nullable=False,
+                "report_definition_id",
+                sa.String(36),
+                nullable=False,
             ),
             sa.Column("schedule_id", sa.String(36), nullable=True),
             sa.Column(
-                "triggered_by_user_id", sa.String(36), nullable=True,
+                "triggered_by_user_id",
+                sa.String(36),
+                nullable=True,
             ),
             sa.Column(
                 "started_at",
@@ -501,7 +515,9 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column(
-                "finished_at", sa.DateTime(timezone=True), nullable=True,
+                "finished_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
                 "output_format",

@@ -8,7 +8,6 @@ the FastAPI app — they only need the per-module SQLite from
 
 from __future__ import annotations
 
-import os
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any
@@ -20,12 +19,10 @@ from app.database import async_session_factory
 from app.modules.geo_hub import geocoder as gc
 from app.modules.geo_hub.geocoder import (
     CACHE_TTL,
-    GeocodeResult,
     ProjectAddress,
     geocode_address,
     project_address_from_jsonb,
 )
-
 
 # ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -95,7 +92,8 @@ async def test_address_country_only_returns_country_precision():
             200,
             json=[
                 {
-                    "lat": "51.0", "lon": "9.0",
+                    "lat": "51.0",
+                    "lon": "9.0",
                     "display_name": "Germany",
                     "addresstype": "country",
                     "class": "boundary",
@@ -106,7 +104,8 @@ async def test_address_country_only_returns_country_precision():
 
     async with _make_transport(handler) as client:
         result = await geocode_address(
-            ProjectAddress(country="Germany"), http_client=client,
+            ProjectAddress(country="Germany"),
+            http_client=client,
         )
     assert result is not None
     assert result.precision == "country"
@@ -124,7 +123,8 @@ async def test_empty_country_returns_none_without_network():
 
     async with _make_transport(handler) as client:
         result = await geocode_address(
-            ProjectAddress(country=""), http_client=client,
+            ProjectAddress(country=""),
+            http_client=client,
         )
     assert result is None
     assert calls == 0  # short-circuits before hitting the network
@@ -153,7 +153,8 @@ async def test_user_agent_header_set_correctly():
 async def test_self_hosted_base_url_honoured(monkeypatch):
     captured: list[httpx.Request] = []
     monkeypatch.setenv(
-        "OE_GEOCODER_BASE_URL", "https://nominatim.example.com",
+        "OE_GEOCODER_BASE_URL",
+        "https://nominatim.example.com",
     )
 
     async def handler(req: httpx.Request) -> httpx.Response:
@@ -239,8 +240,11 @@ async def test_cache_hit_returns_without_http_call():
         return httpx.Response(200, json=_berlin_payload())
 
     addr = ProjectAddress(
-        country="Germany", city="Berlin", street="Hauptstraße",
-        house_number="12", postal_code="10115",
+        country="Germany",
+        city="Berlin",
+        street="Hauptstraße",
+        house_number="12",
+        postal_code="10115",
     )
     async with _make_transport(handler) as client:
         first = await geocode_address(addr, http_client=client)
@@ -306,8 +310,10 @@ async def test_precision_address_for_house_payload():
     async with _make_transport(handler) as client:
         result = await geocode_address(
             ProjectAddress(
-                country="Germany", city="Berlin",
-                street="Hauptstraße", house_number="12",
+                country="Germany",
+                city="Berlin",
+                street="Hauptstraße",
+                house_number="12",
             ),
             http_client=client,
         )
@@ -438,9 +444,7 @@ async def test_hit_count_incremented_on_cache_hit():
         await geocode_address(addr, http_client=client)
 
     async with async_session_factory() as session:
-        row = (
-            await session.execute(select(GeocodeCache))
-        ).scalars().first()
+        row = (await session.execute(select(GeocodeCache))).scalars().first()
     assert row is not None
     # Initial write (0) + two hits = 2.
     assert row.hit_count >= 2

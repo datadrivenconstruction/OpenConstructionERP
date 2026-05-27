@@ -74,7 +74,6 @@ from app.modules.qms.schemas import (
     InspectionCreate,
     InspectionSignatureCreate,
     NCRCreate,
-    NCRActionCreate,
 )
 from app.modules.qms.service import QMSService
 from app.modules.users.models import APIKey, User
@@ -213,14 +212,16 @@ async def test_signature_dedup_same_user_same_role(svc: QMSService) -> None:
     await svc.add_signature(
         insp.id,
         InspectionSignatureCreate(
-            signer_user_id=signer, signer_role="GC",
+            signer_user_id=signer,
+            signer_role="GC",
         ),
     )
     with pytest.raises(ValueError, match="already signed"):
         await svc.add_signature(
             insp.id,
             InspectionSignatureCreate(
-                signer_user_id=signer, signer_role="GC",
+                signer_user_id=signer,
+                signer_role="GC",
             ),
         )
 
@@ -238,13 +239,15 @@ async def test_signature_same_user_different_role_allowed(
     await svc.add_signature(
         insp.id,
         InspectionSignatureCreate(
-            signer_user_id=signer, signer_role="GC",
+            signer_user_id=signer,
+            signer_role="GC",
         ),
     )
     sig = await svc.add_signature(
         insp.id,
         InspectionSignatureCreate(
-            signer_user_id=signer, signer_role="designer",
+            signer_user_id=signer,
+            signer_role="designer",
         ),
     )
     assert sig.signer_role == "designer"

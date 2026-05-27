@@ -76,11 +76,7 @@ class RiskVectorAdapter:
             "category": getattr(row, "category", "") or "",
             "impact": str(getattr(row, "impact_severity", "") or ""),
             "probability": str(getattr(row, "probability", "") or ""),
-            "severity": (
-                str(getattr(row, "risk_tier", "") or "")
-                if hasattr(row, "risk_tier")
-                else ""
-            ),
+            "severity": (str(getattr(row, "risk_tier", "") or "") if hasattr(row, "risk_tier") else ""),
         }
 
     def project_id_of(self, row: RiskItem) -> str | None:

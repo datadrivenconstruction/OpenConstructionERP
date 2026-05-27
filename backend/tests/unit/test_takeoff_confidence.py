@@ -24,7 +24,6 @@ from pydantic import ValidationError
 
 from app.modules.takeoff.schemas import ExtractedElement
 
-
 # ---------------------------------------------------------------------------
 # ExtractedElement schema — field-level validation
 # ---------------------------------------------------------------------------
@@ -34,15 +33,11 @@ class TestExtractedElementConfidenceBound:
     """The ``confidence`` field on ExtractedElement must be in [0.0, 1.0]."""
 
     def test_confidence_zero_is_valid(self) -> None:
-        el = ExtractedElement(
-            id="x1", category="general", description="Wall", quantity=10.0, unit="m2", confidence=0.0
-        )
+        el = ExtractedElement(id="x1", category="general", description="Wall", quantity=10.0, unit="m2", confidence=0.0)
         assert el.confidence == 0.0
 
     def test_confidence_one_is_valid(self) -> None:
-        el = ExtractedElement(
-            id="x2", category="general", description="Wall", quantity=10.0, unit="m2", confidence=1.0
-        )
+        el = ExtractedElement(id="x2", category="general", description="Wall", quantity=10.0, unit="m2", confidence=1.0)
         assert el.confidence == 1.0
 
     def test_confidence_middle_is_valid(self) -> None:
@@ -175,9 +170,7 @@ async def test_extract_tables_high_quality_row_has_high_confidence() -> None:
     result = await svc.extract_tables(str(uuid.uuid4()))
     elements = result["elements"]
     assert len(elements) == 1
-    assert elements[0]["confidence"] >= 0.7, (
-        f"High-quality row should score >= 0.7, got {elements[0]['confidence']}"
-    )
+    assert elements[0]["confidence"] >= 0.7, f"High-quality row should score >= 0.7, got {elements[0]['confidence']}"
 
 
 @pytest.mark.asyncio
@@ -209,9 +202,7 @@ async def test_extract_tables_no_description_lowers_confidence() -> None:
     # depending on whether description == "" trips the filter. Either way,
     # any included row must have confidence < 0.7.
     for el in elements:
-        assert el["confidence"] < 0.7, (
-            f"Row with no description should score < 0.7, got {el['confidence']}"
-        )
+        assert el["confidence"] < 0.7, f"Row with no description should score < 0.7, got {el['confidence']}"
 
 
 # ---------------------------------------------------------------------------
@@ -235,8 +226,7 @@ async def test_manual_measurement_has_null_confidence_not_zero() -> None:
     # Verify the ORM model has NO confidence column at all.
     columns = {c.key for c in TakeoffMeasurement.__table__.columns}
     assert "confidence" not in columns, (
-        "TakeoffMeasurement must NOT have a confidence column — "
-        "manual measurements don't have an AI score."
+        "TakeoffMeasurement must NOT have a confidence column — manual measurements don't have an AI score."
     )
 
 

@@ -90,16 +90,10 @@ class TestNumericRulesDoNotCrashOnLocaleStrings:
                 }
             ]
         }
-        report = await validation_engine.validate(
-            data=data, rule_sets=["boq_quality"]
-        )
+        report = await validation_engine.validate(data=data, rule_sets=["boq_quality"])
         assert report.engine_errors == []
         # quantity/rate parse fine → those completeness rules pass.
-        bad = {
-            r.rule_id
-            for r in report.results
-            if not r.passed and not r.is_engine_error
-        }
+        bad = {r.rule_id for r in report.results if not r.passed and not r.is_engine_error}
         assert "boq_quality.position_has_quantity" not in bad
         assert "boq_quality.position_has_unit_rate" not in bad
         assert "boq_quality.total_mismatch" not in bad
@@ -120,10 +114,7 @@ class TestMedian:
     async def test_unit_rate_in_range_uses_true_median(self) -> None:
         ctx = ValidationContext(
             data={
-                "positions": [
-                    {"id": str(i), "ordinal": str(i), "unit_rate": v}
-                    for i, v in enumerate([10, 20, 30, 40])
-                ]
+                "positions": [{"id": str(i), "ordinal": str(i), "unit_rate": v} for i, v in enumerate([10, 20, 30, 40])]
             }
         )
         results = await UnitRateInRange().validate(ctx)
@@ -136,12 +127,7 @@ class TestTotalMismatchTolerance:
     @pytest.mark.asyncio
     async def test_float_noise_within_absolute_floor_passes(self) -> None:
         ctx = ValidationContext(
-            data={
-                "positions": [
-                    {"id": "p", "ordinal": "1", "quantity": 0.1,
-                     "unit_rate": 0.2, "total": 0.02}
-                ]
-            }
+            data={"positions": [{"id": "p", "ordinal": "1", "quantity": 0.1, "unit_rate": 0.2, "total": 0.02}]}
         )
         r = await TotalMismatch().validate(ctx)
         assert r[0].passed is True
@@ -152,10 +138,7 @@ class TestTotalMismatchTolerance:
         # the magnitude-aware tolerance (~2.0) catches it (E-VAL-014).
         ctx = ValidationContext(
             data={
-                "positions": [
-                    {"id": "p", "ordinal": "1", "quantity": 1000.0,
-                     "unit_rate": 2000.0, "total": 2000005.0}
-                ]
+                "positions": [{"id": "p", "ordinal": "1", "quantity": 1000.0, "unit_rate": 2000.0, "total": 2000005.0}]
             }
         )
         r = await TotalMismatch().validate(ctx)
@@ -167,8 +150,7 @@ class TestTotalMismatchTolerance:
         ctx = ValidationContext(
             data={
                 "positions": [
-                    {"id": "p", "ordinal": "1", "quantity": "1.234,56",
-                     "unit_rate": "150,00", "total": "185.184,00"}
+                    {"id": "p", "ordinal": "1", "quantity": "1.234,56", "unit_rate": "150,00", "total": "185.184,00"}
                 ]
             }
         )

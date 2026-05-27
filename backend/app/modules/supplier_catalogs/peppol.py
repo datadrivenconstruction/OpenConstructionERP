@@ -126,11 +126,22 @@ def _unit_attr(parent: Any, path: str) -> tuple[Decimal, str]:
 
 # Map UBL UNECE recommendation 20 unit codes → human-readable abbreviations
 _UNIT_MAP = {
-    "EA": "pcs", "C62": "pcs", "PCE": "pcs", "PR": "pair",
-    "MTR": "m", "KMT": "km", "CMT": "cm", "MMT": "mm",
-    "MTK": "m2", "MTQ": "m3", "LTR": "l",
-    "KGM": "kg", "TNE": "ton", "GRM": "g",
-    "HUR": "hr", "DAY": "day",
+    "EA": "pcs",
+    "C62": "pcs",
+    "PCE": "pcs",
+    "PR": "pair",
+    "MTR": "m",
+    "KMT": "km",
+    "CMT": "cm",
+    "MMT": "mm",
+    "MTK": "m2",
+    "MTQ": "m3",
+    "LTR": "l",
+    "KGM": "kg",
+    "TNE": "ton",
+    "GRM": "g",
+    "HUR": "hr",
+    "DAY": "day",
 }
 
 
@@ -149,8 +160,7 @@ def parse_peppol_invoice(xml_source: bytes | str) -> PeppolInvoiceParsed:
         # Hard refusal: parsing untrusted PEPPOL XML without defusedxml
         # would expose the platform to XXE / entity-expansion attacks.
         raise PeppolParseError(
-            "Secure XML parser (defusedxml) is not installed; refusing to "
-            "parse untrusted PEPPOL document.",
+            "Secure XML parser (defusedxml) is not installed; refusing to parse untrusted PEPPOL document.",
         )
     raw = xml_source if isinstance(xml_source, bytes) else xml_source.encode("utf-8")
     try:
@@ -183,9 +193,7 @@ def parse_peppol_invoice(xml_source: bytes | str) -> PeppolInvoiceParsed:
 
     # Order reference (buyer PO)
     order_ref_el = root.find("cac:OrderReference/cbc:ID", UBL_NS)
-    order_reference = (
-        order_ref_el.text.strip() if (order_ref_el is not None and order_ref_el.text) else None
-    )
+    order_reference = order_ref_el.text.strip() if (order_ref_el is not None and order_ref_el.text) else None
 
     # Supplier (AccountingSupplierParty)
     supplier = root.find("cac:AccountingSupplierParty/cac:Party", UBL_NS)
@@ -202,7 +210,8 @@ def parse_peppol_invoice(xml_source: bytes | str) -> PeppolInvoiceParsed:
         if ep is not None and ep.text:
             supplier_endpoint = ep.text.strip()
         supplier_vat = _find_text(
-            supplier, "cac:PartyTaxScheme/cbc:CompanyID",
+            supplier,
+            "cac:PartyTaxScheme/cbc:CompanyID",
         )
 
     # Buyer (AccountingCustomerParty)
@@ -211,7 +220,8 @@ def parse_peppol_invoice(xml_source: bytes | str) -> PeppolInvoiceParsed:
     buyer_endpoint: str | None = None
     if buyer is not None:
         buyer_name = _find_text(buyer, "cac:PartyName/cbc:Name") or _find_text(
-            buyer, "cac:PartyLegalEntity/cbc:RegistrationName",
+            buyer,
+            "cac:PartyLegalEntity/cbc:RegistrationName",
         )
         ep = buyer.find("cbc:EndpointID", UBL_NS)
         if ep is not None and ep.text:
@@ -239,9 +249,7 @@ def parse_peppol_invoice(xml_source: bytes | str) -> PeppolInvoiceParsed:
     for line in root.findall("cac:InvoiceLine", UBL_NS):
         line_id = _find_text(line, "cbc:ID") or ""
         description = (
-            _find_text(line, "cac:Item/cbc:Name")
-            or _find_text(line, "cac:Item/cbc:Description")
-            or "(unnamed line)"
+            _find_text(line, "cac:Item/cbc:Name") or _find_text(line, "cac:Item/cbc:Description") or "(unnamed line)"
         )
         qty, unit_code = _unit_attr(line, "cbc:InvoicedQuantity")
         unit_price = _to_decimal(
@@ -249,10 +257,12 @@ def parse_peppol_invoice(xml_source: bytes | str) -> PeppolInvoiceParsed:
         )
         line_total = _to_decimal(_find_text(line, "cbc:LineExtensionAmount"))
         vendor_sku = _find_text(
-            line, "cac:Item/cac:SellersItemIdentification/cbc:ID",
+            line,
+            "cac:Item/cac:SellersItemIdentification/cbc:ID",
         )
         buyer_sku = _find_text(
-            line, "cac:Item/cac:BuyersItemIdentification/cbc:ID",
+            line,
+            "cac:Item/cac:BuyersItemIdentification/cbc:ID",
         )
         lines.append(
             PeppolInvoiceLine(

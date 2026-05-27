@@ -76,7 +76,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -133,9 +132,7 @@ async def _register_and_login(
         "/api/v1/users/auth/register",
         json={"email": email, "password": password, "full_name": f"Tenant {tenant}"},
     )
-    assert reg.status_code in (200, 201), (
-        f"register failed for {tenant}: {reg.status_code} {reg.text}"
-    )
+    assert reg.status_code in (200, 201), f"register failed for {tenant}: {reg.status_code} {reg.text}"
     user_id = reg.json()["id"]
 
     login = await client.post(
@@ -162,16 +159,15 @@ async def _promote_to_admin(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            update(User).where(User.email == email.lower()).values(role="admin")
-        )
+        await session.execute(update(User).where(User.email == email.lower()).values(role="admin"))
         await session.commit()
 
 
 async def _re_login(client: AsyncClient, email: str, password: str) -> dict[str, str]:
     """Log in again so the JWT carries the freshly-promoted role claim."""
     resp = await client.post(
-        "/api/v1/users/auth/login", json={"email": email, "password": password},
+        "/api/v1/users/auth/login",
+        json={"email": email, "password": password},
     )
     assert resp.status_code == 200, resp.text
     token = resp.json()["access_token"]
@@ -236,9 +232,7 @@ async def two_tenants(http_client):
         },
         headers=a_headers,
     )
-    assert contact.status_code in (200, 201), (
-        f"contact create failed: {contact.status_code} {contact.text}"
-    )
+    assert contact.status_code in (200, 201), f"contact create failed: {contact.status_code} {contact.text}"
     contact_id = contact.json()["id"]
 
     # ── Tenant A's dashboard snapshot — direct DB seed ─────────────────────
@@ -291,11 +285,11 @@ async def test_tenant_b_cannot_get_tenant_a_project(http_client, two_tenants):
     b = two_tenants["b"]
 
     resp = await http_client.get(
-        f"/api/v1/projects/{a['project_id']}", headers=b["headers"],
+        f"/api/v1/projects/{a['project_id']}",
+        headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B got status {resp.status_code} on tenant A's project. "
-        f"Body: {resp.text!r}"
+        f"LEAK: tenant B got status {resp.status_code} on tenant A's project. Body: {resp.text!r}"
     )
 
 
@@ -310,9 +304,7 @@ async def test_tenant_b_project_list_excludes_tenant_a(http_client, two_tenants)
     body = resp.json()
     items = body if isinstance(body, list) else body.get("items", [])
     leaked = [p for p in items if p.get("id") == a["project_id"]]
-    assert leaked == [], (
-        f"LEAK: tenant B's project list contains tenant A's project: {leaked!r}"
-    )
+    assert leaked == [], f"LEAK: tenant B's project list contains tenant A's project: {leaked!r}"
 
 
 # ── Contacts ───────────────────────────────────────────────────────────────
@@ -325,14 +317,13 @@ async def test_tenant_b_contact_list_excludes_tenant_a(http_client, two_tenants)
     b = two_tenants["b"]
 
     resp = await http_client.get(
-        "/api/v1/contacts/?limit=500", headers=b["headers"],
+        "/api/v1/contacts/?limit=500",
+        headers=b["headers"],
     )
     assert resp.status_code == 200, resp.text
     items = resp.json().get("items", [])
     leaked = [c for c in items if c.get("id") == a["contact_id"]]
-    assert leaked == [], (
-        f"LEAK: tenant B's contact list contains tenant A's contact: {leaked!r}"
-    )
+    assert leaked == [], f"LEAK: tenant B's contact list contains tenant A's contact: {leaked!r}"
 
 
 @pytest.mark.asyncio
@@ -342,11 +333,11 @@ async def test_tenant_b_cannot_get_tenant_a_contact(http_client, two_tenants):
     b = two_tenants["b"]
 
     resp = await http_client.get(
-        f"/api/v1/contacts/{a['contact_id']}", headers=b["headers"],
+        f"/api/v1/contacts/{a['contact_id']}",
+        headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B got status {resp.status_code} on tenant A's contact. "
-        f"Body: {resp.text!r}"
+        f"LEAK: tenant B got status {resp.status_code} on tenant A's contact. Body: {resp.text!r}"
     )
 
 
@@ -362,8 +353,7 @@ async def test_tenant_b_cannot_patch_tenant_a_contact(http_client, two_tenants):
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B was able to PATCH tenant A's contact "
-        f"(status {resp.status_code}). Body: {resp.text!r}"
+        f"LEAK: tenant B was able to PATCH tenant A's contact (status {resp.status_code}). Body: {resp.text!r}"
     )
 
 
@@ -374,11 +364,11 @@ async def test_tenant_b_cannot_delete_tenant_a_contact(http_client, two_tenants)
     b = two_tenants["b"]
 
     resp = await http_client.delete(
-        f"/api/v1/contacts/{a['contact_id']}", headers=b["headers"],
+        f"/api/v1/contacts/{a['contact_id']}",
+        headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B was able to DELETE tenant A's contact "
-        f"(status {resp.status_code}). Body: {resp.text!r}"
+        f"LEAK: tenant B was able to DELETE tenant A's contact (status {resp.status_code}). Body: {resp.text!r}"
     )
 
 
@@ -396,8 +386,7 @@ async def test_tenant_b_cannot_get_tenant_a_snapshot(http_client, two_tenants):
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B got status {resp.status_code} on tenant A's snapshot. "
-        f"Body: {resp.text!r}"
+        f"LEAK: tenant B got status {resp.status_code} on tenant A's snapshot. Body: {resp.text!r}"
     )
 
 
@@ -412,8 +401,7 @@ async def test_tenant_b_cannot_delete_tenant_a_snapshot(http_client, two_tenants
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B was able to DELETE tenant A's snapshot "
-        f"(status {resp.status_code}). Body: {resp.text!r}"
+        f"LEAK: tenant B was able to DELETE tenant A's snapshot (status {resp.status_code}). Body: {resp.text!r}"
     )
 
     # Confirm the row still exists from A's side.
@@ -422,14 +410,14 @@ async def test_tenant_b_cannot_delete_tenant_a_snapshot(http_client, two_tenants
         headers=a["headers"],
     )
     assert a_view.status_code == 200, (
-        "tenant A's snapshot disappeared after B's DELETE attempt — "
-        f"got {a_view.status_code}: {a_view.text!r}"
+        f"tenant A's snapshot disappeared after B's DELETE attempt — got {a_view.status_code}: {a_view.text!r}"
     )
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_dashboards_project_list_excludes_tenant_a(
-    http_client, two_tenants,
+    http_client,
+    two_tenants,
 ):
     """``GET /dashboards/projects/{a_project}/snapshots`` from B must be empty.
 
@@ -448,10 +436,6 @@ async def test_tenant_b_dashboards_project_list_excludes_tenant_a(
     if resp.status_code == 200:
         items = resp.json().get("items", [])
         leaked = [s for s in items if s.get("id") == a["snapshot_id"]]
-        assert leaked == [], (
-            f"LEAK: tenant B sees tenant A's snapshot in project list: {leaked!r}"
-        )
+        assert leaked == [], f"LEAK: tenant B sees tenant A's snapshot in project list: {leaked!r}"
     else:
-        assert resp.status_code in (403, 404), (
-            f"unexpected status {resp.status_code}: {resp.text!r}"
-        )
+        assert resp.status_code in (403, 404), f"unexpected status {resp.status_code}: {resp.text!r}"

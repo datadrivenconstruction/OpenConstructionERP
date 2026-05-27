@@ -107,10 +107,7 @@ class ProgressEntry(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<ProgressEntry position={self.boq_position_id} "
-            f"period={self.period_label} pct={self.percent_complete}>"
-        )
+        return f"<ProgressEntry position={self.boq_position_id} period={self.period_label} pct={self.percent_complete}>"
 
 
 class ProgressPlan(Base):

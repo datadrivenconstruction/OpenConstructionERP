@@ -43,9 +43,7 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
     return name in inspector.get_table_names()
 
 
-def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str
-) -> bool:
+def _has_index(inspector: sa.engine.reflection.Inspector, table: str, name: str) -> bool:
     if not _has_table(inspector, table):
         return False
     return any(idx["name"] == name for idx in inspector.get_indexes(table))

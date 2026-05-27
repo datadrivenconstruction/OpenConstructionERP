@@ -30,20 +30,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies import CurrentUserId, SessionDep
 from app.modules.eac.aliases.bulk_resolver import resolve_bulk
 from app.modules.eac.aliases.resolver import resolve_alias
+
 # R7 audit (Wave 3): magic-byte denylist for alias upload sniffing.
 # Reuse the proven set from property_dev so the denylist stays consistent
 # across modules. CSV has no magic-byte signature so we denylist obvious
 # non-text binaries.
 ALIAS_UPLOAD_BANNED_PREFIXES: tuple[bytes, ...] = (
-    b"MZ",                # Windows PE
-    b"\x7fELF",           # Linux ELF
+    b"MZ",  # Windows PE
+    b"\x7fELF",  # Linux ELF
     b"\xca\xfe\xba\xbe",  # Mach-O / Java class
-    b"PK\x03\x04",        # ZIP / XLSX / DOCX
+    b"PK\x03\x04",  # ZIP / XLSX / DOCX
     b"PK\x05\x06",
     b"\xd0\xcf\x11\xe0",  # OLE compound (legacy XLS)
     b"%PDF-",
     b"\x89PNG",
-    b"\xff\xd8\xff",      # JPEG
+    b"\xff\xd8\xff",  # JPEG
     b"GIF8",
 )
 # Hard cap on alias-import body size. Aliases are tiny rows; an 8 MB
@@ -66,10 +67,7 @@ def validate_alias_upload_bytes(raw: bytes) -> None:
     if len(raw) > ALIAS_UPLOAD_MAX_BYTES:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=(
-                f"Upload exceeds {ALIAS_UPLOAD_MAX_BYTES // (1024 * 1024)} MB "
-                f"limit (got {len(raw)} bytes)."
-            ),
+            detail=(f"Upload exceeds {ALIAS_UPLOAD_MAX_BYTES // (1024 * 1024)} MB limit (got {len(raw)} bytes)."),
         )
     if not raw:
         return
@@ -78,11 +76,10 @@ def validate_alias_upload_bytes(raw: bytes) -> None:
         if head.startswith(sig):
             raise HTTPException(
                 status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=(
-                    "Uploaded file does not look like CSV or JSON "
-                    "(binary signature detected)."
-                ),
+                detail=("Uploaded file does not look like CSV or JSON (binary signature detected)."),
             )
+
+
 from app.modules.eac.aliases.schemas import (
     EacAliasBulkResolveRequest,
     EacAliasExportRequest,
@@ -148,10 +145,7 @@ def _check_source_filter(value: str | None) -> None:
     if value not in ALIAS_SOURCE_FILTERS:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=(
-                f"source_filter must be one of {ALIAS_SOURCE_FILTERS}, "
-                f"got '{value}'"
-            ),
+            detail=(f"source_filter must be one of {ALIAS_SOURCE_FILTERS}, got '{value}'"),
         )
 
 
@@ -161,16 +155,11 @@ def _check_vth(value: str | None) -> None:
     if value not in ALIAS_VALUE_TYPE_HINTS:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=(
-                f"value_type_hint must be one of {ALIAS_VALUE_TYPE_HINTS}, "
-                f"got '{value}'"
-            ),
+            detail=(f"value_type_hint must be one of {ALIAS_VALUE_TYPE_HINTS}, got '{value}'"),
         )
 
 
-async def _resolve_tenant_id(
-    session: AsyncSession, user_id: str
-) -> uuid.UUID:
+async def _resolve_tenant_id(session: AsyncSession, user_id: str) -> uuid.UUID:
     """‌⁠‍Resolve the current user's tenant.
 
     Mirrors the helper used by :mod:`app.modules.eac.router` so this
@@ -281,9 +270,7 @@ async def get_alias_route(
     """
     tenant_id = await _resolve_tenant_id(session, user_id)
     alias = await session.get(EacParameterAlias, alias_id)
-    if alias is None or (
-        alias.tenant_id is not None and alias.tenant_id != tenant_id
-    ):
+    if alias is None or (alias.tenant_id is not None and alias.tenant_id != tenant_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Alias {alias_id} not found",
@@ -376,9 +363,7 @@ async def get_alias_usages_route(
     """
     tenant_id = await _resolve_tenant_id(session, user_id)
     alias = await session.get(EacParameterAlias, alias_id)
-    if alias is None or (
-        alias.tenant_id is not None and alias.tenant_id != tenant_id
-    ):
+    if alias is None or (alias.tenant_id is not None and alias.tenant_id != tenant_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Alias {alias_id} not found",
@@ -407,9 +392,7 @@ async def test_alias_route(
     _check_source_filter(payload.source)
     tenant_id = await _resolve_tenant_id(session, user_id)
     alias = await session.get(EacParameterAlias, alias_id)
-    if alias is None or (
-        alias.tenant_id is not None and alias.tenant_id != tenant_id
-    ):
+    if alias is None or (alias.tenant_id is not None and alias.tenant_id != tenant_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Alias {alias_id} not found",
@@ -504,9 +487,7 @@ async def resolve_alias_route(
     """
     tenant_id = await _resolve_tenant_id(session, user_id)
     alias = await session.get(EacParameterAlias, payload.alias_id)
-    if alias is None or (
-        alias.tenant_id is not None and alias.tenant_id != tenant_id
-    ):
+    if alias is None or (alias.tenant_id is not None and alias.tenant_id != tenant_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Alias {payload.alias_id} not found",
@@ -559,12 +540,7 @@ async def export_aliases_route(
         aliases = [a for a in aliases if not a.is_built_in]
 
     if format == "json":
-        return {
-            "aliases": [
-                EacParameterAliasRead.model_validate(a).model_dump(mode="json")
-                for a in aliases
-            ]
-        }
+        return {"aliases": [EacParameterAliasRead.model_validate(a).model_dump(mode="json") for a in aliases]}
 
     buf = io.StringIO()
     writer = csv.writer(buf)
@@ -655,7 +631,8 @@ async def import_aliases_route(
                     {
                         "pattern": row.get("synonym_pattern") or row.get("pattern") or "",
                         "kind": row.get("kind") or "exact",
-                        "case_sensitive": (row.get("case_sensitive") or "0") in (
+                        "case_sensitive": (row.get("case_sensitive") or "0")
+                        in (
                             "1",
                             "true",
                             "True",
@@ -717,7 +694,10 @@ async def import_aliases_route(
                     synonyms=synonyms,
                 )
                 await update_alias(
-                    session, existing.id, update_payload, tenant_id=tenant_id,
+                    session,
+                    existing.id,
+                    update_payload,
+                    tenant_id=tenant_id,
                 )
                 summary.updated += 1
         except Exception as exc:  # noqa: BLE001

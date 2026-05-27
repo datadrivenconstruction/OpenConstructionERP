@@ -23,9 +23,7 @@ class KPISnapshot(Base):
     """
 
     __tablename__ = "oe_reporting_kpi_snapshot"
-    __table_args__ = (
-        UniqueConstraint("project_id", "snapshot_date", name="uq_kpi_project_date"),
-    )
+    __table_args__ = (UniqueConstraint("project_id", "snapshot_date", name="uq_kpi_project_date"),)
 
     project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
     snapshot_date: Mapped[str] = mapped_column(String(20), nullable=False)  # ISO date
@@ -34,7 +32,9 @@ class KPISnapshot(Base):
     cpi: Mapped[str | None] = mapped_column(String(20), nullable=True, default=None)
     spi: Mapped[str | None] = mapped_column(String(20), nullable=True, default=None)
     budget_consumed_pct: Mapped[str | None] = mapped_column(
-        String(20), nullable=True, default=None,
+        String(20),
+        nullable=True,
+        default=None,
     )
 
     # Quality / defects
@@ -43,7 +43,9 @@ class KPISnapshot(Base):
 
     # Schedule
     schedule_progress_pct: Mapped[str | None] = mapped_column(
-        String(20), nullable=True, default=None,
+        String(20),
+        nullable=True,
+        default=None,
     )
 
     # Submittals & RFIs
@@ -52,7 +54,9 @@ class KPISnapshot(Base):
 
     # Risk
     risk_score_avg: Mapped[str | None] = mapped_column(
-        String(20), nullable=True, default=None,
+        String(20),
+        nullable=True,
+        default=None,
     )
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
@@ -87,20 +91,31 @@ class ReportTemplate(Base):
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     name_translations: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=True, default=None,
+        JSON,
+        nullable=True,
+        default=None,
     )
     report_type: Mapped[str] = mapped_column(
-        String(50), nullable=False,
+        String(50),
+        nullable=False,
     )  # project_status / cost_report / schedule_status / safety_report / inspection_report / portfolio_summary
     description: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
     template_data: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )  # sections, fields, layout config
     is_system: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
     created_by: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, default=None,
+        GUID(),
+        nullable=True,
+        default=None,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -114,7 +129,9 @@ class ReportTemplate(Base):
     # We store the raw string and parse via ``croniter`` at run time so
     # callers can read back the same expression the user typed.
     schedule_cron: Mapped[str | None] = mapped_column(
-        String(100), nullable=True, default=None,
+        String(100),
+        nullable=True,
+        default=None,
     )
     # List of email addresses or user-ids (JSON-serialised). The worker
     # resolves user-ids to emails at send time.
@@ -125,21 +142,32 @@ class ReportTemplate(Base):
         server_default="[]",
     )
     is_scheduled: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0", index=True,
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
+        index=True,
     )
     # ISO-8601 strings for cross-DB portability — matches the rest of
     # this module's datetime conventions.
     last_run_at: Mapped[str | None] = mapped_column(
-        String(32), nullable=True, default=None,
+        String(32),
+        nullable=True,
+        default=None,
     )
     next_run_at: Mapped[str | None] = mapped_column(
-        String(32), nullable=True, default=None, index=True,
+        String(32),
+        nullable=True,
+        default=None,
+        index=True,
     )
     # Optional scope — when set, the worker renders the report for just
     # this project. ``None`` = portfolio report across every project the
     # creator can read.
     project_id_scope: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, default=None,
+        GUID(),
+        nullable=True,
+        default=None,
     )
 
     def __repr__(self) -> str:
@@ -153,22 +181,32 @@ class GeneratedReport(Base):
 
     project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
     template_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, default=None,
+        GUID(),
+        nullable=True,
+        default=None,
     )
     report_type: Mapped[str] = mapped_column(String(50), nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     generated_at: Mapped[str] = mapped_column(String(20), nullable=False)
     generated_by: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, default=None,
+        GUID(),
+        nullable=True,
+        default=None,
     )
     format: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="pdf",
+        String(20),
+        nullable=False,
+        default="pdf",
     )  # pdf / excel / html
     storage_key: Mapped[str | None] = mapped_column(
-        String(500), nullable=True, default=None,
+        String(500),
+        nullable=True,
+        default=None,
     )
     data_snapshot: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=True, default=None,
+        JSON,
+        nullable=True,
+        default=None,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

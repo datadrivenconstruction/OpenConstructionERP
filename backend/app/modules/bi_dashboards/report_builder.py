@@ -184,7 +184,8 @@ def build_xlsx_report(
         return build_csv_report(report_name=report_name, rows=rows)
 
     path = os.path.join(
-        _reports_dir(), _safe_filename(report_name, "xlsx"),
+        _reports_dir(),
+        _safe_filename(report_name, "xlsx"),
     )
     wb = Workbook()
     ws = wb.active
@@ -316,9 +317,7 @@ def export_widget_svg(
         sy = h - pad - (y - y_min) / y_range * (h - 2 * pad)
         return sx, sy
 
-    path_d = "M " + " L ".join(
-        f"{sx:.1f} {sy:.1f}" for sx, sy in (_to_svg(x, y) for x, y in points)
-    )
+    path_d = "M " + " L ".join(f"{sx:.1f} {sy:.1f}" for sx, sy in (_to_svg(x, y) for x, y in points))
     title = f"{widget_label} ({unit})" if unit else widget_label
     svg = (
         '<svg xmlns="http://www.w3.org/2000/svg" '

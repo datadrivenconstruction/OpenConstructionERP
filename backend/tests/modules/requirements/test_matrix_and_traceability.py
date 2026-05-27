@@ -27,7 +27,7 @@ from __future__ import annotations
 import time
 import uuid
 from datetime import UTC, datetime
-from typing import AsyncIterator, Any
+from typing import AsyncIterator
 
 import pytest
 import pytest_asyncio
@@ -39,33 +39,25 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from unittest.mock import patch
-
-from app.database import Base
 
 # Ensure FK targets are in metadata.
 import app.modules.boq.models  # noqa: F401
 import app.modules.projects.models  # noqa: F401
-
+from app.database import Base
 from app.dependencies import (
     get_current_user_id,
     get_current_user_payload,
     get_session,
     verify_project_access,
 )
-from app.modules.projects.models import Project, ProjectMilestone, ProjectWBS
+from app.modules.projects.models import Project
 from app.modules.requirements.models import (
     Requirement,
     RequirementDeliverable,
     RequirementSet,
 )
-from app.modules.requirements.schemas import (
-    DeliverableCreate,
-    RequirementCreate,
-    RequirementSetCreate,
-)
 from app.modules.requirements.service import RequirementsService
-from app.modules.users.models import APIKey, User
+from app.modules.users.models import User
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -175,6 +167,7 @@ def _build_app(db_session, *, caller_id: str, role: str = "admin") -> FastAPI:
     async def _project_access_override(project_id, user_id, session) -> None:
         from fastapi import HTTPException
         from fastapi import status as st
+
         from app.modules.projects.models import Project as _P
 
         row = await session.get(_P, project_id)
@@ -198,9 +191,7 @@ def _build_app(db_session, *, caller_id: str, role: str = "admin") -> FastAPI:
 
 class TestMatrixPerformance:
     @pytest.mark.asyncio
-    async def test_matrix_with_twenty_requirements_under_one_second(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_matrix_with_twenty_requirements_under_one_second(self, session: AsyncSession) -> None:
         """Matrix must resolve 20 requirements + deliverables under 1 second.
 
         This is a regression guard for the server-error fixed in #140. If the
@@ -238,8 +229,7 @@ class TestMatrixPerformance:
         elapsed = time.perf_counter() - start
 
         assert elapsed < 1.0, (
-            f"get_project_matrix took {elapsed:.2f}s — expected < 1s. "
-            "Possible N+1 query or missing eager load."
+            f"get_project_matrix took {elapsed:.2f}s — expected < 1s. Possible N+1 query or missing eager load."
         )
 
         assert payload["project_id"] == project_id
@@ -254,9 +244,7 @@ class TestMatrixPerformance:
             )
 
     @pytest.mark.asyncio
-    async def test_matrix_empty_project_returns_canonical_columns(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_matrix_empty_project_returns_canonical_columns(self, session: AsyncSession) -> None:
         """An empty project must return the 6 canonical deliverable types."""
         project_id = uuid.uuid4()
         svc = RequirementsService(session)
@@ -269,9 +257,7 @@ class TestMatrixPerformance:
             assert col in payload["deliverable_types"]
 
     @pytest.mark.asyncio
-    async def test_matrix_accepted_deliverable_increments_coverage(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_matrix_accepted_deliverable_increments_coverage(self, session: AsyncSession) -> None:
         """An accepted deliverable makes coverage_pct > 0."""
         project_id = uuid.uuid4()
         svc = RequirementsService(session)
@@ -298,9 +284,7 @@ class TestMatrixPerformance:
         assert payload["coverage_pct"] == pytest.approx(100.0, abs=0.01)
 
     @pytest.mark.asyncio
-    async def test_matrix_filter_by_deliverable_type(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_matrix_filter_by_deliverable_type(self, session: AsyncSession) -> None:
         """Filtering by deliverable_type returns only that column."""
         project_id = uuid.uuid4()
         svc = RequirementsService(session)
@@ -330,9 +314,7 @@ class TestMatrixPerformance:
 
 class TestMatrixRoute:
     @pytest.mark.asyncio
-    async def test_matrix_route_returns_200_with_rows(
-        self, db_session: AsyncSession
-    ) -> None:
+    async def test_matrix_route_returns_200_with_rows(self, db_session: AsyncSession) -> None:
         from app.modules.requirements.permissions import register_requirements_permissions
 
         register_requirements_permissions()
@@ -363,9 +345,7 @@ class TestMatrixRoute:
         assert "model" in body["deliverable_types"]
 
     @pytest.mark.asyncio
-    async def test_matrix_route_cross_tenant_returns_404(
-        self, db_session: AsyncSession
-    ) -> None:
+    async def test_matrix_route_cross_tenant_returns_404(self, db_session: AsyncSession) -> None:
         from app.modules.requirements.permissions import register_requirements_permissions
 
         register_requirements_permissions()
@@ -387,9 +367,7 @@ class TestMatrixRoute:
 
 class TestBimTraceability:
     @pytest.mark.asyncio
-    async def test_link_bim_elements_happy_path(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_link_bim_elements_happy_path(self, session: AsyncSession) -> None:
         project_id = uuid.uuid4()
         svc = RequirementsService(session)
         req_set = await _make_req_set(session, project_id)
@@ -407,9 +385,7 @@ class TestBimTraceability:
         assert elem2 in bim_ids
 
     @pytest.mark.asyncio
-    async def test_link_bim_elements_additive_merge(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_link_bim_elements_additive_merge(self, session: AsyncSession) -> None:
         """Calling link_to_bim_elements twice without replace=True merges."""
         project_id = uuid.uuid4()
         svc = RequirementsService(session)
@@ -429,9 +405,7 @@ class TestBimTraceability:
         assert elem2 in bim_ids
 
     @pytest.mark.asyncio
-    async def test_link_bim_elements_replace_overwrites(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_link_bim_elements_replace_overwrites(self, session: AsyncSession) -> None:
         """replace=True discards existing ids."""
         project_id = uuid.uuid4()
         svc = RequirementsService(session)
@@ -448,14 +422,10 @@ class TestBimTraceability:
 
         bim_ids = updated.metadata_.get("bim_element_ids", [])
         assert new_elem in bim_ids
-        assert old_elem not in bim_ids, (
-            "replace=True must discard the previous bim_element_ids"
-        )
+        assert old_elem not in bim_ids, "replace=True must discard the previous bim_element_ids"
 
     @pytest.mark.asyncio
-    async def test_link_bim_elements_nonexistent_requirement_raises_404(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_link_bim_elements_nonexistent_requirement_raises_404(self, session: AsyncSession) -> None:
         from fastapi import HTTPException
 
         svc = RequirementsService(session)
@@ -466,9 +436,7 @@ class TestBimTraceability:
         assert exc.value.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_list_by_bim_element_returns_linked_requirements(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_list_by_bim_element_returns_linked_requirements(self, session: AsyncSession) -> None:
         """list_by_bim_element returns only requirements that pin the element."""
         project_id = uuid.uuid4()
         svc = RequirementsService(session)
@@ -492,9 +460,7 @@ class TestBimTraceability:
         assert results[0].entity == "wall"
 
     @pytest.mark.asyncio
-    async def test_invalid_uuid_in_bim_element_ids_is_silently_skipped(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_invalid_uuid_in_bim_element_ids_is_silently_skipped(self, session: AsyncSession) -> None:
         """Non-UUID strings in bim_element_ids are silently dropped."""
         project_id = uuid.uuid4()
         svc = RequirementsService(session)
@@ -521,9 +487,7 @@ class TestPositionTraceabilityCrossTenant:
     """
 
     @pytest.mark.asyncio
-    async def test_link_to_nonexistent_position_raises_404(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_link_to_nonexistent_position_raises_404(self, session: AsyncSession) -> None:
         from fastapi import HTTPException
 
         project_id = uuid.uuid4()
@@ -540,9 +504,7 @@ class TestPositionTraceabilityCrossTenant:
         assert "position" in exc.value.detail.lower()
 
     @pytest.mark.asyncio
-    async def test_link_to_position_with_nonexistent_requirement_raises_404(
-        self, session: AsyncSession
-    ) -> None:
+    async def test_link_to_position_with_nonexistent_requirement_raises_404(self, session: AsyncSession) -> None:
         from fastapi import HTTPException
 
         svc = RequirementsService(session)
@@ -572,8 +534,6 @@ class TestRequirementsFileUpload:
     def test_csv_text_content_round_trip(self) -> None:
         """CSV import works via text — verify the text-import parser round-trips."""
         # Pure logic test, no network needed.
-        from app.modules.requirements.service import RequirementsService
-        from unittest.mock import AsyncMock, MagicMock, patch
 
         text_block = (
             "exterior_wall | fire_rating | equals | F90 | -\n"

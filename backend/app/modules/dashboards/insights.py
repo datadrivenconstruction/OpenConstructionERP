@@ -225,9 +225,7 @@ def _looks_like_uuid_column(series: pd.Series, sample: int = 50) -> bool:
     if non_null.empty:
         return False
     sample_values = non_null.iloc[: min(sample, len(non_null))]
-    matches = sum(
-        1 for v in sample_values if isinstance(v, str) and _UUID_VALUE_PATTERN.match(v)
-    )
+    matches = sum(1 for v in sample_values if isinstance(v, str) and _UUID_VALUE_PATTERN.match(v))
     return matches >= 0.8 * len(sample_values)
 
 
@@ -269,7 +267,9 @@ def _try_histogram(df: pd.DataFrame, col: str) -> InsightChart | None:
 
 
 def _try_bar(
-    df: pd.DataFrame, num_col: str, cat_col: str,
+    df: pd.DataFrame,
+    num_col: str,
+    cat_col: str,
 ) -> InsightChart | None:
     cat_series = df[cat_col].astype("string")
     if cat_series.dropna().empty:
@@ -295,11 +295,7 @@ def _try_bar(
     spread = float(grouped.max() - grouped.min())
     score = min(spread / global_std, 5.0)
 
-    data = [
-        {cat_col: str(k), num_col: _round_safe(v)}
-        for k, v in grouped.items()
-        if pd.notna(v)
-    ]
+    data = [{cat_col: str(k), num_col: _round_safe(v)} for k, v in grouped.items() if pd.notna(v)]
     return InsightChart(
         chart_type="bar",
         title=f"Mean {num_col} by {cat_col}",
@@ -313,7 +309,9 @@ def _try_bar(
 
 
 def _try_line(
-    df: pd.DataFrame, dt_col: str, num_col: str,
+    df: pd.DataFrame,
+    dt_col: str,
+    num_col: str,
 ) -> InsightChart | None:
     dt_series = pd.to_datetime(df[dt_col], errors="coerce", utc=False)
     num_series = pd.to_numeric(df[num_col], errors="coerce")
@@ -331,12 +329,7 @@ def _try_line(
         rule = "D"
     else:
         rule = "h"
-    resampled = (
-        sub.set_index(dt_col)[num_col]
-        .resample(rule)
-        .mean()
-        .dropna()
-    )
+    resampled = sub.set_index(dt_col)[num_col].resample(rule).mean().dropna()
     if resampled.empty:
         return None
 
@@ -344,10 +337,7 @@ def _try_line(
     amplitude = float(resampled.max() - resampled.min())
     score = min(amplitude / global_std, 5.0)
 
-    data = [
-        {dt_col: ts.isoformat(), num_col: _round_safe(v)}
-        for ts, v in resampled.items()
-    ]
+    data = [{dt_col: ts.isoformat(), num_col: _round_safe(v)} for ts, v in resampled.items()]
     return InsightChart(
         chart_type="line",
         title=f"{num_col} over time",
@@ -361,7 +351,9 @@ def _try_line(
 
 
 def _try_scatter(
-    df: pd.DataFrame, col_a: str, col_b: str,
+    df: pd.DataFrame,
+    col_a: str,
+    col_b: str,
 ) -> InsightChart | None:
     a = pd.to_numeric(df[col_a], errors="coerce")
     b = pd.to_numeric(df[col_b], errors="coerce")
@@ -384,10 +376,7 @@ def _try_scatter(
 
     if len(sub) > _SCATTER_SAMPLE_CAP:
         sub = sub.sample(_SCATTER_SAMPLE_CAP, random_state=42)
-    data = [
-        {col_a: _round_safe(row[col_a]), col_b: _round_safe(row[col_b])}
-        for _, row in sub.iterrows()
-    ]
+    data = [{col_a: _round_safe(row[col_a]), col_b: _round_safe(row[col_b])} for _, row in sub.iterrows()]
     return InsightChart(
         chart_type="scatter",
         title=f"{col_a} vs {col_b} (r={r:.2f})",
@@ -416,10 +405,7 @@ def _try_donut(df: pd.DataFrame, col: str) -> InsightChart | None:
     entropy = float(-(probs * probs.apply(math.log)).sum())
     max_entropy = math.log(cardinality) if cardinality > 1 else 1.0
     score = entropy / max_entropy if max_entropy > 0 else 0.0
-    data = [
-        {"name": str(k), "value": int(v), "fraction": round(int(v) / total, 4)}
-        for k, v in counts.items()
-    ]
+    data = [{"name": str(k), "value": int(v), "fraction": round(int(v) / total, 4)} for k, v in counts.items()]
     return InsightChart(
         chart_type="donut",
         title=f"Breakdown of {col}",
@@ -436,7 +422,9 @@ def _try_donut(df: pd.DataFrame, col: str) -> InsightChart | None:
 
 
 def _rank_and_diversify(
-    candidates: list[InsightChart], *, limit: int,
+    candidates: list[InsightChart],
+    *,
+    limit: int,
 ) -> list[InsightChart]:
     """Sort by score, then re-order to spread chart types across the top.
 

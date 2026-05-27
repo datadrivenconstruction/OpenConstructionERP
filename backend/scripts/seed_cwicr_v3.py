@@ -55,16 +55,12 @@ from app.modules.costs.qdrant_snapshot_loader import (  # noqa: E402
     server_collections,
 )
 
-
 # Mirror of router constants — duplicated rather than imported because
 # ``app.modules.costs.router`` pulls FastAPI/auth/DB and we want a
 # zero-FastAPI CLI surface. If either constant changes, update both —
 # the unit tests assert the registry vs adapter mapping, so drift will
 # surface there first.
-_GITHUB_CWICR_BASE_URL = (
-    "https://github.com/datadrivenconstruction/"
-    "OpenConstructionEstimate-DDC-CWICR/raw/main"
-)
+_GITHUB_CWICR_BASE_URL = "https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR/raw/main"
 
 
 def _v3_snapshot_cache_path(region: str) -> Path:
@@ -128,9 +124,7 @@ def _pick_top_n(n: int) -> list[CwicrV3Catalogue]:
     return available[:n]
 
 
-def _resolve_requested(
-    regions_csv: str | None, top_n: int | None
-) -> tuple[list[CwicrV3Catalogue], list[str]]:
+def _resolve_requested(regions_csv: str | None, top_n: int | None) -> tuple[list[CwicrV3Catalogue], list[str]]:
     """Resolve the user's selection into concrete catalogue rows.
 
     Returns ``(catalogues, errors)``. Unknown region ids land in the
@@ -150,14 +144,12 @@ def _resolve_requested(
             cat = get_catalogue(region)
             if cat is None:
                 errors.append(
-                    f"unknown region {region!r} — see "
-                    "backend/app/modules/costs/cwicr_v3_catalogue.py for the full list"
+                    f"unknown region {region!r} — see backend/app/modules/costs/cwicr_v3_catalogue.py for the full list"
                 )
                 continue
             if not cat.available:
                 errors.append(
-                    f"{cat.region}: DDC has not yet published the v3 snapshot "
-                    "(marked available=False in the registry)"
+                    f"{cat.region}: DDC has not yet published the v3 snapshot (marked available=False in the registry)"
                 )
                 continue
             catalogues.append(cat)
@@ -167,8 +159,7 @@ def _resolve_requested(
         picks = _pick_top_n(top_n)
         if not picks:
             errors.append(
-                "no available v3 catalogues in the registry — "
-                "check available=True flags in cwicr_v3_catalogue.py"
+                "no available v3 catalogues in the registry — check available=True flags in cwicr_v3_catalogue.py"
             )
         return picks, errors
 
@@ -193,9 +184,7 @@ def _install_one(
     cache_path = _v3_snapshot_cache_path(cat.region)
     cache_path.parent.mkdir(parents=True, exist_ok=True)
 
-    needs_download = (
-        not cache_path.exists() or cache_path.stat().st_size < 1_000_000
-    )
+    needs_download = not cache_path.exists() or cache_path.stat().st_size < 1_000_000
     if needs_download:
         url = f"{_GITHUB_CWICR_BASE_URL}/{cat.ddc_path}"
         log.info(
@@ -216,8 +205,7 @@ def _install_one(
             if not cache_path.exists() or cache_path.stat().st_size < 1_000_000:
                 cache_path.unlink(missing_ok=True)
                 log.error(
-                    "[%s] downloaded file too small or missing — DDC may not "
-                    "have published this snapshot yet",
+                    "[%s] downloaded file too small or missing — DDC may not have published this snapshot yet",
                     cat.region,
                 )
                 return False

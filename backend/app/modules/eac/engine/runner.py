@@ -118,9 +118,7 @@ async def dry_run_rule(
 
         result = await _validate(parsed, session=session, tenant_id=tenant_id)
         if not result.valid:
-            messages = "; ".join(
-                f"{i.path}: {i.message_i18n_key}" for i in result.issues
-            )
+            messages = "; ".join(f"{i.path}: {i.message_i18n_key}" for i in result.issues)
             raise ExecutionError(f"rule failed semantic validation: {messages}")
 
     return execute_rule(parsed, elements)
@@ -223,9 +221,7 @@ async def run_ruleset(
             total_errors += 1
             continue
         except ExecutionError as exc:
-            logger.warning(
-                "EAC rule %s execution error: %s", rule.id, exc, exc_info=True
-            )
+            logger.warning("EAC rule %s execution error: %s", rule.id, exc, exc_info=True)
             rule_outcomes.append(
                 RuleOutcome(
                     rule_id=str(rule.id),
@@ -295,9 +291,7 @@ async def run_ruleset(
 # ── Internal helpers ────────────────────────────────────────────────────
 
 
-async def _load_active_rules(
-    session: AsyncSession, ruleset_id: uuid.UUID
-) -> list[EacRule]:
+async def _load_active_rules(session: AsyncSession, ruleset_id: uuid.UUID) -> list[EacRule]:
     """Return the active rules in stable order for deterministic runs."""
     stmt = (
         select(EacRule)

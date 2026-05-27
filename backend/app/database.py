@@ -11,7 +11,8 @@ import uuid
 from collections.abc import AsyncGenerator
 from datetime import datetime
 
-from sqlalchemy import DateTime, MetaData, String, TypeDecorator, event as sa_event, func
+from sqlalchemy import DateTime, MetaData, String, TypeDecorator, func
+from sqlalchemy import event as sa_event
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -72,6 +73,7 @@ def _log_slow_query(
         },
     )
 
+
 _NS = uuid.UUID("d4d4c300-1909-4ddc-b01c-0a44e3b01c00")
 
 # Stable schema-engine identifier reused by the migration safety
@@ -110,9 +112,7 @@ class GUID(TypeDecorator):
             return str(value)
         return value
 
-    def process_result_value(
-        self, value: str | None, dialect: object
-    ) -> uuid.UUID | str | None:
+    def process_result_value(self, value: str | None, dialect: object) -> uuid.UUID | str | None:
         if value is None:
             return None
         if isinstance(value, uuid.UUID):

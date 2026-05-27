@@ -120,7 +120,8 @@ class FieldReportService:
         return report
 
     async def _project_coords(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> tuple[float, float] | None:
         """Best-effort lat/lon read from the owning project's address dict.
 
@@ -566,9 +567,7 @@ class FieldReportTemplateService:
             for tpl in BUILTIN_TEMPLATES
         ]
 
-    async def list_templates(
-        self, project_id: uuid.UUID, *, include_builtin: bool = True
-    ) -> list[dict[str, Any]]:
+    async def list_templates(self, project_id: uuid.UUID, *, include_builtin: bool = True) -> list[dict[str, Any]]:
         """List built-in + custom templates available for a project."""
         out: list[dict[str, Any]] = []
         if include_builtin:
@@ -577,9 +576,7 @@ class FieldReportTemplateService:
         out.extend(customs)  # ORM objects — Pydantic from_attributes handles them
         return out
 
-    async def get_template(
-        self, template_id: str, project_id: uuid.UUID
-    ) -> Any:
+    async def get_template(self, template_id: str, project_id: uuid.UUID) -> Any:
         """Get a single template (built-in or custom). Raises 404."""
         if is_builtin_id(template_id):
             tpl = get_builtin(template_id)
@@ -622,9 +619,7 @@ class FieldReportTemplateService:
             "updated_at": None,
         }
 
-    async def create_template(
-        self, data: FieldReportTemplateCreate, user_id: str | None = None
-    ) -> FieldReportTemplate:
+    async def create_template(self, data: FieldReportTemplateCreate, user_id: str | None = None) -> FieldReportTemplate:
         """Create a custom, project-scoped template."""
         template = FieldReportTemplate(
             project_id=data.project_id,
@@ -661,10 +656,7 @@ class FieldReportTemplateService:
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
         if "fields" in fields and fields["fields"] is not None:
-            fields["fields"] = [
-                f.model_dump() if hasattr(f, "model_dump") else f
-                for f in fields["fields"]
-            ]
+            fields["fields"] = [f.model_dump() if hasattr(f, "model_dump") else f for f in fields["fields"]]
         if not fields:
             return template
 

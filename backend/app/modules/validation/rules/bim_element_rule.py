@@ -261,8 +261,7 @@ class BIMElementRule:
                     break
             if not satisfied:
                 _emit(
-                    "Element missing a positive value for any of: "
-                    + ", ".join(self.require_any_positive_quantity),
+                    "Element missing a positive value for any of: " + ", ".join(self.require_any_positive_quantity),
                     {
                         "any_positive_of": self.require_any_positive_quantity,
                         "scope": "quantities",

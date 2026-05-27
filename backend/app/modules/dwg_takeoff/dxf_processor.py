@@ -27,10 +27,7 @@ except ImportError:
 def _require_ezdxf() -> None:
     """‌⁠‍Raise ImportError with a helpful message if ezdxf is not available."""
     if not HAS_EZDXF:
-        raise ImportError(
-            "ezdxf is required for DXF processing. "
-            "Install it with: pip install 'ezdxf>=0.18.0'"
-        )
+        raise ImportError("ezdxf is required for DXF processing. Install it with: pip install 'ezdxf>=0.18.0'")
 
 
 def _aci_to_hex(aci: int) -> str:
@@ -133,9 +130,7 @@ def _serialize_entity(entity: Any, layer_colors: dict[str, str] | None = None) -
         major_axis = dxf.get("major_axis", None)
         result["geometry_data"] = {
             "center": {"x": center.x, "y": center.y} if center else {"x": 0, "y": 0},
-            "major_axis": (
-                {"x": major_axis.x, "y": major_axis.y} if major_axis else {"x": 1, "y": 0}
-            ),
+            "major_axis": ({"x": major_axis.x, "y": major_axis.y} if major_axis else {"x": 1, "y": 0}),
             "ratio": dxf.get("ratio", 1.0),
         }
     elif entity_type == "SPLINE":
@@ -199,12 +194,14 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
             is_frozen = bool(layer.is_frozen)
         except Exception:  # noqa: BLE001
             pass
-        layers.append({
-            "name": layer.dxf.name,
-            "color": _aci_to_hex(layer.color),
-            "visible": not (is_off or is_frozen),
-            "entity_count": 0,
-        })
+        layers.append(
+            {
+                "name": layer.dxf.name,
+                "color": _aci_to_hex(layer.color),
+                "visible": not (is_off or is_frozen),
+                "entity_count": 0,
+            }
+        )
 
     # Build layer color map for ByLayer color resolution
     layer_color_map: dict[str, str] = {layer["name"]: layer["color"] for layer in layers}

@@ -185,9 +185,7 @@ def parse_xlsx(payload: bytes) -> tuple[list[dict[str, Any]], list[str]]:
 
     missing_required = REQUIRED_COLUMNS - col_index.keys()
     if missing_required:
-        warnings.append(
-            "Missing required columns: " + ", ".join(sorted(missing_required))
-        )
+        warnings.append("Missing required columns: " + ", ".join(sorted(missing_required)))
         return rows, warnings
 
     for line_no, raw_row in enumerate(iterator, start=2):
@@ -195,14 +193,12 @@ def parse_xlsx(payload: bytes) -> tuple[list[dict[str, Any]], list[str]]:
             continue
         entity = (
             str(raw_row[col_index["entity"]]).strip()
-            if col_index.get("entity") is not None
-            and raw_row[col_index["entity"]] is not None
+            if col_index.get("entity") is not None and raw_row[col_index["entity"]] is not None
             else ""
         )
         attribute = (
             str(raw_row[col_index["attribute"]]).strip()
-            if col_index.get("attribute") is not None
-            and raw_row[col_index["attribute"]] is not None
+            if col_index.get("attribute") is not None and raw_row[col_index["attribute"]] is not None
             else ""
         )
         if not entity and not attribute:
@@ -217,10 +213,7 @@ def parse_xlsx(payload: bytes) -> tuple[list[dict[str, Any]], list[str]]:
 
         normalised = _normalise_row(record)
         if normalised["constraint_type"] not in OPERATORS:
-            warnings.append(
-                f"Row {line_no}: unknown operator "
-                f"'{normalised['constraint_type']}', defaulting to equals"
-            )
+            warnings.append(f"Row {line_no}: unknown operator '{normalised['constraint_type']}', defaulting to equals")
             normalised["constraint_type"] = "equals"
         rows.append(normalised)
 
@@ -259,10 +252,7 @@ def parse_csv(payload: bytes) -> tuple[list[dict[str, Any]], list[str]]:
         if not normalised["entity"] and not normalised["attribute"]:
             continue
         if normalised["constraint_type"] not in OPERATORS:
-            warnings.append(
-                f"Row {line_no}: unknown operator "
-                f"'{normalised['constraint_type']}', defaulting to equals"
-            )
+            warnings.append(f"Row {line_no}: unknown operator '{normalised['constraint_type']}', defaulting to equals")
             normalised["constraint_type"] = "equals"
         rows.append(normalised)
 

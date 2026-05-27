@@ -94,13 +94,9 @@ def upgrade() -> None:
                 server_default=sa.func.now(),
                 nullable=False,
             ),
-            sa.UniqueConstraint(
-                "project_id", "file_kind", "file_id", name=_SEARCH_UQ
-            ),
+            sa.UniqueConstraint("project_id", "file_kind", "file_id", name=_SEARCH_UQ),
         )
-        op.create_index(
-            _SEARCH_PROJECT_KIND_IDX, _SEARCH, ["project_id", "file_kind"]
-        )
+        op.create_index(_SEARCH_PROJECT_KIND_IDX, _SEARCH, ["project_id", "file_kind"])
         op.create_index(_SEARCH_FILE_IDX, _SEARCH, ["file_kind", "file_id"])
 
         # Postgres: add the generated tsvector column + GIN index.
@@ -114,9 +110,7 @@ def upgrade() -> None:
                 ) STORED
                 """
             )
-            op.execute(
-                f"CREATE INDEX {_SEARCH_TSV_IDX} ON {_SEARCH} USING GIN (tsv_vector)"
-            )
+            op.execute(f"CREATE INDEX {_SEARCH_TSV_IDX} ON {_SEARCH} USING GIN (tsv_vector)")
 
     # ── oe_file_tag ───────────────────────────────────────────────────
     if not _has_table(inspector, _TAG):
@@ -182,13 +176,9 @@ def upgrade() -> None:
                 server_default=sa.func.now(),
                 nullable=False,
             ),
-            sa.UniqueConstraint(
-                "tag_id", "file_kind", "file_id", name=_ASSIGN_UQ
-            ),
+            sa.UniqueConstraint("tag_id", "file_kind", "file_id", name=_ASSIGN_UQ),
         )
-        op.create_index(
-            _ASSIGN_KIND_FILE_IDX, _ASSIGN, ["file_kind", "file_id"]
-        )
+        op.create_index(_ASSIGN_KIND_FILE_IDX, _ASSIGN, ["file_kind", "file_id"])
 
 
 def downgrade() -> None:

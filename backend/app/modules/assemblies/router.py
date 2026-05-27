@@ -115,14 +115,17 @@ async def _verify_target_boq_owner(
     project_repo = ProjectRepository(session)
     project = await project_repo.get_by_id(boq.project_id)
     if project is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale())
+        )
     if str(project.owner_id) != str(user_id):
         # 404 here too — don't let callers probe for valid BOQ ids.
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
 
 
 def _assembly_to_response(
-    assembly: object, usage_count: int = 0,
+    assembly: object,
+    usage_count: int = 0,
 ) -> AssemblyResponse:
     """Convert an Assembly ORM model to an AssemblyResponse schema."""
     components = getattr(assembly, "components", None) or []
@@ -231,10 +234,7 @@ async def search_assemblies(
         logger.debug("Could not compute assembly usage counts")
 
     return AssemblySearchResponse(
-        items=[
-            _assembly_to_response(a, usage_count=usage_map.get(str(a.id), 0))
-            for a in assemblies
-        ],
+        items=[_assembly_to_response(a, usage_count=usage_map.get(str(a.id), 0)) for a in assemblies],
         total=total,
         limit=limit,
         offset=offset,
@@ -774,9 +774,7 @@ async def list_templates(
     category: str | None = Query(default=None, description="Filter by category"),
     tag: str | None = Query(default=None, description="Filter by tag"),
     din276: str | None = Query(default=None, description="Filter by DIN 276 KG code"),
-    masterformat: str | None = Query(
-        default=None, description="Filter by MasterFormat division"
-    ),
+    masterformat: str | None = Query(default=None, description="Filter by MasterFormat division"),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=500),
 ) -> AssemblyTemplateSearchResponse:
@@ -1000,10 +998,7 @@ async def apply_template(
 
     warnings: list[str] = []
     if unresolved:
-        warnings.append(
-            f"{len(unresolved)} component(s) could not be matched against the "
-            "project's cost catalogue."
-        )
+        warnings.append(f"{len(unresolved)} component(s) could not be matched against the project's cost catalogue.")
 
     # ``total_rate`` is the per-unit rate (assembly subtotal at quantity=1);
     # ``grand_total`` is the rolled-up total for the requested quantity.

@@ -37,7 +37,6 @@ import uuid
 from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import Any
 
 from fastapi import (
     APIRouter,
@@ -56,6 +55,8 @@ from app.core.file_signature import (
     SIGNATURE_BYTES_REQUIRED,
     FileSignatureMismatch,
     mime_for_signature,
+)
+from app.core.file_signature import (
     require as require_signature,
 )
 from app.core.rate_limiter import approval_limiter
@@ -76,8 +77,6 @@ from app.modules.property_dev.models import (
     PaymentSchedule,
     Plot,
     PortalToken,
-    Reservation,
-    SalesContract,
 )
 from app.modules.property_dev.portal_schemas import (
     _KYC_DOC_TYPE_PATTERN,
@@ -172,7 +171,9 @@ async def _resolve_portal_context(
     svc = PortalLinkService(session, settings)
     try:
         return await svc.verify_token(
-            token, client_ip=_client_ip(request), consume=consume,
+            token,
+            client_ip=_client_ip(request),
+            consume=consume,
         )
     except PortalTokenError as exc:
         raise HTTPException(
@@ -274,7 +275,8 @@ async def list_buyer_portal_tokens(
     buyer = await session.get(Buyer, buyer_id)
     if buyer is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Buyer not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Buyer not found",
         )
     # Cross-tenant guard (same shape as issue/).
     is_admin = user_payload.get("role") == "admin"
@@ -287,13 +289,15 @@ async def list_buyer_portal_tokens(
         )
         if dev is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Buyer not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Buyer not found",
             )
         proj = await ProjectRepository(session).get_by_id(dev.project_id)
         caller_id = user_payload.get("sub") or ""
         if proj is None or str(proj.owner_id) != str(caller_id):
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Buyer not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Buyer not found",
             )
 
     svc = PortalLinkService(session, settings)
@@ -318,13 +322,15 @@ async def revoke_portal_token(
     row = await session.get(PortalToken, token_id)
     if row is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Token not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Token not found",
         )
     # Cross-tenant guard via buyer.
     buyer = await session.get(Buyer, row.buyer_id)
     if buyer is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Token not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Token not found",
         )
     is_admin = user_payload.get("role") == "admin"
     if not is_admin:
@@ -336,18 +342,20 @@ async def revoke_portal_token(
         )
         if dev is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Token not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Token not found",
             )
         proj = await ProjectRepository(session).get_by_id(dev.project_id)
         caller_id = user_payload.get("sub") or ""
         if proj is None or str(proj.owner_id) != str(caller_id):
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Token not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Token not found",
             )
 
     svc = PortalLinkService(session, settings)
     await svc.revoke(token_id)
-    return None
+    return
 
 
 # ── Verify (public) ─────────────────────────────────────────────────────
@@ -385,7 +393,11 @@ async def verify_portal_token(
     with ``/overview/`` for that.
     """
     ctx = await _resolve_portal_context(
-        session, settings, data.token, request, consume=True,
+        session,
+        settings,
+        data.token,
+        request,
+        consume=True,
     )
     scopes: list[str] = []
     if ctx.reservation is not None:
@@ -396,9 +408,7 @@ async def verify_portal_token(
         buyer_id=ctx.buyer.id,
         buyer_full_name=ctx.buyer.full_name,
         reservation_id=ctx.reservation.id if ctx.reservation else None,
-        sales_contract_id=(
-            ctx.sales_contract.id if ctx.sales_contract else None
-        ),
+        sales_contract_id=(ctx.sales_contract.id if ctx.sales_contract else None),
         scope_summary=" + ".join(scopes) if scopes else "buyer",
     )
 
@@ -436,9 +446,7 @@ async def _load_payment_schedule_rows(
     inst_rows = (
         (
             await session.execute(
-                select(Instalment)
-                .where(Instalment.schedule_id == sched.id)
-                .order_by(Instalment.sequence.asc())
+                select(Instalment).where(Instalment.schedule_id == sched.id).order_by(Instalment.sequence.asc())
             )
         )
         .scalars()
@@ -493,9 +501,7 @@ async def _load_signed_documents(
         from app.modules.property_dev.models import Handover
 
         handover = (
-            await session.execute(
-                select(Handover).where(Handover.plot_id == ctx.buyer.plot_id)
-            )
+            await session.execute(select(Handover).where(Handover.plot_id == ctx.buyer.plot_id))
         ).scalar_one_or_none()
         if handover is not None:
             ho_docs = (
@@ -522,15 +528,7 @@ async def _load_signed_documents(
 
     # KYC docs already uploaded by this buyer — found via
     # Document.metadata.buyer_id (no FK, JSON match).
-    kyc_docs = (
-        (
-            await session.execute(
-                select(Document).where(Document.category == "buyer_kyc")
-            )
-        )
-        .scalars()
-        .all()
-    )
+    kyc_docs = (await session.execute(select(Document).where(Document.category == "buyer_kyc"))).scalars().all()
     for d in kyc_docs:
         meta = d.metadata_ or {}
         if str(meta.get("buyer_id")) != str(ctx.buyer.id):
@@ -540,9 +538,7 @@ async def _load_signed_documents(
                 id=d.id,
                 title=d.name,
                 doc_type=f"kyc:{meta.get('kyc_code', 'other')}",
-                delivered_at=(
-                    d.created_at.isoformat() if d.created_at else None
-                ),
+                delivered_at=(d.created_at.isoformat() if d.created_at else None),
                 download_url=_build_doc_download_url(token, d.id),
             )
         )
@@ -574,9 +570,7 @@ def _default_kyc_requests(buyer: Buyer) -> list[PortalKycRequest]:
         PortalKycRequest(
             code="address_proof",
             label="Proof of address",
-            description=(
-                "Utility bill / bank statement issued in the last 3 months."
-            ),
+            description=("Utility bill / bank statement issued in the last 3 months."),
         ),
         PortalKycRequest(
             code="source_of_funds",
@@ -639,11 +633,9 @@ async def buyer_overview(
         )
 
     # Payment schedule.
-    inst_rows, sched_currency, total, paid, outstanding = (
-        await _load_payment_schedule_rows(
-            session,
-            ctx.sales_contract.id if ctx.sales_contract else None,
-        )
+    inst_rows, sched_currency, total, paid, outstanding = await _load_payment_schedule_rows(
+        session,
+        ctx.sales_contract.id if ctx.sales_contract else None,
     )
     inst_payload = [
         PortalInstalmentRow(
@@ -654,9 +646,9 @@ async def buyer_overview(
             amount=row.amount,
             amount_paid=row.amount_paid,
             amount_outstanding=row.amount - row.amount_paid,
-            status=row.status if row.status in {
-                "pending", "due", "overdue", "paid", "waived", "cancelled"
-            } else "pending",
+            status=row.status
+            if row.status in {"pending", "due", "overdue", "paid", "waived", "cancelled"}
+            else "pending",
             paid_at=row.paid_at,
             currency=sched_currency,
         )
@@ -667,11 +659,7 @@ async def buyer_overview(
     documents = await _load_signed_documents(session, ctx, token)
     kyc_requests = _default_kyc_requests(ctx.buyer)
     # Mark already-uploaded codes as is_uploaded=True.
-    uploaded_codes = {
-        d.doc_type.split(":", 1)[1]
-        for d in documents
-        if d.doc_type.startswith("kyc:")
-    }
+    uploaded_codes = {d.doc_type.split(":", 1)[1] for d in documents if d.doc_type.startswith("kyc:")}
     for kr in kyc_requests:
         if kr.code in uploaded_codes:
             kr.is_uploaded = True
@@ -741,16 +729,12 @@ async def download_buyer_document(
         from app.modules.property_dev.models import Handover
 
         handover = (
-            await session.execute(
-                select(Handover).where(Handover.plot_id == ctx.buyer.plot_id)
-            )
+            await session.execute(select(Handover).where(Handover.plot_id == ctx.buyer.plot_id))
         ).scalar_one_or_none()
         if handover is not None:
             hd = (
                 await session.execute(
-                    select(HandoverDoc)
-                    .where(HandoverDoc.id == doc_id)
-                    .where(HandoverDoc.handover_id == handover.id)
+                    select(HandoverDoc).where(HandoverDoc.id == doc_id).where(HandoverDoc.handover_id == handover.id)
                 )
             ).scalar_one_or_none()
             if hd is not None:
@@ -792,7 +776,8 @@ async def download_buyer_document(
     # endpoint cannot be turned into an existence oracle for documents
     # belonging to other buyers.
     raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail="Document not found",
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Document not found",
     )
 
 
@@ -907,9 +892,7 @@ async def upload_kyc_document(
         ) from exc
 
     # Relative path used by /download/ for traversal-safe re-resolution.
-    rel_path = (
-        f"property_dev/portal/kyc/{ctx.buyer.id}/{stored_name}"
-    )
+    rel_path = f"property_dev/portal/kyc/{ctx.buyer.id}/{stored_name}"
 
     doc = Document(
         project_id=project_id,
@@ -998,7 +981,8 @@ async def contact_agent(
     )
 
     return PortalContactAgentResponse(
-        activity_id=activity.id, accepted_at=datetime.now(UTC),
+        activity_id=activity.id,
+        accepted_at=datetime.now(UTC),
     )
 
 

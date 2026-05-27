@@ -60,20 +60,14 @@ def _detail(p: Pipeline) -> PipelineDetail:
     )
 
 
-async def _load(
-    service: PipelineService, pipeline_id: str, user_id: str
-) -> Pipeline:
+async def _load(service: PipelineService, pipeline_id: str, user_id: str) -> Pipeline:
     try:
         pid = uuid.UUID(pipeline_id)
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Pipeline not found"
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pipeline not found") from exc
     pipeline = await service.get_authorized(pid, user_id)
     if pipeline is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Pipeline not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pipeline not found")
     return pipeline
 
 
@@ -91,22 +85,16 @@ async def list_node_types(_user: CurrentUserId) -> list[NodeTypeOut]:
 
 
 @router.get("/runs/{run_id}", response_model=RunDetail)
-async def get_run(
-    run_id: str, session: SessionDep, user_id: CurrentUserId
-) -> RunDetail:
+async def get_run(run_id: str, session: SessionDep, user_id: CurrentUserId) -> RunDetail:
     """‌⁠‍Return a run with its per-node states."""
     service = PipelineService(session)
     try:
         rid = uuid.UUID(run_id)
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Run not found"
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Run not found") from exc
     run = await service.get_run_authorized(rid, user_id)
     if run is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Run not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Run not found")
     return RunDetail(**await service.run_read_model(run))
 
 
@@ -135,9 +123,7 @@ async def list_pipelines(
     ]
 
 
-@router.post(
-    "/", response_model=PipelineDetail, status_code=status.HTTP_201_CREATED
-)
+@router.post("/", response_model=PipelineDetail, status_code=status.HTTP_201_CREATED)
 async def create_pipeline(
     body: PipelineCreate,
     session: SessionDep,
@@ -172,9 +158,7 @@ async def create_pipeline(
 
 
 @router.get("/{pipeline_id}", response_model=PipelineDetail)
-async def get_pipeline(
-    pipeline_id: str, session: SessionDep, user_id: CurrentUserId
-) -> PipelineDetail:
+async def get_pipeline(pipeline_id: str, session: SessionDep, user_id: CurrentUserId) -> PipelineDetail:
     """Fetch a single pipeline by id."""
     service = PipelineService(session)
     return _detail(await _load(service, pipeline_id, user_id))
@@ -200,16 +184,12 @@ async def update_pipeline(
             is_published=body.is_published,
         )
     except GraphValidationError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     return _detail(updated)
 
 
 @router.delete("/{pipeline_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_pipeline(
-    pipeline_id: str, session: SessionDep, user_id: CurrentUserId
-) -> None:
+async def delete_pipeline(pipeline_id: str, session: SessionDep, user_id: CurrentUserId) -> None:
     """Delete a pipeline (cascades to its runs + node states)."""
     service = PipelineService(session)
     pipeline = await _load(service, pipeline_id, user_id)
@@ -236,9 +216,7 @@ async def run_pipeline(
             actor_id=user_id,
         )
     except GraphValidationError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     return RunAccepted(
         run_id=str(run.id),
         job_run_id=str(job.id) if job is not None else None,
@@ -247,9 +225,7 @@ async def run_pipeline(
 
 
 @router.get("/{pipeline_id}/runs/", response_model=list[RunSummary])
-async def list_runs(
-    pipeline_id: str, session: SessionDep, user_id: CurrentUserId
-) -> list[RunSummary]:
+async def list_runs(pipeline_id: str, session: SessionDep, user_id: CurrentUserId) -> list[RunSummary]:
     """List every run of a pipeline, newest first."""
     service = PipelineService(session)
     pipeline = await _load(service, pipeline_id, user_id)

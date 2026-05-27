@@ -21,9 +21,7 @@ class JobRunRead(BaseModel):
     id: UUID
     kind: str
     status: str = Field(
-        description=(
-            "One of: pending, started, success, failed, cancelled, retry."
-        ),
+        description=("One of: pending, started, success, failed, cancelled, retry."),
     )
     progress_percent: int = Field(ge=0, le=100, default=0)
     result: dict[str, Any] | None = Field(

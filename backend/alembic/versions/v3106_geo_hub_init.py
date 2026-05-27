@@ -30,7 +30,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3106_geo_hub_init"
 down_revision: Union[str, Sequence[str], None] = "v3105_propdev_r6_merge"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -45,7 +44,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -76,9 +77,7 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── GeoAnchor ───────────────────────────────────────────────────────
     if not _has_table(inspector, "oe_geo_hub_anchor"):
@@ -90,30 +89,47 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 "project_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "lat", sa.Numeric(10, 7), nullable=False, server_default="0",
+                "lat",
+                sa.Numeric(10, 7),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "lon", sa.Numeric(10, 7), nullable=False, server_default="0",
+                "lon",
+                sa.Numeric(10, 7),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "alt", sa.Numeric(8, 2), nullable=False, server_default="0",
+                "alt",
+                sa.Numeric(8, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "epsg_code", sa.Integer(), nullable=False, server_default="4326",
+                "epsg_code",
+                sa.Integer(),
+                nullable=False,
+                server_default="4326",
             ),
             sa.Column("region_code", sa.String(8), nullable=True),
             sa.Column("address", sa.String(500), nullable=True),
             sa.Column("accuracy_m", sa.Numeric(6, 2), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
-                "project_id", name="uq_oe_geo_hub_anchor_project",
+                "project_id",
+                name="uq_oe_geo_hub_anchor_project",
             ),
         )
         if not _has_index(inspector, "oe_geo_hub_anchor", "ix_oe_geo_hub_anchor_project_id"):
@@ -133,7 +149,8 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 "project_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -162,18 +179,30 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 server_default="b3dm",
             ),
             sa.Column(
-                "tile_count", sa.Integer(), nullable=False, server_default="0",
+                "tile_count",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "total_bytes", sa.Integer(), nullable=False, server_default="0",
+                "total_bytes",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "status", sa.String(20), nullable=False, server_default="draft",
+                "status",
+                sa.String(20),
+                nullable=False,
+                server_default="draft",
             ),
             sa.Column("generated_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("generation_job_id", guid, nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         op.create_index(
@@ -212,19 +241,29 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 "project_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column("name", sa.String(120), nullable=False, server_default=""),
             sa.Column(
-                "provider", sa.String(16), nullable=False, server_default="osm",
+                "provider",
+                sa.String(16),
+                nullable=False,
+                server_default="osm",
             ),
             sa.Column(
-                "url_template", sa.String(2000), nullable=False, server_default="",
+                "url_template",
+                sa.String(2000),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "attribution", sa.String(500), nullable=False, server_default="",
+                "attribution",
+                sa.String(500),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
                 "requires_api_key",
@@ -245,7 +284,10 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 server_default=sa.text("1"),
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         op.create_index(
@@ -281,7 +323,10 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 server_default=sa.text("0"),
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint("name", name="uq_oe_geo_hub_terrain_source_name"),
         )
@@ -301,33 +346,55 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 "project_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column("name", sa.String(120), nullable=False, server_default=""),
             sa.Column("description", sa.Text(), nullable=True),
             sa.Column(
-                "camera_lat", sa.Numeric(10, 7), nullable=False, server_default="0",
+                "camera_lat",
+                sa.Numeric(10, 7),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "camera_lon", sa.Numeric(10, 7), nullable=False, server_default="0",
+                "camera_lon",
+                sa.Numeric(10, 7),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "camera_alt", sa.Numeric(8, 2), nullable=False, server_default="0",
+                "camera_alt",
+                sa.Numeric(8, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "heading", sa.Numeric(7, 3), nullable=False, server_default="0",
+                "heading",
+                sa.Numeric(7, 3),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "pitch", sa.Numeric(7, 3), nullable=False, server_default="0",
+                "pitch",
+                sa.Numeric(7, 3),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "roll", sa.Numeric(7, 3), nullable=False, server_default="0",
+                "roll",
+                sa.Numeric(7, 3),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column("created_by", guid, nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         op.create_index(
@@ -346,20 +413,30 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 "project_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column("name", sa.String(255), nullable=False, server_default=""),
             sa.Column(
-                "kind", sa.String(32), nullable=False, server_default="boundary",
+                "kind",
+                sa.String(32),
+                nullable=False,
+                server_default="boundary",
             ),
             sa.Column(
-                "geojson", sa.JSON(), nullable=False, server_default="{}",
+                "geojson",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column("source_file", sa.String(500), nullable=True),
             sa.Column(
-                "style", sa.JSON(), nullable=False, server_default="{}",
+                "style",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column(
                 "is_visible",
@@ -369,7 +446,10 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
             ),
             sa.Column("source_event_id", sa.String(64), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         op.create_index(
@@ -398,7 +478,8 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 "tileset_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_geo_hub_tileset.id", ondelete="SET NULL",
+                    "oe_geo_hub_tileset.id",
+                    ondelete="SET NULL",
                 ),
                 nullable=True,
             ),
@@ -406,7 +487,8 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 "project_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -419,17 +501,26 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
             sa.Column("source_id", guid, nullable=False),
             sa.Column("requested_by", guid, nullable=True),
             sa.Column(
-                "state", sa.String(20), nullable=False, server_default="queued",
+                "state",
+                sa.String(20),
+                nullable=False,
+                server_default="queued",
             ),
             sa.Column(
-                "progress_pct", sa.Integer(), nullable=False, server_default="0",
+                "progress_pct",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("error_message", sa.Text(), nullable=True),
             sa.Column("output_uri", sa.String(2000), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         op.create_index(

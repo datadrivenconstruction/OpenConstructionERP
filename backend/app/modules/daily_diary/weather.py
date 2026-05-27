@@ -78,10 +78,7 @@ def _build_forecast_url(lat: float, lng: float, target: date) -> str:
     params = {
         "latitude": f"{lat:.6f}",
         "longitude": f"{lng:.6f}",
-        "hourly": (
-            "temperature_2m,relativehumidity_2m,precipitation,"
-            "weathercode,windspeed_10m"
-        ),
+        "hourly": ("temperature_2m,relativehumidity_2m,precipitation,weathercode,windspeed_10m"),
         "daily": "sunrise,sunset",
         "timezone": "UTC",
         "start_date": target.isoformat(),
@@ -95,10 +92,7 @@ def _build_historical_url(lat: float, lng: float, target: date) -> str:
     params = {
         "latitude": f"{lat:.6f}",
         "longitude": f"{lng:.6f}",
-        "hourly": (
-            "temperature_2m,relativehumidity_2m,precipitation,"
-            "weathercode,windspeed_10m"
-        ),
+        "hourly": ("temperature_2m,relativehumidity_2m,precipitation,weathercode,windspeed_10m"),
         "daily": "sunrise,sunset",
         "timezone": "UTC",
         "start_date": target.isoformat(),
@@ -126,7 +120,8 @@ def _do_get(url: str) -> dict[str, Any] | None:
 
 
 def _summarise_open_meteo(
-    payload: dict[str, Any], target: date,
+    payload: dict[str, Any],
+    target: date,
 ) -> dict[str, Any] | None:
     """Reduce an Open-Meteo hourly payload to a single daily summary."""
     hourly = payload.get("hourly") or {}
@@ -181,28 +176,16 @@ def _summarise_open_meteo(
             continue
 
     # Reasonable bounds — return None if everything is missing
-    if (
-        avg_temp is None and avg_hum is None and total_prec is None
-        and dominant_code is None
-    ):
+    if avg_temp is None and avg_hum is None and total_prec is None and dominant_code is None:
         return None
 
     return {
-        "captured_at": datetime.combine(target, datetime.min.time()).isoformat()
-        + "Z",
+        "captured_at": datetime.combine(target, datetime.min.time()).isoformat() + "Z",
         "source": "open_meteo",
-        "temperature_c": (
-            Decimal(str(round(avg_temp, 2))) if avg_temp is not None else None
-        ),
-        "humidity_pct": (
-            Decimal(str(round(avg_hum, 2))) if avg_hum is not None else None
-        ),
-        "wind_speed_kmh": (
-            Decimal(str(round(max_wind, 2))) if max_wind is not None else None
-        ),
-        "precipitation_mm": (
-            Decimal(str(round(total_prec, 2))) if total_prec is not None else None
-        ),
+        "temperature_c": (Decimal(str(round(avg_temp, 2))) if avg_temp is not None else None),
+        "humidity_pct": (Decimal(str(round(avg_hum, 2))) if avg_hum is not None else None),
+        "wind_speed_kmh": (Decimal(str(round(max_wind, 2))) if max_wind is not None else None),
+        "precipitation_mm": (Decimal(str(round(total_prec, 2))) if total_prec is not None else None),
         "conditions_code": conditions_code,
         "conditions_text": conditions_text,
         "sunrise": sunrise,
@@ -212,7 +195,9 @@ def _summarise_open_meteo(
 
 
 async def fetch_weather_for_day(
-    lat: float, lng: float, target: date,
+    lat: float,
+    lng: float,
+    target: date,
 ) -> dict[str, Any] | None:
     """Fetch a daily-summary weather observation from Open-Meteo.
 
@@ -225,11 +210,7 @@ async def fetch_weather_for_day(
     """
     today = date.today()
     use_archive = (today - target) >= timedelta(days=5)
-    url = (
-        _build_historical_url(lat, lng, target)
-        if use_archive
-        else _build_forecast_url(lat, lng, target)
-    )
+    url = _build_historical_url(lat, lng, target) if use_archive else _build_forecast_url(lat, lng, target)
 
     try:
         payload = await asyncio.wait_for(
@@ -375,27 +356,18 @@ def compute_productivity_factor(
     if temperature_c is not None:
         t = float(temperature_c)
         if t < float(rules["temp_min_c"]):
-            reason_parts.append(
-                f"temperature {t}°C below threshold {rules['temp_min_c']}°C"
-            )
+            reason_parts.append(f"temperature {t}°C below threshold {rules['temp_min_c']}°C")
             stopped = True
         elif t > float(rules["temp_max_c"]):
-            reason_parts.append(
-                f"temperature {t}°C above threshold {rules['temp_max_c']}°C"
-            )
+            reason_parts.append(f"temperature {t}°C above threshold {rules['temp_max_c']}°C")
             stopped = True
     if wind_speed_kmh is not None:
         w = float(wind_speed_kmh)
         if w > float(rules["wind_stop_kmh"]):
-            reason_parts.append(
-                f"wind {w}km/h above threshold {rules['wind_stop_kmh']}km/h"
-            )
+            reason_parts.append(f"wind {w}km/h above threshold {rules['wind_stop_kmh']}km/h")
             stopped = True
     if rain_mean_mm_h is not None and rain_mean_mm_h > float(rules["rain_stop_mm_h"]):
-        reason_parts.append(
-            f"rain {rain_mean_mm_h:.1f}mm/h above threshold "
-            f"{rules['rain_stop_mm_h']}mm/h"
-        )
+        reason_parts.append(f"rain {rain_mean_mm_h:.1f}mm/h above threshold {rules['rain_stop_mm_h']}mm/h")
         stopped = True
 
     if stopped:
@@ -412,8 +384,7 @@ def compute_productivity_factor(
     factor = max(0.0, 1.0 - (loss / wh))
     lost_hours = wh * (1.0 - factor)
     reason = (
-        f"{rh}h of rain × loss-coefficient {rules['rain_loss_per_hour']}"
-        if rh > 0 else "no significant weather impact"
+        f"{rh}h of rain × loss-coefficient {rules['rain_loss_per_hour']}" if rh > 0 else "no significant weather impact"
     )
 
     return {
@@ -477,7 +448,8 @@ def extract_exif_gps(image_bytes: bytes) -> dict[str, Any] | None:
         if not exif:
             return None
         gps_ifd_tag = next(
-            (k for k, v in ExifTags.TAGS.items() if v == "GPSInfo"), None,
+            (k for k, v in ExifTags.TAGS.items() if v == "GPSInfo"),
+            None,
         )
         if gps_ifd_tag is None:
             return None
@@ -518,9 +490,7 @@ def extract_exif_gps(image_bytes: bytes) -> dict[str, Any] | None:
         if ts and ds:
             try:
                 t_h, t_m, t_s = (int(float(x)) for x in ts)
-                out["timestamp"] = (
-                    f"{ds.replace(':', '-')}T{t_h:02d}:{t_m:02d}:{t_s:02d}Z"
-                )
+                out["timestamp"] = f"{ds.replace(':', '-')}T{t_h:02d}:{t_m:02d}:{t_s:02d}Z"
             except (TypeError, ValueError):
                 pass
         return out

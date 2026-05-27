@@ -17,14 +17,13 @@ they run in milliseconds and never touch the production database.
 from __future__ import annotations
 
 import uuid
-from types import SimpleNamespace
 from typing import Any
 
 import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.core.audit_log import ActivityLog, get_activity_for_entity, log_activity
+from app.core.audit_log import get_activity_for_entity
 from app.core.fsm import (
     BOQ_FSM,
     INVOICE_FSM,
@@ -40,7 +39,6 @@ from app.core.fsm import (
     all_fsms,
 )
 from app.database import Base
-
 
 # ── Fixtures ─────────────────────────────────────────────────────────────
 
@@ -154,7 +152,9 @@ async def test_apply_writes_audit_row(session: AsyncSession) -> None:
     actor = str(uuid.uuid4())
 
     await BOQ_FSM.apply(
-        session, entity, "final",
+        session,
+        entity,
+        "final",
         actor_id=actor,
         actor_role="manager",
         reason="Approved",
@@ -188,7 +188,9 @@ async def test_apply_role_gate(session: AsyncSession) -> None:
     entity = StubEntity(status="final")
     with pytest.raises(TransitionNotPermitted):
         await BOQ_FSM.apply(
-            session, entity, "draft",
+            session,
+            entity,
+            "draft",
             actor_id=str(uuid.uuid4()),
             actor_role="estimator",
         )
@@ -379,7 +381,9 @@ async def test_ncr_full_happy_path(session: AsyncSession) -> None:
     e = StubEntity(status="open")
     await NCR_FSM.apply(session, e, "in_review")
     await NCR_FSM.apply(
-        session, e, "resolved",
+        session,
+        e,
+        "resolved",
         extra_metadata={"corrective_action": "Re-poured slab"},
     )
     await NCR_FSM.apply(session, e, "closed")
@@ -494,7 +498,12 @@ def test_six_fsms_registered() -> None:
     """All six entity FSMs from the audit findings (WF1-WF6) are registered."""
     registry = all_fsms()
     assert set(registry.keys()) >= {
-        "boq", "project", "invoice", "ncr", "rfq", "submittal",
+        "boq",
+        "project",
+        "invoice",
+        "ncr",
+        "rfq",
+        "submittal",
     }
 
 
@@ -509,9 +518,7 @@ def test_every_fsm_initial_state_is_reachable() -> None:
     can leave its starting node."""
     for fsm in (BOQ_FSM, PROJECT_FSM, INVOICE_FSM, NCR_FSM, RFQ_FSM, SUBMITTAL_FSM):
         froms = {t.from_status for t in fsm.transitions}
-        assert fsm.initial in froms, (
-            f"FSM {fsm.name} initial state {fsm.initial!r} has no outbound transition"
-        )
+        assert fsm.initial in froms, f"FSM {fsm.name} initial state {fsm.initial!r} has no outbound transition"
 
 
 def test_fsm_transition_counts() -> None:
@@ -527,8 +534,5 @@ def test_fsm_transition_counts() -> None:
 
 def test_total_transition_count_at_least_45() -> None:
     """Aggregate sanity: more than 40 declarative transitions across the board."""
-    total = sum(
-        len(f.transitions)
-        for f in (BOQ_FSM, PROJECT_FSM, INVOICE_FSM, NCR_FSM, RFQ_FSM, SUBMITTAL_FSM)
-    )
+    total = sum(len(f.transitions) for f in (BOQ_FSM, PROJECT_FSM, INVOICE_FSM, NCR_FSM, RFQ_FSM, SUBMITTAL_FSM))
     assert total >= 45

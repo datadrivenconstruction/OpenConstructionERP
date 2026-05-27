@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from app.modules.ncr.schemas import NCRCreate, NCRUpdate
-from app.modules.ncr.service import NCRService, _NCR_STATUS_TRANSITIONS
+from app.modules.ncr.service import NCRService
 
 # ── Helpers / stubs ───────────────────────────────────────────────────────
 

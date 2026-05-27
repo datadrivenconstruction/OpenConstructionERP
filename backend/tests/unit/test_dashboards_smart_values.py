@@ -42,13 +42,7 @@ def thousand_row_df() -> pd.DataFrame:
     Plus a few unicode entries.
     """
     rows = []
-    pattern = (
-        ["Concrete"] * 400
-        + ["ConcretePrecast"] * 150
-        + ["Steel"] * 200
-        + ["Wood"] * 150
-        + ["Glass"] * 100
-    )
+    pattern = ["Concrete"] * 400 + ["ConcretePrecast"] * 150 + ["Steel"] * 200 + ["Wood"] * 150 + ["Glass"] * 100
     for i, material in enumerate(pattern):
         rows.append(
             {
@@ -83,7 +77,8 @@ def local_backend(tmp_path: Path) -> LocalStorageBackend:
 
 class TestDataFrameFallback:
     def test_query_concr_returns_concrete_first(
-        self, thousand_row_df: pd.DataFrame,
+        self,
+        thousand_row_df: pd.DataFrame,
     ) -> None:
         results = fetch_distinct_values_from_dataframe(
             thousand_row_df,
@@ -100,7 +95,8 @@ class TestDataFrameFallback:
         assert "Concrete" in values
 
     def test_empty_query_returns_top_n_by_frequency(
-        self, thousand_row_df: pd.DataFrame,
+        self,
+        thousand_row_df: pd.DataFrame,
     ) -> None:
         results = fetch_distinct_values_from_dataframe(
             thousand_row_df,
@@ -127,7 +123,8 @@ class TestDataFrameFallback:
         assert any(r.value == "Бетон Б25" for r in results)
 
     def test_column_not_in_attributes_raises(
-        self, thousand_row_df: pd.DataFrame,
+        self,
+        thousand_row_df: pd.DataFrame,
     ) -> None:
         with pytest.raises(ColumnNotFoundError):
             fetch_distinct_values_from_dataframe(
@@ -137,7 +134,8 @@ class TestDataFrameFallback:
             )
 
     def test_invalid_column_name_raises(
-        self, thousand_row_df: pd.DataFrame,
+        self,
+        thousand_row_df: pd.DataFrame,
     ) -> None:
         with pytest.raises(ColumnNotFoundError):
             fetch_distinct_values_from_dataframe(
@@ -190,7 +188,11 @@ class TestDuckDBPath:
             }
         )
         await write_parquet(
-            project_id, snap_id, "entities", df, backend=local_backend,
+            project_id,
+            snap_id,
+            "entities",
+            df,
+            backend=local_backend,
         )
         monkeypatch.setattr(
             "app.modules.dashboards.snapshot_storage.get_storage_backend",
@@ -229,7 +231,11 @@ class TestDuckDBPath:
             }
         )
         await write_parquet(
-            project_id, snap_id, "entities", df, backend=local_backend,
+            project_id,
+            snap_id,
+            "entities",
+            df,
+            backend=local_backend,
         )
         monkeypatch.setattr(
             "app.modules.dashboards.snapshot_storage.get_storage_backend",
@@ -265,7 +271,11 @@ class TestDuckDBPath:
             }
         )
         await write_parquet(
-            project_id, snap_id, "entities", df, backend=local_backend,
+            project_id,
+            snap_id,
+            "entities",
+            df,
+            backend=local_backend,
         )
         monkeypatch.setattr(
             "app.modules.dashboards.snapshot_storage.get_storage_backend",

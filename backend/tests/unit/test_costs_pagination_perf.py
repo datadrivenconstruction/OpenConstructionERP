@@ -54,9 +54,7 @@ from app.modules.costs.service import CostItemService  # noqa: E402
 @pytest_asyncio.fixture
 async def session() -> AsyncSession:
     db_path = _TMP_DIR / f"test-{uuid.uuid4().hex[:8]}.db"
-    engine = create_async_engine(
-        f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False
-    )
+    engine = create_async_engine(f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all, tables=[CostItem.__table__])
     Session = async_sessionmaker(engine, expire_on_commit=False)
@@ -171,9 +169,7 @@ async def test_autocomplete_within_bucket_sorts_by_code_asc(
         accept_language=None,
     )
     codes = [item.code for item in out]
-    assert codes == sorted(codes), (
-        f"Codes within the components bucket must be ASC, got {codes}"
-    )
+    assert codes == sorted(codes), f"Codes within the components bucket must be ASC, got {codes}"
 
 
 @pytest.mark.asyncio
@@ -203,9 +199,7 @@ async def test_autocomplete_respects_region_filter(session: AsyncSession) -> Non
         locale="en",
         accept_language=None,
     )
-    assert out_us == [], (
-        "Region filter must be applied in SQL — no rows are tagged US_NYC."
-    )
+    assert out_us == [], "Region filter must be applied in SQL — no rows are tagged US_NYC."
 
 
 @pytest.mark.asyncio

@@ -102,9 +102,7 @@ class ProjectRepository:
         sequence number before either inserts. Cheap — single indexed
         scalar query.
         """
-        stmt = select(func.count()).select_from(
-            select(Project.id).where(Project.project_code == code).subquery()
-        )
+        stmt = select(func.count()).select_from(select(Project.id).where(Project.project_code == code).subquery())
         count = (await self.session.execute(stmt)).scalar_one()
         return bool(count)
 
@@ -135,7 +133,7 @@ class ProjectRepository:
         BATCH = 1000
         found: set[str] = set()
         for start in range(0, len(codes), BATCH):
-            chunk = codes[start:start + BATCH]
+            chunk = codes[start : start + BATCH]
             stmt = select(Project.project_code).where(
                 Project.project_code.in_(chunk),
             )

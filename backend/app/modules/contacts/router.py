@@ -648,21 +648,25 @@ async def import_contacts_file(
                 # it back to *their own* error response is fine. Don't
                 # widen ``data`` to the full row though: that broadcasts
                 # phone / notes / other PII alongside.
-                errors.append({
-                    "row": row_idx,
-                    "error": f"Invalid email format: {primary_email}",
-                    "data": _redact_row_for_log(row),
-                })
+                errors.append(
+                    {
+                        "row": row_idx,
+                        "error": f"Invalid email format: {primary_email}",
+                        "data": _redact_row_for_log(row),
+                    }
+                )
                 continue
 
             # Validate country_code
             country_code = str(row.get("country_code", "")).strip().upper() or None
             if country_code and len(country_code) != 2:
-                errors.append({
-                    "row": row_idx,
-                    "error": f"Country code must be 2 characters, got: {country_code}",
-                    "data": _redact_row_for_log(row),
-                })
+                errors.append(
+                    {
+                        "row": row_idx,
+                        "error": f"Country code must be 2 characters, got: {country_code}",
+                        "data": _redact_row_for_log(row),
+                    }
+                )
                 continue
 
             primary_phone = str(row.get("primary_phone", "")).strip() or None
@@ -699,11 +703,13 @@ async def import_contacts_file(
             # Replace the message with the exception class name and log a
             # PII-stripped row dict instead.
             err_kind = type(exc).__name__
-            errors.append({
-                "row": row_idx,
-                "error": f"Row rejected ({err_kind})",
-                "data": _redact_row_for_log(row),
-            })
+            errors.append(
+                {
+                    "row": row_idx,
+                    "error": f"Row rejected ({err_kind})",
+                    "data": _redact_row_for_log(row),
+                }
+            )
             logger.warning(
                 "Contact import error at row %d: %s (fields=%s)",
                 row_idx,
@@ -933,9 +939,7 @@ async def download_contacts_template(
     return StreamingResponse(
         output,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": 'attachment; filename="contacts_import_template.xlsx"'
-        },
+        headers={"Content-Disposition": 'attachment; filename="contacts_import_template.xlsx"'},
     )
 
 
@@ -1088,17 +1092,19 @@ async def convert_contact_to_lead(
     # the contacts module's perspective. If the install doesn't have it
     # we return 422 with a clear message rather than 500.
     try:
-        from app.modules.property_dev.models import Lead
         from app.modules.contacts import bridge as _contacts_bridge
+        from app.modules.property_dev.models import Lead
     except ImportError as exc:  # pragma: no cover — install guard
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Property Development module not installed.",
         ) from exc
 
-    full_name = " ".join(
-        p for p in (contact.first_name or "", contact.last_name or "") if p
-    ).strip() or contact.company_name or ""
+    full_name = (
+        " ".join(p for p in (contact.first_name or "", contact.last_name or "") if p).strip()
+        or contact.company_name
+        or ""
+    )
 
     lead = Lead(
         development_id=payload.development_id,
@@ -1120,9 +1126,7 @@ async def convert_contact_to_lead(
 
     # Idempotently tag the contact as a property_dev_lead.
     if _contacts_bridge.PROPERTY_DEV_LEAD_TAG not in (contact.module_tags or []):
-        contact.module_tags = list(contact.module_tags or []) + [
-            _contacts_bridge.PROPERTY_DEV_LEAD_TAG
-        ]
+        contact.module_tags = list(contact.module_tags or []) + [_contacts_bridge.PROPERTY_DEV_LEAD_TAG]
         await session.flush()
 
     await session.commit()
@@ -1135,9 +1139,7 @@ async def convert_contact_to_lead(
     return {
         "id": str(lead.id),
         "contact_id": str(contact.id),
-        "development_id": (
-            str(lead.development_id) if lead.development_id else None
-        ),
+        "development_id": (str(lead.development_id) if lead.development_id else None),
         "source": lead.source,
         "lead_score": float(lead.lead_score or 0),
         "status": lead.status,
@@ -1166,17 +1168,19 @@ async def convert_contact_to_buyer(
     contact = await _require_contact_access(session, contact_id, user_id)
 
     try:
-        from app.modules.property_dev.models import Buyer
         from app.modules.contacts import bridge as _contacts_bridge
+        from app.modules.property_dev.models import Buyer
     except ImportError as exc:  # pragma: no cover
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Property Development module not installed.",
         ) from exc
 
-    full_name = " ".join(
-        p for p in (contact.first_name or "", contact.last_name or "") if p
-    ).strip() or contact.company_name or ""
+    full_name = (
+        " ".join(p for p in (contact.first_name or "", contact.last_name or "") if p).strip()
+        or contact.company_name
+        or ""
+    )
 
     buyer = Buyer(
         development_id=payload.development_id,
@@ -1194,9 +1198,7 @@ async def convert_contact_to_buyer(
     await session.flush()
 
     if _contacts_bridge.PROPERTY_DEV_BUYER_TAG not in (contact.module_tags or []):
-        contact.module_tags = list(contact.module_tags or []) + [
-            _contacts_bridge.PROPERTY_DEV_BUYER_TAG
-        ]
+        contact.module_tags = list(contact.module_tags or []) + [_contacts_bridge.PROPERTY_DEV_BUYER_TAG]
         await session.flush()
 
     await session.commit()

@@ -128,16 +128,18 @@ def get_available_actions(gap_action_ids: list[str]) -> list[dict[str, Any]]:
         if action_id and action_id in ACTION_REGISTRY and action_id not in seen:
             seen.add(action_id)
             defn = ACTION_REGISTRY[action_id]
-            actions.append({
-                "id": defn.id,
-                "label": defn.label,
-                "description": defn.description,
-                "icon": defn.icon,
-                "requires_confirmation": defn.requires_confirmation,
-                "confirmation_message": defn.confirmation_message,
-                "navigate_to": defn.navigate_to,
-                "has_backend_action": defn.target_module is not None,
-            })
+            actions.append(
+                {
+                    "id": defn.id,
+                    "label": defn.label,
+                    "description": defn.description,
+                    "icon": defn.icon,
+                    "requires_confirmation": defn.requires_confirmation,
+                    "confirmation_message": defn.confirmation_message,
+                    "navigate_to": defn.navigate_to,
+                    "has_backend_action": defn.target_module is not None,
+                }
+            )
     return actions
 
 
@@ -221,12 +223,7 @@ async def _find_project_boq(
     from app.modules.boq.models import BOQ
 
     pid = _to_uuid(project_id)
-    stmt = (
-        select(BOQ)
-        .where(BOQ.project_id == pid)
-        .order_by(BOQ.created_at.asc())
-        .limit(1)
-    )
+    stmt = select(BOQ).where(BOQ.project_id == pid).order_by(BOQ.created_at.asc()).limit(1)
     result = await session.execute(stmt)
     return result.scalar_one_or_none()
 
@@ -407,8 +404,7 @@ async def _match_cwicr_prices(
         return ActionResult(
             success=True,
             message=(
-                f"{count_updated} positions priced from CWICR "
-                f"({count_skipped} skipped, {count_total} candidates)"
+                f"{count_updated} positions priced from CWICR ({count_skipped} skipped, {count_total} candidates)"
             ),
             redirect_url="/boq",
             data={
@@ -456,9 +452,7 @@ async def _generate_schedule(
         schedule_svc = ScheduleService(session)
 
         # Refuse if a schedule already exists.
-        existing, existing_count = await schedule_svc.list_schedules_for_project(
-            pid, limit=1
-        )
+        existing, existing_count = await schedule_svc.list_schedules_for_project(pid, limit=1)
         if existing_count > 0 or existing:
             existing_id = existing[0].id if existing else None
             return ActionResult(
@@ -476,10 +470,7 @@ async def _generate_schedule(
         try:
             project = await ProjectRepository(session).get_by_id(pid)
             if project is not None:
-                candidate = (
-                    getattr(project, "planned_start_date", None)
-                    or getattr(project, "actual_start_date", None)
-                )
+                candidate = getattr(project, "planned_start_date", None) or getattr(project, "actual_start_date", None)
                 if candidate:
                     start_iso = str(candidate)[:10]
         except Exception:

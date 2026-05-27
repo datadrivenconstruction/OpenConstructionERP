@@ -33,7 +33,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "v3081_punchlist_reopen_audit"
 down_revision: Union[str, Sequence[str], None] = "v3071_merge_clash_and_files"
@@ -49,9 +48,7 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
     return name in inspector.get_table_names()
 
 
-def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str
-) -> bool:
+def _has_column(inspector: sa.engine.reflection.Inspector, table: str, column: str) -> bool:
     if not _has_table(inspector, table):
         return False
     return column in {col["name"] for col in inspector.get_columns(table)}

@@ -111,6 +111,7 @@ def _build_app(
     async def _project_access_override(project_id, user_id, session) -> None:
         from fastapi import HTTPException
         from fastapi import status as st
+
         from app.modules.projects.models import Project as _P
 
         row = await session.get(_P, project_id)
@@ -195,9 +196,7 @@ class TestFullReviewCycle:
         assert rev_after_rar == 1, "R&R must NOT increment revision — only re-submit does"
 
         # State-change log must have fired for the review step.
-        state_events = [
-            r for r in caplog.records if "submittal.state_change" in r.getMessage()
-        ]
+        state_events = [r for r in caplog.records if "submittal.state_change" in r.getMessage()]
         assert state_events, "expected at least one submittal.state_change log"
 
         # ── Step 5: Re-submit (round 2) ──────────────────────────────────
@@ -223,9 +222,7 @@ class TestFullReviewCycle:
         assert sub.current_revision == 2, "revision must stay at 2 after approval"
 
     @pytest.mark.asyncio
-    async def test_revise_resubmit_path_allows_second_submission(
-        self, db_session
-    ) -> None:
+    async def test_revise_resubmit_path_allows_second_submission(self, db_session) -> None:
         """Submittal in revise_and_resubmit state can be submitted again."""
         owner_id = await _make_user(db_session)
         reviewer_id = await _make_user(db_session)
@@ -297,9 +294,7 @@ class TestAttachmentVersioning:
     """
 
     @pytest.mark.asyncio
-    async def test_prior_attachments_retained_after_resubmit(
-        self, db_session, tmp_path, monkeypatch
-    ) -> None:
+    async def test_prior_attachments_retained_after_resubmit(self, db_session, tmp_path, monkeypatch) -> None:
         """Attachments from round 1 remain in the list after a round-2 upload.
 
         The metadata["attachments"] list is append-only: uploading a new PDF
@@ -374,17 +369,13 @@ class TestAttachmentVersioning:
         list_resp = client.get(f"/v1/submittals/{sub_id}/attachments/")
         assert list_resp.status_code == 200, list_resp.text
         entries = list_resp.json()
-        assert len(entries) == 2, (
-            f"Expected 2 attachment entries (one per round), got {len(entries)}"
-        )
+        assert len(entries) == 2, f"Expected 2 attachment entries (one per round), got {len(entries)}"
         labels = {e["label"] for e in entries}
         assert "Round 1 drawing" in labels
         assert "Round 2 revised drawing" in labels
 
     @pytest.mark.asyncio
-    async def test_attachment_list_preserves_order(
-        self, db_session, tmp_path, monkeypatch
-    ) -> None:
+    async def test_attachment_list_preserves_order(self, db_session, tmp_path, monkeypatch) -> None:
         """Attachments appear in insertion order (oldest first)."""
         from app.modules.submittals import router as sub_router
 
@@ -423,9 +414,7 @@ class TestAttachmentVersioning:
         assert [e["label"] for e in entries] == ["alpha", "beta", "gamma"]
 
     @pytest.mark.asyncio
-    async def test_delete_removes_only_target_attachment(
-        self, db_session, tmp_path, monkeypatch
-    ) -> None:
+    async def test_delete_removes_only_target_attachment(self, db_session, tmp_path, monkeypatch) -> None:
         """DELETE /{id}/attachments/{doc_id} removes one entry, leaves others intact."""
         from app.modules.submittals import router as sub_router
 
@@ -464,9 +453,7 @@ class TestAttachmentVersioning:
         assert r1.status_code == 201 and r2.status_code == 201
 
         doc_to_remove = r2.json()["document_id"]
-        del_resp = client.delete(
-            f"/v1/submittals/{sub_id}/attachments/{doc_to_remove}"
-        )
+        del_resp = client.delete(f"/v1/submittals/{sub_id}/attachments/{doc_to_remove}")
         assert del_resp.status_code == 204, del_resp.text
 
         list_resp = client.get(f"/v1/submittals/{sub_id}/attachments/")
@@ -486,9 +473,7 @@ class TestClosePastDueDate:
     """
 
     @pytest.mark.asyncio
-    async def test_approve_past_date_required_succeeds(
-        self, db_session
-    ) -> None:
+    async def test_approve_past_date_required_succeeds(self, db_session) -> None:
         """Approving a submittal past its date_required is not blocked.
 
         date_required is informational (urgency badge in the UI). It must
@@ -518,8 +503,7 @@ class TestClosePastDueDate:
 
         # Approval must succeed even though date_required is in the past.
         assert sub.status == "approved", (
-            "Approving a submittal past date_required must succeed — "
-            "overdue is informational, not a gate"
+            "Approving a submittal past date_required must succeed — overdue is informational, not a gate"
         )
         assert sub.ball_in_court is None, "approved must clear ball_in_court"
 
@@ -535,9 +519,7 @@ class TestMagicByteExtendedFormats:
     """
 
     @pytest.mark.asyncio
-    async def test_ole_attachment_accepted(
-        self, db_session, tmp_path, monkeypatch
-    ) -> None:
+    async def test_ole_attachment_accepted(self, db_session, tmp_path, monkeypatch) -> None:
         from app.modules.submittals import router as sub_router
 
         monkeypatch.setattr(sub_router, "ATTACHMENTS_DIR", tmp_path / "attachments")
@@ -570,9 +552,7 @@ class TestMagicByteExtendedFormats:
         assert resp.json()["label"] == "spec.doc"
 
     @pytest.mark.asyncio
-    async def test_dwg_attachment_accepted(
-        self, db_session, tmp_path, monkeypatch
-    ) -> None:
+    async def test_dwg_attachment_accepted(self, db_session, tmp_path, monkeypatch) -> None:
         from app.modules.submittals import router as sub_router
 
         monkeypatch.setattr(sub_router, "ATTACHMENTS_DIR", tmp_path / "attachments")
@@ -606,9 +586,7 @@ class TestMagicByteExtendedFormats:
         assert payload["label"] == "structure.dwg"
 
     @pytest.mark.asyncio
-    async def test_script_disguised_as_dwg_is_rejected(
-        self, db_session, tmp_path, monkeypatch
-    ) -> None:
+    async def test_script_disguised_as_dwg_is_rejected(self, db_session, tmp_path, monkeypatch) -> None:
         from app.modules.submittals import router as sub_router
 
         monkeypatch.setattr(sub_router, "ATTACHMENTS_DIR", tmp_path / "attachments")

@@ -63,22 +63,16 @@ class BCFTopic(Base):
         index=True,
     )
     # Optional link to a BIM model (no hard FK — bim_hub may be disabled).
-    bim_model_id: Mapped[str | None] = mapped_column(
-        String(36), nullable=True, index=True
-    )
+    bim_model_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     topic_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    topic_status: Mapped[str] = mapped_column(
-        String(100), nullable=False, default="Open", server_default="Open"
-    )
+    topic_status: Mapped[str] = mapped_column(String(100), nullable=False, default="Open", server_default="Open")
     priority: Mapped[str | None] = mapped_column(String(100), nullable=True)
     stage: Mapped[str | None] = mapped_column(String(100), nullable=True)
     topic_index: Mapped[int | None] = mapped_column(Integer, nullable=True)
     assigned_to: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    due_date: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     labels: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=list, server_default="[]"
     )
@@ -86,13 +80,9 @@ class BCFTopic(Base):
         JSON, nullable=False, default=list, server_default="[]"
     )
     creation_author: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    creation_date: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    creation_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     modified_author: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    modified_date: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    modified_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -129,9 +119,7 @@ class BCFComment(Base):
     __tablename__ = "oe_bcf_comment"
     __table_args__ = (
         Index("ix_bcf_comment_topic", "topic_id"),
-        UniqueConstraint(
-            "topic_id", "guid", name="uq_bcf_comment_topic_guid"
-        ),
+        UniqueConstraint("topic_id", "guid", name="uq_bcf_comment_topic_guid"),
         Index("ix_bcf_comment_guid", "guid"),
     )
 
@@ -144,13 +132,9 @@ class BCFComment(Base):
     )
     comment_text: Mapped[str] = mapped_column(Text, nullable=False, default="")
     author: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    date: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     modified_author: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    modified_date: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    modified_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     viewpoint_guid: Mapped[str | None] = mapped_column(String(36), nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
@@ -180,9 +164,7 @@ class BCFViewpoint(Base):
     __tablename__ = "oe_bcf_viewpoint"
     __table_args__ = (
         Index("ix_bcf_viewpoint_topic", "topic_id"),
-        UniqueConstraint(
-            "topic_id", "guid", name="uq_bcf_viewpoint_topic_guid"
-        ),
+        UniqueConstraint("topic_id", "guid", name="uq_bcf_viewpoint_topic_guid"),
         Index("ix_bcf_viewpoint_guid", "guid"),
     )
 
@@ -193,13 +175,9 @@ class BCFViewpoint(Base):
         nullable=False,
         index=True,
     )
-    vp_index: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
+    vp_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     # "perspective" | "orthogonal" | "" (no camera).
-    camera_type: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="", server_default=""
-    )
+    camera_type: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")
     camera: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
     )

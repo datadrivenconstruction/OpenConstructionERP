@@ -57,6 +57,7 @@ async def _safe_publish(name: str, data: dict[str, Any]) -> None:
     except Exception:
         logger.debug("Failed to publish requirements event '%s'", name, exc_info=True)
 
+
 # Gate definitions
 GATE_NAMES: dict[int, str] = {
     1: "Completeness",
@@ -519,11 +520,7 @@ class RequirementsService:
             from sqlalchemy import cast
             from sqlalchemy.dialects.postgresql import JSONB
 
-            stmt = select(Requirement).where(
-                cast(Requirement.metadata_, JSONB).contains(
-                    {"bim_element_ids": [target]}
-                )
-            )
+            stmt = select(Requirement).where(cast(Requirement.metadata_, JSONB).contains({"bim_element_ids": [target]}))
             if project_id is not None:
                 from app.modules.requirements.models import RequirementSet
 
@@ -1083,9 +1080,7 @@ class RequirementsService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Requirement not found",
             )
-        return await self.deliverable_repo.list_for_requirement(
-            requirement_id, deliverable_type=deliverable_type
-        )
+        return await self.deliverable_repo.list_for_requirement(requirement_id, deliverable_type=deliverable_type)
 
     async def update_deliverable(
         self,
@@ -1122,7 +1117,8 @@ class RequirementsService:
         await self.session.commit()
 
     async def get_deliverable_coverage(
-        self, requirement_id: uuid.UUID,
+        self,
+        requirement_id: uuid.UUID,
     ) -> dict[str, Any]:
         """Roll up coverage % for one requirement's deliverables."""
         req = await self.req_repo.get_by_id(requirement_id)
@@ -1148,9 +1144,7 @@ class RequirementsService:
         else any missing one). When ``deliverable_type`` is supplied
         only that column is materialised.
         """
-        requirements = await self.deliverable_repo.all_requirements_for_project(
-            project_id
-        )
+        requirements = await self.deliverable_repo.all_requirements_for_project(project_id)
 
         # Collect deliverable types present in the project so the UI can
         # render dynamic columns. Always include the canonical set so the
@@ -1165,7 +1159,7 @@ class RequirementsService:
         ]
         seen_types: set[str] = set()
         for req in requirements:
-            for d in (req.deliverables or []):
+            for d in req.deliverables or []:
                 seen_types.add(d.deliverable_type)
         all_types = list(canonical_types) + sorted(seen_types - set(canonical_types))
         if deliverable_type is not None:
@@ -1178,9 +1172,7 @@ class RequirementsService:
         for req in requirements:
             deliverables = list(req.deliverables or [])
             if deliverable_type is not None:
-                deliverables = [
-                    d for d in deliverables if d.deliverable_type == deliverable_type
-                ]
+                deliverables = [d for d in deliverables if d.deliverable_type == deliverable_type]
 
             cells: dict[str, dict[str, Any]] = {}
 
@@ -1203,13 +1195,7 @@ class RequirementsService:
                     }
                     continue
                 # Status priority: accepted > submitted > missing.
-                bucket.sort(
-                    key=lambda d: (
-                        0 if d.accepted_at is not None
-                        else 1 if d.submitted_at is not None
-                        else 2
-                    )
-                )
+                bucket.sort(key=lambda d: (0 if d.accepted_at is not None else 1 if d.submitted_at is not None else 2))
                 cell = bucket[0]
                 cells[col] = {
                     "deliverable_id": cell.id,
@@ -1221,9 +1207,7 @@ class RequirementsService:
                     "accepted_at": cell.accepted_at,
                 }
 
-            coverage = compute_deliverable_coverage(
-                deliverables, requirement_id=req.id
-            )
+            coverage = compute_deliverable_coverage(deliverables, requirement_id=req.id)
             project_total += coverage["total"]
             project_accepted += coverage["accepted"]
 
@@ -1239,11 +1223,7 @@ class RequirementsService:
                 }
             )
 
-        project_pct = (
-            round((project_accepted / project_total) * 100.0, 2)
-            if project_total
-            else 0.0
-        )
+        project_pct = round((project_accepted / project_total) * 100.0, 2) if project_total else 0.0
 
         return {
             "project_id": project_id,

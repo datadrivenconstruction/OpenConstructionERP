@@ -81,9 +81,7 @@ def _get_service(session: SessionDep) -> ClashService:
     return ClashService(session)
 
 
-async def _require_project_access(
-    session: AsyncSession, project_id: uuid.UUID, user_id: str
-) -> None:
+async def _require_project_access(session: AsyncSession, project_id: uuid.UUID, user_id: str) -> None:
     """‌⁠‍Verify the caller owns (or is admin on) ``project_id`` (IDOR guard)."""
     from app.modules.projects.repository import ProjectRepository
     from app.modules.users.repository import UserRepository
@@ -168,16 +166,12 @@ async def list_categories(
         # ``property:`` with an empty/blank key is meaningless — degrade
         # to the safe default rather than 422 (same forgiving contract
         # the unknown-built-in branch already uses).
-        if not group_by[len(CLASH_PROPERTY_GROUP_PREFIX):].strip():
+        if not group_by[len(CLASH_PROPERTY_GROUP_PREFIX) :].strip():
             group_by = "type"
     elif group_by not in CLASH_GROUP_BY:
         group_by = "type"
-    project_models = {
-        m.id for m in await service.repo.models_for_project(project_id)
-    }
-    wanted = [m for m in model_ids if m in project_models] or list(
-        project_models
-    )
+    project_models = {m.id for m in await service.repo.models_for_project(project_id)}
+    wanted = [m for m in model_ids if m in project_models] or list(project_models)
     etypes, discs = await service.repo.categories_for_models(wanted)
     (
         groups,
@@ -190,15 +184,9 @@ async def list_categories(
         group_by=group_by,
         groups=[ClashCategoryItem(value=v, count=n) for v, n in groups],
         available_group_by=ordered_avail,
-        available_properties=[
-            ClashPropertyFacet(key=k, count=n) for k, n in available_props
-        ],
-        element_types=[
-            ClashCategoryItem(value=v, count=n) for v, n in etypes
-        ],
-        disciplines=[
-            ClashCategoryItem(value=v, count=n) for v, n in discs
-        ],
+        available_properties=[ClashPropertyFacet(key=k, count=n) for k, n in available_props],
+        element_types=[ClashCategoryItem(value=v, count=n) for v, n in etypes],
+        disciplines=[ClashCategoryItem(value=v, count=n) for v, n in discs],
     )
 
 
@@ -462,17 +450,14 @@ async def export_csv(
         )
     csv_text = buf.getvalue()
 
-    safe_name = "".join(
-        c if c.isalnum() or c in (" ", "-", "_") else "_"
-        for c in (run.name or "clash")
-    ).strip() or "clash"
+    safe_name = (
+        "".join(c if c.isalnum() or c in (" ", "-", "_") else "_" for c in (run.name or "clash")).strip() or "clash"
+    )
     filename = f"clash_{safe_name}.csv"
     return StreamingResponse(
         iter([csv_text]),
         media_type="text/csv",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        },
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
@@ -490,9 +475,7 @@ async def export_bcf(
     service: ClashService = Depends(_get_service),
 ) -> ClashBCFExportResponse:
     await _require_project_access(session, project_id, user_id)
-    exported, skipped = await service.export_bcf(
-        project_id, run_id, data, author=user_id, user_id=user_id
-    )
+    exported, skipped = await service.export_bcf(project_id, run_id, data, author=user_id, user_id=user_id)
     return ClashBCFExportResponse(exported=exported, skipped=skipped)
 
 
@@ -506,9 +489,7 @@ async def import_bcf(
     run_id: uuid.UUID,
     user_id: CurrentUserId,
     session: SessionDep,
-    file: UploadFile = FileParam(
-        ..., description="A .bcfzip archive (BCF 2.1 or 3.0)"
-    ),
+    file: UploadFile = FileParam(..., description="A .bcfzip archive (BCF 2.1 or 3.0)"),
     service: ClashService = Depends(_get_service),
 ) -> ClashBCFImportResponse:
     """Round-trip a BCF archive back into clash triage.
@@ -537,12 +518,8 @@ async def import_bcf(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail="BCF archive exceeds 100 MiB upload cap.",
         )
-    matched, unmatched, errors = await service.import_bcf(
-        project_id, run_id, payload, actor=str(user_id)
-    )
-    return ClashBCFImportResponse(
-        matched=matched, unmatched=unmatched, errors=errors
-    )
+    matched, unmatched, errors = await service.import_bcf(project_id, run_id, payload, actor=str(user_id))
+    return ClashBCFImportResponse(matched=matched, unmatched=unmatched, errors=errors)
 
 
 @router.post(
@@ -560,9 +537,7 @@ async def watch_result(
 ) -> ClashWatchResponse:
     """Subscribe the calling user to this clash (idempotent)."""
     await _require_project_access(session, project_id, user_id)
-    watchers, watching = await service.set_watch(
-        project_id, run_id, result_id, str(user_id), watching=True
-    )
+    watchers, watching = await service.set_watch(project_id, run_id, result_id, str(user_id), watching=True)
     return ClashWatchResponse(watchers=watchers, watching=watching)
 
 
@@ -581,9 +556,7 @@ async def unwatch_result(
 ) -> ClashWatchResponse:
     """Unsubscribe the calling user from this clash (idempotent)."""
     await _require_project_access(session, project_id, user_id)
-    watchers, watching = await service.set_watch(
-        project_id, run_id, result_id, str(user_id), watching=False
-    )
+    watchers, watching = await service.set_watch(project_id, run_id, result_id, str(user_id), watching=False)
     return ClashWatchResponse(watchers=watchers, watching=watching)
 
 
@@ -667,9 +640,7 @@ async def apply_rule_suggestion(
         tolerance_m=data.tolerance_m,
         actor=str(user_id),
     )
-    return ClashApplyRuleResponse(
-        rule_added=rule_added, results_affected=affected
-    )
+    return ClashApplyRuleResponse(rule_added=rule_added, results_affected=affected)
 
 
 @router.get(
@@ -762,9 +733,7 @@ async def list_issues(
             except Exception:  # noqa: BLE001
                 payload.due_date = None
         items.append(payload)
-    return ClashIssuePage(
-        items=items, total=int(total), offset=offset, limit=limit
-    )
+    return ClashIssuePage(items=items, total=int(total), offset=offset, limit=limit)
 
 
 @router.post(
@@ -789,17 +758,11 @@ async def suppress_issue(
     # Resolve project from any existing issue lookup so we can IDOR-check
     # without a project_id query parameter. We do that by querying any
     # issue with this id and using its project_id; if none exists → 404.
-    raw = (
-        await session.execute(_select(_IssueModel).where(_IssueModel.id == issue_id))
-    ).scalar_one_or_none()
+    raw = (await session.execute(_select(_IssueModel).where(_IssueModel.id == issue_id))).scalar_one_or_none()
     if raw is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Clash issue not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clash issue not found")
     await _require_project_access(session, raw.project_id, user_id)
-    issue = await service.suppress_by_issue(
-        raw.project_id, issue_id, data.reason, user_id
-    )
+    issue = await service.suppress_by_issue(raw.project_id, issue_id, data.reason, user_id)
     return ClashIssueRead.model_validate(issue)
 
 
@@ -815,13 +778,9 @@ async def unsuppress_issue(
     service: ClashService = Depends(_get_service),
 ) -> ClashIssueRead:
     """Lift a suppression — flip the issue from ``ignored`` back to ``persisted``."""
-    raw = (
-        await session.execute(_select(_IssueModel).where(_IssueModel.id == issue_id))
-    ).scalar_one_or_none()
+    raw = (await session.execute(_select(_IssueModel).where(_IssueModel.id == issue_id))).scalar_one_or_none()
     if raw is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Clash issue not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clash issue not found")
     await _require_project_access(session, raw.project_id, user_id)
     issue = await service.unsuppress_by_issue(raw.project_id, issue_id, user_id)
     return ClashIssueRead.model_validate(issue)
@@ -844,13 +803,9 @@ async def run_signature_diff(
     known smart issues and the prior run. IDOR-guarded via the run's own
     ``project_id``.
     """
-    raw = (
-        await session.execute(_select(_RunModel).where(_RunModel.id == run_id))
-    ).scalar_one_or_none()
+    raw = (await session.execute(_select(_RunModel).where(_RunModel.id == run_id))).scalar_one_or_none()
     if raw is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Clash run not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clash run not found")
     await _require_project_access(session, raw.project_id, user_id)
     diff = await service.run_diff(raw.project_id, run_id)
     return ClashRunDiff(**diff)

@@ -28,7 +28,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v260b_eac_run_spool_idempotency"
 down_revision: Union[str, Sequence[str], None] = "v280_4d_schedule_eac"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -63,6 +62,7 @@ def upgrade() -> None:
         # service boot. Raising here used to brick every future
         # `alembic upgrade head` on prod even though the service worked.
         import logging
+
         logging.getLogger("alembic").warning(
             "v260b skipped: %s missing — Base.metadata.create_all() handles it at boot",
             _TABLE,

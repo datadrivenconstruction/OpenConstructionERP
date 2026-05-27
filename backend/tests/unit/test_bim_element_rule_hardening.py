@@ -117,9 +117,7 @@ class TestPositiveQuantityRules:
 
     def test_wall_thickness_german_string_passes(self) -> None:
         # '0,24' is a valid positive number once locale-coerced.
-        assert WALL_HAS_THICKNESS.evaluate(
-            _elem(quantities={"thickness_m": "0,24"})
-        ) == []
+        assert WALL_HAS_THICKNESS.evaluate(_elem(quantities={"thickness_m": "0,24"})) == []
 
     def test_door_zero_dimensions_fail(self) -> None:
         door = _elem(

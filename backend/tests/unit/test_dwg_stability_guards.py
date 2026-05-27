@@ -20,7 +20,6 @@ from app.modules.dwg_takeoff.service import (
     _sniff_dwg_version,
 )
 
-
 # ── _sniff_dwg_version ────────────────────────────────────────────────
 
 

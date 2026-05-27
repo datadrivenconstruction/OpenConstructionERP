@@ -18,7 +18,6 @@ from sqlalchemy.ext.asyncio import (
 
 from app.database import Base
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────
 
 
@@ -28,7 +27,8 @@ async def session() -> AsyncSession:
     from app.modules.bi_dashboards import models as _m
 
     engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:", echo=False,
+        "sqlite+aiosqlite:///:memory:",
+        echo=False,
     )
     tables = [
         _m.KPIDefinition.__table__,
@@ -87,11 +87,22 @@ def test_list_system_kpis_returns_metadata() -> None:
     codes = {m["code"] for m in meta}
     # Spot-check that the canonical system KPIs are registered
     for code in (
-        "cpi", "spi", "first_pass_yield", "copq", "safety_trir",
-        "procurement_savings", "change_order_ratio", "cash_in_30d",
-        "cash_out_30d", "dso", "embodied_carbon_per_m2",
-        "equipment_utilization", "subcontractor_avg_rating",
-        "bid_win_rate", "punch_close_rate", "rfi_close_avg_days",
+        "cpi",
+        "spi",
+        "first_pass_yield",
+        "copq",
+        "safety_trir",
+        "procurement_savings",
+        "change_order_ratio",
+        "cash_in_30d",
+        "cash_out_30d",
+        "dso",
+        "embodied_carbon_per_m2",
+        "equipment_utilization",
+        "subcontractor_avg_rating",
+        "bid_win_rate",
+        "punch_close_rate",
+        "rfi_close_avg_days",
         "project_count_active",
     ):
         assert code in codes, f"missing system KPI: {code}"
@@ -186,7 +197,8 @@ async def test_dashboard_crud(session: AsyncSession) -> None:
     assert dashboard.owner_user_id == owner
 
     updated = await svc.update_dashboard(
-        dashboard.id, DashboardUpdate(name="Renamed"),
+        dashboard.id,
+        DashboardUpdate(name="Renamed"),
     )
     assert updated is not None
     assert updated.name == "Renamed"
@@ -243,16 +255,21 @@ async def test_widget_add_and_list_ordered(session: AsyncSession) -> None:
 
     svc = BIDashboardsService(session)
     dashboard = await svc.create_dashboard(
-        DashboardCreate(name="D"), owner_user_id=None,
+        DashboardCreate(name="D"),
+        owner_user_id=None,
     )
     w1 = await svc.create_widget(
         WidgetCreate(
-            dashboard_id=dashboard.id, kpi_code="cpi", order_seq=2,
+            dashboard_id=dashboard.id,
+            kpi_code="cpi",
+            order_seq=2,
         ),
     )
     w2 = await svc.create_widget(
         WidgetCreate(
-            dashboard_id=dashboard.id, kpi_code="spi", order_seq=1,
+            dashboard_id=dashboard.id,
+            kpi_code="spi",
+            order_seq=1,
         ),
     )
     assert w1 is not None
@@ -286,13 +303,15 @@ async def test_widget_update_and_delete(session: AsyncSession) -> None:
 
     svc = BIDashboardsService(session)
     dashboard = await svc.create_dashboard(
-        DashboardCreate(name="D"), owner_user_id=None,
+        DashboardCreate(name="D"),
+        owner_user_id=None,
     )
     widget = await svc.create_widget(
         WidgetCreate(dashboard_id=dashboard.id, kpi_code="cpi"),
     )
     updated = await svc.update_widget(
-        widget.id, WidgetUpdate(width=6, kpi_code="spi"),
+        widget.id,
+        WidgetUpdate(width=6, kpi_code="spi"),
     )
     assert updated.width == 6
     assert updated.kpi_code == "spi"
@@ -361,13 +380,14 @@ async def test_render_dashboard_uses_snapshot_cache(
 async def test_snapshot_recomputes_after_expiry(
     session: AsyncSession,
 ) -> None:
+    from sqlalchemy import update
+
     from app.modules.bi_dashboards.models import DashboardWidgetSnapshot
     from app.modules.bi_dashboards.schemas import (
         DashboardCreate,
         WidgetCreate,
     )
     from app.modules.bi_dashboards.service import BIDashboardsService
-    from sqlalchemy import update
 
     svc = BIDashboardsService(session)
     dashboard = await svc.create_dashboard(
@@ -381,9 +401,7 @@ async def test_snapshot_recomputes_after_expiry(
     # Expire snapshot
     past = datetime.now(UTC) - timedelta(hours=1)
     await session.execute(
-        update(DashboardWidgetSnapshot)
-        .where(DashboardWidgetSnapshot.widget_id == widget.id)
-        .values(valid_until=past),
+        update(DashboardWidgetSnapshot).where(DashboardWidgetSnapshot.widget_id == widget.id).values(valid_until=past),
     )
     await session.flush()
     result = await svc.render_dashboard(dashboard.id)
@@ -404,7 +422,8 @@ async def test_update_widget_snapshot_writes_payload(
 
     svc = BIDashboardsService(session)
     dashboard = await svc.create_dashboard(
-        DashboardCreate(name="D"), owner_user_id=None,
+        DashboardCreate(name="D"),
+        owner_user_id=None,
     )
     widget = await svc.create_widget(
         WidgetCreate(dashboard_id=dashboard.id, kpi_code="cpi"),
@@ -435,7 +454,8 @@ async def test_report_definition_crud(session: AsyncSession) -> None:
         owner_user_id=None,
     )
     updated = await svc.update_report(
-        report.id, ReportDefinitionUpdate(name="R2"),
+        report.id,
+        ReportDefinitionUpdate(name="R2"),
     )
     assert updated.name == "R2"
     assert await svc.delete_report(report.id) is True
@@ -463,7 +483,8 @@ async def test_run_report_returns_kpi_rows(session: AsyncSession) -> None:
 
 @pytest.mark.asyncio
 async def test_run_report_publishes_event(
-    session: AsyncSession, event_spy: MagicMock,
+    session: AsyncSession,
+    event_spy: MagicMock,
 ) -> None:
     from app.modules.bi_dashboards.schemas import ReportDefinitionCreate
     from app.modules.bi_dashboards.service import BIDashboardsService
@@ -549,7 +570,8 @@ async def test_schedule_create_computes_next_run(
     svc = BIDashboardsService(session)
     report = await svc.create_report(
         ReportDefinitionCreate(
-            code="rsched", name="R",
+            code="rsched",
+            name="R",
             query_spec_json={"kpis": ["cpi"]},
         ),
         owner_user_id=None,
@@ -569,18 +591,20 @@ async def test_schedule_create_computes_next_run(
 async def test_enqueue_scheduled_reports_fires_due(
     session: AsyncSession,
 ) -> None:
+    from sqlalchemy import update
+
     from app.modules.bi_dashboards.models import ReportSchedule
     from app.modules.bi_dashboards.schemas import (
         ReportDefinitionCreate,
         ReportScheduleCreate,
     )
     from app.modules.bi_dashboards.service import BIDashboardsService
-    from sqlalchemy import update
 
     svc = BIDashboardsService(session)
     report = await svc.create_report(
         ReportDefinitionCreate(
-            code="due", name="R",
+            code="due",
+            name="R",
             query_spec_json={"kpis": ["cpi"]},
         ),
         owner_user_id=None,
@@ -595,9 +619,7 @@ async def test_enqueue_scheduled_reports_fires_due(
     # Force next_run_at into the past
     past = datetime.now(UTC) - timedelta(hours=1)
     await session.execute(
-        update(ReportSchedule)
-        .where(ReportSchedule.id == schedule.id)
-        .values(next_run_at=past),
+        update(ReportSchedule).where(ReportSchedule.id == schedule.id).values(next_run_at=past),
     )
     await session.flush()
     fired = await svc.enqueue_scheduled_reports()
@@ -609,14 +631,18 @@ async def test_enqueue_scheduled_reports_fires_due(
 
 @pytest.mark.asyncio
 async def test_alert_triggers_when_below_threshold(
-    session: AsyncSession, event_spy: MagicMock,
+    session: AsyncSession,
+    event_spy: MagicMock,
 ) -> None:
     from app.modules.bi_dashboards import kpis
     from app.modules.bi_dashboards.schemas import AlertRuleCreate
     from app.modules.bi_dashboards.service import BIDashboardsService
 
     @kpis.register_kpi(
-        "_test_alert_below", name="Test", unit="ratio", category="operational",
+        "_test_alert_below",
+        name="Test",
+        unit="ratio",
+        category="operational",
     )
     async def _t1(session, **_):
         return kpis.KPIComputation(value=Decimal("0.5"), unit="ratio", source_record_count=1)
@@ -632,9 +658,7 @@ async def test_alert_triggers_when_below_threshold(
     )
     fired = await svc.evaluate_alert(alert)
     assert fired is True
-    triggered_events = [
-        c for c in event_spy.call_args_list if c.args[0] == "bi.alert.triggered"
-    ]
+    triggered_events = [c for c in event_spy.call_args_list if c.args[0] == "bi.alert.triggered"]
     assert triggered_events
 
 
@@ -776,11 +800,16 @@ async def test_compute_kpi_persist_writes_kpi_value(
     from app.modules.bi_dashboards.service import BIDashboardsService
 
     @kpis.register_kpi(
-        "_test_persist", name="Test", unit="ratio", category="operational",
+        "_test_persist",
+        name="Test",
+        unit="ratio",
+        category="operational",
     )
     async def _t(session, **_):
         return kpis.KPIComputation(
-            value=Decimal("0.42"), unit="ratio", source_record_count=5,
+            value=Decimal("0.42"),
+            unit="ratio",
+            source_record_count=5,
         )
 
     svc = BIDashboardsService(session)
@@ -830,16 +859,28 @@ async def test_saved_filter_create_and_list(session: AsyncSession) -> None:
 @pytest.mark.parametrize(
     "code",
     [
-        "cpi", "spi", "first_pass_yield", "copq", "safety_trir",
-        "procurement_savings", "change_order_ratio", "cash_in_30d",
-        "cash_out_30d", "dso", "embodied_carbon_per_m2",
-        "equipment_utilization", "subcontractor_avg_rating",
-        "bid_win_rate", "punch_close_rate", "rfi_close_avg_days",
+        "cpi",
+        "spi",
+        "first_pass_yield",
+        "copq",
+        "safety_trir",
+        "procurement_savings",
+        "change_order_ratio",
+        "cash_in_30d",
+        "cash_out_30d",
+        "dso",
+        "embodied_carbon_per_m2",
+        "equipment_utilization",
+        "subcontractor_avg_rating",
+        "bid_win_rate",
+        "punch_close_rate",
+        "rfi_close_avg_days",
         "project_count_active",
     ],
 )
 async def test_system_kpi_returns_decimal(
-    session: AsyncSession, code: str,
+    session: AsyncSession,
+    code: str,
 ) -> None:
     """Every system KPI must return a Decimal without raising."""
     from app.modules.bi_dashboards import kpis
@@ -885,10 +926,12 @@ def test_wave4_subscriber_registration_is_idempotent() -> None:
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "code", ["cv", "sv", "eac", "etc", "vac", "tcpi"],
+    "code",
+    ["cv", "sv", "eac", "etc", "vac", "tcpi"],
 )
 async def test_evm_kpis_registered_and_compute_safely(
-    session: AsyncSession, code: str,
+    session: AsyncSession,
+    code: str,
 ) -> None:
     """Each new EVM KPI is registered and returns a Decimal without raising."""
     from app.modules.bi_dashboards import kpis
@@ -944,7 +987,8 @@ async def test_benchmark_returns_empty_when_no_other_projects(
 
 @pytest.mark.asyncio
 async def test_alert_dsl_and_fires(
-    session: AsyncSession, event_spy: MagicMock,
+    session: AsyncSession,
+    event_spy: MagicMock,
 ) -> None:
     from app.modules.bi_dashboards import kpis
     from app.modules.bi_dashboards.schemas import AlertRuleCreate
@@ -996,9 +1040,7 @@ async def test_alert_dsl_and_fires(
     )
     fired = await svc.evaluate_alert(alert)
     assert fired is True
-    triggered_events = [
-        c for c in event_spy.call_args_list if c.args[0] == "bi.alert.triggered"
-    ]
+    triggered_events = [c for c in event_spy.call_args_list if c.args[0] == "bi.alert.triggered"]
     assert triggered_events
     # Trace included
     payload = triggered_events[0].args[1]
@@ -1013,13 +1055,19 @@ async def test_alert_dsl_or_fires_on_either(session: AsyncSession) -> None:
     from app.modules.bi_dashboards.service import BIDashboardsService
 
     @kpis.register_kpi(
-        "_test_dsl_or_a", name="A", unit="ratio", category="operational",
+        "_test_dsl_or_a",
+        name="A",
+        unit="ratio",
+        category="operational",
     )
     async def _a(session, **_):
         return kpis.KPIComputation(value=Decimal("0.5"), unit="ratio", source_record_count=1)
 
     @kpis.register_kpi(
-        "_test_dsl_or_b", name="B", unit="ratio", category="operational",
+        "_test_dsl_or_b",
+        name="B",
+        unit="ratio",
+        category="operational",
     )
     async def _b(session, **_):
         return kpis.KPIComputation(value=Decimal("0.5"), unit="ratio", source_record_count=1)
@@ -1109,15 +1157,19 @@ async def test_run_report_produces_pdf_file(session: AsyncSession) -> None:
     assert response.file_url.startswith("/api/v1/bi-dashboards/report-runs/")
     # And the file actually exists on disk
     runs = (
-        await session.execute(
-            __import__("sqlalchemy").select(
-                __import__(
-                    "app.modules.bi_dashboards.models",
-                    fromlist=["ReportRun"],
-                ).ReportRun
+        (
+            await session.execute(
+                __import__("sqlalchemy").select(
+                    __import__(
+                        "app.modules.bi_dashboards.models",
+                        fromlist=["ReportRun"],
+                    ).ReportRun
+                )
             )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     assert len(runs) == 1
     assert os.path.exists(runs[0].file_path)
     assert runs[0].file_size_bytes > 0
@@ -1126,15 +1178,14 @@ async def test_run_report_produces_pdf_file(session: AsyncSession) -> None:
 
 @pytest.mark.asyncio
 async def test_run_report_csv_format(session: AsyncSession) -> None:
-    import os
-
     from app.modules.bi_dashboards.schemas import ReportDefinitionCreate
     from app.modules.bi_dashboards.service import BIDashboardsService
 
     svc = BIDashboardsService(session)
     report = await svc.create_report(
         ReportDefinitionCreate(
-            code="r-csv", name="CSV Test",
+            code="r-csv",
+            name="CSV Test",
             query_spec_json={"kpis": ["cpi"]},
             output_format="csv",
         ),
@@ -1160,7 +1211,8 @@ async def test_run_report_xlsx_format(session: AsyncSession) -> None:
     svc = BIDashboardsService(session)
     report = await svc.create_report(
         ReportDefinitionCreate(
-            code="r-xlsx", name="XLSX Test",
+            code="r-xlsx",
+            name="XLSX Test",
             query_spec_json={"kpis": ["cpi"]},
             output_format="xlsx",
         ),
@@ -1190,7 +1242,9 @@ async def test_share_saved_filter_with_user(session: AsyncSession) -> None:
     )
     # Alice shares with Bob
     shared = await svc.share_filter(
-        sf.id, owner_user_id=alice, user_ids=[bob],
+        sf.id,
+        owner_user_id=alice,
+        user_ids=[bob],
     )
     assert str(bob) in shared.shared_with_user_ids_json
     # Bob's library now contains the filter
@@ -1213,7 +1267,9 @@ async def test_share_filter_non_owner_404(session: AsyncSession) -> None:
     with pytest.raises(Exception) as exc:
         # Eve tries to re-share Alice's filter
         await svc.share_filter(
-            sf.id, owner_user_id=eve, user_ids=[uuid.uuid4()],
+            sf.id,
+            owner_user_id=eve,
+            user_ids=[uuid.uuid4()],
         )
     # Service raises HTTPException 404
     assert getattr(exc.value, "status_code", 0) == 404
@@ -1234,7 +1290,8 @@ async def test_export_widget_csv(session: AsyncSession) -> None:
 
     svc = BIDashboardsService(session)
     dashboard = await svc.create_dashboard(
-        DashboardCreate(name="D"), owner_user_id=None,
+        DashboardCreate(name="D"),
+        owner_user_id=None,
     )
     widget = await svc.create_widget(
         WidgetCreate(dashboard_id=dashboard.id, kpi_code="cpi"),
@@ -1258,7 +1315,8 @@ async def test_export_widget_svg(session: AsyncSession) -> None:
 
     svc = BIDashboardsService(session)
     dashboard = await svc.create_dashboard(
-        DashboardCreate(name="D"), owner_user_id=None,
+        DashboardCreate(name="D"),
+        owner_user_id=None,
     )
     widget = await svc.create_widget(
         WidgetCreate(dashboard_id=dashboard.id, kpi_code="cpi"),
@@ -1281,8 +1339,8 @@ async def test_invalidation_handler_publishes_kpi_recompute() -> None:
     """Upstream source-of-truth event → ``bi_dashboards.kpi_recompute``."""
     import asyncio
 
-    from app.core.events import Event
     from app.core import events as _ev_module
+    from app.core.events import Event
     from app.modules.bi_dashboards.events import _on_invalidation_event
 
     captured: list[tuple[str, dict]] = []
@@ -1323,8 +1381,8 @@ async def test_invalidation_handler_ignores_self_event() -> None:
     handler must short-circuit when fed its own event name."""
     import asyncio
 
-    from app.core.events import Event
     from app.core import events as _ev_module
+    from app.core.events import Event
     from app.modules.bi_dashboards.events import _on_invalidation_event
 
     captured: list[tuple[str, dict]] = []
@@ -1446,9 +1504,7 @@ async def test_kpi_history_limit_keeps_most_recent(
     # newer than the dropped (older) rows; still oldest→newest internally.
     starts = [r.period_start for r in rows]
     assert starts == sorted(starts)
-    assert rows[-1].period_start == max(
-        base_day - timedelta(weeks=w) - timedelta(days=6) for w in range(6)
-    )
+    assert rows[-1].period_start == max(base_day - timedelta(weeks=w) - timedelta(days=6) for w in range(6))
 
 
 # ── Drill-down forwards period / filters ───────────────────────────────
@@ -1480,7 +1536,9 @@ async def test_drill_down_forwards_period_and_filters(
     async def _probe(session, **kw):  # noqa: ANN001, ANN003
         seen.update(kw)
         return kpis.KPIComputation(
-            value=Decimal("1"), unit="ratio", source_record_count=1,
+            value=Decimal("1"),
+            unit="ratio",
+            source_record_count=1,
         )
 
     svc = BIDashboardsService(session)

@@ -70,9 +70,7 @@ def _mk(
 @pytest_asyncio.fixture
 async def session() -> AsyncSession:
     db_path = _TMP_DIR / f"test-{uuid.uuid4().hex[:8]}.db"
-    engine = create_async_engine(
-        f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False
-    )
+    engine = create_async_engine(f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all, tables=[CostItem.__table__])
 
@@ -91,7 +89,14 @@ async def session() -> AsyncSession:
                 # Empty-string section → also coalesces.
                 _mk("Z2", collection="Buildings", department="Concrete", section="", subsection="Plain"),
                 # Different region → must not show up when region filter set.
-                _mk("U1", collection="Buildings", department="Concrete", section="Walls", subsection="Plain", region="GB_LONDON"),
+                _mk(
+                    "U1",
+                    collection="Buildings",
+                    department="Concrete",
+                    section="Walls",
+                    subsection="Plain",
+                    region="GB_LONDON",
+                ),
             ]
         )
         await s.commit()
@@ -136,8 +141,7 @@ async def test_tree_count_rollup(session: AsyncSession) -> None:
         if node["children"]:
             child_sum = sum(c["count"] for c in node["children"])
             assert node["count"] == child_sum, (
-                f"rollup broken at {node['name']}: count={node['count']} "
-                f"!= sum(children)={child_sum}"
+                f"rollup broken at {node['name']}: count={node['count']} != sum(children)={child_sum}"
             )
             for c in node["children"]:
                 _walk(c)

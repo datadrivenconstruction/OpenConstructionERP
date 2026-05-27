@@ -54,9 +54,7 @@ async def admin(client: AsyncClient) -> dict:
 
 
 @pytest.mark.asyncio
-async def test_catalogue_includes_has_pdf_renderer_per_entry(
-    client: AsyncClient, admin: dict
-) -> None:
+async def test_catalogue_includes_has_pdf_renderer_per_entry(client: AsyncClient, admin: dict) -> None:
     """Every built-in catalogue entry must declare whether the backend
     can render a PDF for it. The frontend used to gate the Preview
     button on a hardcoded ``BUILTIN_DOC_TYPES`` slug set; the
@@ -72,17 +70,13 @@ async def test_catalogue_includes_has_pdf_renderer_per_entry(
     assert body["templates"], "catalogue must include built-ins"
     for tpl in body["templates"]:
         if not tpl.get("is_custom"):
-            assert "has_pdf_renderer" in tpl, (
-                f"built-in {tpl['doc_type']} missing has_pdf_renderer"
-            )
+            assert "has_pdf_renderer" in tpl, f"built-in {tpl['doc_type']} missing has_pdf_renderer"
             # Every built-in shipped today has a reportlab renderer.
             assert tpl["has_pdf_renderer"] is True
 
 
 @pytest.mark.asyncio
-async def test_catalogue_exposes_doc_type_and_entity_presets(
-    client: AsyncClient, admin: dict
-) -> None:
+async def test_catalogue_exposes_doc_type_and_entity_presets(client: AsyncClient, admin: dict) -> None:
     """The combobox suggestions are now backend-driven. The frontend
     falls back to a bundled list when the field is absent (old API
     contract), but the v4.7 backend MUST emit them — otherwise the
@@ -175,9 +169,7 @@ async def test_save_text_accepts_worldwide_doc_type_slugs(
     ],
 )
 @pytest.mark.asyncio
-async def test_save_text_rejects_malformed_slug(
-    client: AsyncClient, admin: dict, bad_slug: str
-) -> None:
+async def test_save_text_rejects_malformed_slug(client: AsyncClient, admin: dict, bad_slug: str) -> None:
     res = await client.post(
         "/api/v1/property-dev/document-templates/save-text",
         json={
@@ -190,18 +182,14 @@ async def test_save_text_rejects_malformed_slug(
         },
         headers=admin["headers"],
     )
-    assert res.status_code == 422, (
-        f"slug {bad_slug!r} should be rejected: {res.status_code} {res.text}"
-    )
+    assert res.status_code == 422, f"slug {bad_slug!r} should be rejected: {res.status_code} {res.text}"
 
 
 # ── Catalogue surfaces the custom row with the right has_pdf_renderer ──
 
 
 @pytest.mark.asyncio
-async def test_catalogue_marks_text_custom_template_renderable(
-    client: AsyncClient, admin: dict
-) -> None:
+async def test_catalogue_marks_text_custom_template_renderable(client: AsyncClient, admin: dict) -> None:
     """A custom HTML upload should appear in the catalogue with
     ``has_pdf_renderer: True`` so the frontend can keep the editor /
     preview affordances enabled."""

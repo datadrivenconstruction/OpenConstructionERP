@@ -36,9 +36,7 @@ class BOQ(Base):
 
     # ── Phase 12.2 lock & revision fields ────────────────────────────────
     estimate_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    is_locked: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    is_locked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     parent_estimate_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_boq_boq.id", ondelete="SET NULL"),
@@ -144,14 +142,10 @@ class Position(Base):
     # while the SAME ``reference_code`` may be reused across many positions.
     # Every position carries one (auto-generated "R-XXXXXXXX" when the
     # client supplies none) so it is always referenceable.
-    reference_code: Mapped[str | None] = mapped_column(
-        String(64), nullable=True, index=True
-    )
+    reference_code: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     # Positions that SHARE one master definition all carry the same
     # ``link_group_id``. NULL = standalone (not yet part of a group).
-    link_group_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    link_group_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     # 'master' = owns the canonical definition; 'instance' = a linked reuse
     # that mirrors the master's definition; NULL = standalone.
     link_role: Mapped[str | None] = mapped_column(String(16), nullable=True)
@@ -169,9 +163,7 @@ class Position(Base):
     # Bumped on every successful service-layer update.  Clients echo the
     # last-read value on PATCH; mismatch returns 409 instead of allowing
     # a lost write.  Default 0 for legacy rows so existing data is valid.
-    version: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
     # Relationships
     boq: Mapped[BOQ] = relationship(back_populates="positions")
@@ -426,15 +418,9 @@ class QuantityLink(Base):
         server_default="[]",
     )
     quantity_field: Mapped[str] = mapped_column(String(64), nullable=False)
-    target_field: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="quantity", server_default="quantity"
-    )
-    aggregation: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="sum", server_default="sum"
-    )
-    status: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="active", server_default="active"
-    )
+    target_field: Mapped[str] = mapped_column(String(32), nullable=False, default="quantity", server_default="quantity")
+    aggregation: Mapped[str] = mapped_column(String(16), nullable=False, default="sum", server_default="sum")
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="active", server_default="active")
     source_model_version: Mapped[str | None] = mapped_column(String(20), nullable=True)
     last_applied_quantity: Mapped[str | None] = mapped_column(String(50), nullable=True)
     last_pulled_at: Mapped[str | None] = mapped_column(String(40), nullable=True)

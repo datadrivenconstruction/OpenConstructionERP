@@ -47,9 +47,7 @@ _LINUX_CONVERTERS: dict[str, str] = {
 # Active mapping for the running platform — kept under the legacy name
 # `CONVERTERS` so external callers (and the takeoff router) don't need
 # to know about platform branching.
-CONVERTERS: dict[str, str] = (
-    _LINUX_CONVERTERS if sys.platform.startswith("linux") else _WINDOWS_CONVERTERS
-)
+CONVERTERS: dict[str, str] = _LINUX_CONVERTERS if sys.platform.startswith("linux") else _WINDOWS_CONVERTERS
 
 SUPPORTED_CAD_EXTENSIONS: set[str] = set(CONVERTERS.keys())
 
@@ -143,9 +141,7 @@ def find_converter(extension: str) -> Path | None:
     # DLLs colliding. Probe this location explicitly so an installed
     # converter is picked up by the next find_converter() call without
     # any service restart.
-    per_format_windows = (
-        Path.home() / ".openestimator" / "converters" / f"{extension}_windows"
-    )
+    per_format_windows = Path.home() / ".openestimator" / "converters" / f"{extension}_windows"
     if per_format_windows not in search_paths:
         search_paths.insert(0, per_format_windows)
 
@@ -263,8 +259,8 @@ _WINDOWS_DLL_LOAD_FAILURES: frozenset[int] = frozenset(
     {
         -1073741515,  # 0xC0000135 STATUS_DLL_NOT_FOUND
         -1073741502,  # 0xC0000142 STATUS_DLL_INIT_FAILED
-        3221225781,   # 0xC0000135 unsigned
-        3221225794,   # 0xC0000142 unsigned
+        3221225781,  # 0xC0000135 unsigned
+        3221225794,  # 0xC0000142 unsigned
     }
 )
 
@@ -359,11 +355,7 @@ def smoke_test_converter(extension: str, force: bool = False) -> ConverterHealth
             # by `apt install` because the source wasn't added).
             stderr_text = (proc.stderr or b"").decode("utf-8", errors="replace")
             missing_line = next(
-                (
-                    line.strip()
-                    for line in stderr_text.splitlines()
-                    if "error while loading shared libraries" in line
-                ),
+                (line.strip() for line in stderr_text.splitlines() if "error while loading shared libraries" in line),
                 stderr_text.strip()[:200],
             )
             result = {
@@ -433,15 +425,10 @@ def smoke_test_converter(extension: str, force: bool = False) -> ConverterHealth
             "checked_at": now,
         }
     except Exception as exc:  # noqa: BLE001 — health check must never raise
-        logger.warning(
-            "Smoke test for .%s converter errored: %s", extension, exc
-        )
+        logger.warning("Smoke test for .%s converter errored: %s", extension, exc)
         result = {
             "status": "unknown",
-            "message": (
-                f"Health check could not complete: "
-                f"{exc.__class__.__name__}: {exc}"
-            ),
+            "message": (f"Health check could not complete: {exc.__class__.__name__}: {exc}"),
             "suggested_actions": [],
             "checked_at": now,
         }
@@ -723,9 +710,7 @@ _V18_EXCLUSIVE_TOKENS = (
 # Tokens that prove v17-era CLI (positional + ``-no-collada``). The leading
 # single dash is intentional — v17 used the GNU long-style ``-no-collada``
 # (not ``--no-collada``).
-_V17_EXCLUSIVE_TOKENS = (
-    "-no-collada",
-)
+_V17_EXCLUSIVE_TOKENS = ("-no-collada",)
 
 
 def _tokenize_help(text: str) -> set[str]:
@@ -775,7 +760,7 @@ _MODERN_HELP_MARKERS = (
     "-no-collada",
     "--no-collada",
     "no-collada",
-    "complete",       # the depth-mode token only newer CLIs document
+    "complete",  # the depth-mode token only newer CLIs document
 )
 
 
@@ -832,10 +817,7 @@ def build_ddc_args(
     # Legacy / v17 positional path — single output target per call.
     out_path = xlsx_out if xlsx_out is not None else dae_out
     if out_path is None:
-        raise ValueError(
-            "build_ddc_args (legacy profile) requires at least one of "
-            "xlsx_out or dae_out"
-        )
+        raise ValueError("build_ddc_args (legacy profile) requires at least one of xlsx_out or dae_out")
     args.append(str(out_path))
     if caps.get("accepts_depth_mode"):
         args.append(mode)
@@ -950,8 +932,7 @@ def detect_converter_capabilities(extension: str) -> dict[str, Any]:
         caps = _v18_capabilities(version_text=probe_text[:512])
         _CONVERTER_CAPABILITIES[cache_key] = caps
         logger.info(
-            "DDC capability probe for %s detected v18 flag CLI "
-            "(--no-dae / --no-xlsx / --force-path / -m mode)",
+            "DDC capability probe for %s detected v18 flag CLI (--no-dae / --no-xlsx / --force-path / -m mode)",
             exe.name,
         )
         return caps
@@ -959,8 +940,7 @@ def detect_converter_capabilities(extension: str) -> dict[str, Any]:
         caps = _modern_capabilities(version_text=probe_text[:512])
         _CONVERTER_CAPABILITIES[cache_key] = caps
         logger.info(
-            "DDC capability probe for %s detected v17 positional CLI "
-            "(depth-mode + -no-collada accepted)",
+            "DDC capability probe for %s detected v17 positional CLI (depth-mode + -no-collada accepted)",
             exe.name,
         )
         return caps
@@ -1217,8 +1197,20 @@ def _to_float(val: object) -> float:
 # Trailing unit-suffix tokens that carry no semantic meaning of their
 # own (they only annotate the unit of the preceding quantity word).
 _UNIT_SUFFIXES: tuple[str, ...] = (
-    "m3", "m2", "cbm", "sqm", "sqmt", "cubm", "cbft", "sqft",
-    "lfm", "rmt", "lm", "rm", "cum", "sm",
+    "m3",
+    "m2",
+    "cbm",
+    "sqm",
+    "sqmt",
+    "cubm",
+    "cbft",
+    "sqft",
+    "lfm",
+    "rmt",
+    "lm",
+    "rm",
+    "cum",
+    "sm",
 )
 
 # Canonical synonym map: normalised token → canonical column key.
@@ -1307,9 +1299,7 @@ def _norm_col(name: str) -> str:
     # "basequantitiesvolume" → "volume").  Loop so "netbasequantities*"
     # style stacked prefixes peel fully.
     for _ in range(4):
-        m = re.match(
-            r"^(net|gross|base|total|sum|adjusted|basequantities)(.+)$", s
-        )
+        m = re.match(r"^(net|gross|base|total|sum|adjusted|basequantities)(.+)$", s)
         if not m or len(m.group(2)) < 2:
             break
         s = m.group(2)
@@ -1327,11 +1317,20 @@ def _norm_col(name: str) -> str:
     # Bare-unit columns: a converter sometimes labels the only volume
     # column simply "m3" / "cbm" or the area column "sqm" / "m2".
     _BARE_UNIT_CANON = {
-        "m3": "volume", "cbm": "volume", "cum": "volume", "cubm": "volume",
+        "m3": "volume",
+        "cbm": "volume",
+        "cum": "volume",
+        "cubm": "volume",
         "cbft": "volume",
-        "m2": "area", "sqm": "area", "sqmt": "area", "sqft": "area",
+        "m2": "area",
+        "sqm": "area",
+        "sqmt": "area",
+        "sqft": "area",
         "sm": "area",
-        "lfm": "length", "rmt": "length", "lm": "length", "rm": "length",
+        "lfm": "length",
+        "rmt": "length",
+        "lm": "length",
+        "rm": "length",
     }
     if s in _BARE_UNIT_CANON:
         return _BARE_UNIT_CANON[s]

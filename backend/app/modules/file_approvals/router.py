@@ -44,9 +44,7 @@ def _get_service(session: SessionDep) -> ApprovalService:
     return ApprovalService(session)
 
 
-async def _require_project_access(
-    session: AsyncSession, project_id: uuid.UUID, user_id: str
-) -> None:
+async def _require_project_access(session: AsyncSession, project_id: uuid.UUID, user_id: str) -> None:
     """Verify the caller owns or is admin on ``project_id``."""
     from app.modules.projects.repository import ProjectRepository
     from app.modules.users.repository import UserRepository
@@ -62,9 +60,7 @@ async def _require_project_access(
         if user is not None and getattr(user, "role", "") == "admin":
             return
     except Exception:  # noqa: BLE001
-        logger.exception(
-            "Admin-role lookup failed during approval access check"
-        )
+        logger.exception("Admin-role lookup failed during approval access check")
     if str(getattr(project, "owner_id", "")) != str(user_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -126,9 +122,7 @@ async def list_workflows(
 ) -> list[ApprovalWorkflowResponse]:
     """List workflows for a project, newest first."""
     await _require_project_access(session, project_id, user_id)
-    rows = await service.list_workflows(
-        project_id, status_filter=status_filter
-    )
+    rows = await service.list_workflows(project_id, status_filter=status_filter)
     return [ApprovalWorkflowResponse.model_validate(r) for r in rows]
 
 

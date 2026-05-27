@@ -120,9 +120,7 @@ class BidPackageLineItem(Base):
         default=0,
         server_default="0",
     )
-    alternative_allowed: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    alternative_allowed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     parent_line_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
@@ -131,9 +129,7 @@ class BidPackageLineItem(Base):
         index=True,
     )
     spec_attachment_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
-    is_mandatory: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1"
-    )
+    is_mandatory: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
 
     package: Mapped[BidPackage] = relationship(back_populates="line_items")
 
@@ -254,12 +250,8 @@ class BidSubmission(Base):
         default=list,
         server_default="[]",
     )
-    is_valid: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
-    open_after_deadline: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    is_valid: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    open_after_deadline: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     envelope_payload: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON,
         nullable=False,
@@ -306,9 +298,7 @@ class BidSubmissionLine(Base):
         default=0,
         server_default="0",
     )
-    alternative_offered: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    alternative_offered: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     alternative_description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     comment: Mapped[str] = mapped_column(Text, nullable=False, default="")
     # Bid-leveling inclusion taxonomy ("included", "excluded",
@@ -319,9 +309,7 @@ class BidSubmissionLine(Base):
     )
     # US public works flag — Davis-Bacon Act 40 USC 3142 / state
     # prevailing wage laws. Auditable per submission line.
-    prevailing_wage_applicable: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    prevailing_wage_applicable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
 
     def __repr__(self) -> str:
         return f"<BidSubmissionLine sub={self.submission_id} total={self.total_price}>"
@@ -351,9 +339,7 @@ class BidQA(Base):
     answered_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     # No FK to users — keeps the module decoupled.
     answered_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
-    is_public: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    is_public: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     visible_to_bidder_ids: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON,
         nullable=False,
@@ -396,12 +382,8 @@ class BidComparison(Base):
         default=dict,
         server_default="{}",
     )
-    commercial_weight_pct: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=100, server_default="100"
-    )
-    technical_weight_pct: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
+    commercial_weight_pct: Mapped[int] = mapped_column(Integer, nullable=False, default=100, server_default="100")
+    technical_weight_pct: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     recommended_bidder_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_bid_management_bidder.id", ondelete="SET NULL"),

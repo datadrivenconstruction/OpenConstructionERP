@@ -54,12 +54,14 @@ MAX_STEPS: int = 32
 # only knows how to dispatch these; anything else is rejected at the
 # schema boundary so we never silently no-op and never grow this into
 # a templated-code-execution vector.
-ALLOWED_ACTION_TYPES: frozenset[str] = frozenset({
-    "approve",      # Standard approve / reject decision step (default)
-    "review",       # Soft review — captured but doesn't gate progression
-    "sign_off",     # Final binding sign-off (e.g. director / client)
-    "notify",       # Send-and-forward — no decision required
-})
+ALLOWED_ACTION_TYPES: frozenset[str] = frozenset(
+    {
+        "approve",  # Standard approve / reject decision step (default)
+        "review",  # Soft review — captured but doesn't gate progression
+        "sign_off",  # Final binding sign-off (e.g. director / client)
+        "notify",  # Send-and-forward — no decision required
+    }
+)
 
 
 def _validate_steps(steps: list[dict] | None) -> None:
@@ -276,13 +278,15 @@ class WorkflowService:
         """
         metadata = dict(request.metadata_ or {})
         audit_log = list(metadata.get("audit_log") or [])
-        audit_log.append({
-            "actor": user_id,
-            "action": action,
-            "step": step,
-            "at": datetime.now(UTC).isoformat(),
-            "notes": notes,
-        })
+        audit_log.append(
+            {
+                "actor": user_id,
+                "action": action,
+                "step": step,
+                "at": datetime.now(UTC).isoformat(),
+                "notes": notes,
+            }
+        )
         metadata["audit_log"] = audit_log
         return metadata
 
@@ -332,7 +336,11 @@ class WorkflowService:
         if required_role:
             user_role = _resolve_role(user.role)
             needed = _resolve_role(required_role)
-            if user_role is None or needed is None or ROLE_HIERARCHY.get(user_role, -1) < ROLE_HIERARCHY.get(needed, 999):
+            if (
+                user_role is None
+                or needed is None
+                or ROLE_HIERARCHY.get(user_role, -1) < ROLE_HIERARCHY.get(needed, 999)
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail=f"Step requires role '{required_role}'",

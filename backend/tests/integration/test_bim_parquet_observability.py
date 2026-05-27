@@ -88,9 +88,7 @@ async def pq_auth(pq_client: AsyncClient) -> dict[str, str]:
 
 
 @pytest_asyncio.fixture(scope="module")
-async def pq_project(
-    pq_client: AsyncClient, pq_auth: dict[str, str]
-) -> str:
+async def pq_project(pq_client: AsyncClient, pq_auth: dict[str, str]) -> str:
     resp = await pq_client.post(
         "/api/v1/projects/",
         json={
@@ -126,9 +124,7 @@ def _fake_conversion_with_raw_elements(_cad_path, tmp_dir, _depth) -> dict[str, 
     """Deterministic stand-in for ``process_ifc_file`` that always returns
     ``raw_elements`` so the Parquet code path is exercised."""
     geo_path = tmp_dir / "geometry.glb"
-    geo_path.write_bytes(
-        b"glTF" + b"\x02\x00\x00\x00" + b"\x40\x00\x00\x00" + (b"\x00" * 1024)
-    )
+    geo_path.write_bytes(b"glTF" + b"\x02\x00\x00\x00" + b"\x40\x00\x00\x00" + (b"\x00" * 1024))
     return {
         "element_count": 2,
         "elements": [
@@ -170,9 +166,7 @@ def _fake_conversion_with_raw_elements(_cad_path, tmp_dir, _depth) -> dict[str, 
     }
 
 
-async def _wait_for_status(
-    client: AsyncClient, headers: dict[str, str], model_id: str
-) -> dict[str, Any]:
+async def _wait_for_status(client: AsyncClient, headers: dict[str, str], model_id: str) -> dict[str, Any]:
     """Poll until status leaves 'processing' (max 40 × 0.25s = 10s)."""
     for _ in range(40):
         resp = await client.get(f"/api/v1/bim_hub/{model_id}", headers=headers)
@@ -184,9 +178,7 @@ async def _wait_for_status(
     pytest.fail(f"Model {model_id} stuck in processing")
 
 
-async def _upload_ifc(
-    client: AsyncClient, headers: dict[str, str], project_id: str, name: str
-) -> str:
+async def _upload_ifc(client: AsyncClient, headers: dict[str, str], project_id: str, name: str) -> str:
     resp = await client.post(
         "/api/v1/bim_hub/upload-cad/",
         params={"project_id": project_id, "name": name, "discipline": "architecture"},
@@ -219,22 +211,16 @@ class TestBimParquetObservability:
             _fake_conversion_with_raw_elements,
         )
 
-        model_id = await _upload_ifc(
-            pq_client, pq_auth, pq_project, "pq-success"
-        )
+        model_id = await _upload_ifc(pq_client, pq_auth, pq_project, "pq-success")
         body = await _wait_for_status(pq_client, pq_auth, model_id)
 
         # Model itself flipped to ready.
         assert body["status"] in ("ready", "degraded"), body["status"]
 
         meta = body.get("metadata") or {}
-        assert meta.get("parquet_status") == "ok", (
-            f"Expected parquet_status=ok, got meta={meta}"
-        )
+        assert meta.get("parquet_status") == "ok", f"Expected parquet_status=ok, got meta={meta}"
         assert meta.get("parquet_error") in (None, ""), meta
-        assert meta.get("parquet_attempted_at"), (
-            "parquet_attempted_at must be set after a Parquet attempt"
-        )
+        assert meta.get("parquet_attempted_at"), "parquet_attempted_at must be set after a Parquet attempt"
 
     async def test_parquet_failure_surfaces_in_metadata_and_log(
         self,
@@ -263,25 +249,20 @@ class TestBimParquetObservability:
 
         caplog.set_level(logging.ERROR, logger="app.modules.bim_hub.router")
 
-        model_id = await _upload_ifc(
-            pq_client, pq_auth, pq_project, "pq-fail"
-        )
+        model_id = await _upload_ifc(pq_client, pq_auth, pq_project, "pq-fail")
         body = await _wait_for_status(pq_client, pq_auth, model_id)
 
         meta = body.get("metadata") or {}
-        assert meta.get("parquet_status") == "failed", (
-            f"Expected parquet_status=failed, got meta={meta}"
-        )
+        assert meta.get("parquet_status") == "failed", f"Expected parquet_status=failed, got meta={meta}"
         assert "simulated disk full" in (meta.get("parquet_error") or ""), (
-            f"Error string must mention the original message, got "
-            f"{meta.get('parquet_error')!r}"
+            f"Error string must mention the original message, got {meta.get('parquet_error')!r}"
         )
 
         # Structured log event must have fired with the right event tag.
         matched = [
-            r for r in caplog.records
-            if getattr(r, "event", None) == "bim_parquet_write_failed"
-            and getattr(r, "model_id", None) == model_id
+            r
+            for r in caplog.records
+            if getattr(r, "event", None) == "bim_parquet_write_failed" and getattr(r, "model_id", None) == model_id
         ]
         assert matched, (
             "Expected structured log event 'bim_parquet_write_failed' "
@@ -317,15 +298,11 @@ class TestBimParquetObservability:
             _boom,
         )
 
-        model_id = await _upload_ifc(
-            pq_client, pq_auth, pq_project, "pq-nonfatal"
-        )
+        model_id = await _upload_ifc(pq_client, pq_auth, pq_project, "pq-nonfatal")
         body = await _wait_for_status(pq_client, pq_auth, model_id)
 
         # Parquet failure is non-fatal — model itself must still be usable.
-        assert body["status"] in ("ready", "degraded"), (
-            f"Parquet failure leaked into model.status: {body['status']}"
-        )
+        assert body["status"] in ("ready", "degraded"), f"Parquet failure leaked into model.status: {body['status']}"
         # Element rows must have landed too.
         assert body["element_count"] >= 1, body
 
@@ -354,9 +331,7 @@ class TestBimParquetObservability:
             _boom_once,
         )
 
-        model_id = await _upload_ifc(
-            pq_client, pq_auth, pq_project, "pq-retry"
-        )
+        model_id = await _upload_ifc(pq_client, pq_auth, pq_project, "pq-retry")
         body = await _wait_for_status(pq_client, pq_auth, model_id)
         meta = body.get("metadata") or {}
         assert meta.get("parquet_status") == "failed", meta
@@ -382,7 +357,8 @@ class TestBimParquetObservability:
 
         # The model row's metadata is now updated.
         post = await pq_client.get(
-            f"/api/v1/bim_hub/{model_id}", headers=pq_auth,
+            f"/api/v1/bim_hub/{model_id}",
+            headers=pq_auth,
         )
         post_meta = (post.json() or {}).get("metadata") or {}
         assert post_meta.get("parquet_status") == "ok", post_meta
@@ -405,9 +381,7 @@ class TestBimParquetObservability:
             lambda **_k: None,
         )
 
-        model_id = await _upload_ifc(
-            pq_client, pq_auth, pq_project, "pq-status"
-        )
+        model_id = await _upload_ifc(pq_client, pq_auth, pq_project, "pq-status")
         await _wait_for_status(pq_client, pq_auth, model_id)
 
         resp = await pq_client.get(
@@ -420,6 +394,4 @@ class TestBimParquetObservability:
         assert body["status"] == "ok"
         assert body["error"] in (None, "")
         assert body["attempted_at"], body
-        assert body["retry_endpoint"].endswith(
-            f"/models/{model_id}/parquet/retry/"
-        )
+        assert body["retry_endpoint"].endswith(f"/models/{model_id}/parquet/retry/")

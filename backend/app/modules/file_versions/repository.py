@@ -61,9 +61,7 @@ class FileVersionRepository:
         )
         return list((await self.session.execute(stmt)).scalars().all())
 
-    async def list_for_file_id(
-        self, file_id: str, file_kind: str
-    ) -> list[FileVersion]:
+    async def list_for_file_id(self, file_id: str, file_kind: str) -> list[FileVersion]:
         """List every chain row that points at ``file_id``.
 
         Useful for the preview-pane dropdown which knows the row id of

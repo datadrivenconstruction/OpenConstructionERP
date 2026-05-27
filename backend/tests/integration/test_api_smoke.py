@@ -75,11 +75,7 @@ async def auth_headers(client):
     assert reg.status_code == 201, f"Registration failed: {reg.text}"
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     resp = await client.post(
@@ -307,9 +303,7 @@ async def test_tendering_packages(client, auth_headers):
     assert proj_resp.status_code == 201
     pid = proj_resp.json()["id"]
 
-    resp = await client.get(
-        f"/api/v1/tendering/packages/?project_id={pid}", headers=headers
-    )
+    resp = await client.get(f"/api/v1/tendering/packages/?project_id={pid}", headers=headers)
     assert resp.status_code == 200
     assert isinstance(resp.json(), list)
 

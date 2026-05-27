@@ -24,14 +24,13 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from app.database import Base
-
 # Importing dependent models so Base.metadata.create_all() in the
 # fixture has every FK target available (Requirement → BOQ Position,
 # RequirementSet → Project, etc.). Conftest also imports these but
 # this file may be run in isolation.
 import app.modules.boq.models  # noqa: F401
 import app.modules.projects.models  # noqa: F401
+from app.database import Base
 from app.modules.requirements.evaluator import compute_deliverable_coverage
 from app.modules.requirements.models import (
     Requirement,
@@ -40,7 +39,6 @@ from app.modules.requirements.models import (
 )
 from app.modules.requirements.schemas import DeliverableCreate
 from app.modules.requirements.service import RequirementsService
-
 
 # ── Async DB fixture ─────────────────────────────────────────────────────
 
@@ -153,13 +151,12 @@ def test_coverage_empty_returns_zero() -> None:
 
 @pytest.mark.asyncio
 async def test_service_add_and_list_deliverables(
-    session: AsyncSession, requirement: Requirement,
+    session: AsyncSession,
+    requirement: Requirement,
 ) -> None:
     """Round-trip: add 3 deliverables, list them back."""
     svc = RequirementsService(session)
-    with patch(
-        "app.modules.requirements.service.event_bus.publish_detached"
-    ):
+    with patch("app.modules.requirements.service.event_bus.publish_detached"):
         for dtype, lod, loi in [
             ("model", "300", "3"),
             ("drawing", "200", "2"),
@@ -168,7 +165,9 @@ async def test_service_add_and_list_deliverables(
             await svc.add_deliverable(
                 requirement.id,
                 DeliverableCreate(
-                    deliverable_type=dtype, lod=lod, loi=loi,
+                    deliverable_type=dtype,
+                    lod=lod,
+                    loi=loi,
                 ),
             )
 
@@ -180,13 +179,12 @@ async def test_service_add_and_list_deliverables(
 
 @pytest.mark.asyncio
 async def test_service_list_deliverables_filtered_by_type(
-    session: AsyncSession, requirement: Requirement,
+    session: AsyncSession,
+    requirement: Requirement,
 ) -> None:
     """Passing deliverable_type filters the returned rows."""
     svc = RequirementsService(session)
-    with patch(
-        "app.modules.requirements.service.event_bus.publish_detached"
-    ):
+    with patch("app.modules.requirements.service.event_bus.publish_detached"):
         await svc.add_deliverable(
             requirement.id,
             DeliverableCreate(deliverable_type="model", lod="300"),
@@ -196,9 +194,7 @@ async def test_service_list_deliverables_filtered_by_type(
             DeliverableCreate(deliverable_type="drawing", lod="200"),
         )
 
-    only_models = await svc.list_deliverables(
-        requirement.id, deliverable_type="model"
-    )
+    only_models = await svc.list_deliverables(requirement.id, deliverable_type="model")
     assert len(only_models) == 1
     assert only_models[0].deliverable_type == "model"
 
@@ -208,7 +204,8 @@ async def test_service_list_deliverables_filtered_by_type(
 
 @pytest.mark.asyncio
 async def test_get_project_matrix_returns_cell_structure(
-    session: AsyncSession, requirement: Requirement,
+    session: AsyncSession,
+    requirement: Requirement,
 ) -> None:
     """Matrix endpoint returns rows with the expected cell shape."""
     svc = RequirementsService(session)

@@ -183,7 +183,9 @@ async def put_local_upload(token: str, request: Request) -> LocalUploadResponse:
     etag = hashlib.sha256(body).hexdigest()
     size_bytes = len(body)
     logger.info(
-        "Local upload object written: key=%s size=%d", key, size_bytes,
+        "Local upload object written: key=%s size=%d",
+        key,
+        size_bytes,
     )
     return LocalUploadResponse(
         key=cast(str, key),

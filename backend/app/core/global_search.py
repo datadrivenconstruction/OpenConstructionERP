@@ -48,23 +48,23 @@ async def global_search(
             )
         )
         if project_id:
-            stmt = stmt.where(Position.boq_id.in_(
-                select(_boq_id_for_project(project_id))
-            ))
+            stmt = stmt.where(Position.boq_id.in_(select(_boq_id_for_project(project_id))))
         stmt = stmt.limit(limit)
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             # Compute a simple relevance score: exact match in ordinal > description
             score = _score(query, row.ordinal, row.description)
-            results.append({
-                "module": "boq",
-                "type": "position",
-                "id": str(row.id),
-                "title": f"{row.ordinal} — {row.description[:120]}",
-                "subtitle": f"{row.quantity} {row.unit}",
-                "url": f"/boq/{row.boq_id}",
-                "score": score,
-            })
+            results.append(
+                {
+                    "module": "boq",
+                    "type": "position",
+                    "id": str(row.id),
+                    "title": f"{row.ordinal} — {row.description[:120]}",
+                    "subtitle": f"{row.quantity} {row.unit}",
+                    "url": f"/boq/{row.boq_id}",
+                    "score": score,
+                }
+            )
     except Exception:
         logger.debug("global_search: BOQ positions search skipped", exc_info=True)
 
@@ -72,27 +72,33 @@ async def global_search(
     try:
         from app.modules.contacts.models import Contact
 
-        stmt = select(Contact).where(
-            or_(
-                Contact.company_name.ilike(pattern),
-                Contact.first_name.ilike(pattern),
-                Contact.last_name.ilike(pattern),
-                Contact.primary_email.ilike(pattern),
+        stmt = (
+            select(Contact)
+            .where(
+                or_(
+                    Contact.company_name.ilike(pattern),
+                    Contact.first_name.ilike(pattern),
+                    Contact.last_name.ilike(pattern),
+                    Contact.primary_email.ilike(pattern),
+                )
             )
-        ).limit(limit)
+            .limit(limit)
+        )
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             label = row.company_name or f"{row.first_name or ''} {row.last_name or ''}".strip()
             score = _score(query, label, row.primary_email or "")
-            results.append({
-                "module": "contacts",
-                "type": "contact",
-                "id": str(row.id),
-                "title": label,
-                "subtitle": row.contact_type,
-                "url": "/contacts",
-                "score": score,
-            })
+            results.append(
+                {
+                    "module": "contacts",
+                    "type": "contact",
+                    "id": str(row.id),
+                    "title": label,
+                    "subtitle": row.contact_type,
+                    "url": "/contacts",
+                    "score": score,
+                }
+            )
     except Exception:
         logger.debug("global_search: contacts search skipped", exc_info=True)
 
@@ -112,15 +118,17 @@ async def global_search(
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             score = _score(query, row.name, row.description)
-            results.append({
-                "module": "documents",
-                "type": "document",
-                "id": str(row.id),
-                "title": row.name,
-                "subtitle": row.category,
-                "url": f"/projects/{row.project_id}/documents",
-                "score": score,
-            })
+            results.append(
+                {
+                    "module": "documents",
+                    "type": "document",
+                    "id": str(row.id),
+                    "title": row.name,
+                    "subtitle": row.category,
+                    "url": f"/projects/{row.project_id}/documents",
+                    "score": score,
+                }
+            )
     except Exception:
         logger.debug("global_search: documents search skipped", exc_info=True)
 
@@ -141,15 +149,17 @@ async def global_search(
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             score = _score(query, row.rfi_number, row.subject)
-            results.append({
-                "module": "rfi",
-                "type": "rfi",
-                "id": str(row.id),
-                "title": f"{row.rfi_number} — {row.subject[:120]}",
-                "subtitle": row.status,
-                "url": f"/projects/{row.project_id}/rfi",
-                "score": score,
-            })
+            results.append(
+                {
+                    "module": "rfi",
+                    "type": "rfi",
+                    "id": str(row.id),
+                    "title": f"{row.rfi_number} — {row.subject[:120]}",
+                    "subtitle": row.status,
+                    "url": f"/projects/{row.project_id}/rfi",
+                    "score": score,
+                }
+            )
     except Exception:
         logger.debug("global_search: RFI search skipped", exc_info=True)
 
@@ -169,15 +179,17 @@ async def global_search(
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             score = _score(query, row.title, row.description or "")
-            results.append({
-                "module": "tasks",
-                "type": "task",
-                "id": str(row.id),
-                "title": row.title[:200],
-                "subtitle": f"{row.status} / {row.priority}",
-                "url": f"/projects/{row.project_id}/tasks",
-                "score": score,
-            })
+            results.append(
+                {
+                    "module": "tasks",
+                    "type": "task",
+                    "id": str(row.id),
+                    "title": row.title[:200],
+                    "subtitle": f"{row.status} / {row.priority}",
+                    "url": f"/projects/{row.project_id}/tasks",
+                    "score": score,
+                }
+            )
     except Exception:
         logger.debug("global_search: tasks search skipped", exc_info=True)
 
@@ -185,24 +197,30 @@ async def global_search(
     try:
         from app.modules.costs.models import CostItem
 
-        stmt = select(CostItem).where(
-            or_(
-                CostItem.code.ilike(pattern),
-                CostItem.description.ilike(pattern),
+        stmt = (
+            select(CostItem)
+            .where(
+                or_(
+                    CostItem.code.ilike(pattern),
+                    CostItem.description.ilike(pattern),
+                )
             )
-        ).limit(limit)
+            .limit(limit)
+        )
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             score = _score(query, row.code, row.description)
-            results.append({
-                "module": "costs",
-                "type": "cost_item",
-                "id": str(row.id),
-                "title": f"{row.code} — {row.description[:120]}",
-                "subtitle": f"{row.rate} {row.currency}/{row.unit}",
-                "url": "/costs",
-                "score": score,
-            })
+            results.append(
+                {
+                    "module": "costs",
+                    "type": "cost_item",
+                    "id": str(row.id),
+                    "title": f"{row.code} — {row.description[:120]}",
+                    "subtitle": f"{row.rate} {row.currency}/{row.unit}",
+                    "url": "/costs",
+                    "score": score,
+                }
+            )
     except Exception:
         logger.debug("global_search: cost items search skipped", exc_info=True)
 
@@ -223,15 +241,17 @@ async def global_search(
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             score = _score(query, row.title, row.meeting_number)
-            results.append({
-                "module": "meetings",
-                "type": "meeting",
-                "id": str(row.id),
-                "title": f"{row.meeting_number} — {row.title[:120]}",
-                "subtitle": row.meeting_date,
-                "url": f"/projects/{row.project_id}/meetings",
-                "score": score,
-            })
+            results.append(
+                {
+                    "module": "meetings",
+                    "type": "meeting",
+                    "id": str(row.id),
+                    "title": f"{row.meeting_number} — {row.title[:120]}",
+                    "subtitle": row.meeting_date,
+                    "url": f"/projects/{row.project_id}/meetings",
+                    "score": score,
+                }
+            )
     except Exception:
         logger.debug("global_search: meetings search skipped", exc_info=True)
 
@@ -251,15 +271,17 @@ async def global_search(
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             score = _score(query, row.title, row.inspection_number)
-            results.append({
-                "module": "inspections",
-                "type": "inspection",
-                "id": str(row.id),
-                "title": f"{row.inspection_number} — {row.title[:120]}",
-                "subtitle": row.status,
-                "url": f"/projects/{row.project_id}/inspections",
-                "score": score,
-            })
+            results.append(
+                {
+                    "module": "inspections",
+                    "type": "inspection",
+                    "id": str(row.id),
+                    "title": f"{row.inspection_number} — {row.title[:120]}",
+                    "subtitle": row.status,
+                    "url": f"/projects/{row.project_id}/inspections",
+                    "score": score,
+                }
+            )
     except Exception:
         logger.debug("global_search: inspections search skipped", exc_info=True)
 
@@ -280,15 +302,17 @@ async def global_search(
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             score = _score(query, row.ncr_number, row.title)
-            results.append({
-                "module": "ncr",
-                "type": "ncr",
-                "id": str(row.id),
-                "title": f"{row.ncr_number} — {row.title[:120]}",
-                "subtitle": f"{row.severity} / {row.status}",
-                "url": f"/projects/{row.project_id}/ncr",
-                "score": score,
-            })
+            results.append(
+                {
+                    "module": "ncr",
+                    "type": "ncr",
+                    "id": str(row.id),
+                    "title": f"{row.ncr_number} — {row.title[:120]}",
+                    "subtitle": f"{row.severity} / {row.status}",
+                    "url": f"/projects/{row.project_id}/ncr",
+                    "score": score,
+                }
+            )
     except Exception:
         logger.debug("global_search: NCR search skipped", exc_info=True)
 

@@ -73,9 +73,7 @@ def upgrade() -> None:
             sa.Column(
                 "project_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column("bim_model_id", sa.String(length=36), nullable=True),
@@ -92,41 +90,23 @@ def upgrade() -> None:
             sa.Column("stage", sa.String(length=100), nullable=True),
             sa.Column("topic_index", sa.Integer(), nullable=True),
             sa.Column("assigned_to", sa.String(length=255), nullable=True),
-            sa.Column(
-                "due_date", sa.DateTime(timezone=True), nullable=True
-            ),
-            sa.Column(
-                "labels", sa.JSON(), nullable=False, server_default="[]"
-            ),
+            sa.Column("due_date", sa.DateTime(timezone=True), nullable=True),
+            sa.Column("labels", sa.JSON(), nullable=False, server_default="[]"),
             sa.Column(
                 "reference_links",
                 sa.JSON(),
                 nullable=False,
                 server_default="[]",
             ),
-            sa.Column(
-                "creation_author", sa.String(length=255), nullable=True
-            ),
-            sa.Column(
-                "creation_date", sa.DateTime(timezone=True), nullable=True
-            ),
-            sa.Column(
-                "modified_author", sa.String(length=255), nullable=True
-            ),
-            sa.Column(
-                "modified_date", sa.DateTime(timezone=True), nullable=True
-            ),
+            sa.Column("creation_author", sa.String(length=255), nullable=True),
+            sa.Column("creation_date", sa.DateTime(timezone=True), nullable=True),
+            sa.Column("modified_author", sa.String(length=255), nullable=True),
+            sa.Column("modified_date", sa.DateTime(timezone=True), nullable=True),
             sa.Column("created_by", sa.String(length=36), nullable=True),
-            sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}"
-            ),
-            sa.UniqueConstraint(
-                "project_id", "guid", name="uq_bcf_topic_project_guid"
-            ),
+            sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
+            sa.UniqueConstraint("project_id", "guid", name="uq_bcf_topic_project_guid"),
         )
-        op.create_index(
-            "ix_bcf_topic_project", "oe_bcf_topic", ["project_id"]
-        )
+        op.create_index("ix_bcf_topic_project", "oe_bcf_topic", ["project_id"])
         op.create_index("ix_bcf_topic_guid", "oe_bcf_topic", ["guid"])
         op.create_index(
             "ix_oe_bcf_topic_bim_model_id",
@@ -147,29 +127,17 @@ def upgrade() -> None:
                 sa.ForeignKey("oe_bcf_topic.id", ondelete="CASCADE"),
                 nullable=False,
             ),
-            sa.Column(
-                "comment_text", sa.Text(), nullable=False, server_default=""
-            ),
+            sa.Column("comment_text", sa.Text(), nullable=False, server_default=""),
             sa.Column("author", sa.String(length=255), nullable=True),
             sa.Column("date", sa.DateTime(timezone=True), nullable=True),
-            sa.Column(
-                "modified_author", sa.String(length=255), nullable=True
-            ),
-            sa.Column(
-                "modified_date", sa.DateTime(timezone=True), nullable=True
-            ),
+            sa.Column("modified_author", sa.String(length=255), nullable=True),
+            sa.Column("modified_date", sa.DateTime(timezone=True), nullable=True),
             sa.Column("viewpoint_guid", sa.String(length=36), nullable=True),
             sa.Column("created_by", sa.String(length=36), nullable=True),
-            sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}"
-            ),
-            sa.UniqueConstraint(
-                "topic_id", "guid", name="uq_bcf_comment_topic_guid"
-            ),
+            sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
+            sa.UniqueConstraint("topic_id", "guid", name="uq_bcf_comment_topic_guid"),
         )
-        op.create_index(
-            "ix_bcf_comment_topic", "oe_bcf_comment", ["topic_id"]
-        )
+        op.create_index("ix_bcf_comment_topic", "oe_bcf_comment", ["topic_id"])
         op.create_index("ix_bcf_comment_guid", "oe_bcf_comment", ["guid"])
 
     # ── 3. oe_bcf_viewpoint ──────────────────────────────────────────
@@ -197,15 +165,9 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="",
             ),
-            sa.Column(
-                "camera", sa.JSON(), nullable=False, server_default="{}"
-            ),
-            sa.Column(
-                "components", sa.JSON(), nullable=False, server_default="{}"
-            ),
-            sa.Column(
-                "lines", sa.JSON(), nullable=False, server_default="[]"
-            ),
+            sa.Column("camera", sa.JSON(), nullable=False, server_default="{}"),
+            sa.Column("components", sa.JSON(), nullable=False, server_default="{}"),
+            sa.Column("lines", sa.JSON(), nullable=False, server_default="[]"),
             sa.Column(
                 "clipping_planes",
                 sa.JSON(),
@@ -223,19 +185,11 @@ def upgrade() -> None:
             sa.Column("field_of_view", sa.Float(), nullable=True),
             sa.Column("view_to_world_scale", sa.Float(), nullable=True),
             sa.Column("created_by", sa.String(length=36), nullable=True),
-            sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}"
-            ),
-            sa.UniqueConstraint(
-                "topic_id", "guid", name="uq_bcf_viewpoint_topic_guid"
-            ),
+            sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
+            sa.UniqueConstraint("topic_id", "guid", name="uq_bcf_viewpoint_topic_guid"),
         )
-        op.create_index(
-            "ix_bcf_viewpoint_topic", "oe_bcf_viewpoint", ["topic_id"]
-        )
-        op.create_index(
-            "ix_bcf_viewpoint_guid", "oe_bcf_viewpoint", ["guid"]
-        )
+        op.create_index("ix_bcf_viewpoint_topic", "oe_bcf_viewpoint", ["topic_id"])
+        op.create_index("ix_bcf_viewpoint_guid", "oe_bcf_viewpoint", ["guid"])
 
 
 def downgrade() -> None:

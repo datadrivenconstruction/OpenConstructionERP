@@ -31,5 +31,6 @@ async def on_startup() -> None:
         import logging
 
         logging.getLogger(__name__).debug(
-            "notifications: scheduler failed to start", exc_info=True,
+            "notifications: scheduler failed to start",
+            exc_info=True,
         )

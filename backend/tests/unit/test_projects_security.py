@@ -65,7 +65,9 @@ async def engine_factory() -> AsyncGenerator[tuple[Any, Any, Path], None]:
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
     yield engine, factory, tmp_db
     await engine.dispose()
@@ -190,7 +192,8 @@ async def test_currency_change_blocked_when_positions_exist(
         svc = ProjectService(session, _settings_stub())
         with pytest.raises(HTTPException) as exc_info:
             await svc.update_project(
-                project_id, ProjectUpdate(currency="USD"),
+                project_id,
+                ProjectUpdate(currency="USD"),
             )
         assert exc_info.value.status_code == 409
         assert "currency" in exc_info.value.detail.lower()
@@ -280,7 +283,8 @@ async def test_currency_change_allowed_with_metadata_override(
         # in the same session.
         try:
             event_bus.unsubscribe(
-                "projects.project.currency_changed", _on_currency_changed,
+                "projects.project.currency_changed",
+                _on_currency_changed,
             )
         except Exception:
             pass
@@ -309,7 +313,8 @@ async def test_currency_change_allowed_without_positions(seeded_owner) -> None:
     async with factory() as session:
         svc = ProjectService(session, _settings_stub())
         updated = await svc.update_project(
-            project_id, ProjectUpdate(currency="GBP"),
+            project_id,
+            ProjectUpdate(currency="GBP"),
         )
         await session.commit()
         assert updated.currency == "GBP"

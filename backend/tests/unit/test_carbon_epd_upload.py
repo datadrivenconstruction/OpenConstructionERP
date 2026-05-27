@@ -15,7 +15,6 @@ needed for the magic-byte checks).
 
 from __future__ import annotations
 
-import io
 import json
 import os
 import tempfile
@@ -32,22 +31,14 @@ os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}"
 os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 
 import pytest  # noqa: E402
-import pytest_asyncio  # noqa: E402
 from fastapi import HTTPException  # noqa: E402
-from sqlalchemy.ext.asyncio import (  # noqa: E402
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
 
-from app.database import Base  # noqa: E402
 from app.modules.carbon.service import (  # noqa: E402
-    validate_epd_file_magic,
     ALLOWED_EPD_MIME_TYPES,
     EPD_MAGIC_BYTES,
     ingest_epd_document,
+    validate_epd_file_magic,
 )
-
 
 # ── Pure magic-byte helper ─────────────────────────────────────────────────
 
@@ -82,11 +73,13 @@ def test_validate_epd_magic_xml_ilcd_accepted() -> None:
 
 def test_validate_epd_magic_json_object_accepted() -> None:
     """JSON object payload (EC3 format) accepted."""
-    payload = json.dumps({
-        "name": "GGBS C30/37",
-        "gwp_a1a3": 0.083,
-        "declared_unit": "kg",
-    }).encode()
+    payload = json.dumps(
+        {
+            "name": "GGBS C30/37",
+            "gwp_a1a3": 0.083,
+            "declared_unit": "kg",
+        }
+    ).encode()
     result = validate_epd_file_magic(payload)
     assert result == "json"
 
@@ -137,9 +130,7 @@ def test_validate_epd_magic_png_rejected() -> None:
 def test_allowed_mime_types_coverage() -> None:
     """ALLOWED_EPD_MIME_TYPES must include pdf, xml and json variants."""
     expected = {"application/pdf", "text/xml", "application/xml", "application/json"}
-    assert expected.issubset(ALLOWED_EPD_MIME_TYPES), (
-        f"Missing MIME types: {expected - ALLOWED_EPD_MIME_TYPES}"
-    )
+    assert expected.issubset(ALLOWED_EPD_MIME_TYPES), f"Missing MIME types: {expected - ALLOWED_EPD_MIME_TYPES}"
 
 
 def test_epd_magic_bytes_keys_present() -> None:
@@ -241,9 +232,7 @@ async def test_ingest_epd_document_empty_raises_415() -> None:
 async def test_ingest_epd_document_json_payload_accepted() -> None:
     """JSON EPD payload (EC3 format) is accepted and forwarded."""
     mock_service = MagicMock()
-    mock_service.ingest_epd_by_identifier = AsyncMock(
-        return_value=MagicMock(id=uuid.uuid4())
-    )
+    mock_service.ingest_epd_by_identifier = AsyncMock(return_value=MagicMock(id=uuid.uuid4()))
     payload = json.dumps({"name": "GGBS", "gwp_a1a3": 0.083}).encode()
     record = await ingest_epd_document(
         service=mock_service,

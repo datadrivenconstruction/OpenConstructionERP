@@ -28,7 +28,6 @@ import pytest
 
 from app.modules.boq import cad_import
 
-
 # ── find_converter() ───────────────────────────────────────────────────
 
 
@@ -37,9 +36,7 @@ def _patch_no_other_paths(monkeypatch: pytest.MonkeyPatch) -> None:
     on the Linux apt probe specifically. We don't want the Windows
     install-dir under `~/.openestimator/converters/...` to accidentally
     contain a leftover binary from a previous local run."""
-    monkeypatch.setattr(
-        cad_import, "CONVERTER_SEARCH_PATHS", [Path("/nonexistent/oe-test")]
-    )
+    monkeypatch.setattr(cad_import, "CONVERTER_SEARCH_PATHS", [Path("/nonexistent/oe-test")])
     monkeypatch.setattr(cad_import, "_find_ddc_toolkit_bin", lambda: None)
     # Block the per-format Windows install-dir probe by pointing
     # Path.home() at an empty tmp dir handled by the test's monkeypatch.
@@ -68,8 +65,10 @@ def test_find_converter_picks_up_real_apt_binary_path(
 
     def fake_stat(self: Path, **_kwargs: Any) -> Any:
         if self.as_posix() in real_existing:
+
             class _S:
                 st_size = real_existing[self.as_posix()]
+
             return _S()
         return original_stat(self)
 
@@ -83,7 +82,6 @@ def test_find_converter_picks_up_real_apt_binary_path(
 
 
 def test_find_converter_falls_back_to_legacy_ddc_name(  # noqa: PLR0915
-
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -109,8 +107,10 @@ def test_find_converter_falls_back_to_legacy_ddc_name(  # noqa: PLR0915
 
     def fake_stat(self: Path, **_kwargs: Any) -> Any:
         if self.as_posix() in real_existing:
+
             class _S:
                 st_size = real_existing[self.as_posix()]
+
             return _S()
         return original_stat(self)
 

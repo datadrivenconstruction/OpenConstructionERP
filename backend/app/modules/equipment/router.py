@@ -457,6 +457,7 @@ async def list_inspections(
         items = await service.inspection_repo.list_for_equipment(equipment_id)
     else:
         from datetime import date as _d
+
         items = await service.inspection_repo.expiring_within(_d.today().isoformat(), 365)
     return [InspectionResponse.model_validate(i) for i in items]
 
@@ -600,9 +601,7 @@ async def list_fuel_logs(
     _perm: None = Depends(RequirePermission("equipment.read")),
     service: EquipmentService = Depends(_get_service),
 ) -> list[FuelLogResponse]:
-    items, _ = await service.fuel_repo.list_for_equipment(
-        equipment_id, offset=offset, limit=limit
-    )
+    items, _ = await service.fuel_repo.list_for_equipment(equipment_id, offset=offset, limit=limit)
     return [FuelLogResponse.model_validate(i) for i in items]
 
 
@@ -625,9 +624,7 @@ async def update_fuel_log(
 ) -> FuelLogResponse:
     log = await service.fuel_repo.get_by_id(log_id)
     if log is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Fuel log not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fuel log not found")
     fields = data.model_dump(exclude_unset=True)
     if fields:
         await service.fuel_repo.update_fields(log_id, **fields)
@@ -652,9 +649,7 @@ async def fuel_efficiency(
     _perm: None = Depends(RequirePermission("equipment.read")),
     service: EquipmentService = Depends(_get_service),
 ) -> dict[str, Decimal]:
-    return await service.fuel_repo.fuel_consumption(
-        equipment_id, period_start, period_end
-    )
+    return await service.fuel_repo.fuel_consumption(equipment_id, period_start, period_end)
 
 
 # ── Parts Logs ───────────────────────────────────────────────────────────
@@ -668,9 +663,7 @@ async def list_parts_logs(
     _perm: None = Depends(RequirePermission("equipment.read")),
     service: EquipmentService = Depends(_get_service),
 ) -> list[PartsLogResponse]:
-    items, _ = await service.parts_repo.list_for_equipment(
-        equipment_id, offset=offset, limit=limit
-    )
+    items, _ = await service.parts_repo.list_for_equipment(equipment_id, offset=offset, limit=limit)
     return [PartsLogResponse.model_validate(i) for i in items]
 
 

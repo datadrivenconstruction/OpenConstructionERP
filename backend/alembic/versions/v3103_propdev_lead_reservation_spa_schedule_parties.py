@@ -34,7 +34,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3103_propdev_lead_reservation_spa_schedule_parties"
 down_revision: Union[str, Sequence[str], None] = "v3102_round5_merge"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -45,17 +44,13 @@ def _has_table(inspector: sa.engine.reflection.Inspector, table: str) -> bool:
     return table in inspector.get_table_names()
 
 
-def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str
-) -> bool:
+def _has_index(inspector: sa.engine.reflection.Inspector, table: str, name: str) -> bool:
     if not _has_table(inspector, table):
         return False
     return name in {ix["name"] for ix in inspector.get_indexes(table)}
 
 
-def _has_unique(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str
-) -> bool:
+def _has_unique(inspector: sa.engine.reflection.Inspector, table: str, name: str) -> bool:
     if not _has_table(inspector, table):
         return False
     return name in {u["name"] for u in inspector.get_unique_constraints(table)}
@@ -84,9 +79,7 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
             sa.Column(
                 "development_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_development.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_property_dev_development.id", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column("tenant_id", sa.String(length=36), nullable=True),
@@ -114,36 +107,24 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
                 server_default="new",
             ),
             sa.Column("nurture_stage", sa.Text(), nullable=True),
-            sa.Column(
-                "full_name", sa.String(length=255), nullable=False, server_default=""
-            ),
-            sa.Column(
-                "email", sa.String(length=255), nullable=False, server_default=""
-            ),
+            sa.Column("full_name", sa.String(length=255), nullable=False, server_default=""),
+            sa.Column("email", sa.String(length=255), nullable=False, server_default=""),
             sa.Column("phone", sa.String(length=40), nullable=True),
-            sa.Column(
-                "language", sa.String(length=10), nullable=False, server_default="en"
-            ),
+            sa.Column("language", sa.String(length=10), nullable=False, server_default="en"),
             sa.Column("budget_min", sa.Numeric(15, 2), nullable=True),
             sa.Column("budget_max", sa.Numeric(15, 2), nullable=True),
-            sa.Column(
-                "currency", sa.String(length=8), nullable=False, server_default=""
-            ),
+            sa.Column("currency", sa.String(length=8), nullable=False, server_default=""),
             sa.Column(
                 "preferred_house_type_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_house_type.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_property_dev_house_type.id", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column(
                 "converted_to_buyer_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_buyer.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_property_dev_buyer.id", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column(
@@ -186,25 +167,19 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
             sa.Column(
                 "plot_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_plot.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_property_dev_plot.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column(
                 "lead_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_lead.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_property_dev_lead.id", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column(
                 "buyer_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_buyer.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_property_dev_buyer.id", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column("tenant_id", sa.String(length=36), nullable=True),
@@ -215,12 +190,8 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
                 nullable=False,
                 server_default="0",
             ),
-            sa.Column(
-                "currency", sa.String(length=3), nullable=False, server_default=""
-            ),
-            sa.Column(
-                "deposit_paid_at", sa.DateTime(timezone=True), nullable=True
-            ),
+            sa.Column("currency", sa.String(length=3), nullable=False, server_default=""),
+            sa.Column("deposit_paid_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column(
                 "cooling_off_days",
                 sa.Integer(),
@@ -235,9 +206,7 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
                 nullable=False,
                 server_default="active",
             ),
-            sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}"
-            ),
+            sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column(
                 "created_at",
                 sa.DateTime(timezone=True),
@@ -275,17 +244,13 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
             sa.Column(
                 "plot_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_plot.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_property_dev_plot.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column(
                 "reservation_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_reservation.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_property_dev_reservation.id", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column("tenant_id", sa.String(length=36), nullable=True),
@@ -296,9 +261,7 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
                 nullable=False,
                 server_default="",
             ),
-            sa.Column(
-                "language", sa.String(length=10), nullable=False, server_default="en"
-            ),
+            sa.Column("language", sa.String(length=10), nullable=False, server_default="en"),
             sa.Column(
                 "total_price_breakdown",
                 sa.JSON(),
@@ -311,9 +274,7 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
                 nullable=False,
                 server_default="0",
             ),
-            sa.Column(
-                "currency", sa.String(length=3), nullable=False, server_default=""
-            ),
+            sa.Column("currency", sa.String(length=3), nullable=False, server_default=""),
             sa.Column("e_sign_envelope_id", sa.String(length=255), nullable=True),
             sa.Column(
                 "status",
@@ -324,9 +285,7 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
             sa.Column(
                 "parent_contract_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_sales_contract.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_property_dev_sales_contract.id", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column(
@@ -341,9 +300,7 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
                 nullable=False,
                 server_default="",
             ),
-            sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}"
-            ),
+            sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column(
                 "created_at",
                 sa.DateTime(timezone=True),
@@ -380,9 +337,7 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
             sa.Column(
                 "contract_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_sales_contract.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_property_dev_sales_contract.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column("revision_number", sa.Integer(), nullable=False),
@@ -392,9 +347,7 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
                 nullable=False,
                 server_default="{}",
             ),
-            sa.Column(
-                "created_by_user_id", sa.String(length=36), nullable=True
-            ),
+            sa.Column("created_by_user_id", sa.String(length=36), nullable=True),
             sa.Column(
                 "created_at",
                 sa.DateTime(timezone=True),
@@ -434,15 +387,11 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
             sa.Column(
                 "sales_contract_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_sales_contract.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_property_dev_sales_contract.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column("tenant_id", sa.String(length=36), nullable=True),
-            sa.Column(
-                "currency", sa.String(length=3), nullable=False, server_default=""
-            ),
+            sa.Column("currency", sa.String(length=3), nullable=False, server_default=""),
             sa.Column(
                 "total_amount",
                 sa.Numeric(15, 2),
@@ -467,9 +416,7 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
                 nullable=False,
                 server_default="active",
             ),
-            sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}"
-            ),
+            sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column(
                 "created_at",
                 sa.DateTime(timezone=True),
@@ -551,9 +498,7 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
                 server_default="0",
             ),
             sa.Column("invoice_ref", sa.String(length=255), nullable=True),
-            sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}"
-            ),
+            sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column(
                 "created_at",
                 sa.DateTime(timezone=True),
@@ -590,17 +535,13 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
             sa.Column(
                 "sales_contract_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_sales_contract.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_property_dev_sales_contract.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column(
                 "buyer_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_property_dev_buyer.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_property_dev_buyer.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column(
@@ -623,9 +564,7 @@ def upgrade() -> None:  # noqa: PLR0915 — single linear bootstrap
             ),
             sa.Column("signed_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("signature_ref", sa.String(length=255), nullable=True),
-            sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}"
-            ),
+            sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column(
                 "created_at",
                 sa.DateTime(timezone=True),

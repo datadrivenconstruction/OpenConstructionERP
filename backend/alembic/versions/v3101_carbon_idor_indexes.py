@@ -21,7 +21,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3101_carbon"
 down_revision: Union[str, Sequence[str], None] = "v3100_sched"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -47,7 +46,9 @@ def _has_index(inspector: sa.engine.reflection.Inspector, table: str, name: str)
 
 
 def _has_columns(
-    inspector: sa.engine.reflection.Inspector, table: str, cols: list[str],
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    cols: list[str],
 ) -> bool:
     if table not in inspector.get_table_names():
         return False

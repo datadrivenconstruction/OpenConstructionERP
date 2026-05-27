@@ -28,7 +28,6 @@ from app.modules.bim_hub.smart_views import (
     validate_rule_tree,
 )
 
-
 # ── Fixtures: hand-rolled canonical element rows ──────────────────────────
 
 
@@ -153,10 +152,7 @@ def test_validate_rejects_depth_overflow():
 
 def test_validate_rejects_leaf_overflow():
     """MAX_LEAVES + 1 leaves must 400."""
-    leaves = [
-        {"field": "element_type", "op": "=", "value": f"X{i}"}
-        for i in range(MAX_LEAVES + 1)
-    ]
+    leaves = [{"field": "element_type", "op": "=", "value": f"X{i}"} for i in range(MAX_LEAVES + 1)]
     with pytest.raises(HTTPException) as exc:
         validate_rule_tree({"op": "AND", "rules": leaves})
     assert exc.value.status_code == 400
@@ -175,9 +171,7 @@ def test_validate_rejects_invalid_regex():
 
 def test_validate_between_requires_pair():
     with pytest.raises(HTTPException):
-        validate_rule_tree(
-            {"field": "geometry.area_m2", "op": "between", "value": [1]}
-        )
+        validate_rule_tree({"field": "geometry.area_m2", "op": "between", "value": [1]})
 
 
 # ── 2. Evaluator — boolean logic ──────────────────────────────────────────
@@ -250,67 +244,59 @@ def test_nested_groups(elements):
 
 
 def test_op_contains_case_insensitive(elements):
-    tree = validate_rule_tree(
-        {"field": "properties.material", "op": "contains", "value": "concr"}
-    )
+    tree = validate_rule_tree({"field": "properties.material", "op": "contains", "value": "concr"})
     matched = evaluate(tree, elements)
     assert {e["name"] for e in matched} == {"Wall A1", "Floor F1"}
 
 
 def test_op_starts_with_and_ends_with(elements):
-    tree = validate_rule_tree(
-        {"field": "name", "op": "starts_with", "value": "Wall"}
-    )
+    tree = validate_rule_tree({"field": "name", "op": "starts_with", "value": "Wall"})
     assert {e["name"] for e in evaluate(tree, elements)} == {"Wall A1", "Wall A2"}
 
     tree = validate_rule_tree({"field": "name", "op": "ends_with", "value": "1"})
     assert {e["name"] for e in evaluate(tree, elements)} == {
-        "Wall A1", "Door D1", "Floor F1", "Line L1",
+        "Wall A1",
+        "Door D1",
+        "Floor F1",
+        "Line L1",
     }
 
 
 def test_op_regex(elements):
-    tree = validate_rule_tree(
-        {"field": "name", "op": "regex", "value": r"^Wall A\d$"}
-    )
+    tree = validate_rule_tree({"field": "name", "op": "regex", "value": r"^Wall A\d$"})
     assert {e["name"] for e in evaluate(tree, elements)} == {"Wall A1", "Wall A2"}
 
 
 def test_op_in_and_not_in(elements):
-    tree = validate_rule_tree(
-        {"field": "element_type", "op": "in", "value": ["IfcWall", "Floors"]}
-    )
+    tree = validate_rule_tree({"field": "element_type", "op": "in", "value": ["IfcWall", "Floors"]})
     assert {e["name"] for e in evaluate(tree, elements)} == {
-        "Wall A1", "Wall A2", "Floor F1",
+        "Wall A1",
+        "Wall A2",
+        "Floor F1",
     }
-    tree = validate_rule_tree(
-        {"field": "element_type", "op": "not_in", "value": ["IfcWall"]}
-    )
+    tree = validate_rule_tree({"field": "element_type", "op": "not_in", "value": ["IfcWall"]})
     assert {e["name"] for e in evaluate(tree, elements)} == {
-        "Door D1", "Floor F1", "Line L1",
+        "Door D1",
+        "Floor F1",
+        "Line L1",
     }
 
 
 def test_op_between_numeric(elements):
-    tree = validate_rule_tree(
-        {"field": "geometry.area_m2", "op": "between", "value": [10, 30]}
-    )
+    tree = validate_rule_tree({"field": "geometry.area_m2", "op": "between", "value": [10, 30]})
     matched = evaluate(tree, elements)
     # Wall A1 (12.5) and Wall A2 (25) match; Floor F1 (200) is too large.
     assert {e["name"] for e in matched} == {"Wall A1", "Wall A2"}
 
 
 def test_op_gt_lt(elements):
-    tree = validate_rule_tree(
-        {"field": "geometry.volume_m3", "op": ">", "value": 5}
-    )
+    tree = validate_rule_tree({"field": "geometry.volume_m3", "op": ">", "value": 5})
     assert {e["name"] for e in evaluate(tree, elements)} == {"Wall A2", "Floor F1"}
 
-    tree = validate_rule_tree(
-        {"field": "geometry.length_m", "op": "<=", "value": 7.5}
-    )
+    tree = validate_rule_tree({"field": "geometry.length_m", "op": "<=", "value": 7.5})
     assert {e["name"] for e in evaluate(tree, elements)} == {
-        "Wall A1", "Line L1",
+        "Wall A1",
+        "Line L1",
     }
 
 
@@ -327,25 +313,19 @@ def test_op_is_empty_and_not_empty(elements):
 
 def test_identity_classification_field(elements):
     """``identity.din276`` resolves through properties.classification."""
-    tree = validate_rule_tree(
-        {"field": "identity.din276", "op": "=", "value": "330"}
-    )
+    tree = validate_rule_tree({"field": "identity.din276", "op": "=", "value": "330"})
     assert {e["name"] for e in evaluate(tree, elements)} == {"Wall A1", "Wall A2"}
 
 
 def test_geometry_alias_resolution(elements):
     """``geometry.area_m2`` should pick up either "Area" or "area_m2"."""
-    tree = validate_rule_tree(
-        {"field": "geometry.area_m2", "op": ">", "value": 100}
-    )
+    tree = validate_rule_tree({"field": "geometry.area_m2", "op": ">", "value": 100})
     assert {e["name"] for e in evaluate(tree, elements)} == {"Floor F1"}
 
 
 def test_dwg_layer_property(elements):
     """DWG-source element with properties.layer is fully queryable."""
-    tree = validate_rule_tree(
-        {"field": "properties.layer", "op": "=", "value": "A-WALL"}
-    )
+    tree = validate_rule_tree({"field": "properties.layer", "op": "=", "value": "A-WALL"})
     assert {e["name"] for e in evaluate(tree, elements)} == {"Line L1"}
 
 

@@ -196,10 +196,7 @@ class TestResolveLocalized:
         assert resolve_localized({"en": "Hello", "de": "Hallo"}, locale="fr") == "Hello"
 
     def test_dict_custom_fallback(self):
-        assert (
-            resolve_localized({"de": "Hallo", "fr": "Bonjour"}, locale="ja", fallback="fr")
-            == "Bonjour"
-        )
+        assert resolve_localized({"de": "Hallo", "fr": "Bonjour"}, locale="ja", fallback="fr") == "Bonjour"
 
     def test_dict_first_available(self):
         result = resolve_localized({"de": "Hallo", "fr": "Bonjour"}, locale="ja")

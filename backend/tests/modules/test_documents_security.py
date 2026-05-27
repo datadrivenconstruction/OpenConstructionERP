@@ -102,7 +102,6 @@ from app.modules.documents.share_service import (  # noqa: E402
 from app.modules.projects.models import Project  # noqa: E402
 from app.modules.users.models import User  # noqa: E402
 
-
 # ── Fixtures ────────────────────────────────────────────────────────────
 
 
@@ -191,7 +190,8 @@ async def _make_sheet(session: AsyncSession, project: Project) -> Sheet:
 
 
 async def _make_bim_element(
-    session: AsyncSession, project: Project,
+    session: AsyncSession,
+    project: Project,
 ) -> tuple[BIMModel, BIMElement]:
     model = BIMModel(
         project_id=project.id,
@@ -486,7 +486,9 @@ async def test_create_bim_link_blocks_cross_tenant_doc(
     # The router calls verify_project_access on the document side first.
     with pytest.raises(HTTPException) as exc_info:
         await verify_project_access(
-            foreign_doc.project_id, str(attacker.id), session,
+            foreign_doc.project_id,
+            str(attacker.id),
+            session,
         )
     assert exc_info.value.status_code == 404
     # Sanity — attacker still owns the element side.
@@ -517,7 +519,9 @@ async def test_create_bim_link_blocks_cross_tenant_element(
     # Element side must fail.
     with pytest.raises(HTTPException) as exc_info:
         await verify_project_access(
-            foreign_model.project_id, str(attacker.id), session,
+            foreign_model.project_id,
+            str(attacker.id),
+            session,
         )
     assert exc_info.value.status_code == 404
 
@@ -550,7 +554,9 @@ async def test_delete_bim_link_cross_tenant_returns_404(
     assert loaded_doc is not None
     with pytest.raises(HTTPException) as exc_info:
         await verify_project_access(
-            loaded_doc.project_id, str(attacker.id), session,
+            loaded_doc.project_id,
+            str(attacker.id),
+            session,
         )
     assert exc_info.value.status_code == 404
 
@@ -697,6 +703,8 @@ async def test_revoke_share_link_rejects_cross_document(
     # Attempt to revoke link_b while claiming we operate on doc_a.
     with pytest.raises(HTTPException) as exc_info:
         await revoke_share_link(
-            session, link_id=link_b.id, document_id=doc_a.id,
+            session,
+            link_id=link_b.id,
+            document_id=doc_a.id,
         )
     assert exc_info.value.status_code == 404

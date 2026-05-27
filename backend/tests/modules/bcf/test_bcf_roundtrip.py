@@ -17,18 +17,15 @@ Cases:
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
-import pytest
-
-from app.modules.bcf.reader import BCFReader, ParsedTopic
+from app.modules.bcf.reader import BCFReader
 from app.modules.bcf.writer import (
     BCFComment,
     BCFTopic,
     BCFViewpoint,
     BCFWriter,
 )
-
 
 # A pre-baked 1×1 PNG so the snapshot round-trip is exact.
 _PNG_BYTES = (
@@ -73,8 +70,8 @@ def test_roundtrip_required_topic_fields_preserved() -> None:
     # Distinct guids per topic — writer rejects duplicates.
     for i, t in enumerate(topics):
         t.guid = str(uuid.uuid4())
-        t.title = f"Topic #{i+1}"
-        t.server_assigned_id = f"CLASH-{i+1:03d}"
+        t.title = f"Topic #{i + 1}"
+        t.server_assigned_id = f"CLASH-{i + 1:03d}"
 
     writer = BCFWriter().set_project("proj-1", "Round-trip Test")
     for t in topics:

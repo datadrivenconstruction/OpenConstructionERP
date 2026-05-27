@@ -78,9 +78,7 @@ async def test_get_sidebar_preferences_empty_for_new_user(client):
 
     resp = await client.get("/api/v1/users/me/sidebar-preferences/", headers=headers)
 
-    assert resp.status_code == 200, (
-        f"Expected 200 but got {resp.status_code}: {resp.text!r}"
-    )
+    assert resp.status_code == 200, f"Expected 200 but got {resp.status_code}: {resp.text!r}"
     body = resp.json()
     assert body == {"hidden_modules": []}
 
@@ -102,9 +100,7 @@ async def test_put_then_get_sidebar_preferences_round_trip(client):
     assert put_resp.status_code == 200, put_resp.text
     assert put_resp.json() == payload
 
-    get_resp = await client.get(
-        "/api/v1/users/me/sidebar-preferences/", headers=headers
-    )
+    get_resp = await client.get("/api/v1/users/me/sidebar-preferences/", headers=headers)
     assert get_resp.status_code == 200
     assert get_resp.json() == payload
 
@@ -125,9 +121,7 @@ async def test_put_overwrites_previous_value(client):
         json={"hidden_modules": ["/x"]},
     )
 
-    resp = await client.get(
-        "/api/v1/users/me/sidebar-preferences/", headers=headers
-    )
+    resp = await client.get("/api/v1/users/me/sidebar-preferences/", headers=headers)
     assert resp.json() == {"hidden_modules": ["/x"]}
 
 
@@ -146,15 +140,11 @@ async def test_user_a_write_does_not_affect_user_b(client):
         json={"hidden_modules": ["/finance", "/qms"]},
     )
 
-    resp_b = await client.get(
-        "/api/v1/users/me/sidebar-preferences/", headers=headers_b
-    )
+    resp_b = await client.get("/api/v1/users/me/sidebar-preferences/", headers=headers_b)
     assert resp_b.status_code == 200
     assert resp_b.json() == {"hidden_modules": []}
 
-    resp_a = await client.get(
-        "/api/v1/users/me/sidebar-preferences/", headers=headers_a
-    )
+    resp_a = await client.get("/api/v1/users/me/sidebar-preferences/", headers=headers_a)
     assert resp_a.json() == {"hidden_modules": ["/finance", "/qms"]}
 
 

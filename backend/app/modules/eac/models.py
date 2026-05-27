@@ -466,7 +466,7 @@ class EacGlobalVariable(Base):
         nullable=False,
         default=dict,
         server_default="{}",
-        doc="Wrapped value; e.g. {\"value\": 100} or {\"value\": \"Berlin\"}",
+        doc='Wrapped value; e.g. {"value": 100} or {"value": "Berlin"}',
     )
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_locked: Mapped[bool] = mapped_column(
@@ -637,9 +637,7 @@ class EacAliasSynonym(Base):
     """
 
     __tablename__ = "oe_eac_alias_synonyms"
-    __table_args__ = (
-        Index("ix_eac_alias_synonym_alias_priority", "alias_id", "priority"),
-    )
+    __table_args__ = (Index("ix_eac_alias_synonym_alias_priority", "alias_id", "priority"),)
 
     alias_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -696,10 +694,7 @@ class EacAliasSynonym(Base):
     alias: Mapped[EacParameterAlias] = relationship(back_populates="synonyms")
 
     def __repr__(self) -> str:
-        return (
-            f"<EacAliasSynonym alias={self.alias_id} pattern={self.pattern!r} "
-            f"prio={self.priority}>"
-        )
+        return f"<EacAliasSynonym alias={self.alias_id} pattern={self.pattern!r} prio={self.priority}>"
 
 
 # ── Alias snapshot ──────────────────────────────────────────────────────
@@ -714,9 +709,7 @@ class EacAliasSnapshot(Base):
     """
 
     __tablename__ = "oe_eac_alias_snapshots"
-    __table_args__ = (
-        Index("ix_eac_alias_snapshot_scope", "scope", "scope_id"),
-    )
+    __table_args__ = (Index("ix_eac_alias_snapshot_scope", "scope", "scope_id"),)
 
     taken_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -730,10 +723,7 @@ class EacAliasSnapshot(Base):
         nullable=False,
         default=dict,
         server_default="{}",
-        doc=(
-            "Full snapshot: {alias_name: {id, value_type_hint, default_unit, "
-            "synonyms: [...]}}."
-        ),
+        doc=("Full snapshot: {alias_name: {id, value_type_hint, default_unit, synonyms: [...]}}."),
     )
 
     def __repr__(self) -> str:

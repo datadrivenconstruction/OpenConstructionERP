@@ -72,11 +72,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -101,7 +97,9 @@ async def _login(client: AsyncClient, email: str, password: str) -> dict[str, st
 
 
 async def _make_role(
-    client: AsyncClient, label: str, role: str,
+    client: AsyncClient,
+    label: str,
+    role: str,
 ) -> dict[str, str]:
     email, pw = await _register(client, label)
     await _set_role(email, role)
@@ -176,13 +174,16 @@ async def test_broker_crud_happy(http_client, manager_headers):
         "default_commission_pct": "2.5",
     }
     r = await http_client.post(
-        "/api/v1/property-dev/brokers/", json=payload, headers=manager_headers,
+        "/api/v1/property-dev/brokers/",
+        json=payload,
+        headers=manager_headers,
     )
     assert r.status_code == 201, r.text
     broker_id = r.json()["id"]
 
     g = await http_client.get(
-        f"/api/v1/property-dev/brokers/{broker_id}", headers=manager_headers,
+        f"/api/v1/property-dev/brokers/{broker_id}",
+        headers=manager_headers,
     )
     assert g.status_code == 200
     assert g.json()["name"] == "Aldar Realty"
@@ -198,7 +199,9 @@ async def test_broker_crud_happy(http_client, manager_headers):
 
 @pytest.mark.asyncio
 async def test_broker_kyc_verify_manager_only(
-    http_client, manager_headers, editor_headers,
+    http_client,
+    manager_headers,
+    editor_headers,
 ):
     r = await http_client.post(
         "/api/v1/property-dev/brokers/",
@@ -285,7 +288,8 @@ async def test_agreement_structure_flat(http_client, manager_headers):
 
 @pytest.mark.asyncio
 async def test_agreement_structure_percent_overflow_rejected(
-    http_client, manager_headers,
+    http_client,
+    manager_headers,
 ):
     b = await http_client.post(
         "/api/v1/property-dev/brokers/",
@@ -369,7 +373,9 @@ async def test_commission_math_pure_flat():
     from app.modules.property_dev.service import compute_commission_amount
 
     amt = compute_commission_amount(
-        500_000, "flat", {"amount": "5000", "currency": "EUR"},
+        500_000,
+        "flat",
+        {"amount": "5000", "currency": "EUR"},
     )
     assert amt == Decimal("5000")
 
@@ -380,9 +386,7 @@ async def test_commission_math_pure_percent():
 
     from app.modules.property_dev.service import compute_commission_amount
 
-    assert compute_commission_amount(100_000, "percent", {"pct": "2.5"}) == Decimal(
-        "2500.00"
-    )
+    assert compute_commission_amount(100_000, "percent", {"pct": "2.5"}) == Decimal("2500.00")
 
 
 @pytest.mark.asyncio
@@ -419,7 +423,9 @@ async def test_commission_withholding():
 
 @pytest.mark.asyncio
 async def test_commission_accrual_event_flow(
-    http_client, manager_headers, development,
+    http_client,
+    manager_headers,
+    development,
 ):
     """End-to-end: spa.signed event → accrual → approve → pay."""
     from decimal import Decimal
@@ -497,7 +503,10 @@ async def test_commission_accrual_event_flow(
 
 @pytest.mark.asyncio
 async def test_commission_approve_pay_role_gates(
-    http_client, manager_headers, editor_headers, development,
+    http_client,
+    manager_headers,
+    editor_headers,
+    development,
 ):
     """EDITOR can list accruals but not approve / pay."""
     from decimal import Decimal
@@ -564,7 +573,9 @@ async def test_commission_approve_pay_role_gates(
 
 @pytest.mark.asyncio
 async def test_commission_fsm_blocks_skip(
-    http_client, manager_headers, development,
+    http_client,
+    manager_headers,
+    development,
 ):
     """Cannot pay an accrual that's still in `accrued` state (skip approve)."""
     from decimal import Decimal
@@ -619,7 +630,9 @@ async def test_commission_fsm_blocks_skip(
 
 @pytest.mark.asyncio
 async def test_escrow_account_iban_validation(
-    http_client, manager_headers, development,
+    http_client,
+    manager_headers,
+    development,
 ):
     bad = await http_client.post(
         "/api/v1/property-dev/escrow-accounts/",
@@ -637,7 +650,9 @@ async def test_escrow_account_iban_validation(
 
 @pytest.mark.asyncio
 async def test_escrow_account_regulator_ref_enum(
-    http_client, manager_headers, development,
+    http_client,
+    manager_headers,
+    development,
 ):
     bad = await http_client.post(
         "/api/v1/property-dev/escrow-accounts/",
@@ -654,7 +669,9 @@ async def test_escrow_account_regulator_ref_enum(
 
 @pytest.mark.asyncio
 async def test_escrow_account_unique_dev_currency_regulator(
-    http_client, manager_headers, development,
+    http_client,
+    manager_headers,
+    development,
 ):
     payload = {
         "development_id": development["development_id"],
@@ -665,13 +682,15 @@ async def test_escrow_account_unique_dev_currency_regulator(
     }
     r1 = await http_client.post(
         "/api/v1/property-dev/escrow-accounts/",
-        json=payload, headers=manager_headers,
+        json=payload,
+        headers=manager_headers,
     )
     assert r1.status_code == 201, r1.text
     try:
         r2 = await http_client.post(
             "/api/v1/property-dev/escrow-accounts/",
-            json=payload, headers=manager_headers,
+            json=payload,
+            headers=manager_headers,
         )
         assert r2.status_code != 201, r2.text
     except Exception as exc:
@@ -683,7 +702,10 @@ async def test_escrow_account_unique_dev_currency_regulator(
 
 @pytest.mark.asyncio
 async def test_escrow_balance_and_reconcile(
-    http_client, manager_headers, editor_headers, development,
+    http_client,
+    manager_headers,
+    editor_headers,
+    development,
 ):
     acc = await http_client.post(
         "/api/v1/property-dev/escrow-accounts/",
@@ -768,7 +790,9 @@ async def test_escrow_balance_and_reconcile(
 
 @pytest.mark.asyncio
 async def test_escrow_transaction_amount_must_be_positive(
-    http_client, manager_headers, development,
+    http_client,
+    manager_headers,
+    development,
 ):
     acc = await http_client.post(
         "/api/v1/property-dev/escrow-accounts/",
@@ -803,7 +827,9 @@ async def test_escrow_transaction_amount_must_be_positive(
 
 @pytest.mark.asyncio
 async def test_phase_block_crud_and_plot_assignment(
-    http_client, manager_headers, development,
+    http_client,
+    manager_headers,
+    development,
 ):
     phase = await http_client.post(
         "/api/v1/property-dev/phases/",
@@ -1043,7 +1069,10 @@ async def test_price_matrix_phase_escalator():
 
 @pytest.mark.asyncio
 async def test_price_matrix_activate_and_bulk_recompute(
-    http_client, manager_headers, editor_headers, development,
+    http_client,
+    manager_headers,
+    editor_headers,
+    development,
 ):
     pm = await http_client.post(
         "/api/v1/property-dev/price-matrices/",
@@ -1101,7 +1130,9 @@ async def test_price_matrix_activate_and_bulk_recompute(
 
 @pytest.mark.asyncio
 async def test_price_matrix_preview_on_plot(
-    http_client, manager_headers, development,
+    http_client,
+    manager_headers,
+    development,
 ):
     plot_id = development["plots"][1]
     # Create matrix with one rule.
@@ -1142,7 +1173,10 @@ async def test_price_matrix_preview_on_plot(
 
 @pytest.mark.asyncio
 async def test_regulator_report_rera_pdf(
-    http_client, manager_headers, editor_headers, development,
+    http_client,
+    manager_headers,
+    editor_headers,
+    development,
 ):
     # Editor blocked.
     bad = await http_client.get(
@@ -1170,7 +1204,9 @@ async def test_regulator_report_rera_pdf(
 
 @pytest.mark.asyncio
 async def test_regulator_report_maharera(
-    http_client, manager_headers, development,
+    http_client,
+    manager_headers,
+    development,
 ):
     ok = await http_client.get(
         "/api/v1/property-dev/regulator-reports/MAHARERA",
@@ -1186,7 +1222,9 @@ async def test_regulator_report_maharera(
 
 @pytest.mark.asyncio
 async def test_regulator_report_214fz(
-    http_client, manager_headers, development,
+    http_client,
+    manager_headers,
+    development,
 ):
     ok = await http_client.get(
         "/api/v1/property-dev/regulator-reports/214-FZ",
@@ -1202,7 +1240,9 @@ async def test_regulator_report_214fz(
 
 @pytest.mark.asyncio
 async def test_regulator_report_invalid_quarter(
-    http_client, manager_headers, development,
+    http_client,
+    manager_headers,
+    development,
 ):
     bad = await http_client.get(
         "/api/v1/property-dev/regulator-reports/RERA",
@@ -1217,7 +1257,8 @@ async def test_regulator_report_invalid_quarter(
 
 @pytest.mark.asyncio
 async def test_broker_idor_random_uuid_returns_404(
-    http_client, manager_headers,
+    http_client,
+    manager_headers,
 ):
     rand = uuid.uuid4()
     r = await http_client.get(
@@ -1229,7 +1270,8 @@ async def test_broker_idor_random_uuid_returns_404(
 
 @pytest.mark.asyncio
 async def test_commission_accrual_random_uuid_returns_404(
-    http_client, manager_headers,
+    http_client,
+    manager_headers,
 ):
     rand = uuid.uuid4()
     r = await http_client.post(
@@ -1241,7 +1283,8 @@ async def test_commission_accrual_random_uuid_returns_404(
 
 @pytest.mark.asyncio
 async def test_escrow_transaction_random_uuid_returns_404(
-    http_client, manager_headers,
+    http_client,
+    manager_headers,
 ):
     rand = uuid.uuid4()
     r = await http_client.post(
@@ -1254,7 +1297,8 @@ async def test_escrow_transaction_random_uuid_returns_404(
 
 @pytest.mark.asyncio
 async def test_price_matrix_random_uuid_returns_404(
-    http_client, manager_headers,
+    http_client,
+    manager_headers,
 ):
     rand = uuid.uuid4()
     r = await http_client.post(
@@ -1269,10 +1313,12 @@ async def test_price_matrix_random_uuid_returns_404(
 
 @pytest.mark.asyncio
 async def test_viewer_can_list_brokers_but_not_create(
-    http_client, viewer_headers,
+    http_client,
+    viewer_headers,
 ):
     ok = await http_client.get(
-        "/api/v1/property-dev/brokers/", headers=viewer_headers,
+        "/api/v1/property-dev/brokers/",
+        headers=viewer_headers,
     )
     assert ok.status_code == 200
     bad = await http_client.post(

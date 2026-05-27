@@ -28,13 +28,13 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from app.core.audit_log import ActivityLog
 from app.database import Base
 from app.dependencies import get_current_user_id, get_session
-from app.core.audit_log import ActivityLog
 from app.modules.moc.models import MoCEntry, MoCImpact
 from app.modules.moc.router import router as moc_router
 from app.modules.moc.schemas import MoCEntryCreate, MoCEntryUpdate, MoCImpactCreate
-from app.modules.moc.service import MoCService, MOC_TRANSITIONS, allowed_moc_transitions
+from app.modules.moc.service import MOC_TRANSITIONS, MoCService, allowed_moc_transitions
 from app.modules.projects.models import Project, ProjectMilestone, ProjectWBS
 from app.modules.users.models import APIKey, User
 
@@ -87,9 +87,7 @@ async def _make_project(session: AsyncSession, owner: uuid.UUID) -> uuid.UUID:
     return p.id
 
 
-async def _create_entry(
-    svc: MoCService, project_id: uuid.UUID, user_id: uuid.UUID
-) -> MoCEntry:
+async def _create_entry(svc: MoCService, project_id: uuid.UUID, user_id: uuid.UUID) -> MoCEntry:
     return await svc.create_entry(
         MoCEntryCreate(
             project_id=project_id,
@@ -137,9 +135,7 @@ class TestMoCFSM:
             assert isinstance(nexts, list), f"State {state!r} has non-list transitions"
 
     @pytest.mark.asyncio
-    async def test_invalid_leap_raises_409(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_invalid_leap_raises_409(self, session: AsyncSession, svc: MoCService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -152,9 +148,7 @@ class TestMoCFSM:
         assert exc_info.value.status_code == 409
 
     @pytest.mark.asyncio
-    async def test_full_lifecycle_proposed_to_implemented(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_full_lifecycle_proposed_to_implemented(self, session: AsyncSession, svc: MoCService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -179,9 +173,7 @@ class TestMoCFSM:
         await session.commit()
 
     @pytest.mark.asyncio
-    async def test_full_lifecycle_proposed_to_declined(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_full_lifecycle_proposed_to_declined(self, session: AsyncSession, svc: MoCService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -201,9 +193,7 @@ class TestMoCFSM:
             await svc.transition(entry.id, "accepted", user_id=str(user))
 
     @pytest.mark.asyncio
-    async def test_terminal_implemented_raises_on_transition(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_terminal_implemented_raises_on_transition(self, session: AsyncSession, svc: MoCService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -229,9 +219,7 @@ class TestMoCAuditTrail:
     """Every MoC FSM transition writes an ActivityLog row (same transaction)."""
 
     @pytest.mark.asyncio
-    async def test_review_writes_audit_log(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_review_writes_audit_log(self, session: AsyncSession, svc: MoCService) -> None:
         from sqlalchemy import select
 
         user = await _make_user(session)
@@ -245,13 +233,17 @@ class TestMoCAuditTrail:
         await session.commit()
 
         rows = (
-            await session.execute(
-                select(ActivityLog)
-                .where(ActivityLog.entity_type == "moc_entry")
-                .where(ActivityLog.entity_id == str(entry.id))
-                .where(ActivityLog.to_status == "reviewed")
+            (
+                await session.execute(
+                    select(ActivityLog)
+                    .where(ActivityLog.entity_type == "moc_entry")
+                    .where(ActivityLog.entity_id == str(entry.id))
+                    .where(ActivityLog.to_status == "reviewed")
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         assert len(rows) >= 1
         row = rows[0]
         assert row.from_status == "proposed"
@@ -259,9 +251,7 @@ class TestMoCAuditTrail:
         assert row.reason == "OK"
 
     @pytest.mark.asyncio
-    async def test_accept_writes_audit_log(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_accept_writes_audit_log(self, session: AsyncSession, svc: MoCService) -> None:
         from sqlalchemy import select
 
         user = await _make_user(session)
@@ -277,19 +267,21 @@ class TestMoCAuditTrail:
         await session.commit()
 
         rows = (
-            await session.execute(
-                select(ActivityLog)
-                .where(ActivityLog.entity_type == "moc_entry")
-                .where(ActivityLog.entity_id == str(entry.id))
-                .where(ActivityLog.to_status == "accepted")
+            (
+                await session.execute(
+                    select(ActivityLog)
+                    .where(ActivityLog.entity_type == "moc_entry")
+                    .where(ActivityLog.entity_id == str(entry.id))
+                    .where(ActivityLog.to_status == "accepted")
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         assert len(rows) >= 1
 
     @pytest.mark.asyncio
-    async def test_decline_writes_audit_log(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_decline_writes_audit_log(self, session: AsyncSession, svc: MoCService) -> None:
         from sqlalchemy import select
 
         user = await _make_user(session)
@@ -305,13 +297,17 @@ class TestMoCAuditTrail:
         await session.commit()
 
         rows = (
-            await session.execute(
-                select(ActivityLog)
-                .where(ActivityLog.entity_type == "moc_entry")
-                .where(ActivityLog.entity_id == str(entry.id))
-                .where(ActivityLog.to_status == "declined")
+            (
+                await session.execute(
+                    select(ActivityLog)
+                    .where(ActivityLog.entity_type == "moc_entry")
+                    .where(ActivityLog.entity_id == str(entry.id))
+                    .where(ActivityLog.to_status == "declined")
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         assert len(rows) >= 1
 
 
@@ -345,9 +341,7 @@ class TestMoCIDOR:
     """Wrong-tenant caller gets 404, not the resource data."""
 
     @pytest.mark.asyncio
-    async def test_get_entry_wrong_project_returns_404(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_get_entry_wrong_project_returns_404(self, session: AsyncSession, svc: MoCService) -> None:
         owner = await _make_user(session)
         attacker = await _make_user(session)
         project = await _make_project(session, owner)
@@ -362,9 +356,7 @@ class TestMoCIDOR:
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_patch_entry_wrong_project_returns_404(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_patch_entry_wrong_project_returns_404(self, session: AsyncSession, svc: MoCService) -> None:
         owner = await _make_user(session)
         attacker = await _make_user(session)
         project = await _make_project(session, owner)
@@ -379,9 +371,7 @@ class TestMoCIDOR:
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_delete_entry_wrong_project_returns_404(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_delete_entry_wrong_project_returns_404(self, session: AsyncSession, svc: MoCService) -> None:
         owner = await _make_user(session)
         attacker = await _make_user(session)
         project = await _make_project(session, owner)
@@ -396,9 +386,7 @@ class TestMoCIDOR:
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_review_endpoint_wrong_project_returns_404(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_review_endpoint_wrong_project_returns_404(self, session: AsyncSession, svc: MoCService) -> None:
         """FSM transition endpoint also IDOR-guarded."""
         owner = await _make_user(session)
         attacker = await _make_user(session)
@@ -421,9 +409,7 @@ class TestMoCMoneyDecimal:
     """MoCEntry and MoCImpact money fields round-trip as exact Decimal."""
 
     @pytest.mark.asyncio
-    async def test_entry_cost_impact_exact_decimal(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_entry_cost_impact_exact_decimal(self, session: AsyncSession, svc: MoCService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -447,9 +433,7 @@ class TestMoCMoneyDecimal:
         assert result == amount, f"Expected {amount!r}, got {result!r}"
 
     @pytest.mark.asyncio
-    async def test_impact_cost_impact_exact_decimal(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_impact_cost_impact_exact_decimal(self, session: AsyncSession, svc: MoCService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -474,9 +458,7 @@ class TestMoCMoneyDecimal:
         assert result == amount, f"Expected {amount!r}, got {result!r}"
 
     @pytest.mark.asyncio
-    async def test_zero_cost_impact_stored_as_zero(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_zero_cost_impact_stored_as_zero(self, session: AsyncSession, svc: MoCService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -502,9 +484,7 @@ class TestMoCEditLock:
     """Implemented and declined entries cannot be updated."""
 
     @pytest.mark.asyncio
-    async def test_implemented_entry_update_raises_409(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_implemented_entry_update_raises_409(self, session: AsyncSession, svc: MoCService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -524,9 +504,7 @@ class TestMoCEditLock:
         assert exc_info.value.status_code == 409
 
     @pytest.mark.asyncio
-    async def test_declined_entry_update_raises_409(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_declined_entry_update_raises_409(self, session: AsyncSession, svc: MoCService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -544,9 +522,7 @@ class TestMoCEditLock:
         assert exc_info.value.status_code == 409
 
     @pytest.mark.asyncio
-    async def test_proposed_entry_delete_allowed(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_proposed_entry_delete_allowed(self, session: AsyncSession, svc: MoCService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -557,9 +533,7 @@ class TestMoCEditLock:
         await svc.delete_entry(entry.id)  # must not raise
 
     @pytest.mark.asyncio
-    async def test_reviewed_entry_delete_raises_409(
-        self, session: AsyncSession, svc: MoCService
-    ) -> None:
+    async def test_reviewed_entry_delete_raises_409(self, session: AsyncSession, svc: MoCService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -581,22 +555,18 @@ class TestMoCPermissions:
     """Permissions module must register all required permission strings."""
 
     def test_register_moc_permissions_contains_approve(self) -> None:
-        from app.modules.moc.permissions import register_moc_permissions
         from app.core.permissions import permission_registry
+        from app.modules.moc.permissions import register_moc_permissions
 
         register_moc_permissions()
-        all_perms = {
-            perm
-            for module_perms in permission_registry._module_permissions.values()
-            for perm in module_perms
-        }
+        all_perms = {perm for module_perms in permission_registry._module_permissions.values() for perm in module_perms}
         assert "moc.approve" in all_perms
         assert "moc.review" in all_perms
         assert "moc.implement" in all_perms
 
     def test_register_moc_permissions_role_levels(self) -> None:
+        from app.core.permissions import permission_registry
         from app.modules.moc.permissions import register_moc_permissions
-        from app.core.permissions import permission_registry, Role
 
         register_moc_permissions()
         # Verify moc.approve is registered under the moc module.

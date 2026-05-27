@@ -109,10 +109,7 @@ def _reject_unknown_entity_type(entity_type: str) -> None:
     if entity_type not in ALLOWED_LOCK_ENTITY_TYPES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                f"Unsupported entity_type '{entity_type}'. "
-                f"Allowed: {sorted(ALLOWED_LOCK_ENTITY_TYPES)}"
-            ),
+            detail=(f"Unsupported entity_type '{entity_type}'. Allowed: {sorted(ALLOWED_LOCK_ENTITY_TYPES)}"),
         )
 
 
@@ -147,9 +144,7 @@ async def acquire_lock(
             ttl_seconds=data.ttl_seconds,
         )
     except UnknownEntityTypeError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     except LockConflictError as exc:
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
@@ -171,9 +166,7 @@ async def heartbeat_lock(
             extend_seconds=data.extend_seconds,
         )
     except NotLockHolderError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
 @router.delete("/{lock_id}/", status_code=status.HTTP_204_NO_CONTENT)
@@ -185,9 +178,7 @@ async def release_lock(
     try:
         await service.release(lock_id=lock_id, user_id=uuid.UUID(user_id))
     except NotLockHolderError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -200,13 +191,9 @@ async def get_entity_lock(
 ) -> CollabLockResponse | None:
     parsed = _parse_entity_id(entity_id)
     try:
-        return await service.get_for_entity(
-            entity_type=entity_type, entity_id=parsed
-        )
+        return await service.get_for_entity(entity_type=entity_type, entity_id=parsed)
     except UnknownEntityTypeError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
 
 @router.get("/my/", response_model=list[CollabLockResponse])
@@ -301,18 +288,14 @@ async def presence_ws(
     websocket._collab_lock_user_id = user_id  # type: ignore[attr-defined]
 
     key: PresenceKey = (entity_type, parsed_id)
-    roster = await presence_hub.join(
-        key, websocket, user_id=user_id, user_name=user_name
-    )
+    roster = await presence_hub.join(key, websocket, user_id=user_id, user_name=user_name)
 
     # First frame: full roster + current lock holder (if any) so the
     # client can paint without a follow-up REST round-trip.
     try:
         async with async_session_factory() as sess:
             svc = CollabLockService(sess)
-            current_lock = await svc.get_for_entity(
-                entity_type=entity_type, entity_id=parsed_id
-            )
+            current_lock = await svc.get_for_entity(entity_type=entity_type, entity_id=parsed_id)
     except Exception:
         current_lock = None
 
@@ -321,11 +304,7 @@ async def presence_ws(
             {
                 "event": "presence_snapshot",
                 "users": roster,
-                "lock": (
-                    current_lock.model_dump(mode="json")
-                    if current_lock is not None
-                    else None
-                ),
+                "lock": (current_lock.model_dump(mode="json") if current_lock is not None else None),
                 "ts": _now_iso(),
             }
         )
@@ -346,9 +325,7 @@ async def presence_ws(
         while True:
             msg = await websocket.receive_text()
             if msg == "ping":
-                await websocket.send_json(
-                    {"event": "pong", "ts": _now_iso()}
-                )
+                await websocket.send_json({"event": "pong", "ts": _now_iso()})
     except WebSocketDisconnect:
         pass
     except Exception:

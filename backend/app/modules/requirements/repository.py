@@ -238,7 +238,8 @@ class RequirementDeliverableRepository:
         self.session = session
 
     async def get_by_id(
-        self, deliverable_id: uuid.UUID,
+        self,
+        deliverable_id: uuid.UUID,
     ) -> RequirementDeliverable | None:
         """Get a deliverable row by ID."""
         return await self.session.get(RequirementDeliverable, deliverable_id)
@@ -250,13 +251,9 @@ class RequirementDeliverableRepository:
         deliverable_type: str | None = None,
     ) -> list[RequirementDeliverable]:
         """List deliverables for one requirement, optionally filtered by type."""
-        stmt = select(RequirementDeliverable).where(
-            RequirementDeliverable.requirement_id == requirement_id
-        )
+        stmt = select(RequirementDeliverable).where(RequirementDeliverable.requirement_id == requirement_id)
         if deliverable_type is not None:
-            stmt = stmt.where(
-                RequirementDeliverable.deliverable_type == deliverable_type
-            )
+            stmt = stmt.where(RequirementDeliverable.deliverable_type == deliverable_type)
         stmt = stmt.order_by(RequirementDeliverable.created_at)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
@@ -281,14 +278,13 @@ class RequirementDeliverableRepository:
             .where(RequirementSet.project_id == project_id)
         )
         if deliverable_type is not None:
-            stmt = stmt.where(
-                RequirementDeliverable.deliverable_type == deliverable_type
-            )
+            stmt = stmt.where(RequirementDeliverable.deliverable_type == deliverable_type)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
     async def all_requirements_for_project(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> list[Requirement]:
         """Return every requirement in a project with deliverables eager-loaded.
 
@@ -312,7 +308,8 @@ class RequirementDeliverableRepository:
         return list(result.scalars().all())
 
     async def create(
-        self, item: RequirementDeliverable,
+        self,
+        item: RequirementDeliverable,
     ) -> RequirementDeliverable:
         """Insert a new deliverable row."""
         self.session.add(item)
@@ -320,14 +317,12 @@ class RequirementDeliverableRepository:
         return item
 
     async def update_fields(
-        self, deliverable_id: uuid.UUID, **fields: object,
+        self,
+        deliverable_id: uuid.UUID,
+        **fields: object,
     ) -> None:
         """Update specific fields on a deliverable row."""
-        stmt = (
-            update(RequirementDeliverable)
-            .where(RequirementDeliverable.id == deliverable_id)
-            .values(**fields)
-        )
+        stmt = update(RequirementDeliverable).where(RequirementDeliverable.id == deliverable_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()

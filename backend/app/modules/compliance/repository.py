@@ -26,9 +26,7 @@ class ComplianceDSLRepository:
         *,
         tenant_id: str | None,
     ) -> ComplianceDSLRule | None:
-        stmt = select(ComplianceDSLRule).where(
-            ComplianceDSLRule.id == _as_uuid(rule_pk)
-        )
+        stmt = select(ComplianceDSLRule).where(ComplianceDSLRule.id == _as_uuid(rule_pk))
         if tenant_id is not None:
             stmt = stmt.where(ComplianceDSLRule.tenant_id == str(tenant_id))
         return (await self.session.execute(stmt)).scalar_one_or_none()
@@ -39,9 +37,7 @@ class ComplianceDSLRepository:
         *,
         tenant_id: str | None,
     ) -> ComplianceDSLRule | None:
-        stmt = select(ComplianceDSLRule).where(
-            ComplianceDSLRule.rule_id == rule_id
-        )
+        stmt = select(ComplianceDSLRule).where(ComplianceDSLRule.rule_id == rule_id)
         if tenant_id is not None:
             stmt = stmt.where(ComplianceDSLRule.tenant_id == str(tenant_id))
         return (await self.session.execute(stmt)).scalar_one_or_none()
@@ -66,25 +62,15 @@ class ComplianceDSLRepository:
         if active_only:
             base = base.where(ComplianceDSLRule.is_active.is_(True))
 
-        total = (
-            await self.session.execute(
-                select(func.count()).select_from(base.subquery())
-            )
-        ).scalar_one()
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
 
-        rows_stmt = (
-            base.order_by(ComplianceDSLRule.created_at.desc())
-            .limit(limit)
-            .offset(offset)
-        )
+        rows_stmt = base.order_by(ComplianceDSLRule.created_at.desc()).limit(limit).offset(offset)
         rows = (await self.session.execute(rows_stmt)).scalars().all()
         return list(rows), int(total)
 
     async def list_all_active(self) -> list[ComplianceDSLRule]:
         """‌⁠‍Used at startup to register every active rule into the registry."""
-        stmt = select(ComplianceDSLRule).where(
-            ComplianceDSLRule.is_active.is_(True)
-        )
+        stmt = select(ComplianceDSLRule).where(ComplianceDSLRule.is_active.is_(True))
         return list((await self.session.execute(stmt)).scalars().all())
 
     # -- writes -----------------------------------------------------------

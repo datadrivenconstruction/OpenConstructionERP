@@ -21,11 +21,8 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import AsyncIterator
-from datetime import UTC, datetime
 from decimal import Decimal
-from types import SimpleNamespace
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
@@ -54,14 +51,13 @@ from app.modules.variations.router import router as variations_router
 from app.modules.variations.schemas import (
     VariationOrderCreate,
     VariationRequestCreate,
-    VariationRequestUpdate,
 )
 from app.modules.variations.service import (
-    VariationsService,
-    allowed_vr_transitions,
-    allowed_vo_transitions,
-    VR_TRANSITIONS,
     VO_TRANSITIONS,
+    VR_TRANSITIONS,
+    VariationsService,
+    allowed_vo_transitions,
+    allowed_vr_transitions,
 )
 
 # ── Tables needed by in-process tests ────────────────────────────────────────
@@ -113,9 +109,7 @@ async def _make_user(session: AsyncSession) -> uuid.UUID:
     return user.id
 
 
-async def _make_project(
-    session: AsyncSession, owner_id: uuid.UUID, *, currency: str = "GBP"
-) -> uuid.UUID:
+async def _make_project(session: AsyncSession, owner_id: uuid.UUID, *, currency: str = "GBP") -> uuid.UUID:
     p = Project(name="Test Proj", owner_id=owner_id, currency=currency)
     session.add(p)
     await session.flush()
@@ -157,9 +151,7 @@ class TestVRFSM:
             assert isinstance(nexts, list), f"State {state!r} has non-list transitions"
 
     @pytest.mark.asyncio
-    async def test_invalid_transition_raises_409(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_invalid_transition_raises_409(self, session: AsyncSession, svc: VariationsService) -> None:
         """Service raises 409 for a forbidden transition (draft -> approved)."""
         user_id = await _make_user(session)
         project_id = await _make_project(session, user_id)
@@ -177,14 +169,13 @@ class TestVRFSM:
         await session.commit()
 
         from fastapi import HTTPException
+
         with pytest.raises(HTTPException) as exc_info:
             await svc.transition_variation_request(vr.id, "approved")
         assert exc_info.value.status_code == 409
 
     @pytest.mark.asyncio
-    async def test_valid_transitions_succeed(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_valid_transitions_succeed(self, session: AsyncSession, svc: VariationsService) -> None:
         """draft -> submitted -> approved -> (conceptual end state) succeeds."""
         user_id = await _make_user(session)
         project_id = await _make_project(session, user_id)
@@ -239,9 +230,7 @@ class TestVRAuditTrail:
     """Every VR status transition writes an ActivityLog row."""
 
     @pytest.mark.asyncio
-    async def test_approve_vr_writes_audit_log(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_approve_vr_writes_audit_log(self, session: AsyncSession, svc: VariationsService) -> None:
         """Approving a VR must produce an ActivityLog row with correct fields."""
         user_id = await _make_user(session)
         project_id = await _make_project(session, user_id)
@@ -263,19 +252,22 @@ class TestVRAuditTrail:
         await session.commit()
 
         # Approve — this should write an ActivityLog row
-        vr = await svc.transition_variation_request(
-            vr.id, "approved", user_id=str(user_id), decision_notes="Approved"
-        )
+        vr = await svc.transition_variation_request(vr.id, "approved", user_id=str(user_id), decision_notes="Approved")
         await session.commit()
 
         from sqlalchemy import select
+
         rows = (
-            await session.execute(
-                select(ActivityLog)
-                .where(ActivityLog.entity_type == "variation_request")
-                .where(ActivityLog.entity_id == str(vr.id))  # type: ignore[arg-type]
+            (
+                await session.execute(
+                    select(ActivityLog)
+                    .where(ActivityLog.entity_type == "variation_request")
+                    .where(ActivityLog.entity_id == str(vr.id))  # type: ignore[arg-type]
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
         # At minimum the approve transition should have generated a row.
         approval_rows = [r for r in rows if r.to_status == "approved"]
@@ -286,9 +278,7 @@ class TestVRAuditTrail:
         assert row.action == "status_changed"
 
     @pytest.mark.asyncio
-    async def test_reject_vr_writes_audit_log(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_reject_vr_writes_audit_log(self, session: AsyncSession, svc: VariationsService) -> None:
         """Rejecting a VR also writes an ActivityLog row."""
         from sqlalchemy import select
 
@@ -315,13 +305,17 @@ class TestVRAuditTrail:
         await session.commit()
 
         rows = (
-            await session.execute(
-                select(ActivityLog)
-                .where(ActivityLog.entity_type == "variation_request")
-                .where(ActivityLog.entity_id == str(vr.id))
-                .where(ActivityLog.to_status == "rejected")
+            (
+                await session.execute(
+                    select(ActivityLog)
+                    .where(ActivityLog.entity_type == "variation_request")
+                    .where(ActivityLog.entity_id == str(vr.id))
+                    .where(ActivityLog.to_status == "rejected")
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         assert len(rows) >= 1
 
 
@@ -354,9 +348,7 @@ class TestVariationsIDOR:
     """Wrong-tenant callers get 404, not the resource."""
 
     @pytest.mark.asyncio
-    async def test_get_vr_wrong_project_returns_404(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_get_vr_wrong_project_returns_404(self, session: AsyncSession, svc: VariationsService) -> None:
         """GET /variation-requests/{id} for a different user's VR -> 404."""
         owner = await _make_user(session)
         attacker = await _make_user(session)
@@ -380,9 +372,7 @@ class TestVariationsIDOR:
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_patch_vr_wrong_project_returns_404(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_patch_vr_wrong_project_returns_404(self, session: AsyncSession, svc: VariationsService) -> None:
         owner = await _make_user(session)
         attacker = await _make_user(session)
         project_id = await _make_project(session, owner)
@@ -407,9 +397,7 @@ class TestVariationsIDOR:
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_delete_vr_wrong_project_returns_404(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_delete_vr_wrong_project_returns_404(self, session: AsyncSession, svc: VariationsService) -> None:
         owner = await _make_user(session)
         attacker = await _make_user(session)
         project_id = await _make_project(session, owner)
@@ -438,9 +426,7 @@ class TestVariationsMoneyDecimal:
     """Money fields round-trip as exact Decimal (no float drift)."""
 
     @pytest.mark.asyncio
-    async def test_vr_cost_impact_exact_decimal(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_vr_cost_impact_exact_decimal(self, session: AsyncSession, svc: VariationsService) -> None:
         """estimated_cost_impact stored and retrieved as exact Decimal."""
         user_id = await _make_user(session)
         project_id = await _make_project(session, user_id)
@@ -463,9 +449,7 @@ class TestVariationsMoneyDecimal:
         assert result == amount, f"Expected {amount!r}, got {result!r}"
 
     @pytest.mark.asyncio
-    async def test_vo_final_cost_impact_exact_decimal(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_vo_final_cost_impact_exact_decimal(self, session: AsyncSession, svc: VariationsService) -> None:
         """final_cost_impact on VariationOrder persists without float drift."""
         user_id = await _make_user(session)
         project_id = await _make_project(session, user_id)
@@ -524,9 +508,7 @@ class TestConvertVRToVOAtomicity:
     """
 
     @pytest.mark.asyncio
-    async def test_co_insert_failure_rolls_back_vo_and_vr(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_co_insert_failure_rolls_back_vo_and_vr(self, session: AsyncSession, svc: VariationsService) -> None:
         """Simulates a DB error during CO creation — VO and VR status are reverted."""
         user_id = await _make_user(session)
         project_id = await _make_project(session, user_id)
@@ -553,6 +535,7 @@ class TestConvertVRToVOAtomicity:
         assert original_status == "approved"
 
         from fastapi import HTTPException
+
         with patch(
             "app.modules.changeorders.service.ChangeOrderService.create_order",
             new_callable=AsyncMock,
@@ -575,12 +558,11 @@ class TestConvertVRToVOAtomicity:
         # After rollback: VR status must still be "approved" (not "converted_to_vo").
         # Re-fetch in a fresh query — session state may be expired after rollback.
         from sqlalchemy import select
+
         from app.modules.variations.models import VariationRequest
 
         fresh_vr = (
-            await session.execute(
-                select(VariationRequest).where(VariationRequest.id == vr_id)
-            )
+            await session.execute(select(VariationRequest).where(VariationRequest.id == vr_id))
         ).scalar_one_or_none()
 
         # The rollback was performed inside convert_vr_to_vo, so the VR row
@@ -588,9 +570,7 @@ class TestConvertVRToVOAtomicity:
         # Key invariant: the VR code must not have status "converted_to_vo"
         # since the CO creation failed.
         if fresh_vr is not None:
-            assert fresh_vr.status != "converted_to_vo", (
-                "VR status was incorrectly flipped despite CO mirror failure"
-            )
+            assert fresh_vr.status != "converted_to_vo", "VR status was incorrectly flipped despite CO mirror failure"
 
     @pytest.mark.asyncio
     async def test_successful_conversion_creates_both_vo_and_co(
@@ -598,6 +578,7 @@ class TestConvertVRToVOAtomicity:
     ) -> None:
         """Happy path: both VO row and CO row must be created together."""
         from sqlalchemy import select
+
         from app.modules.changeorders.models import ChangeOrder
         from app.modules.variations.models import VariationOrder
 
@@ -633,25 +614,17 @@ class TestConvertVRToVOAtomicity:
 
         # VO must exist.
         assert (
-            await session.execute(
-                select(VariationOrder).where(VariationOrder.id == vo.id)
-            )
+            await session.execute(select(VariationOrder).where(VariationOrder.id == vo.id))
         ).scalar_one_or_none() is not None
 
         # CO mirror must exist (keyed by metadata origin).
-        cos = (
-            await session.execute(
-                select(ChangeOrder).where(ChangeOrder.project_id == project_id)
-            )
-        ).scalars().all()
+        cos = (await session.execute(select(ChangeOrder).where(ChangeOrder.project_id == project_id))).scalars().all()
         assert any(
-            "variations.convert_vr_to_vo" in str(getattr(co, "metadata_", {}).get("origin", ""))
-            for co in cos
+            "variations.convert_vr_to_vo" in str(getattr(co, "metadata_", {}).get("origin", "")) for co in cos
         ), "No mirrored ChangeOrder found after conversion"
 
         # VR must be in converted_to_vo status.
         from app.modules.variations.models import VariationRequest as VR
-        final_vr = (
-            await session.execute(select(VR).where(VR.id == vr.id))
-        ).scalar_one()
+
+        final_vr = (await session.execute(select(VR).where(VR.id == vr.id))).scalar_one()
         assert final_vr.status == "converted_to_vo"

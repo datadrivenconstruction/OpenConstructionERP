@@ -8,11 +8,12 @@ the event bus are stubbed so tests don't touch a database.
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, date as dt_date, datetime
+from datetime import UTC, datetime
+from datetime import date as dt_date
 from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -89,9 +90,7 @@ class _Repo:
         limit: int = 50,
         status: str | None = None,
     ) -> tuple[list[Any], int]:
-        rows = [
-            r for r in self.rows.values() if getattr(r, "project_id", None) == project_id
-        ]
+        rows = [r for r in self.rows.values() if getattr(r, "project_id", None) == project_id]
         if status is not None:
             rows = [r for r in rows if getattr(r, "status", None) == status]
         return rows[offset : offset + limit], len(rows)
@@ -112,16 +111,17 @@ class _Repo:
 
     async def list_open(self, project_id: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
+            r
+            for r in self.rows.values()
             if getattr(r, "project_id", None) == project_id
             and getattr(r, "status", None) in {"draft", "submitted", "under_review"}
         ]
 
     async def list_open_variations(self, project_id: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
-            if getattr(r, "project_id", None) == project_id
-            and getattr(r, "status", None) in {"issued", "in_progress"}
+            r
+            for r in self.rows.values()
+            if getattr(r, "project_id", None) == project_id and getattr(r, "status", None) in {"issued", "in_progress"}
         ]
 
     async def list_all_for_project(self, project_id: uuid.UUID) -> list[Any]:
@@ -129,16 +129,16 @@ class _Repo:
 
     async def list_valued_for_project(self, project_id: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
-            if getattr(r, "project_id", None) == project_id
-            and getattr(r, "status", None) != "voided"
+            r
+            for r in self.rows.values()
+            if getattr(r, "project_id", None) == project_id and getattr(r, "status", None) != "voided"
         ]
 
     def _valued(self, project_id: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
-            if getattr(r, "project_id", None) == project_id
-            and getattr(r, "status", None) != "voided"
+            r
+            for r in self.rows.values()
+            if getattr(r, "project_id", None) == project_id and getattr(r, "status", None) != "voided"
         ]
 
     async def status_counts(self, project_id: uuid.UUID) -> dict[str, int]:
@@ -157,42 +157,37 @@ class _Repo:
         )
 
     async def schedule_days_sum(self, project_id: uuid.UUID) -> int:
-        return sum(
-            int(getattr(r, "final_schedule_days", 0) or 0) for r in self._valued(project_id)
-        )
+        return sum(int(getattr(r, "final_schedule_days", 0) or 0) for r in self._valued(project_id))
 
     async def signed_value(self, project_id: uuid.UUID) -> Decimal:
         return sum(
             (
                 Decimal(str(getattr(r, "total_amount", 0) or 0))
                 for r in self.rows.values()
-                if getattr(r, "project_id", None) == project_id
-                and getattr(r, "status", None) in {"signed", "billed"}
+                if getattr(r, "project_id", None) == project_id and getattr(r, "status", None) in {"signed", "billed"}
             ),
             Decimal("0"),
         )
 
     async def first_currency(self, project_id: uuid.UUID) -> str:
         for r in self.rows.values():
-            if (
-                getattr(r, "project_id", None) == project_id
-                and getattr(r, "currency", "")
-            ):
+            if getattr(r, "project_id", None) == project_id and getattr(r, "currency", ""):
                 return str(r.currency)
         return ""
 
     async def pending_claims(self, project_id: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
+            r
+            for r in self.rows.values()
             if getattr(r, "project_id", None) == project_id
             and getattr(r, "status", None) in {"submitted", "under_review"}
         ]
 
     async def list_signed(self, project_id: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
-            if getattr(r, "project_id", None) == project_id
-            and getattr(r, "status", None) in {"signed", "billed"}
+            r
+            for r in self.rows.values()
+            if getattr(r, "project_id", None) == project_id and getattr(r, "status", None) in {"signed", "billed"}
         ]
 
     async def for_project(self, project_id: uuid.UUID) -> Any:
@@ -416,7 +411,8 @@ async def test_transition_notice_valid() -> None:
     svc = _make_service()
     with patch("app.modules.variations.service.event_bus.publish_detached"):
         n = await svc.create_notice(
-            NoticeCreate(project_id=PROJECT_ID, title="T"), user_id="u1",
+            NoticeCreate(project_id=PROJECT_ID, title="T"),
+            user_id="u1",
         )
     with patch("app.modules.variations.service.event_bus.publish_detached"):
         n2 = await svc.transition_notice(n.id, "acknowledged")
@@ -430,12 +426,12 @@ async def test_transition_notice_invalid_raises() -> None:
     svc = _make_service()
     with patch("app.modules.variations.service.event_bus.publish_detached"):
         n = await svc.create_notice(
-            NoticeCreate(project_id=PROJECT_ID, title="T"), user_id="u1",
+            NoticeCreate(project_id=PROJECT_ID, title="T"),
+            user_id="u1",
         )
     # Force into closed first.
     n.status = "closed"
-    with pytest.raises(HTTPException) as exc, \
-         patch("app.modules.variations.service.event_bus.publish_detached"):
+    with pytest.raises(HTTPException) as exc, patch("app.modules.variations.service.event_bus.publish_detached"):
         await svc.transition_notice(n.id, "acknowledged")
     assert exc.value.status_code == 409
 
@@ -495,8 +491,7 @@ async def test_transition_variation_request_invalid_jump() -> None:
             user_id="u1",
         )
     # draft -> approved is invalid.
-    with pytest.raises(HTTPException) as exc, \
-         patch("app.modules.variations.service.event_bus.publish_detached"):
+    with pytest.raises(HTTPException) as exc, patch("app.modules.variations.service.event_bus.publish_detached"):
         await svc.transition_variation_request(vr.id, "approved")
     assert exc.value.status_code == 409
 
@@ -528,6 +523,7 @@ async def test_convert_vr_to_vo_creates_vo_and_flips_status() -> None:
         final_schedule_days=5,
         currency="EUR",
     )
+
     # R7 audit: convert_vr_to_vo now atomically mirrors the VO into a
     # draft ChangeOrder via ChangeOrderService. The unit-test stub repo
     # set can't satisfy the CO repository contract (real SQLA execute
@@ -544,11 +540,14 @@ async def test_convert_vr_to_vo_creates_vo_and_flips_status() -> None:
         async def create_order(self, _payload: Any) -> Any:
             return _FakeCO()
 
-    with patch(
-        "app.modules.variations.service.event_bus.publish_detached",
-    ) as pub, patch(
-        "app.modules.changeorders.service.ChangeOrderService",
-        _FakeCOService,
+    with (
+        patch(
+            "app.modules.variations.service.event_bus.publish_detached",
+        ) as pub,
+        patch(
+            "app.modules.changeorders.service.ChangeOrderService",
+            _FakeCOService,
+        ),
     ):
         vo = await svc.convert_vr_to_vo(vr.id, vo_payload, user_id="u1")
 
@@ -578,8 +577,7 @@ async def test_convert_vr_to_vo_blocks_when_not_approved() -> None:
             user_id="u1",
         )
     payload = VariationOrderCreate(project_id=PROJECT_ID, title="x")
-    with pytest.raises(HTTPException) as exc, \
-         patch("app.modules.variations.service.event_bus.publish_detached"):
+    with pytest.raises(HTTPException) as exc, patch("app.modules.variations.service.event_bus.publish_detached"):
         await svc.convert_vr_to_vo(vr.id, payload, user_id="u1")
     assert exc.value.status_code == 409
 
@@ -650,11 +648,11 @@ async def test_sign_daywork_sheet_rejects_when_billed() -> None:
     svc = _make_service()
     with patch("app.modules.variations.service.event_bus.publish_detached"):
         sheet = await svc.create_daywork_sheet(
-            DayworkSheetCreate(project_id=PROJECT_ID, currency="EUR"), user_id="u1",
+            DayworkSheetCreate(project_id=PROJECT_ID, currency="EUR"),
+            user_id="u1",
         )
     sheet.status = "billed"
-    with pytest.raises(HTTPException) as exc, \
-         patch("app.modules.variations.service.event_bus.publish_detached"):
+    with pytest.raises(HTTPException) as exc, patch("app.modules.variations.service.event_bus.publish_detached"):
         await svc.sign_daywork_sheet(sheet.id, signer_id="u1")
     assert exc.value.status_code == 409
 
@@ -756,7 +754,8 @@ async def test_recompute_final_account_aggregates_vos_and_daywork() -> None:
         )
         # Add 1 signed daywork sheet (manual status flip + total).
         sheet = await svc.create_daywork_sheet(
-            DayworkSheetCreate(project_id=PROJECT_ID, currency="EUR"), user_id="u1",
+            DayworkSheetCreate(project_id=PROJECT_ID, currency="EUR"),
+            user_id="u1",
         )
         sheet.status = "signed"
         sheet.total_amount = Decimal("3000")
@@ -839,7 +838,8 @@ async def test_update_order_blocked_after_completion() -> None:
         await svc.transition_variation_order(vo.id, "completed")
     with pytest.raises(HTTPException) as exc:
         await svc.update_order(
-            vo.id, VariationOrderUpdate(final_cost_impact=Decimal("999999")),
+            vo.id,
+            VariationOrderUpdate(final_cost_impact=Decimal("999999")),
         )
     assert exc.value.status_code == 409
     # Money unchanged.
@@ -866,7 +866,8 @@ async def test_update_request_blocked_after_approval() -> None:
         await svc.transition_variation_request(vr.id, "approved", user_id="u1")
     with pytest.raises(HTTPException) as exc:
         await svc.update_request(
-            vr.id, VariationRequestUpdate(estimated_cost_impact=Decimal("123456")),
+            vr.id,
+            VariationRequestUpdate(estimated_cost_impact=Decimal("123456")),
         )
     assert exc.value.status_code == 409
 
@@ -885,7 +886,8 @@ async def test_update_request_allowed_while_draft() -> None:
             user_id="u1",
         )
     updated = await svc.update_request(
-        vr.id, VariationRequestUpdate(title="Edited while draft"),
+        vr.id,
+        VariationRequestUpdate(title="Edited while draft"),
     )
     assert updated.title == "Edited while draft"
 
@@ -1005,15 +1007,14 @@ def test_permission_constants_registered() -> None:
         "variations.decide_claim",
         "variations.close_final_account",
     }
-    registered = set(
-        permission_registry.get_module_permissions("variations")
-    ) if hasattr(permission_registry, "get_module_permissions") else None
+    registered = (
+        set(permission_registry.get_module_permissions("variations"))
+        if hasattr(permission_registry, "get_module_permissions")
+        else None
+    )
     if registered is None:
         # Fall back to private dict if no accessor exists.
-        registered = {
-            p for p in getattr(permission_registry, "_permissions", {}).keys()
-            if p.startswith("variations.")
-        }
+        registered = {p for p in getattr(permission_registry, "_permissions", {}).keys() if p.startswith("variations.")}
     assert expected.issubset(registered), f"missing: {expected - registered}"
 
 
@@ -1047,8 +1048,10 @@ def test_fidic_time_bar_notice_beyond_window() -> None:
 
 
 def test_fidic_time_bar_no_notice_yet_shows_remaining() -> None:
+    from datetime import date as _d
+    from datetime import timedelta as _td
+
     from app.modules.variations.service import check_fidic_time_bar
-    from datetime import date as _d, timedelta as _td
 
     # Event was 5 days ago — should show ~23 days remaining.
     event = (_d.today() - _td(days=5)).isoformat()

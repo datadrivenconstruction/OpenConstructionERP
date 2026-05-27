@@ -55,7 +55,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -165,28 +167,45 @@ async def _seed_malformed_profile(
         )
         # The defect-triggering state (mirrors prod openestimate.db
         # seed metadata "gapfill-20260516"):
-        prof.activity = "construction"      # bare str, not ["construction"]
+        prof.activity = "construction"  # bare str, not ["construction"]
         prof.phases = ["design", "tender"]  # this one was well-formed
         prof.extensions_enabled = ["bim"]
-        prof.setup_completion = 1           # int, not a dict  → dict(1) 500
+        prof.setup_completion = 1  # int, not a dict  → dict(1) 500
         s.add(prof)
 
-        s.add(ProjectModule(
-            project_id=project.id, module_name="projects", enabled=True,
-            tier="core", score=1, phase="design", source="profile",
-            ordinal=0, why="seed",
-        ))
-        s.add(ProjectModule(
-            project_id=project.id, module_name="boq", enabled=True,
-            tier="core", score=1, phase="tender", source="profile",
-            ordinal=1, why="seed",
-        ))
+        s.add(
+            ProjectModule(
+                project_id=project.id,
+                module_name="projects",
+                enabled=True,
+                tier="core",
+                score=1,
+                phase="design",
+                source="profile",
+                ordinal=0,
+                why="seed",
+            )
+        )
+        s.add(
+            ProjectModule(
+                project_id=project.id,
+                module_name="boq",
+                enabled=True,
+                tier="core",
+                score=1,
+                phase="tender",
+                source="profile",
+                ordinal=1,
+                why="seed",
+            )
+        )
         await s.commit()
         return owner.id, project.id
 
 
 async def test_get_profile_with_scalar_json_columns_returns_200(
-    client: AsyncClient, temp_engine_and_factory,
+    client: AsyncClient,
+    temp_engine_and_factory,
 ) -> None:
     _engine, factory, _tmp = temp_engine_and_factory
     owner_id, project_id = await _seed_malformed_profile(factory)
@@ -215,7 +234,8 @@ async def test_get_profile_with_scalar_json_columns_returns_200(
 
 
 async def test_get_profile_with_none_json_columns_returns_200(
-    client: AsyncClient, temp_engine_and_factory,
+    client: AsyncClient,
+    temp_engine_and_factory,
 ) -> None:
     """A profile with NULL JSON columns must also be safe (defensive —
     server_default backfills are not guaranteed on legacy rows)."""
@@ -236,7 +256,9 @@ async def test_get_profile_with_none_json_columns_returns_200(
         s.add(owner)
         await s.flush()
         project = Project(
-            id=uuid.uuid4(), owner_id=owner.id, name="Null JSON project",
+            id=uuid.uuid4(),
+            owner_id=owner.id,
+            name="Null JSON project",
             status="active",
         )
         s.add(project)

@@ -79,9 +79,7 @@ def _rule(body: dict) -> EacRuleDefinition:
 
 
 @pytest.mark.asyncio
-async def test_validator_passes_on_existing_alias(
-    session: AsyncSession, seeded_alias: EacParameterAlias
-) -> None:
+async def test_validator_passes_on_existing_alias(session: AsyncSession, seeded_alias: EacParameterAlias) -> None:
     rule = _rule(
         {
             "schema_version": "2.0",

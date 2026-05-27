@@ -222,9 +222,7 @@ def execute_rule(
     :class:`ExecutionError` for malformed input.
     """
     if rule.output_mode == "clash":
-        raise UnsupportedOutputModeError(
-            "clash output mode requires the geometry kernel — see RFC 35 §1.6.4"
-        )
+        raise UnsupportedOutputModeError("clash output mode requires the geometry kernel — see RFC 35 §1.6.4")
 
     # 1. Selector pass — filter to candidate elements.
     matched = [e for e in elements if _matches_selector(e, rule.selector)]
@@ -295,9 +293,7 @@ def _run_issue(
 ) -> ExecutionResult:
     """Render an IssueResult for every matched element that fails the predicate."""
     if rule.issue_template is None:
-        raise ExecutionError(
-            "rule.output_mode='issue' requires issue_template to be set"
-        )
+        raise ExecutionError("rule.output_mode='issue' requires issue_template to be set")
     template = rule.issue_template
 
     issues: list[IssueResult] = []
@@ -319,11 +315,7 @@ def _run_issue(
             IssueResult(
                 element_id=str(elem.get("stable_id") or elem.get("id") or ""),
                 title=_render_template(template.title, elem, snapshot),
-                description=(
-                    _render_template(template.description, elem, snapshot)
-                    if template.description
-                    else None
-                ),
+                description=(_render_template(template.description, elem, snapshot) if template.description else None),
                 topic_type=template.topic_type,
                 priority=template.priority,
                 stage=template.stage,
@@ -351,23 +343,17 @@ def _run_aggregate(
 ) -> ExecutionResult:
     """Run formula across the matched set. Predicate, if present, narrows the set."""
     if rule.formula is None:
-        raise ExecutionError(
-            "rule.output_mode='aggregate' requires formula to be set"
-        )
+        raise ExecutionError("rule.output_mode='aggregate' requires formula to be set")
 
     qualifying = matched
     if rule.predicate is not None:
-        qualifying = [
-            e for e in matched if _eval_predicate(e, rule.predicate, {})
-        ]
+        qualifying = [e for e in matched if _eval_predicate(e, rule.predicate, {})]
 
     # Aggregate-mode formulas operate on numeric arrays. Bind common
     # canonical quantity names to lists; the formula whitelist exposes
     # SUM/AVG/COUNT/MIN/MAX so an expression like ``SUM(volume_m3)``
     # collapses the list to a scalar.
-    bindings: dict[str, list[Any]] = _build_aggregate_bindings(
-        qualifying, formula=rule.formula
-    )
+    bindings: dict[str, list[Any]] = _build_aggregate_bindings(qualifying, formula=rule.formula)
 
     try:
         value = evaluate_formula(
@@ -445,21 +431,12 @@ def _ci_in(value: Any, candidates: list[str]) -> bool:
 def _family_of(elem: dict[str, Any]) -> str | None:
     """Resolve Revit-style family from canonical properties."""
     props = elem.get("properties") or {}
-    return (
-        props.get("family")
-        or props.get("Family")
-        or props.get("revit_family")
-    )
+    return props.get("family") or props.get("Family") or props.get("revit_family")
 
 
 def _type_of(elem: dict[str, Any]) -> str | None:
     props = elem.get("properties") or {}
-    return (
-        props.get("type")
-        or props.get("Type")
-        or props.get("type_name")
-        or props.get("revit_type")
-    )
+    return props.get("type") or props.get("Type") or props.get("type_name") or props.get("revit_type")
 
 
 def _classification_codes(
@@ -490,9 +467,7 @@ def _classification_codes(
             entry_code = entry.get("code") or entry.get("value")
             if entry_code is None:
                 continue
-            if system is None or (
-                entry_system and str(entry_system).lower() == system.lower()
-            ):
+            if system is None or (entry_system and str(entry_system).lower() == system.lower()):
                 out.append(str(entry_code))
     return out
 
@@ -521,9 +496,7 @@ def _named_groups(elem: dict[str, Any]) -> set[str]:
     return set()
 
 
-def _passes_geometry_filter(
-    elem: dict[str, Any], sel: GeometryFilterSelector
-) -> bool:
+def _passes_geometry_filter(elem: dict[str, Any], sel: GeometryFilterSelector) -> bool:
     quantities = elem.get("quantities") or {}
     vol = _as_float(quantities.get("volume_m3") or quantities.get("volume"))
     area = _as_float(quantities.get("area_m2") or quantities.get("area"))
@@ -539,11 +512,7 @@ def _passes_geometry_filter(
         return False
     if sel.min_length_m is not None and (length is None or length < sel.min_length_m):
         return False
-    return not (
-        sel.max_length_m is not None
-        and length is not None
-        and length > sel.max_length_m
-    )
+    return not (sel.max_length_m is not None and length is not None and length > sel.max_length_m)
 
 
 # ── Predicate evaluation ───────────────────────────────────────────────
@@ -562,9 +531,7 @@ def _eval_predicate(
         return not _eval_predicate(elem, pred.child, snapshot)
     if isinstance(pred, TripletPredicate):
         attr_value = _resolve_attribute(elem, pred.attribute)
-        snapshot[_attr_label(pred.attribute)] = (
-            None if attr_value is MISSING else attr_value
-        )
+        snapshot[_attr_label(pred.attribute)] = None if attr_value is MISSING else attr_value
         if attr_value is MISSING:
             # treat_missing_as_fail=True (default): missing attribute fails
             # the predicate. False: missing => predicate passes (vacuous).
@@ -707,18 +674,14 @@ def _eval_constraint(value: Any, constraint: Constraint) -> bool:
     if isinstance(constraint, IsEmptyConstraint):
         return value is None or (isinstance(value, (str, list, dict)) and len(value) == 0)
     if isinstance(constraint, IsNotEmptyConstraint):
-        return not (
-            value is None or (isinstance(value, (str, list, dict)) and len(value) == 0)
-        )
+        return not (value is None or (isinstance(value, (str, list, dict)) and len(value) == 0))
     if isinstance(constraint, IsNumericConstraint):
         return _as_float(value) is not None
     if isinstance(constraint, IsBooleanConstraint):
         return isinstance(value, bool)
     if isinstance(constraint, IsDateConstraint):
         return _looks_like_date(value)
-    raise ExecutionError(
-        f"unknown constraint operator: {type(constraint).__name__}"
-    )
+    raise ExecutionError(f"unknown constraint operator: {type(constraint).__name__}")
 
 
 # ── Comparison helpers ────────────────────────────────────────────────
@@ -832,9 +795,7 @@ def _build_aggregate_bindings(
     for elem in elements:
         quantity_keys.update((elem.get("quantities") or {}).keys())
     for key in quantity_keys:
-        bindings[key] = [
-            (elem.get("quantities") or {}).get(key) for elem in elements
-        ]
+        bindings[key] = [(elem.get("quantities") or {}).get(key) for elem in elements]
 
     # Top-level numeric properties (flat ``properties`` dict).
     property_keys: set[str] = set()
@@ -845,9 +806,7 @@ def _build_aggregate_bindings(
     for key in property_keys:
         if key in bindings:
             continue
-        bindings[key] = [
-            (elem.get("properties") or {}).get(key) for elem in elements
-        ]
+        bindings[key] = [(elem.get("properties") or {}).get(key) for elem in elements]
 
     # Element count is always available as ``elements`` (non-None list).
     bindings.setdefault("elements", [1 for _ in elements])

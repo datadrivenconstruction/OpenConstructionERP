@@ -13,27 +13,56 @@ from pydantic import BaseModel, ConfigDict, Field
 # ── Canonical enumerations ─────────────────────────────────────────────
 
 KPI_UNITS: tuple[str, ...] = (
-    "currency", "percent", "days", "count", "ratio", "m2", "m3", "hours",
+    "currency",
+    "percent",
+    "days",
+    "count",
+    "ratio",
+    "m2",
+    "m3",
+    "hours",
 )
 KPI_AGGREGATIONS: tuple[str, ...] = (
-    "sum", "avg", "min", "max", "last", "derive",
+    "sum",
+    "avg",
+    "min",
+    "max",
+    "last",
+    "derive",
 )
 KPI_CATEGORIES: tuple[str, ...] = (
-    "financial", "schedule", "quality", "safety", "sustainability",
+    "financial",
+    "schedule",
+    "quality",
+    "safety",
+    "sustainability",
     "operational",
 )
 DASHBOARD_SCOPES: tuple[str, ...] = ("personal", "role", "global", "project")
 REPORT_SCOPES: tuple[str, ...] = ("personal", "role", "global")
 WIDGET_TYPES: tuple[str, ...] = (
-    "kpi_card", "line_chart", "bar_chart", "pie", "table", "heatmap",
-    "gauge", "timeline",
+    "kpi_card",
+    "line_chart",
+    "bar_chart",
+    "pie",
+    "table",
+    "heatmap",
+    "gauge",
+    "timeline",
 )
 REPORT_FREQUENCIES: tuple[str, ...] = (
-    "daily", "weekly", "monthly", "quarterly",
+    "daily",
+    "weekly",
+    "monthly",
+    "quarterly",
 )
 OUTPUT_FORMATS: tuple[str, ...] = ("pdf", "xlsx", "csv", "json")
 ALERT_CONDITIONS: tuple[str, ...] = (
-    "above", "below", "equals", "not_equals", "changed_by_more_than",
+    "above",
+    "below",
+    "equals",
+    "not_equals",
+    "changed_by_more_than",
 )
 ALERT_SEVERITIES: tuple[str, ...] = ("info", "warning", "critical")
 ALERT_CHANNELS: tuple[str, ...] = ("in_app", "email", "webhook")

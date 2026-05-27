@@ -111,8 +111,8 @@ _RAW: dict[str, dict[str, str]] = {
     "SA": {"standard": "0.15", "zero": "0.00"},
     "BH": {"standard": "0.10", "zero": "0.00"},
     "OM": {"standard": "0.05", "zero": "0.00"},
-    "QA": {"standard": "0.00"},   # Qatar has no VAT (zero rate for all)
-    "KW": {"standard": "0.00"},   # Kuwait has not implemented VAT (2026)
+    "QA": {"standard": "0.00"},  # Qatar has no VAT (zero rate for all)
+    "KW": {"standard": "0.00"},  # Kuwait has not implemented VAT (2026)
     # ── India ─────────────────────────────────────────────────────────────
     "IN": {"standard": "0.18", "reduced": "0.12", "zero": "0.00"},
     # ── Latin America ─────────────────────────────────────────────────────

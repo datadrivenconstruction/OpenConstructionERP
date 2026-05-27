@@ -32,7 +32,6 @@ from typing import Any
 
 import pytest
 
-
 # ── Tier 1: always-on, pure-Python unit tests ────────────────────────────
 
 
@@ -225,10 +224,7 @@ def _live_infra_available() -> bool:
     return (
         os.environ.get("MATCH_BACKEND", "qdrant") == "qdrant"
         and bool(os.environ.get("CWICR_PARQUET_ROOT"))
-        and (
-            bool(os.environ.get("CWICR_QDRANT_URL"))
-            or bool(os.environ.get("CWICR_QDRANT_PATH"))
-        )
+        and (bool(os.environ.get("CWICR_QDRANT_URL")) or bool(os.environ.get("CWICR_QDRANT_PATH")))
     )
 
 

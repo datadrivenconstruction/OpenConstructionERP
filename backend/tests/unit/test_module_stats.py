@@ -138,12 +138,8 @@ class TestSafetyTrendsSchema:
 
     def test_trends_with_entries(self) -> None:
         entries = [
-            SafetyTrendEntry(
-                period="2026-01", incident_count=2, observation_count=5, days_lost=3
-            ),
-            SafetyTrendEntry(
-                period="2026-02", incident_count=1, observation_count=8, days_lost=0
-            ),
+            SafetyTrendEntry(period="2026-01", incident_count=2, observation_count=5, days_lost=3),
+            SafetyTrendEntry(period="2026-02", incident_count=1, observation_count=8, days_lost=0),
         ]
         trends = SafetyTrendsResponse(period_type="monthly", entries=entries)
         assert len(trends.entries) == 2
@@ -269,9 +265,7 @@ class TestRFIRouterHelpers:
         class MockRFI:
             created_at = datetime.now(UTC) - timedelta(days=20)
             status = "open"
-            response_due_date = (datetime.now(UTC) - timedelta(days=5)).strftime(
-                "%Y-%m-%d"
-            )
+            response_due_date = (datetime.now(UTC) - timedelta(days=5)).strftime("%Y-%m-%d")
             responded_at = None
 
         is_overdue, days_open = _compute_rfi_fields(MockRFI())
@@ -284,12 +278,8 @@ class TestRFIRouterHelpers:
         class MockRFI:
             created_at = datetime.now(UTC) - timedelta(days=30)
             status = "closed"
-            response_due_date = (datetime.now(UTC) - timedelta(days=10)).strftime(
-                "%Y-%m-%d"
-            )
-            responded_at = (datetime.now(UTC) - timedelta(days=15)).strftime(
-                "%Y-%m-%d"
-            )
+            response_due_date = (datetime.now(UTC) - timedelta(days=10)).strftime("%Y-%m-%d")
+            responded_at = (datetime.now(UTC) - timedelta(days=15)).strftime("%Y-%m-%d")
 
         is_overdue, days_open = _compute_rfi_fields(MockRFI())
         assert is_overdue is False
@@ -314,9 +304,7 @@ class TestRFIRouterHelpers:
         class MockRFI:
             created_at = datetime.now(UTC) - timedelta(days=3)
             status = "open"
-            response_due_date = (datetime.now(UTC) + timedelta(days=10)).strftime(
-                "%Y-%m-%d"
-            )
+            response_due_date = (datetime.now(UTC) + timedelta(days=10)).strftime("%Y-%m-%d")
             responded_at = None
 
         is_overdue, days_open = _compute_rfi_fields(MockRFI())

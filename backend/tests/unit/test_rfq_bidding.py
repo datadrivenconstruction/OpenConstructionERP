@@ -25,16 +25,15 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+import app.modules.projects.models  # noqa: E402,F401
+import app.modules.rfq_bidding.models  # noqa: E402,F401
+import app.modules.users.models  # noqa: E402,F401
+from app.core.audit_log import get_activity_for_entity
+
 # Ensure all module ORM tables are registered with Base.metadata before
 # we call create_all() — without this, FK targets (oe_projects_project,
 # oe_users_user, etc) would be missing on a clean per-test engine.
 from app.database import Base  # noqa: E402
-import app.modules.projects.models  # noqa: E402,F401
-import app.modules.users.models  # noqa: E402,F401
-import app.modules.rfq_bidding.models  # noqa: E402,F401
-import app.core.audit_log as _audit_log_mod  # noqa: E402
-
-from app.core.audit_log import get_activity_for_entity
 from app.modules.rfq_bidding.schemas import BidCreate, RFQCreate
 from app.modules.rfq_bidding.service import RFQService
 
@@ -107,9 +106,7 @@ async def test_full_workflow_create_submit_award_audit(session: AsyncSession) ->
     assert bid.is_awarded is False
 
     # 4. Buyer (manager role) awards the bid
-    awarded = await service.award_bid(
-        bid_id, actor_id=actor_id, actor_role="manager", reason="Best price"
-    )
+    awarded = await service.award_bid(bid_id, actor_id=actor_id, actor_role="manager", reason="Best price")
     assert awarded.is_awarded is True
 
     # 5. RFQ status flipped to awarded
@@ -117,9 +114,7 @@ async def test_full_workflow_create_submit_award_audit(session: AsyncSession) ->
     assert final_rfq.status == "awarded"
 
     # 6. Audit log row written with actor_id (was None before the fix)
-    log_rows = await get_activity_for_entity(
-        session, entity_type="rfq", entity_id=str(rfq_id)
-    )
+    log_rows = await get_activity_for_entity(session, entity_type="rfq", entity_id=str(rfq_id))
     award_rows = [r for r in log_rows if r.to_status == "awarded"]
     assert len(award_rows) == 1
     audit = award_rows[0]

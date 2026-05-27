@@ -26,7 +26,6 @@ from defusedxml.common import DefusedXmlException
 # router is rewritten to bypass defusedxml.
 from app.modules.schedule.router import safe_ET
 
-
 # Classic billion-laughs payload — defines a chain of entities each
 # referencing the previous one ten times. A vulnerable parser would
 # expand `&lol9;` into 10**9 `lol` strings (~3 GB) and either OOM the

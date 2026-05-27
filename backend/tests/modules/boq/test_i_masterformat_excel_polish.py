@@ -16,7 +16,6 @@ import pytest
 
 from app.modules.boq.importers.excel import ExcelImporter, _infer_classification
 
-
 # ── Direct heuristic tests ─────────────────────────────────────────────────
 
 

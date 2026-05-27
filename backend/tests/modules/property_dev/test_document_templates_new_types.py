@@ -33,7 +33,6 @@ from app.modules.property_dev.document_templates import (
     render_title_deed_transfer_request_pdf,
 )
 
-
 # ── Shared fixtures (cheap — built once per call) ──────────────────────
 
 
@@ -94,38 +93,46 @@ def _handover() -> SimpleNamespace:
 
 def _tenants() -> list[SimpleNamespace]:
     return [
-        SimpleNamespace(id="t1", full_name="Jane Sample",
-                        email="jane.sample@example.com"),
-        SimpleNamespace(id="t2", full_name="John Sample",
-                        email="john.sample@example.com"),
+        SimpleNamespace(id="t1", full_name="Jane Sample", email="jane.sample@example.com"),
+        SimpleNamespace(id="t2", full_name="John Sample", email="john.sample@example.com"),
     ]
 
 
 def _parties(buyer_id_a: str, buyer_id_b: str) -> list[SimpleNamespace]:
     return [
         SimpleNamespace(
-            buyer_id=buyer_id_a, party_role="primary",
+            buyer_id=buyer_id_a,
+            party_role="primary",
             ownership_pct=Decimal("50"),
-            full_name="Jane Sample", email="jane.sample@example.com",
+            full_name="Jane Sample",
+            email="jane.sample@example.com",
         ),
         SimpleNamespace(
-            buyer_id=buyer_id_b, party_role="secondary",
+            buyer_id=buyer_id_b,
+            party_role="secondary",
             ownership_pct=Decimal("50"),
-            full_name="John Sample", email="john.sample@example.com",
+            full_name="John Sample",
+            email="john.sample@example.com",
         ),
     ]
 
 
 def _rooms() -> list[SimpleNamespace]:
     return [
-        SimpleNamespace(name="Kitchen", items=[
-            SimpleNamespace(label="Oven", condition="New", notes="test"),
-            SimpleNamespace(label="Fridge", condition="New", notes=""),
-        ]),
-        SimpleNamespace(name="Bathroom", items=[
-            SimpleNamespace(label="Toilet", condition="Good", notes=""),
-            SimpleNamespace(label="Shower", condition="Good", notes=""),
-        ]),
+        SimpleNamespace(
+            name="Kitchen",
+            items=[
+                SimpleNamespace(label="Oven", condition="New", notes="test"),
+                SimpleNamespace(label="Fridge", condition="New", notes=""),
+            ],
+        ),
+        SimpleNamespace(
+            name="Bathroom",
+            items=[
+                SimpleNamespace(label="Toilet", condition="Good", notes=""),
+                SimpleNamespace(label="Shower", condition="Good", notes=""),
+            ],
+        ),
     ]
 
 
@@ -182,7 +189,11 @@ def test_tenant_lease_agreement(locale: str) -> None:
         status="draft",
     )
     pdf = render_tenant_lease_agreement_pdf(
-        lease, _plot(), _development(), _tenants(), locale=locale,
+        lease,
+        _plot(),
+        _development(),
+        _tenants(),
+        locale=locale,
     )
     assert _is_pdf(pdf), f"not a PDF for locale={locale}"
     assert len(pdf) > 1000
@@ -202,8 +213,12 @@ def test_tenant_lease_agreement(locale: str) -> None:
 @pytest.mark.parametrize("locale", _LOCALES)
 def test_move_in_checklist(locale: str) -> None:
     pdf = render_move_in_checklist_pdf(
-        _handover(), _contract(), _plot(), _development(),
-        _rooms(), locale=locale,
+        _handover(),
+        _contract(),
+        _plot(),
+        _development(),
+        _rooms(),
+        locale=locale,
     )
     assert _is_pdf(pdf)
     assert len(pdf) > 1000
@@ -216,8 +231,12 @@ def test_move_in_checklist(locale: str) -> None:
 @pytest.mark.parametrize("locale", _LOCALES)
 def test_move_in_checklist_empty_rooms(locale: str) -> None:
     pdf = render_move_in_checklist_pdf(
-        _handover(), _contract(), _plot(), _development(),
-        rooms=[], locale=locale,
+        _handover(),
+        _contract(),
+        _plot(),
+        _development(),
+        rooms=[],
+        locale=locale,
     )
     assert _is_pdf(pdf)
 
@@ -225,7 +244,9 @@ def test_move_in_checklist_empty_rooms(locale: str) -> None:
 @pytest.mark.parametrize("locale", _LOCALES)
 def test_mortgage_clearance_letter(locale: str) -> None:
     pdf = render_mortgage_clearance_letter_pdf(
-        _contract(), _plot(), _development(),
+        _contract(),
+        _plot(),
+        _development(),
         bank_name="Sparkasse Berlin",
         locale=locale,
     )
@@ -244,7 +265,9 @@ def test_title_deed_transfer_request(locale: str) -> None:
         "buy-b": SimpleNamespace(full_name="John Sample"),
     }
     pdf = render_title_deed_transfer_request_pdf(
-        _contract(), _plot(), _development(),
+        _contract(),
+        _plot(),
+        _development(),
         parties=parties,
         registry_name="Grundbuchamt Berlin",
         locale=locale,
@@ -258,7 +281,9 @@ def test_title_deed_transfer_request(locale: str) -> None:
 @pytest.mark.parametrize("locale", _LOCALES)
 def test_escrow_release_authorization(locale: str) -> None:
     pdf = render_escrow_release_authorization_pdf(
-        _contract(), _plot(), _development(),
+        _contract(),
+        _plot(),
+        _development(),
         escrow_account_no="DE89-3704-0044-0532-0130-00",
         amount=Decimal("84000.00"),
         release_reason="Foundation milestone certified",
@@ -274,7 +299,9 @@ def test_escrow_release_authorization(locale: str) -> None:
 @pytest.mark.parametrize("locale", _LOCALES)
 def test_refund_authorization_from_contract(locale: str) -> None:
     pdf = render_refund_authorization_pdf(
-        _contract(), _plot(), _development(),
+        _contract(),
+        _plot(),
+        _development(),
         refund_amount=Decimal("5000.00"),
         refund_reason="Cooling-off cancellation",
         payment_method="bank_transfer",
@@ -291,7 +318,9 @@ def test_refund_authorization_from_reservation() -> None:
     # generator to fall back to the reservation's reservation_number.
     empty_spa = SimpleNamespace(id=None, contract_number=None, currency=None)
     pdf = render_refund_authorization_pdf(
-        empty_spa, _plot(), _development(),
+        empty_spa,
+        _plot(),
+        _development(),
         refund_amount=Decimal("2500.00"),
         refund_reason="Reservation cancelled",
         payment_method="bank_transfer",
@@ -307,7 +336,9 @@ def test_money_is_decimal_not_float() -> None:
     are compressed so we can't byte-find the number — see
     ``test_money_decimal_format_via_pypdf`` for the rendered text check)."""
     pdf = render_escrow_release_authorization_pdf(
-        _contract(), _plot(), _development(),
+        _contract(),
+        _plot(),
+        _development(),
         escrow_account_no="ACC-1",
         amount=Decimal("123456.78"),
         release_reason="Test",
@@ -327,7 +358,9 @@ def test_money_decimal_format_via_pypdf() -> None:
     from io import BytesIO
 
     pdf_bytes = render_escrow_release_authorization_pdf(
-        _contract(), _plot(), _development(),
+        _contract(),
+        _plot(),
+        _development(),
         escrow_account_no="ACC-1",
         amount=Decimal("123456.78"),
         release_reason="Test",
@@ -341,7 +374,9 @@ def test_money_decimal_format_via_pypdf() -> None:
 
 def test_unknown_locale_falls_back_to_en() -> None:
     pdf = render_mortgage_clearance_letter_pdf(
-        _contract(), _plot(), _development(),
+        _contract(),
+        _plot(),
+        _development(),
         bank_name="Test Bank",
         locale="zz",  # not in SUPPORTED_LOCALES
     )

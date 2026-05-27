@@ -123,9 +123,7 @@ async def test_dry_run_endpoint_boolean_mode(client, auth_headers) -> None:
 
 
 @pytest.mark.asyncio
-async def test_dry_run_endpoint_invalid_definition_returns_422(
-    client, auth_headers
-) -> None:
+async def test_dry_run_endpoint_invalid_definition_returns_422(client, auth_headers) -> None:
     resp = await client.post(
         "/api/v1/eac/rules:dry-run",
         json={
@@ -234,9 +232,7 @@ async def test_run_ruleset_endpoint_persists_run(client, auth_headers) -> None:
 
 
 @pytest.mark.asyncio
-async def test_run_ruleset_endpoint_only_failures_filter(
-    client, auth_headers
-) -> None:
+async def test_run_ruleset_endpoint_only_failures_filter(client, auth_headers) -> None:
     ruleset_id, _ = await _create_ruleset_with_rule(client, auth_headers)
     run_resp = await client.post(
         f"/api/v1/eac/rulesets/{ruleset_id}:run",
@@ -256,9 +252,7 @@ async def test_run_ruleset_endpoint_only_failures_filter(
 
 
 @pytest.mark.asyncio
-async def test_run_ruleset_requires_elements_or_model_id(
-    client, auth_headers
-) -> None:
+async def test_run_ruleset_requires_elements_or_model_id(client, auth_headers) -> None:
     ruleset_id, _ = await _create_ruleset_with_rule(client, auth_headers)
     resp = await client.post(
         f"/api/v1/eac/rulesets/{ruleset_id}:run",
@@ -279,9 +273,7 @@ async def test_run_ruleset_unknown_id_returns_404(client, auth_headers) -> None:
 
 
 @pytest.mark.asyncio
-async def test_run_ruleset_rejects_unknown_triggered_by(
-    client, auth_headers
-) -> None:
+async def test_run_ruleset_rejects_unknown_triggered_by(client, auth_headers) -> None:
     """``triggered_by`` is a Literal — a typo must surface as 422."""
     ruleset_id, _ = await _create_ruleset_with_rule(client, auth_headers)
     resp = await client.post(

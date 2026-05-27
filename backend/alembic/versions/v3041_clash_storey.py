@@ -54,13 +54,9 @@ def upgrade() -> None:
     existing_cols = {c["name"] for c in inspector.get_columns(_RESULT)}
 
     if "a_storey" not in existing_cols:
-        op.add_column(
-            _RESULT, sa.Column("a_storey", sa.Integer(), nullable=True)
-        )
+        op.add_column(_RESULT, sa.Column("a_storey", sa.Integer(), nullable=True))
     if "b_storey" not in existing_cols:
-        op.add_column(
-            _RESULT, sa.Column("b_storey", sa.Integer(), nullable=True)
-        )
+        op.add_column(_RESULT, sa.Column("b_storey", sa.Integer(), nullable=True))
 
 
 def downgrade() -> None:

@@ -96,12 +96,8 @@ class RequirementVectorAdapter:
             "category": row.category or "",
             "priority": row.priority or "",
             "status": row.status or "",
-            "requirement_set_id": str(row.requirement_set_id)
-            if row.requirement_set_id
-            else "",
-            "linked_position_id": str(row.linked_position_id)
-            if row.linked_position_id
-            else "",
+            "requirement_set_id": str(row.requirement_set_id) if row.requirement_set_id else "",
+            "linked_position_id": str(row.linked_position_id) if row.linked_position_id else "",
         }
 
     def project_id_of(self, row: Requirement) -> str | None:

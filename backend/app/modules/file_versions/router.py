@@ -112,9 +112,7 @@ async def create_version(
 ) -> FileVersionResponse:
     """Register a new version row + supersede the prior current row."""
     await verify_project_access(payload.project_id, user_id, session)
-    row = await service.register_new_version(
-        payload, uploaded_by_id=_safe_user_uuid(user_id)
-    )
+    row = await service.register_new_version(payload, uploaded_by_id=_safe_user_uuid(user_id))
     return _to_response(row)
 
 
@@ -136,7 +134,5 @@ async def restore_version(
     """
     target = await service.get(version_id)
     await verify_project_access(target.project_id, user_id, session)
-    restored = await service.restore_version(
-        version_id, actor_id=_safe_user_uuid(user_id)
-    )
+    restored = await service.restore_version(version_id, actor_id=_safe_user_uuid(user_id))
     return _to_response(restored)

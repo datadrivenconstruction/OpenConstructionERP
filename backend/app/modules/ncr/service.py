@@ -78,9 +78,7 @@ class NCRService:
             from app.modules.notifications.service import NotificationService
             from app.modules.projects.models import Project
 
-            result = await self.session.execute(
-                select(Project.owner_id).where(Project.id == data.project_id)
-            )
+            result = await self.session.execute(select(Project.owner_id).where(Project.id == data.project_id))
             owner_id = result.scalar_one_or_none()
             if owner_id:
                 notif_svc = NotificationService(self.session)

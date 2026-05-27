@@ -103,7 +103,8 @@ async def test_itp_legal_transitions(svc: QMSService) -> None:
         ITPPlanCreate(project_id=_PROJECT_ID, name="P", work_type="concrete"),
     )
     await svc.add_itp_item(
-        plan.id, ITPItemCreate(control_point_name="CP", hold_witness_point="hold"),
+        plan.id,
+        ITPItemCreate(control_point_name="CP", hold_witness_point="hold"),
     )
     with patch("app.modules.qms.service.event_bus.publish_detached", MagicMock()):
         plan = await svc.activate_itp_plan(plan.id)
@@ -199,12 +200,14 @@ async def test_inspection_conditional_can_resolve_to_passed_or_failed(
             InspectionSignatureCreate(signer_user_id=uuid.uuid4(), signer_role="GC"),
         )
         with patch(
-            "app.modules.qms.service.event_bus.publish_detached", MagicMock(),
+            "app.modules.qms.service.event_bus.publish_detached",
+            MagicMock(),
         ):
             insp = await svc.complete_inspection(insp.id, result="conditional")
         assert insp.status == "conditional"
         with patch(
-            "app.modules.qms.service.event_bus.publish_detached", MagicMock(),
+            "app.modules.qms.service.event_bus.publish_detached",
+            MagicMock(),
         ):
             insp = await svc.complete_inspection(insp.id, result=result)
         assert insp.status == result
@@ -416,7 +419,4 @@ async def test_start_inspection_writes_audit_log(svc: QMSService) -> None:
     await svc.start_inspection(insp.id)
 
     log_entries = await svc.repo.list_audit_log(insp.id, entity_type="inspection")
-    assert any(
-        e.old_status == "scheduled" and e.new_status == "in_progress"
-        for e in log_entries
-    )
+    assert any(e.old_status == "scheduled" and e.new_status == "in_progress" for e in log_entries)

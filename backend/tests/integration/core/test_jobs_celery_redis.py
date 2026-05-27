@@ -58,7 +58,8 @@ def _clean_registry():
 
 @pytest.mark.asyncio
 async def test_celery_eager_dispatch_runs_handler_to_completion(
-    session_factory, eager_celery,
+    session_factory,
+    eager_celery,
 ) -> None:
     """In eager mode, submit_job triggers the dispatch task inline.
 
@@ -89,7 +90,8 @@ async def test_celery_eager_dispatch_runs_handler_to_completion(
 
 @pytest.mark.asyncio
 async def test_celery_eager_dispatch_records_failure(
-    session_factory, eager_celery,
+    session_factory,
+    eager_celery,
 ) -> None:
     """A handler exception in eager mode lands in error_jsonb, not as a raise."""
 

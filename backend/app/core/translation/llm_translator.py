@@ -23,9 +23,9 @@ logger = logging.getLogger(__name__)
 # are intentionally conservative — better to slightly overestimate cost
 # than to under-report it on the audit trail.
 _BLENDED_RATES_USD_PER_1K: dict[str, float] = {
-    "anthropic": 0.012,   # claude-sonnet-4 ~$3/$15 per M, blended
-    "openai": 0.010,      # gpt-4o ~$2.5/$10 per M
-    "gemini": 0.0009,     # gemini-2.5-flash ~$0.30/$2.50 per M
+    "anthropic": 0.012,  # claude-sonnet-4 ~$3/$15 per M, blended
+    "openai": 0.010,  # gpt-4o ~$2.5/$10 per M
+    "gemini": 0.0009,  # gemini-2.5-flash ~$0.30/$2.50 per M
     "openrouter": 0.012,
     "mistral": 0.005,
     "groq": 0.0007,
@@ -36,8 +36,8 @@ _BLENDED_RATES_USD_PER_1K: dict[str, float] = {
     "cohere": 0.005,
     "ai21": 0.005,
     "xai": 0.010,
-    "ollama": 0.0,        # local, no API cost
-    "vllm": 0.0,          # local, no API cost
+    "ollama": 0.0,  # local, no API cost
+    "vllm": 0.0,  # local, no API cost
 }
 
 # Hard cap per call. Construction term translation is at most ~20 tokens
@@ -123,9 +123,7 @@ async def llm_translate(
         logger.debug("LLM translate skipped: %s", exc)
         return None
 
-    prompt = _PROMPT_TEMPLATE.format(
-        src=src, tgt=tgt, domain=domain, text=text
-    )
+    prompt = _PROMPT_TEMPLATE.format(src=src, tgt=tgt, domain=domain, text=text)
 
     try:
         raw, tokens = await call_ai(

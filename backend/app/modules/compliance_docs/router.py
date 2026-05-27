@@ -92,7 +92,9 @@ async def list_compliance_docs(
     """‌⁠‍List compliance docs for a project."""
     await verify_project_access(project_id, user_id, session)
     items = await service.list_docs(
-        project_id, status=status_filter, doc_type=doc_type,
+        project_id,
+        status=status_filter,
+        doc_type=doc_type,
     )
     return [_to_response(i) for i in items]
 
@@ -219,7 +221,8 @@ async def upload_attachment(
         content = await file.read()
     except Exception:
         logger.exception(
-            "Unable to read attachment upload for compliance doc %s", doc_id,
+            "Unable to read attachment upload for compliance doc %s",
+            doc_id,
         )
         raise HTTPException(
             status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -234,9 +237,7 @@ async def upload_attachment(
     if len(content) > _MAX_ATTACHMENT_BYTES:
         raise HTTPException(
             status_code=http_status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=(
-                f"Uploaded file exceeds the {_MAX_ATTACHMENT_BYTES} byte limit"
-            ),
+            detail=(f"Uploaded file exceeds the {_MAX_ATTACHMENT_BYTES} byte limit"),
         )
 
     # Magic-byte gate — reject anything outside the allow-list.
@@ -264,7 +265,8 @@ async def upload_attachment(
         filepath.write_bytes(content)
     except Exception:
         logger.exception(
-            "Unable to save attachment for compliance doc %s", doc_id,
+            "Unable to save attachment for compliance doc %s",
+            doc_id,
         )
         raise HTTPException(
             status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,

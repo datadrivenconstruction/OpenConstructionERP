@@ -83,9 +83,7 @@ class TestSSRFRejectAtWriteTime:
             )
         # The validator wraps ``UnsafeUrlError`` into the Pydantic error.
         msg = str(exc.value)
-        assert "127.0.0.1" in msg or "non-routable" in msg, (
-            f"expected SSRF rejection message, got: {msg!r}"
-        )
+        assert "127.0.0.1" in msg or "non-routable" in msg, f"expected SSRF rejection message, got: {msg!r}"
 
     def test_webhook_create_rejects_localhost_hostname(self) -> None:
         from app.modules.integrations.schemas import WebhookCreate
@@ -225,8 +223,7 @@ class TestSecretRedaction:
         )
         payload = resp.model_dump(mode="json")
         assert payload["config"]["webhook_url"] == "***REDACTED***", (
-            "webhook_url must be redacted in the GET response, "
-            f"got {payload['config']['webhook_url']!r}"
+            f"webhook_url must be redacted in the GET response, got {payload['config']['webhook_url']!r}"
         )
         # Non-secret fields like ``channel`` survive intact so the UI
         # can still render the connector destination label.
@@ -282,9 +279,7 @@ class TestSecretRedaction:
         # Non-secret endpoint survives.
         assert payload["config"]["endpoint"] == "https://api.example.com"
         for needle in ("sk-PROD-LIVE", "OAuth-LIVE", "P@ssw0rd"):
-            assert needle not in str(payload), (
-                f"plaintext secret {needle!r} leaked in response payload"
-            )
+            assert needle not in str(payload), f"plaintext secret {needle!r} leaked in response payload"
 
     def test_webhook_response_redacts_secret(self) -> None:
         from app.modules.integrations.schemas import WebhookResponse
@@ -395,9 +390,7 @@ class TestRateLimiterWired:
         """
         import app.modules.integrations.router as router_mod
 
-        assert hasattr(router_mod, "approval_limiter"), (
-            "router must import approval_limiter for the /test endpoints"
-        )
+        assert hasattr(router_mod, "approval_limiter"), "router must import approval_limiter for the /test endpoints"
 
 
 # ── 5. RBAC: writes elevated to MANAGER ──────────────────────────────────
@@ -416,7 +409,8 @@ class TestRBACManager:
         from app.core.permissions import Role, permission_registry
 
         assert not permission_registry.role_has_permission(
-            Role.EDITOR, "integrations.create",
+            Role.EDITOR,
+            "integrations.create",
         ), (
             "EDITOR must NOT carry integrations.create — credentials "
             "(webhook URLs, bot tokens) are cross-tenant risk vectors "
@@ -428,7 +422,8 @@ class TestRBACManager:
         from app.core.permissions import Role, permission_registry
 
         assert not permission_registry.role_has_permission(
-            Role.EDITOR, "integrations.update",
+            Role.EDITOR,
+            "integrations.update",
         )
 
     def test_editor_cannot_delete_integration(self) -> None:
@@ -436,7 +431,8 @@ class TestRBACManager:
         from app.core.permissions import Role, permission_registry
 
         assert not permission_registry.role_has_permission(
-            Role.EDITOR, "integrations.delete",
+            Role.EDITOR,
+            "integrations.delete",
         )
 
     def test_manager_can_create_integration(self) -> None:
@@ -449,7 +445,8 @@ class TestRBACManager:
             "integrations.delete",
         ):
             assert permission_registry.role_has_permission(
-                Role.MANAGER, perm,
+                Role.MANAGER,
+                perm,
             ), f"MANAGER must carry {perm}"
 
     def test_viewer_can_read_integration(self) -> None:
@@ -457,7 +454,8 @@ class TestRBACManager:
         from app.core.permissions import Role, permission_registry
 
         assert permission_registry.role_has_permission(
-            Role.VIEWER, "integrations.read",
+            Role.VIEWER,
+            "integrations.read",
         )
 
     def test_viewer_cannot_write_integration(self) -> None:
@@ -470,7 +468,8 @@ class TestRBACManager:
             "integrations.delete",
         ):
             assert not permission_registry.role_has_permission(
-                Role.VIEWER, perm,
+                Role.VIEWER,
+                perm,
             )
 
 
@@ -498,8 +497,7 @@ class TestIDORShape:
         # Belt-and-braces — there must be NO ``status_code=403`` in this
         # router. Any 403 in an IDOR handler is by definition a leak.
         assert "status_code=403" not in source, (
-            "router uses 403 somewhere — IDOR handlers must 404 to avoid "
-            "leaking UUID existence"
+            "router uses 403 somewhere — IDOR handlers must 404 to avoid leaking UUID existence"
         )
 
     def test_webhook_router_returns_404_for_foreign_webhook(self) -> None:

@@ -42,10 +42,7 @@ class ScheduleRepository:
 
         # Fetch — skip eager loading of activities for list queries
         stmt = (
-            base.options(noload(Schedule.activities))
-            .order_by(Schedule.created_at.desc())
-            .offset(offset)
-            .limit(limit)
+            base.options(noload(Schedule.activities)).order_by(Schedule.created_at.desc()).offset(offset).limit(limit)
         )
         result = await self.session.execute(stmt)
         schedules = list(result.scalars().all())

@@ -38,8 +38,8 @@ from app.modules.clash.models import (
     ClashSuppression,
 )
 from app.modules.clash.service import (
-    _compute_signature_hash,
     ClashService,
+    _compute_signature_hash,
 )
 
 
@@ -124,8 +124,10 @@ def _make_clash(
     b_stable: str = "B",
 ) -> ClashResult:
     sig, quality = _compute_signature_hash(
-        a_guid=a_stable, b_guid=b_stable,
-        centroid=(1.0, 2.0, 3.0), clash_type="hard",
+        a_guid=a_stable,
+        b_guid=b_stable,
+        centroid=(1.0, 2.0, 3.0),
+        clash_type="hard",
         grid_mm=run.spatial_grid_mm,
     )
     return ClashResult(
@@ -142,10 +144,15 @@ def _make_clash(
         a_model_id=uuid.uuid4(),
         b_model_id=uuid.uuid4(),
         clash_type="hard",
-        penetration_m=0.05, distance_m=0.0,
-        cx=1.0, cy=2.0, cz=3.0,
-        status="new", severity="medium",
-        signature=sig[:16], signature_hash=sig,
+        penetration_m=0.05,
+        distance_m=0.0,
+        cx=1.0,
+        cy=2.0,
+        cz=3.0,
+        status="new",
+        severity="medium",
+        signature=sig[:16],
+        signature_hash=sig,
         signature_quality=quality,
         tolerance_at_signature_time_mm=run.tolerance_m * 1000.0,
     )
@@ -475,6 +482,7 @@ async def test_suppression_unique_per_project_signature(
     await svc.suppress(project_id, sig, "y", None)
     # ORM-level: exactly one suppression row for this (project, sig).
     from sqlalchemy import select
+
     rows = (
         (
             await session.execute(

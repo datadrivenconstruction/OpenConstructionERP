@@ -20,9 +20,7 @@ from unittest.mock import MagicMock
 import pytest
 from fastapi import HTTPException
 
-from app.modules.takeoff import service as takeoff_service
 from app.modules.takeoff.service import TakeoffService, _count_pdf_pages
-
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -71,11 +71,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -121,10 +117,7 @@ async def seeded(http_client):
     headers = await _login(http_client, email, meta["_password"])
 
     async with async_session_factory() as s:
-        owner = (
-            (await s.execute(select(User).where(User.email == email.lower())))
-            .scalar_one()
-        )
+        owner = (await s.execute(select(User).where(User.email == email.lower()))).scalar_one()
 
         proj = Project(
             name=f"Bridge-{uuid.uuid4().hex[:6]}",
@@ -263,12 +256,8 @@ async def test_snag_create_spawns_punch_item(http_client, seeded):
     sid = await _create_snag(seeded, severity="major")
 
     async with async_session_factory() as s:
-        snag = (
-            await s.execute(select(Snag).where(Snag.id == uuid.UUID(sid)))
-        ).scalar_one()
-        assert snag.linked_punch_item_id is not None, (
-            "snag.linked_punch_item_id must be set by the bridge"
-        )
+        snag = (await s.execute(select(Snag).where(Snag.id == uuid.UUID(sid)))).scalar_one()
+        assert snag.linked_punch_item_id is not None, "snag.linked_punch_item_id must be set by the bridge"
 
         items = (
             (
@@ -317,17 +306,9 @@ async def test_severity_priority_mapping(http_client, seeded):
         )
 
         async with async_session_factory() as s:
-            snag = (
-                await s.execute(select(Snag).where(Snag.id == uuid.UUID(sid)))
-            ).scalar_one()
+            snag = (await s.execute(select(Snag).where(Snag.id == uuid.UUID(sid)))).scalar_one()
             assert snag.linked_punch_item_id is not None
-            punch = (
-                await s.execute(
-                    select(PunchItem).where(
-                        PunchItem.id == snag.linked_punch_item_id
-                    )
-                )
-            ).scalar_one()
+            punch = (await s.execute(select(PunchItem).where(PunchItem.id == snag.linked_punch_item_id))).scalar_one()
             assert punch.priority == expected_priority, (
                 f"severity={severity} should map to priority={expected_priority}"
             )
@@ -352,12 +333,6 @@ async def test_snag_only_category_falls_back_to_general(http_client, seeded):
     )
 
     async with async_session_factory() as s:
-        snag = (
-            await s.execute(select(Snag).where(Snag.id == uuid.UUID(sid)))
-        ).scalar_one()
-        punch = (
-            await s.execute(
-                select(PunchItem).where(PunchItem.id == snag.linked_punch_item_id)
-            )
-        ).scalar_one()
+        snag = (await s.execute(select(Snag).where(Snag.id == uuid.UUID(sid)))).scalar_one()
+        punch = (await s.execute(select(PunchItem).where(PunchItem.id == snag.linked_punch_item_id))).scalar_one()
         assert punch.category == "general"

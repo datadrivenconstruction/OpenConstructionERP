@@ -67,9 +67,7 @@ async def auth(client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            sa_update(User).where(User.email == email).values(role="admin")
-        )
+        await s.execute(sa_update(User).where(User.email == email).values(role="admin"))
         await s.commit()
 
     token = ""

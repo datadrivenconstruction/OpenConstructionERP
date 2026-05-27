@@ -130,7 +130,8 @@ async def _create_boq(client: AsyncClient, auth: dict[str, str], project_id: str
 
 @pytest.mark.asyncio
 async def test_fresh_boq_has_no_variables(
-    shared_client: AsyncClient, shared_auth: dict[str, str],
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
 ) -> None:
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
@@ -145,7 +146,8 @@ async def test_fresh_boq_has_no_variables(
 
 @pytest.mark.asyncio
 async def test_round_trip_mixed_types(
-    shared_client: AsyncClient, shared_auth: dict[str, str],
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
 ) -> None:
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
@@ -181,7 +183,8 @@ async def test_round_trip_mixed_types(
 
 @pytest.mark.asyncio
 async def test_leading_dollar_is_stripped(
-    shared_client: AsyncClient, shared_auth: dict[str, str],
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
 ) -> None:
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
@@ -198,18 +201,19 @@ async def test_leading_dollar_is_stripped(
 
 @pytest.mark.asyncio
 async def test_invalid_names_rejected(
-    shared_client: AsyncClient, shared_auth: dict[str, str],
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
 ) -> None:
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
 
     bad_names = [
-        "lowercase",          # not uppercase
-        "1LEAD_DIGIT",        # leading digit
-        "WITH SPACE",         # space
-        "X" * 33,             # too long (> 32)
-        "BAD-DASH",           # disallowed char
-        "",                   # empty
+        "lowercase",  # not uppercase
+        "1LEAD_DIGIT",  # leading digit
+        "WITH SPACE",  # space
+        "X" * 33,  # too long (> 32)
+        "BAD-DASH",  # disallowed char
+        "",  # empty
     ]
     for bad in bad_names:
         resp = await shared_client.put(
@@ -222,7 +226,8 @@ async def test_invalid_names_rejected(
 
 @pytest.mark.asyncio
 async def test_duplicate_name_rejected(
-    shared_client: AsyncClient, shared_auth: dict[str, str],
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
 ) -> None:
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
@@ -241,16 +246,14 @@ async def test_duplicate_name_rejected(
 
 @pytest.mark.asyncio
 async def test_cap_enforced(
-    shared_client: AsyncClient, shared_auth: dict[str, str],
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
 ) -> None:
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
 
     # 51 valid variables — over the cap of 50
-    payload = [
-        {"name": f"VAR_{i:03d}", "type": "number", "value": i}
-        for i in range(51)
-    ]
+    payload = [{"name": f"VAR_{i:03d}", "type": "number", "value": i} for i in range(51)]
     resp = await shared_client.put(
         f"/api/v1/boq/boqs/{boq_id}/variables/",
         json=payload,
@@ -262,7 +265,8 @@ async def test_cap_enforced(
 
 @pytest.mark.asyncio
 async def test_replace_truncates_old_list(
-    shared_client: AsyncClient, shared_auth: dict[str, str],
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
 ) -> None:
     """PUT replaces the whole list — not a merge."""
     project_id = await _create_project(shared_client, shared_auth)
@@ -289,7 +293,8 @@ async def test_replace_truncates_old_list(
 
 @pytest.mark.asyncio
 async def test_non_numeric_value_rejected_for_number_type(
-    shared_client: AsyncClient, shared_auth: dict[str, str],
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
 ) -> None:
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
@@ -305,7 +310,8 @@ async def test_non_numeric_value_rejected_for_number_type(
 
 @pytest.mark.asyncio
 async def test_empty_value_normalised_to_null(
-    shared_client: AsyncClient, shared_auth: dict[str, str],
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
 ) -> None:
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
@@ -326,15 +332,13 @@ async def test_empty_value_normalised_to_null(
 
 @pytest.mark.asyncio
 async def test_boundary_50_variables_accepted(
-    shared_client: AsyncClient, shared_auth: dict[str, str],
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
 ) -> None:
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
 
-    payload = [
-        {"name": f"VAR_{i:03d}", "type": "number", "value": float(i)}
-        for i in range(50)
-    ]
+    payload = [{"name": f"VAR_{i:03d}", "type": "number", "value": float(i)} for i in range(50)]
     resp = await shared_client.put(
         f"/api/v1/boq/boqs/{boq_id}/variables/",
         json=payload,

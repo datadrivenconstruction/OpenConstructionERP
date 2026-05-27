@@ -92,7 +92,8 @@ _INDEXES: tuple[tuple[str, str, str], ...] = (
 
 
 def _existing_index_names(
-    inspector: sa.engine.reflection.Inspector, table: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
 ) -> set[str]:
     """Return the set of existing index names for ``table``, or empty
     set if the table itself is missing (defensive — partial migrations).
@@ -103,7 +104,8 @@ def _existing_index_names(
 
 
 def _table_columns(
-    inspector: sa.engine.reflection.Inspector, table: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
 ) -> set[str]:
     """Return the set of column names on ``table``, or empty set if the
     table is missing. Guards against column-rename divergence.

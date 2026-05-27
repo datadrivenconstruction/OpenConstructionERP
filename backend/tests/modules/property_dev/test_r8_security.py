@@ -31,7 +31,6 @@ from httpx import AsyncClient
 
 from .conftest import _register_user
 
-
 # ── Local R8 fixtures (independent from R7's tenant_a / tenant_b) ───────
 #
 # We mint our own fixtures so a failure here can't poison the R7 suite
@@ -154,12 +153,13 @@ async def r8_tenant_b(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_r8_idor_sales_kanban_collapses_to_404(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Tenant B reading tenant A's sales-kanban → 404 (was: open data)."""
     res = await client.get(
-        f"/api/v1/property-dev/developments/{r8_tenant_a['development_id']}"
-        "/sales-kanban",
+        f"/api/v1/property-dev/developments/{r8_tenant_a['development_id']}/sales-kanban",
         headers=r8_tenant_b["headers"],
     )
     assert res.status_code == 404, res.text
@@ -167,7 +167,9 @@ async def test_r8_idor_sales_kanban_collapses_to_404(
 
 @pytest.mark.asyncio
 async def test_r8_idor_reservation_calendar_collapses_to_404(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Tenant B reading tenant A's reservation calendar → 404."""
     res = await client.get(
@@ -181,12 +183,13 @@ async def test_r8_idor_reservation_calendar_collapses_to_404(
 
 @pytest.mark.asyncio
 async def test_r8_idor_pnl_collapses_to_404(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Tenant B reading tenant A's P&L (revenue!) → 404."""
     res = await client.get(
-        f"/api/v1/property-dev/developments/{r8_tenant_a['development_id']}"
-        "/pnl",
+        f"/api/v1/property-dev/developments/{r8_tenant_a['development_id']}/pnl",
         headers=r8_tenant_b["headers"],
     )
     assert res.status_code == 404, res.text
@@ -194,7 +197,9 @@ async def test_r8_idor_pnl_collapses_to_404(
 
 @pytest.mark.asyncio
 async def test_r8_idor_plot_configurator_collapses_to_404(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Tenant B reading tenant A's plot configurator → 404."""
     res = await client.get(
@@ -206,7 +211,9 @@ async def test_r8_idor_plot_configurator_collapses_to_404(
 
 @pytest.mark.asyncio
 async def test_r8_idor_compliance_dashboard_collapses_to_404(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Tenant B reading tenant A's compliance dashboard → 404.
 
@@ -214,8 +221,7 @@ async def test_r8_idor_compliance_dashboard_collapses_to_404(
     (existence oracle). Now: collapses to 404 for non-owners.
     """
     res = await client.get(
-        "/api/v1/property-dev/compliance/dashboard"
-        f"?dev_id={r8_tenant_a['development_id']}",
+        f"/api/v1/property-dev/compliance/dashboard?dev_id={r8_tenant_a['development_id']}",
         headers=r8_tenant_b["headers"],
     )
     assert res.status_code == 404, res.text
@@ -223,13 +229,13 @@ async def test_r8_idor_compliance_dashboard_collapses_to_404(
 
 @pytest.mark.asyncio
 async def test_r8_idor_compliance_random_uuid_also_404(
-    client: AsyncClient, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_b,
 ):
     """Confirms compliance dashboard isn't an existence oracle: a
     random UUID returns the same 404 as a cross-tenant one."""
     res = await client.get(
-        "/api/v1/property-dev/compliance/dashboard"
-        f"?dev_id={uuid.uuid4()}",
+        f"/api/v1/property-dev/compliance/dashboard?dev_id={uuid.uuid4()}",
         headers=r8_tenant_b["headers"],
     )
     assert res.status_code == 404, res.text
@@ -242,12 +248,13 @@ async def test_r8_idor_compliance_random_uuid_also_404(
 
 @pytest.mark.asyncio
 async def test_r8_idor_list_leads_blocks_cross_tenant_filter(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Listing leads with tenant A's development_id query → 404."""
     res = await client.get(
-        "/api/v1/property-dev/leads/"
-        f"?development_id={r8_tenant_a['development_id']}",
+        f"/api/v1/property-dev/leads/?development_id={r8_tenant_a['development_id']}",
         headers=r8_tenant_b["headers"],
     )
     assert res.status_code == 404, res.text
@@ -255,7 +262,8 @@ async def test_r8_idor_list_leads_blocks_cross_tenant_filter(
 
 @pytest.mark.asyncio
 async def test_r8_idor_list_leads_no_scope_returns_empty(
-    client: AsyncClient, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_b,
 ):
     """Non-admin listing leads with NO development_id → ``[]``.
 
@@ -271,12 +279,13 @@ async def test_r8_idor_list_leads_no_scope_returns_empty(
 
 @pytest.mark.asyncio
 async def test_r8_idor_list_reservations_blocks_cross_tenant_dev(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Listing reservations with tenant A's dev_id → 404."""
     res = await client.get(
-        "/api/v1/property-dev/reservations/"
-        f"?development_id={r8_tenant_a['development_id']}",
+        f"/api/v1/property-dev/reservations/?development_id={r8_tenant_a['development_id']}",
         headers=r8_tenant_b["headers"],
     )
     assert res.status_code == 404, res.text
@@ -284,12 +293,13 @@ async def test_r8_idor_list_reservations_blocks_cross_tenant_dev(
 
 @pytest.mark.asyncio
 async def test_r8_idor_list_reservations_blocks_cross_tenant_plot(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Listing reservations with tenant A's plot_id → 404."""
     res = await client.get(
-        "/api/v1/property-dev/reservations/"
-        f"?plot_id={r8_tenant_a['plot_id']}",
+        f"/api/v1/property-dev/reservations/?plot_id={r8_tenant_a['plot_id']}",
         headers=r8_tenant_b["headers"],
     )
     assert res.status_code == 404, res.text
@@ -297,7 +307,8 @@ async def test_r8_idor_list_reservations_blocks_cross_tenant_plot(
 
 @pytest.mark.asyncio
 async def test_r8_idor_list_reservations_no_scope_returns_empty(
-    client: AsyncClient, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_b,
 ):
     """Non-admin listing reservations with NO scope → ``[]``."""
     res = await client.get(
@@ -315,27 +326,27 @@ async def test_r8_idor_list_reservations_no_scope_returns_empty(
 
 @pytest.mark.asyncio
 async def test_r8_pnl_money_fields_are_strings(
-    client: AsyncClient, r8_tenant_a,
+    client: AsyncClient,
+    r8_tenant_a,
 ):
     """DevelopmentPnLResponse: every money field → str on JSON.
 
     Was: JSON numbers (precision loss past ~15 digits when JS reads them).
     """
     res = await client.get(
-        f"/api/v1/property-dev/developments/{r8_tenant_a['development_id']}"
-        "/pnl",
+        f"/api/v1/property-dev/developments/{r8_tenant_a['development_id']}/pnl",
         headers=r8_tenant_a["headers"],
     )
     assert res.status_code == 200, res.text
     body = res.json()
     for fld in (
-        "revenue_contracted", "revenue_completed", "deposits_held",
-        "deposits_forfeited", "avg_sale_price",
+        "revenue_contracted",
+        "revenue_completed",
+        "deposits_held",
+        "deposits_forfeited",
+        "avg_sale_price",
     ):
-        assert isinstance(body[fld], str), (
-            f"{fld} should be str, got {type(body[fld]).__name__}: "
-            f"{body[fld]!r}"
-        )
+        assert isinstance(body[fld], str), f"{fld} should be str, got {type(body[fld]).__name__}: {body[fld]!r}"
         # Round-trippable via Decimal — no scientific notation.
         Decimal(body[fld])
         assert "E" not in body[fld] and "e" not in body[fld]
@@ -343,7 +354,8 @@ async def test_r8_pnl_money_fields_are_strings(
 
 @pytest.mark.asyncio
 async def test_r8_reservation_deposit_amount_is_string(
-    client: AsyncClient, r8_tenant_a,
+    client: AsyncClient,
+    r8_tenant_a,
 ):
     """ReservationResponse.deposit_amount must be a string on the wire."""
     headers = r8_tenant_a["headers"]
@@ -381,7 +393,8 @@ async def test_r8_reservation_deposit_amount_is_string(
 
 @pytest.mark.asyncio
 async def test_r8_sales_contract_total_value_is_string(
-    client: AsyncClient, r8_tenant_a,
+    client: AsyncClient,
+    r8_tenant_a,
 ):
     """SalesContractResponse.total_value must be a string on the wire."""
     headers = r8_tenant_a["headers"]
@@ -419,7 +432,8 @@ async def test_r8_sales_contract_total_value_is_string(
 
 @pytest.mark.asyncio
 async def test_r8_payment_schedule_money_fields_are_strings(
-    client: AsyncClient, r8_tenant_a,
+    client: AsyncClient,
+    r8_tenant_a,
 ):
     """PaymentScheduleResponse.total_amount + late_fee_pct → str."""
     headers = r8_tenant_a["headers"]
@@ -468,7 +482,8 @@ async def test_r8_payment_schedule_money_fields_are_strings(
 
 @pytest.mark.asyncio
 async def test_r8_instalment_money_fields_are_strings(
-    client: AsyncClient, r8_tenant_a,
+    client: AsyncClient,
+    r8_tenant_a,
 ):
     """InstalmentResponse.amount + amount_paid + late_fee_accrued → str."""
     headers = r8_tenant_a["headers"]
@@ -533,7 +548,8 @@ async def test_r8_instalment_money_fields_are_strings(
 
 @pytest.mark.asyncio
 async def test_r8_fsm_rejects_invalid_buyer_transition(
-    client: AsyncClient, r8_tenant_a,
+    client: AsyncClient,
+    r8_tenant_a,
 ):
     """lead → completed skips reserved/contracted; must 409.
 
@@ -552,7 +568,8 @@ async def test_r8_fsm_rejects_invalid_buyer_transition(
 
 @pytest.mark.asyncio
 async def test_r8_fsm_rejects_invalid_reservation_transition(
-    client: AsyncClient, r8_tenant_a,
+    client: AsyncClient,
+    r8_tenant_a,
 ):
     """cancelled → expired is NOT in ``_RESERVATION_TRANSITIONS``; must 409.
 
@@ -611,7 +628,8 @@ async def test_r8_fsm_rejects_invalid_reservation_transition(
 
 @pytest.mark.asyncio
 async def test_r8_fsm_accepts_valid_buyer_lead_to_cancelled(
-    client: AsyncClient, r8_tenant_a,
+    client: AsyncClient,
+    r8_tenant_a,
 ):
     """lead → cancelled IS allowed (sanity for FSM)."""
     headers = r8_tenant_a["headers"]
@@ -644,7 +662,9 @@ async def test_r8_fsm_accepts_valid_buyer_lead_to_cancelled(
 
 @pytest.mark.asyncio
 async def test_r8_member_denied_delete_plot(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """A non-owner editor in another tenant must not DELETE tenant A's
     plot; the IDOR gate collapses to 404 even if the RBAC gate would
@@ -661,7 +681,9 @@ async def test_r8_member_denied_delete_plot(
 
 @pytest.mark.asyncio
 async def test_r8_member_denied_patch_development(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Editor in tenant B trying to mutate tenant A's development → 404."""
     res = await client.patch(
@@ -706,7 +728,9 @@ async def test_r8_portal_warranty_unauthenticated_blocked(
 
 @pytest.mark.asyncio
 async def test_r8_idor_regulator_report_rera_collapses_to_404(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Non-owner cannot generate a RERA report for another tenant's dev.
 
@@ -716,8 +740,7 @@ async def test_r8_idor_regulator_report_rera_collapses_to_404(
     also acceptable — both block the disclosure.)
     """
     res = await client.get(
-        "/api/v1/property-dev/regulator-reports/RERA"
-        f"?dev_id={r8_tenant_a['development_id']}&quarter=2026-Q1",
+        f"/api/v1/property-dev/regulator-reports/RERA?dev_id={r8_tenant_a['development_id']}&quarter=2026-Q1",
         headers=r8_tenant_b["headers"],
     )
     assert res.status_code in (403, 404), res.text
@@ -725,12 +748,13 @@ async def test_r8_idor_regulator_report_rera_collapses_to_404(
 
 @pytest.mark.asyncio
 async def test_r8_idor_regulator_report_maharera_collapses_to_404(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Same for MAHARERA."""
     res = await client.get(
-        "/api/v1/property-dev/regulator-reports/MAHARERA"
-        f"?dev_id={r8_tenant_a['development_id']}&quarter=2026-Q1",
+        f"/api/v1/property-dev/regulator-reports/MAHARERA?dev_id={r8_tenant_a['development_id']}&quarter=2026-Q1",
         headers=r8_tenant_b["headers"],
     )
     assert res.status_code in (403, 404), res.text
@@ -738,12 +762,13 @@ async def test_r8_idor_regulator_report_maharera_collapses_to_404(
 
 @pytest.mark.asyncio
 async def test_r8_idor_regulator_report_214fz_collapses_to_404(
-    client: AsyncClient, r8_tenant_a, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_a,
+    r8_tenant_b,
 ):
     """Same for 214-FZ (Russian Federal Law no.214)."""
     res = await client.get(
-        "/api/v1/property-dev/regulator-reports/214-FZ"
-        f"?dev_id={r8_tenant_a['development_id']}&quarter=2026-Q1",
+        f"/api/v1/property-dev/regulator-reports/214-FZ?dev_id={r8_tenant_a['development_id']}&quarter=2026-Q1",
         headers=r8_tenant_b["headers"],
     )
     assert res.status_code in (403, 404), res.text
@@ -756,7 +781,8 @@ async def test_r8_idor_regulator_report_214fz_collapses_to_404(
 
 @pytest.mark.asyncio
 async def test_r8_pnl_random_uuid_returns_404(
-    client: AsyncClient, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_b,
 ):
     """A non-existent dev_id on /pnl returns the same 404 as a
     cross-tenant one — confirms no existence oracle."""
@@ -769,7 +795,8 @@ async def test_r8_pnl_random_uuid_returns_404(
 
 @pytest.mark.asyncio
 async def test_r8_sales_kanban_random_uuid_returns_404(
-    client: AsyncClient, r8_tenant_b,
+    client: AsyncClient,
+    r8_tenant_b,
 ):
     """Same parity test for sales-kanban."""
     res = await client.get(

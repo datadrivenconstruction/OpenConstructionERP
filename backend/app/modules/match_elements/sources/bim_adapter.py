@@ -74,12 +74,7 @@ def _read_attr(element: BIMElement, key: str) -> Any:
     if key == "type_name":
         # Revit "Type Name" lives in properties on most extractors.
         props = element.properties or {}
-        return (
-            props.get("type_name")
-            or props.get("Type")
-            or props.get("Family")
-            or element.element_type
-        )
+        return props.get("type_name") or props.get("Type") or props.get("Family") or element.element_type
     props = element.properties or {}
     if key in props:
         return props.get(key)
@@ -93,7 +88,9 @@ def _read_attr(element: BIMElement, key: str) -> Any:
 
 
 def _net_quantities(
-    raw: dict[str, Any], properties: dict[str, Any], use_net: bool,
+    raw: dict[str, Any],
+    properties: dict[str, Any],
+    use_net: bool,
 ) -> dict[str, float]:
     """‌⁠‍Build the rolled-up quantity dict for a single element."""
     out: dict[str, float] = {}
@@ -151,7 +148,9 @@ class BIMSourceAdapter:
         self.session = session
 
     async def list_attribute_keys(
-        self, project_id: uuid.UUID, bim_model_id: uuid.UUID | None = None,
+        self,
+        project_id: uuid.UUID,
+        bim_model_id: uuid.UUID | None = None,
     ) -> list[str]:
         """Sample the first 200 elements of the project to figure out
         which attribute keys are populated. This drives the chip-bar's
@@ -175,7 +174,9 @@ class BIMSourceAdapter:
         return ordered
 
     async def list_categories(
-        self, project_id: uuid.UUID, bim_model_id: uuid.UUID | None = None,
+        self,
+        project_id: uuid.UUID,
+        bim_model_id: uuid.UUID | None = None,
     ) -> list[tuple[str, int]]:
         """Return ``[(ifc_class, count), ...]`` for the scope-filter chip-bar."""
         from sqlalchemy import func

@@ -17,6 +17,7 @@ This empty merge migration unifies the two heads into a single tip so
 ``alembic upgrade head`` succeeds again on a fresh database.  No schema
 changes — both branches' tables are independent.
 """
+
 from __future__ import annotations
 
 from typing import Sequence, Union

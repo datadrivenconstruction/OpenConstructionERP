@@ -80,26 +80,21 @@ class _Repo:
         self.rows.pop(eid, None)
 
     async def list_for_subcontractor(
-        self, sub_id: uuid.UUID, **_kwargs: Any,
+        self,
+        sub_id: uuid.UUID,
+        **_kwargs: Any,
     ) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "subcontractor_id", None) == sub_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "subcontractor_id", None) == sub_id]
 
     async def list_by_subcontractor(self, sub_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "subcontractor_id", None) == sub_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "subcontractor_id", None) == sub_id]
 
     async def list_for_agreement(
-        self, ag_id: uuid.UUID, **_kwargs: Any,
+        self,
+        ag_id: uuid.UUID,
+        **_kwargs: Any,
     ) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "agreement_id", None) == ag_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "agreement_id", None) == ag_id]
 
     async def next_application_number(self, _ag_id: uuid.UUID) -> str:
         self._counter += 1
@@ -107,15 +102,15 @@ class _Repo:
 
     async def get_for_period(self, sub_id: uuid.UUID, period: str) -> Any:
         for r in self.rows.values():
-            if (
-                getattr(r, "subcontractor_id", None) == sub_id
-                and getattr(r, "period", None) == period
-            ):
+            if getattr(r, "subcontractor_id", None) == sub_id and getattr(r, "period", None) == period:
                 return r
         return None
 
     async def find_by_tax_id(
-        self, tax_id: str, *, country: str | None = None,
+        self,
+        tax_id: str,
+        *,
+        country: str | None = None,
     ) -> Any:
         self.find_calls += 1
         for r in self.rows.values():
@@ -128,31 +123,43 @@ class _Repo:
         return None
 
     async def count_open_for_agreements(
-        self, agreement_ids: list[uuid.UUID],
+        self,
+        agreement_ids: list[uuid.UUID],
     ) -> int:
         self.open_payments_calls += 1
         return sum(
-            1 for r in self.rows.values()
+            1
+            for r in self.rows.values()
             if getattr(r, "agreement_id", None) in agreement_ids
-            and getattr(r, "status", None) in (
-                "submitted", "foreman_approved", "finance_approved",
+            and getattr(r, "status", None)
+            in (
+                "submitted",
+                "foreman_approved",
+                "finance_approved",
             )
         )
 
     async def balance_for_agreements(
-        self, agreement_ids: list[uuid.UUID],
+        self,
+        agreement_ids: list[uuid.UUID],
     ) -> dict[uuid.UUID, tuple[Decimal, Decimal]]:
         self.balance_calls += 1
         out: dict[uuid.UUID, tuple[Decimal, Decimal]] = {}
         for ag_id in agreement_ids:
             accrued = sum(
-                (Decimal(str(r.accrued_amount)) for r in self.rows.values()
-                 if getattr(r, "agreement_id", None) == ag_id),
+                (
+                    Decimal(str(r.accrued_amount))
+                    for r in self.rows.values()
+                    if getattr(r, "agreement_id", None) == ag_id
+                ),
                 Decimal("0"),
             )
             released = sum(
-                (Decimal(str(r.released_amount)) for r in self.rows.values()
-                 if getattr(r, "agreement_id", None) == ag_id),
+                (
+                    Decimal(str(r.released_amount))
+                    for r in self.rows.values()
+                    if getattr(r, "agreement_id", None) == ag_id
+                ),
                 Decimal("0"),
             )
             out[ag_id] = (accrued, released)
@@ -197,10 +204,12 @@ class TestNewPermissionsRegistered:
         assert "subcontractors.rate" in permission_registry.list_all()
         # Manager can rate; Editor cannot.
         assert permission_registry.role_has_permission(
-            Role.MANAGER, "subcontractors.rate",
+            Role.MANAGER,
+            "subcontractors.rate",
         )
         assert not permission_registry.role_has_permission(
-            Role.EDITOR, "subcontractors.rate",
+            Role.EDITOR,
+            "subcontractors.rate",
         )
 
     def test_block_perm_registered(self) -> None:
@@ -212,41 +221,29 @@ class TestNewPermissionsRegistered:
         register_subcontractors_permissions()
         assert "subcontractors.block" in permission_registry.list_all()
         assert not permission_registry.role_has_permission(
-            Role.EDITOR, "subcontractors.block",
+            Role.EDITOR,
+            "subcontractors.block",
         )
 
     def test_block_route_uses_block_perm(self) -> None:
         """Regression for: any EDITOR could exclude a rival firm."""
         from app.modules.subcontractors import router as sub_router
 
-        block = next(
-            r for r in sub_router.router.routes
-            if getattr(r, "path", "") == "/subcontractors/{sub_id}/block"
-        )
-        perms = {
-            getattr(d.call, "permission", None)
-            for d in block.dependant.dependencies
-        }
-        assert "subcontractors.block" in perms, (
-            f"/block lost its dedicated permission guard; saw {perms}"
-        )
+        block = next(r for r in sub_router.router.routes if getattr(r, "path", "") == "/subcontractors/{sub_id}/block")
+        perms = {getattr(d.call, "permission", None) for d in block.dependant.dependencies}
+        assert "subcontractors.block" in perms, f"/block lost its dedicated permission guard; saw {perms}"
 
     def test_rate_route_uses_rate_perm(self) -> None:
         """Regression for: any EDITOR could forge a subcontractor rating."""
         from app.modules.subcontractors import router as sub_router
 
         rate = next(
-            r for r in sub_router.router.routes
-            if getattr(r, "path", "") == "/ratings/"
-            and "POST" in getattr(r, "methods", set())
+            r
+            for r in sub_router.router.routes
+            if getattr(r, "path", "") == "/ratings/" and "POST" in getattr(r, "methods", set())
         )
-        perms = {
-            getattr(d.call, "permission", None)
-            for d in rate.dependant.dependencies
-        }
-        assert "subcontractors.rate" in perms, (
-            f"POST /ratings/ lost its dedicated permission guard; saw {perms}"
-        )
+        perms = {getattr(d.call, "permission", None) for d in rate.dependant.dependencies}
+        assert "subcontractors.rate" in perms, f"POST /ratings/ lost its dedicated permission guard; saw {perms}"
 
 
 # ── Rating tampering — SubcontractorUpdate must not accept rating_score ───
@@ -554,7 +551,8 @@ class TestContactPiiNotInLogs:
         )
 
         caplog.set_level(
-            logging.INFO, logger="app.modules.subcontractors.service",
+            logging.INFO,
+            logger="app.modules.subcontractors.service",
         )
         svc = _make_service()
         with patch("app.modules.subcontractors.service.event_bus.publish_detached"):
@@ -569,9 +567,7 @@ class TestContactPiiNotInLogs:
                 ),
             )
         blob = "\n".join(rec.getMessage() for rec in caplog.records)
-        assert "bob.private@secret-domain.example" not in blob, (
-            f"raw e-mail leaked into log stream: {blob!r}"
-        )
+        assert "bob.private@secret-domain.example" not in blob, f"raw e-mail leaked into log stream: {blob!r}"
         assert "+49 170 99999999" not in blob
         assert "99999999" not in blob
         # Sanity — at least one redacted token IS present.
@@ -600,7 +596,8 @@ class TestContactPiiNotInLogs:
             )
             caplog.clear()
             caplog.set_level(
-                logging.INFO, logger="app.modules.subcontractors.service",
+                logging.INFO,
+                logger="app.modules.subcontractors.service",
             )
             await svc.update_contact(
                 created.id,
@@ -688,12 +685,10 @@ class TestDashboardSingleRetentionAndPaymentsQuery:
 
         # Single batched call to each of the two new repo methods.
         assert svc.payments.open_payments_calls == 1, (
-            f"dashboard regressed to per-agreement payments queries: "
-            f"saw {svc.payments.open_payments_calls} calls"
+            f"dashboard regressed to per-agreement payments queries: saw {svc.payments.open_payments_calls} calls"
         )
         assert svc.retention.balance_calls == 1, (
-            f"dashboard regressed to per-agreement retention queries: "
-            f"saw {svc.retention.balance_calls} calls"
+            f"dashboard regressed to per-agreement retention queries: saw {svc.retention.balance_calls} calls"
         )
 
 
@@ -709,9 +704,9 @@ class TestUpdateRatingEventsCap:
         # Inspect the route signature directly so we don't need a full
         # FastAPI TestClient + auth stack here.
         update_route = next(
-            r for r in sub_router.router.routes
-            if getattr(r, "path", "") == "/ratings/"
-            and "POST" in getattr(r, "methods", set())
+            r
+            for r in sub_router.router.routes
+            if getattr(r, "path", "") == "/ratings/" and "POST" in getattr(r, "methods", set())
         )
         handler = update_route.endpoint
         # The handler raises 422 when events len > 50.
@@ -750,9 +745,7 @@ class TestMigrationMetadata:
         # Walk up from this test file: backend/tests/unit/<this>.py →
         # backend/alembic/versions/v3099_subcontractors_unique_tax_id.py
         mig_path = (
-            Path(__file__).resolve().parents[2]
-            / "alembic" / "versions"
-            / "v3099_subcontractors_unique_tax_id.py"
+            Path(__file__).resolve().parents[2] / "alembic" / "versions" / "v3099_subcontractors_unique_tax_id.py"
         )
         assert mig_path.exists(), f"migration file missing at {mig_path}"
         spec = spec_from_file_location("_v3099_sub", mig_path)

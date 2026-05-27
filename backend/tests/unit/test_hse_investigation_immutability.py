@@ -66,12 +66,11 @@ async def test_update_completed_investigation_findings_is_rejected() -> None:
 
     with pytest.raises(HTTPException) as exc:
         await svc.update_investigation(
-            inv.id, InvestigationUpdate(findings="Falsified findings"),
+            inv.id,
+            InvestigationUpdate(findings="Falsified findings"),
         )
     assert exc.value.status_code == 409
-    assert "immutable" in str(exc.value.detail).lower() or "completed" in str(
-        exc.value.detail
-    ).lower()
+    assert "immutable" in str(exc.value.detail).lower() or "completed" in str(exc.value.detail).lower()
     # Stored copy is untouched.
     assert inv.findings == "Original RCA: faulty isolation"
 
@@ -85,7 +84,8 @@ async def test_update_completed_investigation_recommendations_is_rejected() -> N
 
     with pytest.raises(HTTPException) as exc:
         await svc.update_investigation(
-            inv.id, InvestigationUpdate(recommendations="Drop training requirement"),
+            inv.id,
+            InvestigationUpdate(recommendations="Drop training requirement"),
         )
     assert exc.value.status_code == 409
 
@@ -100,7 +100,8 @@ async def test_update_abandoned_investigation_is_rejected() -> None:
 
     with pytest.raises(HTTPException) as exc:
         await svc.update_investigation(
-            inv.id, InvestigationUpdate(findings="Re-write history"),
+            inv.id,
+            InvestigationUpdate(findings="Re-write history"),
         )
     assert exc.value.status_code == 409
 
@@ -114,7 +115,8 @@ async def test_update_completed_investigation_method_is_rejected() -> None:
 
     with pytest.raises(HTTPException) as exc:
         await svc.update_investigation(
-            inv.id, InvestigationUpdate(method="fishbone"),
+            inv.id,
+            InvestigationUpdate(method="fishbone"),
         )
     assert exc.value.status_code == 409
 
@@ -137,7 +139,8 @@ async def test_status_only_update_on_completed_investigation_is_allowed() -> Non
     # The schema only validates the in_progress|completed|abandoned set,
     # so re-opening means flipping back to in_progress.
     result = await svc.update_investigation(
-        inv.id, InvestigationUpdate(status="in_progress"),
+        inv.id,
+        InvestigationUpdate(status="in_progress"),
     )
     assert result.status == "in_progress"
 
@@ -150,7 +153,8 @@ async def test_update_in_progress_investigation_findings_is_allowed() -> None:
     svc.investigation_repo.rows[inv.id] = inv
 
     result = await svc.update_investigation(
-        inv.id, InvestigationUpdate(findings="Updated RCA narrative"),
+        inv.id,
+        InvestigationUpdate(findings="Updated RCA narrative"),
     )
     assert result.findings == "Updated RCA narrative"
 

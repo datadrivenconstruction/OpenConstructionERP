@@ -22,7 +22,7 @@ and independent of the live alembic graph.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -76,7 +76,7 @@ def test_ai_rate_limit_returns_429_after_quota():
     # First N requests succeed.
     for i in range(3):
         allowed, remaining = limiter.is_allowed(user_id)
-        assert allowed is True, f"request {i+1} should be allowed"
+        assert allowed is True, f"request {i + 1} should be allowed"
         assert remaining == 3 - (i + 1)
 
     # The (N+1)-th must be refused — same shape as ``check_ai_rate_limit``.
@@ -129,10 +129,7 @@ async def test_history_drops_disallowed_roles_and_caps_length(session_factory):
             "not-a-dict",
         ]
         # Pad with enough valid turns to overflow MAX_HISTORY_MESSAGES.
-        history.extend(
-            {"role": "user", "content": f"msg {i}"}
-            for i in range(MAX_HISTORY_MESSAGES + 5)
-        )
+        history.extend({"role": "user", "content": f"msg {i}"} for i in range(MAX_HISTORY_MESSAGES + 5))
 
         msgs = await service._build_messages(
             session_id=uuid.uuid4(),
@@ -223,7 +220,10 @@ async def test_stream_response_happy_path(session_factory):
         async def _fake_anthropic(api_key, messages, preferred_model):  # noqa: ARG001
             # Side-effect: record per-turn metrics like the real call does.
             service._record_turn_metrics(
-                tokens_in=42, tokens_out=17, cache_hit=False, latency_ms=120,
+                tokens_in=42,
+                tokens_out=17,
+                cache_hit=False,
+                latency_ms=120,
             )
             return fake_anthropic_response, 59
 
@@ -282,7 +282,7 @@ async def test_daily_token_budget_under_limit_allows_request(session_factory):
             content="ancient",
             tokens_used=DAILY_TOKEN_BUDGET + 100,
         )
-        old.created_at = datetime.now(timezone.utc) - timedelta(hours=48)
+        old.created_at = datetime.now(UTC) - timedelta(hours=48)
         session.add(old)
         await session.commit()
 

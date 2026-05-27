@@ -77,6 +77,7 @@ def _truncate_observation(value: Any, cap: int) -> Any:
         "preview": encoded[:cap],
     }
 
+
 # ── Tool protocol ───────────────────────────────────────────────────────────
 
 
@@ -331,9 +332,7 @@ class AgentRunner:
         """
         registry = tool_registry or global_tool_registry
         allowed = set(agent.allowed_tools)
-        available_tools: list[Tool] = [
-            t for t in registry.all() if not allowed or t.name in allowed
-        ]
+        available_tools: list[Tool] = [t for t in registry.all() if not allowed or t.name in allowed]
 
         messages: list[dict[str, Any]] = []
         if context:
@@ -403,7 +402,7 @@ class AgentRunner:
                         messages=messages,
                         tools=available_tools,
                     )
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 err_step = StepRecord(
                     role="error",
                     content={"reason": "llm_timeout", "timeout_s": step_timeout},
@@ -528,9 +527,7 @@ class AgentRunner:
                 # in its tool_call args is STRIPPED before we re-inject the
                 # trusted runtime context. A model that asks to run a tool
                 # "as another user" must not be able to do so.
-                call_args = {
-                    k: v for k, v in tool_args.items() if k != "__agent_context__"
-                }
+                call_args = {k: v for k, v in tool_args.items() if k != "__agent_context__"}
                 if context:
                     call_args["__agent_context__"] = dict(context)
 

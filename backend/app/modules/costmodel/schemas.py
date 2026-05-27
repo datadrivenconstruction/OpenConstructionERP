@@ -29,6 +29,7 @@ def _serialise_money(v: Decimal | None) -> str | None:
         return "0"
     return format(v, "f")
 
+
 # ── CostSnapshot schemas ─────────────────────────────────────────────────────
 
 
@@ -136,7 +137,10 @@ class BudgetLineCreate(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @field_serializer(
-        "planned_amount", "committed_amount", "actual_amount", "forecast_amount",
+        "planned_amount",
+        "committed_amount",
+        "actual_amount",
+        "forecast_amount",
         when_used="json",
     )
     def _ser_money(self, v: Decimal) -> str | None:
@@ -162,7 +166,10 @@ class BudgetLineUpdate(BaseModel):
     metadata: dict[str, Any] | None = None
 
     @field_serializer(
-        "planned_amount", "committed_amount", "actual_amount", "forecast_amount",
+        "planned_amount",
+        "committed_amount",
+        "actual_amount",
+        "forecast_amount",
         when_used="json",
     )
     def _ser_money(self, v: Decimal | None) -> str | None:
@@ -195,7 +202,10 @@ class BudgetLineResponse(BaseModel):
     updated_at: datetime
 
     @field_serializer(
-        "planned_amount", "committed_amount", "actual_amount", "forecast_amount",
+        "planned_amount",
+        "committed_amount",
+        "actual_amount",
+        "forecast_amount",
         when_used="json",
     )
     def _ser_money(self, v: Decimal) -> str | None:
@@ -225,8 +235,12 @@ class CashFlowCreate(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @field_serializer(
-        "planned_inflow", "planned_outflow", "actual_inflow", "actual_outflow",
-        "cumulative_planned", "cumulative_actual",
+        "planned_inflow",
+        "planned_outflow",
+        "actual_inflow",
+        "actual_outflow",
+        "cumulative_planned",
+        "cumulative_actual",
         when_used="json",
     )
     def _ser_money(self, v: Decimal) -> str | None:
@@ -248,8 +262,12 @@ class CashFlowUpdate(BaseModel):
     metadata: dict[str, Any] | None = None
 
     @field_serializer(
-        "planned_inflow", "planned_outflow", "actual_inflow", "actual_outflow",
-        "cumulative_planned", "cumulative_actual",
+        "planned_inflow",
+        "planned_outflow",
+        "actual_inflow",
+        "actual_outflow",
+        "cumulative_planned",
+        "cumulative_actual",
         when_used="json",
     )
     def _ser_money(self, v: Decimal | None) -> str | None:
@@ -279,8 +297,12 @@ class CashFlowResponse(BaseModel):
     updated_at: datetime
 
     @field_serializer(
-        "planned_inflow", "planned_outflow", "actual_inflow", "actual_outflow",
-        "cumulative_planned", "cumulative_actual",
+        "planned_inflow",
+        "planned_outflow",
+        "actual_inflow",
+        "actual_outflow",
+        "cumulative_planned",
+        "cumulative_actual",
         when_used="json",
     )
     def _ser_money(self, v: Decimal) -> str | None:
@@ -467,12 +489,8 @@ class VarianceResponse(BaseModel):
     budget: Decimal = Decimal("0")
     current: float = 0.0
     variance_abs: Decimal = Field(default=Decimal("0"), description="current - budget")
-    variance_pct: float = Field(
-        0.0, description="(current - budget) / budget * 100 — 0.0 when budget is 0"
-    )
-    red_line: float = Field(
-        5.0, description="Absolute % threshold that flips the KPI to red"
-    )
+    variance_pct: float = Field(0.0, description="(current - budget) / budget * 100 — 0.0 when budget is 0")
+    red_line: float = Field(5.0, description="Absolute % threshold that flips the KPI to red")
     currency: str = ""
 
     @field_serializer("budget", "variance_abs", when_used="json")

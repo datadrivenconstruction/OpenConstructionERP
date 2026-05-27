@@ -20,11 +20,10 @@ Coverage:
 from __future__ import annotations
 
 import asyncio
-import base64
 import uuid
 from types import SimpleNamespace
 from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -37,17 +36,13 @@ from app.modules.match_elements.sources.image_adapter import (
     _quantities_for,
 )
 
-
 # ── Helpers ─────────────────────────────────────────────────────────────
 
 
 # Minimal valid 1x1 PNG so ``base64.b64decode`` returns non-empty bytes
 # and the resolver doesn't short-circuit. The byte content is irrelevant
 # because the AI call is mocked out.
-_TINY_PNG_B64 = (
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjC"
-    "B0C8AAAAASUVORK5CYII="
-)
+_TINY_PNG_B64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
 
 
 def _fake_session(metadata: dict[str, Any] | None) -> SimpleNamespace:
@@ -90,7 +85,9 @@ def _patch_extract(monkeypatch: pytest.MonkeyPatch, items: list[dict[str, Any]])
     """
     mock = AsyncMock(return_value=items)
     monkeypatch.setattr(
-        ImageSourceAdapter, "_extract_via_ai", mock,
+        ImageSourceAdapter,
+        "_extract_via_ai",
+        mock,
     )
     return mock
 
@@ -177,13 +174,15 @@ class TestImageSourceAdapterValidResponse:
     """End-to-end with a happy-path mocked LLM response."""
 
     def test_iter_elements_from_mocked_ai(self, monkeypatch: pytest.MonkeyPatch):
-        sess = _fake_session({
-            "image": {
-                "data_b64": _TINY_PNG_B64,
-                "mime": "image/png",
-                "filename": "photo.png",
+        sess = _fake_session(
+            {
+                "image": {
+                    "data_b64": _TINY_PNG_B64,
+                    "mime": "image/png",
+                    "filename": "photo.png",
+                }
             }
-        })
+        )
         ai_items = [
             {
                 "name": "Concrete wall",
@@ -231,9 +230,7 @@ class TestImageSourceAdapterValidResponse:
         assert wall.raw_ref == str(sess.id)
 
     def test_list_categories(self, monkeypatch: pytest.MonkeyPatch):
-        sess = _fake_session({
-            "image": {"data_b64": _TINY_PNG_B64, "mime": "image/png"}
-        })
+        sess = _fake_session({"image": {"data_b64": _TINY_PNG_B64, "mime": "image/png"}})
         ai_items = [
             {"name": "w1", "ifc_class_guess": "IfcWall"},
             {"name": "w2", "ifc_class_guess": "IfcWall"},
@@ -248,9 +245,7 @@ class TestImageSourceAdapterValidResponse:
         assert cats == {"IfcWall": 2, "IfcDoor": 1, "Image": 1}
 
     def test_excluded_categories_filter(self, monkeypatch: pytest.MonkeyPatch):
-        sess = _fake_session({
-            "image": {"data_b64": _TINY_PNG_B64, "mime": "image/png"}
-        })
+        sess = _fake_session({"image": {"data_b64": _TINY_PNG_B64, "mime": "image/png"}})
         ai_items = [
             {"name": "wall", "ifc_class_guess": "IfcWall"},
             {"name": "furniture", "ifc_class_guess": "IfcFurniture"},
@@ -258,10 +253,12 @@ class TestImageSourceAdapterValidResponse:
         _patch_extract(monkeypatch, ai_items)
 
         adapter = ImageSourceAdapter(session=None, match_session=sess)
-        elements = _run(adapter.iter_elements(
-            project_id=PROJECT_ID,
-            excluded_categories=["IfcFurniture"],
-        ))
+        elements = _run(
+            adapter.iter_elements(
+                project_id=PROJECT_ID,
+                excluded_categories=["IfcFurniture"],
+            )
+        )
         assert len(elements) == 1
         assert elements[0].category == "IfcWall"
 
@@ -270,11 +267,10 @@ class TestImageSourceAdapterEmptyResponse:
     """LLM returned ``[]`` because the image isn't a construction drawing."""
 
     def test_empty_list_from_ai_yields_no_elements(
-        self, monkeypatch: pytest.MonkeyPatch,
+        self,
+        monkeypatch: pytest.MonkeyPatch,
     ):
-        sess = _fake_session({
-            "image": {"data_b64": _TINY_PNG_B64, "mime": "image/jpeg"}
-        })
+        sess = _fake_session({"image": {"data_b64": _TINY_PNG_B64, "mime": "image/jpeg"}})
         _patch_extract(monkeypatch, [])
 
         adapter = ImageSourceAdapter(session=None, match_session=sess)
@@ -298,9 +294,7 @@ class TestImageSourceAdapterEmptyResponse:
     def test_invalid_base64_returns_empty(self, monkeypatch: pytest.MonkeyPatch):
         # Image dict is shaped correctly but the bytes can't decode → []
         # without ever touching the AI service.
-        sess = _fake_session({
-            "image": {"data_b64": "", "mime": "image/png"}
-        })
+        sess = _fake_session({"image": {"data_b64": "", "mime": "image/png"}})
         # The AI mock should NOT be called because resolver returns None.
         mock = _patch_extract(monkeypatch, [{"name": "wall"}])
 
@@ -315,7 +309,8 @@ class TestImageSourceAdapterMalformedResponse:
     """LLM returned junk that's neither valid JSON nor a list."""
 
     def test_garbage_response_does_not_crash(
-        self, monkeypatch: pytest.MonkeyPatch,
+        self,
+        monkeypatch: pytest.MonkeyPatch,
     ):
         # Stub at the lower level — the LLM response is bad so the
         # parser must be exercised. We patch ``call_ai`` directly and
@@ -323,20 +318,19 @@ class TestImageSourceAdapterMalformedResponse:
         # actually runs the parser.
         from app.modules.match_elements.sources import image_adapter
 
-        sess = _fake_session({
-            "image": {"data_b64": _TINY_PNG_B64, "mime": "image/png"}
-        })
+        sess = _fake_session({"image": {"data_b64": _TINY_PNG_B64, "mime": "image/png"}})
 
         # Bypass the settings-resolution branch by overriding
         # ``_extract_via_ai`` to return whatever the parser produces
         # for a malformed string. We re-implement the parser call so
         # the test still exercises real parsing logic.
         async def fake_extract(self, image_bytes, mime):  # noqa: ANN001
-            return image_adapter._parse_ai_response(
-                "this is not json {not really at all"
-            )
+            return image_adapter._parse_ai_response("this is not json {not really at all")
+
         monkeypatch.setattr(
-            ImageSourceAdapter, "_extract_via_ai", fake_extract,
+            ImageSourceAdapter,
+            "_extract_via_ai",
+            fake_extract,
         )
 
         adapter = ImageSourceAdapter(session=None, match_session=sess)
@@ -350,16 +344,15 @@ class TestImageSourceAdapterMalformedResponse:
         # Markdown-wrapped JSON should still parse and produce elements.
         from app.modules.match_elements.sources import image_adapter
 
-        sess = _fake_session({
-            "image": {"data_b64": _TINY_PNG_B64, "mime": "image/png"}
-        })
+        sess = _fake_session({"image": {"data_b64": _TINY_PNG_B64, "mime": "image/png"}})
 
         async def fake_extract(self, image_bytes, mime):  # noqa: ANN001
-            return image_adapter._parse_ai_response(
-                '```json\n[{"name": "wall", "ifc_class_guess": "IfcWall"}]\n```'
-            )
+            return image_adapter._parse_ai_response('```json\n[{"name": "wall", "ifc_class_guess": "IfcWall"}]\n```')
+
         monkeypatch.setattr(
-            ImageSourceAdapter, "_extract_via_ai", fake_extract,
+            ImageSourceAdapter,
+            "_extract_via_ai",
+            fake_extract,
         )
 
         adapter = ImageSourceAdapter(session=None, match_session=sess)
@@ -374,15 +367,14 @@ class TestImageSourceAdapterMalformedResponse:
 
 class TestImageSourceAdapterNoAIKey:
     def test_missing_ai_settings_returns_empty(
-        self, monkeypatch: pytest.MonkeyPatch,
+        self,
+        monkeypatch: pytest.MonkeyPatch,
     ):
         """When :func:`resolve_provider_and_key` raises ``ValueError`` for
         every settings row (no API key), the adapter logs and returns
         ``[]`` — never raises and never bubbles a 5xx.
         """
-        sess = _fake_session({
-            "image": {"data_b64": _TINY_PNG_B64, "mime": "image/png"}
-        })
+        sess = _fake_session({"image": {"data_b64": _TINY_PNG_B64, "mime": "image/png"}})
 
         # Force the real ``_extract_via_ai`` path to execute by giving
         # it a session=None — the resolver returns an empty result and

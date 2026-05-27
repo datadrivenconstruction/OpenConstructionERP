@@ -73,9 +73,7 @@ class FileComment(Base):
     # rows. New writes populate both; reads prefer the FK and fall back
     # to the snapshot only if the FK is NULL. DO NOT drop this column
     # in this epic.
-    file_version_snapshot: Mapped[str | None] = mapped_column(
-        String(32), nullable=True
-    )
+    file_version_snapshot: Mapped[str | None] = mapped_column(String(32), nullable=True)
     # Epic C: unified version-chain link. Points at the
     # ``oe_file_version`` row that was current when this comment was
     # created. NULL = legacy row written before Epic C; the UI treats
@@ -105,12 +103,8 @@ class FileComment(Base):
     page_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
     anchor_x: Mapped[float | None] = mapped_column(Float, nullable=True)
     anchor_y: Mapped[float | None] = mapped_column(Float, nullable=True)
-    resolved: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
-    resolved_at: Mapped[object | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    resolved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    resolved_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
     resolved_by_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
@@ -118,10 +112,7 @@ class FileComment(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<FileComment {self.file_kind}/{self.file_id} "
-            f"parent={self.parent_id} resolved={self.resolved}>"
-        )
+        return f"<FileComment {self.file_kind}/{self.file_id} parent={self.parent_id} resolved={self.resolved}>"
 
 
 class FileCommentMention(Base):
@@ -155,12 +146,9 @@ class FileCommentMention(Base):
         nullable=False,
         index=True,
     )
-    notified_at: Mapped[object | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    notified_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     def __repr__(self) -> str:
         return (
-            f"<FileCommentMention comment={self.comment_id} "
-            f"user={self.mentioned_user_id} notified={self.notified_at}>"
+            f"<FileCommentMention comment={self.comment_id} user={self.mentioned_user_id} notified={self.notified_at}>"
         )

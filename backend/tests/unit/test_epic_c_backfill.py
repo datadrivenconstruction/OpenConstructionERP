@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import importlib.util
 import uuid
-from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -35,10 +34,8 @@ from app.modules.documents.models import (  # noqa: F401 — registers ORM
     ProjectPhoto,
     Sheet,
 )
-from app.modules.file_versions.models import FileVersion
 from app.modules.projects.models import Project
 from app.modules.users.models import User
-
 
 # ── Load the alembic migration module by path ──────────────────────────
 
@@ -53,16 +50,8 @@ def _load_migration():
     """
     here = Path(__file__).resolve()
     repo_root = here.parents[3]
-    mig_path = (
-        repo_root
-        / "backend"
-        / "alembic"
-        / "versions"
-        / "v3143_unified_file_versions.py"
-    )
-    spec = importlib.util.spec_from_file_location(
-        "v3143_unified_file_versions", mig_path
-    )
+    mig_path = repo_root / "backend" / "alembic" / "versions" / "v3143_unified_file_versions.py"
+    spec = importlib.util.spec_from_file_location("v3143_unified_file_versions", mig_path)
     assert spec is not None and spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -164,11 +153,7 @@ async def test_v3143_backfill_inserts_one_chain_row_per_source(
             if kind == "sheet"
             else f"COALESCE(NULLIF(TRIM({table}.{name_col}), ''), 'untitled')"
         )
-        uploaded_by_expr = (
-            f"CAST({table}.{uploaded_by_col} AS TEXT)"
-            if uploaded_by_col
-            else "NULL"
-        )
+        uploaded_by_expr = f"CAST({table}.{uploaded_by_col} AS TEXT)" if uploaded_by_col else "NULL"
         id_cast = f"CAST({table}.{id_col} AS TEXT)"
         sql = text(
             f"""
@@ -239,10 +224,7 @@ async def test_v3143_backfill_inserts_one_chain_row_per_source(
     # Sheet uses the composite ``document_id:sheet_number`` key.
     sheet_row = (
         await session.execute(
-            text(
-                "SELECT canonical_name FROM oe_file_version "
-                "WHERE file_kind='sheet' AND file_id = :fid"
-            ),
+            text("SELECT canonical_name FROM oe_file_version WHERE file_kind='sheet' AND file_id = :fid"),
             {"fid": str(sheet_id)},
         )
     ).scalar_one()

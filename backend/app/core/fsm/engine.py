@@ -243,8 +243,7 @@ class EntityFSM:
                 ) from exc
             if not result:
                 raise GuardFailed(
-                    f"Guard {guard.__name__!r} vetoed transition "
-                    f"{self.name}:{current}->{target}.",
+                    f"Guard {guard.__name__!r} vetoed transition {self.name}:{current}->{target}.",
                     current_status=current,
                     target_status=target,
                     allowed_transitions=self.allowed_from(current),
@@ -267,7 +266,9 @@ class EntityFSM:
                 # run BEFORE the audit row is written.
                 logger.exception(
                     "FSM %s side-effect %s raised %s",
-                    self.name, handler.__name__, type(exc).__name__,
+                    self.name,
+                    handler.__name__,
+                    type(exc).__name__,
                 )
                 raise
 
@@ -287,7 +288,10 @@ class EntityFSM:
         """
         transition = self._resolve(current, target)
         self._check_role(
-            transition, user_role=user_role, current=current, target=target,
+            transition,
+            user_role=user_role,
+            current=current,
+            target=target,
         )
         return transition
 
@@ -329,7 +333,10 @@ class EntityFSM:
         current = getattr(entity, "status", None) or self.initial
         transition = self._resolve(current, target)
         self._check_role(
-            transition, user_role=actor_role, current=current, target=target,
+            transition,
+            user_role=actor_role,
+            current=current,
+            target=target,
         )
 
         context: dict[str, Any] = {
@@ -346,7 +353,10 @@ class EntityFSM:
         }
 
         await self._run_guards(
-            transition, context, current=current, target=target,
+            transition,
+            context,
+            current=current,
+            target=target,
         )
 
         # Persist the new status. We mutate the ORM attribute directly so
@@ -381,13 +391,19 @@ class EntityFSM:
         except Exception:  # pragma: no cover — audit must never block flow
             logger.exception(
                 "FSM %s: audit log write failed for entity %r %s->%s",
-                self.name, getattr(entity, "id", "?"), current, target,
+                self.name,
+                getattr(entity, "id", "?"),
+                current,
+                target,
             )
 
         logger.info(
             "FSM %s: %s -> %s (entity=%s, actor=%s)",
-            self.name, current, target,
-            getattr(entity, "id", "?"), actor_id or "system",
+            self.name,
+            current,
+            target,
+            getattr(entity, "id", "?"),
+            actor_id or "system",
         )
         return entity
 

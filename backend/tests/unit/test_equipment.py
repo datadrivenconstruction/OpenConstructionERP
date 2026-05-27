@@ -41,7 +41,6 @@ from app.modules.equipment.service import (
     depreciation_value_at,
 )
 
-
 # ── Helpers / stubs ──────────────────────────────────────────────────────
 
 
@@ -617,9 +616,7 @@ def test_busy_days_merges_overlapping_rentals() -> None:
 
     r1 = SimpleNamespace(start_date="2026-01-01", end_date="2026-01-10")
     r2 = SimpleNamespace(start_date="2026-01-05", end_date="2026-01-10")
-    busy = _busy_days_in_window(
-        [r1, r2], date(2026, 1, 1), date(2026, 1, 31)
-    )
+    busy = _busy_days_in_window([r1, r2], date(2026, 1, 1), date(2026, 1, 31))
     assert busy == 10
 
 
@@ -741,9 +738,7 @@ async def test_create_equipment_rejects_duplicate_code() -> None:
     from fastapi import HTTPException
 
     with pytest.raises(HTTPException) as exc:
-        await svc.create_equipment(
-            EquipmentCreate(code="EQ-DUP", name="Dup", type_code="excavator")
-        )
+        await svc.create_equipment(EquipmentCreate(code="EQ-DUP", name="Dup", type_code="excavator"))
     assert exc.value.status_code == 409
 
 
@@ -753,9 +748,7 @@ async def test_create_equipment_happy_path() -> None:
     svc.equipment_repo.get_by_code = AsyncMock(return_value=None)
     svc.equipment_repo.create = AsyncMock(side_effect=_attach_meta)
 
-    e = await svc.create_equipment(
-        EquipmentCreate(code="EQ-100", name="Cat 320", type_code="excavator")
-    )
+    e = await svc.create_equipment(EquipmentCreate(code="EQ-100", name="Cat 320", type_code="excavator"))
     assert e.code == "EQ-100"
     assert e.id is not None
 
@@ -851,9 +844,7 @@ async def test_create_fuel_log_emits_event_with_active_project() -> None:
     svc = _make_service()
     equipment_id = uuid.uuid4()
     project_id = uuid.uuid4()
-    svc.equipment_repo.get_by_id = AsyncMock(
-        return_value=_make_equipment(id=equipment_id)
-    )
+    svc.equipment_repo.get_by_id = AsyncMock(return_value=_make_equipment(id=equipment_id))
     rental = SimpleNamespace(
         id=uuid.uuid4(),
         equipment_id=equipment_id,
@@ -877,8 +868,7 @@ async def test_create_fuel_log_emits_event_with_active_project() -> None:
 
     names = [c.args[0] for c in bus.call_args_list]
     assert "equipment.fuel_logged" in names
-    payload = next(c.args[1] for c in bus.call_args_list
-                   if c.args[0] == "equipment.fuel_logged")
+    payload = next(c.args[1] for c in bus.call_args_list if c.args[0] == "equipment.fuel_logged")
     assert payload["project_id"] == str(project_id)
     assert payload["cost"] == "180.50"
 
@@ -890,9 +880,7 @@ async def test_create_fuel_log_emits_event_without_project_when_idle() -> None:
 
     svc = _make_service()
     equipment_id = uuid.uuid4()
-    svc.equipment_repo.get_by_id = AsyncMock(
-        return_value=_make_equipment(id=equipment_id)
-    )
+    svc.equipment_repo.get_by_id = AsyncMock(return_value=_make_equipment(id=equipment_id))
     svc.rental_repo.list_ = AsyncMock(return_value=([], 0))
 
     with patch("app.modules.equipment.service.event_bus.publish_detached") as bus:
@@ -906,8 +894,7 @@ async def test_create_fuel_log_emits_event_without_project_when_idle() -> None:
             )
         )
 
-    payload = next(c.args[1] for c in bus.call_args_list
-                   if c.args[0] == "equipment.fuel_logged")
+    payload = next(c.args[1] for c in bus.call_args_list if c.args[0] == "equipment.fuel_logged")
     assert payload["project_id"] is None
 
 
@@ -924,9 +911,7 @@ async def test_record_telemetry_triggers_maintenance_check() -> None:
     """
     svc = _make_service()
     equipment_id = uuid.uuid4()
-    svc.equipment_repo.get_by_id = AsyncMock(
-        return_value=_make_equipment(id=equipment_id, last_telemetry_at=None)
-    )
+    svc.equipment_repo.get_by_id = AsyncMock(return_value=_make_equipment(id=equipment_id, last_telemetry_at=None))
     triggered: list[uuid.UUID] = []
 
     async def fake_generator(*, equipment_id: uuid.UUID, lookahead_hours: float) -> list:
@@ -1080,9 +1065,7 @@ async def test_create_rental_happy_path_emits_assigned() -> None:
 
     svc = _make_service()
     eid = uuid.uuid4()
-    svc.equipment_repo.get_by_id = AsyncMock(
-        return_value=_make_equipment(id=eid, status="active")
-    )
+    svc.equipment_repo.get_by_id = AsyncMock(return_value=_make_equipment(id=eid, status="active"))
     svc.inspection_repo.list_for_equipment = AsyncMock(return_value=[])
 
     captured: list[str] = []
@@ -1119,9 +1102,7 @@ async def test_create_parts_log_emits_event_with_line_total() -> None:
     svc = _make_service()
     eid = uuid.uuid4()
     pid = uuid.uuid4()
-    svc.equipment_repo.get_by_id = AsyncMock(
-        return_value=_make_equipment(id=eid)
-    )
+    svc.equipment_repo.get_by_id = AsyncMock(return_value=_make_equipment(id=eid))
     rental = SimpleNamespace(
         id=uuid.uuid4(),
         equipment_id=eid,
@@ -1132,9 +1113,7 @@ async def test_create_parts_log_emits_event_with_line_total() -> None:
     )
     svc.rental_repo.list_ = AsyncMock(return_value=([rental], 1))
 
-    with patch(
-        "app.modules.equipment.service.event_bus.publish_detached"
-    ) as bus:
+    with patch("app.modules.equipment.service.event_bus.publish_detached") as bus:
         await svc.create_parts_log(
             PartsLogCreate(
                 equipment_id=eid,
@@ -1146,11 +1125,7 @@ async def test_create_parts_log_emits_event_with_line_total() -> None:
             )
         )
 
-    payload = next(
-        c.args[1]
-        for c in bus.call_args_list
-        if c.args[0] == "equipment.parts_logged"
-    )
+    payload = next(c.args[1] for c in bus.call_args_list if c.args[0] == "equipment.parts_logged")
     assert payload["project_id"] == str(pid)
     assert payload["line_total"] == "37.5000"
     assert payload["currency"] == "GBP"
@@ -1189,9 +1164,7 @@ async def test_equipment_dashboard_aggregates_unit_kpis() -> None:
 async def test_fleet_dashboard_counts_by_status_and_type() -> None:
     svc = _make_service()
     e1 = _make_equipment(id=uuid.uuid4(), status="active", type_code="excavator")
-    e2 = _make_equipment(
-        id=uuid.uuid4(), status="under_maintenance", type_code="excavator"
-    )
+    e2 = _make_equipment(id=uuid.uuid4(), status="under_maintenance", type_code="excavator")
     e3 = _make_equipment(id=uuid.uuid4(), status="active", type_code="crane")
     svc.equipment_repo.list_ = AsyncMock(return_value=([e1, e2, e3], 3))
     svc.fuel_repo.cost_in_range = AsyncMock(return_value=Decimal("0"))

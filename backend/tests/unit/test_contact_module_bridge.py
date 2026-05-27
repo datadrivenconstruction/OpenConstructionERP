@@ -33,39 +33,15 @@ from sqlalchemy.ext.asyncio import (
 from app.database import Base
 from app.modules.contacts import bridge
 from app.modules.contacts.models import Contact
+from app.modules.projects.models import Project
 from app.modules.property_dev.models import (
-    Block,
-    Broker,
     Buyer,
-    BuyerOption,
-    BuyerOptionGroup,
-    BuyerSelection,
-    BuyerSelectionItem,
-    CommissionAccrual,
-    CommissionAgreement,
-    ContractParty,
     Development,
-    EscrowAccount,
-    EscrowTransaction,
-    Handover,
-    HandoverDoc,
     HouseType,
     HouseTypeVariant,
-    Instalment,
     Lead,
-    PaymentSchedule,
-    Phase,
     Plot,
-    PriceMatrix,
-    PropertyDevHouseType,
-    PropertyDevCustomTemplate,
-    Reservation,
-    SalesContract,
-    SalesContractRevision,
-    Snag,
-    WarrantyClaim,
 )
-from app.modules.projects.models import Project
 from app.modules.users.models import User
 
 
@@ -183,9 +159,7 @@ async def test_create_lead_autocreates_contact_with_lead_tag(
     session.add(lead)
     await session.flush()
 
-    contact = await bridge.ensure_contact_for_lead(
-        session, lead, tenant_id="user-1"
-    )
+    contact = await bridge.ensure_contact_for_lead(session, lead, tenant_id="user-1")
 
     assert contact.id is not None
     assert lead.contact_id == contact.id
@@ -220,9 +194,7 @@ async def test_create_buyer_with_existing_contact_email_links_not_duplicates(
     session.add(buyer)
     await session.flush()
 
-    contact = await bridge.ensure_contact_for_buyer(
-        session, buyer, tenant_id="user-1"
-    )
+    contact = await bridge.ensure_contact_for_buyer(session, buyer, tenant_id="user-1")
 
     assert contact.id == existing_id  # same row, not a new one
     assert buyer.contact_id == existing_id
@@ -238,9 +210,7 @@ async def test_lead_then_buyer_for_same_email_gets_both_tags(
     lead = _make_lead(email="convert@example.com")
     session.add(lead)
     await session.flush()
-    contact_lead = await bridge.ensure_contact_for_lead(
-        session, lead, tenant_id="u-1"
-    )
+    contact_lead = await bridge.ensure_contact_for_lead(session, lead, tenant_id="u-1")
     contact_id = contact_lead.id
     assert bridge.PROPERTY_DEV_LEAD_TAG in (contact_lead.module_tags or [])
     assert bridge.PROPERTY_DEV_BUYER_TAG not in (contact_lead.module_tags or [])
@@ -250,9 +220,7 @@ async def test_lead_then_buyer_for_same_email_gets_both_tags(
     buyer = _make_buyer(development_id=dev.id, email="convert@example.com")
     session.add(buyer)
     await session.flush()
-    contact_buyer = await bridge.ensure_contact_for_buyer(
-        session, buyer, tenant_id="u-1"
-    )
+    contact_buyer = await bridge.ensure_contact_for_buyer(session, buyer, tenant_id="u-1")
 
     assert contact_buyer.id == contact_id
     tags = set(contact_buyer.module_tags or [])
@@ -266,9 +234,7 @@ async def test_update_lead_email_mirrors_to_contact(session: AsyncSession) -> No
     lead = _make_lead(email="before@example.com")
     session.add(lead)
     await session.flush()
-    contact = await bridge.ensure_contact_for_lead(
-        session, lead, tenant_id="u-1"
-    )
+    contact = await bridge.ensure_contact_for_lead(session, lead, tenant_id="u-1")
     assert contact.primary_email == "before@example.com"
 
     # Simulate the service update: caller changes the lead's email.
@@ -300,9 +266,7 @@ async def test_cross_tenant_contacts_not_reused(session: AsyncSession) -> None:
     lead = _make_lead(email="shared@example.com")
     session.add(lead)
     await session.flush()
-    contact = await bridge.ensure_contact_for_lead(
-        session, lead, tenant_id="user-1"
-    )
+    contact = await bridge.ensure_contact_for_lead(session, lead, tenant_id="user-1")
 
     # The bridge must NOT pick the foreign contact — it must create a
     # fresh row in user-1's tenant.
@@ -317,9 +281,7 @@ async def test_list_module_rows_for_contact(session: AsyncSession) -> None:
     lead = _make_lead(email="multi@example.com")
     session.add(lead)
     await session.flush()
-    contact = await bridge.ensure_contact_for_lead(
-        session, lead, tenant_id="u-1"
-    )
+    contact = await bridge.ensure_contact_for_lead(session, lead, tenant_id="u-1")
 
     dev = await _make_development(session)
     buyer = _make_buyer(development_id=dev.id, email="multi@example.com")
@@ -348,9 +310,7 @@ async def test_lead_without_email_creates_contact_anyway(
     lead = _make_lead(email="", full_name="Phone-only Walkin")
     session.add(lead)
     await session.flush()
-    contact = await bridge.ensure_contact_for_lead(
-        session, lead, tenant_id="u-1"
-    )
+    contact = await bridge.ensure_contact_for_lead(session, lead, tenant_id="u-1")
 
     assert contact.id is not None
     assert contact.primary_email is None

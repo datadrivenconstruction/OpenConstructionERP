@@ -49,7 +49,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -105,9 +104,7 @@ async def _activate_user(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
 
@@ -132,9 +129,7 @@ async def _register_login_promote(
             "full_name": f"Tenant {tenant}",
         },
     )
-    assert reg.status_code in (200, 201), (
-        f"register failed for {tenant}: {reg.status_code} {reg.text}"
-    )
+    assert reg.status_code in (200, 201), f"register failed for {tenant}: {reg.status_code} {reg.text}"
     user_id = reg.json()["id"]
 
     await _activate_user(email)
@@ -146,11 +141,7 @@ async def _register_login_promote(
         from app.modules.users.models import User
 
         async with async_session_factory() as s:
-            await s.execute(
-                update(User)
-                .where(User.email == email.lower())
-                .values(role=role, is_active=True)
-            )
+            await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
             await s.commit()
 
     login = await client.post(
@@ -168,10 +159,12 @@ async def two_tenants(http_client):
     API; cross-tenant access is then exercised at the row level — A's
     sessions belong to A's project, B cannot see them."""
     a_uid, a_email, a_headers = await _register_login_promote(
-        http_client, tenant="a",
+        http_client,
+        tenant="a",
     )
     b_uid, b_email, b_headers = await _register_login_promote(
-        http_client, tenant="b",
+        http_client,
+        tenant="b",
     )
     return {
         "a": {"user_id": a_uid, "email": a_email, "headers": a_headers},
@@ -227,35 +220,44 @@ async def _seed_project_with_bim_model(
         # A small mix of walls and slabs so group-by produces 2 distinct
         # groups under the default ifc_class+type_name composite key.
         kinds = [
-            ("IfcWallStandardCase", "Generic Wall 240mm",
-             {"thickness_mm": 240.0, "material": "Concrete C30/37"},
-             {"volume_m3": 9.0, "area_m2": 37.5, "count": 1.0,
-              "gross_volume_m3": 9.0, "net_volume_m3": 9.0}),
-            ("IfcSlab", "Generic Slab 200mm",
-             {"thickness_mm": 200.0, "material": "Concrete C25/30"},
-             {"volume_m3": 17.0, "area_m2": 85.0, "count": 1.0}),
-            ("IfcWallStandardCase", "Generic Wall 240mm",
-             {"thickness_mm": 240.0, "material": "Concrete C30/37"},
-             {"volume_m3": 4.5, "area_m2": 18.75, "count": 1.0,
-              "gross_volume_m3": 4.5, "net_volume_m3": 4.5}),
+            (
+                "IfcWallStandardCase",
+                "Generic Wall 240mm",
+                {"thickness_mm": 240.0, "material": "Concrete C30/37"},
+                {"volume_m3": 9.0, "area_m2": 37.5, "count": 1.0, "gross_volume_m3": 9.0, "net_volume_m3": 9.0},
+            ),
+            (
+                "IfcSlab",
+                "Generic Slab 200mm",
+                {"thickness_mm": 200.0, "material": "Concrete C25/30"},
+                {"volume_m3": 17.0, "area_m2": 85.0, "count": 1.0},
+            ),
+            (
+                "IfcWallStandardCase",
+                "Generic Wall 240mm",
+                {"thickness_mm": 240.0, "material": "Concrete C30/37"},
+                {"volume_m3": 4.5, "area_m2": 18.75, "count": 1.0, "gross_volume_m3": 4.5, "net_volume_m3": 4.5},
+            ),
         ]
         for i in range(n_elements):
             kind = kinds[i % len(kinds)]
             elem_type, type_name, props, qty = kind
-            s.add(BIMElement(
-                id=uuid.uuid4(),
-                model_id=model_id,
-                stable_id=f"elem-{i:03d}",
-                element_type=elem_type,
-                name=f"{elem_type}_{i}",
-                storey="Level 01",
-                discipline="ARCH",
-                properties={**props, "type_name": type_name},
-                quantities=qty,
-                metadata_={},
-                asset_info={},
-                is_tracked_asset=False,
-            ))
+            s.add(
+                BIMElement(
+                    id=uuid.uuid4(),
+                    model_id=model_id,
+                    stable_id=f"elem-{i:03d}",
+                    element_type=elem_type,
+                    name=f"{elem_type}_{i}",
+                    storey="Level 01",
+                    discipline="ARCH",
+                    properties={**props, "type_name": type_name},
+                    quantities=qty,
+                    metadata_={},
+                    asset_info={},
+                    is_tracked_asset=False,
+                )
+            )
         await s.commit()
     return project_id, model_id
 
@@ -284,21 +286,23 @@ async def _seed_cwicr_items() -> list[uuid.UUID]:
     async with async_session_factory() as s:
         for code, desc, unit, rate in rows:
             cid = uuid.uuid4()
-            s.add(CostItem(
-                id=cid,
-                code=code,
-                description=desc,
-                unit=unit,
-                rate=rate,
-                currency="EUR",
-                source="cwicr",
-                classification={"din276": "330"},
-                components=[],
-                tags=[],
-                region=region,
-                is_active=True,
-                metadata_={},
-            ))
+            s.add(
+                CostItem(
+                    id=cid,
+                    code=code,
+                    description=desc,
+                    unit=unit,
+                    rate=rate,
+                    currency="EUR",
+                    source="cwicr",
+                    classification={"din276": "330"},
+                    components=[],
+                    tags=[],
+                    region=region,
+                    is_active=True,
+                    metadata_={},
+                )
+            )
             ids.append(cid)
         await s.commit()
     return ids
@@ -350,7 +354,8 @@ async def test_create_session_for_bim_source(http_client, two_tenants):
 
 @pytest.mark.asyncio
 async def test_create_session_with_construction_stage_pin(
-    http_client, two_tenants,
+    http_client,
+    two_tenants,
 ):
     """v3-P10b — user-picked stage from the dropdown survives create + read.
 
@@ -403,7 +408,8 @@ async def test_create_session_with_construction_stage_pin(
 
 @pytest.mark.asyncio
 async def test_create_session_invalid_construction_stage_rejected(
-    http_client, two_tenants,
+    http_client,
+    two_tenants,
 ):
     """Stage outside the 12-OmniClass enum → 422 from the Literal type."""
 
@@ -419,9 +425,7 @@ async def test_create_session_invalid_construction_stage_rejected(
         },
         headers=a["headers"],
     )
-    assert resp.status_code == 422, (
-        f"expected pydantic schema error, got {resp.status_code}: {resp.text}"
-    )
+    assert resp.status_code == 422, f"expected pydantic schema error, got {resp.status_code}: {resp.text}"
 
 
 @pytest.mark.asyncio
@@ -437,9 +441,7 @@ async def test_create_session_invalid_source_rejected(http_client, two_tenants):
         },
         headers=a["headers"],
     )
-    assert resp.status_code == 422, (
-        f"expected pydantic schema error, got {resp.status_code}: {resp.text}"
-    )
+    assert resp.status_code == 422, f"expected pydantic schema error, got {resp.status_code}: {resp.text}"
 
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -454,7 +456,8 @@ async def test_list_sessions_filters_by_project_id(http_client, two_tenants):
 
     # A's project + 2 sessions.
     project_a, model_a = await _seed_project_with_bim_model(
-        owner_id=a["user_id"], name="Project A",
+        owner_id=a["user_id"],
+        name="Project A",
     )
     for n in (1, 2):
         r = await http_client.post(
@@ -471,7 +474,8 @@ async def test_list_sessions_filters_by_project_id(http_client, two_tenants):
 
     # B's project + 1 session.
     project_b, model_b = await _seed_project_with_bim_model(
-        owner_id=b["user_id"], name="Project B",
+        owner_id=b["user_id"],
+        name="Project B",
     )
     r = await http_client.post(
         "/api/v1/match_elements/sessions",
@@ -528,7 +532,8 @@ async def test_list_sessions_filters_by_project_id(http_client, two_tenants):
 async def test_list_groups_paginates(http_client, two_tenants):
     a = two_tenants["a"]
     project_id, bim_model_id = await _seed_project_with_bim_model(
-        owner_id=a["user_id"], n_elements=3,
+        owner_id=a["user_id"],
+        n_elements=3,
     )
 
     # Create the session.
@@ -592,7 +597,9 @@ async def test_list_groups_paginates(http_client, two_tenants):
 
 @pytest.mark.asyncio
 async def test_run_match_vector_returns_candidates(
-    http_client, two_tenants, monkeypatch,
+    http_client,
+    two_tenants,
+    monkeypatch,
 ):
     """Verify the run_match -> VectorMatcher -> MatchCandidate pipeline
     returns the expected candidate shape end-to-end. The real vector
@@ -618,9 +625,7 @@ async def test_run_match_vector_returns_candidates(
         MatchResponse as _MR,
     )
 
-    async def _stub_match_envelope(envelope, *, project_id, top_k=10,
-                                   use_reranker=False, db=None,
-                                   ai_settings=None):
+    async def _stub_match_envelope(envelope, *, project_id, top_k=10, use_reranker=False, db=None, ai_settings=None):
         cand = _MC(
             id=fake_cost_id,
             code="WALL-001",
@@ -639,11 +644,7 @@ async def test_run_match_vector_returns_candidates(
         return _MR(
             request=_MReq(
                 envelope=envelope,
-                project_id=(
-                    project_id
-                    if isinstance(project_id, uuid.UUID)
-                    else uuid.UUID(str(project_id))
-                ),
+                project_id=(project_id if isinstance(project_id, uuid.UUID) else uuid.UUID(str(project_id))),
                 top_k=top_k,
                 use_reranker=use_reranker,
             ),
@@ -701,7 +702,8 @@ async def test_run_match_vector_returns_candidates(
 
 @pytest.mark.asyncio
 async def test_run_match_lexical_no_match_returns_empty(
-    http_client, two_tenants,
+    http_client,
+    two_tenants,
 ):
     """A lexical query that does not ILIKE-match any catalogue row must
     return zero candidates — NOT an alphabetical fallback. This pins the
@@ -730,40 +732,46 @@ async def test_run_match_lexical_no_match_returns_empty(
     project_id = uuid.uuid4()
     model_id = uuid.uuid4()
     async with async_session_factory() as s:
-        s.add(Project(
-            id=project_id,
-            name=f"LexEmpty-{uuid.uuid4().hex[:6]}",
-            owner_id=uuid.UUID(a["user_id"]),
-            currency="EUR",
-            classification_standard="din276",
-            metadata_={},
-            fx_rates=[],
-        ))
-        s.add(BIMModel(
-            id=model_id,
-            project_id=project_id,
-            name="empty.ifc",
-            model_format="ifc",
-            version="1",
-            status="completed",
-            element_count=1,
-            storey_count=1,
-            metadata_={},
-        ))
-        s.add(BIMElement(
-            id=uuid.uuid4(),
-            model_id=model_id,
-            stable_id="elem-zzz-001",
-            element_type="IfcSyntheticZzznoise",
-            name="elem_zzznoise",
-            storey="L01",
-            discipline="ARCH",
-            properties={"type_name": "ZzznoiseType", "material": "xyzlexicalmiss"},
-            quantities={"count": 1.0},
-            metadata_={},
-            asset_info={},
-            is_tracked_asset=False,
-        ))
+        s.add(
+            Project(
+                id=project_id,
+                name=f"LexEmpty-{uuid.uuid4().hex[:6]}",
+                owner_id=uuid.UUID(a["user_id"]),
+                currency="EUR",
+                classification_standard="din276",
+                metadata_={},
+                fx_rates=[],
+            )
+        )
+        s.add(
+            BIMModel(
+                id=model_id,
+                project_id=project_id,
+                name="empty.ifc",
+                model_format="ifc",
+                version="1",
+                status="completed",
+                element_count=1,
+                storey_count=1,
+                metadata_={},
+            )
+        )
+        s.add(
+            BIMElement(
+                id=uuid.uuid4(),
+                model_id=model_id,
+                stable_id="elem-zzz-001",
+                element_type="IfcSyntheticZzznoise",
+                name="elem_zzznoise",
+                storey="L01",
+                discipline="ARCH",
+                properties={"type_name": "ZzznoiseType", "material": "xyzlexicalmiss"},
+                quantities={"count": 1.0},
+                metadata_={},
+                asset_info={},
+                is_tracked_asset=False,
+            )
+        )
         # Wipe all preexisting CWICR cost items so the lexical SQL
         # prefilter has nothing to draw from.
         from sqlalchemy import update as sa_update
@@ -799,8 +807,7 @@ async def test_run_match_lexical_no_match_returns_empty(
     # null/empty.
     for g in body:
         assert g["suggested_code"] in (None, ""), (
-            f"unexpected lexical fallback: group {g['group_key']!r} got "
-            f"code={g['suggested_code']!r}"
+            f"unexpected lexical fallback: group {g['group_key']!r} got code={g['suggested_code']!r}"
         )
 
     # Re-activate so later tests still see catalogue rows.
@@ -825,7 +832,8 @@ async def test_bulk_confirm_caps_at_batch_limit(http_client, two_tenants):
     _BULK_BATCH_LIMIT (1000) rows in one call."""
     a = two_tenants["a"]
     project_id, bim_model_id = await _seed_project_with_bim_model(
-        owner_id=a["user_id"], n_elements=1,
+        owner_id=a["user_id"],
+        n_elements=1,
     )
     r = await http_client.post(
         "/api/v1/match_elements/sessions",
@@ -845,20 +853,22 @@ async def test_bulk_confirm_caps_at_batch_limit(http_client, two_tenants):
     # all clear any reasonable threshold.
     async with async_session_factory() as s:
         for i in range(1500):
-            s.add(MatchGroup(
-                id=uuid.uuid4(),
-                session_id=sid,
-                group_key=f"ifc_class:Synth|i:{i}",
-                signature=f"sig-{i}",
-                element_ids=[],
-                element_count=1,
-                quantities={"count": 1.0},
-                chosen_unit="pcs",
-                methods={},
-                status="suggested",
-                confidence="0.9900",
-                metadata_={},
-            ))
+            s.add(
+                MatchGroup(
+                    id=uuid.uuid4(),
+                    session_id=sid,
+                    group_key=f"ifc_class:Synth|i:{i}",
+                    signature=f"sig-{i}",
+                    element_ids=[],
+                    element_count=1,
+                    quantities={"count": 1.0},
+                    chosen_unit="pcs",
+                    methods={},
+                    status="suggested",
+                    confidence="0.9900",
+                    metadata_={},
+                )
+            )
         await s.commit()
 
     resp = await http_client.post(
@@ -870,9 +880,7 @@ async def test_bulk_confirm_caps_at_batch_limit(http_client, two_tenants):
     body = resp.json()
     # Exactly 1000 — the per-call cap. Caller must repeat to drain the
     # remaining 500.
-    assert body["confirmed_count"] == 1000, (
-        f"_BULK_BATCH_LIMIT regression: confirmed {body['confirmed_count']}"
-    )
+    assert body["confirmed_count"] == 1000, f"_BULK_BATCH_LIMIT regression: confirmed {body['confirmed_count']}"
 
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -913,9 +921,15 @@ async def test_apply_to_boq_dry_run_returns_preview(http_client, two_tenants):
     from app.modules.match_elements.models import MatchGroup
 
     async with async_session_factory() as s:
-        groups = (await s.execute(
-            select(MatchGroup).where(MatchGroup.session_id == sid),
-        )).scalars().all()
+        groups = (
+            (
+                await s.execute(
+                    select(MatchGroup).where(MatchGroup.session_id == sid),
+                )
+            )
+            .scalars()
+            .all()
+        )
         # Confirm whichever group has volume_m3 > 0 (the wall) so the
         # dimensional gate keeps the rate non-zero.
         for g in groups:
@@ -957,19 +971,20 @@ async def test_apply_to_boq_dry_run_returns_preview(http_client, two_tenants):
 
     # Crucially: dry_run did NOT write any Position rows.
     async with async_session_factory() as s:
-        n_positions = (await s.execute(
-            select(Position),
-        )).scalars().all()
+        n_positions = (
+            (
+                await s.execute(
+                    select(Position),
+                )
+            )
+            .scalars()
+            .all()
+        )
         # Defensive — there may be unrelated positions from earlier tests.
         # Filter by metadata's match_session_id link if any leak from the
         # apply path; we expect zero for THIS session.
-        leaked = [
-            p for p in n_positions
-            if (p.metadata_ or {}).get("match_session_id") == str(sid)
-        ]
-        assert len(leaked) == 0, (
-            f"dry_run leaked {len(leaked)} Position rows into the BOQ"
-        )
+        leaked = [p for p in n_positions if (p.metadata_ or {}).get("match_session_id") == str(sid)]
+        assert len(leaked) == 0, f"dry_run leaked {len(leaked)} Position rows into the BOQ"
 
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -984,7 +999,8 @@ async def test_apply_to_boq_currency_uses_project(http_client, two_tenants):
     not the literal string ``"EUR"``."""
     a = two_tenants["a"]
     project_id, bim_model_id = await _seed_project_with_bim_model(
-        owner_id=a["user_id"], currency="USD",
+        owner_id=a["user_id"],
+        currency="USD",
     )
 
     # Seed a CostItem whose currency is the empty string — this
@@ -994,21 +1010,23 @@ async def test_apply_to_boq_currency_uses_project(http_client, two_tenants):
 
     cost_id = uuid.uuid4()
     async with async_session_factory() as s:
-        s.add(CostItem(
-            id=cost_id,
-            code="EMPTY-CCY-001",
-            description="Test row with blank currency",
-            unit="m3",
-            rate="100.00",
-            currency="",  # empty, NOT "EUR"
-            source="cwicr",
-            classification={},
-            components=[],
-            tags=[],
-            region=None,
-            is_active=True,
-            metadata_={},
-        ))
+        s.add(
+            CostItem(
+                id=cost_id,
+                code="EMPTY-CCY-001",
+                description="Test row with blank currency",
+                unit="m3",
+                rate="100.00",
+                currency="",  # empty, NOT "EUR"
+                source="cwicr",
+                classification={},
+                components=[],
+                tags=[],
+                region=None,
+                is_active=True,
+                metadata_={},
+            )
+        )
         await s.commit()
 
     r = await http_client.post(
@@ -1031,9 +1049,15 @@ async def test_apply_to_boq_currency_uses_project(http_client, two_tenants):
     from app.modules.match_elements.models import MatchGroup
 
     async with async_session_factory() as s:
-        groups = (await s.execute(
-            select(MatchGroup).where(MatchGroup.session_id == sid),
-        )).scalars().all()
+        groups = (
+            (
+                await s.execute(
+                    select(MatchGroup).where(MatchGroup.session_id == sid),
+                )
+            )
+            .scalars()
+            .all()
+        )
         for g in groups:
             qty = g.quantities or {}
             if (qty.get("volume_m3") or 0) > 0:
@@ -1060,15 +1084,11 @@ async def test_apply_to_boq_currency_uses_project(http_client, two_tenants):
     body = resp.json()
     # Project currency is USD; the empty CostItem.currency must fall
     # through to USD, not be hardcoded to EUR.
-    assert body["currency"] == "USD", (
-        f"currency fall-through regression: got {body['currency']!r}"
-    )
+    assert body["currency"] == "USD", f"currency fall-through regression: got {body['currency']!r}"
     if body["positions"]:
         # Per-line currency also reflects the fall-through.
         for p in body["positions"]:
-            assert p["currency"] == "USD", (
-                f"per-line currency regression: {p}"
-            )
+            assert p["currency"] == "USD", f"per-line currency regression: {p}"
 
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -1090,16 +1110,21 @@ async def test_idor_get_session_other_user(http_client):
     to actually exercise the cross-tenant rejection path.
     """
     a_uid, _, a_headers = await _register_login_promote(
-        http_client, tenant="a-noadm", role="user",
+        http_client,
+        tenant="a-noadm",
+        role="user",
     )
     b_uid, _, b_headers = await _register_login_promote(
-        http_client, tenant="b-noadm", role="user",
+        http_client,
+        tenant="b-noadm",
+        role="user",
     )
     a = {"user_id": a_uid, "headers": a_headers}
     b = {"user_id": b_uid, "headers": b_headers}
 
     project_a, model_a = await _seed_project_with_bim_model(
-        owner_id=a["user_id"], name="Project A (private)",
+        owner_id=a["user_id"],
+        name="Project A (private)",
     )
     r = await http_client.post(
         "/api/v1/match_elements/sessions",
@@ -1131,7 +1156,8 @@ async def test_idor_get_session_other_user(http_client):
 
 @pytest.mark.asyncio
 async def test_analytics_empty_window_returns_zero_counters(
-    http_client, two_tenants,
+    http_client,
+    two_tenants,
 ):
     """Fresh project with no search-log rows must return 200 + zero
     counters + no alerts. Validates the FastAPI route is registered
@@ -1182,12 +1208,15 @@ async def test_analytics_requires_project_access(http_client):
     """
     # Owner is an admin (so seeding succeeds without extra promotion)
     owner_uid, _, _ = await _register_login_promote(
-        http_client, tenant=f"owner-{uuid.uuid4().hex[:6]}",
+        http_client,
+        tenant=f"owner-{uuid.uuid4().hex[:6]}",
     )
     project_id, _ = await _seed_project_with_bim_model(owner_id=owner_uid)
     # Outsider is a plain viewer — no admin bypass.
     _, _, outsider_headers = await _register_login_promote(
-        http_client, tenant=f"viewer-{uuid.uuid4().hex[:6]}", role="viewer",
+        http_client,
+        tenant=f"viewer-{uuid.uuid4().hex[:6]}",
+        role="viewer",
     )
     resp = await http_client.get(
         f"/api/v1/match_elements/analytics?days=7&project_id={project_id}",
@@ -1198,7 +1227,8 @@ async def test_analytics_requires_project_access(http_client):
 
 @pytest.mark.asyncio
 async def test_analytics_tenant_wide_rollup_requires_auth_only(
-    http_client, two_tenants,
+    http_client,
+    two_tenants,
 ):
     """Without ``project_id`` the endpoint returns the tenant-wide rollup;
     auth is required but no specific project access check fires."""
@@ -1233,7 +1263,8 @@ async def test_analytics_unauthenticated_rejected(http_client):
 
 @pytest.mark.asyncio
 async def test_progress_idle_session_returns_neutral_shape(
-    http_client, two_tenants,
+    http_client,
+    two_tenants,
 ):
     """A freshly-created session that has never been matched returns the
     documented idle shape — stage='idle', status='idle', zero counters —
@@ -1278,7 +1309,9 @@ async def test_progress_idle_session_returns_neutral_shape(
 
 @pytest.mark.asyncio
 async def test_progress_reflects_run_match_terminal_stage(
-    http_client, two_tenants, monkeypatch,
+    http_client,
+    two_tenants,
+    monkeypatch,
 ):
     """After a synchronous run_match call resolves, /progress reports
     ``status='done'`` and ``stage='done'`` so the FE's poll loop sees
@@ -1304,17 +1337,11 @@ async def test_progress_reflects_run_match_terminal_stage(
         MatchResponse as _MR,
     )
 
-    async def _stub_match_envelope(envelope, *, project_id, top_k=10,
-                                   use_reranker=False, db=None,
-                                   ai_settings=None):
+    async def _stub_match_envelope(envelope, *, project_id, top_k=10, use_reranker=False, db=None, ai_settings=None):
         return _MR(
             request=_MReq(
                 envelope=envelope,
-                project_id=(
-                    project_id
-                    if isinstance(project_id, uuid.UUID)
-                    else uuid.UUID(str(project_id))
-                ),
+                project_id=(project_id if isinstance(project_id, uuid.UUID) else uuid.UUID(str(project_id))),
                 top_k=top_k,
                 use_reranker=use_reranker,
             ),
@@ -1390,7 +1417,8 @@ async def test_progress_idor_blocks_non_admin_outsider(http_client):
     pattern above)."""
     # Owner — admin so seeding succeeds without extra promotion.
     owner_uid, _, owner_headers = await _register_login_promote(
-        http_client, tenant=f"prog-owner-{uuid.uuid4().hex[:6]}",
+        http_client,
+        tenant=f"prog-owner-{uuid.uuid4().hex[:6]}",
     )
     project_id, bim_model_id = await _seed_project_with_bim_model(
         owner_id=owner_uid,

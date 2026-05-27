@@ -55,11 +55,7 @@ async def auth_headers(app_client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     login = await app_client.post(
@@ -81,7 +77,6 @@ async def test_metric_takeoff_in_imperial_project_raises_422(
     from fastapi import HTTPException
 
     from app.database import async_session_factory
-    from app.modules.projects.models import Project
     from app.modules.takeoff.schemas import TakeoffMeasurementCreate
     from app.modules.takeoff.service import TakeoffService
 
@@ -119,22 +114,16 @@ async def test_metric_takeoff_in_imperial_project_raises_422(
 
     # ── Assert 422 with correct code ──────────────────────────────────────────
     exc = exc_info.value
-    assert exc.status_code == 422, (
-        f"Expected HTTP 422, got {exc.status_code}"
-    )
+    assert exc.status_code == 422, f"Expected HTTP 422, got {exc.status_code}"
     detail = exc.detail
     assert isinstance(detail, dict), f"Expected dict detail, got: {type(detail)}"
-    assert detail.get("code") == "unit_system_mismatch", (
-        f"Expected code='unit_system_mismatch', got: {detail}"
-    )
+    assert detail.get("code") == "unit_system_mismatch", f"Expected code='unit_system_mismatch', got: {detail}"
     assert detail.get("source_unit_system") == "metric", detail
     assert detail.get("project_unit_system") == "imperial", detail
 
 
 @pytest.mark.asyncio
-async def test_same_unit_system_does_not_raise(
-    app_client: AsyncClient, auth_headers: dict[str, str]
-) -> None:
+async def test_same_unit_system_does_not_raise(app_client: AsyncClient, auth_headers: dict[str, str]) -> None:
     """Metric measurement into a metric project must NOT raise."""
     from app.database import async_session_factory
     from app.modules.takeoff.schemas import TakeoffMeasurementCreate
@@ -172,9 +161,7 @@ async def test_same_unit_system_does_not_raise(
 
 
 @pytest.mark.asyncio
-async def test_no_source_unit_system_never_raises(
-    app_client: AsyncClient, auth_headers: dict[str, str]
-) -> None:
+async def test_no_source_unit_system_never_raises(app_client: AsyncClient, auth_headers: dict[str, str]) -> None:
     """When source_unit_system is not supplied the gate is skipped entirely."""
     from app.database import async_session_factory
     from app.modules.takeoff.schemas import TakeoffMeasurementCreate

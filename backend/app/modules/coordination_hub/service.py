@@ -216,9 +216,7 @@ class CoordinationHubService:
 
     # ── Federation rollup ──────────────────────────────────────────────────
 
-    async def _federation_stats(
-        self, project_id: uuid.UUID
-    ) -> FederationStats:
+    async def _federation_stats(self, project_id: uuid.UUID) -> FederationStats:
         try:
             from app.modules.bim_hub.models import (
                 BIMFederation,
@@ -231,9 +229,7 @@ class CoordinationHubService:
 
         count = await _safe_count(
             self.session,
-            select(func.count(BIMFederation.id)).where(
-                BIMFederation.project_id == project_id
-            ),
+            select(func.count(BIMFederation.id)).where(BIMFederation.project_id == project_id),
             label="federations",
         )
 
@@ -248,17 +244,12 @@ class CoordinationHubService:
             )
             .where(BIMFederation.project_id == project_id)
         )
-        members = await _safe_count(
-            self.session, members_stmt, label="federation_members"
-        )
+        members = await _safe_count(self.session, members_stmt, label="federation_members")
 
-        elements_stmt = (
-            select(func.coalesce(func.sum(BIMModel.element_count), 0))
-            .where(BIMModel.project_id == project_id)
+        elements_stmt = select(func.coalesce(func.sum(BIMModel.element_count), 0)).where(
+            BIMModel.project_id == project_id
         )
-        elements = await _safe_count(
-            self.session, elements_stmt, label="bim_elements"
-        )
+        elements = await _safe_count(self.session, elements_stmt, label="bim_elements")
 
         return FederationStats(
             count=count,
@@ -280,7 +271,8 @@ class CoordinationHubService:
             return ClashStats()
 
         base_join = (
-            ClashRun, ClashResult.run_id == ClashRun.id,
+            ClashRun,
+            ClashResult.run_id == ClashRun.id,
         )
 
         open_q = (
@@ -315,18 +307,12 @@ class CoordinationHubService:
         )
 
         open_count = await _safe_count(self.session, open_q, label="clash_open")
-        resolved_count = await _safe_count(
-            self.session, resolved_q, label="clash_resolved"
-        )
-        ignored_count = await _safe_count(
-            self.session, ignored_q, label="clash_ignored"
-        )
+        resolved_count = await _safe_count(self.session, resolved_q, label="clash_resolved")
+        ignored_count = await _safe_count(self.session, ignored_q, label="clash_ignored")
 
         last_run_at = await _safe_scalar(
             self.session,
-            select(func.max(ClashRun.completed_at)).where(
-                ClashRun.project_id == project_id
-            ),
+            select(func.max(ClashRun.completed_at)).where(ClashRun.project_id == project_id),
             label="clash_last_run",
         )
 
@@ -389,19 +375,13 @@ class CoordinationHubService:
         )
 
         new_n = await _safe_count(self.session, new_q, label="delta_new")
-        resolved_n = await _safe_count(
-            self.session, resolved_q, label="delta_resolved"
-        )
-        reopened_n = await _safe_count(
-            self.session, reopened_q, label="delta_reopened"
-        )
+        resolved_n = await _safe_count(self.session, resolved_q, label="delta_resolved")
+        reopened_n = await _safe_count(self.session, reopened_q, label="delta_reopened")
         return ClashDelta(new=new_n, resolved=resolved_n, reopened=reopened_n)
 
     # ── Rule pack rollup ────────────────────────────────────────────────────
 
-    async def _rule_pack_stats(
-        self, project_id: uuid.UUID
-    ) -> RulePackStats:
+    async def _rule_pack_stats(self, project_id: uuid.UUID) -> RulePackStats:
         try:
             from app.modules.bim_requirements.models import (
                 BIMRequirement,
@@ -413,9 +393,7 @@ class CoordinationHubService:
 
         installed = await _safe_count(
             self.session,
-            select(func.count(BIMRequirementSet.id)).where(
-                BIMRequirementSet.project_id == project_id
-            ),
+            select(func.count(BIMRequirementSet.id)).where(BIMRequirementSet.project_id == project_id),
             label="rule_pack_installed",
         )
         # Active vs inactive requirement rows. The hub treats active = pass
@@ -449,27 +427,19 @@ class CoordinationHubService:
         )
         last_at = await _safe_scalar(
             self.session,
-            select(func.max(BIMRequirementSet.updated_at)).where(
-                BIMRequirementSet.project_id == project_id
-            ),
+            select(func.max(BIMRequirementSet.updated_at)).where(BIMRequirementSet.project_id == project_id),
             label="rule_pack_last_at",
         )
         return RulePackStats(
             installed_count=installed,
-            last_check_pass_count=await _safe_count(
-                self.session, active_q, label="rule_pack_pass"
-            ),
-            last_check_fail_count=await _safe_count(
-                self.session, inactive_q, label="rule_pack_fail"
-            ),
+            last_check_pass_count=await _safe_count(self.session, active_q, label="rule_pack_pass"),
+            last_check_fail_count=await _safe_count(self.session, inactive_q, label="rule_pack_fail"),
             last_check_at=last_at,
         )
 
     # ── Smart view rollup ───────────────────────────────────────────────────
 
-    async def _smart_view_stats(
-        self, project_id: uuid.UUID
-    ) -> SmartViewStats:
+    async def _smart_view_stats(self, project_id: uuid.UUID) -> SmartViewStats:
         try:
             from app.modules.smart_views.models import SmartView
         except Exception:
@@ -496,29 +466,21 @@ class CoordinationHubService:
         )
         user_count = await _safe_count(
             self.session,
-            select(func.count(SmartView.id)).where(
-                SmartView.scope_type == "user"
-            ),
+            select(func.count(SmartView.id)).where(SmartView.scope_type == "user"),
             label="smart_views_user",
         )
-        return SmartViewStats(
-            user_count=user_count, project_count=project_count
-        )
+        return SmartViewStats(user_count=user_count, project_count=project_count)
 
     # ── BCF activity rollup ─────────────────────────────────────────────────
 
-    async def _bcf_activity_stats(
-        self, project_id: uuid.UUID
-    ) -> BCFActivityStats:
+    async def _bcf_activity_stats(self, project_id: uuid.UUID) -> BCFActivityStats:
         try:
             from app.modules.bcf.models import BCFTopic
         except Exception:
             logger.warning("coordination_hub: bcf unavailable")
             return BCFActivityStats()
 
-        thirty_days_ago = datetime.now(UTC) - timedelta(
-            days=_BCF_ACTIVITY_WINDOW_DAYS
-        )
+        thirty_days_ago = datetime.now(UTC) - timedelta(days=_BCF_ACTIVITY_WINDOW_DAYS)
         # BCF tracks an authoring metadata.modified_date + a server
         # created_at. The hub treats Base.created_at as the canonical
         # "exported from OCERP" timestamp (the row was written on
@@ -544,26 +506,18 @@ class CoordinationHubService:
         )
         last_export = await _safe_scalar(
             self.session,
-            select(func.max(BCFTopic.created_at)).where(
-                BCFTopic.project_id == project_id
-            ),
+            select(func.max(BCFTopic.created_at)).where(BCFTopic.project_id == project_id),
             label="bcf_last_export",
         )
         return BCFActivityStats(
-            topics_exported_30d=await _safe_count(
-                self.session, exported_q, label="bcf_exported"
-            ),
-            topics_imported_30d=await _safe_count(
-                self.session, imported_q, label="bcf_imported"
-            ),
+            topics_exported_30d=await _safe_count(self.session, exported_q, label="bcf_exported"),
+            topics_imported_30d=await _safe_count(self.session, imported_q, label="bcf_imported"),
             last_export_at=last_export,
         )
 
     # ── Cost impact ─────────────────────────────────────────────────────────
 
-    async def _open_cost_impact_total(
-        self, project_id: uuid.UUID
-    ) -> float:
+    async def _open_cost_impact_total(self, project_id: uuid.UUID) -> float:
         """Delegate to the clash_cost_impact service when available."""
         try:
             from app.modules.clash_cost_impact.service import (
@@ -660,9 +614,7 @@ class CoordinationHubService:
 
     # ── Trade matrix ────────────────────────────────────────────────────────
 
-    async def trade_matrix(
-        self, project_id: uuid.UUID
-    ) -> TradeMatrixResponse:
+    async def trade_matrix(self, project_id: uuid.UUID) -> TradeMatrixResponse:
         """6×6 discipline-pair heat-map of OPEN clashes for ``project_id``.
 
         Rows / cols come from :data:`CANONICAL_TRADES`; cells aggregate
@@ -706,9 +658,7 @@ class CoordinationHubService:
         # Pair-key → (count, open, resolved). The pair is sorted
         # alphabetically by canonical-trade name so (mep, struct) and
         # (struct, mep) collapse to the same cell.
-        agg: dict[tuple[str, str], dict[str, int]] = defaultdict(
-            lambda: {"count": 0, "open": 0, "resolved": 0}
-        )
+        agg: dict[tuple[str, str], dict[str, int]] = defaultdict(lambda: {"count": 0, "open": 0, "resolved": 0})
         for a, b, status_, n in rows:
             row = _normalise_trade(a)
             col = _normalise_trade(b)
@@ -744,9 +694,7 @@ class CoordinationHubService:
 
     # ── Timeline ────────────────────────────────────────────────────────────
 
-    async def timeline(
-        self, project_id: uuid.UUID, *, days: int = 30
-    ) -> TimelineResponse:
+    async def timeline(self, project_id: uuid.UUID, *, days: int = 30) -> TimelineResponse:
         """Activity stream — UNION of created-rows across sibling modules.
 
         We pull at most ``_TIMELINE_MAX_EVENTS`` per source then merge +
@@ -755,18 +703,10 @@ class CoordinationHubService:
         """
         window_start = datetime.now(UTC) - timedelta(days=max(1, days))
         events: list[TimelineEvent] = []
-        events.extend(
-            await self._timeline_clash_runs(project_id, window_start)
-        )
-        events.extend(
-            await self._timeline_federations(project_id, window_start)
-        )
-        events.extend(
-            await self._timeline_rule_packs(project_id, window_start)
-        )
-        events.extend(
-            await self._timeline_bcf_topics(project_id, window_start)
-        )
+        events.extend(await self._timeline_clash_runs(project_id, window_start))
+        events.extend(await self._timeline_federations(project_id, window_start))
+        events.extend(await self._timeline_rule_packs(project_id, window_start))
+        events.extend(await self._timeline_bcf_topics(project_id, window_start))
         events.sort(
             key=lambda e: e.ts or datetime.min.replace(tzinfo=UTC),
             reverse=True,
@@ -776,9 +716,7 @@ class CoordinationHubService:
             events=events[:_TIMELINE_MAX_EVENTS],
         )
 
-    async def _timeline_clash_runs(
-        self, project_id: uuid.UUID, window_start: datetime
-    ) -> list[TimelineEvent]:
+    async def _timeline_clash_runs(self, project_id: uuid.UUID, window_start: datetime) -> list[TimelineEvent]:
         try:
             from app.modules.clash.models import ClashRun
         except Exception:
@@ -819,9 +757,7 @@ class CoordinationHubService:
             )
         return out
 
-    async def _timeline_federations(
-        self, project_id: uuid.UUID, window_start: datetime
-    ) -> list[TimelineEvent]:
+    async def _timeline_federations(self, project_id: uuid.UUID, window_start: datetime) -> list[TimelineEvent]:
         try:
             from app.modules.bim_hub.models import BIMFederation
         except Exception:
@@ -841,9 +777,7 @@ class CoordinationHubService:
             .order_by(BIMFederation.created_at.desc())
             .limit(_TIMELINE_MAX_EVENTS)
         )
-        rows = await _safe_list(
-            self.session, stmt, label="timeline_federation"
-        )
+        rows = await _safe_list(self.session, stmt, label="timeline_federation")
         return [
             TimelineEvent(
                 ts=ts,
@@ -855,9 +789,7 @@ class CoordinationHubService:
             for fid, name, ts in rows
         ]
 
-    async def _timeline_rule_packs(
-        self, project_id: uuid.UUID, window_start: datetime
-    ) -> list[TimelineEvent]:
+    async def _timeline_rule_packs(self, project_id: uuid.UUID, window_start: datetime) -> list[TimelineEvent]:
         try:
             from app.modules.bim_requirements.models import BIMRequirementSet
         except Exception:
@@ -890,9 +822,7 @@ class CoordinationHubService:
             for _rid, name, ts, by in rows
         ]
 
-    async def _timeline_bcf_topics(
-        self, project_id: uuid.UUID, window_start: datetime
-    ) -> list[TimelineEvent]:
+    async def _timeline_bcf_topics(self, project_id: uuid.UUID, window_start: datetime) -> list[TimelineEvent]:
         try:
             from app.modules.bcf.models import BCFTopic
         except Exception:
@@ -928,13 +858,9 @@ class CoordinationHubService:
 
     # ── Threshold seeding / read / update ──────────────────────────────────
 
-    async def _existing_thresholds(
-        self, project_id: uuid.UUID
-    ) -> dict[str, CoordinationThreshold]:
+    async def _existing_thresholds(self, project_id: uuid.UUID) -> dict[str, CoordinationThreshold]:
         """Return ``{metric: row}`` for already-persisted thresholds."""
-        stmt = select(CoordinationThreshold).where(
-            CoordinationThreshold.project_id == project_id
-        )
+        stmt = select(CoordinationThreshold).where(CoordinationThreshold.project_id == project_id)
         try:
             result = await self.session.execute(stmt)
             rows = list(result.scalars().all())
@@ -957,11 +883,7 @@ class CoordinationHubService:
         workers) we swallow the error and re-fetch — both writers wind
         up with the same canonical row set.
         """
-        missing = [
-            (m, w, e)
-            for (m, w, e) in DEFAULT_THRESHOLDS
-            if m not in existing
-        ]
+        missing = [(m, w, e) for (m, w, e) in DEFAULT_THRESHOLDS if m not in existing]
         if not missing:
             return existing
         for metric, warn, error in missing:
@@ -981,8 +903,7 @@ class CoordinationHubService:
         except SQLAlchemyError as exc:
             await self.session.rollback()
             logger.warning(
-                "coordination_hub: threshold seed failed (%s); evaluation will "
-                "fall back to ephemeral defaults",
+                "coordination_hub: threshold seed failed (%s); evaluation will fall back to ephemeral defaults",
                 exc.__class__.__name__,
             )
             return existing
@@ -1004,9 +925,7 @@ class CoordinationHubService:
         """
         existing = await self._existing_thresholds(project_id)
         if allow_seed and len(existing) < len(DEFAULT_THRESHOLDS):
-            existing = await self._seed_default_thresholds(
-                project_id, existing
-            )
+            existing = await self._seed_default_thresholds(project_id, existing)
         # If seeding still didn't land any row (read-only DB / patched
         # session), fall back to ephemeral defaults so evaluation never
         # 500s for the lack of persisted rows.
@@ -1043,9 +962,7 @@ class CoordinationHubService:
 
         # Ensure the row exists before we update it.
         rows = await self.get_or_seed_thresholds(project_id)
-        target: CoordinationThreshold | None = next(
-            (r for r in rows if r.metric == metric), None
-        )
+        target: CoordinationThreshold | None = next((r for r in rows if r.metric == metric), None)
         if target is None or target.id is None:
             # Ephemeral fallback path — promote to a real row before edit.
             for m, w, e in DEFAULT_THRESHOLDS:
@@ -1067,13 +984,10 @@ class CoordinationHubService:
         # would always be hit first. Reject explicitly with a 422-able
         # ValueError so the operator sees the mistake.
         new_warn = warn_value if warn_value is not None else target.warn_value
-        new_error = (
-            error_value if error_value is not None else target.error_value
-        )
+        new_error = error_value if error_value is not None else target.error_value
         if new_warn is not None and new_error is not None and new_warn > new_error:
             raise ValueError(
-                "warn_value must be less than or equal to error_value "
-                f"(got warn={new_warn}, error={new_error})"
+                f"warn_value must be less than or equal to error_value (got warn={new_warn}, error={new_error})"
             )
         if warn_value is not None:
             target.warn_value = warn_value
@@ -1087,8 +1001,7 @@ class CoordinationHubService:
         # project's alarm bar and should be traceable post-hoc without
         # diff-ing the DB.
         logger.info(
-            "coordination_hub: threshold updated project=%s metric=%s "
-            "warn=%s error=%s enabled=%s",
+            "coordination_hub: threshold updated project=%s metric=%s warn=%s error=%s enabled=%s",
             project_id,
             metric,
             target.warn_value,
@@ -1120,9 +1033,7 @@ class CoordinationHubService:
         )
         return await _safe_count(self.session, stmt, label="th_open_total")
 
-    async def _high_severity_open_clashes(
-        self, project_id: uuid.UUID
-    ) -> int:
+    async def _high_severity_open_clashes(self, project_id: uuid.UUID) -> int:
         try:
             from app.modules.clash.models import ClashResult, ClashRun
             from app.modules.clash.schemas import OPEN_STATUSES
@@ -1141,9 +1052,7 @@ class CoordinationHubService:
         )
         return await _safe_count(self.session, stmt, label="th_high_sev")
 
-    async def _project_budget_decimal(
-        self, project_id: uuid.UUID
-    ) -> Decimal | None:
+    async def _project_budget_decimal(self, project_id: uuid.UUID) -> Decimal | None:
         """Resolve the project's budget; ``None`` when not set.
 
         ``Project.budget_estimate`` is stored as a string for legacy
@@ -1163,9 +1072,7 @@ class CoordinationHubService:
             return None
         return value if value > 0 else None
 
-    async def _cost_impact_pct_of_budget(
-        self, project_id: uuid.UUID
-    ) -> Decimal:
+    async def _cost_impact_pct_of_budget(self, project_id: uuid.UUID) -> Decimal:
         budget = await self._project_budget_decimal(project_id)
         if budget is None:
             return Decimal("0")
@@ -1178,9 +1085,7 @@ class CoordinationHubService:
             return Decimal("0")
         return (total_dec / budget * Decimal("100")).quantize(Decimal("0.0001"))
 
-    async def _model_age_days_max(
-        self, project_id: uuid.UUID
-    ) -> Decimal:
+    async def _model_age_days_max(self, project_id: uuid.UUID) -> Decimal:
         """Days since the most-recent BIM model upload for this project.
 
         Returns ``Decimal('99999')`` when no model has ever been uploaded
@@ -1191,9 +1096,7 @@ class CoordinationHubService:
             from app.modules.bim_hub.models import BIMModel
         except Exception:
             return Decimal("0")
-        stmt = select(func.max(BIMModel.created_at)).where(
-            BIMModel.project_id == project_id
-        )
+        stmt = select(func.max(BIMModel.created_at)).where(BIMModel.project_id == project_id)
         last = await _safe_scalar(self.session, stmt, label="model_age_last")
         if last is None:
             return Decimal("99999")
@@ -1213,17 +1116,11 @@ class CoordinationHubService:
         the default-threshold DB seed — that write is reserved for
         callers holding ``coordination.write``.
         """
-        rows = await self.get_or_seed_thresholds(
-            project_id, allow_seed=allow_seed
-        )
+        rows = await self.get_or_seed_thresholds(project_id, allow_seed=allow_seed)
 
         # Compute every metric once so we never run an N×N query.
-        open_total = Decimal(
-            str(await self._open_clashes_total(project_id))
-        )
-        high_sev = Decimal(
-            str(await self._high_severity_open_clashes(project_id))
-        )
+        open_total = Decimal(str(await self._open_clashes_total(project_id)))
+        high_sev = Decimal(str(await self._high_severity_open_clashes(project_id)))
         pct_budget = await self._cost_impact_pct_of_budget(project_id)
         model_age = await self._model_age_days_max(project_id)
         metric_values: dict[str, Decimal] = {
@@ -1246,15 +1143,11 @@ class CoordinationHubService:
             elif current >= row.error_value and row.error_value > 0:
                 level = "error"
                 threshold = row.error_value
-                message = (
-                    f"{row.metric} reached {current} (error ≥ {row.error_value})"
-                )
+                message = f"{row.metric} reached {current} (error ≥ {row.error_value})"
             elif current >= row.warn_value and row.warn_value > 0:
                 level = "warn"
                 threshold = row.warn_value
-                message = (
-                    f"{row.metric} reached {current} (warn ≥ {row.warn_value})"
-                )
+                message = f"{row.metric} reached {current} (warn ≥ {row.warn_value})"
             else:
                 level = "ok"
                 threshold = row.warn_value

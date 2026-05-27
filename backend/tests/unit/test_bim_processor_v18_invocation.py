@@ -80,13 +80,9 @@ class _V18SubprocessRecorder:
             dae.write_bytes(b"FAKE-DAE")
 
         if xlsx is not None:
-            return subprocess.CompletedProcess(
-                args=args, returncode=self.xlsx_rc, stdout=b"", stderr=self.xlsx_stderr
-            )
+            return subprocess.CompletedProcess(args=args, returncode=self.xlsx_rc, stdout=b"", stderr=self.xlsx_stderr)
         if dae is not None:
-            return subprocess.CompletedProcess(
-                args=args, returncode=self.dae_rc, stdout=b"", stderr=self.dae_stderr
-            )
+            return subprocess.CompletedProcess(args=args, returncode=self.dae_rc, stdout=b"", stderr=self.dae_stderr)
         return subprocess.CompletedProcess(args=args, returncode=0, stdout=b"", stderr=b"")
 
     def xlsx_calls(self) -> list[list[str]]:
@@ -98,9 +94,7 @@ class _V18SubprocessRecorder:
         return [c for c in self.calls if "-d" in c and "-x" not in c]
 
 
-def _install_minimal_dependencies(
-    monkeypatch: pytest.MonkeyPatch, *, converter: Path
-) -> None:
+def _install_minimal_dependencies(monkeypatch: pytest.MonkeyPatch, *, converter: Path) -> None:
     monkeypatch.setattr(cad_import, "find_converter", lambda _ext: converter)
     fake_rows = [
         {
@@ -116,9 +110,7 @@ def _install_minimal_dependencies(
     monkeypatch.setattr(cad_import, "parse_cad_excel", lambda _path: fake_rows)
 
 
-def test_v18_capability_drives_flag_based_invocation(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_v18_capability_drives_flag_based_invocation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍End-to-end: cache the v18 capability profile, run ``_try_cad2data``,
     assert both the XLSX pass and the DAE pass use the v18 flag CLI
     (``-x out.xlsx --no-dae -m standard --force-path`` and
@@ -165,9 +157,7 @@ def test_v18_capability_drives_flag_based_invocation(
     assert "-no-collada" not in dae_args
 
 
-def test_v18_complete_depth_emits_mode_complete(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_v18_complete_depth_emits_mode_complete(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍``conversion_depth="complete"`` must surface as ``-m complete`` on
     the v18 flag CLI (the v18 ``-m`` enum is
     ``{basic,standard,complete,custom}``)."""
@@ -191,9 +181,7 @@ def test_v18_complete_depth_emits_mode_complete(
     assert xlsx_args[idx + 1] == "complete"
 
 
-def test_v18_exit_15_retries_with_reduced_v18_invocation(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_v18_exit_15_retries_with_reduced_v18_invocation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍If v18 itself rejects something (e.g. user has a partial v18 build
     that doesn't grok --no-dae yet), the retry path must stay on the v18
     shape — never fall back to the v17 positional bare form that v18
@@ -220,7 +208,9 @@ def test_v18_exit_15_retries_with_reduced_v18_invocation(
         state[key] += 1
         if state[key] == 1:
             return subprocess.CompletedProcess(
-                args=args, returncode=15, stdout=b"",
+                args=args,
+                returncode=15,
+                stdout=b"",
                 stderr=b"The following arguments were not expected: --some-flag\n",
             )
         # Retry — materialise the output file and report success.

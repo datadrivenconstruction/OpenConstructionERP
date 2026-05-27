@@ -60,8 +60,14 @@ _REASONS = (
 
 
 _INDUSTRIES = (
-    "Residential", "Commercial", "Healthcare", "Education",
-    "Infrastructure", "Industrial", "Hospitality", "Retail",
+    "Residential",
+    "Commercial",
+    "Healthcare",
+    "Education",
+    "Infrastructure",
+    "Industrial",
+    "Hospitality",
+    "Retail",
 )
 
 
@@ -69,8 +75,22 @@ _SIZE_CATS = ("sme", "mid", "enterprise")
 
 
 _COUNTRIES = (
-    "DE", "AT", "CH", "FR", "IT", "ES", "NL", "PL", "GB", "US",
-    "AE", "SA", "BR", "MX", "JP", "AU",
+    "DE",
+    "AT",
+    "CH",
+    "FR",
+    "IT",
+    "ES",
+    "NL",
+    "PL",
+    "GB",
+    "US",
+    "AE",
+    "SA",
+    "BR",
+    "MX",
+    "JP",
+    "AU",
 )
 
 
@@ -274,9 +294,7 @@ async def seed_crm_demo(session: AsyncSession) -> dict[str, int]:
             kind=rng.choice(_ACTIVITY_KINDS),
             subject=f"Demo activity {i + 1:04d}",
             body="Seeded activity body",
-            due_at=(now + timedelta(days=rng.randint(-30, 30))).isoformat()
-            if rng.random() < 0.7
-            else None,
+            due_at=(now + timedelta(days=rng.randint(-30, 30))).isoformat() if rng.random() < 0.7 else None,
             completed_at=now.isoformat() if completed else None,
             outcome=rng.choice(_ACTIVITY_OUTCOMES),
         )

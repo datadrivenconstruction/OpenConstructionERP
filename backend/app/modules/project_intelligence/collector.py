@@ -261,10 +261,7 @@ async def _collect_boq(
         # Count BOQs and positions
         boq_rows = (
             await session.execute(
-                text(
-                    "SELECT b.id, b.updated_at FROM oe_boq_boq b "
-                    "WHERE b.project_id = :pid"
-                ),
+                text("SELECT b.id, b.updated_at FROM oe_boq_boq b WHERE b.project_id = :pid"),
                 {"pid": project_id},
             )
         ).fetchall()
@@ -317,9 +314,7 @@ async def _collect_boq(
             state.completion_pct = 0.3  # Has structure but no items
 
         state.export_ready = (
-            state.total_items > 0
-            and state.items_with_zero_price == 0
-            and state.items_with_zero_quantity == 0
+            state.total_items > 0 and state.items_with_zero_price == 0 and state.items_with_zero_quantity == 0
         )
 
     except Exception:
@@ -336,10 +331,7 @@ async def _collect_schedule(
     try:
         sched_row = (
             await session.execute(
-                text(
-                    "SELECT id, start_date, end_date "
-                    "FROM oe_schedule_schedule WHERE project_id = :pid LIMIT 1"
-                ),
+                text("SELECT id, start_date, end_date FROM oe_schedule_schedule WHERE project_id = :pid LIMIT 1"),
                 {"pid": project_id},
             )
         ).first()
@@ -372,10 +364,7 @@ async def _collect_schedule(
         # Check baseline
         baseline_row = (
             await session.execute(
-                text(
-                    "SELECT COUNT(*) FROM oe_schedule_baseline "
-                    "WHERE schedule_id = :sid"
-                ),
+                text("SELECT COUNT(*) FROM oe_schedule_baseline WHERE schedule_id = :sid"),
                 {"sid": schedule_id},
             )
         ).first()
@@ -417,10 +406,7 @@ async def _collect_takeoff(
     try:
         doc_rows = (
             await session.execute(
-                text(
-                    "SELECT file_type, status FROM oe_takeoff_document "
-                    "WHERE project_id = :pid"
-                ),
+                text("SELECT file_type, status FROM oe_takeoff_document WHERE project_id = :pid"),
                 {"pid": project_id},
             )
         ).fetchall()
@@ -443,10 +429,7 @@ async def _collect_takeoff(
         # Count measurements
         meas_row = (
             await session.execute(
-                text(
-                    "SELECT COUNT(*) FROM oe_takeoff_measurement "
-                    "WHERE project_id = :pid"
-                ),
+                text("SELECT COUNT(*) FROM oe_takeoff_measurement WHERE project_id = :pid"),
                 {"pid": project_id},
             )
         ).first()
@@ -567,10 +550,7 @@ async def _collect_tendering(
     try:
         pkg_row = (
             await session.execute(
-                text(
-                    "SELECT COUNT(*) FROM oe_tendering_package "
-                    "WHERE project_id = :pid"
-                ),
+                text("SELECT COUNT(*) FROM oe_tendering_package WHERE project_id = :pid"),
                 {"pid": project_id},
             )
         ).first()
@@ -624,9 +604,7 @@ async def _collect_documents(
         if doc_row:
             state.total_files = doc_row[0] or 0
             if doc_row[1]:
-                state.categories_covered = [
-                    c.strip() for c in str(doc_row[1]).split(",") if c.strip()
-                ]
+                state.categories_covered = [c.strip() for c in str(doc_row[1]).split(",") if c.strip()]
 
         if state.total_files > 0:
             state.completion_pct = min(1.0, 0.3 + 0.1 * len(state.categories_covered))
@@ -645,10 +623,7 @@ async def _collect_reports(
     try:
         rep_row = (
             await session.execute(
-                text(
-                    "SELECT COUNT(*), MAX(created_at) "
-                    "FROM oe_reporting_generated WHERE project_id = :pid"
-                ),
+                text("SELECT COUNT(*), MAX(created_at) FROM oe_reporting_generated WHERE project_id = :pid"),
                 {"pid": project_id},
             )
         ).first()
@@ -675,10 +650,7 @@ async def _collect_cost_model(
         # Check budget lines
         budget_row = (
             await session.execute(
-                text(
-                    "SELECT COUNT(*) FROM oe_costmodel_budget_line "
-                    "WHERE project_id = :pid"
-                ),
+                text("SELECT COUNT(*) FROM oe_costmodel_budget_line WHERE project_id = :pid"),
                 {"pid": project_id},
             )
         ).first()
@@ -807,9 +779,7 @@ async def _collect_requirements(
             if state.gate_pass_rate >= 80.0:
                 state.completion_pct += 25.0
     except Exception:
-        logger.warning(
-            "Could not collect requirements state for %s", project_id, exc_info=True
-        )
+        logger.warning("Could not collect requirements state for %s", project_id, exc_info=True)
     return state
 
 
@@ -871,9 +841,7 @@ async def _collect_bim(
                 state.completion_pct += 40.0
             state.completion_pct = round(min(100.0, state.completion_pct), 1)
     except Exception:
-        logger.warning(
-            "Could not collect bim state for %s", project_id, exc_info=True
-        )
+        logger.warning("Could not collect bim state for %s", project_id, exc_info=True)
     return state
 
 
@@ -924,9 +892,7 @@ async def _collect_tasks(
             closed = state.total_tasks - state.open_tasks
             state.completion_pct = round((closed / state.total_tasks) * 100.0, 1)
     except Exception:
-        logger.warning(
-            "Could not collect tasks state for %s", project_id, exc_info=True
-        )
+        logger.warning("Could not collect tasks state for %s", project_id, exc_info=True)
     return state
 
 
@@ -979,9 +945,7 @@ async def _collect_assemblies(
             if state.components_total > 0:
                 state.completion_pct += 50.0
     except Exception:
-        logger.warning(
-            "Could not collect assemblies state for %s", project_id, exc_info=True
-        )
+        logger.warning("Could not collect assemblies state for %s", project_id, exc_info=True)
     return state
 
 
@@ -1037,14 +1001,10 @@ async def collect_project_state(
     documents = results[7] if not isinstance(results[7], Exception) else DocumentsState()
     reports = results[8] if not isinstance(results[8], Exception) else ReportsState()
     cost_model = results[9] if not isinstance(results[9], Exception) else CostModelState()
-    requirements = (
-        results[10] if not isinstance(results[10], Exception) else RequirementsState()
-    )
+    requirements = results[10] if not isinstance(results[10], Exception) else RequirementsState()
     bim = results[11] if not isinstance(results[11], Exception) else BIMState()
     tasks_state = results[12] if not isinstance(results[12], Exception) else TasksState()
-    assemblies = (
-        results[13] if not isinstance(results[13], Exception) else AssembliesState()
-    )
+    assemblies = results[13] if not isinstance(results[13], Exception) else AssembliesState()
 
     return ProjectState(
         project_id=project_id,

@@ -4,9 +4,10 @@ Covers field parsing, range/list/step syntax, invalid inputs and the
 ``next_occurrence`` walker for the patterns we care about (daily,
 weekly, monthly, every-N-minutes).
 """
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -69,47 +70,47 @@ class TestNextOccurrence:
 
     def test_daily_at_9am(self):
         """Monday 08:00 → Monday 09:00."""
-        after = datetime(2026, 4, 20, 8, 0, tzinfo=timezone.utc)  # Monday
+        after = datetime(2026, 4, 20, 8, 0, tzinfo=UTC)  # Monday
         result = next_occurrence("0 9 * * *", after)
-        assert result == datetime(2026, 4, 20, 9, 0, tzinfo=timezone.utc)
+        assert result == datetime(2026, 4, 20, 9, 0, tzinfo=UTC)
 
     def test_daily_after_trigger(self):
         """Monday 09:00 exactly → next day 09:00."""
-        after = datetime(2026, 4, 20, 9, 0, tzinfo=timezone.utc)
+        after = datetime(2026, 4, 20, 9, 0, tzinfo=UTC)
         result = next_occurrence("0 9 * * *", after)
-        assert result == datetime(2026, 4, 21, 9, 0, tzinfo=timezone.utc)
+        assert result == datetime(2026, 4, 21, 9, 0, tzinfo=UTC)
 
     def test_weekly_on_monday(self):
         """Every Monday 09:00 — from Wednesday should land on next Monday."""
-        after = datetime(2026, 4, 22, 9, 0, tzinfo=timezone.utc)  # Wednesday
+        after = datetime(2026, 4, 22, 9, 0, tzinfo=UTC)  # Wednesday
         result = next_occurrence("0 9 * * 1", after)
         # Next Monday is 2026-04-27.
-        assert result == datetime(2026, 4, 27, 9, 0, tzinfo=timezone.utc)
+        assert result == datetime(2026, 4, 27, 9, 0, tzinfo=UTC)
         assert result.weekday() == 0  # Python: 0 = Monday
 
     def test_every_15_minutes(self):
-        after = datetime(2026, 4, 22, 9, 17, 30, tzinfo=timezone.utc)
+        after = datetime(2026, 4, 22, 9, 17, 30, tzinfo=UTC)
         result = next_occurrence("*/15 * * * *", after)
         # 9:17:30 → next 15-minute mark is 9:30.
-        assert result == datetime(2026, 4, 22, 9, 30, tzinfo=timezone.utc)
+        assert result == datetime(2026, 4, 22, 9, 30, tzinfo=UTC)
 
     def test_monthly_on_1st(self):
-        after = datetime(2026, 4, 22, 9, 0, tzinfo=timezone.utc)
+        after = datetime(2026, 4, 22, 9, 0, tzinfo=UTC)
         # 1st of every month, 0:00.
         result = next_occurrence("0 0 1 * *", after)
         # Next is May 1 2026.
-        assert result == datetime(2026, 5, 1, 0, 0, tzinfo=timezone.utc)
+        assert result == datetime(2026, 5, 1, 0, 0, tzinfo=UTC)
 
     def test_weekday_morning_range(self):
         """9am Mon-Fri — from Saturday should land on next Monday."""
-        after = datetime(2026, 4, 25, 12, 0, tzinfo=timezone.utc)  # Saturday
+        after = datetime(2026, 4, 25, 12, 0, tzinfo=UTC)  # Saturday
         result = next_occurrence("0 9 * * 1-5", after)
         # Next Monday is 2026-04-27.
-        assert result == datetime(2026, 4, 27, 9, 0, tzinfo=timezone.utc)
+        assert result == datetime(2026, 4, 27, 9, 0, tzinfo=UTC)
 
     def test_specific_day_of_month(self):
-        after = datetime(2026, 4, 22, 9, 0, tzinfo=timezone.utc)
+        after = datetime(2026, 4, 22, 9, 0, tzinfo=UTC)
         # Every 15th at 06:00.
         result = next_occurrence("0 6 15 * *", after)
         # Next 15th is May 15 2026.
-        assert result == datetime(2026, 5, 15, 6, 0, tzinfo=timezone.utc)
+        assert result == datetime(2026, 5, 15, 6, 0, tzinfo=UTC)

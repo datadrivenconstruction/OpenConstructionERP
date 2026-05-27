@@ -18,6 +18,7 @@ from fastapi.responses import Response
 from sqlalchemy import select
 
 from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep, SettingsDep
+from app.modules.projects import profile_service
 from app.modules.projects.bundle_export import (
     export_bundle as fm_export_bundle,
 )
@@ -61,7 +62,6 @@ from app.modules.projects.member_schemas import (
     AddProjectMemberRequest,
     ProjectMemberResponse,
 )
-from app.modules.projects import profile_service
 from app.modules.projects.module_presence import probe_project_modules
 from app.modules.projects.schemas import (
     FocusModePatch,
@@ -72,9 +72,9 @@ from app.modules.projects.schemas import (
     MilestoneUpdate,
     PresetRead,
     ProfileSpec,
+    ProjectCreate,
     ProjectModulePresence,
     ProjectModuleRead,
-    ProjectCreate,
     ProjectProfileResult,
     ProjectResponse,
     ProjectUpdate,
@@ -275,8 +275,7 @@ async def delete_project(
     "/{project_id}/restore/",
     response_model=ProjectResponse,
     summary="Restore archived project",
-    description="Restore an archived project back to active status. "
-    "Only the project owner or admin can restore.",
+    description="Restore an archived project back to active status. Only the project owner or admin can restore.",
 )
 async def restore_project(
     project_id: uuid.UUID,
@@ -332,7 +331,8 @@ async def duplicate_project(
     await _verify_project_owner(service, project_id, user_id, payload)
     try:
         new_project = await service.duplicate_project(
-            project_id, uuid.UUID(user_id),
+            project_id,
+            uuid.UUID(user_id),
         )
         return ProjectResponse.model_validate(new_project)
     except HTTPException:
@@ -449,8 +449,7 @@ async def remove_project_member_endpoint(
 @router.get(
     "/{project_id}/folder-permissions/",
     summary="List folder permissions",
-    description="List all non-revoked folder permissions for the project. "
-    "Owner / admin only.",
+    description="List all non-revoked folder permissions for the project. Owner / admin only.",
 )
 async def list_folder_permissions(
     project_id: uuid.UUID,
@@ -482,9 +481,7 @@ async def list_folder_permissions(
     user_ids = {r.user_id for r in rows}
     user_map: dict[uuid.UUID, User] = {}
     if user_ids:
-        users = (
-            await session.execute(_select(User).where(User.id.in_(user_ids)))
-        ).scalars().all()
+        users = (await session.execute(_select(User).where(User.id.in_(user_ids)))).scalars().all()
         user_map = {u.id: u for u in users}
 
     out: list[dict] = []
@@ -504,9 +501,7 @@ async def list_folder_permissions(
                 "created_at": r.created_at.isoformat() if r.created_at else None,
                 "updated_at": r.updated_at.isoformat() if r.updated_at else None,
                 "user_email": (u.email if u is not None else None),
-                "user_full_name": (
-                    u.full_name if u is not None and u.full_name else None
-                ),
+                "user_full_name": (u.full_name if u is not None and u.full_name else None),
             }
         )
     return out
@@ -1283,7 +1278,9 @@ async def project_dashboard(
         week_ago = date.today() - timedelta(days=7)
         field_reports_this_week = (
             await session.execute(
-                select(func.count(FieldReport.id)).where(FieldReport.project_id == project_id, FieldReport.report_date >= week_ago)
+                select(func.count(FieldReport.id)).where(
+                    FieldReport.project_id == project_id, FieldReport.report_date >= week_ago
+                )
             )
         ).scalar_one()
     except Exception:
@@ -1334,10 +1331,14 @@ async def project_dashboard(
     try:
         from app.modules.changeorders.models import ChangeOrder
 
-        co_total = (await session.execute(select(func.count(ChangeOrder.id)).where(ChangeOrder.project_id == project_id))).scalar_one()
+        co_total = (
+            await session.execute(select(func.count(ChangeOrder.id)).where(ChangeOrder.project_id == project_id))
+        ).scalar_one()
         co_approved = (
             await session.execute(
-                select(func.count(ChangeOrder.id)).where(ChangeOrder.project_id == project_id, ChangeOrder.status == "approved")
+                select(func.count(ChangeOrder.id)).where(
+                    ChangeOrder.project_id == project_id, ChangeOrder.status == "approved"
+                )
             )
         ).scalar_one()
     except Exception:
@@ -1437,11 +1438,7 @@ async def dashboard_cards(
             boq_counts[str(pid)] = cnt
 
         # Get all BOQ IDs grouped by project
-        boq_rows = (
-            await session.execute(
-                select(BOQ.id, BOQ.project_id).where(BOQ.project_id.in_(project_ids))
-            )
-        ).all()
+        boq_rows = (await session.execute(select(BOQ.id, BOQ.project_id).where(BOQ.project_id.in_(project_ids)))).all()
         boq_id_to_project: dict[str, str] = {}
         for bid, pid in boq_rows:
             boq_id_to_project[str(bid)] = str(pid)
@@ -1535,11 +1532,7 @@ async def dashboard_cards(
         from app.modules.schedule.models import Activity, Schedule
 
         sched_rows = (
-            await session.execute(
-                select(Schedule.id, Schedule.project_id).where(
-                    Schedule.project_id.in_(project_ids)
-                )
-            )
+            await session.execute(select(Schedule.id, Schedule.project_id).where(Schedule.project_id.in_(project_ids)))
         ).all()
         sched_to_project: dict[str, str] = {}
         sched_ids = []
@@ -1694,9 +1687,7 @@ async def analytics_overview(
     # Single grouped query for BOQ counts (fixes N+1)
     if project_ids:
         boq_stmt = (
-            select(BOQ.project_id, func.count(BOQ.id))
-            .where(BOQ.project_id.in_(project_ids))
-            .group_by(BOQ.project_id)
+            select(BOQ.project_id, func.count(BOQ.id)).where(BOQ.project_id.in_(project_ids)).group_by(BOQ.project_id)
         )
         boq_count_rows = (await session.execute(boq_stmt)).all()
         boq_counts_map: dict[str, int] = {str(row[0]): int(row[1]) for row in boq_count_rows}
@@ -1761,8 +1752,7 @@ async def analytics_overview(
     response_model=WBSResponse,
     status_code=201,
     summary="Create WBS node",
-    description="Create a Work Breakdown Structure node for a project. "
-    "Supports hierarchical nesting via parent_id.",
+    description="Create a Work Breakdown Structure node for a project. Supports hierarchical nesting via parent_id.",
 )
 async def create_wbs_node(
     project_id: uuid.UUID,
@@ -2124,7 +2114,10 @@ async def patch_match_settings(
     """PATCH the project's match settings (audit-logged)."""
     await _verify_project_owner(service, project_id, user_id, payload)
     row = await update_match_settings(
-        session, project_id, data, user_id=user_id,
+        session,
+        project_id,
+        data,
+        user_id=user_id,
     )
     return MatchProjectSettingsRead.model_validate(row)
 
@@ -2173,7 +2166,10 @@ async def file_manager_tree(
     """
     await _verify_project_owner(service, project_id, user_id, payload)
     return await fm_file_tree(
-        session, str(project_id), query=q, extension=extension,
+        session,
+        str(project_id),
+        query=q,
+        extension=extension,
     )
 
 
@@ -2234,7 +2230,9 @@ async def file_manager_locations(
     """
     project = await _verify_project_owner(service, project_id, user_id, payload)
     return fm_resolve_locations(
-        str(project_id), getattr(project, "name", ""), settings=settings,
+        str(project_id),
+        getattr(project, "name", ""),
+        settings=settings,
     )
 
 
@@ -2350,7 +2348,8 @@ async def post_import_validate(
         return fm_validate_bundle(raw)
     except BundleError as exc:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc),
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
         ) from exc
 
 
@@ -2390,7 +2389,8 @@ async def post_import_bundle(
         )
     except BundleError as exc:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc),
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
         ) from exc
 
     # ``new_project`` mode created a project row; make the importing user
@@ -2409,7 +2409,8 @@ async def post_import_bundle(
                 await session.commit()
         except Exception:  # noqa: BLE001
             logger.exception(
-                "Could not assign owner_id to imported project %s", result.project_id,
+                "Could not assign owner_id to imported project %s",
+                result.project_id,
             )
 
     return result
@@ -2467,14 +2468,13 @@ async def post_email_link(
     for mod, cls_name, kind in file_kinds:
         try:
             import importlib
+
             cls = getattr(importlib.import_module(mod), cls_name, None)
         except ImportError:
             continue
         if cls is None:
             continue
-        row = (
-            await session.execute(select(cls).where(cls.id == file_id))
-        ).scalar_one_or_none()
+        row = (await session.execute(select(cls).where(cls.id == file_id))).scalar_one_or_none()
         if row is not None:
             found_row = row
             found_kind = kind
@@ -2483,7 +2483,8 @@ async def post_email_link(
 
     if found_row is None or not target_project_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="File not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="File not found",
         )
 
     # Project ownership gate.
@@ -2507,6 +2508,7 @@ async def post_email_link(
         "uid": user_id,
     }
     import json as _json
+
     payload_bytes = _json.dumps(payload_obj, separators=(",", ":")).encode("utf-8")
     payload_b64 = base64.urlsafe_b64encode(payload_bytes).rstrip(b"=").decode("ascii")
     sig = hmac.new(
@@ -2517,22 +2519,14 @@ async def post_email_link(
     sig_b64 = base64.urlsafe_b64encode(sig).rstrip(b"=").decode("ascii")
     token = f"{payload_b64}.{sig_b64}"
 
-    name = (
-        getattr(found_row, "name", None)
-        or getattr(found_row, "filename", None)
-        or str(file_id)
-    )
+    name = getattr(found_row, "name", None) or getattr(found_row, "filename", None) or str(file_id)
     size_bytes = int(
-        getattr(found_row, "file_size", None)
-        or getattr(found_row, "size_bytes", None)
-        or 0,
+        getattr(found_row, "file_size", None) or getattr(found_row, "size_bytes", None) or 0,
     )
     if not size_bytes:
         try:
             size_bytes = os.path.getsize(
-                getattr(found_row, "file_path", None)
-                or getattr(found_row, "canonical_file_path", None)
-                or "",
+                getattr(found_row, "file_path", None) or getattr(found_row, "canonical_file_path", None) or "",
             )
         except OSError:
             size_bytes = 0
@@ -2588,6 +2582,7 @@ async def get_share_file(
             payload_b64 + "=" * (-len(payload_b64) % 4),
         )
         import json as _json
+
         payload_obj = _json.loads(payload_bytes)
     except (ValueError, TypeError) as exc:
         raise HTTPException(status_code=400, detail="Malformed share token") from exc
@@ -2602,6 +2597,7 @@ async def get_share_file(
 
     # Resolve the file again — we never trust the token to carry the path.
     import importlib
+
     kind_to_class = {
         "document": ("app.modules.documents.models", "Document", "file_path", "name"),
         "photo": ("app.modules.documents.models", "ProjectPhoto", "file_path", "filename"),
@@ -2619,9 +2615,7 @@ async def get_share_file(
     if cls is None:
         raise HTTPException(status_code=503, detail="File class not loaded")
 
-    row = (
-        await session.execute(select(cls).where(cls.id == fid))
-    ).scalar_one_or_none()
+    row = (await session.execute(select(cls).where(cls.id == fid))).scalar_one_or_none()
     if row is None:
         raise HTTPException(status_code=404, detail="File no longer exists")
 
@@ -2713,7 +2707,8 @@ async def get_project_profile(
         # already created the profile will short-circuit at the existence
         # check.
         result = await profile_service.ensure_default_profile(
-            service.session, project_id,
+            service.session,
+            project_id,
         )
     return result
 
@@ -2734,7 +2729,10 @@ async def apply_project_profile(
 ) -> ProjectProfileResult:
     await _verify_project_owner(service, project_id, user_id, payload)
     return await profile_service.apply_profile(
-        service.session, project_id, spec, _user_uuid(user_id),
+        service.session,
+        project_id,
+        spec,
+        _user_uuid(user_id),
     )
 
 
@@ -2756,7 +2754,8 @@ async def recompute_project_profile(
         return await profile_service.recompute(service.session, project_id)
     except LookupError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc),
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
         ) from exc
 
 
@@ -2776,7 +2775,9 @@ async def set_project_focus_mode(
 ) -> ProjectProfileResult:
     await _verify_project_owner(service, project_id, user_id, payload)
     return await profile_service.set_focus_mode(
-        service.session, project_id, body.focus_mode_enabled,
+        service.session,
+        project_id,
+        body.focus_mode_enabled,
     )
 
 
@@ -2798,7 +2799,8 @@ async def list_project_modules(
     result = await profile_service.get_profile(service.session, project_id)
     if result is None:
         result = await profile_service.ensure_default_profile(
-            service.session, project_id,
+            service.session,
+            project_id,
         )
     return result.modules
 

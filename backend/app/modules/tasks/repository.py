@@ -86,16 +86,20 @@ class TaskRepository:
 
         Private tasks are included only when the requesting user is the creator.
         """
-        base = select(Task).where(
-            or_(
-                Task.responsible_id == user_id,
-                # Include private tasks created by this user
-                Task.created_by == user_id,
+        base = (
+            select(Task)
+            .where(
+                or_(
+                    Task.responsible_id == user_id,
+                    # Include private tasks created by this user
+                    Task.created_by == user_id,
+                )
             )
-        ).where(
-            or_(
-                Task.is_private == False,  # noqa: E712
-                Task.created_by == user_id,
+            .where(
+                or_(
+                    Task.is_private == False,  # noqa: E712
+                    Task.created_by == user_id,
+                )
             )
         )
         if status is not None:

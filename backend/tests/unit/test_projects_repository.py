@@ -52,7 +52,9 @@ async def session() -> AsyncGenerator[AsyncSession, None]:
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
     async with factory() as sess:
         yield sess
@@ -198,7 +200,12 @@ async def test_max_project_code_seq_handles_60_plus_rows_single_query(
     sync_engine = getattr(bind, "sync_engine", bind)
 
     def _count_selects(  # noqa: PLR0913
-        conn, cursor, statement, parameters, context, executemany,  # type: ignore[no-untyped-def]
+        conn,
+        cursor,
+        statement,
+        parameters,
+        context,
+        executemany,  # type: ignore[no-untyped-def]
     ) -> None:
         nonlocal select_count
         normalised = statement.lstrip().upper()

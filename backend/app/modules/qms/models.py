@@ -46,16 +46,23 @@ class ITPPlan(Base):
     __tablename__ = "oe_qms_itp_plan"
 
     project_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True,
+        GUID(),
+        nullable=False,
+        index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     work_type: Mapped[str] = mapped_column(String(100), nullable=False)
     wbs_ref: Mapped[str | None] = mapped_column(String(100), nullable=True)
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="draft", index=True,
+        String(32),
+        nullable=False,
+        default="draft",
+        index=True,
     )
     version: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=1,
+        Integer,
+        nullable=False,
+        default=1,
     )
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
@@ -81,18 +88,19 @@ class ITPItem(Base):
     method: Mapped[str | None] = mapped_column(String(100), nullable=True)
     acceptance_criteria: Mapped[str | None] = mapped_column(Text, nullable=True)
     hold_witness_point: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="review",
+        String(16),
+        nullable=False,
+        default="review",
     )
     responsible_role: Mapped[str | None] = mapped_column(String(100), nullable=True)
     signatories_required: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=1,
+        Integer,
+        nullable=False,
+        default=1,
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<ITPItem {self.sequence}: {self.control_point_name} "
-            f"({self.hold_witness_point})>"
-        )
+        return f"<ITPItem {self.sequence}: {self.control_point_name} ({self.hold_witness_point})>"
 
 
 class QMSInspection(Base):
@@ -107,26 +115,36 @@ class QMSInspection(Base):
         index=True,
     )
     project_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True,
+        GUID(),
+        nullable=False,
+        index=True,
     )
     location_ref: Mapped[str | None] = mapped_column(String(255), nullable=True)
     inspector_user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     scheduled_at: Mapped[datetime | None] = mapped_column(
         # Use String(32) ISO timestamp to stay portable with SQLite tests;
         # production migration uses TIMESTAMPTZ for ordering.
-        String(32), nullable=True,
+        String(32),
+        nullable=True,
     )
     performed_at: Mapped[datetime | None] = mapped_column(
-        String(32), nullable=True,
+        String(32),
+        nullable=True,
     )
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="scheduled", index=True,
+        String(32),
+        nullable=False,
+        default="scheduled",
+        index=True,
     )
     bim_element_ref: Mapped[str | None] = mapped_column(String(255), nullable=True)
     drawing_ref: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     photos_json: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
 
     def __repr__(self) -> str:
@@ -148,7 +166,9 @@ class QMSInspectionSignature(Base):
     signer_role: Mapped[str] = mapped_column(String(64), nullable=False)
     signed_at: Mapped[datetime | None] = mapped_column(String(32), nullable=True)
     signature_method: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="electronic",
+        String(32),
+        nullable=False,
+        default="electronic",
     )
     comments: Mapped[str | None] = mapped_column(Text, nullable=True)
 
@@ -166,33 +186,46 @@ class QMSNCR(Base):
     __tablename__ = "oe_qms_ncr"
 
     project_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True,
+        GUID(),
+        nullable=False,
+        index=True,
     )
     raised_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     raised_at: Mapped[datetime | None] = mapped_column(String(32), nullable=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     severity: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="minor", index=True,
+        String(16),
+        nullable=False,
+        default="minor",
+        index=True,
     )
     root_cause: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="open", index=True,
+        String(32),
+        nullable=False,
+        default="open",
+        index=True,
     )
     cost_impact_currency: Mapped[str] = mapped_column(
-        String(3), nullable=False, default="",
+        String(3),
+        nullable=False,
+        default="",
     )
     cost_impact_amount: Mapped[Decimal | None] = mapped_column(
         # Round 4/5 money convention: Numeric(18, 2). Original schema used
         # Numeric(15, 2); upgraded so very-large infrastructure NCRs no
         # longer truncate at 13 digits of integer precision.
-        Numeric(18, 2), nullable=True,
+        Numeric(18, 2),
+        nullable=True,
     )
     linked_variation_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
     linked_inspection_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
 
     def __repr__(self) -> str:
@@ -212,11 +245,15 @@ class QMSNCRAction(Base):
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
     responsible_user_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
     due_date: Mapped[datetime | None] = mapped_column(String(32), nullable=True)
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="assigned", index=True,
+        String(32),
+        nullable=False,
+        default="assigned",
+        index=True,
     )
     verification_method: Mapped[str | None] = mapped_column(String(255), nullable=True)
     verified_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
@@ -233,7 +270,9 @@ class QMSPunchItem(Base):
     __tablename__ = "oe_qms_punch_item"
 
     project_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True,
+        GUID(),
+        nullable=False,
+        index=True,
     )
     raised_at: Mapped[datetime | None] = mapped_column(String(32), nullable=True)
     raised_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
@@ -243,14 +282,20 @@ class QMSPunchItem(Base):
     drawing_ref: Mapped[str | None] = mapped_column(String(255), nullable=True)
     bim_element_ref: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="open", index=True,
+        String(32),
+        nullable=False,
+        default="open",
+        index=True,
     )
     severity: Mapped[str] = mapped_column(String(16), nullable=False, default="minor")
     assigned_to: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     due_date: Mapped[datetime | None] = mapped_column(String(32), nullable=True)
     closed_at: Mapped[datetime | None] = mapped_column(String(32), nullable=True)
     photos_json: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     source: Mapped[str] = mapped_column(String(32), nullable=False, default="manual")
     category: Mapped[str | None] = mapped_column(String(64), nullable=True)
@@ -265,10 +310,14 @@ class QMSAudit(Base):
     __tablename__ = "oe_qms_audit"
 
     project_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True,
+        GUID(),
+        nullable=False,
+        index=True,
     )
     audit_type: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="internal",
+        String(32),
+        nullable=False,
+        default="internal",
     )
     planned_date: Mapped[datetime | None] = mapped_column(String(32), nullable=True)
     performed_at: Mapped[datetime | None] = mapped_column(String(32), nullable=True)
@@ -276,7 +325,10 @@ class QMSAudit(Base):
     audit_scope: Mapped[str | None] = mapped_column(Text, nullable=True)
     standard_ref: Mapped[str | None] = mapped_column(String(64), nullable=True)
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="planned", index=True,
+        String(32),
+        nullable=False,
+        default="planned",
+        index=True,
     )
     overall_rating: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
@@ -296,13 +348,18 @@ class QMSAuditFinding(Base):
         index=True,
     )
     finding_type: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="observation",
+        String(32),
+        nullable=False,
+        default="observation",
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
     clause_ref: Mapped[str | None] = mapped_column(String(64), nullable=True)
     corrective_action_required: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="open", index=True,
+        String(32),
+        nullable=False,
+        default="open",
+        index=True,
     )
     due_date: Mapped[datetime | None] = mapped_column(String(32), nullable=True)
     closed_at: Mapped[datetime | None] = mapped_column(String(32), nullable=True)
@@ -330,7 +387,10 @@ class ITPTemplate(Base):
     #          acceptance_criteria, hold_witness_point, responsible_role,
     #          signatories_required}]
     items_json: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
@@ -372,13 +432,19 @@ class QMSAuditLog(Base):
     __tablename__ = "oe_qms_audit_log"
 
     tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
     entity_type: Mapped[str] = mapped_column(
-        String(32), nullable=False, index=True,
+        String(32),
+        nullable=False,
+        index=True,
     )
     entity_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True,
+        GUID(),
+        nullable=False,
+        index=True,
     )
     action: Mapped[str] = mapped_column(String(64), nullable=False)
     actor_user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
@@ -386,17 +452,20 @@ class QMSAuditLog(Base):
     new_status: Mapped[str | None] = mapped_column(String(64), nullable=True)
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     before_state: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     after_state: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<QMSAuditLog {self.entity_type}/{self.entity_id} "
-            f"{self.old_status or '-'}->{self.new_status or '-'}>"
-        )
+        return f"<QMSAuditLog {self.entity_type}/{self.entity_id} {self.old_status or '-'}->{self.new_status or '-'}>"
 
 
 class QMSCalibration(Base):
@@ -409,7 +478,9 @@ class QMSCalibration(Base):
     __tablename__ = "oe_qms_calibration"
 
     project_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
     instrument_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     instrument_name: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -424,11 +495,12 @@ class QMSCalibration(Base):
     measurement_uncertainty: Mapped[str | None] = mapped_column(String(255), nullable=True)
     owner_user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="valid", index=True,
+        String(32),
+        nullable=False,
+        default="valid",
+        index=True,
     )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     def __repr__(self) -> str:
-        return (
-            f"<QMSCalibration {self.instrument_id} valid_until={self.valid_until}>"
-        )
+        return f"<QMSCalibration {self.instrument_id} valid_until={self.valid_until}>"

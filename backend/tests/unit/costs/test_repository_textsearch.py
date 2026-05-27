@@ -54,9 +54,7 @@ def _row(code: str, description: str) -> CostItem:
 @pytest_asyncio.fixture
 async def session() -> AsyncIterator[AsyncSession]:
     db_path = _TMP_DIR / f"test-{uuid.uuid4().hex[:8]}.db"
-    engine = create_async_engine(
-        f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False
-    )
+    engine = create_async_engine(f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all, tables=[CostItem.__table__])
 
@@ -86,9 +84,7 @@ async def test_q_finds_substring_in_description(session: AsyncSession) -> None:
     """BUG-012 root case — ``q=Beton`` must match every row containing 'beton'."""
     repo = CostItemRepository(session)
     items, total, _ = await repo.search(q="Beton", limit=50)
-    assert total is not None and total >= 3, (
-        "expected matches: Stahlbeton, Beton C25/30, Wandschalung beton"
-    )
+    assert total is not None and total >= 3, "expected matches: Stahlbeton, Beton C25/30, Wandschalung beton"
     descriptions = [it.description.lower() for it in items]
     assert any("stahlbeton" in d for d in descriptions)
     assert any("beton c25/30" in d for d in descriptions)

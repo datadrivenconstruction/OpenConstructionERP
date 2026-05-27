@@ -142,7 +142,12 @@ async def grant_permission(
 
     logger.info(
         "Granted folder permission project=%s scope=%s:%s user=%s role=%s by=%s",
-        project_id, scope_kind, normalised_path or "*", user_id, role, granted_by,
+        project_id,
+        scope_kind,
+        normalised_path or "*",
+        user_id,
+        role,
+        granted_by,
     )
     return row
 
@@ -167,7 +172,8 @@ async def revoke_permission(
     await session.flush()
     logger.info(
         "Revoked folder permission %s project=%s",
-        permission_id, project_id,
+        permission_id,
+        project_id,
     )
 
 
@@ -192,11 +198,7 @@ async def list_permissions(
         else:
             conditions.append(FolderPermission.scope_path == normalised_path)
 
-    stmt = (
-        select(FolderPermission)
-        .where(and_(*conditions))
-        .order_by(FolderPermission.granted_at.desc().nullslast())
-    )
+    stmt = select(FolderPermission).where(and_(*conditions)).order_by(FolderPermission.granted_at.desc().nullslast())
     return list((await session.execute(stmt)).scalars().all())
 
 
@@ -234,9 +236,7 @@ async def effective_permissions_for(
         # constraint), but if they do we prefer the strongest role —
         # keeps the contract safe under bugs / data import quirks.
         existing = out.get(key)
-        if existing is None or FOLDER_ROLE_RANK.get(role, -1) > FOLDER_ROLE_RANK.get(
-            existing, -1
-        ):
+        if existing is None or FOLDER_ROLE_RANK.get(role, -1) > FOLDER_ROLE_RANK.get(existing, -1):
             out[key] = role
     return out
 
@@ -304,7 +304,9 @@ async def folder_access_for(
     # umbrella that loses to a more specific grant.
     normalised_path = scope_path or None
     grants = await effective_permissions_for(
-        session, project_id=project_id, user_id=user_id_norm,
+        session,
+        project_id=project_id,
+        user_id=user_id_norm,
     )
     exact = grants.get((scope_kind, normalised_path))
     if exact is not None:
@@ -324,9 +326,7 @@ async def folder_access_for(
         return None
     if normalised_path is not None and (scope_kind, None) in restricted:
         return None
-    if normalised_path is None and any(
-        sk == scope_kind for sk, _ in restricted
-    ):
+    if normalised_path is None and any(sk == scope_kind for sk, _ in restricted):
         # A specific sub-path is restricted, but the user is asking
         # for the "all of kind" view. Treat the wildcard view as
         # readable (so they see un-restricted siblings) — the

@@ -144,9 +144,7 @@ class CollabLockRepository:
 
     # ── Read ────────────────────────────────────────────────────────────
 
-    async def _get_row(
-        self, entity_type: str, entity_id: uuid.UUID
-    ) -> CollabLock | None:
+    async def _get_row(self, entity_type: str, entity_id: uuid.UUID) -> CollabLock | None:
         stmt = select(CollabLock).where(
             and_(
                 CollabLock.entity_type == entity_type,
@@ -173,9 +171,7 @@ class CollabLockRepository:
     async def get_by_id(self, lock_id: uuid.UUID) -> CollabLock | None:
         return await self.session.get(CollabLock, lock_id)
 
-    async def list_by_user(
-        self, user_id: uuid.UUID, now: datetime
-    ) -> Sequence[CollabLock]:
+    async def list_by_user(self, user_id: uuid.UUID, now: datetime) -> Sequence[CollabLock]:
         stmt = select(CollabLock).where(
             and_(
                 CollabLock.user_id == user_id,
@@ -210,9 +206,7 @@ class CollabLockRepository:
         await self.session.flush()
         return row
 
-    async def release(
-        self, lock_id: uuid.UUID, *, user_id: uuid.UUID
-    ) -> bool:
+    async def release(self, lock_id: uuid.UUID, *, user_id: uuid.UUID) -> bool:
         """Delete a lock.  Only the holder may release.  Returns True if
         a row was actually deleted.
         """
@@ -233,8 +227,6 @@ class CollabLockRepository:
         report rowcount, in which case we return ``0``).
         """
         stmt = delete(CollabLock).where(CollabLock.expires_at <= now)
-        result = await self.session.execute(
-            stmt, execution_options={"synchronize_session": False}
-        )
+        result = await self.session.execute(stmt, execution_options={"synchronize_session": False})
         await self.session.flush()
         return int(result.rowcount or 0)

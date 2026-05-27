@@ -278,14 +278,10 @@ def _check_constraint(
 # `^[A-Z]{2}-\d+$` or similar). This is a syntactic guard only; the
 # executor still applies a wall-clock timeout per match.
 
-_REDOS_PATTERN = re.compile(
-    r"\([^)]*[*+][^)]*\)[*+]"
-)
+_REDOS_PATTERN = re.compile(r"\([^)]*[*+][^)]*\)[*+]")
 
 
-def _check_regex_pattern(
-    pattern: str, path: str, ctx: _ValidationContext
-) -> None:
+def _check_regex_pattern(pattern: str, path: str, ctx: _ValidationContext) -> None:
     """Compile the pattern and reject obvious ReDoS shapes."""
     try:
         re.compile(pattern)
@@ -337,9 +333,7 @@ async def _check_alias_refs(
         if alias_uuid is not None:
             match = await session.get(EacParameterAlias, alias_uuid)
         if match is None:
-            stmt = select(EacParameterAlias).where(
-                EacParameterAlias.name == alias_id_str
-            )
+            stmt = select(EacParameterAlias).where(EacParameterAlias.name == alias_id_str)
             res = await session.execute(stmt)
             match = res.scalar_one_or_none()
         if match is not None:

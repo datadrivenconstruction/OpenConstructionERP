@@ -25,12 +25,11 @@ import pytest
 
 from app.modules.cad.crs_detector import (
     CRSGuess,
+    _detect_from_ifc_text,  # type: ignore[attr-defined]
     detect_from_bbox,
     detect_from_canonical,
     from_user_supplied,
 )
-from app.modules.cad.crs_detector import _detect_from_ifc_text  # type: ignore[attr-defined]
-
 
 # ── Region coverage table ────────────────────────────────────────────────
 #
@@ -86,8 +85,7 @@ def test_detect_from_bbox_region(
     if guess.epsg != expected_epsg:
         epsgs = [guess.epsg] + [alt.epsg for alt in guess.alternatives]
         assert expected_epsg in epsgs, (
-            f"{label}: expected EPSG:{expected_epsg}, got "
-            f"primary EPSG:{guess.epsg} and alternates {epsgs[1:]}"
+            f"{label}: expected EPSG:{expected_epsg}, got primary EPSG:{guess.epsg} and alternates {epsgs[1:]}"
         )
     else:
         assert guess.epsg == expected_epsg, label
@@ -116,9 +114,7 @@ def test_detect_project_local_small_bbox() -> None:
 def test_detect_degenerate_bbox() -> None:
     """Zero-area / NaN bbox returns unknown."""
     assert detect_from_bbox((0, 0, 0, 0), units="m").epsg is None
-    assert detect_from_bbox(
-        (float("nan"), 0.0, 100.0, 100.0), units="m"
-    ).epsg is None
+    assert detect_from_bbox((float("nan"), 0.0, 100.0, 100.0), units="m").epsg is None
     # Inverted bbox (xmax < xmin) is also degenerate.
     assert detect_from_bbox((100, 100, 0, 0), units="m").epsg is None
 
@@ -128,9 +124,7 @@ def test_detect_returns_alternatives() -> None:
     candidates when they tie at the top score)."""
     # India UTM 43N region — overlaps with UTM 44N at neighbouring x's
     # AND with UAE / KSA UTM zones at the same latitude band.
-    guess = detect_from_bbox(
-        (300_000.0, 2_500_000.0, 400_000.0, 2_600_000.0), units="m"
-    )
+    guess = detect_from_bbox((300_000.0, 2_500_000.0, 400_000.0, 2_600_000.0), units="m")
     assert guess.epsg is not None
     # We always emit at least 3 alternates so the dropdown has options.
     assert len(guess.alternatives) >= 3
@@ -161,12 +155,7 @@ def test_detect_ifc_projected_crs_with_epsg() -> None:
 def test_detect_ifc_no_projected_crs_falls_back_to_map_conversion() -> None:
     """No IfcProjectedCRS, but IfcMapConversion eastings/northings present
     → heuristic kicks in on the derived bbox."""
-    ifc_text = (
-        "ISO-10303-21;\n"
-        "DATA;\n"
-        "#10=IFCMAPCONVERSION(#11,#12,395000.0,5825000.0,0.0,1.0,0.0,$,$);\n"
-        "ENDSEC;\n"
-    )
+    ifc_text = "ISO-10303-21;\nDATA;\n#10=IFCMAPCONVERSION(#11,#12,395000.0,5825000.0,0.0,1.0,0.0,$,$);\nENDSEC;\n"
     guess = _detect_from_ifc_text(ifc_text)
     # Berlin-ish bbox should resolve to UTM 32N (EPSG:25832).
     assert guess.epsg == 25832
@@ -273,9 +262,7 @@ def test_region_accuracy_at_least_80_percent() -> None:
         f"in top-4 ({hits}/{len(REGION_CASES)}); "
         f"strict #1: {strict_accuracy:.0%}"
     )
-    assert accuracy >= 0.80, (
-        f"Accuracy {accuracy:.0%} below 80% threshold — heuristic table needs work"
-    )
+    assert accuracy >= 0.80, f"Accuracy {accuracy:.0%} below 80% threshold — heuristic table needs work"
 
 
 # ── Pydantic schema sanity ──────────────────────────────────────────────
@@ -283,9 +270,7 @@ def test_region_accuracy_at_least_80_percent() -> None:
 
 def test_crs_guess_serialisable() -> None:
     """CRSGuess round-trips through model_dump/model_validate."""
-    guess = detect_from_bbox(
-        (270_000.0, 2_100_000.0, 280_000.0, 2_110_000.0), units="m"
-    )
+    guess = detect_from_bbox((270_000.0, 2_100_000.0, 280_000.0, 2_110_000.0), units="m")
     dumped = guess.model_dump()
     restored = CRSGuess.model_validate(dumped)
     assert restored.epsg == guess.epsg

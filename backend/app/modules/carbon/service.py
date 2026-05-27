@@ -193,22 +193,37 @@ class UnitMismatchError(ValueError):
 
 
 _LENGTH_ALIASES: dict[str, str] = {
-    "m": "m", "metre": "m", "meter": "m",
+    "m": "m",
+    "metre": "m",
+    "meter": "m",
 }
 _AREA_ALIASES: dict[str, str] = {
-    "m2": "m2", "m^2": "m2", "sqm": "m2", "m²": "m2",
+    "m2": "m2",
+    "m^2": "m2",
+    "sqm": "m2",
+    "m²": "m2",
 }
 _VOLUME_ALIASES: dict[str, str] = {
-    "m3": "m3", "m^3": "m3", "cbm": "m3", "m³": "m3",
+    "m3": "m3",
+    "m^3": "m3",
+    "cbm": "m3",
+    "m³": "m3",
 }
 _MASS_ALIASES: dict[str, str] = {
-    "kg": "kg", "kilogram": "kg",
+    "kg": "kg",
+    "kilogram": "kg",
 }
 _TONNE_ALIASES: dict[str, str] = {
-    "t": "t", "tonne": "t", "ton": "t", "tn": "t",
+    "t": "t",
+    "tonne": "t",
+    "ton": "t",
+    "tn": "t",
 }
 _PIECE_ALIASES: dict[str, str] = {
-    "pcs": "pcs", "pc": "pcs", "piece": "pcs", "stk": "pcs",
+    "pcs": "pcs",
+    "pc": "pcs",
+    "piece": "pcs",
+    "stk": "pcs",
 }
 
 
@@ -297,7 +312,10 @@ def compute_embodied_entry_carbon(
 ) -> Decimal:
     """Pure: compute embodied carbon kg = normalised_qty × factor_value."""
     normalised = normalise_quantity_to_factor_unit(
-        quantity, quantity_unit, factor_unit, density,
+        quantity,
+        quantity_unit,
+        factor_unit,
+        density,
     )
     return normalised * Decimal(str(factor_value))
 
@@ -485,25 +503,25 @@ def compare_alternatives(
 
     out: list[dict[str, Any]] = []
     for alt in alternative_factors:
-        alt_factor_value = Decimal(str(
-            getattr(alt, "manual_override_factor", None)
-            or getattr(alt, "factor_value", None)
-            or 0
-        ))
+        alt_factor_value = Decimal(
+            str(getattr(alt, "manual_override_factor", None) or getattr(alt, "factor_value", None) or 0)
+        )
         alt_carbon = normalised_qty * alt_factor_value
         savings = current_carbon - alt_carbon
         if current_carbon != 0:
             savings_pct = float(savings / current_carbon) * 100.0
         else:
             savings_pct = 0.0
-        out.append({
-            "factor_id": getattr(alt, "id", None) or getattr(alt, "factor_id", None),
-            "factor_value": alt_factor_value,
-            "carbon_kg": alt_carbon,
-            "savings_kg": savings,
-            "savings_pct": savings_pct,
-            "confidence": getattr(alt, "confidence", "medium"),
-        })
+        out.append(
+            {
+                "factor_id": getattr(alt, "id", None) or getattr(alt, "factor_id", None),
+                "factor_value": alt_factor_value,
+                "carbon_kg": alt_carbon,
+                "savings_kg": savings,
+                "savings_pct": savings_pct,
+                "confidence": getattr(alt, "confidence", "medium"),
+            }
+        )
 
     out.sort(key=lambda r: r["savings_kg"], reverse=True)
     return out
@@ -549,18 +567,35 @@ def epd_database_sync_hook(
 
 # ── EN 15978 lifecycle stages ─────────────────────────────────────────────
 
-EN_15978_STAGES: frozenset[str] = frozenset({
-    # Product stage
-    "a1", "a2", "a3", "a1a3",
-    # Construction process
-    "a4", "a5",
-    # Use stage
-    "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b",
-    # End of life
-    "c1", "c2", "c3", "c4", "c",
-    # Benefits beyond system boundary
-    "d",
-})
+EN_15978_STAGES: frozenset[str] = frozenset(
+    {
+        # Product stage
+        "a1",
+        "a2",
+        "a3",
+        "a1a3",
+        # Construction process
+        "a4",
+        "a5",
+        # Use stage
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5",
+        "b6",
+        "b7",
+        "b",
+        # End of life
+        "c1",
+        "c2",
+        "c3",
+        "c4",
+        "c",
+        # Benefits beyond system boundary
+        "d",
+    }
+)
 
 
 def validate_en15978_stage(stage: str) -> str:
@@ -661,14 +696,10 @@ def lookup_grid_factor_default(
             "fallback": False,
         }
     # Same-country fallback: nearest year ≤ requested
-    same_country = [
-        (yr, v) for (c, yr), v in GRID_FACTORS_DEFAULT.items() if c == cc and yr <= year
-    ]
+    same_country = [(yr, v) for (c, yr), v in GRID_FACTORS_DEFAULT.items() if c == cc and yr <= year]
     if not same_country:
         # Or any year for this country (newest available)
-        same_country = [
-            (yr, v) for (c, yr), v in GRID_FACTORS_DEFAULT.items() if c == cc
-        ]
+        same_country = [(yr, v) for (c, yr), v in GRID_FACTORS_DEFAULT.items() if c == cc]
     if not same_country:
         return None
     same_country.sort(key=lambda t: t[0], reverse=True)
@@ -933,7 +964,10 @@ class CarbonService:
         limit: int = 100,
     ) -> tuple[list[EPDRecord], int]:
         return await self.epd_repo.list_filtered(
-            material_class=material_class, region=region, offset=offset, limit=limit,
+            material_class=material_class,
+            region=region,
+            offset=offset,
+            limit=limit,
         )
 
     async def update_epd(self, epd_id: uuid.UUID, data: EPDRecordUpdate) -> EPDRecord:
@@ -969,7 +1003,8 @@ class CarbonService:
 
     # ── Material factors ─────────────────────────────────────────────────
     async def create_factor(
-        self, data: MaterialCarbonFactorCreate,
+        self,
+        data: MaterialCarbonFactorCreate,
     ) -> MaterialCarbonFactor:
         factor = MaterialCarbonFactor(**data.model_dump(exclude={"metadata"}))
         factor.metadata_ = data.metadata
@@ -979,7 +1014,8 @@ class CarbonService:
         factor = await self.factor_repo.get_by_id(factor_id)
         if factor is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Material factor not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Material factor not found",
             )
         return factor
 
@@ -992,11 +1028,16 @@ class CarbonService:
         limit: int = 100,
     ) -> tuple[list[MaterialCarbonFactor], int]:
         return await self.factor_repo.list_filtered(
-            cost_item_id=cost_item_id, region=region, offset=offset, limit=limit,
+            cost_item_id=cost_item_id,
+            region=region,
+            offset=offset,
+            limit=limit,
         )
 
     async def update_factor(
-        self, factor_id: uuid.UUID, data: MaterialCarbonFactorUpdate,
+        self,
+        factor_id: uuid.UUID,
+        data: MaterialCarbonFactorUpdate,
     ) -> MaterialCarbonFactor:
         await self.get_factor(factor_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1012,7 +1053,9 @@ class CarbonService:
 
     # ── Inventory ───────────────────────────────────────────────────────
     async def create_inventory(
-        self, data: CarbonInventoryCreate, user_id: str | None = None,
+        self,
+        data: CarbonInventoryCreate,
+        user_id: str | None = None,
     ) -> CarbonInventory:
         inv = CarbonInventory(**data.model_dump(exclude={"metadata"}))
         inv.metadata_ = data.metadata
@@ -1023,7 +1066,8 @@ class CarbonService:
         inv = await self.inventory_repo.get_by_id(inventory_id)
         if inv is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Inventory not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Inventory not found",
             )
         return inv
 
@@ -1065,12 +1109,18 @@ class CarbonService:
         return report.project_id
 
     async def list_inventories(
-        self, project_id: uuid.UUID, *, offset: int = 0, limit: int = 100,
+        self,
+        project_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 100,
     ) -> tuple[list[CarbonInventory], int]:
         return await self.inventory_repo.list_for_project(project_id, offset=offset, limit=limit)
 
     async def update_inventory(
-        self, inventory_id: uuid.UUID, data: CarbonInventoryUpdate,
+        self,
+        inventory_id: uuid.UUID,
+        data: CarbonInventoryUpdate,
     ) -> CarbonInventory:
         await self.get_inventory(inventory_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1085,7 +1135,9 @@ class CarbonService:
         await self.inventory_repo.delete(inventory_id)
 
     async def finalize_inventory(
-        self, inventory_id: uuid.UUID, status_value: str = "baseline",
+        self,
+        inventory_id: uuid.UUID,
+        status_value: str = "baseline",
     ) -> CarbonInventory:
         """Mark inventory as baseline/current and freeze its totals."""
         if status_value not in {"baseline", "current"}:
@@ -1109,7 +1161,9 @@ class CarbonService:
         project_id = inv.project_id
         totals = await self.compute_inventory_totals_fresh(inventory_id)
         await self.inventory_repo.update_fields(
-            inventory_id, status=status_value, totals=totals,
+            inventory_id,
+            status=status_value,
+            totals=totals,
         )
         # Structured audit log: carbon footprint freeze is a high-trust event
         # (changes downstream targets/met state and TCFD report inputs).
@@ -1137,7 +1191,8 @@ class CarbonService:
         return await self.get_inventory(inventory_id)
 
     async def compute_inventory_totals_fresh(
-        self, inventory_id: uuid.UUID,
+        self,
+        inventory_id: uuid.UUID,
     ) -> dict[str, Any]:
         """Recompute totals from current child rows. Pure-ish: reads DB only."""
         embodied = await self.embodied_repo.list_for_inventory(inventory_id)
@@ -1148,7 +1203,8 @@ class CarbonService:
 
     # ── Embodied entries ─────────────────────────────────────────────────
     async def create_embodied_entry(
-        self, data: EmbodiedCarbonEntryCreate,
+        self,
+        data: EmbodiedCarbonEntryCreate,
     ) -> EmbodiedCarbonEntry:
         entry = EmbodiedCarbonEntry(**data.model_dump(exclude={"metadata"}))
         entry.metadata_ = data.metadata
@@ -1165,7 +1221,10 @@ class CarbonService:
         if (entry.carbon_kg in (0, "0", Decimal("0"))) and entry.quantity and entry.factor_value_used:
             try:
                 entry.carbon_kg = compute_embodied_entry_carbon(
-                    entry.quantity, entry.unit, entry.factor_value_used, entry.unit,
+                    entry.quantity,
+                    entry.unit,
+                    entry.factor_value_used,
+                    entry.unit,
                 )
             except UnitMismatchError:
                 pass
@@ -1191,19 +1250,25 @@ class CarbonService:
                     detail=str(exc),
                 ) from exc
         return await self.embodied_repo.list_for_inventory_paged(
-            inventory_id, stage=stage, offset=offset, limit=limit,
+            inventory_id,
+            stage=stage,
+            offset=offset,
+            limit=limit,
         )
 
     async def get_embodied_entry(self, entry_id: uuid.UUID) -> EmbodiedCarbonEntry:
         entry = await self.embodied_repo.get_by_id(entry_id)
         if entry is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Embodied entry not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Embodied entry not found",
             )
         return entry
 
     async def update_embodied_entry(
-        self, entry_id: uuid.UUID, data: EmbodiedCarbonEntryUpdate,
+        self,
+        entry_id: uuid.UUID,
+        data: EmbodiedCarbonEntryUpdate,
     ) -> EmbodiedCarbonEntry:
         await self.get_embodied_entry(entry_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1232,7 +1297,7 @@ class CarbonService:
         for payload in entries:
             payload_dict = payload.model_dump()
             payload_dict["inventory_id"] = inventory_id
-            raw_stage = (payload_dict.get("stage") or "a1a3")
+            raw_stage = payload_dict.get("stage") or "a1a3"
             try:
                 payload_dict["stage"] = validate_en15978_stage(str(raw_stage))
             except ValueError as exc:
@@ -1268,18 +1333,22 @@ class CarbonService:
         entry = await self.scope1_repo.get_by_id(entry_id)
         if entry is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Scope-1 entry not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Scope-1 entry not found",
             )
         return entry
 
     async def list_scope1(
-        self, inventory_id: uuid.UUID,
+        self,
+        inventory_id: uuid.UUID,
     ) -> tuple[list[Scope1Entry], int]:
         rows = await self.scope1_repo.list_for_inventory(inventory_id)
         return rows, len(rows)
 
     async def update_scope1(
-        self, entry_id: uuid.UUID, data: Scope1EntryUpdate,
+        self,
+        entry_id: uuid.UUID,
+        data: Scope1EntryUpdate,
     ) -> Scope1Entry:
         await self.get_scope1(entry_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1298,7 +1367,8 @@ class CarbonService:
         payload = data.model_dump(exclude={"metadata"})
         if payload.get("total_co2e_kg") is None:
             payload["total_co2e_kg"] = compute_scope2_co2e(
-                payload["kwh"], payload["emission_factor_kg_co2e_per_kwh"],
+                payload["kwh"],
+                payload["emission_factor_kg_co2e_per_kwh"],
             )
         entry = Scope2Entry(**payload)
         entry.metadata_ = data.metadata
@@ -1308,18 +1378,22 @@ class CarbonService:
         entry = await self.scope2_repo.get_by_id(entry_id)
         if entry is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Scope-2 entry not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Scope-2 entry not found",
             )
         return entry
 
     async def list_scope2(
-        self, inventory_id: uuid.UUID,
+        self,
+        inventory_id: uuid.UUID,
     ) -> tuple[list[Scope2Entry], int]:
         rows = await self.scope2_repo.list_for_inventory(inventory_id)
         return rows, len(rows)
 
     async def update_scope2(
-        self, entry_id: uuid.UUID, data: Scope2EntryUpdate,
+        self,
+        entry_id: uuid.UUID,
+        data: Scope2EntryUpdate,
     ) -> Scope2Entry:
         await self.get_scope2(entry_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1337,10 +1411,7 @@ class CarbonService:
     async def create_scope3(self, data: Scope3EntryCreate) -> Scope3Entry:
         payload = data.model_dump(exclude={"metadata"})
         if payload.get("total_co2e_kg") is None:
-            payload["total_co2e_kg"] = (
-                Decimal(str(payload["activity_data"]))
-                * Decimal(str(payload["emission_factor"]))
-            )
+            payload["total_co2e_kg"] = Decimal(str(payload["activity_data"])) * Decimal(str(payload["emission_factor"]))
         entry = Scope3Entry(**payload)
         entry.metadata_ = data.metadata
         return await self.scope3_repo.create(entry)
@@ -1349,18 +1420,22 @@ class CarbonService:
         entry = await self.scope3_repo.get_by_id(entry_id)
         if entry is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Scope-3 entry not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Scope-3 entry not found",
             )
         return entry
 
     async def list_scope3(
-        self, inventory_id: uuid.UUID,
+        self,
+        inventory_id: uuid.UUID,
     ) -> tuple[list[Scope3Entry], int]:
         rows = await self.scope3_repo.list_for_inventory(inventory_id)
         return rows, len(rows)
 
     async def update_scope3(
-        self, entry_id: uuid.UUID, data: Scope3EntryUpdate,
+        self,
+        entry_id: uuid.UUID,
+        data: Scope3EntryUpdate,
     ) -> Scope3Entry:
         await self.get_scope3(entry_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1376,7 +1451,9 @@ class CarbonService:
 
     # ── Targets ──────────────────────────────────────────────────────────
     async def create_target(
-        self, data: CarbonTargetCreate, user_id: str | None = None,
+        self,
+        data: CarbonTargetCreate,
+        user_id: str | None = None,
     ) -> CarbonTarget:
         target = CarbonTarget(**data.model_dump(exclude={"metadata"}))
         target.metadata_ = data.metadata
@@ -1387,18 +1464,22 @@ class CarbonService:
         target = await self.target_repo.get_by_id(target_id)
         if target is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Target not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Target not found",
             )
         return target
 
     async def list_targets(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> tuple[list[CarbonTarget], int]:
         rows = await self.target_repo.targets_for_project(project_id)
         return rows, len(rows)
 
     async def update_target(
-        self, target_id: uuid.UUID, data: CarbonTargetUpdate,
+        self,
+        target_id: uuid.UUID,
+        data: CarbonTargetUpdate,
     ) -> CarbonTarget:
         target = await self.get_target(target_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1467,7 +1548,8 @@ class CarbonService:
 
     # ── Alternatives ────────────────────────────────────────────────────
     async def alternatives_for_entry(
-        self, entry_id: uuid.UUID,
+        self,
+        entry_id: uuid.UUID,
     ) -> dict[str, Any]:
         entry = await self.get_embodied_entry(entry_id)
         # Pull EPDs with the same material_class (via entry.factor_id → epd_id → class)
@@ -1506,7 +1588,9 @@ class CarbonService:
 
     # ── Reports ─────────────────────────────────────────────────────────
     async def create_report_record(
-        self, data: SustainabilityReportCreate, user_id: str | None = None,
+        self,
+        data: SustainabilityReportCreate,
+        user_id: str | None = None,
     ) -> SustainabilityReport:
         report = SustainabilityReport(**data.model_dump(exclude={"metadata"}))
         report.metadata_ = data.metadata
@@ -1522,18 +1606,22 @@ class CarbonService:
         report = await self.report_repo.get_by_id(report_id)
         if report is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Report not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Report not found",
             )
         return report
 
     async def list_reports(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> tuple[list[SustainabilityReport], int]:
         rows = await self.report_repo.reports_for_project(project_id)
         return rows, len(rows)
 
     async def update_report(
-        self, report_id: uuid.UUID, data: SustainabilityReportUpdate,
+        self,
+        report_id: uuid.UUID,
+        data: SustainabilityReportUpdate,
     ) -> SustainabilityReport:
         await self.get_report(report_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1557,9 +1645,12 @@ class CarbonService:
         if payload.inventory_id is not None:
             totals = await self.compute_inventory_totals_fresh(payload.inventory_id)
         if payload.project_area_m2 and totals.get("total"):
-            totals["intensity_per_m2"] = str(compute_carbon_intensity(
-                totals["total"], payload.project_area_m2,
-            ))
+            totals["intensity_per_m2"] = str(
+                compute_carbon_intensity(
+                    totals["total"],
+                    payload.project_area_m2,
+                )
+            )
         report = SustainabilityReport(
             project_id=payload.project_id,
             inventory_id=payload.inventory_id,
@@ -1743,9 +1834,7 @@ class CarbonService:
         )
         entry.metadata_ = {
             "boq_position_id": str(boq_position_id),
-            "density_kg_per_m3": (
-                str(density_kg_per_m3) if density_kg_per_m3 is not None else None
-            ),
+            "density_kg_per_m3": (str(density_kg_per_m3) if density_kg_per_m3 is not None else None),
         }
         created = await self.embodied_repo.create(entry)
         event_bus.publish_detached(
@@ -1812,8 +1901,11 @@ class CarbonService:
         else:
             inventories, _ = await self.inventory_repo.list_for_project(project_id)
             totals = {
-                "scope1": "0", "scope2": "0", "scope3": "0",
-                "embodied_a1a5": "0", "total": "0",
+                "scope1": "0",
+                "scope2": "0",
+                "scope3": "0",
+                "embodied_a1a5": "0",
+                "total": "0",
             }
             for inv in inventories:
                 if inv.status in {"baseline", "current"}:
@@ -1866,7 +1958,8 @@ class CarbonService:
 
     # ── Dashboard ───────────────────────────────────────────────────────
     async def project_dashboard(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> dict[str, Any]:
         inventories, _ = await self.inventory_repo.list_for_project(project_id)
         targets, _ = await self.list_targets(project_id)

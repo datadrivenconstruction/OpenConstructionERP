@@ -65,9 +65,7 @@ class Pipeline(Base):
         nullable=True,
         index=True,
     )
-    tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    tenant_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     # The editor graph: {"nodes":[{id,type,params,position}], "edges":[...]}.
     graph: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
@@ -76,12 +74,8 @@ class Pipeline(Base):
     policy: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
     )
-    is_published: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
-    version: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=1, server_default="1"
-    )
+    is_published: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
     def __repr__(self) -> str:
@@ -113,9 +107,7 @@ class PipelineRun(Base):
         index=True,
     )
     # Pointer into oe_job_run — the durable run lifecycle lives there.
-    job_run_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    job_run_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     # Frozen copy of pipeline.graph at submit time (immutable history).
     graph_snapshot: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
@@ -124,12 +116,8 @@ class PipelineRun(Base):
     trigger: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
     )
-    project_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
-    tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    project_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    tenant_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
     def __repr__(self) -> str:
@@ -149,9 +137,7 @@ class PipelineNodeState(Base):
 
     __tablename__ = "oe_pipeline_node_state"
     __table_args__ = (
-        UniqueConstraint(
-            "run_id", "node_id", name="uq_oe_pipeline_node_state_run_node"
-        ),
+        UniqueConstraint("run_id", "node_id", name="uq_oe_pipeline_node_state_run_node"),
         Index("ix_oe_pipeline_node_state_run", "run_id"),
         Index("ix_oe_pipeline_node_state_status", "status"),
     )
@@ -165,9 +151,7 @@ class PipelineNodeState(Base):
     node_id: Mapped[str] = mapped_column(String(128), nullable=False)
     node_type: Mapped[str] = mapped_column(String(64), nullable=False)
     # pending | running | done | error | skipped | stale | paused
-    status: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="pending", server_default="pending"
-    )
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending", server_default="pending")
     inputs: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -176,15 +160,8 @@ class PipelineNodeState(Base):
     )
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     took_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    started_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    finished_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     def __repr__(self) -> str:
-        return (
-            f"<PipelineNodeState run={self.run_id} "
-            f"node={self.node_id} status={self.status}>"
-        )
+        return f"<PipelineNodeState run={self.run_id} node={self.node_id} status={self.status}>"

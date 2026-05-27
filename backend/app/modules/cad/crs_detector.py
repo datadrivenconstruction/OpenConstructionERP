@@ -276,12 +276,7 @@ def _pyproj_verify(epsg: int, bbox: BBox) -> float | None:
         cy = (bbox[1] + bbox[3]) / 2
         transformer = Transformer.from_crs(epsg, 4326, always_xy=True)
         lon, lat = transformer.transform(cx, cy)
-        if (
-            lon is None
-            or lat is None
-            or not (-180.0 <= lon <= 180.0)
-            or not (-90.0 <= lat <= 90.0)
-        ):
+        if lon is None or lat is None or not (-180.0 <= lon <= 180.0) or not (-90.0 <= lat <= 90.0):
             return 0.0
         # All in range → full bonus.
         return 1.0

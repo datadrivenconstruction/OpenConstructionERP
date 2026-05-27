@@ -186,9 +186,7 @@ def test_classify_word_complete_alone_does_not_imply_v18() -> None:
 # ── Capability detection ──────────────────────────────────────────────────
 
 
-def test_v18_binary_probe_returns_v18_profile(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_v18_binary_probe_returns_v18_profile(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍End-to-end probe: stub subprocess to return the v18 help blob,
     assert the cached capability dict has the v18 flag profile and all
     the new flag capabilities flipped to True."""
@@ -211,9 +209,7 @@ def test_v18_binary_probe_returns_v18_profile(
     assert caps["legacy_positional_input_output"] is False
 
 
-def test_v17_binary_probe_returns_v17_profile(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_v17_binary_probe_returns_v17_profile(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍v17 binaries stay on the v17 positional profile — the existing
     fix from v4.6.2 keeps working."""
     binary = _fake_binary(tmp_path)
@@ -230,9 +226,7 @@ def test_v17_binary_probe_returns_v17_profile(
     assert caps["accepts_flag_force_path"] is False
 
 
-def test_legacy_binary_probe_returns_legacy_profile(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_legacy_binary_probe_returns_legacy_profile(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍A binary that emits no recognised flag tokens stays on the legacy
     bare-positional profile.  This is the user-reported v4.6.2 path that
     must not regress."""
@@ -248,9 +242,7 @@ def test_legacy_binary_probe_returns_legacy_profile(
     assert caps["accepts_flag_no_dae"] is False
 
 
-def test_v18_help_with_complete_token_does_not_trigger_v17(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_v18_help_with_complete_token_does_not_trigger_v17(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍THE regression test for task #164: the v18 binary's help mentions
     ``complete`` in the ``{basic,standard,complete,custom}`` mode enum.
     The previous substring-based probe used that as a "modern v17" signal
@@ -271,8 +263,7 @@ def test_v18_help_with_complete_token_does_not_trigger_v17(
         "positional ``standard`` token crashes v18 with exit 15"
     )
     assert caps["accepts_no_collada_flag"] is False, (
-        "v18 binary must NOT advertise -no-collada acceptance — v18 dropped "
-        "that flag in favour of --no-dae"
+        "v18 binary must NOT advertise -no-collada acceptance — v18 dropped that flag in favour of --no-dae"
     )
 
 
@@ -306,9 +297,11 @@ def test_build_args_v18_xlsx_only_pass(tmp_path: Path) -> None:
     assert args == [
         str(converter),
         str(input_path),
-        "-x", str(xlsx_out),
+        "-x",
+        str(xlsx_out),
         "--no-dae",
-        "-m", "standard",
+        "-m",
+        "standard",
         "--force-path",
     ]
 
@@ -332,9 +325,11 @@ def test_build_args_v18_dae_only_pass(tmp_path: Path) -> None:
     assert args == [
         str(converter),
         str(input_path),
-        "-d", str(dae_out),
+        "-d",
+        str(dae_out),
         "--no-xlsx",
-        "-m", "standard",
+        "-m",
+        "standard",
         "--force-path",
     ]
 
@@ -359,9 +354,12 @@ def test_build_args_v18_combined_pass(tmp_path: Path) -> None:
     assert args == [
         str(converter),
         str(input_path),
-        "-x", str(xlsx_out),
-        "-d", str(dae_out),
-        "-m", "complete",
+        "-x",
+        str(xlsx_out),
+        "-d",
+        str(dae_out),
+        "-m",
+        "complete",
         "--force-path",
     ]
 

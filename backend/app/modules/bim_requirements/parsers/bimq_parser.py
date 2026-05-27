@@ -32,9 +32,7 @@ class BIMQParser(BaseRequirementParser):
         try:
             data = self._read_json(source)
         except Exception as exc:
-            result.errors.append(
-                {"row": 0, "field": "json", "msg": f"Cannot parse JSON: {exc}"}
-            )
+            result.errors.append({"row": 0, "field": "json", "msg": f"Cannot parse JSON: {exc}"})
             return result
 
         # Navigate BIMQ structure: concept_tree -> elements
@@ -42,9 +40,7 @@ class BIMQParser(BaseRequirementParser):
         elements = concept_tree.get("elements", [])
 
         if not elements:
-            result.warnings.append(
-                {"row": 0, "field": "elements", "msg": "No elements found in BIMQ JSON"}
-            )
+            result.warnings.append({"row": 0, "field": "elements", "msg": "No elements found in BIMQ JSON"})
             return result
 
         result.metadata["element_count"] = len(elements)
@@ -76,9 +72,7 @@ class BIMQParser(BaseRequirementParser):
             return json.loads(source.decode("utf-8"))
         return json.loads(source)
 
-    def _parse_element(
-        self, element: dict[str, Any], elem_idx: int, result: ParseResult
-    ) -> None:
+    def _parse_element(self, element: dict[str, Any], elem_idx: int, result: ParseResult) -> None:
         """Parse a single BIMQ element with its property groups."""
         ifc_class_raw = element.get("ifc_class", "")
         element_name = element.get("name", "")

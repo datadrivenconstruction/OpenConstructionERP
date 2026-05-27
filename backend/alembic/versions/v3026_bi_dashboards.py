@@ -46,10 +46,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 _BASE_COLS = (
-    sa.Column("created_at", sa.DateTime(timezone=True),
-              server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-    sa.Column("updated_at", sa.DateTime(timezone=True),
-              server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+    sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+    sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
 )
 
 
@@ -58,7 +56,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -69,9 +69,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── KPI Definition ────────────────────────────────────────────
     if not _has_table(inspector, "oe_bi_dashboards_kpi_definition"):
@@ -115,7 +113,8 @@ def upgrade() -> None:
             sa.Column("id", guid_type, primary_key=True),
             *_BASE_COLS,
             sa.Column(
-                "dashboard_id", guid_type,
+                "dashboard_id",
+                guid_type,
                 sa.ForeignKey("oe_bi_dashboards_dashboard.id", ondelete="CASCADE"),
                 nullable=False,
             ),
@@ -136,7 +135,8 @@ def upgrade() -> None:
             sa.Column("id", guid_type, primary_key=True),
             *_BASE_COLS,
             sa.Column(
-                "widget_id", guid_type,
+                "widget_id",
+                guid_type,
                 sa.ForeignKey("oe_bi_dashboards_widget.id", ondelete="CASCADE"),
                 nullable=False,
             ),
@@ -169,7 +169,8 @@ def upgrade() -> None:
             sa.Column("id", guid_type, primary_key=True),
             *_BASE_COLS,
             sa.Column(
-                "report_definition_id", guid_type,
+                "report_definition_id",
+                guid_type,
                 sa.ForeignKey(
                     "oe_bi_dashboards_report_definition.id",
                     ondelete="CASCADE",
@@ -236,53 +237,61 @@ def upgrade() -> None:
             sa.Column("unit", sa.String(32), nullable=False, server_default="ratio"),
             sa.Column("computed_at", sa.DateTime(timezone=True), nullable=False),
             sa.Column(
-                "source_record_count", sa.Integer(), nullable=False, server_default="0",
+                "source_record_count",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
         )
 
     # ── Indexes (created after tables; cache is stale) ───────────
     inspector = sa.inspect(bind)
     index_specs: tuple[tuple[str, str, tuple[str, ...], bool], ...] = (
-        ("ix_oe_bi_dashboards_kpi_definition_code",
-         "oe_bi_dashboards_kpi_definition", ("code",), False),
-        ("ix_oe_bi_dashboards_kpi_definition_category",
-         "oe_bi_dashboards_kpi_definition", ("category",), False),
-        ("ix_oe_bi_dashboards_dashboard_owner_user_id",
-         "oe_bi_dashboards_dashboard", ("owner_user_id",), False),
-        ("ix_oe_bi_dashboards_dashboard_scope",
-         "oe_bi_dashboards_dashboard", ("scope",), False),
-        ("ix_oe_bi_dashboards_dashboard_project_id",
-         "oe_bi_dashboards_dashboard", ("project_id",), False),
-        ("ix_oe_bi_dashboards_widget_dashboard_id",
-         "oe_bi_dashboards_widget", ("dashboard_id",), False),
-        ("ix_oe_bi_dashboards_widget_kpi_code",
-         "oe_bi_dashboards_widget", ("kpi_code",), False),
-        ("ix_oe_bi_dashboards_widget_snapshot_widget_id",
-         "oe_bi_dashboards_widget_snapshot", ("widget_id",), False),
-        ("ix_oe_bi_dashboards_widget_snapshot_valid_until",
-         "oe_bi_dashboards_widget_snapshot", ("valid_until",), False),
-        ("ix_oe_bi_dashboards_report_definition_code",
-         "oe_bi_dashboards_report_definition", ("code",), False),
-        ("ix_oe_bi_dashboards_report_definition_owner_user_id",
-         "oe_bi_dashboards_report_definition", ("owner_user_id",), False),
-        ("ix_oe_bi_dashboards_report_definition_scope",
-         "oe_bi_dashboards_report_definition", ("scope",), False),
-        ("ix_oe_bi_dashboards_report_schedule_report_definition_id",
-         "oe_bi_dashboards_report_schedule", ("report_definition_id",), False),
-        ("ix_oe_bi_dashboards_report_schedule_next_run_at",
-         "oe_bi_dashboards_report_schedule", ("next_run_at",), False),
-        ("ix_oe_bi_dashboards_alert_rule_kpi_code",
-         "oe_bi_dashboards_alert_rule", ("kpi_code",), False),
-        ("ix_oe_bi_dashboards_alert_rule_scope_project_id",
-         "oe_bi_dashboards_alert_rule", ("scope_project_id",), False),
-        ("ix_oe_bi_dashboards_saved_filter_owner_user_id",
-         "oe_bi_dashboards_saved_filter", ("owner_user_id",), False),
-        ("ix_oe_bi_dashboards_saved_filter_module",
-         "oe_bi_dashboards_saved_filter", ("module",), False),
-        ("ix_oe_bi_dashboards_kpi_value_kpi_code",
-         "oe_bi_dashboards_kpi_value", ("kpi_code",), False),
-        ("ix_oe_bi_dashboards_kpi_value_project_id",
-         "oe_bi_dashboards_kpi_value", ("project_id",), False),
+        ("ix_oe_bi_dashboards_kpi_definition_code", "oe_bi_dashboards_kpi_definition", ("code",), False),
+        ("ix_oe_bi_dashboards_kpi_definition_category", "oe_bi_dashboards_kpi_definition", ("category",), False),
+        ("ix_oe_bi_dashboards_dashboard_owner_user_id", "oe_bi_dashboards_dashboard", ("owner_user_id",), False),
+        ("ix_oe_bi_dashboards_dashboard_scope", "oe_bi_dashboards_dashboard", ("scope",), False),
+        ("ix_oe_bi_dashboards_dashboard_project_id", "oe_bi_dashboards_dashboard", ("project_id",), False),
+        ("ix_oe_bi_dashboards_widget_dashboard_id", "oe_bi_dashboards_widget", ("dashboard_id",), False),
+        ("ix_oe_bi_dashboards_widget_kpi_code", "oe_bi_dashboards_widget", ("kpi_code",), False),
+        ("ix_oe_bi_dashboards_widget_snapshot_widget_id", "oe_bi_dashboards_widget_snapshot", ("widget_id",), False),
+        (
+            "ix_oe_bi_dashboards_widget_snapshot_valid_until",
+            "oe_bi_dashboards_widget_snapshot",
+            ("valid_until",),
+            False,
+        ),
+        ("ix_oe_bi_dashboards_report_definition_code", "oe_bi_dashboards_report_definition", ("code",), False),
+        (
+            "ix_oe_bi_dashboards_report_definition_owner_user_id",
+            "oe_bi_dashboards_report_definition",
+            ("owner_user_id",),
+            False,
+        ),
+        ("ix_oe_bi_dashboards_report_definition_scope", "oe_bi_dashboards_report_definition", ("scope",), False),
+        (
+            "ix_oe_bi_dashboards_report_schedule_report_definition_id",
+            "oe_bi_dashboards_report_schedule",
+            ("report_definition_id",),
+            False,
+        ),
+        (
+            "ix_oe_bi_dashboards_report_schedule_next_run_at",
+            "oe_bi_dashboards_report_schedule",
+            ("next_run_at",),
+            False,
+        ),
+        ("ix_oe_bi_dashboards_alert_rule_kpi_code", "oe_bi_dashboards_alert_rule", ("kpi_code",), False),
+        (
+            "ix_oe_bi_dashboards_alert_rule_scope_project_id",
+            "oe_bi_dashboards_alert_rule",
+            ("scope_project_id",),
+            False,
+        ),
+        ("ix_oe_bi_dashboards_saved_filter_owner_user_id", "oe_bi_dashboards_saved_filter", ("owner_user_id",), False),
+        ("ix_oe_bi_dashboards_saved_filter_module", "oe_bi_dashboards_saved_filter", ("module",), False),
+        ("ix_oe_bi_dashboards_kpi_value_kpi_code", "oe_bi_dashboards_kpi_value", ("kpi_code",), False),
+        ("ix_oe_bi_dashboards_kpi_value_project_id", "oe_bi_dashboards_kpi_value", ("project_id",), False),
     )
     for name, table, cols, unique in index_specs:
         if _has_table(inspector, table) and not _has_index(inspector, table, name):

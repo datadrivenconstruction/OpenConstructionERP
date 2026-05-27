@@ -112,13 +112,9 @@ class DefaultEacResolver:
     ) -> list[str]:
         """Load elements + execute the rule via the EAC engine."""
         try:
-            elements = await self._element_loader(
-                self._session, model_version_id=model_version_id
-            )
+            elements = await self._element_loader(self._session, model_version_id=model_version_id)
         except Exception:  # pragma: no cover - defensive
-            logger.exception(
-                "Element loader failed for model_version_id=%s", model_version_id
-            )
+            logger.exception("Element loader failed for model_version_id=%s", model_version_id)
             return []
 
         if not elements:
@@ -166,14 +162,10 @@ class DefaultEacResolver:
 class ElementLoader(Protocol):
     """Callback that supplies the list of canonical elements to evaluate."""
 
-    async def __call__(
-        self, session: AsyncSession, *, model_version_id: uuid.UUID | None
-    ) -> list[dict]: ...
+    async def __call__(self, session: AsyncSession, *, model_version_id: uuid.UUID | None) -> list[dict]: ...
 
 
-async def _default_element_loader(
-    session: AsyncSession, *, model_version_id: uuid.UUID | None
-) -> list[dict]:
+async def _default_element_loader(session: AsyncSession, *, model_version_id: uuid.UUID | None) -> list[dict]:
     """Production element loader — pulls BIMElements for ``model_version_id``.
 
     The current bim_hub schema treats ``BIMModel.id`` as the model-version
@@ -256,13 +248,9 @@ class EacScheduleLinkService:
     ) -> tuple[EacScheduleLink, DryRunResult]:
         """Create a link, run a dry-run, persist the cached match count."""
         if mode not in EAC_LINK_MODES:
-            raise ValueError(
-                f"mode must be one of {EAC_LINK_MODES}, got {mode!r}"
-            )
+            raise ValueError(f"mode must be one of {EAC_LINK_MODES}, got {mode!r}")
         if rule_id is None and predicate_json is None:
-            raise ValueError(
-                "either rule_id or predicate_json must be provided"
-            )
+            raise ValueError("either rule_id or predicate_json must be provided")
 
         link = EacScheduleLink(
             task_id=task_id,
@@ -399,9 +387,7 @@ class ScheduleSnapshotService:
         activity_map = {a.id: a for a in activities}
 
         # Load all links for these tasks.
-        link_stmt = select(EacScheduleLink).where(
-            EacScheduleLink.task_id.in_(activity_ids)
-        )
+        link_stmt = select(EacScheduleLink).where(EacScheduleLink.task_id.in_(activity_ids))
         links = list((await self.session.execute(link_stmt)).scalars().all())
 
         # Resolve each link once. We could cache by (rule_id, predicate_hash)
@@ -422,9 +408,7 @@ class ScheduleSnapshotService:
             )
             for element_id in ids:
                 existing = result.get(element_id)
-                if existing is None or _status_priority(status) > _status_priority(
-                    existing
-                ):
+                if existing is None or _status_priority(status) > _status_priority(existing):
                     result[element_id] = status
         return result
 
@@ -470,9 +454,7 @@ class ScheduleProgressService:
         history for audit / dashboard charts.
         """
         if progress_percent < 0.0 or progress_percent > 100.0:
-            raise ValueError(
-                f"progress_percent must be 0..100, got {progress_percent!r}"
-            )
+            raise ValueError(f"progress_percent must be 0..100, got {progress_percent!r}")
 
         activity = await self.session.get(Activity, task_id)
         if activity is None:
@@ -633,9 +615,7 @@ class ScheduleDashboardService:
             bucket.activity_count += 1
             bucket.planned_value += _decimal_to_float(a.cost_planned)
             bucket.actual_cost += _decimal_to_float(a.cost_actual)
-            bucket.earned_value += _decimal_to_float(a.cost_planned) * (
-                _coerce_progress(a) / 100.0
-            )
+            bucket.earned_value += _decimal_to_float(a.cost_planned) * (_coerce_progress(a) / 100.0)
 
         # Roll up progress per WBS as duration-weighted mean.
         wbs_weights: dict[str, float] = {}
@@ -647,15 +627,10 @@ class ScheduleDashboardService:
         for a in activities:
             key = (a.wbs_code or "").split(".")[0] or "_root"
             weight = max(int(a.duration_days or 0), 1)
-            wbs_weighted_progress[key] = (
-                wbs_weighted_progress.get(key, 0.0)
-                + weight * _coerce_progress(a)
-            )
+            wbs_weighted_progress[key] = wbs_weighted_progress.get(key, 0.0) + weight * _coerce_progress(a)
         for key, bucket in by_wbs.items():
             w = wbs_weights.get(key, 0.0)
-            bucket.progress_percent = (
-                wbs_weighted_progress.get(key, 0.0) / w if w else 0.0
-            )
+            bucket.progress_percent = wbs_weighted_progress.get(key, 0.0) / w if w else 0.0
 
         by_wbs_json = {
             k: {
@@ -689,9 +664,7 @@ class ScheduleDashboardService:
             has_cost_data=any_cost,
         )
 
-    def _build_s_curve(
-        self, activities: list[Activity], as_of_date: date
-    ) -> list[SCurvePoint]:
+    def _build_s_curve(self, activities: list[Activity], as_of_date: date) -> list[SCurvePoint]:
         """Build a daily-sampled S-curve from project start to ``as_of_date``.
 
         For each day we compute:
@@ -824,9 +797,7 @@ async def import_schedule_csv(
     headers = [h.strip().lower() for h in reader.fieldnames]
     missing = [c for c in REQUIRED_CSV_COLUMNS if c not in headers]
     if missing:
-        raise ValueError(
-            f"CSV is missing required columns: {', '.join(missing)}"
-        )
+        raise ValueError(f"CSV is missing required columns: {', '.join(missing)}")
 
     # Two passes: first create activities, then resolve predecessor refs.
     pending_predecessors: list[tuple[uuid.UUID, str]] = []
@@ -839,9 +810,7 @@ async def import_schedule_csv(
         end = row.get("end", "")
         if not wbs or not name or not start or not end:
             result.activities_failed += 1
-            result.warnings.append(
-                f"row {row_idx}: missing required field — skipped"
-            )
+            result.warnings.append(f"row {row_idx}: missing required field — skipped")
             continue
         try:
             start_d = _parse_iso(start)
@@ -850,30 +819,19 @@ async def import_schedule_csv(
             start_d = end_d = None
         if start_d is None or end_d is None:
             result.activities_failed += 1
-            result.warnings.append(
-                f"row {row_idx}: invalid ISO date — skipped"
-            )
+            result.warnings.append(f"row {row_idx}: invalid ISO date — skipped")
             continue
         duration_raw = row.get("duration") or row.get("duration_days") or ""
         try:
-            duration = (
-                int(duration_raw) if duration_raw else (end_d - start_d).days
-            )
+            duration = int(duration_raw) if duration_raw else (end_d - start_d).days
         except ValueError:
             duration = (end_d - start_d).days
-        progress_raw = (
-            row.get("progress")
-            or row.get("progress_percent")
-            or row.get("progress_pct")
-            or "0"
-        )
+        progress_raw = row.get("progress") or row.get("progress_percent") or row.get("progress_pct") or "0"
         try:
             progress = float(progress_raw)
         except ValueError:
             progress = 0.0
-            result.warnings.append(
-                f"row {row_idx}: invalid progress {progress_raw!r} — defaulted to 0"
-            )
+            result.warnings.append(f"row {row_idx}: invalid progress {progress_raw!r} — defaulted to 0")
 
         activity = Activity(
             schedule_id=schedule_id,
@@ -885,11 +843,7 @@ async def import_schedule_csv(
             duration_days=max(duration, 0),
             progress_pct=str(progress),
             status=(
-                STATUS_COMPLETED
-                if progress >= 100
-                else STATUS_IN_PROGRESS
-                if progress > 0
-                else STATUS_NOT_STARTED
+                STATUS_COMPLETED if progress >= 100 else STATUS_IN_PROGRESS if progress > 0 else STATUS_NOT_STARTED
             ),
             sort_order=sort_order,
         )
@@ -911,17 +865,13 @@ async def import_schedule_csv(
         for activity_id, pred_wbs in pending_predecessors:
             pred_id = result.activity_ids_by_wbs.get(pred_wbs)
             if pred_id is None:
-                result.warnings.append(
-                    f"unknown predecessor wbs_code {pred_wbs!r}"
-                )
+                result.warnings.append(f"unknown predecessor wbs_code {pred_wbs!r}")
                 continue
             activity = await session.get(Activity, activity_id)
             if activity is None:  # pragma: no cover - defensive
                 continue
             deps = list(activity.dependencies or [])
-            deps.append(
-                {"activity_id": pred_id, "type": "FS", "lag_days": 0}
-            )
+            deps.append({"activity_id": pred_id, "type": "FS", "lag_days": 0})
             activity.dependencies = deps
 
     await session.flush()

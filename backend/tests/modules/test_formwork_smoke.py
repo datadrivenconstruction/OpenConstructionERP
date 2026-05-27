@@ -82,9 +82,7 @@ async def _admin_header(client: AsyncClient) -> tuple[str, dict[str, str]]:
 
     async with async_session_factory() as session:
         await session.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True),
+            update(User).where(User.email == email.lower()).values(role="admin", is_active=True),
         )
         await session.commit()
 
@@ -171,7 +169,8 @@ async def test_formwork_end_to_end(client: AsyncClient):
 
     # 4. Verify list endpoints return what we inserted.
     list_sys = await client.get(
-        "/api/v1/formwork/systems/", headers=header,
+        "/api/v1/formwork/systems/",
+        headers=header,
     )
     assert list_sys.status_code == 200, list_sys.text
     assert any(s["id"] == system_id for s in list_sys.json())

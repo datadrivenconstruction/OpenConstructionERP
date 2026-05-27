@@ -91,9 +91,7 @@ def _remaining_seconds(expires_at: datetime, now: datetime) -> int:
     return int(math.floor(delta))
 
 
-async def _resolve_user_name(
-    session: AsyncSession, user_id: uuid.UUID
-) -> str:
+async def _resolve_user_name(session: AsyncSession, user_id: uuid.UUID) -> str:
     """Return a best-effort display string for a user.
 
     Prefers ``full_name``; falls back to ``email``; falls back to the
@@ -105,9 +103,7 @@ async def _resolve_user_name(
     return (user.full_name or "").strip() or user.email or str(user_id)
 
 
-def _to_response(
-    row: CollabLock, *, user_name: str, now: datetime
-) -> CollabLockResponse:
+def _to_response(row: CollabLock, *, user_name: str, now: datetime) -> CollabLockResponse:
     return CollabLockResponse(
         id=row.id,
         entity_type=row.entity_type,
@@ -145,8 +141,7 @@ class CollabLockService:
         """Acquire a lock or raise :class:`LockConflictError`."""
         if entity_type not in ALLOWED_LOCK_ENTITY_TYPES:
             raise UnknownEntityTypeError(
-                f"entity_type '{entity_type}' is not lockable. "
-                f"Allowed: {sorted(ALLOWED_LOCK_ENTITY_TYPES)}"
+                f"entity_type '{entity_type}' is not lockable. Allowed: {sorted(ALLOWED_LOCK_ENTITY_TYPES)}"
             )
 
         now = _now()
@@ -218,9 +213,7 @@ class CollabLockService:
             now=now,
         )
         if row is None:
-            raise NotLockHolderError(
-                "Lock missing, expired, or not held by current user"
-            )
+            raise NotLockHolderError("Lock missing, expired, or not held by current user")
 
         user_name = await _resolve_user_name(self.session, user_id)
         event_bus.publish_detached(
@@ -239,9 +232,7 @@ class CollabLockService:
 
     # ── Release ─────────────────────────────────────────────────────────
 
-    async def release(
-        self, *, lock_id: uuid.UUID, user_id: uuid.UUID
-    ) -> None:
+    async def release(self, *, lock_id: uuid.UUID, user_id: uuid.UUID) -> None:
         row = await self.repo.get_by_id(lock_id)
         if row is None:
             # Idempotent release — nothing to do.
@@ -266,13 +257,9 @@ class CollabLockService:
 
     # ── Reads ───────────────────────────────────────────────────────────
 
-    async def get_for_entity(
-        self, *, entity_type: str, entity_id: uuid.UUID
-    ) -> CollabLockResponse | None:
+    async def get_for_entity(self, *, entity_type: str, entity_id: uuid.UUID) -> CollabLockResponse | None:
         if entity_type not in ALLOWED_LOCK_ENTITY_TYPES:
-            raise UnknownEntityTypeError(
-                f"entity_type '{entity_type}' is not lockable"
-            )
+            raise UnknownEntityTypeError(f"entity_type '{entity_type}' is not lockable")
         now = _now()
         row = await self.repo.get_active(entity_type, entity_id, now)
         if row is None:
@@ -280,9 +267,7 @@ class CollabLockService:
         user_name = await _resolve_user_name(self.session, row.user_id)
         return _to_response(row, user_name=user_name, now=now)
 
-    async def list_my_locks(
-        self, *, user_id: uuid.UUID
-    ) -> list[CollabLockResponse]:
+    async def list_my_locks(self, *, user_id: uuid.UUID) -> list[CollabLockResponse]:
         now = _now()
         rows = await self.repo.list_by_user(user_id, now)
         user_name = await _resolve_user_name(self.session, user_id)
@@ -297,9 +282,7 @@ class CollabLockService:
         now = _now()
         # First read the rows so we can publish events after delete.
         stale_rows = [
-            row
-            for row in await self.repo.list_by_user(uuid.UUID(int=0), now)
-            if _as_aware(row.expires_at) <= now
+            row for row in await self.repo.list_by_user(uuid.UUID(int=0), now) if _as_aware(row.expires_at) <= now
         ]
         # The above filter only finds the zero-user edge case; for the
         # real sweep we rely on bulk delete_expired.  We still want to

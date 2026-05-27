@@ -122,9 +122,7 @@ CONFIDENCE_MEDIUM_THRESHOLD: float = _env_float("MATCH_CONFIDENCE_MEDIUM", 0.62)
 # a perfect match. We want auto-confirm to catch HIGH-band hits (≥0.78
 # under the re-calibrated thresholds), so 0.88 sits comfortably above
 # HIGH while still letting strong-but-not-perfect candidates through.
-DEFAULT_AUTO_CONFIRM_THRESHOLD: float = _env_float(
-    "MATCH_AUTO_CONFIRM_DEFAULT", 0.88
-)
+DEFAULT_AUTO_CONFIRM_THRESHOLD: float = _env_float("MATCH_AUTO_CONFIRM_DEFAULT", 0.88)
 
 
 # ── Fuzzy lex thresholds (rapidfuzz token_set_ratio, 0-100) ──────────────
@@ -170,9 +168,7 @@ RERANK_MODEL_HINT: str = os.environ.get("MATCH_RERANK_MODEL", "claude-sonnet")
 # degradation behaviour.
 
 RERANK_BGE_TOP_K: int = _env_int("MATCH_RERANK_BGE_TOP_K", 10)
-RERANK_BGE_MODEL_NAME: str = os.environ.get(
-    "MATCH_RERANK_BGE_MODEL", "BAAI/bge-reranker-v2-m3"
-)
+RERANK_BGE_MODEL_NAME: str = os.environ.get("MATCH_RERANK_BGE_MODEL", "BAAI/bge-reranker-v2-m3")
 # fp16 saves ~50% VRAM on GPU but is a no-op on CPU; default off so the
 # CPU-only VPS path stays bit-identical regardless of env.
 RERANK_BGE_USE_FP16: bool = os.environ.get("MATCH_RERANK_BGE_FP16", "0") in ("1", "true", "True")
@@ -212,9 +208,7 @@ def _load_encoder_profiles_raw() -> dict[str, Any]:
         with _ENCODER_PROFILE_PATH.open("r", encoding="utf-8") as fh:
             data = json.load(fh)
         if not isinstance(data, dict):
-            logger.debug(
-                "MATCH config: encoder_profiles.json root is not an object — ignoring"
-            )
+            logger.debug("MATCH config: encoder_profiles.json root is not an object — ignoring")
             return {}
         return data
     except FileNotFoundError:
@@ -231,9 +225,7 @@ def _load_lex_profiles_raw() -> dict[str, Any]:
         with _LEX_PROFILE_PATH.open("r", encoding="utf-8") as fh:
             data = json.load(fh)
         if not isinstance(data, dict):
-            logger.debug(
-                "MATCH config: lex_thresholds.json root is not an object — ignoring"
-            )
+            logger.debug("MATCH config: lex_thresholds.json root is not an object — ignoring")
             return {}
         return data
     except FileNotFoundError:

@@ -62,9 +62,7 @@ async def _on_cert_expiring(event: Event) -> None:
             svc = NotificationService(session)
             await svc.create(
                 user_id=str(res.contact_id),
-                notification_type=(
-                    "cert_critical" if window_days <= 7 else "cert_warning"
-                ),
+                notification_type=("cert_critical" if window_days <= 7 else "cert_warning"),
                 title_key="notifications.resources.cert_expiring.title",
                 body_key="notifications.resources.cert_expiring.body",
                 body_context={
@@ -121,7 +119,8 @@ async def _on_claim_certified(event: Event) -> None:
             if meta.get("auto_invoice_id"):
                 logger.debug(
                     "claim %s already auto-invoiced (%s)",
-                    claim_id, meta["auto_invoice_id"],
+                    claim_id,
+                    meta["auto_invoice_id"],
                 )
                 return
             net_due = Decimal(str(claim.net_due or 0))
@@ -137,16 +136,14 @@ async def _on_claim_certified(event: Event) -> None:
                 invoice_date=datetime.now(UTC).date().isoformat(),
                 due_date=(datetime.now(UTC).date() + timedelta(days=30)).isoformat(),
                 currency_code=contract.currency or "",
-                amount_subtotal=Decimal(str(claim.gross_amount or 0))
-                - Decimal(str(claim.retention_amount or 0)),
+                amount_subtotal=Decimal(str(claim.gross_amount or 0)) - Decimal(str(claim.retention_amount or 0)),
                 tax_amount=Decimal("0"),
                 retention_amount=Decimal(str(claim.retention_amount or 0)),
                 amount_total=net_due,
                 status="draft",
                 payment_terms_days="30",
                 notes=(
-                    f"Auto-generated from certified progress claim "
-                    f"{claim.claim_number} on contract {contract.code}"
+                    f"Auto-generated from certified progress claim {claim.claim_number} on contract {contract.code}"
                 ),
             )
             invoice.metadata_ = {
@@ -175,7 +172,9 @@ async def _on_claim_certified(event: Event) -> None:
             )
             logger.info(
                 "Auto-created invoice %s from claim %s (net_due=%s)",
-                invoice.id, claim.id, net_due,
+                invoice.id,
+                claim.id,
+                net_due,
             )
     except Exception:
         logger.debug("notifications: _on_claim_certified failed", exc_info=True)
@@ -258,8 +257,7 @@ async def _on_opportunity_won(event: Event) -> None:
                 # notes; a downstream Projects-subscriber re-fires this
                 # event after Project creation if needed.
                 logger.info(
-                    "crm.opportunity.won: project not yet materialised — "
-                    "skipping auto bid package creation for opp %s",
+                    "crm.opportunity.won: project not yet materialised — skipping auto bid package creation for opp %s",
                     opportunity_id,
                 )
                 return
@@ -273,8 +271,11 @@ async def _on_opportunity_won(event: Event) -> None:
             code = f"BP-OPP-{str(opp.id)[:8].upper()}"
             existing_stmt = await session.execute(
                 __import__(
-                    "sqlalchemy", fromlist=["select"],
-                ).select(BidPackage).where(BidPackage.code == code),
+                    "sqlalchemy",
+                    fromlist=["select"],
+                )
+                .select(BidPackage)
+                .where(BidPackage.code == code),
             )
             if existing_stmt.scalar_one_or_none() is not None:
                 return
@@ -308,7 +309,8 @@ async def _on_opportunity_won(event: Event) -> None:
             )
             logger.info(
                 "Auto-created bid package %s from opportunity %s",
-                package.id, opp.id,
+                package.id,
+                opp.id,
             )
     except Exception:
         logger.debug("notifications: _on_opportunity_won failed", exc_info=True)
@@ -341,9 +343,7 @@ async def _on_opportunity_scored(event: Event) -> None:
             band = score.get("band", "warm")
             await svc.create(
                 user_id=str(opp.owner_user_id),
-                notification_type=(
-                    "crm_score_hot" if band == "hot" else "crm_score_updated"
-                ),
+                notification_type=("crm_score_hot" if band == "hot" else "crm_score_updated"),
                 title_key="notifications.crm.opportunity_scored.title",
                 body_key="notifications.crm.opportunity_scored.body",
                 body_context={
@@ -407,7 +407,8 @@ async def _on_boq_position_assigned(event: Event) -> None:
             await session.commit()
     except Exception:
         logger.debug(
-            "notifications: _on_boq_position_assigned failed", exc_info=True,
+            "notifications: _on_boq_position_assigned failed",
+            exc_info=True,
         )
 
 
@@ -503,7 +504,8 @@ async def _on_bid_package_awarded(event: Event) -> None:
                 select(BidPackageLineItem)
                 .where(BidPackageLineItem.package_id == package_id)
                 .order_by(
-                    BidPackageLineItem.order_index, BidPackageLineItem.code,
+                    BidPackageLineItem.order_index,
+                    BidPackageLineItem.code,
                 )
             )
             pkg_lines = (await session.execute(line_stmt)).scalars().all()
@@ -556,11 +558,13 @@ async def _on_bid_package_awarded(event: Event) -> None:
             )
             logger.info(
                 "Auto-created contract draft %s from bid award (package=%s)",
-                contract.code, package.code,
+                contract.code,
+                package.code,
             )
     except Exception:
         logger.debug(
-            "notifications: _on_bid_package_awarded failed", exc_info=True,
+            "notifications: _on_bid_package_awarded failed",
+            exc_info=True,
         )
 
 
@@ -603,21 +607,20 @@ async def _on_variation_completed(event: Event) -> None:
                 return
             applied.append(str(vo_id_raw))
             md["variation_ids"] = applied
-            md["variation_total"] = str(
-                Decimal(str(md.get("variation_total") or 0)) + delta
-            )
+            md["variation_total"] = str(Decimal(str(md.get("variation_total") or 0)) + delta)
             contract.metadata_ = md
-            contract.total_value = (
-                Decimal(str(contract.total_value or 0)) + delta
-            )
+            contract.total_value = Decimal(str(contract.total_value or 0)) + delta
             await session.commit()
             logger.info(
                 "Contract %s total_value bumped by %s (VO=%s)",
-                contract.code, delta, vo_id_raw,
+                contract.code,
+                delta,
+                vo_id_raw,
             )
     except Exception:
         logger.debug(
-            "notifications: _on_variation_completed failed", exc_info=True,
+            "notifications: _on_variation_completed failed",
+            exc_info=True,
         )
 
 
@@ -691,9 +694,7 @@ async def _on_qms_ncr_mirrored_from_hse(event: Event) -> None:
                 await svc.create(
                     user_id=uid,
                     notification_type=(
-                        "qms_ncr_mirrored_critical"
-                        if severity in {"critical", "major"}
-                        else "qms_ncr_mirrored"
+                        "qms_ncr_mirrored_critical" if severity in {"critical", "major"} else "qms_ncr_mirrored"
                     ),
                     title_key="notifications.qms.ncr_mirrored_from_hse.title",
                     body_key="notifications.qms.ncr_mirrored_from_hse.body",
@@ -709,7 +710,8 @@ async def _on_qms_ncr_mirrored_from_hse(event: Event) -> None:
             await session.commit()
     except Exception:
         logger.debug(
-            "notifications: _on_qms_ncr_mirrored_from_hse failed", exc_info=True,
+            "notifications: _on_qms_ncr_mirrored_from_hse failed",
+            exc_info=True,
         )
 
 

@@ -41,7 +41,6 @@ import logging
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from typing import Any
 
 from jose import JWTError, jwt
 from sqlalchemy import select, update
@@ -184,7 +183,10 @@ class PortalLinkService:
     # ── Verification + IDOR guard ─────────────────────────────────────
 
     async def consume_token_atomic(
-        self, jti: str, *, now: datetime,
+        self,
+        jti: str,
+        *,
+        now: datetime,
     ) -> bool:
         """Single-use redemption — flip ``consumed_at`` NULL → ``now`` atomically.
 
@@ -213,7 +215,10 @@ class PortalLinkService:
         return int(result.rowcount or 0) == 1  # type: ignore[union-attr]
 
     async def verify_token(
-        self, token: str, *, client_ip: str | None = None,
+        self,
+        token: str,
+        *,
+        client_ip: str | None = None,
         consume: bool = False,
     ) -> PortalContext:
         """Decode the JWT, check the revocation list, return resolved context.
@@ -316,12 +321,14 @@ class PortalLinkService:
         reservation: Reservation | None = None
         if row.reservation_id is not None:
             reservation = await self.session.get(
-                Reservation, row.reservation_id,
+                Reservation,
+                row.reservation_id,
             )
         sales_contract: SalesContract | None = None
         if row.sales_contract_id is not None:
             sales_contract = await self.session.get(
-                SalesContract, row.sales_contract_id,
+                SalesContract,
+                row.sales_contract_id,
             )
 
         # Best-effort audit write. Failures here MUST NOT block the
@@ -333,7 +340,8 @@ class PortalLinkService:
             await self.session.flush()
         except Exception:  # noqa: BLE001 — audit is best-effort
             logger.warning(
-                "portal_token: failed to bump last_used_at for jti=%s", jti,
+                "portal_token: failed to bump last_used_at for jti=%s",
+                jti,
             )
 
         return PortalContext(
@@ -358,7 +366,8 @@ class PortalLinkService:
     # ── Listing / lookup for the manager UI ──────────────────────────
 
     async def list_active_for_buyer(
-        self, buyer_id: uuid.UUID,
+        self,
+        buyer_id: uuid.UUID,
     ) -> list[PortalToken]:
         """Return non-revoked, non-expired tokens for a buyer."""
         now = datetime.now(UTC)

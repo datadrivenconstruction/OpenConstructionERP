@@ -109,7 +109,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -137,9 +139,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── EPD ──────────────────────────────────────────────────────────────
     if not _has_table(inspector, "oe_carbon_epd_record"):
@@ -183,7 +183,10 @@ def upgrade() -> None:
             sa.Column("region", sa.String(8), nullable=False, server_default=""),
             sa.Column("last_reviewed_at", sa.Date(), nullable=True),
             sa.Column(
-                "confidence", sa.String(16), nullable=False, server_default="medium",
+                "confidence",
+                sa.String(16),
+                nullable=False,
+                server_default="medium",
             ),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
@@ -202,10 +205,16 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column(
-                "name", sa.String(255), nullable=False, server_default="Baseline inventory",
+                "name",
+                sa.String(255),
+                nullable=False,
+                server_default="Baseline inventory",
             ),
             sa.Column(
-                "scope", sa.String(40), nullable=False, server_default="cradle_to_gate",
+                "scope",
+                sa.String(40),
+                nullable=False,
+                server_default="cradle_to_gate",
             ),
             sa.Column("as_of_date", sa.Date(), nullable=True),
             sa.Column("status", sa.String(20), nullable=False, server_default="draft"),
@@ -238,7 +247,10 @@ def upgrade() -> None:
                 nullable=True,
             ),
             sa.Column(
-                "factor_value_used", sa.Numeric(18, 6), nullable=False, server_default="0",
+                "factor_value_used",
+                sa.Numeric(18, 6),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column("carbon_kg", sa.Numeric(18, 6), nullable=False, server_default="0"),
             sa.Column("stage", sa.String(8), nullable=False, server_default="a1a3"),
@@ -260,7 +272,10 @@ def upgrade() -> None:
             sa.Column("period_start", sa.Date(), nullable=False),
             sa.Column("period_end", sa.Date(), nullable=False),
             sa.Column(
-                "fuel_type", sa.String(40), nullable=False, server_default="diesel",
+                "fuel_type",
+                sa.String(40),
+                nullable=False,
+                server_default="diesel",
             ),
             sa.Column("litres_or_m3", sa.Numeric(18, 6), nullable=False, server_default="0"),
             sa.Column(
@@ -304,7 +319,10 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column(
-                "market_or_location", sa.String(16), nullable=False, server_default="location",
+                "market_or_location",
+                sa.String(16),
+                nullable=False,
+                server_default="location",
             ),
             sa.Column("total_co2e_kg", sa.Numeric(18, 6), nullable=False, server_default="0"),
             sa.Column("supplier_name", sa.String(255), nullable=True),
@@ -335,10 +353,16 @@ def upgrade() -> None:
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
             sa.Column("activity_data", sa.Numeric(18, 6), nullable=False, server_default="0"),
             sa.Column(
-                "activity_unit", sa.String(40), nullable=False, server_default="tkm",
+                "activity_unit",
+                sa.String(40),
+                nullable=False,
+                server_default="tkm",
             ),
             sa.Column(
-                "emission_factor", sa.Numeric(18, 6), nullable=False, server_default="0",
+                "emission_factor",
+                sa.Numeric(18, 6),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column("total_co2e_kg", sa.Numeric(18, 6), nullable=False, server_default="0"),
             sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
@@ -358,7 +382,10 @@ def upgrade() -> None:
             ),
             sa.Column("name", sa.String(255), nullable=False, server_default=""),
             sa.Column(
-                "target_type", sa.String(40), nullable=False, server_default="absolute",
+                "target_type",
+                sa.String(40),
+                nullable=False,
+                server_default="absolute",
             ),
             sa.Column("baseline_value", sa.Numeric(18, 6), nullable=False, server_default="0"),
             sa.Column("target_value", sa.Numeric(18, 6), nullable=False, server_default="0"),
@@ -392,7 +419,10 @@ def upgrade() -> None:
             sa.Column("period_start", sa.Date(), nullable=False),
             sa.Column("period_end", sa.Date(), nullable=False),
             sa.Column(
-                "framework", sa.String(40), nullable=False, server_default="ghg_protocol",
+                "framework",
+                sa.String(40),
+                nullable=False,
+                server_default="ghg_protocol",
             ),
             sa.Column("totals", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column("narrative", sa.Text(), nullable=True),

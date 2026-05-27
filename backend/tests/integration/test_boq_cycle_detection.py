@@ -80,11 +80,7 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     token = ""
@@ -172,9 +168,7 @@ async def _add_position(
 
 
 @pytest.mark.asyncio
-async def test_update_self_parent_rejected(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_update_self_parent_rejected(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """PATCH parent_id == id must return 400 (self-cycle, BUG-CYCLE01)."""
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
@@ -195,9 +189,7 @@ async def test_update_self_parent_rejected(
 
 
 @pytest.mark.asyncio
-async def test_update_direct_child_as_parent_rejected(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_update_direct_child_as_parent_rejected(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """PATCH P.parent_id = C.id where C is direct child of P must 400."""
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
@@ -221,20 +213,14 @@ async def test_update_direct_child_as_parent_rejected(
 
 
 @pytest.mark.asyncio
-async def test_update_grandchild_as_parent_rejected(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_update_grandchild_as_parent_rejected(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """PATCH P.parent_id = GC.id where GC is grandchild of P must 400."""
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
 
     p = await _add_position(shared_client, shared_auth, boq_id, ordinal="03.001")
-    c = await _add_position(
-        shared_client, shared_auth, boq_id, ordinal="03.001.01", parent_id=p["id"]
-    )
-    gc = await _add_position(
-        shared_client, shared_auth, boq_id, ordinal="03.001.01.01", parent_id=c["id"]
-    )
+    c = await _add_position(shared_client, shared_auth, boq_id, ordinal="03.001.01", parent_id=p["id"])
+    gc = await _add_position(shared_client, shared_auth, boq_id, ordinal="03.001.01.01", parent_id=c["id"])
 
     resp = await shared_client.patch(
         f"/api/v1/boq/positions/{p['id']}",
@@ -246,9 +232,7 @@ async def test_update_grandchild_as_parent_rejected(
 
 
 @pytest.mark.asyncio
-async def test_update_cross_boq_parent_rejected(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_update_cross_boq_parent_rejected(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """PATCH parent_id pointing at a position in a different BOQ must 400."""
     project_id = await _create_project(shared_client, shared_auth)
     boq_a = await _create_boq(shared_client, shared_auth, project_id)
@@ -269,9 +253,7 @@ async def test_update_cross_boq_parent_rejected(
 
 
 @pytest.mark.asyncio
-async def test_update_valid_sibling_reparent_succeeds(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_update_valid_sibling_reparent_succeeds(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """Valid re-parenting between two non-overlapping subtrees succeeds.
 
     Tree before:
@@ -286,9 +268,7 @@ async def test_update_valid_sibling_reparent_succeeds(
 
     s1 = await _add_position(shared_client, shared_auth, boq_id, ordinal="05.001")
     s2 = await _add_position(shared_client, shared_auth, boq_id, ordinal="05.002")
-    a = await _add_position(
-        shared_client, shared_auth, boq_id, ordinal="05.001.01", parent_id=s1["id"]
-    )
+    a = await _add_position(shared_client, shared_auth, boq_id, ordinal="05.001.01", parent_id=s1["id"])
 
     resp = await shared_client.patch(
         f"/api/v1/boq/positions/{a['id']}",
@@ -319,12 +299,8 @@ async def test_update_move_subtree_to_other_parent_succeeds(
 
     s1 = await _add_position(shared_client, shared_auth, boq_id, ordinal="06.001")
     s2 = await _add_position(shared_client, shared_auth, boq_id, ordinal="06.002")
-    a = await _add_position(
-        shared_client, shared_auth, boq_id, ordinal="06.001.01", parent_id=s1["id"]
-    )
-    a1 = await _add_position(
-        shared_client, shared_auth, boq_id, ordinal="06.001.01.01", parent_id=a["id"]
-    )
+    a = await _add_position(shared_client, shared_auth, boq_id, ordinal="06.001.01", parent_id=s1["id"])
+    a1 = await _add_position(shared_client, shared_auth, boq_id, ordinal="06.001.01.01", parent_id=a["id"])
 
     resp = await shared_client.patch(
         f"/api/v1/boq/positions/{a['id']}",
@@ -375,9 +351,7 @@ async def test_create_with_self_referencing_parent_id_rejected(
 
 
 @pytest.mark.asyncio
-async def test_create_with_cross_boq_parent_rejected(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_create_with_cross_boq_parent_rejected(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """Creating a position whose parent_id points into a different BOQ is rejected."""
     project_id = await _create_project(shared_client, shared_auth)
     boq_a = await _create_boq(shared_client, shared_auth, project_id)

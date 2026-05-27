@@ -150,9 +150,7 @@ def plan_rule(
     projection = _projection_for(parsed)
 
     # 5. Build the SQL.
-    sql = (
-        f"SELECT {', '.join(projection)} FROM elements WHERE {where_clause}"
-    )
+    sql = f"SELECT {', '.join(projection)} FROM elements WHERE {where_clause}"
 
     return ExecutionPlan(
         duckdb_sql=sql,
@@ -208,37 +206,22 @@ def _compile_selector(selector: EntitySelector, builder: _PlanBuilder) -> str:
     if isinstance(selector, PsetsPresentSelector):
         # Each value: a Pset name. We test ``psets ? :pname`` (DuckDB JSON
         # `?` operator). Multiple values → ANDed (all must be present).
-        clauses = [
-            f"(json_contains(psets, {builder.bind(v)}))"
-            for v in selector.values
-        ]
+        clauses = [f"(json_contains(psets, {builder.bind(v)}))" for v in selector.values]
         return "(" + " AND ".join(clauses) + ")"
     if isinstance(selector, GeometryFilterSelector):
         clauses: list[str] = []
         if selector.min_volume_m3 is not None:
-            clauses.append(
-                f"(volume_m3 >= {builder.bind(selector.min_volume_m3)})"
-            )
+            clauses.append(f"(volume_m3 >= {builder.bind(selector.min_volume_m3)})")
         if selector.max_volume_m3 is not None:
-            clauses.append(
-                f"(volume_m3 <= {builder.bind(selector.max_volume_m3)})"
-            )
+            clauses.append(f"(volume_m3 <= {builder.bind(selector.max_volume_m3)})")
         if selector.min_area_m2 is not None:
-            clauses.append(
-                f"(area_m2 >= {builder.bind(selector.min_area_m2)})"
-            )
+            clauses.append(f"(area_m2 >= {builder.bind(selector.min_area_m2)})")
         if selector.max_area_m2 is not None:
-            clauses.append(
-                f"(area_m2 <= {builder.bind(selector.max_area_m2)})"
-            )
+            clauses.append(f"(area_m2 <= {builder.bind(selector.max_area_m2)})")
         if selector.min_length_m is not None:
-            clauses.append(
-                f"(length_m >= {builder.bind(selector.min_length_m)})"
-            )
+            clauses.append(f"(length_m >= {builder.bind(selector.min_length_m)})")
         if selector.max_length_m is not None:
-            clauses.append(
-                f"(length_m <= {builder.bind(selector.max_length_m)})"
-            )
+            clauses.append(f"(length_m <= {builder.bind(selector.max_length_m)})")
         return "(" + " AND ".join(clauses or ["TRUE"]) + ")"
 
     # Defensive fallback — the schema is closed by Pydantic so this
@@ -276,9 +259,7 @@ def _compile_predicate(predicate: Predicate, builder: _PlanBuilder) -> str:
     return "TRUE"
 
 
-def _compile_triplet(
-    triplet: TripletPredicate, builder: _PlanBuilder
-) -> str:
+def _compile_triplet(triplet: TripletPredicate, builder: _PlanBuilder) -> str:
     """Compile a single (attribute, constraint) predicate."""
     column_expr = _attribute_to_sql_column(triplet.attribute)
     return _constraint_to_sql(column_expr, triplet.constraint, builder)
@@ -301,10 +282,7 @@ def _attribute_to_sql_column(
     """
     if isinstance(attribute, ExactAttributeRef):
         if attribute.pset_name:
-            return (
-                f"properties->'{_escape(attribute.pset_name)}'"
-                f"->>'{_escape(attribute.name)}'"
-            )
+            return f"properties->'{_escape(attribute.pset_name)}'->>'{_escape(attribute.name)}'"
         return f"properties->>'{_escape(attribute.name)}'"
     if isinstance(attribute, AliasAttributeRef):
         return f"alias_lookup('{_escape(attribute.alias_id)}')"
@@ -351,15 +329,9 @@ def _constraint_to_sql(
         # executor rewrites to (col > min AND col < max). We keep the
         # SQL inclusive here — the executor applies the open-interval
         # form when needed.
-        return (
-            f"({column_expr} {op} {builder.bind(constraint.min)} "
-            f"AND {builder.bind(constraint.max)})"
-        )
+        return f"({column_expr} {op} {builder.bind(constraint.min)} AND {builder.bind(constraint.max)})"
     if isinstance(constraint, NotBetweenConstraint):
-        return (
-            f"({column_expr} NOT BETWEEN {builder.bind(constraint.min)} "
-            f"AND {builder.bind(constraint.max)})"
-        )
+        return f"({column_expr} NOT BETWEEN {builder.bind(constraint.min)} AND {builder.bind(constraint.max)})"
     if isinstance(constraint, InConstraint):
         bound = ", ".join(builder.bind(v) for v in constraint.values)
         return f"({column_expr} IN ({bound}))"
@@ -378,9 +350,7 @@ def _constraint_to_sql(
     if isinstance(constraint, MatchesConstraint):
         return f"(regexp_matches({column_expr}, {builder.bind(constraint.pattern)}))"
     if isinstance(constraint, NotMatchesConstraint):
-        return (
-            f"(NOT regexp_matches({column_expr}, {builder.bind(constraint.pattern)}))"
-        )
+        return f"(NOT regexp_matches({column_expr}, {builder.bind(constraint.pattern)}))"
     if isinstance(constraint, ExistsConstraint):
         return f"({column_expr} IS NOT NULL)"
     if isinstance(constraint, NotExistsConstraint):
@@ -396,10 +366,7 @@ def _constraint_to_sql(
     if isinstance(constraint, IsNumericConstraint):
         return f"(try_cast({column_expr} AS DOUBLE) IS NOT NULL)"
     if isinstance(constraint, IsBooleanConstraint):
-        return (
-            f"(lower(cast({column_expr} AS VARCHAR)) IN "
-            f"('true', 'false', '0', '1'))"
-        )
+        return f"(lower(cast({column_expr} AS VARCHAR)) IN ('true', 'false', '0', '1'))"
     if isinstance(constraint, IsDateConstraint):
         return f"(try_cast({column_expr} AS DATE) IS NOT NULL)"
     return "TRUE"

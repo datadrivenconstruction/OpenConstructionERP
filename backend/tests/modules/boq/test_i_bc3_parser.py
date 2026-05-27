@@ -21,7 +21,6 @@ import pytest
 
 from app.modules.boq.importers.bc3 import BC3Importer
 
-
 # ── Fixtures ────────────────────────────────────────────────────────────────
 
 
@@ -32,7 +31,7 @@ def _build_bc3_utf8() -> bytes:
         "~C|01.01|m3|Excavación en vaciado|18.50|||0|\n"
         "~T|01.01|Excavación en vaciado por medios mecánicos, incluso carga sobre camión.|\n"
         "~M|01\\01.01|1|125.0|Sótano|\n"
-    ).encode("utf-8")
+    ).encode()
 
 
 def _build_bc3_latin1() -> bytes:
@@ -54,7 +53,7 @@ def _build_bc3_with_continuation() -> bytes:
         "~T|03.01|Hormigón HA-25/B/20/IIa fabricado en central\n"
         "y vertido con bomba, vibrado y curado.|\n"
         "~M|03\\03.01|1|12.5||\n"
-    ).encode("utf-8")
+    ).encode()
 
 
 def _build_bc3_multi_chapter() -> bytes:
@@ -68,7 +67,7 @@ def _build_bc3_multi_chapter() -> bytes:
         "~C|CAP02#|m2|Cimentaciones|0|||1|\n"
         "~C|CAP02.01|m3|Hormigón limpieza|62.40|||0|\n"
         "~M|CAP02\\CAP02.01|1|18.0||\n"
-    ).encode("utf-8")
+    ).encode()
 
 
 # ── Tests ───────────────────────────────────────────────────────────────────

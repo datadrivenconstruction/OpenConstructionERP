@@ -32,6 +32,7 @@ def _serialise_money(v: Decimal | None) -> str | None:
         return "0"
     return format(v, "f")
 
+
 # ── KPI rollup ─────────────────────────────────────────────────────────────
 
 
@@ -225,12 +226,6 @@ class CoordinationThresholdUpdate(BaseModel):
 
     @model_validator(mode="after")
     def _at_least_one_field(self) -> CoordinationThresholdUpdate:
-        if (
-            self.warn_value is None
-            and self.error_value is None
-            and self.enabled is None
-        ):
-            raise ValueError(
-                "At least one of warn_value, error_value or enabled must be set."
-            )
+        if self.warn_value is None and self.error_value is None and self.enabled is None:
+            raise ValueError("At least one of warn_value, error_value or enabled must be set.")
         return self

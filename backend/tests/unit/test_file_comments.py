@@ -29,9 +29,6 @@ from app.modules.file_comments.models import (  # noqa: F401 — registers ORM
     FileComment,
     FileCommentMention,
 )
-# Epic C: FileComment now has an FK to oe_file_version — the test's
-# Base.metadata.create_all() needs the version table registered too.
-from app.modules.file_versions.models import FileVersion  # noqa: F401 — registers ORM
 from app.modules.file_comments.schemas import (
     FileCommentCreate,
     FileCommentUpdate,
@@ -44,6 +41,10 @@ from app.modules.file_comments.service import (
     soft_delete_comment,
     update_comment,
 )
+
+# Epic C: FileComment now has an FK to oe_file_version — the test's
+# Base.metadata.create_all() needs the version table registered too.
+from app.modules.file_versions.models import FileVersion  # noqa: F401 — registers ORM
 from app.modules.projects.models import Project  # noqa: F401 — registers ORM
 from app.modules.users.models import User  # noqa: F401 — registers ORM
 
@@ -296,18 +297,12 @@ async def test_soft_delete_preserves_thread_and_clears_mentions(
     assert ok is True
 
     # Row still present, body replaced.
-    row = (
-        await session.execute(select(FileComment).where(FileComment.id == top.id))
-    ).scalar_one_or_none()
+    row = (await session.execute(select(FileComment).where(FileComment.id == top.id))).scalar_one_or_none()
     assert row is not None
     assert row.body == "[deleted]"
 
     # Reply still hangs off the tombstoned parent.
-    reply_row = (
-        await session.execute(
-            select(FileComment).where(FileComment.id == reply.id)
-        )
-    ).scalar_one_or_none()
+    reply_row = (await session.execute(select(FileComment).where(FileComment.id == reply.id))).scalar_one_or_none()
     assert reply_row is not None
     assert reply_row.parent_id == top.id
 

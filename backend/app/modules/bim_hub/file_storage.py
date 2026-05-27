@@ -363,8 +363,7 @@ async def bulk_model_storage_summary(
         entries = await backend.list_prefix(prefix)
     except NotImplementedError:
         logger.debug(
-            "Storage backend %s does not implement list_prefix; "
-            "BIM list endpoint will fall back to per-model probes.",
+            "Storage backend %s does not implement list_prefix; BIM list endpoint will fall back to per-model probes.",
             type(backend).__name__,
         )
         return {}
@@ -376,7 +375,7 @@ async def bulk_model_storage_summary(
     for key, size_bytes in entries:
         if not key.startswith(prefix_with_slash):
             continue
-        remainder = key[len(prefix_with_slash):]
+        remainder = key[len(prefix_with_slash) :]
         parts = remainder.split("/", 1)
         if len(parts) != 2:
             # Stray file directly under the project dir; not a model artifact.

@@ -183,9 +183,7 @@ class MaintenanceSchedule(Base):
     """A recurring maintenance schedule for an equipment unit."""
 
     __tablename__ = "oe_equipment_maintenance_schedule"
-    __table_args__ = (
-        Index("ix_oe_equipment_maintenance_schedule_next_due_date", "next_due_date"),
-    )
+    __table_args__ = (Index("ix_oe_equipment_maintenance_schedule_next_due_date", "next_due_date"),)
 
     equipment_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -219,9 +217,7 @@ class MaintenanceWorkOrder(Base):
     """A maintenance work order generated or created for an equipment unit."""
 
     __tablename__ = "oe_equipment_work_order"
-    __table_args__ = (
-        Index("ix_oe_equipment_work_order_status", "status"),
-    )
+    __table_args__ = (Index("ix_oe_equipment_work_order_status", "status"),)
 
     equipment_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -271,9 +267,7 @@ class Inspection(Base):
     """A periodic equipment inspection with validity window."""
 
     __tablename__ = "oe_equipment_inspection"
-    __table_args__ = (
-        Index("ix_oe_equipment_inspection_valid_until", "valid_until"),
-    )
+    __table_args__ = (Index("ix_oe_equipment_inspection_valid_until", "valid_until"),)
 
     equipment_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -291,19 +285,14 @@ class Inspection(Base):
     approved_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
     def __repr__(self) -> str:
-        return (
-            f"<Inspection equipment={self.equipment_id} {self.inspection_type} "
-            f"valid_until={self.valid_until}>"
-        )
+        return f"<Inspection equipment={self.equipment_id} {self.inspection_type} valid_until={self.valid_until}>"
 
 
 class EquipmentRental(Base):
     """Internal rental of equipment to a project with billing rates."""
 
     __tablename__ = "oe_equipment_rental"
-    __table_args__ = (
-        Index("ix_oe_equipment_rental_status", "status"),
-    )
+    __table_args__ = (Index("ix_oe_equipment_rental_status", "status"),)
 
     equipment_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -347,10 +336,7 @@ class EquipmentRental(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<EquipmentRental equipment={self.equipment_id} project={self.project_id} "
-            f"{self.status}>"
-        )
+        return f"<EquipmentRental equipment={self.equipment_id} project={self.project_id} {self.status}>"
 
 
 class FuelLog(Base):

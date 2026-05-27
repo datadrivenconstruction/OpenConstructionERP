@@ -67,9 +67,7 @@ class _StubRepo:
     async def get_package_by_id(self, package_id: uuid.UUID) -> Any:
         return self.packages.get(package_id)
 
-    async def update_package_fields(
-        self, package_id: uuid.UUID, **fields: Any
-    ) -> None:
+    async def update_package_fields(self, package_id: uuid.UUID, **fields: Any) -> None:
         p = self.packages.get(package_id)
         if p:
             for k, v in fields.items():
@@ -89,9 +87,7 @@ class _StubRepo:
     async def get_bid_by_id(self, bid_id: uuid.UUID) -> Any:
         return self.bids.get(bid_id)
 
-    async def list_bids_for_package(
-        self, package_id: uuid.UUID
-    ) -> list[Any]:
+    async def list_bids_for_package(self, package_id: uuid.UUID) -> list[Any]:
         return [b for b in self.bids.values() if b.package_id == package_id]
 
     async def update_bid_fields(self, bid_id: uuid.UUID, **fields: Any) -> None:
@@ -166,9 +162,7 @@ async def test_verify_bid_access_blocks_cross_project_user(
     svc = _make_service()
 
     # Project A owns the tender + bid.
-    pkg = await svc.create_package(
-        PackageCreate(project_id=PROJECT_A, name="A-confidential package")
-    )
+    pkg = await svc.create_package(PackageCreate(project_id=PROJECT_A, name="A-confidential package"))
     bid = await svc.create_bid(
         pkg.id,
         BidCreate(
@@ -188,19 +182,14 @@ async def test_verify_bid_access_blocks_cross_project_user(
         async def get_by_id(self, project_id: uuid.UUID):
             return project_a if project_id == PROJECT_A else None
 
-    monkeypatch.setattr(
-        "app.modules.projects.repository.ProjectRepository", _StubProjectRepo
-    )
+    monkeypatch.setattr("app.modules.projects.repository.ProjectRepository", _StubProjectRepo)
 
     # USER_B trying to touch project A's bid — must be rejected (403/404)
     # consistent with sibling IDOR guards in the codebase.
     with pytest.raises(HTTPException) as exc_info:
-        await _verify_bid_access(
-            svc, svc.session, bid.id, USER_B, payload={"role": "estimator"}
-        )
+        await _verify_bid_access(svc, svc.session, bid.id, USER_B, payload={"role": "estimator"})
     assert exc_info.value.status_code in (403, 404), (
-        f"expected 403/404 for cross-tenant bid access, got "
-        f"{exc_info.value.status_code}"
+        f"expected 403/404 for cross-tenant bid access, got {exc_info.value.status_code}"
     )
 
 
@@ -213,9 +202,7 @@ async def test_verify_bid_access_allows_owning_user(
     have over-locked the route and broken legitimate edits.
     """
     svc = _make_service()
-    pkg = await svc.create_package(
-        PackageCreate(project_id=PROJECT_A, name="A-confidential package")
-    )
+    pkg = await svc.create_package(PackageCreate(project_id=PROJECT_A, name="A-confidential package"))
     bid = await svc.create_bid(
         pkg.id,
         BidCreate(company_name="ACME GmbH", total_amount="100000"),
@@ -230,13 +217,9 @@ async def test_verify_bid_access_allows_owning_user(
         async def get_by_id(self, project_id: uuid.UUID):
             return project_a if project_id == PROJECT_A else None
 
-    monkeypatch.setattr(
-        "app.modules.projects.repository.ProjectRepository", _StubProjectRepo
-    )
+    monkeypatch.setattr("app.modules.projects.repository.ProjectRepository", _StubProjectRepo)
 
-    returned = await _verify_bid_access(
-        svc, svc.session, bid.id, USER_A, payload={"role": "estimator"}
-    )
+    returned = await _verify_bid_access(svc, svc.session, bid.id, USER_A, payload={"role": "estimator"})
     assert returned.id == bid.id
 
 
@@ -282,19 +265,14 @@ def test_router_update_bid_verifies_access_before_mutation() -> None:
     for i, stmt in enumerate(ast.walk(handler)):
         if isinstance(stmt, ast.Call):
             fn = stmt.func
-            name = (
-                fn.id if isinstance(fn, ast.Name)
-                else (fn.attr if isinstance(fn, ast.Attribute) else "")
-            )
+            name = fn.id if isinstance(fn, ast.Name) else (fn.attr if isinstance(fn, ast.Attribute) else "")
             if name == "_verify_bid_access" and verify_idx is None:
                 verify_idx = i
             if name == "update_bid" and update_idx is None:
                 update_idx = i
     assert verify_idx is not None, "update_bid no longer calls _verify_bid_access"
     assert update_idx is not None, "update_bid no longer calls service.update_bid"
-    assert verify_idx < update_idx, (
-        "IDOR REGRESSION: _verify_bid_access must run BEFORE service.update_bid"
-    )
+    assert verify_idx < update_idx, "IDOR REGRESSION: _verify_bid_access must run BEFORE service.update_bid"
 
 
 # ── P0-2: Currency-mismatch guard on apply_winner ──────────────────────────
@@ -333,9 +311,7 @@ def _seed_position(session: _StubSession, *, currency: str = "EUR") -> uuid.UUID
     return pos_id
 
 
-def _patch_project_currency(
-    monkeypatch: pytest.MonkeyPatch, *, currency: str
-) -> None:
+def _patch_project_currency(monkeypatch: pytest.MonkeyPatch, *, currency: str) -> None:
     """Stub ProjectRepository.get_by_id to return a project in `currency`."""
     project = SimpleNamespace(id=PROJECT_A, owner_id=USER_A, currency=currency)
 
@@ -346,9 +322,7 @@ def _patch_project_currency(
         async def get_by_id(self, project_id: uuid.UUID):
             return project if project_id == PROJECT_A else None
 
-    monkeypatch.setattr(
-        "app.modules.projects.repository.ProjectRepository", _StubProjectRepo
-    )
+    monkeypatch.setattr("app.modules.projects.repository.ProjectRepository", _StubProjectRepo)
 
 
 @pytest.mark.asyncio
@@ -437,10 +411,9 @@ async def test_apply_winner_different_currency_raises_400(
     assert detail["code"] == "currency_mismatch"
     assert detail["project_currency"] == "EUR"
     offenders = detail["offenders"]
-    assert any(
-        o["bid_id"] == str(bid.id) and o["currency"] == "USD"
-        for o in offenders
-    ), f"offender list missing the USD bid: {offenders!r}"
+    assert any(o["bid_id"] == str(bid.id) and o["currency"] == "USD" for o in offenders), (
+        f"offender list missing the USD bid: {offenders!r}"
+    )
 
     # Critically: the BOQ position must be untouched — no foreign-
     # currency value bled into the project budget.
@@ -500,10 +473,9 @@ async def test_apply_winner_line_level_currency_override_detected(
     assert isinstance(detail, dict)
     assert detail["code"] == "currency_mismatch"
     offenders = detail["offenders"]
-    assert any(
-        o.get("scope", "").startswith("line[") and o["currency"] == "USD"
-        for o in offenders
-    ), f"per-line USD offender not flagged: {offenders!r}"
+    assert any(o.get("scope", "").startswith("line[") and o["currency"] == "USD" for o in offenders), (
+        f"per-line USD offender not flagged: {offenders!r}"
+    )
 
     # BOQ unchanged.
     assert Decimal(session.positions[pos_id].unit_rate) == Decimal("100")

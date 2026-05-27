@@ -11,9 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 # ── Contract ─────────────────────────────────────────────────────────────
 
-CONTRACT_TYPES = (
-    "lump_sum|gmp|cost_plus|tm|unit_price|design_build|combination"
-)
+CONTRACT_TYPES = "lump_sum|gmp|cost_plus|tm|unit_price|design_build|combination"
 COUNTERPARTY_TYPES = "client|subcontractor"
 CONTRACT_STATUSES = "draft|active|suspended|completed|terminated"
 RETENTION_RELEASE_EVENTS = "practical_completion|final_account|handover"
@@ -62,7 +60,8 @@ class ContractUpdate(BaseModel):
     currency: str | None = Field(default=None, max_length=3)
     retention_percent: Decimal | None = Field(default=None, ge=0, le=100)
     retention_release_event: str | None = Field(
-        default=None, pattern=rf"^({RETENTION_RELEASE_EVENTS})$",
+        default=None,
+        pattern=rf"^({RETENTION_RELEASE_EVENTS})$",
     )
     status: str | None = Field(default=None, pattern=rf"^({CONTRACT_STATUSES})$")
     signed_at: str | None = None
@@ -288,7 +287,8 @@ class GainshareConfigurationCreate(BaseModel):
     savings_split_owner_pct: Decimal = Field(default=Decimal("50"), ge=0, le=100)
     savings_split_contractor_pct: Decimal = Field(default=Decimal("50"), ge=0, le=100)
     overrun_responsibility: str = Field(
-        default="contractor", pattern=rf"^({OVERRUN_RESPONSIBILITIES})$",
+        default="contractor",
+        pattern=rf"^({OVERRUN_RESPONSIBILITIES})$",
     )
 
 
@@ -298,7 +298,8 @@ class GainshareConfigurationUpdate(BaseModel):
     savings_split_owner_pct: Decimal | None = Field(default=None, ge=0, le=100)
     savings_split_contractor_pct: Decimal | None = Field(default=None, ge=0, le=100)
     overrun_responsibility: str | None = Field(
-        default=None, pattern=rf"^({OVERRUN_RESPONSIBILITIES})$",
+        default=None,
+        pattern=rf"^({OVERRUN_RESPONSIBILITIES})$",
     )
 
 
@@ -329,7 +330,8 @@ class LDClauseCreate(BaseModel):
     max_amount: Decimal | None = None
     milestone_id: UUID | None = None
     enforcement_status: str = Field(
-        default="active", pattern=rf"^({LD_ENFORCEMENT_STATUSES})$",
+        default="active",
+        pattern=rf"^({LD_ENFORCEMENT_STATUSES})$",
     )
 
 
@@ -339,7 +341,8 @@ class LDClauseUpdate(BaseModel):
     max_amount: Decimal | None = None
     milestone_id: UUID | None = None
     enforcement_status: str | None = Field(
-        default=None, pattern=rf"^({LD_ENFORCEMENT_STATUSES})$",
+        default=None,
+        pattern=rf"^({LD_ENFORCEMENT_STATUSES})$",
     )
 
 

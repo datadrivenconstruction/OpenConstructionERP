@@ -94,11 +94,7 @@ class DailyDiaryRepository(_BaseRepository):
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = (
-            base.order_by(DailyDiary.diary_date.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = base.order_by(DailyDiary.diary_date.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), total
 
@@ -126,9 +122,7 @@ class WeatherRecordRepository(_BaseRepository):
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = (
-            base.order_by(WeatherRecord.captured_at.desc()).offset(offset).limit(limit)
-        )
+        stmt = base.order_by(WeatherRecord.captured_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), total
 
@@ -230,11 +224,7 @@ class DiaryPhotoRepository(_BaseRepository):
         and filtered in Python — wasteful and a P2 latency hit on large
         projects. A single indexed ``WHERE diary_id = ?`` is enough.
         """
-        stmt = (
-            select(DiaryPhoto)
-            .where(DiaryPhoto.diary_id == diary_id)
-            .order_by(DiaryPhoto.taken_at.asc())
-        )
+        stmt = select(DiaryPhoto).where(DiaryPhoto.diary_id == diary_id).order_by(DiaryPhoto.taken_at.asc())
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -254,9 +244,7 @@ class DiaryVideoRepository(_BaseRepository):
         base = select(DiaryVideo).where(DiaryVideo.project_id == project_id)
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
-        stmt = (
-            base.order_by(DiaryVideo.recorded_at.desc()).offset(offset).limit(limit)
-        )
+        stmt = base.order_by(DiaryVideo.recorded_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), total
 
@@ -276,9 +264,7 @@ class DroneSurveyRepository(_BaseRepository):
         base = select(DroneSurvey).where(DroneSurvey.project_id == project_id)
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
-        stmt = (
-            base.order_by(DroneSurvey.flown_at.desc()).offset(offset).limit(limit)
-        )
+        stmt = base.order_by(DroneSurvey.flown_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), total
 
@@ -295,16 +281,10 @@ class RealityCaptureRepository(_BaseRepository):
         offset: int = 0,
         limit: int = 100,
     ) -> tuple[list[RealityCaptureDataset], int]:
-        base = select(RealityCaptureDataset).where(
-            RealityCaptureDataset.project_id == project_id
-        )
+        base = select(RealityCaptureDataset).where(RealityCaptureDataset.project_id == project_id)
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
-        stmt = (
-            base.order_by(RealityCaptureDataset.captured_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = base.order_by(RealityCaptureDataset.captured_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), total
 

@@ -32,7 +32,6 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────────
 
 
@@ -58,7 +57,9 @@ async def engine_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -218,7 +219,8 @@ async def test_picked_unknown_catalog_with_no_others_returns_no_catalogs_loaded(
 
 @pytest.mark.asyncio
 async def test_picked_loaded_catalog_no_vectors_returns_catalog_not_vectorized(
-    engine_factory, monkeypatch,
+    engine_factory,
+    monkeypatch,
 ) -> None:
     """SQL rows present but Qdrant collection empty for this region → not_vectorized."""
     _engine, factory, _tmp = engine_factory
@@ -247,7 +249,8 @@ async def test_picked_loaded_catalog_no_vectors_returns_catalog_not_vectorized(
 
 @pytest.mark.asyncio
 async def test_picked_loaded_catalog_with_vectors_returns_ok(
-    engine_factory, monkeypatch,
+    engine_factory,
+    monkeypatch,
 ) -> None:
     """Happy path: SQL rows + vectors → ``ok``."""
     _engine, factory, _tmp = engine_factory
@@ -319,7 +322,8 @@ def test_vector_count_accepts_valid_cwicr_ids(monkeypatch) -> None:
     monkeypatch.setattr(vector_mod, "_get_lancedb", lambda: _StubDB())
 
     out = vector_mod.vector_count_with_payload_substring(
-        "oe_cost_items", "RU_STPETERSBURG",
+        "oe_cost_items",
+        "RU_STPETERSBURG",
     )
     assert out == 7
     assert any("RU_STPETERSBURG" in c for c in calls)
@@ -330,7 +334,9 @@ def test_vector_count_accepts_valid_cwicr_ids(monkeypatch) -> None:
 
 @pytest.mark.asyncio
 async def test_loaded_databases_returns_one_entry_per_region(
-    http_client: AsyncClient, engine_factory, monkeypatch,
+    http_client: AsyncClient,
+    engine_factory,
+    monkeypatch,
 ) -> None:
     """Every distinct region with at least one active row gets one entry."""
     _engine, factory, _tmp = engine_factory
@@ -378,7 +384,9 @@ async def test_loaded_databases_empty_when_no_rows(
 
 @pytest.mark.asyncio
 async def test_loaded_databases_skips_inactive_rows(
-    http_client: AsyncClient, engine_factory, monkeypatch,
+    http_client: AsyncClient,
+    engine_factory,
+    monkeypatch,
 ) -> None:
     """Soft-deleted rows are ignored — they shouldn't count toward the badge."""
     _engine, factory, _tmp = engine_factory

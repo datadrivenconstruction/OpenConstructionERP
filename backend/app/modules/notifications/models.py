@@ -103,10 +103,16 @@ class NotificationPreference(Base):
     event_type: Mapped[str] = mapped_column(String(80), nullable=False)
     channel: Mapped[str] = mapped_column(String(32), nullable=False)
     enabled: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1",
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="1",
     )
     digest: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="realtime", server_default="realtime",
+        String(16),
+        nullable=False,
+        default="realtime",
+        server_default="realtime",
     )
 
     def __repr__(self) -> str:
@@ -146,21 +152,23 @@ class NotificationDigestQueue(Base):
     event_type: Mapped[str] = mapped_column(String(80), nullable=False)
     channel: Mapped[str] = mapped_column(String(32), nullable=False)
     payload: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     scheduled_for: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False,
+        DateTime(timezone=True),
+        nullable=False,
     )
     sent_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     def __repr__(self) -> str:
         sent = "sent" if self.sent_at else "pending"
-        return (
-            f"<NotificationDigestQueue user={self.user_id} "
-            f"event={self.event_type} channel={self.channel} [{sent}]>"
-        )
+        return f"<NotificationDigestQueue user={self.user_id} event={self.event_type} channel={self.channel} [{sent}]>"
 
 
 class WebhookTarget(Base):
@@ -184,9 +192,7 @@ class WebhookTarget(Base):
     """
 
     __tablename__ = "oe_notification_webhook_target"
-    __table_args__ = (
-        Index("ix_oe_notification_webhook_target_active", "active"),
-    )
+    __table_args__ = (Index("ix_oe_notification_webhook_target_active", "active"),)
 
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     url: Mapped[str] = mapped_column(String(2048), nullable=False)
@@ -195,22 +201,29 @@ class WebhookTarget(Base):
     # so SQLite indexes can lean on it for substring searches when the
     # list grows.
     event_filter: Mapped[str] = mapped_column(
-        String(1024), nullable=False, default="*", server_default="*",
+        String(1024),
+        nullable=False,
+        default="*",
+        server_default="*",
     )
     secret: Mapped[str | None] = mapped_column(String(255), nullable=True)
     active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1",
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="1",
     )
     last_status: Mapped[int | None] = mapped_column(Integer, nullable=True)
     last_attempt_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     failure_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<WebhookTarget {self.name!r} url={self.url[:40]}... "
-            f"active={self.active}>"
-        )
+        return f"<WebhookTarget {self.name!r} url={self.url[:40]}... active={self.active}>"

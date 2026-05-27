@@ -78,16 +78,16 @@ SYSTEM_PROMPT_V1: str = (
     "\n"
     "You output STRICT JSON, no commentary. Schema:\n"
     "{\n"
-    "  \"category\": \"real_design_flaw\" | \"expected_intersection\" | "
-    "\"tolerance_artifact\" | \"modeling_error\" | \"duplicate\" | "
-    "\"unclear\",\n"
-    "  \"confidence\": 0.0-1.0,\n"
-    "  \"severity_suggested\": \"critical\"|\"high\"|\"medium\"|\"low\",\n"
-    "  \"explanation\": \"<one sentence>\",\n"
-    "  \"suggested_action\": \"reroute_pipe\"|\"add_sleeve\"|"
-    "\"accept_intersection\"|\"ignore_duplicate\"|\"escalate_to_designer\"|"
-    "\"request_more_info\",\n"
-    "  \"model_evidence_used\": [\"<key=value>\", \"...\"]\n"
+    '  "category": "real_design_flaw" | "expected_intersection" | '
+    '"tolerance_artifact" | "modeling_error" | "duplicate" | '
+    '"unclear",\n'
+    '  "confidence": 0.0-1.0,\n'
+    '  "severity_suggested": "critical"|"high"|"medium"|"low",\n'
+    '  "explanation": "<one sentence>",\n'
+    '  "suggested_action": "reroute_pipe"|"add_sleeve"|'
+    '"accept_intersection"|"ignore_duplicate"|"escalate_to_designer"|'
+    '"request_more_info",\n'
+    '  "model_evidence_used": ["<key=value>", "..."]\n'
     "}\n"
     "\n"
     "Rules:\n"
@@ -98,7 +98,7 @@ SYSTEM_PROMPT_V1: str = (
     "- duplicate = same clash appears already triaged at the same "
     "coordinates.\n"
     "- Use ONLY the evidence in the input. Do not invent properties.\n"
-    "- If evidence is insufficient, return category=\"unclear\", "
+    '- If evidence is insufficient, return category="unclear", '
     "confidence<0.4."
 )
 
@@ -142,7 +142,42 @@ RETRY_PROMPT_V1: str = (
 # Characters that can carry prompt-control intent if echoed back into the
 # LLM payload. We strip them entirely — they are not load-bearing in
 # any of our real evidence fields (IFC GUIDs / materials / floats).
-_DANGEROUS_PATTERN = re.compile("[`" + chr(0x00) + chr(0x01) + chr(0x02) + chr(0x03) + chr(0x04) + chr(0x05) + chr(0x06) + chr(0x07) + chr(0x08) + chr(0x09) + chr(0x0a) + chr(0x0b) + chr(0x0c) + chr(0x0d) + chr(0x0e) + chr(0x0f) + chr(0x10) + chr(0x11) + chr(0x12) + chr(0x13) + chr(0x14) + chr(0x15) + chr(0x16) + chr(0x17) + chr(0x18) + chr(0x19) + chr(0x1a) + chr(0x1b) + chr(0x1c) + chr(0x1d) + chr(0x1e) + chr(0x1f) + "]")
+_DANGEROUS_PATTERN = re.compile(
+    "[`"
+    + chr(0x00)
+    + chr(0x01)
+    + chr(0x02)
+    + chr(0x03)
+    + chr(0x04)
+    + chr(0x05)
+    + chr(0x06)
+    + chr(0x07)
+    + chr(0x08)
+    + chr(0x09)
+    + chr(0x0A)
+    + chr(0x0B)
+    + chr(0x0C)
+    + chr(0x0D)
+    + chr(0x0E)
+    + chr(0x0F)
+    + chr(0x10)
+    + chr(0x11)
+    + chr(0x12)
+    + chr(0x13)
+    + chr(0x14)
+    + chr(0x15)
+    + chr(0x16)
+    + chr(0x17)
+    + chr(0x18)
+    + chr(0x19)
+    + chr(0x1A)
+    + chr(0x1B)
+    + chr(0x1C)
+    + chr(0x1D)
+    + chr(0x1E)
+    + chr(0x1F)
+    + "]"
+)
 
 # Lines starting with these tokens are classic prompt-injection trailers
 # (the user controls part of the input — properties blobs, descriptions —
@@ -214,10 +249,7 @@ def _build_prior_triage_section(prior: Mapping[str, Any] | None) -> str:
     date = _sanitise(date_raw, max_chars=64)
     cat = _sanitise(cat_raw, max_chars=48)
     conf = _format_float(conf_raw)
-    return (
-        f"This clash signature was previously triaged on {date} as "
-        f"{cat} (confidence {conf:.2f}). Re-evaluate."
-    )
+    return f"This clash signature was previously triaged on {date} as {cat} (confidence {conf:.2f}). Re-evaluate."
 
 
 def build_user_prompt(

@@ -133,7 +133,8 @@ class ComplianceDocResponse(BaseModel):
     attachment_document_id: UUID | None = None
     notes: str = ""
     metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_",
+        default_factory=dict,
+        validation_alias="metadata_",
     )
     created_by: str | None = None
     created_at: datetime
@@ -142,10 +143,7 @@ class ComplianceDocResponse(BaseModel):
     # Computed convenience field
     days_until_expiry: int = Field(
         default=0,
-        description=(
-            "Signed integer — negative when already expired, "
-            "0 on expiry day, positive when still valid."
-        ),
+        description=("Signed integer — negative when already expired, 0 on expiry day, positive when still valid."),
     )
 
 

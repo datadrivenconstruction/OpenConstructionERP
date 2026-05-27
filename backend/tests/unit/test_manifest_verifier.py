@@ -32,17 +32,20 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
 
 from app.modules.takeoff import manifest_verifier as mv
 
-
 # ── Helpers ───────────────────────────────────────────────────────────────
 
 
 def _new_keypair() -> tuple[Ed25519PrivateKey, str]:
     """Generate a private key + its hex-encoded public counterpart."""
     private = Ed25519PrivateKey.generate()
-    pub_hex = private.public_key().public_bytes(
-        encoding=serialization.Encoding.Raw,
-        format=serialization.PublicFormat.Raw,
-    ).hex()
+    pub_hex = (
+        private.public_key()
+        .public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+        .hex()
+    )
     return private, pub_hex
 
 
@@ -51,7 +54,8 @@ def _make_manifest_bytes(components: dict | None = None) -> bytes:
     doc = {
         "version": "2026-05-13",
         "signed_at": "2026-05-13T12:00:00Z",
-        "components": components or {
+        "components": components
+        or {
             "ddc_dwg_converter": {
                 "version": "1.4.2",
                 "platforms": {
@@ -85,7 +89,7 @@ class _FakeResp:
     def read(self, size: int = -1) -> bytes:
         return self._body.read(size)
 
-    def __enter__(self) -> "_FakeResp":
+    def __enter__(self) -> _FakeResp:
         return self
 
     def __exit__(self, *_exc: object) -> None:
@@ -210,36 +214,40 @@ def test_parse_rejects_missing_required_key() -> None:
 
 def test_parse_rejects_short_sha() -> None:
     """SHA-256 must be exactly 64 hex chars."""
-    bad = _make_manifest_bytes({
-        "x": {
-            "version": "1",
-            "platforms": {
-                "linux_x86_64": {
-                    "url": "https://raw.githubusercontent.com/x",
-                    "sha256": "abc",
-                    "size_bytes": 1,
+    bad = _make_manifest_bytes(
+        {
+            "x": {
+                "version": "1",
+                "platforms": {
+                    "linux_x86_64": {
+                        "url": "https://raw.githubusercontent.com/x",
+                        "sha256": "abc",
+                        "size_bytes": 1,
+                    },
                 },
             },
-        },
-    })
+        }
+    )
     with pytest.raises(mv.ManifestParseError, match="64 lowercase hex"):
         mv.parse_manifest(bad)
 
 
 def test_parse_rejects_uppercase_sha_via_validator() -> None:
     """SHAs in the manifest must already be lowercase hex."""
-    bad = _make_manifest_bytes({
-        "x": {
-            "version": "1",
-            "platforms": {
-                "linux_x86_64": {
-                    "url": "https://raw.githubusercontent.com/x",
-                    "sha256": "A" * 64,  # uppercase
-                    "size_bytes": 1,
+    bad = _make_manifest_bytes(
+        {
+            "x": {
+                "version": "1",
+                "platforms": {
+                    "linux_x86_64": {
+                        "url": "https://raw.githubusercontent.com/x",
+                        "sha256": "A" * 64,  # uppercase
+                        "size_bytes": 1,
+                    },
                 },
             },
-        },
-    })
+        }
+    )
     # The shape validator lowercases via ``.lower()`` before checking,
     # but our hex-character check runs on the lowered string — so the
     # offending case actually passes parse and only the
@@ -251,18 +259,20 @@ def test_parse_rejects_uppercase_sha_via_validator() -> None:
 
 def test_parse_rejects_non_hex_sha() -> None:
     """Non-hex characters in the SHA fail validation."""
-    bad = _make_manifest_bytes({
-        "x": {
-            "version": "1",
-            "platforms": {
-                "linux_x86_64": {
-                    "url": "https://x",
-                    "sha256": "z" * 64,
-                    "size_bytes": 1,
+    bad = _make_manifest_bytes(
+        {
+            "x": {
+                "version": "1",
+                "platforms": {
+                    "linux_x86_64": {
+                        "url": "https://x",
+                        "sha256": "z" * 64,
+                        "size_bytes": 1,
+                    },
                 },
             },
-        },
-    })
+        }
+    )
     with pytest.raises(mv.ManifestParseError, match="64 lowercase hex"):
         mv.parse_manifest(bad)
 
@@ -354,10 +364,13 @@ def test_fetch_manifest_verifies_and_parses(monkeypatch: pytest.MonkeyPatch) -> 
     sig = private.sign(body)
 
     manifest_url = "https://example.test/manifest.json"
-    _patch_urlopen(monkeypatch, {
-        manifest_url: body,
-        manifest_url + ".sig": sig,
-    })
+    _patch_urlopen(
+        monkeypatch,
+        {
+            manifest_url: body,
+            manifest_url + ".sig": sig,
+        },
+    )
 
     m = mv.fetch_manifest(url=manifest_url)
     assert m.version == "2026-05-13"
@@ -372,10 +385,13 @@ def test_fetch_manifest_rejects_bad_signature(monkeypatch: pytest.MonkeyPatch) -
     bogus_sig = b"\x00" * 64
 
     manifest_url = "https://example.test/manifest.json"
-    _patch_urlopen(monkeypatch, {
-        manifest_url: body,
-        manifest_url + ".sig": bogus_sig,
-    })
+    _patch_urlopen(
+        monkeypatch,
+        {
+            manifest_url: body,
+            manifest_url + ".sig": bogus_sig,
+        },
+    )
 
     with pytest.raises(mv.ManifestSignatureInvalid):
         mv.fetch_manifest(url=manifest_url)
@@ -390,6 +406,7 @@ def test_fetch_manifest_network_error_raises_fetch_error(
 
     def fail(*_a, **_kw):  # type: ignore[no-untyped-def]
         raise urllib.error.URLError("nope")
+
     monkeypatch.setattr(urllib.request, "urlopen", fail)
 
     with pytest.raises(mv.ManifestFetchError):
@@ -500,13 +517,27 @@ def test_public_exports() -> None:
     at runtime.
     """
     expected = {
-        "Manifest", "ComponentEntry", "PlatformEntry", "ResolvedInstall",
-        "ManifestError", "ManifestSignatureInvalid", "ManifestFetchError",
-        "ManifestParseError", "InstallNotSupported", "InstallSHAMismatch",
-        "fetch_manifest", "parse_manifest", "verify_signature",
-        "verify_downloaded_file", "sha256_of_file", "resolve_install",
-        "current_platform_key", "is_version_in_range",
+        "Manifest",
+        "ComponentEntry",
+        "PlatformEntry",
+        "ResolvedInstall",
+        "ManifestError",
+        "ManifestSignatureInvalid",
+        "ManifestFetchError",
+        "ManifestParseError",
+        "InstallNotSupported",
+        "InstallSHAMismatch",
+        "fetch_manifest",
+        "parse_manifest",
+        "verify_signature",
+        "verify_downloaded_file",
+        "sha256_of_file",
+        "resolve_install",
+        "current_platform_key",
+        "is_version_in_range",
         "maybe_warn_disabled",
-        "CURRENT_PUBKEY_HEX", "DEFAULT_MANIFEST_URL", "FALLBACK_MANIFEST_URL",
+        "CURRENT_PUBKEY_HEX",
+        "DEFAULT_MANIFEST_URL",
+        "FALLBACK_MANIFEST_URL",
     }
     assert expected.issubset(set(mv.__all__))

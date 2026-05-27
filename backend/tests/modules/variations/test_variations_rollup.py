@@ -72,10 +72,7 @@ class _Repo:
         limit: int = 50,
         status: str | None = None,
     ) -> tuple[list[Any], int]:
-        rows = [
-            r for r in self.rows.values()
-            if getattr(r, "project_id", None) == project_id
-        ]
+        rows = [r for r in self.rows.values() if getattr(r, "project_id", None) == project_id]
         if status is not None:
             rows = [r for r in rows if getattr(r, "status", None) == status]
         return rows[offset : offset + limit], len(rows)
@@ -89,29 +86,23 @@ class _Repo:
         return f"DW-{self._counter:04d}"
 
     async def list_for_sheet(self, sheet_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "sheet_id", None) == sheet_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "sheet_id", None) == sheet_id]
 
     async def list_for_order(self, vo_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "variation_order_id", None) == vo_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "variation_order_id", None) == vo_id]
 
     async def list_valued_for_project(self, project_id: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
-            if getattr(r, "project_id", None) == project_id
-            and getattr(r, "status", None) != "voided"
+            r
+            for r in self.rows.values()
+            if getattr(r, "project_id", None) == project_id and getattr(r, "status", None) != "voided"
         ]
 
     async def list_signed(self, project_id: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
-            if getattr(r, "project_id", None) == project_id
-            and getattr(r, "status", None) in {"signed", "billed"}
+            r
+            for r in self.rows.values()
+            if getattr(r, "project_id", None) == project_id and getattr(r, "status", None) in {"signed", "billed"}
         ]
 
     async def for_project(self, project_id: uuid.UUID) -> Any:
@@ -162,10 +153,7 @@ def test_compute_cost_impact_total_decimal_exact_no_float_drift() -> None:
 
 def test_compute_cost_impact_total_long_chain_no_drift() -> None:
     """Sum 1000 lines of 0.01 each — must be exactly 10.00."""
-    lines = [
-        SimpleNamespace(total=Decimal("0.01"), quantity=1, unit_rate=Decimal("0.01"))
-        for _ in range(1000)
-    ]
+    lines = [SimpleNamespace(total=Decimal("0.01"), quantity=1, unit_rate=Decimal("0.01")) for _ in range(1000)]
     assert compute_cost_impact_total(lines) == Decimal("10.00")
 
 
@@ -273,7 +261,8 @@ async def test_bulk_cost_impacts_rejects_oversized_payload() -> None:
     project_id = uuid.uuid4()
     with patch("app.modules.variations.service.event_bus.publish_detached"):
         vo = await svc.create_order(
-            VariationOrderCreate(project_id=project_id, title="vo"), user_id="u1",
+            VariationOrderCreate(project_id=project_id, title="vo"),
+            user_id="u1",
         )
     too_many = [
         VariationCostImpactCreate(
@@ -320,6 +309,7 @@ async def test_bulk_daywork_lines_rejects_oversized_payload() -> None:
 @pytest.mark.asyncio
 async def test_recompute_final_account_skips_mismatched_currency(caplog) -> None:
     import logging
+
     svc = _make_service()
     project_id = uuid.uuid4()
     # FA in EUR.
@@ -356,10 +346,7 @@ async def test_recompute_final_account_skips_mismatched_currency(caplog) -> None
     # Only the EUR VO should have contributed.
     assert fa is not None
     assert fa.variations_total == Decimal("50000")
-    assert any(
-        "currency_skip" in rec.message or "currency_skip" in (rec.name or "")
-        for rec in caplog.records
-    )
+    assert any("currency_skip" in rec.message or "currency_skip" in (rec.name or "") for rec in caplog.records)
 
 
 @pytest.mark.asyncio

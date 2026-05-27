@@ -74,18 +74,12 @@ def upgrade() -> None:
             sa.Column(
                 "project_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
                 nullable=True,
             ),
             sa.Column("tenant_id", sa.String(length=36), nullable=True),
-            sa.Column(
-                "graph", sa.JSON(), nullable=False, server_default="{}"
-            ),
-            sa.Column(
-                "policy", sa.JSON(), nullable=False, server_default="{}"
-            ),
+            sa.Column("graph", sa.JSON(), nullable=False, server_default="{}"),
+            sa.Column("policy", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column(
                 "is_published",
                 sa.Boolean(),
@@ -100,15 +94,9 @@ def upgrade() -> None:
             ),
             sa.Column("created_by", sa.String(length=36), nullable=True),
         )
-        op.create_index(
-            "ix_oe_pipeline_project", "oe_pipeline", ["project_id"]
-        )
-        op.create_index(
-            "ix_oe_pipeline_tenant", "oe_pipeline", ["tenant_id"]
-        )
-        op.create_index(
-            "ix_oe_pipeline_published", "oe_pipeline", ["is_published"]
-        )
+        op.create_index("ix_oe_pipeline_project", "oe_pipeline", ["project_id"])
+        op.create_index("ix_oe_pipeline_tenant", "oe_pipeline", ["tenant_id"])
+        op.create_index("ix_oe_pipeline_published", "oe_pipeline", ["is_published"])
 
     # ── 2. oe_pipeline_run ───────────────────────────────────────────
     if not _has_table(inspector, "oe_pipeline_run"):
@@ -129,9 +117,7 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="{}",
             ),
-            sa.Column(
-                "trigger", sa.JSON(), nullable=False, server_default="{}"
-            ),
+            sa.Column("trigger", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column("project_id", sa.String(length=36), nullable=True),
             sa.Column("tenant_id", sa.String(length=36), nullable=True),
             sa.Column("created_by", sa.String(length=36), nullable=True),
@@ -141,9 +127,7 @@ def upgrade() -> None:
             "oe_pipeline_run",
             ["pipeline_id"],
         )
-        op.create_index(
-            "ix_oe_pipeline_run_job", "oe_pipeline_run", ["job_run_id"]
-        )
+        op.create_index("ix_oe_pipeline_run_job", "oe_pipeline_run", ["job_run_id"])
         op.create_index(
             "ix_oe_pipeline_run_project",
             "oe_pipeline_run",
@@ -175,20 +159,12 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="pending",
             ),
-            sa.Column(
-                "inputs", sa.JSON(), nullable=False, server_default="{}"
-            ),
-            sa.Column(
-                "output", sa.JSON(), nullable=False, server_default="{}"
-            ),
+            sa.Column("inputs", sa.JSON(), nullable=False, server_default="{}"),
+            sa.Column("output", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column("error", sa.Text(), nullable=True),
             sa.Column("took_ms", sa.Integer(), nullable=True),
-            sa.Column(
-                "started_at", sa.DateTime(timezone=True), nullable=True
-            ),
-            sa.Column(
-                "finished_at", sa.DateTime(timezone=True), nullable=True
-            ),
+            sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
+            sa.Column("finished_at", sa.DateTime(timezone=True), nullable=True),
             sa.UniqueConstraint(
                 "run_id",
                 "node_id",

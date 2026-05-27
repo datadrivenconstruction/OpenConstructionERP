@@ -43,6 +43,7 @@ def _strip_html(value: str) -> str:
     stripped = _HTML_TAG_RE.sub("", value)
     return html.escape(stripped, quote=True)
 
+
 # ── KPI Snapshot schemas ─────────────────────────────────────────────────
 
 

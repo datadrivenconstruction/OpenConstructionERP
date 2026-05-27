@@ -101,9 +101,7 @@ def captured_events():
 async def test_create_package_emits_event(captured_events: list[Event]) -> None:
     svc = _make_service()
 
-    pkg = await svc.create_package(
-        PackageCreate(project_id=PROJECT_ID, name="Concrete works")
-    )
+    pkg = await svc.create_package(PackageCreate(project_id=PROJECT_ID, name="Concrete works"))
 
     matches = [e for e in captured_events if e.name == "tendering.package.created"]
     assert len(matches) == 1
@@ -117,9 +115,7 @@ async def test_create_package_emits_event(captured_events: list[Event]) -> None:
 @pytest.mark.asyncio
 async def test_update_package_emits_event(captured_events: list[Event]) -> None:
     svc = _make_service()
-    pkg = await svc.create_package(
-        PackageCreate(project_id=PROJECT_ID, name="Concrete works")
-    )
+    pkg = await svc.create_package(PackageCreate(project_id=PROJECT_ID, name="Concrete works"))
     captured_events.clear()
 
     await svc.update_package(pkg.id, PackageUpdate(name="Concrete works v2"))
@@ -134,14 +130,10 @@ async def test_update_package_emits_event(captured_events: list[Event]) -> None:
 @pytest.mark.asyncio
 async def test_create_bid_emits_event(captured_events: list[Event]) -> None:
     svc = _make_service()
-    pkg = await svc.create_package(
-        PackageCreate(project_id=PROJECT_ID, name="Concrete works")
-    )
+    pkg = await svc.create_package(PackageCreate(project_id=PROJECT_ID, name="Concrete works"))
     captured_events.clear()
 
-    bid = await svc.create_bid(
-        pkg.id, BidCreate(company_name="ACME GmbH", total_amount="100000")
-    )
+    bid = await svc.create_bid(pkg.id, BidCreate(company_name="ACME GmbH", total_amount="100000"))
 
     matches = [e for e in captured_events if e.name == "tendering.bid.created"]
     assert len(matches) == 1
@@ -155,12 +147,8 @@ async def test_create_bid_emits_event(captured_events: list[Event]) -> None:
 @pytest.mark.asyncio
 async def test_update_bid_emits_event(captured_events: list[Event]) -> None:
     svc = _make_service()
-    pkg = await svc.create_package(
-        PackageCreate(project_id=PROJECT_ID, name="Concrete works")
-    )
-    bid = await svc.create_bid(
-        pkg.id, BidCreate(company_name="ACME GmbH", total_amount="100000")
-    )
+    pkg = await svc.create_package(PackageCreate(project_id=PROJECT_ID, name="Concrete works"))
+    bid = await svc.create_bid(pkg.id, BidCreate(company_name="ACME GmbH", total_amount="100000"))
     captured_events.clear()
 
     await svc.update_bid(bid.id, BidUpdate(notes="revised"))

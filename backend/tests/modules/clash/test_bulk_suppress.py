@@ -40,8 +40,8 @@ from app.modules.clash.models import (
     ClashSuppression,
 )
 from app.modules.clash.service import (
-    _compute_signature_hash,
     ClashService,
+    _compute_signature_hash,
 )
 
 
@@ -121,8 +121,10 @@ def _make_run(project_id: uuid.UUID, name: str = "run") -> ClashRun:
 
 def _make_clash(run: ClashRun, *, a: str, b: str) -> ClashResult:
     sig, quality = _compute_signature_hash(
-        a_guid=a, b_guid=b,
-        centroid=(1.0, 2.0, 3.0), clash_type="hard",
+        a_guid=a,
+        b_guid=b,
+        centroid=(1.0, 2.0, 3.0),
+        clash_type="hard",
         grid_mm=run.spatial_grid_mm,
     )
     return ClashResult(
@@ -139,10 +141,15 @@ def _make_clash(run: ClashRun, *, a: str, b: str) -> ClashResult:
         a_model_id=uuid.uuid4(),
         b_model_id=uuid.uuid4(),
         clash_type="hard",
-        penetration_m=0.05, distance_m=0.0,
-        cx=1.0, cy=2.0, cz=3.0,
-        status="new", severity="medium",
-        signature=sig[:16], signature_hash=sig,
+        penetration_m=0.05,
+        distance_m=0.0,
+        cx=1.0,
+        cy=2.0,
+        cz=3.0,
+        status="new",
+        severity="medium",
+        signature=sig[:16],
+        signature_hash=sig,
         signature_quality=quality,
         tolerance_at_signature_time_mm=run.tolerance_m * 1000.0,
     )
@@ -187,9 +194,7 @@ async def test_bulk_suppress_empty_list_is_noop(session: AsyncSession) -> None:
         "skipped_count": 0,
     }
     # No suppression rows were created.
-    rows = (
-        (await session.execute(select(ClashSuppression))).scalars().all()
-    )
+    rows = (await session.execute(select(ClashSuppression))).scalars().all()
     assert rows == []
 
 
@@ -257,12 +262,8 @@ async def test_bulk_suppress_idempotent_updates_reason(
     issue, sig = await _seed_issue(session, project_id, a="A", b="B")
     svc = ClashService(session)
 
-    out1 = await svc.bulk_suppress(
-        project_id, [issue.id], "first reason", None
-    )
-    out2 = await svc.bulk_suppress(
-        project_id, [issue.id], "second reason", None
-    )
+    out1 = await svc.bulk_suppress(project_id, [issue.id], "first reason", None)
+    out2 = await svc.bulk_suppress(project_id, [issue.id], "second reason", None)
     assert out1["suppressed_count"] == 1
     assert out2["suppressed_count"] == 1
 
@@ -292,9 +293,7 @@ async def test_bulk_suppress_deduplicates_repeated_ids_in_input(
     issue, _sig = await _seed_issue(session, project_id, a="A", b="B")
     svc = ClashService(session)
 
-    out = await svc.bulk_suppress(
-        project_id, [issue.id, issue.id, issue.id], "x", None
-    )
+    out = await svc.bulk_suppress(project_id, [issue.id, issue.id, issue.id], "x", None)
     # The id is reported once, not three times.
     assert out["suppressed_ids"] == [issue.id]
     assert out["suppressed_count"] == 1
@@ -302,9 +301,7 @@ async def test_bulk_suppress_deduplicates_repeated_ids_in_input(
     # History on the underlying result row was appended exactly once.
     stmt = select(ClashResult).where(ClashResult.issue_id == issue.id)
     result = (await session.execute(stmt)).scalar_one()
-    suppression_entries = [
-        h for h in (result.history or []) if h.get("field") == "suppression"
-    ]
+    suppression_entries = [h for h in (result.history or []) if h.get("field") == "suppression"]
     assert len(suppression_entries) == 1
 
 
@@ -330,9 +327,7 @@ async def test_bulk_suppress_writes_audit_log_to_result_history(
 
     stmt = select(ClashResult).where(ClashResult.issue_id == issue.id)
     result = (await session.execute(stmt)).scalar_one()
-    entries = [
-        h for h in (result.history or []) if h.get("field") == "suppression"
-    ]
+    entries = [h for h in (result.history or []) if h.get("field") == "suppression"]
     assert len(entries) == 1
     e = entries[0]
     assert e["after"] == "ignored"
@@ -354,9 +349,7 @@ async def test_bulk_suppress_actor_recorded_as_system_when_no_user(
     await svc.bulk_suppress(project_id, [issue.id], "x", None)
     stmt = select(ClashResult).where(ClashResult.issue_id == issue.id)
     result = (await session.execute(stmt)).scalar_one()
-    e = next(
-        h for h in (result.history or []) if h.get("field") == "suppression"
-    )
+    e = next(h for h in (result.history or []) if h.get("field") == "suppression")
     assert e["actor"] == "system"
 
 
@@ -386,9 +379,7 @@ async def test_bulk_suppress_rollback_undoes_every_change(
     await session.commit()
     svc = ClashService(session)
 
-    out = await svc.bulk_suppress(
-        project_id, [issue_a_id, issue_b_id], "x", None
-    )
+    out = await svc.bulk_suppress(project_id, [issue_a_id, issue_b_id], "x", None)
     assert out["suppressed_count"] == 2
 
     # Caller decides to roll back (e.g. a downstream notify call exploded).
@@ -401,15 +392,7 @@ async def test_bulk_suppress_rollback_undoes_every_change(
     # Issue status reverted: re-fetch via SELECT (the in-memory instances
     # are expired by the rollback so ``session.refresh`` is unsafe here).
     issues_after = (
-        (
-            await session.execute(
-                select(ClashIssue).where(
-                    ClashIssue.id.in_([issue_a_id, issue_b_id])
-                )
-            )
-        )
-        .scalars()
-        .all()
+        (await session.execute(select(ClashIssue).where(ClashIssue.id.in_([issue_a_id, issue_b_id])))).scalars().all()
     )
     assert len(issues_after) == 2
     assert {i.status for i in issues_after}.isdisjoint({"ignored"})

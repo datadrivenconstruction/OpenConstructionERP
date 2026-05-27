@@ -10,8 +10,6 @@ from __future__ import annotations
 import json
 import struct
 
-import pytest
-
 from app.modules.geo_hub.coord_transforms import (
     ecef_to_enu,
     ecef_to_wgs84,
@@ -22,7 +20,6 @@ from app.modules.geo_hub.coord_transforms import (
     wgs84_to_web_mercator,
 )
 from app.modules.geo_hub.tile_pipeline import (
-    GLTFBuild,
     TileAABB,
     build_gltf_for_tile,
     build_tile_artifacts,
@@ -31,7 +28,6 @@ from app.modules.geo_hub.tile_pipeline import (
     partition_by_aabb,
     write_b3dm,
 )
-
 
 # ── Fixtures (pure data) ────────────────────────────────────────────────
 
@@ -142,9 +138,7 @@ class TestBuildGltf:
 
     def test_property_table_count_matches_features(self):
         build = build_gltf_for_tile(_elements(5))
-        tbl = build.gltf["extensions"]["EXT_structural_metadata"][
-            "propertyTables"
-        ][0]
+        tbl = build.gltf["extensions"]["EXT_structural_metadata"]["propertyTables"][0]
         assert tbl["count"] == 5
         assert len(tbl["properties"]["din276"]["values"]) == 5
 
@@ -160,7 +154,8 @@ class TestWriteB3dm:
     def test_b3dm_has_correct_magic(self):
         build = build_gltf_for_tile(_elements(2))
         blob = write_b3dm(
-            build.gltf, build.binary_blob,
+            build.gltf,
+            build.binary_blob,
             feature_table={"BATCH_LENGTH": build.feature_count},
         )
         assert blob[:4] == b"b3dm"
@@ -168,7 +163,8 @@ class TestWriteB3dm:
     def test_b3dm_header_byte_length_matches_blob(self):
         build = build_gltf_for_tile(_elements(2))
         blob = write_b3dm(
-            build.gltf, build.binary_blob,
+            build.gltf,
+            build.binary_blob,
             feature_table={"BATCH_LENGTH": build.feature_count},
         )
         # Header: [4 magic][4 version][4 byteLength]... — uint32 little-endian.
@@ -178,15 +174,14 @@ class TestWriteB3dm:
     def test_b3dm_payload_starts_8byte_aligned(self):
         build = build_gltf_for_tile(_elements(2))
         blob = write_b3dm(
-            build.gltf, build.binary_blob,
+            build.gltf,
+            build.binary_blob,
             feature_table={"BATCH_LENGTH": build.feature_count},
         )
         # Find the embedded glb. It starts with "glTF" magic.
         idx = blob.find(b"glTF")
         assert idx != -1
-        assert idx % 8 == 0, (
-            f"glb payload starts at byte {idx} which is not 8-byte aligned"
-        )
+        assert idx % 8 == 0, f"glb payload starts at byte {idx} which is not 8-byte aligned"
 
 
 # ── Stage 6: tileset.json ───────────────────────────────────────────────
@@ -233,12 +228,14 @@ class TestBuildTilesetJson:
         small = build_tileset_json(
             aabb_small,
             content_uri="x.b3dm",
-            anchor_lat=0, anchor_lon=0,
+            anchor_lat=0,
+            anchor_lon=0,
         )["geometricError"]
         large = build_tileset_json(
             aabb_large,
             content_uri="x.b3dm",
-            anchor_lat=0, anchor_lon=0,
+            anchor_lat=0,
+            anchor_lon=0,
         )["geometricError"]
         assert large >= small  # roughly
 
@@ -250,7 +247,9 @@ class TestBuildTileArtifacts:
     def test_round_trip(self):
         elems = _elements(3)
         tileset_json, b3dm_bytes, build = build_tile_artifacts(
-            elems, anchor_lat=52.52, anchor_lon=13.40,
+            elems,
+            anchor_lat=52.52,
+            anchor_lon=13.40,
         )
         # The tileset_json + b3dm shapes are spec-correct.
         assert tileset_json["asset"]["version"] == "1.1"
@@ -323,7 +322,10 @@ class TestRotateElement:
         pivot_x = 1000.5
         pivot_y = 500.5
         rotated = _rotate_element(
-            element, 180.0, pivot_x=pivot_x, pivot_y=pivot_y,
+            element,
+            180.0,
+            pivot_x=pivot_x,
+            pivot_y=pivot_y,
         )
         new_aabb = rotated["geometry"]["aabb"]
         # After a 180 rotation around the centroid, the box must overlap
@@ -362,5 +364,5 @@ class TestRotateElement:
         }
         rotated = _rotate_element(element, 0.0, pivot_x=2.0, pivot_y=3.0)
         new_aabb = rotated["geometry"]["aabb"]
-        for original, after in zip(element["geometry"]["aabb"], new_aabb):
+        for original, after in zip(element["geometry"]["aabb"], new_aabb, strict=False):
             assert abs(original - after) < 1e-9

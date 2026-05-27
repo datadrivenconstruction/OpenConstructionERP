@@ -25,11 +25,7 @@ from fastapi import FastAPI
 
 
 def _mounted_paths(app: FastAPI, prefix: str) -> list[str]:
-    return [
-        getattr(route, "path", "")
-        for route in app.routes
-        if getattr(route, "path", "").startswith(prefix)
-    ]
+    return [getattr(route, "path", "") for route in app.routes if getattr(route, "path", "").startswith(prefix)]
 
 
 def _load_real_module(module_name: str) -> FastAPI:
@@ -48,13 +44,12 @@ def test_bi_dashboards_mounted_on_kebab_case() -> None:
     app = _load_real_module("oe_bi_dashboards")
     paths = _mounted_paths(app, "/api/v1/bi-dashboards/")
     assert paths, (
-        "BI dashboards router must mount under /api/v1/bi-dashboards/* "
-        "(frontend api.ts uses this kebab-case prefix)."
+        "BI dashboards router must mount under /api/v1/bi-dashboards/* (frontend api.ts uses this kebab-case prefix)."
     )
     # Specifically the create endpoint that was failing for the user.
-    assert any(
-        p == "/api/v1/bi-dashboards/dashboards" for p in paths
-    ), f"Missing POST /api/v1/bi-dashboards/dashboards: {paths!r}"
+    assert any(p == "/api/v1/bi-dashboards/dashboards" for p in paths), (
+        f"Missing POST /api/v1/bi-dashboards/dashboards: {paths!r}"
+    )
 
 
 def test_bi_dashboards_legacy_underscore_mirror() -> None:
@@ -73,9 +68,9 @@ def test_hse_advanced_mounted_on_kebab_case() -> None:
     paths = _mounted_paths(app, "/api/v1/hse-advanced/")
     assert paths, paths
     # Investigations list endpoint added during the same fix.
-    assert any(
-        p == "/api/v1/hse-advanced/investigations/" for p in paths
-    ), f"Missing GET /api/v1/hse-advanced/investigations/: {paths!r}"
+    assert any(p == "/api/v1/hse-advanced/investigations/" for p in paths), (
+        f"Missing GET /api/v1/hse-advanced/investigations/: {paths!r}"
+    )
 
 
 def test_schedule_advanced_mounted_on_kebab_case() -> None:
@@ -86,6 +81,6 @@ def test_schedule_advanced_mounted_on_kebab_case() -> None:
     app = _load_real_module("oe_schedule_advanced")
     paths = _mounted_paths(app, "/api/v1/schedule-advanced/")
     assert paths, paths
-    assert any(
-        p == "/api/v1/schedule-advanced/master-schedules/" for p in paths
-    ), f"Missing POST /api/v1/schedule-advanced/master-schedules/: {paths!r}"
+    assert any(p == "/api/v1/schedule-advanced/master-schedules/" for p in paths), (
+        f"Missing POST /api/v1/schedule-advanced/master-schedules/: {paths!r}"
+    )

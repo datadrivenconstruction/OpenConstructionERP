@@ -86,9 +86,7 @@ def upgrade() -> None:
     # on SQLite still apply cleanly.
     dialect = bind.dialect.name
     if dialect != "sqlite":
-        existing_checks = {
-            cc["name"] for cc in inspector.get_check_constraints(_TABLE)
-        }
+        existing_checks = {cc["name"] for cc in inspector.get_check_constraints(_TABLE)}
         if _CHECK_CONSTRAINT not in existing_checks:
             op.create_check_constraint(
                 _CHECK_CONSTRAINT,
@@ -106,12 +104,12 @@ def downgrade() -> None:
 
     dialect = bind.dialect.name
     if dialect != "sqlite":
-        existing_checks = {
-            cc["name"] for cc in inspector.get_check_constraints(_TABLE)
-        }
+        existing_checks = {cc["name"] for cc in inspector.get_check_constraints(_TABLE)}
         if _CHECK_CONSTRAINT in existing_checks:
             op.drop_constraint(
-                _CHECK_CONSTRAINT, _TABLE, type_="check",
+                _CHECK_CONSTRAINT,
+                _TABLE,
+                type_="check",
             )
 
     if _has_column(inspector, _TABLE, _LAST_CHECK_COL):

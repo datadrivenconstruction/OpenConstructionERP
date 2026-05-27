@@ -63,17 +63,13 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
     return name in inspector.get_table_names()
 
 
-def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str
-) -> bool:
+def _has_column(inspector: sa.engine.reflection.Inspector, table: str, column: str) -> bool:
     if not _has_table(inspector, table):
         return False
     return any(c["name"] == column for c in inspector.get_columns(table))
 
 
-def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str
-) -> bool:
+def _has_index(inspector: sa.engine.reflection.Inspector, table: str, index: str) -> bool:
     if not _has_table(inspector, table):
         return False
     return any(ix["name"] == index for ix in inspector.get_indexes(table))

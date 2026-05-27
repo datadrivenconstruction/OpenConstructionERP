@@ -68,9 +68,7 @@ async def session():
     _register_models()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with factory() as s:
         yield s
     await engine.dispose()
@@ -107,9 +105,7 @@ async def _new_source(
     return src.id, secret
 
 
-async def _add_default_mappings(
-    svc: WebhookLeadsService, source_id: uuid.UUID
-) -> None:
+async def _add_default_mappings(svc: WebhookLeadsService, source_id: uuid.UUID) -> None:
     await svc.create_mapping(
         source_id,
         PayloadMappingCreate(
@@ -212,9 +208,7 @@ async def test_apikey_happy_path_creates_lead_and_log(session):
     await _add_default_mappings(svc, sid)
     src = await svc.get_source(sid)
 
-    body = json.dumps(
-        {"data": {"name": "Jane Doe", "email": "JANE@EXAMPLE.COM"}}
-    ).encode()
+    body = json.dumps({"data": {"name": "Jane Doe", "email": "JANE@EXAMPLE.COM"}}).encode()
     log, lead_id = await svc.ingest(
         source_slug=src.slug,
         raw_body=body,
@@ -334,9 +328,7 @@ async def test_jwt_auth(session):
 @pytest.mark.asyncio
 async def test_ip_allowlist_block_logged(session):
     svc = WebhookLeadsService(session)
-    sid, secret = await _new_source(
-        svc, auth_method="api_key", ip_allowlist=["10.0.0.1"]
-    )
+    sid, secret = await _new_source(svc, auth_method="api_key", ip_allowlist=["10.0.0.1"])
     await _add_default_mappings(svc, sid)
     src = await svc.get_source(sid)
 
@@ -358,9 +350,7 @@ async def test_ip_allowlist_block_logged(session):
 @pytest.mark.asyncio
 async def test_rate_limit_429_and_logged(session):
     svc = WebhookLeadsService(session)
-    sid, secret = await _new_source(
-        svc, auth_method="api_key", rate_limit=2
-    )
+    sid, secret = await _new_source(svc, auth_method="api_key", rate_limit=2)
     await _add_default_mappings(svc, sid)
     src = await svc.get_source(sid)
     body = json.dumps({"data": {"name": "RL"}}).encode()
@@ -384,9 +374,7 @@ async def test_rate_limit_429_and_logged(session):
     # 2 accepted + 1 rejected(429) = 3 audit rows.
     assert total == 3
     assert sum(1 for li in logs if li.status == "accepted") == 2
-    assert sum(
-        1 for li in logs if li.status == "rejected" and li.http_status == 429
-    ) == 1
+    assert sum(1 for li in logs if li.status == "rejected" and li.http_status == 429) == 1
 
 
 @pytest.mark.asyncio

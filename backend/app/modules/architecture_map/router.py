@@ -189,11 +189,7 @@ async def list_modules(
     result: list[dict[str, Any]] = []
     for mod in modules:
         mod_id = mod.get("id", "")
-        conn_count = sum(
-            1
-            for c in connections
-            if c.get("source") == mod_id or c.get("target") == mod_id
-        )
+        conn_count = sum(1 for c in connections if c.get("source") == mod_id or c.get("target") == mod_id)
         result.append({**mod, "connection_count": conn_count})
 
     return result
@@ -337,12 +333,7 @@ async def search_entities(
         "connections": matched_connections,
         "layers": matched_layers,
         "categories": matched_categories,
-        "total": (
-            len(matched_modules)
-            + len(matched_connections)
-            + len(matched_layers)
-            + len(matched_categories)
-        ),
+        "total": (len(matched_modules) + len(matched_connections) + len(matched_layers) + len(matched_categories)),
     }
 
 
@@ -386,9 +377,7 @@ async def get_stats(
         if tgt:
             connection_counts[tgt] = connection_counts.get(tgt, 0) + 1
 
-    most_connected = sorted(
-        connection_counts.items(), key=lambda x: x[1], reverse=True
-    )[:10]
+    most_connected = sorted(connection_counts.items(), key=lambda x: x[1], reverse=True)[:10]
 
     return {
         "total_modules": len(modules),
@@ -398,8 +387,6 @@ async def get_stats(
         "modules_by_layer": modules_by_layer,
         "modules_by_category": modules_by_category,
         "connections_by_type": connections_by_type,
-        "most_connected": [
-            {"module_id": mid, "connection_count": cnt} for mid, cnt in most_connected
-        ],
+        "most_connected": [{"module_id": mid, "connection_count": cnt} for mid, cnt in most_connected],
         "manifest_file_exists": _MANIFEST_PATH.exists(),
     }

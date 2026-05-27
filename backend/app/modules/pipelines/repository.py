@@ -45,9 +45,7 @@ class PipelineRepository:
         # Deterministic order: newest-touched first, then a stable id
         # tiebreak so two pipelines saved in the same second never swap
         # rows between requests.
-        stmt = stmt.order_by(
-            Pipeline.updated_at.desc(), Pipeline.id.desc()
-        )
+        stmt = stmt.order_by(Pipeline.updated_at.desc(), Pipeline.id.desc())
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def add(self, pipeline: Pipeline) -> Pipeline:
@@ -68,9 +66,7 @@ class PipelineRepository:
         await self.session.flush()
         return run
 
-    async def list_runs(
-        self, pipeline_id: uuid.UUID
-    ) -> list[PipelineRun]:
+    async def list_runs(self, pipeline_id: uuid.UUID) -> list[PipelineRun]:
         stmt = (
             select(PipelineRun)
             .where(PipelineRun.pipeline_id == pipeline_id)
@@ -80,9 +76,7 @@ class PipelineRepository:
 
     # ── PipelineNodeState ────────────────────────────────────────────────
 
-    async def list_node_states(
-        self, run_id: uuid.UUID
-    ) -> list[PipelineNodeState]:
+    async def list_node_states(self, run_id: uuid.UUID) -> list[PipelineNodeState]:
         stmt = (
             select(PipelineNodeState)
             .where(PipelineNodeState.run_id == run_id)

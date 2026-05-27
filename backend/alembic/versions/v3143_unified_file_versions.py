@@ -109,9 +109,7 @@ def _backfill_chain(
     uploaded_at_expr = (
         f"{source_table}.{uploaded_at_col}"
         if uploaded_at_col
-        else (
-            "datetime('now')" if dialect == "sqlite" else "now()"
-        )
+        else ("datetime('now')" if dialect == "sqlite" else "now()")
     )
     if uploaded_by_col:
         uploaded_by_expr = (
@@ -142,9 +140,7 @@ def _backfill_chain(
             )
         )
     else:
-        canonical_expr = (
-            f"COALESCE(NULLIF(TRIM({source_table}.{name_col}), ''), 'untitled')"
-        )
+        canonical_expr = f"COALESCE(NULLIF(TRIM({source_table}.{name_col}), ''), 'untitled')"
 
     # SQLite cannot cast a String UUID column to TEXT inside the SELECT
     # the same way Postgres can — but both store project_id as a String
@@ -245,9 +241,7 @@ def upgrade() -> None:
     bind = op.get_bind()
 
     # ── file_comment: add FK column (batch_alter_table for SQLite) ────
-    if _table_exists(bind, "oe_file_comment") and not _column_exists(
-        bind, "oe_file_comment", "file_version_id"
-    ):
+    if _table_exists(bind, "oe_file_comment") and not _column_exists(bind, "oe_file_comment", "file_version_id"):
         with op.batch_alter_table("oe_file_comment") as batch_op:
             batch_op.add_column(
                 sa.Column(
@@ -263,9 +257,7 @@ def upgrade() -> None:
             )
 
     # ── markups_markup: add FK column (batch_alter_table for SQLite) ──
-    if _table_exists(bind, "oe_markups_markup") and not _column_exists(
-        bind, "oe_markups_markup", "file_version_id"
-    ):
+    if _table_exists(bind, "oe_markups_markup") and not _column_exists(bind, "oe_markups_markup", "file_version_id"):
         with op.batch_alter_table("oe_markups_markup") as batch_op:
             batch_op.add_column(
                 sa.Column(

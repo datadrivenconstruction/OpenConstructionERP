@@ -241,7 +241,8 @@ class MeetingSeriesCreate(BaseModel):
     recurrence_rule: str = Field(..., min_length=5, max_length=200, pattern=_RRULE_PATTERN)
     # Optional ISO 8601 date; if provided, materialise occurrences up to it.
     materialize_until: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$",
+        default=None,
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
     )
 
 

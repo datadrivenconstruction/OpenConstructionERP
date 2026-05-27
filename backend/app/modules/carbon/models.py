@@ -114,13 +114,19 @@ class CarbonInventory(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="Baseline inventory")
     scope: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="cradle_to_gate", index=True,
+        String(40),
+        nullable=False,
+        default="cradle_to_gate",
+        index=True,
     )
     as_of_date: Mapped[str | None] = mapped_column(Date, nullable=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft", index=True)
 
     totals: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
@@ -190,11 +196,16 @@ class Scope1Entry(Base):
     fuel_type: Mapped[str] = mapped_column(String(40), nullable=False, default="diesel", index=True)
     litres_or_m3: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
     emission_factor_kg_co2e_per_unit: Mapped[str] = mapped_column(
-        Numeric(18, 6), nullable=False, default=0,
+        Numeric(18, 6),
+        nullable=False,
+        default=0,
     )
     total_co2e_kg: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
     source: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="manual", index=True,
+        String(40),
+        nullable=False,
+        default="manual",
+        index=True,
     )
     source_ref: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -225,14 +236,21 @@ class Scope2Entry(Base):
     period_start: Mapped[str] = mapped_column(Date, nullable=False)
     period_end: Mapped[str] = mapped_column(Date, nullable=False)
     energy_type: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="grid_electricity", index=True,
+        String(40),
+        nullable=False,
+        default="grid_electricity",
+        index=True,
     )
     kwh: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
     emission_factor_kg_co2e_per_kwh: Mapped[str] = mapped_column(
-        Numeric(18, 6), nullable=False, default=0,
+        Numeric(18, 6),
+        nullable=False,
+        default=0,
     )
     market_or_location: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="location",
+        String(16),
+        nullable=False,
+        default="location",
     )
     total_co2e_kg: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
     supplier_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -264,7 +282,10 @@ class Scope3Entry(Base):
     period_start: Mapped[str] = mapped_column(Date, nullable=False)
     period_end: Mapped[str] = mapped_column(Date, nullable=False)
     category: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="transport_upstream", index=True,
+        String(40),
+        nullable=False,
+        default="transport_upstream",
+        index=True,
     )
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     activity_data: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
@@ -297,14 +318,20 @@ class CarbonTarget(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     target_type: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="absolute", index=True,
+        String(40),
+        nullable=False,
+        default="absolute",
+        index=True,
     )
     baseline_value: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
     target_value: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
     baseline_year: Mapped[int] = mapped_column(nullable=False, default=2020)
     target_year: Mapped[int] = mapped_column(nullable=False, default=2030)
     scope_set: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="active", index=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -342,10 +369,16 @@ class SustainabilityReport(Base):
     period_start: Mapped[str] = mapped_column(Date, nullable=False)
     period_end: Mapped[str] = mapped_column(Date, nullable=False)
     framework: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="ghg_protocol", index=True,
+        String(40),
+        nullable=False,
+        default="ghg_protocol",
+        index=True,
     )
     totals: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     narrative: Mapped[str | None] = mapped_column(Text, nullable=True)
     generated_at: Mapped[str | None] = mapped_column(Date, nullable=True)
@@ -388,10 +421,14 @@ class GridEmissionFactor(Base):
     country_code: Mapped[str] = mapped_column(String(8), nullable=False)
     year: Mapped[int] = mapped_column(Integer, nullable=False)
     factor_kg_co2e_per_kwh: Mapped[str] = mapped_column(
-        Numeric(18, 6), nullable=False, default=0,
+        Numeric(18, 6),
+        nullable=False,
+        default=0,
     )
     method: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="location",
+        String(16),
+        nullable=False,
+        default="location",
     )
     source: Mapped[str] = mapped_column(String(64), nullable=False, default="")
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="")

@@ -50,9 +50,7 @@ async def _index_task(event: Event) -> None:
                 # Race: row was deleted between publish and handler.
                 await vector_delete_one(task_vector_adapter, str(task_id))
                 return
-            project_id = (
-                str(row.project_id) if row.project_id is not None else None
-            )
+            project_id = str(row.project_id) if row.project_id is not None else None
             await vector_index_one(
                 task_vector_adapter,
                 row,

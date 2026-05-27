@@ -11,6 +11,7 @@ Revision ID: v191_dwg_entity_groups
 Revises: v191_meetings_document_ids
 Create Date: 2026-04-17
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

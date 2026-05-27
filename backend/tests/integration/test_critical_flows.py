@@ -62,6 +62,7 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
     assert reg_resp.status_code == 201, f"Registration failed: {reg_resp.text}"
 
     from ._auth_helpers import promote_to_admin
+
     await promote_to_admin(email)
 
     import asyncio
@@ -99,9 +100,7 @@ async def shared_user_id(shared_auth: dict[str, str]) -> str:
 
 
 @pytest_asyncio.fixture(scope="module")
-async def shared_project_id(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> str:
+async def shared_project_id(shared_client: AsyncClient, shared_auth: dict[str, str]) -> str:
     """Module-scoped project for tests that need one."""
     resp = await shared_client.post(
         "/api/v1/projects/",
@@ -166,9 +165,7 @@ class TestHealthAndSystem:
             assert key in data, f"Missing section: {key}"
         assert data["api"]["status"] == "healthy"
 
-    async def test_system_modules_list(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_system_modules_list(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         resp = await client.get("/api/system/modules", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
@@ -183,9 +180,7 @@ class TestHealthAndSystem:
         assert data["license"] == "AGPL-3.0"
         assert "source_code" in data
 
-    async def test_validation_rules_list(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_validation_rules_list(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         resp = await client.get("/api/system/validation-rules", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
@@ -201,9 +196,7 @@ class TestHealthAndSystem:
 class TestContactsCRUD:
     """Full CRUD cycle for contacts."""
 
-    async def test_create_contact(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_create_contact(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         unique = uuid.uuid4().hex[:8]
         resp = await client.post(
             "/api/v1/contacts/",
@@ -223,9 +216,7 @@ class TestContactsCRUD:
         assert data["company_name"] == "Test GmbH"
         assert data["first_name"] == "Max"
 
-    async def test_list_contacts(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_list_contacts(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         resp = await client.get("/api/v1/contacts/", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
@@ -233,9 +224,7 @@ class TestContactsCRUD:
         assert "total" in data
         assert isinstance(data["items"], list)
 
-    async def test_create_and_get_contact(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_create_and_get_contact(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         unique = uuid.uuid4().hex[:8]
         # Create
         resp = await client.post(
@@ -253,16 +242,12 @@ class TestContactsCRUD:
         contact_id = resp.json()["id"]
 
         # Get
-        resp = await client.get(
-            f"/api/v1/contacts/{contact_id}", headers=auth_headers
-        )
+        resp = await client.get(f"/api/v1/contacts/{contact_id}", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["id"] == contact_id
         assert resp.json()["company_name"] == "Bauherr AG"
 
-    async def test_update_contact(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_update_contact(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         # Create
         resp = await client.post(
             "/api/v1/contacts/",
@@ -283,9 +268,7 @@ class TestContactsCRUD:
         assert resp.status_code == 200
         assert resp.json()["company_name"] == "Material Corp"
 
-    async def test_delete_contact(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_delete_contact(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         # Create
         resp = await client.post(
             "/api/v1/contacts/",
@@ -295,14 +278,10 @@ class TestContactsCRUD:
         contact_id = resp.json()["id"]
 
         # Delete (soft)
-        resp = await client.delete(
-            f"/api/v1/contacts/{contact_id}", headers=auth_headers
-        )
+        resp = await client.delete(f"/api/v1/contacts/{contact_id}", headers=auth_headers)
         assert resp.status_code == 204
 
-    async def test_search_contacts(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_search_contacts(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         # Create a contact with a unique name
         unique = uuid.uuid4().hex[:8]
         await client.post(
@@ -315,16 +294,12 @@ class TestContactsCRUD:
         )
 
         # Search for it
-        resp = await client.get(
-            f"/api/v1/contacts/search/?q=Searchable-{unique}", headers=auth_headers
-        )
+        resp = await client.get(f"/api/v1/contacts/search/?q=Searchable-{unique}", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert data["total"] >= 1
 
-    async def test_filter_by_contact_type(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_filter_by_contact_type(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         # Create contacts of different types
         for ct in ["client", "internal"]:
             await client.post(
@@ -336,16 +311,12 @@ class TestContactsCRUD:
                 headers=auth_headers,
             )
 
-        resp = await client.get(
-            "/api/v1/contacts/?contact_type=internal", headers=auth_headers
-        )
+        resp = await client.get("/api/v1/contacts/?contact_type=internal", headers=auth_headers)
         assert resp.status_code == 200
         for item in resp.json()["items"]:
             assert item["contact_type"] == "internal"
 
-    async def test_create_contact_invalid_type(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_create_contact_invalid_type(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         resp = await client.post(
             "/api/v1/contacts/",
             json={"contact_type": "invalid_type", "company_name": "Bad"},
@@ -353,13 +324,9 @@ class TestContactsCRUD:
         )
         assert resp.status_code == 422
 
-    async def test_get_nonexistent_contact(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_get_nonexistent_contact(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         fake_id = str(uuid.uuid4())
-        resp = await client.get(
-            f"/api/v1/contacts/{fake_id}", headers=auth_headers
-        )
+        resp = await client.get(f"/api/v1/contacts/{fake_id}", headers=auth_headers)
         assert resp.status_code in (404, 500)
 
 
@@ -377,9 +344,7 @@ class TestFinanceFlow:
     correctly as they use POST or the root GET path.
     """
 
-    async def test_list_invoices(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_list_invoices(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         resp = await client.get("/api/v1/finance/", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
@@ -464,9 +429,7 @@ class TestFinanceFlow:
         assert data["bac"] == "1000000"
         assert data["spi"] == "0.95"
 
-    async def test_create_invoice_invalid_direction(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_create_invoice_invalid_direction(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         fake_pid = str(uuid.uuid4())
         resp = await client.post(
             "/api/v1/finance/",
@@ -493,9 +456,7 @@ class TestFinanceFlow:
 class TestNotificationsFlow:
     """List notifications, mark read, count, auth checks."""
 
-    async def test_list_empty_notifications(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_list_empty_notifications(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         resp = await client.get("/api/v1/notifications", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
@@ -503,43 +464,27 @@ class TestNotificationsFlow:
         assert "total" in data
         assert "unread_count" in data
 
-    async def test_unread_count(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
-        resp = await client.get(
-            "/api/v1/notifications/unread-count/", headers=auth_headers
-        )
+    async def test_unread_count(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
+        resp = await client.get("/api/v1/notifications/unread-count/", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert "count" in data
         assert isinstance(data["count"], int)
 
-    async def test_mark_all_read(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
-        resp = await client.post(
-            "/api/v1/notifications/read-all/", headers=auth_headers
-        )
+    async def test_mark_all_read(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
+        resp = await client.post("/api/v1/notifications/read-all/", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert "marked_read" in data
 
-    async def test_mark_nonexistent_notification_read(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_mark_nonexistent_notification_read(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         fake_id = str(uuid.uuid4())
-        resp = await client.post(
-            f"/api/v1/notifications/{fake_id}/read", headers=auth_headers
-        )
+        resp = await client.post(f"/api/v1/notifications/{fake_id}/read", headers=auth_headers)
         assert resp.status_code == 404
 
-    async def test_delete_nonexistent_notification(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_delete_nonexistent_notification(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         fake_id = str(uuid.uuid4())
-        resp = await client.delete(
-            f"/api/v1/notifications/{fake_id}", headers=auth_headers
-        )
+        resp = await client.delete(f"/api/v1/notifications/{fake_id}", headers=auth_headers)
         assert resp.status_code == 404
 
     async def test_notifications_require_auth(self, client: AsyncClient) -> None:
@@ -614,9 +559,7 @@ class TestRFIFlow:
         assert resp.json()["status"] == "answered"
 
         # Close
-        resp = await client.post(
-            f"/api/v1/rfi/{rfi_id}/close/", headers=auth_headers
-        )
+        resp = await client.post(f"/api/v1/rfi/{rfi_id}/close/", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["status"] == "closed"
 
@@ -667,9 +610,7 @@ class TestRFIFlow:
         )
         rfi_id = resp.json()["id"]
 
-        resp = await client.get(
-            f"/api/v1/rfi/{rfi_id}", headers=auth_headers
-        )
+        resp = await client.get(f"/api/v1/rfi/{rfi_id}", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["id"] == rfi_id
 
@@ -724,14 +665,10 @@ class TestRFIFlow:
         )
         rfi_id = resp.json()["id"]
 
-        resp = await client.delete(
-            f"/api/v1/rfi/{rfi_id}", headers=auth_headers
-        )
+        resp = await client.delete(f"/api/v1/rfi/{rfi_id}", headers=auth_headers)
         assert resp.status_code == 204
 
-    async def test_create_rfi_missing_required(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_create_rfi_missing_required(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         resp = await client.post(
             "/api/v1/rfi/",
             json={"subject": "No project_id"},
@@ -815,9 +752,7 @@ class TestI18nFoundation:
         assert "items" in data
         assert "total" in data
 
-    async def test_create_exchange_rate(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_create_exchange_rate(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         # Use a random rare currency pair + unique date to avoid UNIQUE constraint
         # with seed data or previous test runs
         tag = uuid.uuid4().hex[:4].upper()[:3]
@@ -864,9 +799,7 @@ class TestI18nFoundation:
         data = resp.json()
         assert "items" in data
 
-    async def test_exchange_rate_filter_by_currency(
-        self, client: AsyncClient, auth_headers: dict[str, str]
-    ) -> None:
+    async def test_exchange_rate_filter_by_currency(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         # Create a rate with unique year to avoid constraint violations
         year = 2200 + uuid.uuid4().int % 700
         await client.post(
@@ -881,9 +814,7 @@ class TestI18nFoundation:
             headers=auth_headers,
         )
 
-        resp = await client.get(
-            "/api/v1/i18n_foundation/exchange-rates/?from_currency=GBP"
-        )
+        resp = await client.get("/api/v1/i18n_foundation/exchange-rates/?from_currency=GBP")
         assert resp.status_code == 200
         data = resp.json()
         for item in data["items"]:
@@ -916,9 +847,7 @@ class TestI18nLocales:
         data = resp.json()
         assert "app.name" in data
 
-    async def test_get_translations_invalid_locale(
-        self, client: AsyncClient
-    ) -> None:
+    async def test_get_translations_invalid_locale(self, client: AsyncClient) -> None:
         resp = await client.get("/api/v1/i18n/xx")
         # Should either fallback to English or return 404
         assert resp.status_code in (200, 404)

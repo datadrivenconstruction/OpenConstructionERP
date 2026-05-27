@@ -78,11 +78,10 @@ class ContractRepository(_CRUDBase):
         total = (await self.session.execute(count_stmt)).scalar_one()
 
         items = (
-            await self.session.execute(
-                stmt.order_by(Contract.created_at.desc())
-                .offset(offset).limit(limit)
-            )
-        ).scalars().all()
+            (await self.session.execute(stmt.order_by(Contract.created_at.desc()).offset(offset).limit(limit)))
+            .scalars()
+            .all()
+        )
         return list(items), total
 
     async def list_active_for_counterparty(
@@ -97,9 +96,7 @@ class ContractRepository(_CRUDBase):
         return list(result.scalars().all())
 
     async def get_by_code(self, code: str) -> Contract | None:
-        result = await self.session.execute(
-            select(Contract).where(Contract.code == code).limit(1)
-        )
+        result = await self.session.execute(select(Contract).where(Contract.code == code).limit(1))
         return result.scalar_one_or_none()
 
 
@@ -134,12 +131,15 @@ class ContractTypeConfigurationRepository(_CRUDBase):
         return list(result.scalars().all())
 
     async def get_by_type(
-        self, contract_type: str,
+        self,
+        contract_type: str,
     ) -> ContractTypeConfiguration | None:
         result = await self.session.execute(
-            select(ContractTypeConfiguration).where(
+            select(ContractTypeConfiguration)
+            .where(
                 ContractTypeConfiguration.contract_type == contract_type,
-            ).limit(1)
+            )
+            .limit(1)
         )
         return result.scalar_one_or_none()
 
@@ -148,7 +148,8 @@ class RetentionScheduleRepository(_CRUDBase):
     model = RetentionSchedule
 
     async def list_for_contract(
-        self, contract_id: uuid.UUID,
+        self,
+        contract_id: uuid.UUID,
     ) -> list[RetentionSchedule]:
         result = await self.session.execute(
             select(RetentionSchedule).where(
@@ -163,9 +164,11 @@ class FeeStructureRepository(_CRUDBase):
 
     async def get_for_contract(self, contract_id: uuid.UUID) -> FeeStructure | None:
         result = await self.session.execute(
-            select(FeeStructure).where(
+            select(FeeStructure)
+            .where(
                 FeeStructure.contract_id == contract_id,
-            ).limit(1)
+            )
+            .limit(1)
         )
         return result.scalar_one_or_none()
 
@@ -174,12 +177,15 @@ class GainshareConfigurationRepository(_CRUDBase):
     model = GainshareConfiguration
 
     async def get_for_contract(
-        self, contract_id: uuid.UUID,
+        self,
+        contract_id: uuid.UUID,
     ) -> GainshareConfiguration | None:
         result = await self.session.execute(
-            select(GainshareConfiguration).where(
+            select(GainshareConfiguration)
+            .where(
                 GainshareConfiguration.contract_id == contract_id,
-            ).limit(1)
+            )
+            .limit(1)
         )
         return result.scalar_one_or_none()
 
@@ -188,9 +194,7 @@ class LDClauseRepository(_CRUDBase):
     model = LDClause
 
     async def list_for_contract(self, contract_id: uuid.UUID) -> list[LDClause]:
-        result = await self.session.execute(
-            select(LDClause).where(LDClause.contract_id == contract_id)
-        )
+        result = await self.session.execute(select(LDClause).where(LDClause.contract_id == contract_id))
         return list(result.scalars().all())
 
 
@@ -213,18 +217,15 @@ class ProgressClaimRepository(_CRUDBase):
         total = (await self.session.execute(count_stmt)).scalar_one()
 
         items = (
-            await self.session.execute(
-                stmt.order_by(ProgressClaim.created_at.desc())
-                .offset(offset).limit(limit)
-            )
-        ).scalars().all()
+            (await self.session.execute(stmt.order_by(ProgressClaim.created_at.desc()).offset(offset).limit(limit)))
+            .scalars()
+            .all()
+        )
         return list(items), total
 
     async def next_claim_number(self, contract_id: uuid.UUID) -> str:
         result = await self.session.execute(
-            select(func.count())
-            .select_from(ProgressClaim)
-            .where(ProgressClaim.contract_id == contract_id)
+            select(func.count()).select_from(ProgressClaim).where(ProgressClaim.contract_id == contract_id)
         )
         count = result.scalar_one()
         return f"PC-{count + 1:04d}"
@@ -264,7 +265,8 @@ class ProgressClaimLineRepository(_CRUDBase):
     model = ProgressClaimLine
 
     async def list_for_claim(
-        self, claim_id: uuid.UUID,
+        self,
+        claim_id: uuid.UUID,
     ) -> list[ProgressClaimLine]:
         result = await self.session.execute(
             select(ProgressClaimLine).where(
@@ -274,7 +276,8 @@ class ProgressClaimLineRepository(_CRUDBase):
         return list(result.scalars().all())
 
     async def bulk_create(
-        self, lines: list[ProgressClaimLine],
+        self,
+        lines: list[ProgressClaimLine],
     ) -> list[ProgressClaimLine]:
         for line in lines:
             self.session.add(line)
@@ -282,7 +285,8 @@ class ProgressClaimLineRepository(_CRUDBase):
         return lines
 
     async def lines_with_status_for_contract(
-        self, contract_id: uuid.UUID,
+        self,
+        contract_id: uuid.UUID,
     ) -> list[tuple[ProgressClaimLine, str]]:
         """‌⁠‍All claim lines for a contract + their parent claim status.
 
@@ -306,8 +310,10 @@ class FinalAccountRepository(_CRUDBase):
 
     async def get_for_contract(self, contract_id: uuid.UUID) -> FinalAccount | None:
         result = await self.session.execute(
-            select(FinalAccount).where(
+            select(FinalAccount)
+            .where(
                 FinalAccount.contract_id == contract_id,
-            ).limit(1)
+            )
+            .limit(1)
         )
         return result.scalar_one_or_none()

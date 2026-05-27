@@ -60,11 +60,7 @@ async def _force_set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await session.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await session.commit()
 
 
@@ -110,7 +106,8 @@ async def _register_user(
 
 @pytest_asyncio.fixture(scope="module")
 async def admin_auth(
-    client: AsyncClient, request,
+    client: AsyncClient,
+    request,
 ) -> tuple[str, dict[str, str]]:
     """Admin caller (full RBAC).
 
@@ -121,7 +118,9 @@ async def admin_auth(
     """
     mod_tag = request.module.__name__.rsplit(".", 1)[-1][-12:]
     uid, _email, header = await _register_user(
-        client, role="admin", tag=f"adm-{mod_tag}",
+        client,
+        role="admin",
+        tag=f"adm-{mod_tag}",
     )
     return uid, header
 
@@ -148,12 +147,15 @@ async def project_id(
 # Exposed for tests that need a fresh, non-admin user to verify IDOR.
 @pytest_asyncio.fixture(scope="module")
 async def other_user_auth(
-    client: AsyncClient, request,
+    client: AsyncClient,
+    request,
 ) -> tuple[str, dict[str, str]]:
     """A second admin caller in a completely different project."""
     mod_tag = request.module.__name__.rsplit(".", 1)[-1][-12:]
     uid, _email, header = await _register_user(
-        client, role="admin", tag=f"oth-{mod_tag}",
+        client,
+        role="admin",
+        tag=f"oth-{mod_tag}",
     )
     return uid, header
 

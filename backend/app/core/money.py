@@ -166,9 +166,7 @@ class MoneyValue(BaseModel):
     def _validate_currency_code(cls, v: str) -> str:
         """‌⁠‍Ensure currency code is exactly 3 uppercase ASCII letters."""
         if not _CURRENCY_CODE_RE.match(v):
-            raise ValueError(
-                f"Currency code must be 3 uppercase letters, got {v!r}"
-            )
+            raise ValueError(f"Currency code must be 3 uppercase letters, got {v!r}")
         return v
 
     @field_validator("amount", "amount_base", "exchange_rate")
@@ -227,9 +225,7 @@ class MoneyValue(BaseModel):
         target_info = CURRENCIES.get(target_currency)
         decimals = target_info["decimals"] if target_info else 2
         quantum = Decimal(10) ** -decimals if decimals > 0 else Decimal("1")
-        converted = (self.to_decimal() * rate_dec).quantize(
-            quantum, rounding=ROUND_HALF_UP
-        )
+        converted = (self.to_decimal() * rate_dec).quantize(quantum, rounding=ROUND_HALF_UP)
         return MoneyValue(
             amount=str(converted),
             currency_code=target_currency,
@@ -307,8 +303,7 @@ def _assert_same_currency(a: MoneyValue, b: MoneyValue, op: str) -> None:
     """Raise ``ValueError`` if two MoneyValues have different currencies."""
     if a.currency_code != b.currency_code:
         raise ValueError(
-            f"Cannot {op} MoneyValue with currency {a.currency_code!r} "
-            f"and {b.currency_code!r}; convert first"
+            f"Cannot {op} MoneyValue with currency {a.currency_code!r} and {b.currency_code!r}; convert first"
         )
 
 
@@ -346,16 +341,10 @@ def money_columns(prefix: str = "amount") -> dict[str, Any]:
     """
     return {
         f"{prefix}": mapped_column(String(50), default="0", server_default="0"),
-        f"{prefix}_currency": mapped_column(
-            String(10), default="EUR", server_default="EUR"
-        ),
+        f"{prefix}_currency": mapped_column(String(10), default="EUR", server_default="EUR"),
         f"{prefix}_base": mapped_column(String(50), default="0", server_default="0"),
-        f"{prefix}_base_currency": mapped_column(
-            String(10), default="EUR", server_default="EUR"
-        ),
-        f"{prefix}_exchange_rate": mapped_column(
-            String(50), default="1", server_default="1"
-        ),
+        f"{prefix}_base_currency": mapped_column(String(10), default="EUR", server_default="EUR"),
+        f"{prefix}_exchange_rate": mapped_column(String(50), default="1", server_default="1"),
     }
 
 

@@ -91,7 +91,9 @@ async def create_session(
     await verify_project_access(spec.project_id, current_user_id, session)
     try:
         return await get_service().create_session(
-            session, spec, _u(current_user_id),
+            session,
+            spec,
+            _u(current_user_id),
         )
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc)) from exc
@@ -131,10 +133,7 @@ async def create_session_from_excel(
     if not filename.endswith(".xlsx"):
         raise HTTPException(
             status_code=400,
-            detail=(
-                "Only .xlsx files are supported. Save your BoQ as Excel "
-                "(not .xls / .csv) and re-upload."
-            ),
+            detail=("Only .xlsx files are supported. Save your BoQ as Excel (not .xls / .csv) and re-upload."),
         )
 
     content = await file.read()
@@ -167,7 +166,9 @@ async def create_session_from_excel(
 
     try:
         return await get_service().create_session(
-            session, spec, _u(current_user_id),
+            session,
+            spec,
+            _u(current_user_id),
         )
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc)) from exc
@@ -184,7 +185,8 @@ async def list_sessions(
     await verify_project_access(project_id, current_user_id, session)
     try:
         return await get_service().list_sessions(
-            session, project_id,
+            session,
+            project_id,
             include_archived=include_archived,
             limit=limit,
         )
@@ -302,7 +304,11 @@ async def list_groups(
     await _assert_session_access(session, session_id, current_user_id)
     try:
         return await get_service().list_groups(
-            session, session_id, status=status, limit=limit, offset=offset,
+            session,
+            session_id,
+            status=status,
+            limit=limit,
+            offset=offset,
         )
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc)) from exc
@@ -321,7 +327,9 @@ async def get_group(
     await _assert_session_access(session, session_id, current_user_id)
     try:
         return await get_service().get_group_detail(
-            session, session_id, group_key,
+            session,
+            session_id,
+            group_key,
         )
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc)) from exc
@@ -341,7 +349,10 @@ async def split_group(
     await _assert_session_access(session, session_id, current_user_id)
     try:
         return await get_service().split_group(
-            session, session_id, group_key, spec,
+            session,
+            session_id,
+            group_key,
+            spec,
         )
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc)) from exc
@@ -361,7 +372,10 @@ async def merge_groups(
     await _assert_session_access(session, session_id, current_user_id)
     try:
         return await get_service().merge_groups(
-            session, session_id, group_key, spec,
+            session,
+            session_id,
+            group_key,
+            spec,
         )
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc)) from exc
@@ -424,11 +438,7 @@ async def list_project_bim_models(
     await verify_project_access(project_id, current_user_id, session)
     from app.modules.bim_hub.models import BIMModel
 
-    stmt = (
-        select(BIMModel)
-        .where(BIMModel.project_id == project_id)
-        .order_by(BIMModel.created_at.desc())
-    )
+    stmt = select(BIMModel).where(BIMModel.project_id == project_id).order_by(BIMModel.created_at.desc())
     rows = (await session.execute(stmt)).scalars().all()
     out: list[schemas.BIMModelOption] = []
     for m in rows:
@@ -467,7 +477,8 @@ async def run_match(
 
 
 @router.post(
-    "/sessions/{session_id}/confirm", response_model=schemas.GroupDetail,
+    "/sessions/{session_id}/confirm",
+    response_model=schemas.GroupDetail,
 )
 async def confirm_match(
     session_id: uuid.UUID,
@@ -478,7 +489,10 @@ async def confirm_match(
     await _assert_session_access(session, session_id, current_user_id)
     try:
         return await get_service().confirm(
-            session, session_id, spec, _u(current_user_id),
+            session,
+            session_id,
+            spec,
+            _u(current_user_id),
         )
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc)) from exc
@@ -494,7 +508,10 @@ async def bulk_confirm(
     await _assert_session_access(session, session_id, current_user_id)
     try:
         n = await get_service().bulk_confirm(
-            session, session_id, spec, _u(current_user_id),
+            session,
+            session_id,
+            spec,
+            _u(current_user_id),
         )
         return {"confirmed_count": n}
     except NotImplementedError as exc:
@@ -502,7 +519,8 @@ async def bulk_confirm(
 
 
 @router.post(
-    "/sessions/{session_id}/apply", response_model=schemas.ApplyToBoqResponse,
+    "/sessions/{session_id}/apply",
+    response_model=schemas.ApplyToBoqResponse,
 )
 async def apply_to_boq(
     session_id: uuid.UUID,
@@ -513,14 +531,18 @@ async def apply_to_boq(
     await _assert_session_access(session, session_id, current_user_id)
     try:
         return await get_service().apply_to_boq(
-            session, session_id, spec, _u(current_user_id),
+            session,
+            session_id,
+            spec,
+            _u(current_user_id),
         )
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc)) from exc
 
 
 @router.post(
-    "/sessions/{session_id}/no-match", response_model=schemas.GroupDetail,
+    "/sessions/{session_id}/no-match",
+    response_model=schemas.GroupDetail,
 )
 async def no_match(
     session_id: uuid.UUID,
@@ -550,7 +572,8 @@ async def list_templates(
 
 
 @router.post(
-    "/templates/lookup", response_model=schemas.TemplateLookupResponse,
+    "/templates/lookup",
+    response_model=schemas.TemplateLookupResponse,
 )
 async def lookup_templates(
     spec: schemas.TemplateLookupRequest,
@@ -559,7 +582,9 @@ async def lookup_templates(
 ) -> schemas.TemplateLookupResponse:
     try:
         return await get_service().lookup_templates(
-            session, tenant_id=None, signatures=spec.signatures,
+            session,
+            tenant_id=None,
+            signatures=spec.signatures,
         )
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc)) from exc
@@ -625,7 +650,8 @@ async def run_pipeline_stage(
     await _assert_session_access(session, session_id, current_user_id)
     if stage_name not in pipeline.STAGE_NAMES:
         raise HTTPException(
-            status_code=404, detail=f"Unknown stage: {stage_name!r}",
+            status_code=404,
+            detail=f"Unknown stage: {stage_name!r}",
         )
     try:
         result = await pipeline.run_stage(
@@ -667,8 +693,7 @@ async def list_prompt_templates(
     except (ValueError, TypeError):
         uid = None
     stmt = select(MatchPromptTemplate).where(
-        (MatchPromptTemplate.is_system.is_(True))
-        | (MatchPromptTemplate.created_by == uid)
+        (MatchPromptTemplate.is_system.is_(True)) | (MatchPromptTemplate.created_by == uid)
     )
     if key:
         stmt = stmt.where(MatchPromptTemplate.key == key)
@@ -721,18 +746,11 @@ async def create_prompt_template(
     The ``key`` is validated against the known stage hooks so a typo
     can't orphan a prompt that no stage will ever resolve.
     """
-    valid_keys = {
-        m["prompt_key"]
-        for m in pipeline.STAGE_META.values()
-        if m["prompt_key"]
-    }
+    valid_keys = {m["prompt_key"] for m in pipeline.STAGE_META.values() if m["prompt_key"]}
     if spec.key not in valid_keys:
         raise HTTPException(
             status_code=400,
-            detail=(
-                f"Unknown prompt key {spec.key!r}. "
-                f"Valid keys: {sorted(valid_keys)}"
-            ),
+            detail=(f"Unknown prompt key {spec.key!r}. Valid keys: {sorted(valid_keys)}"),
         )
     try:
         uid: uuid.UUID | None = uuid.UUID(current_user_id)
@@ -814,7 +832,8 @@ async def delete_prompt_template(
         return
     if row.is_system:
         raise HTTPException(
-            status_code=403, detail="System prompts cannot be deleted",
+            status_code=403,
+            detail="System prompts cannot be deleted",
         )
     try:
         uid = uuid.UUID(current_user_id)

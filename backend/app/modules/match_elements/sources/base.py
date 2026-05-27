@@ -60,7 +60,8 @@ class SourceAdapter(Protocol):
     source_name: str  # 'bim' | 'dwg' | 'pdf' | 'photo'
 
     async def list_attribute_keys(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> list[str]:
         """Return all attributes available for group-by on this project.
 
@@ -71,7 +72,8 @@ class SourceAdapter(Protocol):
         ...
 
     async def list_categories(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> list[tuple[str, int]]:
         """Return ``[(category_name, element_count), ...]`` for the
         scope-filter chip-bar (include/exclude IfcCategory).

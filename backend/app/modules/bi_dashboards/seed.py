@@ -193,7 +193,8 @@ _DEFAULT_ALERTS: list[dict] = [
 
 
 async def _seed_kpi_definitions(
-    session: AsyncSession, service: BIDashboardsService,
+    session: AsyncSession,
+    service: BIDashboardsService,
 ) -> int:
     return await service.bootstrap_system_kpis()
 
@@ -260,7 +261,8 @@ async def _seed_reports(session: AsyncSession) -> list[ReportDefinition]:
 
 
 async def _seed_schedules(
-    session: AsyncSession, reports: list[ReportDefinition],
+    session: AsyncSession,
+    reports: list[ReportDefinition],
 ) -> list[ReportSchedule]:
     if not reports:
         return []
@@ -315,7 +317,8 @@ async def _seed_alerts(session: AsyncSession) -> list[AlertRule]:
     created: list[AlertRule] = []
     for spec in _DEFAULT_ALERTS:
         existing_q = select(AlertRule).where(
-            AlertRule.name == spec["name"], AlertRule.kpi_code == spec["kpi_code"],
+            AlertRule.name == spec["name"],
+            AlertRule.kpi_code == spec["kpi_code"],
         )
         if (await session.execute(existing_q)).scalar_one_or_none() is not None:
             continue

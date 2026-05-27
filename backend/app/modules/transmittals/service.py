@@ -207,9 +207,7 @@ class TransmittalService:
         transmittal_number_s = transmittal.transmittal_number
         subject_s = transmittal.subject
         recipient_user_ids = [
-            str(r.recipient_user_id)
-            for r in (transmittal.recipients or [])
-            if r.recipient_user_id is not None
+            str(r.recipient_user_id) for r in (transmittal.recipients or []) if r.recipient_user_id is not None
         ]
 
         prior_status = transmittal.status
@@ -342,9 +340,7 @@ class TransmittalService:
 
         project_id_s = str(transmittal.project_id)
         sender_user_id_s = str(transmittal.created_by) if transmittal.created_by else None
-        responder_user_id_s = (
-            str(recipient.recipient_user_id) if recipient.recipient_user_id else None
-        )
+        responder_user_id_s = str(recipient.recipient_user_id) if recipient.recipient_user_id else None
         transmittal_number_s = transmittal.transmittal_number
         subject_s = transmittal.subject
         response_summary = (response_text or "")[:200]

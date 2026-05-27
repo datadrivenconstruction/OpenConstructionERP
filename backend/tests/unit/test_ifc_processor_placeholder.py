@@ -28,7 +28,6 @@ from app.modules.bim_hub.ifc_processor import (
     process_ifc_file,
 )
 
-
 MINIMAL_IFC = """ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION(('ViewDefinition [CoordinationView]'),'2;1');
@@ -50,14 +49,14 @@ END-ISO-10303-21;
 """
 
 
-@pytest.fixture()
+@pytest.fixture
 def temp_dir():
     d = Path(tempfile.mkdtemp(prefix="bim_placeholder_test_"))
     yield d
     shutil.rmtree(d, ignore_errors=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def minimal_ifc_file(temp_dir):
     f = temp_dir / "test.ifc"
     f.write_text(MINIMAL_IFC, encoding="utf-8")

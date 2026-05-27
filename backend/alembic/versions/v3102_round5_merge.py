@@ -28,7 +28,6 @@ from __future__ import annotations
 
 from typing import Sequence, Union
 
-
 revision: str = "v3102_round5_merge"
 down_revision: Union[str, Sequence[str], None] = (
     "v3101_carbon",

@@ -27,7 +27,6 @@ from fastapi import HTTPException
 
 from app.modules.changeorders.service import ChangeOrderService
 
-
 # ── Stubs ───────────────────────────────────────────────────────────────────
 
 
@@ -96,7 +95,7 @@ class _StubSession:
             def scalar_one(self) -> Any:
                 return self._v
 
-            def scalars(self) -> "_ScalarOneOrNone":
+            def scalars(self) -> _ScalarOneOrNone:
                 return self
 
             def all(self) -> list[Any]:
@@ -290,25 +289,19 @@ async def test_three_step_chain_approves_advances_then_finalises(
     monkeypatch.setattr(service, "approve_order", _fake_approve_order)
 
     # Step 1: first approver approves.
-    row1 = await service.advance_approval(
-        order.id, str(approvers[0]), "approved", comments="ok"
-    )
+    row1 = await service.advance_approval(order.id, str(approvers[0]), "approved", comments="ok")
     assert row1.decision == "approved"
     assert order.current_approval_step == 2
     assert order.status == "submitted"
 
     # Step 2: second approver approves.
-    row2 = await service.advance_approval(
-        order.id, str(approvers[1]), "approved", comments="also ok"
-    )
+    row2 = await service.advance_approval(order.id, str(approvers[1]), "approved", comments="also ok")
     assert row2.decision == "approved"
     assert order.current_approval_step == 3
     assert order.status == "submitted"
 
     # Step 3: final approver approves → chain complete.
-    row3 = await service.advance_approval(
-        order.id, str(approvers[2]), "approved", comments="ship it"
-    )
+    row3 = await service.advance_approval(order.id, str(approvers[2]), "approved", comments="ship it")
     assert row3.decision == "approved"
     assert order.status == "approved"
     assert len(final_calls) == 1
@@ -358,9 +351,7 @@ async def test_reject_at_step_2_short_circuits_chain() -> None:
     step_1.decision = "approved"
     step_1.decided_at = datetime.now(UTC)
 
-    row = await service.advance_approval(
-        order.id, str(approvers[1]), "rejected", comments="scope creep"
-    )
+    row = await service.advance_approval(order.id, str(approvers[1]), "rejected", comments="scope creep")
     assert row.decision == "rejected"
     assert order.status == "rejected"
     assert order.current_approval_step is None

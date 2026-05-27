@@ -60,7 +60,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -154,11 +156,15 @@ async def _create_preset(
 
 @pytest.mark.asyncio
 async def test_sync_check_empty_preset_returns_synced(
-    client: AsyncClient, user_a: uuid.UUID, project_id: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> None:
     _set_acting_user(user_a)
     preset = await _create_preset(
-        client, project_id=project_id, config_json={},
+        client,
+        project_id=project_id,
+        config_json={},
     )
 
     resp = await client.post(
@@ -175,12 +181,16 @@ async def test_sync_check_empty_preset_returns_synced(
 
 @pytest.mark.asyncio
 async def test_sync_check_persists_status_and_timestamp(
-    client: AsyncClient, user_a: uuid.UUID, project_id: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> None:
     """After sync-check the preset row carries last_sync_check_at."""
     _set_acting_user(user_a)
     preset = await _create_preset(
-        client, project_id=project_id, config_json={},
+        client,
+        project_id=project_id,
+        config_json={},
     )
 
     # Initial state — no last_sync_check_at.
@@ -205,7 +215,9 @@ async def test_sync_check_persists_status_and_timestamp(
 
 @pytest.mark.asyncio
 async def test_sync_check_flags_dropped_column(
-    client: AsyncClient, user_a: uuid.UUID, project_id: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> None:
     """A preset that references a column the (empty) snapshot doesn't
     have should report it as dropped, status=needs_review."""
@@ -232,7 +244,9 @@ async def test_sync_check_flags_dropped_column(
 
 @pytest.mark.asyncio
 async def test_sync_heal_returns_patched_preset(
-    client: AsyncClient, user_a: uuid.UUID, project_id: uuid.UUID,
+    client: AsyncClient,
+    user_a: uuid.UUID,
+    project_id: uuid.UUID,
 ) -> None:
     """Heal endpoint returns both the patched preset and the report."""
     _set_acting_user(user_a)
@@ -268,7 +282,9 @@ async def test_sync_check_non_owner_404s(
     tenant = "shared-tenant"
     _set_acting_user(user_a, tenant_id=tenant)
     preset = await _create_preset(
-        client, project_id=project_id, config_json={},
+        client,
+        project_id=project_id,
+        config_json={},
     )
 
     _set_acting_user(user_b, tenant_id=tenant)
@@ -318,7 +334,9 @@ async def test_sync_check_isolated_across_tenants(
     """User in tenant A cannot see / sync-check a preset from tenant B."""
     _set_acting_user(user_a, tenant_id="tenant-a")
     preset = await _create_preset(
-        client, project_id=project_id, config_json={},
+        client,
+        project_id=project_id,
+        config_json={},
     )
 
     _set_acting_user(user_b, tenant_id="tenant-b")

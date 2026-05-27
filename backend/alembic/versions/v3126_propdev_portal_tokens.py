@@ -64,7 +64,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -75,11 +77,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36)
-        if is_sqlite
-        else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     if not _has_table(inspector, _TABLE):
         op.create_table(
@@ -100,30 +98,22 @@ def upgrade() -> None:
             sa.Column(
                 "buyer_id",
                 guid_type,
-                sa.ForeignKey(
-                    "oe_property_dev_buyer.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_property_dev_buyer.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column(
                 "reservation_id",
                 guid_type,
-                sa.ForeignKey(
-                    "oe_property_dev_reservation.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_property_dev_reservation.id", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column(
                 "sales_contract_id",
                 guid_type,
-                sa.ForeignKey(
-                    "oe_property_dev_sales_contract.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_property_dev_sales_contract.id", ondelete="SET NULL"),
                 nullable=True,
             ),
-            sa.Column(
-                "jwt_id", sa.String(64), nullable=False, server_default=""
-            ),
+            sa.Column("jwt_id", sa.String(64), nullable=False, server_default=""),
             sa.Column(
                 "issued_at",
                 sa.DateTime(timezone=True),

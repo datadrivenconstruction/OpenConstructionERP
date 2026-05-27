@@ -101,7 +101,8 @@ class ComplianceDSLService:
             return parse_definition(definition)
         except DSLError as exc:
             raise ComplianceValidationError(
-                str(exc), details={"path": exc.path, **exc.details},
+                str(exc),
+                details={"path": exc.path, **exc.details},
             ) from exc
 
     # -- compile + persist -------------------------------------------------
@@ -114,7 +115,8 @@ class ComplianceDSLService:
         definition = self.parse_or_raise(args.definition_yaml)
 
         existing = await self.repo.get_by_rule_id(
-            definition.rule_id, tenant_id=args.tenant_id,
+            definition.rule_id,
+            tenant_id=args.tenant_id,
         )
         if existing is not None:
             raise ComplianceConflictError(
@@ -154,7 +156,10 @@ class ComplianceDSLService:
     # -- read / list -------------------------------------------------------
 
     async def get(
-        self, rule_pk: uuid.UUID, *, tenant_id: str | None,
+        self,
+        rule_pk: uuid.UUID,
+        *,
+        tenant_id: str | None,
     ) -> ComplianceDSLRule:
         row = await self.repo.get_by_pk(rule_pk, tenant_id=tenant_id)
         if row is None:
@@ -253,11 +258,13 @@ async def register_active_rules(repo: ComplianceDSLRepository) -> int:
             )
         except Exception:  # pragma: no cover — defensive
             logger.exception(
-                "Failed to compile compliance DSL rule %s", row.rule_id,
+                "Failed to compile compliance DSL rule %s",
+                row.rule_id,
             )
     if registered:
         logger.info(
-            "Registered %d compliance DSL rules from database", registered,
+            "Registered %d compliance DSL rules from database",
+            registered,
         )
     return registered
 

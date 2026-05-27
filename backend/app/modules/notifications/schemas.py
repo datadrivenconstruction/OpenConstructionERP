@@ -121,16 +121,22 @@ class NotificationResponse(BaseModel):
 
         if not self.title_default:
             object.__setattr__(
-                self, "title_default", render_template(resolved_title_key, ctx),
+                self,
+                "title_default",
+                render_template(resolved_title_key, ctx),
             )
         if not self.body_default and resolved_body_key:
             object.__setattr__(
-                self, "body_default", render_template(resolved_body_key, ctx),
+                self,
+                "body_default",
+                render_template(resolved_body_key, ctx),
             )
         # Always compute icon_category — the stored notification_type is
         # the source of truth and the model never persists icon_category.
         object.__setattr__(
-            self, "icon_category", icon_category_for(self.notification_type),
+            self,
+            "icon_category",
+            icon_category_for(self.notification_type),
         )
         # Surface the canonical key to the frontend so the i18n call
         # uses the new convention even for legacy rows.
@@ -247,7 +253,10 @@ class WebhookTargetUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=120)
     url: str | None = Field(
-        default=None, min_length=8, max_length=2048, pattern=r"^https?://.+",
+        default=None,
+        min_length=8,
+        max_length=2048,
+        pattern=r"^https?://.+",
     )
     event_filter: str | None = Field(default=None, max_length=1024)
     secret: str | None = Field(default=None, max_length=255)

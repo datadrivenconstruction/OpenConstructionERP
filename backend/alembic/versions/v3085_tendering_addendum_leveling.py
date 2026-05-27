@@ -35,7 +35,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "v3085_tendering_addendum_leveling"
 down_revision: Union[str, Sequence[str], None] = "v3083_merge_v311_heads"
@@ -59,7 +58,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -67,7 +68,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -158,12 +161,8 @@ def upgrade() -> None:
 
     # ── 2. Add leveling columns to the bid table ─────────────────────────
     if _has_table(inspector, _BID_TABLE):
-        needs_leveled_amount = not _has_column(
-            inspector, _BID_TABLE, "leveled_amount"
-        )
-        needs_leveling_notes = not _has_column(
-            inspector, _BID_TABLE, "leveling_notes"
-        )
+        needs_leveled_amount = not _has_column(inspector, _BID_TABLE, "leveled_amount")
+        needs_leveling_notes = not _has_column(inspector, _BID_TABLE, "leveling_notes")
         if needs_leveled_amount or needs_leveling_notes:
             with op.batch_alter_table(_BID_TABLE) as batch:
                 if needs_leveled_amount:

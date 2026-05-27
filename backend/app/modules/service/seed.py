@@ -51,13 +51,24 @@ _CUSTOMER_NAMES: list[str] = [
 ]
 
 _ASSET_TYPES: list[str] = [
-    "boiler", "chiller", "ahu", "fan_coil", "lift",
-    "generator", "ups", "fire_panel", "bms_controller", "heat_pump",
+    "boiler",
+    "chiller",
+    "ahu",
+    "fan_coil",
+    "lift",
+    "generator",
+    "ups",
+    "fire_panel",
+    "bms_controller",
+    "heat_pump",
 ]
 
 _ROOT_CAUSE_CATEGORIES: list[str] = [
-    "wear_and_tear", "operator_error", "design_flaw",
-    "environmental", "consumable_depleted",
+    "wear_and_tear",
+    "operator_error",
+    "design_flaw",
+    "environmental",
+    "consumable_depleted",
 ]
 
 
@@ -123,9 +134,9 @@ async def seed_service_demo(session: AsyncSession) -> dict[str, int]:
     # ── SLA definitions ──────────────────────────────────────────────────
     slas: list[SLADefinition] = []
     for tier, response, resolution in (
-        ("gold", 60, 240),       # 1h response / 4h resolution
-        ("silver", 240, 1440),   # 4h / 24h
-        ("bronze", 480, 4320),   # 8h / 72h
+        ("gold", 60, 240),  # 1h response / 4h resolution
+        ("silver", 240, 1440),  # 4h / 24h
+        ("bronze", 480, 4320),  # 8h / 72h
     ):
         sla = SLADefinition(
             name=tier,
@@ -134,9 +145,9 @@ async def seed_service_demo(session: AsyncSession) -> dict[str, int]:
             resolution_time_minutes=resolution,
             severity_levels={
                 "critical": {"response_time_minutes": max(15, response // 4)},
-                "high":     {"response_time_minutes": max(30, response // 2)},
-                "med":      {"response_time_minutes": response},
-                "low":      {"response_time_minutes": response * 2},
+                "high": {"response_time_minutes": max(30, response // 2)},
+                "med": {"response_time_minutes": response},
+                "low": {"response_time_minutes": response * 2},
             },
         )
         session.add(sla)
@@ -221,7 +232,8 @@ async def seed_service_demo(session: AsyncSession) -> dict[str, int]:
         reported_at = now - timedelta(hours=rng.randint(0, 72))
         sla = slas[0] if contract.sla_definition_id == slas[0].id else slas[1]
         sla_minutes = sla.severity_levels.get(priority, {}).get(
-            "response_time_minutes", sla.response_time_minutes,
+            "response_time_minutes",
+            sla.response_time_minutes,
         )
         sla_due = reported_at + timedelta(minutes=sla_minutes)
         ticket = ServiceTicket(
@@ -288,30 +300,34 @@ async def seed_service_demo(session: AsyncSession) -> dict[str, int]:
         labor_rate = Decimal(rng.choice([45, 60, 75, 90]))
         labor_total = (labor_qty * labor_rate).quantize(Decimal("0.01"))
         items_total += labor_total
-        session.add(ServiceWorkOrderItem(
-            work_order_id=wo.id,
-            item_type="labor",
-            description="On-site service",
-            quantity=labor_qty,
-            unit="h",
-            unit_rate=labor_rate,
-            total=labor_total,
-        ))
+        session.add(
+            ServiceWorkOrderItem(
+                work_order_id=wo.id,
+                item_type="labor",
+                description="On-site service",
+                quantity=labor_qty,
+                unit="h",
+                unit_rate=labor_rate,
+                total=labor_total,
+            )
+        )
         counters["work_order_items"] += 1
         if rng.random() < 0.7:
             mat_qty = Decimal(1)
             mat_rate = Decimal(rng.randint(20, 400))
             mat_total = (mat_qty * mat_rate).quantize(Decimal("0.01"))
             items_total += mat_total
-            session.add(ServiceWorkOrderItem(
-                work_order_id=wo.id,
-                item_type="material",
-                description="Replacement part",
-                quantity=mat_qty,
-                unit="pcs",
-                unit_rate=mat_rate,
-                total=mat_total,
-            ))
+            session.add(
+                ServiceWorkOrderItem(
+                    work_order_id=wo.id,
+                    item_type="material",
+                    description="Replacement part",
+                    quantity=mat_qty,
+                    unit="pcs",
+                    unit_rate=mat_rate,
+                    total=mat_total,
+                )
+            )
             counters["work_order_items"] += 1
 
         # Patch the WO total via the loaded object (no extra UPDATE needed
@@ -319,14 +335,16 @@ async def seed_service_demo(session: AsyncSession) -> dict[str, int]:
         wo.billed_amount = items_total
 
         # Debrief
-        session.add(DebriefReport(
-            work_order_id=wo.id,
-            problem="Equipment alarm raised.",
-            cause="Worn consumable.",
-            solution="Replaced consumable and tested.",
-            root_cause_category=_ROOT_CAUSE_CATEGORIES[rng.randrange(len(_ROOT_CAUSE_CATEGORIES))],
-            follow_up_required=(rng.random() < 0.1),
-        ))
+        session.add(
+            DebriefReport(
+                work_order_id=wo.id,
+                problem="Equipment alarm raised.",
+                cause="Worn consumable.",
+                solution="Replaced consumable and tested.",
+                root_cause_category=_ROOT_CAUSE_CATEGORIES[rng.randrange(len(_ROOT_CAUSE_CATEGORIES))],
+                follow_up_required=(rng.random() < 0.1),
+            )
+        )
         counters["debriefs"] += 1
 
     await session.flush()

@@ -24,7 +24,9 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_delete_tileset_calls_storage_delete_prefix(
-    http_client, tenant_a, monkeypatch,
+    http_client,
+    tenant_a,
+    monkeypatch,
 ):
     """Deleting a tileset must sweep the per-tileset storage prefix."""
     # Create a tileset row directly via the API.
@@ -59,7 +61,9 @@ async def test_delete_tileset_calls_storage_delete_prefix(
     from app.core import storage as storage_mod
 
     monkeypatch.setattr(
-        storage_mod, "get_storage_backend", lambda: _FakeBackend(),
+        storage_mod,
+        "get_storage_backend",
+        lambda: _FakeBackend(),
     )
 
     # DELETE -> 204.
@@ -83,7 +87,9 @@ async def test_delete_tileset_calls_storage_delete_prefix(
 
 @pytest.mark.asyncio
 async def test_delete_tileset_continues_when_storage_fails(
-    http_client, tenant_a, monkeypatch,
+    http_client,
+    tenant_a,
+    monkeypatch,
 ):
     """A storage backend that throws must not block the DB delete."""
     res = await http_client.post(
@@ -109,7 +115,9 @@ async def test_delete_tileset_continues_when_storage_fails(
     from app.core import storage as storage_mod
 
     monkeypatch.setattr(
-        storage_mod, "get_storage_backend", lambda: _BrokenBackend(),
+        storage_mod,
+        "get_storage_backend",
+        lambda: _BrokenBackend(),
     )
 
     res = await http_client.delete(
@@ -121,7 +129,9 @@ async def test_delete_tileset_continues_when_storage_fails(
 
 @pytest.mark.asyncio
 async def test_sweep_deleted_raster_overlays_removes_old_rows(
-    app_instance, tenant_a, monkeypatch,
+    app_instance,
+    tenant_a,
+    monkeypatch,
 ):
     """Soft-deleted raster overlays older than the grace window are purged."""
     from app.database import async_session_factory
@@ -166,7 +176,9 @@ async def test_sweep_deleted_raster_overlays_removes_old_rows(
     from app.core import storage as storage_mod
 
     monkeypatch.setattr(
-        storage_mod, "get_storage_backend", lambda: _CapturingBackend(),
+        storage_mod,
+        "get_storage_backend",
+        lambda: _CapturingBackend(),
     )
 
     async with async_session_factory() as s:
@@ -202,7 +214,8 @@ async def test_sweep_rejects_negative_grace_window(app_instance):
 
 @pytest.mark.asyncio
 async def test_tileset_repository_filters_by_development_id_in_sql(
-    app_instance, tenant_a,
+    app_instance,
+    tenant_a,
 ):
     """``list_for_project(development_id=...)`` must filter in SQL.
 
@@ -263,7 +276,9 @@ async def test_tileset_repository_filters_by_development_id_in_sql(
 
     async with async_session_factory() as s:
         rows = await TilesetRepository(s).list_for_project(
-            project_id, limit=50, development_id=str(dev_id),
+            project_id,
+            limit=50,
+            development_id=str(dev_id),
         )
 
     names = sorted(r.name for r in rows)
@@ -272,7 +287,8 @@ async def test_tileset_repository_filters_by_development_id_in_sql(
 
 @pytest.mark.asyncio
 async def test_accuracy_m_upper_bound_rejects_huge_values(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     """Schema rejects accuracy_m > 10 km (Decimal upper bound)."""
     res = await http_client.post(
@@ -290,7 +306,8 @@ async def test_accuracy_m_upper_bound_rejects_huge_values(
 
 @pytest.mark.asyncio
 async def test_lat_lon_clamp_rejected_at_schema_layer(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     """Out-of-range lat/lon must 422 rather than silently clamp.
 

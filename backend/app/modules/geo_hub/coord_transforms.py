@@ -28,15 +28,16 @@ import math
 from typing import Iterable
 
 # WGS84 ellipsoid constants.
-_A = 6_378_137.0           # semi-major axis in metres
+_A = 6_378_137.0  # semi-major axis in metres
 _F = 1.0 / 298.257_223_563  # flattening
-_B = _A * (1.0 - _F)       # semi-minor axis in metres
+_B = _A * (1.0 - _F)  # semi-minor axis in metres
 _E2 = 1.0 - (_B / _A) ** 2  # eccentricity squared
 
 
 def _has_pyproj() -> bool:
     try:  # pragma: no cover — depends on installer
         import pyproj  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -46,7 +47,9 @@ def _has_pyproj() -> bool:
 
 
 def wgs84_to_ecef(
-    lat_deg: float, lon_deg: float, alt_m: float = 0.0,
+    lat_deg: float,
+    lon_deg: float,
+    alt_m: float = 0.0,
 ) -> tuple[float, float, float]:
     """Convert WGS84 (lat, lon, alt) -> ECEF (X, Y, Z) in metres.
 
@@ -65,7 +68,9 @@ def wgs84_to_ecef(
 
 
 def ecef_to_wgs84(
-    x: float, y: float, z: float,
+    x: float,
+    y: float,
+    z: float,
 ) -> tuple[float, float, float]:
     """ECEF (m) -> WGS84 (lat_deg, lon_deg, alt_m) — Bowring's method.
 
@@ -100,21 +105,14 @@ def wgs84_to_web_mercator(lat_deg: float, lon_deg: float) -> tuple[float, float]
     """WGS84 (lat, lon) -> EPSG 3857 (x, y) in metres."""
     lat = max(-_MERC_LAT_CLAMP, min(_MERC_LAT_CLAMP, lat_deg))
     x = lon_deg * _ORIGIN_SHIFT / 180.0
-    y = (
-        math.log(math.tan((90.0 + lat) * math.pi / 360.0))
-        * _ORIGIN_SHIFT
-        / math.pi
-    )
+    y = math.log(math.tan((90.0 + lat) * math.pi / 360.0)) * _ORIGIN_SHIFT / math.pi
     return x, y
 
 
 def web_mercator_to_wgs84(x: float, y: float) -> tuple[float, float]:
     """EPSG 3857 (x, y) -> WGS84 (lat_deg, lon_deg)."""
     lon = x / _ORIGIN_SHIFT * 180.0
-    lat = (
-        math.degrees(2.0 * math.atan(math.exp(y * math.pi / _ORIGIN_SHIFT)))
-        - 90.0
-    )
+    lat = math.degrees(2.0 * math.atan(math.exp(y * math.pi / _ORIGIN_SHIFT))) - 90.0
     return lat, lon
 
 
@@ -122,8 +120,12 @@ def web_mercator_to_wgs84(x: float, y: float) -> tuple[float, float]:
 
 
 def ecef_to_enu(
-    x: float, y: float, z: float,
-    ref_lat_deg: float, ref_lon_deg: float, ref_alt_m: float = 0.0,
+    x: float,
+    y: float,
+    z: float,
+    ref_lat_deg: float,
+    ref_lon_deg: float,
+    ref_alt_m: float = 0.0,
 ) -> tuple[float, float, float]:
     """Rotate ECEF deltas into the local east-north-up frame at the anchor."""
     ref_ecef = wgs84_to_ecef(ref_lat_deg, ref_lon_deg, ref_alt_m)
@@ -135,22 +137,18 @@ def ecef_to_enu(
     sin_lat, cos_lat = math.sin(lat), math.cos(lat)
     sin_lon, cos_lon = math.sin(lon), math.cos(lon)
     east = -sin_lon * dx + cos_lon * dy
-    north = (
-        -sin_lat * cos_lon * dx
-        - sin_lat * sin_lon * dy
-        + cos_lat * dz
-    )
-    up = (
-        cos_lat * cos_lon * dx
-        + cos_lat * sin_lon * dy
-        + sin_lat * dz
-    )
+    north = -sin_lat * cos_lon * dx - sin_lat * sin_lon * dy + cos_lat * dz
+    up = cos_lat * cos_lon * dx + cos_lat * sin_lon * dy + sin_lat * dz
     return east, north, up
 
 
 def enu_to_ecef(
-    east: float, north: float, up: float,
-    ref_lat_deg: float, ref_lon_deg: float, ref_alt_m: float = 0.0,
+    east: float,
+    north: float,
+    up: float,
+    ref_lat_deg: float,
+    ref_lon_deg: float,
+    ref_alt_m: float = 0.0,
 ) -> tuple[float, float, float]:
     """Inverse of :func:`ecef_to_enu` — local ENU back to ECEF."""
     ref_ecef = wgs84_to_ecef(ref_lat_deg, ref_lon_deg, ref_alt_m)
@@ -158,18 +156,8 @@ def enu_to_ecef(
     lon = math.radians(ref_lon_deg)
     sin_lat, cos_lat = math.sin(lat), math.cos(lat)
     sin_lon, cos_lon = math.sin(lon), math.cos(lon)
-    x = (
-        -sin_lon * east
-        - sin_lat * cos_lon * north
-        + cos_lat * cos_lon * up
-        + ref_ecef[0]
-    )
-    y = (
-        cos_lon * east
-        - sin_lat * sin_lon * north
-        + cos_lat * sin_lon * up
-        + ref_ecef[1]
-    )
+    x = -sin_lon * east - sin_lat * cos_lon * north + cos_lat * cos_lon * up + ref_ecef[0]
+    y = cos_lon * east - sin_lat * sin_lon * north + cos_lat * sin_lon * up + ref_ecef[1]
     z = cos_lat * north + sin_lat * up + ref_ecef[2]
     return x, y, z
 
@@ -180,7 +168,9 @@ def enu_to_ecef(
 def transform(
     src_epsg: int,
     dst_epsg: int,
-    x: float, y: float, z: float = 0.0,
+    x: float,
+    y: float,
+    z: float = 0.0,
 ) -> tuple[float, float, float]:
     """Transform one (x, y, z) triple between two EPSG codes.
 
@@ -210,14 +200,15 @@ def transform(
         import pyproj
 
         transformer = pyproj.Transformer.from_crs(
-            src_epsg, dst_epsg, always_xy=True,
+            src_epsg,
+            dst_epsg,
+            always_xy=True,
         )
         nx, ny, nz = transformer.transform(x, y, z)
         return nx, ny, nz
 
     raise NotImplementedError(
-        f"transform({src_epsg} -> {dst_epsg}) requires pyproj — "
-        "install openconstructionerp[geo] to enable it",
+        f"transform({src_epsg} -> {dst_epsg}) requires pyproj — install openconstructionerp[geo] to enable it",
     )
 
 

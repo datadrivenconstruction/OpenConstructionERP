@@ -82,7 +82,9 @@ def _lead_to_response(
     redaction happens at the response boundary only.
     """
     email, phone = redact_lead_pii(
-        lead, viewer_id=viewer_id, viewer_role=viewer_role,
+        lead,
+        viewer_id=viewer_id,
+        viewer_role=viewer_role,
     )
     payload = LeadResponse.model_validate(lead)
     # Pydantic v2 frozen=False default — we mutate the validated copy in
@@ -190,10 +192,7 @@ async def list_leads(
     )
     viewer_id = payload.get("sub")
     viewer_role = payload.get("role")
-    return [
-        _lead_to_response(li, viewer_id=viewer_id, viewer_role=viewer_role)
-        for li in items
-    ]
+    return [_lead_to_response(li, viewer_id=viewer_id, viewer_role=viewer_role) for li in items]
 
 
 @router.post("/leads/", response_model=LeadResponse, status_code=201)
@@ -206,7 +205,9 @@ async def create_lead(
 ) -> LeadResponse:
     lead = await service.create_lead(data, user_id=user_id)
     return _lead_to_response(
-        lead, viewer_id=user_id, viewer_role=payload.get("role"),
+        lead,
+        viewer_id=user_id,
+        viewer_role=payload.get("role"),
     )
 
 
@@ -219,7 +220,9 @@ async def get_lead(
 ) -> LeadResponse:
     lead = await service.get_lead(lead_id)
     return _lead_to_response(
-        lead, viewer_id=payload.get("sub"), viewer_role=payload.get("role"),
+        lead,
+        viewer_id=payload.get("sub"),
+        viewer_role=payload.get("role"),
     )
 
 
@@ -233,7 +236,9 @@ async def update_lead(
 ) -> LeadResponse:
     lead = await service.update_lead(lead_id, data)
     return _lead_to_response(
-        lead, viewer_id=payload.get("sub"), viewer_role=payload.get("role"),
+        lead,
+        viewer_id=payload.get("sub"),
+        viewer_role=payload.get("role"),
     )
 
 
@@ -271,11 +276,11 @@ async def qualify_lead(
     _perm: None = Depends(RequirePermission("crm.qualify_lead")),
     service: CrmService = Depends(_get_service),
 ) -> LeadResponse:
-    lead = await service.qualify_lead(
-        lead_id, data.qualification_notes, user_id=user_id
-    )
+    lead = await service.qualify_lead(lead_id, data.qualification_notes, user_id=user_id)
     return _lead_to_response(
-        lead, viewer_id=user_id, viewer_role=payload.get("role"),
+        lead,
+        viewer_id=user_id,
+        viewer_role=payload.get("role"),
     )
 
 
@@ -289,7 +294,9 @@ async def disqualify_lead(
 ) -> LeadResponse:
     lead = await service.disqualify_lead(lead_id, user_id=user_id)
     return _lead_to_response(
-        lead, viewer_id=user_id, viewer_role=payload.get("role"),
+        lead,
+        viewer_id=user_id,
+        viewer_role=payload.get("role"),
     )
 
 
@@ -644,9 +651,7 @@ async def pipeline_kanban(
     service: CrmService = Depends(_get_service),
 ) -> KanbanBoardResponse:
     stages = await service.stage_repo.list_all()
-    opps_tuple = await service.opportunity_repo.list_all(
-        limit=10000, owner_user_id=owner_user_id, status="open"
-    )
+    opps_tuple = await service.opportunity_repo.list_all(limit=10000, owner_user_id=owner_user_id, status="open")
     opps = opps_tuple[0]
     by_stage: dict[uuid.UUID, list[Any]] = {s.id: [] for s in stages}
     for o in opps:
@@ -659,9 +664,7 @@ async def pipeline_kanban(
             name=s.name,
             display_order=s.display_order,
             color=s.color,
-            opportunities=[
-                OpportunityResponse.model_validate(o) for o in by_stage.get(s.id, [])
-            ],
+            opportunities=[OpportunityResponse.model_validate(o) for o in by_stage.get(s.id, [])],
         )
         for s in stages
     ]
@@ -719,9 +722,7 @@ async def win_loss_analytics(
         abandoned_count=abandoned_count,
         win_rate=compute_win_rate(opps, period_start, period_end),
         average_sales_cycle_days=compute_average_sales_cycle(opps),
-        lost_reasons_breakdown=compute_lost_reasons_breakdown(
-            opps, period_start, period_end
-        ),
+        lost_reasons_breakdown=compute_lost_reasons_breakdown(opps, period_start, period_end),
         won_value=won_value,
         lost_value=lost_value,
     )
@@ -788,9 +789,7 @@ async def set_account_parent(
     account = await service.set_account_parent(account_id, parent_id)
     return {
         "id": str(account.id),
-        "parent_account_id": (
-            str(account.parent_account_id) if account.parent_account_id else None
-        ),
+        "parent_account_id": (str(account.parent_account_id) if account.parent_account_id else None),
         "role": account.role,
     }
 
@@ -855,9 +854,7 @@ async def stage_weighted_forecast(
     result = await service.stage_weighted_forecast(owner_user_id=owner_user_id)
     return {
         "by_stage": {
-            sid: {
-                **{k: (str(v) if hasattr(v, "as_tuple") else v) for k, v in bucket.items()}
-            }
+            sid: {**{k: (str(v) if hasattr(v, "as_tuple") else v) for k, v in bucket.items()}}
             for sid, bucket in result["by_stage"].items()
         },
         "grand_total": str(result["grand_total"]),

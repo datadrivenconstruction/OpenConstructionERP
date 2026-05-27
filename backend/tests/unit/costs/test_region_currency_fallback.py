@@ -62,10 +62,7 @@ def test_resolve_currency_malformed_region_logs_warning_and_appends(
     assert result == "EUR"  # fallback
     assert len(warnings) == 1
     assert "non-canonical" in warnings[0]
-    assert any(
-        r.levelno == logging.WARNING and "non-canonical" in r.getMessage()
-        for r in caplog.records
-    )
+    assert any(r.levelno == logging.WARNING and "non-canonical" in r.getMessage() for r in caplog.records)
 
 
 def test_resolve_currency_unknown_but_valid_format_warns(

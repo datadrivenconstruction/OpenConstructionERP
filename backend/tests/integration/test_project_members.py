@@ -109,9 +109,7 @@ async def seeded_ids(temp_engine_and_factory) -> dict[str, str]:
         team = Team(project_id=project.id, name="Default Team", is_default=True)
         session.add(team)
         await session.flush()
-        session.add(
-            TeamMembership(team_id=team.id, user_id=owner.id, role="lead")
-        )
+        session.add(TeamMembership(team_id=team.id, user_id=owner.id, role="lead"))
         await session.commit()
 
         return {
@@ -151,9 +149,7 @@ def _build_app(factory, current_user_id: str, role: str = "editor") -> FastAPI:
 
 
 @pytest_asyncio.fixture
-async def owner_client(
-    temp_engine_and_factory, seeded_ids
-) -> AsyncGenerator[AsyncClient, None]:
+async def owner_client(temp_engine_and_factory, seeded_ids) -> AsyncGenerator[AsyncClient, None]:
     _engine, factory, _tmp = temp_engine_and_factory
     app = _build_app(factory, seeded_ids["owner_id"])
     transport = ASGITransport(app=app)
@@ -162,9 +158,7 @@ async def owner_client(
 
 
 @pytest_asyncio.fixture
-async def other_client(
-    temp_engine_and_factory, seeded_ids
-) -> AsyncGenerator[AsyncClient, None]:
+async def other_client(temp_engine_and_factory, seeded_ids) -> AsyncGenerator[AsyncClient, None]:
     _engine, factory, _tmp = temp_engine_and_factory
     app = _build_app(factory, seeded_ids["other_id"])
     transport = ASGITransport(app=app)
@@ -176,9 +170,7 @@ async def other_client(
 
 
 @pytest.mark.asyncio
-async def test_owner_can_list_members(
-    owner_client: AsyncClient, seeded_ids: dict[str, str]
-):
+async def test_owner_can_list_members(owner_client: AsyncClient, seeded_ids: dict[str, str]):
     """Owner sees themselves as the sole member after project creation."""
     pid = seeded_ids["project_id"]
     resp = await owner_client.get(f"/api/v1/projects/{pid}/members/")
@@ -194,9 +186,7 @@ async def test_owner_can_list_members(
 
 
 @pytest.mark.asyncio
-async def test_owner_can_add_member(
-    owner_client: AsyncClient, seeded_ids: dict[str, str]
-):
+async def test_owner_can_add_member(owner_client: AsyncClient, seeded_ids: dict[str, str]):
     """Owner adds the invitee with a non-default role; result echoes inputs."""
     pid = seeded_ids["project_id"]
     resp = await owner_client.post(
@@ -220,9 +210,7 @@ async def test_owner_can_add_member(
 
 
 @pytest.mark.asyncio
-async def test_cannot_add_same_user_twice(
-    owner_client: AsyncClient, seeded_ids: dict[str, str]
-):
+async def test_cannot_add_same_user_twice(owner_client: AsyncClient, seeded_ids: dict[str, str]):
     """Second POST with the same user_id returns 409 Conflict."""
     pid = seeded_ids["project_id"]
     first = await owner_client.post(
@@ -239,9 +227,7 @@ async def test_cannot_add_same_user_twice(
 
 
 @pytest.mark.asyncio
-async def test_owner_can_remove_member(
-    owner_client: AsyncClient, seeded_ids: dict[str, str]
-):
+async def test_owner_can_remove_member(owner_client: AsyncClient, seeded_ids: dict[str, str]):
     """Owner removes a previously-added member; subsequent list excludes them."""
     pid = seeded_ids["project_id"]
     add = await owner_client.post(
@@ -250,9 +236,7 @@ async def test_owner_can_remove_member(
     )
     assert add.status_code == 201
 
-    delete = await owner_client.delete(
-        f"/api/v1/projects/{pid}/members/{seeded_ids['invitee_id']}/"
-    )
+    delete = await owner_client.delete(f"/api/v1/projects/{pid}/members/{seeded_ids['invitee_id']}/")
     assert delete.status_code == 204, delete.text
 
     listing = await owner_client.get(f"/api/v1/projects/{pid}/members/")
@@ -262,22 +246,16 @@ async def test_owner_can_remove_member(
 
 
 @pytest.mark.asyncio
-async def test_cannot_remove_owner(
-    owner_client: AsyncClient, seeded_ids: dict[str, str]
-):
+async def test_cannot_remove_owner(owner_client: AsyncClient, seeded_ids: dict[str, str]):
     """Attempting to delete the owner returns 400 with a clear message."""
     pid = seeded_ids["project_id"]
-    resp = await owner_client.delete(
-        f"/api/v1/projects/{pid}/members/{seeded_ids['owner_id']}/"
-    )
+    resp = await owner_client.delete(f"/api/v1/projects/{pid}/members/{seeded_ids['owner_id']}/")
     assert resp.status_code == 400, resp.text
     assert "owner" in resp.json()["detail"].lower()
 
 
 @pytest.mark.asyncio
-async def test_non_owner_cannot_access_members(
-    other_client: AsyncClient, seeded_ids: dict[str, str]
-):
+async def test_non_owner_cannot_access_members(other_client: AsyncClient, seeded_ids: dict[str, str]):
     """A logged-in user that is NOT the project owner gets 403 on every verb.
 
     The router's ``_verify_project_owner`` raises 403 directly (not 404) for
@@ -294,7 +272,5 @@ async def test_non_owner_cannot_access_members(
     )
     assert add.status_code == 403, add.text
 
-    delete = await other_client.delete(
-        f"/api/v1/projects/{pid}/members/{seeded_ids['invitee_id']}/"
-    )
+    delete = await other_client.delete(f"/api/v1/projects/{pid}/members/{seeded_ids['invitee_id']}/")
     assert delete.status_code == 403, delete.text

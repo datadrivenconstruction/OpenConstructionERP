@@ -30,7 +30,6 @@ from app.modules.clash.service import (
     _compute_signature_hash,
 )
 
-
 # ── Pure-helper tests ────────────────────────────────────────────────────
 
 
@@ -222,15 +221,18 @@ def test_weak_when_both_guids_missing_and_fallback_provided() -> None:
 def test_weak_fallback_uses_ifc_class_material_qty_keys() -> None:
     """Same fallback inputs → same hash; different inputs → different hash."""
     h1, _ = _sig(
-        a_guid=None, b_guid=None,
+        a_guid=None,
+        b_guid=None,
         weak_fallback=("IfcWall", "concrete", ["area", "volume"]),
     )
     h2, _ = _sig(
-        a_guid=None, b_guid=None,
+        a_guid=None,
+        b_guid=None,
         weak_fallback=("IfcWall", "concrete", ["area", "volume"]),
     )
     h3, _ = _sig(
-        a_guid=None, b_guid=None,
+        a_guid=None,
+        b_guid=None,
         weak_fallback=("IfcWall", "steel", ["area", "volume"]),
     )
     assert h1 == h2
@@ -240,11 +242,13 @@ def test_weak_fallback_uses_ifc_class_material_qty_keys() -> None:
 def test_weak_fallback_qty_keys_sorted_for_determinism() -> None:
     """Reordering quantity keys must not change the weak signature."""
     h_ordered, _ = _sig(
-        a_guid=None, b_guid=None,
+        a_guid=None,
+        b_guid=None,
         weak_fallback=("IfcWall", "concrete", ["area", "volume", "length"]),
     )
     h_shuffled, _ = _sig(
-        a_guid=None, b_guid=None,
+        a_guid=None,
+        b_guid=None,
         weak_fallback=("IfcWall", "concrete", ["volume", "length", "area"]),
     )
     assert h_ordered == h_shuffled
@@ -307,8 +311,11 @@ def test_signature_matches_spec_form() -> None:
     raw = "guid-x|guid-y|2,4,6|hard"
     expected = hashlib.sha1(raw.encode("utf-8")).hexdigest()
     h, q = _compute_signature_hash(
-        a_guid=a, b_guid=b, centroid=centroid,
-        clash_type="hard", grid_mm=grid_mm,
+        a_guid=a,
+        b_guid=b,
+        centroid=centroid,
+        clash_type="hard",
+        grid_mm=grid_mm,
     )
     assert h == expected
     assert q == "strong"

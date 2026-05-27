@@ -112,8 +112,7 @@ PRESENCE_PROBES: tuple[Probe, ...] = (
     Probe("assemblies", _project_probe("oe_assemblies_assembly")),
     Probe(
         "smart_views",
-        "SELECT 1 FROM oe_smart_view "
-        "WHERE scope_type = 'project' AND scope_id = :pid LIMIT 1",
+        "SELECT 1 FROM oe_smart_view WHERE scope_type = 'project' AND scope_id = :pid LIMIT 1",
     ),
     Probe("bim_requirements", _project_probe("oe_bim_requirement_set")),
     Probe("bcf", _project_probe("oe_bcf_topic")),

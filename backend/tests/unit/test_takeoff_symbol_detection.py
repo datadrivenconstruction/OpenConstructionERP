@@ -21,9 +21,6 @@ the backend module, the stubs can be replaced with monkeypatching.
 from __future__ import annotations
 
 import random
-import types
-from unittest.mock import MagicMock, patch
-
 
 # ---------------------------------------------------------------------------
 # Stub helpers
@@ -147,6 +144,7 @@ def test_yolo_inference_is_deterministic_with_seeded_torch() -> None:
 
     weights_path = "services/cv-pipeline/models/yolo_symbols.pt"
     import os
+
     if not os.path.exists(weights_path):
         pytest.skip(f"YOLO weights not found at {weights_path!r}")
 

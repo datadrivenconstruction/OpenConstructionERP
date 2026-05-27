@@ -23,7 +23,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3099_eac"
 down_revision: Union[str, Sequence[str], None] = "v3098"
 branch_labels: Union[str, Sequence[str], None] = None

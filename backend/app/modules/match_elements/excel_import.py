@@ -36,79 +36,170 @@ logger = logging.getLogger(__name__)
 _ALIASES: dict[str, list[str]] = {
     "description": [
         # English
-        "description", "desc", "text", "item", "item description",
-        "work description", "scope", "scope of work",
+        "description",
+        "desc",
+        "text",
+        "item",
+        "item description",
+        "work description",
+        "scope",
+        "scope of work",
         # German
-        "beschreibung", "bezeichnung", "leistung", "leistungstext",
-        "kurztext", "langtext",
+        "beschreibung",
+        "bezeichnung",
+        "leistung",
+        "leistungstext",
+        "kurztext",
+        "langtext",
         # Russian / Ukrainian / Belarusian
-        "описание", "наименование", "наименование работ",
-        "работы", "элемент", "состав работ", "опис",
+        "описание",
+        "наименование",
+        "наименование работ",
+        "работы",
+        "элемент",
+        "состав работ",
+        "опис",
         # Romance
-        "descripción", "descripcion", "descrição", "descricao",
-        "descrizione", "désignation", "designation", "obra",
+        "descripción",
+        "descripcion",
+        "descrição",
+        "descricao",
+        "descrizione",
+        "désignation",
+        "designation",
+        "obra",
         # Turkic / Slavic
-        "açıklama", "iş tanımı", "opis", "opis prac",
+        "açıklama",
+        "iş tanımı",
+        "opis",
+        "opis prac",
         # CJK
-        "説明", "工事内容", "描述", "项目描述", "설명", "내역",
+        "説明",
+        "工事内容",
+        "描述",
+        "项目描述",
+        "설명",
+        "내역",
         # Arabic
-        "الوصف", "البند",
+        "الوصف",
+        "البند",
     ],
     "qty": [
-        "qty", "quantity", "amount", "qty.", "quantity (qty)",
+        "qty",
+        "quantity",
+        "amount",
+        "qty.",
+        "quantity (qty)",
         # German / Dutch
-        "menge", "anzahl", "hoeveelheid",
+        "menge",
+        "anzahl",
+        "hoeveelheid",
         # Russian
-        "количество", "кол-во", "кол.",
+        "количество",
+        "кол-во",
+        "кол.",
         # Romance
-        "cantidad", "quantidade", "quantité", "quantita", "quantità",
+        "cantidad",
+        "quantidade",
+        "quantité",
+        "quantita",
+        "quantità",
         # Turkic / Slavic
-        "miktar", "ilość",
+        "miktar",
+        "ilość",
         # CJK
-        "数量", "수량",
+        "数量",
+        "수량",
         # Arabic
         "الكمية",
     ],
     "unit": [
-        "unit", "uom", "unit of measure", "unit_of_measure",
+        "unit",
+        "uom",
+        "unit of measure",
+        "unit_of_measure",
         # German
-        "einheit", "me", "mengeneinheit",
+        "einheit",
+        "me",
+        "mengeneinheit",
         # Russian
-        "ед", "ед.изм", "ед.изм.", "единица", "ед изм",
+        "ед",
+        "ед.изм",
+        "ед.изм.",
+        "единица",
+        "ед изм",
         # Romance
-        "unidad", "unidade", "unité", "unita", "unità",
+        "unidad",
+        "unidade",
+        "unité",
+        "unita",
+        "unità",
         # Turkic / Slavic
-        "birim", "jednostka",
+        "birim",
+        "jednostka",
         # CJK
-        "単位", "单位", "단위",
+        "単位",
+        "单位",
+        "단위",
         # Arabic
         "الوحدة",
     ],
     "code": [
-        "code", "rate code", "rate_code",
+        "code",
+        "rate code",
+        "rate_code",
         # German
-        "kennzeichen", "pos.kennz", "ord.-nr", "art.-nr",
+        "kennzeichen",
+        "pos.kennz",
+        "ord.-nr",
+        "art.-nr",
         # Russian
-        "код", "артикул", "шифр",
+        "код",
+        "артикул",
+        "шифр",
         # Romance
-        "código", "codigo", "codice",
+        "código",
+        "codigo",
+        "codice",
         # CJK / Arabic / Turkic
-        "コード", "代码", "코드", "kod", "الكود",
+        "コード",
+        "代码",
+        "코드",
+        "kod",
+        "الكود",
     ],
     "category": [
-        "category", "section", "trade",
+        "category",
+        "section",
+        "trade",
         # German
-        "kategorie", "abteilung", "abschnitt", "gewerk",
+        "kategorie",
+        "abteilung",
+        "abschnitt",
+        "gewerk",
         # Russian
-        "категория", "раздел", "вид",
+        "категория",
+        "раздел",
+        "вид",
         # Romance
-        "categoría", "categoria", "sección", "secção", "categoría",
-        "section", "categoria", "rubrique",
+        "categoría",
+        "categoria",
+        "sección",
+        "secção",
+        "categoría",
+        "section",
+        "categoria",
+        "rubrique",
         # CJK
-        "カテゴリー", "类别", "분류",
+        "カテゴリー",
+        "类别",
+        "분류",
     ],
     "source_lang": [
-        "source_lang", "lang", "language", "language code",
+        "source_lang",
+        "lang",
+        "language",
+        "language code",
         "язык",
     ],
 }
@@ -197,9 +288,7 @@ def parse_boq_xlsx(content: bytes) -> list[dict[str, Any]]:
     try:
         wb = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
     except Exception as exc:
-        raise ValueError(
-            f"Could not open the uploaded file as an xlsx workbook: {exc}"
-        ) from exc
+        raise ValueError(f"Could not open the uploaded file as an xlsx workbook: {exc}") from exc
 
     try:
         ws = wb.active
@@ -236,9 +325,7 @@ def parse_boq_xlsx(content: bytes) -> list[dict[str, Any]]:
                     if f is not None:
                         entry["qty"] = f
                 else:
-                    entry[key] = (
-                        str(val).strip() if isinstance(val, str) else val
-                    )
+                    entry[key] = str(val).strip() if isinstance(val, str) else val
             description = entry.get("description")
             if isinstance(description, str) and description.strip():
                 out.append(entry)

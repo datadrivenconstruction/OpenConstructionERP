@@ -289,6 +289,25 @@ ignore = [
     "RET503",           # implicit return — sometimes intentional for None
     "UP022",            # replace stdout/stderr — old pattern, harmless
     "E722",             # bare except — sometimes deliberate (silencing all errors)
+    "PT018",            # composite assert — splitting hurts test readability for many cases
+    "PT017",            # assertion on exception in except — legacy test pattern, harmless
+    "PT006",            # parametrize first arg type — comma-string form is the common idiom
+    "PT013",            # incorrect pytest import — minor style, no bug risk
+    "PT019",            # fixture without value — harmless, used as side-effect injection
+    "N814",             # camelcase imported as constant — common alias pattern (e.g., `_SC`, `_BIO`)
+    "N803",             # argument name not lowercase — math/geometry code uses `A`, `B`, `triA`
+    "N802",             # function name not lowercase — some regulator-report helpers use codes (RERA, 214FZ)
+    "N801",             # class name not CapWords — historical, rare
+    "N811",             # constant imported as non-constant — pyproj CRS / typing aliases
+    "N817",             # camelcase imported as acronym — xml.etree.ElementTree as ET is canonical
+    "SIM103",           # return condition directly — explicit if/else often clearer for readers
+    "SIM118",           # `key in dict.keys()` — explicit form sometimes intentional for clarity
+    "SIM101",           # merge isinstance calls — sometimes split for readability
+    "SIM110",           # use any()/all() — for loop with return can be clearer
+    "C408",             # unnecessary dict() call — kwargs form is sometimes intentional
+    "UP046",            # PEP 695 generic syntax — not yet ubiquitous, optional uplift
+    "E741",             # ambiguous variable name `l`/`I`/`O` — domain code uses `l` for length
+    "A001",             # builtin shadowing — `license` as variable name in test is fine
 ]
 
 [tool.ruff.lint.isort]

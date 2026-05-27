@@ -38,22 +38,23 @@ from sqlalchemy.ext.asyncio import (
 from app.database import Base
 from app.dependencies import get_current_user_id, get_session
 
-
 # ── Minimal model registration ─────────────────────────────────────────────
 
+
 def _register_models() -> None:
-    import app.modules.users.models  # noqa: F401
-    import app.modules.projects.models  # noqa: F401
     import app.modules.boq.models  # noqa: F401
-    import app.modules.validation.models  # noqa: F401
-    import app.modules.safety.models  # noqa: F401
-    import app.modules.procurement.models  # noqa: F401
-    import app.modules.finance.models  # noqa: F401
     import app.modules.changeorders.models  # noqa: F401
     import app.modules.daily_diary.models  # noqa: F401
+    import app.modules.finance.models  # noqa: F401
+    import app.modules.procurement.models  # noqa: F401
+    import app.modules.projects.models  # noqa: F401
+    import app.modules.safety.models  # noqa: F401
+    import app.modules.users.models  # noqa: F401
+    import app.modules.validation.models  # noqa: F401
 
 
 # ── FastAPI app factory ────────────────────────────────────────────────────
+
 
 def _build_app(session_factory: async_sessionmaker, caller_id: uuid.UUID) -> FastAPI:
     """Minimal app with dashboard router and injected auth."""
@@ -78,6 +79,7 @@ def _build_app(session_factory: async_sessionmaker, caller_id: uuid.UUID) -> Fas
 
 # ── Fixtures ──────────────────────────────────────────────────────────────
 
+
 @pytest_asyncio.fixture
 async def db_factory():
     tmp_db = Path(tempfile.mkdtemp()) / "idor_dash.db"
@@ -100,18 +102,22 @@ async def db_factory():
 
 
 async def _seed_user(
-    session: AsyncSession, *, role: str = "member",
+    session: AsyncSession,
+    *,
+    role: str = "member",
 ) -> uuid.UUID:
     from app.modules.users.models import User
 
     uid = uuid.uuid4()
-    session.add(User(
-        id=uid,
-        email=f"u-{uid.hex[:6]}@idor.io",
-        hashed_password="x",
-        full_name="Test",
-        role=role,
-    ))
+    session.add(
+        User(
+            id=uid,
+            email=f"u-{uid.hex[:6]}@idor.io",
+            hashed_password="x",
+            full_name="Test",
+            role=role,
+        )
+    )
     await session.flush()
     return uid
 
@@ -125,10 +131,15 @@ async def _seed_project(
     from app.modules.projects.models import Project
 
     pid = uuid.uuid4()
-    session.add(Project(
-        id=pid, name=name, owner_id=owner_id,
-        status="active", currency="EUR",
-    ))
+    session.add(
+        Project(
+            id=pid,
+            name=name,
+            owner_id=owner_id,
+            status="active",
+            currency="EUR",
+        )
+    )
     await session.flush()
     return pid
 
@@ -144,24 +155,28 @@ async def _seed_boq_with_value(
     boq = BOQ(id=uuid.uuid4(), project_id=project_id, name="BOQ", status="draft")
     session.add(boq)
     await session.flush()
-    session.add(Position(
-        boq_id=boq.id,
-        ordinal="01",
-        description="Secret position",
-        unit="m2",
-        quantity="1",
-        unit_rate=total,
-        total=total,
-    ))
+    session.add(
+        Position(
+            boq_id=boq.id,
+            ordinal="01",
+            description="Secret position",
+            unit="m2",
+            quantity="1",
+            unit_rate=total,
+            total=total,
+        )
+    )
     await session.flush()
 
 
 # ── Test cases ────────────────────────────────────────────────────────────
 
+
 class TestDashboardIDOR:
     @pytest.mark.asyncio
     async def test_alice_rollup_excludes_bobs_boq_value(
-        self, db_factory: async_sessionmaker,
+        self,
+        db_factory: async_sessionmaker,
     ) -> None:
         """Alice's rollup total must not include Bob's BOQ value."""
         async with db_factory() as session:
@@ -187,13 +202,13 @@ class TestDashboardIDOR:
         # Alice has 1 project → 1 BOQ → total 1 000; Bob's 99 999 must not leak.
         total_val = boq.get("total_value_eur", "0")
         from decimal import Decimal
-        assert Decimal(total_val) < Decimal("10000"), (
-            f"Bob's BOQ value leaked into Alice's rollup: {total_val}"
-        )
+
+        assert Decimal(total_val) < Decimal("10000"), f"Bob's BOQ value leaked into Alice's rollup: {total_val}"
 
     @pytest.mark.asyncio
     async def test_scoping_to_bobs_project_returns_zero(
-        self, db_factory: async_sessionmaker,
+        self,
+        db_factory: async_sessionmaker,
     ) -> None:
         """Alice scopes rollup to Bob's project_id → project_count=0, empty data."""
         async with db_factory() as session:
@@ -215,13 +230,12 @@ class TestDashboardIDOR:
             )
         assert resp.status_code == 200
         data = resp.json()
-        assert data.get("project_count", -1) == 0, (
-            "Scoping to another tenant's project_id must yield project_count=0"
-        )
+        assert data.get("project_count", -1) == 0, "Scoping to another tenant's project_id must yield project_count=0"
 
     @pytest.mark.asyncio
     async def test_garbage_project_ids_ignored(
-        self, db_factory: async_sessionmaker,
+        self,
+        db_factory: async_sessionmaker,
     ) -> None:
         """Malformed UUIDs in project_ids → 200 with zero results, not 422/500."""
         async with db_factory() as session:
@@ -243,7 +257,8 @@ class TestDashboardIDOR:
 
     @pytest.mark.asyncio
     async def test_admin_sees_both_tenants(
-        self, db_factory: async_sessionmaker,
+        self,
+        db_factory: async_sessionmaker,
     ) -> None:
         """Admin rollup aggregates across all tenants."""
         async with db_factory() as session:
@@ -263,13 +278,12 @@ class TestDashboardIDOR:
             )
         assert resp.status_code == 200
         data = resp.json()
-        assert data.get("project_count", 0) >= 2, (
-            "Admin must see at least the two seeded projects"
-        )
+        assert data.get("project_count", 0) >= 2, "Admin must see at least the two seeded projects"
 
     @pytest.mark.asyncio
     async def test_post_rollup_bad_widget_config_returns_422(
-        self, db_factory: async_sessionmaker,
+        self,
+        db_factory: async_sessionmaker,
     ) -> None:
         """POST /rollup/ with unknown config key returns 422 before any DB query."""
         async with db_factory() as session:
@@ -291,13 +305,12 @@ class TestDashboardIDOR:
                     ],
                 },
             )
-        assert resp.status_code == 422, (
-            f"Expected 422 for unknown config key, got {resp.status_code}"
-        )
+        assert resp.status_code == 422, f"Expected 422 for unknown config key, got {resp.status_code}"
 
     @pytest.mark.asyncio
     async def test_post_rollup_unknown_widget_id_returns_422(
-        self, db_factory: async_sessionmaker,
+        self,
+        db_factory: async_sessionmaker,
     ) -> None:
         """POST /rollup/ with unknown widget_id returns 422."""
         async with db_factory() as session:
@@ -319,7 +332,8 @@ class TestDashboardIDOR:
 
     @pytest.mark.asyncio
     async def test_post_rollup_valid_config_returns_200(
-        self, db_factory: async_sessionmaker,
+        self,
+        db_factory: async_sessionmaker,
     ) -> None:
         """POST /rollup/ with valid config returns 200."""
         async with db_factory() as session:

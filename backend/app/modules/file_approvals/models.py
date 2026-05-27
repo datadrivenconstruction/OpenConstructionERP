@@ -33,7 +33,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
 
-
 # Lifecycle states for the whole workflow.
 WORKFLOW_STATUSES: tuple[str, ...] = (
     "in_review",
@@ -81,13 +80,9 @@ class FileStampTemplate(Base):
     )
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     text: Mapped[str] = mapped_column(String(255), nullable=False)
-    color: Mapped[str] = mapped_column(
-        String(7), nullable=False, default="#16a34a", server_default="#16a34a"
-    )
+    color: Mapped[str] = mapped_column(String(7), nullable=False, default="#16a34a", server_default="#16a34a")
     svg_template: Mapped[str] = mapped_column(Text, nullable=False)
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1"
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
 
     def __repr__(self) -> str:
         scope = "global" if self.project_id is None else str(self.project_id)
@@ -125,27 +120,21 @@ class FileApprovalWorkflow(Base):
     )
     file_kind: Mapped[str] = mapped_column(String(32), nullable=False)
     file_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    file_version_snapshot: Mapped[str | None] = mapped_column(
-        String(32), nullable=True, default=None
-    )
+    file_version_snapshot: Mapped[str | None] = mapped_column(String(32), nullable=True, default=None)
     submitted_by_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )
-    submitted_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     status: Mapped[str] = mapped_column(
         String(16),
         nullable=False,
         default="in_review",
         server_default="in_review",
     )
-    final_decision_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, default=None
-    )
+    final_decision_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
     final_decision_by_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
@@ -158,12 +147,10 @@ class FileApprovalWorkflow(Base):
         nullable=True,
         default=None,
     )
-    stamped_artifact_path: Mapped[str | None] = mapped_column(
-        String(512), nullable=True, default=None
-    )
+    stamped_artifact_path: Mapped[str | None] = mapped_column(String(512), nullable=True, default=None)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
 
-    steps: Mapped[list["FileApprovalStep"]] = relationship(
+    steps: Mapped[list[FileApprovalStep]] = relationship(
         "FileApprovalStep",
         back_populates="workflow",
         cascade="all, delete-orphan",
@@ -171,10 +158,7 @@ class FileApprovalWorkflow(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<FileApprovalWorkflow {self.file_kind}/{self.file_id} "
-            f"({self.status})>"
-        )
+        return f"<FileApprovalWorkflow {self.file_kind}/{self.file_id} ({self.status})>"
 
 
 class FileApprovalStep(Base):
@@ -205,22 +189,14 @@ class FileApprovalStep(Base):
         ForeignKey("oe_users_user.id", ondelete="CASCADE"),
         nullable=False,
     )
-    role_label: Mapped[str | None] = mapped_column(
-        String(64), nullable=True, default=None
-    )
+    role_label: Mapped[str | None] = mapped_column(String(64), nullable=True, default=None)
     decision: Mapped[str] = mapped_column(
         String(16),
         nullable=False,
         default="pending",
         server_default="pending",
     )
-    decision_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, default=None
-    )
-    decision_note: Mapped[str | None] = mapped_column(
-        Text, nullable=True, default=None
-    )
+    decision_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+    decision_note: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
 
-    workflow: Mapped["FileApprovalWorkflow"] = relationship(
-        "FileApprovalWorkflow", back_populates="steps"
-    )
+    workflow: Mapped[FileApprovalWorkflow] = relationship("FileApprovalWorkflow", back_populates="steps")

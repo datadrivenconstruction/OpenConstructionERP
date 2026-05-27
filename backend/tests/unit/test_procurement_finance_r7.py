@@ -18,36 +18,30 @@ from datetime import date, timedelta
 from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any
-from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi import HTTPException
 
 # ── Import targets ────────────────────────────────────────────────────────
-
-
 from app.modules.finance.schemas import (
+    InvoiceCreate,
     LedgerEntryCreate,
     PaymentCreate,
-    InvoiceCreate,
 )
 from app.modules.finance.service import (
     FinanceService,
     _safe_decimal,
-    _utcnow_iso,
 )
 from app.modules.procurement.service import (
+    _MR_STATUS_TRANSITIONS,
     MaterialRequisitionService,
     _compute_delivery_date,
     _mr_assert_transition,
     _mr_reconcile,
-    _MR_STATUS_TRANSITIONS,
 )
 from app.modules.service.service import (
-    ServiceService,
     allowed_work_order_transitions,
     assert_transition,
-    _WORK_ORDER_TRANSITIONS,
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -60,6 +54,7 @@ PROJECT_B = uuid.uuid4()
 
 def _stamp(obj: Any) -> Any:
     from datetime import UTC, datetime
+
     if getattr(obj, "id", None) is None:
         obj.id = uuid.uuid4()
     obj.created_at = datetime.now(UTC)
@@ -101,8 +96,10 @@ class _StubInvoiceRepo:
 
     async def aggregate_for_dashboard(self, **kwargs: Any) -> dict:
         return {
-            "total_payable": Decimal("0"), "total_receivable": Decimal("0"),
-            "total_overdue": Decimal("0"), "overdue_count": 0,
+            "total_payable": Decimal("0"),
+            "total_receivable": Decimal("0"),
+            "total_overdue": Decimal("0"),
+            "overdue_count": 0,
             "status_counts": {"draft": 0, "pending": 0, "approved": 0, "paid": 0},
             "currency": "",
         }
@@ -132,8 +129,9 @@ class _StubPaymentRepo:
     async def get_by_idempotency_key(self, key: str) -> Any:
         return self._by_key.get(key)
 
-    async def list(self, *, invoice_id: uuid.UUID | None = None,
-                   limit: int = 50, offset: int = 0) -> tuple[list[Any], int]:
+    async def list(
+        self, *, invoice_id: uuid.UUID | None = None, limit: int = 50, offset: int = 0
+    ) -> tuple[list[Any], int]:
         rows = list(self.rows) if isinstance(self.rows, list) else list(self.rows.values())
         if invoice_id is not None:
             rows = [r for r in rows if r.invoice_id == invoice_id]
@@ -207,7 +205,7 @@ class _FakeNestedTxn:
     def __init__(self, ok: bool) -> None:
         self._ok = ok
 
-    async def __aenter__(self) -> "_FakeNestedTxn":
+    async def __aenter__(self) -> _FakeNestedTxn:
         return self
 
     async def __aexit__(self, *args: Any) -> None:
@@ -370,7 +368,7 @@ class TestQtyReconciliation:
         )
         r = _mr_reconcile(item)
         assert Decimal(r["undelivered"]) == Decimal("7")  # 10 - 3
-        assert Decimal(r["unconsumed"]) == Decimal("3")   # 3 received, none consumed
+        assert Decimal(r["unconsumed"]) == Decimal("3")  # 3 received, none consumed
 
     def test_no_negative_undelivered(self) -> None:
         """received > ordered (over-delivery) must not produce negative undelivered."""
@@ -468,10 +466,11 @@ class TestMaterialRequisitionService:
             items=[{"description": "Concrete C30", "quantity_requested": "10", "unit_cost": "75"}],
         )
         # Items are added to session.add() calls — inspect the session
-        added = [
-            o for o in svc.session._store.values()
-            if hasattr(o, "extended_cost")
-        ] if hasattr(svc.session, "_store") else []
+        added = (
+            [o for o in svc.session._store.values() if hasattr(o, "extended_cost")]
+            if hasattr(svc.session, "_store")
+            else []
+        )
         # The extended_cost was passed as str(10*75)=750 inside create_requisition
         # We validate the item creation didn't crash — full assertion requires real DB
         assert req.status == "draft"
@@ -542,7 +541,6 @@ class TestWorkOrderFSMExtended:
 
 from tests.unit.test_service import (  # type: ignore[import-not-found]
     _make_service as _make_svc_service,
-    _setup_contract,
 )
 
 
@@ -584,6 +582,7 @@ def _make_wo(
         items=[SimpleNamespace(id=uuid.uuid4())],
     )
     from datetime import UTC, datetime
+
     wo.created_at = datetime.now(UTC)
     wo.updated_at = datetime.now(UTC)
     return wo
@@ -665,13 +664,16 @@ class TestWorkOrderSubtaskCascade:
             items=[],
         )
         from datetime import UTC, datetime
+
         wo.created_at = wo.updated_at = datetime.now(UTC)
 
         class _SingleWORepo:
             async def get_by_id(self, wo_id: uuid.UUID) -> Any:
                 return wo
+
             async def get(self, wo_id: uuid.UUID) -> Any:
                 return wo
+
             async def update_fields(self, wo_id: uuid.UUID, **kw: Any) -> None:
                 for k, v in kw.items():
                     setattr(wo, k, v)
@@ -835,8 +837,10 @@ class TestRefundGuard:
 
         # First pay 500
         fwd = SimpleNamespace(
-            id=uuid.uuid4(), invoice_id=invoice.id,
-            amount=Decimal("500"), is_refund=False,
+            id=uuid.uuid4(),
+            invoice_id=invoice.id,
+            amount=Decimal("500"),
+            is_refund=False,
         )
         svc.payments_repo.rows.append(fwd)
 
@@ -860,8 +864,10 @@ class TestRefundGuard:
         invoice = await _create_test_invoice(svc)
 
         fwd = SimpleNamespace(
-            id=uuid.uuid4(), invoice_id=invoice.id,
-            amount=Decimal("500"), is_refund=False,
+            id=uuid.uuid4(),
+            invoice_id=invoice.id,
+            amount=Decimal("500"),
+            is_refund=False,
         )
         svc.payments_repo.rows.append(fwd)
 
@@ -882,8 +888,10 @@ class TestRefundGuard:
         invoice = await _create_test_invoice(svc)
 
         fwd = SimpleNamespace(
-            id=uuid.uuid4(), invoice_id=invoice.id,
-            amount=Decimal("1000"), is_refund=False,
+            id=uuid.uuid4(),
+            invoice_id=invoice.id,
+            amount=Decimal("1000"),
+            is_refund=False,
         )
         svc.payments_repo.rows.append(fwd)
 
@@ -906,15 +914,19 @@ class TestRefundGuard:
 
         # 800 paid
         fwd = SimpleNamespace(
-            id=uuid.uuid4(), invoice_id=invoice.id,
-            amount=Decimal("800"), is_refund=False,
+            id=uuid.uuid4(),
+            invoice_id=invoice.id,
+            amount=Decimal("800"),
+            is_refund=False,
         )
         svc.payments_repo.rows.append(fwd)
 
         # First refund: 500 — allowed
         refund1_row = SimpleNamespace(
-            id=uuid.uuid4(), invoice_id=invoice.id,
-            amount=Decimal("500"), is_refund=True,
+            id=uuid.uuid4(),
+            invoice_id=invoice.id,
+            amount=Decimal("500"),
+            is_refund=True,
         )
         svc.payments_repo.rows.append(refund1_row)
 
@@ -986,7 +998,7 @@ class TestLedgerDoubleEntry:
                     debit_account="1000 / Cash",
                     debit_amount="1500.00",
                     credit_account="2000 / AP",
-                    credit_amount="1200.00",   # ← UNBALANCED: 1500 != 1200
+                    credit_amount="1200.00",  # ← UNBALANCED: 1500 != 1200
                     description="Bad entry",
                     currency_code="EUR",
                     posted_at="2026-05-25",
@@ -1071,11 +1083,7 @@ class TestLedgerDoubleEntry:
         # Now wire a fake execute() that returns the originals for the
         # reverse_ledger_transaction lookup.
         async def _fake_execute(stmt: Any) -> Any:
-            return SimpleNamespace(
-                scalars=lambda: SimpleNamespace(
-                    all=lambda: [debit_orig, credit_orig]
-                )
-            )
+            return SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: [debit_orig, credit_orig]))
 
         svc.session.execute = _fake_execute  # type: ignore[method-assign]
 
@@ -1104,9 +1112,7 @@ class TestLedgerDoubleEntry:
 
         # execute returns empty list
         async def _empty_execute(stmt: Any) -> Any:
-            return SimpleNamespace(
-                scalars=lambda: SimpleNamespace(all=lambda: [])
-            )
+            return SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: []))
 
         svc.session.execute = _empty_execute  # type: ignore[method-assign]
 

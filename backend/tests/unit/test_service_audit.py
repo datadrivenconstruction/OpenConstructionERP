@@ -38,14 +38,12 @@ from app.modules.service.schemas import (
     ServiceContractCreate,
     ServiceTicketCreate,
     ServiceTicketUpdate,
-    TicketReopenRequest,
     WorkOrderCreate,
 )
 from app.modules.service.service import (
     _MAX_NUMBER_RETRIES,
     TICKET_DISPATCH_PROTECTED_FIELDS,
     ServiceService,
-    compute_sla_response_and_resolution,
 )
 
 # Reuse the well-tested in-module stubs from test_service.py so behaviour
@@ -54,7 +52,6 @@ from tests.unit.test_service import (  # type: ignore[import-not-found]
     _make_service,
     _setup_contract,
 )
-
 
 # ── 1. Dispatch-protected field gate on PATCH /tickets/{id} ───────────────
 
@@ -70,7 +67,9 @@ class TestDispatchProtectedFields:
         with patch("app.modules.service.service.event_bus.publish_detached"):
             ticket = await svc.create_ticket(
                 ServiceTicketCreate(
-                    contract_id=contract.id, title="X", description="",
+                    contract_id=contract.id,
+                    title="X",
+                    description="",
                     priority="med",
                 ),
                 user_id="reporter-1",
@@ -95,8 +94,10 @@ class TestDispatchProtectedFields:
         with patch("app.modules.service.service.event_bus.publish_detached"):
             ticket = await svc.create_ticket(
                 ServiceTicketCreate(
-                    contract_id=contract.id, title="Boiler",
-                    description="", priority="high",
+                    contract_id=contract.id,
+                    title="Boiler",
+                    description="",
+                    priority="high",
                 ),
                 user_id="reporter-1",
             )
@@ -117,8 +118,10 @@ class TestDispatchProtectedFields:
         with patch("app.modules.service.service.event_bus.publish_detached"):
             ticket = await svc.create_ticket(
                 ServiceTicketCreate(
-                    contract_id=contract.id, title="X",
-                    description="", priority="med",
+                    contract_id=contract.id,
+                    title="X",
+                    description="",
+                    priority="med",
                 ),
                 user_id="reporter-1",
             )
@@ -139,15 +142,18 @@ class TestDispatchProtectedFields:
 
         R7 additions: response_due_at, resolution_due_at (two-clock SLA).
         """
-        assert TICKET_DISPATCH_PROTECTED_FIELDS == frozenset(
-            {
-                "assigned_to",
-                "sla_due_at",
-                "response_due_at",
-                "resolution_due_at",
-                "sla_breach_notified_at",
-                "sla_breached_at",
-            }
+        assert (
+            frozenset(
+                {
+                    "assigned_to",
+                    "sla_due_at",
+                    "response_due_at",
+                    "resolution_due_at",
+                    "sla_breach_notified_at",
+                    "sla_breached_at",
+                }
+            )
+            == TICKET_DISPATCH_PROTECTED_FIELDS
         )
 
 
@@ -164,13 +170,16 @@ class TestAssetIdOwnershipOnPatch:
         with patch("app.modules.service.service.event_bus.publish_detached"):
             asset_b = await svc.create_asset(
                 ServiceAssetCreate(
-                    contract_id=contract_b.id, asset_type="boiler",
+                    contract_id=contract_b.id,
+                    asset_type="boiler",
                 ),
             )
             ticket_a = await svc.create_ticket(
                 ServiceTicketCreate(
-                    contract_id=contract_a.id, title="X",
-                    description="", priority="med",
+                    contract_id=contract_a.id,
+                    title="X",
+                    description="",
+                    priority="med",
                 ),
                 user_id="d",
             )
@@ -256,8 +265,10 @@ class TestNumberAllocationRetry:
         with patch("app.modules.service.service.event_bus.publish_detached"):
             ticket = await svc.create_ticket(
                 ServiceTicketCreate(
-                    contract_id=contract.id, title="X",
-                    description="", priority="med",
+                    contract_id=contract.id,
+                    title="X",
+                    description="",
+                    priority="med",
                 ),
                 user_id="d",
             )
@@ -277,8 +288,10 @@ class TestNumberAllocationRetry:
             with pytest.raises(HTTPException) as exc_info:
                 await svc.create_ticket(
                     ServiceTicketCreate(
-                        contract_id=contract.id, title="X",
-                        description="", priority="med",
+                        contract_id=contract.id,
+                        title="X",
+                        description="",
+                        priority="med",
                     ),
                     user_id="d",
                 )
@@ -327,8 +340,10 @@ class TestWorkOrderNumberRetry:
         with patch("app.modules.service.service.event_bus.publish_detached"):
             ticket = await svc.create_ticket(
                 ServiceTicketCreate(
-                    contract_id=contract.id, title="X",
-                    description="", priority="med",
+                    contract_id=contract.id,
+                    title="X",
+                    description="",
+                    priority="med",
                 ),
                 user_id="d",
             )
@@ -418,7 +433,8 @@ class TestContractNumberRetry:
 class TestStatusChangeLogging:
     @pytest.mark.asyncio
     async def test_status_patch_emits_log_line(
-        self, caplog: pytest.LogCaptureFixture,
+        self,
+        caplog: pytest.LogCaptureFixture,
     ) -> None:
         """Admins correcting status via PATCH should leave an audit trail."""
         svc = _make_service()
@@ -426,8 +442,10 @@ class TestStatusChangeLogging:
         with patch("app.modules.service.service.event_bus.publish_detached"):
             ticket = await svc.create_ticket(
                 ServiceTicketCreate(
-                    contract_id=contract.id, title="X",
-                    description="", priority="med",
+                    contract_id=contract.id,
+                    title="X",
+                    description="",
+                    priority="med",
                 ),
                 user_id="d",
             )
@@ -537,22 +555,25 @@ class TestAwaitingCustomerFSM:
 
     def test_in_progress_can_move_to_awaiting_customer(self) -> None:
         from app.modules.service.service import allowed_ticket_transitions
+
         assert "awaiting_customer" in allowed_ticket_transitions("in_progress")
 
     def test_awaiting_customer_resumes_to_in_progress(self) -> None:
         from app.modules.service.service import allowed_ticket_transitions
+
         assert "in_progress" in allowed_ticket_transitions("awaiting_customer")
 
     def test_closed_can_transition_to_in_progress_via_graph(self) -> None:
         """Graph-level: closed→in_progress is allowed (window gate is separate)."""
         from app.modules.service.service import allowed_ticket_transitions
+
         assert "in_progress" in allowed_ticket_transitions("closed")
 
     @pytest.mark.asyncio
     async def test_reopen_outside_window_raises_422(self) -> None:
         """Ticket closed more than TICKET_REOPEN_WINDOW_DAYS days ago → 422."""
-        from app.modules.service.service import TICKET_REOPEN_WINDOW_DAYS
         from app.modules.service.schemas import TicketReopenRequest
+        from app.modules.service.service import TICKET_REOPEN_WINDOW_DAYS
 
         svc = _make_service()
         contract = await _setup_contract(svc)
@@ -562,9 +583,7 @@ class TestAwaitingCustomerFSM:
                 user_id="u",
             )
         # Manually force ticket to closed with an old closed_at date.
-        old_closed = (
-            datetime.now(UTC) - timedelta(days=TICKET_REOPEN_WINDOW_DAYS + 1)
-        ).isoformat()
+        old_closed = (datetime.now(UTC) - timedelta(days=TICKET_REOPEN_WINDOW_DAYS + 1)).isoformat()
         ticket.status = "closed"
         ticket.closed_at = old_closed
 
@@ -605,9 +624,7 @@ class TestSLATwoClock:
         """When no SLA definition exists, both due clocks must be None."""
         from app.modules.service.service import compute_sla_response_and_resolution
 
-        resp, resol = compute_sla_response_and_resolution(
-            datetime.now(UTC), None, priority="med"
-        )
+        resp, resol = compute_sla_response_and_resolution(datetime.now(UTC), None, priority="med")
         assert resp is None
         assert resol is None
 
@@ -616,9 +633,9 @@ class TestSLATwoClock:
         from app.modules.service.service import compute_sla_response_and_resolution
 
         sla = SimpleNamespace(
-            response_time_minutes=60,     # 1-hour response window
-            resolution_time_minutes=1440, # 24-hour resolution window
-            severity_levels={},           # no per-priority overrides
+            response_time_minutes=60,  # 1-hour response window
+            resolution_time_minutes=1440,  # 24-hour resolution window
+            severity_levels={},  # no per-priority overrides
         )
         now = datetime.now(UTC)
         resp, resol = compute_sla_response_and_resolution(now, sla, priority="high")

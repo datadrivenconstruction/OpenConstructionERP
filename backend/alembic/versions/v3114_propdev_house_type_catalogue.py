@@ -172,9 +172,7 @@ def upgrade() -> None:
 
     # Refresh inspector after create_table.
     inspector = sa.inspect(bind)
-    existing_indexes = {
-        idx["name"] for idx in inspector.get_indexes(table_name)
-    }
+    existing_indexes = {idx["name"] for idx in inspector.get_indexes(table_name)}
 
     def _ensure_index(name: str, cols: list[str]) -> None:
         if name not in existing_indexes:
@@ -184,26 +182,20 @@ def upgrade() -> None:
         "ix_oe_property_dev_house_type_catalogue_proj_country",
         ["project_id", "country_code"],
     )
-    _ensure_index(
-        "ix_oe_property_dev_house_type_catalogue_project_id", ["project_id"]
-    )
-    _ensure_index(
-        "ix_oe_property_dev_house_type_catalogue_country_code", ["country_code"]
-    )
-    _ensure_index(
-        "ix_oe_property_dev_house_type_catalogue_is_preset", ["is_preset"]
-    )
-    _ensure_index(
-        "ix_oe_property_dev_house_type_catalogue_created_by", ["created_by"]
-    )
+    _ensure_index("ix_oe_property_dev_house_type_catalogue_project_id", ["project_id"])
+    _ensure_index("ix_oe_property_dev_house_type_catalogue_country_code", ["country_code"])
+    _ensure_index("ix_oe_property_dev_house_type_catalogue_is_preset", ["is_preset"])
+    _ensure_index("ix_oe_property_dev_house_type_catalogue_created_by", ["created_by"])
 
     # Seed presets — skip if any preset row exists (idempotent re-runs).
-    existing_preset_count = bind.execute(
-        sa.text(
-            "SELECT COUNT(*) FROM oe_property_dev_house_type_catalogue "
-            "WHERE is_preset = 1 AND project_id IS NULL"
-        )
-    ).scalar() or 0
+    existing_preset_count = (
+        bind.execute(
+            sa.text(
+                "SELECT COUNT(*) FROM oe_property_dev_house_type_catalogue WHERE is_preset = 1 AND project_id IS NULL"
+            )
+        ).scalar()
+        or 0
+    )
 
     if existing_preset_count == 0:
         rows: list[dict[str, object]] = []
@@ -261,9 +253,7 @@ def downgrade() -> None:
     if not inspector.has_table(table_name):
         return
 
-    existing_indexes = {
-        idx["name"] for idx in inspector.get_indexes(table_name)
-    }
+    existing_indexes = {idx["name"] for idx in inspector.get_indexes(table_name)}
     for ix in (
         "ix_oe_property_dev_house_type_catalogue_proj_country",
         "ix_oe_property_dev_house_type_catalogue_project_id",

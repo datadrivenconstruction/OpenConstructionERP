@@ -95,6 +95,7 @@ def _decorate_bookings(
         out.append(BookingResponse.model_validate(base))
     return out
 
+
 router = APIRouter()
 
 
@@ -184,12 +185,10 @@ async def get_accommodation(
     accom = await get_accommodation_or_404(session, accommodation_id, user_id)
 
     rooms = (
-        await session.execute(
-            select(Room)
-            .where(Room.accommodation_id == accom.id)
-            .order_by(Room.label.asc())
-        )
-    ).scalars().all()
+        (await session.execute(select(Room).where(Room.accommodation_id == accom.id).order_by(Room.label.asc())))
+        .scalars()
+        .all()
+    )
     counter = await active_bookings_count(session, accom.id)
 
     base = AccommodationResponse.model_validate(accom).model_dump(by_alias=False)
@@ -250,7 +249,8 @@ async def list_bookings_for_accommodation_endpoint(
     session: SessionDep,
     user_id: CurrentUserId,
     status_filter: list[str] | None = Query(
-        default=None, alias="status",
+        default=None,
+        alias="status",
     ),
     from_date: date | None = Query(default=None),
     to_date: date | None = Query(default=None),
@@ -314,7 +314,9 @@ async def bulk_create_rooms(
             )
         seen.add(r.label)
         currency = await inherit_currency_for_room(
-            session, accom, r.base_rate_currency,
+            session,
+            accom,
+            r.base_rate_currency,
         )
         new_rooms.append(
             Room(
@@ -330,15 +332,7 @@ async def bulk_create_rooms(
         )
 
     # Verify no existing label collisions before inserting.
-    existing = set(
-        (
-            await session.execute(
-                select(Room.label).where(Room.accommodation_id == accom.id)
-            )
-        )
-        .scalars()
-        .all()
-    )
+    existing = set((await session.execute(select(Room.label).where(Room.accommodation_id == accom.id))).scalars().all())
     collisions = sorted(label for label in seen if label in existing)
     if collisions:
         raise HTTPException(
@@ -366,11 +360,7 @@ async def list_rooms(
 ) -> list[RoomResponse]:
     """List rooms (optionally filtered by status) for one accommodation."""
     accom = await get_accommodation_or_404(session, accommodation_id, user_id)
-    stmt = (
-        select(Room)
-        .where(Room.accommodation_id == accom.id)
-        .order_by(Room.label.asc())
-    )
+    stmt = select(Room).where(Room.accommodation_id == accom.id).order_by(Room.label.asc())
     if room_status is not None:
         stmt = stmt.where(Room.status == room_status)
     rows = (await session.execute(stmt)).scalars().all()
@@ -414,7 +404,8 @@ async def list_bookings_for_room_endpoint(
     session: SessionDep,
     user_id: CurrentUserId,
     status_filter: list[str] | None = Query(
-        default=None, alias="status",
+        default=None,
+        alias="status",
     ),
     from_date: date | None = Query(default=None),
     to_date: date | None = Query(default=None),
@@ -459,7 +450,10 @@ async def create_booking(
     assert_room_bookable(room)
     # Block silent double-booking — half-open overlap with any live row.
     await assert_no_booking_overlap(
-        session, room.id, payload.check_in, payload.check_out,
+        session,
+        room.id,
+        payload.check_in,
+        payload.check_out,
     )
 
     booking = Booking(
@@ -500,15 +494,15 @@ async def get_booking(
 ) -> BookingDetailResponse:
     """Return one booking with its charges."""
     booking, _room, _accom = await get_booking_or_404(
-        session, booking_id, user_id,
+        session,
+        booking_id,
+        user_id,
     )
     charges = (
-        await session.execute(
-            select(Charge)
-            .where(Charge.booking_id == booking.id)
-            .order_by(Charge.created_at.asc())
-        )
-    ).scalars().all()
+        (await session.execute(select(Charge).where(Charge.booking_id == booking.id).order_by(Charge.created_at.asc())))
+        .scalars()
+        .all()
+    )
     base = BookingResponse.model_validate(booking).model_dump(by_alias=False)
     base["charges"] = [ChargeResponse.model_validate(c) for c in charges]
     return BookingDetailResponse.model_validate(base)
@@ -527,7 +521,9 @@ async def update_booking(
 ) -> BookingResponse:
     """Partial update with state-machine enforcement."""
     booking, room, _accom = await get_booking_or_404(
-        session, booking_id, user_id,
+        session,
+        booking_id,
+        user_id,
     )
     data = payload.model_dump(exclude_unset=True)
     metadata = data.pop("metadata", None)
@@ -537,13 +533,12 @@ async def update_booking(
     # transition itself is allowed.
     target_status = data.get("status")
     if target_status is not None and not is_valid_booking_transition(
-        booking.status, target_status,
+        booking.status,
+        target_status,
     ):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=(
-                f"Invalid transition: {booking.status} → {target_status}"
-            ),
+            detail=(f"Invalid transition: {booking.status} → {target_status}"),
         )
 
     # If the patch moves the booking dates and the resulting row will
@@ -552,10 +547,7 @@ async def update_booking(
     # live bookings. Excluding the booking's own id makes a no-op PATCH
     # of identical dates idempotent.
     resulting_status = target_status if target_status is not None else booking.status
-    if (
-        ("check_in" in data or "check_out" in data)
-        and resulting_status in ("reserved", "checked_in")
-    ):
+    if ("check_in" in data or "check_out" in data) and resulting_status in ("reserved", "checked_in"):
         new_check_in = data.get("check_in", booking.check_in)
         new_check_out = data.get("check_out", booking.check_out)
         await assert_no_booking_overlap(
@@ -600,14 +592,18 @@ async def create_charge(
 ) -> ChargeResponse:
     """Attach a charge to a booking. Inherits currency from room if blank."""
     booking, room, accom = await get_booking_or_404(
-        session, booking_id, user_id,
+        session,
+        booking_id,
+        user_id,
     )
 
     currency = payload.currency
     if not currency:
         # Inherit room → project — never a hardcoded EUR.
         currency = room.base_rate_currency or await inherit_currency_for_room(
-            session, accom, "",
+            session,
+            accom,
+            "",
         )
 
     charge = Charge(
@@ -639,15 +635,15 @@ async def list_charges(
 ) -> list[ChargeResponse]:
     """List charges attached to a booking."""
     booking, _room, _accom = await get_booking_or_404(
-        session, booking_id, user_id,
+        session,
+        booking_id,
+        user_id,
     )
     rows = (
-        await session.execute(
-            select(Charge)
-            .where(Charge.booking_id == booking.id)
-            .order_by(Charge.created_at.asc())
-        )
-    ).scalars().all()
+        (await session.execute(select(Charge).where(Charge.booking_id == booking.id).order_by(Charge.created_at.asc())))
+        .scalars()
+        .all()
+    )
     return [ChargeResponse.model_validate(r) for r in rows]
 
 

@@ -336,9 +336,7 @@ async def _sql_search_collection(
                 project_id=str(rset.project_id) if rset.project_id else "",
                 payload={
                     "title": f"{req.entity}.{req.attribute}"[:160],
-                    "constraint": (
-                        f"{req.constraint_type} {req.constraint_value}"
-                    )[:160],
+                    "constraint": (f"{req.constraint_type} {req.constraint_value}")[:160],
                     "status": req.status or "",
                     "priority": req.priority or "",
                 },
@@ -442,9 +440,7 @@ async def unified_search_service(
                     limit=limit_per_collection,
                 )
             except Exception as exc:
-                logger.debug(
-                    "_sql_search_collection(%s) failed: %s", collection, exc
-                )
+                logger.debug("_sql_search_collection(%s) failed: %s", collection, exc)
                 hits = []
             sql_rankings.append(hits)
 

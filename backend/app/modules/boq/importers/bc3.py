@@ -37,7 +37,6 @@ import logging
 from typing import Any, ClassVar
 
 from app.modules.boq.importers._base import (
-    BOQImporter,
     ImportedBOQ,
     ImportedPosition,
     ImporterParseError,
@@ -233,15 +232,20 @@ class BC3Importer:
                 # we sniff the trailing fields for a 3-letter ISO code.
                 for f in fields:
                     f_up = f.strip().upper()
-                    if len(f_up) == 3 and f_up.isalpha() and f_up in (
-                        "EUR",
-                        "USD",
-                        "MXN",
-                        "ARS",
-                        "CLP",
-                        "PEN",
-                        "COP",
-                        "BRL",
+                    if (
+                        len(f_up) == 3
+                        and f_up.isalpha()
+                        and f_up
+                        in (
+                            "EUR",
+                            "USD",
+                            "MXN",
+                            "ARS",
+                            "CLP",
+                            "PEN",
+                            "COP",
+                            "BRL",
+                        )
                     ):
                         currency = f_up
                         break
@@ -286,9 +290,7 @@ class BC3Importer:
                 decompositions.setdefault(parent, [])
                 for trip in triplets:
                     if len(trip) >= 3:
-                        decompositions[parent].append(
-                            (trip[0], safe_float(trip[2], default=0.0))
-                        )
+                        decompositions[parent].append((trip[0], safe_float(trip[2], default=0.0)))
 
             elif hdr == _HDR_MEASUREMENT:
                 # ``~M|PARENT\CHILD|POSITIONS|TOTAL_QTY|COMMENT|``
@@ -333,9 +335,7 @@ class BC3Importer:
 
         for code, concept in concepts.items():
             ctype = concept.get("type", "")
-            is_section = ctype == _CONCEPT_TYPE_CAPITULO or (
-                not ctype and _looks_like_section_code(code)
-            )
+            is_section = ctype == _CONCEPT_TYPE_CAPITULO or (not ctype and _looks_like_section_code(code))
             if is_section:
                 # Emit section row so the editor preserves the BC3
                 # chapter hierarchy.
@@ -374,11 +374,7 @@ class BC3Importer:
                 continue
 
             auto_ord += 1
-            description = (
-                concept.get("summary", "")
-                or extended_texts.get(code, "")
-                or ""
-            ).strip()
+            description = (concept.get("summary", "") or extended_texts.get(code, "") or "").strip()
             if not description:
                 result.skipped += 1
                 continue
@@ -390,14 +386,10 @@ class BC3Importer:
 
             # Sanity caps.
             if not (0 <= quantity <= 1e9):
-                result.errors.append(
-                    {"ordinal": code, "error": f"Quantity out of range: {quantity}"}
-                )
+                result.errors.append({"ordinal": code, "error": f"Quantity out of range: {quantity}"})
                 continue
             if not (0 <= unit_rate <= 1e8):
-                result.errors.append(
-                    {"ordinal": code, "error": f"Unit rate out of range: {unit_rate}"}
-                )
+                result.errors.append({"ordinal": code, "error": f"Unit rate out of range: {unit_rate}"})
                 continue
 
             metadata: dict[str, Any] = {

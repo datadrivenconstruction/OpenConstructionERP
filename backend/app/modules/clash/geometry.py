@@ -286,8 +286,7 @@ def _resolve_unit_scale(scene: object, raw_extent: np.ndarray) -> float:
         return declared
     if _PLAUSIBLE_MODEL_MIN_M <= biggest_raw <= _PLAUSIBLE_MODEL_MAX_M:
         logger.info(
-            "Declared unit scale %.6g would yield a %.1f m model — "
-            "treating raw coordinates as metres instead",
+            "Declared unit scale %.6g would yield a %.1f m model — treating raw coordinates as metres instead",
             declared,
             scaled,
         )
@@ -431,9 +430,7 @@ class ClashGeometryProvider:
                 Defaults to ``<repo>/data`` (same as
                 :class:`app.core.storage.LocalStorageBackend`).
         """
-        self.storage_root: pathlib.Path = (
-            pathlib.Path(storage_root) if storage_root is not None else _repo_data_root()
-        )
+        self.storage_root: pathlib.Path = pathlib.Path(storage_root) if storage_root is not None else _repo_data_root()
 
     # ── path resolution (reuses the bim_hub storage scheme) ────────────
 
@@ -496,9 +493,7 @@ class ClashGeometryProvider:
 
         from app.modules.bim_hub.models import BIMModel
 
-        model = (
-            await session.execute(select(BIMModel).where(BIMModel.id == model_id))
-        ).scalar_one_or_none()
+        model = (await session.execute(select(BIMModel).where(BIMModel.id == model_id))).scalar_one_or_none()
         if model is None:
             logger.warning("clash.geometry: model %s not found", model_id)
             return {}
@@ -648,9 +643,7 @@ class ClashGeometryProvider:
 
         from app.modules.bim_hub.models import BIMModel
 
-        model = (
-            await session.execute(select(BIMModel).where(BIMModel.id == model_id))
-        ).scalar_one_or_none()
+        model = (await session.execute(select(BIMModel).where(BIMModel.id == model_id))).scalar_one_or_none()
         if model is None:
             return 0
         glb_path = self._resolve_glb_path(model)
@@ -667,9 +660,7 @@ class ClashGeometryProvider:
             "discipline": str(getattr(model, "discipline", None) or "Unassigned"),
             "element_count": len(geoms),
             "storeys": sorted({g.storey for g in geoms.values()}),
-            "elements": {
-                nid: {"aabb": list(g.aabb), "storey": g.storey} for nid, g in geoms.items()
-            },
+            "elements": {nid: {"aabb": list(g.aabb), "storey": g.storey} for nid, g in geoms.items()},
         }
         cache_path = self._cache_path(glb_path)
 

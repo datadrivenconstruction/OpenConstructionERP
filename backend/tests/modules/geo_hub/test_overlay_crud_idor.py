@@ -7,7 +7,10 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_see_tenant_a_overlays(
-    http_client, tenant_a, tenant_b, tiny_png,
+    http_client,
+    tenant_a,
+    tenant_b,
+    tiny_png,
 ):
     # Tenant A creates an image overlay.
     files = {"file": ("plan.png", tiny_png, "image/png")}
@@ -51,8 +54,7 @@ async def test_tenant_b_cannot_see_tenant_a_overlays(
 
     # B asking for A's project list -> 404 (project-not-found).
     list_b_cross = await http_client.get(
-        "/api/v1/geo-hub/raster-overlays/"
-        f"?project_id={tenant_a['project_id']}",
+        f"/api/v1/geo-hub/raster-overlays/?project_id={tenant_a['project_id']}",
         headers=tenant_b["headers"],
     )
     assert list_b_cross.status_code == 404
@@ -66,8 +68,7 @@ async def test_tenant_b_cannot_see_tenant_a_overlays(
 
     # After soft delete A no longer sees it in list.
     list_a = await http_client.get(
-        "/api/v1/geo-hub/raster-overlays/"
-        f"?project_id={tenant_a['project_id']}",
+        f"/api/v1/geo-hub/raster-overlays/?project_id={tenant_a['project_id']}",
         headers=tenant_a["headers"],
     )
     assert list_a.status_code == 200

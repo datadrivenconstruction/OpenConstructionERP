@@ -75,15 +75,19 @@ class EPDRecordRepository(_BaseRepo):
             base = base.where(EPDRecord.material_class == material_class)
         if region is not None:
             base = base.where(EPDRecord.region == region)
-        count = (await self.session.execute(
-            select(func.count()).select_from(base.subquery()),
-        )).scalar_one()
+        count = (
+            await self.session.execute(
+                select(func.count()).select_from(base.subquery()),
+            )
+        ).scalar_one()
         stmt = base.order_by(EPDRecord.created_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), int(count)
 
     async def find_epd_by_material_class(
-        self, material_class: str, region: str | None = None,
+        self,
+        material_class: str,
+        region: str | None = None,
     ) -> EPDRecord | None:
         stmt = select(EPDRecord).where(EPDRecord.material_class == material_class)
         if region is not None:
@@ -120,14 +124,12 @@ class MaterialFactorRepository(_BaseRepo):
             base = base.where(MaterialCarbonFactor.cost_item_id == cost_item_id)
         if region is not None:
             base = base.where(MaterialCarbonFactor.region == region)
-        count = (await self.session.execute(
-            select(func.count()).select_from(base.subquery()),
-        )).scalar_one()
-        stmt = (
-            base.order_by(MaterialCarbonFactor.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        count = (
+            await self.session.execute(
+                select(func.count()).select_from(base.subquery()),
+            )
+        ).scalar_one()
+        stmt = base.order_by(MaterialCarbonFactor.created_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), int(count)
 
@@ -141,12 +143,18 @@ class InventoryRepository(_BaseRepo):
     model = CarbonInventory
 
     async def list_for_project(
-        self, project_id: uuid.UUID, *, offset: int = 0, limit: int = 100,
+        self,
+        project_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 100,
     ) -> tuple[list[CarbonInventory], int]:
         base = select(CarbonInventory).where(CarbonInventory.project_id == project_id)
-        count = (await self.session.execute(
-            select(func.count()).select_from(base.subquery()),
-        )).scalar_one()
+        count = (
+            await self.session.execute(
+                select(func.count()).select_from(base.subquery()),
+            )
+        ).scalar_one()
         stmt = base.order_by(CarbonInventory.created_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), int(count)
@@ -161,7 +169,8 @@ class EmbodiedEntryRepository(_BaseRepo):
     model = EmbodiedCarbonEntry
 
     async def list_for_inventory(
-        self, inventory_id: uuid.UUID,
+        self,
+        inventory_id: uuid.UUID,
     ) -> list[EmbodiedCarbonEntry]:
         stmt = select(EmbodiedCarbonEntry).where(
             EmbodiedCarbonEntry.inventory_id == inventory_id,
@@ -182,23 +191,22 @@ class EmbodiedEntryRepository(_BaseRepo):
         )
         if stage is not None:
             base = base.where(EmbodiedCarbonEntry.stage == stage)
-        count = (await self.session.execute(
-            select(func.count()).select_from(base.subquery()),
-        )).scalar_one()
-        stmt = (
-            base.order_by(EmbodiedCarbonEntry.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        count = (
+            await self.session.execute(
+                select(func.count()).select_from(base.subquery()),
+            )
+        ).scalar_one()
+        stmt = base.order_by(EmbodiedCarbonEntry.created_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), int(count)
 
     async def entries_by_stage(
-        self, inventory_id: uuid.UUID, stage: str,
+        self,
+        inventory_id: uuid.UUID,
+        stage: str,
     ) -> list[EmbodiedCarbonEntry]:
         stmt = select(EmbodiedCarbonEntry).where(
-            (EmbodiedCarbonEntry.inventory_id == inventory_id)
-            & (EmbodiedCarbonEntry.stage == stage),
+            (EmbodiedCarbonEntry.inventory_id == inventory_id) & (EmbodiedCarbonEntry.stage == stage),
         )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
@@ -240,12 +248,11 @@ class TargetRepository(_BaseRepo):
     model = CarbonTarget
 
     async def targets_for_project(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> list[CarbonTarget]:
         stmt = (
-            select(CarbonTarget)
-            .where(CarbonTarget.project_id == project_id)
-            .order_by(CarbonTarget.created_at.desc())
+            select(CarbonTarget).where(CarbonTarget.project_id == project_id).order_by(CarbonTarget.created_at.desc())
         )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
@@ -260,7 +267,8 @@ class SustainabilityReportRepository(_BaseRepo):
     model = SustainabilityReport
 
     async def reports_for_project(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> list[SustainabilityReport]:
         stmt = (
             select(SustainabilityReport)

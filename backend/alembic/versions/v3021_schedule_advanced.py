@@ -169,7 +169,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -180,9 +182,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── MasterSchedule ─────────────────────────────────────────────────
     if not _has_table(inspector, "oe_schedule_advanced_master_schedule"):
@@ -237,7 +237,8 @@ def upgrade() -> None:
                 "master_schedule_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_schedule_advanced_master_schedule.id", ondelete="CASCADE",
+                    "oe_schedule_advanced_master_schedule.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -282,7 +283,8 @@ def upgrade() -> None:
                 "master_schedule_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_schedule_advanced_master_schedule.id", ondelete="CASCADE",
+                    "oe_schedule_advanced_master_schedule.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -296,7 +298,10 @@ def upgrade() -> None:
             ),
             sa.Column("generated_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column(
-                "status", sa.String(32), nullable=False, server_default="draft",
+                "status",
+                sa.String(32),
+                nullable=False,
+                server_default="draft",
             ),
         )
 
@@ -321,7 +326,8 @@ def upgrade() -> None:
                 "look_ahead_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_schedule_advanced_look_ahead.id", ondelete="SET NULL",
+                    "oe_schedule_advanced_look_ahead.id",
+                    ondelete="SET NULL",
                 ),
                 nullable=True,
             ),
@@ -343,7 +349,10 @@ def upgrade() -> None:
                 nullable=True,
             ),
             sa.Column(
-                "status", sa.String(32), nullable=False, server_default="open",
+                "status",
+                sa.String(32),
+                nullable=False,
+                server_default="open",
             ),
         )
 
@@ -368,7 +377,8 @@ def upgrade() -> None:
                 "master_schedule_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_schedule_advanced_master_schedule.id", ondelete="CASCADE",
+                    "oe_schedule_advanced_master_schedule.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -382,7 +392,10 @@ def upgrade() -> None:
                 nullable=True,
             ),
             sa.Column(
-                "status", sa.String(32), nullable=False, server_default="draft",
+                "status",
+                sa.String(32),
+                nullable=False,
+                server_default="draft",
             ),
             sa.Column("ppc_percent", sa.Numeric(5, 2), nullable=True),
             sa.Column("notes", sa.Text(), nullable=False, server_default=""),
@@ -409,13 +422,17 @@ def upgrade() -> None:
                 "week_plan_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_schedule_advanced_weekly_plan.id", ondelete="CASCADE",
+                    "oe_schedule_advanced_weekly_plan.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column("task_ref", guid_type, nullable=False),
             sa.Column(
-                "worker_or_crew", sa.String(255), nullable=False, server_default="",
+                "worker_or_crew",
+                sa.String(255),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
                 "promised_qty",
@@ -427,7 +444,10 @@ def upgrade() -> None:
             sa.Column("planned_start", sa.Date(), nullable=True),
             sa.Column("planned_finish", sa.Date(), nullable=True),
             sa.Column(
-                "status", sa.String(32), nullable=False, server_default="planned",
+                "status",
+                sa.String(32),
+                nullable=False,
+                server_default="planned",
             ),
             sa.Column(
                 "made_by_user_id",
@@ -461,7 +481,8 @@ def upgrade() -> None:
                 "commitment_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_schedule_advanced_commitment.id", ondelete="CASCADE",
+                    "oe_schedule_advanced_commitment.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -475,7 +496,10 @@ def upgrade() -> None:
                 nullable=True,
             ),
             sa.Column(
-                "root_cause_notes", sa.Text(), nullable=False, server_default="",
+                "root_cause_notes",
+                sa.Text(),
+                nullable=False,
+                server_default="",
             ),
         )
 
@@ -500,7 +524,8 @@ def upgrade() -> None:
                 "master_schedule_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_schedule_advanced_master_schedule.id", ondelete="CASCADE",
+                    "oe_schedule_advanced_master_schedule.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -515,7 +540,10 @@ def upgrade() -> None:
             sa.Column("snapshot", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column("notes", sa.Text(), nullable=False, server_default=""),
             sa.Column(
-                "status", sa.String(32), nullable=False, server_default="active",
+                "status",
+                sa.String(32),
+                nullable=False,
+                server_default="active",
             ),
         )
 
@@ -540,7 +568,8 @@ def upgrade() -> None:
                 "baseline_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_schedule_advanced_baseline.id", ondelete="CASCADE",
+                    "oe_schedule_advanced_baseline.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -548,7 +577,8 @@ def upgrade() -> None:
                 "current_master_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_schedule_advanced_master_schedule.id", ondelete="CASCADE",
+                    "oe_schedule_advanced_master_schedule.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -604,7 +634,10 @@ def upgrade() -> None:
             ),
             sa.Column("holidays", sa.JSON(), nullable=False, server_default="[]"),
             sa.Column(
-                "special_shifts", sa.JSON(), nullable=False, server_default="{}",
+                "special_shifts",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column(
                 "is_default",

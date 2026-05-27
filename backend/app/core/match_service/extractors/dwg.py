@@ -83,10 +83,7 @@ def extract(raw: dict[str, Any]) -> ElementEnvelope:
     """
     description = str(raw.get("description") or "").strip()
     layer = str(raw.get("layer") or "").strip()
-    category = (
-        str(raw.get("category") or "").strip()
-        or _category_from_layer(layer)
-    )
+    category = str(raw.get("category") or "").strip() or _category_from_layer(layer)
 
     properties: dict[str, Any] = {}
     if layer:

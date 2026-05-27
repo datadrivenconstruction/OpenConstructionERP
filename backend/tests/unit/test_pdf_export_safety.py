@@ -22,13 +22,10 @@ no longer crashes and no longer renders attacker-supplied markup.
 from __future__ import annotations
 
 import uuid
-from typing import Any
 
-import pytest
 from reportlab.lib.styles import ParagraphStyle
 
 from app.modules.boq.pdf_export import _safe_para
-
 
 # ─────────────────────────────────────────────────────────────────────────
 # _safe_para — unit-level contract

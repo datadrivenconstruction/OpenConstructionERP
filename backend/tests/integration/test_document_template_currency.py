@@ -38,7 +38,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -52,10 +51,11 @@ async def app_instance():
     app = create_app()
     async with app.router.lifespan_context(app):
         from app.database import Base, engine
+        from app.modules.projects import models as _project_models  # noqa: F401
+        from app.modules.property_dev import models as _propdev_models  # noqa: F401
+
         # Import all relevant model namespaces so SQLAlchemy knows the tables.
         from app.modules.reporting import models as _reporting_models  # noqa: F401
-        from app.modules.property_dev import models as _propdev_models  # noqa: F401
-        from app.modules.projects import models as _project_models  # noqa: F401
 
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -76,11 +76,7 @@ async def _activate_admin(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await s.commit()
 
 
@@ -233,7 +229,9 @@ async def test_resolver_require_resolved_ok_when_override_supplied(app_instance)
 
 @pytest.mark.asyncio
 async def test_resolver_currency_change_reflected_on_next_call(
-    http_client, admin_headers, app_instance,
+    http_client,
+    admin_headers,
+    app_instance,
 ):
     """Changing the project's currency is reflected in the next resolve call."""
     from sqlalchemy import update
@@ -252,9 +250,7 @@ async def test_resolver_currency_change_reflected_on_next_call(
 
     # Swap currency to MXN.
     async with async_session_factory() as session:
-        await session.execute(
-            update(Project).where(Project.id == pid).values(currency="MXN")
-        )
+        await session.execute(update(Project).where(Project.id == pid).values(currency="MXN"))
         await session.commit()
 
     # Second resolution: should now return MXN.
@@ -292,9 +288,7 @@ async def test_custom_template_override_currency_persisted(app_instance):
     async with async_session_factory() as session:
         loaded = await session.get(PropertyDevCustomTemplate, tmpl_id)
         assert loaded is not None
-        assert loaded.override_currency == "USD", (
-            f"Expected override_currency='USD', got {loaded.override_currency!r}"
-        )
+        assert loaded.override_currency == "USD", f"Expected override_currency='USD', got {loaded.override_currency!r}"
 
 
 @pytest.mark.asyncio
@@ -330,7 +324,9 @@ async def test_custom_template_override_currency_nullable(app_instance):
 
 @pytest.mark.asyncio
 async def test_resolver_uses_template_override_over_project(
-    http_client, admin_headers, app_instance,
+    http_client,
+    admin_headers,
+    app_instance,
 ):
     """When template.override_currency != project.currency, override wins."""
     from app.database import async_session_factory
@@ -366,6 +362,4 @@ async def test_resolver_uses_template_override_over_project(
             override_currency=loaded.override_currency,
         )
 
-    assert resolved == "AED", (
-        f"Expected 'AED' from template override, got {resolved!r}"
-    )
+    assert resolved == "AED", f"Expected 'AED' from template override, got {resolved!r}"

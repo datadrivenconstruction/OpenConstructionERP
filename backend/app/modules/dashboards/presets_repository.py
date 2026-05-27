@@ -32,9 +32,7 @@ class DashboardPresetRepository:
         tenant_id: str | None,
     ) -> DashboardPreset | None:
         """‌⁠‍Return one preset by id, constrained to the caller's tenant."""
-        stmt = select(DashboardPreset).where(
-            DashboardPreset.id == _as_uuid(preset_id)
-        )
+        stmt = select(DashboardPreset).where(DashboardPreset.id == _as_uuid(preset_id))
         if tenant_id is not None:
             stmt = stmt.where(DashboardPreset.tenant_id == str(tenant_id))
         result = await self.session.execute(stmt)
@@ -97,17 +95,9 @@ class DashboardPresetRepository:
         if kind is not None:
             base = base.where(DashboardPreset.kind == kind)
 
-        total = (
-            await self.session.execute(
-                select(func.count()).select_from(base.subquery())
-            )
-        ).scalar_one()
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
 
-        rows_stmt = (
-            base.order_by(DashboardPreset.created_at.desc())
-            .limit(limit)
-            .offset(offset)
-        )
+        rows_stmt = base.order_by(DashboardPreset.created_at.desc()).limit(limit).offset(offset)
         rows = (await self.session.execute(rows_stmt)).scalars().all()
         return list(rows), total
 

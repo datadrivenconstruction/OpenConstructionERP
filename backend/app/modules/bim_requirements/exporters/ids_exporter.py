@@ -158,7 +158,7 @@ def export_ids_xml(
         # Insert after the XML declaration's closing ?>.
         end = xml.find("?>")
         if end != -1:
-            xml = xml[: end + 2] + marker + xml[end + 2:]
+            xml = xml[: end + 2] + marker + xml[end + 2 :]
     else:
         xml = marker + xml
     return xml
@@ -182,9 +182,7 @@ def _add_property_facet(parent: ET.Element, req: UniversalRequirement) -> None:
     _make_simple_value(prop, f"{{{_IDS_NS}}}baseName", req.property_name)
 
     # Value with restrictions
-    has_value_constraint = any(
-        k in cd for k in ("value", "enum", "pattern", "min", "max")
-    )
+    has_value_constraint = any(k in cd for k in ("value", "enum", "pattern", "min", "max"))
     if has_value_constraint:
         value_el = ET.SubElement(prop, f"{{{_IDS_NS}}}value")
         if "value" in cd and "enum" not in cd and "pattern" not in cd:
@@ -204,9 +202,7 @@ def _add_attribute_facet(parent: ET.Element, req: UniversalRequirement) -> None:
 
     _make_simple_value(attr, f"{{{_IDS_NS}}}name", req.property_name)
 
-    has_value_constraint = any(
-        k in cd for k in ("value", "enum", "pattern", "min", "max")
-    )
+    has_value_constraint = any(k in cd for k in ("value", "enum", "pattern", "min", "max"))
     if has_value_constraint:
         value_el = ET.SubElement(attr, f"{{{_IDS_NS}}}value")
         if "value" in cd and "enum" not in cd and "pattern" not in cd:

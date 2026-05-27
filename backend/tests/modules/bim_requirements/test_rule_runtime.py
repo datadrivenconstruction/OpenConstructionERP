@@ -173,12 +173,14 @@ def test_selector_classification_wildcard() -> None:
 
 
 def test_evaluate_rule_passes() -> None:
-    rule = Rule.model_validate({
-        "id": "ok",
-        "name": "ok",
-        "selector": {"ifc_class": "IfcSpace"},
-        "assertion": {"property": {"key": "Width", "op": "gte", "value": 1.5}},
-    })
+    rule = Rule.model_validate(
+        {
+            "id": "ok",
+            "name": "ok",
+            "selector": {"ifc_class": "IfcSpace"},
+            "assertion": {"property": {"key": "Width", "op": "gte", "value": 1.5}},
+        }
+    )
     elem = {"id": "e1", "ifc_class": "IfcSpace", "properties": {"Width": 1.6}}
     result = evaluate_rule(rule, elem)
     assert result is not None
@@ -187,13 +189,15 @@ def test_evaluate_rule_passes() -> None:
 
 
 def test_evaluate_rule_fails_with_templated_message() -> None:
-    rule = Rule.model_validate({
-        "id": "narrow",
-        "name": "narrow corridor",
-        "selector": {"ifc_class": "IfcSpace"},
-        "assertion": {"property": {"key": "Width", "op": "gte", "value": 1.5}},
-        "failure_message": "Width {{Width}} m below 1.5 m.",
-    })
+    rule = Rule.model_validate(
+        {
+            "id": "narrow",
+            "name": "narrow corridor",
+            "selector": {"ifc_class": "IfcSpace"},
+            "assertion": {"property": {"key": "Width", "op": "gte", "value": 1.5}},
+            "failure_message": "Width {{Width}} m below 1.5 m.",
+        }
+    )
     elem = {"id": "e1", "ifc_class": "IfcSpace", "properties": {"Width": 1.2}}
     result = evaluate_rule(rule, elem)
     assert result is not None
@@ -204,31 +208,35 @@ def test_evaluate_rule_fails_with_templated_message() -> None:
 
 def test_evaluate_rule_skips_non_matching_element() -> None:
     """Returns None when the selector does not match."""
-    rule = Rule.model_validate({
-        "id": "x",
-        "name": "x",
-        "selector": {"ifc_class": "IfcSpace"},
-        "assertion": {"property": {"key": "Width", "op": "gte", "value": 1.5}},
-    })
+    rule = Rule.model_validate(
+        {
+            "id": "x",
+            "name": "x",
+            "selector": {"ifc_class": "IfcSpace"},
+            "assertion": {"property": {"key": "Width", "op": "gte", "value": 1.5}},
+        }
+    )
     elem = {"id": "e1", "ifc_class": "IfcWall", "properties": {"Width": 1.0}}
     assert evaluate_rule(rule, elem) is None
 
 
 def test_evaluate_rule_set_vs_set_fails_when_clearance_too_small() -> None:
-    rule = Rule.model_validate({
-        "id": "clr",
-        "name": "clearance",
-        "rule_type": "set_vs_set",
-        "selector": {"ifc_class": "IfcPipeSegment"},
-        "assertion": {
-            "set_vs_set": {
-                "other_selector": {"ifc_class": "IfcBeam"},
-                "metric": "clearance",
-                "property": {"key": "ClearanceToStructure", "op": "gte", "value": 0.1},
+    rule = Rule.model_validate(
+        {
+            "id": "clr",
+            "name": "clearance",
+            "rule_type": "set_vs_set",
+            "selector": {"ifc_class": "IfcPipeSegment"},
+            "assertion": {
+                "set_vs_set": {
+                    "other_selector": {"ifc_class": "IfcBeam"},
+                    "metric": "clearance",
+                    "property": {"key": "ClearanceToStructure", "op": "gte", "value": 0.1},
+                },
             },
-        },
-        "failure_message": "Pipe {{id}} too close.",
-    })
+            "failure_message": "Pipe {{id}} too close.",
+        }
+    )
     pipe = {"id": "p1", "ifc_class": "IfcPipeSegment", "properties": {"ClearanceToStructure": 0.05}}
     beam = {"id": "b1", "ifc_class": "IfcBeam"}
     result = evaluate_rule(rule, pipe, other_elements=[beam])
@@ -239,19 +247,21 @@ def test_evaluate_rule_set_vs_set_fails_when_clearance_too_small() -> None:
 
 def test_evaluate_rule_set_vs_set_passes_when_no_other_set_members() -> None:
     """When the other selector matches nothing, the rule trivially passes."""
-    rule = Rule.model_validate({
-        "id": "clr",
-        "name": "clearance",
-        "rule_type": "set_vs_set",
-        "selector": {"ifc_class": "IfcPipeSegment"},
-        "assertion": {
-            "set_vs_set": {
-                "other_selector": {"ifc_class": "IfcBeam"},
-                "metric": "clearance",
-                "property": {"key": "ClearanceToStructure", "op": "gte", "value": 0.1},
+    rule = Rule.model_validate(
+        {
+            "id": "clr",
+            "name": "clearance",
+            "rule_type": "set_vs_set",
+            "selector": {"ifc_class": "IfcPipeSegment"},
+            "assertion": {
+                "set_vs_set": {
+                    "other_selector": {"ifc_class": "IfcBeam"},
+                    "metric": "clearance",
+                    "property": {"key": "ClearanceToStructure", "op": "gte", "value": 0.1},
+                },
             },
-        },
-    })
+        }
+    )
     pipe = {"id": "p1", "ifc_class": "IfcPipeSegment", "properties": {"ClearanceToStructure": 0.05}}
     # No beams at all in the model.
     result = evaluate_rule(rule, pipe, other_elements=[])
@@ -263,20 +273,23 @@ def test_evaluate_rule_set_vs_set_passes_when_no_other_set_members() -> None:
 
 
 def _corridor_pack() -> RulePack:
-    return load_rule_pack("<inline>", text=(
-        "schema_version: '1.0'\n"
-        "pack: { id: corridor, name: corridor }\n"
-        "rules:\n"
-        "  - id: width\n"
-        "    name: corridor width\n"
-        "    selector:\n"
-        "      ifc_class: IfcSpace\n"
-        "      properties:\n"
-        "        - { key: SpaceType, op: eq, value: Corridor }\n"
-        "    assertion:\n"
-        "      property: { key: Width, op: gte, value: 1.5 }\n"
-        "    failure_message: 'Width {{Width}} m below 1.5 m.'\n"
-    ))
+    return load_rule_pack(
+        "<inline>",
+        text=(
+            "schema_version: '1.0'\n"
+            "pack: { id: corridor, name: corridor }\n"
+            "rules:\n"
+            "  - id: width\n"
+            "    name: corridor width\n"
+            "    selector:\n"
+            "      ifc_class: IfcSpace\n"
+            "      properties:\n"
+            "        - { key: SpaceType, op: eq, value: Corridor }\n"
+            "    assertion:\n"
+            "      property: { key: Width, op: gte, value: 1.5 }\n"
+            "    failure_message: 'Width {{Width}} m below 1.5 m.'\n"
+        ),
+    )
 
 
 def test_pack_summary_counts() -> None:
@@ -284,7 +297,7 @@ def test_pack_summary_counts() -> None:
     elements = [
         {"id": "c1", "ifc_class": "IfcSpace", "properties": {"SpaceType": "Corridor", "Width": 1.8}},  # pass
         {"id": "c2", "ifc_class": "IfcSpace", "properties": {"SpaceType": "Corridor", "Width": 1.2}},  # fail
-        {"id": "r1", "ifc_class": "IfcSpace", "properties": {"SpaceType": "Office", "Width": 0.5}},   # n/a
+        {"id": "r1", "ifc_class": "IfcSpace", "properties": {"SpaceType": "Office", "Width": 0.5}},  # n/a
         {"id": "w1", "ifc_class": "IfcWall"},  # n/a
     ]
     result = evaluate_rule_pack(pack, elements)
@@ -308,12 +321,14 @@ def test_pack_summary_on_empty_input() -> None:
 
 def test_unicode_property_keys_and_values() -> None:
     """The runtime must not corrupt non-ASCII property values."""
-    rule = Rule.model_validate({
-        "id": "umlaut",
-        "name": "umlaut",
-        "selector": {"ifc_class": "IfcSpace"},
-        "assertion": {"property": {"key": "Name", "op": "regex", "value": r"^Büro"}},
-    })
+    rule = Rule.model_validate(
+        {
+            "id": "umlaut",
+            "name": "umlaut",
+            "selector": {"ifc_class": "IfcSpace"},
+            "assertion": {"property": {"key": "Name", "op": "regex", "value": r"^Büro"}},
+        }
+    )
     elem = {"id": "e1", "ifc_class": "IfcSpace", "properties": {"Name": "Büro 2.OG"}}
     result = evaluate_rule(rule, elem)
     assert result is not None

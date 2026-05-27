@@ -157,11 +157,7 @@ async def _register_admin(client: AsyncClient) -> tuple[dict[str, str], str]:
     )
     assert reg.status_code == 201, reg.text
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
     resp = await client.post(
         "/api/v1/users/auth/login",
@@ -210,18 +206,13 @@ def test_get_photo_handler_is_idor_guarded() -> None:
     import ast
     from pathlib import Path
 
-    router_src = (
-        Path(__file__).resolve().parents[2]
-        / "app" / "modules" / "documents" / "router.py"
-    ).read_text(encoding="utf-8")
+    router_src = (Path(__file__).resolve().parents[2] / "app" / "modules" / "documents" / "router.py").read_text(
+        encoding="utf-8"
+    )
     tree = ast.parse(router_src)
 
     fn = next(
-        (
-            n
-            for n in ast.walk(tree)
-            if isinstance(n, ast.AsyncFunctionDef) and n.name == "get_photo"
-        ),
+        (n for n in ast.walk(tree) if isinstance(n, ast.AsyncFunctionDef) and n.name == "get_photo"),
         None,
     )
     assert fn is not None, "get_photo handler not found"
@@ -235,14 +226,8 @@ def test_get_photo_handler_is_idor_guarded() -> None:
         isinstance(node, ast.Await)
         and isinstance(node.value, ast.Call)
         and (
-            (
-                isinstance(node.value.func, ast.Name)
-                and node.value.func.id == "verify_project_access"
-            )
-            or (
-                isinstance(node.value.func, ast.Attribute)
-                and node.value.func.attr == "verify_project_access"
-            )
+            (isinstance(node.value.func, ast.Name) and node.value.func.id == "verify_project_access")
+            or (isinstance(node.value.func, ast.Attribute) and node.value.func.attr == "verify_project_access")
         )
         for node in ast.walk(fn)
     )
@@ -254,10 +239,7 @@ def test_get_photo_handler_is_idor_guarded() -> None:
     deco_src = ast.get_source_segment(router_src, fn) or ""
     # The dependency is on the @router.get(...) decorator immediately
     # above; assert it's wired by checking the decorator list.
-    deco_has_dep = any(
-        "RequirePermission" in (ast.get_source_segment(router_src, d) or "")
-        for d in fn.decorator_list
-    )
+    deco_has_dep = any("RequirePermission" in (ast.get_source_segment(router_src, d) or "") for d in fn.decorator_list)
     assert deco_has_dep, "get_photo missing RequirePermission dependency"
 
 
@@ -284,22 +266,16 @@ async def test_photo_delete_removes_cross_linked_document(
     assert up.status_code == 201, up.text
     photo_id = up.json()["id"]
 
-    s1 = await client.get(
-        f"/api/v1/documents/summary/?project_id={pid}", headers=headers
-    )
+    s1 = await client.get(f"/api/v1/documents/summary/?project_id={pid}", headers=headers)
     assert s1.status_code == 200, s1.text
     photo_count_before = s1.json()["by_category"].get("photo", 0)
     total_before = s1.json()["total"]
     assert photo_count_before >= 1
 
-    d = await client.delete(
-        f"/api/v1/documents/photos/{photo_id}", headers=headers
-    )
+    d = await client.delete(f"/api/v1/documents/photos/{photo_id}", headers=headers)
     assert d.status_code == 204, d.text
 
-    s2 = await client.get(
-        f"/api/v1/documents/summary/?project_id={pid}", headers=headers
-    )
+    s2 = await client.get(f"/api/v1/documents/summary/?project_id={pid}", headers=headers)
     assert s2.status_code == 200, s2.text
     body = s2.json()
     # The cross-linked Document is gone — the orphan no longer counts.
@@ -417,8 +393,7 @@ async def test_photo_49mb_accepted(client: AsyncClient) -> None:
     # service doesn't decode the image, it only sniffs magic bytes,
     # so padding after the PNG signature is fine.
     png_head = (
-        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
-        b"\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89"
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89"
     )
     payload = png_head + (b"\x00" * (49 * 1024 * 1024))
     r = await client.post(
@@ -437,8 +412,7 @@ async def test_oversize_photo_upload_413(client: AsyncClient) -> None:
     headers, _ = await _register_admin(client)
     pid = await _make_project(client, headers)
     png_head = (
-        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
-        b"\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89"
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89"
     )
     oversize = png_head + (b"\x00" * (MAX_PHOTO_SIZE + 1024))
     r = await client.post(
@@ -527,9 +501,7 @@ async def test_revision_conflict_guard_rejects_dual_current() -> None:
     svc.session = _Session()  # type: ignore[assignment]
 
     with pytest.raises(HTTPException) as exc:
-        await svc.update_document(
-            target_doc_id, DocumentUpdate(is_current_revision=True)
-        )
+        await svc.update_document(target_doc_id, DocumentUpdate(is_current_revision=True))
     assert exc.value.status_code == 409
     assert "current revision" in str(exc.value.detail).lower()
 
@@ -586,7 +558,5 @@ async def test_revision_promote_allowed_when_no_other_current() -> None:
     svc.repo = _Repo()  # type: ignore[attr-defined]
     svc.session = _Session()  # type: ignore[assignment]
 
-    await svc.update_document(
-        target_doc_id, DocumentUpdate(is_current_revision=True)
-    )
+    await svc.update_document(target_doc_id, DocumentUpdate(is_current_revision=True))
     assert updated_fields.get("is_current_revision") is True

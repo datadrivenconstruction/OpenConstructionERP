@@ -31,12 +31,14 @@ class Transmittal(Base):
     issued_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     response_due_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="draft", server_default="draft", index=True,
+        String(50),
+        nullable=False,
+        default="draft",
+        server_default="draft",
+        index=True,
     )
     cover_note: Mapped[str | None] = mapped_column(Text, nullable=True)
-    is_locked: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    is_locked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -76,13 +78,9 @@ class TransmittalRecipient(Base):
     recipient_org_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     recipient_user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     action_required: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    acknowledged_at: Mapped[str | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    acknowledged_at: Mapped[str | None] = mapped_column(DateTime(timezone=True), nullable=True)
     response: Mapped[str | None] = mapped_column(Text, nullable=True)
-    responded_at: Mapped[str | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    responded_at: Mapped[str | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     transmittal: Mapped[Transmittal] = relationship(back_populates="recipients")

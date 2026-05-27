@@ -401,8 +401,7 @@ class TestBuildFederatedView:
         try:
             rows = await federated_query(
                 view,
-                f'SELECT "{PROVENANCE_PROJECT_COL}", "{PROVENANCE_SNAPSHOT_COL}" '
-                f'FROM "{view.view_name}"',
+                f'SELECT "{PROVENANCE_PROJECT_COL}", "{PROVENANCE_SNAPSHOT_COL}" FROM "{view.view_name}"',
                 limit=20,
             )
             project_ids = {r[PROVENANCE_PROJECT_COL] for r in rows}
@@ -556,8 +555,7 @@ class TestFederatedQuery:
         try:
             rows = await federated_query(
                 view,
-                f'SELECT entity_guid, category FROM "{view.view_name}" '
-                f"ORDER BY entity_guid",
+                f'SELECT entity_guid, category FROM "{view.view_name}" ORDER BY entity_guid',
                 limit=10,
             )
             guids = [r["entity_guid"] for r in rows]
@@ -586,7 +584,9 @@ class TestFederatedQuery:
         await view.close()
         with pytest.raises(Exception):
             await federated_query(
-                view, f'SELECT 1 FROM "{view.view_name}"', limit=10,
+                view,
+                f'SELECT 1 FROM "{view.view_name}"',
+                limit=10,
             )
 
     @pytest.mark.asyncio
@@ -610,7 +610,9 @@ class TestFederatedQuery:
         try:
             with pytest.raises(FederationSqlError):
                 await federated_query(
-                    view, "DROP TABLE entities", limit=10,
+                    view,
+                    "DROP TABLE entities",
+                    limit=10,
                 )
         finally:
             await view.close()

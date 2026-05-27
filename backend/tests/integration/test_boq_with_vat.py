@@ -17,8 +17,7 @@ from decimal import Decimal
 import pytest
 from pydantic import ValidationError
 
-from app.modules.boq.schemas import BOQCreate, BOQListItem, BOQWithSections, BOQUpdate
-
+from app.modules.boq.schemas import BOQCreate, BOQListItem, BOQUpdate, BOQWithSections
 
 # ── BOQCreate schema — tax_rate validation ──────────────────────────────────
 

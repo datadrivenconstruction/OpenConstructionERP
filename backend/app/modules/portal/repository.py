@@ -61,9 +61,7 @@ class PortalUserRepository:
         return list(result.scalars().all()), total
 
     async def update_fields(self, user_id: uuid.UUID, **fields: Any) -> None:
-        stmt = (
-            update(PortalUser).where(PortalUser.id == user_id).values(**fields)
-        )
+        stmt = update(PortalUser).where(PortalUser.id == user_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()
@@ -135,11 +133,7 @@ class PortalAccessRuleRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = (
-            base.order_by(PortalAccessRule.granted_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = base.order_by(PortalAccessRule.granted_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), int(total)
 
@@ -149,11 +143,7 @@ class PortalAccessRuleRepository:
         return rule
 
     async def update_fields(self, rule_id: uuid.UUID, **fields: Any) -> None:
-        stmt = (
-            update(PortalAccessRule)
-            .where(PortalAccessRule.id == rule_id)
-            .values(**fields)
-        )
+        stmt = update(PortalAccessRule).where(PortalAccessRule.id == rule_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()
@@ -195,11 +185,7 @@ class PortalSessionRepository:
         return sess
 
     async def update_fields(self, session_id: uuid.UUID, **fields: Any) -> None:
-        stmt = (
-            update(PortalSession)
-            .where(PortalSession.id == session_id)
-            .values(**fields)
-        )
+        stmt = update(PortalSession).where(PortalSession.id == session_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()
@@ -237,7 +223,8 @@ class PortalMagicLinkRepository:
         return link
 
     async def get_by_token_hash(
-        self, token_hash: str,
+        self,
+        token_hash: str,
     ) -> PortalMagicLink | None:
         stmt = select(PortalMagicLink).where(
             PortalMagicLink.token_hash == token_hash,
@@ -246,11 +233,7 @@ class PortalMagicLinkRepository:
         return result.scalar_one_or_none()
 
     async def update_fields(self, link_id: uuid.UUID, **fields: Any) -> None:
-        stmt = (
-            update(PortalMagicLink)
-            .where(PortalMagicLink.id == link_id)
-            .values(**fields)
-        )
+        stmt = update(PortalMagicLink).where(PortalMagicLink.id == link_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()
@@ -287,11 +270,7 @@ class PortalNotificationRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = (
-            base.order_by(PortalNotification.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = base.order_by(PortalNotification.created_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), total
 
@@ -309,11 +288,7 @@ class PortalNotificationRepository:
         return int((await self.session.execute(stmt)).scalar_one())
 
     async def update_fields(self, notif_id: uuid.UUID, **fields: Any) -> None:
-        stmt = (
-            update(PortalNotification)
-            .where(PortalNotification.id == notif_id)
-            .values(**fields)
-        )
+        stmt = update(PortalNotification).where(PortalNotification.id == notif_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()
@@ -326,7 +301,8 @@ class PortalDocumentAccessLogRepository:
         self.session = session
 
     async def create(
-        self, entry: PortalDocumentAccessLog,
+        self,
+        entry: PortalDocumentAccessLog,
     ) -> PortalDocumentAccessLog:
         self.session.add(entry)
         await self.session.flush()
@@ -353,11 +329,7 @@ class PortalDocumentAccessLogRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = (
-            base.order_by(PortalDocumentAccessLog.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = base.order_by(PortalDocumentAccessLog.created_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), total
 

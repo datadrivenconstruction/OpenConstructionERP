@@ -16,12 +16,11 @@ Covers Round-3 Wave F sweep findings:
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from fastapi import HTTPException
 from pydantic import ValidationError
 
 from app.core.permissions import Role, permission_registry
@@ -34,12 +33,7 @@ from app.modules.hse_advanced.schemas import (
     AuditFindingPayload,
     InvestigationCreate,
 )
-from app.modules.hse_advanced.service import HSEAdvancedService
 from tests.unit.test_hse_advanced import (  # type: ignore[import-not-found]
-    _FindingRepo,
-    _JSATemplateRepo,
-    _StubRepo,
-    _StubSession,
     _make_service,
 )
 
@@ -73,7 +67,9 @@ async def test_close_capa_writes_audit_log_row() -> None:
         new_callable=AsyncMock,
     ) as mock_log:
         await svc.close_capa(
-            capa.id, verification_notes="Verified by HSE", user_id=USER_ID,
+            capa.id,
+            verification_notes="Verified by HSE",
+            user_id=USER_ID,
         )
 
     assert mock_log.await_count == 1
@@ -155,7 +151,6 @@ async def test_complete_audit_writes_status_change_audit_row() -> None:
 @pytest.mark.asyncio
 async def test_jsa_template_repo_accepts_tri_state_is_active() -> None:
     """``is_active=None`` must return both active and inactive rows."""
-    from app.modules.hse_advanced.models import JSATemplate
 
     captured: list[Any] = []
 
@@ -168,9 +163,12 @@ async def test_jsa_template_repo_accepts_tri_state_is_active() -> None:
                     class _S:
                         def all(self) -> list[Any]:
                             return []
+
                     return _S()
+
                 def scalar_one(self) -> int:
                     return 0
+
             return _R()
 
     repo = JSATemplateRepository(_RecordingSession())  # type: ignore[arg-type]
@@ -198,7 +196,6 @@ async def test_jsa_template_repo_accepts_tri_state_is_active() -> None:
 @pytest.mark.asyncio
 async def test_toolbox_topic_repo_legacy_active_only_still_works() -> None:
     """Legacy ``active_only=True`` callers (e.g. test stubs) keep working."""
-    from app.modules.hse_advanced.models import ToolboxTopic
 
     captured: list[str] = []
 
@@ -211,9 +208,12 @@ async def test_toolbox_topic_repo_legacy_active_only_still_works() -> None:
                     class _S:
                         def all(self) -> list[Any]:
                             return []
+
                     return _S()
+
                 def scalar_one(self) -> int:
                     return 0
+
             return _R()
 
     repo = ToolboxTopicRepository(_RecordingSession())  # type: ignore[arg-type]
@@ -290,7 +290,4 @@ def test_closure_permissions_require_manager_role() -> None:
     ):
         required = permission_registry.get_min_role(perm)
         # A plain EDITOR must NOT satisfy a closure permission anymore.
-        assert required == Role.MANAGER, (
-            f"{perm} must require MANAGER (Round-3 Wave F closure gate), "
-            f"got {required}"
-        )
+        assert required == Role.MANAGER, f"{perm} must require MANAGER (Round-3 Wave F closure gate), got {required}"

@@ -41,7 +41,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -49,7 +51,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -89,7 +93,9 @@ def upgrade() -> None:
 
     if not _has_index(inspector, _TABLE, "ix_match_session_bim_model"):
         op.create_index(
-            "ix_match_session_bim_model", _TABLE, ["bim_model_id"],
+            "ix_match_session_bim_model",
+            _TABLE,
+            ["bim_model_id"],
         )
     # Compose project + active filter — the resume picker hits this hot.
     if not _has_index(inspector, _TABLE, "ix_match_session_project_active"):

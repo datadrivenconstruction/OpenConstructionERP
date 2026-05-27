@@ -179,15 +179,11 @@ def _register_models() -> None:
 @pytest_asyncio.fixture
 async def session():
     tmp_db = Path(tempfile.mkdtemp(prefix="tkc-remed-")) / "t.db"
-    engine = create_async_engine(
-        f"sqlite+aiosqlite:///{tmp_db.as_posix()}", future=True
-    )
+    engine = create_async_engine(f"sqlite+aiosqlite:///{tmp_db.as_posix()}", future=True)
     _register_models()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with factory() as s:
         yield s
     await engine.dispose()
@@ -216,8 +212,7 @@ async def _mk_project(s: AsyncSession) -> uuid.UUID:
     return project.id
 
 
-async def _mk_boq_position(s: AsyncSession, *, unit: str, quantity: str,
-                           unit_rate: str = "50"):
+async def _mk_boq_position(s: AsyncSession, *, unit: str, quantity: str, unit_rate: str = "50"):
     from app.modules.boq.models import BOQ, Position
 
     project_id = await _mk_project(s)
@@ -239,8 +234,7 @@ async def _mk_boq_position(s: AsyncSession, *, unit: str, quantity: str,
     return project_id, boq, pos
 
 
-async def _link_element(s: AsyncSession, svc: BIMHubService, project_id,
-                        pos, quantities: dict):
+async def _link_element(s: AsyncSession, svc: BIMHubService, project_id, pos, quantities: dict):
     from app.modules.bim_hub.models import (
         BIMElement,
         BIMModel,
@@ -273,11 +267,12 @@ async def test_exmod003_count_position_not_corrupted(session) -> None:
     """E-XMOD-003 — a 'pcs' position linked to a Wall keeps a sane
     piece count, NOT volume_m3 (7.5)."""
     svc = BIMHubService(session)
-    project_id, _boq, pos = await _mk_boq_position(
-        session, unit="pcs", quantity="1"
-    )
+    project_id, _boq, pos = await _mk_boq_position(session, unit="pcs", quantity="1")
     await _link_element(
-        session, svc, project_id, pos,
+        session,
+        svc,
+        project_id,
+        pos,
         {"volume_m3": 7.5, "area_m2": 30, "weight_kg": 18000},
     )
     await svc._sync_boq_quantity_from_links(pos.id)
@@ -289,11 +284,12 @@ async def test_exmod003_count_position_not_corrupted(session) -> None:
 @pytest.mark.asyncio
 async def test_exmod003_german_st_unit_not_corrupted(session) -> None:
     svc = BIMHubService(session)
-    project_id, _boq, pos = await _mk_boq_position(
-        session, unit="St", quantity="5"
-    )
+    project_id, _boq, pos = await _mk_boq_position(session, unit="St", quantity="5")
     await _link_element(
-        session, svc, project_id, pos,
+        session,
+        svc,
+        project_id,
+        pos,
         {"volume_m3": 7.5, "area_m2": 30},
     )
     await svc._sync_boq_quantity_from_links(pos.id)
@@ -304,9 +300,7 @@ async def test_exmod003_german_st_unit_not_corrupted(session) -> None:
 @pytest.mark.asyncio
 async def test_dtkc005_tonne_divides_by_1000(session) -> None:
     svc = BIMHubService(session)
-    project_id, _boq, pos = await _mk_boq_position(
-        session, unit="t", quantity="0"
-    )
+    project_id, _boq, pos = await _mk_boq_position(session, unit="t", quantity="0")
     # two elements, weight 1500 + 2500 kg → 4 t (not 4000)
     await _link_element(session, svc, project_id, pos, {"weight_kg": 1500})
     await _link_element(session, svc, project_id, pos, {"weight_kg": 2500})
@@ -320,12 +314,8 @@ async def test_dtkc028_no_arbitrary_dimension_fallback(session) -> None:
     """D-TKC-028 — an 'm' (length) position linked to an element with
     only area_m2 keeps its manual quantity, NOT the area."""
     svc = BIMHubService(session)
-    project_id, _boq, pos = await _mk_boq_position(
-        session, unit="m", quantity="12.5"
-    )
-    await _link_element(
-        session, svc, project_id, pos, {"area_m2": 37.5}
-    )
+    project_id, _boq, pos = await _mk_boq_position(session, unit="m", quantity="12.5")
+    await _link_element(session, svc, project_id, pos, {"area_m2": 37.5})
     await svc._sync_boq_quantity_from_links(pos.id)
     await session.refresh(pos)
     assert pos.quantity == "12.5"  # untouched — no area→length corruption
@@ -335,12 +325,8 @@ async def test_dtkc028_no_arbitrary_dimension_fallback(session) -> None:
 async def test_dtkc028_correct_dimension_still_works(session) -> None:
     """Sanity: a correct m³ link still auto-populates."""
     svc = BIMHubService(session)
-    project_id, _boq, pos = await _mk_boq_position(
-        session, unit="m³", quantity="0", unit_rate="10"
-    )
-    await _link_element(
-        session, svc, project_id, pos, {"volume_m3": 9.0}
-    )
+    project_id, _boq, pos = await _mk_boq_position(session, unit="m³", quantity="0", unit_rate="10")
+    await _link_element(session, svc, project_id, pos, {"volume_m3": 9.0})
     await svc._sync_boq_quantity_from_links(pos.id)
     await session.refresh(pos)
     assert pos.quantity == "9.0000"
@@ -358,9 +344,7 @@ async def test_qr004_prefilled_rate_clamped(session) -> None:
     )
 
     svc = BIMHubService(session)
-    project_id, boq, _pos = await _mk_boq_position(
-        session, unit="m2", quantity="0"
-    )
+    project_id, boq, _pos = await _mk_boq_position(session, unit="m2", quantity="0")
     model = BIMModel(project_id=project_id, name="m", status="ready")
     session.add(model)
     await session.flush()
@@ -389,8 +373,7 @@ async def test_qr004_prefilled_rate_clamped(session) -> None:
     new_pos = await svc._auto_create_position_for_rule(
         rule=rule,
         project_id=project_id,
-        matches=[(elem, __import__("decimal").Decimal("10"),
-                  __import__("decimal").Decimal("10"))],
+        matches=[(elem, __import__("decimal").Decimal("10"), __import__("decimal").Decimal("10"))],
     )
     assert new_pos is not None
     # E-XMOD-020: unit canonicalised m³ → m3

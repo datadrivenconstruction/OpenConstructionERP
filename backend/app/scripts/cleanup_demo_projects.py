@@ -30,9 +30,7 @@ print(f"Total projects: {len(all_projects)}")
 print(f"Keeping {len(all_projects) - len(to_delete)}, deleting {len(to_delete)}")
 
 # Find all tables that have a project_id column
-cur.execute(
-    "SELECT m.name FROM sqlite_master m WHERE m.type='table' AND m.name LIKE 'oe_%'"
-)
+cur.execute("SELECT m.name FROM sqlite_master m WHERE m.type='table' AND m.name LIKE 'oe_%'")
 all_tables = [r[0] for r in cur.fetchall()]
 project_tables: list[tuple[str, list[str]]] = []
 for tbl in all_tables:
@@ -44,9 +42,11 @@ for tbl in all_tables:
 
 print(f"\n{len(project_tables)} tables reference project_id")
 
+
 # Build placeholders and delete in chunks (SQLite parameter limit)
 def chunked(seq: list[str], n: int = 500) -> list[list[str]]:
     return [seq[i : i + n] for i in range(0, len(seq), n)]
+
 
 deleted_total = 0
 for tbl, _ in project_tables:

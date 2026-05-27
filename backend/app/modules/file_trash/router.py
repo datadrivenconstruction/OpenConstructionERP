@@ -67,9 +67,7 @@ async def list_trash(
     service: FileTrashService = Depends(_get_service),
 ) -> TrashListResponse:
     await verify_project_access(project_id, user_id, session)
-    rows, total = await service.list_for_project(
-        project_id, offset=offset, limit=limit
-    )
+    rows, total = await service.list_for_project(project_id, offset=offset, limit=limit)
     return TrashListResponse(
         items=[_to_response(r) for r in rows],
         total=total,
@@ -140,9 +138,7 @@ async def restore_trash(
 ) -> TrashItemResponse:
     row = await service.get(trash_id)
     await verify_project_access(row.project_id, user_id, session)
-    restored = await service.restore(
-        trash_id, actor_id=_safe_user_uuid(user_id)
-    )
+    restored = await service.restore(trash_id, actor_id=_safe_user_uuid(user_id))
     return _to_response(restored)
 
 

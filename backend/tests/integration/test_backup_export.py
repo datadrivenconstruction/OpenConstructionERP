@@ -65,9 +65,7 @@ async def admin_headers(client: AsyncClient) -> dict[str, str]:
 
 
 @pytest.mark.asyncio
-async def test_export_with_empty_body_returns_valid_zip(
-    client: AsyncClient, admin_headers: dict[str, str]
-) -> None:
+async def test_export_with_empty_body_returns_valid_zip(client: AsyncClient, admin_headers: dict[str, str]) -> None:
     """BUG-018: ``POST /backup/export/`` with ``json={}`` must NOT be empty."""
     resp = await client.post("/api/v1/backup/export/", headers=admin_headers, json={})
 
@@ -96,9 +94,7 @@ async def test_export_with_empty_body_returns_valid_zip(
 
 
 @pytest.mark.asyncio
-async def test_export_with_include_modules_filters_archive(
-    client: AsyncClient, admin_headers: dict[str, str]
-) -> None:
+async def test_export_with_include_modules_filters_archive(client: AsyncClient, admin_headers: dict[str, str]) -> None:
     """When ``include_modules`` is specified, only those JSON dumps appear."""
     resp = await client.post(
         "/api/v1/backup/export/",
@@ -125,9 +121,7 @@ async def test_export_with_include_modules_filters_archive(
 
 
 @pytest.mark.asyncio
-async def test_export_unknown_module_surfaces_warning(
-    client: AsyncClient, admin_headers: dict[str, str]
-) -> None:
+async def test_export_unknown_module_surfaces_warning(client: AsyncClient, admin_headers: dict[str, str]) -> None:
     """Unknown ``include_modules`` entries must emit a manifest warning."""
     resp = await client.post(
         "/api/v1/backup/export/",
@@ -142,9 +136,7 @@ async def test_export_unknown_module_surfaces_warning(
 
 
 @pytest.mark.asyncio
-async def test_export_no_body_still_works(
-    client: AsyncClient, admin_headers: dict[str, str]
-) -> None:
+async def test_export_no_body_still_works(client: AsyncClient, admin_headers: dict[str, str]) -> None:
     """Sanity: ``POST`` without a body still returns a full backup."""
     resp = await client.post("/api/v1/backup/export/", headers=admin_headers)
     assert resp.status_code == 200
@@ -153,9 +145,7 @@ async def test_export_no_body_still_works(
 
 
 @pytest.mark.asyncio
-async def test_export_openapi_documents_request_body(
-    client: AsyncClient, admin_headers: dict[str, str]
-) -> None:
+async def test_export_openapi_documents_request_body(client: AsyncClient, admin_headers: dict[str, str]) -> None:
     """OpenAPI must document ``include_modules`` / ``include_files``."""
     resp = await client.get("/api/openapi.json")
     assert resp.status_code == 200, resp.text

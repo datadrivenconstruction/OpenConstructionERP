@@ -53,14 +53,8 @@ class QMSRepository:
         base = select(ITPPlan).where(ITPPlan.project_id == project_id)
         if status:
             base = base.where(ITPPlan.status == status)
-        total = (
-            await self.session.execute(
-                select(func.count()).select_from(base.subquery())
-            )
-        ).scalar_one()
-        result = await self.session.execute(
-            base.order_by(ITPPlan.created_at.desc()).offset(offset).limit(limit)
-        )
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        result = await self.session.execute(base.order_by(ITPPlan.created_at.desc()).offset(offset).limit(limit))
         return list(result.scalars().all()), total
 
     async def create_itp_plan(self, plan: ITPPlan) -> ITPPlan:
@@ -80,9 +74,7 @@ class QMSRepository:
 
     async def list_itp_items(self, plan_id: uuid.UUID) -> list[ITPItem]:
         result = await self.session.execute(
-            select(ITPItem)
-            .where(ITPItem.itp_plan_id == plan_id)
-            .order_by(ITPItem.sequence.asc())
+            select(ITPItem).where(ITPItem.itp_plan_id == plan_id).order_by(ITPItem.sequence.asc())
         )
         return list(result.scalars().all())
 
@@ -107,16 +99,8 @@ class QMSRepository:
         base = select(QMSInspection).where(QMSInspection.project_id == project_id)
         if status:
             base = base.where(QMSInspection.status == status)
-        total = (
-            await self.session.execute(
-                select(func.count()).select_from(base.subquery())
-            )
-        ).scalar_one()
-        result = await self.session.execute(
-            base.order_by(QMSInspection.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        result = await self.session.execute(base.order_by(QMSInspection.created_at.desc()).offset(offset).limit(limit))
         return list(result.scalars().all()), total
 
     async def create_inspection(self, inspection: QMSInspection) -> QMSInspection:
@@ -125,18 +109,17 @@ class QMSRepository:
         return inspection
 
     async def update_inspection_fields(
-        self, inspection_id: uuid.UUID, **fields: Any,
+        self,
+        inspection_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
-        stmt = (
-            update(QMSInspection)
-            .where(QMSInspection.id == inspection_id)
-            .values(**fields)
-        )
+        stmt = update(QMSInspection).where(QMSInspection.id == inspection_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
 
     async def list_signatures(
-        self, inspection_id: uuid.UUID,
+        self,
+        inspection_id: uuid.UUID,
     ) -> list[QMSInspectionSignature]:
         result = await self.session.execute(
             select(QMSInspectionSignature)
@@ -146,7 +129,8 @@ class QMSRepository:
         return list(result.scalars().all())
 
     async def add_signature(
-        self, sig: QMSInspectionSignature,
+        self,
+        sig: QMSInspectionSignature,
     ) -> QMSInspectionSignature:
         self.session.add(sig)
         await self.session.flush()
@@ -171,14 +155,8 @@ class QMSRepository:
             base = base.where(QMSNCR.status == status)
         if severity:
             base = base.where(QMSNCR.severity == severity)
-        total = (
-            await self.session.execute(
-                select(func.count()).select_from(base.subquery())
-            )
-        ).scalar_one()
-        result = await self.session.execute(
-            base.order_by(QMSNCR.created_at.desc()).offset(offset).limit(limit)
-        )
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        result = await self.session.execute(base.order_by(QMSNCR.created_at.desc()).offset(offset).limit(limit))
         return list(result.scalars().all()), total
 
     async def create_ncr(self, ncr: QMSNCR) -> QMSNCR:
@@ -193,9 +171,7 @@ class QMSRepository:
 
     async def list_ncr_actions(self, ncr_id: uuid.UUID) -> list[QMSNCRAction]:
         result = await self.session.execute(
-            select(QMSNCRAction)
-            .where(QMSNCRAction.ncr_id == ncr_id)
-            .order_by(QMSNCRAction.created_at.asc())
+            select(QMSNCRAction).where(QMSNCRAction.ncr_id == ncr_id).order_by(QMSNCRAction.created_at.asc())
         )
         return list(result.scalars().all())
 
@@ -208,13 +184,11 @@ class QMSRepository:
         return action
 
     async def update_ncr_action_fields(
-        self, action_id: uuid.UUID, **fields: Any,
+        self,
+        action_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
-        stmt = (
-            update(QMSNCRAction)
-            .where(QMSNCRAction.id == action_id)
-            .values(**fields)
-        )
+        stmt = update(QMSNCRAction).where(QMSNCRAction.id == action_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
 
@@ -234,14 +208,8 @@ class QMSRepository:
         base = select(QMSPunchItem).where(QMSPunchItem.project_id == project_id)
         if status:
             base = base.where(QMSPunchItem.status == status)
-        total = (
-            await self.session.execute(
-                select(func.count()).select_from(base.subquery())
-            )
-        ).scalar_one()
-        result = await self.session.execute(
-            base.order_by(QMSPunchItem.created_at.desc()).offset(offset).limit(limit)
-        )
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        result = await self.session.execute(base.order_by(QMSPunchItem.created_at.desc()).offset(offset).limit(limit))
         return list(result.scalars().all()), total
 
     async def create_punch(self, punch: QMSPunchItem) -> QMSPunchItem:
@@ -250,9 +218,7 @@ class QMSRepository:
         return punch
 
     async def update_punch_fields(self, punch_id: uuid.UUID, **fields: Any) -> None:
-        stmt = (
-            update(QMSPunchItem).where(QMSPunchItem.id == punch_id).values(**fields)
-        )
+        stmt = update(QMSPunchItem).where(QMSPunchItem.id == punch_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
 
@@ -279,14 +245,8 @@ class QMSRepository:
         base = select(QMSAudit).where(QMSAudit.project_id == project_id)
         if status:
             base = base.where(QMSAudit.status == status)
-        total = (
-            await self.session.execute(
-                select(func.count()).select_from(base.subquery())
-            )
-        ).scalar_one()
-        result = await self.session.execute(
-            base.order_by(QMSAudit.created_at.desc()).offset(offset).limit(limit)
-        )
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        result = await self.session.execute(base.order_by(QMSAudit.created_at.desc()).offset(offset).limit(limit))
         return list(result.scalars().all()), total
 
     async def create_audit(self, audit: QMSAudit) -> QMSAudit:
@@ -316,13 +276,11 @@ class QMSRepository:
         return finding
 
     async def update_finding_fields(
-        self, finding_id: uuid.UUID, **fields: Any,
+        self,
+        finding_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
-        stmt = (
-            update(QMSAuditFinding)
-            .where(QMSAuditFinding.id == finding_id)
-            .values(**fields)
-        )
+        stmt = update(QMSAuditFinding).where(QMSAuditFinding.id == finding_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
 
@@ -330,9 +288,7 @@ class QMSRepository:
 
     async def sum_ncr_cost_impact(self, project_id: uuid.UUID) -> Any:
         """‌⁠‍Sum cost_impact_amount for non-cancelled NCRs in a project."""
-        stmt = select(
-            func.coalesce(func.sum(QMSNCR.cost_impact_amount), 0)
-        ).where(
+        stmt = select(func.coalesce(func.sum(QMSNCR.cost_impact_amount), 0)).where(
             QMSNCR.project_id == project_id,
             QMSNCR.status != "cancelled",
         )
@@ -374,8 +330,11 @@ class QMSRepository:
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def count_open_findings_in_period(
-        self, project_id: uuid.UUID, *,
-        date_from_iso: str, date_to_iso: str,
+        self,
+        project_id: uuid.UUID,
+        *,
+        date_from_iso: str,
+        date_to_iso: str,
     ) -> int:
         stmt = (
             select(func.count())
@@ -391,8 +350,11 @@ class QMSRepository:
         return (await self.session.execute(stmt)).scalar_one()
 
     async def count_closed_findings_in_period(
-        self, project_id: uuid.UUID, *,
-        date_from_iso: str, date_to_iso: str,
+        self,
+        project_id: uuid.UUID,
+        *,
+        date_from_iso: str,
+        date_to_iso: str,
     ) -> int:
         stmt = (
             select(func.count())
@@ -408,8 +370,11 @@ class QMSRepository:
         return (await self.session.execute(stmt)).scalar_one()
 
     async def count_audits_in_period(
-        self, project_id: uuid.UUID, *,
-        date_from_iso: str, date_to_iso: str,
+        self,
+        project_id: uuid.UUID,
+        *,
+        date_from_iso: str,
+        date_to_iso: str,
     ) -> int:
         stmt = select(func.count()).where(
             QMSAudit.project_id == project_id,
@@ -421,8 +386,11 @@ class QMSRepository:
         return (await self.session.execute(stmt)).scalar_one()
 
     async def count_ncrs_in_period(
-        self, project_id: uuid.UUID, *,
-        date_from_iso: str, date_to_iso: str,
+        self,
+        project_id: uuid.UUID,
+        *,
+        date_from_iso: str,
+        date_to_iso: str,
         only_closed: bool = False,
     ) -> int:
         conditions = [
@@ -442,7 +410,8 @@ class QMSRepository:
         return await self.session.get(ITPTemplate, tpl_id)
 
     async def list_itp_templates(
-        self, *,
+        self,
+        *,
         csi_division: str | None = None,
         work_type: str | None = None,
         active_only: bool = True,
@@ -456,14 +425,15 @@ class QMSRepository:
             base = base.where(ITPTemplate.work_type == work_type)
         if active_only:
             base = base.where(ITPTemplate.is_active.is_(True))
-        total = (
-            await self.session.execute(
-                select(func.count()).select_from(base.subquery())
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        stmt = (
+            base.order_by(
+                ITPTemplate.csi_division.asc(),
+                ITPTemplate.work_type.asc(),
             )
-        ).scalar_one()
-        stmt = base.order_by(
-            ITPTemplate.csi_division.asc(), ITPTemplate.work_type.asc(),
-        ).offset(offset).limit(limit)
+            .offset(offset)
+            .limit(limit)
+        )
         rows = (await self.session.execute(stmt)).scalars().all()
         return list(rows), total
 
@@ -473,11 +443,11 @@ class QMSRepository:
         return tpl
 
     async def update_itp_template_fields(
-        self, tpl_id: uuid.UUID, **fields: Any,
+        self,
+        tpl_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
-        stmt = (
-            update(ITPTemplate).where(ITPTemplate.id == tpl_id).values(**fields)
-        )
+        stmt = update(ITPTemplate).where(ITPTemplate.id == tpl_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
 
@@ -508,11 +478,7 @@ class QMSRepository:
             base = base.where(QMSCalibration.instrument_type == instrument_type)
         if status:
             base = base.where(QMSCalibration.status == status)
-        total = (
-            await self.session.execute(
-                select(func.count()).select_from(base.subquery())
-            )
-        ).scalar_one()
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
         stmt = base.order_by(QMSCalibration.valid_until.asc()).offset(offset).limit(limit)
         rows = (await self.session.execute(stmt)).scalars().all()
         return list(rows), total
@@ -523,11 +489,11 @@ class QMSRepository:
         return cal
 
     async def update_calibration_fields(
-        self, cal_id: uuid.UUID, **fields: Any,
+        self,
+        cal_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
-        stmt = (
-            update(QMSCalibration).where(QMSCalibration.id == cal_id).values(**fields)
-        )
+        stmt = update(QMSCalibration).where(QMSCalibration.id == cal_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
 
@@ -538,7 +504,8 @@ class QMSRepository:
             await self.session.flush()
 
     async def expiring_calibrations(
-        self, *,
+        self,
+        *,
         before: date,
         project_id: uuid.UUID | None = None,
     ) -> list[QMSCalibration]:
@@ -607,11 +574,7 @@ class QMSRepository:
         stmt = select(QMSAuditLog).where(QMSAuditLog.entity_id == entity_id)
         if entity_type is not None:
             stmt = stmt.where(QMSAuditLog.entity_type == entity_type)
-        stmt = (
-            stmt.order_by(QMSAuditLog.created_at.asc())
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = stmt.order_by(QMSAuditLog.created_at.asc()).offset(offset).limit(limit)
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def list_audit_for_entity(

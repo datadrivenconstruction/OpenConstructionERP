@@ -42,7 +42,8 @@ def _register_minimal_models() -> None:
 async def app() -> AsyncGenerator[FastAPI, None]:
     tmp_db = Path(tempfile.mkdtemp()) / "users_limit.db"
     engine = create_async_engine(
-        f"sqlite+aiosqlite:///{tmp_db.as_posix()}", future=True,
+        f"sqlite+aiosqlite:///{tmp_db.as_posix()}",
+        future=True,
     )
 
     _register_minimal_models()
@@ -53,7 +54,9 @@ async def app() -> AsyncGenerator[FastAPI, None]:
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     from app.dependencies import (

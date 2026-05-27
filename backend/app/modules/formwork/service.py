@@ -80,18 +80,19 @@ class FormworkService:
         return await self.system_repo.create(obj)
 
     async def update_system(
-        self, system_id: uuid.UUID, data: FormworkSystemUpdate,
+        self,
+        system_id: uuid.UUID,
+        data: FormworkSystemUpdate,
     ) -> FormworkSystem | None:
-        fields = {
-            k: v for k, v in data.model_dump(exclude_unset=True).items()
-            if v is not None
-        }
+        fields = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
         if fields:
             await self.system_repo.update_fields(system_id, **fields)
         return await self.system_repo.get_by_id(system_id)
 
     async def seed_defaults(
-        self, *, tenant_id: uuid.UUID | None,
+        self,
+        *,
+        tenant_id: uuid.UUID | None,
     ) -> dict[str, int]:
         """Idempotently insert the starter formwork catalogue."""
         already = await self.system_repo.list_names_for_tenant(tenant_id)
@@ -111,7 +112,8 @@ class FormworkService:
     # ── Assignments ────────────────────────────────────────────────────
 
     async def create_assignment(
-        self, data: FormworkAssignmentCreate,
+        self,
+        data: FormworkAssignmentCreate,
     ) -> FormworkAssignment:
         system = await self.system_repo.get_by_id(data.formwork_system_id)
         if system is None:
@@ -137,15 +139,14 @@ class FormworkService:
         return await self.assignment_repo.create(obj)
 
     async def update_assignment(
-        self, assignment_id: uuid.UUID, data: FormworkAssignmentUpdate,
+        self,
+        assignment_id: uuid.UUID,
+        data: FormworkAssignmentUpdate,
     ) -> FormworkAssignment | None:
         obj = await self.assignment_repo.get_by_id(assignment_id)
         if obj is None:
             return None
-        fields: dict[str, Any] = {
-            k: v for k, v in data.model_dump(exclude_unset=True).items()
-            if v is not None
-        }
+        fields: dict[str, Any] = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
         # Apply patches in-memory so we can recompute against the merged state.
         for k, v in fields.items():
             setattr(obj, k, v)

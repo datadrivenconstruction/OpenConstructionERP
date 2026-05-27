@@ -268,21 +268,23 @@ class ModuleLoader:
         for name, manifest in self._manifests.items():
             loaded = name in self._modules
             loaded_mod = self._modules.get(name)
-            result.append({
-                "name": manifest.name,
-                "version": manifest.version,
-                "display_name": manifest.display_name,
-                "display_name_i18n": manifest.display_name_i18n,
-                "description": manifest.description,
-                "author": manifest.author,
-                "category": manifest.category,
-                "depends": manifest.depends,
-                "optional_depends": manifest.optional_depends,
-                "has_router": loaded_mod.router is not None if loaded_mod else False,
-                "loaded": loaded,
-                "enabled": name not in self._disabled,
-                "is_core": manifest.category == "core",
-            })
+            result.append(
+                {
+                    "name": manifest.name,
+                    "version": manifest.version,
+                    "display_name": manifest.display_name,
+                    "display_name_i18n": manifest.display_name_i18n,
+                    "description": manifest.description,
+                    "author": manifest.author,
+                    "category": manifest.category,
+                    "depends": manifest.depends,
+                    "optional_depends": manifest.optional_depends,
+                    "has_router": loaded_mod.router is not None if loaded_mod else False,
+                    "loaded": loaded,
+                    "enabled": name not in self._disabled,
+                    "is_core": manifest.category == "core",
+                }
+            )
 
         return result
 
@@ -362,20 +364,15 @@ class ModuleLoader:
         manifest = self._manifests[module_name]
 
         if manifest.category == "core":
-            raise ValueError(
-                f"Module '{module_name}' is a core module and cannot be disabled."
-            )
+            raise ValueError(f"Module '{module_name}' is a core module and cannot be disabled.")
 
         # Check that no other enabled module depends on this one
         tree = self.get_dependency_tree(module_name)
         dependents = tree.get("dependents", [])
-        enabled_dependents = [
-            d for d in dependents if d not in self._disabled
-        ]
+        enabled_dependents = [d for d in dependents if d not in self._disabled]
         if enabled_dependents:
             raise ValueError(
-                f"Cannot disable '{module_name}': required by enabled modules: "
-                f"{', '.join(enabled_dependents)}"
+                f"Cannot disable '{module_name}': required by enabled modules: {', '.join(enabled_dependents)}"
             )
 
         # Remove router from the FastAPI app — sweep both the canonical
@@ -387,13 +384,9 @@ class ModuleLoader:
             kebab_name = dir_name.replace("_", "-")
             prefixes = {f"/api/v1/{kebab_name}", f"/api/v1/{dir_name}"}
             app.routes[:] = [
-                r for r in app.routes
-                if not (
-                    hasattr(r, "path")
-                    and any(
-                        getattr(r, "path", "").startswith(p) for p in prefixes
-                    )
-                )
+                r
+                for r in app.routes
+                if not (hasattr(r, "path") and any(getattr(r, "path", "").startswith(p) for p in prefixes))
             ]
             logger.info(
                 "Removed routes for %s (prefixes %s)",

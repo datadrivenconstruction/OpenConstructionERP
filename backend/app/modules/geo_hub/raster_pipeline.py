@@ -242,7 +242,8 @@ def _union_bbox(
 
 
 def _empty_placeholder(
-    size_px: int, background: str,
+    size_px: int,
+    background: str,
 ) -> tuple[bytes, int, int]:
     from PIL import Image, ImageDraw
 
@@ -251,10 +252,14 @@ def _empty_placeholder(
     # Diagonal "no data" tick so the user sees a visible card on the
     # globe instead of a blank white square that reads as a bug.
     draw.line(
-        [(0, 0), (size_px, size_px)], fill="#9ca3af", width=2,
+        [(0, 0), (size_px, size_px)],
+        fill="#9ca3af",
+        width=2,
     )
     draw.line(
-        [(0, size_px), (size_px, 0)], fill="#9ca3af", width=2,
+        [(0, size_px), (size_px, 0)],
+        fill="#9ca3af",
+        width=2,
     )
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=True)

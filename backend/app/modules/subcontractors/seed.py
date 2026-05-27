@@ -39,16 +39,36 @@ from app.modules.subcontractors.service import (
 logger = logging.getLogger(__name__)
 
 _TRADES = [
-    "earthworks", "concrete", "steel_erection", "carpentry", "roofing",
-    "waterproofing", "facade", "drywall", "tiling", "painting",
-    "plumbing", "hvac", "electrical", "fire_protection", "elevators",
-    "scaffolding", "demolition", "landscaping", "asphalt", "joinery",
+    "earthworks",
+    "concrete",
+    "steel_erection",
+    "carpentry",
+    "roofing",
+    "waterproofing",
+    "facade",
+    "drywall",
+    "tiling",
+    "painting",
+    "plumbing",
+    "hvac",
+    "electrical",
+    "fire_protection",
+    "elevators",
+    "scaffolding",
+    "demolition",
+    "landscaping",
+    "asphalt",
+    "joinery",
 ]
 
 _CERT_TYPES = ("insurance", "license", "iso", "safety", "bond")
 _STATUSES = ("pending", "approved", "suspended", "rejected")
 _PAYMENT_STATUSES = (
-    "submitted", "foreman_approved", "finance_approved", "paid", "rejected",
+    "submitted",
+    "foreman_approved",
+    "finance_approved",
+    "paid",
+    "rejected",
 )
 _AGREEMENT_STATUSES = ("active", "completed")
 
@@ -101,7 +121,9 @@ async def seed_subcontractors_demo(
         trade_count = rng.randint(1, 3)
         trades = rng.sample(_TRADES, trade_count)
         prequal_status = rng.choices(
-            _STATUSES, weights=[3, 5, 1, 1], k=1,
+            _STATUSES,
+            weights=[3, 5, 1, 1],
+            k=1,
         )[0]
         sub = Subcontractor(
             legal_name=f"Demo Subcontractor {i + 1:02d} GmbH",
@@ -172,12 +194,13 @@ async def seed_subcontractors_demo(
     # Prequalification applications — one per subcontractor.
     for sub in subcontractors:
         sub_status = sub.prequalification_status
-        prequal_status = "approved" if sub_status == "approved" else (
-            "rejected" if sub_status == "rejected" else "submitted"
+        prequal_status = (
+            "approved" if sub_status == "approved" else ("rejected" if sub_status == "rejected" else "submitted")
         )
         decision_at = (
             datetime.now(UTC) - timedelta(days=rng.randint(1, 180))
-            if prequal_status in ("approved", "rejected") else None
+            if prequal_status in ("approved", "rejected")
+            else None
         )
         session.add(
             PrequalificationApplication(
@@ -238,13 +261,13 @@ async def seed_subcontractors_demo(
         target_payment_count = 80
         for i in range(target_payment_count):
             ag = agreements[i % len(agreements)]
-            gross = (
-                ag.total_value / Decimal(str(rng.randint(6, 18)))
-            ).quantize(Decimal("0.01"))
+            gross = (ag.total_value / Decimal(str(rng.randint(6, 18)))).quantize(Decimal("0.01"))
             retention = (gross * Decimal("0.05")).quantize(Decimal("0.01"))
             net = gross - retention
             pay_status = rng.choices(
-                _PAYMENT_STATUSES, weights=[3, 3, 3, 5, 1], k=1,
+                _PAYMENT_STATUSES,
+                weights=[3, 3, 3, 5, 1],
+                k=1,
             )[0]
             now = datetime.now(UTC) - timedelta(days=rng.randint(1, 240))
             pa = PaymentApplication(
@@ -261,9 +284,7 @@ async def seed_subcontractors_demo(
                 foreman_approved_at=now + timedelta(days=2)
                 if pay_status in ("foreman_approved", "finance_approved", "paid")
                 else None,
-                finance_approved_at=now + timedelta(days=5)
-                if pay_status in ("finance_approved", "paid")
-                else None,
+                finance_approved_at=now + timedelta(days=5) if pay_status in ("finance_approved", "paid") else None,
                 paid_at=now + timedelta(days=10) if pay_status == "paid" else None,
             )
             session.add(pa)

@@ -136,7 +136,10 @@ class TestRepositoryListTenantScoping:
         alice = str(uuid.uuid4())
         bob = str(uuid.uuid4())
         await _insert_raw(
-            session, company_name="Bob Legacy", tenant_id=None, created_by=bob,
+            session,
+            company_name="Bob Legacy",
+            tenant_id=None,
+            created_by=bob,
         )
 
         repo = ContactRepository(session)
@@ -162,7 +165,10 @@ class TestRepositoryListTenantScoping:
         """Rows with neither tenant_id nor created_by must only leak via admin bypass."""
         alice = str(uuid.uuid4())
         await _insert_raw(
-            session, company_name="Orphaned Co", tenant_id=None, created_by=None,
+            session,
+            company_name="Orphaned Co",
+            tenant_id=None,
+            created_by=None,
         )
 
         repo = ContactRepository(session)
@@ -199,10 +205,16 @@ class TestStatsTenantScoping:
         alice = str(uuid.uuid4())
         bob = str(uuid.uuid4())
         await _insert_raw(
-            session, company_name="Shared Corp", tenant_id=alice, created_by=alice,
+            session,
+            company_name="Shared Corp",
+            tenant_id=alice,
+            created_by=alice,
         )
         await _insert_raw(
-            session, company_name="Shared Corp", tenant_id=bob, created_by=bob,
+            session,
+            company_name="Shared Corp",
+            tenant_id=bob,
+            created_by=bob,
         )
 
         repo = ContactRepository(session)

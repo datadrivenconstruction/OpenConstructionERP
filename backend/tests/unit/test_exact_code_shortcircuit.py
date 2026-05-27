@@ -42,7 +42,6 @@ from app.core.match_service.ranker_qdrant import (
 )
 from app.modules.match_elements.service import _envelope_from_group
 
-
 # ── ElementEnvelope carries the field ─────────────────────────────────────
 
 
@@ -76,7 +75,10 @@ def test_envelope_from_group_extracts_exact_code_from_boq_attributes() -> None:
         ),
     ]
     env = _envelope_from_group(
-        group_key="g1", elements=elements, quantities={"m3": 12.5}, source="bim",
+        group_key="g1",
+        elements=elements,
+        quantities={"m3": 12.5},
+        source="bim",
     )
     assert env.exact_code == "FER46-01-001"
 
@@ -87,13 +89,19 @@ def test_envelope_from_group_falls_back_to_rate_code_then_code() -> None:
     names; we read all three."""
     e1 = _fake_source_element(attributes={"rate_code": "DIN-001"}, category="IfcWall")
     env1 = _envelope_from_group(
-        group_key="g", elements=[e1], quantities={"m3": 1}, source="bim",
+        group_key="g",
+        elements=[e1],
+        quantities={"m3": 1},
+        source="bim",
     )
     assert env1.exact_code == "DIN-001"
 
     e2 = _fake_source_element(attributes={"code": "GAEB-X-42"}, category="IfcWall")
     env2 = _envelope_from_group(
-        group_key="g", elements=[e2], quantities={"m3": 1}, source="bim",
+        group_key="g",
+        elements=[e2],
+        quantities={"m3": 1},
+        source="bim",
     )
     assert env2.exact_code == "GAEB-X-42"
 
@@ -103,7 +111,10 @@ def test_envelope_from_group_omits_exact_code_when_absent() -> None:
     envelope.exact_code stays None so the short-circuit is skipped."""
     e = _fake_source_element(attributes={"type_name": "Wall"}, category="IfcWall")
     env = _envelope_from_group(
-        group_key="g", elements=[e], quantities={"m2": 5}, source="bim",
+        group_key="g",
+        elements=[e],
+        quantities={"m2": 5},
+        source="bim",
     )
     assert env.exact_code is None
 
@@ -143,7 +154,9 @@ def test_build_exact_candidate_handles_missing_fields_gracefully() -> None:
     """Stale parquet rows may be missing rate_total / rate_unit. The
     helper must not crash — defaults are 0.0 / empty string."""
     cand = _build_exact_candidate(
-        rate_code="X", row={"rate_original_name": "Generic"}, catalog_id="DE",
+        rate_code="X",
+        row={"rate_original_name": "Generic"},
+        catalog_id="DE",
     )
     assert cand.unit_rate == 0.0
     assert cand.unit == ""
@@ -190,7 +203,8 @@ def test_short_circuit_returns_response_when_code_in_catalogue(
         ]
 
     monkeypatch.setattr(
-        "app.core.match_service.ranker_qdrant.lookup_full_rows", fake_lookup,
+        "app.core.match_service.ranker_qdrant.lookup_full_rows",
+        fake_lookup,
     )
     # Stub _write_search_log so the test doesn't need a real DB session.
     written: list[dict] = []
@@ -199,11 +213,14 @@ def test_short_circuit_returns_response_when_code_in_catalogue(
         written.append(kwargs)
 
     monkeypatch.setattr(
-        "app.core.match_service.ranker_qdrant._write_search_log", fake_write_log,
+        "app.core.match_service.ranker_qdrant._write_search_log",
+        fake_write_log,
     )
 
     env = ElementEnvelope(
-        source="bim", description="Бетон C25/30", exact_code="FER46-001",
+        source="bim",
+        description="Бетон C25/30",
+        exact_code="FER46-001",
     )
     req = _fake_request(env)
 
@@ -245,7 +262,8 @@ def test_short_circuit_returns_none_when_code_missing_from_catalogue(
         return []
 
     monkeypatch.setattr(
-        "app.core.match_service.ranker_qdrant.lookup_full_rows", fake_lookup,
+        "app.core.match_service.ranker_qdrant.lookup_full_rows",
+        fake_lookup,
     )
 
     env = ElementEnvelope(source="bim", description="Stale", exact_code="STALE-X")
@@ -274,7 +292,8 @@ def test_short_circuit_returns_none_for_empty_inputs(
         return []
 
     monkeypatch.setattr(
-        "app.core.match_service.ranker_qdrant.lookup_full_rows", fake_lookup,
+        "app.core.match_service.ranker_qdrant.lookup_full_rows",
+        fake_lookup,
     )
 
     env_empty = ElementEnvelope(source="bim", description="x", exact_code="")
@@ -318,7 +337,8 @@ def test_short_circuit_swallows_lookup_failures(
         raise RuntimeError("parquet root not configured")
 
     monkeypatch.setattr(
-        "app.core.match_service.ranker_qdrant.lookup_full_rows", boom,
+        "app.core.match_service.ranker_qdrant.lookup_full_rows",
+        boom,
     )
     env = ElementEnvelope(source="bim", description="x", exact_code="ANY")
     resp = _run(

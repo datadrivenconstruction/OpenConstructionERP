@@ -22,10 +22,10 @@ import pytest
 
 from app.modules.contracts import service as contracts_service
 from app.modules.contracts.service import (
+    _REQUIRED_TERM_FIELDS,
     ContractsService,
     InvalidTransitionError,
     NTECapExceededError,
-    _REQUIRED_TERM_FIELDS,
     allowed_claim_transitions,
     allowed_contract_transitions,
     allowed_final_account_transitions,
@@ -95,7 +95,8 @@ def test_validate_contract_terms_lump_sum_no_required() -> None:
 
 def test_validate_contract_terms_gmp_success() -> None:
     ok, errors = validate_contract_terms(
-        "gmp", {"gmp_cap": "1000000", "target_cost": "900000"},
+        "gmp",
+        {"gmp_cap": "1000000", "target_cost": "900000"},
     )
     assert ok is True
     assert errors == []
@@ -133,8 +134,13 @@ def test_validate_contract_terms_rejects_negative_value() -> None:
 def test_required_term_fields_completeness() -> None:
     # Every contract type must be in the required-fields map.
     for t in (
-        "lump_sum", "gmp", "cost_plus", "tm", "unit_price",
-        "design_build", "combination",
+        "lump_sum",
+        "gmp",
+        "cost_plus",
+        "tm",
+        "unit_price",
+        "design_build",
+        "combination",
     ):
         assert t in _REQUIRED_TERM_FIELDS
 
@@ -182,7 +188,9 @@ def test_compute_progress_claim_total_basic() -> None:
         SimpleNamespace(period_completed_value=Decimal("500")),
     ]
     totals = compute_progress_claim_total(
-        claim_lines, retention_percent=Decimal("5"), prior_claims_paid=Decimal("200"),
+        claim_lines,
+        retention_percent=Decimal("5"),
+        prior_claims_paid=Decimal("200"),
     )
     assert totals["gross"] == Decimal("1500")
     assert totals["retention"] == Decimal("75.0000")
@@ -192,7 +200,9 @@ def test_compute_progress_claim_total_basic() -> None:
 def test_compute_progress_claim_total_net_clamped_at_zero() -> None:
     claim_lines = [SimpleNamespace(period_completed_value=Decimal("100"))]
     totals = compute_progress_claim_total(
-        claim_lines, retention_percent=Decimal("10"), prior_claims_paid=Decimal("999"),
+        claim_lines,
+        retention_percent=Decimal("10"),
+        prior_claims_paid=Decimal("999"),
     )
     assert totals["net"] == Decimal("0")
 
@@ -232,7 +242,9 @@ def test_generate_lump_sum_claim_skips_parents() -> None:
     child = _line(parent_line_id=parent_id, quantity=10, unit_rate=50)
     c = _contract(retention_percent=Decimal("0"))
     result = generate_lump_sum_claim(
-        c, [parent, child], completion={str(child.id): Decimal("100")},
+        c,
+        [parent, child],
+        completion={str(child.id): Decimal("100")},
     )
     # Only the child contributes.
     assert result["gross"] == Decimal("500.0000")
@@ -274,7 +286,8 @@ def test_generate_tm_claim_below_cap() -> None:
         terms={"tm_nte_cap": "10000"},
     )
     result = generate_tm_claim(
-        c, time_entries_total=Decimal("3000"),
+        c,
+        time_entries_total=Decimal("3000"),
         material_entries_total=Decimal("2000"),
         fee_structure=None,
     )
@@ -290,7 +303,8 @@ def test_generate_tm_claim_raises_nte_cap_exceeded() -> None:
     )
     with pytest.raises(NTECapExceededError):
         generate_tm_claim(
-            c, time_entries_total=Decimal("800"),
+            c,
+            time_entries_total=Decimal("800"),
             material_entries_total=Decimal("500"),
             fee_structure=None,
         )
@@ -304,7 +318,8 @@ def test_generate_tm_claim_with_fee_and_prior_paid() -> None:
     )
     fee = {"fee_type": "percent_of_cost", "fee_percent": Decimal("10")}
     result = generate_tm_claim(
-        c, time_entries_total=Decimal("4000"),
+        c,
+        time_entries_total=Decimal("4000"),
         material_entries_total=Decimal("1000"),
         fee_structure=fee,
         prior_paid=Decimal("1000"),
@@ -323,7 +338,9 @@ def test_generate_unit_price_claim() -> None:
     c = _contract(contract_type="unit_price", retention_percent=Decimal("5"))
     line = _line(quantity=100, unit_rate=50)  # contracted qty=100
     result = generate_unit_price_claim(
-        c, [line], measurements={str(line.id): Decimal("30")},
+        c,
+        [line],
+        measurements={str(line.id): Decimal("30")},
     )
     # 30 measured × 50 rate = 1500 gross
     assert result["gross"] == Decimal("1500.0000")
@@ -411,13 +428,15 @@ def test_compute_ld_amount_no_cap() -> None:
 
 def test_apply_change_order_to_contract_pure_increment() -> None:
     assert apply_change_order_to_contract_pure(
-        Decimal("100000"), Decimal("25000"),
+        Decimal("100000"),
+        Decimal("25000"),
     ) == Decimal("125000")
 
 
 def test_apply_change_order_to_contract_pure_negative() -> None:
     assert apply_change_order_to_contract_pure(
-        Decimal("100000"), Decimal("-10000"),
+        Decimal("100000"),
+        Decimal("-10000"),
     ) == Decimal("90000")
 
 
@@ -476,10 +495,17 @@ def test_permissions_registered() -> None:
 
     register_contracts_permissions()
     expected = {
-        "contracts.read", "contracts.create", "contracts.update",
-        "contracts.delete", "contracts.sign", "contracts.terminate",
-        "contracts.submit_claim", "contracts.approve_claim",
-        "contracts.certify_claim", "contracts.mark_paid", "contracts.close",
+        "contracts.read",
+        "contracts.create",
+        "contracts.update",
+        "contracts.delete",
+        "contracts.sign",
+        "contracts.terminate",
+        "contracts.submit_claim",
+        "contracts.approve_claim",
+        "contracts.certify_claim",
+        "contracts.mark_paid",
+        "contracts.close",
     }
     # Use the real registry contract (list_modules → {module: [perms]}),
     # not a hasattr fallback that silently weakens the assertion.
@@ -534,7 +560,10 @@ async def test_apply_change_order_increments_value_and_emits_event() -> None:
     mock_publish = MagicMock()
     with patch.object(contracts_service.event_bus, "publish_detached", mock_publish):
         await svc.apply_change_order_to_contract(
-            contract_id, Decimal("25000"), co_schedule_days=14, co_reference="CO-1",
+            contract_id,
+            Decimal("25000"),
+            co_schedule_days=14,
+            co_reference="CO-1",
         )
     assert svc.contract_repo.rows[contract_id].total_value == Decimal("125000")
     assert mock_publish.called
@@ -565,10 +594,13 @@ async def test_transition_contract_emits_signed_event() -> None:
 @pytest.mark.asyncio
 async def test_transition_contract_invalid_raises_http_400() -> None:
     from fastapi import HTTPException
+
     svc = _stub_service()
     contract_id = uuid.uuid4()
     svc.contract_repo.rows[contract_id] = SimpleNamespace(
-        id=contract_id, status="completed", total_value=Decimal("0"),
+        id=contract_id,
+        status="completed",
+        total_value=Decimal("0"),
     )
     with pytest.raises(HTTPException) as exc:
         await svc.transition_contract(contract_id, "draft", actor_id="u")
@@ -643,7 +675,8 @@ def test_plan_retention_release_custom_schedule() -> None:
     from app.modules.contracts.service import plan_retention_release
 
     result = plan_retention_release(
-        Decimal("20000"), "milestone_3",
+        Decimal("20000"),
+        "milestone_3",
         schedule={"milestone_3": Decimal("25")},
     )
     assert result["percent_released"] == Decimal("25")
@@ -653,12 +686,14 @@ def test_plan_retention_release_custom_schedule() -> None:
 def test_validate_lien_waiver_payload_happy() -> None:
     from app.modules.contracts.service import validate_lien_waiver_payload
 
-    ok, errors = validate_lien_waiver_payload({
-        "waiver_type": "conditional_partial",
-        "through_date": "2026-05-31",
-        "amount": "10000",
-        "signed_by": "GC Treasurer",
-    })
+    ok, errors = validate_lien_waiver_payload(
+        {
+            "waiver_type": "conditional_partial",
+            "through_date": "2026-05-31",
+            "amount": "10000",
+            "signed_by": "GC Treasurer",
+        }
+    )
     assert ok is True
     assert errors == []
 
@@ -666,12 +701,14 @@ def test_validate_lien_waiver_payload_happy() -> None:
 def test_validate_lien_waiver_payload_rejects_bad_type() -> None:
     from app.modules.contracts.service import validate_lien_waiver_payload
 
-    ok, errors = validate_lien_waiver_payload({
-        "waiver_type": "random",
-        "through_date": "2026-05-31",
-        "amount": "10000",
-        "signed_by": "GC",
-    })
+    ok, errors = validate_lien_waiver_payload(
+        {
+            "waiver_type": "random",
+            "through_date": "2026-05-31",
+            "amount": "10000",
+            "signed_by": "GC",
+        }
+    )
     assert ok is False
     assert any("waiver_type" in e for e in errors)
 
@@ -679,12 +716,14 @@ def test_validate_lien_waiver_payload_rejects_bad_type() -> None:
 def test_validate_lien_waiver_payload_rejects_negative_amount() -> None:
     from app.modules.contracts.service import validate_lien_waiver_payload
 
-    ok, errors = validate_lien_waiver_payload({
-        "waiver_type": "unconditional_final",
-        "through_date": "2026-05-31",
-        "amount": "-1",
-        "signed_by": "GC",
-    })
+    ok, errors = validate_lien_waiver_payload(
+        {
+            "waiver_type": "unconditional_final",
+            "through_date": "2026-05-31",
+            "amount": "-1",
+            "signed_by": "GC",
+        }
+    )
     assert ok is False
     assert any("non-negative" in e for e in errors)
 
@@ -789,8 +828,11 @@ async def test_update_contract_locks_financial_terms_when_active() -> None:
     svc = _stub_update_service()
     cid = uuid.uuid4()
     svc.contract_repo.rows[cid] = SimpleNamespace(
-        id=cid, status="active", contract_type="lump_sum",
-        terms={}, total_value=Decimal("100000"),
+        id=cid,
+        status="active",
+        contract_type="lump_sum",
+        terms={},
+        total_value=Decimal("100000"),
     )
     with pytest.raises(HTTPException) as exc:
         await svc.update_contract(cid, _contract_update(total_value=Decimal("250000")))
@@ -803,8 +845,12 @@ async def test_update_contract_allows_title_when_active() -> None:
     svc = _stub_update_service()
     cid = uuid.uuid4()
     svc.contract_repo.rows[cid] = SimpleNamespace(
-        id=cid, status="active", contract_type="lump_sum",
-        terms={}, total_value=Decimal("100000"), title="Old",
+        id=cid,
+        status="active",
+        contract_type="lump_sum",
+        terms={},
+        total_value=Decimal("100000"),
+        title="Old",
     )
     await svc.update_contract(cid, _contract_update(title="New title"))
     assert svc.contract_repo.rows[cid].title == "New title"
@@ -815,8 +861,11 @@ async def test_update_contract_allows_financial_edit_while_draft() -> None:
     svc = _stub_update_service()
     cid = uuid.uuid4()
     svc.contract_repo.rows[cid] = SimpleNamespace(
-        id=cid, status="draft", contract_type="lump_sum",
-        terms={}, total_value=Decimal("0"),
+        id=cid,
+        status="draft",
+        contract_type="lump_sum",
+        terms={},
+        total_value=Decimal("0"),
     )
     await svc.update_contract(cid, _contract_update(total_value=Decimal("500000")))
     assert svc.contract_repo.rows[cid].total_value == Decimal("500000")
@@ -829,8 +878,11 @@ async def test_update_contract_rejects_direct_status_change() -> None:
     svc = _stub_update_service()
     cid = uuid.uuid4()
     svc.contract_repo.rows[cid] = SimpleNamespace(
-        id=cid, status="draft", contract_type="lump_sum",
-        terms={}, total_value=Decimal("0"),
+        id=cid,
+        status="draft",
+        contract_type="lump_sum",
+        terms={},
+        total_value=Decimal("0"),
     )
     with pytest.raises(HTTPException) as exc:
         await svc.update_contract(cid, _contract_update(status="active"))

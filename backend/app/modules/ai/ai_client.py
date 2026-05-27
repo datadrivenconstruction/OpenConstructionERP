@@ -104,6 +104,7 @@ def fallback_models_for(provider: str, attempted: str) -> list[str]:
             out.append(c)
     return out
 
+
 # Timeout for AI API calls (2 minutes — large BOQ generation can be slow)
 AI_TIMEOUT = 120.0
 
@@ -212,9 +213,7 @@ def _extract_openai_message_text(provider: str, data: Any) -> str:
 
     if isinstance(content, list):
         text = "".join(
-            p.get("text", "")
-            for p in content
-            if isinstance(p, dict) and p.get("type") in (None, "text", "output_text")
+            p.get("text", "") for p in content if isinstance(p, dict) and p.get("type") in (None, "text", "output_text")
         ).strip()
     elif isinstance(content, str):
         text = content.strip()
@@ -663,13 +662,15 @@ async def call_ai(
                 except (ValueError, KeyError, httpx.HTTPError):
                     continue
                 logger.warning(
-                    "call_ai: model %r rejected by %s (HTTP %s); "
-                    "auto-recovered with fallback model %r",
-                    effective_model, provider, status_code, fb_model,
+                    "call_ai: model %r rejected by %s (HTTP %s); auto-recovered with fallback model %r",
+                    effective_model,
+                    provider,
+                    status_code,
+                    fb_model,
                 )
                 return result
             msg = (
-                f"The AI model \"{effective_model}\" was rejected by {provider} "
+                f'The AI model "{effective_model}" was rejected by {provider} '
                 f"(HTTP {status_code}) and the automatic fallbacks did not "
                 f"succeed. Providers rename and retire models over time — open "
                 f"Settings > AI, set the model name to a currently valid "
@@ -685,7 +686,7 @@ async def call_ai(
             raise ValueError(msg) from exc
         if status_code in (403,) and ("model" in low or "access" in low):
             msg = (
-                f"{provider} denied access to model \"{effective_model}\" with "
+                f'{provider} denied access to model "{effective_model}" with '
                 f"this API key. Pick a model your account/plan can use in "
                 f"Settings > AI. Provider said: {detail[:200]}"
             )

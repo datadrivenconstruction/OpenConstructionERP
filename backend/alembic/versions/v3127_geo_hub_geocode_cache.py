@@ -62,36 +62,50 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column(
-            "query_hash", sa.String(64),
-            nullable=False, server_default="",
+            "query_hash",
+            sa.String(64),
+            nullable=False,
+            server_default="",
         ),
         sa.Column(
-            "query_text", sa.String(500),
-            nullable=False, server_default="",
+            "query_text",
+            sa.String(500),
+            nullable=False,
+            server_default="",
         ),
         sa.Column(
-            "lat", sa.Numeric(10, 7),
-            nullable=False, server_default="0",
+            "lat",
+            sa.Numeric(10, 7),
+            nullable=False,
+            server_default="0",
         ),
         sa.Column(
-            "lon", sa.Numeric(10, 7),
-            nullable=False, server_default="0",
+            "lon",
+            sa.Numeric(10, 7),
+            nullable=False,
+            server_default="0",
         ),
         sa.Column(
-            "precision", sa.String(20),
-            nullable=False, server_default="address",
+            "precision",
+            sa.String(20),
+            nullable=False,
+            server_default="address",
         ),
         sa.Column(
-            "display_name", sa.String(500),
-            nullable=False, server_default="",
+            "display_name",
+            sa.String(500),
+            nullable=False,
+            server_default="",
         ),
         sa.Column("bbox_min_lat", sa.Numeric(10, 7), nullable=True),
         sa.Column("bbox_min_lon", sa.Numeric(10, 7), nullable=True),
         sa.Column("bbox_max_lat", sa.Numeric(10, 7), nullable=True),
         sa.Column("bbox_max_lon", sa.Numeric(10, 7), nullable=True),
         sa.Column(
-            "source", sa.String(20),
-            nullable=False, server_default="nominatim",
+            "source",
+            sa.String(20),
+            nullable=False,
+            server_default="nominatim",
         ),
         sa.Column(
             "cached_at",
@@ -100,8 +114,10 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column(
-            "hit_count", sa.Integer(),
-            nullable=False, server_default="0",
+            "hit_count",
+            sa.Integer(),
+            nullable=False,
+            server_default="0",
         ),
     )
     op.create_index(
@@ -123,9 +139,11 @@ def downgrade() -> None:
     if not inspector.has_table(TABLE):
         return
     op.drop_index(
-        "ix_oe_geo_hub_geocode_cache_cached_at", table_name=TABLE,
+        "ix_oe_geo_hub_geocode_cache_cached_at",
+        table_name=TABLE,
     )
     op.drop_index(
-        "uq_oe_geo_hub_geocode_cache_query_hash", table_name=TABLE,
+        "uq_oe_geo_hub_geocode_cache_query_hash",
+        table_name=TABLE,
     )
     op.drop_table(TABLE)

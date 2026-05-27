@@ -232,11 +232,7 @@ class PositionRepository:
         dropping positions 1001+ from every total. Aggregation callers use
         this method so the count limit can never under-state a tender.
         """
-        stmt = (
-            select(Position)
-            .where(Position.boq_id == boq_id)
-            .order_by(Position.sort_order, Position.ordinal)
-        )
+        stmt = select(Position).where(Position.boq_id == boq_id).order_by(Position.sort_order, Position.ordinal)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -353,9 +349,7 @@ class PositionRepository:
             .where(BOQ.project_id == project_id, Position.reference_code == rc)
         )
         # 1. explicit master wins
-        master_stmt = base.where(Position.link_role == "master").order_by(
-            Position.created_at
-        )
+        master_stmt = base.where(Position.link_role == "master").order_by(Position.created_at)
         master = (await self.session.execute(master_stmt)).scalars().first()
         if master is not None:
             return master
@@ -544,11 +538,7 @@ class QuantityLinkRepository:
 
     async def list_for_position(self, position_id: uuid.UUID) -> list[QuantityLink]:
         """List every quantity link bound to a single position, oldest first."""
-        stmt = (
-            select(QuantityLink)
-            .where(QuantityLink.position_id == position_id)
-            .order_by(QuantityLink.created_at)
-        )
+        stmt = select(QuantityLink).where(QuantityLink.position_id == position_id).order_by(QuantityLink.created_at)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 

@@ -80,19 +80,30 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
     "rfi": ["get_rfi", "update_rfi", "delete_rfi"],
     "submittals": ["get_submittal", "update_submittal", "delete_submittal"],
     "correspondence": [
-        "get_correspondence", "update_correspondence", "delete_correspondence",
+        "get_correspondence",
+        "update_correspondence",
+        "delete_correspondence",
     ],
     "transmittals": [
-        "get_transmittal", "update_transmittal", "delete_transmittal",
+        "get_transmittal",
+        "update_transmittal",
+        "delete_transmittal",
     ],
     "markups": [
-        "get_markup", "update_markup", "delete_markup",
+        "get_markup",
+        "update_markup",
+        "delete_markup",
         # v2.6.48 sweep
-        "link_to_boq", "get_summary", "export_markups",
-        "update_stamp_template", "delete_stamp_template",
+        "link_to_boq",
+        "get_summary",
+        "export_markups",
+        "update_stamp_template",
+        "delete_stamp_template",
     ],
     "changeorders": [
-        "get_change_order", "update_change_order", "delete_change_order",
+        "get_change_order",
+        "update_change_order",
+        "delete_change_order",
     ],
     # v2.6.47 sweep
     "requirements": ["get_set", "update_set", "delete_set"],
@@ -146,23 +157,25 @@ def _arg_names(fn: ast.AsyncFunctionDef) -> list[str]:
 # Wrappers that themselves call verify_project_access. Adding a name here
 # is a deliberate audit decision: the wrapper must do an equivalent or
 # stricter project-scope check before the handler mutates state.
-_GUARD_WRAPPERS = frozenset({
-    "verify_project_access",
-    "_authorize_stamp_mutation",
-    # documents.router replaced raw verify_project_access with a strict
-    # superset that *also* checks folder ACLs (v2.9.42 refactor).
-    "_verify_project_membership_or_404",
-    # Audit B5 — takeoff document access helper (gates by owning project
-    # or owner-user for standalone uploads).
-    "_verify_takeoff_doc_access",
-    # Audit B6 — CAD extraction session access helper.
-    "_verify_cad_session_access",
-    # Round-6 audit — dwg_takeoff IDOR sweep. Each helper resolves the
-    # resource's owning project_id and delegates to verify_project_access.
-    "_gate_by_drawing",
-    "_gate_by_annotation",
-    "_gate_by_group",
-})
+_GUARD_WRAPPERS = frozenset(
+    {
+        "verify_project_access",
+        "_authorize_stamp_mutation",
+        # documents.router replaced raw verify_project_access with a strict
+        # superset that *also* checks folder ACLs (v2.9.42 refactor).
+        "_verify_project_membership_or_404",
+        # Audit B5 — takeoff document access helper (gates by owning project
+        # or owner-user for standalone uploads).
+        "_verify_takeoff_doc_access",
+        # Audit B6 — CAD extraction session access helper.
+        "_verify_cad_session_access",
+        # Round-6 audit — dwg_takeoff IDOR sweep. Each helper resolves the
+        # resource's owning project_id and delegates to verify_project_access.
+        "_gate_by_drawing",
+        "_gate_by_annotation",
+        "_gate_by_group",
+    }
+)
 
 
 # Handlers that don't use the canonical `session` arg name. Each entry
@@ -200,8 +213,7 @@ def _calls_verify_project_access(fn: ast.AsyncFunctionDef) -> bool:
     return False
 
 
-@pytest.mark.parametrize(("module", "handler"),
-    [(m, h) for m, hs in ROUTER_HANDLERS.items() for h in hs])
+@pytest.mark.parametrize(("module", "handler"), [(m, h) for m, hs in ROUTER_HANDLERS.items() for h in hs])
 def test_handler_calls_verify_project_access(module: str, handler: str) -> None:
     """Each handler must `await verify_project_access(...)` somewhere in its body.
 
@@ -213,13 +225,11 @@ def test_handler_calls_verify_project_access(module: str, handler: str) -> None:
     fn = _find_handler(tree, handler)
     assert fn is not None, f"handler {module}.router.{handler} not found"
     assert _calls_verify_project_access(fn), (
-        f"{module}.router.{handler} does not call verify_project_access — "
-        f"IDOR guard regression"
+        f"{module}.router.{handler} does not call verify_project_access — IDOR guard regression"
     )
 
 
-@pytest.mark.parametrize(("module", "handler"),
-    [(m, h) for m, hs in ROUTER_HANDLERS.items() for h in hs])
+@pytest.mark.parametrize(("module", "handler"), [(m, h) for m, hs in ROUTER_HANDLERS.items() for h in hs])
 def test_handler_takes_session_dep(module: str, handler: str) -> None:
     """Each handler must accept a session-style param so the IDOR helper
     can do its DB lookup. Catches refactors that drop the param along
@@ -236,6 +246,5 @@ def test_handler_takes_session_dep(module: str, handler: str) -> None:
     args = _arg_names(fn)
     expected = _SESSION_ARG_OVERRIDES.get(f"{module}.{handler}", "session")
     assert expected in args, (
-        f"{module}.router.{handler} no longer takes a `{expected}` arg — "
-        f"verify_project_access cannot run"
+        f"{module}.router.{handler} no longer takes a `{expected}` arg — verify_project_access cannot run"
     )

@@ -26,7 +26,6 @@ locale-level control).
 from __future__ import annotations
 
 import os
-import sys
 from decimal import Decimal
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -59,6 +58,7 @@ def _stub(**kwargs: Any) -> MagicMock:
 def _make_reservation(*, full_name: str = "Alice Tester") -> tuple[Any, Any, Any, list[Any]]:
     """Minimal stubs for render_reservation_receipt_pdf()."""
     import uuid
+
     reservation = _stub(
         id=uuid.uuid4(),
         reservation_number="RES-2025-001",
@@ -139,24 +139,20 @@ class TestLocaleOverridePrecedence:
         # _load_locale must have been called with "de" (the override locale)
         # rather than "en" (the hypothetical project default).
         called_locales = [call.args[0] for call in mock_load.call_args_list]
-        assert "de" in called_locales, (
-            f"Expected _load_locale('de') but only saw: {called_locales}"
-        )
+        assert "de" in called_locales, f"Expected _load_locale('de') but only saw: {called_locales}"
 
     def test_unsupported_locale_falls_back_to_en(self) -> None:
         """An unknown locale code must NOT raise — it falls back to 'en'."""
         from app.modules.property_dev.document_templates import (
-            render_reservation_receipt_pdf,
             SUPPORTED_LOCALES,
+            render_reservation_receipt_pdf,
         )
 
         assert "xx" not in SUPPORTED_LOCALES, "Test assumes 'xx' is not a supported locale"
         reservation, plot, development, buyers = _make_reservation()
 
         # Must not raise even with an unknown locale code.
-        pdf_bytes = render_reservation_receipt_pdf(
-            reservation, plot, development, buyers, locale="xx"
-        )
+        pdf_bytes = render_reservation_receipt_pdf(reservation, plot, development, buyers, locale="xx")
         assert pdf_bytes[:4] == b"%PDF"
 
     def test_en_locale_produces_valid_pdf(self) -> None:
@@ -164,9 +160,7 @@ class TestLocaleOverridePrecedence:
         from app.modules.property_dev.document_templates import render_reservation_receipt_pdf
 
         reservation, plot, development, buyers = _make_reservation()
-        pdf_bytes = render_reservation_receipt_pdf(
-            reservation, plot, development, buyers, locale="en"
-        )
+        pdf_bytes = render_reservation_receipt_pdf(reservation, plot, development, buyers, locale="en")
         assert pdf_bytes[:4] == b"%PDF"
 
     def test_locale_en_vs_de_output_differs(self) -> None:
@@ -177,8 +171,8 @@ class TestLocaleOverridePrecedence:
         fall back to 'en' data and the test is skipped gracefully.
         """
         from app.modules.property_dev.document_templates import (
-            render_reservation_receipt_pdf,
             _load_locale,
+            render_reservation_receipt_pdf,
         )
 
         # Only run the diff-check if the 'de' locale file actually exists and
@@ -189,12 +183,8 @@ class TestLocaleOverridePrecedence:
             pytest.skip("de locale JSON absent or identical to en — skipping diff check")
 
         reservation, plot, development, buyers = _make_reservation()
-        pdf_en = render_reservation_receipt_pdf(
-            reservation, plot, development, buyers, locale="en"
-        )
-        pdf_de = render_reservation_receipt_pdf(
-            reservation, plot, development, buyers, locale="de"
-        )
+        pdf_en = render_reservation_receipt_pdf(reservation, plot, development, buyers, locale="en")
+        pdf_de = render_reservation_receipt_pdf(reservation, plot, development, buyers, locale="de")
         assert pdf_en != pdf_de, (
             "PDF content must differ between locale='en' and locale='de' "
             "when the locale JSON files are present and distinct."
@@ -255,20 +245,17 @@ class TestTemplateVariableSafety:
 
         os.system = _patched_system
         try:
-            pdf_bytes = render_reservation_receipt_pdf(
-                reservation, plot, development, buyers, locale="en"
-            )
+            pdf_bytes = render_reservation_receipt_pdf(reservation, plot, development, buyers, locale="en")
         finally:
             os.system = original_system
 
-        assert call_count["n"] == 0, (
-            "os.system was called — the template renderer executed user-supplied code!"
-        )
+        assert call_count["n"] == 0, "os.system was called — the template renderer executed user-supplied code!"
         assert pdf_bytes[:4] == b"%PDF"
 
     def test_subprocess_import_in_buyer_name_is_not_executed(self) -> None:
         """{{ __import__('subprocess').run(['id']) }} must be inert."""
         import subprocess
+
         from app.modules.property_dev.document_templates import render_reservation_receipt_pdf
 
         malicious_name = "{{ __import__('subprocess').run(['id']) }}"
@@ -283,15 +270,11 @@ class TestTemplateVariableSafety:
 
         subprocess.run = _patched_run  # type: ignore[method-assign]
         try:
-            pdf_bytes = render_reservation_receipt_pdf(
-                reservation, plot, development, buyers, locale="en"
-            )
+            pdf_bytes = render_reservation_receipt_pdf(reservation, plot, development, buyers, locale="en")
         finally:
             subprocess.run = original_run  # type: ignore[method-assign]
 
-        assert call_count["n"] == 0, (
-            "subprocess.run was called — the template renderer executed user-supplied code!"
-        )
+        assert call_count["n"] == 0, "subprocess.run was called — the template renderer executed user-supplied code!"
         assert pdf_bytes[:4] == b"%PDF"
 
     def test_reportlab_xml_injection_in_buyer_name_does_not_execute_code(self) -> None:
@@ -330,9 +313,7 @@ class TestTemplateVariableSafety:
             # Both are safe outcomes.  A raw exec() or subprocess call is the
             # outcome that would indicate a vulnerability.
             try:
-                pdf_bytes = render_reservation_receipt_pdf(
-                    reservation, plot, development, buyers, locale="en"
-                )
+                pdf_bytes = render_reservation_receipt_pdf(reservation, plot, development, buyers, locale="en")
                 # If it rendered, it must start with %PDF.
                 assert pdf_bytes[:4] == b"%PDF"
             except AttributeError as exc:
@@ -344,9 +325,7 @@ class TestTemplateVariableSafety:
         finally:
             os.system = original_system
 
-        assert call_count["n"] == 0, (
-            "os.system was called — the renderer executed user-supplied code!"
-        )
+        assert call_count["n"] == 0, "os.system was called — the renderer executed user-supplied code!"
 
     def test_exec_in_locale_key_does_not_execute(self) -> None:
         """Malicious locale JSON value is treated as a plain string.
@@ -368,9 +347,7 @@ class TestTemplateVariableSafety:
             value = _t("en", "reservation_receipt.title", "fallback")
 
         # The value must be the raw string — NOT a function-call result.
-        assert value == "__import__('os').system('id')", (
-            "_t() must return the string verbatim, never eval() it."
-        )
+        assert value == "__import__('os').system('id')", "_t() must return the string verbatim, never eval() it."
 
     def test_no_jinja2_environment_in_module(self) -> None:
         """document_templates must NOT import jinja2 or use Environment/eval.
@@ -379,6 +356,7 @@ class TestTemplateVariableSafety:
         an unsafe Environment could be used accidentally in future edits.
         """
         import importlib
+
         mod = importlib.import_module("app.modules.property_dev.document_templates")
         # The module must not hold a reference to a Jinja2 Environment instance.
         assert not hasattr(mod, "jinja_env"), (
@@ -386,9 +364,9 @@ class TestTemplateVariableSafety:
         )
         # jinja2 must not appear in the module's direct __dict__ as a submodule.
         import types
+
         jinja_refs = [
-            name for name, val in vars(mod).items()
-            if isinstance(val, types.ModuleType) and "jinja2" in val.__name__
+            name for name, val in vars(mod).items() if isinstance(val, types.ModuleType) and "jinja2" in val.__name__
         ]
         assert not jinja_refs, (
             f"document_templates imports jinja2 module(s): {jinja_refs}. "

@@ -24,9 +24,7 @@ _MAX_NUMBER_RETRIES = 5
 # is funnelled through the dedicated ``/submit``, ``/review``, ``/approve``
 # endpoints so the role-gate and audit logging in those handlers cannot
 # be bypassed by a plain editor PATCHing ``status=approved`` directly.
-_PATCH_ALLOWED_STATUSES: frozenset[str] = frozenset(
-    {"draft", "submitted", "under_review"}
-)
+_PATCH_ALLOWED_STATUSES: frozenset[str] = frozenset({"draft", "submitted", "under_review"})
 
 
 async def _safe_publish(name: str, data: dict, source_module: str = "oe_submittals") -> None:
@@ -149,8 +147,7 @@ class SubmittalService:
             except IntegrityError as exc:
                 last_exc = exc
                 logger.warning(
-                    "Submittal-number collision on attempt %d for project %s "
-                    "(number=%s); retrying",
+                    "Submittal-number collision on attempt %d for project %s (number=%s); retrying",
                     attempt + 1,
                     data.project_id,
                     submittal_number,
@@ -167,16 +164,14 @@ class SubmittalService:
         # All retries exhausted — translate to 409 so the caller can retry
         # at the HTTP layer with a clear contract.
         logger.error(
-            "Submittal-number collision still unresolved after %d retries "
-            "for project %s",
+            "Submittal-number collision still unresolved after %d retries for project %s",
             _MAX_NUMBER_RETRIES,
             data.project_id,
         )
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=(
-                "Could not allocate a unique submittal number after "
-                f"{_MAX_NUMBER_RETRIES} attempts; please retry."
+                f"Could not allocate a unique submittal number after {_MAX_NUMBER_RETRIES} attempts; please retry."
             ),
         ) from last_exc
 
@@ -290,10 +285,7 @@ class SubmittalService:
         if submittal.status not in allowed:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Can only submit from draft or revise_and_resubmit status, "
-                    f"current: {submittal.status}"
-                ),
+                detail=(f"Can only submit from draft or revise_and_resubmit status, current: {submittal.status}"),
             )
 
         from datetime import UTC, datetime
@@ -371,8 +363,13 @@ class SubmittalService:
             },
         )
 
-        new_rev = fresh.current_revision if fresh else fields.get(
-            "current_revision", current_rev,
+        new_rev = (
+            fresh.current_revision
+            if fresh
+            else fields.get(
+                "current_revision",
+                current_rev,
+            )
         )
         logger.info(
             "Submittal submitted: %s (rev %s)",
@@ -538,8 +535,7 @@ class SubmittalService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
-                    f"Cannot approve submittal with status '{submittal.status}'. "
-                    f"Expected one of: {', '.join(allowed)}"
+                    f"Cannot approve submittal with status '{submittal.status}'. Expected one of: {', '.join(allowed)}"
                 ),
             )
 

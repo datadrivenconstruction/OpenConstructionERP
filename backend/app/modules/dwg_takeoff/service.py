@@ -315,9 +315,7 @@ def _process_dxf_sync(file_path: str, entities_key: str, thumbnail_key: str) -> 
 
     # Generate and save SVG thumbnail
     svg_content = generate_svg_thumbnail(file_path)
-    thumb_dir = os.path.join(
-        os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data")), "dwg_thumbnails"
-    )
+    thumb_dir = os.path.join(os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data")), "dwg_thumbnails")
     thumb_path = os.path.join(thumb_dir, thumbnail_key)
     os.makedirs(os.path.dirname(thumb_path), exist_ok=True)
     with open(thumb_path, "w", encoding="utf-8") as f:
@@ -485,9 +483,7 @@ class DwgTakeoffService:
         thumbnail_key = f"{drawing_id}/thumbnail.svg"
 
         try:
-            result = await asyncio.to_thread(
-                _process_dxf_sync, file_path, entities_key, thumbnail_key
-            )
+            result = await asyncio.to_thread(_process_dxf_sync, file_path, entities_key, thumbnail_key)
 
             # Create drawing version
             version_number = await self.version_repo.get_next_version_number(drawing_id)
@@ -520,17 +516,17 @@ class DwgTakeoffService:
                 status="empty" if is_empty else "ready",
                 thumbnail_key=thumbnail_key,
                 error_message=(
-                    "This DXF/DWG contains no drawable entities — "
-                    "the file is empty or contains only metadata."
-                    if is_empty else None
+                    "This DXF/DWG contains no drawable entities — the file is empty or contains only metadata."
+                    if is_empty
+                    else None
                 ),
             )
 
             if is_empty:
                 logger.warning(
-                    "Drawing %s parsed as empty (0 entities, %d layers) — "
-                    "surfacing status=empty to the user",
-                    drawing_id, len(result["layers"]),
+                    "Drawing %s parsed as empty (0 entities, %d layers) — surfacing status=empty to the user",
+                    drawing_id,
+                    len(result["layers"]),
                 )
             else:
                 logger.info(
@@ -608,8 +604,7 @@ class DwgTakeoffService:
                 drawing_id,
                 status="error",
                 error_message=(
-                    "DWG conversion requires DDC DwgExporter. "
-                    "Please upload DXF format or install the converter."
+                    "DWG conversion requires DDC DwgExporter. Please upload DXF format or install the converter."
                 ),
             )
             return
@@ -656,13 +651,15 @@ class DwgTakeoffService:
                 return
         except subprocess.TimeoutExpired:
             await self.drawing_repo.update_fields(
-                drawing_id, status="error",
+                drawing_id,
+                status="error",
                 error_message="DWG conversion timed out (120s limit)",
             )
             return
         except Exception as exc:
             await self.drawing_repo.update_fields(
-                drawing_id, status="error",
+                drawing_id,
+                status="error",
                 error_message=f"DWG conversion error: {exc}"[:500],
             )
             return
@@ -675,7 +672,8 @@ class DwgTakeoffService:
 
             if result["entity_count"] == 0:
                 await self.drawing_repo.update_fields(
-                    drawing_id, status="error",
+                    drawing_id,
+                    status="error",
                     error_message="No drawable entities found in DWG file",
                 )
                 return
@@ -684,6 +682,7 @@ class DwgTakeoffService:
             entities_key = f"{drawing_id}/entities.json"
             entities_path = os.path.join(os.path.dirname(file_path), f"{drawing_id}_entities.json")
             import json
+
             with open(entities_path, "w", encoding="utf-8") as f:
                 json.dump(result["entities"], f)
 
@@ -709,12 +708,15 @@ class DwgTakeoffService:
 
             logger.info(
                 "DWG processed via DDC: %s — %d entities, %d layers",
-                drawing_id, result["entity_count"], len(result["layers"]),
+                drawing_id,
+                result["entity_count"],
+                len(result["layers"]),
             )
 
         except Exception as exc:
             await self.drawing_repo.update_fields(
-                drawing_id, status="error",
+                drawing_id,
+                status="error",
                 error_message=f"DWG parsing error: {exc}"[:500],
             )
             logger.exception("Failed to parse DWG %s: %s", drawing_id, exc)
@@ -784,9 +786,7 @@ class DwgTakeoffService:
         # Remove entities and thumbnail files for all versions
         versions = await self.version_repo.list_for_drawing(drawing_id)
         entities_dir = _get_entities_dir()
-        thumb_dir = os.path.join(
-            os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data")), "dwg_thumbnails"
-        )
+        thumb_dir = os.path.join(os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data")), "dwg_thumbnails")
         for version in versions:
             if version.entities_key:
                 ent_path = os.path.join(entities_dir, version.entities_key)
@@ -837,7 +837,9 @@ class DwgTakeoffService:
             return []
         except json.JSONDecodeError as exc:
             logger.error(
-                "Corrupt entities JSON for drawing %s: %s", drawing_id, exc,
+                "Corrupt entities JSON for drawing %s: %s",
+                drawing_id,
+                exc,
             )
             return []
         except Exception:
@@ -860,9 +862,7 @@ class DwgTakeoffService:
         if not drawing.thumbnail_key:
             return None
 
-        thumb_dir = os.path.join(
-            os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data")), "dwg_thumbnails"
-        )
+        thumb_dir = os.path.join(os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data")), "dwg_thumbnails")
         thumb_path = os.path.join(thumb_dir, drawing.thumbnail_key)
         if not os.path.exists(thumb_path):
             return None
@@ -1004,9 +1004,7 @@ class DwgTakeoffService:
         """Link an annotation to a BOQ position."""
         item = await self.get_annotation(annotation_id)
 
-        await self.annotation_repo.update_fields(
-            annotation_id, linked_boq_position_id=position_id
-        )
+        await self.annotation_repo.update_fields(annotation_id, linked_boq_position_id=position_id)
         await self.session.refresh(item)
 
         logger.info("Annotation %s linked to BOQ position %s", annotation_id, position_id)
@@ -1063,7 +1061,9 @@ class DwgTakeoffService:
     ) -> tuple[list[DwgEntityGroup], int]:
         """List saved entity groups for a drawing."""
         return await self.group_repo.list_for_drawing(
-            drawing_id, offset=offset, limit=limit,
+            drawing_id,
+            offset=offset,
+            limit=limit,
         )
 
     async def delete_entity_group(self, group_id: uuid.UUID) -> None:
@@ -1095,10 +1095,7 @@ class DwgTakeoffService:
                 "ready": False,
                 "converter_available": False,
                 "version": None,
-                "message": (
-                    "Install dwg2data to enable offline DWG conversion. "
-                    "DXF files already work without it."
-                ),
+                "message": ("Install dwg2data to enable offline DWG conversion. DXF files already work without it."),
             }
 
         version: str | None = None
@@ -1116,7 +1113,8 @@ class DwgTakeoffService:
 
 
 async def _run_dwg_conversion_in_background(
-    drawing_id: uuid.UUID, file_path: str,
+    drawing_id: uuid.UUID,
+    file_path: str,
 ) -> None:
     """Detached DDC conversion task with its own DB session.
 

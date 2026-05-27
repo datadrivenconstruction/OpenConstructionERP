@@ -25,7 +25,6 @@ from app.modules.smart_views.schemas import (
     SmartViewSelector,
 )
 
-
 # ── Fixtures (plain dict elements — no DB) ────────────────────────────────
 
 

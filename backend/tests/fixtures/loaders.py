@@ -1,4 +1,5 @@
 """Test fixture loaders for the EAC v2 platform tests (RFC 35)."""
+
 from __future__ import annotations
 
 import json

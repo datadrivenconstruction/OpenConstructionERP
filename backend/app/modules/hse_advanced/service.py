@@ -29,7 +29,6 @@ from app.modules.hse_advanced.models import (
     ToolboxTalk,
     ToolboxTopic,
 )
-from app.modules.safety.models import HSECorrectiveAction, SafetyIncident
 from app.modules.hse_advanced.repository import (
     AuditFindingRepository,
     AuditRepository,
@@ -75,6 +74,7 @@ from app.modules.hse_advanced.schemas import (
     ToolboxTopicCreate,
     ToolboxTopicUpdate,
 )
+from app.modules.safety.models import HSECorrectiveAction, SafetyIncident
 
 logger = logging.getLogger(__name__)
 
@@ -118,9 +118,7 @@ _PTW_PREREQUISITES: dict[str, tuple[str, ...]] = {
         "prereq_jsa_approved",
         "prereq_supervisor_present",
     ),
-    "other": (
-        "prereq_jsa_approved",
-    ),
+    "other": ("prereq_jsa_approved",),
 }
 
 
@@ -334,9 +332,7 @@ def compute_trir(recordable_count: int, hours_worked: Decimal | float | int) -> 
     hw = Decimal(str(hours_worked)) if hours_worked is not None else Decimal("0")
     if hw <= 0:
         return Decimal("0")
-    return (Decimal(recordable_count) * Decimal("200000") / hw).quantize(
-        Decimal("0.0001")
-    )
+    return (Decimal(recordable_count) * Decimal("200000") / hw).quantize(Decimal("0.0001"))
 
 
 def compute_ltifr(lti_count: int, hours_worked: Decimal | float | int) -> Decimal:
@@ -344,14 +340,10 @@ def compute_ltifr(lti_count: int, hours_worked: Decimal | float | int) -> Decima
     hw = Decimal(str(hours_worked)) if hours_worked is not None else Decimal("0")
     if hw <= 0:
         return Decimal("0")
-    return (Decimal(lti_count) * Decimal("1000000") / hw).quantize(
-        Decimal("0.0001")
-    )
+    return (Decimal(lti_count) * Decimal("1000000") / hw).quantize(Decimal("0.0001"))
 
 
-def days_without_lti(
-    incident_dates: list[date | str], today: date | None = None
-) -> int:
+def days_without_lti(incident_dates: list[date | str], today: date | None = None) -> int:
     """Pure: days since the most recent LTI incident. None-yet => some sentinel.
 
     Returns 0 if today equals the most recent incident date, or a large
@@ -446,9 +438,7 @@ def is_user_blocked_for_work(
         if ct:
             # keep the latest valid_until per type
             existing = held.get(ct)
-            if existing is None or getattr(c, "valid_until", date.min) > getattr(
-                existing, "valid_until", date.min
-            ):
+            if existing is None or getattr(c, "valid_until", date.min) > getattr(existing, "valid_until", date.min):
                 held[ct] = c
 
     missing: list[str] = []
@@ -625,9 +615,7 @@ class HSEAdvancedService:
             raise HTTPException(404, "Investigation not found")
         return obj
 
-    async def update_investigation(
-        self, item_id: uuid.UUID, data: InvestigationUpdate
-    ) -> HSEIncidentInvestigation:
+    async def update_investigation(self, item_id: uuid.UUID, data: InvestigationUpdate) -> HSEIncidentInvestigation:
         obj = await self.get_investigation(item_id)
         fields = data.model_dump(exclude_unset=True)
         # RIDDOR (UK) / OSHA 1904.33 (US) require the formal investigation
@@ -651,7 +639,9 @@ class HSEAdvancedService:
         return obj
 
     async def complete_investigation(
-        self, item_id: uuid.UUID, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        user_id: str | None = None,
     ) -> HSEIncidentInvestigation:
         obj = await self.get_investigation(item_id)
         # `completed` and `abandoned` are terminal — re-completing would
@@ -662,9 +652,7 @@ class HSEAdvancedService:
                 f"Cannot complete an investigation in status '{obj.status}'",
             )
         prior = obj.status
-        await self.investigation_repo.update_fields(
-            item_id, status="completed", completed_at=datetime.now(UTC)
-        )
+        await self.investigation_repo.update_fields(item_id, status="completed", completed_at=datetime.now(UTC))
         await self.session.refresh(obj)
         await _safe_audit(
             self.session,
@@ -679,7 +667,9 @@ class HSEAdvancedService:
         return obj
 
     async def abandon_investigation(
-        self, item_id: uuid.UUID, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        user_id: str | None = None,
     ) -> HSEIncidentInvestigation:
         obj = await self.get_investigation(item_id)
         # A completed investigation is a closed record; an already-abandoned
@@ -691,9 +681,7 @@ class HSEAdvancedService:
                 f"Cannot abandon an investigation in status '{obj.status}'",
             )
         prior = obj.status
-        await self.investigation_repo.update_fields(
-            item_id, status="abandoned", completed_at=datetime.now(UTC)
-        )
+        await self.investigation_repo.update_fields(item_id, status="abandoned", completed_at=datetime.now(UTC))
         await self.session.refresh(obj)
         await _safe_audit(
             self.session,
@@ -709,9 +697,7 @@ class HSEAdvancedService:
 
     # ── JSA ───────────────────────────────────────────────────────────────
 
-    async def create_jsa(
-        self, data: JSACreate, user_id: str | None = None
-    ) -> JobSafetyAnalysis:
+    async def create_jsa(self, data: JSACreate, user_id: str | None = None) -> JobSafetyAnalysis:
         hazards = [h.model_dump() for h in data.hazards]
         risk = compute_jsa_risk(hazards)
         obj = JobSafetyAnalysis(
@@ -736,7 +722,10 @@ class HSEAdvancedService:
         return obj
 
     async def update_jsa(
-        self, item_id: uuid.UUID, data: JSAUpdate, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        data: JSAUpdate,
+        user_id: str | None = None,
     ) -> JobSafetyAnalysis:
         obj = await self.get_jsa(item_id)
         fields = data.model_dump(exclude_unset=True)
@@ -749,14 +738,10 @@ class HSEAdvancedService:
         if content_keys and obj.status not in ("draft", "under_review"):
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
-                f"Cannot edit a JSA in status '{obj.status}' — "
-                "revert it to draft before changing content",
+                f"Cannot edit a JSA in status '{obj.status}' — revert it to draft before changing content",
             )
         if "hazards" in fields and fields["hazards"] is not None:
-            fields["hazards"] = [
-                h.model_dump() if hasattr(h, "model_dump") else h
-                for h in fields["hazards"]
-            ]
+            fields["hazards"] = [h.model_dump() if hasattr(h, "model_dump") else h for h in fields["hazards"]]
             fields["risk_score"] = compute_jsa_risk(fields["hazards"])
         if fields:
             await self.jsa_repo.update_fields(item_id, **fields)
@@ -775,7 +760,9 @@ class HSEAdvancedService:
         return obj
 
     async def delete_jsa(
-        self, item_id: uuid.UUID, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        user_id: str | None = None,
     ) -> None:
         obj = await self.get_jsa(item_id)
         snapshot = {
@@ -816,9 +803,7 @@ class HSEAdvancedService:
         )
         return obj
 
-    async def approve_jsa(
-        self, item_id: uuid.UUID, approver_id: uuid.UUID | None = None
-    ) -> JobSafetyAnalysis:
+    async def approve_jsa(self, item_id: uuid.UUID, approver_id: uuid.UUID | None = None) -> JobSafetyAnalysis:
         obj = await self.get_jsa(item_id)
         if "approved" not in allowed_jsa_transitions(obj.status):
             raise HTTPException(
@@ -850,9 +835,7 @@ class HSEAdvancedService:
 
     # ── PTW ──────────────────────────────────────────────────────────────
 
-    async def request_permit(
-        self, data: PermitCreate, user_id: str | None = None
-    ) -> PermitToWork:
+    async def request_permit(self, data: PermitCreate, user_id: str | None = None) -> PermitToWork:
         if data.work_end <= data.work_start:
             raise HTTPException(422, "work_end must be after work_start")
         obj = PermitToWork(
@@ -891,7 +874,10 @@ class HSEAdvancedService:
         return obj
 
     async def update_permit(
-        self, item_id: uuid.UUID, data: PermitUpdate, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        data: PermitUpdate,
+        user_id: str | None = None,
     ) -> PermitToWork:
         obj = await self.get_permit(item_id)
         # Editing the scope / window of a live, closed or cancelled permit
@@ -927,7 +913,9 @@ class HSEAdvancedService:
         return obj
 
     async def delete_permit(
-        self, item_id: uuid.UUID, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        user_id: str | None = None,
     ) -> None:
         obj = await self.get_permit(item_id)
         snapshot = {
@@ -988,8 +976,7 @@ class HSEAdvancedService:
         if missing:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
-                "Cannot activate permit — unmet prerequisites: "
-                + ", ".join(missing),
+                "Cannot activate permit — unmet prerequisites: " + ", ".join(missing),
             )
         # If the permit references a JSA, ensure it is approved.
         if obj.jsa_id is not None:
@@ -1030,7 +1017,8 @@ class HSEAdvancedService:
         return obj
 
     def permit_prerequisite_status(
-        self, permit: PermitToWork,
+        self,
+        permit: PermitToWork,
     ) -> PermitPrerequisiteStatus:
         """Build a human-readable summary of permit prerequisite state."""
         required = list(ptw_required_prerequisites(permit.permit_type))
@@ -1153,9 +1141,7 @@ class HSEAdvancedService:
                 attendance_status=att.attendance_status,
             )
             added.append(await self.attendance_repo.create(row))
-        await self.talk_repo.update_fields(
-            talk_id, attendance_count=talk.attendance_count + len(added)
-        )
+        await self.talk_repo.update_fields(talk_id, attendance_count=talk.attendance_count + len(added))
         return added
 
     async def get_toolbox_talk(self, item_id: uuid.UUID) -> ToolboxTalk:
@@ -1164,9 +1150,7 @@ class HSEAdvancedService:
             raise HTTPException(404, "Toolbox talk not found")
         return obj
 
-    async def update_toolbox_talk(
-        self, item_id: uuid.UUID, data: ToolboxTalkUpdate
-    ) -> ToolboxTalk:
+    async def update_toolbox_talk(self, item_id: uuid.UUID, data: ToolboxTalkUpdate) -> ToolboxTalk:
         obj = await self.get_toolbox_talk(item_id)
         fields = data.model_dump(exclude_unset=True)
         if fields:
@@ -1189,9 +1173,7 @@ class HSEAdvancedService:
         obj = ToolboxTopic(**data.model_dump())
         return await self.topic_repo.create(obj)
 
-    async def update_topic(
-        self, item_id: uuid.UUID, data: ToolboxTopicUpdate
-    ) -> ToolboxTopic:
+    async def update_topic(self, item_id: uuid.UUID, data: ToolboxTopicUpdate) -> ToolboxTopic:
         obj = await self.topic_repo.get_by_id(item_id)
         if obj is None:
             raise HTTPException(404, "Toolbox topic not found")
@@ -1213,9 +1195,7 @@ class HSEAdvancedService:
             raise HTTPException(404, "PPE issue not found")
         return obj
 
-    async def update_ppe_issue(
-        self, item_id: uuid.UUID, data: PPEIssueUpdate
-    ) -> PPEIssue:
+    async def update_ppe_issue(self, item_id: uuid.UUID, data: PPEIssueUpdate) -> PPEIssue:
         obj = await self.get_ppe_issue(item_id)
         fields = data.model_dump(exclude_unset=True)
         if fields:
@@ -1225,17 +1205,13 @@ class HSEAdvancedService:
 
     async def return_ppe(self, item_id: uuid.UUID) -> PPEIssue:
         obj = await self.get_ppe_issue(item_id)
-        await self.ppe_repo.update_fields(
-            item_id, status="returned", returned_at=datetime.now(UTC)
-        )
+        await self.ppe_repo.update_fields(item_id, status="returned", returned_at=datetime.now(UTC))
         await self.session.refresh(obj)
         return obj
 
     # ── Audits ───────────────────────────────────────────────────────────
 
-    async def create_audit(
-        self, data: AuditCreate, user_id: str | None = None
-    ) -> SafetyAudit:
+    async def create_audit(self, data: AuditCreate, user_id: str | None = None) -> SafetyAudit:
         obj = SafetyAudit(
             project_id=data.project_id,
             audit_type=data.audit_type,
@@ -1255,7 +1231,10 @@ class HSEAdvancedService:
         return obj
 
     async def update_audit(
-        self, item_id: uuid.UUID, data: AuditUpdate, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        data: AuditUpdate,
+        user_id: str | None = None,
     ) -> SafetyAudit:
         obj = await self.get_audit(item_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1276,7 +1255,9 @@ class HSEAdvancedService:
         return obj
 
     async def delete_audit(
-        self, item_id: uuid.UUID, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        user_id: str | None = None,
     ) -> None:
         obj = await self.get_audit(item_id)
         snapshot = {
@@ -1326,9 +1307,7 @@ class HSEAdvancedService:
                     created_by=user_id,
                 )
                 capa = await self.capa_repo.create(capa)
-                await self.finding_repo.update_fields(
-                    finding.id, corrective_action_ref=capa.id
-                )
+                await self.finding_repo.update_fields(finding.id, corrective_action_ref=capa.id)
 
         # Recompute audit score from all findings now persisted.
         findings = await self.finding_repo.list_for_audit(audit_id)
@@ -1343,7 +1322,9 @@ class HSEAdvancedService:
         return audit
 
     async def complete_audit(
-        self, audit_id: uuid.UUID, user_id: str | None = None,
+        self,
+        audit_id: uuid.UUID,
+        user_id: str | None = None,
     ) -> SafetyAudit:
         audit = await self.get_audit(audit_id)
         if "completed" not in allowed_audit_transitions(audit.status):
@@ -1388,9 +1369,7 @@ class HSEAdvancedService:
 
     # ── Audit Findings (CRUD basics) ────────────────────────────────────
 
-    async def create_finding(
-        self, audit_id: uuid.UUID, payload: AuditFindingCreate
-    ) -> SafetyAuditFinding:
+    async def create_finding(self, audit_id: uuid.UUID, payload: AuditFindingCreate) -> SafetyAuditFinding:
         await self.get_audit(audit_id)
         obj = SafetyAuditFinding(
             audit_id=audit_id,
@@ -1407,9 +1386,7 @@ class HSEAdvancedService:
 
     # ── CAPA ─────────────────────────────────────────────────────────────
 
-    async def create_capa(
-        self, data: CAPACreate, user_id: str | None = None
-    ) -> CorrectiveAction:
+    async def create_capa(self, data: CAPACreate, user_id: str | None = None) -> CorrectiveAction:
         obj = CorrectiveAction(
             project_id=data.project_id,
             source_type=data.source_type,
@@ -1431,7 +1408,10 @@ class HSEAdvancedService:
         return obj
 
     async def update_capa(
-        self, item_id: uuid.UUID, data: CAPAUpdate, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        data: CAPAUpdate,
+        user_id: str | None = None,
     ) -> CorrectiveAction:
         obj = await self.get_capa(item_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1452,7 +1432,9 @@ class HSEAdvancedService:
         return obj
 
     async def delete_capa(
-        self, item_id: uuid.UUID, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        user_id: str | None = None,
     ) -> None:
         obj = await self.get_capa(item_id)
         snapshot = {
@@ -1471,7 +1453,9 @@ class HSEAdvancedService:
         )
 
     async def escalate_capa(
-        self, item_id: uuid.UUID, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        user_id: str | None = None,
     ) -> CorrectiveAction:
         obj = await self.get_capa(item_id)
         if "overdue" not in allowed_capa_transitions(obj.status):
@@ -1546,7 +1530,9 @@ class HSEAdvancedService:
         return obj
 
     async def cancel_capa(
-        self, item_id: uuid.UUID, user_id: str | None = None,
+        self,
+        item_id: uuid.UUID,
+        user_id: str | None = None,
     ) -> CorrectiveAction:
         obj = await self.get_capa(item_id)
         if "cancelled" not in allowed_capa_transitions(obj.status):
@@ -1571,9 +1557,7 @@ class HSEAdvancedService:
 
     # ── Certifications ──────────────────────────────────────────────────
 
-    async def create_certification(
-        self, data: CertificationCreate
-    ) -> SafetyCertification:
+    async def create_certification(self, data: CertificationCreate) -> SafetyCertification:
         obj = SafetyCertification(**data.model_dump())
         return await self.cert_repo.create(obj)
 
@@ -1583,9 +1567,7 @@ class HSEAdvancedService:
             raise HTTPException(404, "Certification not found")
         return obj
 
-    async def update_certification(
-        self, item_id: uuid.UUID, data: CertificationUpdate
-    ) -> SafetyCertification:
+    async def update_certification(self, item_id: uuid.UUID, data: CertificationUpdate) -> SafetyCertification:
         obj = await self.get_certification(item_id)
         fields = data.model_dump(exclude_unset=True)
         if fields:
@@ -1593,9 +1575,7 @@ class HSEAdvancedService:
             await self.session.refresh(obj)
         return obj
 
-    async def expiring_certifications(
-        self, days: int = 30, today: date | None = None
-    ) -> list[SafetyCertification]:
+    async def expiring_certifications(self, days: int = 30, today: date | None = None) -> list[SafetyCertification]:
         today = today or date.today()
         certs = await self.cert_repo.expiring_within(days, today)
         # Publish a single dashboard tick for dashboard counters.
@@ -1609,7 +1589,9 @@ class HSEAdvancedService:
     # ── CAPA 5-Whys + Effectiveness Verification ─────────────────────────
 
     async def set_capa_five_whys(
-        self, item_id: uuid.UUID, payload: CAPAFiveWhysPayload,
+        self,
+        item_id: uuid.UUID,
+        payload: CAPAFiveWhysPayload,
     ) -> CorrectiveAction:
         """Record a structured 5-Whys chain on a CAPA.
 
@@ -1629,10 +1611,7 @@ class HSEAdvancedService:
         await self.capa_repo.update_fields(
             item_id,
             five_whys=[s.model_dump() for s in payload.steps],
-            **(
-                {"root_cause_category": payload.root_cause_category}
-                if payload.root_cause_category else {}
-            ),
+            **({"root_cause_category": payload.root_cause_category} if payload.root_cause_category else {}),
         )
         await self.session.refresh(obj)
         _safe_publish(
@@ -1672,13 +1651,12 @@ class HSEAdvancedService:
             fields["status"] = "in_progress"
             extra = (
                 f"\n[Effectiveness check failed: {payload.notes}]"
-                if payload.notes else "\n[Effectiveness check failed]"
+                if payload.notes
+                else "\n[Effectiveness check failed]"
             )
             fields["verification_notes"] = (obj.verification_notes or "") + extra
         elif payload.notes:
-            fields["verification_notes"] = (
-                (obj.verification_notes or "") + f"\n[Effective: {payload.notes}]"
-            )
+            fields["verification_notes"] = (obj.verification_notes or "") + f"\n[Effective: {payload.notes}]"
         await self.capa_repo.update_fields(item_id, **fields)
         await self.session.refresh(obj)
         _safe_publish(
@@ -1694,16 +1672,15 @@ class HSEAdvancedService:
     # ── JSA template library ─────────────────────────────────────────────
 
     async def create_jsa_template(
-        self, data: JSATemplateCreate, user_id: str | None = None,
+        self,
+        data: JSATemplateCreate,
+        user_id: str | None = None,
     ) -> JSATemplate:
         tpl = JSATemplate(
             trade=data.trade,
             name=data.name,
             task_description=data.task_description,
-            hazards_json=[
-                (h.model_dump() if hasattr(h, "model_dump") else dict(h))
-                for h in data.hazards
-            ],
+            hazards_json=[(h.model_dump() if hasattr(h, "model_dump") else dict(h)) for h in data.hazards],
             required_ppe_json=list(data.required_ppe),
             region=data.region,
             is_active=data.is_active,
@@ -1713,7 +1690,9 @@ class HSEAdvancedService:
         return await self.jsa_template_repo.create(tpl)
 
     async def update_jsa_template(
-        self, tpl_id: uuid.UUID, data: JSATemplateUpdate,
+        self,
+        tpl_id: uuid.UUID,
+        data: JSATemplateUpdate,
     ) -> JSATemplate:
         tpl = await self.jsa_template_repo.get_by_id(tpl_id)
         if tpl is None:
@@ -1721,8 +1700,7 @@ class HSEAdvancedService:
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "hazards" in fields and fields["hazards"] is not None:
             fields["hazards_json"] = [
-                (h.model_dump() if hasattr(h, "model_dump") else dict(h))
-                for h in fields.pop("hazards")
+                (h.model_dump() if hasattr(h, "model_dump") else dict(h)) for h in fields.pop("hazards")
             ]
         else:
             fields.pop("hazards", None)
@@ -1800,7 +1778,9 @@ class HSEAdvancedService:
     )
 
     async def generate_osha_300_csv(
-        self, project_id: uuid.UUID, year: int,
+        self,
+        project_id: uuid.UUID,
+        year: int,
     ) -> str:
         """‌⁠‍Render the OSHA 300 incident log for one project + year.
 
@@ -1826,23 +1806,15 @@ class HSEAdvancedService:
 
         for r in rows:
             ipd = r.injured_person_details or {}
-            employee_name = (
-                ipd.get("name") if isinstance(ipd, dict) else None
-            ) or ""
-            job_title = (
-                ipd.get("role") if isinstance(ipd, dict) else None
-            ) or ""
+            employee_name = (ipd.get("name") if isinstance(ipd, dict) else None) or ""
+            job_title = (ipd.get("role") if isinstance(ipd, dict) else None) or ""
             # OSHA 1904.7 — fatality wins over "other recordable".
             is_fatality = (r.treatment_type or "").lower() == "fatality"
             death_yes_no = "Y" if is_fatality else "N"
             # "Other recordable" = recordable AND neither death nor
             # days_away nor days_restricted nor job-transfer (we collapse
             # the latter two into the days_restricted column).
-            other_recordable = (
-                not is_fatality
-                and not (r.days_away or 0)
-                and not (r.days_restricted or 0)
-            )
+            other_recordable = not is_fatality and not (r.days_away or 0) and not (r.days_restricted or 0)
             writer.writerow(
                 [
                     r.osha_case_number or r.incident_number or "",
@@ -1882,12 +1854,11 @@ class HSEAdvancedService:
         return obj
 
     async def get_corrective_action(
-        self, ca_id: uuid.UUID,
+        self,
+        ca_id: uuid.UUID,
     ) -> HSECorrectiveAction:
         obj = (
-            await self.session.execute(
-                select(HSECorrectiveAction).where(HSECorrectiveAction.id == ca_id)
-            )
+            await self.session.execute(select(HSECorrectiveAction).where(HSECorrectiveAction.id == ca_id))
         ).scalar_one_or_none()
         if obj is None:
             raise HTTPException(404, "Corrective action not found")
@@ -1941,9 +1912,7 @@ class HSEAdvancedService:
             verifier_uuid: uuid.UUID | None = None
             if user_id is not None:
                 try:
-                    verifier_uuid = (
-                        user_id if isinstance(user_id, uuid.UUID) else uuid.UUID(str(user_id))
-                    )
+                    verifier_uuid = user_id if isinstance(user_id, uuid.UUID) else uuid.UUID(str(user_id))
                 except (TypeError, ValueError):
                     verifier_uuid = None
             obj.verified_by_user_id = verifier_uuid
@@ -1951,10 +1920,7 @@ class HSEAdvancedService:
         if verification_notes:
             stamp = datetime.now(UTC).isoformat(timespec="seconds")
             entry = f"[{stamp} {to_status}] {verification_notes}"
-            obj.verification_notes = (
-                f"{obj.verification_notes}\n{entry}"
-                if obj.verification_notes else entry
-            )
+            obj.verification_notes = f"{obj.verification_notes}\n{entry}" if obj.verification_notes else entry
 
         await self.session.flush()
         _safe_publish(

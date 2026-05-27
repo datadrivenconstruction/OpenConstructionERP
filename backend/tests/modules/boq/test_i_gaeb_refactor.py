@@ -18,7 +18,6 @@ import pytest
 
 from app.modules.boq.importers.gaeb_xml import GAEBXMLImporter
 
-
 _GAEB_X83 = b"""<?xml version="1.0" encoding="UTF-8"?>
 <GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/200407">
   <GAEBInfo><DPType>83</DPType></GAEBInfo>
@@ -139,9 +138,7 @@ class TestGAEBImporterRegression:
     async def test_section_label_collected(self) -> None:
         result = await GAEBXMLImporter.parse(_GAEB_X83)
         sections = result.metadata["sections"]
-        assert any(
-            s["ordinal"] == "01" and s["label"] == "Erdarbeiten" for s in sections
-        )
+        assert any(s["ordinal"] == "01" and s["label"] == "Erdarbeiten" for s in sections)
 
     @pytest.mark.asyncio
     async def test_da_kind_x83(self) -> None:
@@ -169,9 +166,7 @@ class TestGAEBImporterRegression:
         # Rich-text view captured under metadata.
         assert "descr_txc" in pos.metadata
         descr = pos.metadata["descr_txc"]
-        assert "DescrTxc" in descr["raw_xml"] or "DescrTxc" in descr["raw_xml"].replace(
-            "{", ""
-        )
+        assert "DescrTxc" in descr["raw_xml"] or "DescrTxc" in descr["raw_xml"].replace("{", "")
         assert "Bold heading" in descr["plain_text"]
         assert "Indented detail line" in descr["plain_text"]
 

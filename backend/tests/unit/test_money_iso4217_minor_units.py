@@ -22,7 +22,6 @@ import pytest
 
 from app.core.money import CURRENCIES, MoneyValue, format_money
 
-
 # ── Conversion quantisation ----------------------------------------------
 
 

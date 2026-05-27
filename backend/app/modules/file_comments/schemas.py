@@ -58,12 +58,8 @@ class FileCommentCreate(BaseModel):
     parent_id: UUID | None = None
     body: str = Field(..., min_length=1, max_length=_MAX_BODY)
     page_number: int | None = Field(default=None, ge=1, le=_MAX_PAGE)
-    anchor_x: float | None = Field(
-        default=None, ge=0.0, le=1.0, allow_inf_nan=False
-    )
-    anchor_y: float | None = Field(
-        default=None, ge=0.0, le=1.0, allow_inf_nan=False
-    )
+    anchor_x: float | None = Field(default=None, ge=0.0, le=1.0, allow_inf_nan=False)
+    anchor_y: float | None = Field(default=None, ge=0.0, le=1.0, allow_inf_nan=False)
 
 
 class FileCommentUpdate(BaseModel):

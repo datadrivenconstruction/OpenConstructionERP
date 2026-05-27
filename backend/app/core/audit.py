@@ -170,11 +170,7 @@ async def get_audit_entries(
         stmt = stmt.where(AuditEntry.created_at >= parsed_from)
     if parsed_to is not None:
         stmt = stmt.where(AuditEntry.created_at <= parsed_to)
-    order_col = (
-        AuditEntry.created_at.asc()
-        if sort == "asc"
-        else AuditEntry.created_at.desc()
-    )
+    order_col = AuditEntry.created_at.asc() if sort == "asc" else AuditEntry.created_at.desc()
     stmt = stmt.order_by(order_col).offset(offset).limit(limit)
     result = await session.execute(stmt)
     return list(result.scalars().all())

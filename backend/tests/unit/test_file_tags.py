@@ -34,12 +34,12 @@ os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 
+import app.modules.file_tags.models  # noqa: E402, F401
+
 # Ensure ORM registration.
 import app.modules.projects.models  # noqa: E402, F401
 import app.modules.users.models  # noqa: E402, F401
-import app.modules.file_tags.models  # noqa: E402, F401
-
-from app.modules.file_tags.models import FileTag, FileTagAssignment  # noqa: E402
+from app.modules.file_tags.models import FileTagAssignment  # noqa: E402
 from app.modules.file_tags.schemas import (  # noqa: E402
     TagCreate,
     TagUpdate,
@@ -57,7 +57,6 @@ from app.modules.file_tags.service import (  # noqa: E402
     unassign_tag,
     update_tag,
 )
-
 
 # ── Pure: slugify ─────────────────────────────────────────────────────────
 
@@ -213,9 +212,7 @@ async def test_assign_three_files_then_list_by_file(db_session) -> None:
     )
 
     file_ids = [str(uuid.uuid4()) for _ in range(3)]
-    result = await assign_tag(
-        db_session, project_id, tag.id, "document", file_ids, user_id=None
-    )
+    result = await assign_tag(db_session, project_id, tag.id, "document", file_ids, user_id=None)
     assert result.requested == 3
     assert result.changed == 3
     assert result.already_done == 0
@@ -240,9 +237,7 @@ async def test_unassign_one_leaves_only_two(db_session) -> None:
     await assign_tag(db_session, project_id, tag.id, "sheet", file_ids, user_id=None)
 
     # Detach the first id.
-    result = await unassign_tag(
-        db_session, project_id, tag.id, "sheet", file_ids[:1]
-    )
+    result = await unassign_tag(db_session, project_id, tag.id, "sheet", file_ids[:1])
     assert result.changed == 1
 
     # The remaining two are still tagged.
@@ -264,12 +259,8 @@ async def test_assign_is_idempotent(db_session) -> None:
         user_id=None,
     )
     fid = str(uuid.uuid4())
-    first = await assign_tag(
-        db_session, project_id, tag.id, "report", [fid], user_id=None
-    )
-    second = await assign_tag(
-        db_session, project_id, tag.id, "report", [fid], user_id=None
-    )
+    first = await assign_tag(db_session, project_id, tag.id, "report", [fid], user_id=None)
+    second = await assign_tag(db_session, project_id, tag.id, "report", [fid], user_id=None)
     assert first.changed == 1
     assert second.changed == 0
     assert second.already_done == 1
@@ -291,19 +282,15 @@ async def test_delete_tag_cascades_assignments(db_session) -> None:
 
     # Sanity: 4 assignments exist.
     count_before = (
-        await db_session.execute(
-            select(FileTagAssignment).where(FileTagAssignment.tag_id == tag.id)
-        )
-    ).scalars().all()
+        (await db_session.execute(select(FileTagAssignment).where(FileTagAssignment.tag_id == tag.id))).scalars().all()
+    )
     assert len(count_before) == 4
 
     await delete_tag(db_session, project_id, tag.id)
 
     count_after = (
-        await db_session.execute(
-            select(FileTagAssignment).where(FileTagAssignment.tag_id == tag.id)
-        )
-    ).scalars().all()
+        (await db_session.execute(select(FileTagAssignment).where(FileTagAssignment.tag_id == tag.id))).scalars().all()
+    )
     assert count_after == []
 
 

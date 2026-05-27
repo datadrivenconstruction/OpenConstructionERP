@@ -39,9 +39,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3116_propdev_custom_templates"
-down_revision: Union[str, Sequence[str], None] = (
-    "v3115_propdev_development_extra_fields"
-)
+down_revision: Union[str, Sequence[str], None] = "v3115_propdev_development_extra_fields"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -109,26 +107,16 @@ def upgrade() -> None:
 
     # Refresh inspector after create_table.
     inspector = sa.inspect(bind)
-    existing_indexes = {
-        idx["name"] for idx in inspector.get_indexes(_TABLE_NAME)
-    }
+    existing_indexes = {idx["name"] for idx in inspector.get_indexes(_TABLE_NAME)}
 
     def _ensure_index(name: str, cols: list[str]) -> None:
         if name not in existing_indexes:
             op.create_index(name, _TABLE_NAME, cols)
 
-    _ensure_index(
-        "ix_oe_property_dev_custom_template_project_id", ["project_id"]
-    )
-    _ensure_index(
-        "ix_oe_property_dev_custom_template_development_id", ["development_id"]
-    )
-    _ensure_index(
-        "ix_oe_property_dev_custom_template_doc_type", ["doc_type"]
-    )
-    _ensure_index(
-        "ix_oe_property_dev_custom_template_created_by", ["created_by"]
-    )
+    _ensure_index("ix_oe_property_dev_custom_template_project_id", ["project_id"])
+    _ensure_index("ix_oe_property_dev_custom_template_development_id", ["development_id"])
+    _ensure_index("ix_oe_property_dev_custom_template_doc_type", ["doc_type"])
+    _ensure_index("ix_oe_property_dev_custom_template_created_by", ["created_by"])
 
 
 def downgrade() -> None:

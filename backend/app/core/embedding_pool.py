@@ -44,6 +44,7 @@ Concurrency safety
   default asyncio thread executor — the app keeps working, only the
   parallelism degrades.
 """
+
 from __future__ import annotations
 
 import logging
@@ -88,7 +89,8 @@ def _resolve_pool_size() -> int:
             return max(0, n)
         except ValueError:
             logger.warning(
-                "OE_VECTOR_POOL_WORKERS=%r is not an integer; using default", raw,
+                "OE_VECTOR_POOL_WORKERS=%r is not an integer; using default",
+                raw,
             )
     cpu = os.cpu_count() or 1
     return min(4, max(1, cpu))
@@ -99,7 +101,8 @@ def _resolve_pool_kind() -> str:
     raw = (os.environ.get("OE_VECTOR_POOL_KIND") or "thread").strip().lower()
     if raw not in ("thread", "process"):
         logger.warning(
-            "OE_VECTOR_POOL_KIND=%r is unknown; falling back to 'thread'", raw,
+            "OE_VECTOR_POOL_KIND=%r is unknown; falling back to 'thread'",
+            raw,
         )
         return "thread"
     return raw
@@ -125,11 +128,13 @@ def init_pool() -> int:
     try:
         if kind == "process":
             _pool = ProcessPoolExecutor(
-                max_workers=size, initializer=_warm_worker,
+                max_workers=size,
+                initializer=_warm_worker,
             )
         else:
             _pool = ThreadPoolExecutor(
-                max_workers=size, thread_name_prefix="oe-embed",
+                max_workers=size,
+                thread_name_prefix="oe-embed",
             )
         _pool_size = size
         _pool_kind = kind
@@ -143,9 +148,7 @@ def init_pool() -> int:
         # own model that must be loaded + ONNX-compiled.
         warmup_started = time.monotonic()
         warmup_jobs = size * 2 if kind == "process" else size
-        futures = [
-            _pool.submit(encode_in_worker, ["warm"]) for _ in range(warmup_jobs)
-        ]
+        futures = [_pool.submit(encode_in_worker, ["warm"]) for _ in range(warmup_jobs)]
         for f in futures:
             try:
                 f.result(timeout=180)

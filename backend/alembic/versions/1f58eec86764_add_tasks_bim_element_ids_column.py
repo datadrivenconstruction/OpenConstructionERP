@@ -15,11 +15,11 @@ Revises: ffe3f561e2c1
 Create Date: 2026-04-11 11:03:25.253364
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-
 
 # revision identifiers, used by Alembic.
 revision: str = "1f58eec86764"

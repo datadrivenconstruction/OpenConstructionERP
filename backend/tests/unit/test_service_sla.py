@@ -33,14 +33,12 @@ from app.modules.service.models import (
 )
 from app.modules.service.schemas import (
     RecurringScheduleCreate,
-    ServiceTicketCreate,
 )
 from app.modules.service.service import (
     ServiceService,
     compute_sla_due,
     priority_sla_minutes,
 )
-
 
 # ── Async DB fixture ─────────────────────────────────────────────────────
 
@@ -125,7 +123,8 @@ def test_compute_sla_due_priority_table() -> None:
 
 @pytest.mark.asyncio
 async def test_check_breaches_stamps_overdue_tickets(
-    session: AsyncSession, contract: ServiceContract,
+    session: AsyncSession,
+    contract: ServiceContract,
 ) -> None:
     """Tickets past sla_due_at get sla_breached_at stamped and event emitted."""
     past_due = (datetime.now(UTC) - timedelta(hours=2)).isoformat()
@@ -175,7 +174,8 @@ async def test_check_breaches_stamps_overdue_tickets(
 
 @pytest.mark.asyncio
 async def test_check_breaches_idempotent(
-    session: AsyncSession, contract: ServiceContract,
+    session: AsyncSession,
+    contract: ServiceContract,
 ) -> None:
     """Re-running check_breaches() does not re-stamp already-breached tickets."""
     past_due = (datetime.now(UTC) - timedelta(hours=2)).isoformat()
@@ -218,7 +218,8 @@ async def test_check_breaches_idempotent(
 
 @pytest.mark.asyncio
 async def test_create_recurring_computes_next_run_at(
-    session: AsyncSession, contract: ServiceContract,
+    session: AsyncSession,
+    contract: ServiceContract,
 ) -> None:
     """Daily RRULE schedule gets a next_run_at within the next 24h."""
     svc = ServiceService(session)
@@ -249,7 +250,8 @@ async def test_create_recurring_computes_next_run_at(
 
 @pytest.mark.asyncio
 async def test_materialize_recurring_advances_next_run_at(
-    session: AsyncSession, contract: ServiceContract,
+    session: AsyncSession,
+    contract: ServiceContract,
 ) -> None:
     """Materialise: ticket created, last_run_at set, next_run_at advanced by one period."""
     svc = ServiceService(session)
@@ -299,7 +301,8 @@ async def test_materialize_recurring_advances_next_run_at(
 
 @pytest.mark.asyncio
 async def test_materialize_recurring_skips_disabled_unless_forced(
-    session: AsyncSession, contract: ServiceContract,
+    session: AsyncSession,
+    contract: ServiceContract,
 ) -> None:
     """Disabled schedules are skipped; force=True materialises anyway."""
     svc = ServiceService(session)

@@ -158,9 +158,7 @@ async def test_restore_recreates_original_row(session: AsyncSession) -> None:
     assert restored.restored_by_id == user_id
 
     # Document is back in the kind table.
-    rows = (
-        await session.execute(select(Document).where(Document.project_id == project_id))
-    ).scalars().all()
+    rows = (await session.execute(select(Document).where(Document.project_id == project_id))).scalars().all()
     assert len(rows) == 1
     assert rows[0].name == "contract-v1.pdf"
     assert rows[0].file_size == 4096

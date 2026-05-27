@@ -85,10 +85,9 @@ class SmartViewRepository:
             # Without this, federation-scoped views never list (issue #103
             # mirror — they existed in DB but were invisible to owners).
             from app.modules.bim_hub.models import BIMFederation
+
             fed_subq = (
-                select(BIMFederation.id)
-                .where(BIMFederation.project_id.in_(accessible_project_ids))
-                .scalar_subquery()
+                select(BIMFederation.id).where(BIMFederation.project_id.in_(accessible_project_ids)).scalar_subquery()
             )
             clauses.append(
                 and_(
@@ -108,9 +107,7 @@ class SmartViewRepository:
 
     # ── BIM element feed (for the evaluator) ────────────────────────
 
-    async def elements_for_model(
-        self, model_id: uuid.UUID
-    ) -> list[BIMElement]:
+    async def elements_for_model(self, model_id: uuid.UUID) -> list[BIMElement]:
         """Return every element of a BIM model — no geometry filter.
 
         Smart Views drive *visibility*, not geometry, so we must keep

@@ -22,9 +22,8 @@ Usage::
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field as dc_field
+from dataclasses import dataclass
 from typing import Any
-
 
 # ── Per-country phone rules ───────────────────────────────────────────────────
 #
@@ -263,8 +262,7 @@ def validate_phone(
                 original=original,
                 error_code="invalid_format",
                 error_message=(
-                    f"International number '{stripped}' does not match "
-                    f"the expected pattern for country '{cc}'."
+                    f"International number '{stripped}' does not match the expected pattern for country '{cc}'."
                 ),
             )
         # Accept as-is (even if country_code has no int_regex we accept it)
@@ -294,10 +292,7 @@ def validate_phone(
             msg = f"Phone number '{original}' is too long for country '{cc}'."
         else:
             code = "invalid_format"
-            msg = (
-                f"Phone number '{original}' does not match the national "
-                f"format for country '{cc}'."
-            )
+            msg = f"Phone number '{original}' does not match the national format for country '{cc}'."
         return PhoneValidationResult(
             passed=False,
             country_code=cc,

@@ -26,7 +26,6 @@ stubbed out so no I/O occurs.
 
 from __future__ import annotations
 
-import io
 import uuid
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -44,7 +43,6 @@ from app.core.file_signature import (
     mime_for_signature,
     require,
 )
-
 
 # ── Format sample bytes ───────────────────────────────────────────────────
 #
@@ -83,9 +81,7 @@ FORMAT_SAMPLES: list[tuple[str, bytes, str]] = [
 @pytest.mark.parametrize("token,head,name", FORMAT_SAMPLES)
 def test_detect_returns_correct_token(token: str, head: bytes, name: str) -> None:
     """``detect`` must return the expected symbolic token for every sample."""
-    assert detect(head[:SIGNATURE_BYTES_REQUIRED]) == token, (
-        f"detect() failed for {name}: expected '{token}'"
-    )
+    assert detect(head[:SIGNATURE_BYTES_REQUIRED]) == token, f"detect() failed for {name}: expected '{token}'"
 
 
 # ── 2. mime_for_signature maps every detector token to a MIME string ──────
@@ -134,12 +130,8 @@ def test_require_succeeds_for_pdf_in_doc_set() -> None:
 
 def test_banned_tokens_do_not_include_allowed_types() -> None:
     """Allowed document / CAD / photo types must not appear in the ban list."""
-    overlap = BANNED_SIGNATURE_TOKENS & (
-        ALLOWED_DOCUMENT_TYPES | ALLOWED_CAD_TYPES | ALLOWED_PHOTO_TYPES
-    )
-    assert not overlap, (
-        f"Types in both allowed and banned sets: {overlap}"
-    )
+    overlap = BANNED_SIGNATURE_TOKENS & (ALLOWED_DOCUMENT_TYPES | ALLOWED_CAD_TYPES | ALLOWED_PHOTO_TYPES)
+    assert not overlap, f"Types in both allowed and banned sets: {overlap}"
 
 
 def test_banned_tokens_are_nonempty_set() -> None:
@@ -156,25 +148,26 @@ def test_banned_tokens_are_nonempty_set() -> None:
 from app.modules.documents.service import _blocked_extension_segment  # noqa: E402
 
 
-@pytest.mark.parametrize("filename,expected", [
-    # .php is intentionally NOT in BLOCKED_EXTENSIONS (no PHP runtime in this
-    # stack — the magic-byte gate + UUID-prefixed storage cover residual risk).
-    # Use .vbs instead which IS in the blocklist.
-    ("shell.vbs.png", ".vbs"),          # VBScript injected before real ext
-    ("run.bat.jpg",  ".bat"),           # BAT script masquerading as JPEG
-    ("evil.exe.pdf", ".exe"),           # PE executable as PDF
-    ("normal.pdf",   None),             # Clean name — allowed
-    ("drawing.v2.dwg", None),           # Multi-dot but benign
-    ("report.2024.final.pdf", None),    # Multi-dot benign
-    ("x.cmd.docx", ".cmd"),             # CMD script
-    ("a.ps1.xlsx", ".ps1"),             # PowerShell
-    ("b.sh.xml", ".sh"),                # Bash script
-])
+@pytest.mark.parametrize(
+    "filename,expected",
+    [
+        # .php is intentionally NOT in BLOCKED_EXTENSIONS (no PHP runtime in this
+        # stack — the magic-byte gate + UUID-prefixed storage cover residual risk).
+        # Use .vbs instead which IS in the blocklist.
+        ("shell.vbs.png", ".vbs"),  # VBScript injected before real ext
+        ("run.bat.jpg", ".bat"),  # BAT script masquerading as JPEG
+        ("evil.exe.pdf", ".exe"),  # PE executable as PDF
+        ("normal.pdf", None),  # Clean name — allowed
+        ("drawing.v2.dwg", None),  # Multi-dot but benign
+        ("report.2024.final.pdf", None),  # Multi-dot benign
+        ("x.cmd.docx", ".cmd"),  # CMD script
+        ("a.ps1.xlsx", ".ps1"),  # PowerShell
+        ("b.sh.xml", ".sh"),  # Bash script
+    ],
+)
 def test_blocked_extension_segment(filename: str, expected: str | None) -> None:
     result = _blocked_extension_segment(filename)
-    assert result == expected, (
-        f"_blocked_extension_segment({filename!r}) = {result!r}, expected {expected!r}"
-    )
+    assert result == expected, f"_blocked_extension_segment({filename!r}) = {result!r}, expected {expected!r}"
 
 
 # ── 6. Upload service rejects executable bytes even with .pdf extension ───
@@ -202,7 +195,6 @@ _PDF_HEADER = b"%PDF-1.7\n" + b"\x00" * 60
 @pytest.mark.asyncio
 async def test_upload_service_rejects_pe_disguised_as_pdf() -> None:
     """DocumentService.upload_document must reject PE bytes even if named .pdf."""
-    from fastapi import HTTPException
 
     from app.modules.documents.service import DocumentService
 
@@ -303,6 +295,7 @@ async def test_upload_service_accepts_real_pdf_bytes() -> None:
 async def test_upload_service_rejects_blocked_extension() -> None:
     """A file with .exe in any dotted segment is rejected before bytes are read."""
     from fastapi import HTTPException
+
     from app.modules.documents.service import DocumentService
 
     session = AsyncMock()
@@ -323,9 +316,7 @@ async def test_upload_service_rejects_blocked_extension() -> None:
 def test_allowed_photo_types_contains_expected_image_formats() -> None:
     """ALLOWED_PHOTO_TYPES must include jpeg, png, gif, webp, heic, heif, tiff."""
     required = {"jpeg", "png", "gif", "webp", "heic", "heif", "tiff"}
-    assert required <= ALLOWED_PHOTO_TYPES, (
-        f"ALLOWED_PHOTO_TYPES is missing: {required - ALLOWED_PHOTO_TYPES}"
-    )
+    assert required <= ALLOWED_PHOTO_TYPES, f"ALLOWED_PHOTO_TYPES is missing: {required - ALLOWED_PHOTO_TYPES}"
 
 
 def test_pdf_is_not_allowed_as_photo() -> None:
@@ -341,9 +332,7 @@ def test_pdf_is_not_allowed_as_photo() -> None:
 def test_allowed_cad_types_covers_bim_and_cad() -> None:
     """ALLOWED_CAD_TYPES covers the minimum set of BIM and CAD formats."""
     required_cad = {"dwg", "dxf", "ifc", "glb", "ole", "zip", "xml"}
-    assert required_cad <= ALLOWED_CAD_TYPES, (
-        f"ALLOWED_CAD_TYPES is missing: {required_cad - ALLOWED_CAD_TYPES}"
-    )
+    assert required_cad <= ALLOWED_CAD_TYPES, f"ALLOWED_CAD_TYPES is missing: {required_cad - ALLOWED_CAD_TYPES}"
 
 
 def test_detect_unknown_bytes_returns_none() -> None:

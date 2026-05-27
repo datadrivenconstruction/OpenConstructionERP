@@ -170,18 +170,14 @@ def restore_snapshot_from_url(
     """
 
     if not qdrant_url:
-        raise RuntimeError(
-            "restore_snapshot_from_url requires a server-mode Qdrant URL"
-        )
+        raise RuntimeError("restore_snapshot_from_url requires a server-mode Qdrant URL")
 
     try:
         import httpx
     except ImportError as exc:  # pragma: no cover
         raise RuntimeError("httpx is required for snapshot recover") from exc
 
-    recover_url = (
-        qdrant_url.rstrip("/") + f"/collections/{collection_name}/snapshots/recover"
-    )
+    recover_url = qdrant_url.rstrip("/") + f"/collections/{collection_name}/snapshots/recover"
     headers: dict[str, str] = {"Content-Type": "application/json"}
     if api_key:
         headers["api-key"] = api_key
@@ -294,14 +290,10 @@ def restore_snapshot_file(
         import httpx
     except ImportError as exc:  # pragma: no cover — httpx is in pyproject base deps
         raise RuntimeError(
-            "httpx is required for snapshot upload; install via the "
-            "project's base requirements"
+            "httpx is required for snapshot upload; install via the project's base requirements"
         ) from exc
 
-    upload_url = (
-        qdrant_url.rstrip("/")
-        + f"/collections/{collection_name}/snapshots/upload?priority=snapshot"
-    )
+    upload_url = qdrant_url.rstrip("/") + f"/collections/{collection_name}/snapshots/upload?priority=snapshot"
     size_mb = snapshot_path.stat().st_size / 1e6
     logger.info(
         "Restoring snapshot %s -> %s (%.1f MB)",
@@ -361,8 +353,7 @@ def restore_snapshot_file(
             body = None
         if isinstance(body, dict) and body.get("result") is False:
             logger.error(
-                "Qdrant accepted the upload but recover_snapshot returned "
-                "result=false for %s -> %s: %s",
+                "Qdrant accepted the upload but recover_snapshot returned result=false for %s -> %s: %s",
                 snapshot_path.name,
                 collection_name,
                 resp.text[:200],
@@ -439,9 +430,7 @@ def load_ddc_snapshot_dir(
     for snap in sorted(snapshots_dir.rglob("*.snapshot")):
         target = cwicr_snapshot_target_for(snap.name)
         if target is None:
-            summary.skipped.append(
-                f"{snap.name}: not a BGE-M3 v3 DDC snapshot"
-            )
+            summary.skipped.append(f"{snap.name}: not a BGE-M3 v3 DDC snapshot")
             continue
 
         prior = seen_collections.get(target)
@@ -458,9 +447,7 @@ def load_ddc_snapshot_dir(
 
         size_mb = snap.stat().st_size / 1e6
         if dry_run:
-            summary.loaded.append(
-                f"{snap.name} -> {target} (DRY RUN, {size_mb:.1f} MB)"
-            )
+            summary.loaded.append(f"{snap.name} -> {target} (DRY RUN, {size_mb:.1f} MB)")
             continue
 
         try:
@@ -471,19 +458,13 @@ def load_ddc_snapshot_dir(
                 api_key=api_key,
             )
         except (FileNotFoundError, RuntimeError) as exc:
-            summary.errors.append(
-                f"{snap.name} -> {target}: {type(exc).__name__}: "
-                f"{str(exc)[:200]}"
-            )
+            summary.errors.append(f"{snap.name} -> {target}: {type(exc).__name__}: {str(exc)[:200]}")
             continue
 
         if ok:
             summary.loaded.append(f"{snap.name} -> {target}")
         else:
-            summary.errors.append(
-                f"{snap.name} -> {target}: upload returned non-2xx "
-                "(see ERROR log)"
-            )
+            summary.errors.append(f"{snap.name} -> {target}: upload returned non-2xx (see ERROR log)")
 
     return summary
 
@@ -555,17 +536,13 @@ def enumerate_qdrant_v3_collections(
     if qdrant_url is None:
         try:
             settings = get_settings()
-            qdrant_url = getattr(settings, "cwicr_qdrant_url", None) or getattr(
-                settings, "qdrant_url", None
-            )
+            qdrant_url = getattr(settings, "cwicr_qdrant_url", None) or getattr(settings, "qdrant_url", None)
         except Exception as exc:  # pragma: no cover — defensive
             logger.debug("enumerate_qdrant_v3_collections: settings read failed: %s", exc)
             qdrant_url = None
 
     if not qdrant_url:
-        logger.debug(
-            "enumerate_qdrant_v3_collections: no Qdrant URL configured — returning []"
-        )
+        logger.debug("enumerate_qdrant_v3_collections: no Qdrant URL configured — returning []")
         return []
 
     all_collections = server_collections(

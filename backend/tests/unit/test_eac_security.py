@@ -50,7 +50,6 @@ from app.modules.eac.engine.safe_eval import (
 )
 from app.modules.eac.models import EacRun, EacRunResultItem
 
-
 # ── Test 1: FK index on rule_id (Round-3 Wave A finding) ────────────────
 
 
@@ -71,10 +70,7 @@ def test_eac_run_result_item_has_rule_id_index() -> None:
 
     idx = indexes["ix_eac_run_result_rule_id"]
     columns = [c.name for c in idx.columns]
-    assert columns == ["rule_id"], (
-        f"ix_eac_run_result_rule_id must cover exactly ['rule_id'], "
-        f"got {columns}"
-    )
+    assert columns == ["rule_id"], f"ix_eac_run_result_rule_id must cover exactly ['rule_id'], got {columns}"
 
 
 # ── Test 2: Formula sandbox rejects dunder + eval escapes ───────────────
@@ -162,10 +158,14 @@ def test_idempotency_key_stable_across_dict_ordering() -> None:
     ]
 
     key_a = compute_idempotency_key(
-        ruleset_id=ruleset_id, ruleset_updated_at=ts, elements=elements_a,
+        ruleset_id=ruleset_id,
+        ruleset_updated_at=ts,
+        elements=elements_a,
     )
     key_b = compute_idempotency_key(
-        ruleset_id=ruleset_id, ruleset_updated_at=ts, elements=elements_b,
+        ruleset_id=ruleset_id,
+        ruleset_updated_at=ts,
+        elements=elements_b,
     )
     assert key_a == key_b, "Idempotency key must be stable across dict ordering"
     assert key_a.startswith("auto:"), "Auto-derived key must carry the auto: prefix"
@@ -173,7 +173,9 @@ def test_idempotency_key_stable_across_dict_ordering() -> None:
     # And a different element-set must produce a different key.
     elements_c = elements_a + [{"stable_id": "e3", "properties": {"Mark": "A3"}}]
     key_c = compute_idempotency_key(
-        ruleset_id=ruleset_id, ruleset_updated_at=ts, elements=elements_c,
+        ruleset_id=ruleset_id,
+        ruleset_updated_at=ts,
+        elements=elements_c,
     )
     assert key_c != key_a, "Adding an element must change the key"
 
@@ -376,7 +378,9 @@ async def test_cross_tenant_engine_access_is_blocked() -> None:
 
             # Tenant B owns a ruleset + run.
             ruleset_b = EacRuleset(
-                name="b_set", kind="validation", tenant_id=tenant_b,
+                name="b_set",
+                kind="validation",
+                tenant_id=tenant_b,
             )
             session.add(ruleset_b)
             await session.flush()
@@ -395,21 +399,21 @@ async def test_cross_tenant_engine_access_is_blocked() -> None:
 
             # Tenant A asks the engine for B's run status — None.
             snapshot_for_a = await engine_api.status(
-                session, run_b.id, tenant_id=tenant_a,
+                session,
+                run_b.id,
+                tenant_id=tenant_a,
             )
             assert snapshot_for_a is None, (
-                "Cross-tenant status() must return None (router 404). "
-                f"Got: {snapshot_for_a!r}"
+                f"Cross-tenant status() must return None (router 404). Got: {snapshot_for_a!r}"
             )
 
             # Cancel as tenant A must refuse.
             accepted = await engine_api.cancel(
-                session, run_b.id, tenant_id=tenant_a,
+                session,
+                run_b.id,
+                tenant_id=tenant_a,
             )
-            assert accepted is False, (
-                "Cross-tenant cancel() must return False (router 404). "
-                f"Got: {accepted!r}"
-            )
+            assert accepted is False, f"Cross-tenant cancel() must return False (router 404). Got: {accepted!r}"
 
             # Diff between two B-owned runs must be refused under A.
             run_b2 = EacRun(
@@ -426,12 +430,16 @@ async def test_cross_tenant_engine_access_is_blocked() -> None:
 
             with pytest.raises(ExecutionError):
                 await engine_api.diff(
-                    session, run_b.id, run_b2.id, tenant_id=tenant_a,
+                    session,
+                    run_b.id,
+                    run_b2.id,
+                    tenant_id=tenant_a,
                 )
 
             # And list_runs scoped to tenant A must NOT see B's runs.
             visible_to_a = await engine_api.list_runs(
-                session, tenant_id=tenant_a,
+                session,
+                tenant_id=tenant_a,
             )
             assert all(r.id not in {run_b.id, run_b2.id} for r in visible_to_a), (
                 "Cross-tenant list_runs leak: tenant A saw tenant B's runs"
@@ -439,7 +447,9 @@ async def test_cross_tenant_engine_access_is_blocked() -> None:
 
             # Sanity — tenant B sees its own run.
             own_snapshot = await engine_api.status(
-                session, run_b.id, tenant_id=tenant_b,
+                session,
+                run_b.id,
+                tenant_id=tenant_b,
             )
             assert own_snapshot is not None
             assert own_snapshot.run_id == run_b.id
@@ -485,21 +495,13 @@ async def test_run_trigger_writes_audit_log_row(client) -> None:
             ).all()
         )
 
-    assert len(rows) >= 1, (
-        f"Expected at least one ActivityLog row for eac_run {run_id}, "
-        f"got {len(rows)}"
-    )
+    assert len(rows) >= 1, f"Expected at least one ActivityLog row for eac_run {run_id}, got {len(rows)}"
     triggered = next((r for r in rows if r.action == "run_triggered"), None)
     assert triggered is not None, (
-        "Expected an action='run_triggered' ActivityLog row for the "
-        f"new run; saw actions {[r.action for r in rows]}"
+        f"Expected an action='run_triggered' ActivityLog row for the new run; saw actions {[r.action for r in rows]}"
     )
-    assert triggered.actor_id is not None, (
-        "Audit log row must record the actor (user_id) — got NULL"
-    )
-    assert "ruleset_id" in (triggered.metadata_ or {}), (
-        "Audit metadata must capture ruleset_id"
-    )
+    assert triggered.actor_id is not None, "Audit log row must record the actor (user_id) — got NULL"
+    assert "ruleset_id" in (triggered.metadata_ or {}), "Audit metadata must capture ruleset_id"
 
 
 # ── Sanity: the new model column is wired to the DB ─────────────────────

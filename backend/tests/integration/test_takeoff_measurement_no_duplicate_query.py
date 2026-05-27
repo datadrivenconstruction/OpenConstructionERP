@@ -44,10 +44,14 @@ async def test_update_measurement_with_existing_row_skips_lookup() -> None:
 
     with (
         patch.object(
-            service.measurement_repo, "get_by_id", new=AsyncMock(),
+            service.measurement_repo,
+            "get_by_id",
+            new=AsyncMock(),
         ) as get_mock,
         patch.object(
-            service.measurement_repo, "update_fields", new=AsyncMock(),
+            service.measurement_repo,
+            "update_fields",
+            new=AsyncMock(),
         ),
     ):
         await service.update_measurement(
@@ -79,10 +83,14 @@ async def test_delete_measurement_with_existing_row_skips_lookup() -> None:
 
     with (
         patch.object(
-            service.measurement_repo, "get_by_id", new=AsyncMock(),
+            service.measurement_repo,
+            "get_by_id",
+            new=AsyncMock(),
         ) as get_mock,
         patch.object(
-            service.measurement_repo, "delete", new=AsyncMock(),
+            service.measurement_repo,
+            "delete",
+            new=AsyncMock(),
         ),
     ):
         import uuid as _uuid
@@ -92,8 +100,7 @@ async def test_delete_measurement_with_existing_row_skips_lookup() -> None:
             existing=row,
         )
         assert get_mock.await_count == 0, (
-            f"delete_measurement re-fetched the row {get_mock.await_count}× "
-            "despite ``existing=`` being passed."
+            f"delete_measurement re-fetched the row {get_mock.await_count}× despite ``existing=`` being passed."
         )
 
 
@@ -112,10 +119,14 @@ async def test_link_measurement_to_boq_with_existing_row_skips_lookup() -> None:
 
     with (
         patch.object(
-            service.measurement_repo, "get_by_id", new=AsyncMock(),
+            service.measurement_repo,
+            "get_by_id",
+            new=AsyncMock(),
         ) as get_mock,
         patch.object(
-            service.measurement_repo, "update_fields", new=AsyncMock(),
+            service.measurement_repo,
+            "update_fields",
+            new=AsyncMock(),
         ),
     ):
         import uuid as _uuid
@@ -126,6 +137,5 @@ async def test_link_measurement_to_boq_with_existing_row_skips_lookup() -> None:
             existing=row,
         )
         assert get_mock.await_count == 0, (
-            f"link_measurement_to_boq re-fetched the row {get_mock.await_count}× "
-            "despite ``existing=`` being passed."
+            f"link_measurement_to_boq re-fetched the row {get_mock.await_count}× despite ``existing=`` being passed."
         )

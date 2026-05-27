@@ -27,14 +27,14 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
-from typing import Any, Iterable
+from typing import Any
 
-from sqlalchemy import and_, func as _func, or_, select as _select
+from sqlalchemy import func as _func
+from sqlalchemy import select as _select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.property_dev.models import (
     Broker,
-    Buyer,
     CommissionAccrual,
     Handover,
     Lead,
@@ -136,7 +136,8 @@ def _days_between(start_iso: str | None, end_iso: str | None) -> int | None:
 
 
 def _days_between_dt(
-    start: datetime | None, end: datetime | None,
+    start: datetime | None,
+    end: datetime | None,
 ) -> int | None:
     """Return integer days between two datetimes, or ``None``."""
     if start is None or end is None:
@@ -210,13 +211,14 @@ class AnalyticsService:
             Reservation.metadata_,
         )
         if since_d is not None:
-            stmt = stmt.where(
-                Reservation.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC)
-            )
+            stmt = stmt.where(Reservation.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC))
         if until_d is not None:
             stmt = stmt.where(
-                Reservation.created_at < datetime.combine(
-                    until_d + timedelta(days=1), datetime.min.time(), tzinfo=UTC,
+                Reservation.created_at
+                < datetime.combine(
+                    until_d + timedelta(days=1),
+                    datetime.min.time(),
+                    tzinfo=UTC,
                 )
             )
 
@@ -260,9 +262,7 @@ class AnalyticsService:
             else:
                 slot["still_active"] += 1
 
-            days_to_terminal = (
-                (terminal_d - created_d).days if terminal_d else None
-            )
+            days_to_terminal = (terminal_d - created_d).days if terminal_d else None
             slot["events"].append(
                 {
                     "status": status,
@@ -293,9 +293,7 @@ class AnalyticsService:
                     days_to_terminal = ev["days_to_terminal"]
                     if days_to_terminal is None or days_to_terminal > offset:
                         retained += 1
-                retention_pct[offset] = (
-                    Decimal(retained) / Decimal(total) * Decimal("100")
-                ).quantize(Decimal("0.1"))
+                retention_pct[offset] = (Decimal(retained) / Decimal(total) * Decimal("100")).quantize(Decimal("0.1"))
 
             out_rows.append(
                 {
@@ -366,14 +364,10 @@ class AnalyticsService:
 
         spa_rows = (await self.session.execute(stmt)).all()
 
-        lead_ids: set[uuid.UUID] = {
-            r.lead_id for r in spa_rows if r.lead_id is not None
-        }
+        lead_ids: set[uuid.UUID] = {r.lead_id for r in spa_rows if r.lead_id is not None}
         lead_created_at: dict[uuid.UUID, datetime] = {}
         if lead_ids:
-            lead_stmt = _select(Lead.id, Lead.created_at).where(
-                Lead.id.in_(lead_ids)
-            )
+            lead_stmt = _select(Lead.id, Lead.created_at).where(Lead.id.in_(lead_ids))
             for lid, lc in (await self.session.execute(lead_stmt)).all():
                 lead_created_at[lid] = lc
 
@@ -383,9 +377,7 @@ class AnalyticsService:
         l_to_h: list[Decimal] = []
 
         for r in spa_rows:
-            lead_dt = (
-                lead_created_at.get(r.lead_id) if r.lead_id is not None else None
-            )
+            lead_dt = lead_created_at.get(r.lead_id) if r.lead_id is not None else None
             lead_d = _date_or_dt_to_date(lead_dt)
             res_d = _date_or_dt_to_date(r.res_created_at)
             sale_d = _date_or_dt_to_date(r.signing_date)
@@ -411,13 +403,7 @@ class AnalyticsService:
         def _stage(label: str, samples: list[Decimal]) -> dict[str, Any]:
             samples_sorted = sorted(samples)
             n = len(samples_sorted)
-            mean_d = (
-                (sum(samples_sorted, Decimal("0")) / Decimal(n)).quantize(
-                    Decimal("0.1")
-                )
-                if n
-                else Decimal("0")
-            )
+            mean_d = (sum(samples_sorted, Decimal("0")) / Decimal(n)).quantize(Decimal("0.1")) if n else Decimal("0")
             p50 = _percentile(samples_sorted, 50).quantize(Decimal("0.1"))
             p90 = _percentile(samples_sorted, 90).quantize(Decimal("0.1"))
 
@@ -474,13 +460,14 @@ class AnalyticsService:
             _func.coalesce(_func.sum(Lead.source_cost), 0).label("total_cost"),
         )
         if since_d is not None:
-            q1 = q1.where(
-                Lead.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC)
-            )
+            q1 = q1.where(Lead.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC))
         if until_d is not None:
             q1 = q1.where(
-                Lead.created_at < datetime.combine(
-                    until_d + timedelta(days=1), datetime.min.time(), tzinfo=UTC,
+                Lead.created_at
+                < datetime.combine(
+                    until_d + timedelta(days=1),
+                    datetime.min.time(),
+                    tzinfo=UTC,
                 )
             )
         q1 = q1.group_by(Lead.source)
@@ -505,13 +492,14 @@ class AnalyticsService:
             .group_by(Lead.source)
         )
         if since_d is not None:
-            q2 = q2.where(
-                Lead.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC)
-            )
+            q2 = q2.where(Lead.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC))
         if until_d is not None:
             q2 = q2.where(
-                Lead.created_at < datetime.combine(
-                    until_d + timedelta(days=1), datetime.min.time(), tzinfo=UTC,
+                Lead.created_at
+                < datetime.combine(
+                    until_d + timedelta(days=1),
+                    datetime.min.time(),
+                    tzinfo=UTC,
                 )
             )
         for src, res_count in (await self.session.execute(q2)).all():
@@ -543,13 +531,14 @@ class AnalyticsService:
             .group_by(Lead.source, SalesContract.currency)
         )
         if since_d is not None:
-            q3 = q3.where(
-                Lead.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC)
-            )
+            q3 = q3.where(Lead.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC))
         if until_d is not None:
             q3 = q3.where(
-                Lead.created_at < datetime.combine(
-                    until_d + timedelta(days=1), datetime.min.time(), tzinfo=UTC,
+                Lead.created_at
+                < datetime.combine(
+                    until_d + timedelta(days=1),
+                    datetime.min.time(),
+                    tzinfo=UTC,
                 )
             )
         sales_count_by_source: dict[str, int] = {}
@@ -567,13 +556,8 @@ class AnalyticsService:
                 },
             )
             cur = currency or ""
-            slot["revenue"][cur] = (
-                slot["revenue"].get(cur, Decimal("0"))
-                + Decimal(str(revenue or 0))
-            )
-            sales_count_by_source[key] = (
-                sales_count_by_source.get(key, 0) + int(sale_count or 0)
-            )
+            slot["revenue"][cur] = slot["revenue"].get(cur, Decimal("0")) + Decimal(str(revenue or 0))
+            sales_count_by_source[key] = sales_count_by_source.get(key, 0) + int(sale_count or 0)
 
         for key, n in sales_count_by_source.items():
             per_source[key]["sales"] = n
@@ -585,11 +569,15 @@ class AnalyticsService:
             leads = int(slot["leads"])
             total_leads += leads
             conv_to_res = (
-                Decimal(slot["reservations"]) / Decimal(leads) * Decimal("100")
-            ).quantize(Decimal("0.1")) if leads else Decimal("0")
+                (Decimal(slot["reservations"]) / Decimal(leads) * Decimal("100")).quantize(Decimal("0.1"))
+                if leads
+                else Decimal("0")
+            )
             conv_to_sale = (
-                Decimal(slot["sales"]) / Decimal(leads) * Decimal("100")
-            ).quantize(Decimal("0.1")) if leads else Decimal("0")
+                (Decimal(slot["sales"]) / Decimal(leads) * Decimal("100")).quantize(Decimal("0.1"))
+                if leads
+                else Decimal("0")
+            )
 
             revenue_list = [
                 {"currency": cur, "amount": amt.quantize(Decimal("0.01"))}
@@ -602,9 +590,7 @@ class AnalyticsService:
             cpa: Decimal | None = None
             cpa_currency = ""
             if slot["sales"] > 0 and slot["total_source_cost"] > 0:
-                cpa = (
-                    slot["total_source_cost"] / Decimal(slot["sales"])
-                ).quantize(Decimal("0.01"))
+                cpa = (slot["total_source_cost"] / Decimal(slot["sales"])).quantize(Decimal("0.01"))
                 if revenue_list:
                     # Pick the currency with the largest contribution so
                     # the CPA matches the same currency the director is
@@ -623,9 +609,7 @@ class AnalyticsService:
                     "conversion_to_reservation_pct": conv_to_res,
                     "conversion_to_sale_pct": conv_to_sale,
                     "revenue": revenue_list,
-                    "total_source_cost": slot["total_source_cost"].quantize(
-                        Decimal("0.01")
-                    ),
+                    "total_source_cost": slot["total_source_cost"].quantize(Decimal("0.01")),
                     "cpa": cpa,
                     "cpa_currency": cpa_currency,
                 }
@@ -666,13 +650,14 @@ class AnalyticsService:
         if dev_id is not None:
             base = base.where(Lead.development_id == dev_id)
         if since_d is not None:
-            base = base.where(
-                Lead.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC)
-            )
+            base = base.where(Lead.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC))
         if until_d is not None:
             base = base.where(
-                Lead.created_at < datetime.combine(
-                    until_d + timedelta(days=1), datetime.min.time(), tzinfo=UTC,
+                Lead.created_at
+                < datetime.combine(
+                    until_d + timedelta(days=1),
+                    datetime.min.time(),
+                    tzinfo=UTC,
                 )
             )
         # plot_type filter narrows to leads where preferred_house_type
@@ -681,10 +666,7 @@ class AnalyticsService:
         if plot_type is not None and plot_type != "":
             # Hop via plot.house_type_label using a sub-select.
             base = base.where(
-                Lead.preferred_house_type_id.in_(
-                    _select(Plot.house_type_id)
-                    .where(Plot.house_type_label == plot_type)
-                )
+                Lead.preferred_house_type_id.in_(_select(Plot.house_type_id).where(Plot.house_type_label == plot_type))
             )
 
         lead_count_q = _select(_func.count()).select_from(base.subquery())
@@ -697,14 +679,11 @@ class AnalyticsService:
         # NB: Lead.id.in_(subquery.select()) — SQLAlchemy 2 form.
 
         lead_count = (await self.session.execute(lead_count_q)).scalar_one() or 0
-        qualified_count = (
-            await self.session.execute(qual_count_q)
-        ).scalar_one() or 0
+        qualified_count = (await self.session.execute(qual_count_q)).scalar_one() or 0
 
         # ── Stage 3: reservations from those leads (any state) ─────
-        res_count_q = (
-            _select(_func.count(_func.distinct(Reservation.id)))
-            .where(Reservation.lead_id.in_(base.subquery().select()))
+        res_count_q = _select(_func.count(_func.distinct(Reservation.id))).where(
+            Reservation.lead_id.in_(base.subquery().select())
         )
         res_count = (await self.session.execute(res_count_q)).scalar_one() or 0
 
@@ -740,17 +719,12 @@ class AnalyticsService:
         prev: int = top
         for code, label, count in counts:
             drop = (
-                (Decimal(prev - count) / Decimal(prev) * Decimal("100"))
-                .quantize(Decimal("0.1"))
+                (Decimal(prev - count) / Decimal(prev) * Decimal("100")).quantize(Decimal("0.1"))
                 if prev > 0
                 else Decimal("0")
             )
             from_top = (
-                (Decimal(count) / Decimal(top) * Decimal("100")).quantize(
-                    Decimal("0.1")
-                )
-                if top > 0
-                else Decimal("0")
+                (Decimal(count) / Decimal(top) * Decimal("100")).quantize(Decimal("0.1")) if top > 0 else Decimal("0")
             )
             if code == "leads":
                 drop = Decimal("0")
@@ -766,9 +740,7 @@ class AnalyticsService:
             prev = count
 
         overall = (
-            (Decimal(int(ho_count)) / Decimal(top) * Decimal("100")).quantize(
-                Decimal("0.1")
-            )
+            (Decimal(int(ho_count)) / Decimal(top) * Decimal("100")).quantize(Decimal("0.1"))
             if top > 0
             else Decimal("0")
         )
@@ -798,16 +770,8 @@ class AnalyticsService:
         """
         since_d = _parse_iso_date(since)
         until_d = _parse_iso_date(until)
-        since_dt = (
-            datetime.combine(since_d, datetime.min.time(), tzinfo=UTC)
-            if since_d
-            else None
-        )
-        until_dt = (
-            datetime.combine(until_d + timedelta(days=1), datetime.min.time(), tzinfo=UTC)
-            if until_d
-            else None
-        )
+        since_dt = datetime.combine(since_d, datetime.min.time(), tzinfo=UTC) if since_d else None
+        until_dt = datetime.combine(until_d + timedelta(days=1), datetime.min.time(), tzinfo=UTC) if until_d else None
 
         # Broker base list.
         brokers_stmt = _select(Broker.id, Broker.name).where(Broker.active.is_(True))
@@ -826,9 +790,7 @@ class AnalyticsService:
         }
 
         # 1) leads_assigned — count(Lead) GROUP BY broker_id.
-        q_leads = _select(
-            Lead.broker_id, _func.count(Lead.id).label("c")
-        ).where(Lead.broker_id.is_not(None))
+        q_leads = _select(Lead.broker_id, _func.count(Lead.id).label("c")).where(Lead.broker_id.is_not(None))
         if since_dt is not None:
             q_leads = q_leads.where(Lead.created_at >= since_dt)
         if until_dt is not None:
@@ -885,9 +847,7 @@ class AnalyticsService:
                 Lead.broker_id,
                 SalesContract.currency,
                 _func.count(_func.distinct(SalesContract.id)).label("c"),
-                _func.coalesce(
-                    _func.sum(SalesContract.total_value), 0
-                ).label("gmv"),
+                _func.coalesce(_func.sum(SalesContract.total_value), 0).label("gmv"),
             )
             .join(Reservation, Reservation.lead_id == Lead.id)
             .join(SalesContract, SalesContract.reservation_id == Reservation.id)
@@ -914,10 +874,7 @@ class AnalyticsService:
             )
             slot["sales_closed"] += int(c or 0)
             currency = cur or ""
-            slot["gmv"][currency] = (
-                slot["gmv"].get(currency, Decimal("0"))
-                + Decimal(str(gmv or 0))
-            )
+            slot["gmv"][currency] = slot["gmv"].get(currency, Decimal("0")) + Decimal(str(gmv or 0))
 
         # 4) commission_earned — CommissionAccrual GROUP BY broker_id +
         # currency. Counts ``accrued`` / ``approved`` / ``paid`` (all
@@ -926,9 +883,7 @@ class AnalyticsService:
             _select(
                 CommissionAccrual.broker_id,
                 CommissionAccrual.currency,
-                _func.coalesce(
-                    _func.sum(CommissionAccrual.commission_amount), 0
-                ).label("comm"),
+                _func.coalesce(_func.sum(CommissionAccrual.commission_amount), 0).label("comm"),
             )
             .where(CommissionAccrual.state != "cancelled")
             .group_by(CommissionAccrual.broker_id, CommissionAccrual.currency)
@@ -951,23 +906,18 @@ class AnalyticsService:
                 },
             )
             currency = cur or ""
-            slot["commission_earned"][currency] = (
-                slot["commission_earned"].get(currency, Decimal("0"))
-                + Decimal(str(comm or 0))
+            slot["commission_earned"][currency] = slot["commission_earned"].get(currency, Decimal("0")) + Decimal(
+                str(comm or 0)
             )
 
         # Backfill any broker name we discovered via the joined queries
         # but missed on the initial active-only roster (defensive — when
         # a broker is marked inactive mid-window we still want their row
         # on the leaderboard).
-        missing_names = [
-            bid for bid, slot in per_broker.items() if not slot["broker_name"]
-        ]
+        missing_names = [bid for bid, slot in per_broker.items() if not slot["broker_name"]]
         if missing_names:
             extra = (
-                await self.session.execute(
-                    _select(Broker.id, Broker.name).where(Broker.id.in_(missing_names))
-                )
+                await self.session.execute(_select(Broker.id, Broker.name).where(Broker.id.in_(missing_names)))
             ).all()
             for bid, nm in extra:
                 per_broker[bid]["broker_name"] = nm or ""
@@ -977,9 +927,7 @@ class AnalyticsService:
             leads = int(slot["leads_assigned"])
             sales = int(slot["sales_closed"])
             conv = (
-                (Decimal(sales) / Decimal(leads) * Decimal("100")).quantize(
-                    Decimal("0.1")
-                )
+                (Decimal(sales) / Decimal(leads) * Decimal("100")).quantize(Decimal("0.1"))
                 if leads > 0
                 else Decimal("0")
             )

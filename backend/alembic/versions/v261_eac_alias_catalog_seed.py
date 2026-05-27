@@ -50,9 +50,7 @@ def _load_catalog() -> list[dict[str, Any]]:
     except Exception:  # noqa: BLE001
         # Fallback for non-installed checkouts.
         here = Path(__file__).resolve().parent.parent.parent
-        text = (
-            here / "app" / "modules" / "eac" / "aliases" / "seed_catalog.json"
-        ).read_text(encoding="utf-8")
+        text = (here / "app" / "modules" / "eac" / "aliases" / "seed_catalog.json").read_text(encoding="utf-8")
     doc = json.loads(text)
     return doc.get("aliases", [])
 
@@ -127,7 +125,8 @@ def upgrade() -> None:
         description = alias.get("description")
         if isinstance(description, dict):
             description = description.get("en") or next(
-                iter(description.values()), None,
+                iter(description.values()),
+                None,
             )
         op.execute(
             alias_meta.insert().values(
@@ -174,6 +173,4 @@ def downgrade() -> None:
         ALIAS_TABLE,
         sa.column("is_built_in", sa.Boolean),
     )
-    op.execute(
-        alias_meta.delete().where(alias_meta.c.is_built_in.is_(True))
-    )
+    op.execute(alias_meta.delete().where(alias_meta.c.is_built_in.is_(True)))

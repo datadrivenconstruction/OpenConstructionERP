@@ -94,9 +94,7 @@ async def bulk_update_status(
     if not ids:
         return 0
     if allowed_statuses is not None and new_status not in allowed_statuses:
-        raise ValueError(
-            f"Status '{new_status}' not allowed. Expected one of: {sorted(allowed_statuses)}"
-        )
+        raise ValueError(f"Status '{new_status}' not allowed. Expected one of: {sorted(allowed_statuses)}")
     stmt = update(model).where(model.id.in_(ids)).values(status=new_status)
     result = await session.execute(stmt)
     await session.flush()

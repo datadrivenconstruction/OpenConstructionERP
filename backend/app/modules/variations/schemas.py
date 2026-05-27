@@ -18,6 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_serializer
 # locale-neutral and exact. NaN/Infinity collapse to "0" rather than
 # crashing the encoder.
 
+
 def _serialize_money_string(value: Any) -> str | None:
     """Render a Decimal-ish value as a plain-decimal string, or ``None``."""
     if value is None:
@@ -30,6 +31,7 @@ def _serialize_money_string(value: Any) -> str | None:
     if not value.is_finite():
         return "0"
     return format(value, "f")
+
 
 # Status / category patterns
 _NOTICE_STATUS = r"^(issued|acknowledged|responded|closed)$"
@@ -458,7 +460,10 @@ class DayworkSheetResponse(BaseModel):
     updated_at: datetime
 
     @field_serializer(
-        "subtotal_amount", "markup_percent", "total_amount", when_used="json",
+        "subtotal_amount",
+        "markup_percent",
+        "total_amount",
+        when_used="json",
     )
     @classmethod
     def _ser_money(cls, v: Decimal) -> str:

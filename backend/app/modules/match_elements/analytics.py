@@ -241,45 +241,51 @@ async def compute_match_analytics(
     alerts: list[AnalyticsAlert] = []
     if total >= _MIN_SAMPLE:
         if low_score_pct >= _LOW_SCORE_PCT:
-            alerts.append(AnalyticsAlert(
-                id="low_top_score",
-                severity="warning",
-                title="Low-confidence searches above threshold",
-                detail=(
-                    f"{low_score_pct:.1%} of {total} searches scored below "
-                    f"{_LOW_SCORE_VALUE:.2f} — likely catalogue gap or "
-                    "missing language coverage."
-                ),
-                metric=low_score_pct,
-                threshold=_LOW_SCORE_PCT,
-                spec_ref="MAPPING_PROCESS.md §10 (catalogue gap)",
-            ))
+            alerts.append(
+                AnalyticsAlert(
+                    id="low_top_score",
+                    severity="warning",
+                    title="Low-confidence searches above threshold",
+                    detail=(
+                        f"{low_score_pct:.1%} of {total} searches scored below "
+                        f"{_LOW_SCORE_VALUE:.2f} — likely catalogue gap or "
+                        "missing language coverage."
+                    ),
+                    metric=low_score_pct,
+                    threshold=_LOW_SCORE_PCT,
+                    spec_ref="MAPPING_PROCESS.md §10 (catalogue gap)",
+                )
+            )
         if with_pick >= _MIN_SAMPLE and high_rank_pct >= _HIGH_RANK_PCT:
-            alerts.append(AnalyticsAlert(
-                id="high_picked_rank",
-                severity="warning",
-                title="Users picking past suggested top-4",
-                detail=(
-                    f"{high_rank_pct:.1%} of {with_pick} picks landed beyond rank "
-                    f"{_HIGH_RANK_VALUE:.0f} — re-rank model may need re-training."
-                ),
-                metric=high_rank_pct,
-                threshold=_HIGH_RANK_PCT,
-                spec_ref="MAPPING_PROCESS.md §10 (re-train classifier)",
-            ))
+            alerts.append(
+                AnalyticsAlert(
+                    id="high_picked_rank",
+                    severity="warning",
+                    title="Users picking past suggested top-4",
+                    detail=(
+                        f"{high_rank_pct:.1%} of {with_pick} picks landed beyond rank "
+                        f"{_HIGH_RANK_VALUE:.0f} — re-rank model may need re-training."
+                    ),
+                    metric=high_rank_pct,
+                    threshold=_HIGH_RANK_PCT,
+                    spec_ref="MAPPING_PROCESS.md §10 (re-train classifier)",
+                )
+            )
         if with_filter >= _MIN_SAMPLE and zero_hit_with_filter_pct >= _ZERO_HIT_PCT:
-            alerts.append(AnalyticsAlert(
-                id="over_restrictive_filters",
-                severity="critical" if zero_hit_with_filter_pct >= 0.25 else "warning",
-                title="Hard filters returning zero hits",
-                detail=(
-                    f"{zero_hit_with_filter_pct:.1%} of {with_filter} filtered "
-                    "searches returned no candidates — relax-tier ladder may need tuning."
-                ),
-                metric=zero_hit_with_filter_pct,
-                threshold=_ZERO_HIT_PCT,
-                spec_ref="MAPPING_PROCESS.md §10 (over-restrictive filters)",
-            ))
+            alerts.append(
+                AnalyticsAlert(
+                    id="over_restrictive_filters",
+                    severity="critical" if zero_hit_with_filter_pct >= 0.25 else "warning",
+                    title="Hard filters returning zero hits",
+                    detail=(
+                        f"{zero_hit_with_filter_pct:.1%} of {with_filter} filtered "
+                        "searches returned no candidates — relax-tier ladder may need tuning."
+                    ),
+                    metric=zero_hit_with_filter_pct,
+                    threshold=_ZERO_HIT_PCT,
+                    spec_ref="MAPPING_PROCESS.md §10 (over-restrictive filters)",
+                )
+            )
 
     return AnalyticsResponse(
         window_days=days,

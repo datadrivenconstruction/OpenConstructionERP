@@ -305,7 +305,8 @@ async def portal_request_magic_link(
     the internal admin ``POST /admin/users/invite`` flow.
     """
     await service.request_magic_link(
-        data.email, created_ip=_client_ip(request),
+        data.email,
+        created_ip=_client_ip(request),
     )
     return MagicLinkResponse()
 
@@ -369,7 +370,10 @@ async def portal_me_notifications(
     limit: int = Query(default=50, ge=1, le=200),
 ) -> NotificationListResponse:
     items, total, unread = await service.list_notifications(
-        user.id, unread_only=unread_only, offset=offset, limit=limit,
+        user.id,
+        unread_only=unread_only,
+        offset=offset,
+        limit=limit,
     )
     return NotificationListResponse(
         items=[NotificationResponse.model_validate(i) for i in items],
@@ -410,9 +414,7 @@ async def portal_me_document_access(
         user.id,
         data.document_type,
         data.document_id,
-        required="view" if data.action == "view" else (
-            "sign" if data.action == "sign" else "view"
-        ),
+        required="view" if data.action == "view" else ("sign" if data.action == "sign" else "view"),
     ):
         from fastapi import HTTPException
 
@@ -475,7 +477,10 @@ async def portal_create_ticket(
     from fastapi import HTTPException
 
     if not await service.enforce_rls(
-        user.id, "service_contract", data.contract_id, required="submit",
+        user.id,
+        "service_contract",
+        data.contract_id,
+        required="submit",
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -529,7 +534,8 @@ async def portal_list_tickets(
     from app.modules.service.models import ServiceTicket as _ST
 
     accessible_contracts = await service.list_accessible_resources(
-        user.id, "service_contract",
+        user.id,
+        "service_contract",
     )
     if not accessible_contracts:
         return PortalTicketList(items=[], total=0)
@@ -545,9 +551,7 @@ async def portal_list_tickets(
     count_stmt = _select(_func.count()).select_from(base.subquery())
     total = int((await session.execute(count_stmt)).scalar_one())
 
-    stmt = (
-        base.order_by(_ST.created_at.desc()).offset(offset).limit(limit)
-    )
+    stmt = base.order_by(_ST.created_at.desc()).offset(offset).limit(limit)
     rows = list((await session.execute(stmt)).scalars().all())
 
     return PortalTicketList(
@@ -592,10 +596,12 @@ async def portal_list_change_orders(
     from app.modules.changeorders.models import ChangeOrder as _CO
 
     accessible_cos = await service.list_accessible_resources(
-        user.id, "change_order",
+        user.id,
+        "change_order",
     )
     accessible_projects = await service.list_accessible_resources(
-        user.id, "project",
+        user.id,
+        "project",
     )
     if not accessible_cos and not accessible_projects:
         return PortalChangeOrderList(items=[], total=0)
@@ -616,11 +622,7 @@ async def portal_list_change_orders(
     # scope_ors is non-empty here (guarded by the early return above).
     scope_predicate = or_(*scope_ors)
 
-    base = (
-        _select(_CO)
-        .where(_CO.status.in_(visible_statuses))
-        .where(scope_predicate)
-    )
+    base = _select(_CO).where(_CO.status.in_(visible_statuses)).where(scope_predicate)
     if project_id is not None:
         base = base.where(_CO.project_id == project_id)
 
@@ -629,9 +631,7 @@ async def portal_list_change_orders(
     count_stmt = _select(_func.count()).select_from(base.subquery())
     total = int((await session.execute(count_stmt)).scalar_one())
 
-    stmt = (
-        base.order_by(_CO.created_at.desc()).offset(offset).limit(limit)
-    )
+    stmt = base.order_by(_CO.created_at.desc()).offset(offset).limit(limit)
     rows = list((await session.execute(stmt)).scalars().all())
 
     items: list[PortalChangeOrderEntry] = []
@@ -643,8 +643,7 @@ async def portal_list_change_orders(
                 title=co.title,
                 description=co.description or "",
                 status=co.status,
-                approved_amount=co.approved_amount if co.approved_amount is not None
-                else co.cost_impact,
+                approved_amount=co.approved_amount if co.approved_amount is not None else co.cost_impact,
                 approved_time_days=co.approved_time_days,
                 currency=co.currency or "",
                 approved_at=co.approved_at,

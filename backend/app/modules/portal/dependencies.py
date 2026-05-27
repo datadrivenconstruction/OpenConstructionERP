@@ -24,7 +24,8 @@ _portal_bearer = HTTPBearer(auto_error=False, scheme_name="PortalSession")
 async def get_current_portal_user(
     session: SessionDep,
     credentials: Annotated[
-        HTTPAuthorizationCredentials | None, Depends(_portal_bearer),
+        HTTPAuthorizationCredentials | None,
+        Depends(_portal_bearer),
     ] = None,
 ) -> PortalUser:
     """‌⁠‍Validate the ``Authorization: Bearer <token>`` header against
@@ -49,7 +50,8 @@ async def get_current_portal_user(
 
 async def get_current_portal_session_token(
     credentials: Annotated[
-        HTTPAuthorizationCredentials | None, Depends(_portal_bearer),
+        HTTPAuthorizationCredentials | None,
+        Depends(_portal_bearer),
     ] = None,
 ) -> str:
     """‌⁠‍Return the raw bearer token for revocation endpoints. Raises 401 if absent."""

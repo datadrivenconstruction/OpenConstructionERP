@@ -79,9 +79,7 @@ class SubmittalReviewRequest(BaseModel):
 
     status: str = Field(
         ...,
-        pattern=(
-            r"^(approved|approved_as_noted|revise_and_resubmit|rejected)$"
-        ),
+        pattern=(r"^(approved|approved_as_noted|revise_and_resubmit|rejected)$"),
     )
     notes: str | None = Field(default=None, max_length=5000)
 

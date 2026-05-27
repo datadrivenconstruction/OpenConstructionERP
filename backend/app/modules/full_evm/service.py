@@ -177,9 +177,7 @@ class EVMService:
 
         # Fetch all snapshots ordered by date
         snap_stmt = (
-            select(EVMSnapshot)
-            .where(EVMSnapshot.project_id == project_id)
-            .order_by(EVMSnapshot.snapshot_date.asc())
+            select(EVMSnapshot).where(EVMSnapshot.project_id == project_id).order_by(EVMSnapshot.snapshot_date.asc())
         )
         snap_result = await self.session.execute(snap_stmt)
         snapshots = list(snap_result.scalars().all())

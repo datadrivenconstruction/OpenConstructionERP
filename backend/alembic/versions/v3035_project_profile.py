@@ -76,7 +76,8 @@ def upgrade() -> None:
                 "project_id",
                 sa.String(length=36),
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -87,10 +88,16 @@ def upgrade() -> None:
                 server_default="custom",
             ),
             sa.Column(
-                "activity", sa.JSON(), nullable=False, server_default="[]",
+                "activity",
+                sa.JSON(),
+                nullable=False,
+                server_default="[]",
             ),
             sa.Column(
-                "phases", sa.JSON(), nullable=False, server_default="[]",
+                "phases",
+                sa.JSON(),
+                nullable=False,
+                server_default="[]",
             ),
             sa.Column("role", sa.String(length=48), nullable=True),
             sa.Column("size", sa.String(length=24), nullable=True),
@@ -116,10 +123,14 @@ def upgrade() -> None:
             ),
             sa.Column("created_by", sa.String(length=36), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
-                "project_id", name="uq_project_profile_project",
+                "project_id",
+                name="uq_project_profile_project",
             ),
         )
         op.create_index(
@@ -152,7 +163,8 @@ def upgrade() -> None:
                 "project_id",
                 sa.String(length=36),
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -170,7 +182,10 @@ def upgrade() -> None:
                 server_default="hidden",
             ),
             sa.Column(
-                "score", sa.Integer(), nullable=False, server_default="0",
+                "score",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
                 "phase",
@@ -219,7 +234,10 @@ def upgrade() -> None:
             "oe_project_wizard_draft",
             *_base_cols(),
             sa.Column(
-                "payload", sa.JSON(), nullable=False, server_default="{}",
+                "payload",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column("created_by", sa.String(length=36), nullable=True),
         )

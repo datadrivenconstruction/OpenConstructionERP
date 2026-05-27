@@ -63,7 +63,6 @@ Python is well under 50 ms for realistic models.
 from __future__ import annotations
 
 import re
-import uuid
 from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any, Literal
@@ -124,10 +123,19 @@ OP_NOT_IN = "not_in"
 OP_EMPTY = "is_empty"
 OP_NOT_EMPTY = "is_not_empty"
 
-_STRING_OPS = {OP_EQ, OP_NE, OP_CONTAINS, OP_STARTS_WITH, OP_ENDS_WITH, OP_REGEX,
-               OP_IN, OP_NOT_IN, OP_EMPTY, OP_NOT_EMPTY}
-_NUMERIC_OPS = {OP_EQ, OP_NE, OP_GT, OP_LT, OP_GTE, OP_LTE, OP_BETWEEN, OP_IN,
-                OP_NOT_IN, OP_EMPTY, OP_NOT_EMPTY}
+_STRING_OPS = {
+    OP_EQ,
+    OP_NE,
+    OP_CONTAINS,
+    OP_STARTS_WITH,
+    OP_ENDS_WITH,
+    OP_REGEX,
+    OP_IN,
+    OP_NOT_IN,
+    OP_EMPTY,
+    OP_NOT_EMPTY,
+}
+_NUMERIC_OPS = {OP_EQ, OP_NE, OP_GT, OP_LT, OP_GTE, OP_LTE, OP_BETWEEN, OP_IN, OP_NOT_IN, OP_EMPTY, OP_NOT_EMPTY}
 _ALL_OPS = _STRING_OPS | _NUMERIC_OPS
 
 
@@ -164,8 +172,7 @@ def _validate_field(field: Any) -> str:
         if field.startswith(prefix) and len(field) > len(prefix):
             return field
     raise SmartViewRuleError(
-        f"field '{field}' is not in the allowed set "
-        f"(top-level or properties./quantities./geometry./identity. prefix)"
+        f"field '{field}' is not in the allowed set (top-level or properties./quantities./geometry./identity. prefix)"
     )
 
 
@@ -198,18 +205,14 @@ def _validate_leaf(node: dict[str, Any]) -> None:
         if not isinstance(value, list):
             raise SmartViewRuleError(f"{field} {op}: value must be array")
         if len(value) > MAX_VALUE_LIST:
-            raise SmartViewRuleError(
-                f"{field} {op}: value array too long (>{MAX_VALUE_LIST} items)"
-            )
+            raise SmartViewRuleError(f"{field} {op}: value array too long (>{MAX_VALUE_LIST} items)")
         return
 
     if op == OP_REGEX:
         if not isinstance(value, str):
             raise SmartViewRuleError(f"{field} regex: value must be string")
         if len(value) > MAX_REGEX_LEN:
-            raise SmartViewRuleError(
-                f"{field} regex: pattern too long (>{MAX_REGEX_LEN} chars)"
-            )
+            raise SmartViewRuleError(f"{field} regex: pattern too long (>{MAX_REGEX_LEN} chars)")
         try:
             re.compile(value)
         except re.error as exc:
@@ -283,6 +286,7 @@ def _resolve_field(element: Any, field: str) -> Any:
     evaluator can run against fully-loaded rows OR against client-side
     canonical-format payloads in tests.
     """
+
     def _get(obj: Any, key: str) -> Any:
         if isinstance(obj, dict):
             return obj.get(key)
@@ -302,7 +306,7 @@ def _resolve_field(element: Any, field: str) -> Any:
         return _get(element, field)
 
     if field.startswith("identity."):
-        sub = field[len("identity."):]
+        sub = field[len("identity.") :]
         # identity.din276 / identity.nrm / identity.masterformat live inside
         # properties.classification (canonical format spec).
         props = _get(element, "properties") or {}
@@ -314,7 +318,7 @@ def _resolve_field(element: Any, field: str) -> Any:
         return props.get(sub)
 
     if field.startswith("properties."):
-        key = field[len("properties."):]
+        key = field[len("properties.") :]
         props = _get(element, "properties") or {}
         if not isinstance(props, dict):
             return None
@@ -329,7 +333,7 @@ def _resolve_field(element: Any, field: str) -> Any:
         return None
 
     if field.startswith("quantities."):
-        key = field[len("quantities."):]
+        key = field[len("quantities.") :]
         qty = _get(element, "quantities") or {}
         if not isinstance(qty, dict):
             return None
@@ -342,7 +346,7 @@ def _resolve_field(element: Any, field: str) -> Any:
         return None
 
     if field.startswith("geometry."):
-        key = field[len("geometry."):]
+        key = field[len("geometry.") :]
         # Geometry values live in quantities for backend-converted models
         # (canonical format) — check the alias map then fall through to
         # the raw quantities map.
@@ -546,12 +550,19 @@ def build_property_catalog(
     # Identity — every element always has these.
     for el in elements:
         _record("name", "identity", getattr(el, "name", None) or (el.get("name") if isinstance(el, dict) else None))
-        _record("element_type", "identity",
-                getattr(el, "element_type", None) or (el.get("element_type") if isinstance(el, dict) else None))
-        _record("discipline", "identity",
-                getattr(el, "discipline", None) or (el.get("discipline") if isinstance(el, dict) else None))
-        _record("storey", "identity",
-                getattr(el, "storey", None) or (el.get("storey") if isinstance(el, dict) else None))
+        _record(
+            "element_type",
+            "identity",
+            getattr(el, "element_type", None) or (el.get("element_type") if isinstance(el, dict) else None),
+        )
+        _record(
+            "discipline",
+            "identity",
+            getattr(el, "discipline", None) or (el.get("discipline") if isinstance(el, dict) else None),
+        )
+        _record(
+            "storey", "identity", getattr(el, "storey", None) or (el.get("storey") if isinstance(el, dict) else None)
+        )
 
         props = getattr(el, "properties", None)
         if props is None and isinstance(el, dict):
@@ -707,7 +718,19 @@ __all__ = [
     "legacy_criteria_to_tree",
     "validate_rule_tree",
     # Operator literals re-exported for tests + UI.
-    "OP_EQ", "OP_NE", "OP_CONTAINS", "OP_STARTS_WITH", "OP_ENDS_WITH",
-    "OP_REGEX", "OP_GT", "OP_LT", "OP_GTE", "OP_LTE", "OP_BETWEEN",
-    "OP_IN", "OP_NOT_IN", "OP_EMPTY", "OP_NOT_EMPTY",
+    "OP_EQ",
+    "OP_NE",
+    "OP_CONTAINS",
+    "OP_STARTS_WITH",
+    "OP_ENDS_WITH",
+    "OP_REGEX",
+    "OP_GT",
+    "OP_LT",
+    "OP_GTE",
+    "OP_LTE",
+    "OP_BETWEEN",
+    "OP_IN",
+    "OP_NOT_IN",
+    "OP_EMPTY",
+    "OP_NOT_EMPTY",
 ]

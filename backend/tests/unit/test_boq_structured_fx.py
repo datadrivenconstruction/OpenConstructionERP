@@ -98,26 +98,18 @@ def test_position_total_in_base_converts_foreign():
 
 
 def test_position_total_in_base_base_currency_passthrough():
-    assert _position_total_in_base("1000", "EUR", {"USD": "1.10"}, "EUR") == Decimal(
-        "1000"
-    )
+    assert _position_total_in_base("1000", "EUR", {"USD": "1.10"}, "EUR") == Decimal("1000")
     # No currency on the row → treated as base.
-    assert _position_total_in_base("1000", "", {"USD": "1.10"}, "EUR") == Decimal(
-        "1000"
-    )
+    assert _position_total_in_base("1000", "", {"USD": "1.10"}, "EUR") == Decimal("1000")
 
 
 def test_position_total_in_base_missing_rate_not_zeroed():
     # GBP has no configured rate — must be summed in its own units, never 0.
-    assert _position_total_in_base("800", "GBP", {"USD": "1.10"}, "EUR") == Decimal(
-        "800"
-    )
+    assert _position_total_in_base("800", "GBP", {"USD": "1.10"}, "EUR") == Decimal("800")
 
 
 def test_position_total_in_base_garbage_total_is_zero():
-    assert _position_total_in_base("not-a-number", "USD", {"USD": "1.1"}, "EUR") == (
-        Decimal("0")
-    )
+    assert _position_total_in_base("not-a-number", "USD", {"USD": "1.1"}, "EUR") == (Decimal("0"))
 
 
 def test_position_currency_priority():
@@ -211,9 +203,7 @@ async def _make_boq_with_mixed_currency(session, fx_rates):
 
 @pytest.mark.asyncio
 async def test_get_boq_structured_converts_foreign_currency(session):
-    boq = await _make_boq_with_mixed_currency(
-        session, [{"code": "USD", "rate": "1.10", "label": "US Dollar"}]
-    )
+    boq = await _make_boq_with_mixed_currency(session, [{"code": "USD", "rate": "1.10", "label": "US Dollar"}])
     service = BOQService(session)
     structured = await service.get_boq_structured(boq.id)
 
@@ -228,9 +218,7 @@ async def test_get_boq_structured_converts_foreign_currency(session):
 async def test_get_boq_structured_missing_rate_not_zeroed(session):
     # USD has a rate; the project also has a position implicitly in EUR.
     # Swap the USD leaf's currency to an unconfigured GBP via no GBP rate.
-    boq = await _make_boq_with_mixed_currency(
-        session, [{"code": "CHF", "rate": "0.95", "label": "Swiss Franc"}]
-    )
+    boq = await _make_boq_with_mixed_currency(session, [{"code": "CHF", "rate": "0.95", "label": "Swiss Franc"}])
     service = BOQService(session)
     structured = await service.get_boq_structured(boq.id)
 

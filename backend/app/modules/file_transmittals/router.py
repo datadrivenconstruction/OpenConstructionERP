@@ -51,9 +51,7 @@ def _get_service(session: SessionDep) -> TransmittalService:
     return TransmittalService(session)
 
 
-async def _require_project_access(
-    session: AsyncSession, project_id: uuid.UUID, user_id: str
-) -> None:
+async def _require_project_access(session: AsyncSession, project_id: uuid.UUID, user_id: str) -> None:
     """Verify the caller owns or is admin on ``project_id``."""
     from app.modules.projects.repository import ProjectRepository
     from app.modules.users.repository import UserRepository
@@ -69,9 +67,7 @@ async def _require_project_access(
         if user is not None and getattr(user, "role", "") == "admin":
             return
     except Exception:  # noqa: BLE001
-        logger.exception(
-            "Admin-role lookup failed during transmittal access check"
-        )
+        logger.exception("Admin-role lookup failed during transmittal access check")
     if str(getattr(project, "owner_id", "")) != str(user_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -92,9 +88,7 @@ def _to_list_item(transmittal) -> TransmittalListItem:  # noqa: ANN001
         status=transmittal.status,
         item_count=len(transmittal.items),
         recipient_count=len(transmittal.recipients),
-        acknowledged_count=sum(
-            1 for r in transmittal.recipients if r.acknowledged_at is not None
-        ),
+        acknowledged_count=sum(1 for r in transmittal.recipients if r.acknowledged_at is not None),
         created_at=transmittal.created_at,
         updated_at=transmittal.updated_at,
     )
@@ -344,10 +338,7 @@ async def download_cover(
     await _require_project_access(session, transmittal.project_id, user_id)
     data, media_type = await service.read_cover(transmittal_id)
     ext = "pdf" if media_type == "application/pdf" else "txt"
-    safe_number = "".join(
-        c if c.isalnum() or c in ("-", "_") else "_"
-        for c in (transmittal.number or "transmittal")
-    )
+    safe_number = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in (transmittal.number or "transmittal"))
     filename = f"transmittal_{safe_number}.{ext}"
     return Response(
         content=data,

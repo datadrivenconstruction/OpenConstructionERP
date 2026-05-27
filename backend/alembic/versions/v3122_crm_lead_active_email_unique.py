@@ -63,16 +63,7 @@ def upgrade() -> None:
         return
 
     dialect = bind.dialect.name
-    if dialect == "postgresql":
-        op.execute(
-            f"""
-            CREATE UNIQUE INDEX IF NOT EXISTS {INDEX_NAME}
-            ON {TABLE} (LOWER(contact_email))
-            WHERE status IN ('new', 'qualifying', 'qualified')
-              AND contact_email IS NOT NULL
-            """
-        )
-    elif dialect == "sqlite":
+    if dialect == "postgresql" or dialect == "sqlite":
         op.execute(
             f"""
             CREATE UNIQUE INDEX IF NOT EXISTS {INDEX_NAME}

@@ -68,9 +68,7 @@ def _now() -> datetime:
     return datetime.now(UTC)
 
 
-def _to_response(
-    comment: FileComment, mentions: list[FileCommentMention]
-) -> FileCommentResponse:
+def _to_response(comment: FileComment, mentions: list[FileCommentMention]) -> FileCommentResponse:
     """Build a flat response row out of an ORM object."""
     return FileCommentResponse(
         id=comment.id,
@@ -90,9 +88,7 @@ def _to_response(
         resolved_by_id=comment.resolved_by_id,
         created_at=comment.created_at,
         updated_at=comment.updated_at,
-        mentions=[
-            FileCommentMentionResponse.model_validate(m) for m in mentions
-        ],
+        mentions=[FileCommentMentionResponse.model_validate(m) for m in mentions],
     )
 
 
@@ -185,9 +181,7 @@ async def list_threads(
         return [], 0
 
     # Bulk-load mentions for every comment in one query.
-    mention_stmt = select(FileCommentMention).where(
-        FileCommentMention.comment_id.in_([c.id for c in comments])
-    )
+    mention_stmt = select(FileCommentMention).where(FileCommentMention.comment_id.in_([c.id for c in comments]))
     mention_rows = list((await session.execute(mention_stmt)).scalars().all())
     mentions_by_comment: dict[uuid.UUID, list[FileCommentMention]] = {}
     for m in mention_rows:
@@ -215,18 +209,14 @@ async def create_comment(
     here (we can't render half a pin).
     """
     if (payload.anchor_x is None) != (payload.anchor_y is None):
-        raise ValueError(
-            "Both anchor_x and anchor_y must be provided together"
-        )
+        raise ValueError("Both anchor_x and anchor_y must be provided together")
 
     # If a parent is referenced, it must (a) exist, (b) belong to the
     # same (project, kind, file) tuple. Cross-thread parenting is
     # rejected — otherwise a stranger could nest replies under a
     # comment they do not normally see.
     if payload.parent_id is not None:
-        parent_stmt = select(FileComment).where(
-            FileComment.id == payload.parent_id
-        )
+        parent_stmt = select(FileComment).where(FileComment.id == payload.parent_id)
         parent = (await session.execute(parent_stmt)).scalar_one_or_none()
         if parent is None:
             raise ValueError(f"Parent comment {payload.parent_id} not found")
@@ -235,9 +225,7 @@ async def create_comment(
             or parent.file_kind != payload.file_kind
             or parent.file_id != payload.file_id
         ):
-            raise ValueError(
-                "Parent comment belongs to a different file"
-            )
+            raise ValueError("Parent comment belongs to a different file")
 
     # Epic C — default ``file_version_id`` to the chain head when the
     # caller hasn't pinned one explicitly. Best-effort: a missing chain
@@ -348,14 +336,8 @@ async def _extract_and_persist_mentions(
     # email-local prefix; falls back to full_name match in Python).
     user_stmt = select(User).where(
         or_(
-            *(
-                func.lower(User.email).like(f"{h.lower()}@%")
-                for h in handles
-            ),
-            *(
-                func.lower(User.full_name).like(f"%{h.lower()}%")
-                for h in handles
-            ),
+            *(func.lower(User.email).like(f"{h.lower()}@%") for h in handles),
+            *(func.lower(User.full_name).like(f"%{h.lower()}%") for h in handles),
         )
     )
     candidates = list((await session.execute(user_stmt)).scalars().all())
@@ -390,9 +372,7 @@ async def _extract_and_persist_mentions(
             ctx_comment = comment
             if ctx_comment is None:
                 ctx_comment = (
-                    await session.execute(
-                        select(FileComment).where(FileComment.id == comment_id)
-                    )
+                    await session.execute(select(FileComment).where(FileComment.id == comment_id))
                 ).scalar_one_or_none()
             for row in rows:
                 event_bus.publish_detached(
@@ -402,9 +382,7 @@ async def _extract_and_persist_mentions(
                         "mention_id": str(row.id),
                         "mentioned_user_id": str(row.mentioned_user_id),
                         "author_id": str(exclude_user_id) if exclude_user_id else None,
-                        "project_id": (
-                            str(ctx_comment.project_id) if ctx_comment else None
-                        ),
+                        "project_id": (str(ctx_comment.project_id) if ctx_comment else None),
                         "file_kind": ctx_comment.file_kind if ctx_comment else None,
                         "file_id": ctx_comment.file_id if ctx_comment else None,
                         "body_excerpt": (body or "")[:160],
@@ -459,9 +437,7 @@ async def update_comment(
         # surface, and removed ones stop pinging. Old rows are
         # cleared and replaced — the unique constraint prevents
         # accidental duplicates.
-        del_stmt = delete(FileCommentMention).where(
-            FileCommentMention.comment_id == comment_id
-        )
+        del_stmt = delete(FileCommentMention).where(FileCommentMention.comment_id == comment_id)
         await session.execute(del_stmt)
         await session.flush()
         await _extract_and_persist_mentions(
@@ -472,9 +448,7 @@ async def update_comment(
             comment=comment,
         )
 
-    mention_stmt = select(FileCommentMention).where(
-        FileCommentMention.comment_id == comment_id
-    )
+    mention_stmt = select(FileCommentMention).where(FileCommentMention.comment_id == comment_id)
     mentions = list((await session.execute(mention_stmt)).scalars().all())
     return comment, mentions
 
@@ -501,11 +475,7 @@ async def soft_delete_comment(
     comment.resolved = False
     comment.resolved_at = None
     comment.resolved_by_id = None
-    await session.execute(
-        delete(FileCommentMention).where(
-            FileCommentMention.comment_id == comment_id
-        )
-    )
+    await session.execute(delete(FileCommentMention).where(FileCommentMention.comment_id == comment_id))
     await session.flush()
 
     # Epic H — universal audit trail.
@@ -562,9 +532,7 @@ async def list_unread_mentions(
             file_kind=c.file_kind,
             file_id=c.file_id,
             author_id=c.author_id,
-            body_excerpt=(c.body[:_EXCERPT_MAX] + "…")
-            if len(c.body) > _EXCERPT_MAX
-            else c.body,
+            body_excerpt=(c.body[:_EXCERPT_MAX] + "…") if len(c.body) > _EXCERPT_MAX else c.body,
             created_at=m.created_at,
         )
         for (m, c) in rows

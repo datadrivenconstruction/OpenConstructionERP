@@ -146,10 +146,7 @@ class I18nFoundationService:
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=(
-                f"No exchange rate found for {from_code}/{to_code}"
-                + (f" on {rate_date}" if rate_date else "")
-            ),
+            detail=(f"No exchange rate found for {from_code}/{to_code}" + (f" on {rate_date}" if rate_date else "")),
         )
 
     # ── Working Days Calculation ───────────────────────────────────────────

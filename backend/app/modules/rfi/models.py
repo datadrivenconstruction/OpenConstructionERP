@@ -21,9 +21,7 @@ class RFI(Base):
     # a clean :class:`IntegrityError` the service can retry, rather than
     # quietly writing two RFI-007 rows in the same project. Mirrors the
     # changeorders ``uq_changeorders_project_code`` pattern.
-    __table_args__ = (
-        UniqueConstraint("project_id", "rfi_number", name="uq_rfi_project_number"),
-    )
+    __table_args__ = (UniqueConstraint("project_id", "rfi_number", name="uq_rfi_project_number"),)
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),

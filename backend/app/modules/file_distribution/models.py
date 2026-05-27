@@ -61,10 +61,13 @@ class FileDistributionList(Base):
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
     is_shared: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
 
-    members: Mapped[list["FileDistributionMember"]] = relationship(
+    members: Mapped[list[FileDistributionMember]] = relationship(
         back_populates="distribution_list",
         cascade="all, delete-orphan",
         lazy="selectin",
@@ -105,10 +108,14 @@ class FileDistributionMember(Base):
     )
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     display_name: Mapped[str | None] = mapped_column(
-        String(128), nullable=True, default=None,
+        String(128),
+        nullable=True,
+        default=None,
     )
     role: Mapped[str | None] = mapped_column(
-        String(32), nullable=True, default=None,
+        String(32),
+        nullable=True,
+        default=None,
     )
 
     distribution_list: Mapped[FileDistributionList] = relationship(
@@ -154,7 +161,10 @@ class FileDistributionSubscription(Base):
         nullable=False,
     )
     file_kind: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="*", server_default="*",
+        String(32),
+        nullable=False,
+        default="*",
+        server_default="*",
     )
     subscriber_email: Mapped[str] = mapped_column(String(255), nullable=False)
     # When the subscriber is an internal user we record the user_id so a
@@ -173,7 +183,10 @@ class FileDistributionSubscription(Base):
         server_default='["created","updated","deleted"]',
     )
     active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1",
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="1",
     )
 
     def __repr__(self) -> str:  # pragma: no cover — debug helper

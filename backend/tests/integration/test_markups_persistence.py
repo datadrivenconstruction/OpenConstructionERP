@@ -24,7 +24,6 @@ from httpx import ASGITransport, AsyncClient
 
 from app.main import create_app
 
-
 # ── Fixtures ────────────────────────────────────────────────────────────────
 
 
@@ -61,11 +60,7 @@ async def _register_admin(client: AsyncClient) -> tuple[dict[str, str], str]:
     assert reg.status_code == 201, reg.text
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     # Login can hit rate-limiting on fast reruns; tolerate a single retry.
@@ -291,7 +286,6 @@ async def test_non_creator_cannot_delete_comment(
 
     B is not project owner and not the comment author → 403.
     """
-    from sqlalchemy import update as sa_update
 
     from app.database import async_session_factory
     from app.modules.projects.models import Project
@@ -325,9 +319,7 @@ async def test_non_creator_cannot_delete_comment(
     async with async_session_factory() as session:
         from sqlalchemy import select as sa_select
 
-        result = await session.execute(
-            sa_select(Project.owner_id).where(Project.id == uuid.UUID(project_id))
-        )
+        result = await session.execute(sa_select(Project.owner_id).where(Project.id == uuid.UUID(project_id)))
         owner_id = result.scalar_one_or_none()
         assert owner_id is not None
         # And confirm B is not that owner

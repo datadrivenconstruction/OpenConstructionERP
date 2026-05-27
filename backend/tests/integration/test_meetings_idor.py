@@ -36,7 +36,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -74,14 +73,14 @@ async def _activate_user(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
 
 async def _register_and_login(
-    client: AsyncClient, *, tenant: str,
+    client: AsyncClient,
+    *,
+    tenant: str,
 ) -> tuple[str, str, str, dict[str, str]]:
     email = f"{tenant}-{uuid.uuid4().hex[:8]}@meetings-idor.io"
     password = f"MeetingsIdor{uuid.uuid4().hex[:6]}9"
@@ -90,9 +89,7 @@ async def _register_and_login(
         "/api/v1/users/auth/register",
         json={"email": email, "password": password, "full_name": f"Tenant {tenant}"},
     )
-    assert reg.status_code in (200, 201), (
-        f"register failed for {tenant}: {reg.status_code} {reg.text}"
-    )
+    assert reg.status_code in (200, 201), f"register failed for {tenant}: {reg.status_code} {reg.text}"
     user_id = reg.json()["id"]
 
     await _activate_user(email)
@@ -110,10 +107,12 @@ async def _register_and_login(
 async def two_meetings_tenants(http_client):
     """A owns a project; B is the attacker."""
     a_uid, a_email, a_password, _a_headers = await _register_and_login(
-        http_client, tenant="a",
+        http_client,
+        tenant="a",
     )
     b_uid, b_email, _b_password, b_headers = await _register_and_login(
-        http_client, tenant="b",
+        http_client,
+        tenant="b",
     )
 
     from sqlalchemy import update
@@ -122,19 +121,11 @@ async def two_meetings_tenants(http_client):
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == a_email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == a_email.lower()).values(role="admin", is_active=True))
         # Promote B to editor so they pass the meetings.create RBAC gate.
         # The IDOR we're hunting is at the project-ownership layer, not
         # the role-based one — B has the role, just not A's project.
-        await s.execute(
-            update(User)
-            .where(User.email == b_email.lower())
-            .values(role="editor", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == b_email.lower()).values(role="editor", is_active=True))
         await s.commit()
 
     a_login = await http_client.post(
@@ -201,9 +192,7 @@ async def test_tenant_b_cannot_get_tenant_a_meeting(http_client, two_meetings_te
         f"/api/v1/meetings/{a['meeting_id']}",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"LEAK: B read A's meeting: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"LEAK: B read A's meeting: {resp.status_code} {resp.text!r}"
     assert "confidential kickoff" not in resp.text
 
 
@@ -216,9 +205,7 @@ async def test_tenant_b_cannot_list_tenant_a_meetings(http_client, two_meetings_
         f"/api/v1/meetings/?project_id={a['project_id']}",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"LEAK: B listed A's meetings: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"LEAK: B listed A's meetings: {resp.status_code} {resp.text!r}"
     assert "confidential kickoff" not in resp.text
 
 
@@ -227,7 +214,8 @@ async def test_tenant_b_cannot_list_tenant_a_meetings(http_client, two_meetings_
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_import_summary_into_a_project(
-    http_client, two_meetings_tenants,
+    http_client,
+    two_meetings_tenants,
 ):
     """``POST /import-summary/?project_id=A`` must NOT inject into A's project.
 
@@ -255,8 +243,7 @@ async def test_tenant_b_cannot_import_summary_into_a_project(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B injected a meeting into A's project: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B injected a meeting into A's project: {resp.status_code} {resp.text!r}"
     )
 
     # Belt-and-braces: nothing B-authored should have landed in A's
@@ -281,9 +268,7 @@ async def test_tenant_b_cannot_delete_tenant_a_meeting(http_client, two_meetings
         f"/api/v1/meetings/{a['meeting_id']}",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B deleted A's meeting: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"WRITE-IDOR: B deleted A's meeting: {resp.status_code} {resp.text!r}"
 
 
 # ── Regression guards ─────────────────────────────────────────────────────
@@ -297,8 +282,7 @@ async def test_owner_can_still_import_summary(http_client, two_meetings_tenants)
     # Same caveat as the cross-tenant test — keep the transcript free of
     # weekday tokens so the heuristic doesn't poison ``ActionItemEntry``.
     transcript = (
-        "Alice: Discussed foundation pour schedule for next week.\n"
-        "Bob: Action: order rebar before the deadline.\n"
+        "Alice: Discussed foundation pour schedule for next week.\nBob: Action: order rebar before the deadline.\n"
     )
     files = {"file": ("ok.txt", io.BytesIO(transcript.encode()), "text/plain")}
 
@@ -308,14 +292,14 @@ async def test_owner_can_still_import_summary(http_client, two_meetings_tenants)
         headers=a["headers"],
     )
     assert resp.status_code in (200, 201), (
-        f"REGRESSION: owner A blocked from importing into own project: "
-        f"{resp.status_code} {resp.text!r}"
+        f"REGRESSION: owner A blocked from importing into own project: {resp.status_code} {resp.text!r}"
     )
 
 
 @pytest.mark.asyncio
 async def test_import_summary_handles_nonstandard_due_date_hints(
-    http_client, two_meetings_tenants,
+    http_client,
+    two_meetings_tenants,
 ):
     """Transcript heuristic must NOT crash the endpoint when the speaker
     says "by Friday" / "by next week" / "by end of month".
@@ -339,9 +323,13 @@ async def test_import_summary_handles_nonstandard_due_date_hints(
         "Alice: Action: send drawings by next week.\n"
         "Bob: Action: file permit by end of month.\n"
     )
-    files = {"file": (
-        "weekday-actions.txt", io.BytesIO(transcript.encode()), "text/plain",
-    )}
+    files = {
+        "file": (
+            "weekday-actions.txt",
+            io.BytesIO(transcript.encode()),
+            "text/plain",
+        )
+    }
 
     resp = await http_client.post(
         f"/api/v1/meetings/import-summary/?project_id={a['project_id']}",
@@ -349,25 +337,22 @@ async def test_import_summary_handles_nonstandard_due_date_hints(
         headers=a["headers"],
     )
     assert resp.status_code in (200, 201), (
-        f"CRASH: heuristic-extracted weekday due_date crashed import: "
-        f"{resp.status_code} {resp.text!r}"
+        f"CRASH: heuristic-extracted weekday due_date crashed import: {resp.status_code} {resp.text!r}"
     )
     body = resp.json()
     # All action items must round-trip; none can have a non-ISO due_date.
     for ai in body.get("action_items", []):
         due = ai.get("due_date")
         if due is not None:
-            assert (
-                isinstance(due, str)
-                and len(due) == 10
-                and due[4] == "-"
-                and due[7] == "-"
-            ), f"non-ISO due_date leaked into response: {due!r}"
+            assert isinstance(due, str) and len(due) == 10 and due[4] == "-" and due[7] == "-", (
+                f"non-ISO due_date leaked into response: {due!r}"
+            )
 
 
 @pytest.mark.asyncio
 async def test_create_meeting_rejects_foreign_document_ids(
-    http_client, two_meetings_tenants,
+    http_client,
+    two_meetings_tenants,
 ):
     """A meeting's ``document_ids`` array must NOT cross project boundaries.
 
@@ -432,11 +417,7 @@ async def test_create_meeting_rejects_foreign_document_ids(
         s.add(doc)
         await s.commit()
         # Read back to get the assigned UUID.
-        row = (
-            await s.execute(
-                select(Document).where(Document.project_id == uuid.UUID(project_b))
-            )
-        ).scalars().first()
+        row = (await s.execute(select(Document).where(Document.project_id == uuid.UUID(project_b)))).scalars().first()
         foreign_document_id = str(row.id)
 
     # Try to create a meeting in project_a referencing the foreign doc.
@@ -453,8 +434,7 @@ async def test_create_meeting_rejects_foreign_document_ids(
         headers=a["headers"],
     )
     assert resp.status_code in (400, 404, 422), (
-        f"INTEGRITY: meeting accepted foreign-project document_id: "
-        f"{resp.status_code} {resp.text!r}"
+        f"INTEGRITY: meeting accepted foreign-project document_id: {resp.status_code} {resp.text!r}"
     )
 
 

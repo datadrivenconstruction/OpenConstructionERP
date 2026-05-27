@@ -27,7 +27,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 _VALID_VERDICT_JSON = json.dumps(
     {
         "category": "real_design_flaw",
@@ -134,16 +133,15 @@ async def _seed_ai_settings(user_id: str) -> None:
     value is a placeholder — the resolver only checks that decrypt_secret
     yields a non-empty string.
     """
+    from sqlalchemy import select
+
     from app.core.crypto import encrypt_secret
     from app.database import async_session_factory
     from app.modules.ai.models import AISettings
-    from sqlalchemy import select
 
     async with async_session_factory() as session:
         existing = (
-            await session.execute(
-                select(AISettings).where(AISettings.user_id == uuid.UUID(user_id))
-            )
+            await session.execute(select(AISettings).where(AISettings.user_id == uuid.UUID(user_id)))
         ).scalar_one_or_none()
         if existing is not None:
             existing.anthropic_api_key = encrypt_secret("sk-test-fake-key")
@@ -161,15 +159,14 @@ async def _seed_ai_settings(user_id: str) -> None:
 
 async def _clear_ai_settings(user_id: str) -> None:
     """Strip every API key so the resolver raises."""
+    from sqlalchemy import select
+
     from app.database import async_session_factory
     from app.modules.ai.models import AISettings
-    from sqlalchemy import select
 
     async with async_session_factory() as session:
         existing = (
-            await session.execute(
-                select(AISettings).where(AISettings.user_id == uuid.UUID(user_id))
-            )
+            await session.execute(select(AISettings).where(AISettings.user_id == uuid.UUID(user_id)))
         ).scalar_one_or_none()
         if existing is not None:
             for attr in (
@@ -250,12 +247,8 @@ async def test_post_single_triage_happy(
 ) -> None:
     await _seed_ai_settings(admin_user_id)
     clash_id = await _seed_clash(project_id)
-    with patch(
-        "app.modules.clash_ai_triage.service.call_ai", new=_mock_call_ai
-    ):
-        resp = await client.post(
-            f"/api/v1/clash-ai-triage/clashes/{clash_id}", headers=auth
-        )
+    with patch("app.modules.clash_ai_triage.service.call_ai", new=_mock_call_ai):
+        resp = await client.post(f"/api/v1/clash-ai-triage/clashes/{clash_id}", headers=auth)
     assert resp.status_code == 200, resp.text
     body = resp.json()
     assert body["category"] == "real_design_flaw"
@@ -277,9 +270,7 @@ async def test_post_batch_returns_results(
     await _seed_ai_settings(admin_user_id)
     cid1 = await _seed_clash(project_id)
     cid2 = await _seed_clash(project_id)
-    with patch(
-        "app.modules.clash_ai_triage.service.call_ai", new=_mock_call_ai
-    ):
+    with patch("app.modules.clash_ai_triage.service.call_ai", new=_mock_call_ai):
         resp = await client.post(
             "/api/v1/clash-ai-triage/batch",
             json={"clash_ids": [cid1, cid2], "max_concurrent": 2},
@@ -303,20 +294,14 @@ async def test_history_returns_newest_first(
 ) -> None:
     await _seed_ai_settings(admin_user_id)
     clash_id = await _seed_clash(project_id)
-    with patch(
-        "app.modules.clash_ai_triage.service.call_ai", new=_mock_call_ai
-    ):
-        await client.post(
-            f"/api/v1/clash-ai-triage/clashes/{clash_id}", headers=auth
-        )
+    with patch("app.modules.clash_ai_triage.service.call_ai", new=_mock_call_ai):
+        await client.post(f"/api/v1/clash-ai-triage/clashes/{clash_id}", headers=auth)
         await client.post(
             f"/api/v1/clash-ai-triage/clashes/{clash_id}?force_refresh=true",
             headers=auth,
         )
 
-    resp = await client.get(
-        f"/api/v1/clash-ai-triage/clashes/{clash_id}/history", headers=auth
-    )
+    resp = await client.get(f"/api/v1/clash-ai-triage/clashes/{clash_id}/history", headers=auth)
     assert resp.status_code == 200, resp.text
     body = resp.json()
     assert body["total"] >= 2
@@ -331,12 +316,8 @@ async def test_history_returns_newest_first(
 
 
 @pytest.mark.asyncio
-async def test_prompts_current_returns_templates(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
-    resp = await client.get(
-        "/api/v1/clash-ai-triage/prompts/current", headers=auth
-    )
+async def test_prompts_current_returns_templates(client: AsyncClient, auth: dict[str, str]) -> None:
+    resp = await client.get("/api/v1/clash-ai-triage/prompts/current", headers=auth)
     assert resp.status_code == 200, resp.text
     body = resp.json()
     assert body["prompt_version"] == "v1.0"
@@ -348,13 +329,9 @@ async def test_prompts_current_returns_templates(
 
 
 @pytest.mark.asyncio
-async def test_unauthorised_returns_401(
-    client: AsyncClient, admin_user_id: str, project_id: str
-) -> None:
+async def test_unauthorised_returns_401(client: AsyncClient, admin_user_id: str, project_id: str) -> None:
     clash_id = await _seed_clash(project_id)
-    resp = await client.post(
-        f"/api/v1/clash-ai-triage/clashes/{clash_id}"
-    )
+    resp = await client.post(f"/api/v1/clash-ai-triage/clashes/{clash_id}")
     assert resp.status_code == 401
 
 
@@ -370,9 +347,7 @@ async def test_503_when_llm_not_configured(
 ) -> None:
     await _clear_ai_settings(admin_user_id)
     clash_id = await _seed_clash(project_id)
-    resp = await client.post(
-        f"/api/v1/clash-ai-triage/clashes/{clash_id}", headers=auth
-    )
+    resp = await client.post(f"/api/v1/clash-ai-triage/clashes/{clash_id}", headers=auth)
     assert resp.status_code == 503, resp.text
     # Restore the settings for any test that runs after this one.
     await _seed_ai_settings(admin_user_id)
@@ -382,14 +357,10 @@ async def test_503_when_llm_not_configured(
 
 
 @pytest.mark.asyncio
-async def test_404_when_clash_missing(
-    client: AsyncClient, auth: dict[str, str], admin_user_id: str
-) -> None:
+async def test_404_when_clash_missing(client: AsyncClient, auth: dict[str, str], admin_user_id: str) -> None:
     await _seed_ai_settings(admin_user_id)
     bogus = uuid.uuid4()
-    resp = await client.post(
-        f"/api/v1/clash-ai-triage/clashes/{bogus}", headers=auth
-    )
+    resp = await client.post(f"/api/v1/clash-ai-triage/clashes/{bogus}", headers=auth)
     assert resp.status_code == 404
 
 
@@ -405,12 +376,8 @@ async def test_replay_endpoint_creates_new_row(
 ) -> None:
     await _seed_ai_settings(admin_user_id)
     clash_id = await _seed_clash(project_id)
-    with patch(
-        "app.modules.clash_ai_triage.service.call_ai", new=_mock_call_ai
-    ):
-        original = await client.post(
-            f"/api/v1/clash-ai-triage/clashes/{clash_id}", headers=auth
-        )
+    with patch("app.modules.clash_ai_triage.service.call_ai", new=_mock_call_ai):
+        original = await client.post(f"/api/v1/clash-ai-triage/clashes/{clash_id}", headers=auth)
         assert original.status_code == 200, original.text
         original_id = original.json()["id"]
 

@@ -137,7 +137,9 @@ async def list_investigations(
         )
     elif incident_ref is not None:
         rows, _ = await service.investigation_repo.list_for_incident(
-            incident_ref, offset=offset, limit=limit,
+            incident_ref,
+            offset=offset,
+            limit=limit,
         )
     else:
         # No scope provided — return empty list rather than 422 so the
@@ -183,9 +185,7 @@ async def update_investigation(
     return InvestigationResponse.model_validate(obj)
 
 
-@router.post(
-    "/investigations/{item_id}/complete", response_model=InvestigationResponse
-)
+@router.post("/investigations/{item_id}/complete", response_model=InvestigationResponse)
 async def complete_investigation(
     item_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -196,9 +196,7 @@ async def complete_investigation(
     return InvestigationResponse.model_validate(obj)
 
 
-@router.post(
-    "/investigations/{item_id}/abandon", response_model=InvestigationResponse
-)
+@router.post("/investigations/{item_id}/abandon", response_model=InvestigationResponse)
 async def abandon_investigation(
     item_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -223,9 +221,7 @@ async def list_jsa(
     service: HSEAdvancedService = Depends(_get_service),
 ) -> list[JSAResponse]:
     await verify_project_access(project_id, user_id, session)
-    rows, _ = await service.jsa_repo.list_for_project(
-        project_id, offset=offset, limit=limit, status=status_filter
-    )
+    rows, _ = await service.jsa_repo.list_for_project(project_id, offset=offset, limit=limit, status=status_filter)
     return [JSAResponse.model_validate(r) for r in rows]
 
 
@@ -415,9 +411,7 @@ async def approve_permit(
         approver_uuid = uuid.UUID(str(user_id)) if user_id else None
     except (TypeError, ValueError):
         approver_uuid = None
-    obj = await service.approve_permit(
-        item_id, approver_id=approver_uuid, conditions=payload.conditions
-    )
+    obj = await service.approve_permit(item_id, approver_id=approver_uuid, conditions=payload.conditions)
     return PermitResponse.model_validate(obj)
 
 
@@ -479,15 +473,11 @@ async def list_toolbox_talks(
     service: HSEAdvancedService = Depends(_get_service),
 ) -> list[ToolboxTalkResponse]:
     await verify_project_access(project_id, user_id, session)
-    rows, _ = await service.talk_repo.list_for_project(
-        project_id, offset=offset, limit=limit
-    )
+    rows, _ = await service.talk_repo.list_for_project(project_id, offset=offset, limit=limit)
     return [ToolboxTalkResponse.model_validate(r) for r in rows]
 
 
-@router.post(
-    "/toolbox-talks/", response_model=ToolboxTalkResponse, status_code=201
-)
+@router.post("/toolbox-talks/", response_model=ToolboxTalkResponse, status_code=201)
 async def record_toolbox_talk(
     data: ToolboxTalkCreate,
     user_id: CurrentUserId,
@@ -555,23 +545,18 @@ async def list_topics(
     is_active: bool | None = Query(
         default=True,
         description=(
-            "Tri-state filter (Round-3 Wave B convention): True = only "
-            "active, False = only inactive, omit/null = both."
+            "Tri-state filter (Round-3 Wave B convention): True = only active, False = only inactive, omit/null = both."
         ),
     ),
     language: str | None = Query(default=None),
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> list[ToolboxTopicResponse]:
-    rows, _ = await service.topic_repo.list_topics(
-        offset=offset, limit=limit, is_active=is_active, language=language
-    )
+    rows, _ = await service.topic_repo.list_topics(offset=offset, limit=limit, is_active=is_active, language=language)
     return [ToolboxTopicResponse.model_validate(r) for r in rows]
 
 
-@router.post(
-    "/toolbox-topics/", response_model=ToolboxTopicResponse, status_code=201
-)
+@router.post("/toolbox-topics/", response_model=ToolboxTopicResponse, status_code=201)
 async def create_topic(
     data: ToolboxTopicCreate,
     _perm: None = Depends(RequirePermission("hse_advanced.create")),
@@ -581,9 +566,7 @@ async def create_topic(
     return ToolboxTopicResponse.model_validate(obj)
 
 
-@router.patch(
-    "/toolbox-topics/{item_id}", response_model=ToolboxTopicResponse
-)
+@router.patch("/toolbox-topics/{item_id}", response_model=ToolboxTopicResponse)
 async def update_topic(
     item_id: uuid.UUID,
     data: ToolboxTopicUpdate,
@@ -624,9 +607,7 @@ async def list_ppe(
     return [PPEIssueResponse.model_validate(r) for r in rows]
 
 
-@router.post(
-    "/ppe-issues/", response_model=PPEIssueResponse, status_code=201
-)
+@router.post("/ppe-issues/", response_model=PPEIssueResponse, status_code=201)
 async def issue_ppe(
     data: PPEIssueCreate,
     _perm: None = Depends(RequirePermission("hse_advanced.issue_ppe")),
@@ -691,9 +672,7 @@ async def list_audits(
     service: HSEAdvancedService = Depends(_get_service),
 ) -> list[AuditResponse]:
     await verify_project_access(project_id, user_id, session)
-    rows, _ = await service.audit_repo.list_for_project(
-        project_id, offset=offset, limit=limit, status=status_filter
-    )
+    rows, _ = await service.audit_repo.list_for_project(project_id, offset=offset, limit=limit, status=status_filter)
     return [AuditResponse.model_validate(r) for r in rows]
 
 
@@ -777,9 +756,7 @@ async def create_finding(
     return AuditFindingResponse.model_validate(obj)
 
 
-@router.get(
-    "/audits/{item_id}/findings", response_model=list[AuditFindingResponse]
-)
+@router.get("/audits/{item_id}/findings", response_model=list[AuditFindingResponse])
 async def list_findings(
     item_id: uuid.UUID,
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
@@ -812,9 +789,7 @@ async def list_capas(
     service: HSEAdvancedService = Depends(_get_service),
 ) -> list[CAPAResponse]:
     await verify_project_access(project_id, user_id, session)
-    rows, _ = await service.capa_repo.list_for_project(
-        project_id, offset=offset, limit=limit, status=status_filter
-    )
+    rows, _ = await service.capa_repo.list_for_project(project_id, offset=offset, limit=limit, status=status_filter)
     return [CAPAResponse.model_validate(r) for r in rows]
 
 
@@ -881,7 +856,9 @@ async def complete_capa(
     existing = await service.get_capa(item_id)
     await _guard_project(existing.project_id, user_id, session)
     obj = await service.close_capa(
-        item_id, verification_notes=payload.verification_notes, user_id=user_id,
+        item_id,
+        verification_notes=payload.verification_notes,
+        user_id=user_id,
     )
     return CAPAResponse.model_validate(obj)
 
@@ -935,9 +912,7 @@ async def list_certifications(
     return [CertificationResponse.model_validate(r) for r in rows]
 
 
-@router.post(
-    "/certifications/", response_model=CertificationResponse, status_code=201
-)
+@router.post("/certifications/", response_model=CertificationResponse, status_code=201)
 async def create_certification(
     data: CertificationCreate,
     _perm: None = Depends(RequirePermission("hse_advanced.create")),
@@ -947,9 +922,7 @@ async def create_certification(
     return CertificationResponse.model_validate(obj)
 
 
-@router.get(
-    "/certifications/expiring", response_model=list[CertificationResponse]
-)
+@router.get("/certifications/expiring", response_model=list[CertificationResponse])
 async def list_expiring_certifications(
     days: int = Query(default=30, ge=1, le=365),
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
@@ -959,9 +932,7 @@ async def list_expiring_certifications(
     return [CertificationResponse.model_validate(r) for r in rows]
 
 
-@router.get(
-    "/certifications/{item_id}", response_model=CertificationResponse
-)
+@router.get("/certifications/{item_id}", response_model=CertificationResponse)
 async def get_certification(
     item_id: uuid.UUID,
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
@@ -971,9 +942,7 @@ async def get_certification(
     return CertificationResponse.model_validate(obj)
 
 
-@router.patch(
-    "/certifications/{item_id}", response_model=CertificationResponse
-)
+@router.patch("/certifications/{item_id}", response_model=CertificationResponse)
 async def update_certification(
     item_id: uuid.UUID,
     data: CertificationUpdate,
@@ -1029,12 +998,7 @@ async def project_kpi(
     # treatment_type is still recordable), which is mathematically
     # impossible (recordable >= lti must always hold) and corrupts TRIR.
     recordable_treatments = {"medical", "hospital", "fatality"}
-    recordable = sum(
-        1
-        for i in incs
-        if (i.treatment_type or "") in recordable_treatments
-        or (i.days_lost or 0) > 0
-    )
+    recordable = sum(1 for i in incs if (i.treatment_type or "") in recordable_treatments or (i.days_lost or 0) > 0)
     lti = sum(1 for i in incs if (i.days_lost or 0) > 0)
 
     trir = compute_trir(recordable, hours_worked)
@@ -1058,9 +1022,7 @@ async def project_kpi(
     )
 
 
-@router.get(
-    "/dashboard/project/{project_id}", response_model=HSEDashboardResponse
-)
+@router.get("/dashboard/project/{project_id}", response_model=HSEDashboardResponse)
 async def project_dashboard(
     project_id: uuid.UUID,
     session: SessionDep,
@@ -1073,18 +1035,12 @@ async def project_dashboard(
     active_permits = await service.permit_repo.count_status(project_id, "active")
     overdue_capas = await service.capa_repo.count_status(project_id, "overdue")
     open_capas = await service.capa_repo.count_status(project_id, "open")
-    audits_completed = await service.audit_repo.list_for_project(
-        project_id, status="completed", limit=100
-    )
+    audits_completed = await service.audit_repo.list_for_project(project_id, status="completed", limit=100)
 
-    talks_this_month = await service.talk_repo.count_in_month(
-        project_id, date.today()
-    )
+    talks_this_month = await service.talk_repo.count_in_month(project_id, date.today())
 
     # JSA count
-    jsa_rows, jsa_total = await service.jsa_repo.list_for_project(
-        project_id, limit=1
-    )
+    jsa_rows, jsa_total = await service.jsa_repo.list_for_project(project_id, limit=1)
 
     # Expiring certs (org-wide, simple count)
     expiring = await service.cert_repo.expiring_within(30, date.today())
@@ -1114,9 +1070,7 @@ async def project_dashboard(
     )
 
 
-@router.get(
-    "/permits/dashboard/{project_id}", response_model=PermitDashboardResponse
-)
+@router.get("/permits/dashboard/{project_id}", response_model=PermitDashboardResponse)
 async def permit_dashboard(
     project_id: uuid.UUID,
     session: SessionDep,
@@ -1127,14 +1081,10 @@ async def permit_dashboard(
     await verify_project_access(project_id, user_id, session)
 
     active = await service.permit_repo.active_today(project_id)
-    pending_rows, _ = await service.permit_repo.list_for_project(
-        project_id, status="requested", limit=100
-    )
+    pending_rows, _ = await service.permit_repo.list_for_project(project_id, status="requested", limit=100)
 
     today = datetime.now(UTC).date()
-    closed_rows, _ = await service.permit_repo.list_for_project(
-        project_id, status="closed", limit=100
-    )
+    closed_rows, _ = await service.permit_repo.list_for_project(project_id, status="closed", limit=100)
 
     def _utc_date(dt: datetime | None) -> date | None:
         """Normalise a possibly-naive stored timestamp to a UTC date."""
@@ -1144,9 +1094,7 @@ async def permit_dashboard(
             dt = dt.replace(tzinfo=UTC)
         return dt.astimezone(UTC).date()
 
-    closed_today = [
-        p for p in closed_rows if _utc_date(p.updated_at) == today
-    ]
+    closed_today = [p for p in closed_rows if _utc_date(p.updated_at) == today]
 
     def _to_entry(p: object) -> PermitDashboardEntry:
         return PermitDashboardEntry(
@@ -1169,9 +1117,7 @@ async def permit_dashboard(
 # ── PTW prerequisites ─────────────────────────────────────────────────────
 
 
-@router.get(
-    "/permits/{item_id}/prerequisites", response_model=PermitPrerequisiteStatus
-)
+@router.get("/permits/{item_id}/prerequisites", response_model=PermitPrerequisiteStatus)
 async def permit_prereq_status(
     item_id: uuid.UUID,
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
@@ -1182,9 +1128,7 @@ async def permit_prereq_status(
     return service.permit_prerequisite_status(permit)
 
 
-@router.patch(
-    "/permits/{item_id}/prerequisites", response_model=PermitResponse
-)
+@router.patch("/permits/{item_id}/prerequisites", response_model=PermitResponse)
 async def update_permit_prereqs(
     item_id: uuid.UUID,
     payload: PermitPrerequisitesPayload,
@@ -1198,9 +1142,7 @@ async def update_permit_prereqs(
 # ── CAPA 5-Whys + Effectiveness ───────────────────────────────────────────
 
 
-@router.post(
-    "/capas/{item_id}/five-whys", response_model=CAPAResponse
-)
+@router.post("/capas/{item_id}/five-whys", response_model=CAPAResponse)
 async def set_five_whys(
     item_id: uuid.UUID,
     payload: CAPAFiveWhysPayload,
@@ -1212,9 +1154,7 @@ async def set_five_whys(
     return CAPAResponse.model_validate(obj)
 
 
-@router.post(
-    "/capas/{item_id}/effectiveness", response_model=CAPAResponse
-)
+@router.post("/capas/{item_id}/effectiveness", response_model=CAPAResponse)
 async def verify_effectiveness(
     item_id: uuid.UUID,
     payload: CAPAEffectivenessPayload,
@@ -1229,7 +1169,9 @@ async def verify_effectiveness(
     except (TypeError, ValueError):
         verifier = None
     obj = await service.verify_capa_effectiveness(
-        item_id, payload, verified_by=verifier,
+        item_id,
+        payload,
+        verified_by=verifier,
     )
     return CAPAResponse.model_validate(obj)
 
@@ -1244,8 +1186,7 @@ async def list_jsa_templates(
     is_active: bool | None = Query(
         default=True,
         description=(
-            "Tri-state filter (Round-3 Wave B convention): True = only "
-            "active, False = only inactive, omit/null = both."
+            "Tri-state filter (Round-3 Wave B convention): True = only active, False = only inactive, omit/null = both."
         ),
     ),
     offset: int = Query(default=0, ge=0),
@@ -1254,15 +1195,16 @@ async def list_jsa_templates(
     service: HSEAdvancedService = Depends(_get_service),
 ) -> list[JSATemplateResponse]:
     rows, _ = await service.jsa_template_repo.list_templates(
-        trade=trade, region=region, is_active=is_active,
-        offset=offset, limit=limit,
+        trade=trade,
+        region=region,
+        is_active=is_active,
+        offset=offset,
+        limit=limit,
     )
     return [JSATemplateResponse.model_validate(r) for r in rows]
 
 
-@router.post(
-    "/jsa-templates/", response_model=JSATemplateResponse, status_code=201
-)
+@router.post("/jsa-templates/", response_model=JSATemplateResponse, status_code=201)
 async def create_jsa_template(
     data: JSATemplateCreate,
     user_id: CurrentUserId,
@@ -1273,9 +1215,7 @@ async def create_jsa_template(
     return JSATemplateResponse.model_validate(tpl)
 
 
-@router.patch(
-    "/jsa-templates/{tpl_id}", response_model=JSATemplateResponse
-)
+@router.patch("/jsa-templates/{tpl_id}", response_model=JSATemplateResponse)
 async def update_jsa_template(
     tpl_id: uuid.UUID,
     data: JSATemplateUpdate,
@@ -1295,9 +1235,7 @@ async def delete_jsa_template(
     await service.delete_jsa_template(tpl_id)
 
 
-@router.post(
-    "/jsa-templates/{tpl_id}/clone", response_model=JSAResponse, status_code=201
-)
+@router.post("/jsa-templates/{tpl_id}/clone", response_model=JSAResponse, status_code=201)
 async def clone_jsa_template(
     tpl_id: uuid.UUID,
     request: JSATemplateCloneRequest,
@@ -1307,9 +1245,12 @@ async def clone_jsa_template(
     service: HSEAdvancedService = Depends(_get_service),
 ) -> JSAResponse:
     from app.dependencies import verify_project_access as _verify
+
     await _verify(request.project_id, user_id, session)
     jsa = await service.clone_jsa_template_to_project(
-        tpl_id, request, user_id=user_id,
+        tpl_id,
+        request,
+        user_id=user_id,
     )
     return JSAResponse.model_validate(jsa)
 
@@ -1317,9 +1258,7 @@ async def clone_jsa_template(
 # ── Incident escalation matrix (lookup) ───────────────────────────────────
 
 
-@router.get(
-    "/incident-escalation-matrix", response_model=IncidentEscalationMatrix
-)
+@router.get("/incident-escalation-matrix", response_model=IncidentEscalationMatrix)
 async def get_incident_escalation_matrix(
     regime: str = Query(
         default="iso45001",
@@ -1363,9 +1302,8 @@ async def osha_300_log_csv(
 
     # Look up the project's name for a friendly download filename.
     from app.modules.projects.models import Project
-    proj = (
-        await session.execute(select(Project).where(Project.id == project_id))
-    ).scalar_one_or_none()
+
+    proj = (await session.execute(select(Project).where(Project.id == project_id))).scalar_one_or_none()
     project_name = getattr(proj, "name", None) if proj is not None else None
     slug = _project_slug(project_id, project_name)
 
@@ -1410,21 +1348,17 @@ async def list_corrective_actions(
         # Resolve project-scope by joining via incident_id ∈ project's
         # incidents — cheaper than a SQL join in this slim model.
         from app.modules.safety.models import SafetyIncident
+
         inc_ids = list(
-            (
-                await session.execute(
-                    select(SafetyIncident.id).where(
-                        SafetyIncident.project_id == project_id
-                    )
-                )
-            ).scalars().all()
+            (await session.execute(select(SafetyIncident.id).where(SafetyIncident.project_id == project_id)))
+            .scalars()
+            .all()
         )
         if not inc_ids:
             return []
         from app.modules.safety.models import HSECorrectiveAction
-        stmt = select(HSECorrectiveAction).where(
-            HSECorrectiveAction.incident_id.in_(inc_ids)
-        )
+
+        stmt = select(HSECorrectiveAction).where(HSECorrectiveAction.incident_id.in_(inc_ids))
         if status_filter is not None:
             stmt = stmt.where(HSECorrectiveAction.status == status_filter)
         stmt = stmt.offset(offset).limit(limit)

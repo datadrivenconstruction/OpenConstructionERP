@@ -17,7 +17,6 @@ from app.core.match_service.region_language import (
     language_for,
 )
 
-
 # ── Canonical mappings ───────────────────────────────────────────────────
 
 
@@ -109,9 +108,28 @@ def test_canonical_table_covers_22_supported_locales() -> None:
     cover at least the production-supported subset so the translation
     cascade can fire for every language a customer might select."""
     expected_languages = {
-        "de", "en", "es", "fr", "it", "nl", "pt", "pl", "cs", "ru",
-        "bg", "ro", "sv", "tr", "ar", "zh", "ja", "ko", "hi", "id",
-        "th", "vi",
+        "de",
+        "en",
+        "es",
+        "fr",
+        "it",
+        "nl",
+        "pt",
+        "pl",
+        "cs",
+        "ru",
+        "bg",
+        "ro",
+        "sv",
+        "tr",
+        "ar",
+        "zh",
+        "ja",
+        "ko",
+        "hi",
+        "id",
+        "th",
+        "vi",
     }
     actual_languages = set(REGION_LANGUAGE.values())
     missing = expected_languages - actual_languages
@@ -158,9 +176,7 @@ def test_canonical_table_covers_22_supported_locales() -> None:
         ("AU", "en"),
     ],
 )
-def test_bare_country_resolves_via_overrides_or_head_fallback(
-    country: str, language: str
-) -> None:
+def test_bare_country_resolves_via_overrides_or_head_fallback(country: str, language: str) -> None:
     assert language_for(country) == language
 
 
@@ -181,9 +197,9 @@ def test_unknown_locality_within_known_country_uses_head_fallback() -> None:
         ("DE_BERLIN", "DE"),
         ("USA_USD", "USA"),
         ("MX_MEXICO", "MX"),
-        ("DE", "DE"),                # bare code is its own head
-        ("de_berlin", "DE"),         # case-normalisation
-        ("  DE_BERLIN  ", "DE"),     # whitespace stripped
+        ("DE", "DE"),  # bare code is its own head
+        ("de_berlin", "DE"),  # case-normalisation
+        ("  DE_BERLIN  ", "DE"),  # whitespace stripped
     ],
 )
 def test_country_head_extracts_iso_3166_prefix(region: str, head: str) -> None:

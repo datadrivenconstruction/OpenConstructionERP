@@ -97,9 +97,7 @@ async def list_sources(
     _perm: None = Depends(RequirePermission("webhook_leads.read")),
     service: WebhookLeadsService = Depends(_get_service),
 ) -> list[WebhookSourceResponse]:
-    items, _ = await service.source_repo.list_all(
-        offset=offset, limit=limit, is_active=is_active
-    )
+    items, _ = await service.source_repo.list_all(offset=offset, limit=limit, is_active=is_active)
     return [WebhookSourceResponse.model_validate(s) for s in items]
 
 
@@ -130,9 +128,7 @@ async def get_source(
     _perm: None = Depends(RequirePermission("webhook_leads.read")),
     service: WebhookLeadsService = Depends(_get_service),
 ) -> WebhookSourceResponse:
-    return WebhookSourceResponse.model_validate(
-        await service.get_source(source_id)
-    )
+    return WebhookSourceResponse.model_validate(await service.get_source(source_id))
 
 
 @router.patch("/sources/{source_id}", response_model=WebhookSourceResponse)
@@ -142,9 +138,7 @@ async def update_source(
     _perm: None = Depends(RequirePermission("webhook_leads.update")),
     service: WebhookLeadsService = Depends(_get_service),
 ) -> WebhookSourceResponse:
-    return WebhookSourceResponse.model_validate(
-        await service.update_source(source_id, data)
-    )
+    return WebhookSourceResponse.model_validate(await service.update_source(source_id, data))
 
 
 @router.post(
@@ -201,23 +195,17 @@ async def create_mapping(
     _perm: None = Depends(RequirePermission("webhook_leads.create")),
     service: WebhookLeadsService = Depends(_get_service),
 ) -> PayloadMappingResponse:
-    return PayloadMappingResponse.model_validate(
-        await service.create_mapping(source_id, data)
-    )
+    return PayloadMappingResponse.model_validate(await service.create_mapping(source_id, data))
 
 
-@router.patch(
-    "/mappings/{mapping_id}", response_model=PayloadMappingResponse
-)
+@router.patch("/mappings/{mapping_id}", response_model=PayloadMappingResponse)
 async def update_mapping(
     mapping_id: uuid.UUID,
     data: PayloadMappingUpdate,
     _perm: None = Depends(RequirePermission("webhook_leads.update")),
     service: WebhookLeadsService = Depends(_get_service),
 ) -> PayloadMappingResponse:
-    return PayloadMappingResponse.model_validate(
-        await service.update_mapping(mapping_id, data)
-    )
+    return PayloadMappingResponse.model_validate(await service.update_mapping(mapping_id, data))
 
 
 @router.delete("/mappings/{mapping_id}", status_code=204)

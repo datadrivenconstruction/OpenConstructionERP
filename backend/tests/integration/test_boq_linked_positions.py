@@ -39,7 +39,6 @@ from httpx import ASGITransport, AsyncClient
 
 from app.main import create_app
 
-
 # ── Shared fixtures (module-scoped — same pattern as other BOQ integration tests) ──
 
 
@@ -83,11 +82,7 @@ async def auth(client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     token = ""
@@ -126,9 +121,7 @@ async def _create_project(client: AsyncClient, auth: dict[str, str]) -> str:
     return resp.json()["id"]
 
 
-async def _create_boq(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> str:
+async def _create_boq(client: AsyncClient, auth: dict[str, str], project_id: str) -> str:
     resp = await client.post(
         "/api/v1/boq/boqs/",
         json={
@@ -173,7 +166,9 @@ async def test_reuse_by_code_creates_linked_instance_with_copied_definition_and_
     boq_id = await _create_boq(client, auth, project_id)
 
     master_r = await _add_position(
-        client, auth, boq_id,
+        client,
+        auth,
+        boq_id,
         ordinal="0040",
         description="RC wall C30/37",
         unit="m3",
@@ -186,7 +181,9 @@ async def test_reuse_by_code_creates_linked_instance_with_copied_definition_and_
     assert master["reference_code"] == "0040"
 
     child_r = await _add_position(
-        client, auth, boq_id,
+        client,
+        auth,
+        boq_id,
         ordinal="0040.C1",
         description="Rebar BSt500",
         unit="kg",
@@ -197,7 +194,9 @@ async def test_reuse_by_code_creates_linked_instance_with_copied_definition_and_
     assert child_r.status_code == 201, child_r.text
 
     reuse_r = await _add_position(
-        client, auth, boq_id,
+        client,
+        auth,
+        boq_id,
         ordinal="0040",  # same as master on purpose
         description="(ignored — definition copied from master)",
         unit="pcs",  # ignored — copied from master
@@ -223,9 +222,7 @@ async def test_reuse_by_code_creates_linked_instance_with_copied_definition_and_
     inst_children = [p for p in all_positions if p.get("parent_id") == inst["id"]]
     assert len(inst_children) >= 1, "the master's child subtree must be cloned"
 
-    links = await client.get(
-        f"/api/v1/boq/positions/{inst['id']}/links/", headers=auth
-    )
+    links = await client.get(f"/api/v1/boq/positions/{inst['id']}/links/", headers=auth)
     assert links.status_code == 200, links.text
     lj = links.json()
     assert lj["linked"] is True
@@ -243,16 +240,27 @@ async def test_master_definition_edit_propagates_but_not_quantity_or_ordinal(
 
     master = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="P1", description="Old desc", unit="m2",
-            quantity=5.0, unit_rate=10.0, reference_code="REUSE1",
+            client,
+            auth,
+            boq_id,
+            ordinal="P1",
+            description="Old desc",
+            unit="m2",
+            quantity=5.0,
+            unit_rate=10.0,
+            reference_code="REUSE1",
         )
     ).json()
     inst = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="P1", description="x", unit="x",
-            quantity=99.0, reference_code="REUSE1",
+            client,
+            auth,
+            boq_id,
+            ordinal="P1",
+            description="x",
+            unit="x",
+            quantity=99.0,
+            reference_code="REUSE1",
         )
     ).json()
     inst_ordinal_before = inst["ordinal"]
@@ -266,9 +274,7 @@ async def test_master_definition_edit_propagates_but_not_quantity_or_ordinal(
     pj = patch.json()
     assert pj["metadata"].get("link_propagation", {}).get("propagated_to") == 1
 
-    got = await client.get(
-        f"/api/v1/boq/positions/{inst['id']}", headers=auth
-    )
+    got = await client.get(f"/api/v1/boq/positions/{inst['id']}", headers=auth)
     assert got.status_code == 200, got.text
     gi = got.json()
     assert gi["description"] == "NEW desc"
@@ -279,24 +285,33 @@ async def test_master_definition_edit_propagates_but_not_quantity_or_ordinal(
 
 
 @pytest.mark.asyncio
-async def test_instance_definition_edit_unlinks_and_warns(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_instance_definition_edit_unlinks_and_warns(client: AsyncClient, auth: dict[str, str]) -> None:
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
 
     master = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="U1", description="shared", unit="m",
-            quantity=1.0, unit_rate=5.0, reference_code="UCODE",
+            client,
+            auth,
+            boq_id,
+            ordinal="U1",
+            description="shared",
+            unit="m",
+            quantity=1.0,
+            unit_rate=5.0,
+            reference_code="UCODE",
         )
     ).json()
     inst = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="U1", description="x", unit="x",
-            quantity=2.0, reference_code="UCODE",
+            client,
+            auth,
+            boq_id,
+            ordinal="U1",
+            description="x",
+            unit="x",
+            quantity=2.0,
+            reference_code="UCODE",
         )
     ).json()
     assert inst["link_role"] == "instance"
@@ -314,33 +329,38 @@ async def test_instance_definition_edit_unlinks_and_warns(
     assert any("unlinked it from code" in str(w) for w in warnings), warnings
     assert pj["validation_status"] == "warnings"
 
-    m = (
-        await client.get(
-            f"/api/v1/boq/positions/{master['id']}", headers=auth
-        )
-    ).json()
+    m = (await client.get(f"/api/v1/boq/positions/{master['id']}", headers=auth)).json()
     assert m["description"] == "shared"
 
 
 @pytest.mark.asyncio
-async def test_instance_quantity_edit_does_not_propagate_or_unlink(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_instance_quantity_edit_does_not_propagate_or_unlink(client: AsyncClient, auth: dict[str, str]) -> None:
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
 
     master = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="Q1", description="qty test", unit="m3",
-            quantity=1.0, unit_rate=100.0, reference_code="QCODE",
+            client,
+            auth,
+            boq_id,
+            ordinal="Q1",
+            description="qty test",
+            unit="m3",
+            quantity=1.0,
+            unit_rate=100.0,
+            reference_code="QCODE",
         )
     ).json()
     inst = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="Q1", description="x", unit="x",
-            quantity=3.0, reference_code="QCODE",
+            client,
+            auth,
+            boq_id,
+            ordinal="Q1",
+            description="x",
+            unit="x",
+            quantity=3.0,
+            reference_code="QCODE",
         )
     ).json()
 
@@ -354,18 +374,12 @@ async def test_instance_quantity_edit_does_not_propagate_or_unlink(
     assert pj["link_role"] == "instance"
     assert pj["link_group_id"] is not None
     assert float(pj["quantity"]) == 50.0
-    m = (
-        await client.get(
-            f"/api/v1/boq/positions/{master['id']}", headers=auth
-        )
-    ).json()
+    m = (await client.get(f"/api/v1/boq/positions/{master['id']}", headers=auth)).json()
     assert float(m["quantity"]) == 1.0
 
 
 @pytest.mark.asyncio
-async def test_duplicate_ordinal_still_409s(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_duplicate_ordinal_still_409s(client: AsyncClient, auth: dict[str, str]) -> None:
     """The ordinal-uniqueness invariant (GAEB X83 / no_duplicate_ordinals)
     is preserved: a plain duplicate ordinal with NO reuse code still 409s.
     """
@@ -373,29 +387,42 @@ async def test_duplicate_ordinal_still_409s(
     boq_id = await _create_boq(client, auth, project_id)
 
     r1 = await _add_position(
-        client, auth, boq_id,
-        ordinal="DUP", description="first", unit="m", quantity=1.0,
+        client,
+        auth,
+        boq_id,
+        ordinal="DUP",
+        description="first",
+        unit="m",
+        quantity=1.0,
     )
     assert r1.status_code == 201, r1.text
 
     r2 = await _add_position(
-        client, auth, boq_id,
-        ordinal="DUP", description="second", unit="m", quantity=1.0,
+        client,
+        auth,
+        boq_id,
+        ordinal="DUP",
+        description="second",
+        unit="m",
+        quantity=1.0,
     )
     assert r2.status_code == 409, f"Expected 409, got {r2.status_code}: {r2.text}"
     assert "ordinal" in r2.text.lower()
 
 
 @pytest.mark.asyncio
-async def test_auto_internal_code_generated_when_none_supplied(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_auto_internal_code_generated_when_none_supplied(client: AsyncClient, auth: dict[str, str]) -> None:
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
 
     r = await _add_position(
-        client, auth, boq_id,
-        ordinal="AUTO1", description="no code given", unit="m", quantity=1.0,
+        client,
+        auth,
+        boq_id,
+        ordinal="AUTO1",
+        description="no code given",
+        unit="m",
+        quantity=1.0,
     )
     assert r.status_code == 201, r.text
     pj = r.json()
@@ -406,51 +433,55 @@ async def test_auto_internal_code_generated_when_none_supplied(
 
 
 @pytest.mark.asyncio
-async def test_delete_master_promotes_an_instance(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_delete_master_promotes_an_instance(client: AsyncClient, auth: dict[str, str]) -> None:
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
 
     master = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="D1", description="to delete", unit="m",
-            quantity=1.0, unit_rate=9.0, reference_code="DELC",
+            client,
+            auth,
+            boq_id,
+            ordinal="D1",
+            description="to delete",
+            unit="m",
+            quantity=1.0,
+            unit_rate=9.0,
+            reference_code="DELC",
         )
     ).json()
     inst1 = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="D1", description="x", unit="x",
-            quantity=2.0, reference_code="DELC",
+            client,
+            auth,
+            boq_id,
+            ordinal="D1",
+            description="x",
+            unit="x",
+            quantity=2.0,
+            reference_code="DELC",
         )
     ).json()
     inst2 = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="D1", description="x", unit="x",
-            quantity=3.0, reference_code="DELC",
+            client,
+            auth,
+            boq_id,
+            ordinal="D1",
+            description="x",
+            unit="x",
+            quantity=3.0,
+            reference_code="DELC",
         )
     ).json()
     assert inst1["link_role"] == "instance"
     assert inst2["link_role"] == "instance"
 
-    d = await client.delete(
-        f"/api/v1/boq/positions/{master['id']}", headers=auth
-    )
+    d = await client.delete(f"/api/v1/boq/positions/{master['id']}", headers=auth)
     assert d.status_code == 204, d.text
 
-    g1 = (
-        await client.get(
-            f"/api/v1/boq/positions/{inst1['id']}", headers=auth
-        )
-    ).json()
-    g2 = (
-        await client.get(
-            f"/api/v1/boq/positions/{inst2['id']}", headers=auth
-        )
-    ).json()
+    g1 = (await client.get(f"/api/v1/boq/positions/{inst1['id']}", headers=auth)).json()
+    g2 = (await client.get(f"/api/v1/boq/positions/{inst2['id']}", headers=auth)).json()
     roles = {g1["link_role"], g2["link_role"]}
     assert "master" in roles, f"a survivor must be promoted: {roles}"
     group_ids = {g1["link_group_id"], g2["link_group_id"]}
@@ -458,24 +489,33 @@ async def test_delete_master_promotes_an_instance(
 
 
 @pytest.mark.asyncio
-async def test_link_group_ordinals_are_all_distinct(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_link_group_ordinals_are_all_distinct(client: AsyncClient, auth: dict[str, str]) -> None:
     """GAEB / no_duplicate_ordinals invariant across a reuse group:
     every linked instance gets a distinct ordinal."""
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
 
     await _add_position(
-        client, auth, boq_id,
-        ordinal="G1", description="grp master", unit="m",
-        quantity=1.0, unit_rate=1.0, reference_code="GRP",
+        client,
+        auth,
+        boq_id,
+        ordinal="G1",
+        description="grp master",
+        unit="m",
+        quantity=1.0,
+        unit_rate=1.0,
+        reference_code="GRP",
     )
     for _ in range(4):
         rr = await _add_position(
-            client, auth, boq_id,
-            ordinal="G1", description="x", unit="x",
-            quantity=1.0, reference_code="GRP",
+            client,
+            auth,
+            boq_id,
+            ordinal="G1",
+            description="x",
+            unit="x",
+            quantity=1.0,
+            reference_code="GRP",
         )
         assert rr.status_code == 201, rr.text
 
@@ -483,9 +523,7 @@ async def test_link_group_ordinals_are_all_distinct(
     assert boq.status_code == 200, boq.text
     positions = boq.json().get("positions", [])
     ordinals = [p["ordinal"] for p in positions]
-    assert len(ordinals) == len(set(ordinals)), (
-        f"ordinals must be unique within the BOQ: {ordinals}"
-    )
+    assert len(ordinals) == len(set(ordinals)), f"ordinals must be unique within the BOQ: {ordinals}"
 
 
 @pytest.mark.asyncio
@@ -513,16 +551,27 @@ async def test_unlink_master_endpoint_does_not_500_and_preserves_values(
 
     master = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="UM1", description="shared def", unit="m3",
-            quantity=4.0, unit_rate=50.0, reference_code="UNLNK",
+            client,
+            auth,
+            boq_id,
+            ordinal="UM1",
+            description="shared def",
+            unit="m3",
+            quantity=4.0,
+            unit_rate=50.0,
+            reference_code="UNLNK",
         )
     ).json()
     inst = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="UM1", description="x", unit="x",
-            quantity=2.0, reference_code="UNLNK",
+            client,
+            auth,
+            boq_id,
+            ordinal="UM1",
+            description="x",
+            unit="x",
+            quantity=2.0,
+            reference_code="UNLNK",
         )
     ).json()
     # The first-create response is still a standalone (role None) — a
@@ -532,16 +581,10 @@ async def test_unlink_master_endpoint_does_not_500_and_preserves_values(
     # promoted role.
     assert inst["link_role"] == "instance"
     assert inst["link_group_id"] is not None
-    master_now = (
-        await client.get(
-            f"/api/v1/boq/positions/{master['id']}", headers=auth
-        )
-    ).json()
+    master_now = (await client.get(f"/api/v1/boq/positions/{master['id']}", headers=auth)).json()
     assert master_now["link_role"] == "master"
 
-    un = await client.post(
-        f"/api/v1/boq/positions/{master['id']}/unlink/", headers=auth
-    )
+    un = await client.post(f"/api/v1/boq/positions/{master['id']}/unlink/", headers=auth)
     assert un.status_code == 200, f"unlink master must not 500: {un.text}"
     uj = un.json()
     # Old master detached, values preserved (code kept, still referenceable).
@@ -561,17 +604,11 @@ async def test_unlink_master_endpoint_does_not_500_and_preserves_values(
     # position's own values.
 
 
-async def _instance_child_of(
-    client: AsyncClient, auth: dict[str, str], boq_id: str, inst_id: str
-) -> dict:
+async def _instance_child_of(client: AsyncClient, auth: dict[str, str], boq_id: str, inst_id: str) -> dict:
     """Return the single cloned child of a reused-instance root."""
     boq = await client.get(f"/api/v1/boq/boqs/{boq_id}", headers=auth)
     assert boq.status_code == 200, boq.text
-    kids = [
-        p
-        for p in boq.json().get("positions", [])
-        if p.get("parent_id") == inst_id
-    ]
+    kids = [p for p in boq.json().get("positions", []) if p.get("parent_id") == inst_id]
     assert len(kids) == 1, f"expected exactly one cloned child, got {kids}"
     return kids[0]
 
@@ -592,24 +629,41 @@ async def test_master_child_edit_propagates_to_instance_children_only(
 
     master = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="MC1", description="Partida master", unit="m3",
-            quantity=10.0, unit_rate=185.0, reference_code="MCODE",
+            client,
+            auth,
+            boq_id,
+            ordinal="MC1",
+            description="Partida master",
+            unit="m3",
+            quantity=10.0,
+            unit_rate=185.0,
+            reference_code="MCODE",
         )
     ).json()
     master_child = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="MC1.1", description="Old sub-line", unit="kg",
-            quantity=120.0, unit_rate=1.85, parent_id=master["id"],
+            client,
+            auth,
+            boq_id,
+            ordinal="MC1.1",
+            description="Old sub-line",
+            unit="kg",
+            quantity=120.0,
+            unit_rate=1.85,
+            parent_id=master["id"],
         )
     ).json()
 
     inst = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="MC1", description="x", unit="x",
-            quantity=7.0, reference_code="MCODE",
+            client,
+            auth,
+            boq_id,
+            ordinal="MC1",
+            description="x",
+            unit="x",
+            quantity=7.0,
+            reference_code="MCODE",
         )
     ).json()
     assert inst["link_role"] == "instance"
@@ -624,15 +678,9 @@ async def test_master_child_edit_propagates_to_instance_children_only(
     )
     assert patch.status_code == 200, patch.text
     pj = patch.json()
-    assert (
-        pj["metadata"].get("link_propagation", {}).get("propagated_to") == 1
-    ), pj["metadata"]
+    assert pj["metadata"].get("link_propagation", {}).get("propagated_to") == 1, pj["metadata"]
 
-    gi_child = (
-        await client.get(
-            f"/api/v1/boq/positions/{inst_child['id']}", headers=auth
-        )
-    ).json()
+    gi_child = (await client.get(f"/api/v1/boq/positions/{inst_child['id']}", headers=auth)).json()
     assert gi_child["description"] == "NEW sub-line"
     assert float(gi_child["unit_rate"]) == 2.0
     # Per-instance quantity untouched; total recomputed against IT.
@@ -640,19 +688,13 @@ async def test_master_child_edit_propagates_to_instance_children_only(
     assert abs(float(gi_child["total"]) - inst_child_qty_before * 2.0) < 0.01
 
     # The instance ROOT must be untouched by a child edit.
-    gi_root = (
-        await client.get(
-            f"/api/v1/boq/positions/{inst['id']}", headers=auth
-        )
-    ).json()
+    gi_root = (await client.get(f"/api/v1/boq/positions/{inst['id']}", headers=auth)).json()
     assert gi_root["description"] == "Partida master"
     assert float(gi_root["quantity"]) == 7.0
 
 
 @pytest.mark.asyncio
-async def test_master_root_edit_does_not_clobber_instance_children(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_master_root_edit_does_not_clobber_instance_children(client: AsyncClient, auth: dict[str, str]) -> None:
     """Issue #132 — Gap A'.
 
     A ROOT definition edit must reach the instance ROOTS only; it must
@@ -664,21 +706,38 @@ async def test_master_root_edit_does_not_clobber_instance_children(
 
     master = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="MR1", description="Root def", unit="m3",
-            quantity=10.0, unit_rate=185.0, reference_code="MRCODE",
+            client,
+            auth,
+            boq_id,
+            ordinal="MR1",
+            description="Root def",
+            unit="m3",
+            quantity=10.0,
+            unit_rate=185.0,
+            reference_code="MRCODE",
         )
     ).json()
     await _add_position(
-        client, auth, boq_id,
-        ordinal="MR1.1", description="Child def", unit="kg",
-        quantity=120.0, unit_rate=1.85, parent_id=master["id"],
+        client,
+        auth,
+        boq_id,
+        ordinal="MR1.1",
+        description="Child def",
+        unit="kg",
+        quantity=120.0,
+        unit_rate=1.85,
+        parent_id=master["id"],
     )
     inst = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="MR1", description="x", unit="x",
-            quantity=4.0, reference_code="MRCODE",
+            client,
+            auth,
+            boq_id,
+            ordinal="MR1",
+            description="x",
+            unit="x",
+            quantity=4.0,
+            reference_code="MRCODE",
         )
     ).json()
     inst_child = await _instance_child_of(client, auth, boq_id, inst["id"])
@@ -690,16 +749,8 @@ async def test_master_root_edit_does_not_clobber_instance_children(
     )
     assert patch.status_code == 200, patch.text
 
-    gi_root = (
-        await client.get(
-            f"/api/v1/boq/positions/{inst['id']}", headers=auth
-        )
-    ).json()
-    gi_child = (
-        await client.get(
-            f"/api/v1/boq/positions/{inst_child['id']}", headers=auth
-        )
-    ).json()
+    gi_root = (await client.get(f"/api/v1/boq/positions/{inst['id']}", headers=auth)).json()
+    gi_child = (await client.get(f"/api/v1/boq/positions/{inst_child['id']}", headers=auth)).json()
     # Instance root mirrors the master root.
     assert gi_root["description"] == "Root def CHANGED"
     # Instance child keeps ITS OWN definition — NOT the root's.
@@ -707,9 +758,7 @@ async def test_master_root_edit_does_not_clobber_instance_children(
 
 
 @pytest.mark.asyncio
-async def test_master_child_quantity_edit_never_propagates(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_master_child_quantity_edit_never_propagates(client: AsyncClient, auth: dict[str, str]) -> None:
     """Issue #132 — a pure quantity edit on a master CHILD must never
     reach the instance children (quantities are per-instance)."""
     project_id = await _create_project(client, auth)
@@ -717,23 +766,40 @@ async def test_master_child_quantity_edit_never_propagates(
 
     master = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="MQ1", description="qmaster", unit="m3",
-            quantity=1.0, unit_rate=100.0, reference_code="MQCODE",
+            client,
+            auth,
+            boq_id,
+            ordinal="MQ1",
+            description="qmaster",
+            unit="m3",
+            quantity=1.0,
+            unit_rate=100.0,
+            reference_code="MQCODE",
         )
     ).json()
     master_child = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="MQ1.1", description="qchild", unit="kg",
-            quantity=10.0, unit_rate=5.0, parent_id=master["id"],
+            client,
+            auth,
+            boq_id,
+            ordinal="MQ1.1",
+            description="qchild",
+            unit="kg",
+            quantity=10.0,
+            unit_rate=5.0,
+            parent_id=master["id"],
         )
     ).json()
     inst = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="MQ1", description="x", unit="x",
-            quantity=2.0, reference_code="MQCODE",
+            client,
+            auth,
+            boq_id,
+            ordinal="MQ1",
+            description="x",
+            unit="x",
+            quantity=2.0,
+            reference_code="MQCODE",
         )
     ).json()
     inst_child = await _instance_child_of(client, auth, boq_id, inst["id"])
@@ -746,36 +812,31 @@ async def test_master_child_quantity_edit_never_propagates(
     )
     assert patch.status_code == 200, patch.text
     pj = patch.json()
-    assert pj["metadata"].get("link_propagation", {}).get(
-        "propagated_to", 0
-    ) in (0, None)
+    assert pj["metadata"].get("link_propagation", {}).get("propagated_to", 0) in (0, None)
 
-    gi_child = (
-        await client.get(
-            f"/api/v1/boq/positions/{inst_child['id']}", headers=auth
-        )
-    ).json()
+    gi_child = (await client.get(f"/api/v1/boq/positions/{inst_child['id']}", headers=auth)).json()
     assert float(gi_child["quantity"]) == qty_before
 
 
 @pytest.mark.asyncio
-async def test_unlink_standalone_position_is_422_not_500(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_unlink_standalone_position_is_422_not_500(client: AsyncClient, auth: dict[str, str]) -> None:
     """A position that is not part of a link group → clean 422, never 500."""
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
 
     solo = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="SOLO1", description="lonely", unit="m",
-            quantity=1.0, unit_rate=1.0,
+            client,
+            auth,
+            boq_id,
+            ordinal="SOLO1",
+            description="lonely",
+            unit="m",
+            quantity=1.0,
+            unit_rate=1.0,
         )
     ).json()
-    un = await client.post(
-        f"/api/v1/boq/positions/{solo['id']}/unlink/", headers=auth
-    )
+    un = await client.post(f"/api/v1/boq/positions/{solo['id']}/unlink/", headers=auth)
     assert un.status_code == 422, f"expected 422, got {un.status_code}: {un.text}"
 
 
@@ -783,9 +844,7 @@ async def test_unlink_standalone_position_is_422_not_500(
 
 
 @pytest.mark.asyncio
-async def test_resource_code_lookup_finds_and_misses(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_resource_code_lookup_finds_and_misses(client: AsyncClient, auth: dict[str, str]) -> None:
     """The resource-by-code endpoint returns the existing resource's
     reusable definition (no quantity) when the code is in use anywhere in
     the project, and ``found=False`` for a free code."""
@@ -794,9 +853,14 @@ async def test_resource_code_lookup_finds_and_misses(
 
     host = (
         await _add_position(
-            client, auth, boq_id,
-            ordinal="RC-HOST", description="host position", unit="m3",
-            quantity=1.0, unit_rate=0.0,
+            client,
+            auth,
+            boq_id,
+            ordinal="RC-HOST",
+            description="host position",
+            unit="m3",
+            quantity=1.0,
+            unit_rate=0.0,
         )
     ).json()
 
@@ -865,15 +929,11 @@ async def _add_section(
     body: dict = {"boq_id": boq_id, "ordinal": ordinal, "description": ordinal}
     if parent_id is not None:
         body["parent_id"] = parent_id
-    return await client.post(
-        f"/api/v1/boq/boqs/{boq_id}/sections/", json=body, headers=auth
-    )
+    return await client.post(f"/api/v1/boq/boqs/{boq_id}/sections/", json=body, headers=auth)
 
 
 @pytest.mark.asyncio
-async def test_limits_endpoint_reports_max_nesting_depth(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_limits_endpoint_reports_max_nesting_depth(client: AsyncClient, auth: dict[str, str]) -> None:
     r = await client.get("/api/v1/boq/limits/", headers=auth)
     assert r.status_code == 200, r.text
     body = r.json()
@@ -882,9 +942,7 @@ async def test_limits_endpoint_reports_max_nesting_depth(
 
 
 @pytest.mark.asyncio
-async def test_deep_section_and_partida_nesting_is_allowed(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_deep_section_and_partida_nesting_is_allowed(client: AsyncClient, auth: dict[str, str]) -> None:
     """Sections-within-sections and partidas-within-partidas may nest
     several tiers deep (Issue #136 — up to MAX_NESTING_DEPTH)."""
     from app.modules.boq.service import MAX_NESTING_DEPTH
@@ -894,26 +952,34 @@ async def test_deep_section_and_partida_nesting_is_allowed(
 
     # Build a chain of nested sections down to tier 3.
     s1 = (await _add_section(client, auth, boq_id, "01")).json()
-    s2 = (
-        await _add_section(client, auth, boq_id, "01.01", parent_id=s1["id"])
-    ).json()
-    s3 = (
-        await _add_section(client, auth, boq_id, "01.01.01", parent_id=s2["id"])
-    ).json()
+    s2 = (await _add_section(client, auth, boq_id, "01.01", parent_id=s1["id"])).json()
+    s3 = (await _add_section(client, auth, boq_id, "01.01.01", parent_id=s2["id"])).json()
     assert s2["parent_id"] == s1["id"]
     assert s3["parent_id"] == s2["id"]
 
     # Partidas-within-partidas: a child partida under a partida under s3.
     p1 = (
         await _add_position(
-            client, auth, boq_id, ordinal="P-A", description="lvl4",
-            unit="m3", quantity=1.0, parent_id=s3["id"],
+            client,
+            auth,
+            boq_id,
+            ordinal="P-A",
+            description="lvl4",
+            unit="m3",
+            quantity=1.0,
+            parent_id=s3["id"],
         )
     ).json()
     p2 = (
         await _add_position(
-            client, auth, boq_id, ordinal="P-B", description="lvl5",
-            unit="m3", quantity=1.0, parent_id=p1["id"],
+            client,
+            auth,
+            boq_id,
+            ordinal="P-B",
+            description="lvl5",
+            unit="m3",
+            quantity=1.0,
+            parent_id=p1["id"],
         )
     ).json()
     assert p2["parent_id"] == p1["id"]
@@ -922,9 +988,7 @@ async def test_deep_section_and_partida_nesting_is_allowed(
 
 
 @pytest.mark.asyncio
-async def test_nesting_beyond_cap_is_rejected_422(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_nesting_beyond_cap_is_rejected_422(client: AsyncClient, auth: dict[str, str]) -> None:
     """A create that would exceed MAX_NESTING_DEPTH tiers is rejected."""
     from app.modules.boq.service import MAX_NESTING_DEPTH
 
@@ -936,39 +1000,40 @@ async def test_nesting_beyond_cap_is_rejected_422(
     last_id: str | None = None
     for tier in range(1, MAX_NESTING_DEPTH + 1):
         r = await _add_position(
-            client, auth, boq_id,
-            ordinal=f"D{tier}", description=f"tier {tier}",
-            unit="m3", quantity=1.0,
+            client,
+            auth,
+            boq_id,
+            ordinal=f"D{tier}",
+            description=f"tier {tier}",
+            unit="m3",
+            quantity=1.0,
             **({"parent_id": parent_id} if parent_id else {}),
         )
-        assert r.status_code == 201, (
-            f"tier {tier} within cap must succeed: {r.text}"
-        )
+        assert r.status_code == 201, f"tier {tier} within cap must succeed: {r.text}"
         last_id = r.json()["id"]
         parent_id = last_id
 
     # One more level would be tier MAX+1 → rejected.
     over = await _add_position(
-        client, auth, boq_id,
-        ordinal="DOVER", description="over the cap",
-        unit="m3", quantity=1.0, parent_id=last_id,
+        client,
+        auth,
+        boq_id,
+        ordinal="DOVER",
+        description="over the cap",
+        unit="m3",
+        quantity=1.0,
+        parent_id=last_id,
     )
-    assert over.status_code == 422, (
-        f"expected 422 over the cap, got {over.status_code}: {over.text}"
-    )
+    assert over.status_code == 422, f"expected 422 over the cap, got {over.status_code}: {over.text}"
     assert "nesting depth" in over.text.lower()
 
     # A sub-section over the cap is rejected too.
-    over_sec = await _add_section(
-        client, auth, boq_id, "OVER.SEC", parent_id=last_id
-    )
+    over_sec = await _add_section(client, auth, boq_id, "OVER.SEC", parent_id=last_id)
     assert over_sec.status_code == 422, over_sec.text
 
 
 @pytest.mark.asyncio
-async def test_top_level_section_still_works_unchanged(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_top_level_section_still_works_unchanged(client: AsyncClient, auth: dict[str, str]) -> None:
     """Legacy behaviour: omitting parent_id makes a top-level section."""
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
@@ -998,9 +1063,7 @@ def _resources_of(pos_json: dict) -> list[dict]:
 
 
 @pytest.mark.asyncio
-async def test_master_resource_edit_propagates_to_other_positions(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_master_resource_edit_propagates_to_other_positions(client: AsyncClient, auth: dict[str, str]) -> None:
     """Editing the master (oldest) resource definition for a shared code
     fans the changed definition out to every other position carrying that
     code — but never the per-instance quantity."""
@@ -1009,58 +1072,91 @@ async def test_master_resource_edit_propagates_to_other_positions(
 
     master_pos = (
         await _add_position(
-            client, auth, boq_id, ordinal="RP-1",
-            description="host A", unit="m3", quantity=2.0,
+            client,
+            auth,
+            boq_id,
+            ordinal="RP-1",
+            description="host A",
+            unit="m3",
+            quantity=2.0,
         )
     ).json()
     inst_pos = (
         await _add_position(
-            client, auth, boq_id, ordinal="RP-2",
-            description="host B", unit="m3", quantity=3.0,
+            client,
+            auth,
+            boq_id,
+            ordinal="RP-2",
+            description="host B",
+            unit="m3",
+            quantity=3.0,
         )
     ).json()
 
     # Master carries the canonical resource (oldest position wins).
     r1 = await _set_resources(
-        client, auth, master_pos["id"],
-        [{
-            "name": "Cement", "code": "RES-9", "type": "material",
-            "unit": "kg", "quantity": 100.0, "unit_rate": 0.5,
-            "currency": "EUR", "total": 50.0,
-        }],
+        client,
+        auth,
+        master_pos["id"],
+        [
+            {
+                "name": "Cement",
+                "code": "RES-9",
+                "type": "material",
+                "unit": "kg",
+                "quantity": 100.0,
+                "unit_rate": 0.5,
+                "currency": "EUR",
+                "total": 50.0,
+            }
+        ],
     )
     assert r1.status_code == 200, r1.text
 
     # Instance position re-uses the same code with its OWN quantity.
     r2 = await _set_resources(
-        client, auth, inst_pos["id"],
-        [{
-            "name": "Cement", "code": "RES-9", "type": "material",
-            "unit": "kg", "quantity": 7.0, "unit_rate": 0.5,
-            "currency": "EUR", "total": 3.5,
-        }],
+        client,
+        auth,
+        inst_pos["id"],
+        [
+            {
+                "name": "Cement",
+                "code": "RES-9",
+                "type": "material",
+                "unit": "kg",
+                "quantity": 7.0,
+                "unit_rate": 0.5,
+                "currency": "EUR",
+                "total": 3.5,
+            }
+        ],
     )
     assert r2.status_code == 200, r2.text
 
     # Edit the MASTER resource's definition (rate + name).
     patch = await _set_resources(
-        client, auth, master_pos["id"],
-        [{
-            "name": "Cement CEM II", "code": "RES-9", "type": "material",
-            "unit": "kg", "quantity": 100.0, "unit_rate": 0.8,
-            "currency": "EUR", "total": 80.0,
-        }],
+        client,
+        auth,
+        master_pos["id"],
+        [
+            {
+                "name": "Cement CEM II",
+                "code": "RES-9",
+                "type": "material",
+                "unit": "kg",
+                "quantity": 100.0,
+                "unit_rate": 0.8,
+                "currency": "EUR",
+                "total": 80.0,
+            }
+        ],
     )
     assert patch.status_code == 200, patch.text
     prop = (patch.json().get("metadata") or {}).get("link_propagation") or {}
     assert prop.get("resource_propagated_to") == 1, patch.json().get("metadata")
 
     # Instance resource picked up the new definition, kept its quantity.
-    gi = (
-        await client.get(
-            f"/api/v1/boq/positions/{inst_pos['id']}", headers=auth
-        )
-    ).json()
+    gi = (await client.get(f"/api/v1/boq/positions/{inst_pos['id']}", headers=auth)).json()
     res = _resources_of(gi)
     assert len(res) == 1
     assert res[0]["name"] == "Cement CEM II"
@@ -1070,9 +1166,7 @@ async def test_master_resource_edit_propagates_to_other_positions(
 
 
 @pytest.mark.asyncio
-async def test_user_overridden_resource_instance_is_not_clobbered(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_user_overridden_resource_instance_is_not_clobbered(client: AsyncClient, auth: dict[str, str]) -> None:
     """A resource instance the user explicitly diverged
     (``_code_overridden``) must NOT be silently overwritten by a master
     edit (CLAUDE.md: AI-augmented, human-confirmed)."""
@@ -1081,57 +1175,86 @@ async def test_user_overridden_resource_instance_is_not_clobbered(
 
     master_pos = (
         await _add_position(
-            client, auth, boq_id, ordinal="OV-1",
-            description="host", unit="m3", quantity=1.0,
+            client,
+            auth,
+            boq_id,
+            ordinal="OV-1",
+            description="host",
+            unit="m3",
+            quantity=1.0,
         )
     ).json()
     inst_pos = (
         await _add_position(
-            client, auth, boq_id, ordinal="OV-2",
-            description="host2", unit="m3", quantity=1.0,
+            client,
+            auth,
+            boq_id,
+            ordinal="OV-2",
+            description="host2",
+            unit="m3",
+            quantity=1.0,
         )
     ).json()
     await _set_resources(
-        client, auth, master_pos["id"],
-        [{
-            "name": "Steel", "code": "OVR-1", "type": "material",
-            "unit": "kg", "quantity": 10.0, "unit_rate": 1.0,
-            "total": 10.0,
-        }],
+        client,
+        auth,
+        master_pos["id"],
+        [
+            {
+                "name": "Steel",
+                "code": "OVR-1",
+                "type": "material",
+                "unit": "kg",
+                "quantity": 10.0,
+                "unit_rate": 1.0,
+                "total": 10.0,
+            }
+        ],
     )
     await _set_resources(
-        client, auth, inst_pos["id"],
-        [{
-            "name": "Steel custom", "code": "OVR-1", "type": "material",
-            "unit": "kg", "quantity": 5.0, "unit_rate": 9.99,
-            "total": 49.95, "_code_overridden": True,
-        }],
+        client,
+        auth,
+        inst_pos["id"],
+        [
+            {
+                "name": "Steel custom",
+                "code": "OVR-1",
+                "type": "material",
+                "unit": "kg",
+                "quantity": 5.0,
+                "unit_rate": 9.99,
+                "total": 49.95,
+                "_code_overridden": True,
+            }
+        ],
     )
 
     patch = await _set_resources(
-        client, auth, master_pos["id"],
-        [{
-            "name": "Steel S355", "code": "OVR-1", "type": "material",
-            "unit": "kg", "quantity": 10.0, "unit_rate": 2.0,
-            "total": 20.0,
-        }],
+        client,
+        auth,
+        master_pos["id"],
+        [
+            {
+                "name": "Steel S355",
+                "code": "OVR-1",
+                "type": "material",
+                "unit": "kg",
+                "quantity": 10.0,
+                "unit_rate": 2.0,
+                "total": 20.0,
+            }
+        ],
     )
     assert patch.status_code == 200, patch.text
 
-    gi = (
-        await client.get(
-            f"/api/v1/boq/positions/{inst_pos['id']}", headers=auth
-        )
-    ).json()
+    gi = (await client.get(f"/api/v1/boq/positions/{inst_pos['id']}", headers=auth)).json()
     res = _resources_of(gi)
     assert res[0]["name"] == "Steel custom"  # untouched
     assert abs(float(res[0]["unit_rate"]) - 9.99) < 0.001
 
 
 @pytest.mark.asyncio
-async def test_non_master_resource_edit_does_not_propagate(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_non_master_resource_edit_does_not_propagate(client: AsyncClient, auth: dict[str, str]) -> None:
     """Editing the resource on the NON-master (newer) position must not
     fan out to the master / others (only the master definition owner
     propagates — mirrors the #127 contract)."""
@@ -1140,41 +1263,80 @@ async def test_non_master_resource_edit_does_not_propagate(
 
     master_pos = (
         await _add_position(
-            client, auth, boq_id, ordinal="NM-1",
-            description="m", unit="m3", quantity=1.0,
+            client,
+            auth,
+            boq_id,
+            ordinal="NM-1",
+            description="m",
+            unit="m3",
+            quantity=1.0,
         )
     ).json()
     other_pos = (
         await _add_position(
-            client, auth, boq_id, ordinal="NM-2",
-            description="o", unit="m3", quantity=1.0,
+            client,
+            auth,
+            boq_id,
+            ordinal="NM-2",
+            description="o",
+            unit="m3",
+            quantity=1.0,
         )
     ).json()
     await _set_resources(
-        client, auth, master_pos["id"],
-        [{"name": "Sand", "code": "SND-1", "type": "material",
-          "unit": "t", "quantity": 1.0, "unit_rate": 1.0, "total": 1.0}],
+        client,
+        auth,
+        master_pos["id"],
+        [
+            {
+                "name": "Sand",
+                "code": "SND-1",
+                "type": "material",
+                "unit": "t",
+                "quantity": 1.0,
+                "unit_rate": 1.0,
+                "total": 1.0,
+            }
+        ],
     )
     await _set_resources(
-        client, auth, other_pos["id"],
-        [{"name": "Sand", "code": "SND-1", "type": "material",
-          "unit": "t", "quantity": 1.0, "unit_rate": 1.0, "total": 1.0}],
+        client,
+        auth,
+        other_pos["id"],
+        [
+            {
+                "name": "Sand",
+                "code": "SND-1",
+                "type": "material",
+                "unit": "t",
+                "quantity": 1.0,
+                "unit_rate": 1.0,
+                "total": 1.0,
+            }
+        ],
     )
 
     # Edit the NON-master (other_pos, created later).
     patch = await _set_resources(
-        client, auth, other_pos["id"],
-        [{"name": "Sand washed", "code": "SND-1", "type": "material",
-          "unit": "t", "quantity": 1.0, "unit_rate": 5.0, "total": 5.0}],
+        client,
+        auth,
+        other_pos["id"],
+        [
+            {
+                "name": "Sand washed",
+                "code": "SND-1",
+                "type": "material",
+                "unit": "t",
+                "quantity": 1.0,
+                "unit_rate": 5.0,
+                "total": 5.0,
+            }
+        ],
     )
     assert patch.status_code == 200, patch.text
     prop = (patch.json().get("metadata") or {}).get("link_propagation") or {}
     assert prop.get("resource_propagated_to", 0) in (0, None)
 
     # Master untouched.
-    gm = (
-        await client.get(
-            f"/api/v1/boq/positions/{master_pos['id']}", headers=auth
-        )
-    ).json()
+    gm = (await client.get(f"/api/v1/boq/positions/{master_pos['id']}", headers=auth)).json()
     assert _resources_of(gm)[0]["name"] == "Sand"

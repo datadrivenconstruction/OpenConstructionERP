@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -139,12 +138,8 @@ async def test_create_rfi_open_status_auto_calculates_due_date() -> None:
 async def test_list_rfis_returns_project_scoped_results() -> None:
     service = _make_service()
     pid = uuid.uuid4()
-    await service.create_rfi(
-        RFICreate(project_id=pid, subject="A", question="Q1")
-    )
-    await service.create_rfi(
-        RFICreate(project_id=uuid.uuid4(), subject="B", question="Q2")
-    )
+    await service.create_rfi(RFICreate(project_id=pid, subject="A", question="Q1"))
+    await service.create_rfi(RFICreate(project_id=uuid.uuid4(), subject="B", question="Q2"))
 
     rows, total = await service.list_rfis(pid)
     assert total == 1

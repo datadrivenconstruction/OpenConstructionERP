@@ -48,10 +48,7 @@ def _bim_root() -> Path:
 async def _migrate() -> None:
     settings = get_settings()
     if settings.storage_backend != "s3":
-        print(
-            "ERROR: settings.storage_backend is "
-            f"{settings.storage_backend!r}, expected 's3'."
-        )
+        print(f"ERROR: settings.storage_backend is {settings.storage_backend!r}, expected 's3'.")
         print("Set STORAGE_BACKEND=s3 in your environment first.")
         sys.exit(2)
 
@@ -95,10 +92,7 @@ async def _migrate() -> None:
                 print(f"  push  {key}  ({size:,} bytes)")
 
     print()
-    print(
-        f"Done: uploaded={uploaded} skipped={skipped} "
-        f"bytes={total_bytes:,}"
-    )
+    print(f"Done: uploaded={uploaded} skipped={skipped} bytes={total_bytes:,}")
 
 
 def main() -> None:

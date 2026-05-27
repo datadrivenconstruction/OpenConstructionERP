@@ -50,8 +50,7 @@ def test_ws_rejects_missing_token(ws_client: TestClient) -> None:
     entity_id = str(uuid.uuid4())
     with pytest.raises(Exception):
         with ws_client.websocket_connect(
-            f"/api/v1/collaboration_locks/presence/"
-            f"?entity_type=boq_position&entity_id={entity_id}"
+            f"/api/v1/collaboration_locks/presence/?entity_type=boq_position&entity_id={entity_id}"
         ):
             pass
 
@@ -67,10 +66,7 @@ def test_ws_receives_presence_snapshot_then_lock_acquired(
     alice_token, _ = _register_and_login(ws_client, "alice")
 
     entity_id = str(uuid.uuid4())
-    path = (
-        f"/api/v1/collaboration_locks/presence/"
-        f"?entity_type=boq_position&entity_id={entity_id}&token={alice_token}"
-    )
+    path = f"/api/v1/collaboration_locks/presence/?entity_type=boq_position&entity_id={entity_id}&token={alice_token}"
     with ws_client.websocket_connect(path) as ws:
         snapshot = ws.receive_json()
         assert snapshot["event"] == "presence_snapshot"
@@ -111,10 +107,7 @@ def test_ws_two_users_see_each_others_join(
     alice_token, _ = _register_and_login(ws_client, "alicejoin")
     bob_token, _ = _register_and_login(ws_client, "bobjoin")
     entity_id = str(uuid.uuid4())
-    base = (
-        f"/api/v1/collaboration_locks/presence/"
-        f"?entity_type=boq_position&entity_id={entity_id}"
-    )
+    base = f"/api/v1/collaboration_locks/presence/?entity_type=boq_position&entity_id={entity_id}"
 
     with ws_client.websocket_connect(f"{base}&token={alice_token}") as alice_ws:
         # Consume Alice's own snapshot.

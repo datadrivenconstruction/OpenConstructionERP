@@ -62,9 +62,5 @@ class AgentStepRepository:
 
     async def list_for_run(self, run_id: uuid.UUID) -> list[AgentStep]:
         """Return every step for a run in chronological order."""
-        stmt = (
-            select(AgentStep)
-            .where(AgentStep.run_id == run_id)
-            .order_by(AgentStep.step_idx.asc())
-        )
+        stmt = select(AgentStep).where(AgentStep.run_id == run_id).order_by(AgentStep.step_idx.asc())
         return list((await self.session.execute(stmt)).scalars().all())

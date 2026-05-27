@@ -76,18 +76,14 @@ def _parse_restriction(value_el: ET.Element | None) -> dict[str, Any]:
     # Look for xs:restriction in any namespace variant
     restriction = _find(value_el, "xs:restriction")
     if restriction is None:
-        restriction = value_el.find(
-            "{http://www.w3.org/2001/XMLSchema}restriction"
-        )
+        restriction = value_el.find("{http://www.w3.org/2001/XMLSchema}restriction")
     if restriction is None:
         # Try without namespace
         restriction = value_el.find("restriction")
 
     if restriction is not None:
         enums = []
-        for enum_el in restriction.findall(
-            f"{{{_XS_NS}}}enumeration"
-        ):
+        for enum_el in restriction.findall(f"{{{_XS_NS}}}enumeration"):
             val = enum_el.get("value")
             if val:
                 enums.append(val)
@@ -191,9 +187,7 @@ class IDSParser(BaseRequirementParser):
             specifications = specs_container.findall("specification")
 
         if not specifications:
-            result.warnings.append(
-                {"row": 0, "field": "specifications", "msg": "No specifications found in IDS file"}
-            )
+            result.warnings.append({"row": 0, "field": "specifications", "msg": "No specifications found in IDS file"})
             return result
 
         result.metadata["specification_count"] = len(specifications)
@@ -226,9 +220,7 @@ class IDSParser(BaseRequirementParser):
             return source.read_text(encoding="utf-8")
         return source
 
-    def _parse_specification(
-        self, spec: ET.Element, spec_idx: int, result: ParseResult
-    ) -> None:
+    def _parse_specification(self, spec: ET.Element, spec_idx: int, result: ParseResult) -> None:
         """Parse a single <specification> into one or more UniversalRequirement rows."""
         spec_name = spec.get("name", f"Specification {spec_idx + 1}")
         ifc_version = spec.get("ifcVersion", "")

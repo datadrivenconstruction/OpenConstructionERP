@@ -176,9 +176,7 @@ class ProgressService:
         2. Compute delta_pct = cum_pct[i] - cum_pct[i-1] (clamped to ≥ 0).
         3. The last entry's cumulative_pct is the current overall completion.
         """
-        period_rows = await self.repo.entries_grouped_by_period(
-            project_id, boq_position_id=boq_position_id
-        )
+        period_rows = await self.repo.entries_grouped_by_period(project_id, boq_position_id=boq_position_id)
         periods = _compute_deltas(period_rows)
         current = periods[-1].cumulative_pct if periods else 0.0
         return CumulativeProgressResponse(
@@ -214,9 +212,7 @@ class ProgressService:
             else:
                 current_pct = 0.0
 
-            entries = await self.repo.list_entries_for_project(
-                project_id, boq_position_id=boq_position_id, limit=1000
-            )
+            entries = await self.repo.list_entries_for_project(project_id, boq_position_id=boq_position_id, limit=1000)
             return PositionProgressSummary(
                 boq_position_id=boq_position_id,
                 current_pct=current_pct,
@@ -227,9 +223,7 @@ class ProgressService:
             )
 
         # Leaf position path
-        entries = await self.repo.list_entries_for_project(
-            project_id, boq_position_id=boq_position_id, limit=1000
-        )
+        entries = await self.repo.list_entries_for_project(project_id, boq_position_id=boq_position_id, limit=1000)
         current_pct = float(entries[-1].percent_complete) if entries else 0.0
         return PositionProgressSummary(
             boq_position_id=boq_position_id,
@@ -283,9 +277,7 @@ class ProgressService:
 
         # Planned data
         plan_rows = await self.repo.list_plan(project_id)
-        planned_by_period: dict[str, float] = {
-            p.period_label: round(float(p.planned_pct), 3) for p in plan_rows
-        }
+        planned_by_period: dict[str, float] = {p.period_label: round(float(p.planned_pct), 3) for p in plan_rows}
 
         # Union of all periods, sorted
         all_periods = sorted(set(actual_by_period) | set(planned_by_period))

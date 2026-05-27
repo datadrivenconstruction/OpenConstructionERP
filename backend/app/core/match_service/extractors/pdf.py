@@ -118,10 +118,7 @@ def extract(raw: dict[str, Any]) -> ElementEnvelope:
         category=category,
         source_lang=str(raw.get("language") or ""),
         properties={
-            k: v
-            for k, v in raw.items()
-            if k in ("group_name", "page", "depth", "perimeter")
-            and v not in (None, "", 0)
+            k: v for k, v in raw.items() if k in ("group_name", "page", "depth", "perimeter") and v not in (None, "", 0)
         },
         quantities=_quantities_from_takeoff(raw),
         unit_hint=unit_hint,

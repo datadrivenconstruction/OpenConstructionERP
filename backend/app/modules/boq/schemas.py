@@ -53,8 +53,7 @@ def _check_position_total_cap(
         return
     if product > POSITION_TOTAL_CAP:
         raise ValueError(
-            "Position total exceeds reasonable limit. "
-            "Check quantity and unit rate.",
+            "Position total exceeds reasonable limit. Check quantity and unit rate.",
         )
 
 
@@ -91,6 +90,7 @@ def _sanitise_free_text(value: str | None) -> str | None:
     from app.core.sanitize import strip_dangerous_html
 
     return strip_dangerous_html(value)
+
 
 # ── BOQ schemas ───────────────────────────────────────────────────────────────
 
@@ -209,9 +209,7 @@ class BOQListItem(BOQResponse):
     grand_total: Decimal = Decimal("0")
     position_count: int = 0
 
-    @field_serializer(
-        "direct_cost_total", "markups_total", "grand_total", when_used="json"
-    )
+    @field_serializer("direct_cost_total", "markups_total", "grand_total", when_used="json")
     def _ser_money(self, v: Decimal) -> str | None:
         return _serialise_money(v)
 
@@ -225,9 +223,7 @@ class PositionCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     boq_id: UUID = Field(..., description="UUID of the parent BOQ")
-    parent_id: UUID | None = Field(
-        default=None, description="Parent position UUID for hierarchical grouping"
-    )
+    parent_id: UUID | None = Field(default=None, description="Parent position UUID for hierarchical grouping")
     ordinal: str = Field(
         ...,
         min_length=1,
@@ -255,7 +251,10 @@ class PositionCreate(BaseModel):
     # v3 §10 — money is Decimal-in / Decimal-as-string out. Pydantic v2
     # coerces int/float/str inputs to Decimal so legacy clients still work.
     unit_rate: Decimal = Field(
-        default=Decimal("0"), ge=0, description="Price per unit", examples=["285.00"],
+        default=Decimal("0"),
+        ge=0,
+        description="Price per unit",
+        examples=["285.00"],
     )
     classification: dict[str, Any] = Field(
         default_factory=dict,
@@ -278,9 +277,7 @@ class PositionCreate(BaseModel):
         le=1.0,
         description="AI confidence score (0.0-1.0). Only for AI-sourced positions",
     )
-    cad_element_ids: list[str] = Field(
-        default_factory=list, description="Linked CAD element IDs from canonical format"
-    )
+    cad_element_ids: list[str] = Field(default_factory=list, description="Linked CAD element IDs from canonical format")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Arbitrary metadata")
     wbs_id: str | None = Field(default=None, description="Linked WBS node ID")
     cost_code_id: str | None = Field(default=None, description="Linked cost code ID")
@@ -388,10 +385,7 @@ class SectionCreate(BaseModel):
     description: str = Field(default="", max_length=5000)
     parent_id: UUID | None = Field(
         default=None,
-        description=(
-            "Parent section UUID for nested sections (Issue #136). "
-            "None = top-level section."
-        ),
+        description=("Parent section UUID for nested sections (Issue #136). None = top-level section."),
     )
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -459,8 +453,7 @@ class PositionUpdate(BaseModel):
     link_mode: Literal["link", "copy", "standalone"] | None = Field(
         default=None,
         description=(
-            "Reserved for symmetry with PositionCreate; ignored on update "
-            "(linking decisions are made at create time)."
+            "Reserved for symmetry with PositionCreate; ignored on update (linking decisions are made at create time)."
         ),
     )
 
@@ -556,8 +549,7 @@ class BulkPositionUpdate(BaseModel):
         ]
         if sum(1 for s in styles if s) != 1:
             raise ValueError(
-                "Exactly one of 'updates', 'rate_factor', "
-                "'quantity_factor' must be supplied.",
+                "Exactly one of 'updates', 'rate_factor', 'quantity_factor' must be supplied.",
             )
         if isinstance(self.updates, dict):
             # Tight allowlist — bulk operations must not silently rewrite
@@ -567,8 +559,7 @@ class BulkPositionUpdate(BaseModel):
             bad = set(self.updates) - allowed
             if bad:
                 raise ValueError(
-                    f"updates keys not allowed in bulk mode: {sorted(bad)}. "
-                    f"Allowed: {sorted(allowed)}.",
+                    f"updates keys not allowed in bulk mode: {sorted(bad)}. Allowed: {sorted(allowed)}.",
                 )
             if not self.updates:
                 raise ValueError("updates dict cannot be empty.")
@@ -825,9 +816,7 @@ class BOQWithPositions(BOQResponse):
     grand_total: Decimal = Decimal("0")
     position_count: int = 0
 
-    @field_serializer(
-        "direct_cost_total", "markups_total", "grand_total", when_used="json"
-    )
+    @field_serializer("direct_cost_total", "markups_total", "grand_total", when_used="json")
     def _ser_money(self, v: Decimal) -> str | None:
         return _serialise_money(v)
 
@@ -877,9 +866,7 @@ class BOQWithSections(BOQResponse):
     net_total: Decimal = Decimal("0")
     grand_total: Decimal = Decimal("0")
 
-    @field_serializer(
-        "direct_cost", "net_total", "grand_total", when_used="json"
-    )
+    @field_serializer("direct_cost", "net_total", "grand_total", when_used="json")
     def _ser_money(self, v: Decimal) -> str | None:
         return _serialise_money(v)
 
@@ -1829,9 +1816,7 @@ class BOQStatisticsResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    @field_serializer(
-        "direct_cost", "grand_total", "avg_unit_rate", when_used="json"
-    )
+    @field_serializer("direct_cost", "grand_total", "avg_unit_rate", when_used="json")
     def _ser_money(self, v: Decimal) -> str | None:
         return _serialise_money(v)
 
@@ -1914,9 +1899,8 @@ class LineItemResponse(BaseModel):
     @field_serializer("unit_rate", "total_cost", when_used="json")
     def _ser_money(self, v: Decimal) -> str | None:
         return _serialise_money(v)
-    share_of_total: float = Field(
-        0.0, description="Share of the aggregate project total — 0.0 to 1.0"
-    )
+
+    share_of_total: float = Field(0.0, description="Share of the aggregate project total — 0.0 to 1.0")
 
 
 class CostRollupItem(BaseModel):
@@ -2076,9 +2060,7 @@ class QuantityLinkApplyResponse(BaseModel):
 # ── Feature 2: estimate baseline / line-level compare schemas ─────────────────
 
 # How a position pairs across the two BOQs and what (if anything) moved.
-CompareChangeType = Literal[
-    "added", "removed", "qty_changed", "rate_changed", "changed", "unchanged"
-]
+CompareChangeType = Literal["added", "removed", "qty_changed", "rate_changed", "changed", "unchanged"]
 
 
 class ComparePositionRow(BaseModel):

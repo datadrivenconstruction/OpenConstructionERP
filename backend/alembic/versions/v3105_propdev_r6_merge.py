@@ -24,7 +24,6 @@ from __future__ import annotations
 
 from typing import Sequence, Union
 
-
 revision: str = "v3105_propdev_r6_merge"
 down_revision: Union[str, Sequence[str], None] = (
     "v3103_propdev_lead_reservation_spa_schedule_parties",

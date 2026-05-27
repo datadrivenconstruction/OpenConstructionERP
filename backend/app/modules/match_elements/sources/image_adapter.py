@@ -67,24 +67,26 @@ _GROUP_BY_KEY_ORDER = (
 # Allowed IFC class hints the prompt asks the LLM to choose from. We
 # normalise the LLM's free-form output against this set so a hallucinated
 # "IfcConcreteWall" gets coerced to "IfcWall" (or dropped to None).
-_ALLOWED_IFC_CLASSES = frozenset({
-    "IfcWall",
-    "IfcSlab",
-    "IfcColumn",
-    "IfcBeam",
-    "IfcDoor",
-    "IfcWindow",
-    "IfcRoof",
-    "IfcStair",
-    "IfcRailing",
-    "IfcCovering",
-    "IfcPipeSegment",
-    "IfcDuctSegment",
-    "IfcCableSegment",
-    "IfcSpace",
-    "IfcFurniture",
-    "IfcBuildingElementProxy",
-})
+_ALLOWED_IFC_CLASSES = frozenset(
+    {
+        "IfcWall",
+        "IfcSlab",
+        "IfcColumn",
+        "IfcBeam",
+        "IfcDoor",
+        "IfcWindow",
+        "IfcRoof",
+        "IfcStair",
+        "IfcRailing",
+        "IfcCovering",
+        "IfcPipeSegment",
+        "IfcDuctSegment",
+        "IfcCableSegment",
+        "IfcSpace",
+        "IfcFurniture",
+        "IfcBuildingElementProxy",
+    }
+)
 
 
 # Unit string → canonical SourceElement quantity bucket. Mirrors the
@@ -370,10 +372,14 @@ class ImageSourceAdapter:
                     from app.modules.ai.models import AISettings
 
                     rows = (
-                        await self.session.execute(
-                            select(AISettings).limit(50),
+                        (
+                            await self.session.execute(
+                                select(AISettings).limit(50),
+                            )
                         )
-                    ).scalars().all()
+                        .scalars()
+                        .all()
+                    )
                     for row in rows:
                         try:
                             provider, api_key = resolve_provider_and_key(row)
@@ -458,8 +464,7 @@ class ImageSourceAdapter:
             keys.update(k for k in item if isinstance(k, str))
         # Drop quantity-bearing columns from the chip-bar — they belong
         # to ``quantities``, not group-by.
-        for q in ("qty_estimate", "unit_estimate", "ifc_class_guess",
-                  "material_guess", "confidence"):
+        for q in ("qty_estimate", "unit_estimate", "ifc_class_guess", "material_guess", "confidence"):
             keys.discard(q)
         ordered = [k for k in _GROUP_BY_KEY_ORDER if k in keys]
         ordered.extend(sorted(k for k in keys if k not in _GROUP_BY_KEY_ORDER))
@@ -505,11 +510,7 @@ class ImageSourceAdapter:
         ref_id: str | None = None
         if self.match_session is not None:
             image = self._image_metadata() or {}
-            ref_id = (
-                str(image.get("image_id"))
-                if image.get("image_id")
-                else str(self.match_session.id)
-            )
+            ref_id = str(image.get("image_id")) if image.get("image_id") else str(self.match_session.id)
 
         out: list[SourceElement] = []
         for idx, item in enumerate(items):
@@ -523,9 +524,7 @@ class ImageSourceAdapter:
 
             material_guess = item.get("material_guess")
             material = (
-                str(material_guess).strip()
-                if isinstance(material_guess, str) and material_guess.strip()
-                else None
+                str(material_guess).strip() if isinstance(material_guess, str) and material_guess.strip() else None
             )
 
             # Always normalise confidence to 'low' in metadata — the

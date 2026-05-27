@@ -51,10 +51,7 @@ async def _make_camp_with_rooms(
     )
     accom_id = accom.json()["id"]
     statuses = statuses or ["available"] * len(labels)
-    rooms = [
-        {"label": lbl, "capacity": 1, "status": st}
-        for lbl, st in zip(labels, statuses, strict=True)
-    ]
+    rooms = [{"label": lbl, "capacity": 1, "status": st} for lbl, st in zip(labels, statuses, strict=True)]
     add = await client.post(
         f"/api/v1/accommodation/{accom_id}/rooms",
         json={"rooms": rooms},
@@ -73,7 +70,9 @@ async def test_returns_lowest_available_room(
 ):
     _, header = admin_auth
     await _make_camp_with_rooms(
-        client, header, project_id,
+        client,
+        header,
+        project_id,
         labels=["B-202", "B-101", "B-303"],
         name="Sorted Camp",
     )
@@ -100,7 +99,9 @@ async def test_skips_blocked_and_maintenance_rooms(
 ):
     _, header = admin_auth
     await _make_camp_with_rooms(
-        client, header, project_id,
+        client,
+        header,
+        project_id,
         labels=["A-101", "A-102", "A-103"],
         statuses=["maintenance", "blocked", "available"],
         name="Mixed Camp",
@@ -136,7 +137,9 @@ async def test_skips_non_worker_camp(
     """
     _, header = admin_auth
     await _make_camp_with_rooms(
-        client, header, project_id,
+        client,
+        header,
+        project_id,
         labels=["AAA-001"],  # would lex-sort first if hotels were eligible
         kind="hotel",
         name="Should Skip Hotel",
@@ -154,9 +157,7 @@ async def test_skips_non_worker_camp(
     # what's NOT fine is a hotel being suggested.
     assert resp.status_code in (200, 404), resp.text
     if resp.status_code == 200:
-        assert resp.json()["accommodation_kind"] == "worker_camp", (
-            "non worker_camp accommodation was suggested"
-        )
+        assert resp.json()["accommodation_kind"] == "worker_camp", "non worker_camp accommodation was suggested"
 
 
 @pytest.mark.asyncio
@@ -169,7 +170,9 @@ async def test_404_when_no_available_room(
     _, header = admin_auth
     # All rooms blocked.
     await _make_camp_with_rooms(
-        client, header, project_id,
+        client,
+        header,
+        project_id,
         labels=["X-1", "X-2"],
         statuses=["blocked", "blocked"],
         name="All Blocked",
@@ -185,18 +188,10 @@ async def test_404_when_no_available_room(
 
     async with async_session_factory() as sess:
         camp_ids = (
-            await sess.execute(
-                select(Accommodation.id).where(
-                    Accommodation.kind == "worker_camp"
-                )
-            )
-        ).scalars().all()
+            (await sess.execute(select(Accommodation.id).where(Accommodation.kind == "worker_camp"))).scalars().all()
+        )
         if camp_ids:
-            await sess.execute(
-                update(Room)
-                .where(Room.accommodation_id.in_(camp_ids))
-                .values(status="blocked")
-            )
+            await sess.execute(update(Room).where(Room.accommodation_id.in_(camp_ids)).values(status="blocked"))
         await sess.commit()
 
     resp = await client.post(

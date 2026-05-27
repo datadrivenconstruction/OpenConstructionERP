@@ -123,9 +123,7 @@ async def test_validate_endpoint_rejects_unknown_alias(client, auth_headers) -> 
 
 
 @pytest.mark.asyncio
-async def test_validate_endpoint_rejects_cyclic_local_var_fixture(
-    client, auth_headers
-) -> None:
+async def test_validate_endpoint_rejects_cyclic_local_var_fixture(client, auth_headers) -> None:
     fixture = FIXTURES_ROOT / "invalid_rules" / "02_invalid_cyclic_local_var.json"
     body = json.loads(fixture.read_text(encoding="utf-8"))
     body.pop("_invalid_reason", None)
@@ -146,9 +144,7 @@ async def test_validate_endpoint_rejects_cyclic_local_var_fixture(
 
 
 @pytest.mark.asyncio
-async def test_validate_endpoint_rejects_redos_regex_fixture(
-    client, auth_headers
-) -> None:
+async def test_validate_endpoint_rejects_redos_regex_fixture(client, auth_headers) -> None:
     fixture = FIXTURES_ROOT / "invalid_rules" / "13_invalid_redos_regex.json"
     body = json.loads(fixture.read_text(encoding="utf-8"))
     body.pop("_invalid_reason", None)

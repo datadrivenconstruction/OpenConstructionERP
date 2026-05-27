@@ -71,7 +71,8 @@ def upgrade() -> None:
             "subcontractor_id",
             sa.String(36),
             sa.ForeignKey(
-                "oe_subcontractors_subcontractor.id", ondelete="CASCADE",
+                "oe_subcontractors_subcontractor.id",
+                ondelete="CASCADE",
             ),
             nullable=False,
         ),
@@ -134,9 +135,11 @@ def downgrade() -> None:
         return
     op.drop_index(f"ix_{_TABLE}_waiver_type", table_name=_TABLE)
     op.drop_index(
-        f"ix_{_TABLE}_payment_application_id", table_name=_TABLE,
+        f"ix_{_TABLE}_payment_application_id",
+        table_name=_TABLE,
     )
     op.drop_index(
-        f"ix_{_TABLE}_subcontractor_id", table_name=_TABLE,
+        f"ix_{_TABLE}_subcontractor_id",
+        table_name=_TABLE,
     )
     op.drop_table(_TABLE)

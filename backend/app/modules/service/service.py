@@ -67,8 +67,8 @@ from app.modules.service.schemas import (
     SLABreachScanResponse,
     SLADefinitionCreate,
     SLADefinitionUpdate,
-    SLAOverdueSummaryResponse,
     SLAOverdueReport,
+    SLAOverdueSummaryResponse,
     TicketAwaitCustomerRequest,
     TicketDispatchRequest,
     TicketReopenRequest,
@@ -114,9 +114,7 @@ _WORK_ORDER_TRANSITIONS: dict[str, set[str]] = {
 }
 
 # States where a WO is effectively done for the purposes of sub-task cascade
-_WO_TERMINAL_LIKE: frozenset[str] = frozenset(
-    {"completed", "verified", "billed", "closed", "cancelled"}
-)
+_WO_TERMINAL_LIKE: frozenset[str] = frozenset({"completed", "verified", "billed", "closed", "cancelled"})
 
 _CONTRACT_TRANSITIONS: dict[str, set[str]] = {
     "draft": {"active", "terminated"},
@@ -534,9 +532,7 @@ class ServiceService:
                     detail="asset_id does not belong to this contract",
                 )
 
-        reported_at_dt = (
-            _parse_iso(data.reported_at) if data.reported_at else datetime.now(UTC)
-        )
+        reported_at_dt = _parse_iso(data.reported_at) if data.reported_at else datetime.now(UTC)
 
         sla: SLADefinition | None = None
         if contract.sla_definition_id is not None:
@@ -544,7 +540,9 @@ class ServiceService:
 
         sla_due_dt = compute_sla_due_at(reported_at_dt, sla, priority=data.priority)
         response_due_dt, resolution_due_dt = compute_sla_response_and_resolution(
-            reported_at_dt, sla, priority=data.priority,
+            reported_at_dt,
+            sla,
+            priority=data.priority,
         )
 
         # Race-safe ticket number allocation, scoped per contract. See
@@ -666,8 +664,7 @@ class ServiceService:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=(
-                    "Missing permission: service.dispatch (required to mutate "
-                    f"{sorted(protected_touched)} via PATCH)"
+                    f"Missing permission: service.dispatch (required to mutate {sorted(protected_touched)} via PATCH)"
                 ),
             )
 
@@ -688,21 +685,15 @@ class ServiceService:
             # Keep lifecycle timestamps consistent with the dedicated
             # resolve/close endpoints when an admin corrects status via PATCH —
             # otherwise a 'closed' ticket can end up with closed_at = NULL.
-            if (
-                new_status == "resolved"
-                and ticket.status != "resolved"
-                and ticket.resolved_at is None
-            ):
+            if new_status == "resolved" and ticket.status != "resolved" and ticket.resolved_at is None:
                 fields["resolved_at"] = _utcnow_iso()
-            if (
-                new_status == "closed"
-                and ticket.status != "closed"
-                and ticket.closed_at is None
-            ):
+            if new_status == "closed" and ticket.status != "closed" and ticket.closed_at is None:
                 fields["closed_at"] = _utcnow_iso()
             logger.info(
                 "Service ticket status patched: %s %s → %s",
-                ticket.ticket_number, ticket.status, new_status,
+                ticket.ticket_number,
+                ticket.status,
+                new_status,
             )
 
         if not fields:
@@ -741,7 +732,8 @@ class ServiceService:
         await self.session.refresh(ticket)
         logger.info(
             "Service ticket dispatched: %s → technician %s",
-            ticket.ticket_number, body.technician_id,
+            ticket.ticket_number,
+            body.technician_id,
         )
         event_bus.publish_detached(
             "service.ticket.dispatched",
@@ -849,9 +841,7 @@ class ServiceService:
         if ticket.status != "closed":
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    f"Only closed tickets can be reopened (current status: '{ticket.status}')."
-                ),
+                detail=(f"Only closed tickets can be reopened (current status: '{ticket.status}')."),
             )
         if ticket.closed_at is not None:
             try:
@@ -873,11 +863,13 @@ class ServiceService:
         assert_transition(ticket.status, "in_progress", machine="ticket")
         meta = dict(ticket.metadata_ or {})
         reopen_history = list(meta.get("reopen_history", []))
-        reopen_history.append({
-            "reopened_at": _utcnow_iso(),
-            "reopened_by": user_id,
-            "reason": body.reason,
-        })
+        reopen_history.append(
+            {
+                "reopened_at": _utcnow_iso(),
+                "reopened_by": user_id,
+                "reason": body.reason,
+            }
+        )
         meta["reopen_history"] = reopen_history
 
         await self.ticket_repo.update_fields(
@@ -889,7 +881,8 @@ class ServiceService:
         await self.session.refresh(ticket)
         logger.info(
             "Service ticket reopened: %s by %s",
-            ticket.ticket_number, user_id,
+            ticket.ticket_number,
+            user_id,
         )
         event_bus.publish_detached(
             "service.ticket.reopened",
@@ -981,16 +974,12 @@ class ServiceService:
             res_mins = 0
             if ticket.response_due_at and ticket.response_due_at < now_iso:
                 try:
-                    resp_mins = int(
-                        (now_dt - _parse_iso(ticket.response_due_at)).total_seconds() // 60
-                    )
+                    resp_mins = int((now_dt - _parse_iso(ticket.response_due_at)).total_seconds() // 60)
                 except (ValueError, TypeError):
                     pass
             if ticket.resolution_due_at and ticket.resolution_due_at < now_iso:
                 try:
-                    res_mins = int(
-                        (now_dt - _parse_iso(ticket.resolution_due_at)).total_seconds() // 60
-                    )
+                    res_mins = int((now_dt - _parse_iso(ticket.resolution_due_at)).total_seconds() // 60)
                 except (ValueError, TypeError):
                     pass
             if resp_mins > 0 or res_mins > 0:
@@ -1091,7 +1080,9 @@ class ServiceService:
 
         await self.session.refresh(wo)
         logger.info(
-            "Work order created: %s for ticket %s", wo_number, ticket.ticket_number,
+            "Work order created: %s for ticket %s",
+            wo_number,
+            ticket.ticket_number,
         )
         event_bus.publish_detached(
             "service.work_order.created",
@@ -1109,11 +1100,7 @@ class ServiceService:
         work_order_id: uuid.UUID,
         data: WorkOrderItemCreate,
     ) -> ServiceWorkOrderItem:
-        total = (
-            data.total
-            if data.total is not None
-            else (data.quantity * data.unit_rate).quantize(Decimal("0.01"))
-        )
+        total = data.total if data.total is not None else (data.quantity * data.unit_rate).quantize(Decimal("0.01"))
         item = ServiceWorkOrderItem(
             work_order_id=work_order_id,
             item_type=data.item_type,
@@ -1172,9 +1159,7 @@ class ServiceService:
             "status": "completed",
             "completed_at": _utcnow_iso(),
             "billed_amount": billed_amount,
-            "debrief_summary": (
-                body.debrief.solution[:1000] if body.debrief.solution else wo.debrief_summary
-            ),
+            "debrief_summary": (body.debrief.solution[:1000] if body.debrief.solution else wo.debrief_summary),
         }
         if body.customer_signature is not None:
             update_fields["customer_signature"] = body.customer_signature
@@ -1196,7 +1181,8 @@ class ServiceService:
         await self.session.refresh(wo)
         logger.info(
             "Work order completed: %s (billed_amount=%s)",
-            wo.work_order_number, billed_amount,
+            wo.work_order_number,
+            billed_amount,
         )
         event_bus.publish_detached(
             "service.work_order.completed",
@@ -1291,10 +1277,7 @@ class ServiceService:
 
         # Sub-task cascade: all siblings must be in a terminal-like state
         sibling_wos = await self.work_order_repo.list_for_ticket(wo.ticket_id)
-        open_siblings = [
-            s for s in sibling_wos
-            if s.id != wo_id and s.status not in _WO_TERMINAL_LIKE
-        ]
+        open_siblings = [s for s in sibling_wos if s.id != wo_id and s.status not in _WO_TERMINAL_LIKE]
         if open_siblings:
             nums = ", ".join(s.work_order_number for s in open_siblings[:5])
             raise HTTPException(
@@ -1484,9 +1467,7 @@ class ServiceService:
                 ServiceWorkOrder.status.in_(("scheduled", "dispatched", "in_progress")),
             )
         )
-        scheduled_work_orders = int(
-            (await self.session.execute(scheduled_wo_stmt)).scalar_one()
-        )
+        scheduled_work_orders = int((await self.session.execute(scheduled_wo_stmt)).scalar_one())
 
         # completed_at is stored full-ISO ("…T…+00:00"); compare against a
         # matching full-ISO bound (not a bare date) so the string ordering is
@@ -1511,9 +1492,7 @@ class ServiceService:
                 ServiceWorkOrder.completed_at >= thirty_days_ago,
             )
         )
-        completed_wo_count_raw, billed_amount_raw = (
-            await self.session.execute(completed_wo_stmt)
-        ).one()
+        completed_wo_count_raw, billed_amount_raw = (await self.session.execute(completed_wo_stmt)).one()
         completed_wo_count = int(completed_wo_count_raw)
         billed_amount_total = Decimal(billed_amount_raw or 0)
 
@@ -1525,9 +1504,7 @@ class ServiceService:
                 start = datetime.fromisoformat(contract.period_start)
                 end = datetime.fromisoformat(contract.period_end)
                 months = max(1, (end.year - start.year) * 12 + (end.month - start.month))
-                monthly_revenue = (Decimal(contract.value) / Decimal(months)).quantize(
-                    Decimal("0.01")
-                )
+                monthly_revenue = (Decimal(contract.value) / Decimal(months)).quantize(Decimal("0.01"))
             except (ValueError, TypeError):
                 pass
 
@@ -1610,9 +1587,7 @@ class ServiceService:
                 due_dt = _parse_iso(ticket.sla_due_at) if ticket.sla_due_at else None
             except (ValueError, TypeError):
                 continue
-            minutes_overdue = (
-                int((now_dt - due_dt).total_seconds() // 60) if due_dt else 0
-            )
+            minutes_overdue = int((now_dt - due_dt).total_seconds() // 60) if due_dt else 0
             breaches.append(
                 SLABreachEntry(
                     ticket_id=ticket.id,
@@ -1627,7 +1602,8 @@ class ServiceService:
 
             if notify and ticket.sla_breach_notified_at is None:
                 await self.ticket_repo.update_fields(
-                    ticket.id, sla_breach_notified_at=now_iso,
+                    ticket.id,
+                    sla_breach_notified_at=now_iso,
                 )
                 newly_notified += 1
                 event_bus.publish_detached(
@@ -1672,10 +1648,7 @@ class ServiceService:
         if contract.project_id is None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    "NCR requires a project-scoped contract. "
-                    f"Contract {contract.contract_number} has no project."
-                ),
+                detail=(f"NCR requires a project-scoped contract. Contract {contract.contract_number} has no project."),
             )
 
         # Late import to avoid pulling NCR into service-module import graph.
@@ -1725,7 +1698,9 @@ class ServiceService:
         )
         logger.info(
             "NCR filed from work order: %s → %s (project=%s)",
-            wo.work_order_number, ncr_number, contract.project_id,
+            wo.work_order_number,
+            ncr_number,
+            contract.project_id,
         )
         return NCRFromWorkOrderResponse(
             ncr_id=ncr.id,
@@ -1792,7 +1767,9 @@ class ServiceService:
     # ── T10: SLA breach detector (priority-driven, dateutil-free) ────────
 
     async def check_breaches(
-        self, *, contract_id: uuid.UUID | None = None,
+        self,
+        *,
+        contract_id: uuid.UUID | None = None,
     ) -> SLABreachCheckResponse:
         """Find tickets whose ``sla_due_at`` is past and stamp ``sla_breached_at``.
 
@@ -1862,9 +1839,7 @@ class ServiceService:
         )
         if contract_id is not None:
             total_stmt = total_stmt.where(ServiceTicket.contract_id == contract_id)
-        total_breached = len(
-            list((await self.session.execute(total_stmt)).scalars().all())
-        )
+        total_breached = len(list((await self.session.execute(total_stmt)).scalars().all()))
 
         return SLABreachCheckResponse(
             checked_at=now_iso,
@@ -1909,7 +1884,8 @@ class ServiceService:
         return candidate
 
     async def create_recurring(
-        self, data: RecurringScheduleCreate,
+        self,
+        data: RecurringScheduleCreate,
     ) -> ServiceRecurringSchedule:
         """Persist a recurring schedule and compute its first ``next_run_at``."""
         # If contract scope is set, validate the contract exists so the user
@@ -1953,7 +1929,8 @@ class ServiceService:
         return sched
 
     async def get_recurring(
-        self, schedule_id: uuid.UUID,
+        self,
+        schedule_id: uuid.UUID,
     ) -> ServiceRecurringSchedule:
         sched = await self.recurring_repo.get_by_id(schedule_id)
         if sched is None:
@@ -2030,9 +2007,7 @@ class ServiceService:
         # required, taken from the template payload or — when the schedule
         # itself carries one — from the schedule row.
         template = dict(sched.template_ticket_data or {})
-        contract_id_raw = template.get("contract_id") or (
-            str(sched.contract_id) if sched.contract_id else None
-        )
+        contract_id_raw = template.get("contract_id") or (str(sched.contract_id) if sched.contract_id else None)
         if not contract_id_raw:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -2042,10 +2017,7 @@ class ServiceService:
         try:
             ticket_create = ServiceTicketCreate(
                 contract_id=uuid.UUID(str(contract_id_raw)),
-                asset_id=(
-                    uuid.UUID(str(template["asset_id"]))
-                    if template.get("asset_id") else None
-                ),
+                asset_id=(uuid.UUID(str(template["asset_id"])) if template.get("asset_id") else None),
                 title=str(template.get("title") or sched.name),
                 description=str(template.get("description") or ""),
                 priority=str(template.get("priority") or "med"),
@@ -2072,7 +2044,8 @@ class ServiceService:
         # Backfill the schedule link on the ticket so the dashboard can list
         # "tickets from this schedule" without an extra metadata round-trip.
         await self.ticket_repo.update_fields(
-            ticket_id, recurring_schedule_id=sched_id,
+            ticket_id,
+            recurring_schedule_id=sched_id,
         )
 
         # Advance next_run_at via the RRULE, anchored at the *previous*

@@ -59,6 +59,7 @@ async def _safe_audit(
     except Exception:
         _logger_audit.debug("Audit log write skipped for %s %s", action, entity_type)
 
+
 # ── Allowed meeting status transitions ────────────────────────────────────────
 
 _MEETING_STATUS_TRANSITIONS: dict[str, set[str]] = {
@@ -142,10 +143,7 @@ class MeetingService:
         if bad:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
-                    "document_ids reference documents that do not belong "
-                    f"to project {project_id}: {bad}"
-                ),
+                detail=(f"document_ids reference documents that do not belong to project {project_id}: {bad}"),
             )
 
     # ── Create ────────────────────────────────────────────────────────────
@@ -162,7 +160,8 @@ class MeetingService:
         # FKs and leaks the *existence* of foreign documents into the
         # meeting payload.  Same rule on update_meeting below.
         await self._reject_foreign_document_ids(
-            data.project_id, [str(x) for x in data.document_ids],
+            data.project_id,
+            [str(x) for x in data.document_ids],
         )
 
         meeting_number = await self.repo.next_meeting_number(data.project_id)
@@ -286,10 +285,7 @@ class MeetingService:
         # Convert Pydantic models to dicts for JSON columns
         for key in ("attendees", "agenda_items", "action_items"):
             if key in fields and fields[key] is not None:
-                fields[key] = [
-                    entry.model_dump() if hasattr(entry, "model_dump") else entry
-                    for entry in fields[key]
-                ]
+                fields[key] = [entry.model_dump() if hasattr(entry, "model_dump") else entry for entry in fields[key]]
 
         # Stringify + deduplicate document_ids for JSON storage
         if "document_ids" in fields and fields["document_ids"] is not None:
@@ -303,7 +299,8 @@ class MeetingService:
             fields["document_ids"] = deduped
             # Same per-project integrity gate as create_meeting.
             await self._reject_foreign_document_ids(
-                meeting.project_id, deduped,
+                meeting.project_id,
+                deduped,
             )
 
         if not fields:
@@ -333,19 +330,19 @@ class MeetingService:
             from app.modules.tasks.models import Task
 
             result = await self.session.execute(
-                _update(Task)
-                .where(Task.meeting_id == str(meeting_id))
-                .values(meeting_id=None)
+                _update(Task).where(Task.meeting_id == str(meeting_id)).values(meeting_id=None)
             )
             if result.rowcount:
                 logger.info(
                     "Cleared meeting_id on %d tasks before deleting meeting %s",
-                    result.rowcount, meeting_id,
+                    result.rowcount,
+                    meeting_id,
                 )
         except Exception as exc:  # best-effort cleanup
             logger.warning(
                 "Failed to scrub task.meeting_id refs for meeting %s: %s",
-                meeting_id, exc,
+                meeting_id,
+                exc,
             )
 
         await self.repo.delete(meeting_id)
@@ -399,11 +396,7 @@ class MeetingService:
         # response surface the real success/failure breakdown so the
         # UI can show "3 of 5 tasks created" instead of lying.
         action_items = meeting.action_items or []
-        open_actions = [
-            ai
-            for ai in action_items
-            if isinstance(ai, dict) and ai.get("status", "open") == "open"
-        ]
+        open_actions = [ai for ai in action_items if isinstance(ai, dict) and ai.get("status", "open") == "open"]
         created_action_items: list[dict] = []
         failed_action_items: list[dict] = []
 
@@ -416,10 +409,7 @@ class MeetingService:
                         project_id=meeting.project_id,
                         task_type="task",
                         title=ai.get("description", "Action item from meeting")[:500],
-                        description=(
-                            f"Auto-created from meeting {meeting.meeting_number}: "
-                            f"{meeting.title}"
-                        ),
+                        description=(f"Auto-created from meeting {meeting.meeting_number}: {meeting.title}"),
                         responsible_id=ai.get("owner_id"),
                         due_date=ai.get("due_date"),
                         meeting_id=str(meeting.id),
@@ -441,8 +431,7 @@ class MeetingService:
                     failed_action_items.append({**ai, "error": str(exc)})
 
             logger.info(
-                "Meeting %s: %d/%d tasks created from action items "
-                "(%d failed)",
+                "Meeting %s: %d/%d tasks created from action items (%d failed)",
                 meeting.meeting_number,
                 len(created_action_items),
                 len(open_actions),
@@ -590,10 +579,13 @@ class MeetingService:
         occurrences: list[Meeting] = []
         if data.materialize_until:
             until_dt = datetime.strptime(
-                data.materialize_until, "%Y-%m-%d",
+                data.materialize_until,
+                "%Y-%m-%d",
             ).replace(tzinfo=UTC)
             occurrences = await self.generate_occurrences(
-                str(master.id), until_dt, user_id=user_id,
+                str(master.id),
+                until_dt,
+                user_id=user_id,
             )
 
         return master, occurrences
@@ -612,18 +604,13 @@ class MeetingService:
         master, not pre-existing rows).
         """
         # Load master + existing occurrences in one query.
-        result = await self.session.execute(
-            select(Meeting).where(Meeting.series_id == series_id)
-        )
+        result = await self.session.execute(select(Meeting).where(Meeting.series_id == series_id))
         existing = result.scalars().all()
         master = next((m for m in existing if m.is_series_master), None)
         if master is None or not master.recurrence_rule:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=(
-                    "Series master not found or has no recurrence_rule "
-                    f"(series_id={series_id})"
-                ),
+                detail=(f"Series master not found or has no recurrence_rule (series_id={series_id})"),
             )
 
         already_have_dates: set[str] = {m.meeting_date for m in existing}
@@ -631,7 +618,8 @@ class MeetingService:
         # Anchor at the master meeting_date so DTSTART is implicit.
         try:
             start_dt = datetime.strptime(
-                master.meeting_date, "%Y-%m-%d",
+                master.meeting_date,
+                "%Y-%m-%d",
             ).replace(tzinfo=UTC)
         except ValueError as exc:
             raise HTTPException(
@@ -661,7 +649,7 @@ class MeetingService:
                 meeting_date=date_str,
                 location=master.location,
                 chairperson_id=master.chairperson_id,
-                attendees=[],   # occurrences start with empty rolls
+                attendees=[],  # occurrences start with empty rolls
                 agenda_items=[],
                 action_items=[],
                 minutes=None,
@@ -681,7 +669,9 @@ class MeetingService:
 
         logger.info(
             "Series %s materialised %d new occurrences (until=%s)",
-            series_id, len(new_occurrences), until.date(),
+            series_id,
+            len(new_occurrences),
+            until.date(),
         )
         return new_occurrences
 
@@ -712,7 +702,8 @@ class MeetingService:
         sig_path: str | None = None
         if signature_image_data:
             sig_path = await _save_signature_image(
-                meeting_id, signature_image_data,
+                meeting_id,
+                signature_image_data,
             )
 
         now = datetime.now(UTC)
@@ -751,7 +742,8 @@ class MeetingService:
         sig_path: str | None = None
         if signature_image_data:
             sig_path = await _save_signature_image(
-                meeting_id, signature_image_data,
+                meeting_id,
+                signature_image_data,
             )
 
         row = MeetingAttendance(
@@ -792,7 +784,9 @@ _WEEKDAY_MAP = {"MO": 0, "TU": 1, "WE": 2, "TH": 3, "FR": 4, "SA": 5, "SU": 6}
 
 
 def _expand_rrule(
-    rule: str, start: datetime, until: datetime,
+    rule: str,
+    start: datetime,
+    until: datetime,
 ) -> list[datetime]:
     """Expand an RRULE string into a list of datetimes ≤ ``until``.
 
@@ -831,16 +825,13 @@ def _expand_rrule(
     if "UNTIL" in parts:
         try:
             rule_until = datetime.strptime(
-                parts["UNTIL"][:8], "%Y%m%d",
+                parts["UNTIL"][:8],
+                "%Y%m%d",
             ).replace(tzinfo=UTC)
         except ValueError as exc:
             raise _RRuleError(f"bad UNTIL: {parts['UNTIL']}") from exc
 
-    bydays = (
-        [_WEEKDAY_MAP[d] for d in parts["BYDAY"].split(",") if d in _WEEKDAY_MAP]
-        if "BYDAY" in parts
-        else []
-    )
+    bydays = [_WEEKDAY_MAP[d] for d in parts["BYDAY"].split(",") if d in _WEEKDAY_MAP] if "BYDAY" in parts else []
 
     horizon = until if rule_until is None else min(until, rule_until)
     results: list[datetime] = []
@@ -908,6 +899,7 @@ _SIGNATURE_DIR_ENV = "MEETING_SIGNATURE_DIR"
 
 def _signature_dir() -> Path:
     import os
+
     base = os.environ.get(_SIGNATURE_DIR_ENV)
     if base:
         return Path(base)
@@ -917,7 +909,8 @@ def _signature_dir() -> Path:
 
 
 async def _save_signature_image(
-    meeting_id: uuid.UUID, data: str,
+    meeting_id: uuid.UUID,
+    data: str,
 ) -> str:
     """Decode + persist a signature image, return the saved file path.
 

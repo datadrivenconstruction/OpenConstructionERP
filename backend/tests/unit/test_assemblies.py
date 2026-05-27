@@ -249,9 +249,7 @@ async def test_component_update_round_trip_reads_back(session):
     from app.modules.assemblies.schemas import ComponentUpdate
     from app.modules.assemblies.service import _str_to_float
 
-    updated = await svc.update_component(
-        asm.id, comp.id, ComponentUpdate(quantity=5.0)
-    )
+    updated = await svc.update_component(asm.id, comp.id, ComponentUpdate(quantity=5.0))
     assert _str_to_float(updated.quantity) == pytest.approx(5.0)
     assert _str_to_float(updated.total) == pytest.approx(50.0)  # 1*5*10
     full = await svc.get_assembly_with_components(asm.id)
@@ -274,11 +272,7 @@ def test_component_repo_update_fields_has_no_global_expire():
     func = tree.body[0]
     # Drop the leading docstring expression before scanning the body.
     body = func.body
-    if (
-        body
-        and isinstance(body[0], ast.Expr)
-        and isinstance(body[0].value, ast.Constant)
-    ):
+    if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant):
         body = body[1:]
     code_only = "\n".join(ast.dump(n) for n in body)
     assert "expire_all" not in code_only
@@ -311,9 +305,7 @@ async def test_apply_to_boq_currency_mismatch_no_rate_flags_not_blocks(session):
     await session.flush()
 
     # No exception — the apply succeeds.
-    pos = await svc.apply_to_boq(
-        asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=1.0)
-    )
+    pos = await svc.apply_to_boq(asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=1.0))
     meta = getattr(pos, "metadata_", {}) or {}
     assert "currency_mismatch" in meta
     assert "currency_converted" not in meta
@@ -357,9 +349,7 @@ async def test_apply_to_boq_converts_when_fx_rate_present(session):
         ComponentCreate(unit="m", description="c", factor=1.0, quantity=1.0, unit_cost=100.0),
     )
 
-    pos = await svc.apply_to_boq(
-        asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=1.0)
-    )
+    pos = await svc.apply_to_boq(asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=1.0))
     meta = getattr(pos, "metadata_", {}) or {}
     assert "currency_converted" in meta
     assert "currency_mismatch" not in meta
@@ -390,9 +380,7 @@ async def test_apply_to_boq_same_currency_ok(session):
     boq = BOQ(project_id=PROJECT_ID, name="B2")
     session.add(boq)
     await session.flush()
-    pos = await svc.apply_to_boq(
-        asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=2.0)
-    )
+    pos = await svc.apply_to_boq(asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=2.0))
     meta = getattr(pos, "metadata_", {}) or {}
     assert "currency_mismatch" not in meta
 
@@ -417,9 +405,7 @@ def test_formula_if_with_func_branch():
 
 def test_formula_lookup_and_params():
     ev = FormulaEvaluator()
-    r = ev.evaluate(
-        'lookup("w", "HEB300") * ${n}', {"n": 2}, {"w": {"HEB300": 117.7}}
-    )
+    r = ev.evaluate('lookup("w", "HEB300") * ${n}', {"n": 2}, {"w": {"HEB300": 117.7}})
     assert r == pytest.approx(235.4)
 
 
@@ -485,9 +471,7 @@ async def test_apply_to_boq_drops_non_finite_regional_factor(session):
     from app.modules.assemblies.models import Assembly as AsmModel
 
     await session.execute(
-        sa_update(AsmModel)
-        .where(AsmModel.id == asm.id)
-        .values(regional_factors={"berlin": "Infinity", "muc": "1.10"})
+        sa_update(AsmModel).where(AsmModel.id == asm.id).values(regional_factors={"berlin": "Infinity", "muc": "1.10"})
     )
     await session.flush()
 
@@ -497,9 +481,7 @@ async def test_apply_to_boq_drops_non_finite_regional_factor(session):
     session.add(boq)
     await session.flush()
 
-    pos = await svc.apply_to_boq(
-        asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=1.0, region="berlin")
-    )
+    pos = await svc.apply_to_boq(asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=1.0, region="berlin"))
     from app.modules.assemblies.service import _str_to_float
 
     # The non-finite Berlin factor was silently dropped → base rate 100.
@@ -534,9 +516,7 @@ async def test_apply_to_boq_valid_regional_factor_still_applies(session):
     boq = BOQ(project_id=PROJECT_ID, name="RFB2")
     session.add(boq)
     await session.flush()
-    pos = await svc.apply_to_boq(
-        asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=1.0, region="muc")
-    )
+    pos = await svc.apply_to_boq(asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=1.0, region="muc"))
     from app.modules.assemblies.service import _str_to_float
 
     # 100 × 1.10 = 110.

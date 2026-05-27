@@ -143,7 +143,11 @@ def level_by_resource_max(
         ceiling = earliest + sum(max(0, x.duration) for x in activities.values()) + 1
         start = earliest
         while start <= ceiling and not _can_place(
-            aid, start, activities, schedule, resource_limits,
+            aid,
+            start,
+            activities,
+            schedule,
+            resource_limits,
         ):
             start += 1
         schedule[aid] = (start, start + max(0, a.duration))

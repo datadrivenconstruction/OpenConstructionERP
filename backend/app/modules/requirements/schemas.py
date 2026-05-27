@@ -259,9 +259,7 @@ class DeliverableCreate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    deliverable_type: str = Field(
-        ..., pattern=_DELIVERABLE_TYPE_PATTERN, max_length=64
-    )
+    deliverable_type: str = Field(..., pattern=_DELIVERABLE_TYPE_PATTERN, max_length=64)
     lod: str | None = Field(default=None, pattern=_LOD_PATTERN)
     loi: str | None = Field(default=None, pattern=_LOI_PATTERN)
     due_milestone_id: UUID | None = None
@@ -275,9 +273,7 @@ class DeliverableUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    deliverable_type: str | None = Field(
-        default=None, pattern=_DELIVERABLE_TYPE_PATTERN, max_length=64
-    )
+    deliverable_type: str | None = Field(default=None, pattern=_DELIVERABLE_TYPE_PATTERN, max_length=64)
     lod: str | None = Field(default=None, pattern=_LOD_PATTERN)
     loi: str | None = Field(default=None, pattern=_LOI_PATTERN)
     due_milestone_id: UUID | None = None

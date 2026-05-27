@@ -64,9 +64,7 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column("name", sa.String(length=255), nullable=False),
-            sa.Column(
-                "model_ids", sa.JSON(), nullable=False, server_default="[]"
-            ),
+            sa.Column("model_ids", sa.JSON(), nullable=False, server_default="[]"),
             sa.Column(
                 "tolerance_m",
                 sa.Float(),
@@ -105,13 +103,9 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="0",
             ),
-            sa.Column(
-                "summary", sa.JSON(), nullable=False, server_default="{}"
-            ),
+            sa.Column("summary", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column("created_by", sa.String(length=64), nullable=False),
-            sa.Column(
-                "completed_at", sa.DateTime(timezone=True), nullable=True
-            ),
+            sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
         )
         op.create_index("ix_clash_run_project", _RUN, ["project_id"])
 
@@ -198,9 +192,7 @@ def upgrade() -> None:
             sa.Column("bcf_topic_guid", sa.String(length=36), nullable=True),
         )
         op.create_index("ix_clash_result_run", _RESULT, ["run_id"])
-        op.create_index(
-            "ix_clash_result_run_status", _RESULT, ["run_id", "status"]
-        )
+        op.create_index("ix_clash_result_run_status", _RESULT, ["run_id", "status"])
         op.create_index(
             "ix_clash_result_run_disc",
             _RESULT,

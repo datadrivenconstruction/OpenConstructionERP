@@ -204,15 +204,9 @@ def depreciation_value_at(
     if method in ("declining_balance", "double_declining"):
         # Double-declining-balance with switch to straight-line in the
         # final 12 months so the unit lands on residual_value.
-        rate = (
-            declining_balance_rate
-            if declining_balance_rate is not None
-            else Decimal("2") / Decimal(useful_life)
-        )
+        rate = declining_balance_rate if declining_balance_rate is not None else Decimal("2") / Decimal(useful_life)
         if rate <= 0 or rate > 1:
-            raise ValueError(
-                f"declining_balance_rate must be in (0, 1], got {rate}"
-            )
+            raise ValueError(f"declining_balance_rate must be in (0, 1], got {rate}")
         # Number of full years elapsed plus the day fraction of the
         # in-progress year.
         elapsed_years_int = elapsed_days // 365
@@ -285,7 +279,8 @@ class EquipmentService:
 
     async def delete_type(self, type_id: uuid.UUID) -> None:
         """Delete an equipment type. Blocks if any Equipment still references it."""
-        from sqlalchemy import func as _sa_func, select as _sa_select
+        from sqlalchemy import func as _sa_func
+        from sqlalchemy import select as _sa_select
 
         t = await self.type_repo.get_by_id(type_id)
         if t is None:
@@ -297,17 +292,12 @@ class EquipmentService:
         # otherwise we'd orphan the FK reference (it's a string code, not a
         # DB-level FK).
         ref_count = await self.session.scalar(
-            _sa_select(_sa_func.count())
-            .select_from(Equipment)
-            .where(Equipment.type_code == t.code)
+            _sa_select(_sa_func.count()).select_from(Equipment).where(Equipment.type_code == t.code)
         )
         if ref_count and ref_count > 0:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    f"Cannot delete type '{t.code}': {ref_count} equipment "
-                    "unit(s) still reference it"
-                ),
+                detail=(f"Cannot delete type '{t.code}': {ref_count} equipment unit(s) still reference it"),
             )
         await self.type_repo.delete(type_id)
 
@@ -409,12 +399,8 @@ class EquipmentService:
                         if hasattr(data.recorded_at, "isoformat")
                         else str(data.recorded_at)
                     ),
-                    "hour_meter": (
-                        str(data.hour_meter) if data.hour_meter is not None else None
-                    ),
-                    "odometer_km": (
-                        str(data.odometer_km) if data.odometer_km is not None else None
-                    ),
+                    "hour_meter": (str(data.hour_meter) if data.hour_meter is not None else None),
+                    "odometer_km": (str(data.odometer_km) if data.odometer_km is not None else None),
                     "engine_status": data.engine_status,
                 },
                 source_module="equipment",
@@ -426,12 +412,14 @@ class EquipmentService:
             # to also remember to ask the maintenance team to schedule.
             try:
                 await self.generate_due_work_orders(
-                    equipment_id=equipment_id, lookahead_hours=50.0,
+                    equipment_id=equipment_id,
+                    lookahead_hours=50.0,
                 )
             except Exception:
                 logger.debug(
                     "telemetry post-trigger WO generation failed for %s",
-                    equipment_id, exc_info=True,
+                    equipment_id,
+                    exc_info=True,
                 )
 
         return reading
@@ -496,15 +484,11 @@ class EquipmentService:
             scheduled_for = today_iso
 
             if schedule.trigger_type == "hours" and schedule.next_due_meter is not None:
-                remaining = Decimal(str(schedule.next_due_meter)) - Decimal(
-                    str(equipment.hour_meter or 0)
-                )
+                remaining = Decimal(str(schedule.next_due_meter)) - Decimal(str(equipment.hour_meter or 0))
                 if remaining <= Decimal(str(lookahead_hours)):
                     due_now = True
             elif schedule.trigger_type == "km" and schedule.next_due_meter is not None:
-                remaining = Decimal(str(schedule.next_due_meter)) - Decimal(
-                    str(equipment.odometer_km or 0)
-                )
+                remaining = Decimal(str(schedule.next_due_meter)) - Decimal(str(equipment.odometer_km or 0))
                 # Use the same lookahead magnitude for km (treat 50 hours ≈ 50 km).
                 if remaining <= Decimal(str(lookahead_hours)):
                     due_now = True
@@ -650,10 +634,7 @@ class EquipmentService:
             if cur is None or insp.valid_until > cur.valid_until:
                 latest[insp.inspection_type] = insp
 
-        return {
-            t: insp.valid_until < today_iso
-            for t, insp in latest.items()
-        }
+        return {t: insp.valid_until < today_iso for t, insp in latest.items()}
 
     async def expiring_inspections(self, days: int = 30) -> list[Inspection]:
         today = date.today().isoformat()
@@ -700,8 +681,7 @@ class EquipmentService:
         """
         if await self.is_blocked_from_assignment(equipment_id):
             raise ValueError(
-                f"Equipment {equipment_id} is blocked from assignment "
-                "(status != active or inspection expired)"
+                f"Equipment {equipment_id} is blocked from assignment (status != active or inspection expired)"
             )
 
         # A rental whose end precedes its start has a negative billing
@@ -709,9 +689,7 @@ class EquipmentService:
         # never registers as utilized. Reject it at the boundary instead
         # of persisting a corrupt record.
         if end_date is not None and end_date < start_date:
-            raise ValueError(
-                f"Rental end_date {end_date} is before start_date {start_date}"
-            )
+            raise ValueError(f"Rental end_date {end_date} is before start_date {start_date}")
 
         rental = EquipmentRental(
             equipment_id=equipment_id,
@@ -775,10 +753,7 @@ class EquipmentService:
         if rental.start_date and end_iso < rental.start_date:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    f"Return date {end_iso} is before the rental start "
-                    f"date {rental.start_date}"
-                ),
+                detail=(f"Return date {end_iso} is before the rental start date {rental.start_date}"),
             )
         await self.rental_repo.update_fields(
             rental_id,
@@ -802,7 +777,9 @@ class EquipmentService:
         ``end_date IS NULL`` or ``end_date >= D``.
         """
         rentals, _ = await self.rental_repo.list_(
-            equipment_id=equipment_id, status="active", limit=10,
+            equipment_id=equipment_id,
+            status="active",
+            limit=10,
         )
         if not rentals:
             return None
@@ -827,7 +804,8 @@ class EquipmentService:
         entity = await self.fuel_repo.create(entity)
 
         project_id = await self._active_rental_project_id(
-            data.equipment_id, on_date=data.logged_at,
+            data.equipment_id,
+            on_date=data.logged_at,
         )
         event_bus.publish_detached(
             "equipment.fuel_logged",
@@ -858,11 +836,10 @@ class EquipmentService:
 
         ref = data.logged_at or date.today().isoformat()
         project_id = await self._active_rental_project_id(
-            data.equipment_id, on_date=ref,
+            data.equipment_id,
+            on_date=ref,
         )
-        line_total = (Decimal(str(data.quantity or 0)) * Decimal(str(data.unit_cost or 0))).quantize(
-            Decimal("0.0001")
-        )
+        line_total = (Decimal(str(data.quantity or 0)) * Decimal(str(data.unit_cost or 0))).quantize(Decimal("0.0001"))
         event_bus.publish_detached(
             "equipment.parts_logged",
             {
@@ -948,16 +925,12 @@ class EquipmentService:
         month_start = today.replace(day=1).isoformat()
         today_iso = today.isoformat()
 
-        fuel_cost_mtd = await self.fuel_repo.cost_in_range(
-            month_start, today_iso, equipment_id=equipment_id
-        )
+        fuel_cost_mtd = await self.fuel_repo.cost_in_range(month_start, today_iso, equipment_id=equipment_id)
         open_wo = await self.workorder_repo.count_open_for_equipment(equipment_id)
         expiring = await self.inspection_repo.expiring_within(today_iso, 30)
         expiring_for_unit = sum(1 for i in expiring if i.equipment_id == equipment_id)
         blocked = await self.is_blocked_from_assignment(equipment_id, today=today_iso)
-        utilization = await utilization_for_equipment(
-            self.session, equipment_id, month_start, today_iso
-        )
+        utilization = await utilization_for_equipment(self.session, equipment_id, month_start, today_iso)
 
         return EquipmentDashboardResponse(
             equipment_id=equipment_id,

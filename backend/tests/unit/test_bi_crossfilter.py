@@ -39,7 +39,8 @@ async def session() -> AsyncSession:
     from app.modules.bi_dashboards import models as _m
 
     engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:", echo=False,
+        "sqlite+aiosqlite:///:memory:",
+        echo=False,
     )
     tables = [
         _m.KPIDefinition.__table__,
@@ -124,7 +125,8 @@ async def _make_dashboard_with_widget(
 
 @pytest.mark.asyncio
 async def test_evaluate_off_path_ignores_filters(
-    session: AsyncSession, monkeypatch: pytest.MonkeyPatch,
+    session: AsyncSession,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """cross_filter_enabled=False -> compute called with no kwargs even when
     caller supplies a filter dict. Forward-compat contract."""
@@ -135,11 +137,13 @@ async def test_evaluate_off_path_ignores_filters(
     monkeypatch.setattr(_kpis, "compute", spy)
 
     dashboard_id, _ = await _make_dashboard_with_widget(
-        session, cross_filter=False,
+        session,
+        cross_filter=False,
     )
     svc = BIDashboardsService(session)
     response = await svc.evaluate_dashboard(
-        dashboard_id, filters={"project_id": str(uuid.uuid4())},
+        dashboard_id,
+        filters={"project_id": str(uuid.uuid4())},
     )
 
     assert response is not None
@@ -158,7 +162,8 @@ async def test_evaluate_off_path_ignores_filters(
 
 @pytest.mark.asyncio
 async def test_evaluate_on_path_propagates_filters(
-    session: AsyncSession, monkeypatch: pytest.MonkeyPatch,
+    session: AsyncSession,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """cross_filter_enabled=True -> filters propagate. project_id and
     period bounds are lifted to typed kwargs; the rest go into filters="""
@@ -170,7 +175,8 @@ async def test_evaluate_on_path_propagates_filters(
 
     project_uuid = uuid.uuid4()
     dashboard_id, _ = await _make_dashboard_with_widget(
-        session, cross_filter=True,
+        session,
+        cross_filter=True,
     )
     svc = BIDashboardsService(session)
     response = await svc.evaluate_dashboard(
@@ -198,7 +204,8 @@ async def test_evaluate_on_path_propagates_filters(
 
 @pytest.mark.asyncio
 async def test_evaluate_unknown_filter_keys_are_passed_through(
-    session: AsyncSession, monkeypatch: pytest.MonkeyPatch,
+    session: AsyncSession,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Unknown filter keys (no first-class kwarg + no KPI handler) must
     not 500 — they ride along in ``filters=`` and each KPI ignores
@@ -210,7 +217,8 @@ async def test_evaluate_unknown_filter_keys_are_passed_through(
     monkeypatch.setattr(_kpis, "compute", spy)
 
     dashboard_id, _ = await _make_dashboard_with_widget(
-        session, cross_filter=True,
+        session,
+        cross_filter=True,
     )
     svc = BIDashboardsService(session)
     response = await svc.evaluate_dashboard(
@@ -254,7 +262,9 @@ async def test_widget_drill_path_round_trips(session: AsyncSession) -> None:
         "filter_value_from": "row.project_id",
     }
     dashboard_id, widget_id = await _make_dashboard_with_widget(
-        session, cross_filter=True, drill_path=drill_path,
+        session,
+        cross_filter=True,
+        drill_path=drill_path,
     )
     svc = BIDashboardsService(session)
     response = await svc.evaluate_dashboard(dashboard_id, filters=None)

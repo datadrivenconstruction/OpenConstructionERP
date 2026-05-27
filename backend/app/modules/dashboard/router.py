@@ -73,10 +73,7 @@ async def get_rollup(
     session: SessionDep,
     widgets: str | None = Query(
         default=None,
-        description=(
-            "Comma-separated widget IDs to include. Omit for all 10. "
-            "Unknown ids are silently ignored."
-        ),
+        description=("Comma-separated widget IDs to include. Omit for all 10. Unknown ids are silently ignored."),
     ),
     project_ids: str | None = Query(
         default=None,
@@ -106,7 +103,8 @@ async def get_rollup(
     # and the 304 short-circuit never fires.
     etag_basis = json.dumps(
         {"u": user_id, "w": requested_widgets, "p": payload},
-        sort_keys=True, default=str,
+        sort_keys=True,
+        default=str,
     )
     etag = '"' + hashlib.sha256(etag_basis.encode("utf-8")).hexdigest()[:16] + '"'
 

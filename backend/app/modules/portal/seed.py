@@ -134,8 +134,7 @@ async def seed_portal_demo(
             resource_type = _RESOURCE_TYPES[(u_idx + r_idx) % len(_RESOURCE_TYPES)]
             project_id = project_pool[r_idx % len(project_pool)]
             resource_id = (
-                project_id if resource_type == "project"
-                else _det_uuid(f"res-{user.email}-{resource_type}-{r_idx}")
+                project_id if resource_type == "project" else _det_uuid(f"res-{user.email}-{resource_type}-{r_idx}")
             )
             permission = ("view", "comment", "submit", "sign")[r_idx % 4]
             rule = PortalAccessRule(

@@ -148,9 +148,7 @@ async def test_empty_federation_returns_empty_classes(session: AsyncSession) -> 
     """A federation with zero members must yield a well-formed empty payload."""
     project_id: uuid.UUID = session.info["project_a_id"]
     service = BIMHubService(session)
-    fed = await service.create_federation(
-        FederationCreate(project_id=project_id, name="Empty fed")
-    )
+    fed = await service.create_federation(FederationCreate(project_id=project_id, name="Empty fed"))
     await session.commit()
 
     tree = await service.aggregate_federation_type_tree(fed.id)
@@ -179,10 +177,7 @@ async def test_three_members_two_classes_correct_counts(
         project_id,
         name="ARCH",
         discipline="arch",
-        elements=(
-            [("IfcWall", {"FireRating": "F90"})] * 5
-            + [("IfcDoor", {"Material": "Wood"})] * 2
-        ),
+        elements=([("IfcWall", {"FireRating": "F90"})] * 5 + [("IfcDoor", {"Material": "Wood"})] * 2),
     )
     # STRUCT: 7 IfcWall
     m_struct = await _seed_model_with_elements(
@@ -202,7 +197,8 @@ async def test_three_members_two_classes_correct_counts(
     )
     for m, disc in [(m_arch, "arch"), (m_struct, "struct"), (m_mep, "mep")]:
         await service.add_federation_member(
-            fed.id, FederationModelAdd(bim_model_id=m.id, discipline=disc),
+            fed.id,
+            FederationModelAdd(bim_model_id=m.id, discipline=disc),
         )
     await session.commit()
 
@@ -229,20 +225,25 @@ async def test_per_class_breakdown_sums_to_class_total(
     """For each class, ``sum(member_breakdown.element_count) == element_count``."""
     project_id: uuid.UUID = session.info["project_a_id"]
     service = BIMHubService(session)
-    fed = await service.create_federation(
-        FederationCreate(project_id=project_id, name="Sum check")
-    )
+    fed = await service.create_federation(FederationCreate(project_id=project_id, name="Sum check"))
     m_a = await _seed_model_with_elements(
-        session, project_id, "ModelA", "arch",
+        session,
+        project_id,
+        "ModelA",
+        "arch",
         [("IfcWall", None)] * 4 + [("IfcSlab", None)] * 2,
     )
     m_b = await _seed_model_with_elements(
-        session, project_id, "ModelB", "struct",
+        session,
+        project_id,
+        "ModelB",
+        "struct",
         [("IfcWall", None)] * 6 + [("IfcSlab", None)] * 9,
     )
     for m, disc in [(m_a, "arch"), (m_b, "struct")]:
         await service.add_federation_member(
-            fed.id, FederationModelAdd(bim_model_id=m.id, discipline=disc),
+            fed.id,
+            FederationModelAdd(bim_model_id=m.id, discipline=disc),
         )
     await session.commit()
 
@@ -251,8 +252,7 @@ async def test_per_class_breakdown_sums_to_class_total(
     for cls in tree.classes:
         breakdown_sum = sum(m.element_count for m in cls.member_breakdown)
         assert breakdown_sum == cls.element_count, (
-            f"breakdown sum mismatch for {cls.ifc_class}: "
-            f"got {breakdown_sum}, expected {cls.element_count}"
+            f"breakdown sum mismatch for {cls.ifc_class}: got {breakdown_sum}, expected {cls.element_count}"
         )
     # Sanity: total_elements == sum across classes.
     assert tree.total_elements == sum(c.element_count for c in tree.classes)
@@ -268,25 +268,33 @@ async def test_member_breakdown_ordered_by_count_desc(
     """Per-class breakdown rows are sorted by element_count DESC, then model_name ASC."""
     project_id: uuid.UUID = session.info["project_a_id"]
     service = BIMHubService(session)
-    fed = await service.create_federation(
-        FederationCreate(project_id=project_id, name="Order")
-    )
+    fed = await service.create_federation(FederationCreate(project_id=project_id, name="Order"))
     # Three models with strictly decreasing wall counts.
     m_lo = await _seed_model_with_elements(
-        session, project_id, "MLO", "arch",
+        session,
+        project_id,
+        "MLO",
+        "arch",
         [("IfcWall", None)] * 1,
     )
     m_hi = await _seed_model_with_elements(
-        session, project_id, "MHI", "struct",
+        session,
+        project_id,
+        "MHI",
+        "struct",
         [("IfcWall", None)] * 9,
     )
     m_mid = await _seed_model_with_elements(
-        session, project_id, "MMID", "mep",
+        session,
+        project_id,
+        "MMID",
+        "mep",
         [("IfcWall", None)] * 5,
     )
     for m, disc in [(m_lo, "arch"), (m_hi, "struct"), (m_mid, "mep")]:
         await service.add_federation_member(
-            fed.id, FederationModelAdd(bim_model_id=m.id, discipline=disc),
+            fed.id,
+            FederationModelAdd(bim_model_id=m.id, discipline=disc),
         )
     await session.commit()
 
@@ -348,21 +356,26 @@ async def test_member_with_zero_elements_is_well_formed(
     """A member model whose elements were never imported must not crash the tree."""
     project_id: uuid.UUID = session.info["project_a_id"]
     service = BIMHubService(session)
-    fed = await service.create_federation(
-        FederationCreate(project_id=project_id, name="ZeroMember")
-    )
+    fed = await service.create_federation(FederationCreate(project_id=project_id, name="ZeroMember"))
     # One real member with elements, one empty member.
     m_real = await _seed_model_with_elements(
-        session, project_id, "Real", "arch",
+        session,
+        project_id,
+        "Real",
+        "arch",
         [("IfcWall", None)] * 3,
     )
     m_empty = await _seed_model_with_elements(
-        session, project_id, "Empty", "struct",
+        session,
+        project_id,
+        "Empty",
+        "struct",
         elements=[],
     )
     for m, disc in [(m_real, "arch"), (m_empty, "struct")]:
         await service.add_federation_member(
-            fed.id, FederationModelAdd(bim_model_id=m.id, discipline=disc),
+            fed.id,
+            FederationModelAdd(bim_model_id=m.id, discipline=disc),
         )
     await session.commit()
 
@@ -388,18 +401,23 @@ async def test_total_elements_matches_class_sum(session: AsyncSession) -> None:
         FederationCreate(project_id=project_id, name="TotalSum"),
     )
     m_a = await _seed_model_with_elements(
-        session, project_id, "A", "arch",
-        [("IfcWall", None)] * 2
-        + [("IfcDoor", None)] * 1
-        + [("IfcWindow", None)] * 3,
+        session,
+        project_id,
+        "A",
+        "arch",
+        [("IfcWall", None)] * 2 + [("IfcDoor", None)] * 1 + [("IfcWindow", None)] * 3,
     )
     m_b = await _seed_model_with_elements(
-        session, project_id, "B", "mep",
+        session,
+        project_id,
+        "B",
+        "mep",
         [("IfcDuctSegment", None)] * 8,
     )
     for m, disc in [(m_a, "arch"), (m_b, "mep")]:
         await service.add_federation_member(
-            fed.id, FederationModelAdd(bim_model_id=m.id, discipline=disc),
+            fed.id,
+            FederationModelAdd(bim_model_id=m.id, discipline=disc),
         )
     await session.commit()
 
@@ -424,11 +442,15 @@ async def test_sample_properties_surfaced(session: AsyncSession) -> None:
         FederationCreate(project_id=project_id, name="SampleProps"),
     )
     m = await _seed_model_with_elements(
-        session, project_id, "Sample", "arch",
+        session,
+        project_id,
+        "Sample",
+        "arch",
         [("IfcWall", {"FireRating": "F90", "LoadBearing": True, "Material": "C30/37"})],
     )
     await service.add_federation_member(
-        fed.id, FederationModelAdd(bim_model_id=m.id, discipline="arch"),
+        fed.id,
+        FederationModelAdd(bim_model_id=m.id, discipline="arch"),
     )
     await session.commit()
 

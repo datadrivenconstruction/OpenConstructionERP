@@ -38,9 +38,7 @@ import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
 # 1x1 transparent PNG.
-_PNG_B64 = (
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
-)
+_PNG_B64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
 
 
 # ── App + auth fixtures ────────────────────────────────────────────────────
@@ -72,9 +70,7 @@ async def client(app_instance):
         yield ac
 
 
-async def _register_login(
-    client: AsyncClient, tag: str, role: str = "admin"
-) -> dict[str, str]:
+async def _register_login(client: AsyncClient, tag: str, role: str = "admin") -> dict[str, str]:
     """Register a unique user, (optionally) promote to admin, return headers."""
     from ._auth_helpers import promote_to_admin
 
@@ -106,11 +102,7 @@ async def _register_login(
         from app.modules.users.models import User
 
         async with async_session_factory() as session:
-            await session.execute(
-                update(User)
-                .where(User.email == email.lower())
-                .values(is_active=True)
-            )
+            await session.execute(update(User).where(User.email == email.lower()).values(is_active=True))
             await session.commit()
 
     token = ""
@@ -140,9 +132,7 @@ async def auth(client: AsyncClient) -> dict[str, str]:
     return await _register_login(client, "owner")
 
 
-async def _make_project(
-    client: AsyncClient, auth: dict[str, str], name: str
-) -> str:
+async def _make_project(client: AsyncClient, auth: dict[str, str], name: str) -> str:
     resp = await client.post(
         "/api/v1/projects/",
         json={"name": name, "description": "bcf test"},
@@ -161,9 +151,7 @@ async def project_id(client: AsyncClient, auth: dict[str, str]) -> str:
 
 
 @pytest.mark.asyncio
-async def test_topic_comment_viewpoint_crud(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_topic_comment_viewpoint_crud(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     """Create topic → add viewpoint (with PNG) → add comment → fetch."""
     create = await client.post(
         f"/api/v1/bcf/projects/{project_id}/topics/",
@@ -182,9 +170,7 @@ async def test_topic_comment_viewpoint_crud(
     topic_db_id = None  # the URL uses surrogate id; fetch list to resolve
 
     # The response carries the BCF guid; list to get the surrogate path id.
-    lst = await client.get(
-        f"/api/v1/bcf/projects/{project_id}/topics/", headers=auth
-    )
+    lst = await client.get(f"/api/v1/bcf/projects/{project_id}/topics/", headers=auth)
     assert lst.status_code == 200
     assert any(t["guid"] == topic["guid"] for t in lst.json())
 
@@ -197,11 +183,7 @@ async def test_topic_comment_viewpoint_crud(
     from app.modules.bcf.models import BCFTopic
 
     async with async_session_factory() as session:
-        row = (
-            await session.execute(
-                select(BCFTopic).where(BCFTopic.guid == topic["guid"])
-            )
-        ).scalar_one()
+        row = (await session.execute(select(BCFTopic).where(BCFTopic.guid == topic["guid"]))).scalar_one()
         topic_db_id = str(row.id)
 
     # Add a viewpoint with a perspective camera + snapshot.
@@ -261,9 +243,7 @@ async def test_topic_comment_viewpoint_crud(
 
 @pytest.mark.parametrize("version", ["2.1", "3.0"])
 @pytest.mark.asyncio
-async def test_bcfzip_roundtrip(
-    client: AsyncClient, auth: dict[str, str], version: str
-) -> None:
+async def test_bcfzip_roundtrip(client: AsyncClient, auth: dict[str, str], version: str) -> None:
     """Build topics in project A → export → import into clean project B →
     assert the topic/comment/viewpoint set is equal.
     """
@@ -295,11 +275,7 @@ async def test_bcfzip_roundtrip(
         from app.modules.bcf.models import BCFTopic
 
         async with async_session_factory() as session:
-            row = (
-                await session.execute(
-                    select(BCFTopic).where(BCFTopic.guid == guid)
-                )
-            ).scalar_one()
+            row = (await session.execute(select(BCFTopic).where(BCFTopic.guid == guid))).scalar_one()
             tid = str(row.id)
 
         await client.post(
@@ -356,9 +332,7 @@ async def test_bcfzip_roundtrip(
     assert report["status"] in ("passed", "warnings")
 
     # Destination now mirrors the source: same guids, comments, viewpoints.
-    dst_list = await client.get(
-        f"/api/v1/bcf/projects/{dst_proj}/topics/", headers=auth
-    )
+    dst_list = await client.get(f"/api/v1/bcf/projects/{dst_proj}/topics/", headers=auth)
     assert dst_list.status_code == 200
     dst_topics = {t["guid"]: t for t in dst_list.json()}
     assert set(dst_topics) == set(seeded_guids)
@@ -378,9 +352,7 @@ async def test_bcfzip_roundtrip(
     report2 = imp2.json()
     assert report2["topics_imported"] == 0
     assert report2["topics_updated"] == 2
-    dst_list2 = await client.get(
-        f"/api/v1/bcf/projects/{dst_proj}/topics/", headers=auth
-    )
+    dst_list2 = await client.get(f"/api/v1/bcf/projects/{dst_proj}/topics/", headers=auth)
     assert len(dst_list2.json()) == 2  # no duplicates
 
 
@@ -388,9 +360,7 @@ async def test_bcfzip_roundtrip(
 
 
 @pytest.mark.asyncio
-async def test_import_malformed_zip_returns_report(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_import_malformed_zip_returns_report(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     """A non-BCF / corrupt payload returns a 200 report with errors."""
     files = {"file": ("garbage.bcfzip", b"\x50\x4b not really a zip", "application/octet-stream")}
     resp = await client.post(
@@ -406,9 +376,7 @@ async def test_import_malformed_zip_returns_report(
 
 
 @pytest.mark.asyncio
-async def test_import_empty_file_rejected(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_import_empty_file_rejected(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     """An empty upload is a 400 (client error), not a 500."""
     files = {"file": ("empty.bcfzip", b"", "application/octet-stream")}
     resp = await client.post(
@@ -423,9 +391,7 @@ async def test_import_empty_file_rejected(
 
 
 @pytest.mark.asyncio
-async def test_unauthenticated_is_rejected(
-    client: AsyncClient, project_id: str
-) -> None:
+async def test_unauthenticated_is_rejected(client: AsyncClient, project_id: str) -> None:
     """No bearer token → 401/403, never 200."""
     resp = await client.get(f"/api/v1/bcf/projects/{project_id}/topics/")
     assert resp.status_code in (401, 403)
@@ -437,8 +403,6 @@ async def test_idor_non_owner_cannot_read_other_project(
 ) -> None:
     """A different (non-admin) user cannot read the owner's topics."""
     intruder = await _register_login(client, "intruder", role="viewer")
-    resp = await client.get(
-        f"/api/v1/bcf/projects/{project_id}/topics/", headers=intruder
-    )
+    resp = await client.get(f"/api/v1/bcf/projects/{project_id}/topics/", headers=intruder)
     # 403 (access denied) or 404 (existence hidden) — both block the read.
     assert resp.status_code in (403, 404)

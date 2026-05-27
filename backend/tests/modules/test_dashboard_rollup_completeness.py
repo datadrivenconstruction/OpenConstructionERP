@@ -82,11 +82,7 @@ async def _force_set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await session.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await session.commit()
 
 
@@ -123,7 +119,8 @@ async def auth(client: AsyncClient) -> tuple[str, dict[str, str]]:
 
 @pytest_asyncio.fixture(scope="module")
 async def project_id(
-    client: AsyncClient, auth: tuple[str, dict[str, str]],
+    client: AsyncClient,
+    auth: tuple[str, dict[str, str]],
 ) -> str:
     _, header = auth
     resp = await client.post(
@@ -143,18 +140,14 @@ def test_service_registry_covers_every_widget() -> None:
     up the full app.
     """
     from app.modules.dashboard.service import (
-        KNOWN_WIDGETS,
         _COMPUTE_MAP,
+        KNOWN_WIDGETS,
     )
 
     missing_from_known = [w for w in PROJECT_DETAIL_WIDGET_IDS if w not in KNOWN_WIDGETS]
     missing_from_map = [w for w in PROJECT_DETAIL_WIDGET_IDS if w not in _COMPUTE_MAP]
-    assert not missing_from_known, (
-        f"Widget id(s) missing from KNOWN_WIDGETS: {missing_from_known}"
-    )
-    assert not missing_from_map, (
-        f"Widget id(s) missing from _COMPUTE_MAP: {missing_from_map}"
-    )
+    assert not missing_from_known, f"Widget id(s) missing from KNOWN_WIDGETS: {missing_from_known}"
+    assert not missing_from_map, f"Widget id(s) missing from _COMPUTE_MAP: {missing_from_map}"
 
 
 @pytest.mark.asyncio
@@ -174,10 +167,7 @@ async def test_rollup_returns_every_project_detail_widget(
     body = resp.json()
 
     missing = [w for w in PROJECT_DETAIL_WIDGET_IDS if w not in body]
-    assert not missing, (
-        f"Rollup response missing project-detail widget(s): {missing}. "
-        f"Got keys: {sorted(body.keys())}"
-    )
+    assert not missing, f"Rollup response missing project-detail widget(s): {missing}. Got keys: {sorted(body.keys())}"
 
     # Envelope correctness — widgets_requested reflects exactly what we asked.
     assert set(body["widgets_requested"]) == set(PROJECT_DETAIL_WIDGET_IDS)
@@ -205,6 +195,4 @@ async def test_rollup_payloads_are_dict_shaped(
     body = resp.json()
     for wid in PROJECT_DETAIL_WIDGET_IDS:
         payload = body.get(wid)
-        assert isinstance(payload, dict), (
-            f"Widget {wid} should be a dict payload; got {type(payload).__name__}"
-        )
+        assert isinstance(payload, dict), f"Widget {wid} should be a dict payload; got {type(payload).__name__}"

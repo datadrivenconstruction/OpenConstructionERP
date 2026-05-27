@@ -134,10 +134,18 @@ async def test_list_all_filters_by_status_and_priority(
     c = await _make_contract(session)
     await _make_ticket(session, c.id, number="T-1", status="new", priority="low")
     await _make_ticket(
-        session, c.id, number="T-2", status="in_progress", priority="high",
+        session,
+        c.id,
+        number="T-2",
+        status="in_progress",
+        priority="high",
     )
     await _make_ticket(
-        session, c.id, number="T-3", status="in_progress", priority="low",
+        session,
+        c.id,
+        number="T-3",
+        status="in_progress",
+        priority="low",
     )
 
     repo = TicketRepository(session)
@@ -163,7 +171,10 @@ async def test_list_all_orders_by_reported_at_desc_and_paginates(
     base = datetime(2026, 5, 1, 9, 0, tzinfo=UTC)
     # Oldest → newest.
     await _make_ticket(
-        session, c.id, number="T-OLD", reported_at=base.isoformat(),
+        session,
+        c.id,
+        number="T-OLD",
+        reported_at=base.isoformat(),
     )
     await _make_ticket(
         session,

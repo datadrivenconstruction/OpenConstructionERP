@@ -195,14 +195,10 @@ def _deliverable_status(deliverable: Any) -> str:
     plain dicts (e.g. test fixtures) and ORM rows can be mixed.
     """
     accepted = (
-        deliverable.get("accepted_at")
-        if isinstance(deliverable, dict)
-        else getattr(deliverable, "accepted_at", None)
+        deliverable.get("accepted_at") if isinstance(deliverable, dict) else getattr(deliverable, "accepted_at", None)
     )
     submitted = (
-        deliverable.get("submitted_at")
-        if isinstance(deliverable, dict)
-        else getattr(deliverable, "submitted_at", None)
+        deliverable.get("submitted_at") if isinstance(deliverable, dict) else getattr(deliverable, "submitted_at", None)
     )
     if accepted is not None:
         return "accepted"

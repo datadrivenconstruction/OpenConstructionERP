@@ -42,11 +42,10 @@ from app.modules.bim_hub.ifc_processor import (
     process_ifc_file,
 )
 
-
 # ── Helpers ─────────────────────────────────────────────────────────
 
 
-@pytest.fixture()
+@pytest.fixture
 def workdir() -> Path:
     """Scratch dir per test — the parser writes placeholder COLLADA here."""
     d = Path(tempfile.mkdtemp(prefix="ifc_units_"))
@@ -123,7 +122,10 @@ class TestStepArgsTopLevel:
 
     def test_enum_with_dots(self) -> None:
         assert _step_args_top_level("$,.LENGTHUNIT.,$,.METRE.") == [
-            "$", ".LENGTHUNIT.", "$", ".METRE.",
+            "$",
+            ".LENGTHUNIT.",
+            "$",
+            ".METRE.",
         ]
 
     def test_empty_arglist(self) -> None:
@@ -174,12 +176,8 @@ class TestResolveIfcSiUnit:
         assert scale == pytest.approx(100.0)
 
     def test_deca_and_deci(self) -> None:
-        deca = _resolve_ifc_si_unit(
-            _ent(10, "IFCSIUNIT", "*,.LENGTHUNIT.,.DECA.,.METRE.")
-        )
-        deci = _resolve_ifc_si_unit(
-            _ent(11, "IFCSIUNIT", "*,.LENGTHUNIT.,.DECI.,.METRE.")
-        )
+        deca = _resolve_ifc_si_unit(_ent(10, "IFCSIUNIT", "*,.LENGTHUNIT.,.DECA.,.METRE."))
+        deci = _resolve_ifc_si_unit(_ent(11, "IFCSIUNIT", "*,.LENGTHUNIT.,.DECI.,.METRE."))
         assert deca[1] == pytest.approx(10.0)
         assert deci[1] == pytest.approx(0.1)
 
@@ -258,15 +256,15 @@ class TestSiPrefixTable:
     @pytest.mark.parametrize(
         ("prefix", "expected"),
         [
-            ("KILO",  1e3),
+            ("KILO", 1e3),
             ("HECTO", 1e2),
-            ("DECA",  1e1),
-            ("",      1.0),
-            ("DECI",  1e-1),
+            ("DECA", 1e1),
+            ("", 1.0),
+            ("DECI", 1e-1),
             ("CENTI", 1e-2),
             ("MILLI", 1e-3),
             ("MICRO", 1e-6),
-            ("NANO",  1e-9),
+            ("NANO", 1e-9),
         ],
     )
     def test_required_prefixes(self, prefix: str, expected: float) -> None:
@@ -285,8 +283,7 @@ class TestResolveMeasureWithUnit:
         # where #20 is IfcSIUnit(LENGTHUNIT, $, METRE).
         entities = {
             20: _ent(20, "IFCSIUNIT", "*,.LENGTHUNIT.,$,.METRE."),
-            10: _ent(10, "IFCMEASUREWITHUNIT",
-                     "IFCLENGTHMEASURE(0.0254),#20"),
+            10: _ent(10, "IFCMEASUREWITHUNIT", "IFCLENGTHMEASURE(0.0254),#20"),
         }
         v = _resolve_measure_with_unit(entities[10], entities, set())
         assert v == pytest.approx(0.0254)
@@ -298,8 +295,7 @@ class TestResolveMeasureWithUnit:
         nested literal) the value is taken as already in SI."""
         # Two positional args; the second is a literal placeholder.
         entities = {}
-        ent = _ent(10, "IFCMEASUREWITHUNIT",
-                   "IFCLENGTHMEASURE(0.0254),$")
+        ent = _ent(10, "IFCMEASUREWITHUNIT", "IFCLENGTHMEASURE(0.0254),$")
         v = _resolve_measure_with_unit(ent, entities, set())
         assert v == pytest.approx(0.0254)
 
@@ -319,14 +315,10 @@ class TestResolveConversionBasedUnit:
         """1 inch = 0.0254 m through an explicit IFCMEASUREWITHUNIT chain."""
         entities = {
             30: _ent(30, "IFCSIUNIT", "*,.LENGTHUNIT.,$,.METRE."),
-            20: _ent(20, "IFCMEASUREWITHUNIT",
-                     "IFCLENGTHMEASURE(0.0254),#30"),
-            10: _ent(10, "IFCCONVERSIONBASEDUNIT",
-                     "#100,.LENGTHUNIT.,'INCH',#20"),
+            20: _ent(20, "IFCMEASUREWITHUNIT", "IFCLENGTHMEASURE(0.0254),#30"),
+            10: _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.LENGTHUNIT.,'INCH',#20"),
         }
-        unit, scale, label = _resolve_conversion_based_unit(
-            entities[10], entities, set()
-        )
+        unit, scale, label = _resolve_conversion_based_unit(entities[10], entities, set())
         assert unit == "LENGTHUNIT"
         assert scale == pytest.approx(0.0254)
         assert label == "inch"
@@ -335,67 +327,57 @@ class TestResolveConversionBasedUnit:
         """When the ConversionFactor #ref is missing/broken we fall back
         to the hard-coded customary-unit table (FOOT = 0.3048 m)."""
         # No referenced IFCMEASUREWITHUNIT — only the Name string.
-        ent = _ent(10, "IFCCONVERSIONBASEDUNIT",
-                   "#100,.LENGTHUNIT.,'FOOT',$")
+        ent = _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.LENGTHUNIT.,'FOOT',$")
         unit, scale, _ = _resolve_conversion_based_unit(ent, {}, set())
         assert unit == "LENGTHUNIT"
         assert scale == pytest.approx(0.3048)
 
     def test_yard(self) -> None:
-        ent = _ent(10, "IFCCONVERSIONBASEDUNIT",
-                   "#100,.LENGTHUNIT.,'YARD',$")
+        ent = _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.LENGTHUNIT.,'YARD',$")
         _, scale, _ = _resolve_conversion_based_unit(ent, {}, set())
         assert scale == pytest.approx(0.9144)
 
     def test_square_foot(self) -> None:
-        ent = _ent(10, "IFCCONVERSIONBASEDUNIT",
-                   "#100,.AREAUNIT.,'SQUAREFOOT',$")
+        ent = _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.AREAUNIT.,'SQUAREFOOT',$")
         unit, scale, _ = _resolve_conversion_based_unit(ent, {}, set())
         assert unit == "AREAUNIT"
         assert scale == pytest.approx(0.09290304)
 
     def test_cubic_yard(self) -> None:
-        ent = _ent(10, "IFCCONVERSIONBASEDUNIT",
-                   "#100,.VOLUMEUNIT.,'CUBICYARD',$")
+        ent = _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.VOLUMEUNIT.,'CUBICYARD',$")
         unit, scale, _ = _resolve_conversion_based_unit(ent, {}, set())
         assert unit == "VOLUMEUNIT"
         assert scale == pytest.approx(0.764554857984)
 
     def test_pound(self) -> None:
-        ent = _ent(10, "IFCCONVERSIONBASEDUNIT",
-                   "#100,.MASSUNIT.,'POUND',$")
+        ent = _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.MASSUNIT.,'POUND',$")
         unit, scale, _ = _resolve_conversion_based_unit(ent, {}, set())
         assert unit == "MASSUNIT"
         assert scale == pytest.approx(0.45359237)
 
     def test_fahrenheit_scale_factor(self) -> None:
         """5/9 scale (note: bias is NOT handled here — see parser docs)."""
-        ent = _ent(10, "IFCCONVERSIONBASEDUNIT",
-                   "#100,.THERMODYNAMICTEMPERATUREUNIT.,'FAHRENHEIT',$")
+        ent = _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.THERMODYNAMICTEMPERATUREUNIT.,'FAHRENHEIT',$")
         _, scale, _ = _resolve_conversion_based_unit(ent, {}, set())
         assert scale == pytest.approx(5.0 / 9.0)
 
     def test_degree_to_radian(self) -> None:
-        ent = _ent(10, "IFCCONVERSIONBASEDUNIT",
-                   "#100,.PLANEANGLEUNIT.,'DEGREE',$")
+        ent = _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.PLANEANGLEUNIT.,'DEGREE',$")
         _, scale, _ = _resolve_conversion_based_unit(ent, {}, set())
         assert scale == pytest.approx(math.pi / 180.0)
 
     def test_hour_to_second(self) -> None:
-        ent = _ent(10, "IFCCONVERSIONBASEDUNIT",
-                   "#100,.TIMEUNIT.,'HOUR',$")
+        ent = _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.TIMEUNIT.,'HOUR',$")
         _, scale, _ = _resolve_conversion_based_unit(ent, {}, set())
         assert scale == pytest.approx(3600.0)
 
     def test_psi_to_pascal(self) -> None:
-        ent = _ent(10, "IFCCONVERSIONBASEDUNIT",
-                   "#100,.PRESSUREUNIT.,'PSI',$")
+        ent = _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.PRESSUREUNIT.,'PSI',$")
         _, scale, _ = _resolve_conversion_based_unit(ent, {}, set())
         assert scale == pytest.approx(6894.757293168)
 
     def test_btu_to_joule(self) -> None:
-        ent = _ent(10, "IFCCONVERSIONBASEDUNIT",
-                   "#100,.ENERGYUNIT.,'BTU',$")
+        ent = _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.ENERGYUNIT.,'BTU',$")
         _, scale, _ = _resolve_conversion_based_unit(ent, {}, set())
         assert scale == pytest.approx(1055.05585262)
 
@@ -405,25 +387,19 @@ class TestResolveConversionBasedUnit:
         dereference recursively without infinite-looping."""
         entities = {
             # #30 = inch (base imperial length unit, name-only fallback)
-            30: _ent(30, "IFCCONVERSIONBASEDUNIT",
-                     "#100,.LENGTHUNIT.,'INCH',$"),
+            30: _ent(30, "IFCCONVERSIONBASEDUNIT", "#100,.LENGTHUNIT.,'INCH',$"),
             # #20 = MeasureWithUnit(12 inches, #30 = inch)
-            20: _ent(20, "IFCMEASUREWITHUNIT",
-                     "IFCLENGTHMEASURE(12.0),#30"),
+            20: _ent(20, "IFCMEASUREWITHUNIT", "IFCLENGTHMEASURE(12.0),#30"),
             # #10 = foot, declared as 12 inches
-            10: _ent(10, "IFCCONVERSIONBASEDUNIT",
-                     "#100,.LENGTHUNIT.,'FOOT',#20"),
+            10: _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.LENGTHUNIT.,'FOOT',#20"),
         }
-        _, scale, _ = _resolve_conversion_based_unit(
-            entities[10], entities, set()
-        )
+        _, scale, _ = _resolve_conversion_based_unit(entities[10], entities, set())
         # 12 inches * 0.0254 m/inch = 0.3048 m
         assert scale == pytest.approx(0.3048)
 
     def test_alias_inch_in(self) -> None:
         """Common abbreviation 'IN' resolves to the same scale as INCH."""
-        ent = _ent(10, "IFCCONVERSIONBASEDUNIT",
-                   "#100,.LENGTHUNIT.,'IN',$")
+        ent = _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.LENGTHUNIT.,'IN',$")
         _, scale, _ = _resolve_conversion_based_unit(ent, {}, set())
         assert scale == pytest.approx(0.0254)
 
@@ -437,15 +413,12 @@ class TestResolveDerivedUnit:
     def test_volumetric_flow_m3_per_hour(self) -> None:
         """m³/h = CubicMetre^+1 + Hour^-1 → scale = 1.0 / 3600 = 1/3600 s⁻¹."""
         entities = {
-            40: _ent(40, "IFCSIUNIT",
-                     "*,.VOLUMEUNIT.,$,.CUBIC_METRE."),
-            41: _ent(41, "IFCCONVERSIONBASEDUNIT",
-                     "#100,.TIMEUNIT.,'HOUR',$"),
+            40: _ent(40, "IFCSIUNIT", "*,.VOLUMEUNIT.,$,.CUBIC_METRE."),
+            41: _ent(41, "IFCCONVERSIONBASEDUNIT", "#100,.TIMEUNIT.,'HOUR',$"),
             # Elements: each pair (Unit_ref, Exponent).
             50: _ent(50, "IFCDERIVEDUNITELEMENT", "#40,1"),
             51: _ent(51, "IFCDERIVEDUNITELEMENT", "#41,-1"),
-            10: _ent(10, "IFCDERIVEDUNIT",
-                     "(#50,#51),.VOLUMETRICFLOWRATEUNIT."),
+            10: _ent(10, "IFCDERIVEDUNIT", "(#50,#51),.VOLUMETRICFLOWRATEUNIT."),
         }
         unit, scale, _ = _resolve_derived_unit(entities[10], entities, set())
         assert unit == "VOLUMETRICFLOWRATEUNIT"
@@ -454,14 +427,11 @@ class TestResolveDerivedUnit:
     def test_mass_density_kg_per_m3(self) -> None:
         """kg/m³ = KILOGRAM^+1 * CubicMetre^-1 → scale = 1.0."""
         entities = {
-            40: _ent(40, "IFCSIUNIT",
-                     "*,.MASSUNIT.,.KILO.,.GRAM."),
-            41: _ent(41, "IFCSIUNIT",
-                     "*,.VOLUMEUNIT.,$,.CUBIC_METRE."),
+            40: _ent(40, "IFCSIUNIT", "*,.MASSUNIT.,.KILO.,.GRAM."),
+            41: _ent(41, "IFCSIUNIT", "*,.VOLUMEUNIT.,$,.CUBIC_METRE."),
             50: _ent(50, "IFCDERIVEDUNITELEMENT", "#40,1"),
             51: _ent(51, "IFCDERIVEDUNITELEMENT", "#41,-1"),
-            10: _ent(10, "IFCDERIVEDUNIT",
-                     "(#50,#51),.MASSDENSITYUNIT."),
+            10: _ent(10, "IFCDERIVEDUNIT", "(#50,#51),.MASSDENSITYUNIT."),
         }
         _, scale, _ = _resolve_derived_unit(entities[10], entities, set())
         assert scale == pytest.approx(1000.0)  # KILO prefix on mass
@@ -472,8 +442,7 @@ class TestResolveDerivedUnit:
             41: _ent(41, "IFCSIUNIT", "*,.TIMEUNIT.,$,.SECOND."),
             50: _ent(50, "IFCDERIVEDUNITELEMENT", "#40,1"),
             51: _ent(51, "IFCDERIVEDUNITELEMENT", "#41,-1"),
-            10: _ent(10, "IFCDERIVEDUNIT",
-                     "(#50,#51),.LINEARVELOCITYUNIT."),
+            10: _ent(10, "IFCDERIVEDUNIT", "(#50,#51),.LINEARVELOCITYUNIT."),
         }
         _, scale, _ = _resolve_derived_unit(entities[10], entities, set())
         assert scale == pytest.approx(1.0)
@@ -485,8 +454,7 @@ class TestResolveDerivedUnit:
             41: _ent(41, "IFCSIUNIT", "*,.AREAUNIT.,$,.SQUARE_METRE."),
             50: _ent(50, "IFCDERIVEDUNITELEMENT", "#40,1"),
             51: _ent(51, "IFCDERIVEDUNITELEMENT", "#41,-1"),
-            10: _ent(10, "IFCDERIVEDUNIT",
-                     "(#50,#51),.PRESSUREUNIT."),
+            10: _ent(10, "IFCDERIVEDUNIT", "(#50,#51),.PRESSUREUNIT."),
         }
         _, scale, _ = _resolve_derived_unit(entities[10], entities, set())
         assert scale == pytest.approx(1.0)
@@ -572,10 +540,8 @@ class TestParseUnitAssignment:
         """Revit-default lengths = inches → length scale 0.0254."""
         entities = {
             30: _ent(30, "IFCSIUNIT", "*,.LENGTHUNIT.,$,.METRE."),
-            20: _ent(20, "IFCMEASUREWITHUNIT",
-                     "IFCLENGTHMEASURE(0.0254),#30"),
-            10: _ent(10, "IFCCONVERSIONBASEDUNIT",
-                     "#100,.LENGTHUNIT.,'INCH',#20"),
+            20: _ent(20, "IFCMEASUREWITHUNIT", "IFCLENGTHMEASURE(0.0254),#30"),
+            10: _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.LENGTHUNIT.,'INCH',#20"),
             11: _ent(11, "IFCUNITASSIGNMENT", "(#10)"),
         }
         ctx = _parse_unit_assignment(entities)
@@ -587,8 +553,7 @@ class TestParseUnitAssignment:
     def test_imperial_foot_name_only(self) -> None:
         """Foot via the Name fallback (no #ref to IfcMeasureWithUnit)."""
         entities = {
-            10: _ent(10, "IFCCONVERSIONBASEDUNIT",
-                     "#100,.LENGTHUNIT.,'FOOT',$"),
+            10: _ent(10, "IFCCONVERSIONBASEDUNIT", "#100,.LENGTHUNIT.,'FOOT',$"),
             11: _ent(11, "IFCUNITASSIGNMENT", "(#10)"),
         }
         ctx = _parse_unit_assignment(entities)
@@ -599,8 +564,7 @@ class TestParseUnitAssignment:
         """SI length + imperial mass (kg + lb)."""
         entities = {
             10: _ent(10, "IFCSIUNIT", "*,.LENGTHUNIT.,$,.METRE."),
-            11: _ent(11, "IFCCONVERSIONBASEDUNIT",
-                     "#100,.MASSUNIT.,'POUND',$"),
+            11: _ent(11, "IFCCONVERSIONBASEDUNIT", "#100,.MASSUNIT.,'POUND',$"),
             12: _ent(12, "IFCUNITASSIGNMENT", "(#10,#11)"),
         }
         ctx = _parse_unit_assignment(entities)
@@ -646,8 +610,7 @@ class TestParseUnitAssignment:
         """IFCCONTEXTDEPENDENTUNIT is opaque — we tolerate without crashing."""
         entities = {
             10: _ent(10, "IFCSIUNIT", "*,.LENGTHUNIT.,$,.METRE."),
-            11: _ent(11, "IFCCONTEXTDEPENDENTUNIT",
-                     "#100,.USERDEFINED.,'somenonsense'"),
+            11: _ent(11, "IFCCONTEXTDEPENDENTUNIT", "#100,.USERDEFINED.,'somenonsense'"),
             12: _ent(12, "IFCUNITASSIGNMENT", "(#10,#11)"),
         }
         ctx = _parse_unit_assignment(entities)
@@ -697,30 +660,32 @@ class TestUnitContextScale:
 class TestExtractQuantitiesWithScale:
     """The full quantity extractor must apply the UnitContext scale."""
 
-    def _build_qty_entities(
-        self, qty_type: str, qty_name: str, qty_value: float
-    ) -> dict[int, dict[str, object]]:
+    def _build_qty_entities(self, qty_type: str, qty_name: str, qty_value: float) -> dict[int, dict[str, object]]:
         # IFCQUANTITY* entities have the quantity-name string as their
         # first positional arg; the extractor uses ``strings[0]`` as
         # the key, so we have to populate ``strings`` accordingly.
         return {
             100: {
-                "id": 100, "type": "IFCWALL",
+                "id": 100,
+                "type": "IFCWALL",
                 "args_raw": "'guid',#5,'Wall',$,$,$,$,$,$",
                 "strings": ["guid", "Wall"],
             },
             200: {
-                "id": 200, "type": "IFCRELDEFINESBYPROPERTIES",
+                "id": 200,
+                "type": "IFCRELDEFINESBYPROPERTIES",
                 "args_raw": "'relguid',#5,$,$,(#100),#300",
                 "strings": ["relguid"],
             },
             300: {
-                "id": 300, "type": "IFCELEMENTQUANTITY",
+                "id": 300,
+                "type": "IFCELEMENTQUANTITY",
                 "args_raw": "'eqguid',#5,'BaseQuantities',$,'OE',(#400)",
                 "strings": ["eqguid", "BaseQuantities", "OE"],
             },
             400: {
-                "id": 400, "type": qty_type,
+                "id": 400,
+                "type": qty_type,
                 "args_raw": f"'{qty_name}',$,$,#5,{qty_value}",
                 "strings": [qty_name],
             },
@@ -728,7 +693,9 @@ class TestExtractQuantitiesWithScale:
 
     def test_length_mm_to_m(self) -> None:
         entities = self._build_qty_entities(
-            "IFCQUANTITYLENGTH", "Length", 24.0,
+            "IFCQUANTITYLENGTH",
+            "Length",
+            24.0,
         )
         ctx = UnitContext()
         ctx.scale_for["LENGTHUNIT"] = 0.001
@@ -738,7 +705,9 @@ class TestExtractQuantitiesWithScale:
 
     def test_area_mm2_to_m2(self) -> None:
         entities = self._build_qty_entities(
-            "IFCQUANTITYAREA", "NetArea", 5e6,
+            "IFCQUANTITYAREA",
+            "NetArea",
+            5e6,
         )
         ctx = UnitContext()
         ctx.scale_for["AREAUNIT"] = 1e-6
@@ -748,7 +717,9 @@ class TestExtractQuantitiesWithScale:
 
     def test_volume_inch3_to_m3(self) -> None:
         entities = self._build_qty_entities(
-            "IFCQUANTITYVOLUME", "Volume", 1.0,
+            "IFCQUANTITYVOLUME",
+            "Volume",
+            1.0,
         )
         ctx = UnitContext()
         # 1 cubic inch in m³
@@ -758,7 +729,9 @@ class TestExtractQuantitiesWithScale:
 
     def test_weight_lb_to_kg(self) -> None:
         entities = self._build_qty_entities(
-            "IFCQUANTITYWEIGHT", "GrossWeight", 100.0,
+            "IFCQUANTITYWEIGHT",
+            "GrossWeight",
+            100.0,
         )
         ctx = UnitContext()
         ctx.scale_for["MASSUNIT"] = 0.45359237
@@ -768,7 +741,9 @@ class TestExtractQuantitiesWithScale:
 
     def test_count_never_scaled(self) -> None:
         entities = self._build_qty_entities(
-            "IFCQUANTITYCOUNT", "DoorCount", 12.0,
+            "IFCQUANTITYCOUNT",
+            "DoorCount",
+            12.0,
         )
         ctx = UnitContext()
         # Even with a wonky length scale, count stays 12.
@@ -779,7 +754,9 @@ class TestExtractQuantitiesWithScale:
     def test_none_context_uses_raw_value(self) -> None:
         """Back-compat: legacy callers pass ``None`` and get raw values."""
         entities = self._build_qty_entities(
-            "IFCQUANTITYAREA", "NetArea", 42.5,
+            "IFCQUANTITYAREA",
+            "NetArea",
+            42.5,
         )
         q = _extract_quantities_for_element(100, entities, None)
         # No scale applied.
@@ -792,14 +769,20 @@ class TestExtractQuantitiesWithScale:
 def _make_full_ifc(unit_assignment_block: str, quantity_value: float) -> str:
     """Synthesise an IFC file with a configurable unit assignment block
     and a single wall carrying one IFCQUANTITYAREA value."""
-    return _IFC_HEADER + dedent(unit_assignment_block) + dedent(f"""
+    return (
+        _IFC_HEADER
+        + dedent(unit_assignment_block)
+        + dedent(f"""
         #100= IFCBUILDINGSTOREY('storeyGUIDxxxxxxxxxx',#5,'L1',$,$,$,$,$,.ELEMENT.,0.0);
         #101= IFCWALL('wallGUIDxxxxxxxxxxxxxxx',#5,'Wall',$,$,$,$,$,$);
         #102= IFCRELCONTAINEDINSPATIALSTRUCTURE('relGUIDxxxxxxxxxxxxx',#5,$,$,(#101),#100);
         #200= IFCRELDEFINESBYPROPERTIES('rdpGUIDxxxxxxxxxxxxx',#5,$,$,(#101),#300);
         #300= IFCELEMENTQUANTITY('eqGUIDxxxxxxxxxxxxxxx',#5,'BaseQuantities',$,'OE',(#400));
         #400= IFCQUANTITYAREA('NetArea',$,$,#5,{quantity_value});
-    """).strip() + "\n" + _IFC_FOOTER
+    """).strip()
+        + "\n"
+        + _IFC_FOOTER
+    )
 
 
 def test_end_to_end_pure_si_no_rescaling(workdir: Path) -> None:
@@ -889,14 +872,19 @@ def test_end_to_end_no_unit_assignment_defaults_to_metric(
 ) -> None:
     """IFC without IFCUNITASSIGNMENT → ISO default metric, flag set."""
     # Reuse the basic regression fixture with no unit assignment block.
-    ifc = _IFC_HEADER + dedent("""
+    ifc = (
+        _IFC_HEADER
+        + dedent("""
         #100= IFCBUILDINGSTOREY('storeyGUIDxxxxxxxxxx',#5,'L1',$,$,$,$,$,.ELEMENT.,0.0);
         #101= IFCWALL('wallGUIDxxxxxxxxxxxxxxx',#5,'Wall',$,$,$,$,$,$);
         #102= IFCRELCONTAINEDINSPATIALSTRUCTURE('relGUIDxxxxxxxxxxxxx',#5,$,$,(#101),#100);
         #200= IFCRELDEFINESBYPROPERTIES('rdpGUIDxxxxxxxxxxxxx',#5,$,$,(#101),#300);
         #300= IFCELEMENTQUANTITY('eqGUIDxxxxxxxxxxxxxxx',#5,'BaseQuantities',$,'OE',(#400));
         #400= IFCQUANTITYAREA('NetArea',$,$,#5,7.5);
-    """).strip() + "\n" + _IFC_FOOTER
+    """).strip()
+        + "\n"
+        + _IFC_FOOTER
+    )
     path = _write_ifc(ifc, workdir)
     result = process_ifc_file(path, workdir / "out")
     walls = [e for e in result["elements"] if e["element_type"] == "Wall"]
@@ -913,13 +901,18 @@ def test_end_to_end_malformed_unit_assignment_recovers(
     workdir: Path,
 ) -> None:
     """Non-conforming IFCUNITASSIGNMENT with an unparseable ref must not crash."""
-    ifc = _IFC_HEADER + dedent("""
+    ifc = (
+        _IFC_HEADER
+        + dedent("""
         #10= IFCSIUNIT(*,.LENGTHUNIT.,$,.METRE.);
         #13= IFCUNITASSIGNMENT((#10,#999));
         #100= IFCBUILDINGSTOREY('storeyGUIDxxxxxxxxxx',#5,'L1',$,$,$,$,$,.ELEMENT.,0.0);
         #101= IFCWALL('wallGUIDxxxxxxxxxxxxxxx',#5,'Wall',$,$,$,$,$,$);
         #102= IFCRELCONTAINEDINSPATIALSTRUCTURE('relGUIDxxxxxxxxxxxxx',#5,$,$,(#101),#100);
-    """).strip() + "\n" + _IFC_FOOTER
+    """).strip()
+        + "\n"
+        + _IFC_FOOTER
+    )
     path = _write_ifc(ifc, workdir)
     result = process_ifc_file(path, workdir / "out")
     # Must not crash; metadata must still be populated.

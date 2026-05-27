@@ -160,7 +160,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -171,9 +173,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     if not _has_table(inspector, _TABLE_SUBCONTRACTOR):
         op.create_table(
@@ -237,7 +237,8 @@ def upgrade() -> None:
                 "subcontractor_id",
                 guid_type,
                 sa.ForeignKey(
-                    f"{_TABLE_SUBCONTRACTOR}.id", ondelete="CASCADE",
+                    f"{_TABLE_SUBCONTRACTOR}.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -246,7 +247,10 @@ def upgrade() -> None:
             sa.Column("email", sa.String(255), nullable=True),
             sa.Column("phone", sa.String(64), nullable=True),
             sa.Column(
-                "primary", sa.Boolean(), nullable=False, server_default=sa.false(),
+                "primary",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.false(),
             ),
         )
 
@@ -270,7 +274,8 @@ def upgrade() -> None:
                 "subcontractor_id",
                 guid_type,
                 sa.ForeignKey(
-                    f"{_TABLE_SUBCONTRACTOR}.id", ondelete="CASCADE",
+                    f"{_TABLE_SUBCONTRACTOR}.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -303,7 +308,8 @@ def upgrade() -> None:
                 "subcontractor_id",
                 guid_type,
                 sa.ForeignKey(
-                    f"{_TABLE_SUBCONTRACTOR}.id", ondelete="CASCADE",
+                    f"{_TABLE_SUBCONTRACTOR}.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -314,7 +320,10 @@ def upgrade() -> None:
             sa.Column("document_url", sa.String(1000), nullable=True),
             sa.Column("status", sa.String(32), nullable=False, server_default="valid"),
             sa.Column(
-                "revoked", sa.Boolean(), nullable=False, server_default=sa.false(),
+                "revoked",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.false(),
             ),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
@@ -340,7 +349,8 @@ def upgrade() -> None:
                 "subcontractor_id",
                 guid_type,
                 sa.ForeignKey(
-                    f"{_TABLE_SUBCONTRACTOR}.id", ondelete="CASCADE",
+                    f"{_TABLE_SUBCONTRACTOR}.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -393,7 +403,10 @@ def upgrade() -> None:
             sa.Column("name", sa.String(500), nullable=False),
             sa.Column("scope", sa.Text(), nullable=True),
             sa.Column(
-                "planned_value", sa.Numeric(18, 2), nullable=False, server_default="0",
+                "planned_value",
+                sa.Numeric(18, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
                 "completion_percent",
@@ -430,7 +443,10 @@ def upgrade() -> None:
             sa.Column("period_start", sa.Date(), nullable=True),
             sa.Column("period_end", sa.Date(), nullable=True),
             sa.Column(
-                "gross_amount", sa.Numeric(18, 2), nullable=False, server_default="0",
+                "gross_amount",
+                sa.Numeric(18, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
                 "retention_amount",
@@ -439,11 +455,17 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column(
-                "net_amount", sa.Numeric(18, 2), nullable=False, server_default="0",
+                "net_amount",
+                sa.Numeric(18, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column("currency", sa.String(3), nullable=False, server_default=""),
             sa.Column(
-                "status", sa.String(32), nullable=False, server_default="submitted",
+                "status",
+                sa.String(32),
+                nullable=False,
+                server_default="submitted",
             ),
             sa.Column("submitted_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column("foreman_approved_at", sa.DateTime(timezone=True), nullable=True),
@@ -485,7 +507,10 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column(
-                "claimed_amount", sa.Numeric(18, 2), nullable=False, server_default="0",
+                "claimed_amount",
+                sa.Numeric(18, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
                 "certified_amount",
@@ -566,16 +591,23 @@ def upgrade() -> None:
                 "subcontractor_id",
                 guid_type,
                 sa.ForeignKey(
-                    f"{_TABLE_SUBCONTRACTOR}.id", ondelete="CASCADE",
+                    f"{_TABLE_SUBCONTRACTOR}.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column("period", sa.String(7), nullable=False),
             sa.Column(
-                "quality_score", sa.Numeric(5, 2), nullable=False, server_default="0",
+                "quality_score",
+                sa.Numeric(5, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "hse_score", sa.Numeric(5, 2), nullable=False, server_default="0",
+                "hse_score",
+                sa.Numeric(5, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
                 "schedule_score",
@@ -584,7 +616,10 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column(
-                "cost_score", sa.Numeric(5, 2), nullable=False, server_default="0",
+                "cost_score",
+                sa.Numeric(5, 2),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
                 "overall_score",

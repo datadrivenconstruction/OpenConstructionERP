@@ -24,17 +24,17 @@ IntegrationType = Literal["teams", "slack", "telegram", "discord", "whatsapp", "
 # validate output-only redaction on input).
 _SECRET_CONFIG_KEYS: frozenset[str] = frozenset(
     {
-        "webhook_url",       # Teams / Slack / Discord — full URL is the bearer credential
-        "bot_token",         # Telegram bot token (BotFather-issued)
-        "access_token",      # WhatsApp / generic OAuth bearer
-        "api_key",           # Generic third-party API key
-        "api_token",         # Synonym
-        "secret",            # Generic shared-secret
-        "client_secret",     # OAuth2 client secret
-        "smtp_password",     # Email connector password
-        "password",          # Generic password field
-        "phone_number_id",   # WhatsApp Cloud API tenant identifier (sensitive)
-        "auth_token",        # Twilio-style
+        "webhook_url",  # Teams / Slack / Discord — full URL is the bearer credential
+        "bot_token",  # Telegram bot token (BotFather-issued)
+        "access_token",  # WhatsApp / generic OAuth bearer
+        "api_key",  # Generic third-party API key
+        "api_token",  # Synonym
+        "secret",  # Generic shared-secret
+        "client_secret",  # OAuth2 client secret
+        "smtp_password",  # Email connector password
+        "password",  # Generic password field
+        "phone_number_id",  # WhatsApp Cloud API tenant identifier (sensitive)
+        "auth_token",  # Twilio-style
     }
 )
 

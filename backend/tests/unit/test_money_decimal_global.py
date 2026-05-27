@@ -48,8 +48,7 @@ def _assert_money_field_is_string(payload: str, field_name: str) -> None:
     assert field_name in obj, f"{field_name!r} missing from payload {payload!r}"
     value = obj[field_name]
     assert isinstance(value, str), (
-        f"{field_name!r} serialised as {type(value).__name__} {value!r}; "
-        f"expected str per v3 §10 (Decimal-as-string)"
+        f"{field_name!r} serialised as {type(value).__name__} {value!r}; expected str per v3 §10 (Decimal-as-string)"
     )
 
 
@@ -68,12 +67,10 @@ def _assert_decimal_roundtrips(
     reparsed = schema_cls.model_validate_json(payload)
     actual = getattr(reparsed, field_name)
     assert isinstance(actual, Decimal), (
-        f"{schema_cls.__name__}.{field_name} reparsed as "
-        f"{type(actual).__name__}, expected Decimal"
+        f"{schema_cls.__name__}.{field_name} reparsed as {type(actual).__name__}, expected Decimal"
     )
     assert actual == Decimal(value), (
-        f"{schema_cls.__name__}.{field_name} round-trip lost precision: "
-        f"{value!r} → {actual!r}"
+        f"{schema_cls.__name__}.{field_name} round-trip lost precision: {value!r} → {actual!r}"
     )
 
 
@@ -137,9 +134,7 @@ def _resolve(module_path: str, cls_name: str) -> type[BaseModel]:
 
 
 @pytest.mark.parametrize(("module_path", "cls_name", "field_name"), MONEY_FIELDS)
-def test_money_field_serialises_as_string(
-    module_path: str, cls_name: str, field_name: str
-) -> None:
+def test_money_field_serialises_as_string(module_path: str, cls_name: str, field_name: str) -> None:
     """v3 §10 — money emerges from JSON serialisation as a STRING."""
     schema_cls = _resolve(module_path, cls_name)
     instance = schema_cls.model_construct(**{field_name: Decimal("1234.56")})
@@ -148,9 +143,7 @@ def test_money_field_serialises_as_string(
 
 
 @pytest.mark.parametrize(("module_path", "cls_name", "field_name"), MONEY_FIELDS)
-def test_money_field_accepts_string_input(
-    module_path: str, cls_name: str, field_name: str
-) -> None:
+def test_money_field_accepts_string_input(module_path: str, cls_name: str, field_name: str) -> None:
     """v3 §10 — money fields accept a string input and parse back to Decimal."""
     schema_cls = _resolve(module_path, cls_name)
     # Build via Pydantic's full validator path so string→Decimal coercion runs.
@@ -161,8 +154,7 @@ def test_money_field_accepts_string_input(
     # (no float-mediated drift like "9876.539999...").
     obj = json.loads(payload)
     assert obj[field_name] == "9876.54", (
-        f"{cls_name}.{field_name} round-trip drifted: "
-        f"in='9876.54' out={obj[field_name]!r}"
+        f"{cls_name}.{field_name} round-trip drifted: in='9876.54' out={obj[field_name]!r}"
     )
 
 
@@ -253,9 +245,7 @@ def _collect_module_schemas() -> dict[str, dict]:
     out: dict[str, dict] = {}
     for mod_info in pkgutil.iter_modules(modules_pkg.__path__):
         try:
-            schemas_mod = importlib.import_module(
-                f"app.modules.{mod_info.name}.schemas"
-            )
+            schemas_mod = importlib.import_module(f"app.modules.{mod_info.name}.schemas")
         except ModuleNotFoundError:
             continue
         except Exception:  # noqa: BLE001
@@ -263,11 +253,7 @@ def _collect_module_schemas() -> dict[str, dict]:
             continue
         for attr_name in dir(schemas_mod):
             cls = getattr(schemas_mod, attr_name)
-            if (
-                isinstance(cls, type)
-                and issubclass(cls, BaseModel)
-                and cls is not BaseModel
-            ):
+            if isinstance(cls, type) and issubclass(cls, BaseModel) and cls is not BaseModel:
                 # Only include classes declared IN this module (skip imports).
                 if cls.__module__ != schemas_mod.__name__:
                     continue
@@ -321,8 +307,7 @@ def test_money_as_float_deficit_does_not_grow() -> None:
         f"cap is {MAX_REMAINING_MONEY_FLOATS}. New offenders since last "
         f"audit indicate a regression. Either fix them or, after a wave "
         f"that intentionally widens scope, lower MAX_REMAINING_MONEY_FLOATS "
-        f"here.\n\nOffenders (top 30):\n  - "
-        + "\n  - ".join(offenders_unique[:30])
+        f"here.\n\nOffenders (top 30):\n  - " + "\n  - ".join(offenders_unique[:30])
     )
 
 

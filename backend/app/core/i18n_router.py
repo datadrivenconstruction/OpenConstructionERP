@@ -37,10 +37,7 @@ async def get_locale_messages(locale: str) -> dict:
     if locale not in SUPPORTED_LOCALES:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=(
-                f"Locale '{locale}' is not supported. "
-                f"Supported codes: {', '.join(SUPPORTED_LOCALES)}"
-            ),
+            detail=(f"Locale '{locale}' is not supported. Supported codes: {', '.join(SUPPORTED_LOCALES)}"),
         )
     translations = get_all_translations(locale)
     meta: dict[str, object] = {"locale": locale, "fallback": not is_locale_loaded(locale)}

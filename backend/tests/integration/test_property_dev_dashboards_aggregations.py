@@ -25,7 +25,6 @@ from __future__ import annotations
 import os
 import tempfile
 import uuid
-from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 
@@ -74,11 +73,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -119,6 +114,8 @@ async def _seed_db_world(
 ) -> dict:
     """Seed Project + Development + Phase + Block + plots + (optionally)
     leads / SPAs / payment schedules / instalments / escrows."""
+    from sqlalchemy import select
+
     from app.database import async_session_factory
     from app.modules.projects.models import Project
     from app.modules.property_dev.models import (
@@ -138,18 +135,10 @@ async def _seed_db_world(
         SalesContract,
     )
     from app.modules.users.models import User
-    from sqlalchemy import select
 
     async with async_session_factory() as s:
         # Find the owner user.
-        owner = (
-            (
-                await s.execute(
-                    select(User).where(User.email == project_owner_email.lower())
-                )
-            )
-            .scalar_one()
-        )
+        owner = (await s.execute(select(User).where(User.email == project_owner_email.lower()))).scalar_one()
 
         proj = Project(
             name=project_name,
@@ -541,9 +530,7 @@ async def test_inventory_heatmap_groups_by_phase_and_block(http_client, tenant_a
     for phase in body["phases"]:
         for blk in phase["blocks"]:
             for unit in blk["units"]:
-                found_plots.append(
-                    (phase["phase_id"], blk["block_id"], unit["plot_id"])
-                )
+                found_plots.append((phase["phase_id"], blk["block_id"], unit["plot_id"]))
     plot_to_phase = {p[2]: p for p in found_plots}
     a1_id = tenant_a["plots"][next(k for k in tenant_a["plots"] if k.endswith("-A1"))]
     leg_id = tenant_a["plots"][next(k for k in tenant_a["plots"] if k.endswith("-LEG"))]
@@ -575,7 +562,8 @@ async def test_sales_velocity_uses_spa_signing_date(http_client, tenant_a):
     apr = next((b for b in body["series"] if b["period"] == "2026-04"), None)
     assert apr is not None, body
     eur_rev = next(
-        (e for e in apr["revenue"] if e["currency"] == "EUR"), None,
+        (e for e in apr["revenue"] if e["currency"] == "EUR"),
+        None,
     )
     assert eur_rev is not None
     assert Decimal(str(eur_rev["amount"])) == Decimal("480000.00")
@@ -584,7 +572,8 @@ async def test_sales_velocity_uses_spa_signing_date(http_client, tenant_a):
 
 @pytest.mark.asyncio
 async def test_cashflow_waterfall_from_instalments_and_escrow(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     """Cashflow waterfall sums Instalment + EscrowTransaction by month."""
     dev_id = tenant_a["development_id"]
@@ -600,17 +589,20 @@ async def test_cashflow_waterfall_from_instalments_and_escrow(
     jun = next((s for s in body["series"] if s["month"] == "2026-06"), None)
     assert jun is not None, body
     sched_eur = next(
-        (e for e in jun["scheduled"] if e["currency"] == "EUR"), None,
+        (e for e in jun["scheduled"] if e["currency"] == "EUR"),
+        None,
     )
     assert sched_eur is not None
     assert Decimal(str(sched_eur["amount"])) == Decimal("60000.00")
     coll_eur = next(
-        (e for e in jun["actual_collected"] if e["currency"] == "EUR"), None,
+        (e for e in jun["actual_collected"] if e["currency"] == "EUR"),
+        None,
     )
     assert coll_eur is not None
     assert Decimal(str(coll_eur["amount"])) == Decimal("60000.00")
     disb_eur = next(
-        (e for e in jun["actual_disbursed"] if e["currency"] == "EUR"), None,
+        (e for e in jun["actual_disbursed"] if e["currency"] == "EUR"),
+        None,
     )
     assert disb_eur is not None
     assert Decimal(str(disb_eur["amount"])) == Decimal("15000.00")
@@ -634,9 +626,7 @@ async def test_inventory_ageing_buckets(http_client, tenant_a):
     # total_unsold = sum across all buckets.
     assert body["total_unsold"] == sum(int(b["count"]) for b in body["buckets"])
     # Sold plot is not in any bucket.
-    sold_id = tenant_a["plots"][
-        next(k for k in tenant_a["plots"] if k.endswith("-SOLD"))
-    ]
+    sold_id = tenant_a["plots"][next(k for k in tenant_a["plots"] if k.endswith("-SOLD"))]
     for b in body["buckets"]:
         for p in b["plots"]:
             assert p["plot_id"] != sold_id
@@ -655,7 +645,11 @@ async def test_funnel_conversion_5_stages(http_client, tenant_a):
     body = res.json()
     codes = [s["code"] for s in body["stages"]]
     assert codes == [
-        "lead", "reservation", "spa_draft", "spa_signed", "handover",
+        "lead",
+        "reservation",
+        "spa_draft",
+        "spa_signed",
+        "handover",
     ]
     # We seeded 3 leads + 1 reservation + 1 SPA (signed) + 1 handover.
     by_code = {s["code"]: int(s["count"]) for s in body["stages"]}
@@ -680,14 +674,8 @@ async def test_buyer_journey_cross_entity_chain(http_client, tenant_a):
 
     async with async_session_factory() as s:
         # Buyer whose plot is the A1 one (has signed SPA).
-        a1_id = tenant_a["plots"][
-            next(k for k in tenant_a["plots"] if k.endswith("-A1"))
-        ]
-        buyer_row = (
-            await s.execute(
-                select(Buyer).where(Buyer.plot_id == uuid.UUID(a1_id))
-            )
-        ).scalar_one()
+        a1_id = tenant_a["plots"][next(k for k in tenant_a["plots"] if k.endswith("-A1"))]
+        buyer_row = (await s.execute(select(Buyer).where(Buyer.plot_id == uuid.UUID(a1_id)))).scalar_one()
         buyer_id = str(buyer_row.id)
 
     res = await http_client.get(
@@ -770,14 +758,8 @@ async def test_idor_buyer_journey_404(http_client, tenant_a, tenant_b):
     from app.modules.property_dev.models import Buyer
 
     async with async_session_factory() as s:
-        a1_id = tenant_a["plots"][
-            next(k for k in tenant_a["plots"] if k.endswith("-A1"))
-        ]
-        buyer_row = (
-            await s.execute(
-                select(Buyer).where(Buyer.plot_id == uuid.UUID(a1_id))
-            )
-        ).scalar_one()
+        a1_id = tenant_a["plots"][next(k for k in tenant_a["plots"] if k.endswith("-A1"))]
+        buyer_row = (await s.execute(select(Buyer).where(Buyer.plot_id == uuid.UUID(a1_id)))).scalar_one()
         target_buyer_id = str(buyer_row.id)
 
     res = await http_client.get(
@@ -795,7 +777,8 @@ async def test_idor_buyer_journey_404(http_client, tenant_a, tenant_b):
 
 @pytest.mark.asyncio
 async def test_velocity_keeps_separate_currency_buckets(
-    http_client, tenant_multi,
+    http_client,
+    tenant_multi,
 ):
     dev_id = tenant_multi["development_id"]
     res = await http_client.get(
@@ -814,10 +797,12 @@ async def test_velocity_keeps_separate_currency_buckets(
     assert eur is not None and Decimal(str(eur["amount"])) == Decimal("500000.00")
     assert usd is not None and Decimal(str(usd["amount"])) == Decimal("600000.00")
     totals_eur = next(
-        (r for r in body["totals"]["revenue"] if r["currency"] == "EUR"), None,
+        (r for r in body["totals"]["revenue"] if r["currency"] == "EUR"),
+        None,
     )
     totals_usd = next(
-        (r for r in body["totals"]["revenue"] if r["currency"] == "USD"), None,
+        (r for r in body["totals"]["revenue"] if r["currency"] == "USD"),
+        None,
     )
     assert totals_eur is not None
     assert totals_usd is not None
@@ -827,7 +812,8 @@ async def test_velocity_keeps_separate_currency_buckets(
 
 @pytest.mark.asyncio
 async def test_cashflow_keeps_separate_currency_buckets(
-    http_client, tenant_multi,
+    http_client,
+    tenant_multi,
 ):
     dev_id = tenant_multi["development_id"]
     res = await http_client.get(
@@ -841,10 +827,12 @@ async def test_cashflow_keeps_separate_currency_buckets(
     apr = next((s for s in body["series"] if s["month"] == "2026-04"), None)
     assert apr is not None
     eur_coll = next(
-        (e for e in apr["actual_collected"] if e["currency"] == "EUR"), None,
+        (e for e in apr["actual_collected"] if e["currency"] == "EUR"),
+        None,
     )
     usd_coll = next(
-        (e for e in apr["actual_collected"] if e["currency"] == "USD"), None,
+        (e for e in apr["actual_collected"] if e["currency"] == "USD"),
+        None,
     )
     assert eur_coll is not None
     assert usd_coll is not None

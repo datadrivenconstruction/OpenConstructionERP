@@ -215,9 +215,7 @@ async def create_topic(
 ) -> TopicResponse:
     """Create a new BCF topic."""
     await _require_project_access(session, project_id, user_id)
-    topic = await service.create_topic(
-        project_id, data, author=user_id, user_id=user_id
-    )
+    topic = await service.create_topic(project_id, data, author=user_id, user_id=user_id)
     return _topic_response(topic)
 
 
@@ -261,9 +259,7 @@ async def update_topic(
     """Patch a topic — only fields present in the body change."""
     await _require_project_access(session, project_id, user_id)
     try:
-        topic = await service.update_topic(
-            project_id, topic_id, data, author=user_id
-        )
+        topic = await service.update_topic(project_id, topic_id, data, author=user_id)
     except BCFServiceError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -315,9 +311,7 @@ async def add_comment(
     """Append a comment to a topic (optionally bound to a viewpoint)."""
     await _require_project_access(session, project_id, user_id)
     try:
-        comment = await service.add_comment(
-            project_id, topic_id, data, author=user_id, user_id=user_id
-        )
+        comment = await service.add_comment(project_id, topic_id, data, author=user_id, user_id=user_id)
     except BCFServiceError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -351,9 +345,7 @@ async def update_comment(
     """Edit a comment's text."""
     await _require_project_access(session, project_id, user_id)
     try:
-        comment = await service.update_comment(
-            project_id, topic_id, comment_id, data.comment, author=user_id
-        )
+        comment = await service.update_comment(project_id, topic_id, comment_id, data.comment, author=user_id)
     except BCFServiceError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -429,8 +421,7 @@ async def add_viewpoint(
         element_stable_ids=list(vp.element_stable_ids or []),
         has_snapshot=bool(vp.snapshot_key),
         snapshot_url=(
-            f"/api/v1/bcf/projects/{project_id}/topics/{topic_id}"
-            f"/viewpoints/{vp.guid}/snapshot"
+            f"/api/v1/bcf/projects/{project_id}/topics/{topic_id}/viewpoints/{vp.guid}/snapshot"
             if vp.snapshot_key
             else None
         ),
@@ -491,9 +482,7 @@ async def export_project_bcf(
             ),
         )
     try:
-        archive, _count = await service.export_bcfzip(
-            project_id, project_name or str(project_id), version
-        )
+        archive, _count = await service.export_bcfzip(project_id, project_name or str(project_id), version)
     except BCFServiceError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -558,9 +547,7 @@ async def import_project_bcf(
             detail=translate("bcf.upload_too_large", _locale_of(user_id)),
         )
 
-    return await service.import_bcfzip(
-        project_id, payload, user_id, forced_version=version
-    )
+    return await service.import_bcfzip(project_id, payload, user_id, forced_version=version)
 
 
 # ── Clash → BCF 3.0 zip (file-based, no persistence) ──────────────────────
@@ -651,9 +638,7 @@ async def import_clashes_bcfzip(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
     session: SessionDep,
-    file: UploadFile = FileParam(
-        ..., description="A BCF 3.0 .bcfzip archive (Revit/ArchiCAD/etc.)"
-    ),
+    file: UploadFile = FileParam(..., description="A BCF 3.0 .bcfzip archive (Revit/ArchiCAD/etc.)"),
 ) -> dict:
     """Ingest a ``.bcfzip`` and upsert each Topic as a :class:`ClashIssue`.
 
@@ -709,9 +694,7 @@ async def import_clashes_bcfzip(
 
     importer = BCFImportService(session)
     try:
-        report = await importer.import_clashes_from_bcf(
-            project_id, payload, current_user_id=user_id
-        )
+        report = await importer.import_clashes_from_bcf(project_id, payload, current_user_id=user_id)
     except BCFImportFeatureUnavailable as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

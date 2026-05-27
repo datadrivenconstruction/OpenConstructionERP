@@ -58,9 +58,8 @@ def test_valid_fixture_passes_jsonschema(
 ) -> None:
     """Each fixture in the valid set must validate without error."""
     errors = sorted(validator.iter_errors(body), key=lambda e: e.path)
-    assert errors == [], (
-        f"fixture {label} should validate but raised: "
-        + "; ".join(f"{'/'.join(str(p) for p in e.path)}: {e.message}" for e in errors)
+    assert errors == [], f"fixture {label} should validate but raised: " + "; ".join(
+        f"{'/'.join(str(p) for p in e.path)}: {e.message}" for e in errors
     )
 
 
@@ -76,9 +75,7 @@ def test_invalid_fixture_fails_jsonschema(
 ) -> None:
     """Each fixture in the invalid set must raise at least one error."""
     errors = list(validator.iter_errors(body))
-    assert errors, (
-        f"fixture {label} should NOT validate but the schema accepted it"
-    )
+    assert errors, f"fixture {label} should NOT validate but the schema accepted it"
 
 
 def test_schema_iter_errors_returns_validation_error_class(

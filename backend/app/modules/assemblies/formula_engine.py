@@ -66,17 +66,13 @@ class FormulaEvaluator:
         if not isinstance(formula, str):
             raise FormulaError("Formula must be a string")
         if len(formula) > _MAX_FORMULA_LEN:
-            raise FormulaError(
-                f"Formula too long ({len(formula)} > {_MAX_FORMULA_LEN} chars)"
-            )
+            raise FormulaError(f"Formula too long ({len(formula)} > {_MAX_FORMULA_LEN} chars)")
         depth = 0
         for ch in formula:
             if ch == "(":
                 depth += 1
                 if depth > _MAX_PAREN_DEPTH:
-                    raise FormulaError(
-                        f"Parenthesis nesting too deep (> {_MAX_PAREN_DEPTH})"
-                    )
+                    raise FormulaError(f"Parenthesis nesting too deep (> {_MAX_PAREN_DEPTH})")
             elif ch == ")":
                 depth -= 1
 
@@ -104,9 +100,7 @@ class FormulaEvaluator:
             # NOT be returned silently — it would propagate as a corrupt
             # null total downstream (same class as ASM-002).
             if not math.isfinite(result_f):
-                raise FormulaError(
-                    "Formula produced a non-finite result (overflow / NaN)"
-                )
+                raise FormulaError("Formula produced a non-finite result (overflow / NaN)")
 
             return result_f
 
@@ -167,10 +161,7 @@ class FormulaEvaluator:
             start, end = span
             args = self._split_call_args(formula[start:end])
             if len(args) != 3:
-                raise FormulaError(
-                    f"if() takes exactly 3 arguments, got {len(args)}: "
-                    f"'{formula[start:end]}'"
-                )
+                raise FormulaError(f"if() takes exactly 3 arguments, got {len(args)}: '{formula[start:end]}'")
             cond_str, true_val, false_val = (a.strip() for a in args)
             cond_result = self._eval_condition(cond_str)
             replacement = true_val if cond_result else false_val

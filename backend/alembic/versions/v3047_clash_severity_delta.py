@@ -78,9 +78,7 @@ def upgrade() -> None:
             ),
         )
     if "due_date" not in cols:
-        op.add_column(
-            _RESULT, sa.Column("due_date", sa.String(20), nullable=True)
-        )
+        op.add_column(_RESULT, sa.Column("due_date", sa.String(20), nullable=True))
     if "comments" not in cols:
         op.add_column(
             _RESULT,

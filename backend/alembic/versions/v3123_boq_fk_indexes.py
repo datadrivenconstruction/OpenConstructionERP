@@ -127,28 +127,19 @@ def upgrade() -> None:
             # This pattern is documented in the alembic FAQ and matches
             # what the geo-hub raster overlay migration does.
             op.execute("COMMIT")
-            op.execute(
-                f"CREATE INDEX CONCURRENTLY IF NOT EXISTS {index_name} "
-                f"ON {table} ({col_list})"
-            )
+            op.execute(f"CREATE INDEX CONCURRENTLY IF NOT EXISTS {index_name} ON {table} ({col_list})")
             # Reopen a transaction so alembic's ``op.*`` and the version
             # bookkeeping update stay transactional.
             op.execute("BEGIN")
         elif dialect == "sqlite":
-            op.execute(
-                f"CREATE INDEX IF NOT EXISTS {index_name} "
-                f"ON {table} ({col_list})"
-            )
+            op.execute(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({col_list})")
         else:
             # MySQL / others: plain CREATE INDEX. MySQL ≥ 5.6 also
             # supports ALGORITHM=INPLACE LOCK=NONE for online creates
             # but the alembic op.create_index dispatcher handles that
             # automatically for the ORM-managed path. We stay on the
             # raw SQL path here for parity.
-            op.execute(
-                f"CREATE INDEX IF NOT EXISTS {index_name} "
-                f"ON {table} ({col_list})"
-            )
+            op.execute(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({col_list})")
 
 
 def downgrade() -> None:

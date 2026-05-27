@@ -83,48 +83,23 @@ def _make_po(
 
 
 def test_classify_line_match_ok() -> None:
-    assert (
-        ProcurementService._classify_line_match(
-            Decimal("10"), Decimal("10"), Decimal("10")
-        )
-        == "ok"
-    )
+    assert ProcurementService._classify_line_match(Decimal("10"), Decimal("10"), Decimal("10")) == "ok"
 
 
 def test_classify_line_match_partial() -> None:
-    assert (
-        ProcurementService._classify_line_match(
-            Decimal("10"), Decimal("5"), Decimal("0")
-        )
-        == "partial"
-    )
+    assert ProcurementService._classify_line_match(Decimal("10"), Decimal("5"), Decimal("0")) == "partial"
 
 
 def test_classify_line_match_unmatched() -> None:
-    assert (
-        ProcurementService._classify_line_match(
-            Decimal("10"), Decimal("0"), Decimal("0")
-        )
-        == "unmatched"
-    )
+    assert ProcurementService._classify_line_match(Decimal("10"), Decimal("0"), Decimal("0")) == "unmatched"
 
 
 def test_classify_line_match_over_received() -> None:
-    assert (
-        ProcurementService._classify_line_match(
-            Decimal("10"), Decimal("15"), Decimal("10")
-        )
-        == "over_received"
-    )
+    assert ProcurementService._classify_line_match(Decimal("10"), Decimal("15"), Decimal("10")) == "over_received"
 
 
 def test_classify_line_match_over_invoiced() -> None:
-    assert (
-        ProcurementService._classify_line_match(
-            Decimal("10"), Decimal("5"), Decimal("8")
-        )
-        == "over_invoiced"
-    )
+    assert ProcurementService._classify_line_match(Decimal("10"), Decimal("5"), Decimal("8")) == "over_invoiced"
 
 
 # ── get_match_status (E2E with SQLite) ─────────────────────────────────
@@ -164,22 +139,24 @@ async def test_match_status_two_lines_mixed(session: AsyncSession) -> None:
     session.add(gr)
     await session.flush()
 
-    session.add_all([
-        GoodsReceiptItem(
-            receipt_id=gr.id,
-            po_item_id=line_a.id,
-            quantity_ordered="100",
-            quantity_received="100",
-            quantity_rejected="0",
-        ),
-        GoodsReceiptItem(
-            receipt_id=gr.id,
-            po_item_id=line_b.id,
-            quantity_ordered="50",
-            quantity_received="75",  # over-received
-            quantity_rejected="0",
-        ),
-    ])
+    session.add_all(
+        [
+            GoodsReceiptItem(
+                receipt_id=gr.id,
+                po_item_id=line_a.id,
+                quantity_ordered="100",
+                quantity_received="100",
+                quantity_rejected="0",
+            ),
+            GoodsReceiptItem(
+                receipt_id=gr.id,
+                po_item_id=line_b.id,
+                quantity_ordered="50",
+                quantity_received="75",  # over-received
+                quantity_rejected="0",
+            ),
+        ]
+    )
     await session.flush()
 
     svc = ProcurementService(session)
@@ -211,7 +188,10 @@ async def test_match_status_unconfirmed_gr_ignored(session: AsyncSession) -> Non
     await session.flush()
 
     line = PurchaseOrderItem(
-        po_id=po.id, description="Steel", quantity="20", sort_order=0,
+        po_id=po.id,
+        description="Steel",
+        quantity="20",
+        sort_order=0,
     )
     session.add(line)
     await session.flush()
@@ -247,7 +227,10 @@ async def test_scorecard_on_time_and_rejection(session: AsyncSession) -> None:
     await session.flush()
 
     line = PurchaseOrderItem(
-        po_id=po.id, description="Cement", quantity="100", sort_order=0,
+        po_id=po.id,
+        description="Cement",
+        quantity="100",
+        sort_order=0,
     )
     session.add(line)
     await session.flush()
@@ -338,9 +321,7 @@ async def test_scorecard_unscheduled_po_excluded_from_on_time(
     await session.flush()
 
     gr_a = GoodsReceipt(po_id=po_sched.id, receipt_date="2026-04-09", status="confirmed")
-    gr_b = GoodsReceipt(
-        po_id=po_unsched.id, receipt_date="2026-04-09", status="confirmed"
-    )
+    gr_b = GoodsReceipt(po_id=po_unsched.id, receipt_date="2026-04-09", status="confirmed")
     session.add_all([gr_a, gr_b])
     await session.flush()
 

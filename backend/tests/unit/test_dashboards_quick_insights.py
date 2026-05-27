@@ -40,9 +40,7 @@ def numeric_x_categorical_df() -> pd.DataFrame:
             "category": (["wall"] * 20) + (["door"] * 15) + (["window"] * 10),
             "area_m2": (
                 # walls cluster around 25, doors around 2, windows around 1.5
-                [22.0, 24.0, 25.0, 26.0, 28.0] * 4
-                + [1.8, 2.0, 2.1, 2.2, 2.3] * 3
-                + [1.4, 1.5, 1.6, 1.7, 1.8] * 2
+                [22.0, 24.0, 25.0, 26.0, 28.0] * 4 + [1.8, 2.0, 2.1, 2.2, 2.3] * 3 + [1.4, 1.5, 1.6, 1.7, 1.8] * 2
             ),
         }
     )
@@ -87,11 +85,7 @@ def all_null_column_df() -> pd.DataFrame:
 def low_cardinality_categorical_df() -> pd.DataFrame:
     return pd.DataFrame(
         {
-            "discipline": (
-                ["architecture"] * 10
-                + ["structure"] * 6
-                + ["mep"] * 4
-            ),
+            "discipline": (["architecture"] * 10 + ["structure"] * 6 + ["mep"] * 4),
             "thickness_mm": list(range(20)) * 1,
         }
     )
@@ -116,7 +110,8 @@ def uuid_column_df() -> pd.DataFrame:
 
 class TestNumericOnly:
     def test_numeric_only_yields_at_least_one_histogram(
-        self, numeric_only_df: pd.DataFrame,
+        self,
+        numeric_only_df: pd.DataFrame,
     ) -> None:
         charts = generate_quick_insights(numeric_only_df, limit=6)
         types = {c.chart_type for c in charts}
@@ -235,7 +230,8 @@ class TestNullAndPKExclusion:
 
 class TestLowCardinalityDonut:
     def test_yields_donut(
-        self, low_cardinality_categorical_df: pd.DataFrame,
+        self,
+        low_cardinality_categorical_df: pd.DataFrame,
     ) -> None:
         charts = generate_quick_insights(low_cardinality_categorical_df, limit=6)
         donuts = [c for c in charts if c.chart_type == "donut"]
@@ -251,12 +247,7 @@ class TestLowCardinalityDonut:
 
 class TestRankingAndDiversity:
     def test_returns_at_most_limit(self) -> None:
-        df = pd.DataFrame(
-            {
-                f"num_{i}": list(range(50))
-                for i in range(8)
-            }
-        )
+        df = pd.DataFrame({f"num_{i}": list(range(50)) for i in range(8)})
         charts = generate_quick_insights(df, limit=4)
         assert len(charts) <= 4
 
@@ -266,9 +257,7 @@ class TestRankingAndDiversity:
         df = pd.DataFrame(
             {
                 "category": (["wall"] * 20 + ["door"] * 15 + ["window"] * 10) * 1,
-                "discipline": (
-                    ["arch"] * 18 + ["mep"] * 15 + ["struct"] * 12
-                ),
+                "discipline": (["arch"] * 18 + ["mep"] * 15 + ["struct"] * 12),
                 "thickness_mm": list(range(45)),
                 "height_m": [1.5 + i * 0.05 for i in range(45)],
                 "created_at": pd.date_range("2025-01-01", periods=45, freq="D"),

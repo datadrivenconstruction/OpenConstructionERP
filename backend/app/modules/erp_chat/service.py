@@ -52,8 +52,8 @@ MAX_TOOL_RESULT_CHARS = 8000
 # before re-feeding to the LLM, otherwise (a) prompt injection via stuffed
 # history grows unbounded, (b) cost explodes on a single request, and
 # (c) the provider rejects/truncates the request unpredictably.
-MAX_HISTORY_MESSAGES = 20           # keep most-recent N turns only
-MAX_HISTORY_MESSAGE_CHARS = 4000    # truncate each individual message
+MAX_HISTORY_MESSAGES = 20  # keep most-recent N turns only
+MAX_HISTORY_MESSAGE_CHARS = 4000  # truncate each individual message
 ALLOWED_HISTORY_ROLES = ("user", "assistant")
 
 # Per-user 24h soft token budget. When exceeded, the chat endpoint refuses
@@ -92,10 +92,7 @@ def _truncate_tool_result(result: Any) -> Any:
             "summary": (result.get("summary") or "")[:1000],
             "renderer": result.get("renderer", "generic_table"),
             "data": data[:20] if isinstance(data, list) else None,
-            "_truncated": (
-                f"original size {len(serialized)} chars, "
-                "truncated to fit context window"
-            ),
+            "_truncated": (f"original size {len(serialized)} chars, truncated to fit context window"),
         }
     return result
 
@@ -136,12 +133,8 @@ class ERPChatService:
         message; we sum tokens + latency and OR the cache-hit signal so a
         single round serving from cache marks the whole turn as a hit.
         """
-        self._last_turn["tokens_input"] = (
-            (self._last_turn.get("tokens_input") or 0) + tokens_in
-        )
-        self._last_turn["tokens_output"] = (
-            (self._last_turn.get("tokens_output") or 0) + tokens_out
-        )
+        self._last_turn["tokens_input"] = (self._last_turn.get("tokens_input") or 0) + tokens_in
+        self._last_turn["tokens_output"] = (self._last_turn.get("tokens_output") or 0) + tokens_out
         prior_hit = self._last_turn.get("cache_hit")
         if cache_hit:
             self._last_turn["cache_hit"] = True
@@ -149,9 +142,7 @@ class ERPChatService:
             # First round reported a definite miss — record it; later True
             # wins via the branch above.
             self._last_turn["cache_hit"] = False
-        self._last_turn["latency_ms"] = (
-            (self._last_turn.get("latency_ms") or 0) + latency_ms
-        )
+        self._last_turn["latency_ms"] = (self._last_turn.get("latency_ms") or 0) + latency_ms
 
     # ── Session management ───────────────────────────────────────────────
 
@@ -160,9 +151,7 @@ class ERPChatService:
     ) -> ChatSession:
         """Get an existing chat session or create a new one."""
         if session_id:
-            stmt = select(ChatSession).where(
-                ChatSession.id == session_id, ChatSession.user_id == uuid.UUID(user_id)
-            )
+            stmt = select(ChatSession).where(ChatSession.id == session_id, ChatSession.user_id == uuid.UUID(user_id))
             result = await self.session.execute(stmt)
             chat_session = result.scalar_one_or_none()
             if chat_session:
@@ -196,9 +185,7 @@ class ERPChatService:
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), total
 
-    async def get_session_messages(
-        self, session_id: uuid.UUID, user_id: str
-    ) -> list[ChatMessage]:
+    async def get_session_messages(self, session_id: uuid.UUID, user_id: str) -> list[ChatMessage]:
         """Get all messages for a session."""
         stmt = (
             select(ChatMessage)
@@ -214,9 +201,7 @@ class ERPChatService:
 
     async def delete_session(self, session_id: uuid.UUID, user_id: str) -> bool:
         """Delete a chat session and its messages."""
-        stmt = select(ChatSession).where(
-            ChatSession.id == session_id, ChatSession.user_id == uuid.UUID(user_id)
-        )
+        stmt = select(ChatSession).where(ChatSession.id == session_id, ChatSession.user_id == uuid.UUID(user_id))
         result = await self.session.execute(stmt)
         chat_session = result.scalar_one_or_none()
         if not chat_session:
@@ -250,18 +235,14 @@ class ERPChatService:
 
     # ── Main streaming entry point ───────────────────────────────────────
 
-    async def stream_response(
-        self, user_id: str, request: StreamChatRequest
-    ) -> AsyncGenerator[str, None]:
+    async def stream_response(self, user_id: str, request: StreamChatRequest) -> AsyncGenerator[str, None]:
         """Main SSE streaming generator.
 
         Yields SSE-formatted strings: session_id, tool_start, tool_result, text, done events.
         """
         try:
             # 1. Get or create session
-            chat_session = await self.get_or_create_session(
-                user_id, request.session_id, request.project_id
-            )
+            chat_session = await self.get_or_create_session(user_id, request.session_id, request.project_id)
             yield _sse("session_id", {"session_id": str(chat_session.id)})
 
             # 1b. Enforce per-user 24h token budget. Rate-limit handles
@@ -270,15 +251,20 @@ class ERPChatService:
             if not within_budget:
                 logger.warning(
                     "erp_chat budget exceeded: user=%s used_24h=%d limit=%d",
-                    user_id, tokens_used_24h, DAILY_TOKEN_BUDGET,
+                    user_id,
+                    tokens_used_24h,
+                    DAILY_TOKEN_BUDGET,
                 )
-                yield _sse("error", {
-                    "message": (
-                        "Daily AI token budget exceeded "
-                        f"({tokens_used_24h:,} / {DAILY_TOKEN_BUDGET:,}). "
-                        "Try again tomorrow or contact your administrator."
-                    )
-                })
+                yield _sse(
+                    "error",
+                    {
+                        "message": (
+                            "Daily AI token budget exceeded "
+                            f"({tokens_used_24h:,} / {DAILY_TOKEN_BUDGET:,}). "
+                            "Try again tomorrow or contact your administrator."
+                        )
+                    },
+                )
                 yield _sse("done", {})
                 return
 
@@ -304,18 +290,12 @@ class ERPChatService:
             for _round in range(MAX_AGENT_ROUNDS):
                 try:
                     if provider == "anthropic":
-                        result, tokens = await self._call_anthropic(
-                            api_key, messages, preferred_model
-                        )
+                        result, tokens = await self._call_anthropic(api_key, messages, preferred_model)
                     elif provider == "openai":
-                        result, tokens = await self._call_openai(
-                            api_key, messages, preferred_model
-                        )
+                        result, tokens = await self._call_openai(api_key, messages, preferred_model)
                     else:
                         # Fallback: no tool support — plain text
-                        async for chunk in self._call_fallback(
-                            provider, api_key, request.message, preferred_model
-                        ):
+                        async for chunk in self._call_fallback(provider, api_key, request.message, preferred_model):
                             yield chunk
                         yield _sse("done", {})
                         return
@@ -373,14 +353,17 @@ class ERPChatService:
                             if project_id is not None:
                                 try:
                                     await _require_project_access(
-                                        self.session, project_id, user_id,
+                                        self.session,
+                                        project_id,
+                                        user_id,
                                     )
                                 except ToolAuthError as _te:
                                     # 404 posture — never reach the role check.
                                     tool_result = _auth_error(str(_te))
                                 except Exception:
                                     logger.exception(
-                                        "IDOR check failed for %s", tool_name,
+                                        "IDOR check failed for %s",
+                                        tool_name,
                                     )
                             if tool_result is None:
                                 # Project accessible (or no project_id —
@@ -388,7 +371,10 @@ class ERPChatService:
                                 # manager+.
                                 try:
                                     await check_tool_permission(
-                                        self.session, tool_name, tool_args, user_id,
+                                        self.session,
+                                        tool_name,
+                                        tool_args,
+                                        user_id,
                                     )
                                 except ToolPermissionDenied:
                                     tool_result = manager_permission_error_result()
@@ -404,7 +390,9 @@ class ERPChatService:
                         if tool_result is None:
                             try:
                                 tool_result = await handler(
-                                    self.session, tool_args, user_id,
+                                    self.session,
+                                    tool_args,
+                                    user_id,
                                 )
                             except Exception as exc:
                                 logger.exception("Tool handler %s failed", tool_name)
@@ -420,27 +408,32 @@ class ERPChatService:
                             "summary": f"Unknown tool: {tool_name}",
                         }
 
-                    yield _sse("tool_result", {
-                        "tool": tool_name,
-                        "result": tool_result,
-                    })
+                    yield _sse(
+                        "tool_result",
+                        {
+                            "tool": tool_name,
+                            "result": tool_result,
+                        },
+                    )
 
                     all_tool_calls.append({"name": tool_name, "args": tool_args, "id": tool_id})
-                    all_tool_results.append({
-                        "tool": tool_name,
-                        "id": tool_id,
-                        "result": tool_result,
-                    })
-                    tool_results_for_round.append({
-                        "tool_name": tool_name,
-                        "tool_id": tool_id,
-                        "result": tool_result,
-                    })
+                    all_tool_results.append(
+                        {
+                            "tool": tool_name,
+                            "id": tool_id,
+                            "result": tool_result,
+                        }
+                    )
+                    tool_results_for_round.append(
+                        {
+                            "tool_name": tool_name,
+                            "tool_id": tool_id,
+                            "result": tool_result,
+                        }
+                    )
 
                 # Add tool results to messages for next round
-                messages = self._append_tool_results(
-                    provider, messages, result, tool_results_for_round
-                )
+                messages = self._append_tool_results(provider, messages, result, tool_results_for_round)
             else:
                 # Hit max rounds — extract whatever text we have
                 assistant_text = self._extract_text(provider, result) if result else ""  # type: ignore[possibly-undefined]
@@ -469,7 +462,7 @@ class ERPChatService:
 
             # Structured cost log — one INFO line per chat turn carries the
             # full per-turn observability split. Operators tail this for
-                # billing / abuse-detection without joining DB tables.
+            # billing / abuse-detection without joining DB tables.
             logger.info(
                 "erp_chat.turn user=%s session=%s project=%s provider=%s "
                 "tokens_in=%d tokens_out=%d total=%d cache_hit=%s latency_ms=%d "
@@ -738,20 +731,20 @@ class ERPChatService:
 
     # ── Response parsing ─────────────────────────────────────────────────
 
-    def _extract_tool_calls(
-        self, provider: str, result: dict[str, Any]
-    ) -> list[dict[str, Any]]:
+    def _extract_tool_calls(self, provider: str, result: dict[str, Any]) -> list[dict[str, Any]]:
         """Extract tool calls from AI response."""
         calls: list[dict[str, Any]] = []
 
         if provider == "anthropic":
             for block in result.get("content", []):
                 if block.get("type") == "tool_use":
-                    calls.append({
-                        "id": block.get("id", str(uuid.uuid4())),
-                        "name": block["name"],
-                        "args": block.get("input", {}),
-                    })
+                    calls.append(
+                        {
+                            "id": block.get("id", str(uuid.uuid4())),
+                            "name": block["name"],
+                            "args": block.get("input", {}),
+                        }
+                    )
 
         elif provider == "openai":
             msg = result.get("choices", [{}])[0].get("message", {})
@@ -761,11 +754,13 @@ class ERPChatService:
                     args = json.loads(func.get("arguments", "{}"))
                 except json.JSONDecodeError:
                     args = {}
-                calls.append({
-                    "id": tc.get("id", str(uuid.uuid4())),
-                    "name": func.get("name", ""),
-                    "args": args,
-                })
+                calls.append(
+                    {
+                        "id": tc.get("id", str(uuid.uuid4())),
+                        "name": func.get("name", ""),
+                        "args": args,
+                    }
+                )
 
         return calls
 
@@ -799,11 +794,13 @@ class ERPChatService:
             # Add tool results (truncated so large payloads do not blow the context window)
             tool_result_blocks = []
             for tr in tool_results:
-                tool_result_blocks.append({
-                    "type": "tool_result",
-                    "tool_use_id": tr["tool_id"],
-                    "content": json.dumps(_truncate_tool_result(tr["result"]), default=str),
-                })
+                tool_result_blocks.append(
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": tr["tool_id"],
+                        "content": json.dumps(_truncate_tool_result(tr["result"]), default=str),
+                    }
+                )
             messages.append({"role": "user", "content": tool_result_blocks})
 
         elif provider == "openai":
@@ -813,11 +810,13 @@ class ERPChatService:
 
             # Add tool result messages (truncated so large payloads do not blow the context window)
             for tr in tool_results:
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": tr["tool_id"],
-                    "content": json.dumps(_truncate_tool_result(tr["result"]), default=str),
-                })
+                messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tr["tool_id"],
+                        "content": json.dumps(_truncate_tool_result(tr["result"]), default=str),
+                    }
+                )
 
         return messages
 
@@ -880,11 +879,7 @@ class ERPChatService:
             try:
                 from app.core.events import event_bus
 
-                project_id = (
-                    str(chat_session.project_id)
-                    if getattr(chat_session, "project_id", None)
-                    else None
-                )
+                project_id = str(chat_session.project_id) if getattr(chat_session, "project_id", None) else None
                 for msg, role in (
                     (user_msg, "user"),
                     (assistant_msg, "assistant"),
@@ -941,11 +936,7 @@ class ERPChatService:
         # the ``/messages/{id}/similar`` endpoint.
         from sqlalchemy.orm import selectinload as _selectinload
 
-        msg_stmt = (
-            select(ChatMessage)
-            .options(_selectinload(ChatMessage.session))
-            .where(ChatMessage.id == message_id)
-        )
+        msg_stmt = select(ChatMessage).options(_selectinload(ChatMessage.session)).where(ChatMessage.id == message_id)
         message = (await self.session.execute(msg_stmt)).scalar_one_or_none()
         if message is None or message.session is None:
             raise LookupError("Chat message not found")
@@ -1000,9 +991,7 @@ class ERPChatService:
             ChatMessage.role == "assistant",
             ChatMessage.created_at >= cutoff,
         )
-        total_messages = int(
-            (await self.session.execute(assistant_q)).scalar_one() or 0
-        )
+        total_messages = int((await self.session.execute(assistant_q)).scalar_one() or 0)
 
         tokens_q = select(
             func.coalesce(func.sum(ChatMessage.tokens_input), 0),
@@ -1030,37 +1019,34 @@ class ERPChatService:
         cache_hits, cache_denom = (await self.session.execute(cache_q)).one()
         cache_hits = int(cache_hits or 0)
         cache_denom = int(cache_denom or 0)
-        cache_hit_rate_pct = (
-            round(100.0 * cache_hits / cache_denom, 2) if cache_denom else 0.0
-        )
+        cache_hit_rate_pct = round(100.0 * cache_hits / cache_denom, 2) if cache_denom else 0.0
 
         # ── Feedback split ──────────────────────────────────────────────
-        fb_q = select(
-            func.coalesce(
-                func.sum(case((ChatTurnFeedback.rating == 1, 1), else_=0)),
-                0,
-            ),
-            func.coalesce(
-                func.sum(case((ChatTurnFeedback.rating == -1, 1), else_=0)),
-                0,
-            ),
-            func.count(func.distinct(ChatTurnFeedback.message_id)),
-        ).join(
-            ChatMessage, ChatTurnFeedback.message_id == ChatMessage.id,
-        ).where(
-            ChatMessage.created_at >= cutoff,
+        fb_q = (
+            select(
+                func.coalesce(
+                    func.sum(case((ChatTurnFeedback.rating == 1, 1), else_=0)),
+                    0,
+                ),
+                func.coalesce(
+                    func.sum(case((ChatTurnFeedback.rating == -1, 1), else_=0)),
+                    0,
+                ),
+                func.count(func.distinct(ChatTurnFeedback.message_id)),
+            )
+            .join(
+                ChatMessage,
+                ChatTurnFeedback.message_id == ChatMessage.id,
+            )
+            .where(
+                ChatMessage.created_at >= cutoff,
+            )
         )
-        thumbs_up, thumbs_down, rated_messages = (
-            await self.session.execute(fb_q)
-        ).one()
+        thumbs_up, thumbs_down, rated_messages = (await self.session.execute(fb_q)).one()
         thumbs_up = int(thumbs_up or 0)
         thumbs_down = int(thumbs_down or 0)
         rated_messages = int(rated_messages or 0)
-        feedback_rate_pct = (
-            round(100.0 * rated_messages / total_messages, 2)
-            if total_messages
-            else 0.0
-        )
+        feedback_rate_pct = round(100.0 * rated_messages / total_messages, 2) if total_messages else 0.0
 
         # ── Top negative prompts ───────────────────────────────────────
         # The user-prompt that immediately *precedes* a thumbs-down
@@ -1122,9 +1108,7 @@ class ERPChatService:
         daily: dict[str, dict[str, int]] = {}
         # seed every day in the window so the chart isn't gappy
         for offset in range(window):
-            day = (
-                datetime.now(UTC) - timedelta(days=window - 1 - offset)
-            ).date().isoformat()
+            day = (datetime.now(UTC) - timedelta(days=window - 1 - offset)).date().isoformat()
             daily[day] = {
                 "messages": 0,
                 "thumbs_up": 0,
@@ -1134,8 +1118,7 @@ class ERPChatService:
 
         msgs_q = select(
             ChatMessage.created_at,
-            func.coalesce(ChatMessage.tokens_input, 0)
-            + func.coalesce(ChatMessage.tokens_output, 0),
+            func.coalesce(ChatMessage.tokens_input, 0) + func.coalesce(ChatMessage.tokens_output, 0),
         ).where(
             ChatMessage.role == "assistant",
             ChatMessage.created_at >= cutoff,
@@ -1172,10 +1155,7 @@ class ERPChatService:
             elif rating == -1:
                 bucket["thumbs_down"] += 1
 
-        daily_breakdown = [
-            {"date": d, **values}
-            for d, values in sorted(daily.items())
-        ]
+        daily_breakdown = [{"date": d, **values} for d, values in sorted(daily.items())]
 
         return {
             "window_days": window,

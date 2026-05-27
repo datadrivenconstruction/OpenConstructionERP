@@ -126,9 +126,7 @@ class _SubprocessRecorder:
         return out
 
 
-def _install_minimal_dependencies(
-    monkeypatch: pytest.MonkeyPatch, *, converter: Path
-) -> None:
+def _install_minimal_dependencies(monkeypatch: pytest.MonkeyPatch, *, converter: Path) -> None:
     """‌⁠‍Patch the cad_import helpers consumed by ``_try_cad2data`` so the
     test focuses on the CLI-tolerance code path and ignores Excel parsing,
     converter discovery, etc."""
@@ -212,9 +210,7 @@ def test_exit_15_with_unknown_arg_stderr_retries_with_bare_invocation(
     assert len(dae_calls[1]) == 3
 
 
-def test_capability_matrix_strips_tokens_up_front(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_capability_matrix_strips_tokens_up_front(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍When the probe has already flagged the binary as legacy, the very
     first XLSX call must omit ``standard`` and ``-no-collada`` — no
     retry needed. ``converter_cli_outdated`` is still set on the result
@@ -246,9 +242,7 @@ def test_capability_matrix_strips_tokens_up_front(
         assert len(call) == 3
 
 
-def test_genuine_failure_with_unrelated_stderr_does_not_retry(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_genuine_failure_with_unrelated_stderr_does_not_retry(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍A non-zero exit whose stderr doesn't mention 'unknown argument'
     must NOT trigger the retry path — otherwise we'd silently re-run a
     crashing converter with stripped flags and produce misleading
@@ -282,9 +276,7 @@ def test_genuine_failure_with_unrelated_stderr_does_not_retry(
     )
 
 
-def test_both_attempts_fail_records_converter_outdated_cause(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_both_attempts_fail_records_converter_outdated_cause(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍Both the original and the bare-retry invocations fail with the
     user-reported stderr. The router consumes the recorded cause to
     decide whether to show the Reinstall CTA; that cause must be
@@ -321,29 +313,30 @@ def test_infer_failure_cause_handles_each_input_class() -> None:
     """‌⁠‍Direct unit test for the heuristic — pins each branch of the
     decision tree so future stderr phrasings can be added safely."""
     # Direct stderr marker → converter_outdated regardless of exit code
-    assert ifc_processor._infer_failure_cause(
-        reason="nonzero_exit", exit_code=15, stderr_text="arguments were not expected"
-    ) == "converter_outdated"
-    assert ifc_processor._infer_failure_cause(
-        reason="nonzero_exit", exit_code=1, stderr_text="Unknown argument: --foo"
-    ) == "converter_outdated"
+    assert (
+        ifc_processor._infer_failure_cause(
+            reason="nonzero_exit", exit_code=15, stderr_text="arguments were not expected"
+        )
+        == "converter_outdated"
+    )
+    assert (
+        ifc_processor._infer_failure_cause(reason="nonzero_exit", exit_code=1, stderr_text="Unknown argument: --foo")
+        == "converter_outdated"
+    )
 
     # Exit 15 alone (e.g. terse runtime) → converter_outdated as a safe
     # default — Reinstall is the only one-click fix anyway.
-    assert ifc_processor._infer_failure_cause(
-        reason="nonzero_exit", exit_code=15, stderr_text=""
-    ) == "converter_outdated"
+    assert (
+        ifc_processor._infer_failure_cause(reason="nonzero_exit", exit_code=15, stderr_text="") == "converter_outdated"
+    )
 
     # Other failures keep their existing labels.
-    assert ifc_processor._infer_failure_cause(
-        reason="timeout", exit_code=None, stderr_text=""
-    ) == "timeout"
-    assert ifc_processor._infer_failure_cause(
-        reason="empty_output", exit_code=0, stderr_text=""
-    ) == "empty_output"
-    assert ifc_processor._infer_failure_cause(
-        reason="nonzero_exit", exit_code=1, stderr_text="License denied"
-    ) == "unknown"
+    assert ifc_processor._infer_failure_cause(reason="timeout", exit_code=None, stderr_text="") == "timeout"
+    assert ifc_processor._infer_failure_cause(reason="empty_output", exit_code=0, stderr_text="") == "empty_output"
+    assert (
+        ifc_processor._infer_failure_cause(reason="nonzero_exit", exit_code=1, stderr_text="License denied")
+        == "unknown"
+    )
 
 
 def test_record_ddc_failure_accepts_explicit_cause(

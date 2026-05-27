@@ -55,6 +55,7 @@ def _safe_document_url(value: str | None) -> str | None:
         raise ValueError("document_url must be a relative upload path or https/s3 URL")
     return value
 
+
 # ── Subcontractor ────────────────────────────────────────────────────────
 
 
@@ -465,7 +466,8 @@ class WorkPackageCreate(BaseModel):
     planned_value: Decimal = Field(default=Decimal("0"), ge=0)
     completion_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
     status: str = Field(
-        default="planned", pattern=r"^(planned|in_progress|completed)$",
+        default="planned",
+        pattern=r"^(planned|in_progress|completed)$",
     )
 
 
@@ -479,7 +481,8 @@ class WorkPackageUpdate(BaseModel):
     planned_value: Decimal | None = Field(default=None, ge=0)
     completion_percent: Decimal | None = Field(default=None, ge=0, le=100)
     status: str | None = Field(
-        default=None, pattern=r"^(planned|in_progress|completed)$",
+        default=None,
+        pattern=r"^(planned|in_progress|completed)$",
     )
 
 
@@ -811,7 +814,8 @@ class LienWaiverResponse(BaseModel):
     # ORM attribute (the model maps SQLAlchemy's reserved ``metadata``
     # column to ``metadata_`` in Python). Mirrors CertificateResponse.
     metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_",
+        default_factory=dict,
+        validation_alias="metadata_",
     )
     created_at: datetime
     updated_at: datetime

@@ -204,7 +204,10 @@ async def list_master_schedules(
 ) -> list[MasterScheduleResponse]:
     await verify_project_access(project_id, user_id, session)
     items, _ = await service.master_repo.list_for_project(
-        project_id, offset=offset, limit=limit, status=status,
+        project_id,
+        offset=offset,
+        limit=limit,
+        status=status,
     )
     return [MasterScheduleResponse.model_validate(i) for i in items]
 
@@ -1169,7 +1172,10 @@ async def run_tia(
     acts = [a.model_dump() for a in data.activities]
     deps = [d.model_dump() for d in data.dependencies] if data.dependencies else None
     result = time_impact_analysis(
-        acts, deps, data.impacted_activity_id, data.delay_days,
+        acts,
+        deps,
+        data.impacted_activity_id,
+        data.delay_days,
     )
     return TIAResponse(**result)
 
@@ -1225,7 +1231,9 @@ async def project_rnc_pareto_sorted(
     """Sorted-desc RNC Pareto with cumulative percentage column."""
     await verify_project_access(project_id, user_id, session)
     payload = await service.rnc_pareto_sorted_for_project(
-        project_id, period_start, period_end,
+        project_id,
+        period_start,
+        period_end,
     )
     return RNCParetoSortedResponse(**payload)
 
@@ -1287,15 +1295,23 @@ async def compute_cpm_for_schedule(
     await verify_project_access(project_id, user_id, session)
 
     act_rows = (
-        await session.execute(
-            select(_Activity).where(_Activity.schedule_id == schedule_id),
+        (
+            await session.execute(
+                select(_Activity).where(_Activity.schedule_id == schedule_id),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     rel_rows = (
-        await session.execute(
-            select(_Rel).where(_Rel.schedule_id == schedule_id),
+        (
+            await session.execute(
+                select(_Rel).where(_Rel.schedule_id == schedule_id),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
 
     # Build the pure-Python network.
     cpm_acts: list[_CPMActivity] = []
@@ -1380,15 +1396,23 @@ async def level_resources_for_schedule(
     await verify_project_access(project_id, user_id, session)
 
     act_rows = (
-        await session.execute(
-            select(_Activity).where(_Activity.schedule_id == schedule_id),
+        (
+            await session.execute(
+                select(_Activity).where(_Activity.schedule_id == schedule_id),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     rel_rows = (
-        await session.execute(
-            select(_Rel).where(_Rel.schedule_id == schedule_id),
+        (
+            await session.execute(
+                select(_Rel).where(_Rel.schedule_id == schedule_id),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
 
     rel_index: dict[uuid.UUID, list[tuple[uuid.UUID, str, int]]] = {}
     for r in rel_rows:
@@ -1404,7 +1428,7 @@ async def level_resources_for_schedule(
         # (Slice 1 limits to integer counts). Callers passing a richer
         # shape will be supported in Slice 2.
         required: dict[str, int] = {}
-        for r in (a.resources or []):
+        for r in a.resources or []:
             if isinstance(r, dict) and r.get("name"):
                 required[str(r["name"])] = int(r.get("count", 1) or 1)
         cpm_acts.append(
@@ -1520,13 +1544,17 @@ async def get_weekly_ppc(
     await verify_project_access(project_id, user_id, session)
 
     rows = (
-        await session.execute(
-            select(_WeeklyCommitment).where(
-                _WeeklyCommitment.schedule_id == schedule_id,
-                _WeeklyCommitment.week_start == week,
-            ),
+        (
+            await session.execute(
+                select(_WeeklyCommitment).where(
+                    _WeeklyCommitment.schedule_id == schedule_id,
+                    _WeeklyCommitment.week_start == week,
+                ),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
 
     if not rows:
         return PPCWeeklyResponse(

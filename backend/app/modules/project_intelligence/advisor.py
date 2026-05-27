@@ -35,8 +35,7 @@ LLM_CACHE_MAX_ENTRIES = 256
 _llm_cache: "OrderedDict[str, tuple[float, str]]" = OrderedDict()
 
 
-def _llm_cache_key(*, provider: str, model: str | None, system: str,
-                   prompt: str, max_tokens: int) -> str:
+def _llm_cache_key(*, provider: str, model: str | None, system: str, prompt: str, max_tokens: int) -> str:
     """Stable cache key for (provider, model, system, prompt, max_tokens)."""
     h = hashlib.sha256()
     h.update(provider.encode("utf-8"))
@@ -91,8 +90,11 @@ async def _call_ai_logged(
     from app.modules.ai.ai_client import call_ai
 
     cache_key = _llm_cache_key(
-        provider=provider, model=model, system=system,
-        prompt=prompt, max_tokens=max_tokens,
+        provider=provider,
+        model=model,
+        system=system,
+        prompt=prompt,
+        max_tokens=max_tokens,
     )
     cached = _llm_cache_get(cache_key)
     if cached is not None:
@@ -203,7 +205,7 @@ def _build_system_prompt(role: str, language: str, standard: str) -> str:
 def _build_context_prompt(state: ProjectState, score: ProjectScore) -> str:
     """‌⁠‍Serialize project state into a token-efficient prompt context."""
     lines = [
-        f"Project: \"{state.project_name}\" | Type: {state.project_type or 'unspecified'} "
+        f'Project: "{state.project_name}" | Type: {state.project_type or "unspecified"} '
         f"| Standard: {state.standard or 'unspecified'} | Region: {state.region or 'unspecified'} "
         f"| Currency: {state.currency or 'unspecified'}",
         f"Overall Score: {score.overall:.0f}/100 (Grade {score.overall_grade})",
@@ -212,9 +214,7 @@ def _build_context_prompt(state: ProjectState, score: ProjectScore) -> str:
 
     # Domain scores
     lines.append("DOMAIN SCORES:")
-    for domain, dscore in sorted(
-        score.domain_scores.items(), key=lambda x: -x[1]
-    ):
+    for domain, dscore in sorted(score.domain_scores.items(), key=lambda x: -x[1]):
         bar = "#" * int(dscore / 10) + "." * (10 - int(dscore / 10))
         lines.append(f"  {domain:12s} [{bar}] {dscore:.0f}%")
     lines.append("")
@@ -224,9 +224,7 @@ def _build_context_prompt(state: ProjectState, score: ProjectScore) -> str:
         lines.append("CRITICAL GAPS:")
         for gap in score.critical_gaps:
             count_str = f" ({gap.affected_count} items)" if gap.affected_count else ""
-            lines.append(
-                f"  [{gap.severity.upper()}] {gap.domain}: {gap.title}{count_str}"
-            )
+            lines.append(f"  [{gap.severity.upper()}] {gap.domain}: {gap.title}{count_str}")
             lines.append(f"    Impact: {gap.impact}")
         lines.append("")
 
@@ -265,11 +263,7 @@ async def _get_ai_settings(session: AsyncSession) -> Any:
     try:
         from sqlalchemy import text
 
-        row = (
-            await session.execute(
-                text("SELECT * FROM oe_ai_settings LIMIT 1")
-            )
-        ).first()
+        row = (await session.execute(text("SELECT * FROM oe_ai_settings LIMIT 1"))).first()
         return row
     except Exception:
         return None
@@ -435,9 +429,7 @@ async def _retrieve_relevant_chunks(
         snippet = hit.snippet or hit.text or ""
         if len(snippet) > 280:
             snippet = snippet[:277].rstrip() + "…"
-        lines.append(
-            f"- [{hit.module}] {hit.title} (score {hit.score:.2f}): {snippet}"
-        )
+        lines.append(f"- [{hit.module}] {hit.title} (score {hit.score:.2f}): {snippet}")
     return "\n".join(lines)
 
 
@@ -473,9 +465,7 @@ async def answer_question(
             # turns the advisor from a structured-stats summarizer into a
             # genuine RAG agent — answers stay anchored in real evidence
             # instead of hallucinating from the structured project state alone.
-            project_id = (
-                str(getattr(state, "project_id", "")) or None
-            )
+            project_id = str(getattr(state, "project_id", "")) or None
             rag_context = await _retrieve_relevant_chunks(question, project_id)
             prompt_parts = [f"Project context:\n{context}"]
             if rag_context:
@@ -515,10 +505,7 @@ def _generate_fallback_recommendations(
     """Generate rule-based recommendations when no LLM is available."""
     lines: list[str] = []
 
-    lines.append(
-        f"Project \"{state.project_name}\" scores {score.overall:.0f}/100 "
-        f"(Grade {score.overall_grade})."
-    )
+    lines.append(f'Project "{state.project_name}" scores {score.overall:.0f}/100 (Grade {score.overall_grade}).')
     lines.append("")
 
     if not score.critical_gaps:

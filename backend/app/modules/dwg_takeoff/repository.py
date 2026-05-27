@@ -103,9 +103,7 @@ class DwgDrawingVersionRepository:
 
     async def get_next_version_number(self, drawing_id: uuid.UUID) -> int:
         """Get the next version number for a drawing."""
-        stmt = select(func.max(DwgDrawingVersion.version_number)).where(
-            DwgDrawingVersion.drawing_id == drawing_id
-        )
+        stmt = select(func.max(DwgDrawingVersion.version_number)).where(DwgDrawingVersion.drawing_id == drawing_id)
         result = (await self.session.execute(stmt)).scalar_one_or_none()
         return (result or 0) + 1
 
@@ -160,10 +158,7 @@ class DwgAnnotationRepository:
         stmt = (
             select(DwgAnnotation)
             .where(DwgAnnotation.drawing_id == drawing_id)
-            .where(
-                (DwgAnnotation.linked_task_id.isnot(None))
-                | (DwgAnnotation.linked_punch_item_id.isnot(None))
-            )
+            .where((DwgAnnotation.linked_task_id.isnot(None)) | (DwgAnnotation.linked_punch_item_id.isnot(None)))
             .order_by(DwgAnnotation.created_at.desc())
         )
         result = await self.session.execute(stmt)

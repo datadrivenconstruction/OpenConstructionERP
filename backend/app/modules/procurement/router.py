@@ -53,9 +53,7 @@ def _contact_display_name(c: Contact) -> str:
     return full or c.email or ""
 
 
-async def _fetch_vendor_names(
-    session: AsyncSession, vendor_ids: Iterable[str | None]
-) -> dict[str, str]:
+async def _fetch_vendor_names(session: AsyncSession, vendor_ids: Iterable[str | None]) -> dict[str, str]:
     """‌⁠‍Resolve ``vendor_contact_id`` → display name in one round trip.
 
     Returns a dict keyed by the string form of the contact UUID. Unknown IDs
@@ -65,9 +63,7 @@ async def _fetch_vendor_names(
     ids = {vid for vid in vendor_ids if vid}
     if not ids:
         return {}
-    rows = (
-        await session.execute(select(Contact).where(Contact.id.in_(ids)))
-    ).scalars().all()
+    rows = (await session.execute(select(Contact).where(Contact.id.in_(ids)))).scalars().all()
     return {str(c.id): _contact_display_name(c) for c in rows}
 
 
@@ -105,9 +101,7 @@ async def list_purchase_orders(
         offset=offset,
         limit=limit,
     )
-    vendor_names = await _fetch_vendor_names(
-        service.session, (po.vendor_contact_id for po in items)
-    )
+    vendor_names = await _fetch_vendor_names(service.session, (po.vendor_contact_id for po in items))
     return POListResponse(
         items=[_po_to_response(po, vendor_names) for po in items],
         total=total,
@@ -176,9 +170,7 @@ async def list_goods_receipts(
     """List goods receipts with optional filters."""
     po = await service.get_po(po_id)
     await verify_project_access(po.project_id, str(user_id), session)
-    items, total = await service.list_goods_receipts(
-        po_id=po_id, gr_status=status, limit=limit, offset=offset
-    )
+    items, total = await service.list_goods_receipts(po_id=po_id, gr_status=status, limit=limit, offset=offset)
     return GRListResponse(
         items=[GRResponse.model_validate(gr) for gr in items],
         total=total,
@@ -387,10 +379,8 @@ async def create_invoice_from_po(
                 status_code=400,
                 detail={
                     "code": "no_confirmed_grs",
-                    "message": no_conf_violation.get("message") or (
-                        "No confirmed goods receipts exist for this PO; "
-                        "pass force=true to invoice without GR match."
-                    ),
+                    "message": no_conf_violation.get("message")
+                    or ("No confirmed goods receipts exist for this PO; pass force=true to invoice without GR match."),
                     "errors": violations,
                 },
             )
@@ -484,10 +474,7 @@ async def create_invoice_from_po(
                     entity_type="purchase_order",
                     entity_id=str(po_id),
                     action="invoice_created",
-                    reason=(
-                        "PO → payable invoice conversion via "
-                        "create_invoice_from_po()"
-                    ),
+                    reason=("PO → payable invoice conversion via create_invoice_from_po()"),
                     metadata={
                         "po_number": po.po_number,
                         "invoice_id": str(invoice.id),
@@ -503,9 +490,9 @@ async def create_invoice_from_po(
                 # gaps on financial-commitment endpoints are a P0
                 # compliance hazard.
                 _log.exception(
-                    "Audit log FAILED inside PO→Invoice SAVEPOINT, "
-                    "rolling back invoice (PO %s): %s",
-                    po.po_number, exc,
+                    "Audit log FAILED inside PO→Invoice SAVEPOINT, rolling back invoice (PO %s): %s",
+                    po.po_number,
+                    exc,
                 )
                 raise
 

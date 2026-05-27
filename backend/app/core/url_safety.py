@@ -80,9 +80,7 @@ def _parse_host(url: str) -> tuple[str, str]:
 
     scheme = (parsed.scheme or "").lower()
     if scheme not in _ALLOWED_SCHEMES:
-        raise UnsafeUrlError(
-            f"URL scheme {scheme!r} is not allowed — use http or https"
-        )
+        raise UnsafeUrlError(f"URL scheme {scheme!r} is not allowed — use http or https")
 
     host = (parsed.hostname or "").strip().lower()
     if not host:
@@ -150,8 +148,6 @@ async def resolve_and_validate_external_url(url: str) -> str:
         except ValueError:
             continue
         if _is_blocked_address(addr):
-            raise UnsafeUrlError(
-                f"Hostname {host!r} resolves to non-routable address {addr}"
-            )
+            raise UnsafeUrlError(f"Hostname {host!r} resolves to non-routable address {addr}")
 
     return url

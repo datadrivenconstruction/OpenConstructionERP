@@ -75,13 +75,9 @@ class ProgressRepository:
             .subquery()
         )
 
-        stmt = (
-            select(ProgressEntry.boq_position_id, ProgressEntry.percent_complete)
-            .join(
-                sub,
-                (ProgressEntry.boq_position_id == sub.c.boq_position_id)
-                & (ProgressEntry.recorded_at == sub.c.max_ra),
-            )
+        stmt = select(ProgressEntry.boq_position_id, ProgressEntry.percent_complete).join(
+            sub,
+            (ProgressEntry.boq_position_id == sub.c.boq_position_id) & (ProgressEntry.recorded_at == sub.c.max_ra),
         )
         rows = (await self.session.execute(stmt)).all()
         return {row[0]: float(row[1]) for row in rows}
@@ -102,9 +98,7 @@ class ProgressRepository:
         ).where(ProgressEntry.project_id == project_id)
         if boq_position_id is not None:
             stmt = stmt.where(ProgressEntry.boq_position_id == boq_position_id)
-        stmt = stmt.group_by(ProgressEntry.period_label).order_by(
-            ProgressEntry.period_label.asc()
-        )
+        stmt = stmt.group_by(ProgressEntry.period_label).order_by(ProgressEntry.period_label.asc())
         rows = (await self.session.execute(stmt)).all()
         return [(row[0], float(row[1])) for row in rows]
 
@@ -143,9 +137,7 @@ class ProgressRepository:
     async def list_plan(self, project_id: uuid.UUID) -> list[ProgressPlan]:
         """Return all plan points ordered by period_label."""
         stmt = (
-            select(ProgressPlan)
-            .where(ProgressPlan.project_id == project_id)
-            .order_by(ProgressPlan.period_label.asc())
+            select(ProgressPlan).where(ProgressPlan.project_id == project_id).order_by(ProgressPlan.period_label.asc())
         )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())

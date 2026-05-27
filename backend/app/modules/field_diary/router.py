@@ -88,7 +88,8 @@ class RequirePinPlusMagicLink:
         self,
         session: SessionDep,
         credentials: Annotated[
-            HTTPAuthorizationCredentials | None, Depends(_bearer),
+            HTTPAuthorizationCredentials | None,
+            Depends(_bearer),
         ],
         x_field_pin: Annotated[str | None, Header(alias="X-Field-PIN")] = None,
     ):
@@ -135,10 +136,7 @@ async def _require_field_module_grant(
     if not ok:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                f"No active field-module grant for module "
-                f"'{field_session.module_key}' on this project"
-            ),
+            detail=(f"No active field-module grant for module '{field_session.module_key}' on this project"),
         )
     return field_session
 
@@ -177,9 +175,7 @@ async def request_magic_link(
     # FK target exists. A dedicated ``phone`` column on ``oe_users_user``
     # is a follow-up; this MVP encodes it in the email local-part.
     synth_email = f"field+{payload.phone.lstrip('+')}@field.local"
-    result = await session.execute(
-        select(User).where(User.email == synth_email)
-    )
+    result = await session.execute(select(User).where(User.email == synth_email))
     user = result.scalar_one_or_none()
     if user is None:
         user = User(
@@ -220,7 +216,8 @@ async def consume_magic_link(
     service: FieldDiaryService = Depends(_get_service),
 ) -> FieldSessionResponse:
     sess, plain = await service.consume_magic_link(
-        token=payload.token, pin=payload.pin,
+        token=payload.token,
+        pin=payload.pin,
     )
     return FieldSessionResponse(
         session_token=plain,
@@ -275,7 +272,8 @@ async def create_entry(
             detail="Session is scoped to a different project",
         )
     entry = await service.create_diary_entry(
-        payload, author_id=field_session.user_id,
+        payload,
+        author_id=field_session.user_id,
     )
     return DiaryEntryResponse.model_validate(entry)
 
@@ -397,9 +395,7 @@ async def upload_attachment(
     if len(content) > MAX_ATTACHMENT_BYTES:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=(
-                f"Attachment exceeds {MAX_ATTACHMENT_BYTES // (1024 * 1024)} MB cap"
-            ),
+            detail=(f"Attachment exceeds {MAX_ATTACHMENT_BYTES // (1024 * 1024)} MB cap"),
         )
 
     ATTACHMENTS_DIR.mkdir(parents=True, exist_ok=True)

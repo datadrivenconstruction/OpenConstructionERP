@@ -45,7 +45,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -83,14 +82,14 @@ async def _activate_user(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
 
 async def _register_and_login(
-    client: AsyncClient, *, tenant: str,
+    client: AsyncClient,
+    *,
+    tenant: str,
 ) -> tuple[str, str, str, dict[str, str]]:
     email = f"{tenant}-{uuid.uuid4().hex[:8]}@resources-idor.io"
     password = f"ResourcesIdor{uuid.uuid4().hex[:6]}9"
@@ -99,9 +98,7 @@ async def _register_and_login(
         "/api/v1/users/auth/register",
         json={"email": email, "password": password, "full_name": f"Tenant {tenant}"},
     )
-    assert reg.status_code in (200, 201), (
-        f"register failed for {tenant}: {reg.status_code} {reg.text}"
-    )
+    assert reg.status_code in (200, 201), f"register failed for {tenant}: {reg.status_code} {reg.text}"
     user_id = reg.json()["id"]
 
     await _activate_user(email)
@@ -123,11 +120,7 @@ async def _promote_to_admin(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await s.commit()
 
 
@@ -135,10 +128,12 @@ async def _promote_to_admin(email: str) -> None:
 async def two_tenants(http_client):
     """A owns a project + resource + request; B is the attacker."""
     a_uid, a_email, a_password, _a_headers0 = await _register_and_login(
-        http_client, tenant="a",
+        http_client,
+        tenant="a",
     )
     b_uid, b_email, _b_password, b_headers = await _register_and_login(
-        http_client, tenant="b",
+        http_client,
+        tenant="b",
     )
 
     # A needs admin so they can create projects + resources (registration
@@ -225,9 +220,7 @@ async def test_tenant_b_cannot_list_requests_for_a_project(http_client, two_tena
         f"/api/v1/resources/requests/?project_id={a['project_id']}",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"LEAK: B listed A's resource requests: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"LEAK: B listed A's resource requests: {resp.status_code} {resp.text!r}"
     assert "secret-payload-marker" not in resp.text
     assert "confidential resource request" not in resp.text
 
@@ -242,9 +235,7 @@ async def test_tenant_b_cannot_read_request_by_id(http_client, two_tenants):
         f"/api/v1/resources/requests/{a['request_id']}",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"LEAK: B read A's resource request: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"LEAK: B read A's resource request: {resp.status_code} {resp.text!r}"
     assert "secret-payload-marker" not in resp.text
 
 
@@ -259,9 +250,7 @@ async def test_tenant_b_cannot_view_board_for_a_project(http_client, two_tenants
         f"&start=2026-06-01T00:00:00%2B00:00&end=2026-07-01T00:00:00%2B00:00",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"LEAK: B viewed A's dispatcher board: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"LEAK: B viewed A's dispatcher board: {resp.status_code} {resp.text!r}"
     assert "confidential foreman" not in resp.text
 
 
@@ -270,7 +259,8 @@ async def test_tenant_b_cannot_view_board_for_a_project(http_client, two_tenants
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_create_request_against_a_project(
-    http_client, two_tenants,
+    http_client,
+    two_tenants,
 ):
     """``POST /requests/`` body must reject foreign project_id."""
     a = two_tenants["a"]
@@ -289,8 +279,7 @@ async def test_tenant_b_cannot_create_request_against_a_project(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B opened a request on A's project: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B opened a request on A's project: {resp.status_code} {resp.text!r}"
     )
 
 
@@ -305,9 +294,7 @@ async def test_tenant_b_cannot_patch_a_request(http_client, two_tenants):
         json={"title": "B-overwrote-A"},
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B patched A's request: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"WRITE-IDOR: B patched A's request: {resp.status_code} {resp.text!r}"
 
 
 @pytest.mark.asyncio
@@ -320,9 +307,7 @@ async def test_tenant_b_cannot_delete_a_request(http_client, two_tenants):
         f"/api/v1/resources/requests/{a['request_id']}",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B deleted A's request: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"WRITE-IDOR: B deleted A's request: {resp.status_code} {resp.text!r}"
 
 
 @pytest.mark.asyncio
@@ -341,14 +326,13 @@ async def test_tenant_b_cannot_fulfill_a_request(http_client, two_tenants):
         },
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B fulfilled A's request: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"WRITE-IDOR: B fulfilled A's request: {resp.status_code} {resp.text!r}"
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_create_assignment_against_a_project(
-    http_client, two_tenants,
+    http_client,
+    two_tenants,
 ):
     """``POST /assignments/`` body must reject foreign project_id."""
     a = two_tenants["a"]
@@ -366,14 +350,14 @@ async def test_tenant_b_cannot_create_assignment_against_a_project(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B created assignment on A's project: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B created assignment on A's project: {resp.status_code} {resp.text!r}"
     )
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_propose_assignment_against_a_project(
-    http_client, two_tenants,
+    http_client,
+    two_tenants,
 ):
     """``POST /assignments/propose`` body must reject foreign project_id."""
     a = two_tenants["a"]
@@ -391,6 +375,5 @@ async def test_tenant_b_cannot_propose_assignment_against_a_project(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B proposed assignment on A's project: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B proposed assignment on A's project: {resp.status_code} {resp.text!r}"
     )

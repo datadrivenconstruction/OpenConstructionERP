@@ -123,6 +123,7 @@ def _import_all_models() -> None:
     from app.modules.costs import models as _costs  # noqa: F401
     from app.modules.dashboards import models as _dash  # noqa: F401
     from app.modules.documents import models as _docs  # noqa: F401
+
     # EAC models — not imported by env.py; their tables are alembic-only
     # in production. We import them here so ``Base.metadata.create_all``
     # mirrors the post-migration shape.
@@ -167,13 +168,12 @@ def _create_all_then_stamp(tmp_db: Path, cfg: Config) -> None:
     """
     _import_all_models()  # populate Base.metadata
 
-    from app.database import Base
     from sqlalchemy.ext.asyncio import create_async_engine
 
+    from app.database import Base
+
     async def _create() -> None:
-        eng = create_async_engine(
-            f"sqlite+aiosqlite:///{tmp_db.as_posix()}", future=True
-        )
+        eng = create_async_engine(f"sqlite+aiosqlite:///{tmp_db.as_posix()}", future=True)
         try:
             async with eng.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
@@ -266,9 +266,7 @@ def test_create_all_plus_stamp_head_succeeds(temp_db_env: Path) -> None:
 
 
 @pytest.mark.parametrize("revision", RECENT_REVISIONS)
-def test_revision_downgrade_reupgrade_does_not_error(
-    temp_db_env: Path, revision: str
-) -> None:
+def test_revision_downgrade_reupgrade_does_not_error(temp_db_env: Path, revision: str) -> None:
     """For each recent revision: ``downgrade R^`` -> ``upgrade head`` cleanly.
 
     Starts from a production-style boot (create_all + stamp head),
@@ -319,8 +317,7 @@ def test_revision_downgrade_reupgrade_does_not_error(
         command.upgrade(cfg, "head")
     except Exception as exc:  # noqa: BLE001
         pytest.fail(
-            f"re-upgrade after downgrading {revision} raised — likely "
-            f"upgrade() is non-idempotent. Root cause: {exc!r}"
+            f"re-upgrade after downgrading {revision} raised — likely upgrade() is non-idempotent. Root cause: {exc!r}"
         )
 
     snap_after = _schema_snapshot(temp_db_env)
@@ -354,10 +351,7 @@ def test_recent_migrations_have_real_downgrade_bodies() -> None:
         # positives (e.g. eb1cef6f5fce mentions both v260_jobs_runner
         # and v261_eac_alias_catalog_seed in its down_revision).
         marker = f'revision: str = "{revision}"'
-        candidates = [
-            p for p in versions_dir.glob("*.py")
-            if marker in p.read_text(encoding="utf-8")
-        ]
+        candidates = [p for p in versions_dir.glob("*.py") if marker in p.read_text(encoding="utf-8")]
         assert candidates, f"Couldn't locate migration file for {revision}"
         src = candidates[0].read_text(encoding="utf-8")
         _, _, after = src.partition("def downgrade()")
@@ -367,7 +361,8 @@ def test_recent_migrations_have_real_downgrade_bodies() -> None:
         body = after.split("\ndef ", 1)[0]
         # Strip docstrings / comments / blanks; check what remains.
         stripped_lines = [
-            line for line in body.splitlines()
+            line
+            for line in body.splitlines()
             if line.strip()
             and not line.strip().startswith("#")
             and not line.strip().startswith('"""')
@@ -387,8 +382,7 @@ def test_dev_db_is_not_being_targeted(temp_db_env: Path) -> None:
     a screaming failure rather than silent corruption of the dev DB.
     """
     assert "openestimate.db" not in os.environ.get("DATABASE_SYNC_URL", ""), (
-        "Test fixture failed to override DATABASE_SYNC_URL — "
-        "would have written to the dev DB. Aborting."
+        "Test fixture failed to override DATABASE_SYNC_URL — would have written to the dev DB. Aborting."
     )
     assert temp_db_env.parent.exists()
     assert "Temp" in str(temp_db_env) or "tmp" in str(temp_db_env).lower(), (

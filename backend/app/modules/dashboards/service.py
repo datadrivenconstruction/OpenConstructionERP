@@ -176,7 +176,10 @@ class SnapshotService:
         try:
             await self._persist_parquet(args.project_id, snapshot_id, build)
             await self._write_manifest_file(
-                args.project_id, snapshot_id, args, build,
+                args.project_id,
+                snapshot_id,
+                args,
+                build,
             )
         except Exception:
             await self._cleanup_storage_on_failure(args.project_id, snapshot_id)
@@ -224,7 +227,9 @@ class SnapshotService:
         except Exception as exc:  # pragma: no cover — defensive
             logger.warning(
                 "dashboards.snapshot.publish event failed for snapshot_id=%s: %s",
-                snapshot_id, type(exc).__name__, exc_info=True,
+                snapshot_id,
+                type(exc).__name__,
+                exc_info=True,
             )
 
         return row
@@ -232,7 +237,10 @@ class SnapshotService:
     # -- read --------------------------------------------------------------
 
     async def get(
-        self, snapshot_id: uuid.UUID, *, tenant_id: str | None,
+        self,
+        snapshot_id: uuid.UUID,
+        *,
+        tenant_id: str | None,
     ) -> Snapshot:
         row = await self.repo.get(snapshot_id, tenant_id=tenant_id)
         if row is None:
@@ -251,18 +259,25 @@ class SnapshotService:
         offset: int = 0,
     ) -> tuple[list[Snapshot], int]:
         return await self.repo.list_for_project(
-            project_id, tenant_id=tenant_id, limit=limit, offset=offset,
+            project_id,
+            tenant_id=tenant_id,
+            limit=limit,
+            offset=offset,
         )
 
     async def list_source_files(
-        self, snapshot_id: uuid.UUID,
+        self,
+        snapshot_id: uuid.UUID,
     ) -> list[SnapshotSourceFile]:
         return await self.repo.list_source_files(snapshot_id)
 
     # -- delete ------------------------------------------------------------
 
     async def delete(
-        self, snapshot_id: uuid.UUID, *, tenant_id: str | None,
+        self,
+        snapshot_id: uuid.UUID,
+        *,
+        tenant_id: str | None,
     ) -> None:
         row = await self.get(snapshot_id, tenant_id=tenant_id)
         project_id = row.project_id
@@ -276,7 +291,9 @@ class SnapshotService:
             except Exception as exc:  # pragma: no cover — defensive
                 logger.warning(
                     "dashboards.snapshot.pool_invalidate failed for snapshot_id=%s: %s",
-                    snapshot_id, type(exc).__name__, exc_info=True,
+                    snapshot_id,
+                    type(exc).__name__,
+                    exc_info=True,
                 )
 
         # DB row first, then storage. Orphan files are less dangerous
@@ -289,8 +306,9 @@ class SnapshotService:
             # Storage cleanup is best-effort; log + let the request
             # succeed so the user doesn't see a false failure.
             logger.warning(
-                "dashboards.snapshot.delete storage cleanup failed for "
-                "snapshot_id=%s: %s", snapshot_id, type(exc).__name__,
+                "dashboards.snapshot.delete storage cleanup failed for snapshot_id=%s: %s",
+                snapshot_id,
+                type(exc).__name__,
                 exc_info=True,
             )
 
@@ -306,8 +324,9 @@ class SnapshotService:
             )
         except Exception as exc:  # pragma: no cover — defensive
             logger.warning(
-                "dashboards.snapshot.publish delete event failed for "
-                "snapshot_id=%s: %s", snapshot_id, type(exc).__name__,
+                "dashboards.snapshot.publish delete event failed for snapshot_id=%s: %s",
+                snapshot_id,
+                type(exc).__name__,
                 exc_info=True,
             )
 
@@ -332,15 +351,24 @@ class SnapshotService:
         build: SnapshotBuildResult,
     ) -> None:
         await write_parquet(
-            project_id, snapshot_id, "entities", build.entities_df,
+            project_id,
+            snapshot_id,
+            "entities",
+            build.entities_df,
         )
         if not build.materials_df.empty:
             await write_parquet(
-                project_id, snapshot_id, "materials", build.materials_df,
+                project_id,
+                snapshot_id,
+                "materials",
+                build.materials_df,
             )
         if not build.source_files_df.empty:
             await write_parquet(
-                project_id, snapshot_id, "source_files", build.source_files_df,
+                project_id,
+                snapshot_id,
+                "source_files",
+                build.source_files_df,
             )
 
     async def _write_manifest_file(
@@ -359,22 +387,23 @@ class SnapshotService:
             "total_entities": build.total_entities,
             "total_categories": build.total_categories,
             "summary_stats": build.summary_stats,
-            "source_files": json.loads(
-                build.source_files_df.to_json(orient="records") or "[]"
-            ),
+            "source_files": json.loads(build.source_files_df.to_json(orient="records") or "[]"),
             "converter_notes": build.converter_notes,
         }
         await write_manifest(project_id, snapshot_id, manifest_payload)
 
     async def _cleanup_storage_on_failure(
-        self, project_id: uuid.UUID, snapshot_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
+        snapshot_id: uuid.UUID,
     ) -> None:
         try:
             await delete_snapshot_files(project_id, snapshot_id)
         except Exception as exc:  # pragma: no cover — defensive
             logger.warning(
-                "dashboards.snapshot.create rollback cleanup failed for "
-                "snapshot_id=%s: %s", snapshot_id, type(exc).__name__,
+                "dashboards.snapshot.create rollback cleanup failed for snapshot_id=%s: %s",
+                snapshot_id,
+                type(exc).__name__,
                 exc_info=True,
             )
 

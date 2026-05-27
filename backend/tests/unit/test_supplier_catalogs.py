@@ -1264,10 +1264,12 @@ async def test_recompute_scorecard_full_pipeline(session, captured_events):
     )
     # Add ISO + tax KYC docs to boost ESG
     await svc.add_kyc_document(
-        vendor.id, KYCDocumentCreate(doc_type="iso"),
+        vendor.id,
+        KYCDocumentCreate(doc_type="iso"),
     )
     await svc.add_kyc_document(
-        vendor.id, KYCDocumentCreate(doc_type="vat_cert"),
+        vendor.id,
+        KYCDocumentCreate(doc_type="vat_cert"),
     )
 
     sc = await svc.recompute_scorecard(
@@ -1284,9 +1286,7 @@ async def test_recompute_scorecard_full_pipeline(session, captured_events):
     assert sc.quality_score == Decimal("100.00")
     # ESG > 0 because ISO + VAT present (40 + 35 = 75)
     assert sc.esg_score == Decimal("75.00")
-    assert any(
-        n == "supplier_catalogs.scorecard.computed" for n, _ in captured_events
-    )
+    assert any(n == "supplier_catalogs.scorecard.computed" for n, _ in captured_events)
 
 
 @pytest.mark.asyncio
@@ -1424,21 +1424,26 @@ async def test_peppol_ingest_creates_invoice_and_matches(session, captured_event
     )
     # The PO total is 1000 (sub) + 0 tax = 1000 but invoice carries 1190 (19% VAT)
     # We adjust the PO model to match expected total — instead build XML to match
-    xml = _PEPPOL_XML_TEMPLATE.format(
-        invoice_id="INV-PEPPOL-100",
-        po_number=po.number,
-        supplier_name="Acme GmbH",
-        supplier_vat="DE111222333",
-    ).replace(
-        "<cbc:PayableAmount currencyID=\"EUR\">1190.00</cbc:PayableAmount>",
-        f"<cbc:PayableAmount currencyID=\"EUR\">{po.total}</cbc:PayableAmount>",
-    ).replace(
-        "<cbc:TaxAmount currencyID=\"EUR\">190.00</cbc:TaxAmount>",
-        "<cbc:TaxAmount currencyID=\"EUR\">0.00</cbc:TaxAmount>",
-    ).replace(
-        "<cbc:LineExtensionAmount currencyID=\"EUR\">1000.00</cbc:LineExtensionAmount>",
-        f"<cbc:LineExtensionAmount currencyID=\"EUR\">{po.subtotal}</cbc:LineExtensionAmount>",
-        1,
+    xml = (
+        _PEPPOL_XML_TEMPLATE.format(
+            invoice_id="INV-PEPPOL-100",
+            po_number=po.number,
+            supplier_name="Acme GmbH",
+            supplier_vat="DE111222333",
+        )
+        .replace(
+            '<cbc:PayableAmount currencyID="EUR">1190.00</cbc:PayableAmount>',
+            f'<cbc:PayableAmount currencyID="EUR">{po.total}</cbc:PayableAmount>',
+        )
+        .replace(
+            '<cbc:TaxAmount currencyID="EUR">190.00</cbc:TaxAmount>',
+            '<cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>',
+        )
+        .replace(
+            '<cbc:LineExtensionAmount currencyID="EUR">1000.00</cbc:LineExtensionAmount>',
+            f'<cbc:LineExtensionAmount currencyID="EUR">{po.subtotal}</cbc:LineExtensionAmount>',
+            1,
+        )
     )
     result = await svc.ingest_peppol_invoice(xml, user_id="u1")
     assert result.invoice_number == "INV-PEPPOL-100"
@@ -1566,7 +1571,8 @@ async def test_gr_emits_canonical_stock_low_event(session, captured_events):
 
 @pytest.mark.asyncio
 async def test_create_catalog_item_emits_material_added(
-    session, captured_events,
+    session,
+    captured_events,
 ) -> None:
     """Catalog item creation publishes ``supplier_catalogs.material.added``."""
     svc = SupplierCatalogsService(session)
@@ -1579,10 +1585,7 @@ async def test_create_catalog_item_emits_material_added(
             mpn="HC-CEMI-425R",
         ),
     )
-    matches = [
-        (n, d) for n, d in captured_events
-        if n == "supplier_catalogs.material.added"
-    ]
+    matches = [(n, d) for n, d in captured_events if n == "supplier_catalogs.material.added"]
     assert len(matches) == 1, f"expected 1 material.added event, got {len(matches)}"
     payload = matches[0][1]
     assert payload["catalog_item_id"] == str(item.id)
@@ -1596,12 +1599,11 @@ async def test_create_catalog_item_emits_material_added(
 async def test_material_added_subscriber_publishes_vector_reindex() -> None:
     """``supplier_catalogs.material.added`` → ``match_elements.vector_reindex``."""
     import asyncio
-    from unittest.mock import MagicMock
 
+    from app.core.events import Event
     from app.modules.supplier_catalogs.events import (
         _on_material_added,
     )
-    from app.core.events import Event
 
     captured: list[tuple[str, dict]] = []
 

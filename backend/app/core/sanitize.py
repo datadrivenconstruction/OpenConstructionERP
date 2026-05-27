@@ -139,7 +139,7 @@ def strip_dangerous_html(value: str) -> str:
     # 4. Remove event-handler attributes from whatever tags remain.
     cleaned = _EVENT_HANDLER_RE.sub("", cleaned)
     # 5. Neutralise dangerous URI schemes — replace with ``href="#"``.
-    cleaned = _DANGEROUS_URI_RE.sub(r'\g<attr>\g<quote>#\g<quote>', cleaned)
+    cleaned = _DANGEROUS_URI_RE.sub(r"\g<attr>\g<quote>#\g<quote>", cleaned)
     return cleaned
 
 
@@ -354,9 +354,7 @@ def safe_text(
     """
     cleaned = reject_control_chars(value, field=field)
     if len(cleaned) > max_length:
-        raise ValueError(
-            f"{field} exceeds maximum length of {max_length} characters"
-        )
+        raise ValueError(f"{field} exceeds maximum length of {max_length} characters")
     if strip_html:
         cleaned = strip_dangerous_html(cleaned)
     return cleaned

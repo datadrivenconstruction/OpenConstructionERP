@@ -77,7 +77,9 @@ def _coerce_decimal(value: Any, default: Decimal = Decimal("0")) -> Decimal:
 
 
 async def _fan_out_failure(
-    subscriber: str, event_name: str, exc: BaseException,
+    subscriber: str,
+    event_name: str,
+    exc: BaseException,
 ) -> None:
     """Best-effort error fanout — never raises itself."""
     try:
@@ -131,7 +133,9 @@ async def _on_project_created(event: Event) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         logger.warning("geo_hub._on_project_created: %s", exc)
         await _fan_out_failure(
-            "_on_project_created", event.name, exc,
+            "_on_project_created",
+            event.name,
+            exc,
         )
         return {"status": "error", "error": str(exc)}
 
@@ -180,7 +184,9 @@ async def _on_project_address_set(event: Event) -> dict[str, Any]:
             await _asyncio.sleep(0.05 * (2 ** (attempt - 1)))
         try:
             return await _do_geocode_and_persist(
-                project_id, typed_address, event,
+                project_id,
+                typed_address,
+                event,
             )
         except RuntimeError as exc:
             # aiosqlite cross-loop / writer-contention surface; retry.
@@ -195,7 +201,9 @@ async def _on_project_address_set(event: Event) -> dict[str, Any]:
     logger.warning("geo_hub._on_project_address_set: %s", last_exc)
     if last_exc is not None:
         await _fan_out_failure(
-            "_on_project_address_set", event.name, last_exc,
+            "_on_project_address_set",
+            event.name,
+            last_exc,
         )
     return {"status": "error", "error": str(last_exc)}
 
@@ -214,12 +222,7 @@ async def _do_geocode_and_persist(
     async with async_session_factory() as session:
         repo = GeoAnchorRepository(session)
         existing = await repo.get_by_project(project_id)
-        if (
-            existing is not None
-            and (
-                existing.lat != Decimal("0") or existing.lon != Decimal("0")
-            )
-        ):
+        if existing is not None and (existing.lat != Decimal("0") or existing.lon != Decimal("0")):
             meta = existing.metadata_ or {}
             if meta.get("geocoded_from") != "project_address":
                 # Manual anchor present — don't clobber.
@@ -243,7 +246,8 @@ async def _do_geocode_and_persist(
             "geocoded_at": now,
         }
         address_line = ", ".join(
-            part for part in (
+            part
+            for part in (
                 typed_address.street,
                 typed_address.house_number,
                 typed_address.postal_code,
@@ -364,7 +368,9 @@ async def _on_bim_federation_created(event: Event) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         logger.warning("geo_hub._on_bim_federation_created: %s", exc)
         await _fan_out_failure(
-            "_on_bim_federation_created", event.name, exc,
+            "_on_bim_federation_created",
+            event.name,
+            exc,
         )
         return {"status": "error", "error": str(exc)}
 
@@ -440,10 +446,13 @@ async def _on_property_dev_development_created(
         return {"status": "ok", "anchor_id": str(anchor_id)}
     except Exception as exc:  # noqa: BLE001
         logger.warning(
-            "geo_hub._on_property_dev_development_created: %s", exc,
+            "geo_hub._on_property_dev_development_created: %s",
+            exc,
         )
         await _fan_out_failure(
-            "_on_property_dev_development_created", event.name, exc,
+            "_on_property_dev_development_created",
+            event.name,
+            exc,
         )
         return {"status": "error", "error": str(exc)}
 
@@ -481,7 +490,9 @@ async def _on_carbon_footprint_computed(event: Event) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         logger.warning("geo_hub._on_carbon_footprint_computed: %s", exc)
         await _fan_out_failure(
-            "_on_carbon_footprint_computed", event.name, exc,
+            "_on_carbon_footprint_computed",
+            event.name,
+            exc,
         )
         return {"status": "error", "error": str(exc)}
 
@@ -533,7 +544,9 @@ async def _on_schedule_task_scheduled(event: Event) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         logger.warning("geo_hub._on_schedule_task_scheduled: %s", exc)
         await _fan_out_failure(
-            "_on_schedule_task_scheduled", event.name, exc,
+            "_on_schedule_task_scheduled",
+            event.name,
+            exc,
         )
         return {"status": "error", "error": str(exc)}
 
@@ -613,9 +626,13 @@ async def _on_clash_detected(event: Event) -> dict[str, Any]:
                 "label": "Clash",
             },
         )
-        return {"status": "ok", "overlay_id": str(ovid)} if ovid else {
-            "status": "ignored",
-        }
+        return (
+            {"status": "ok", "overlay_id": str(ovid)}
+            if ovid
+            else {
+                "status": "ignored",
+            }
+        )
     except Exception as exc:  # noqa: BLE001
         logger.warning("geo_hub._on_clash_detected: %s", exc)
         await _fan_out_failure("_on_clash_detected", event.name, exc)
@@ -648,13 +665,19 @@ async def _on_field_report_submitted(event: Event) -> dict[str, Any]:
             },
             style={"iconColor": "#3D7BFF", "iconSize": 22},
         )
-        return {"status": "ok", "overlay_id": str(ovid)} if ovid else {
-            "status": "ignored",
-        }
+        return (
+            {"status": "ok", "overlay_id": str(ovid)}
+            if ovid
+            else {
+                "status": "ignored",
+            }
+        )
     except Exception as exc:  # noqa: BLE001
         logger.warning("geo_hub._on_field_report_submitted: %s", exc)
         await _fan_out_failure(
-            "_on_field_report_submitted", event.name, exc,
+            "_on_field_report_submitted",
+            event.name,
+            exc,
         )
         return {"status": "error", "error": str(exc)}
 
@@ -685,13 +708,19 @@ async def _on_safety_incident_created(event: Event) -> dict[str, Any]:
             },
             style={"iconColor": "#FFB400", "iconSize": 26, "label": "Safety"},
         )
-        return {"status": "ok", "overlay_id": str(ovid)} if ovid else {
-            "status": "ignored",
-        }
+        return (
+            {"status": "ok", "overlay_id": str(ovid)}
+            if ovid
+            else {
+                "status": "ignored",
+            }
+        )
     except Exception as exc:  # noqa: BLE001
         logger.warning("geo_hub._on_safety_incident_created: %s", exc)
         await _fan_out_failure(
-            "_on_safety_incident_created", event.name, exc,
+            "_on_safety_incident_created",
+            event.name,
+            exc,
         )
         return {"status": "error", "error": str(exc)}
 
@@ -734,11 +763,7 @@ async def _on_risk_zone_flagged(event: Event) -> dict[str, Any]:
             obj = GeoOverlay(
                 project_id=project_id,
                 name=payload.get("name") or f"Risk zone {zone_id}",
-                kind=(
-                    payload.get("kind")
-                    if payload.get("kind") in {"flood_zone", "risk_zone"}
-                    else "risk_zone"
-                ),
+                kind=(payload.get("kind") if payload.get("kind") in {"flood_zone", "risk_zone"} else "risk_zone"),
                 geojson={"type": "FeatureCollection", "features": features},
                 style={
                     "fillColor": "#A8001B",

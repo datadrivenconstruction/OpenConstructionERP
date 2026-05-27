@@ -30,10 +30,7 @@ Edge cases:
 
 from __future__ import annotations
 
-from decimal import Decimal, InvalidOperation
-from typing import Optional
-
-import pytest
+from decimal import Decimal
 
 # ── EVM calculation engine (pure functions, no DB/ORM) ───────────────────────
 
@@ -43,7 +40,7 @@ def _d(value: str | int | float) -> Decimal:
     return Decimal(str(value))
 
 
-def compute_cpi(ev: Decimal, ac: Decimal) -> Optional[float]:
+def compute_cpi(ev: Decimal, ac: Decimal) -> float | None:
     """Cost Performance Index = EV / AC.
 
     Returns None when AC is zero to signal division-by-zero instead of
@@ -54,7 +51,7 @@ def compute_cpi(ev: Decimal, ac: Decimal) -> Optional[float]:
     return float(ev / ac)
 
 
-def compute_spi(ev: Decimal, pv: Decimal) -> Optional[float]:
+def compute_spi(ev: Decimal, pv: Decimal) -> float | None:
     """Schedule Performance Index = EV / PV.
 
     Returns None when PV is zero (no work was planned yet).
@@ -74,7 +71,7 @@ def compute_cv(ev: Decimal, ac: Decimal) -> Decimal:
     return ev - ac
 
 
-def compute_eac_cpi(bac: Decimal, cpi: Optional[float]) -> Optional[Decimal]:
+def compute_eac_cpi(bac: Decimal, cpi: float | None) -> Decimal | None:
     """EAC₁ = BAC / CPI — forecast purely from cost performance trend.
 
     Returns None when CPI is undefined (AC=0) or zero.
@@ -93,9 +90,9 @@ def compute_eac_combined(
     ac: Decimal,
     bac: Decimal,
     ev: Decimal,
-    cpi: Optional[float],
-    spi: Optional[float],
-) -> Optional[Decimal]:
+    cpi: float | None,
+    spi: float | None,
+) -> Decimal | None:
     """EAC₃ = AC + (BAC - EV) / (CPI × SPI) — combined performance factor.
 
     Returns None when either index is undefined or their product is zero.
@@ -109,14 +106,14 @@ def compute_eac_combined(
     return (ac + remaining / Decimal(str(product))).quantize(Decimal("0.01"))
 
 
-def compute_etc(eac: Optional[Decimal], ac: Decimal) -> Optional[Decimal]:
+def compute_etc(eac: Decimal | None, ac: Decimal) -> Decimal | None:
     """ETC = EAC - AC. Returns None when EAC is undefined."""
     if eac is None:
         return None
     return eac - ac
 
 
-def compute_vac(bac: Decimal, eac: Optional[Decimal]) -> Optional[Decimal]:
+def compute_vac(bac: Decimal, eac: Decimal | None) -> Decimal | None:
     """VAC = BAC - EAC. Returns None when EAC is undefined."""
     if eac is None:
         return None
@@ -124,6 +121,7 @@ def compute_vac(bac: Decimal, eac: Optional[Decimal]) -> Optional[Decimal]:
 
 
 # ── Tests ────────────────────────────────────────────────────────────────────
+
 
 class TestCPIandSPI:
     """Cost and Schedule Performance Indices."""

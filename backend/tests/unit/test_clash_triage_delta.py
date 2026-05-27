@@ -63,7 +63,7 @@ def test_severity_hard_tiers():
 def test_severity_clearance_tiers_never_critical():
     """Clearance keyed off gap/clearance ratio; never escalates to critical."""
     # clearance_m = 1.0 → ratio == distance.
-    assert _severity_for("clearance", 0.0, 0.20, 1.0) == "high"   # 0.20 ≤ .25
+    assert _severity_for("clearance", 0.0, 0.20, 1.0) == "high"  # 0.20 ≤ .25
     assert _severity_for("clearance", 0.0, 0.25, 1.0) == "high"
     assert _severity_for("clearance", 0.0, 0.40, 1.0) == "medium"  # ≤ .50
     assert _severity_for("clearance", 0.0, 0.50, 1.0) == "medium"
@@ -172,9 +172,7 @@ def _patch_engine_geometry(monkeypatch, geoms_by_eid: dict):
 
 
 @pytest.mark.asyncio
-async def test_carry_forward_persists_triage_by_signature(
-    db_session, monkeypatch
-):
+async def test_carry_forward_persists_triage_by_signature(db_session, monkeypatch):
     """status / assignee / due_date / comments survive a re-run."""
     from app.modules.bim_hub.models import BIMElement
 
@@ -193,8 +191,12 @@ async def test_carry_forward_persists_triage_by_signature(
             element_type="Generic",
             discipline=g.discipline,
             bounding_box={
-                "min_x": g.aabb[0], "min_y": g.aabb[1], "min_z": g.aabb[2],
-                "max_x": g.aabb[3], "max_y": g.aabb[4], "max_z": g.aabb[5],
+                "min_x": g.aabb[0],
+                "min_y": g.aabb[1],
+                "min_z": g.aabb[2],
+                "max_x": g.aabb[3],
+                "max_y": g.aabb[4],
+                "max_z": g.aabb[5],
             },
         )
         db_session.add(el)
@@ -217,7 +219,9 @@ async def test_carry_forward_persists_triage_by_signature(
 
     # Triage it: assign, set status + due date + a comment.
     await svc.update_result(
-        project_id, run1.id, r1.id,
+        project_id,
+        run1.id,
+        r1.id,
         new_status="reviewed",
         assigned_to="Alice",
         due_date="2026-06-30",
@@ -230,18 +234,16 @@ async def test_carry_forward_persists_triage_by_signature(
     rows2, _ = await svc.repo.list_results(run2.id, limit=100)
     assert len(rows2) == 1
     r2 = rows2[0]
-    assert r2.signature == sig                       # stable identity
-    assert r2.status == "reviewed"                   # status carried
-    assert r2.assigned_to == "Alice"                 # assignee carried
-    assert r2.due_date == "2026-06-30"               # due date carried
+    assert r2.signature == sig  # stable identity
+    assert r2.status == "reviewed"  # status carried
+    assert r2.assigned_to == "Alice"  # assignee carried
+    assert r2.due_date == "2026-06-30"  # due date carried
     assert [c["text"] for c in r2.comments] == ["Coordinate with MEP"]
     assert r2.comments[0]["author"] == "Bob"
 
 
 @pytest.mark.asyncio
-async def test_compare_partitions_new_resolved_persistent(
-    db_session, monkeypatch
-):
+async def test_compare_partitions_new_resolved_persistent(db_session, monkeypatch):
     """compare_runs splits clashes into new / resolved / persistent."""
     from app.modules.bim_hub.models import BIMElement
 
@@ -256,8 +258,12 @@ async def test_compare_partitions_new_resolved_persistent(
             element_type="Generic",
             discipline="Structural",
             bounding_box={
-                "min_x": g.aabb[0], "min_y": g.aabb[1], "min_z": g.aabb[2],
-                "max_x": g.aabb[3], "max_y": g.aabb[4], "max_z": g.aabb[5],
+                "min_x": g.aabb[0],
+                "min_y": g.aabb[1],
+                "min_z": g.aabb[2],
+                "max_x": g.aabb[3],
+                "max_y": g.aabb[4],
+                "max_z": g.aabb[5],
             },
         )
         db_session.add(el)
@@ -272,7 +278,9 @@ async def test_compare_partitions_new_resolved_persistent(
 
     svc = ClashService(db_session)
     create = ClashRunCreate(
-        model_ids=[model_id], tolerance_m=0.01, mode="all",
+        model_ids=[model_id],
+        tolerance_m=0.01,
+        mode="all",
         carry_forward=False,
     )
 
@@ -315,9 +323,7 @@ async def test_compare_partitions_new_resolved_persistent(
     assert diff["stats"]["base_total"] == 1
     assert diff["stats"]["current_total"] == 1
     assert diff["new"][0]["a_name"] or diff["new"][0]["b_name"]
-    assert diff["resolved"][0]["status"] in (
-        "new", "active", "reviewed", "approved", "resolved", "ignored"
-    )
+    assert diff["resolved"][0]["status"] in ("new", "active", "reviewed", "approved", "resolved", "ignored")
 
     # Now a run identical to base → that clash is PERSISTENT (same sig).
     _patch_engine_geometry(
@@ -329,6 +335,4 @@ async def test_compare_partitions_new_resolved_persistent(
     assert diff2["stats"]["persistent"] == 1
     assert diff2["stats"]["new"] == 0
     assert diff2["stats"]["resolved"] == 0
-    assert diff2["persistent"][0]["current"]["a_name"] == (
-        diff2["persistent"][0]["base"]["a_name"]
-    )
+    assert diff2["persistent"][0]["current"]["a_name"] == (diff2["persistent"][0]["base"]["a_name"])

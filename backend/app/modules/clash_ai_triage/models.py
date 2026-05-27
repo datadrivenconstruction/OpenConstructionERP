@@ -76,9 +76,7 @@ class ClashTriageResult(Base):
     # ── Polymorphic subject link ──────────────────────────────────────────
     # ``"clash"`` → ``oe_clash_result.id``;
     # ``"clash_issue"`` → ``oe_clash_issue.id`` when that table is present.
-    subject_type: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="clash", server_default="clash"
-    )
+    subject_type: Mapped[str] = mapped_column(String(16), nullable=False, default="clash", server_default="clash")
     subject_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
     # Convenience column — the original clash_id even when the triage was
     # later promoted to a clash_issue subject. NULL on issue-only triages
@@ -88,17 +86,13 @@ class ClashTriageResult(Base):
 
     # ── LLM call metadata ─────────────────────────────────────────────────
     model_name: Mapped[str] = mapped_column(String(128), nullable=False, default="")
-    prompt_version: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="v1.0", server_default="v1.0"
-    )
+    prompt_version: Mapped[str] = mapped_column(String(16), nullable=False, default="v1.0", server_default="v1.0")
 
     # ── Structured verdict ────────────────────────────────────────────────
     # One of: real_design_flaw | expected_intersection | tolerance_artifact
     #       | modeling_error | duplicate | unclear
     category: Mapped[str] = mapped_column(String(32), nullable=False, default="unclear")
-    confidence: Mapped[float] = mapped_column(
-        Float, nullable=False, default=0.0, server_default="0.0"
-    )
+    confidence: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0.0")
     # critical | high | medium | low — independent suggestion (the user's
     # confirmed severity stays on ``ClashResult.severity``).
     severity_suggested: Mapped[str] = mapped_column(
@@ -116,15 +110,11 @@ class ClashTriageResult(Base):
     # ── Audit trail ───────────────────────────────────────────────────────
     raw_prompt: Mapped[str] = mapped_column(Text, nullable=False, default="")
     raw_response: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    tokens_used: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
+    tokens_used: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     # Per-call USD cost estimate (input + output tokens × per-1k rate).
     # Always positive, ``Numeric(10, 4)`` so a single triage cannot exceed
     # $999999.9999 (sanity rather than reality).
-    cost_usd_estimate: Mapped[float] = mapped_column(
-        Numeric(10, 4), nullable=False, default=0.0, server_default="0.0"
-    )
+    cost_usd_estimate: Mapped[float] = mapped_column(Numeric(10, 4), nullable=False, default=0.0, server_default="0.0")
 
     # ── Provenance ────────────────────────────────────────────────────────
     created_by_user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)

@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # 1. meeting.action_item.created -> auto-create task
 # ---------------------------------------------------------------------------
 
+
 async def _handle_meeting_action_item_created(event: Event) -> None:
     """‌⁠‍Create a task for each open action item from a meeting.
 
@@ -92,6 +93,7 @@ async def _handle_meeting_action_item_created(event: Event) -> None:
 # 2. safety.observation.high_risk -> notify PM + safety officer
 # ---------------------------------------------------------------------------
 
+
 async def _handle_safety_observation_high_risk(event: Event) -> None:
     """‌⁠‍Notify PM and safety officer when observation risk_score > 15.
 
@@ -130,16 +132,12 @@ async def _handle_safety_observation_high_risk(event: Event) -> None:
 
                     from app.modules.projects.models import Project
 
-                    result = await session.execute(
-                        select(Project.owner_id).where(Project.id == project_id)
-                    )
+                    result = await session.execute(select(Project.owner_id).where(Project.id == project_id))
                     owner_id = result.scalar_one_or_none()
                     if owner_id:
                         notify_user_ids = [str(owner_id)]
                 except Exception:
-                    logger.debug(
-                        "safety.observation.high_risk: could not resolve project owner"
-                    )
+                    logger.debug("safety.observation.high_risk: could not resolve project owner")
 
             if not notify_user_ids:
                 logger.debug("safety.observation.high_risk: no users to notify")
@@ -176,6 +174,7 @@ async def _handle_safety_observation_high_risk(event: Event) -> None:
 # 2b. safety.incident.created -> notify project owner
 # ---------------------------------------------------------------------------
 
+
 async def _handle_safety_incident_created(event: Event) -> None:
     """Notify project owner when a safety incident is created.
 
@@ -207,16 +206,12 @@ async def _handle_safety_incident_created(event: Event) -> None:
 
                     from app.modules.projects.models import Project
 
-                    result = await session.execute(
-                        select(Project.owner_id).where(Project.id == project_id)
-                    )
+                    result = await session.execute(select(Project.owner_id).where(Project.id == project_id))
                     owner_id = result.scalar_one_or_none()
                     if owner_id:
                         notify_user_ids = [str(owner_id)]
                 except Exception:
-                    logger.debug(
-                        "safety.incident.created: could not resolve project owner"
-                    )
+                    logger.debug("safety.incident.created: could not resolve project owner")
 
             if not notify_user_ids:
                 logger.debug("safety.incident.created: no users to notify")
@@ -253,6 +248,7 @@ async def _handle_safety_incident_created(event: Event) -> None:
 # 3. inspection.completed.failed -> log for possible punch item
 # ---------------------------------------------------------------------------
 
+
 async def _handle_inspection_completed_failed(event: Event) -> None:
     """Log failed inspection for UI to offer punch item creation.
 
@@ -270,8 +266,7 @@ async def _handle_inspection_completed_failed(event: Event) -> None:
         result = data.get("result", "")
 
         logger.info(
-            "inspection.completed.failed: inspection %s (%s) result=%s -- "
-            "UI may offer punch item creation",
+            "inspection.completed.failed: inspection %s (%s) result=%s -- UI may offer punch item creation",
             inspection_number,
             inspection_id,
             result,
@@ -297,6 +292,7 @@ async def _handle_inspection_completed_failed(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 4. rfi.response.design_change -> flag for variation
 # ---------------------------------------------------------------------------
+
 
 async def _handle_rfi_response_design_change(event: Event) -> None:
     """Flag RFI response with cost_impact for potential variation/change order.
@@ -347,6 +343,7 @@ async def _handle_rfi_response_design_change(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 5. ncr.cost_impact -> flag for variation
 # ---------------------------------------------------------------------------
+
 
 async def _handle_ncr_cost_impact(event: Event) -> None:
     """Flag NCR with cost_impact > 0 for potential variation/change order.
@@ -402,6 +399,7 @@ async def _handle_ncr_cost_impact(event: Event) -> None:
 # 6. document.revision.created -> flag linked BOQ positions
 # ---------------------------------------------------------------------------
 
+
 async def _handle_document_revision_created(event: Event) -> None:
     """Log new document revision for affected BOQ positions.
 
@@ -447,6 +445,7 @@ async def _handle_document_revision_created(event: Event) -> None:
 # 7. invoice.paid -> update project budget actuals
 # ---------------------------------------------------------------------------
 
+
 async def _handle_invoice_paid(event: Event) -> None:
     """Recalculate project budget actuals when an invoice is paid.
 
@@ -491,9 +490,7 @@ async def _handle_invoice_paid(event: Event) -> None:
                     continue
 
             # Update all budget lines for the project (aggregate level)
-            budget_result = await session.execute(
-                select(ProjectBudget).where(ProjectBudget.project_id == project_id)
-            )
+            budget_result = await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id))
             budgets = budget_result.scalars().all()
             for budget in budgets:
                 budget.actual = str(total_actual)
@@ -513,6 +510,7 @@ async def _handle_invoice_paid(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 8. po.issued -> update project budget committed
 # ---------------------------------------------------------------------------
+
 
 async def _handle_po_issued(event: Event) -> None:
     """Recalculate project budget committed when a PO is issued.
@@ -558,9 +556,7 @@ async def _handle_po_issued(event: Event) -> None:
                     continue
 
             # Update budget lines for the project
-            budget_result = await session.execute(
-                select(ProjectBudget).where(ProjectBudget.project_id == project_id)
-            )
+            budget_result = await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id))
             budgets = budget_result.scalars().all()
             for budget in budgets:
                 budget.committed = str(total_committed)
@@ -580,6 +576,7 @@ async def _handle_po_issued(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 9. estimate.approved -> auto-populate project budget from BOQ
 # ---------------------------------------------------------------------------
+
 
 async def _handle_estimate_approved(event: Event) -> None:
     """BOQ approved -> create project_budgets.original_budget entries.
@@ -610,9 +607,7 @@ async def _handle_estimate_approved(event: Event) -> None:
 
         async with async_session_factory() as session:
             # Load all positions for this BOQ
-            result = await session.execute(
-                select(Position).where(Position.boq_id == boq_id)
-            )
+            result = await session.execute(select(Position).where(Position.boq_id == boq_id))
             positions = result.scalars().all()
 
             if not positions:
@@ -672,6 +667,7 @@ async def _handle_estimate_approved(event: Event) -> None:
 # 10. schedule.progress_updated -> EVM snapshot
 # ---------------------------------------------------------------------------
 
+
 async def _handle_schedule_progress(event: Event) -> None:
     """Schedule progress updated -> create EVM snapshot with PV/EV/AC/SPI/CPI.
 
@@ -704,14 +700,14 @@ async def _handle_schedule_progress(event: Event) -> None:
         async with async_session_factory() as session:
             # Compute BAC: sum of all original_budget for the project
             bac_result = await session.execute(
-                select(func.coalesce(func.sum(0), 0)).select_from(ProjectBudget).where(
+                select(func.coalesce(func.sum(0), 0))
+                .select_from(ProjectBudget)
+                .where(
                     ProjectBudget.project_id == project_id,
                 )
             )
             # Manual sum because original_budget is stored as String
-            budget_result = await session.execute(
-                select(ProjectBudget).where(ProjectBudget.project_id == project_id)
-            )
+            budget_result = await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id))
             budgets = budget_result.scalars().all()
             _ = bac_result.scalar()  # consume the previous query
 
@@ -772,8 +768,7 @@ async def _handle_schedule_progress(event: Event) -> None:
             await session.commit()
 
         logger.info(
-            "schedule.progress_updated: EVM snapshot for project %s "
-            "(BAC=%s PV=%s EV=%s AC=%s SPI=%s CPI=%s)",
+            "schedule.progress_updated: EVM snapshot for project %s (BAC=%s PV=%s EV=%s AC=%s SPI=%s CPI=%s)",
             project_id,
             snapshot.bac,
             snapshot.pv,
@@ -789,6 +784,7 @@ async def _handle_schedule_progress(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 11. bim_model.ready -> apply quantity maps -> draft BOQ
 # ---------------------------------------------------------------------------
+
 
 async def _handle_bim_model_ready(event: Event) -> None:
     """BIM model processed -> apply quantity maps -> generate draft BOQ positions.
@@ -820,9 +816,7 @@ async def _handle_bim_model_ready(event: Event) -> None:
 
         async with async_session_factory() as session:
             # Load BIM elements for this model
-            elem_result = await session.execute(
-                select(BIMElement).where(BIMElement.model_id == model_id)
-            )
+            elem_result = await session.execute(select(BIMElement).where(BIMElement.model_id == model_id))
             elements = elem_result.scalars().all()
 
             if not elements:
@@ -833,10 +827,7 @@ async def _handle_bim_model_ready(event: Event) -> None:
             map_result = await session.execute(
                 select(BIMQuantityMap).where(
                     BIMQuantityMap.is_active.is_(True),
-                    (
-                        (BIMQuantityMap.project_id == project_id)
-                        | BIMQuantityMap.project_id.is_(None)
-                    ),
+                    ((BIMQuantityMap.project_id == project_id) | BIMQuantityMap.project_id.is_(None)),
                 )
             )
             qty_maps = map_result.scalars().all()
@@ -858,10 +849,7 @@ async def _handle_bim_model_ready(event: Event) -> None:
 
                     # Filter by property_filter if specified
                     if qmap.property_filter:
-                        match = all(
-                            elem.properties.get(k) == v
-                            for k, v in qmap.property_filter.items()
-                        )
+                        match = all(elem.properties.get(k) == v for k, v in qmap.property_filter.items())
                         if not match:
                             continue
 
@@ -877,8 +865,7 @@ async def _handle_bim_model_ready(event: Event) -> None:
                     matched_count += 1
 
             logger.info(
-                "bim_model.ready: matched %d element-rule pairs for model %s (project %s, "
-                "%d elements, %d rules)",
+                "bim_model.ready: matched %d element-rule pairs for model %s (project %s, %d elements, %d rules)",
                 matched_count,
                 model_id,
                 project_id,
@@ -907,6 +894,7 @@ async def _handle_bim_model_ready(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 12. bim_model.new_version -> diff -> flag affected BOQ positions
 # ---------------------------------------------------------------------------
+
 
 async def _handle_bim_model_new_version(event: Event) -> None:
     """New BIM model version -> compute diff -> flag linked BOQ positions.
@@ -937,14 +925,10 @@ async def _handle_bim_model_new_version(event: Event) -> None:
 
         async with async_session_factory() as session:
             # Load elements for both versions keyed by stable_id
-            old_result = await session.execute(
-                select(BIMElement).where(BIMElement.model_id == old_model_id)
-            )
+            old_result = await session.execute(select(BIMElement).where(BIMElement.model_id == old_model_id))
             old_elements = {e.stable_id: e for e in old_result.scalars().all()}
 
-            new_result = await session.execute(
-                select(BIMElement).where(BIMElement.model_id == new_model_id)
-            )
+            new_result = await session.execute(select(BIMElement).where(BIMElement.model_id == new_model_id))
             new_elements = {e.stable_id: e for e in new_result.scalars().all()}
 
             # Detect modified and deleted elements
@@ -964,8 +948,7 @@ async def _handle_bim_model_new_version(event: Event) -> None:
 
             if not affected_elem_ids:
                 logger.info(
-                    "bim_model.new_version: no modified/deleted elements between "
-                    "%s and %s",
+                    "bim_model.new_version: no modified/deleted elements between %s and %s",
                     old_model_id,
                     new_model_id,
                 )
@@ -973,18 +956,13 @@ async def _handle_bim_model_new_version(event: Event) -> None:
 
             # Find BOQ positions linked to the affected old elements
             link_result = await session.execute(
-                select(BOQElementLink).where(
-                    BOQElementLink.bim_element_id.in_(affected_elem_ids)
-                )
+                select(BOQElementLink).where(BOQElementLink.bim_element_id.in_(affected_elem_ids))
             )
             affected_links = link_result.scalars().all()
-            affected_position_ids = list(
-                {str(link.boq_position_id) for link in affected_links}
-            )
+            affected_position_ids = list({str(link.boq_position_id) for link in affected_links})
 
         logger.info(
-            "bim_model.new_version: %d modified, %d deleted elements; "
-            "%d BOQ positions affected (models %s -> %s)",
+            "bim_model.new_version: %d modified, %d deleted elements; %d BOQ positions affected (models %s -> %s)",
             len(modified_old_elem_ids),
             len(deleted_old_elem_ids),
             len(affected_position_ids),
@@ -1012,6 +990,7 @@ async def _handle_bim_model_new_version(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 13. variation.approved -> update contract_value + budget
 # ---------------------------------------------------------------------------
+
 
 async def _handle_variation_approved(event: Event) -> None:
     """Variation approved -> update project contract_value and budget.
@@ -1046,9 +1025,7 @@ async def _handle_variation_approved(event: Event) -> None:
         try:
             amount = Decimal(str(approved_amount).replace(",", ""))
         except (InvalidOperation, ValueError):
-            logger.warning(
-                "variation.approved: invalid approved_amount=%s", approved_amount
-            )
+            logger.warning("variation.approved: invalid approved_amount=%s", approved_amount)
             return
 
         if amount == 0:
@@ -1094,8 +1071,7 @@ async def _handle_variation_approved(event: Event) -> None:
             await session.commit()
 
         logger.info(
-            "variation.approved: updated contract_value (+%s) and budget for project %s "
-            "(variation %s)",
+            "variation.approved: updated contract_value (+%s) and budget for project %s (variation %s)",
             approved_amount,
             project_id,
             variation_id,
@@ -1107,6 +1083,7 @@ async def _handle_variation_approved(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 14. transmittal.issued -> audit trail for distribution
 # ---------------------------------------------------------------------------
+
 
 async def _handle_transmittal_issued(event: Event) -> None:
     """Transmittal issued -> create audit trail for each recipient.
@@ -1168,6 +1145,7 @@ async def _handle_transmittal_issued(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 15. cde.container.promoted -> audit + notify stakeholders
 # ---------------------------------------------------------------------------
+
 
 async def _handle_cde_container_promoted(event: Event) -> None:
     """CDE container state change -> log + notify stakeholders.
@@ -1254,6 +1232,7 @@ async def _handle_cde_container_promoted(event: Event) -> None:
 # 16. rfi.assigned -> notify the assignee
 # ---------------------------------------------------------------------------
 
+
 async def _notify_rfi_assigned(event: Event) -> None:
     """Notify the person assigned to answer an RFI.
 
@@ -1300,6 +1279,7 @@ async def _notify_rfi_assigned(event: Event) -> None:
 # 17. task.assigned -> notify the assignee
 # ---------------------------------------------------------------------------
 
+
 async def _notify_task_assigned(event: Event) -> None:
     """Notify the person responsible for a newly assigned task.
 
@@ -1344,6 +1324,7 @@ async def _notify_task_assigned(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 18. invoice.approved -> notify the submitter
 # ---------------------------------------------------------------------------
+
 
 async def _notify_invoice_approved(event: Event) -> None:
     """Notify the invoice creator when the invoice is approved.
@@ -1397,6 +1378,7 @@ async def _notify_invoice_approved(event: Event) -> None:
 # 19. inspection.scheduled -> notify the inspector
 # ---------------------------------------------------------------------------
 
+
 async def _notify_inspection_due(event: Event) -> None:
     """Notify the inspector when an inspection is scheduled.
 
@@ -1447,6 +1429,7 @@ async def _notify_inspection_due(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 20. submittal.status_changed -> notify the submitter
 # ---------------------------------------------------------------------------
+
 
 async def _notify_submittal_status_changed(event: Event) -> None:
     """Notify the submitter when a submittal's review status changes.
@@ -1501,6 +1484,7 @@ async def _notify_submittal_status_changed(event: Event) -> None:
 # 21. meeting.scheduled -> notify all attendees
 # ---------------------------------------------------------------------------
 
+
 async def _notify_meeting_scheduled(event: Event) -> None:
     """Notify all attendees when a meeting is scheduled.
 
@@ -1552,6 +1536,7 @@ async def _notify_meeting_scheduled(event: Event) -> None:
 # 22. ncr.created -> notify project team (creator receives confirmation)
 # ---------------------------------------------------------------------------
 
+
 async def _notify_ncr_created(event: Event) -> None:
     """Notify relevant users when an NCR is raised.
 
@@ -1580,9 +1565,7 @@ async def _notify_ncr_created(event: Event) -> None:
 
                     from app.modules.projects.models import Project
 
-                    result = await session.execute(
-                        select(Project.owner_id).where(Project.id == project_id)
-                    )
+                    result = await session.execute(select(Project.owner_id).where(Project.id == project_id))
                     owner_id = result.scalar_one_or_none()
                     if owner_id:
                         notify_ids = [str(owner_id)]
@@ -1622,6 +1605,7 @@ async def _notify_ncr_created(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 23. document.uploaded -> notify project owner / relevant watchers
 # ---------------------------------------------------------------------------
+
 
 async def _notify_document_uploaded(event: Event) -> None:
     """Notify project team when a new document is uploaded.
@@ -1672,6 +1656,7 @@ async def _notify_document_uploaded(event: Event) -> None:
 # ---------------------------------------------------------------------------
 # 24. Wildcard: forward ALL events to registered outgoing webhooks
 # ---------------------------------------------------------------------------
+
 
 async def _dispatch_to_webhooks(event: Event) -> None:
     """Forward all events to registered webhooks.

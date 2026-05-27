@@ -54,9 +54,7 @@ async def _index_risk(event: Event) -> None:
                 # Race: row was deleted between publish and handler.
                 await vector_delete_one(risk_vector_adapter, str(risk_id))
                 return
-            project_id = (
-                str(row.project_id) if row.project_id is not None else None
-            )
+            project_id = str(row.project_id) if row.project_id is not None else None
             await vector_index_one(
                 risk_vector_adapter,
                 row,
@@ -172,16 +170,13 @@ async def _on_contracts_risk_register_update(event: Event) -> None:
                 if md.get("source_incident_id") == incident_id_str:
                     logger.debug(
                         "risk: incident %s already projected → risk %s",
-                        incident_id_str, row.id,
+                        incident_id_str,
+                        row.id,
                     )
                     return
 
             tier = _HSE_SEVERITY_TO_RISK_TIER.get(severity, "medium")
-            code = (
-                f"HSE-{incident_number}"
-                if incident_number
-                else f"HSE-{incident_id_str[:8].upper()}"
-            )[:50]
+            code = (f"HSE-{incident_number}" if incident_number else f"HSE-{incident_id_str[:8].upper()}")[:50]
             title = (
                 f"Safety incident → risk projection ({incident_number})"
                 if incident_number
@@ -222,14 +217,18 @@ async def _on_contracts_risk_register_update(event: Event) -> None:
             await session.commit()
             logger.info(
                 "risk: auto-projected incident %s → RiskItem %s (tier=%s)",
-                incident_id_str, risk.id, tier,
+                incident_id_str,
+                risk.id,
+                tier,
             )
     except Exception:
         logger.debug(
-            "risk: _on_contracts_risk_register_update failed", exc_info=True,
+            "risk: _on_contracts_risk_register_update failed",
+            exc_info=True,
         )
 
 
 event_bus.subscribe(
-    "contracts.risk_register_update", _on_contracts_risk_register_update,
+    "contracts.risk_register_update",
+    _on_contracts_risk_register_update,
 )

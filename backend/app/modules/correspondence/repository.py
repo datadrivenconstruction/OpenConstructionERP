@@ -41,10 +41,7 @@ class CorrespondenceRepository:
 
     async def next_reference_number(self, project_id: uuid.UUID) -> str:
         """‌⁠‍Generate the next reference number using MAX to avoid collisions after deletions."""
-        stmt = (
-            select(func.max(Correspondence.reference_number))
-            .where(Correspondence.project_id == project_id)
-        )
+        stmt = select(func.max(Correspondence.reference_number)).where(Correspondence.project_id == project_id)
         max_number = (await self.session.execute(stmt)).scalar_one()
         if max_number is None:
             return "COR-001"
@@ -59,14 +56,8 @@ class CorrespondenceRepository:
         await self.session.flush()
         return correspondence
 
-    async def update_fields(
-        self, correspondence_id: uuid.UUID, **fields: object
-    ) -> None:
-        stmt = (
-            update(Correspondence)
-            .where(Correspondence.id == correspondence_id)
-            .values(**fields)
-        )
+    async def update_fields(self, correspondence_id: uuid.UUID, **fields: object) -> None:
+        stmt = update(Correspondence).where(Correspondence.id == correspondence_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()

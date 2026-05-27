@@ -40,11 +40,7 @@ class IncidentRepository:
         return list(result.scalars().all()), total
 
     async def next_incident_number(self, project_id: uuid.UUID) -> str:
-        stmt = (
-            select(func.count())
-            .select_from(SafetyIncident)
-            .where(SafetyIncident.project_id == project_id)
-        )
+        stmt = select(func.count()).select_from(SafetyIncident).where(SafetyIncident.project_id == project_id)
         count = (await self.session.execute(stmt)).scalar_one()
         return f"INC-{count + 1:03d}"
 
@@ -54,11 +50,7 @@ class IncidentRepository:
         return incident
 
     async def update_fields(self, incident_id: uuid.UUID, **fields: object) -> None:
-        stmt = (
-            update(SafetyIncident)
-            .where(SafetyIncident.id == incident_id)
-            .values(**fields)
-        )
+        stmt = update(SafetyIncident).where(SafetyIncident.id == incident_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()
@@ -88,9 +80,7 @@ class ObservationRepository:
         observation_type: str | None = None,
         status: str | None = None,
     ) -> tuple[list[SafetyObservation], int]:
-        base = select(SafetyObservation).where(
-            SafetyObservation.project_id == project_id
-        )
+        base = select(SafetyObservation).where(SafetyObservation.project_id == project_id)
         if observation_type is not None:
             base = base.where(SafetyObservation.observation_type == observation_type)
         if status is not None:
@@ -104,11 +94,7 @@ class ObservationRepository:
         return list(result.scalars().all()), total
 
     async def next_observation_number(self, project_id: uuid.UUID) -> str:
-        stmt = (
-            select(func.count())
-            .select_from(SafetyObservation)
-            .where(SafetyObservation.project_id == project_id)
-        )
+        stmt = select(func.count()).select_from(SafetyObservation).where(SafetyObservation.project_id == project_id)
         count = (await self.session.execute(stmt)).scalar_one()
         return f"OBS-{count + 1:03d}"
 
@@ -118,11 +104,7 @@ class ObservationRepository:
         return observation
 
     async def update_fields(self, observation_id: uuid.UUID, **fields: object) -> None:
-        stmt = (
-            update(SafetyObservation)
-            .where(SafetyObservation.id == observation_id)
-            .values(**fields)
-        )
+        stmt = update(SafetyObservation).where(SafetyObservation.id == observation_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()

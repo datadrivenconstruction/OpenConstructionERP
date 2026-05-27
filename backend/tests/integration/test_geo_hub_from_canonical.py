@@ -27,7 +27,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -66,11 +65,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -126,7 +121,9 @@ async def tenant_b(http_client):
 
 
 async def _create_bim_model_with_elements(
-    project_id: str, *, with_elements: bool = True,
+    project_id: str,
+    *,
+    with_elements: bool = True,
 ) -> uuid.UUID:
     """Insert a BIMModel + a few canonical-shaped BIMElement rows."""
     from app.database import async_session_factory
@@ -188,7 +185,9 @@ async def _create_anchor(client: AsyncClient, tenant: dict) -> None:
 class TestFromCanonical:
     @pytest.mark.asyncio
     async def test_happy_path_returns_200_and_persists_tileset(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         await _create_anchor(http_client, tenant_a)
         model_id = await _create_bim_model_with_elements(tenant_a["project_id"])
@@ -237,7 +236,10 @@ class TestFromCanonical:
 
     @pytest.mark.asyncio
     async def test_cross_tenant_returns_404(
-        self, http_client, tenant_a, tenant_b,
+        self,
+        http_client,
+        tenant_a,
+        tenant_b,
     ):
         # Anchor + model belong to tenant_a; tenant_b must see 404.
         model_id = await _create_bim_model_with_elements(
@@ -252,7 +254,9 @@ class TestFromCanonical:
 
     @pytest.mark.asyncio
     async def test_unknown_cad_import_returns_404(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         fake_id = uuid.uuid4()
         res = await http_client.post(
@@ -280,7 +284,9 @@ class TestFromCanonical:
 
     @pytest.mark.asyncio
     async def test_elements_with_no_geometry_returns_422(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         """An import whose elements all lack usable bounding boxes must
         fail loudly with 422 instead of persisting a degenerate tileset.

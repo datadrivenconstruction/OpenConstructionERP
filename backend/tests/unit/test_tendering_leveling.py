@@ -107,7 +107,9 @@ class _StubRepo:
         return self.packages.get(package_id)
 
     async def update_package_fields(
-        self, package_id: uuid.UUID, **fields: Any,
+        self,
+        package_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
         p = self.packages.get(package_id)
         if p:
@@ -132,12 +134,15 @@ class _StubRepo:
         return self.bids.get(bid_id)
 
     async def list_bids_for_package(
-        self, package_id: uuid.UUID,
+        self,
+        package_id: uuid.UUID,
     ) -> list[Any]:
         return [b for b in self.bids.values() if b.package_id == package_id]
 
     async def update_bid_fields(
-        self, bid_id: uuid.UUID, **fields: Any,
+        self,
+        bid_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
         b = self.bids.get(bid_id)
         if b:
@@ -149,7 +154,8 @@ class _StubRepo:
         return self.addenda.get(addendum_id)
 
     async def list_addenda_for_package(
-        self, package_id: uuid.UUID,
+        self,
+        package_id: uuid.UUID,
     ) -> list[Any]:
         return sorted(
             (a for a in self.addenda.values() if a.package_id == package_id),
@@ -157,10 +163,7 @@ class _StubRepo:
         )
 
     async def get_max_revision_no(self, package_id: uuid.UUID) -> int:
-        rows = [
-            a.revision_no for a in self.addenda.values()
-            if a.package_id == package_id
-        ]
+        rows = [a.revision_no for a in self.addenda.values() if a.package_id == package_id]
         return max(rows) if rows else 0
 
     async def create_addendum(self, addendum: Any) -> Any:
@@ -173,7 +176,9 @@ class _StubRepo:
         return addendum
 
     async def update_addendum_fields(
-        self, addendum_id: uuid.UUID, **fields: Any,
+        self,
+        addendum_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
         a = self.addenda.get(addendum_id)
         if a:
@@ -190,7 +195,8 @@ def _make_service() -> TenderingService:
 
 
 async def _make_package_with_boq(
-    svc: TenderingService, reference_lines: list[dict],
+    svc: TenderingService,
+    reference_lines: list[dict],
 ) -> Any:
     """Create a package and stub ``_load_reference_lines`` to return the
     supplied lines — bypasses the real BOQ service so leveling is testable
@@ -218,15 +224,15 @@ async def _make_package_with_boq(
 async def test_addendum_auto_increment_revision() -> None:
     """Two consecutive create_addendum calls produce revisions 1 and 2."""
     svc = _make_service()
-    pkg = await svc.create_package(
-        PackageCreate(project_id=PROJECT_ID, name="Concrete works")
-    )
+    pkg = await svc.create_package(PackageCreate(project_id=PROJECT_ID, name="Concrete works"))
 
     first = await svc.create_addendum(
-        pkg.id, AddendumCreate(title="Clarification 1", body="Updated specs"),
+        pkg.id,
+        AddendumCreate(title="Clarification 1", body="Updated specs"),
     )
     second = await svc.create_addendum(
-        pkg.id, AddendumCreate(title="Clarification 2", body="Extra detail"),
+        pkg.id,
+        AddendumCreate(title="Clarification 2", body="Extra detail"),
     )
 
     assert first.revision_no == 1
@@ -239,11 +245,10 @@ async def test_addendum_auto_increment_revision() -> None:
 async def test_addendum_publish_and_acknowledge_idempotent() -> None:
     """Publish stamps the timestamp; ack appends once and re-ack is a no-op."""
     svc = _make_service()
-    pkg = await svc.create_package(
-        PackageCreate(project_id=PROJECT_ID, name="Concrete works")
-    )
+    pkg = await svc.create_package(PackageCreate(project_id=PROJECT_ID, name="Concrete works"))
     addendum = await svc.create_addendum(
-        pkg.id, AddendumCreate(title="Spec change", body="Updated rebar grade"),
+        pkg.id,
+        AddendumCreate(title="Spec change", body="Updated rebar grade"),
     )
 
     # Publish — published_at gets stamped.
@@ -253,7 +258,9 @@ async def test_addendum_publish_and_acknowledge_idempotent() -> None:
     bidder_id = uuid.uuid4()
     # First ack lands.
     after_first = await svc.acknowledge_addendum(
-        addendum.id, bidder_id, user_id=str(uuid.uuid4()),
+        addendum.id,
+        bidder_id,
+        user_id=str(uuid.uuid4()),
     )
     assert len(after_first.acknowledged_by) == 1
     entry = after_first.acknowledged_by[0]
@@ -262,7 +269,9 @@ async def test_addendum_publish_and_acknowledge_idempotent() -> None:
 
     # Second ack from the same bidder is a no-op — no duplicate appended.
     after_second = await svc.acknowledge_addendum(
-        addendum.id, bidder_id, user_id=str(uuid.uuid4()),
+        addendum.id,
+        bidder_id,
+        user_id=str(uuid.uuid4()),
     )
     assert len(after_second.acknowledged_by) == 1
 
@@ -321,16 +330,28 @@ async def test_level_bids_imputes_omitted_line_with_mean_rate_penalty() -> None:
             status="submitted",
             line_items=[
                 BidLineItem(
-                    position_id="p1", description="Concrete C30/37",
-                    unit="m3", quantity=100.0, unit_rate=115.0, total=11500.0,
+                    position_id="p1",
+                    description="Concrete C30/37",
+                    unit="m3",
+                    quantity=100.0,
+                    unit_rate=115.0,
+                    total=11500.0,
                 ),
                 BidLineItem(
-                    position_id="p2", description="Rebar B500B",
-                    unit="kg", quantity=8000.0, unit_rate=1.1, total=8800.0,
+                    position_id="p2",
+                    description="Rebar B500B",
+                    unit="kg",
+                    quantity=8000.0,
+                    unit_rate=1.1,
+                    total=8800.0,
                 ),
                 BidLineItem(
-                    position_id="p3", description="Formwork",
-                    unit="m2", quantity=500.0, unit_rate=19.0, total=9500.0,
+                    position_id="p3",
+                    description="Formwork",
+                    unit="m2",
+                    quantity=500.0,
+                    unit_rate=19.0,
+                    total=9500.0,
                 ),
             ],
         ),
@@ -347,12 +368,20 @@ async def test_level_bids_imputes_omitted_line_with_mean_rate_penalty() -> None:
             status="submitted",
             line_items=[
                 BidLineItem(
-                    position_id="p1", description="Concrete C30/37",
-                    unit="m3", quantity=100.0, unit_rate=130.0, total=13000.0,
+                    position_id="p1",
+                    description="Concrete C30/37",
+                    unit="m3",
+                    quantity=100.0,
+                    unit_rate=130.0,
+                    total=13000.0,
                 ),
                 BidLineItem(
-                    position_id="p2", description="Rebar B500B",
-                    unit="kg", quantity=8000.0, unit_rate=1.3, total=10400.0,
+                    position_id="p2",
+                    description="Rebar B500B",
+                    unit="kg",
+                    quantity=8000.0,
+                    unit_rate=1.3,
+                    total=10400.0,
                 ),
             ],
         ),
@@ -363,9 +392,7 @@ async def test_level_bids_imputes_omitted_line_with_mean_rate_penalty() -> None:
     assert result["bid_count"] == 2
     assert result["reference_line_count"] == 3
 
-    summaries = {
-        s["bid_id"]: s for s in result["bid_summaries"]
-    }
+    summaries = {s["bid_id"]: s for s in result["bid_summaries"]}
 
     # Bid A — all three lines matched. Leveled == raw.
     a_sum = summaries[str(bid_a.id)]

@@ -79,9 +79,7 @@ async def session() -> AsyncIterator[tuple[AsyncSession, str]]:
     optional ``project_id`` scope filter without re-seeding.
     """
     db_path = _TMP_DIR / f"test-{uuid.uuid4().hex[:8]}.db"
-    engine = create_async_engine(
-        f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False
-    )
+    engine = create_async_engine(f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all, tables=_TABLES)
 
@@ -101,9 +99,7 @@ async def session() -> AsyncIterator[tuple[AsyncSession, str]]:
         await s.flush()
 
         # Project (FK target for everything else)
-        project = Project(
-            id=project_id, name="Test Project", description="", owner_id=owner_id
-        )
+        project = Project(id=project_id, name="Test Project", description="", owner_id=owner_id)
         s.add(project)
         await s.flush()
 
@@ -247,9 +243,7 @@ async def test_sql_fallback_boq_project_scope(session: tuple[AsyncSession, str])
     s, project_id = session
     same = await _sql_search_collection(s, COLLECTION_BOQ, "Test", project_id=project_id)
     assert len(same) >= 1
-    other = await _sql_search_collection(
-        s, COLLECTION_BOQ, "Test", project_id=str(uuid.uuid4())
-    )
+    other = await _sql_search_collection(s, COLLECTION_BOQ, "Test", project_id=str(uuid.uuid4()))
     assert other == []
 
 
@@ -302,9 +296,7 @@ async def test_sql_fallback_requirement_via_notes(
 ) -> None:
     """A free-text token in ``notes`` must still surface the requirement."""
     s, _ = session
-    hits = await _sql_search_collection(
-        s, COLLECTION_REQUIREMENTS, "Test requirement", limit=10
-    )
+    hits = await _sql_search_collection(s, COLLECTION_REQUIREMENTS, "Test requirement", limit=10)
     assert len(hits) == 1
 
 
@@ -336,9 +328,7 @@ async def test_sql_fallback_no_match_returns_empty(
     session: tuple[AsyncSession, str],
 ) -> None:
     s, _ = session
-    hits = await _sql_search_collection(
-        s, COLLECTION_BOQ, "definitely-not-anywhere-xyz", limit=10
-    )
+    hits = await _sql_search_collection(s, COLLECTION_BOQ, "definitely-not-anywhere-xyz", limit=10)
     assert hits == []
 
 

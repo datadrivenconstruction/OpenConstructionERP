@@ -217,10 +217,7 @@ class BoqAdapter:
         """Group rows by ``category`` (or ``section``) — fallback "BoQ"."""
         counter: Counter[str] = Counter()
         for row in self._rows():
-            cat = (
-                str(row.get("category") or row.get("section") or "BoQ")
-                or "BoQ"
-            )
+            cat = str(row.get("category") or row.get("section") or "BoQ") or "BoQ"
             counter[cat] += 1
         return counter.most_common()
 
@@ -243,26 +240,13 @@ class BoqAdapter:
 
         out: list[SourceElement] = []
         for idx, row in enumerate(self._rows()):
-            cat = (
-                str(row.get("category") or row.get("section") or "BoQ")
-                or "BoQ"
-            )
+            cat = str(row.get("category") or row.get("section") or "BoQ") or "BoQ"
             if cat in excluded:
                 continue
 
-            description = str(
-                row.get("description")
-                or row.get("name")
-                or row.get("text")
-                or ""
-            ).strip()
+            description = str(row.get("description") or row.get("name") or row.get("text") or "").strip()
             unit = str(row.get("unit") or row.get("uom") or "").strip()
-            qty = _to_float(
-                row.get("qty")
-                or row.get("quantity")
-                or row.get("Qty")
-                or row.get("Quantity")
-            )
+            qty = _to_float(row.get("qty") or row.get("quantity") or row.get("Qty") or row.get("Quantity"))
 
             attrs: dict[str, Any] = dict(row)
             attrs.setdefault("category", cat)
@@ -299,17 +283,8 @@ class BoqAdapter:
 
             quantities = _quantities_for(unit, qty)
 
-            row_id = (
-                row.get("id")
-                or row.get("row_id")
-                or row.get("ordinal")
-                or f"boq:{idx}"
-            )
-            ref = (
-                str(self.match_session.id)
-                if self.match_session is not None
-                else None
-            )
+            row_id = row.get("id") or row.get("row_id") or row.get("ordinal") or f"boq:{idx}"
+            ref = str(self.match_session.id) if self.match_session is not None else None
 
             out.append(
                 SourceElement(

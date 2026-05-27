@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError
@@ -34,10 +34,10 @@ from app.modules.file_distribution.models import (
     FileDistributionSubscription,
 )
 from app.modules.file_distribution.schemas import (
+    NOTIFY_EVENTS,
     DistributionListCreate,
     DistributionListUpdate,
     DistributionMemberCreate,
-    NOTIFY_EVENTS,
     SearchHit,
     SubscriptionCreate,
 )
@@ -152,9 +152,7 @@ class CrossProjectSearchService:
                 Project.id.in_(allowed_project_ids),
             ),
         )
-        proj_names: dict[uuid.UUID, str] = {
-            row[0]: row[1] for row in proj_rows.all()
-        }
+        proj_names: dict[uuid.UUID, str] = {row[0]: row[1] for row in proj_rows.all()}
 
         like = f"%{q.lower()}%"
         hits: list[SearchHit] = []
@@ -289,9 +287,7 @@ class CrossProjectSearchService:
                             SearchHit(
                                 project_id=pid,
                                 project_name=proj_names.get(pid, ""),
-                                file_id=uuid.UUID(str(fid))
-                                if not isinstance(fid, uuid.UUID)
-                                else fid,
+                                file_id=uuid.UUID(str(fid)) if not isinstance(fid, uuid.UUID) else fid,
                                 kind=kind if kind in ("document", "sheet", "photo") else "document",
                                 canonical_name="",
                                 snippet=snippet,
@@ -301,8 +297,7 @@ class CrossProjectSearchService:
                 used_content_index = True
             except Exception:  # noqa: BLE001 — fall back if anything blows up
                 logger.exception(
-                    "file_search content index probe failed; "
-                    "falling back to canonical_name-only search",
+                    "file_search content index probe failed; falling back to canonical_name-only search",
                 )
                 used_content_index = False
 
@@ -389,7 +384,9 @@ class DistributionListService:
         return list(result.scalars().unique().all())
 
     async def _load(
-        self, list_id: uuid.UUID, user_id: uuid.UUID,
+        self,
+        list_id: uuid.UUID,
+        user_id: uuid.UUID,
     ) -> FileDistributionList:
         row = await self.session.get(FileDistributionList, list_id)
         if row is None:
@@ -401,7 +398,9 @@ class DistributionListService:
         raise DistributionNotFoundError(str(list_id))
 
     async def get(
-        self, list_id: uuid.UUID, user_id: uuid.UUID,
+        self,
+        list_id: uuid.UUID,
+        user_id: uuid.UUID,
     ) -> FileDistributionList:
         return await self._load(list_id, user_id)
 
@@ -535,24 +534,34 @@ class SubscriptionService:
         subscription manager UI both want "what does this user
         receive?" so per-user filtering is the natural answer.
         """
-        stmt = select(FileDistributionSubscription).where(
-            FileDistributionSubscription.project_id == project_id,
-            or_(
-                FileDistributionSubscription.subscriber_user_id == user_id,
-            ),
-        ).order_by(FileDistributionSubscription.file_kind.asc())
+        stmt = (
+            select(FileDistributionSubscription)
+            .where(
+                FileDistributionSubscription.project_id == project_id,
+                or_(
+                    FileDistributionSubscription.subscriber_user_id == user_id,
+                ),
+            )
+            .order_by(FileDistributionSubscription.file_kind.asc())
+        )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
     async def list_for_user_global(
-        self, *, user_id: uuid.UUID,
+        self,
+        *,
+        user_id: uuid.UUID,
     ) -> list[FileDistributionSubscription]:
         """All subscriptions the user has across every project."""
-        stmt = select(FileDistributionSubscription).where(
-            FileDistributionSubscription.subscriber_user_id == user_id,
-        ).order_by(
-            FileDistributionSubscription.project_id.asc(),
-            FileDistributionSubscription.file_kind.asc(),
+        stmt = (
+            select(FileDistributionSubscription)
+            .where(
+                FileDistributionSubscription.subscriber_user_id == user_id,
+            )
+            .order_by(
+                FileDistributionSubscription.project_id.asc(),
+                FileDistributionSubscription.file_kind.asc(),
+            )
         )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
@@ -586,16 +595,18 @@ class SubscriptionService:
         except IntegrityError as exc:
             await self.session.rollback()
             raise DistributionConflictError(
-                f"Subscription already exists for {sub.subscriber_email} "
-                f"on kind={sub.file_kind}",
+                f"Subscription already exists for {sub.subscriber_email} on kind={sub.file_kind}",
             ) from exc
         return sub
 
     async def delete(
-        self, subscription_id: uuid.UUID, user_id: uuid.UUID,
+        self,
+        subscription_id: uuid.UUID,
+        user_id: uuid.UUID,
     ) -> None:
         row = await self.session.get(
-            FileDistributionSubscription, subscription_id,
+            FileDistributionSubscription,
+            subscription_id,
         )
         if row is None:
             raise DistributionNotFoundError(str(subscription_id))
@@ -676,8 +687,7 @@ async def on_file_new_revision(
         from app.modules.notifications.service import NotificationService
     except Exception:  # noqa: BLE001
         logger.debug(
-            "on_file_new_revision: notifications module not available; "
-            "skipping fan-out",
+            "on_file_new_revision: notifications module not available; skipping fan-out",
         )
         return 0
 
@@ -718,8 +728,7 @@ async def on_file_new_revision(
             )
     if created:
         logger.info(
-            "on_file_new_revision: fan-out created %d notification(s) "
-            "for project=%s kind=%s file=%s",
+            "on_file_new_revision: fan-out created %d notification(s) for project=%s kind=%s file=%s",
             created,
             project_id,
             file_kind,

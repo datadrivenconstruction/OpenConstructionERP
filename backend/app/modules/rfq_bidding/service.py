@@ -25,9 +25,7 @@ logger = logging.getLogger(__name__)
 # draft / awarded / completed / cancelled RFQs are rejected — those would
 # otherwise allow a vendor to slip a bid in after the award has been made
 # or before the RFQ has been published.
-_BID_SUBMISSION_OPEN_STATUSES: frozenset[str] = frozenset(
-    {"published", "issued", "bids_received"}
-)
+_BID_SUBMISSION_OPEN_STATUSES: frozenset[str] = frozenset({"published", "issued", "bids_received"})
 
 # Roles permitted to award an RFQ (mirrors FSM registry
 # ``bids_received → awarded`` ``required_roles=("admin", "manager")``).
@@ -202,8 +200,7 @@ class RFQService:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=(
-                    f"Cannot submit bid against RFQ in status '{rfq.status}'; "
-                    "RFQ must be published or accepting bids."
+                    f"Cannot submit bid against RFQ in status '{rfq.status}'; RFQ must be published or accepting bids."
                 ),
             )
 
@@ -213,9 +210,7 @@ class RFQService:
         # must resolve before bids land.
         if rfq.submission_deadline:
             try:
-                deadline = datetime.fromisoformat(
-                    rfq.submission_deadline.replace("Z", "+00:00")
-                )
+                deadline = datetime.fromisoformat(rfq.submission_deadline.replace("Z", "+00:00"))
                 if deadline.tzinfo is None:
                     deadline = deadline.replace(tzinfo=UTC)
                 if datetime.now(UTC) > deadline:
@@ -226,7 +221,8 @@ class RFQService:
             except (ValueError, TypeError):
                 logger.warning(
                     "RFQ %s has malformed submission_deadline %r — bid rejected",
-                    data.rfq_id, rfq.submission_deadline,
+                    data.rfq_id,
+                    rfq.submission_deadline,
                 )
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -339,10 +335,7 @@ class RFQService:
         if actor_role is not None and actor_role.lower() not in _AWARD_ALLOWED_ROLES:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    "RFQ award requires admin or manager role; "
-                    f"role '{actor_role}' is not permitted."
-                ),
+                detail=(f"RFQ award requires admin or manager role; role '{actor_role}' is not permitted."),
             )
 
         bid = await self.get_bid(bid_id)
@@ -373,10 +366,7 @@ class RFQService:
         if prior_status in {"cancelled", "completed"}:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    f"Cannot award bid against RFQ in terminal status "
-                    f"'{prior_status}'."
-                ),
+                detail=(f"Cannot award bid against RFQ in terminal status '{prior_status}'."),
             )
 
         # Capture identity + display fields BEFORE calling repo.update().
@@ -448,6 +438,9 @@ class RFQService:
                 detail="Bid not found",
             )
         logger.info(
-            "Bid awarded: %s for RFQ %s by actor %s", bid_id, rfq_id_local, actor_id,
+            "Bid awarded: %s for RFQ %s by actor %s",
+            bid_id,
+            rfq_id_local,
+            actor_id,
         )
         return updated

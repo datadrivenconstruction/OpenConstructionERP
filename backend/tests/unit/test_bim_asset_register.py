@@ -5,6 +5,7 @@ full app lifespan because SQLAlchemy models can be exercised in
 isolation against an in-memory SQLite DB. Router-level tests live in
 ``tests/integration/`` so they share the fuller auth fixtures.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -87,9 +88,7 @@ class TestAssetInfoMerge:
 
     @pytest.mark.asyncio
     async def test_partial_update_preserves_existing_keys(self, session):
-        element = await _seed_element(
-            session, asset_info={"manufacturer": "Siemens", "serial_number": "SN123"}
-        )
+        element = await _seed_element(session, asset_info={"manufacturer": "Siemens", "serial_number": "SN123"})
         # Pre-existing write manually flipped the flag so the fixture
         # mimics a row that was already registered.
         element.is_tracked_asset = True
@@ -139,9 +138,7 @@ class TestAssetInfoMerge:
     async def test_missing_element_returns_none(self, session):
         repo = BIMElementRepository(session)
         missing = uuid.uuid4()
-        result = await repo.update_asset_info(
-            missing, asset_info={"manufacturer": "ACME"}
-        )
+        result = await repo.update_asset_info(missing, asset_info={"manufacturer": "ACME"})
         assert result is None
 
 
@@ -188,9 +185,7 @@ class TestListTrackedAssets:
             is_tracked_asset=True,
         )
         repo = BIMElementRepository(session)
-        rows, total = await repo.list_tracked_assets_for_project(
-            project_id, search="grund"
-        )
+        rows, total = await repo.list_tracked_assets_for_project(project_id, search="grund")
         assert total == 1
         assert rows[0][0].stable_id == "pump-1"
 
@@ -213,9 +208,7 @@ class TestListTrackedAssets:
             is_tracked_asset=True,
         )
         repo = BIMElementRepository(session)
-        rows, total = await repo.list_tracked_assets_for_project(
-            project_id, operational_status="under_maintenance"
-        )
+        rows, total = await repo.list_tracked_assets_for_project(project_id, operational_status="under_maintenance")
         assert total == 1
         assert rows[0][0].stable_id == "b"
 
@@ -224,12 +217,17 @@ class TestListTrackedAssets:
         project_a = uuid.uuid4()
         project_b = uuid.uuid4()
         await _seed_element(
-            session, project_id=project_a, is_tracked_asset=True,
+            session,
+            project_id=project_a,
+            is_tracked_asset=True,
             asset_info={"manufacturer": "A"},
         )
         await _seed_element(
-            session, project_id=project_b, is_tracked_asset=True,
-            model_name="B-model", stable_id="b-asset",
+            session,
+            project_id=project_b,
+            is_tracked_asset=True,
+            model_name="B-model",
+            stable_id="b-asset",
             asset_info={"manufacturer": "B"},
         )
         repo = BIMElementRepository(session)

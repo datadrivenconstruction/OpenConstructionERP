@@ -36,31 +36,24 @@ def _serialize_money_string(value: Any) -> str | None:
         return "0"
     return format(value, "f")
 
+
 # Regex for an ISO-4217 3-letter currency code (uppercase).
 _CURRENCY_PATTERN = r"^[A-Z]{3}$"
 
 # R6 (task #137) enum patterns — kept in module scope so router + tests can re-use.
-_LEAD_SOURCE_PATTERN = (
-    r"^(web_form|walk_in|broker|referral|portal|other)$"
-)
+_LEAD_SOURCE_PATTERN = r"^(web_form|walk_in|broker|referral|portal|other)$"
 _LEAD_STATUS_PATTERN = (
     r"^(new|qualified|viewing_scheduled|visited|quotation_sent|"
     r"negotiating|converted|lost|disqualified)$"
 )
-_RESERVATION_STATUS_PATTERN = (
-    r"^(active|expired|converted|cancelled|refunded)$"
-)
+_RESERVATION_STATUS_PATTERN = r"^(active|expired|converted|cancelled|refunded)$"
 _SPA_STATUS_PATTERN = (
     r"^(draft|sent_for_signature|partially_signed|signed|countersigned|"
     r"registered|cancelled)$"
 )
 _SCHEDULE_STATUS_PATTERN = r"^(active|completed|suspended|cancelled)$"
-_INSTALMENT_STATUS_PATTERN = (
-    r"^(pending|due|overdue|paid|waived|cancelled)$"
-)
-_PARTY_ROLE_PATTERN = (
-    r"^(primary|co_owner|guarantor|power_of_attorney)$"
-)
+_INSTALMENT_STATUS_PATTERN = r"^(pending|due|overdue|paid|waived|cancelled)$"
+_PARTY_ROLE_PATTERN = r"^(primary|co_owner|guarantor|power_of_attorney)$"
 _RESERVATION_NUMBER_PATTERN = r"^RES-[A-Z0-9-]{1,40}-\d{5}$"
 _CONTRACT_NUMBER_PATTERN = r"^SPA-[A-Z0-9-]{1,40}-\d{5}$"
 
@@ -129,9 +122,7 @@ class DevelopmentUpdate(BaseModel):
     total_plots: int | None = Field(default=None, ge=0)
     total_area_m2: Decimal | None = Field(default=None, ge=0)
     total_floors: int | None = Field(default=None, ge=0)
-    sales_phase: str | None = Field(
-        default=None, pattern=r"^(planning|launch|sales|handover|closed)$"
-    )
+    sales_phase: str | None = Field(default=None, pattern=r"^(planning|launch|sales|handover|closed)$")
     start_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     launch_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     completion_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -341,12 +332,8 @@ class PlotCreate(BaseModel):
         default="planned",
         pattern=r"^(planned|reserved|under_construction|ready|sold|handed_over|held|blocked)$",
     )
-    reservation_deadline: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
-    construction_status_percent: Decimal = Field(
-        default=Decimal("0"), ge=0, le=100
-    )
+    reservation_deadline: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    construction_status_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -378,9 +365,7 @@ class PlotUpdate(BaseModel):
         default=None,
         pattern=r"^(planned|reserved|under_construction|ready|sold|handed_over|held|blocked)$",
     )
-    reservation_deadline: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    reservation_deadline: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     construction_status_percent: Decimal | None = Field(default=None, ge=0, le=100)
     metadata: dict[str, Any] | None = None
 
@@ -421,7 +406,9 @@ class PlotResponse(BaseModel):
 
     # R7: money + numeric area fields as plain-decimal strings.
     @field_serializer(
-        "area_m2", "price_base", "construction_status_percent",
+        "area_m2",
+        "price_base",
+        "construction_status_percent",
         when_used="json",
     )
     @classmethod
@@ -429,8 +416,11 @@ class PlotResponse(BaseModel):
         return _serialize_money_string(v) or "0"
 
     @field_serializer(
-        "garden_area_m2", "balcony_area_m2", "storage_area_m2",
-        "sun_exposure_hours", "computed_price",
+        "garden_area_m2",
+        "balcony_area_m2",
+        "storage_area_m2",
+        "sun_exposure_hours",
+        "computed_price",
         when_used="json",
     )
     @classmethod
@@ -448,9 +438,7 @@ class PlotReserveRequest(BaseModel):
     email: str = Field(default="", max_length=255)
     phone: str | None = Field(default=None, max_length=40)
     language: str = Field(default="en", max_length=10)
-    reservation_deadline: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    reservation_deadline: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -620,15 +608,9 @@ class BuyerUpdate(BaseModel):
     )
     contract_value: Decimal | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=8)
-    contract_signed_at: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
-    deposit_paid_at: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
-    freeze_deadline: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    contract_signed_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    deposit_paid_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    freeze_deadline: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     # Optional financial / jurisdiction fields exposed so the edit flow
     # introduced in task #134 can adjust them post-contract without
     # forcing the user back through ``POST /buyers/{id}/contract``.
@@ -670,7 +652,9 @@ class BuyerResponse(BaseModel):
 
     # R7: money fields as plain-decimal strings.
     @field_serializer(
-        "contract_value", "deposit_amount", "deposit_forfeited",
+        "contract_value",
+        "deposit_amount",
+        "deposit_forfeited",
         "deposit_refunded",
         when_used="json",
     )
@@ -717,7 +701,9 @@ class DepositForfeitureResponse(BaseModel):
 
     # R7: money fields as plain-decimal strings.
     @field_serializer(
-        "deposit_amount", "forfeited_amount", "refundable_amount",
+        "deposit_amount",
+        "forfeited_amount",
+        "refundable_amount",
         when_used="json",
     )
     @classmethod
@@ -734,9 +720,7 @@ class BuyerSelectionCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     buyer_id: UUID
-    status: str = Field(
-        default="draft", pattern=r"^(draft|submitted|locked|cancelled)$"
-    )
+    status: str = Field(default="draft", pattern=r"^(draft|submitted|locked|cancelled)$")
     notes: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -746,9 +730,7 @@ class BuyerSelectionUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    status: str | None = Field(
-        default=None, pattern=r"^(draft|submitted|locked|cancelled)$"
-    )
+    status: str | None = Field(default=None, pattern=r"^(draft|submitted|locked|cancelled)$")
     notes: str | None = None
     metadata: dict[str, Any] | None = None
 
@@ -827,9 +809,7 @@ class HandoverUpdate(BaseModel):
     completed_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     snag_count_at_handover: int | None = Field(default=None, ge=0)
     final_check_passed: bool | None = None
-    keys_handed_over_at: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    keys_handed_over_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     customer_signature_ref: str | None = Field(default=None, max_length=255)
     notes: str | None = None
     metadata: dict[str, Any] | None = None
@@ -861,9 +841,7 @@ class HandoverCompleteRequest(BaseModel):
 
     completed_at: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     customer_signature_ref: str = Field(..., min_length=1, max_length=255)
-    keys_handed_over_at: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    keys_handed_over_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     final_check_passed: bool = True
     snag_count_at_handover: int = Field(default=0, ge=0)
     notes: str | None = None
@@ -884,13 +862,9 @@ class SnagCreate(BaseModel):
     buyer_id: UUID | None = None
     category: str = Field(default="general", pattern=_SNAG_CATEGORY_PATTERN)
     location_in_plot: str | None = Field(default=None, max_length=255)
-    severity: str = Field(
-        default="minor", pattern=r"^(cosmetic|minor|major|safety)$"
-    )
+    severity: str = Field(default="minor", pattern=r"^(cosmetic|minor|major|safety)$")
     description: str = Field(..., min_length=1)
-    status: str = Field(
-        default="open", pattern=r"^(open|in_progress|fixed|wont_fix)$"
-    )
+    status: str = Field(default="open", pattern=r"^(open|in_progress|fixed|wont_fix)$")
     reported_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     cost_impact: Decimal = Field(default=Decimal("0"), ge=Decimal("0"))
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -903,13 +877,9 @@ class SnagUpdate(BaseModel):
 
     category: str | None = Field(default=None, pattern=_SNAG_CATEGORY_PATTERN)
     location_in_plot: str | None = Field(default=None, max_length=255)
-    severity: str | None = Field(
-        default=None, pattern=r"^(cosmetic|minor|major|safety)$"
-    )
+    severity: str | None = Field(default=None, pattern=r"^(cosmetic|minor|major|safety)$")
     description: str | None = Field(default=None, min_length=1)
-    status: str | None = Field(
-        default=None, pattern=r"^(open|in_progress|fixed|wont_fix)$"
-    )
+    status: str | None = Field(default=None, pattern=r"^(open|in_progress|fixed|wont_fix)$")
     fixed_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     fix_notes: str | None = None
     cost_impact: Decimal | None = Field(default=None, ge=Decimal("0"))
@@ -958,9 +928,7 @@ class WarrantyClaimCreate(BaseModel):
         default="defect",
         pattern=r"^(defect|snag|service|structural|cosmetic|mep)$",
     )
-    severity: str = Field(
-        default="minor", pattern=r"^(minor|major|critical)$"
-    )
+    severity: str = Field(default="minor", pattern=r"^(minor|major|critical)$")
     description: str = Field(..., min_length=1)
     photos: list[str] = Field(default_factory=list)
     status: str = Field(
@@ -981,9 +949,7 @@ class WarrantyClaimUpdate(BaseModel):
         default=None,
         pattern=r"^(defect|snag|service|structural|cosmetic|mep)$",
     )
-    severity: str | None = Field(
-        default=None, pattern=r"^(minor|major|critical)$"
-    )
+    severity: str | None = Field(default=None, pattern=r"^(minor|major|critical)$")
     description: str | None = Field(default=None, min_length=1)
     photos: list[str] | None = None
     status: str | None = Field(
@@ -1084,7 +1050,9 @@ class DevelopmentDashboard(BaseModel):
 # ── Handover docs ───────────────────────────────────────────────────────
 
 
-_HANDOVER_DOC_TYPES = r"^(warranty|manual|key_receipt|hs_file|epc|nhbc|inspection_cert|certificate_completion|insurance|other)$"
+_HANDOVER_DOC_TYPES = (
+    r"^(warranty|manual|key_receipt|hs_file|epc|nhbc|inspection_cert|certificate_completion|insurance|other)$"
+)
 
 
 class HandoverDocCreate(BaseModel):
@@ -1126,9 +1094,7 @@ class HandoverDocResponse(BaseModel):
     is_required: bool = False
     is_delivered: bool = False
     delivered_at: str | None = None
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -1227,15 +1193,16 @@ class DevelopmentPnLResponse(BaseModel):
 
     # R8: money fields as plain-decimal strings.
     @field_serializer(
-        "revenue_contracted", "revenue_completed", "deposits_held",
-        "deposits_forfeited", "avg_sale_price",
+        "revenue_contracted",
+        "revenue_completed",
+        "deposits_held",
+        "deposits_forfeited",
+        "avg_sale_price",
         when_used="json",
     )
     @classmethod
     def _ser_money(cls, v: Decimal) -> str:
         return _serialize_money_string(v) or "0"
-
-
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -1338,15 +1305,16 @@ class LeadResponse(BaseModel):
     preferred_house_type_id: UUID | None = None
     notes: str | None = None
     converted_to_buyer_id: UUID | None = None
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
     # R8: money / score fields as plain-decimal strings.
     @field_serializer(
-        "lead_score", "budget_min", "budget_max", when_used="json",
+        "lead_score",
+        "budget_min",
+        "budget_max",
+        when_used="json",
     )
     @classmethod
     def _ser_money(cls, v: Decimal | None) -> str | None:
@@ -1362,9 +1330,7 @@ class LeadConvertToReservationRequest(BaseModel):
     deposit_amount: Decimal = Field(..., ge=0)
     currency: str = Field(..., min_length=3, max_length=3)
     cooling_off_days: int = Field(default=7, ge=0, le=90)
-    expires_at: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    expires_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     # Optional Buyer-shadow creation. When True a Buyer row is materialised
     # from the Lead data so downstream modules (selections, handover, ...)
     # have something to link against.
@@ -1389,15 +1355,11 @@ class ReservationCreate(BaseModel):
     buyer_id: UUID | None = None
     tenant_id: UUID | None = None
     # Auto-generated when omitted — see ``next_reservation_number``.
-    reservation_number: str | None = Field(
-        default=None, pattern=_RESERVATION_NUMBER_PATTERN
-    )
+    reservation_number: str | None = Field(default=None, pattern=_RESERVATION_NUMBER_PATTERN)
     deposit_amount: Decimal = Field(..., ge=0)
     currency: str = Field(..., min_length=3, max_length=3)
     cooling_off_days: int = Field(default=7, ge=0, le=90)
-    expires_at: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    expires_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("currency")
@@ -1411,9 +1373,7 @@ class ReservationUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    expires_at: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    expires_at: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     cooling_off_days: int | None = Field(default=None, ge=0, le=90)
     metadata: dict[str, Any] | None = None
 
@@ -1440,9 +1400,7 @@ class ReservationResponse(BaseModel):
     # ``property_dev.pricing_engine.PriceQuote``. Empty dict for legacy
     # rows pre-dating the snapshot column.
     price_breakdown_snapshot: dict[str, Any] = Field(default_factory=dict)
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -1458,9 +1416,7 @@ class ReservationConvertToSpaRequest(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    contract_number: str | None = Field(
-        default=None, pattern=_CONTRACT_NUMBER_PATTERN
-    )
+    contract_number: str | None = Field(default=None, pattern=_CONTRACT_NUMBER_PATTERN)
     signing_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     governing_law: str = Field(default="", max_length=16)
     language: str = Field(default="en", max_length=10)
@@ -1484,15 +1440,11 @@ class SalesContractCreate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    contract_number: str | None = Field(
-        default=None, pattern=_CONTRACT_NUMBER_PATTERN
-    )
+    contract_number: str | None = Field(default=None, pattern=_CONTRACT_NUMBER_PATTERN)
     plot_id: UUID
     reservation_id: UUID | None = None
     tenant_id: UUID | None = None
-    signing_date: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    signing_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     governing_law: str = Field(default="", max_length=16)
     language: str = Field(default="en", max_length=10)
     total_price_breakdown: dict[str, Any] = Field(default_factory=dict)
@@ -1515,9 +1467,7 @@ class SalesContractUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    signing_date: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    signing_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     governing_law: str | None = Field(default=None, max_length=16)
     language: str | None = Field(default=None, max_length=10)
     total_price_breakdown: dict[str, Any] | None = None
@@ -1554,9 +1504,7 @@ class SalesContractResponse(BaseModel):
     parent_contract_id: UUID | None = None
     revision_number: int = 1
     terms_version: str = ""
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -1581,9 +1529,7 @@ class SalesContractSignRequest(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    signing_date: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    signing_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
 
 
 # ── PaymentSchedule ─────────────────────────────────────────────────────
@@ -1631,9 +1577,7 @@ class PaymentScheduleResponse(BaseModel):
     late_fee_pct: Decimal = Decimal("0")
     grace_period_days: int = 0
     status: str = "active"
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -1656,9 +1600,7 @@ class InstalmentCreate(BaseModel):
     sequence: int = Field(..., ge=1)
     milestone_label: str = Field(default="", max_length=255)
     milestone_event: str = Field(default="", max_length=80)
-    due_date: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     amount: Decimal = Field(..., ge=0)
     invoice_ref: str | None = Field(default=None, max_length=255)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -1671,9 +1613,7 @@ class InstalmentUpdate(BaseModel):
 
     milestone_label: str | None = Field(default=None, max_length=255)
     milestone_event: str | None = Field(default=None, max_length=80)
-    due_date: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     amount: Decimal | None = Field(default=None, ge=0)
     invoice_ref: str | None = Field(default=None, max_length=255)
     metadata: dict[str, Any] | None = None
@@ -1696,15 +1636,16 @@ class InstalmentResponse(BaseModel):
     status: str = "pending"
     late_fee_accrued: Decimal = Decimal("0")
     invoice_ref: str | None = None
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
     # R8: money fields as plain-decimal strings.
     @field_serializer(
-        "amount", "amount_paid", "late_fee_accrued", when_used="json",
+        "amount",
+        "amount_paid",
+        "late_fee_accrued",
+        when_used="json",
     )
     @classmethod
     def _ser_money(cls, v: Decimal) -> str:
@@ -1781,9 +1722,7 @@ class ContractPartyResponse(BaseModel):
     signing_order: int = 0
     signed_at: datetime | None = None
     signature_ref: str | None = None
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -1824,9 +1763,7 @@ _REGULATOR_REFS = (
     "section32_au",
     "other",
 )
-_REGULATOR_REF_PATTERN = (
-    r"^(rera_dubai|rera_abu_dhabi|maharera|214_FZ_RU|cma_saudi|section32_au|other)$"
-)
+_REGULATOR_REF_PATTERN = r"^(rera_dubai|rera_abu_dhabi|maharera|214_FZ_RU|cma_saudi|section32_au|other)$"
 
 # Loose IBAN format: 15-34 alphanumeric, first 2 letters = country code,
 # next 2 = check digits. Real-world IBANs span this range; we do not run
@@ -1847,15 +1784,10 @@ def _validate_iban(value: str) -> str:
     return normalised
 
 
-def _validate_iso_date_order(
-    start: str | None, end: str | None, *, field_pair: str
-) -> None:
+def _validate_iso_date_order(start: str | None, end: str | None, *, field_pair: str) -> None:
     """Reject ``effective_from > effective_to`` style mistakes."""
     if start and end and start > end:
-        raise ValueError(
-            f"{field_pair}: effective_from ({start}) must precede "
-            f"effective_to ({end})"
-        )
+        raise ValueError(f"{field_pair}: effective_from ({start}) must precede effective_to ({end})")
 
 
 # ── Phase ───────────────────────────────────────────────────────────────
@@ -1880,9 +1812,7 @@ class PhaseCreate(BaseModel):
 
     @model_validator(mode="after")
     def _check_dates(self) -> PhaseCreate:
-        _validate_iso_date_order(
-            self.planned_start, self.planned_end, field_pair="phase"
-        )
+        _validate_iso_date_order(self.planned_start, self.planned_end, field_pair="phase")
         return self
 
 
@@ -1895,9 +1825,7 @@ class PhaseUpdate(BaseModel):
     sequence: int | None = Field(default=None, ge=0)
     planned_start: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     planned_end: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    status: str | None = Field(
-        default=None, pattern=r"^(planned|under_construction|completed)$"
-    )
+    status: str | None = Field(default=None, pattern=r"^(planned|under_construction|completed)$")
     metadata: dict[str, Any] | None = None
 
 
@@ -1914,9 +1842,7 @@ class PhaseResponse(BaseModel):
     planned_start: str | None = None
     planned_end: str | None = None
     status: str = "planned"
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -1974,9 +1900,7 @@ class BlockResponse(BaseModel):
     orientation: str | None = None
     geo_coordinates: dict[str, Any] | None = None
     status: str = "planned"
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -1997,9 +1921,7 @@ class BrokerCreate(BaseModel):
     contact_email: str = Field(default="", max_length=255)
     contact_phone: str | None = Field(default=None, max_length=40)
     default_commission_pct: Decimal = Field(default=Decimal("0"), ge=0, le=100)
-    kyc_status: str = Field(
-        default="pending", pattern=r"^(pending|verified|expired|rejected)$"
-    )
+    kyc_status: str = Field(default="pending", pattern=r"^(pending|verified|expired|rejected)$")
     active: bool = True
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -2015,9 +1937,7 @@ class BrokerUpdate(BaseModel):
     contact_email: str | None = Field(default=None, max_length=255)
     contact_phone: str | None = Field(default=None, max_length=40)
     default_commission_pct: Decimal | None = Field(default=None, ge=0, le=100)
-    kyc_status: str | None = Field(
-        default=None, pattern=r"^(pending|verified|expired|rejected)$"
-    )
+    kyc_status: str | None = Field(default=None, pattern=r"^(pending|verified|expired|rejected)$")
     active: bool | None = None
     metadata: dict[str, Any] | None = None
 
@@ -2038,9 +1958,7 @@ class BrokerResponse(BaseModel):
     kyc_status: str = "pending"
     kyc_verified_at: datetime | None = None
     active: bool = True
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -2107,9 +2025,7 @@ class CommissionAgreementCreate(BaseModel):
     currency: str = Field(..., min_length=3, max_length=8)
     effective_from: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    status: str = Field(
-        default="draft", pattern=r"^(draft|active|expired|cancelled)$"
-    )
+    status: str = Field(default="draft", pattern=r"^(draft|active|expired|cancelled)$")
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -2128,9 +2044,7 @@ class CommissionAgreementCreate(BaseModel):
                 amount = self.structure.get("amount")
                 currency = self.structure.get("currency")
                 if amount is None or currency is None:
-                    raise ValueError(
-                        "flat structure requires {amount, currency}"
-                    )
+                    raise ValueError("flat structure requires {amount, currency}")
                 amt_dec = Decimal(str(amount))
                 if amt_dec < 0:
                     raise ValueError("amount must be >= 0")
@@ -2146,9 +2060,7 @@ class CommissionAgreementCreate(BaseModel):
             elif self.structure_type == "ladder":
                 tiers = self.structure.get("tiers")
                 if not tiers or not isinstance(tiers, list):
-                    raise ValueError(
-                        "ladder structure requires non-empty tiers[]"
-                    )
+                    raise ValueError("ladder structure requires non-empty tiers[]")
                 for tier in tiers:
                     t = Decimal(str(tier.get("threshold", 0)))
                     p = Decimal(str(tier.get("pct", 0)))
@@ -2157,11 +2069,10 @@ class CommissionAgreementCreate(BaseModel):
                     if p < 0 or p > 100:
                         raise ValueError("tier.pct must be between 0 and 100")
         except (TypeError, ValueError) as exc:
-            raise ValueError(
-                f"Invalid {self.structure_type!r} commission structure: {exc}"
-            ) from exc
+            raise ValueError(f"Invalid {self.structure_type!r} commission structure: {exc}") from exc
         _validate_iso_date_order(
-            self.effective_from, self.effective_to,
+            self.effective_from,
+            self.effective_to,
             field_pair="commission_agreement",
         )
         return self
@@ -2180,16 +2091,12 @@ class CommissionAgreementUpdate(BaseModel):
         default=None,
         pattern=r"^(lead_qualified|reservation_paid|spa_signed|handover_complete)$",
     )
-    payout_terms: str | None = Field(
-        default=None, pattern=r"^(immediate|net30|net60|per_milestone)$"
-    )
+    payout_terms: str | None = Field(default=None, pattern=r"^(immediate|net30|net60|per_milestone)$")
     withholding_tax_pct: Decimal | None = Field(default=None, ge=0, le=100)
     currency: str | None = Field(default=None, min_length=3, max_length=8)
     effective_from: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    status: str | None = Field(
-        default=None, pattern=r"^(draft|active|expired|cancelled)$"
-    )
+    status: str | None = Field(default=None, pattern=r"^(draft|active|expired|cancelled)$")
     metadata: dict[str, Any] | None = None
 
 
@@ -2211,9 +2118,7 @@ class CommissionAgreementResponse(BaseModel):
     effective_from: str = ""
     effective_to: str | None = None
     status: str = "draft"
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -2248,15 +2153,15 @@ class CommissionAccrualResponse(BaseModel):
     payment_ref: str | None = None
     withholding_amount: Decimal = Decimal("0")
     net_payable: Decimal = Decimal("0")
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
     # R7: money fields as plain-decimal strings.
     @field_serializer(
-        "base_amount", "commission_amount", "withholding_amount",
+        "base_amount",
+        "commission_amount",
+        "withholding_amount",
         "net_payable",
         when_used="json",
     )
@@ -2335,9 +2240,7 @@ class EscrowAccountResponse(BaseModel):
     opened_at: str = ""
     closed_at: str | None = None
     is_active: bool = True
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -2356,7 +2259,10 @@ class EscrowBalanceResponse(BaseModel):
 
     # R7: money fields as plain-decimal strings.
     @field_serializer(
-        "credit_total", "debit_total", "balance", when_used="json",
+        "credit_total",
+        "debit_total",
+        "balance",
+        when_used="json",
     )
     @classmethod
     def _ser_money(cls, v: Decimal) -> str:
@@ -2433,9 +2339,7 @@ class EscrowTransactionResponse(BaseModel):
     reconciliation_state: str = "unreconciled"
     reconciled_at: datetime | None = None
     reconciled_by_user_id: UUID | None = None
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -2472,9 +2376,7 @@ class PriceMatrixRule(BaseModel):
 
     factor_type: str = Field(
         ...,
-        pattern=(
-            r"^(floor|view|orientation|corner|launch_discount|phase_escalator)$"
-        ),
+        pattern=(r"^(floor|view|orientation|corner|launch_discount|phase_escalator)$"),
     )
     condition: dict[str, Any] = Field(default_factory=dict)
     multiplier: Decimal = Field(..., gt=0)
@@ -2492,17 +2394,13 @@ class PriceMatrixCreate(BaseModel):
     effective_from: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     rules: list[PriceMatrixRule] = Field(default_factory=list)
-    status: str = Field(
-        default="draft", pattern=r"^(draft|active|expired|archived)$"
-    )
+    status: str = Field(default="draft", pattern=r"^(draft|active|expired|archived)$")
     version: int = Field(default=1, ge=1)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def _check_dates(self) -> PriceMatrixCreate:
-        _validate_iso_date_order(
-            self.effective_from, self.effective_to, field_pair="price_matrix"
-        )
+        _validate_iso_date_order(self.effective_from, self.effective_to, field_pair="price_matrix")
         return self
 
 
@@ -2517,9 +2415,7 @@ class PriceMatrixUpdate(BaseModel):
     effective_from: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     rules: list[PriceMatrixRule] | None = None
-    status: str | None = Field(
-        default=None, pattern=r"^(draft|active|expired|archived)$"
-    )
+    status: str | None = Field(default=None, pattern=r"^(draft|active|expired|archived)$")
     version: int | None = Field(default=None, ge=1)
     metadata: dict[str, Any] | None = None
 
@@ -2539,9 +2435,7 @@ class PriceMatrixResponse(BaseModel):
     rules: list[Any] = Field(default_factory=list)
     status: str = "draft"
     version: int = 1
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, validation_alias="metadata_"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -2567,8 +2461,11 @@ class PriceMatrixPreviewResponse(BaseModel):
 
     # R7: money fields as plain-decimal strings.
     @field_serializer(
-        "base_price_per_m2", "area_m2", "base_price",
-        "combined_multiplier", "final_price",
+        "base_price_per_m2",
+        "area_m2",
+        "base_price",
+        "combined_multiplier",
+        "final_price",
         when_used="json",
     )
     @classmethod
@@ -2655,8 +2552,15 @@ class ContractTaxQuote(BaseModel):
 
     # R8: every money field as a plain-decimal string.
     @field_serializer(
-        "net", "vat", "stamp_duty", "transfer_fee", "registration_fee",
-        "absd", "late_interest", "subtotal_taxes", "grand_total",
+        "net",
+        "vat",
+        "stamp_duty",
+        "transfer_fee",
+        "registration_fee",
+        "absd",
+        "late_interest",
+        "subtotal_taxes",
+        "grand_total",
         when_used="json",
     )
     @classmethod
@@ -3060,7 +2964,10 @@ class StageDistribution(BaseModel):
     buckets: list[StageHistogramBucket] = Field(default_factory=list)
 
     @field_serializer(
-        "mean_days", "p50_days", "p90_days", when_used="json",
+        "mean_days",
+        "p50_days",
+        "p90_days",
+        when_used="json",
     )
     @classmethod
     def _ser_days(cls, v: Decimal) -> str:
@@ -3085,7 +2992,7 @@ class LeadSourceRow(BaseModel):
     sales: int = 0
     conversion_to_reservation_pct: Decimal = Decimal("0")
     conversion_to_sale_pct: Decimal = Decimal("0")
-    revenue: list["CurrencyAmount"] = Field(default_factory=list)
+    revenue: list[CurrencyAmount] = Field(default_factory=list)
     total_source_cost: Decimal = Decimal("0")
     cpa: Decimal | None = None
     cpa_currency: str = ""
@@ -3132,7 +3039,9 @@ class ConversionFunnelStep(BaseModel):
     conversion_from_top_pct: Decimal = Decimal("0")
 
     @field_serializer(
-        "drop_pct", "conversion_from_top_pct", when_used="json",
+        "drop_pct",
+        "conversion_from_top_pct",
+        when_used="json",
     )
     @classmethod
     def _ser_pct(cls, v: Decimal) -> str:
@@ -3164,8 +3073,8 @@ class BrokerLeaderboardRow(BaseModel):
     reservations_closed: int = 0
     sales_closed: int = 0
     conversion_rate_pct: Decimal = Decimal("0")
-    gmv: list["CurrencyAmount"] = Field(default_factory=list)
-    commission_earned: list["CurrencyAmount"] = Field(default_factory=list)
+    gmv: list[CurrencyAmount] = Field(default_factory=list)
+    commission_earned: list[CurrencyAmount] = Field(default_factory=list)
 
     @field_serializer("conversion_rate_pct", when_used="json")
     @classmethod
@@ -3275,9 +3184,7 @@ class PropertyDevHouseTypeCreate(BaseModel):
     parking_spots: int | None = Field(default=None, ge=0, le=10)
     typical_price_min: Decimal | None = Field(default=None, ge=0)
     typical_price_max: Decimal | None = Field(default=None, ge=0)
-    currency: str | None = Field(
-        default=None, min_length=3, max_length=3, pattern=r"^[A-Z]{3}$"
-    )
+    currency: str | None = Field(default=None, min_length=3, max_length=3, pattern=r"^[A-Z]{3}$")
     construction_type: str | None = Field(default=None, max_length=20)
     energy_class: str | None = Field(default=None, max_length=10)
     sales_channel: str | None = Field(default=None, max_length=20)
@@ -3310,9 +3217,7 @@ class PropertyDevHouseTypeUpdate(BaseModel):
     parking_spots: int | None = Field(default=None, ge=0, le=10)
     typical_price_min: Decimal | None = Field(default=None, ge=0)
     typical_price_max: Decimal | None = Field(default=None, ge=0)
-    currency: str | None = Field(
-        default=None, min_length=3, max_length=3, pattern=r"^[A-Z]{3}$"
-    )
+    currency: str | None = Field(default=None, min_length=3, max_length=3, pattern=r"^[A-Z]{3}$")
     construction_type: str | None = Field(default=None, max_length=20)
     energy_class: str | None = Field(default=None, max_length=10)
     sales_channel: str | None = Field(default=None, max_length=20)
@@ -3403,9 +3308,7 @@ def _validate_condition_for_rule_type(rule_type: str, cond: dict[str, Any]) -> N
 
     if rule_type == "size_premium":
         if "min_area_m2" not in cond and "max_area_m2" not in cond:
-            raise ValueError(
-                "size_premium requires 'min_area_m2' or 'max_area_m2'"
-            )
+            raise ValueError("size_premium requires 'min_area_m2' or 'max_area_m2'")
         return
 
     if rule_type == "promo_code":
@@ -3421,9 +3324,7 @@ def _validate_condition_for_rule_type(rule_type: str, cond: dict[str, Any]) -> N
     if rule_type == "loyalty":
         threshold = cond.get("prior_purchases_min", 1)
         if not isinstance(threshold, int) or threshold < 1:
-            raise ValueError(
-                "loyalty requires 'prior_purchases_min' >= 1"
-            )
+            raise ValueError("loyalty requires 'prior_purchases_min' >= 1")
         return
 
     if rule_type == "bulk_buy":
@@ -3448,9 +3349,7 @@ class PricingRuleCreate(BaseModel):
     priority: int = Field(default=100, ge=0, le=10000)
     active: bool = True
     effective_from: str = Field(default="", pattern=r"^(\d{4}-\d{2}-\d{2})?$")
-    effective_to: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     max_uses: int | None = Field(default=None, ge=1)
 
     @model_validator(mode="after")
@@ -3471,20 +3370,14 @@ class PricingRuleUpdate(BaseModel):
     adjustment_fixed: Decimal | None = None
     priority: int | None = Field(default=None, ge=0, le=10000)
     active: bool | None = None
-    effective_from: str | None = Field(
-        default=None, pattern=r"^(\d{4}-\d{2}-\d{2})?$"
-    )
-    effective_to: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    effective_from: str | None = Field(default=None, pattern=r"^(\d{4}-\d{2}-\d{2})?$")
+    effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     max_uses: int | None = Field(default=None, ge=1)
 
     @model_validator(mode="after")
     def _check_condition(self) -> PricingRuleUpdate:
         if self.rule_type is not None and self.condition_json is not None:
-            _validate_condition_for_rule_type(
-                self.rule_type, self.condition_json
-            )
+            _validate_condition_for_rule_type(self.rule_type, self.condition_json)
         return self
 
 
@@ -3574,9 +3467,7 @@ class InventoryMapBulkHoldRequest(BaseModel):
 
     plot_ids: list[UUID] = Field(..., min_length=1, max_length=500)
     hold_reason: str = Field(default="", max_length=500)
-    hold_until: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    hold_until: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
 
 
 class InventoryMapBulkReleaseRequest(BaseModel):
@@ -3651,9 +3542,7 @@ class BulkResult(BaseModel):
 
 # ── Plot bulk status change ─────────────────────────────────────────────
 
-_PLOT_STATUS_PATTERN = (
-    r"^(planned|reserved|under_construction|ready|sold|handed_over)$"
-)
+_PLOT_STATUS_PATTERN = r"^(planned|reserved|under_construction|ready|sold|handed_over)$"
 
 
 class PlotBulkStatusChange(BaseModel):
@@ -3680,9 +3569,7 @@ class ReservationBulkExtendExpiry(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    reservation_ids: list[UUID] = Field(
-        ..., min_length=1, max_length=BULK_MAX_ITEMS
-    )
+    reservation_ids: list[UUID] = Field(..., min_length=1, max_length=BULK_MAX_ITEMS)
     new_expiry: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     reason: str = Field(default="", max_length=500)
 
@@ -3715,23 +3602,15 @@ class DocumentsBulkRegenerate(BaseModel):
     locale: str = Field(default="en", max_length=10)
 
     @model_validator(mode="after")
-    def _check_payload_target(self) -> "DocumentsBulkRegenerate":
+    def _check_payload_target(self) -> DocumentsBulkRegenerate:
         if not self.reservation_ids and not self.sales_contract_ids:
-            raise ValueError(
-                "Provide at least one of reservation_ids or sales_contract_ids."
-            )
+            raise ValueError("Provide at least one of reservation_ids or sales_contract_ids.")
         if self.reservation_ids and self.sales_contract_ids:
-            raise ValueError(
-                "Provide only ONE of reservation_ids / sales_contract_ids per request."
-            )
+            raise ValueError("Provide only ONE of reservation_ids / sales_contract_ids per request.")
         if self.document_type == "reservation_receipt" and not self.reservation_ids:
-            raise ValueError(
-                "reservation_receipt requires reservation_ids."
-            )
+            raise ValueError("reservation_receipt requires reservation_ids.")
         if self.document_type != "reservation_receipt" and not self.sales_contract_ids:
-            raise ValueError(
-                f"{self.document_type} requires sales_contract_ids."
-            )
+            raise ValueError(f"{self.document_type} requires sales_contract_ids.")
         return self
 
 
@@ -3792,9 +3671,7 @@ class PriceListCreate(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=255)
     effective_from: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
-    effective_to: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     currency: str = Field(..., min_length=3, max_length=3)
     notes: str | None = None
     entries: list[PriceListEntryInput] = Field(default_factory=list)
@@ -3812,12 +3689,8 @@ class PriceListUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
-    effective_from: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
-    effective_to: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    effective_from: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    effective_to: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     currency: str | None = Field(default=None, min_length=3, max_length=3)
     notes: str | None = None
 
@@ -3890,9 +3763,7 @@ class PriceQuoteBasketRequest(BaseModel):
     plot_ids: list[UUID] = Field(..., min_length=1)
     promo_code: str | None = None
     buyer_id: UUID | None = None
-    quote_date: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    quote_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
 
 
 class PriceQuoteBasketResponse(BaseModel):
@@ -3935,17 +3806,13 @@ class BuyerBulkMerge(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     primary_buyer_id: UUID
-    duplicate_buyer_ids: list[UUID] = Field(
-        ..., min_length=1, max_length=BULK_MAX_ITEMS
-    )
+    duplicate_buyer_ids: list[UUID] = Field(..., min_length=1, max_length=BULK_MAX_ITEMS)
     reason: str = Field(default="", max_length=500)
 
     @model_validator(mode="after")
-    def _check_distinct(self) -> "BuyerBulkMerge":
+    def _check_distinct(self) -> BuyerBulkMerge:
         if self.primary_buyer_id in self.duplicate_buyer_ids:
-            raise ValueError(
-                "primary_buyer_id must not appear in duplicate_buyer_ids."
-            )
+            raise ValueError("primary_buyer_id must not appear in duplicate_buyer_ids.")
         if len(set(self.duplicate_buyer_ids)) != len(self.duplicate_buyer_ids):
             raise ValueError("duplicate_buyer_ids must not contain duplicates.")
         return self

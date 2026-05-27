@@ -83,10 +83,7 @@ async def list_jobs(
     job_status: str | None = Query(
         default=None,
         alias="status",
-        description=(
-            "Filter by JobRun.status (pending, started, success, failed, "
-            "cancelled, retry)."
-        ),
+        description=("Filter by JobRun.status (pending, started, success, failed, cancelled, retry)."),
     ),
     limit: int = Query(default=_DEFAULT_LIMIT, ge=1, le=10_000),
     offset: int = Query(default=0, ge=0),

@@ -53,7 +53,9 @@ class Snapshot(Base):
         index=True,
     )
     tenant_id: Mapped[str | None] = mapped_column(
-        String(36), nullable=True, index=True,
+        String(36),
+        nullable=True,
+        index=True,
     )
     label: Mapped[str] = mapped_column(String(200), nullable=False)
     parquet_dir: Mapped[str] = mapped_column(String(500), nullable=False)
@@ -63,25 +65,33 @@ class Snapshot(Base):
     # category, value is row count. Rendered directly by T07 as the
     # "category bar" chart without re-querying DuckDB.
     summary_stats: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict,
+        JSON,
+        nullable=False,
+        default=dict,
     )
     # List of source-file descriptors; populated by T10 when a snapshot
     # is built from multiple input files. Empty list = single-source.
     source_files_json: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list,
+        JSON,
+        nullable=False,
+        default=list,
     )
     parent_snapshot_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
     created_by_user_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False,
+        GUID(),
+        nullable=False,
     )
 
     __table_args__ = (
         # A label is unique within a project — two users on the same
         # project cannot both call a snapshot "Baseline".
         UniqueConstraint(
-            "project_id", "label", name="uq_oe_dashboards_snapshot_project_label",
+            "project_id",
+            "label",
+            name="uq_oe_dashboards_snapshot_project_label",
         ),
     )
 
@@ -119,7 +129,9 @@ class SnapshotSourceFile(Base):
     # categories, version warnings. Stored as JSON to avoid a string
     # schema lock-in.
     converter_notes: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict,
+        JSON,
+        nullable=False,
+        default=dict,
     )
 
 
@@ -144,35 +156,50 @@ class DashboardPreset(Base):
     __tablename__ = "oe_dashboards_preset"
 
     tenant_id: Mapped[str | None] = mapped_column(
-        String(36), nullable=True, index=True,
+        String(36),
+        nullable=True,
+        index=True,
     )
     project_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
     owner_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True,
+        GUID(),
+        nullable=False,
+        index=True,
     )
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str | None] = mapped_column(String(2000), nullable=True)
     # 'preset' (private) or 'collection' (shared with project).
     kind: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="preset",
+        String(32),
+        nullable=False,
+        default="preset",
     )
     config_json: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict,
+        JSON,
+        nullable=False,
+        default=dict,
     )
     shared_with_project: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False,
+        Boolean,
+        nullable=False,
+        default=False,
     )
     # ── Sync protocol (T09) ────────────────────────────────────────────
     # ``synced``       — preset references match the snapshot's current shape.
     # ``stale``        — snapshot was refreshed but no sync-check has run yet.
     # ``needs_review`` — sync-check found issues that auto-heal cannot fix.
     sync_status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="synced",
+        String(32),
+        nullable=False,
+        default="synced",
     )
     last_sync_check_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     __table_args__ = (
@@ -187,7 +214,4 @@ class DashboardPreset(Base):
     )
 
     def __repr__(self) -> str:  # pragma: no cover — debug only
-        return (
-            f"DashboardPreset(id={self.id}, owner_id={self.owner_id}, "
-            f"name={self.name!r}, kind={self.kind})"
-        )
+        return f"DashboardPreset(id={self.id}, owner_id={self.owner_id}, name={self.name!r}, kind={self.kind})"

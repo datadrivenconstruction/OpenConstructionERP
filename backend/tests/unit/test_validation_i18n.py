@@ -49,9 +49,7 @@ class TestMessageBundleLoader:
     def test_ships_three_locales_at_minimum(self) -> None:
         reload_bundle()
         locales = available_locales()
-        assert {"en", "de", "ru"}.issubset(set(locales)), (
-            f"expected en/de/ru bundle at minimum, got {locales}"
-        )
+        assert {"en", "de", "ru"}.issubset(set(locales)), f"expected en/de/ru bundle at minimum, got {locales}"
 
     def test_default_locale_is_english(self) -> None:
         assert DEFAULT_LOCALE == "en"
@@ -120,9 +118,7 @@ class TestTranslateResolution:
 
 
 class TestTranslateFallback:
-    def test_unknown_locale_falls_back_to_en_with_warning(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_unknown_locale_falls_back_to_en_with_warning(self, caplog: pytest.LogCaptureFixture) -> None:
         """Unknown locale must not crash; it must warn and serve English."""
         reload_bundle()  # reset per-process fallback-warned cache
         caplog.clear()
@@ -137,14 +133,11 @@ class TestTranslateFallback:
             locale="en",
             ordinal="01",
         )
-        assert any(
-            "falling back" in rec.message.lower() and "xx_unknown" in rec.message
-            for rec in caplog.records
-        ), f"expected fallback WARNING, got {[r.message for r in caplog.records]}"
+        assert any("falling back" in rec.message.lower() and "xx_unknown" in rec.message for rec in caplog.records), (
+            f"expected fallback WARNING, got {[r.message for r in caplog.records]}"
+        )
 
-    def test_missing_key_falls_back_to_humanised_with_warning(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_missing_key_falls_back_to_humanised_with_warning(self, caplog: pytest.LogCaptureFixture) -> None:
         reload_bundle()
         caplog.clear()
         with caplog.at_level(logging.WARNING, logger="app.core.validation.messages"):
@@ -154,13 +147,10 @@ class TestTranslateFallback:
         assert "nonexistent.rule.fail" not in msg
         assert "foo=bar" in msg
         assert any(
-            "not found" in rec.message.lower() and "nonexistent.rule.fail" in rec.message
-            for rec in caplog.records
+            "not found" in rec.message.lower() and "nonexistent.rule.fail" in rec.message for rec in caplog.records
         )
 
-    def test_missing_key_in_locale_but_present_in_en_warns_once(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_missing_key_in_locale_but_present_in_en_warns_once(self, caplog: pytest.LogCaptureFixture) -> None:
         """Tests that a locale-level miss logs a warning about falling back."""
         with tempfile.TemporaryDirectory() as tmp:
             tmp_dir = Path(tmp)
@@ -219,17 +209,13 @@ class TestLocaleCoverage:
         reload_bundle()
         bundle = get_default_bundle()
         missing = bundle.keys("en") - bundle.keys("de")
-        assert missing == set(), (
-            f"de.json is missing {len(missing)} keys present in en.json: {sorted(missing)[:10]}"
-        )
+        assert missing == set(), f"de.json is missing {len(missing)} keys present in en.json: {sorted(missing)[:10]}"
 
     def test_ru_defines_every_key_en_defines(self) -> None:
         reload_bundle()
         bundle = get_default_bundle()
         missing = bundle.keys("en") - bundle.keys("ru")
-        assert missing == set(), (
-            f"ru.json is missing {len(missing)} keys present in en.json: {sorted(missing)[:10]}"
-        )
+        assert missing == set(), f"ru.json is missing {len(missing)} keys present in en.json: {sorted(missing)[:10]}"
 
     def test_common_ok_is_translated_everywhere(self) -> None:
         for loc in ("en", "de", "ru"):
@@ -294,9 +280,7 @@ class TestRuleLocaleWiring:
         assert any("\u0400" <= ch <= "\u04ff" for ch in results[0].suggestion)
 
     @pytest.mark.asyncio
-    async def test_unknown_locale_rule_falls_back_to_english(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    async def test_unknown_locale_rule_falls_back_to_english(self, caplog: pytest.LogCaptureFixture) -> None:
         reload_bundle()
         rule = GAEBOrdinalFormat()
         ctx = ValidationContext(

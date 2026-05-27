@@ -42,7 +42,6 @@ from app.modules.contracts.service import (
     list_contract_templates,
 )
 
-
 # ── 1. Template catalogue smoke ───────────────────────────────────────────
 
 
@@ -79,8 +78,7 @@ def test_each_template_carries_keys_the_ui_reads() -> None:
         for key in ("code", "family", "retention_release_event", "clause_count"):
             assert key in tpl, f"template {tpl.get('code')!r} missing key {key!r}"
         assert isinstance(tpl["clause_count"], int) and tpl["clause_count"] > 0, (
-            f"template {tpl['code']!r} clause_count must be a positive int, "
-            f"got {tpl['clause_count']!r}"
+            f"template {tpl['code']!r} clause_count must be a positive int, got {tpl['clause_count']!r}"
         )
 
 
@@ -99,9 +97,7 @@ def test_get_contract_template_round_trips_each_code() -> None:
         # detail view will surface it later.
         assert "key_clauses" in body
         assert isinstance(body["key_clauses"], dict)
-        assert body["key_clauses"], (
-            f"template {code!r} key_clauses must be non-empty"
-        )
+        assert body["key_clauses"], f"template {code!r} key_clauses must be non-empty"
 
 
 def test_get_contract_template_raises_keyerror_for_unknown() -> None:
@@ -153,11 +149,7 @@ class _StubLineRepo:
         self.rows: dict[uuid.UUID, Any] = {}
 
     async def list_for_contract(self, contract_id: uuid.UUID) -> list[Any]:
-        return [
-            r
-            for r in self.rows.values()
-            if getattr(r, "contract_id", None) == contract_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "contract_id", None) == contract_id]
 
     async def create(self, item: Any) -> Any:
         if getattr(item, "id", None) is None:
@@ -171,11 +163,7 @@ class _StubGenericRepo:
         self.rows: dict[uuid.UUID, Any] = {}
 
     async def list_for_contract(self, contract_id: uuid.UUID) -> list[Any]:
-        return [
-            r
-            for r in self.rows.values()
-            if getattr(r, "contract_id", None) == contract_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "contract_id", None) == contract_id]
 
     async def get_for_contract(self, contract_id: uuid.UUID) -> Any:
         for r in self.rows.values():

@@ -31,7 +31,7 @@ privilege the frontend falls back to the read-only matrix.
 from __future__ import annotations
 
 import logging
-from typing import Annotated, Any
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
@@ -247,7 +247,10 @@ async def update_permission_min_role(
 
     logger.info(
         "Permissions matrix toggle: actor=%s key=%s %s → %s",
-        payload.get("sub"), permission_key, previous.value, new_min_role.value,
+        payload.get("sub"),
+        permission_key,
+        previous.value,
+        new_min_role.value,
     )
 
     return PermissionUpdateResponse(
@@ -324,7 +327,10 @@ async def apply_permission_preset(
 
     logger.info(
         "Permissions matrix preset applied: actor=%s preset=%s changed=%d/%d",
-        payload.get("sub"), preset_name, len(changes), len(snapshot),
+        payload.get("sub"),
+        preset_name,
+        len(changes),
+        len(snapshot),
     )
 
     return PresetApplyResponse(

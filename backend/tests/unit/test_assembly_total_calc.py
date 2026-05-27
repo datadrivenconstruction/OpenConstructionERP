@@ -105,6 +105,7 @@ async def session():
 
 # ── CASE 1: concrete wall assembly total per m³ ───────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_concrete_wall_assembly_total(session):
     """RC wall assembly: 1 m³ concrete @ 95 EUR + 0.12 t rebar @ 750 EUR +
@@ -158,6 +159,7 @@ async def test_concrete_wall_assembly_total(session):
 
 # ── CASE 2: Decimal precision — 0.12 t rebar factor ──────────────────────────
 
+
 def test_rebar_factor_decimal_precision():
     """0.12 * 1.0 * 750 must be exactly 90 — no IEEE-754 0.09999... drift."""
     result = _compute_component_total(0.12, 1.0, 750.0)
@@ -165,6 +167,7 @@ def test_rebar_factor_decimal_precision():
 
 
 # ── CASE 3: regional factor multiplies correctly ──────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_regional_factor_applied_on_apply_to_boq(session):
@@ -211,6 +214,7 @@ async def test_regional_factor_applied_on_apply_to_boq(session):
 
 # ── CASE 4: no region → base rate unchanged ───────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_no_region_uses_base_rate(session):
     """apply_to_boq with no region → unit_rate equals base total_rate."""
@@ -245,6 +249,7 @@ async def test_no_region_uses_base_rate(session):
 
 
 # ── CASE 5: unknown region key → graceful fallback to base ───────────────────
+
 
 @pytest.mark.asyncio
 async def test_invalid_region_falls_back_to_base_rate(session):
@@ -282,6 +287,7 @@ async def test_invalid_region_falls_back_to_base_rate(session):
 
 # ── CASE 6: bid_factor scales the subtotal ───────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_bid_factor_scales_total_rate(session):
     """bid_factor=1.15 → total_rate = subtotal * 1.15."""
@@ -306,6 +312,7 @@ async def test_bid_factor_scales_total_rate(session):
 
 # ── CASE 7: zero-component assembly ──────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_zero_component_assembly_has_zero_total(session):
     """An assembly with no components has total_rate = 0."""
@@ -320,6 +327,7 @@ async def test_zero_component_assembly_has_zero_total(session):
 
 
 # ── CASE 8: non-finite component total skipped in rollup ─────────────────────
+
 
 def test_sum_skips_non_finite_component_total():
     """_sum_component_totals silently skips Infinity/NaN stored totals
@@ -339,6 +347,7 @@ def test_sum_skips_non_finite_component_total():
 
 
 # ── CASE 9: material waste_pct uplift ────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_material_waste_pct_applied(session):
@@ -367,6 +376,7 @@ async def test_material_waste_pct_applied(session):
 
 # ── CASE 10: labor burden_pct uplift ─────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_labor_burden_pct_applied(session):
     """burden_pct=25 on a labor component → total = base * 1.25."""
@@ -394,14 +404,15 @@ async def test_labor_burden_pct_applied(session):
 
 # ── CASE 11: compute_component_total pure function ───────────────────────────
 
+
 @pytest.mark.parametrize(
     ("factor", "quantity", "unit_cost", "expected"),
     [
         (1.0, 1.0, 100.0, "100"),
-        (0.12, 1.0, 750.0, "90.0"),     # rebar
-        (4.5, 1.0, 18.0, "81.0"),       # formwork
-        (0.0, 5.0, 200.0, "0"),         # disabled line (factor=0)
-        (1.0, 0.0, 300.0, "0"),         # quantity=0
+        (0.12, 1.0, 750.0, "90.0"),  # rebar
+        (4.5, 1.0, 18.0, "81.0"),  # formwork
+        (0.0, 5.0, 200.0, "0"),  # disabled line (factor=0)
+        (1.0, 0.0, 300.0, "0"),  # quantity=0
         (2.5, 4.0, 6.0, "60.0"),
     ],
 )
@@ -412,6 +423,7 @@ def test_compute_component_total_exact(factor, quantity, unit_cost, expected):
 
 
 # ── CASE 12: _compute_assembly_total with bid_factor ─────────────────────────
+
 
 def test_compute_assembly_total_with_bid_factor():
     """_compute_assembly_total: subtotal * bid_factor via mock components."""
@@ -430,6 +442,7 @@ def test_compute_assembly_total_with_bid_factor():
 
 # ── CASE 13: MAX_ASSEMBLY_DEPTH is defined and positive ──────────────────────
 
+
 def test_max_assembly_depth_constant():
     """MAX_ASSEMBLY_DEPTH is exported and is a positive integer."""
     assert isinstance(MAX_ASSEMBLY_DEPTH, int)
@@ -437,6 +450,7 @@ def test_max_assembly_depth_constant():
 
 
 # ── CASE 14: cycle detection — explicit self-reference ───────────────────────
+
 
 def test_check_assembly_depth_detects_cycle():
     """_check_assembly_depth raises AssemblyCycleError when assembly_id
@@ -450,6 +464,7 @@ def test_check_assembly_depth_detects_cycle():
 
 
 # ── CASE 15: depth limit triggers at MAX_ASSEMBLY_DEPTH ──────────────────────
+
 
 def test_check_assembly_depth_triggers_at_max_depth():
     """_check_assembly_depth raises when depth == MAX_ASSEMBLY_DEPTH."""
@@ -473,6 +488,7 @@ def test_check_assembly_depth_allows_first_call():
 
 
 # ── CASE 16: ComponentResponse.total is Decimal-serialised ───────────────────
+
 
 @pytest.mark.asyncio
 async def test_component_response_total_is_decimal(session):

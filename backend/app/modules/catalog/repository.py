@@ -24,11 +24,7 @@ def _escape_like(term: str) -> str:
     backslash stays literal), then ``%`` and ``_``; callers must pair
     the resulting pattern with ``.ilike(pattern, escape="\\")``.
     """
-    return (
-        term.replace("\\", "\\\\")
-        .replace("%", "\\%")
-        .replace("_", "\\_")
-    )
+    return term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
 class CatalogResourceRepository:

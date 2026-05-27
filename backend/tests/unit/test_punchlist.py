@@ -121,7 +121,9 @@ class _StubPunchRepo:
         return 0
 
     async def count_open_critical(
-        self, project_id: uuid.UUID, exclude_id: uuid.UUID | None = None,
+        self,
+        project_id: uuid.UUID,
+        exclude_id: uuid.UUID | None = None,
     ) -> int:
         return self._open_critical_count
 
@@ -239,7 +241,9 @@ async def test_full_status_workflow() -> None:
 
     # open -> in_progress
     item = await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="in_progress"), user_id="resolver-user",
+        item.id,
+        PunchStatusTransition(new_status="in_progress"),
+        user_id="resolver-user",
     )
     assert item.status == "in_progress"
 
@@ -254,14 +258,18 @@ async def test_full_status_workflow() -> None:
 
     # resolved -> verified (must be different user than assigned_to)
     item = await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="verified"), user_id="verifier-user",
+        item.id,
+        PunchStatusTransition(new_status="verified"),
+        user_id="verifier-user",
     )
     assert item.status == "verified"
     assert item.verified_by == "verifier-user"
 
     # verified -> closed
     item = await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="closed"), user_id="admin",
+        item.id,
+        PunchStatusTransition(new_status="closed"),
+        user_id="admin",
     )
     assert item.status == "closed"
 
@@ -277,10 +285,14 @@ async def test_verification_same_user_blocked() -> None:
 
     # Move to resolved
     await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="in_progress"), user_id="user-A",
+        item.id,
+        PunchStatusTransition(new_status="in_progress"),
+        user_id="user-A",
     )
     await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="resolved"), user_id="user-A",
+        item.id,
+        PunchStatusTransition(new_status="resolved"),
+        user_id="user-A",
     )
 
     from fastapi import HTTPException
@@ -288,7 +300,9 @@ async def test_verification_same_user_blocked() -> None:
     # Verify by same assigned user should fail
     with pytest.raises(HTTPException) as exc_info:
         await svc.transition_status(
-            item.id, PunchStatusTransition(new_status="verified"), user_id="user-A",
+            item.id,
+            PunchStatusTransition(new_status="verified"),
+            user_id="user-A",
         )
     assert exc_info.value.status_code == 400
     assert "different user" in exc_info.value.detail

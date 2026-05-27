@@ -32,7 +32,9 @@ class BIDashboardsRepository:
     # ── KPI Definition ─────────────────────────────────────────────
 
     async def list_kpi_definitions(
-        self, *, category: str | None = None,
+        self,
+        *,
+        category: str | None = None,
     ) -> list[KPIDefinition]:
         stmt = select(KPIDefinition).order_by(KPIDefinition.code.asc())
         if category is not None:
@@ -40,7 +42,8 @@ class BIDashboardsRepository:
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def get_kpi_definition_by_code(
-        self, code: str,
+        self,
+        code: str,
     ) -> KPIDefinition | None:
         stmt = select(KPIDefinition).where(KPIDefinition.code == code)
         return (await self.session.execute(stmt)).scalar_one_or_none()
@@ -110,11 +113,13 @@ class BIDashboardsRepository:
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def list_dashboards_visible_to(
-        self, owner_user_id: uuid.UUID | None,
+        self,
+        owner_user_id: uuid.UUID | None,
     ) -> list[Dashboard]:
         """‌⁠‍Return dashboards a user can see: own + role/global ones."""
         stmt = select(Dashboard).order_by(
-            Dashboard.scope.asc(), Dashboard.name.asc(),
+            Dashboard.scope.asc(),
+            Dashboard.name.asc(),
         )
         from sqlalchemy import or_
 
@@ -135,7 +140,9 @@ class BIDashboardsRepository:
         return dashboard
 
     async def update_dashboard(
-        self, dashboard_id: uuid.UUID, **fields: Any,
+        self,
+        dashboard_id: uuid.UUID,
+        **fields: Any,
     ) -> Dashboard | None:
         dashboard = await self.get_dashboard(dashboard_id)
         if dashboard is None:
@@ -157,7 +164,8 @@ class BIDashboardsRepository:
     # ── Widget ─────────────────────────────────────────────────────
 
     async def list_widgets(
-        self, dashboard_id: uuid.UUID,
+        self,
+        dashboard_id: uuid.UUID,
     ) -> list[DashboardWidget]:
         stmt = (
             select(DashboardWidget)
@@ -175,7 +183,9 @@ class BIDashboardsRepository:
         return widget
 
     async def update_widget(
-        self, widget_id: uuid.UUID, **fields: Any,
+        self,
+        widget_id: uuid.UUID,
+        **fields: Any,
     ) -> DashboardWidget | None:
         widget = await self.get_widget(widget_id)
         if widget is None:
@@ -197,7 +207,8 @@ class BIDashboardsRepository:
     # ── Snapshot ───────────────────────────────────────────────────
 
     async def get_latest_snapshot(
-        self, widget_id: uuid.UUID,
+        self,
+        widget_id: uuid.UUID,
     ) -> DashboardWidgetSnapshot | None:
         stmt = (
             select(DashboardWidgetSnapshot)
@@ -235,7 +246,9 @@ class BIDashboardsRepository:
     # ── Report Definition ─────────────────────────────────────────
 
     async def list_reports(
-        self, *, owner_user_id: uuid.UUID | None = None,
+        self,
+        *,
+        owner_user_id: uuid.UUID | None = None,
     ) -> list[ReportDefinition]:
         from sqlalchemy import or_
 
@@ -250,7 +263,8 @@ class BIDashboardsRepository:
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def get_report(
-        self, report_id: uuid.UUID,
+        self,
+        report_id: uuid.UUID,
     ) -> ReportDefinition | None:
         return await self.session.get(ReportDefinition, report_id)
 
@@ -264,7 +278,9 @@ class BIDashboardsRepository:
         return report
 
     async def update_report(
-        self, report_id: uuid.UUID, **fields: Any,
+        self,
+        report_id: uuid.UUID,
+        **fields: Any,
     ) -> ReportDefinition | None:
         report = await self.get_report(report_id)
         if report is None:
@@ -286,31 +302,36 @@ class BIDashboardsRepository:
     # ── Report Schedule ────────────────────────────────────────────
 
     async def list_schedules(
-        self, *, due_before: datetime | None = None,
+        self,
+        *,
+        due_before: datetime | None = None,
     ) -> list[ReportSchedule]:
         stmt = select(ReportSchedule).where(ReportSchedule.enabled.is_(True))
         if due_before is not None:
             stmt = stmt.where(
-                (ReportSchedule.next_run_at.is_(None))
-                | (ReportSchedule.next_run_at <= due_before),
+                (ReportSchedule.next_run_at.is_(None)) | (ReportSchedule.next_run_at <= due_before),
             )
         stmt = stmt.order_by(ReportSchedule.next_run_at.asc().nullsfirst())
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def get_schedule(
-        self, schedule_id: uuid.UUID,
+        self,
+        schedule_id: uuid.UUID,
     ) -> ReportSchedule | None:
         return await self.session.get(ReportSchedule, schedule_id)
 
     async def create_schedule(
-        self, schedule: ReportSchedule,
+        self,
+        schedule: ReportSchedule,
     ) -> ReportSchedule:
         self.session.add(schedule)
         await self.session.flush()
         return schedule
 
     async def update_schedule(
-        self, schedule_id: uuid.UUID, **fields: Any,
+        self,
+        schedule_id: uuid.UUID,
+        **fields: Any,
     ) -> ReportSchedule | None:
         schedule = await self.get_schedule(schedule_id)
         if schedule is None:
@@ -324,7 +345,9 @@ class BIDashboardsRepository:
     # ── Alert Rule ─────────────────────────────────────────────────
 
     async def list_alerts(
-        self, *, enabled_only: bool = False,
+        self,
+        *,
+        enabled_only: bool = False,
     ) -> list[AlertRule]:
         stmt = select(AlertRule).order_by(AlertRule.name.asc())
         if enabled_only:
@@ -340,7 +363,9 @@ class BIDashboardsRepository:
         return alert
 
     async def update_alert(
-        self, alert_id: uuid.UUID, **fields: Any,
+        self,
+        alert_id: uuid.UUID,
+        **fields: Any,
     ) -> AlertRule | None:
         alert = await self.get_alert(alert_id)
         if alert is None:
@@ -387,7 +412,8 @@ class BIDashboardsRepository:
         return sf
 
     async def get_filter(
-        self, filter_id: uuid.UUID,
+        self,
+        filter_id: uuid.UUID,
     ) -> SavedFilter | None:
         return await self.session.get(SavedFilter, filter_id)
 
@@ -434,7 +460,8 @@ class BIDashboardsRepository:
         if project_id is not None:
             stmt = stmt.where(KPIValue.project_id == project_id)
         stmt = stmt.order_by(
-            KPIValue.period_start.desc(), KPIValue.computed_at.desc(),
+            KPIValue.period_start.desc(),
+            KPIValue.computed_at.desc(),
         ).limit(limit)
         rows = list((await self.session.execute(stmt)).scalars().all())
         rows.reverse()

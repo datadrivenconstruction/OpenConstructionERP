@@ -56,6 +56,7 @@ def _ifc_point(x: float, y: float, z: float) -> str:
 # Element definitions per demo project
 # ---------------------------------------------------------------------------
 
+
 def _residential_berlin_elements() -> list[dict]:
     """‌⁠‍48-unit residential complex — 4 storeys."""
     elements = []
@@ -63,68 +64,144 @@ def _residential_berlin_elements() -> list[dict]:
     for si, storey in enumerate(storeys):
         z = si * 3.0
         # Exterior walls (4 per floor)
-        for wi, (x, y, dx, dy) in enumerate([
-            (0, 0, 20, 0.3), (0, 0, 0.3, 12),
-            (20, 0, 0.3, 12), (0, 12, 20, 0.3),
-        ]):
-            elements.append({
-                "type": "IFCWALLSTANDARDCASE", "name": f"Exterior Wall {storey}-{wi+1}",
-                "storey": storey, "x": x, "y": y, "z": z,
-                "length": max(dx, dy), "width": min(dx, dy) or 0.3, "height": 3.0,
-            })
+        for wi, (x, y, dx, dy) in enumerate(
+            [
+                (0, 0, 20, 0.3),
+                (0, 0, 0.3, 12),
+                (20, 0, 0.3, 12),
+                (0, 12, 20, 0.3),
+            ]
+        ):
+            elements.append(
+                {
+                    "type": "IFCWALLSTANDARDCASE",
+                    "name": f"Exterior Wall {storey}-{wi + 1}",
+                    "storey": storey,
+                    "x": x,
+                    "y": y,
+                    "z": z,
+                    "length": max(dx, dy),
+                    "width": min(dx, dy) or 0.3,
+                    "height": 3.0,
+                }
+            )
         # Interior walls (3 per floor)
         for wi, x_pos in enumerate([5.0, 10.0, 15.0]):
-            elements.append({
-                "type": "IFCWALL", "name": f"Interior Wall {storey}-{wi+1}",
-                "storey": storey, "x": x_pos, "y": 0.3, "z": z,
-                "length": 0.15, "width": 11.4, "height": 3.0,
-            })
+            elements.append(
+                {
+                    "type": "IFCWALL",
+                    "name": f"Interior Wall {storey}-{wi + 1}",
+                    "storey": storey,
+                    "x": x_pos,
+                    "y": 0.3,
+                    "z": z,
+                    "length": 0.15,
+                    "width": 11.4,
+                    "height": 3.0,
+                }
+            )
         # Floor slab
-        elements.append({
-            "type": "IFCSLAB", "name": f"Floor Slab {storey}",
-            "storey": storey, "x": 0, "y": 0, "z": z,
-            "length": 20, "width": 12, "height": 0.25,
-        })
+        elements.append(
+            {
+                "type": "IFCSLAB",
+                "name": f"Floor Slab {storey}",
+                "storey": storey,
+                "x": 0,
+                "y": 0,
+                "z": z,
+                "length": 20,
+                "width": 12,
+                "height": 0.25,
+            }
+        )
         # Columns (4 per floor)
         for ci, (cx, cy) in enumerate([(0, 0), (20, 0), (0, 12), (20, 12)]):
-            elements.append({
-                "type": "IFCCOLUMN", "name": f"Column {storey}-{ci+1}",
-                "storey": storey, "x": cx, "y": cy, "z": z,
-                "length": 0.4, "width": 0.4, "height": 3.0,
-            })
+            elements.append(
+                {
+                    "type": "IFCCOLUMN",
+                    "name": f"Column {storey}-{ci + 1}",
+                    "storey": storey,
+                    "x": cx,
+                    "y": cy,
+                    "z": z,
+                    "length": 0.4,
+                    "width": 0.4,
+                    "height": 3.0,
+                }
+            )
         # Doors (4 per floor)
         for di in range(4):
-            elements.append({
-                "type": "IFCDOOR", "name": f"Door {storey}-{di+1}",
-                "storey": storey, "x": 2.5 + di * 5.0, "y": 0.0, "z": z,
-                "length": 1.0, "width": 0.1, "height": 2.1,
-            })
+            elements.append(
+                {
+                    "type": "IFCDOOR",
+                    "name": f"Door {storey}-{di + 1}",
+                    "storey": storey,
+                    "x": 2.5 + di * 5.0,
+                    "y": 0.0,
+                    "z": z,
+                    "length": 1.0,
+                    "width": 0.1,
+                    "height": 2.1,
+                }
+            )
         # Windows (6 per floor)
         for wi in range(6):
-            elements.append({
-                "type": "IFCWINDOW", "name": f"Window {storey}-{wi+1}",
-                "storey": storey, "x": 1.5 + wi * 3.0, "y": 12.0, "z": z + 0.9,
-                "length": 1.2, "width": 0.1, "height": 1.5,
-            })
+            elements.append(
+                {
+                    "type": "IFCWINDOW",
+                    "name": f"Window {storey}-{wi + 1}",
+                    "storey": storey,
+                    "x": 1.5 + wi * 3.0,
+                    "y": 12.0,
+                    "z": z + 0.9,
+                    "length": 1.2,
+                    "width": 0.1,
+                    "height": 1.5,
+                }
+            )
     # Roof slab
-    elements.append({
-        "type": "IFCSLAB", "name": "Roof Slab",
-        "storey": "Dach", "x": 0, "y": 0, "z": 12.0,
-        "length": 20, "width": 12, "height": 0.3,
-    })
+    elements.append(
+        {
+            "type": "IFCSLAB",
+            "name": "Roof Slab",
+            "storey": "Dach",
+            "x": 0,
+            "y": 0,
+            "z": 12.0,
+            "length": 20,
+            "width": 12,
+            "height": 0.3,
+        }
+    )
     # Stair
-    elements.append({
-        "type": "IFCSTAIR", "name": "Main Staircase",
-        "storey": "EG (Erdgeschoss)", "x": 9.0, "y": 4.0, "z": 0,
-        "length": 2.5, "width": 4.0, "height": 12.0,
-    })
+    elements.append(
+        {
+            "type": "IFCSTAIR",
+            "name": "Main Staircase",
+            "storey": "EG (Erdgeschoss)",
+            "x": 9.0,
+            "y": 4.0,
+            "z": 0,
+            "length": 2.5,
+            "width": 4.0,
+            "height": 12.0,
+        }
+    )
     # Footings
     for fi, (fx, fy) in enumerate([(0, 0), (20, 0), (0, 12), (20, 12), (10, 0), (10, 12)]):
-        elements.append({
-            "type": "IFCFOOTING", "name": f"Strip Footing {fi+1}",
-            "storey": "Foundation", "x": fx, "y": fy, "z": -1.0,
-            "length": 1.5, "width": 0.8, "height": 0.5,
-        })
+        elements.append(
+            {
+                "type": "IFCFOOTING",
+                "name": f"Strip Footing {fi + 1}",
+                "storey": "Foundation",
+                "x": fx,
+                "y": fy,
+                "z": -1.0,
+                "length": 1.5,
+                "width": 0.8,
+                "height": 0.5,
+            }
+        )
     return elements
 
 
@@ -135,49 +212,100 @@ def _office_london_elements() -> list[dict]:
     for si, storey in enumerate(storeys[:-1]):
         z = si * 3.5
         # Core walls
-        for wi, (x, y, dx, dy) in enumerate([
-            (12, 5, 6, 0.3), (12, 10, 6, 0.3),
-            (12, 5, 0.3, 5), (18, 5, 0.3, 5),
-        ]):
-            elements.append({
-                "type": "IFCWALL", "name": f"Core Wall {storey}-{wi+1}",
-                "storey": storey, "x": x, "y": y, "z": z,
-                "length": max(dx, dy), "width": min(dx, dy) or 0.3, "height": 3.5,
-            })
+        for wi, (x, y, dx, dy) in enumerate(
+            [
+                (12, 5, 6, 0.3),
+                (12, 10, 6, 0.3),
+                (12, 5, 0.3, 5),
+                (18, 5, 0.3, 5),
+            ]
+        ):
+            elements.append(
+                {
+                    "type": "IFCWALL",
+                    "name": f"Core Wall {storey}-{wi + 1}",
+                    "storey": storey,
+                    "x": x,
+                    "y": y,
+                    "z": z,
+                    "length": max(dx, dy),
+                    "width": min(dx, dy) or 0.3,
+                    "height": 3.5,
+                }
+            )
         # Floor slab
-        elements.append({
-            "type": "IFCSLAB", "name": f"Slab {storey}",
-            "storey": storey, "x": 0, "y": 0, "z": z,
-            "length": 30, "width": 15, "height": 0.3,
-        })
+        elements.append(
+            {
+                "type": "IFCSLAB",
+                "name": f"Slab {storey}",
+                "storey": storey,
+                "x": 0,
+                "y": 0,
+                "z": z,
+                "length": 30,
+                "width": 15,
+                "height": 0.3,
+            }
+        )
         # Curtain wall facade (2 sides)
         for side in range(2):
-            elements.append({
-                "type": "IFCCURTAINWALL", "name": f"Curtain Wall {storey}-{side+1}",
-                "storey": storey,
-                "x": 0 if side == 0 else 30, "y": 0, "z": z,
-                "length": 0.15, "width": 15, "height": 3.5,
-            })
+            elements.append(
+                {
+                    "type": "IFCCURTAINWALL",
+                    "name": f"Curtain Wall {storey}-{side + 1}",
+                    "storey": storey,
+                    "x": 0 if side == 0 else 30,
+                    "y": 0,
+                    "z": z,
+                    "length": 0.15,
+                    "width": 15,
+                    "height": 3.5,
+                }
+            )
         # Columns (6 per floor)
         for ci, (cx, cy) in enumerate([(0, 0), (15, 0), (30, 0), (0, 15), (15, 15), (30, 15)]):
-            elements.append({
-                "type": "IFCCOLUMN", "name": f"Column {storey}-{ci+1}",
-                "storey": storey, "x": cx, "y": cy, "z": z,
-                "length": 0.5, "width": 0.5, "height": 3.5,
-            })
+            elements.append(
+                {
+                    "type": "IFCCOLUMN",
+                    "name": f"Column {storey}-{ci + 1}",
+                    "storey": storey,
+                    "x": cx,
+                    "y": cy,
+                    "z": z,
+                    "length": 0.5,
+                    "width": 0.5,
+                    "height": 3.5,
+                }
+            )
         # Beams (4 per floor)
         for bi in range(4):
-            elements.append({
-                "type": "IFCBEAM", "name": f"Beam {storey}-{bi+1}",
-                "storey": storey, "x": 0, "y": bi * 5.0, "z": z + 3.2,
-                "length": 30, "width": 0.3, "height": 0.5,
-            })
+            elements.append(
+                {
+                    "type": "IFCBEAM",
+                    "name": f"Beam {storey}-{bi + 1}",
+                    "storey": storey,
+                    "x": 0,
+                    "y": bi * 5.0,
+                    "z": z + 3.2,
+                    "length": 30,
+                    "width": 0.3,
+                    "height": 0.5,
+                }
+            )
     # Roof
-    elements.append({
-        "type": "IFCSLAB", "name": "Roof Slab",
-        "storey": "Roof", "x": 0, "y": 0, "z": 42.0,
-        "length": 30, "width": 15, "height": 0.35,
-    })
+    elements.append(
+        {
+            "type": "IFCSLAB",
+            "name": "Roof Slab",
+            "storey": "Roof",
+            "x": 0,
+            "y": 0,
+            "z": 42.0,
+            "length": 30,
+            "width": 15,
+            "height": 0.35,
+        }
+    )
     return elements
 
 
@@ -188,41 +316,78 @@ def _medical_us_elements() -> list[dict]:
     for si, storey in enumerate(storeys):
         z = (si - 1) * 4.0  # basement at -4.0
         # Exterior walls
-        for wi, (x, y, dx, dy) in enumerate([
-            (0, 0, 40, 0.3), (0, 0, 0.3, 25),
-            (40, 0, 0.3, 25), (0, 25, 40, 0.3),
-        ]):
-            elements.append({
-                "type": "IFCWALLSTANDARDCASE", "name": f"Ext Wall {storey}-{wi+1}",
-                "storey": storey, "x": x, "y": y, "z": z,
-                "length": max(dx, dy), "width": min(dx, dy) or 0.3, "height": 4.0,
-            })
+        for wi, (x, y, dx, dy) in enumerate(
+            [
+                (0, 0, 40, 0.3),
+                (0, 0, 0.3, 25),
+                (40, 0, 0.3, 25),
+                (0, 25, 40, 0.3),
+            ]
+        ):
+            elements.append(
+                {
+                    "type": "IFCWALLSTANDARDCASE",
+                    "name": f"Ext Wall {storey}-{wi + 1}",
+                    "storey": storey,
+                    "x": x,
+                    "y": y,
+                    "z": z,
+                    "length": max(dx, dy),
+                    "width": min(dx, dy) or 0.3,
+                    "height": 4.0,
+                }
+            )
         # Floor
-        elements.append({
-            "type": "IFCSLAB", "name": f"Slab {storey}",
-            "storey": storey, "x": 0, "y": 0, "z": z,
-            "length": 40, "width": 25, "height": 0.3,
-        })
+        elements.append(
+            {
+                "type": "IFCSLAB",
+                "name": f"Slab {storey}",
+                "storey": storey,
+                "x": 0,
+                "y": 0,
+                "z": z,
+                "length": 40,
+                "width": 25,
+                "height": 0.3,
+            }
+        )
         # Interior partitions
         for pi in range(5):
-            elements.append({
-                "type": "IFCWALL", "name": f"Partition {storey}-{pi+1}",
-                "storey": storey, "x": 8.0 * (pi + 1), "y": 0.3, "z": z,
-                "length": 0.12, "width": 24.4, "height": 4.0,
-            })
+            elements.append(
+                {
+                    "type": "IFCWALL",
+                    "name": f"Partition {storey}-{pi + 1}",
+                    "storey": storey,
+                    "x": 8.0 * (pi + 1),
+                    "y": 0.3,
+                    "z": z,
+                    "length": 0.12,
+                    "width": 24.4,
+                    "height": 4.0,
+                }
+            )
         # Doors
         for di in range(8):
-            elements.append({
-                "type": "IFCDOOR", "name": f"Door {storey}-{di+1}",
-                "storey": storey, "x": 4.0 + di * 5.0, "y": 0.0, "z": z,
-                "length": 1.2, "width": 0.1, "height": 2.1,
-            })
+            elements.append(
+                {
+                    "type": "IFCDOOR",
+                    "name": f"Door {storey}-{di + 1}",
+                    "storey": storey,
+                    "x": 4.0 + di * 5.0,
+                    "y": 0.0,
+                    "z": z,
+                    "length": 1.2,
+                    "width": 0.1,
+                    "height": 2.1,
+                }
+            )
     return elements
 
 
 # ---------------------------------------------------------------------------
 # IFC File Generator
 # ---------------------------------------------------------------------------
+
 
 def generate_demo_ifc(
     demo_id: str,
@@ -254,7 +419,9 @@ def generate_demo_ifc(
     lines.append("ISO-10303-21;")
     lines.append("HEADER;")
     lines.append("FILE_DESCRIPTION(('ViewDefinition [CoordinationView_V2.0]'),'2;1');")
-    lines.append(f"FILE_NAME('{project_name}.ifc','{datetime.now(UTC).strftime('%Y-%m-%d')}',('OpenConstructionERP'),('DDC'),'','OpenConstructionERP v1.5.0','');")
+    lines.append(
+        f"FILE_NAME('{project_name}.ifc','{datetime.now(UTC).strftime('%Y-%m-%d')}',('OpenConstructionERP'),('DDC'),'','OpenConstructionERP v1.5.0','');"
+    )
     lines.append("FILE_SCHEMA(('IFC2X3'));")
     lines.append("ENDSEC;")
     lines.append("DATA;")
@@ -292,17 +459,23 @@ def generate_demo_ifc(
     axis_id = _next_id()
     lines.append(f"#{axis_id}= IFCAXIS2PLACEMENT3D(#{origin_id},$,$);")
 
-    lines.append(f"#{project_id}= IFCPROJECT('{_guid()}',#{owner_id},{_ifc_string(project_name)},$,$,$,$,(#{ctx3d_id}),#{units_id});")
+    lines.append(
+        f"#{project_id}= IFCPROJECT('{_guid()}',#{owner_id},{_ifc_string(project_name)},$,$,$,$,(#{ctx3d_id}),#{units_id});"
+    )
 
     # Site
     site_placement_id = _next_id()
     lines.append(f"#{site_placement_id}= IFCLOCALPLACEMENT($,#{axis_id});")
-    lines.append(f"#{site_id}= IFCSITE('{_guid()}',#{owner_id},'Site',$,$,#{site_placement_id},$,$,.ELEMENT.,$,$,$,$,$);")
+    lines.append(
+        f"#{site_id}= IFCSITE('{_guid()}',#{owner_id},'Site',$,$,#{site_placement_id},$,$,.ELEMENT.,$,$,$,$,$);"
+    )
 
     # Building
     bld_placement_id = _next_id()
     lines.append(f"#{bld_placement_id}= IFCLOCALPLACEMENT(#{site_placement_id},#{axis_id});")
-    lines.append(f"#{building_id}= IFCBUILDING('{_guid()}',#{owner_id},{_ifc_string(project_name)},$,$,#{bld_placement_id},$,$,.ELEMENT.,$,$,$);")
+    lines.append(
+        f"#{building_id}= IFCBUILDING('{_guid()}',#{owner_id},{_ifc_string(project_name)},$,$,#{bld_placement_id},$,$,.ELEMENT.,$,$,$);"
+    )
 
     # Storeys
     storey_ids: dict[str, int] = {}
@@ -311,7 +484,9 @@ def generate_demo_ifc(
         storey_ids[s_name] = sid
         s_placement_id = _next_id()
         lines.append(f"#{s_placement_id}= IFCLOCALPLACEMENT(#{bld_placement_id},#{axis_id});")
-        lines.append(f"#{sid}= IFCBUILDINGSTOREY('{_guid()}',#{owner_id},{_ifc_string(s_name)},$,$,#{s_placement_id},$,$,.ELEMENT.,0.0);")
+        lines.append(
+            f"#{sid}= IFCBUILDINGSTOREY('{_guid()}',#{owner_id},{_ifc_string(s_name)},$,$,#{s_placement_id},$,$,.ELEMENT.,0.0);"
+        )
 
     # Elements with placement and quantities
     storey_element_map: dict[str, list[int]] = {s: [] for s in storey_names}
@@ -379,7 +554,9 @@ def generate_demo_ifc(
             continue
         rel_id = _next_id()
         refs = ",".join(f"#{e}" for e in e_ids)
-        lines.append(f"#{rel_id}= IFCRELCONTAINEDINSPATIALSTRUCTURE('{_guid()}',#{owner_id},$,$,({refs}),#{storey_ids[s_name]});")
+        lines.append(
+            f"#{rel_id}= IFCRELCONTAINEDINSPATIALSTRUCTURE('{_guid()}',#{owner_id},$,$,({refs}),#{storey_ids[s_name]});"
+        )
 
     # Aggregation: project > site > building > storeys
     rel_id = _next_id()

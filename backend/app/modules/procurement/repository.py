@@ -96,11 +96,7 @@ class PurchaseOrderRepository:
         total_received (confirmed GR count), pending_delivery_count.
         """
         # Total POs
-        total_stmt = (
-            select(func.count())
-            .select_from(PurchaseOrder)
-            .where(PurchaseOrder.project_id == project_id)
-        )
+        total_stmt = select(func.count()).select_from(PurchaseOrder).where(PurchaseOrder.project_id == project_id)
         total_pos = (await self.session.execute(total_stmt)).scalar_one()
 
         # By status

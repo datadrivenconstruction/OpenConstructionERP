@@ -59,9 +59,19 @@ logger = logging.getLogger(__name__)
 _ALLOWED_ATTACHMENT_TYPES = frozenset(
     {
         "pdf",
-        "png", "jpeg", "gif", "webp", "heic", "heif", "tiff",
-        "zip", "ole",
-        "dwg", "dxf", "ifc", "glb",
+        "png",
+        "jpeg",
+        "gif",
+        "webp",
+        "heic",
+        "heif",
+        "tiff",
+        "zip",
+        "ole",
+        "dwg",
+        "dxf",
+        "ifc",
+        "glb",
     }
 )
 
@@ -501,11 +511,7 @@ async def add_submittal_attachment(
     attachments: list[dict] = list(meta.get("attachments", []) or [])
 
     # Reject duplicates — idempotency for retry-safe clients.
-    if any(
-        str(a.get("document_id")) == str(data.document_id)
-        for a in attachments
-        if isinstance(a, dict)
-    ):
+    if any(str(a.get("document_id")) == str(data.document_id) for a in attachments if isinstance(a, dict)):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Document already attached to this submittal",
@@ -550,10 +556,7 @@ async def remove_submittal_attachment(
     meta = dict(getattr(submittal, "metadata_", {}) or {})
     attachments: list[dict] = list(meta.get("attachments", []) or [])
 
-    new_list = [
-        a for a in attachments
-        if isinstance(a, dict) and str(a.get("document_id")) != str(document_id)
-    ]
+    new_list = [a for a in attachments if isinstance(a, dict) and str(a.get("document_id")) != str(document_id)]
     if len(new_list) == len(attachments):
         raise HTTPException(status_code=404, detail="Attachment not found")
 

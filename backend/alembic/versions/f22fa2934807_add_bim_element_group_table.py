@@ -11,6 +11,7 @@ Revises: v090_new_modules
 Create Date: 2026-04-11
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

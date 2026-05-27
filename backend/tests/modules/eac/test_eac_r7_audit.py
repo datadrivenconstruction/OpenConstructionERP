@@ -32,10 +32,11 @@ import pytest_asyncio
 from sqlalchemy import event, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+import app.core.audit_log  # noqa: F401
+
 # Register all metadata before any in-memory create_all runs.
 import app.modules.eac.models  # noqa: F401
 import app.modules.users.models  # noqa: F401
-import app.core.audit_log  # noqa: F401
 from app.database import Base
 from app.modules.eac.aliases.schemas import (
     EacAliasSynonymCreate,
@@ -51,7 +52,6 @@ from app.modules.eac.aliases.service import (
     update_alias,
 )
 from app.modules.eac.models import EacParameterAlias
-
 
 # ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -119,7 +119,10 @@ async def test_alias_cross_tenant_update_is_404(session: AsyncSession) -> None:
     # Same call from tenant B succeeds — sanity check that the gate is
     # tenant-aware, not unconditional.
     updated = await update_alias(
-        session, alias_b.id, update, tenant_id=tenant_b,
+        session,
+        alias_b.id,
+        update,
+        tenant_id=tenant_b,
     )
     assert updated.description == "hijack attempt"
 
@@ -162,9 +165,7 @@ async def test_alias_list_excludes_other_tenant(session: AsyncSession) -> None:
     visible_to_a = await list_aliases(session, tenant_id=tenant_a)
     visible_ids = {a.id for a in visible_to_a}
     assert alias_a.id in visible_ids, "Tenant A must see its own alias"
-    assert alias_b.id not in visible_ids, (
-        "IDOR leak: tenant A saw tenant B's alias in list_aliases output"
-    )
+    assert alias_b.id not in visible_ids, "IDOR leak: tenant A saw tenant B's alias in list_aliases output"
 
     visible_to_b = await list_aliases(session, tenant_id=tenant_b)
     visible_b_ids = {a.id for a in visible_to_b}
@@ -203,9 +204,7 @@ async def test_find_usages_only_scans_caller_tenant(session: AsyncSession) -> No
     await session.flush()
 
     usages_for_a = await find_usages(session, alias_a.id, tenant_id=tenant_a)
-    assert usages_for_a == [], (
-        "find_usages must scope to tenant_a's rules, not see tenant_b's rule"
-    )
+    assert usages_for_a == [], "find_usages must scope to tenant_a's rules, not see tenant_b's rule"
 
     # Tenant B sees the polluted reference.
     usages_for_b = await find_usages(session, alias_a.id, tenant_id=tenant_b)
@@ -294,9 +293,7 @@ def test_alias_import_rejects_binary_payload() -> None:
     ):
         with pytest.raises(HTTPException) as exc_info:
             validate_alias_upload_bytes(binary_prefix)
-        assert exc_info.value.status_code == 415, (
-            f"{label} prefix should produce 415; got {exc_info.value.status_code}"
-        )
+        assert exc_info.value.status_code == 415, f"{label} prefix should produce 415; got {exc_info.value.status_code}"
 
 
 def test_alias_import_rejects_oversize_payload() -> None:
@@ -312,9 +309,7 @@ def test_alias_import_rejects_oversize_payload() -> None:
     oversized = b"a" * (ALIAS_UPLOAD_MAX_BYTES + 1)
     with pytest.raises(HTTPException) as exc_info:
         validate_alias_upload_bytes(oversized)
-    assert exc_info.value.status_code == 413, (
-        f"Oversized payload should produce 413; got {exc_info.value.status_code}"
-    )
+    assert exc_info.value.status_code == 413, f"Oversized payload should produce 413; got {exc_info.value.status_code}"
 
 
 def test_alias_import_accepts_clean_csv_and_json() -> None:
@@ -395,6 +390,4 @@ async def test_bulk_alias_select_filters_by_tenant(session: AsyncSession) -> Non
     rows = list((await session.execute(stmt)).scalars().unique().all())
     fetched_ids = {r.id for r in rows}
     assert alias_a.id in fetched_ids
-    assert alias_b.id not in fetched_ids, (
-        "Bulk select with tenant predicate must drop cross-tenant ids"
-    )
+    assert alias_b.id not in fetched_ids, "Bulk select with tenant predicate must drop cross-tenant ids"

@@ -39,7 +39,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -59,7 +61,10 @@ def upgrade() -> None:
         (
             "crs_name",
             sa.Column(
-                "crs_name", sa.String(120), nullable=False, server_default="",
+                "crs_name",
+                sa.String(120),
+                nullable=False,
+                server_default="",
             ),
         ),
         (
@@ -69,7 +74,10 @@ def upgrade() -> None:
         (
             "crs_method",
             sa.Column(
-                "crs_method", sa.String(40), nullable=False, server_default="",
+                "crs_method",
+                sa.String(40),
+                nullable=False,
+                server_default="",
             ),
         ),
     ]
@@ -87,7 +95,10 @@ def upgrade() -> None:
         (
             "crs_name",
             sa.Column(
-                "crs_name", sa.String(120), nullable=False, server_default="",
+                "crs_name",
+                sa.String(120),
+                nullable=False,
+                server_default="",
             ),
         ),
         (
@@ -97,13 +108,18 @@ def upgrade() -> None:
         (
             "crs_method",
             sa.Column(
-                "crs_method", sa.String(40), nullable=False, server_default="",
+                "crs_method",
+                sa.String(40),
+                nullable=False,
+                server_default="",
             ),
         ),
     ]
     for col_name, col_def in dwg_additions:
         if not _has_column(
-            inspector, "oe_dwg_takeoff_drawing_version", col_name,
+            inspector,
+            "oe_dwg_takeoff_drawing_version",
+            col_name,
         ):
             with op.batch_alter_table(
                 "oe_dwg_takeoff_drawing_version",

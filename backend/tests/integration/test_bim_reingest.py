@@ -13,24 +13,19 @@ silently when either is missing so CI without DDC stays green.
 
 from __future__ import annotations
 
-import asyncio
 import json
-import os
 import shutil
-import sys
-import tempfile
 import uuid
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
 import pytest
 
-
 # ── Real DB setup ────────────────────────────────────────────────────────────
 # We need actual SQLite tables for these tests; conftest pre-imports the
 # models so create_all sees them.
+
 
 @pytest.fixture(scope="module", autouse=True)
 def _create_tables() -> None:
@@ -83,16 +78,27 @@ def _make_real_xlsx(path: Path, n_rows: int = 1500) -> None:
     ws = wb.active
     ws.title = "Sheet1"
     headers = [
-        "ID", "UniqueId : String", "Category : String",
-        "Family : String", "Family Name : String", "Type Name : String",
-        "Name : String", "Level : String", "Mark : String",
-        "Width : Double", "Height : Double", "Volume : Double",
+        "ID",
+        "UniqueId : String",
+        "Category : String",
+        "Family : String",
+        "Family Name : String",
+        "Type Name : String",
+        "Name : String",
+        "Level : String",
+        "Mark : String",
+        "Width : Double",
+        "Height : Double",
+        "Volume : Double",
     ]
     ws.append(headers)
     families = ["Basic Wall", "Curtain Wall", "M_Single-Flush", "Basic Floor", "Basic Roof"]
     type_names = [
-        "Exterior - Brick on CMU", "Storefront", "0915 x 2134mm",
-        "Generic 250mm", "Generic - 400mm",
+        "Exterior - Brick on CMU",
+        "Storefront",
+        "0915 x 2134mm",
+        "Generic 250mm",
+        "Generic - 400mm",
     ]
     categories = ["OST_Walls", "OST_Doors", "OST_Floors", "OST_Roofs", "OST_Walls"]
     levels = ["Level 1", "Level 2", "Roof"]
@@ -103,17 +109,29 @@ def _make_real_xlsx(path: Path, n_rows: int = 1500) -> None:
         cat = categories[i % len(categories)]
         # Synthetic Revit UniqueId: <GUID>-<hex element id>
         uniq = f"deadbeef-cafe-1234-5678-90abcdef0000-{elem_id:08x}"
-        ws.append([
-            elem_id, uniq, cat, fam, fam, tn, tn,
-            levels[i % len(levels)], f"M-{i:04d}",
-            1200.0 + i, 2400.0, (1.2 + i * 0.01),
-        ])
+        ws.append(
+            [
+                elem_id,
+                uniq,
+                cat,
+                fam,
+                fam,
+                tn,
+                tn,
+                levels[i % len(levels)],
+                f"M-{i:04d}",
+                1200.0 + i,
+                2400.0,
+                (1.2 + i * 0.01),
+            ]
+        )
     wb.save(path)
     wb.close()
 
 
 def _seed_placeholder_model(
-    project_id: uuid.UUID, n_rows: int = 380,
+    project_id: uuid.UUID,
+    n_rows: int = 380,
 ) -> tuple[uuid.UUID, Path]:
     """Insert a BIMModel + ``n_rows`` placeholder BIMElement rows.
 
@@ -142,9 +160,7 @@ def _seed_placeholder_model(
             status="ready",
             element_count=n_rows,
             storey_count=6,
-            canonical_file_path=(
-                f"bim/{project_id}/{model_id}/geometry.glb"
-            ),
+            canonical_file_path=(f"bim/{project_id}/{model_id}/geometry.glb"),
         )
         session.add(model)
         for i in range(n_rows):
@@ -183,9 +199,7 @@ def _count_rows_with_mesh_ref(model_id: uuid.UUID) -> tuple[int, int]:
     sync_url = get_settings().database_sync_url
     engine = create_engine(sync_url)
     with engine.connect() as conn:
-        total = conn.execute(
-            select(func.count(BIMElement.id)).where(BIMElement.model_id == model_id)
-        ).scalar()
+        total = conn.execute(select(func.count(BIMElement.id)).where(BIMElement.model_id == model_id)).scalar()
         with_mesh = conn.execute(
             select(func.count(BIMElement.id))
             .where(BIMElement.model_id == model_id)
@@ -207,8 +221,10 @@ def _fetch_sample_rows(model_id: uuid.UUID, limit: int = 50) -> list[dict[str, A
     with engine.connect() as conn:
         rows = conn.execute(
             select(
-                BIMElement.stable_id, BIMElement.name,
-                BIMElement.mesh_ref, BIMElement.properties,
+                BIMElement.stable_id,
+                BIMElement.name,
+                BIMElement.mesh_ref,
+                BIMElement.properties,
             )
             .where(BIMElement.model_id == model_id)
             .limit(limit)
@@ -216,8 +232,10 @@ def _fetch_sample_rows(model_id: uuid.UUID, limit: int = 50) -> list[dict[str, A
     engine.dispose()
     return [
         {
-            "stable_id": r[0], "name": r[1],
-            "mesh_ref": r[2], "properties": r[3] or {},
+            "stable_id": r[0],
+            "name": r[1],
+            "mesh_ref": r[2],
+            "properties": r[3] or {},
         }
         for r in rows
     ]
@@ -234,6 +252,7 @@ def _make_mock_process_ifc_file(xlsx_template: Path, dae_text: str | None = None
     :func:`_excel_elements_to_bim_result` we exercise the production
     mapping code; only the DDC subprocess invocation is bypassed.
     """
+
     def _stub(ifc_path: Path, output_dir: Path, depth: str = "standard") -> dict[str, Any]:
         from app.modules.bim_hub.ifc_processor import _excel_elements_to_bim_result
         from app.modules.boq.cad_import import parse_cad_excel
@@ -250,6 +269,7 @@ def _make_mock_process_ifc_file(xlsx_template: Path, dae_text: str | None = None
             output_dir,
             real_dae_path=real_dae_path,
         )
+
     return _stub
 
 
@@ -267,6 +287,7 @@ def synthetic_xlsx(tmp_path: Path) -> Path:
 def _run_cli(*args: str) -> int:
     """Invoke ``app.scripts.reingest_bim_model.main`` directly."""
     from app.scripts.reingest_bim_model import main
+
     return main(list(args))
 
 
@@ -322,9 +343,7 @@ def test_reingest_replaces_synthetic_rows_with_real_data(
 
     # Patch the DDC pass with our xlsx-driven stub.
     stub = _make_mock_process_ifc_file(synthetic_xlsx)
-    with patch(
-        "app.modules.bim_hub.ifc_processor.process_ifc_file", side_effect=stub
-    ):
+    with patch("app.modules.bim_hub.ifc_processor.process_ifc_file", side_effect=stub):
         rc = _run_cli(str(model_id))
     assert rc == 0
 
@@ -332,26 +351,16 @@ def test_reingest_replaces_synthetic_rows_with_real_data(
     # New row count > 1000 (the bug remediation threshold from instructions)
     assert after_total > 1000, f"only {after_total} rows after reingest"
     # 100% mesh_ref populated
-    assert after_with_mesh == after_total, (
-        f"{after_total - after_with_mesh} rows still missing mesh_ref"
-    )
+    assert after_with_mesh == after_total, f"{after_total - after_with_mesh} rows still missing mesh_ref"
 
     # Sample names should no longer match the "Walls N" placeholder
     # pattern, and at least 50% must carry family + type_name in props.
     sample = _fetch_sample_rows(model_id, limit=200)
     placeholder_re = {f"Walls {i}" for i in range(1, 65)}
     placeholder_hits = sum(1 for r in sample if r["name"] in placeholder_re)
-    assert placeholder_hits == 0, (
-        f"{placeholder_hits}/{len(sample)} rows still have the 'Walls N' "
-        f"placeholder name"
-    )
-    with_meta = sum(
-        1 for r in sample
-        if (r["properties"].get("family") and r["properties"].get("type_name"))
-    )
-    assert with_meta / len(sample) >= 0.5, (
-        f"only {with_meta}/{len(sample)} rows have family+type_name"
-    )
+    assert placeholder_hits == 0, f"{placeholder_hits}/{len(sample)} rows still have the 'Walls N' placeholder name"
+    with_meta = sum(1 for r in sample if (r["properties"].get("family") and r["properties"].get("type_name")))
+    assert with_meta / len(sample) >= 0.5, f"only {with_meta}/{len(sample)} rows have family+type_name"
 
 
 def test_reingest_idempotent(synthetic_xlsx: Path) -> None:
@@ -360,9 +369,7 @@ def test_reingest_idempotent(synthetic_xlsx: Path) -> None:
     model_id, _ = _seed_placeholder_model(project_id, n_rows=380)
     stub = _make_mock_process_ifc_file(synthetic_xlsx)
 
-    with patch(
-        "app.modules.bim_hub.ifc_processor.process_ifc_file", side_effect=stub
-    ):
+    with patch("app.modules.bim_hub.ifc_processor.process_ifc_file", side_effect=stub):
         rc1 = _run_cli(str(model_id))
         assert rc1 == 0
         n1, _ = _count_rows_with_mesh_ref(model_id)
@@ -382,9 +389,7 @@ def test_reingest_dry_run_no_mutation(synthetic_xlsx: Path) -> None:
     assert before_total == 380
 
     stub = _make_mock_process_ifc_file(synthetic_xlsx)
-    with patch(
-        "app.modules.bim_hub.ifc_processor.process_ifc_file", side_effect=stub
-    ):
+    with patch("app.modules.bim_hub.ifc_processor.process_ifc_file", side_effect=stub):
         rc = _run_cli(str(model_id), "--dry-run")
     assert rc == 0
 
@@ -405,17 +410,13 @@ def test_reingest_backup_creates_file(synthetic_xlsx: Path) -> None:
     before = set(data_dir.glob(f"reingest_backup_{model_id}_*.json"))
 
     stub = _make_mock_process_ifc_file(synthetic_xlsx)
-    with patch(
-        "app.modules.bim_hub.ifc_processor.process_ifc_file", side_effect=stub
-    ):
+    with patch("app.modules.bim_hub.ifc_processor.process_ifc_file", side_effect=stub):
         rc = _run_cli(str(model_id), "--backup-rows")
     assert rc == 0
 
     after = set(data_dir.glob(f"reingest_backup_{model_id}_*.json"))
     new_files = after - before
-    assert len(new_files) == 1, (
-        f"expected one new backup, got {len(new_files)}: {new_files}"
-    )
+    assert len(new_files) == 1, f"expected one new backup, got {len(new_files)}: {new_files}"
     backup_path = next(iter(new_files))
     try:
         payload = json.loads(backup_path.read_text(encoding="utf-8"))
@@ -440,8 +441,7 @@ def test_reingest_backup_creates_file(synthetic_xlsx: Path) -> None:
 _SHOWCASE_MODEL_ID = "c5436288-8f71-5d89-95a4-c2a4372a5cb3"
 _SHOWCASE_PROJECT_ID = "24c3ddfb-00db-44f0-b0b8-9d7ad4078cf2"
 _SHOWCASE_RVT = (
-    Path(__file__).resolve().parents[3]
-    / "data" / "bim" / _SHOWCASE_PROJECT_ID / _SHOWCASE_MODEL_ID / "original.rvt"
+    Path(__file__).resolve().parents[3] / "data" / "bim" / _SHOWCASE_PROJECT_ID / _SHOWCASE_MODEL_ID / "original.rvt"
 )
 
 
@@ -477,7 +477,6 @@ def test_reingest_one_real_showcase_model() -> None:
     assert with_mesh == total
     sample = _fetch_sample_rows(model_id, limit=200)
     placeholder_hits = sum(
-        1 for r in sample if r["name"] and r["name"].startswith("Walls ")
-        and r["name"][6:].isdigit()
+        1 for r in sample if r["name"] and r["name"].startswith("Walls ") and r["name"][6:].isdigit()
     )
     assert placeholder_hits == 0

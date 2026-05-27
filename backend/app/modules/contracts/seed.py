@@ -84,10 +84,14 @@ _TYPE_CONFIG_CATALOG: list[dict[str, object]] = [
 
 
 _TYPE_DISTRIBUTION: list[str] = [
-    "lump_sum", "lump_sum", "lump_sum",
-    "gmp", "gmp",
+    "lump_sum",
+    "lump_sum",
+    "lump_sum",
+    "gmp",
+    "gmp",
     "cost_plus",
-    "tm", "tm",
+    "tm",
+    "tm",
     "unit_price",
     "design_build",
 ]
@@ -96,9 +100,8 @@ _TYPE_DISTRIBUTION: list[str] = [
 async def seed_type_configurations(session: AsyncSession) -> int:
     """‌⁠‍Insert ContractTypeConfiguration catalog rows if missing."""
     from sqlalchemy import select
-    existing = (
-        await session.execute(select(ContractTypeConfiguration.contract_type))
-    ).scalars().all()
+
+    existing = (await session.execute(select(ContractTypeConfiguration.contract_type))).scalars().all()
     inserted = 0
     for cfg in _TYPE_CONFIG_CATALOG:
         if cfg["contract_type"] in existing:
@@ -135,9 +138,13 @@ async def seed_contracts_demo(
     if not project_ids:
         logger.info("seed_contracts_demo: no project_ids → skipping")
         return {
-            "contracts": 0, "lines": 0, "claims": 0,
-            "final_accounts": 0, "type_configs": 0,
-            "fee_structures": 0, "gainshare_configs": 0,
+            "contracts": 0,
+            "lines": 0,
+            "claims": 0,
+            "final_accounts": 0,
+            "type_configs": 0,
+            "fee_structures": 0,
+            "gainshare_configs": 0,
         }
 
     rng = random.Random(42)
@@ -189,103 +196,119 @@ async def seed_contracts_demo(
         for li in range(line_count):
             qty = Decimal(str(rng.randint(1, 500)))
             rate = Decimal(str(rng.randint(50, 5000)))
-            session.add(ContractLine(
-                contract_id=contract.id,
-                code=f"{idx + 1:02d}.{li + 1:03d}",
-                description=f"Demo line {li + 1} for {c_type}",
-                line_type=rng.choice(
-                    ("work", "material", "labor", "fee", "contingency"),
-                ),
-                unit=rng.choice(("m", "m2", "m3", "kg", "pcs", "lsum")),
-                quantity=qty,
-                unit_rate=rate,
-                total_value=qty * rate,
-                order_index=li,
-            ))
+            session.add(
+                ContractLine(
+                    contract_id=contract.id,
+                    code=f"{idx + 1:02d}.{li + 1:03d}",
+                    description=f"Demo line {li + 1} for {c_type}",
+                    line_type=rng.choice(
+                        ("work", "material", "labor", "fee", "contingency"),
+                    ),
+                    unit=rng.choice(("m", "m2", "m3", "kg", "pcs", "lsum")),
+                    quantity=qty,
+                    unit_rate=rate,
+                    total_value=qty * rate,
+                    order_index=li,
+                )
+            )
             lines_count += 1
 
         # FeeStructure for cost_plus / tm / design_build
         if c_type in ("cost_plus", "tm", "design_build"):
-            session.add(FeeStructure(
-                contract_id=contract.id,
-                fee_type="percent_of_cost",
-                fee_percent=Decimal("7.5") if c_type == "cost_plus" else Decimal("5"),
-                fee_fixed_amount=None,
-                max_fee=None,
-                sliding_scale=[],
-            ))
+            session.add(
+                FeeStructure(
+                    contract_id=contract.id,
+                    fee_type="percent_of_cost",
+                    fee_percent=Decimal("7.5") if c_type == "cost_plus" else Decimal("5"),
+                    fee_fixed_amount=None,
+                    max_fee=None,
+                    sliding_scale=[],
+                )
+            )
             fee_count += 1
 
         # GainshareConfiguration for GMP
         if c_type == "gmp":
-            session.add(GainshareConfiguration(
-                contract_id=contract.id,
-                target_cost=Decimal(terms.get("target_cost") or 0),  # type: ignore[arg-type]
-                gmp_cap=Decimal(terms.get("gmp_cap") or 0),  # type: ignore[arg-type]
-                savings_split_owner_pct=Decimal("50"),
-                savings_split_contractor_pct=Decimal("50"),
-                overrun_responsibility="contractor",
-            ))
+            session.add(
+                GainshareConfiguration(
+                    contract_id=contract.id,
+                    target_cost=Decimal(terms.get("target_cost") or 0),  # type: ignore[arg-type]
+                    gmp_cap=Decimal(terms.get("gmp_cap") or 0),  # type: ignore[arg-type]
+                    savings_split_owner_pct=Decimal("50"),
+                    savings_split_contractor_pct=Decimal("50"),
+                    overrun_responsibility="contractor",
+                )
+            )
             gainshare_count += 1
 
         # RetentionSchedule
-        session.add(RetentionSchedule(
-            contract_id=contract.id,
-            accrual_rule={"per_claim_percent": 5},
-            release_rule={"on_event": "practical_completion"},
-            notes="Standard 5% retention",
-        ))
+        session.add(
+            RetentionSchedule(
+                contract_id=contract.id,
+                accrual_rule={"per_claim_percent": 5},
+                release_rule={"on_event": "practical_completion"},
+                notes="Standard 5% retention",
+            )
+        )
 
         # LDClause
-        session.add(LDClause(
-            contract_id=contract.id,
-            per_day_amount=Decimal("500"),
-            currency="EUR",
-            max_amount=Decimal("50000"),
-            enforcement_status="active",
-        ))
+        session.add(
+            LDClause(
+                contract_id=contract.id,
+                per_day_amount=Decimal("500"),
+                currency="EUR",
+                max_amount=Decimal("50000"),
+                enforcement_status="active",
+            )
+        )
 
         # 4 progress claims
         statuses = ("paid", "approved", "submitted", "draft")
         for ci, st in enumerate(statuses):
             gross = total_value * Decimal(str(0.1 * (ci + 1)))
             retention = gross * Decimal("0.05")
-            session.add(ProgressClaim(
-                contract_id=contract.id,
-                claim_number=f"PC-{ci + 1:04d}",
-                period_start=f"2026-0{ci + 1}-01",
-                period_end=f"2026-0{ci + 1}-28",
-                claim_date=f"2026-0{ci + 1}-28",
-                gross_amount=gross,
-                retention_amount=retention,
-                prior_claims_total=gross * Decimal(str(ci)),
-                net_due=gross - retention,
-                status=st,
-                currency="EUR",
-            ))
+            session.add(
+                ProgressClaim(
+                    contract_id=contract.id,
+                    claim_number=f"PC-{ci + 1:04d}",
+                    period_start=f"2026-0{ci + 1}-01",
+                    period_end=f"2026-0{ci + 1}-28",
+                    claim_date=f"2026-0{ci + 1}-28",
+                    gross_amount=gross,
+                    retention_amount=retention,
+                    prior_claims_total=gross * Decimal(str(ci)),
+                    net_due=gross - retention,
+                    status=st,
+                    currency="EUR",
+                )
+            )
             claims_count += 1
 
         # Close two of the contracts with a FinalAccount
         if idx in (0, 5):
             paid_amount = total_value * Decimal("0.95")
-            session.add(FinalAccount(
-                contract_id=contract.id,
-                final_contract_value=total_value,
-                total_paid=paid_amount,
-                retention_held=total_value * Decimal("0.05"),
-                retention_released=Decimal("0"),
-                final_balance=total_value - paid_amount,
-                sign_off_date="2026-12-31",
-                status="closed",
-                notes="Closed via demo seed",
-            ))
+            session.add(
+                FinalAccount(
+                    contract_id=contract.id,
+                    final_contract_value=total_value,
+                    total_paid=paid_amount,
+                    retention_held=total_value * Decimal("0.05"),
+                    retention_released=Decimal("0"),
+                    final_balance=total_value - paid_amount,
+                    sign_off_date="2026-12-31",
+                    status="closed",
+                    notes="Closed via demo seed",
+                )
+            )
             final_account_count += 1
 
     await session.flush()
     logger.info(
-        "seed_contracts_demo: %d contracts, %d lines, %d claims, %d "
-        "final_accounts, %d type_configs",
-        contracts_count, lines_count, claims_count, final_account_count,
+        "seed_contracts_demo: %d contracts, %d lines, %d claims, %d final_accounts, %d type_configs",
+        contracts_count,
+        lines_count,
+        claims_count,
+        final_account_count,
         type_configs,
     )
     return {

@@ -160,12 +160,8 @@ class TestLocaleConstraintParsing:
         assert _parse_constraint_value("<= 100") == {"max": 100.0}
 
     def test_real_enum_still_splits(self) -> None:
-        assert _parse_constraint_value("REI60; REI90; REI120") == {
-            "enum": ["REI60", "REI90", "REI120"]
-        }
-        assert _parse_constraint_value("Steel, Concrete, Timber") == {
-            "enum": ["Steel", "Concrete", "Timber"]
-        }
+        assert _parse_constraint_value("REI60; REI90; REI120") == {"enum": ["REI60", "REI90", "REI120"]}
+        assert _parse_constraint_value("Steel, Concrete, Timber") == {"enum": ["Steel", "Concrete", "Timber"]}
 
 
 class TestDelimiterSniffing:

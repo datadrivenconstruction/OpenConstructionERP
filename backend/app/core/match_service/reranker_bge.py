@@ -88,6 +88,7 @@ def _dynamic_band_for_bge(
         return "medium"
     return "low"
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -182,11 +183,7 @@ def _build_candidate_text(candidate: MatchCandidate) -> str:
         parts.append(f"unit {candidate.unit}")
     if not candidate.description:
         for std in ("din276", "nrm", "masterformat"):
-            cls = (
-                candidate.classification.get(std)
-                if candidate.classification
-                else None
-            )
+            cls = candidate.classification.get(std) if candidate.classification else None
             if cls:
                 parts.append(f"{std} {cls}")
         if candidate.region_code:
@@ -251,9 +248,7 @@ def rerank(
     tail = candidates[head_size:]
 
     query = _build_query_text(envelope)
-    pairs: list[tuple[str, str]] = [
-        (query, _build_candidate_text(c)) for c in head
-    ]
+    pairs: list[tuple[str, str]] = [(query, _build_candidate_text(c)) for c in head]
     if not query or not all(text for _, text in pairs):
         return candidates
 

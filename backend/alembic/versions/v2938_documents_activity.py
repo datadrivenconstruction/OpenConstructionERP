@@ -42,7 +42,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -56,9 +58,7 @@ def upgrade() -> None:
     # Mirror the GUID() TypeDecorator behaviour: VARCHAR(36) on SQLite,
     # native UUID on PostgreSQL. Keeps existing GUID columns happy and
     # avoids a downstream UUID-cast issue in JSON serialization.
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     if not _has_table(inspector, _TABLE):
         op.create_table(
@@ -85,7 +85,10 @@ def upgrade() -> None:
             sa.Column("user_id", sa.String(36), nullable=True),
             sa.Column("action", sa.String(40), nullable=False),
             sa.Column(
-                "meta", sa.JSON(), nullable=False, server_default="{}",
+                "meta",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
 

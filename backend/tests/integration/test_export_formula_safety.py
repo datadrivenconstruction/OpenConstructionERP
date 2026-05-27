@@ -185,9 +185,7 @@ async def test_csv_export_neutralises_formula_payload(
         [ATTACK_PAYLOAD, PLUS_PAYLOAD, MINUS_PAYLOAD, AT_PAYLOAD, SAFE_DESCRIPTION],
     )
 
-    resp = await shared_client.get(
-        f"/api/v1/boq/boqs/{boq_id}/export/csv/", headers=shared_auth
-    )
+    resp = await shared_client.get(f"/api/v1/boq/boqs/{boq_id}/export/csv/", headers=shared_auth)
     assert resp.status_code == 200, resp.text
     body = resp.text
 
@@ -197,9 +195,7 @@ async def test_csv_export_neutralises_formula_payload(
     # so we look for the quoted form.
     for payload in (ATTACK_PAYLOAD, PLUS_PAYLOAD, MINUS_PAYLOAD, AT_PAYLOAD):
         neutralised = "'" + payload
-        assert neutralised in body, (
-            f"Expected neutralised payload {neutralised!r} in CSV body"
-        )
+        assert neutralised in body, f"Expected neutralised payload {neutralised!r} in CSV body"
 
     # Sanity: legitimate text is not mangled — no spurious apostrophe.
     assert SAFE_DESCRIPTION in body
@@ -225,9 +221,7 @@ async def test_xlsx_export_neutralises_formula_payload(
         [ATTACK_PAYLOAD, PLUS_PAYLOAD, MINUS_PAYLOAD, AT_PAYLOAD, SAFE_DESCRIPTION],
     )
 
-    resp = await shared_client.get(
-        f"/api/v1/boq/boqs/{boq_id}/export/excel/", headers=shared_auth
-    )
+    resp = await shared_client.get(f"/api/v1/boq/boqs/{boq_id}/export/excel/", headers=shared_auth)
     assert resp.status_code == 200, resp.text
     assert "spreadsheetml" in resp.headers.get("content-type", "")
 
@@ -245,14 +239,9 @@ async def test_xlsx_export_neutralises_formula_payload(
 
     for payload in (ATTACK_PAYLOAD, PLUS_PAYLOAD, MINUS_PAYLOAD, AT_PAYLOAD):
         neutralised = "'" + payload
-        assert neutralised in cells, (
-            f"Expected neutralised payload {neutralised!r} in XLSX cells; "
-            f"got {cells!r}"
-        )
+        assert neutralised in cells, f"Expected neutralised payload {neutralised!r} in XLSX cells; got {cells!r}"
         # The bare payload must NEVER appear — that's the vulnerability.
-        assert payload not in cells, (
-            f"Bare payload {payload!r} leaked into XLSX cells: {cells!r}"
-        )
+        assert payload not in cells, f"Bare payload {payload!r} leaked into XLSX cells: {cells!r}"
 
     # Sanity: legitimate text round-trips unchanged.
     assert SAFE_DESCRIPTION in cells
@@ -272,9 +261,7 @@ async def test_csv_export_does_not_modify_safe_descriptions(
         ["Concrete C30/37", "Formwork for foundations", "Reinforcing steel BSt 500 S"],
     )
 
-    resp = await shared_client.get(
-        f"/api/v1/boq/boqs/{boq_id}/export/csv/", headers=shared_auth
-    )
+    resp = await shared_client.get(f"/api/v1/boq/boqs/{boq_id}/export/csv/", headers=shared_auth)
     assert resp.status_code == 200, resp.text
     body = resp.text
 

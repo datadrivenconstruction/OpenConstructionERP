@@ -90,9 +90,7 @@ async def _wipe() -> None:
     async with async_session_factory() as sess:
         await sess.execute(delete(CrmActivity))
         await sess.execute(delete(Lead))
-        await sess.execute(
-            delete(AuditEntry).where(AuditEntry.entity_type == "crm_lead")
-        )
+        await sess.execute(delete(AuditEntry).where(AuditEntry.entity_type == "crm_lead"))
         await sess.commit()
     await engine.dispose()
 
@@ -173,15 +171,17 @@ async def _list_activities(lead_id):
 
 
 def test_forget_scrubs_pii_columns_keeps_row():
-    lead = _run(_create_lead(
-        LeadCreate(
-            contact_name="Erin Müller",
-            contact_email="erin@example.com",
-            contact_phone="+491701234567",
-            qualification_notes="Met at Bauma, urgent rebar order",
-        ),
-        _USER_ACTOR,
-    ))
+    lead = _run(
+        _create_lead(
+            LeadCreate(
+                contact_name="Erin Müller",
+                contact_email="erin@example.com",
+                contact_phone="+491701234567",
+                qualification_notes="Met at Bauma, urgent rebar order",
+            ),
+            _USER_ACTOR,
+        )
+    )
     result = _run(_forget(lead.id, _USER_FORGETTER))
     assert result["lead_id"] == str(lead.id)
     refreshed = _run(_get_lead(lead.id))
@@ -193,24 +193,28 @@ def test_forget_scrubs_pii_columns_keeps_row():
 
 
 def test_forget_scrubs_activity_bodies():
-    lead = _run(_create_lead(
-        LeadCreate(contact_name="Frank K", contact_email="frank@example.com"),
-        _USER_ACTOR,
-    ))
+    lead = _run(
+        _create_lead(
+            LeadCreate(contact_name="Frank K", contact_email="frank@example.com"),
+            _USER_ACTOR,
+        )
+    )
     for subject, body in [
         ("Intro call", "frank@example.com  // talked about C30/37"),
         ("Follow-up email", "called +491701234567 — no answer"),
         ("Send proposal", "draft attached, ping frank@example.com"),
     ]:
-        _run(_create_activity(
-            ActivityCreate(
-                lead_id=lead.id,
-                kind="note",
-                subject=subject,
-                body=body,
-            ),
-            _USER_ACTOR,
-        ))
+        _run(
+            _create_activity(
+                ActivityCreate(
+                    lead_id=lead.id,
+                    kind="note",
+                    subject=subject,
+                    body=body,
+                ),
+                _USER_ACTOR,
+            )
+        )
 
     result = _run(_forget(lead.id, _USER_FORGETTER))
     assert result["activities_scrubbed"] == 3
@@ -223,10 +227,12 @@ def test_forget_scrubs_activity_bodies():
 
 
 def test_forget_writes_audit_log_entry():
-    lead = _run(_create_lead(
-        LeadCreate(contact_name="Gina H", contact_email="gina@example.com"),
-        _USER_ACTOR,
-    ))
+    lead = _run(
+        _create_lead(
+            LeadCreate(contact_name="Gina H", contact_email="gina@example.com"),
+            _USER_ACTOR,
+        )
+    )
     actor = _USER_FORGETTER
     _run(_forget(lead.id, actor))
 
@@ -238,15 +244,17 @@ def test_forget_writes_audit_log_entry():
 
         async with async_session_factory() as sess:
             rows = (
-                await sess.execute(
-                    select(AuditEntry)
-                    .where(AuditEntry.entity_type == "crm_lead")
-                    .where(AuditEntry.action == "forget")
+                (
+                    await sess.execute(
+                        select(AuditEntry)
+                        .where(AuditEntry.entity_type == "crm_lead")
+                        .where(AuditEntry.action == "forget")
+                    )
                 )
-            ).scalars().all()
-            data = [
-                (r.user_id, r.entity_id, str(r.details or {})) for r in rows
-            ]
+                .scalars()
+                .all()
+            )
+            data = [(r.user_id, r.entity_id, str(r.details or {})) for r in rows]
         await engine.dispose()
         return data
 
@@ -278,10 +286,12 @@ def test_forget_unknown_lead_404():
 
 
 def test_forget_idempotent_second_call_succeeds():
-    lead = _run(_create_lead(
-        LeadCreate(contact_name="Hugo R", contact_email="hugo@example.com"),
-        _USER_ACTOR,
-    ))
+    lead = _run(
+        _create_lead(
+            LeadCreate(contact_name="Hugo R", contact_email="hugo@example.com"),
+            _USER_ACTOR,
+        )
+    )
     _run(_forget(lead.id, _USER_FORGETTER))
     result = _run(_forget(lead.id, _USER_FORGETTER))
     assert result["lead_id"] == str(lead.id)

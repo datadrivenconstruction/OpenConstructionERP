@@ -48,9 +48,7 @@ async def client():
             yield ac
 
 
-async def _register_user(
-    client: AsyncClient, *, prefix: str, role: str = "estimator"
-) -> tuple[dict[str, str], str]:
+async def _register_user(client: AsyncClient, *, prefix: str, role: str = "estimator") -> tuple[dict[str, str], str]:
     """Register a fresh user with a unique email, return (headers, user_id)."""
     from sqlalchemy import update as sa_update
 
@@ -73,11 +71,7 @@ async def _register_user(
     # `_verify_project_membership_or_404` entirely, so use ``estimator``
     # (which has documents.create / update / delete via RequirePermission).
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await session.commit()
 
     login = await client.post(
@@ -109,9 +103,7 @@ async def stranger_headers(client: AsyncClient) -> tuple[dict[str, str], str]:
     return await _register_user(client, prefix="stranger", role="manager")
 
 
-async def _create_project(
-    client: AsyncClient, headers: dict[str, str], name: str = "FP Test"
-) -> str:
+async def _create_project(client: AsyncClient, headers: dict[str, str], name: str = "FP Test") -> str:
     resp = await client.post(
         "/api/v1/projects/",
         json={
@@ -190,9 +182,7 @@ async def test_viewer_can_list_and_get_but_not_write(
     assert grant.status_code == 201, grant.text
 
     # Member can list (sees the doc)
-    listing = await client.get(
-        f"/api/v1/documents/?project_id={project_id}", headers=member_h
-    )
+    listing = await client.get(f"/api/v1/documents/?project_id={project_id}", headers=member_h)
     assert listing.status_code == 200, listing.text
     assert any(d["id"] == doc_id for d in listing.json()), listing.json()
 
@@ -201,9 +191,7 @@ async def test_viewer_can_list_and_get_but_not_write(
     assert one.status_code == 200, one.text
 
     # Member CANNOT delete (viewer has no write)
-    delete = await client.delete(
-        f"/api/v1/documents/{doc_id}", headers=member_h
-    )
+    delete = await client.delete(f"/api/v1/documents/{doc_id}", headers=member_h)
     assert delete.status_code in (403, 404), delete.text
 
 
@@ -239,14 +227,10 @@ async def test_editor_can_upload_and_delete_own(
     assert grant.status_code == 201, grant.text
 
     # Member uploads (editor can write)
-    member_doc = await _upload_doc(
-        client, member_h, project_id, category="drawing", name="from_member.pdf"
-    )
+    member_doc = await _upload_doc(client, member_h, project_id, category="drawing", name="from_member.pdf")
 
     # Member can delete OWN upload
-    delete = await client.delete(
-        f"/api/v1/documents/{member_doc}", headers=member_h
-    )
+    delete = await client.delete(f"/api/v1/documents/{member_doc}", headers=member_h)
     assert delete.status_code == 204, delete.text
 
 
@@ -297,9 +281,7 @@ async def test_revoke_restores_404(
     one_after = await client.get(f"/api/v1/documents/{doc_id}", headers=member_h)
     assert one_after.status_code == 404, one_after.text
 
-    listing = await client.get(
-        f"/api/v1/documents/?project_id={project_id}", headers=member_h
-    )
+    listing = await client.get(f"/api/v1/documents/?project_id={project_id}", headers=member_h)
     assert listing.status_code == 200
     assert not any(d["id"] == doc_id for d in listing.json())
 
@@ -392,9 +374,7 @@ async def test_unscoped_folder_visible_to_all_members(
 
     # Member sees the doc — no grants on (document, other) means
     # everyone with project access can read.
-    listing = await client.get(
-        f"/api/v1/documents/?project_id={project_id}", headers=member_h
-    )
+    listing = await client.get(f"/api/v1/documents/?project_id={project_id}", headers=member_h)
     assert listing.status_code == 200, listing.text
     assert any(d["id"] == doc_id for d in listing.json()), listing.json()
 
@@ -433,9 +413,7 @@ async def test_grant_on_project_A_does_not_leak_project_B(
 
     # Member is NOT in project B → listing B's documents 404s.
     member_h, _ = member_headers
-    leak_listing = await client.get(
-        f"/api/v1/documents/?project_id={project_b}", headers=member_h
-    )
+    leak_listing = await client.get(f"/api/v1/documents/?project_id={project_b}", headers=member_h)
     assert leak_listing.status_code == 404, leak_listing.text
 
 
@@ -471,7 +449,5 @@ async def test_editor_cannot_delete_others_uploads(
     assert grant.status_code == 201
 
     # Member cannot delete the OWNER's upload — defence in depth.
-    delete = await client.delete(
-        f"/api/v1/documents/{owner_doc}", headers=member_h
-    )
+    delete = await client.delete(f"/api/v1/documents/{owner_doc}", headers=member_h)
     assert delete.status_code in (403, 404), delete.text

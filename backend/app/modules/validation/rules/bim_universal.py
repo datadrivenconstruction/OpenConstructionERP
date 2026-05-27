@@ -95,10 +95,7 @@ DOOR_HAS_DIMENSIONS = BIMElementRule(
     rule_id="bim.door.has_dimensions",
     name="Door elements must have width and height",
     severity="error",
-    description=(
-        "Every door must declare both width and height in either its "
-        "properties or its quantities dict."
-    ),
+    description=("Every door must declare both width and height in either its properties or its quantities dict."),
     element_filter={"element_type_startswith": ["door", "ifcdoor"]},
     require_any_of_properties=["width", "width_m", "overall_width"],
     # Dimensions must be positive numbers, not merely present (E-BIM-010).
@@ -109,10 +106,7 @@ WINDOW_HAS_DIMENSIONS = BIMElementRule(
     rule_id="bim.window.has_dimensions",
     name="Window elements must have width and height",
     severity="error",
-    description=(
-        "Every window must declare both width and height in either its "
-        "properties or its quantities dict."
-    ),
+    description=("Every window must declare both width and height in either its properties or its quantities dict."),
     element_filter={"element_type_startswith": ["window", "ifcwindow"]},
     require_any_of_properties=["width", "width_m", "overall_width"],
     # Dimensions must be positive numbers, not merely present (E-BIM-010).

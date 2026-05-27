@@ -71,7 +71,4 @@ class Correspondence(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<Correspondence {self.reference_number} "
-            f"({self.direction}/{self.correspondence_type})>"
-        )
+        return f"<Correspondence {self.reference_number} ({self.direction}/{self.correspondence_type})>"

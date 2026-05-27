@@ -158,7 +158,9 @@ async def validate_requirement_set_against_model(
         raise ValueError(msg)
 
     elements, total_elements = await elem_repo.list_for_model(
-        model_id, offset=0, limit=MAX_ELEMENTS_PER_VALIDATION + 1,
+        model_id,
+        offset=0,
+        limit=MAX_ELEMENTS_PER_VALIDATION + 1,
     )
     elements_truncated = False
     if total_elements > MAX_ELEMENTS_PER_VALIDATION:
@@ -168,7 +170,9 @@ async def validate_requirement_set_against_model(
         elements_truncated = True
         logger.warning(
             "validate_requirement_set: model %s has %d elements; capping at %d",
-            model_id, total_elements, MAX_ELEMENTS_PER_VALIDATION,
+            model_id,
+            total_elements,
+            MAX_ELEMENTS_PER_VALIDATION,
         )
 
     passed_count = 0
@@ -187,7 +191,9 @@ async def validate_requirement_set_against_model(
 
         severity_default = _severity_from_priority(req.priority or "must")
         rule_id = f"req:{req.id}"
-        rule_name = f"{req.entity}.{req.attribute} {req.constraint_type or 'equals'} {req.constraint_value or ''}".strip()
+        rule_name = (
+            f"{req.entity}.{req.attribute} {req.constraint_type or 'equals'} {req.constraint_value or ''}".strip()
+        )
 
         matched = [e for e in elements if _matches_entity(e, req.entity)]
         if not matched:
@@ -201,8 +207,7 @@ async def validate_requirement_set_against_model(
                         "status": "info",
                         "passed": True,
                         "message": (
-                            f"Requirement '{req.entity}.{req.attribute}' "
-                            f"matched no elements in this model — skipped."
+                            f"Requirement '{req.entity}.{req.attribute}' matched no elements in this model — skipped."
                         ),
                         "element_id": None,
                         "element_name": None,

@@ -273,9 +273,7 @@ def test_classify_wave3_does_not_match_legit_projects_with_similar_prefix():
         "Safety Project — Site B",
     ]
     for name in legit_names:
-        assert _classify(name) != "DELETE", (
-            f"{name!r} must NOT be classified DELETE — would destroy real data"
-        )
+        assert _classify(name) != "DELETE", f"{name!r} must NOT be classified DELETE — would destroy real data"
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -368,9 +366,7 @@ def test_execute_no_backup_flag_skips_backup(synthetic_db: Path):
 
 def test_include_uncertain_folds_them_into_delete(synthetic_db: Path):
     """``--include-uncertain`` deletes the unrecognised single-named rows too."""
-    rc = main(
-        ["--db", str(synthetic_db), "--execute", "--no-backup", "--include-uncertain"]
-    )
+    rc = main(["--db", str(synthetic_db), "--execute", "--no-backup", "--include-uncertain"])
     assert rc == 0
     with sqlite3.connect(str(synthetic_db)) as con:
         kept = {row[0] for row in con.execute("SELECT name FROM oe_projects_project")}
@@ -403,10 +399,7 @@ def test_demo_id_metadata_overrides_pattern(synthetic_db: Path):
     assert rc == 0
 
     with sqlite3.connect(str(synthetic_db)) as con:
-        kept = [
-            row[0]
-            for row in con.execute("SELECT name FROM oe_projects_project")
-        ]
+        kept = [row[0] for row in con.execute("SELECT name FROM oe_projects_project")]
     assert "Test Project zzzzzz" in kept
 
 

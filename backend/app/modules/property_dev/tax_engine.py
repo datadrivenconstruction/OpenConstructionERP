@@ -78,10 +78,7 @@ class UnsupportedJurisdictionError(TaxEngineError):
 
     def __init__(self, jurisdiction: str, supported: Iterable[str]) -> None:
         codes = sorted(supported)
-        super().__init__(
-            f"Unsupported jurisdiction '{jurisdiction}'. "
-            f"Supported: {', '.join(codes)}"
-        )
+        super().__init__(f"Unsupported jurisdiction '{jurisdiction}'. Supported: {', '.join(codes)}")
         self.jurisdiction = jurisdiction
         self.supported = list(codes)
 
@@ -93,8 +90,7 @@ class MissingRegionSubcodeError(TaxEngineError):
     def __init__(self, jurisdiction: str, supported: Iterable[str]) -> None:
         codes = sorted(supported)
         super().__init__(
-            f"Jurisdiction '{jurisdiction}' requires a region_subcode. "
-            f"Supported subcodes: {', '.join(codes)}"
+            f"Jurisdiction '{jurisdiction}' requires a region_subcode. Supported subcodes: {', '.join(codes)}"
         )
         self.jurisdiction = jurisdiction
         self.supported = list(codes)
@@ -117,9 +113,7 @@ def _load_table(*, force_reload: bool = False) -> dict[str, Any]:
         if _TABLE_CACHE is not None and not force_reload:
             return _TABLE_CACHE
         if not _TABLE_PATH.exists():
-            raise TaxEngineError(
-                f"tax_rates.yaml not found at expected path {_TABLE_PATH}"
-            )
+            raise TaxEngineError(f"tax_rates.yaml not found at expected path {_TABLE_PATH}")
         with _TABLE_PATH.open(encoding="utf-8") as fh:
             raw = yaml.safe_load(fh) or {}
         if not isinstance(raw, dict):
@@ -195,9 +189,7 @@ def jurisdiction_metadata(jurisdiction: str) -> dict[str, Any]:
 # ── VAT / GST ───────────────────────────────────────────────────────────
 
 
-def _resolve_vat_block(
-    jur_table: dict[str, Any], rate_class: str
-) -> dict[str, Any] | None:
+def _resolve_vat_block(jur_table: dict[str, Any], rate_class: str) -> dict[str, Any] | None:
     """Return the VAT/GST sub-block for ``rate_class``.
 
     Looks in ``vat.*`` first then ``gst.*`` so IN/SG/AU work the same
@@ -244,10 +236,7 @@ def compute_vat(
     jur = _table_for(jurisdiction)
     block = _resolve_vat_block(jur, rate_class)
     if block is None:
-        raise UnknownRateClassError(
-            f"Jurisdiction '{jurisdiction}' has no VAT/GST rate class "
-            f"'{rate_class}'"
-        )
+        raise UnknownRateClassError(f"Jurisdiction '{jurisdiction}' has no VAT/GST rate class '{rate_class}'")
     # Honour effective_from if present.
     if effective_on is not None and "effective_from" in block:
         eff = _parse_iso(block["effective_from"])
@@ -269,9 +258,7 @@ def gross_from_net(
 ) -> Decimal:
     """Return ``net + compute_vat(net)`` rounded to 2 dp."""
     net_d = _D(net)
-    vat = compute_vat(
-        net_d, jurisdiction, rate_class=rate_class, effective_on=effective_on
-    )
+    vat = compute_vat(net_d, jurisdiction, rate_class=rate_class, effective_on=effective_on)
     return _money(net_d + vat)
 
 
@@ -291,10 +278,7 @@ def net_from_gross(
     jur = _table_for(jurisdiction)
     block = _resolve_vat_block(jur, rate_class)
     if block is None:
-        raise UnknownRateClassError(
-            f"Jurisdiction '{jurisdiction}' has no VAT/GST rate class "
-            f"'{rate_class}'"
-        )
+        raise UnknownRateClassError(f"Jurisdiction '{jurisdiction}' has no VAT/GST rate class '{rate_class}'")
     # Honour effective-from window.
     if effective_on is not None and "effective_from" in block:
         eff = _parse_iso(block["effective_from"])
@@ -311,9 +295,7 @@ def net_from_gross(
 # ── Stamp duty / transfer tax (progressive + flat) ──────────────────────
 
 
-def _progressive_band_amount(
-    price: Decimal, bands: Iterable[Mapping[str, Any]]
-) -> Decimal:
+def _progressive_band_amount(price: Decimal, bands: Iterable[Mapping[str, Any]]) -> Decimal:
     """Apply marginal-band progressive rates and return total tax.
 
     Each band: ``{up_to: <inclusive ceiling>, rate: <0..1 fraction>}``.
@@ -497,13 +479,10 @@ def compute_absd(
     jur = _table_for(jurisdiction)
     absd = jur.get("absd")
     if not isinstance(absd, Mapping):
-        raise UnknownRateClassError(
-            f"Jurisdiction '{jurisdiction}' has no ABSD table"
-        )
+        raise UnknownRateClassError(f"Jurisdiction '{jurisdiction}' has no ABSD table")
     if buyer_profile not in absd:
         raise UnknownRateClassError(
-            f"Unknown ABSD buyer profile '{buyer_profile}' for "
-            f"'{jurisdiction}'. Supported: {sorted(absd.keys())}"
+            f"Unknown ABSD buyer profile '{buyer_profile}' for '{jurisdiction}'. Supported: {sorted(absd.keys())}"
         )
     rate = _D(absd[buyer_profile])
     return _money(_D(price) * rate)
@@ -555,21 +534,14 @@ def compute_transfer_fee(
 # ── Registration / notary fees ──────────────────────────────────────────
 
 
-def compute_registration_fee(
-    price: Any, jurisdiction: str
-) -> Decimal:
+def compute_registration_fee(price: Any, jurisdiction: str) -> Decimal:
     """Return the flat-% registration fee (IN, BR, AT).
 
     Returns Decimal("0.00") if the jurisdiction has no registration
     fee defined.
     """
     jur = _table_for(jurisdiction)
-    rate = (
-        jur.get("registration_fee")
-        or jur.get("land_registry_fee")
-        or jur.get("notary_fee_pct")
-        or 0
-    )
+    rate = jur.get("registration_fee") or jur.get("land_registry_fee") or jur.get("notary_fee_pct") or 0
     return _money(_D(price) * _D(rate))
 
 
@@ -599,9 +571,7 @@ def compute_late_interest(
     """
     if days_overdue is None:
         if due_date is None:
-            raise TaxEngineError(
-                "compute_late_interest needs either days_overdue or due_date"
-            )
+            raise TaxEngineError("compute_late_interest needs either days_overdue or due_date")
         end = paid_date or date.today()
         days_overdue = (end - due_date).days
     if days_overdue <= 0:
@@ -718,9 +688,9 @@ def compute_total_taxes_for_contract(
     )
 
     # ── 4. Transfer fee (UAE DLD style) ─────────────────────────
-    transfer_fee = compute_transfer_fee(
-        net, jurisdiction, emirate=emirate
-    ) if jur.get("transfer_fee") else _money(_ZERO)
+    transfer_fee = (
+        compute_transfer_fee(net, jurisdiction, emirate=emirate) if jur.get("transfer_fee") else _money(_ZERO)
+    )
 
     # ── 5. Registration / notary fee ────────────────────────────
     registration_fee = compute_registration_fee(net, jurisdiction)
@@ -728,9 +698,7 @@ def compute_total_taxes_for_contract(
     # ── 6. ABSD (SG style) ──────────────────────────────────────
     absd = _money(_ZERO)
     if absd_buyer_profile and jur.get("absd"):
-        absd = compute_absd(
-            net, jurisdiction, buyer_profile=absd_buyer_profile
-        )
+        absd = compute_absd(net, jurisdiction, buyer_profile=absd_buyer_profile)
 
     # ── 7. Late interest on overdue instalments ─────────────────
     late_interest = _money(_ZERO)
@@ -767,9 +735,7 @@ def compute_total_taxes_for_contract(
         {"line": "Net price", "amount": _money(net)},
     ]
     if vat > _ZERO:
-        breakdown.append(
-            {"line": f"VAT/GST ({vat_rate_class})", "amount": vat}
-        )
+        breakdown.append({"line": f"VAT/GST ({vat_rate_class})", "amount": vat})
     if stamp_duty > _ZERO:
         breakdown.append({"line": "Stamp duty / transfer tax", "amount": stamp_duty})
     if transfer_fee > _ZERO:
@@ -777,9 +743,7 @@ def compute_total_taxes_for_contract(
     if registration_fee > _ZERO:
         breakdown.append({"line": "Registration / notary fee", "amount": registration_fee})
     if absd > _ZERO:
-        breakdown.append(
-            {"line": f"ABSD ({absd_buyer_profile})", "amount": absd}
-        )
+        breakdown.append({"line": f"ABSD ({absd_buyer_profile})", "amount": absd})
     breakdown.extend(overdue_lines)
 
     return {

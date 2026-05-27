@@ -81,7 +81,10 @@ def upgrade() -> None:
                 server_default="engineering",
             ),
             sa.Column(
-                "risk_level", sa.String(20), nullable=False, server_default="medium",
+                "risk_level",
+                sa.String(20),
+                nullable=False,
+                server_default="medium",
             ),
             sa.Column("proposed_by", sa.String(36), nullable=True),
             sa.Column("proposed_at", sa.String(40), nullable=True),
@@ -102,26 +105,37 @@ def upgrade() -> None:
             ),
             sa.Column("currency", sa.String(10), nullable=False, server_default=""),
             sa.Column(
-                "status", sa.String(40), nullable=False, server_default="proposed",
+                "status",
+                sa.String(40),
+                nullable=False,
+                server_default="proposed",
             ),
             sa.Column("variation_request_id", sa.String(36), nullable=True),
             sa.Column("variation_order_id", sa.String(36), nullable=True),
             sa.Column("change_order_id", sa.String(36), nullable=True),
             sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
             sa.UniqueConstraint(
-                "project_id", "code", name="uq_oe_moc_entry_project_code",
+                "project_id",
+                "code",
+                name="uq_oe_moc_entry_project_code",
             ),
         )
         op.create_index(f"ix_{_ENTRY}_project_id", _ENTRY, ["project_id"])
         op.create_index(f"ix_{_ENTRY}_status", _ENTRY, ["status"])
         op.create_index(
-            f"ix_{_ENTRY}_variation_request_id", _ENTRY, ["variation_request_id"],
+            f"ix_{_ENTRY}_variation_request_id",
+            _ENTRY,
+            ["variation_request_id"],
         )
         op.create_index(
-            f"ix_{_ENTRY}_variation_order_id", _ENTRY, ["variation_order_id"],
+            f"ix_{_ENTRY}_variation_order_id",
+            _ENTRY,
+            ["variation_order_id"],
         )
         op.create_index(
-            f"ix_{_ENTRY}_change_order_id", _ENTRY, ["change_order_id"],
+            f"ix_{_ENTRY}_change_order_id",
+            _ENTRY,
+            ["change_order_id"],
         )
 
     # ── oe_moc_impact ─────────────────────────────────────────────────
@@ -148,11 +162,17 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column(
-                "impact_area", sa.String(40), nullable=False, server_default="cost",
+                "impact_area",
+                sa.String(40),
+                nullable=False,
+                server_default="cost",
             ),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
             sa.Column(
-                "severity", sa.String(20), nullable=False, server_default="medium",
+                "severity",
+                sa.String(20),
+                nullable=False,
+                server_default="medium",
             ),
             sa.Column("cost_impact", sa.String(20), nullable=False, server_default="0"),
             sa.Column(

@@ -36,9 +36,7 @@ async def client():
 
     async with lifespan_ctx():
         transport = ASGITransport(app=app)
-        async with AsyncClient(
-            transport=transport, base_url="http://test"
-        ) as ac:
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
             yield ac
 
 
@@ -59,11 +57,7 @@ async def auth(client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await s.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await s.commit()
 
     login = await client.post(
@@ -100,12 +94,8 @@ def _seed_session(elements: list[dict], columns_metadata=None) -> str:
 
 
 @pytest.mark.asyncio
-async def test_dtkc009_mixed_type_sort_no_500(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
-    sid = _seed_session(
-        [{"mark": 12}, {"mark": "A-3"}, {"mark": 7}, {"mark": None}]
-    )
+async def test_dtkc009_mixed_type_sort_no_500(client: AsyncClient, auth: dict[str, str]) -> None:
+    sid = _seed_session([{"mark": 12}, {"mark": "A-3"}, {"mark": 7}, {"mark": None}])
     r = await client.get(
         f"/api/v1/takeoff/cad-data/elements/?session_id={sid}&sort_by=mark",
         headers=auth,
@@ -118,13 +108,10 @@ async def test_dtkc009_mixed_type_sort_no_500(
 
 
 @pytest.mark.asyncio
-async def test_dtkc018_numeric_filter_matches(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_dtkc018_numeric_filter_matches(client: AsyncClient, auth: dict[str, str]) -> None:
     sid = _seed_session([{"length": 3.0}, {"length": 3.10}, {"length": 9}])
     r = await client.get(
-        f"/api/v1/takeoff/cad-data/elements/"
-        f"?session_id={sid}&filter_column=length&filter_value=3",
+        f"/api/v1/takeoff/cad-data/elements/?session_id={sid}&filter_column=length&filter_value=3",
         headers=auth,
     )
     assert r.status_code == 200, r.text
@@ -135,13 +122,8 @@ async def test_dtkc018_numeric_filter_matches(
 
 
 @pytest.mark.asyncio
-async def test_dtkc025_describe_reports_excluded(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
-    sid = _seed_session(
-        [{"v": 10}, {"v": 20}, {"v": "N/A"}, {"v": 30},
-         {"v": "TBD"}, {"v": 40}]
-    )
+async def test_dtkc025_describe_reports_excluded(client: AsyncClient, auth: dict[str, str]) -> None:
+    sid = _seed_session([{"v": 10}, {"v": 20}, {"v": "N/A"}, {"v": 30}, {"v": "TBD"}, {"v": 40}])
     r = await client.post(
         "/api/v1/takeoff/cad-data/describe/",
         json={"session_id": sid},
@@ -158,13 +140,8 @@ async def test_dtkc025_describe_reports_excluded(
 
 
 @pytest.mark.asyncio
-async def test_dtkc026_value_counts_non_null(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
-    sid = _seed_session(
-        [{"cat": "A"}, {"cat": "A"}, {"cat": None},
-         {"cat": None}, {"cat": None}]
-    )
+async def test_dtkc026_value_counts_non_null(client: AsyncClient, auth: dict[str, str]) -> None:
+    sid = _seed_session([{"cat": "A"}, {"cat": "A"}, {"cat": None}, {"cat": None}, {"cat": None}])
     r = await client.post(
         "/api/v1/takeoff/cad-data/value-counts/",
         json={"session_id": sid, "column": "cat", "limit": 10},
@@ -183,13 +160,8 @@ async def test_dtkc026_value_counts_non_null(
 
 
 @pytest.mark.asyncio
-async def test_dtkc011_aggregate_totals_semantics(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
-    sid = _seed_session(
-        [{"cat": "A", "v": 10}, {"cat": "A", "v": 30},
-         {"cat": "B", "v": 50}]
-    )
+async def test_dtkc011_aggregate_totals_semantics(client: AsyncClient, auth: dict[str, str]) -> None:
+    sid = _seed_session([{"cat": "A", "v": 10}, {"cat": "A", "v": 30}, {"cat": "B", "v": 50}])
     r = await client.post(
         "/api/v1/takeoff/cad-data/aggregate/",
         json={
@@ -208,9 +180,7 @@ async def test_dtkc011_aggregate_totals_semantics(
 
 
 @pytest.mark.asyncio
-async def test_dtkc030_group_totals_require_majority_numeric(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_dtkc030_group_totals_require_majority_numeric(client: AsyncClient, auth: dict[str, str]) -> None:
     # thickness column: 2/3 numeric → still totalled, 1 excluded reported.
     sid = _seed_session(
         [
@@ -231,9 +201,7 @@ async def test_dtkc030_group_totals_require_majority_numeric(
 
 
 @pytest.mark.asyncio
-async def test_dtkc030_mostly_string_column_not_totalled(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_dtkc030_mostly_string_column_not_totalled(client: AsyncClient, auth: dict[str, str]) -> None:
     # code column: only 1/3 parses → must NOT be totalled.
     sid = _seed_session(
         [
@@ -255,12 +223,8 @@ async def test_dtkc030_mostly_string_column_not_totalled(
 
 
 @pytest.mark.asyncio
-async def test_dtkc012_create_boq_real_uom_all_dimensions(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
-    proj = await client.post(
-        "/api/v1/projects/", json={"name": "CAD QTO"}, headers=auth
-    )
+async def test_dtkc012_create_boq_real_uom_all_dimensions(client: AsyncClient, auth: dict[str, str]) -> None:
+    proj = await client.post("/api/v1/projects/", json={"name": "CAD QTO"}, headers=auth)
     assert proj.status_code in (200, 201), proj.text
     project_id = proj.json()["id"]
 
@@ -289,9 +253,7 @@ async def test_dtkc012_create_boq_real_uom_all_dimensions(
     assert r.status_code == 201, r.text
     boq_id = r.json()["boq_id"]
     # Two positions: one m3 (volume), one m2 (area) — area NOT dropped.
-    structured = await client.get(
-        f"/api/v1/boq/boqs/{boq_id}/structured/", headers=auth
-    )
+    structured = await client.get(f"/api/v1/boq/boqs/{boq_id}/structured/", headers=auth)
     assert structured.status_code == 200, structured.text
     positions = structured.json().get("positions", [])
     units = sorted(p["unit"] for p in positions)
@@ -351,7 +313,8 @@ async def _build_takeoff_only_app():
 
     tmp_db = Path(tempfile.mkdtemp()) / "takeoff_410.db"
     engine = create_async_engine(
-        f"sqlite+aiosqlite:///{tmp_db.as_posix()}", future=True,
+        f"sqlite+aiosqlite:///{tmp_db.as_posix()}",
+        future=True,
     )
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

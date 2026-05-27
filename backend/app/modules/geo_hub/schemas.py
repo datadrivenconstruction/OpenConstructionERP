@@ -10,11 +10,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-
 # Regex patterns shared across create + update + response shapes.
-_SOURCE_KIND_PATTERN = (
-    r"^(bim_model|federation|development|upload|point_cloud|photogrammetry)$"
-)
+_SOURCE_KIND_PATTERN = r"^(bim_model|federation|development|upload|point_cloud|photogrammetry)$"
 _TILESET_STATUS_PATTERN = r"^(draft|generating|ready|failed|obsolete)$"
 _TILE_FORMAT_PATTERN = r"^(b3dm|i3dm|pnts|cmpt)$"
 _JOB_STATE_PATTERN = r"^(queued|running|completed|failed|cancelled)$"
@@ -430,9 +427,7 @@ def _check_corners(v: list[Any]) -> list[Any]:
         raise ValueError("corners_geojson must contain exactly 4 points")
     for point in v:
         if not isinstance(point, (list, tuple)) or len(point) != 2:
-            raise ValueError(
-                "each corner must be a 2-element [lon, lat] array"
-            )
+            raise ValueError("each corner must be a 2-element [lon, lat] array")
         lon, lat = point
         try:
             lon_d = Decimal(str(lon))
@@ -474,7 +469,8 @@ class GeoRasterOverlayCreate(BaseModel):
     project_id: UUID
     name: str = Field(default="", max_length=255)
     source_kind: str = Field(
-        default="image", pattern=_RASTER_OVERLAY_KIND_PATTERN,
+        default="image",
+        pattern=_RASTER_OVERLAY_KIND_PATTERN,
     )
     source_blob_url: str | None = Field(default=None, max_length=500)
     source_page: int = Field(default=1, ge=1, le=10_000)
@@ -519,7 +515,8 @@ class GeoRasterOverlayUpdate(BaseModel):
     @field_validator("crop_polygon_geojson")
     @classmethod
     def _v_crop(
-        cls, v: dict[str, Any] | None,
+        cls,
+        v: dict[str, Any] | None,
     ) -> dict[str, Any] | None:
         return _check_crop_polygon(v)
 

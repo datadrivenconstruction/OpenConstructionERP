@@ -158,9 +158,7 @@ logger = logging.getLogger(__name__)
 #       format=s.PublicFormat.Raw).hex())'
 #
 # ROTATION_SENTINEL_BEGIN — do not edit by hand; script writes here
-CURRENT_PUBKEY_HEX: str = (
-    "0000000000000000000000000000000000000000000000000000000000000000"
-)
+CURRENT_PUBKEY_HEX: str = "0000000000000000000000000000000000000000000000000000000000000000"
 # ROTATION_SENTINEL_END
 
 # Canonical manifest location. Mirror fallback is the marketing site,
@@ -311,10 +309,7 @@ class Manifest:
         entry = self.components.get(name)
         if entry is None:
             available = sorted(self.components.keys())
-            raise InstallNotSupported(
-                f"Component {name!r} is not in the manifest. "
-                f"Available components: {available}."
-            )
+            raise InstallNotSupported(f"Component {name!r} is not in the manifest. Available components: {available}.")
         return entry
 
 
@@ -391,8 +386,7 @@ def _fetch_bytes(url: str, max_bytes: int) -> bytes:
                 else:
                     if declared > max_bytes:
                         raise ManifestFetchError(
-                            f"Refused to fetch {url!r} — declared size "
-                            f"{declared} bytes exceeds cap of {max_bytes}"
+                            f"Refused to fetch {url!r} — declared size {declared} bytes exceeds cap of {max_bytes}"
                         )
             buf = bytearray()
             while True:
@@ -401,23 +395,15 @@ def _fetch_bytes(url: str, max_bytes: int) -> bytes:
                     break
                 buf.extend(chunk)
                 if len(buf) > max_bytes:
-                    raise ManifestFetchError(
-                        f"Aborted fetch of {url!r} — body exceeded cap "
-                        f"of {max_bytes} bytes"
-                    )
+                    raise ManifestFetchError(f"Aborted fetch of {url!r} — body exceeded cap of {max_bytes} bytes")
             return bytes(buf)
     except urllib.error.HTTPError as exc:
-        raise ManifestFetchError(
-            f"HTTP {exc.code} fetching {url!r}: {exc.reason}"
-        ) from exc
+        raise ManifestFetchError(f"HTTP {exc.code} fetching {url!r}: {exc.reason}") from exc
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        raise ManifestFetchError(
-            f"Network error fetching {url!r}: {exc}"
-        ) from exc
+        raise ManifestFetchError(f"Network error fetching {url!r}: {exc}") from exc
 
 
-def verify_signature(manifest_bytes: bytes, signature_bytes: bytes,
-                     pubkey_hex: str | None = None) -> None:
+def verify_signature(manifest_bytes: bytes, signature_bytes: bytes, pubkey_hex: str | None = None) -> None:
     """Verify a detached Ed25519 signature.
 
     Raises ``ManifestSignatureInvalid`` on any failure. Accepts an
@@ -434,22 +420,17 @@ def verify_signature(manifest_bytes: bytes, signature_bytes: bytes,
     try:
         pubkey_raw = bytes.fromhex(hex_key)
     except ValueError as exc:
-        raise ManifestSignatureInvalid(
-            f"Embedded pubkey is not valid hex: {exc}"
-        ) from exc
+        raise ManifestSignatureInvalid(f"Embedded pubkey is not valid hex: {exc}") from exc
     if len(pubkey_raw) != 32:
-        raise ManifestSignatureInvalid(
-            f"Embedded pubkey must be 32 bytes (got {len(pubkey_raw)})"
-        )
+        raise ManifestSignatureInvalid(f"Embedded pubkey must be 32 bytes (got {len(pubkey_raw)})")
     if len(signature_bytes) != 64:
         # Ed25519 signatures are always 64 bytes — anything else is
         # either truncated or a different algorithm.
-        raise ManifestSignatureInvalid(
-            f"Signature must be 64 bytes (got {len(signature_bytes)})"
-        )
+        raise ManifestSignatureInvalid(f"Signature must be 64 bytes (got {len(signature_bytes)})")
     try:
         Ed25519PublicKey.from_public_bytes(pubkey_raw).verify(
-            signature_bytes, manifest_bytes,
+            signature_bytes,
+            manifest_bytes,
         )
     except InvalidSignature as exc:
         raise ManifestSignatureInvalid(
@@ -473,81 +454,57 @@ def parse_manifest(manifest_bytes: bytes) -> Manifest:
     try:
         doc = json.loads(manifest_bytes.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ManifestParseError(
-            f"Manifest body is not valid UTF-8 JSON: {exc}"
-        ) from exc
+        raise ManifestParseError(f"Manifest body is not valid UTF-8 JSON: {exc}") from exc
 
     if not isinstance(doc, dict):
-        raise ManifestParseError(
-            f"Manifest top-level must be an object, got {type(doc).__name__}"
-        )
+        raise ManifestParseError(f"Manifest top-level must be an object, got {type(doc).__name__}")
 
     try:
         version = str(doc["version"])
         signed_at = str(doc["signed_at"])
         components_raw = doc["components"]
     except KeyError as exc:
-        raise ManifestParseError(
-            f"Manifest missing required key: {exc}"
-        ) from exc
+        raise ManifestParseError(f"Manifest missing required key: {exc}") from exc
 
     if not isinstance(components_raw, dict):
-        raise ManifestParseError(
-            "Manifest 'components' must be an object keyed by component name"
-        )
+        raise ManifestParseError("Manifest 'components' must be an object keyed by component name")
 
     components: dict[str, ComponentEntry] = {}
     for name, raw in components_raw.items():
         if not isinstance(raw, dict):
-            raise ManifestParseError(
-                f"Component {name!r} entry must be an object"
-            )
+            raise ManifestParseError(f"Component {name!r} entry must be an object")
         platforms_raw = raw.get("platforms", {})
         if not isinstance(platforms_raw, dict):
-            raise ManifestParseError(
-                f"Component {name!r} 'platforms' must be an object"
-            )
+            raise ManifestParseError(f"Component {name!r} 'platforms' must be an object")
         platforms: dict[str, PlatformEntry] = {}
         for plat_key, plat_raw in platforms_raw.items():
             if not isinstance(plat_raw, dict):
-                raise ManifestParseError(
-                    f"Component {name!r} platform {plat_key!r} entry "
-                    f"must be an object"
-                )
+                raise ManifestParseError(f"Component {name!r} platform {plat_key!r} entry must be an object")
             try:
                 url = str(plat_raw["url"])
                 sha256 = str(plat_raw["sha256"]).lower()
                 size_bytes = int(plat_raw["size_bytes"])
             except (KeyError, TypeError, ValueError) as exc:
                 raise ManifestParseError(
-                    f"Component {name!r} platform {plat_key!r} is missing "
-                    f"a required field or has the wrong type: {exc}"
+                    f"Component {name!r} platform {plat_key!r} is missing a required field or has the wrong type: {exc}"
                 ) from exc
             if len(sha256) != 64 or any(c not in "0123456789abcdef" for c in sha256):
                 raise ManifestParseError(
-                    f"Component {name!r} platform {plat_key!r} SHA-256 "
-                    f"must be 64 lowercase hex chars, got {sha256!r}"
+                    f"Component {name!r} platform {plat_key!r} SHA-256 must be 64 lowercase hex chars, got {sha256!r}"
                 )
             platforms[plat_key] = PlatformEntry(
-                url=url, sha256=sha256, size_bytes=size_bytes,
+                url=url,
+                sha256=sha256,
+                size_bytes=size_bytes,
             )
 
         components[name] = ComponentEntry(
             name=name,
             version=str(raw.get("version", "unknown")),
             platforms=platforms,
-            upstream_commit_sha=(
-                str(raw["upstream_commit_sha"])
-                if "upstream_commit_sha" in raw else None
-            ),
-            min_oe_version=(
-                str(raw["min_oe_version"])
-                if "min_oe_version" in raw else None
-            ),
-            max_oe_version=(
-                str(raw["max_oe_version"])
-                if "max_oe_version" in raw else None
-            ),
+            upstream_commit_sha=(str(raw["upstream_commit_sha"]) if "upstream_commit_sha" in raw else None),
+            min_oe_version=(str(raw["min_oe_version"]) if "min_oe_version" in raw else None),
+            max_oe_version=(str(raw["max_oe_version"]) if "max_oe_version" in raw else None),
         )
 
     return Manifest(
@@ -650,6 +607,7 @@ def is_version_in_range(
     range checks. That matches the spirit of "the user is on a
     pre-release, allow them through".
     """
+
     def _to_tuple(v: str) -> tuple[int, ...]:
         head = v.split("-", 1)[0].split("+", 1)[0]
         parts: list[int] = []

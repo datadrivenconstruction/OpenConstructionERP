@@ -50,7 +50,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -97,9 +96,7 @@ async def _activate_user(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
 
@@ -116,9 +113,7 @@ async def _register_and_login(
         "/api/v1/users/auth/register",
         json={"email": email, "password": password, "full_name": f"Tenant {tenant}"},
     )
-    assert reg.status_code in (200, 201), (
-        f"register failed for {tenant}: {reg.status_code} {reg.text}"
-    )
+    assert reg.status_code in (200, 201), f"register failed for {tenant}: {reg.status_code} {reg.text}"
     user_id = reg.json()["id"]
 
     await _activate_user(email)
@@ -136,10 +131,12 @@ async def _register_and_login(
 async def two_costs_tenants(http_client):
     """A is admin (can seed catalog rows); B is a viewer (the attacker)."""
     a_uid, a_email, a_password, a_headers = await _register_and_login(
-        http_client, tenant="a",
+        http_client,
+        tenant="a",
     )
     b_uid, b_email, _b_password, b_headers = await _register_and_login(
-        http_client, tenant="b",
+        http_client,
+        tenant="b",
     )
 
     # Promote A to admin via direct DB write so they can create cost
@@ -151,11 +148,7 @@ async def two_costs_tenants(http_client):
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == a_email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == a_email.lower()).values(role="admin", is_active=True))
         await s.commit()
 
     # Re-login A so the JWT carries the freshly-promoted role claim.
@@ -226,8 +219,7 @@ async def test_viewer_b_cannot_create_cost_item(http_client, two_costs_tenants):
         headers=b["headers"],
     )
     assert resp.status_code in (401, 403), (
-        f"LEAK: viewer B was able to create a cost item "
-        f"(status {resp.status_code}). Body: {resp.text!r}"
+        f"LEAK: viewer B was able to create a cost item (status {resp.status_code}). Body: {resp.text!r}"
     )
 
 
@@ -243,8 +235,7 @@ async def test_viewer_b_cannot_update_cost_item(http_client, two_costs_tenants):
         headers=b["headers"],
     )
     assert resp.status_code in (401, 403), (
-        f"LEAK: viewer B was able to update cost item {item_id} "
-        f"(status {resp.status_code}). Body: {resp.text!r}"
+        f"LEAK: viewer B was able to update cost item {item_id} (status {resp.status_code}). Body: {resp.text!r}"
     )
 
     # Defensive: confirm the row was not actually modified.
@@ -254,9 +245,7 @@ async def test_viewer_b_cannot_update_cost_item(http_client, two_costs_tenants):
     async with async_session_factory() as s:
         item = await s.get(CostItem, uuid.UUID(item_id))
         assert item is not None
-        assert item.description == "Seeded for IDOR audit", (
-            "tenant B's PATCH attempt actually mutated the row"
-        )
+        assert item.description == "Seeded for IDOR audit", "tenant B's PATCH attempt actually mutated the row"
 
 
 @pytest.mark.asyncio
@@ -270,8 +259,7 @@ async def test_viewer_b_cannot_delete_cost_item(http_client, two_costs_tenants):
         headers=b["headers"],
     )
     assert resp.status_code in (401, 403), (
-        f"LEAK: viewer B was able to delete cost item {item_id} "
-        f"(status {resp.status_code}). Body: {resp.text!r}"
+        f"LEAK: viewer B was able to delete cost item {item_id} (status {resp.status_code}). Body: {resp.text!r}"
     )
 
     # Confirm the soft-delete flag was not flipped.
@@ -281,9 +269,7 @@ async def test_viewer_b_cannot_delete_cost_item(http_client, two_costs_tenants):
     async with async_session_factory() as s:
         item = await s.get(CostItem, uuid.UUID(item_id))
         assert item is not None
-        assert item.is_active is True, (
-            "tenant B's DELETE attempt actually soft-deleted the row"
-        )
+        assert item.is_active is True, "tenant B's DELETE attempt actually soft-deleted the row"
 
 
 @pytest.mark.asyncio
@@ -329,6 +315,5 @@ async def test_clear_database_requires_admin(http_client, two_costs_tenants):
         headers=b["headers"],
     )
     assert resp.status_code in (401, 403), (
-        f"LEAK: viewer B was able to call clear-database "
-        f"(status {resp.status_code}). Body: {resp.text!r}"
+        f"LEAK: viewer B was able to call clear-database (status {resp.status_code}). Body: {resp.text!r}"
     )

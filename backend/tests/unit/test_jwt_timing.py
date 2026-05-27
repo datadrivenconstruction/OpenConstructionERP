@@ -55,7 +55,6 @@ from jose import jwt  # noqa: E402
 
 from app.dependencies import decode_access_token  # noqa: E402
 
-
 # ── Helpers ───────────────────────────────────────────────────────────────
 
 
@@ -192,6 +191,6 @@ def test_no_order_of_magnitude_timing_leak_between_failure_modes() -> None:
     # We only catch order-of-magnitude leaks here.
     assert ratio < 5.0, (
         f"JWT failure paths show suspicious timing delta: "
-        f"missing-sub={mean_no_sub*1e6:.1f}us  bad-sig={mean_bad_sig*1e6:.1f}us  "
+        f"missing-sub={mean_no_sub * 1e6:.1f}us  bad-sig={mean_bad_sig * 1e6:.1f}us  "
         f"ratio={ratio:.2f}x (should be <5x)"
     )

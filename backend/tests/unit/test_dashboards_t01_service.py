@@ -301,7 +301,10 @@ class TestCad2DataBridge:
 
 class TestSnapshotServiceCreate:
     async def test_empty_label_rejected(
-        self, session, tmp_storage, project_row,
+        self,
+        session,
+        tmp_storage,
+        project_row,
     ) -> None:
         svc = SnapshotService(repo=SnapshotRepository(session))
         with pytest.raises(SnapshotLabelInvalidError):
@@ -311,7 +314,9 @@ class TestSnapshotServiceCreate:
                     label="   ",
                     files=[
                         bridge.UploadedFile(
-                            original_name="x.ifc", extension="ifc", content=b"",
+                            original_name="x.ifc",
+                            extension="ifc",
+                            content=b"",
                         )
                     ],
                     user_id=uuid.uuid4(),
@@ -319,7 +324,10 @@ class TestSnapshotServiceCreate:
             )
 
     async def test_over_long_label_rejected(
-        self, session, tmp_storage, project_row,
+        self,
+        session,
+        tmp_storage,
+        project_row,
     ) -> None:
         svc = SnapshotService(repo=SnapshotRepository(session))
         with pytest.raises(SnapshotLabelTooLongError):
@@ -329,7 +337,9 @@ class TestSnapshotServiceCreate:
                     label="x" * 201,
                     files=[
                         bridge.UploadedFile(
-                            original_name="x.ifc", extension="ifc", content=b"",
+                            original_name="x.ifc",
+                            extension="ifc",
+                            content=b"",
                         )
                     ],
                     user_id=uuid.uuid4(),
@@ -337,7 +347,10 @@ class TestSnapshotServiceCreate:
             )
 
     async def test_duplicate_label_rejected(
-        self, session, tmp_storage, project_row,
+        self,
+        session,
+        tmp_storage,
+        project_row,
     ) -> None:
         svc = SnapshotService(repo=SnapshotRepository(session))
         uploaded = [
@@ -373,7 +386,10 @@ class TestSnapshotServiceCreate:
                 )
 
     async def test_unsupported_format_wrapped(
-        self, session, tmp_storage, project_row,
+        self,
+        session,
+        tmp_storage,
+        project_row,
     ) -> None:
         svc = SnapshotService(repo=SnapshotRepository(session))
         with pytest.raises(SnapshotUnsupportedFormatError):
@@ -393,7 +409,10 @@ class TestSnapshotServiceCreate:
             )
 
     async def test_conversion_failure_wrapped(
-        self, session, tmp_storage, project_row,
+        self,
+        session,
+        tmp_storage,
+        project_row,
     ) -> None:
         svc = SnapshotService(repo=SnapshotRepository(session))
         with patch(
@@ -417,7 +436,11 @@ class TestSnapshotServiceCreate:
                 )
 
     async def test_happy_path_persists_everything(
-        self, session, tmp_storage, project_row, captured_events,
+        self,
+        session,
+        tmp_storage,
+        project_row,
+        captured_events,
     ) -> None:
         svc = SnapshotService(repo=SnapshotRepository(session))
         user_id = uuid.uuid4()
@@ -450,18 +473,13 @@ class TestSnapshotServiceCreate:
         assert snap.tenant_id == str(user_id)
 
         # Parquet files landed on disk.
-        expected = tmp_storage.base_dir / parquet_key(
-            project_row.id, snap.id, "entities"
-        )
+        expected = tmp_storage.base_dir / parquet_key(project_row.id, snap.id, "entities")
         assert expected.is_file()
 
         # Event emitted.
         names = [e["name"] for e in captured_events]
         assert event_taxonomy.SNAPSHOT_CREATED in names
-        created = [
-            e for e in captured_events
-            if e["name"] == event_taxonomy.SNAPSHOT_CREATED
-        ][0]
+        created = [e for e in captured_events if e["name"] == event_taxonomy.SNAPSHOT_CREATED][0]
         assert created["data"]["snapshot_id"] == str(snap.id)
         assert created["data"]["total_entities"] == 3
 
@@ -476,7 +494,10 @@ class TestSnapshotServiceReadAndDelete:
             await svc.get(uuid.uuid4(), tenant_id=str(uuid.uuid4()))
 
     async def test_tenant_scope_blocks_foreign_read(
-        self, session, tmp_storage, project_row,
+        self,
+        session,
+        tmp_storage,
+        project_row,
     ) -> None:
         svc = SnapshotService(repo=SnapshotRepository(session))
         user_a = uuid.uuid4()
@@ -510,7 +531,11 @@ class TestSnapshotServiceReadAndDelete:
         assert row.id == snap.id
 
     async def test_delete_removes_row_and_storage(
-        self, session, tmp_storage, project_row, captured_events,
+        self,
+        session,
+        tmp_storage,
+        project_row,
+        captured_events,
     ) -> None:
         svc = SnapshotService(repo=SnapshotRepository(session))
         user_id = uuid.uuid4()
@@ -535,9 +560,7 @@ class TestSnapshotServiceReadAndDelete:
                 )
             )
 
-        entities_file = tmp_storage.base_dir / parquet_key(
-            project_row.id, snap.id, "entities"
-        )
+        entities_file = tmp_storage.base_dir / parquet_key(project_row.id, snap.id, "entities")
         assert entities_file.is_file()
 
         await svc.delete(snap.id, tenant_id=str(user_id))
@@ -550,7 +573,10 @@ class TestSnapshotServiceReadAndDelete:
         assert event_taxonomy.SNAPSHOT_DELETED in names
 
     async def test_list_for_project_paginates(
-        self, session, tmp_storage, project_row,
+        self,
+        session,
+        tmp_storage,
+        project_row,
     ) -> None:
         svc = SnapshotService(repo=SnapshotRepository(session))
         user_id = uuid.uuid4()
@@ -577,13 +603,19 @@ class TestSnapshotServiceReadAndDelete:
                 )
 
         rows, total = await svc.list_for_project(
-            project_row.id, tenant_id=str(user_id), limit=2, offset=0,
+            project_row.id,
+            tenant_id=str(user_id),
+            limit=2,
+            offset=0,
         )
         assert total == 3
         assert len(rows) == 2
 
     async def test_manifest_file_round_trips(
-        self, session, tmp_storage, project_row,
+        self,
+        session,
+        tmp_storage,
+        project_row,
     ) -> None:
         """``manifest.json`` on disk matches the label / counts / source files
         of the DB row — reviewers often cross-check this off-line."""

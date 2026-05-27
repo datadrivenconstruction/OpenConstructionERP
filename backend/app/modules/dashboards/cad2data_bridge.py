@@ -126,9 +126,7 @@ def convert_to_snapshot_frames(
     becomes the common case.
     """
     if not files:
-        raise NoEntitiesExtractedError(
-            "No source files supplied — nothing to convert."
-        )
+        raise NoEntitiesExtractedError("No source files supplied — nothing to convert.")
 
     all_entities: list[pd.DataFrame] = []
     all_materials: list[pd.DataFrame] = []
@@ -169,8 +167,12 @@ def convert_to_snapshot_frames(
     source_files_df = pd.DataFrame(
         source_file_rows,
         columns=[
-            "id", "original_name", "format", "discipline",
-            "entity_count", "bytes_size",
+            "id",
+            "original_name",
+            "format",
+            "discipline",
+            "entity_count",
+            "bytes_size",
         ],
     )
 
@@ -192,7 +194,9 @@ def convert_to_snapshot_frames(
 
 
 def _dispatch(
-    file: UploadedFile, source_file_id: str, ext: str,
+    file: UploadedFile,
+    source_file_id: str,
+    ext: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
     """Route one file to the right converter and normalise its output."""
     if ext in {"ifc", "rvt"}:
@@ -203,7 +207,8 @@ def _dispatch(
 
 
 def _convert_ifc_or_rvt(
-    file: UploadedFile, source_file_id: str,
+    file: UploadedFile,
+    source_file_id: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
     """Hand the bytes to bim_hub's IFC/RVT processor and canonicalise
     its dict output into our DataFrame shape.
@@ -230,16 +235,18 @@ def _convert_ifc_or_rvt(
 
         try:
             result = process_ifc_file(
-                input_path, output_dir, conversion_depth="standard",
+                input_path,
+                output_dir,
+                conversion_depth="standard",
             )
         except Exception as exc:
             logger.warning(
                 "dashboards.cad2data.convert_ifc failed for %s: %s",
-                file.original_name, type(exc).__name__, exc_info=True,
+                file.original_name,
+                type(exc).__name__,
+                exc_info=True,
             )
-            raise BridgeError(
-                f"Converter failed on '{file.original_name}': {exc}"
-            ) from exc
+            raise BridgeError(f"Converter failed on '{file.original_name}': {exc}") from exc
 
     elements = result.get("elements") or []
     entities_df = _elements_to_entities_df(elements, source_file_id)
@@ -263,16 +270,12 @@ def _materials_schema() -> list[str]:
 
 
 def _elements_to_entities_df(
-    elements: list[dict[str, Any]], source_file_id: str,
+    elements: list[dict[str, Any]],
+    source_file_id: str,
 ) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     for elem in elements:
-        guid = (
-            elem.get("guid")
-            or elem.get("global_id")
-            or elem.get("entity_guid")
-            or str(uuid.uuid4())
-        )
+        guid = elem.get("guid") or elem.get("global_id") or elem.get("entity_guid") or str(uuid.uuid4())
         category = _canonical_category(
             elem.get("category") or elem.get("ifc_type") or elem.get("type"),
         )
@@ -305,11 +308,7 @@ def _elements_to_entities_df(
 def _elements_to_materials_df(elements: list[dict[str, Any]]) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     for elem in elements:
-        guid = (
-            elem.get("guid")
-            or elem.get("global_id")
-            or elem.get("entity_guid")
-        )
+        guid = elem.get("guid") or elem.get("global_id") or elem.get("entity_guid")
         if not guid:
             continue
 
@@ -324,15 +323,10 @@ def _elements_to_materials_df(elements: list[dict[str, Any]]) -> pd.DataFrame:
                     "entity_guid": str(guid),
                     "layer_index": idx,
                     "material": str(
-                        layer.get("material")
-                        or layer.get("name")
-                        or layer.get("layer_name")
-                        or "unknown",
+                        layer.get("material") or layer.get("name") or layer.get("layer_name") or "unknown",
                     ),
                     "thickness_mm": _safe_float(
-                        layer.get("thickness_mm")
-                        or layer.get("thickness")
-                        or layer.get("thickness_m"),
+                        layer.get("thickness_mm") or layer.get("thickness") or layer.get("thickness_m"),
                     ),
                 }
             )
@@ -369,7 +363,8 @@ def _safe_float(v: object) -> float | None:
 
 
 def _concat_or_empty(
-    frames: list[pd.DataFrame], columns: list[str],
+    frames: list[pd.DataFrame],
+    columns: list[str],
 ) -> pd.DataFrame:
     if not frames:
         return pd.DataFrame(columns=columns)

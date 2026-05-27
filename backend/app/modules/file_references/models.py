@@ -28,10 +28,10 @@ related rows.
 import uuid
 
 from sqlalchemy import (
+    JSON,
     DateTime,
     ForeignKey,
     Index,
-    JSON,
     String,
     Text,
     UniqueConstraint,
@@ -39,7 +39,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
-
 
 # ── Naming violations ─────────────────────────────────────────────────
 
@@ -81,15 +80,11 @@ class FileNamingViolation(Base):
     file_id: Mapped[str] = mapped_column(String(255), nullable=False)
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
     # JSON list of violation codes (e.g. ``["missing-volume", "bad-role-code"]``).
-    violation_codes: Mapped[list[str]] = mapped_column(
-        JSON, nullable=False, default=list, server_default="[]"
-    )
+    violation_codes: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list, server_default="[]")
     # Optional human-readable note for the worst single issue — surfaced
     # in the banner so the user sees the punch-line without expanding.
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
-    acknowledged_at: Mapped[object | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    acknowledged_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
     acknowledged_by_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
@@ -97,10 +92,7 @@ class FileNamingViolation(Base):
     )
 
     def __repr__(self) -> str:  # pragma: no cover — debug helper
-        return (
-            f"<FileNamingViolation {self.file_kind}/{self.filename} "
-            f"codes={self.violation_codes}>"
-        )
+        return f"<FileNamingViolation {self.file_kind}/{self.filename} codes={self.violation_codes}>"
 
 
 # ── Cross-entity references ──────────────────────────────────────────
@@ -171,6 +163,5 @@ class FileReference(Base):
 
     def __repr__(self) -> str:  # pragma: no cover — debug helper
         return (
-            f"<FileReference {self.file_kind}/{self.file_id} "
-            f"-> {self.target_type}/{self.target_id} ({self.relation})>"
+            f"<FileReference {self.file_kind}/{self.file_id} -> {self.target_type}/{self.target_id} ({self.relation})>"
         )

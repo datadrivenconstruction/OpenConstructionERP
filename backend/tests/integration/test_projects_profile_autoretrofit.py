@@ -63,7 +63,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -161,7 +163,8 @@ async def _seed_owner_and_bare_project(
 
 
 async def test_get_profile_on_bare_project_auto_retrofits_default(
-    client: AsyncClient, temp_engine_and_factory,
+    client: AsyncClient,
+    temp_engine_and_factory,
 ) -> None:
     """A project with no ProjectProfile row used to 404. It must now
     silently retrofit a default and return 200 with a usable profile."""
@@ -184,7 +187,8 @@ async def test_get_profile_on_bare_project_auto_retrofits_default(
 
 
 async def test_get_profile_is_idempotent_no_duplicate_rows(
-    client: AsyncClient, temp_engine_and_factory,
+    client: AsyncClient,
+    temp_engine_and_factory,
 ) -> None:
     """Calling GET /profile twice on the same bare project must not
     create a second ProjectProfile row (idempotency contract — older
@@ -237,7 +241,8 @@ async def test_get_profile_is_idempotent_no_duplicate_rows(
     assert rows_after_second == 1, (rows_after_first, rows_after_second)
     # Module assignment rows must also not duplicate.
     assert modules_after_second == modules_after_first, (
-        modules_after_first, modules_after_second,
+        modules_after_first,
+        modules_after_second,
     )
 
     # Response bodies must agree.
@@ -246,7 +251,8 @@ async def test_get_profile_is_idempotent_no_duplicate_rows(
 
 
 async def test_post_profile_still_creates_explicit_profile(
-    client: AsyncClient, temp_engine_and_factory,
+    client: AsyncClient,
+    temp_engine_and_factory,
 ) -> None:
     """POST /profile (apply_project_profile) is independent of the GET
     retrofit and must keep working: it upserts the wizard answers and
@@ -271,7 +277,8 @@ async def test_post_profile_still_creates_explicit_profile(
     }
 
     resp = await client.post(
-        f"/api/v1/projects/{project_id}/profile", json=body,
+        f"/api/v1/projects/{project_id}/profile",
+        json=body,
     )
     assert resp.status_code == 200, resp.text
     out = resp.json()["profile"]
@@ -292,7 +299,8 @@ async def test_post_profile_still_creates_explicit_profile(
 
 
 async def test_retrofit_matches_focus_mode_default_shape(
-    client: AsyncClient, temp_engine_and_factory,
+    client: AsyncClient,
+    temp_engine_and_factory,
 ) -> None:
     """The shape /profile auto-retrofits must equal the shape
     /profile/focus-mode would have produced — both paths share

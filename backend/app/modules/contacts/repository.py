@@ -159,18 +159,12 @@ class ContactRepository:
             return stmt.where(owner_filter) if owner_filter is not None else stmt
 
         # Total active contacts
-        total_stmt = _scope(
-            select(func.count())
-            .select_from(Contact)
-            .where(Contact.is_active.is_(True))
-        )
+        total_stmt = _scope(select(func.count()).select_from(Contact).where(Contact.is_active.is_(True)))
         total = (await self.session.execute(total_stmt)).scalar_one()
 
         # Count by type
         type_stmt = _scope(
-            select(Contact.contact_type, func.count())
-            .where(Contact.is_active.is_(True))
-            .group_by(Contact.contact_type)
+            select(Contact.contact_type, func.count()).where(Contact.is_active.is_(True)).group_by(Contact.contact_type)
         )
         type_rows = (await self.session.execute(type_stmt)).all()
         by_type = {row[0]: row[1] for row in type_rows}

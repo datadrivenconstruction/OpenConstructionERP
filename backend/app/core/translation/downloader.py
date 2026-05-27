@@ -70,9 +70,7 @@ def _iate_allowlist() -> tuple[str, ...]:
     import os  # noqa: PLC0415 — lazy so tests can monkeypatch via env
 
     extra_raw = os.environ.get("OE_IATE_EXTRA_HOSTS", "")
-    extra: tuple[str, ...] = tuple(
-        p.strip() for p in extra_raw.split(",") if p.strip().startswith("https://")
-    )
+    extra: tuple[str, ...] = tuple(p.strip() for p in extra_raw.split(",") if p.strip().startswith("https://"))
     return _IATE_ALLOWED_PREFIXES + extra
 
 
@@ -139,8 +137,10 @@ async def download_muse_pair(
     # Convert MUSE format (space-separated source/target pairs, one per
     # line) to TSV. Run in executor — the file may be 30-50MB.
     def _convert() -> None:
-        with tmp_path.open("r", encoding="utf-8", errors="replace") as fin, \
-             out_path.open("w", encoding="utf-8") as fout:
+        with (
+            tmp_path.open("r", encoding="utf-8", errors="replace") as fin,
+            out_path.open("w", encoding="utf-8") as fout,
+        ):
             fout.write("# MUSE bilingual dictionary, source: facebookresearch/MUSE\n")
             for raw in fin:
                 line = raw.rstrip("\n\r")
@@ -217,7 +217,8 @@ async def download_iate_dump(
     # ``follow_redirects=False`` so an attacker can't bypass the
     # allowlist by setting up a 302 to ``http://169.254.169.254/...``.
     async with httpx.AsyncClient(
-        timeout=_DOWNLOAD_TIMEOUT, follow_redirects=False,
+        timeout=_DOWNLOAD_TIMEOUT,
+        follow_redirects=False,
     ) as client:
         async with client.stream("GET", url) as resp:
             resp.raise_for_status()
@@ -285,10 +286,10 @@ async def process_iate_tbx(
                     if ltag != "langSec":
                         continue
                     lang = (
-                        lang_sec.get("{http://www.w3.org/XML/1998/namespace}lang")
-                        or lang_sec.get("lang")
-                        or ""
-                    ).lower().split("-")[0]
+                        (lang_sec.get("{http://www.w3.org/XML/1998/namespace}lang") or lang_sec.get("lang") or "")
+                        .lower()
+                        .split("-")[0]
+                    )
                     if not lang:
                         continue
                     terms: list[str] = []
@@ -311,9 +312,7 @@ async def process_iate_tbx(
                         if pair_key not in out_files:
                             p = target_dir / f"{pair_key}.tsv"
                             fh = p.open("w", encoding="utf-8")
-                            fh.write(
-                                "# IATE EU termbase, parsed from TBX dump\n"
-                            )
+                            fh.write("# IATE EU termbase, parsed from TBX dump\n")
                             out_files[pair_key] = fh
                             out_paths[pair_key] = p
                         fh = out_files[pair_key]

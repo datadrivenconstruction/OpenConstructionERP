@@ -21,8 +21,7 @@ BUILTIN_TEMPLATES: list[dict[str, Any]] = [
     {
         "id": "builtin:daily-site-report",
         "name": "Daily Site Report",
-        "description": "General-purpose end-of-day site diary covering "
-        "progress, workforce, and conditions.",
+        "description": "General-purpose end-of-day site diary covering progress, workforce, and conditions.",
         "report_type": "daily",
         "fields": [
             {
@@ -64,8 +63,7 @@ BUILTIN_TEMPLATES: list[dict[str, Any]] = [
     {
         "id": "builtin:safety-walk",
         "name": "Safety Walk",
-        "description": "Structured safety observation walk — hazards, "
-        "corrective actions, and sign-off.",
+        "description": "Structured safety observation walk — hazards, corrective actions, and sign-off.",
         "report_type": "safety",
         "fields": [
             {
@@ -113,8 +111,7 @@ BUILTIN_TEMPLATES: list[dict[str, Any]] = [
     {
         "id": "builtin:progress-report",
         "name": "Progress Report",
-        "description": "Periodic progress snapshot — percent complete, "
-        "milestones, and forecast.",
+        "description": "Periodic progress snapshot — percent complete, milestones, and forecast.",
         "report_type": "inspection",
         "fields": [
             {

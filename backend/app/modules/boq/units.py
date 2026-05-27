@@ -35,17 +35,46 @@ from typing import Final
 APPROVED_UNITS: Final[frozenset[str]] = frozenset(
     {
         # length
-        "m", "mm", "cm", "km", "lm", "ll", "ft", "in", "yd",
+        "m",
+        "mm",
+        "cm",
+        "km",
+        "lm",
+        "ll",
+        "ft",
+        "in",
+        "yd",
         # area
-        "m2", "cm2", "ft2",
+        "m2",
+        "cm2",
+        "ft2",
         # volume
-        "m3", "cm3", "l", "ft3", "gal",
+        "m3",
+        "cm3",
+        "l",
+        "ft3",
+        "gal",
         # mass / weight
-        "kg", "g", "t",
+        "kg",
+        "g",
+        "t",
         # counts / lump
-        "pcs", "ea", "no", "set", "lsum", "ls",
+        "pcs",
+        "ea",
+        "no",
+        "set",
+        "lsum",
+        "ls",
         # time / labour
-        "hr", "h", "hrs", "hour", "hours", "day", "days", "wk", "month",
+        "hr",
+        "h",
+        "hrs",
+        "hour",
+        "hours",
+        "day",
+        "days",
+        "wk",
+        "month",
         # internal sentinel: section header rows have unit="section" — kept
         # in the canonical table so existing section-create paths round-trip
         # cleanly through any future ``PositionResponse`` re-validation.
@@ -114,7 +143,7 @@ _BODY_EXTRA_CHARS: Final[frozenset[str]] = frozenset(" ._-/²³%")
 # values out of HTML / SQL / shell injection vectors regardless of context
 # the value is later concatenated into.
 _FORBIDDEN_CHARS: Final[frozenset[str]] = frozenset(
-    '<>&"\'`;\\\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f'
+    "<>&\"'`;\\\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
 )
 
 

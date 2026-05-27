@@ -40,11 +40,21 @@ def _short_date_offset(rng: random.Random, days_back_max: int = 180) -> str:
 _NOTICE_RECIPIENTS = ("owner", "contractor", "architect", "engineer")
 _VR_STATUSES = ("draft", "submitted", "under_review", "approved", "rejected", "converted_to_vo")
 _VR_CLASSIFICATIONS = (
-    "scope_change", "unforeseen", "owner_change", "design_dev", "regulatory", "other",
+    "scope_change",
+    "unforeseen",
+    "owner_change",
+    "design_dev",
+    "regulatory",
+    "other",
 )
 _VO_STATUSES = ("issued", "in_progress", "completed", "voided")
 _COST_CATEGORIES = (
-    "labor", "material", "equipment", "subcontractor", "overhead", "profit",
+    "labor",
+    "material",
+    "equipment",
+    "subcontractor",
+    "overhead",
+    "profit",
 )
 _LINE_TYPES = ("labor", "material", "equipment")
 _DW_STATUSES = ("draft", "signed", "disputed", "billed")
@@ -103,11 +113,7 @@ async def seed_variations_demo(
     vrs: list[VariationRequest] = []
     for i in range(40):
         pid = rng.choice(projects)
-        notice_id = (
-            rng.choice(notices).id
-            if notices and rng.random() < 0.4
-            else None
-        )
+        notice_id = rng.choice(notices).id if notices and rng.random() < 0.4 else None
         classification = rng.choice(_VR_CLASSIFICATIONS)
         vr = VariationRequest(
             project_id=pid,

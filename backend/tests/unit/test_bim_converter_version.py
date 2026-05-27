@@ -36,9 +36,7 @@ def _stub_subprocess_run(monkeypatch: pytest.MonkeyPatch, *, returncode: int, st
     monkeypatch.setattr(_subprocess, "run", fake_run)
 
 
-def test_detect_converter_version_safe_linux_dpkg_path(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_detect_converter_version_safe_linux_dpkg_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍Linux + dpkg available → ``_detect_converter_version_safe`` mirrors
     the apt-package version verbatim and tags the source as ``dpkg:…``."""
     fake_bin = tmp_path / "RvtExporter"
@@ -54,9 +52,7 @@ def test_detect_converter_version_safe_linux_dpkg_path(
     assert info["binary_path"] == str(fake_bin)
 
 
-def test_detect_converter_version_safe_windows_parent_dir(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_detect_converter_version_safe_windows_parent_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍Windows path (no dpkg) → falls back to the install dir name and tags
     the source as ``binary_metadata``."""
     install_dir = tmp_path / "rvt_windows_v18.0.0"
@@ -104,9 +100,7 @@ def test_detect_converter_version_safe_never_raises(
     assert info == {"version": None, "source": None, "binary_path": None}
 
 
-def test_excel_result_round_trip_carries_converter_version(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_excel_result_round_trip_carries_converter_version(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """‌⁠‍Integration check: the dict returned by ``_excel_elements_to_bim_result``
     is the same shape that ``_try_cad2data`` augments with the converter
     fields before returning. We verify the converter fields can be attached

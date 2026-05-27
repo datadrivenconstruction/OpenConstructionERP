@@ -21,8 +21,6 @@ from datetime import date as dt_date
 from decimal import Decimal
 from types import SimpleNamespace
 
-import pytest
-
 from app.modules.bid_management.service import BidManagementService
 from app.modules.property_dev.service import (
     compute_deposit_forfeiture,
@@ -43,7 +41,6 @@ from app.modules.variations.service import (
     is_nec4_overdue,
     supported_contract_standards,
 )
-
 
 # ─────────────────────────────────────────────────────────────────────────
 # property_dev: deposit forfeiture per jurisdiction
@@ -67,7 +64,9 @@ class TestDepositForfeiture:
     def test_cooling_off_overrides_jurisdiction(self) -> None:
         # Even GB returns full refund inside cooling-off / pre-exchange window.
         result = compute_deposit_forfeiture(
-            "10000.00", "GB", cancelled_before_contract=True,
+            "10000.00",
+            "GB",
+            cancelled_before_contract=True,
         )
         assert result["forfeited_amount"] == Decimal("0")
         assert result["refundable_amount"] == Decimal("10000.00")
@@ -105,7 +104,9 @@ class TestNEC4Timers:
 
     def test_custom_windows(self) -> None:
         result = compute_nec4_timers(
-            dt_date(2026, 1, 1), quotation_weeks=2, assessment_weeks=2,
+            dt_date(2026, 1, 1),
+            quotation_weeks=2,
+            assessment_weeks=2,
         )
         assert result["quotation_due_at"] == "2026-01-15"
         assert result["assessment_due_at"] == "2026-01-29"
@@ -263,7 +264,8 @@ class TestTimeImpactAnalysis:
         ]
         deps = [{"predecessor": "A", "successor": "B"}]
         result = time_impact_analysis(
-            activities, deps,
+            activities,
+            deps,
             impacted_activity_id="A",
             delay_days=4,
         )
@@ -284,7 +286,8 @@ class TestTimeImpactAnalysis:
             {"predecessor": "B", "successor": "C"},
         ]
         result = time_impact_analysis(
-            activities, deps,
+            activities,
+            deps,
             impacted_activity_id="B",
             delay_days=1,
         )
@@ -424,7 +427,8 @@ class TestInvitationEmailRender:
             "Regards,\n{sender_name}"
         )
         subj, body = BidManagementService.render_invitation_email(
-            subj_tpl, body_tpl,
+            subj_tpl,
+            body_tpl,
             package_code="BP-001",
             package_title="Concrete works",
             invitee_email="bid@example.com",
@@ -444,7 +448,8 @@ class TestInvitationEmailRender:
         subj_tpl = "Hi {unknown_field}"
         body_tpl = "Hello {invitee_company_name}"
         subj, body = BidManagementService.render_invitation_email(
-            subj_tpl, body_tpl,
+            subj_tpl,
+            body_tpl,
             package_code="X",
             package_title="X",
             invitee_email="x@x.com",

@@ -119,10 +119,7 @@ class ContactService:
             if existing is not None and existing.is_active:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail=(
-                        f"A contact with email '{normalised_email}' already exists "
-                        f"(id={existing.id})."
-                    ),
+                    detail=(f"A contact with email '{normalised_email}' already exists (id={existing.id})."),
                 )
 
         contact = Contact(
@@ -281,10 +278,7 @@ class ContactService:
             if existing is not None and existing.id != contact_id and existing.is_active:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail=(
-                        f"A contact with email '{fields['primary_email']}' already exists "
-                        f"(id={existing.id})."
-                    ),
+                    detail=(f"A contact with email '{fields['primary_email']}' already exists (id={existing.id})."),
                 )
         elif "primary_email" in fields:
             # Explicitly setting to None is OK (clearing the email)

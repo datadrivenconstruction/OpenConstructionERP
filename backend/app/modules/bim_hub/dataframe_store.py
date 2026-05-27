@@ -40,6 +40,7 @@ class ParquetWriteError(RuntimeError):
     chained via ``__cause__``.
     """
 
+
 # Operators that take no value (unary predicates).
 _UNARY_OPS = frozenset({"IS NULL", "IS NOT NULL"})
 
@@ -50,6 +51,7 @@ _BINARY_OPS = frozenset({"=", "!=", ">", "<", ">=", "<=", "LIKE", "IN"})
 # ---------------------------------------------------------------------------
 # Write
 # ---------------------------------------------------------------------------
+
 
 def write_dataframe(
     project_id: str,
@@ -122,6 +124,7 @@ def write_dataframe(
 # Schema introspection
 # ---------------------------------------------------------------------------
 
+
 def read_schema(
     project_id: str,
     model_id: str,
@@ -157,6 +160,7 @@ def read_schema(
 # ---------------------------------------------------------------------------
 # Query (DuckDB with pyarrow fallback)
 # ---------------------------------------------------------------------------
+
 
 def _validate_column_name(name: str, known_columns: set[str]) -> None:
     """Raise ``ValueError`` if *name* is not in the Parquet schema.
@@ -253,6 +257,7 @@ def query_parquet(
 # Column value counts (filter dropdowns)
 # ---------------------------------------------------------------------------
 
+
 def column_value_counts(
     project_id: str,
     model_id: str,
@@ -281,7 +286,7 @@ def column_value_counts(
                 f'SELECT "{column}" AS value, COUNT(*) AS count '
                 f"FROM read_parquet(?) "
                 f'WHERE "{column}" IS NOT NULL '
-                f"GROUP BY \"{column}\" "
+                f'GROUP BY "{column}" '
                 f"ORDER BY count DESC "
                 f"LIMIT ?"
             )
@@ -304,6 +309,7 @@ def column_value_counts(
 # ---------------------------------------------------------------------------
 # Fallback: pure-pyarrow query (when duckdb is not installed)
 # ---------------------------------------------------------------------------
+
 
 def _fallback_pyarrow_query(
     parquet_path: Path,

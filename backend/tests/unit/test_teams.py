@@ -142,6 +142,7 @@ def _make_service(
 
     svc._assert_project_access = _assert  # type: ignore[assignment]
     svc._is_project_owner_or_admin = _priv  # type: ignore[assignment]
+
     # No-op audit + events so the focused test doesn't depend on the
     # global event bus or the audit-log table.
     async def _noop_audit(**_kw: Any) -> None: ...

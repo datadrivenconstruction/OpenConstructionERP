@@ -13,7 +13,6 @@ import uuid
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import Any
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -23,7 +22,7 @@ from app.modules.schedule.schemas import (
     ScheduleCreate,
     ScheduleUpdate,
 )
-from app.modules.schedule.service import ScheduleService, compute_duration, _normalize_deps
+from app.modules.schedule.service import ScheduleService, _normalize_deps, compute_duration
 
 # ── Helpers / stubs ───────────────────────────────────────────────────────
 
@@ -56,7 +55,11 @@ class _StubScheduleRepo:
         return self.rows.get(schedule_id)
 
     async def list_for_project(
-        self, project_id: uuid.UUID, *, offset: int = 0, limit: int = 50,
+        self,
+        project_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 50,
     ) -> tuple[list[Any], int]:
         rows = [r for r in self.rows.values() if r.project_id == project_id]
         return rows[offset : offset + limit], len(rows)
@@ -89,7 +92,11 @@ class _StubActivityRepo:
         return self.rows.get(activity_id)
 
     async def list_for_schedule(
-        self, schedule_id: uuid.UUID, *, offset: int = 0, limit: int = 1000,
+        self,
+        schedule_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 1000,
     ) -> tuple[list[Any], int]:
         rows = [r for r in self.rows.values() if r.schedule_id == schedule_id]
         return rows[offset : offset + limit], len(rows)
@@ -246,7 +253,8 @@ async def test_create_milestone() -> None:
     schedule = await _create_schedule(svc)
 
     milestone = await _create_activity(
-        svc, schedule.id,
+        svc,
+        schedule.id,
         name="Foundation complete",
         activity_type="milestone",
         start_date="2026-06-01",
@@ -344,14 +352,16 @@ async def test_gantt_duration_matches_stored_working_days() -> None:
     svc = _make_service()
     schedule = await _create_schedule(svc)
     activity = await _create_activity(
-        svc, schedule.id, start_date="2026-05-01", end_date="2026-05-15",
+        svc,
+        schedule.id,
+        start_date="2026-05-01",
+        end_date="2026-05-15",
     )
     assert activity.duration_days == 11  # working days
 
     gantt = await svc.get_gantt_data(schedule.id)
     assert gantt.activities[0].duration_days == 11, (
-        "Gantt duration must match the stored working-day duration, "
-        "not the calendar-day diff"
+        "Gantt duration must match the stored working-day duration, not the calendar-day diff"
     )
 
 
@@ -431,10 +441,7 @@ async def test_reject_dependency_cycles_lists_activities_only_once() -> None:
     svc = _make_service()
     schedule = await _create_schedule(svc)
     a = await _create_activity(svc, schedule.id, name="A")
-    others = [
-        await _create_activity(svc, schedule.id, name=f"N{i}")
-        for i in range(5)
-    ]
+    others = [await _create_activity(svc, schedule.id, name=f"N{i}") for i in range(5)]
 
     original = svc.activity_repo.list_for_schedule
     counter = {"n": 0}
@@ -452,6 +459,4 @@ async def test_reject_dependency_cycles_lists_activities_only_once() -> None:
         proposed_predecessors=[o.id for o in others],
     )
 
-    assert counter["n"] == 1, (
-        f"Expected one repo load for the whole batch; got {counter['n']}."
-    )
+    assert counter["n"] == 1, f"Expected one repo load for the whole batch; got {counter['n']}."

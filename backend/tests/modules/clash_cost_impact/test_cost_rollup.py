@@ -116,9 +116,7 @@ async def _make_boq_with_position(
         unit="m3",
         quantity=quantity,
         unit_rate=unit_rate,
-        total=total
-        if total is not None
-        else str(Decimal(quantity) * Decimal(unit_rate)),
+        total=total if total is not None else str(Decimal(quantity) * Decimal(unit_rate)),
         cad_element_ids=cad_element_ids,
     )
     session.add(pos)
@@ -126,9 +124,7 @@ async def _make_boq_with_position(
     return pos
 
 
-async def _make_run(
-    session, project: Project, *, model_ids: list[uuid.UUID] | None = None
-) -> ClashRun:
+async def _make_run(session, project: Project, *, model_ids: list[uuid.UUID] | None = None) -> ClashRun:
     run = ClashRun(
         project_id=project.id,
         name="Test Run",
@@ -226,9 +222,7 @@ async def test_single_clash_no_affected_positions_medium_confidence(db_session):
     user = await _make_user(db_session)
     project = await _make_project(db_session, owner=user)
     # BOQ position whose GUIDs do NOT overlap the clash.
-    await _make_boq_with_position(
-        db_session, project, cad_element_ids=["UNRELATED-1"]
-    )
+    await _make_boq_with_position(db_session, project, cad_element_ids=["UNRELATED-1"])
     run = await _make_run(db_session, project)
     clash = await _make_clash(
         db_session,
@@ -324,9 +318,7 @@ async def test_currency_comes_from_project(db_session):
     user = await _make_user(db_session)
     project = await _make_project(db_session, owner=user, currency="USD")
     run = await _make_run(db_session, project)
-    clash = await _make_clash(
-        db_session, run, a_stable_id="X", b_stable_id="Y"
-    )
+    clash = await _make_clash(db_session, run, a_stable_id="X", b_stable_id="Y")
     service = ClashCostImpactService(db_session)
     payload, _ = await service.impact_for_clash(clash.id)
     assert payload["currency"] == "USD"
@@ -389,15 +381,9 @@ async def test_project_rollup_excludes_closed_clashes(db_session):
     run = await _make_run(db_session, project)
 
     # One open + one resolved + one ignored.
-    await _make_clash(
-        db_session, run, a_stable_id="A", b_stable_id="B", status_="new"
-    )
-    await _make_clash(
-        db_session, run, a_stable_id="C", b_stable_id="D", status_="resolved"
-    )
-    await _make_clash(
-        db_session, run, a_stable_id="E", b_stable_id="F", status_="ignored"
-    )
+    await _make_clash(db_session, run, a_stable_id="A", b_stable_id="B", status_="new")
+    await _make_clash(db_session, run, a_stable_id="C", b_stable_id="D", status_="resolved")
+    await _make_clash(db_session, run, a_stable_id="E", b_stable_id="F", status_="ignored")
 
     service = ClashCostImpactService(db_session)
     rollup = await service.rollup_for_project(project.id, status_filter="open")
@@ -407,9 +393,7 @@ async def test_project_rollup_excludes_closed_clashes(db_session):
     assert rollup["total_open_impact"] == 400.00
 
     # With ``all`` every status counts (3 clashes × 400 = 1200).
-    rollup_all = await service.rollup_for_project(
-        project.id, status_filter="all"
-    )
+    rollup_all = await service.rollup_for_project(project.id, status_filter="all")
     assert rollup_all["clash_count"] == 3
     assert rollup_all["total_open_impact"] == 1200.00
 
@@ -432,9 +416,7 @@ async def test_rework_factor_configurable_per_project(db_session):
         unit_rate="100",
     )
     run = await _make_run(db_session, project)
-    clash = await _make_clash(
-        db_session, run, a_stable_id="X", b_stable_id="Y"
-    )
+    clash = await _make_clash(db_session, run, a_stable_id="X", b_stable_id="Y")
     service = ClashCostImpactService(db_session)
     payload, _ = await service.impact_for_clash(clash.id)
     # 1000 × 0.25 = 250 + 400 labour = 650
@@ -490,9 +472,7 @@ async def test_decimal_precision_rounds_to_two_dp(db_session):
         total="99.99",
     )
     run = await _make_run(db_session, project)
-    clash = await _make_clash(
-        db_session, run, a_stable_id="Q", b_stable_id="R"
-    )
+    clash = await _make_clash(db_session, run, a_stable_id="Q", b_stable_id="R")
     service = ClashCostImpactService(db_session)
     payload, _ = await service.impact_for_clash(clash.id)
     # 99.99 × 0.10 = 9.999 → rounds to 10.00; labour 400 → total 410.00.
@@ -554,9 +534,7 @@ async def test_rollup_isolates_by_project_id(db_session):
     proj_b = await _make_project(db_session, owner=user, currency="USD")
     # Clash on project B only.
     run_b = await _make_run(db_session, proj_b)
-    await _make_clash(
-        db_session, run_b, a_stable_id="B1", b_stable_id="B2"
-    )
+    await _make_clash(db_session, run_b, a_stable_id="B1", b_stable_id="B2")
 
     service = ClashCostImpactService(db_session)
     rollup_a = await service.rollup_for_project(proj_a.id)

@@ -14,7 +14,7 @@ Repositories + event bus are stubbed — no database touched.
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime, UTC
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any
@@ -235,9 +235,7 @@ def test_validate_compatibility_must_not_have_violated() -> None:
 
 def test_validate_compatibility_explicit_rules_override() -> None:
     opts = [_opt("OPT-A", "1"), _opt("OPT-B", "2")]
-    ok, viol = validate_option_compatibility(
-        ["1"], opts, rules={"must_have": ["OPT-B"]}
-    )
+    ok, viol = validate_option_compatibility(["1"], opts, rules={"must_have": ["OPT-B"]})
     assert ok is False
     assert any("OPT-B" in v for v in viol)
 
@@ -397,9 +395,7 @@ async def test_convert_buyer_lead_to_contracted_emits_event() -> None:
         currency="EUR",
         contract_signed_at="2026-04-15",
     )
-    with patch(
-        "app.modules.property_dev.service.event_bus.publish_detached"
-    ) as pub:
+    with patch("app.modules.property_dev.service.event_bus.publish_detached") as pub:
         result = await svc.convert_buyer_to_contracted(buyer.id, req)
     assert result.status == "contracted"
     pub.assert_called_once()
@@ -439,9 +435,7 @@ async def test_lock_selection_emits_event_and_flips_status() -> None:
         notes=None,
     )
     svc.selections.rows[sel.id] = sel
-    with patch(
-        "app.modules.property_dev.service.event_bus.publish_detached"
-    ) as pub:
+    with patch("app.modules.property_dev.service.event_bus.publish_detached") as pub:
         out = await svc.lock_selection(sel.id)
     assert out.status == "locked"
     pub.assert_called_once()
@@ -471,9 +465,7 @@ async def test_submit_for_production_emits_event_and_flips_items() -> None:
         included_in_production=False,
     )
     svc.selection_items.rows[item.id] = item
-    with patch(
-        "app.modules.property_dev.service.event_bus.publish_detached"
-    ) as pub:
+    with patch("app.modules.property_dev.service.event_bus.publish_detached") as pub:
         await svc.submit_for_production(buyer.id)
     assert item.included_in_production is True
     pub.assert_called_once()
@@ -485,9 +477,7 @@ async def test_submit_for_production_requires_locked() -> None:
     svc = _make_service()
     buyer = _buyer()
     svc.buyers.rows[buyer.id] = buyer
-    sel = SimpleNamespace(
-        id=uuid.uuid4(), buyer_id=buyer.id, status="draft"
-    )
+    sel = SimpleNamespace(id=uuid.uuid4(), buyer_id=buyer.id, status="draft")
     svc.selections.rows[sel.id] = sel
     with pytest.raises(HTTPException) as exc:
         await svc.submit_for_production(buyer.id)
@@ -532,8 +522,11 @@ async def test_add_selection_item_rejects_locked() -> None:
     )
     svc.selections.rows[sel.id] = sel
     opt = SimpleNamespace(
-        id=uuid.uuid4(), code="OPT-A", price_delta=Decimal("100"),
-        currency="EUR", is_active=True,
+        id=uuid.uuid4(),
+        code="OPT-A",
+        price_delta=Decimal("100"),
+        currency="EUR",
+        is_active=True,
     )
     svc.options.rows[opt.id] = opt
     payload = BuyerSelectionItemCreate(option_id=opt.id, quantity=1)
@@ -568,9 +561,7 @@ async def test_complete_handover_emits_event_and_flips_plot() -> None:
         final_check_passed=True,
         snag_count_at_handover=2,
     )
-    with patch(
-        "app.modules.property_dev.service.event_bus.publish_detached"
-    ) as pub:
+    with patch("app.modules.property_dev.service.event_bus.publish_detached") as pub:
         out = await svc.complete_handover(h.id, req)
     assert out.completed_at == "2026-04-15"
     assert plot.status == "handed_over"
@@ -699,9 +690,7 @@ async def test_raise_warranty_claim_creates_and_emits_event() -> None:
         category="defect",
         description="Heating not working",
     )
-    with patch(
-        "app.modules.property_dev.service.event_bus.publish_detached"
-    ) as pub:
+    with patch("app.modules.property_dev.service.event_bus.publish_detached") as pub:
         claim = await svc.raise_warranty_claim(plot_id, buyer_id, payload)
     assert claim.status == "raised"
     assert claim.description == "Heating not working"

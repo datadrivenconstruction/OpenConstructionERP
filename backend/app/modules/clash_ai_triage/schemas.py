@@ -26,6 +26,7 @@ def _serialise_money(v: Decimal | None) -> str | None:
         return "0"
     return format(v, "f")
 
+
 # ── Enumerations ────────────────────────────────────────────────────────────
 # Tuples are exported so service-layer validators can ``in``-check without
 # importing the Literal alias type.

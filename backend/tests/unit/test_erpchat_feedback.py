@@ -19,7 +19,7 @@ state of the live alembic graph.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from sqlalchemy import select
@@ -48,9 +48,14 @@ async def session_factory():
 
 
 async def _seed_session_and_assistant(
-    session, user_id: uuid.UUID, *, content: str = "Sample reply.",
-    tokens_in: int | None = 100, tokens_out: int | None = 50,
-    cache_hit: bool | None = False, created_at: datetime | None = None,
+    session,
+    user_id: uuid.UUID,
+    *,
+    content: str = "Sample reply.",
+    tokens_in: int | None = 100,
+    tokens_out: int | None = 50,
+    cache_hit: bool | None = False,
+    created_at: datetime | None = None,
 ) -> tuple[ChatSession, ChatMessage]:
     chat = ChatSession(user_id=user_id, title="Test")
     session.add(chat)
@@ -87,7 +92,9 @@ async def test_submit_feedback_creates_row_with_thumbs_up(session_factory) -> No
     async with session_factory() as session:
         service = ERPChatService(session)
         row = await service.submit_feedback(
-            message_id=msg.id, user_id=str(user_id), rating=1,
+            message_id=msg.id,
+            user_id=str(user_id),
+            rating=1,
         )
         await session.commit()
         assert row.rating == 1
@@ -111,7 +118,9 @@ async def test_submit_feedback_flip_updates_in_place(session_factory) -> None:
     async with session_factory() as session:
         service = ERPChatService(session)
         first = await service.submit_feedback(
-            message_id=msg.id, user_id=str(user_id), rating=1,
+            message_id=msg.id,
+            user_id=str(user_id),
+            rating=1,
         )
         await session.commit()
         first_id = first.id
@@ -119,7 +128,9 @@ async def test_submit_feedback_flip_updates_in_place(session_factory) -> None:
     async with session_factory() as session:
         service = ERPChatService(session)
         second = await service.submit_feedback(
-            message_id=msg.id, user_id=str(user_id), rating=-1,
+            message_id=msg.id,
+            user_id=str(user_id),
+            rating=-1,
             comment="Hallucinated cost code",
         )
         await session.commit()
@@ -144,11 +155,15 @@ async def test_submit_feedback_rejects_invalid_rating(session_factory) -> None:
         service = ERPChatService(session)
         with pytest.raises(ValueError):
             await service.submit_feedback(
-                message_id=msg.id, user_id=str(user_id), rating=0,
+                message_id=msg.id,
+                user_id=str(user_id),
+                rating=0,
             )
         with pytest.raises(ValueError):
             await service.submit_feedback(
-                message_id=msg.id, user_id=str(user_id), rating=99,
+                message_id=msg.id,
+                user_id=str(user_id),
+                rating=99,
             )
 
 
@@ -165,7 +180,9 @@ async def test_submit_feedback_idor_guard(session_factory) -> None:
         service = ERPChatService(session)
         with pytest.raises(LookupError):
             await service.submit_feedback(
-                message_id=msg.id, user_id=str(attacker), rating=1,
+                message_id=msg.id,
+                user_id=str(attacker),
+                rating=1,
             )
 
 
@@ -196,19 +213,38 @@ async def test_admin_stats_counts_thumbs_and_feedback_rate(session_factory) -> N
     user_id = uuid.uuid4()
     async with session_factory() as session:
         chat, m1 = await _seed_session_and_assistant(
-            session, user_id, content="Reply 1", tokens_in=100, tokens_out=50,
+            session,
+            user_id,
+            content="Reply 1",
+            tokens_in=100,
+            tokens_out=50,
         )
         m2 = ChatMessage(
-            session_id=chat.id, role="assistant", content="Reply 2",
-            tokens_used=120, tokens_input=80, tokens_output=40, cache_hit=True,
+            session_id=chat.id,
+            role="assistant",
+            content="Reply 2",
+            tokens_used=120,
+            tokens_input=80,
+            tokens_output=40,
+            cache_hit=True,
         )
         m3 = ChatMessage(
-            session_id=chat.id, role="assistant", content="Reply 3",
-            tokens_used=200, tokens_input=120, tokens_output=80, cache_hit=False,
+            session_id=chat.id,
+            role="assistant",
+            content="Reply 3",
+            tokens_used=200,
+            tokens_input=120,
+            tokens_output=80,
+            cache_hit=False,
         )
         m4 = ChatMessage(
-            session_id=chat.id, role="assistant", content="Reply 4",
-            tokens_used=0, tokens_input=None, tokens_output=None, cache_hit=None,
+            session_id=chat.id,
+            role="assistant",
+            content="Reply 4",
+            tokens_used=0,
+            tokens_input=None,
+            tokens_output=None,
+            cache_hit=None,
         )
         session.add_all([m2, m3, m4])
         await session.flush()
@@ -216,23 +252,31 @@ async def test_admin_stats_counts_thumbs_and_feedback_rate(session_factory) -> N
         # Also seed a couple of user-prompt messages — these should NOT be
         # counted in total_messages.
         u1 = ChatMessage(
-            session_id=chat.id, role="user", content="how much is rebar?",
+            session_id=chat.id,
+            role="user",
+            content="how much is rebar?",
         )
         u2 = ChatMessage(
-            session_id=chat.id, role="user", content="what about steel?",
+            session_id=chat.id,
+            role="user",
+            content="what about steel?",
         )
         session.add_all([u1, u2])
         await session.flush()
 
         # 2 thumbs up
-        session.add_all([
-            ChatTurnFeedback(message_id=m1.id, user_id=user_id, rating=1),
-            ChatTurnFeedback(message_id=m2.id, user_id=user_id, rating=1),
-        ])
+        session.add_all(
+            [
+                ChatTurnFeedback(message_id=m1.id, user_id=user_id, rating=1),
+                ChatTurnFeedback(message_id=m2.id, user_id=user_id, rating=1),
+            ]
+        )
         # 1 thumbs down
         session.add(
             ChatTurnFeedback(
-                message_id=m3.id, user_id=user_id, rating=-1,
+                message_id=m3.id,
+                user_id=user_id,
+                rating=-1,
                 comment="wrong unit",
             )
         )
@@ -281,28 +325,29 @@ async def test_admin_stats_top_negative_prompts_uses_preceding_user_message(
 ) -> None:
     """Downvoted assistant turn surfaces the immediately-preceding user prompt."""
     user_id = uuid.uuid4()
-    base = datetime.now(timezone.utc) - timedelta(hours=2)
+    base = datetime.now(UTC) - timedelta(hours=2)
     async with session_factory() as session:
         chat = ChatSession(user_id=user_id, title="x")
         session.add(chat)
         await session.flush()
         u1 = ChatMessage(
-            session_id=chat.id, role="user",
+            session_id=chat.id,
+            role="user",
             content="please compute the BOQ total for project alpha quickly",
         )
         u1.created_at = base
         session.add(u1)
         await session.flush()
         a1 = ChatMessage(
-            session_id=chat.id, role="assistant", content="42 EUR",
+            session_id=chat.id,
+            role="assistant",
+            content="42 EUR",
         )
         a1.created_at = base + timedelta(minutes=1)
         session.add(a1)
         await session.flush()
 
-        session.add(
-            ChatTurnFeedback(message_id=a1.id, user_id=user_id, rating=-1)
-        )
+        session.add(ChatTurnFeedback(message_id=a1.id, user_id=user_id, rating=-1))
         await session.commit()
 
     async with session_factory() as session:

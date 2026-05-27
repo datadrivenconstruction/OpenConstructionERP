@@ -67,9 +67,7 @@ def _get_service(session: SessionDep) -> ClashTriageService:
     return ClashTriageService(session)
 
 
-async def _project_id_for_clash(
-    session: AsyncSession, clash_id: uuid.UUID
-) -> uuid.UUID:
+async def _project_id_for_clash(session: AsyncSession, clash_id: uuid.UUID) -> uuid.UUID:
     """Walk ``ClashResult → ClashRun → project_id``; 404 if not reachable."""
     stmt = (
         select(ClashRun.project_id)
@@ -208,9 +206,7 @@ async def list_history(
     """Paginated per-clash triage history, newest first."""
     project_id = await _project_id_for_clash(session, clash_id)
     await verify_project_access(project_id, user_id, session)
-    rows, total = await service.list_history(
-        clash_id, page=page, page_size=page_size
-    )
+    rows, total = await service.list_history(clash_id, page=page, page_size=page_size)
     return TriageHistoryPage(
         items=[_to_response(r) for r in rows],
         total=total,

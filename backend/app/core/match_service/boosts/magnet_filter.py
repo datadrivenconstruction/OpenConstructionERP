@@ -148,16 +148,39 @@ def _thresholds() -> tuple[float, float, float]:
 # normalisation step.
 
 _UNIT_HINT_TO_FAMILY: dict[str, str] = {
-    "m3": "volume", "m³": "volume", "cy": "volume", "cbm": "volume",
-    "cum": "volume", "cubic meter": "volume", "cubic metre": "volume",
-    "m2": "area", "m²": "area", "sm": "area", "sf": "area",
-    "sqm": "area", "sqft": "area",
-    "m": "linear", "lm": "linear", "lf": "linear", "lfm": "linear",
+    "m3": "volume",
+    "m³": "volume",
+    "cy": "volume",
+    "cbm": "volume",
+    "cum": "volume",
+    "cubic meter": "volume",
+    "cubic metre": "volume",
+    "m2": "area",
+    "m²": "area",
+    "sm": "area",
+    "sf": "area",
+    "sqm": "area",
+    "sqft": "area",
+    "m": "linear",
+    "lm": "linear",
+    "lf": "linear",
+    "lfm": "linear",
     "rm": "linear",
-    "kg": "mass", "t": "mass", "ton": "mass", "tonne": "mass", "tn": "mass",
-    "pcs": "count", "ea": "count", "stk": "count", "nr": "count",
-    "no": "count", "u": "count", "stck": "count",
-    "h": "time", "hr": "time", "hour": "time",
+    "kg": "mass",
+    "t": "mass",
+    "ton": "mass",
+    "tonne": "mass",
+    "tn": "mass",
+    "pcs": "count",
+    "ea": "count",
+    "stk": "count",
+    "nr": "count",
+    "no": "count",
+    "u": "count",
+    "stck": "count",
+    "h": "time",
+    "hr": "time",
+    "hour": "time",
 }
 
 _QUANTITY_KEY_TO_FAMILY: dict[str, str] = {
@@ -195,8 +218,7 @@ def _unit_family_from_quantities(quantities: dict[str, float] | None) -> str | N
     # Precedence — volume > area > linear > mass > count. A wall
     # carrying both ``area_m2`` AND ``length_m`` should be classified
     # as Area (it's priced per m²), not Linear.
-    for key in ("volume_m3", "area_m2", "length_m", "perimeter_m",
-                "mass_kg", "weight_kg", "count", "quantity"):
+    for key in ("volume_m3", "area_m2", "length_m", "perimeter_m", "mass_kg", "weight_kg", "count", "quantity"):
         v = quantities.get(key)
         if v is not None:
             try:
@@ -285,21 +307,21 @@ def _mf_compatible(query_mf_heads: list[str], cand_mf_head: str) -> bool:
 # for the finishing layer rather than the structural element.
 
 _IFC_ADJACENCY: dict[str, set[str]] = {
-    "IfcWall":          {"IfcWallStandardCase", "IfcCovering"},
-    "IfcSlab":          {"IfcCovering", "IfcFooting"},
-    "IfcRoof":          {"IfcCovering", "IfcSlab"},
-    "IfcFooting":       {"IfcSlab", "IfcPile"},
-    "IfcBeam":          {"IfcColumn"},
-    "IfcColumn":        {"IfcBeam"},
-    "IfcCovering":      {"IfcWall", "IfcSlab", "IfcRoof", "IfcFlooring"},
-    "IfcCurtainWall":   {"IfcWindow", "IfcWall"},
-    "IfcPipeSegment":   {"IfcPipeFitting"},
-    "IfcDuctSegment":   {"IfcDuctFitting"},
-    "IfcDoor":          {"IfcWindow"},  # Both are openings
-    "IfcWindow":        {"IfcDoor", "IfcCurtainWall"},
-    "IfcSpaceHeater":   {"IfcPipeSegment"},  # Radiators connect to plumbing
-    "IfcOutlet":        {"IfcLightFixture"},
-    "IfcLightFixture":  {"IfcOutlet"},
+    "IfcWall": {"IfcWallStandardCase", "IfcCovering"},
+    "IfcSlab": {"IfcCovering", "IfcFooting"},
+    "IfcRoof": {"IfcCovering", "IfcSlab"},
+    "IfcFooting": {"IfcSlab", "IfcPile"},
+    "IfcBeam": {"IfcColumn"},
+    "IfcColumn": {"IfcBeam"},
+    "IfcCovering": {"IfcWall", "IfcSlab", "IfcRoof", "IfcFlooring"},
+    "IfcCurtainWall": {"IfcWindow", "IfcWall"},
+    "IfcPipeSegment": {"IfcPipeFitting"},
+    "IfcDuctSegment": {"IfcDuctFitting"},
+    "IfcDoor": {"IfcWindow"},  # Both are openings
+    "IfcWindow": {"IfcDoor", "IfcCurtainWall"},
+    "IfcSpaceHeater": {"IfcPipeSegment"},  # Radiators connect to plumbing
+    "IfcOutlet": {"IfcLightFixture"},
+    "IfcLightFixture": {"IfcOutlet"},
 }
 
 
@@ -359,26 +381,26 @@ class QueryClassification:
 # hint. Kept narrow on purpose: when an envelope's classifier_hint is
 # present we trust it verbatim; this map is only a fallback.
 _IFC_TO_MF_HEADS: dict[str, tuple[str, ...]] = {
-    "IfcWall":          ("03", "04", "09"),
-    "IfcSlab":          ("03",),
-    "IfcFooting":       ("03", "31"),
-    "IfcColumn":        ("03", "05"),
-    "IfcBeam":          ("05", "06", "03"),
-    "IfcRoof":          ("07",),
-    "IfcCurtainWall":   ("08",),
-    "IfcDoor":          ("08",),
-    "IfcWindow":        ("08",),
-    "IfcCovering":      ("09", "07"),
-    "IfcFlooring":      ("09",),
-    "IfcPipeSegment":   ("22",),
-    "IfcDuctSegment":   ("23",),
-    "IfcSpaceHeater":   ("23",),
-    "IfcOutlet":        ("26",),
-    "IfcLightFixture":  ("26",),
-    "IfcCableSegment":  ("26",),
+    "IfcWall": ("03", "04", "09"),
+    "IfcSlab": ("03",),
+    "IfcFooting": ("03", "31"),
+    "IfcColumn": ("03", "05"),
+    "IfcBeam": ("05", "06", "03"),
+    "IfcRoof": ("07",),
+    "IfcCurtainWall": ("08",),
+    "IfcDoor": ("08",),
+    "IfcWindow": ("08",),
+    "IfcCovering": ("09", "07"),
+    "IfcFlooring": ("09",),
+    "IfcPipeSegment": ("22",),
+    "IfcDuctSegment": ("23",),
+    "IfcSpaceHeater": ("23",),
+    "IfcOutlet": ("26",),
+    "IfcLightFixture": ("26",),
+    "IfcCableSegment": ("26",),
     "IfcReinforcingBar": ("03",),
-    "IfcStair":         ("06", "05"),
-    "IfcRailing":       ("05", "06"),
+    "IfcStair": ("06", "05"),
+    "IfcRailing": ("05", "06"),
 }
 
 
@@ -518,12 +540,7 @@ def _decide_compat(
     # purpose and the magnets exploit exactly that gap.
     if len(reasons) >= 2:
         return False, tuple(reasons)
-    if (
-        reasons == ["mf_mismatch"]
-        and not cand_ifc
-        and not cand_unit_family
-        and classification.confidence >= 0.65
-    ):
+    if reasons == ["mf_mismatch"] and not cand_ifc and not cand_unit_family and classification.confidence >= 0.65:
         return False, tuple(reasons + ["sparse_payload"])
     return True, ()
 
@@ -596,7 +613,9 @@ def apply_to_hits(
     if classification.confidence < soft_floor:
         logger.debug(
             "magnet_filter: query=%s conf=%.2f below floor %.2f — no-op",
-            query_id or "?", classification.confidence, soft_floor,
+            query_id or "?",
+            classification.confidence,
+            soft_floor,
         )
         return hits
 
@@ -617,9 +636,9 @@ def apply_to_hits(
         if decision.action == "drop":
             dropped += 1
             logger.debug(
-                "magnet_filter: query=%s conf=%.2f DROP code=%s "
-                "ifc=%s mf=%s unit=%s reason=%s",
-                query_id or "?", classification.confidence,
+                "magnet_filter: query=%s conf=%.2f DROP code=%s ifc=%s mf=%s unit=%s reason=%s",
+                query_id or "?",
+                classification.confidence,
                 getattr(hit, "rate_code", "?"),
                 payload.get("ifc_class") or "-",
                 payload.get("masterformat_division") or "-",
@@ -634,10 +653,11 @@ def apply_to_hits(
                 pass
             penalised += 1
             logger.debug(
-                "magnet_filter: query=%s conf=%.2f PENALISE code=%s delta=%.2f "
-                "ifc=%s mf=%s unit=%s reason=%s",
-                query_id or "?", classification.confidence,
-                getattr(hit, "rate_code", "?"), decision.score_delta,
+                "magnet_filter: query=%s conf=%.2f PENALISE code=%s delta=%.2f ifc=%s mf=%s unit=%s reason=%s",
+                query_id or "?",
+                classification.confidence,
+                getattr(hit, "rate_code", "?"),
+                decision.score_delta,
                 payload.get("ifc_class") or "-",
                 payload.get("masterformat_division") or "-",
                 payload.get("unit_type") or "-",
@@ -647,10 +667,12 @@ def apply_to_hits(
 
     if dropped or penalised:
         logger.info(
-            "magnet_filter: query=%s conf=%.2f kept=%d dropped=%d penalised=%d "
-            "(qry_ifc=%s qry_mf=%s qry_unit=%s)",
-            query_id or "?", classification.confidence,
-            len(kept), dropped, penalised,
+            "magnet_filter: query=%s conf=%.2f kept=%d dropped=%d penalised=%d (qry_ifc=%s qry_mf=%s qry_unit=%s)",
+            query_id or "?",
+            classification.confidence,
+            len(kept),
+            dropped,
+            penalised,
             classification.ifc_class or "-",
             ",".join(classification.mf_heads) or "-",
             classification.unit_family or "-",

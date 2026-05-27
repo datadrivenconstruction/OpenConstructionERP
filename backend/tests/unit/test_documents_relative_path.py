@@ -69,15 +69,12 @@ def test_relative_path_resolves_under_upload_base(tmp_path: Path) -> None:
     foreign_cwd.mkdir()
     os.chdir(foreign_cwd)
     try:
-        resolved = _resolve_under_base(
-            "demo/medical-us/tender.pdf", upload_base.resolve()
-        )
+        resolved = _resolve_under_base("demo/medical-us/tender.pdf", upload_base.resolve())
     finally:
         os.chdir(cwd_before)
 
     assert _is_inside(resolved, upload_base.resolve()), (
-        f"Relative demo path escaped upload_base: resolved={resolved}, "
-        f"base={upload_base.resolve()}"
+        f"Relative demo path escaped upload_base: resolved={resolved}, base={upload_base.resolve()}"
     )
     assert resolved.exists(), "Resolver must point at the actual file on disk"
 
@@ -148,9 +145,7 @@ def test_traversal_attempt_with_absolute_outside_base(tmp_path: Path) -> None:
     outside.write_text("nope")
 
     resolved = _resolve_under_base(str(outside), upload_base)
-    assert not _is_inside(resolved, upload_base), (
-        "Absolute path outside upload_base must be rejected by containment."
-    )
+    assert not _is_inside(resolved, upload_base), "Absolute path outside upload_base must be rejected by containment."
 
 
 # ── Sanity: the resolver is the canonical fix ───────────────────────────────
@@ -161,10 +156,7 @@ def test_router_uses_normalized_resolution() -> None:
     with relative ``file_path`` *before* calling ``.resolve()``. If a
     future refactor removes that step, this test fails fast.
     """
-    router_path = (
-        Path(__file__).resolve().parent.parent.parent
-        / "app" / "modules" / "documents" / "router.py"
-    )
+    router_path = Path(__file__).resolve().parent.parent.parent / "app" / "modules" / "documents" / "router.py"
     src = router_path.read_text(encoding="utf-8")
     # The fix introduces this exact branch — keep it grep-able.
     assert "raw if raw.is_absolute() else upload_base / raw" in src, (
@@ -184,9 +176,7 @@ def test_router_uses_normalized_resolution() -> None:
         ("foo/../bar.pdf", True),  # collapses to bar.pdf — still inside
     ],
 )
-def test_parametrised_relative_inputs(
-    tmp_path: Path, stored: str, expected_inside: bool
-) -> None:
+def test_parametrised_relative_inputs(tmp_path: Path, stored: str, expected_inside: bool) -> None:
     upload_base = (tmp_path / "uploads").resolve()
     upload_base.mkdir()
     resolved = _resolve_under_base(stored, upload_base)

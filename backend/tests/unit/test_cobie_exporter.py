@@ -6,14 +6,14 @@ that makes byte-level reproducibility brittle across versions. We pin
 the timestamp via ``CobieOptions.frozen_now`` so VALUES (not bytes)
 stay deterministic.
 """
+
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from io import BytesIO
 from types import SimpleNamespace
 
-import pytest
 from openpyxl import load_workbook
 
 from app.modules.bim_hub.exporters import build_cobie_workbook
@@ -219,19 +219,13 @@ class TestCobieDataCorrectness:
         xlsx = build_cobie_workbook(_fixture_model(), _fixture_elements())
         wb = _workbook_from_bytes(xlsx)
         # Type column for component must equal the Type sheet's Name.
-        types = {
-            row[0].value
-            for row in wb["Type"].iter_rows(min_row=2)
-            if row[0].value
-        }
+        types = {row[0].value for row in wb["Type"].iter_rows(min_row=2) if row[0].value}
         components_type_names = {
             row[COMPONENT_COLUMNS.index("TypeName")].value
             for row in wb["Component"].iter_rows(min_row=2)
             if row[0].value
         }
-        assert components_type_names.issubset(types), (
-            "Every Component.TypeName must reference an existing Type.Name"
-        )
+        assert components_type_names.issubset(types), "Every Component.TypeName must reference an existing Type.Name"
 
     def test_system_has_correct_component_names(self):
         xlsx = build_cobie_workbook(_fixture_model(), _fixture_elements())
@@ -246,9 +240,7 @@ class TestCobieDataCorrectness:
     def test_untracked_elements_excluded_from_component(self):
         xlsx = build_cobie_workbook(_fixture_model(), _fixture_elements())
         wb = _workbook_from_bytes(xlsx)
-        component_names = {
-            row[0].value for row in wb["Component"].iter_rows(min_row=2)
-        }
+        component_names = {row[0].value for row in wb["Component"].iter_rows(min_row=2)}
         # wall-001 is NOT tracked, so should not be here.
         assert "Wall 001" not in component_names
         assert "wall-001" not in component_names
@@ -258,9 +250,7 @@ class TestCobieDeterminism:
     def test_frozen_timestamp_produces_repeatable_timestamps(self):
         """Same input with same frozen_now yields identical CreatedOn
         strings across runs — snapshot-style comparison."""
-        opts = CobieOptions(
-            frozen_now=datetime(2026, 4, 22, 9, 0, 0, tzinfo=timezone.utc)
-        )
+        opts = CobieOptions(frozen_now=datetime(2026, 4, 22, 9, 0, 0, tzinfo=UTC))
         xlsx1 = build_cobie_workbook(_fixture_model(), _fixture_elements(), options=opts)
         xlsx2 = build_cobie_workbook(_fixture_model(), _fixture_elements(), options=opts)
         # Load both and compare the Facility row (which contains CreatedOn).
@@ -271,9 +261,7 @@ class TestCobieDeterminism:
         assert r1 == r2
 
     def test_created_on_format_is_iso_without_timezone(self):
-        opts = CobieOptions(
-            frozen_now=datetime(2026, 4, 22, 9, 15, 42, tzinfo=timezone.utc)
-        )
+        opts = CobieOptions(frozen_now=datetime(2026, 4, 22, 9, 15, 42, tzinfo=UTC))
         xlsx = build_cobie_workbook(_fixture_model(), _fixture_elements(), options=opts)
         wb = _workbook_from_bytes(xlsx)
         facility_row = next(wb["Facility"].iter_rows(min_row=2, max_row=2))
@@ -313,9 +301,7 @@ class TestCobieEdgeCases:
                     storey=f"Floor {(i // 500) + 1}",
                     discipline="MEP" if i % 50 == 0 else "Arch",
                     asset_info=(
-                        {"manufacturer": "ACME", "model": "M-1", "parent_system": "SYS"}
-                        if i % 50 == 0
-                        else {}
+                        {"manufacturer": "ACME", "model": "M-1", "parent_system": "SYS"} if i % 50 == 0 else {}
                     ),
                     is_tracked_asset=(i % 50 == 0),
                     quantities={},

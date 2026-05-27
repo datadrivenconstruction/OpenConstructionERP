@@ -187,9 +187,7 @@ async def _seed_clash_with_boq(
 
 
 @pytest.mark.asyncio
-async def test_clash_impact_happy_path(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_clash_impact_happy_path(client: AsyncClient, auth: dict[str, str], project_id: str):
     clash_id = await _seed_clash_with_boq(
         project_id,
         cad_element_ids=["EP-A"],
@@ -210,9 +208,7 @@ async def test_clash_impact_happy_path(
 
 
 @pytest.mark.asyncio
-async def test_clash_impact_unauthorised_returns_401(
-    client: AsyncClient, project_id: str
-):
+async def test_clash_impact_unauthorised_returns_401(client: AsyncClient, project_id: str):
     clash_id = await _seed_clash_with_boq(
         project_id,
         cad_element_ids=["NA"],
@@ -226,9 +222,7 @@ async def test_clash_impact_unauthorised_returns_401(
 
 
 @pytest.mark.asyncio
-async def test_clash_impact_missing_returns_404(
-    client: AsyncClient, auth: dict[str, str]
-):
+async def test_clash_impact_missing_returns_404(client: AsyncClient, auth: dict[str, str]):
     resp = await client.get(
         f"/api/v1/clash-cost-impact/clash/{uuid.uuid4()}/impact",
         headers=auth,
@@ -237,9 +231,7 @@ async def test_clash_impact_missing_returns_404(
 
 
 @pytest.mark.asyncio
-async def test_project_rollup_unauthorised_returns_401(
-    client: AsyncClient, project_id: str
-):
+async def test_project_rollup_unauthorised_returns_401(client: AsyncClient, project_id: str):
     """No Authorization header → 401 (the ``HTTPBearer`` auth gate)."""
     resp = await client.get(
         f"/api/v1/clash-cost-impact/project/{project_id}/rollup",
@@ -248,9 +240,7 @@ async def test_project_rollup_unauthorised_returns_401(
 
 
 @pytest.mark.asyncio
-async def test_project_rollup_happy_path(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_project_rollup_happy_path(client: AsyncClient, auth: dict[str, str], project_id: str):
     # Existing seeded clashes from earlier tests live on this project —
     # we just verify the rollup endpoint returns a well-formed envelope.
     resp = await client.get(
@@ -271,9 +261,7 @@ async def test_project_rollup_happy_path(
 
 
 @pytest.mark.asyncio
-async def test_project_rollup_unknown_returns_404(
-    client: AsyncClient, auth: dict[str, str]
-):
+async def test_project_rollup_unknown_returns_404(client: AsyncClient, auth: dict[str, str]):
     resp = await client.get(
         f"/api/v1/clash-cost-impact/project/{uuid.uuid4()}/rollup",
         headers=auth,
@@ -282,9 +270,7 @@ async def test_project_rollup_unknown_returns_404(
 
 
 @pytest.mark.asyncio
-async def test_project_rollup_status_filter_all_widens(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_project_rollup_status_filter_all_widens(client: AsyncClient, auth: dict[str, str], project_id: str):
     resp_open = await client.get(
         f"/api/v1/clash-cost-impact/project/{project_id}/rollup",
         headers=auth,
@@ -296,6 +282,4 @@ async def test_project_rollup_status_filter_all_widens(
     assert resp_open.status_code == 200
     assert resp_all.status_code == 200
     # status=all must include AT LEAST as many clashes as status=open.
-    assert (
-        resp_all.json()["clash_count"] >= resp_open.json()["clash_count"]
-    )
+    assert resp_all.json()["clash_count"] >= resp_open.json()["clash_count"]

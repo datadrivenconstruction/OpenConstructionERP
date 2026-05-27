@@ -266,9 +266,7 @@ class CountryRepository:
 
     async def count(self) -> int:
         """Total number of active countries."""
-        stmt = select(func.count()).select_from(
-            select(Country).where(Country.is_active.is_(True)).subquery()
-        )
+        stmt = select(func.count()).select_from(select(Country).where(Country.is_active.is_(True)).subquery())
         return (await self.session.execute(stmt)).scalar_one()
 
 
@@ -437,8 +435,7 @@ class TaxConfigRepository:
             select(TaxConfiguration)
             .where(
                 TaxConfiguration.country_code == country_code.upper(),
-                (TaxConfiguration.effective_to.is_(None))
-                | (TaxConfiguration.effective_to >= today),
+                (TaxConfiguration.effective_to.is_(None)) | (TaxConfiguration.effective_to >= today),
             )
             .order_by(TaxConfiguration.tax_name)
         )
@@ -484,11 +481,7 @@ class TaxConfigRepository:
             data["metadata_"] = data.pop("metadata")
 
         if data:
-            stmt = (
-                update(TaxConfiguration)
-                .where(TaxConfiguration.id == config_id)
-                .values(**data)
-            )
+            stmt = update(TaxConfiguration).where(TaxConfiguration.id == config_id).values(**data)
             await self.session.execute(stmt)
             await self.session.flush()
             self.session.expire_all()

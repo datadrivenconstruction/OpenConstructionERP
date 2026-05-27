@@ -71,12 +71,9 @@ def _opp(
 def test_money_column_is_numeric_not_float(model, column_name):
     col = model.__table__.columns[column_name]
     assert isinstance(col.type, SANumeric), (
-        f"{model.__name__}.{column_name} must be Numeric, "
-        f"got {type(col.type).__name__}"
+        f"{model.__name__}.{column_name} must be Numeric, got {type(col.type).__name__}"
     )
-    assert not isinstance(col.type, SAFloat), (
-        f"{model.__name__}.{column_name} must NOT be Float"
-    )
+    assert not isinstance(col.type, SAFloat), f"{model.__name__}.{column_name} must NOT be Float"
 
 
 # ── Pure helpers ─────────────────────────────────────────────────────────
@@ -137,7 +134,9 @@ def test_pipeline_metrics_won_lost_excluded_from_open_totals():
 def test_stage_weighted_forecast_returns_decimal_only():
     stage_id = uuid.uuid4()
     stage = SimpleNamespace(
-        id=stage_id, name="Proposal", code="proposal",
+        id=stage_id,
+        name="Proposal",
+        code="proposal",
         default_probability_percent=50,
     )
     opps = [

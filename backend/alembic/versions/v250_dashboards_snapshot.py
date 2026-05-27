@@ -9,6 +9,7 @@ Revision ID: v250_dashboards_snapshot
 Revises: v231_contact_tenant_id
 Create Date: 2026-04-23
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -40,7 +41,9 @@ def upgrade() -> None:
             SNAPSHOT_TABLE,
             sa.Column("id", sa.String(length=36), primary_key=True),
             sa.Column(
-                "project_id", sa.String(length=36), nullable=False,
+                "project_id",
+                sa.String(length=36),
+                nullable=False,
             ),
             sa.Column("tenant_id", sa.String(length=36), nullable=True),
             sa.Column("label", sa.String(length=200), nullable=False),
@@ -64,10 +67,14 @@ def upgrade() -> None:
                 server_default=sa.text("CURRENT_TIMESTAMP"),
             ),
             sa.ForeignKeyConstraint(
-                ["project_id"], ["oe_projects_project.id"], ondelete="CASCADE",
+                ["project_id"],
+                ["oe_projects_project.id"],
+                ondelete="CASCADE",
             ),
             sa.UniqueConstraint(
-                "project_id", "label", name=SNAPSHOT_LABEL_UQ,
+                "project_id",
+                "label",
+                name=SNAPSHOT_LABEL_UQ,
             ),
         )
         op.create_index(SNAPSHOT_PROJECT_IX, SNAPSHOT_TABLE, ["project_id"])
@@ -97,11 +104,15 @@ def upgrade() -> None:
                 server_default=sa.text("CURRENT_TIMESTAMP"),
             ),
             sa.ForeignKeyConstraint(
-                ["snapshot_id"], [f"{SNAPSHOT_TABLE}.id"], ondelete="CASCADE",
+                ["snapshot_id"],
+                [f"{SNAPSHOT_TABLE}.id"],
+                ondelete="CASCADE",
             ),
         )
         op.create_index(
-            SOURCE_FILE_SNAPSHOT_IX, SOURCE_FILE_TABLE, ["snapshot_id"],
+            SOURCE_FILE_SNAPSHOT_IX,
+            SOURCE_FILE_TABLE,
+            ["snapshot_id"],
         )
 
 

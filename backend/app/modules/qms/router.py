@@ -16,6 +16,8 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, 
 from app.core.file_signature import (
     SIGNATURE_BYTES_REQUIRED,
     FileSignatureMismatch,
+)
+from app.core.file_signature import (
     require as require_signature,
 )
 from app.core.permissions import permission_registry
@@ -32,9 +34,7 @@ from app.dependencies import (
 # Office ZIP / OLE containers. XML/HTML deliberately excluded — these
 # files are rendered back as clickable links and HTML has repeatedly
 # been an XSS sink in audited modules.
-_QMS_ALLOWED_ATTACHMENT_TYPES = frozenset(
-    {"pdf", "png", "jpeg", "gif", "webp", "zip", "ole"}
-)
+_QMS_ALLOWED_ATTACHMENT_TYPES = frozenset({"pdf", "png", "jpeg", "gif", "webp", "zip", "ole"})
 
 # Per-attachment storage root. Lazy-created on first upload so fresh
 # installs that never use the feature don't ship the directory.
@@ -107,7 +107,8 @@ async def list_itp_plans(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
     status_filter: str | None = Query(
-        default=None, alias="status",
+        default=None,
+        alias="status",
         pattern=r"^(draft|active|superseded|closed)$",
     ),
     _perm: None = Depends(RequirePermission("qms.itp.read")),
@@ -116,7 +117,10 @@ async def list_itp_plans(
     """‌⁠‍List ITP plans for a project."""
     await verify_project_access(project_id, user_id, session)
     plans, _ = await service.repo.list_itp_plans(
-        project_id, offset=offset, limit=limit, status=status_filter,
+        project_id,
+        offset=offset,
+        limit=limit,
+        status=status_filter,
     )
     return [ITPPlanRead.model_validate(p) for p in plans]
 
@@ -187,7 +191,8 @@ async def list_inspections(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
     status_filter: str | None = Query(
-        default=None, alias="status",
+        default=None,
+        alias="status",
         pattern=r"^(scheduled|in_progress|passed|failed|conditional)$",
     ),
     _perm: None = Depends(RequirePermission("qms.inspection.read")),
@@ -195,7 +200,10 @@ async def list_inspections(
 ) -> list[InspectionRead]:
     await verify_project_access(project_id, user_id, session)
     rows, _ = await service.repo.list_inspections(
-        project_id, offset=offset, limit=limit, status=status_filter,
+        project_id,
+        offset=offset,
+        limit=limit,
+        status=status_filter,
     )
     return [InspectionRead.model_validate(r) for r in rows]
 
@@ -256,7 +264,9 @@ async def complete_inspection(
     await verify_project_access(inspection.project_id, user_id, session)
     try:
         inspection = await service.complete_inspection(
-            inspection_id, result=result, notes=notes,
+            inspection_id,
+            result=result,
+            notes=notes,
         )
     except ValueError as exc:
         raise _bad(str(exc)) from exc
@@ -363,7 +373,8 @@ async def upload_inspection_attachment(
         filepath.write_bytes(content)
     except Exception as exc:
         logger.exception(
-            "Unable to save attachment for inspection %s", inspection_id,
+            "Unable to save attachment for inspection %s",
+            inspection_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -390,19 +401,24 @@ async def list_ncrs(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
     status_filter: str | None = Query(
-        default=None, alias="status",
+        default=None,
+        alias="status",
         pattern=r"^(open|action_pending|verifying|closed|cancelled)$",
     ),
     severity: str | None = Query(
-        default=None, pattern=r"^(minor|major|critical)$",
+        default=None,
+        pattern=r"^(minor|major|critical)$",
     ),
     _perm: None = Depends(RequirePermission("qms.ncr.read")),
     service: QMSService = Depends(_get_service),
 ) -> list[NCRRead]:
     await verify_project_access(project_id, user_id, session)
     rows, _ = await service.repo.list_ncrs(
-        project_id, offset=offset, limit=limit,
-        status=status_filter, severity=severity,
+        project_id,
+        offset=offset,
+        limit=limit,
+        status=status_filter,
+        severity=severity,
     )
     return [NCRRead.model_validate(r) for r in rows]
 
@@ -464,7 +480,8 @@ async def add_ncr_action(
 
 
 @router.post(
-    "/ncrs/{ncr_id}/escalate-to-variation", response_model=NCRRead,
+    "/ncrs/{ncr_id}/escalate-to-variation",
+    response_model=NCRRead,
 )
 async def escalate_ncr_to_variation(
     ncr_id: uuid.UUID,
@@ -480,7 +497,8 @@ async def escalate_ncr_to_variation(
     await verify_project_access(ncr.project_id, user_id, session)
     try:
         ncr = await service.escalate_ncr_to_variation(
-            ncr_id, variation_id=variation_id,
+            ncr_id,
+            variation_id=variation_id,
         )
     except ValueError as exc:
         raise _bad(str(exc)) from exc
@@ -544,7 +562,8 @@ async def upload_ncr_attachment(
         content = await file.read()
     except Exception as exc:
         logger.exception(
-            "Unable to read attachment upload for NCR %s", ncr_id,
+            "Unable to read attachment upload for NCR %s",
+            ncr_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -578,7 +597,8 @@ async def upload_ncr_attachment(
         filepath.write_bytes(content)
     except Exception as exc:
         logger.exception(
-            "Unable to save attachment for NCR %s", ncr_id,
+            "Unable to save attachment for NCR %s",
+            ncr_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -605,7 +625,8 @@ async def list_punch_items(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
     status_filter: str | None = Query(
-        default=None, alias="status",
+        default=None,
+        alias="status",
         pattern=r"^(open|assigned|in_progress|ready_for_inspection|closed|rejected)$",
     ),
     _perm: None = Depends(RequirePermission("qms.punch.read")),
@@ -613,7 +634,10 @@ async def list_punch_items(
 ) -> list[PunchItemRead]:
     await verify_project_access(project_id, user_id, session)
     rows, _ = await service.repo.list_punch(
-        project_id, offset=offset, limit=limit, status=status_filter,
+        project_id,
+        offset=offset,
+        limit=limit,
+        status=status_filter,
     )
     return [PunchItemRead.model_validate(r) for r in rows]
 
@@ -704,7 +728,8 @@ async def list_audits(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
     status_filter: str | None = Query(
-        default=None, alias="status",
+        default=None,
+        alias="status",
         pattern=r"^(planned|in_progress|completed|closed)$",
     ),
     _perm: None = Depends(RequirePermission("qms.audit.read")),
@@ -712,7 +737,10 @@ async def list_audits(
 ) -> list[AuditRead]:
     await verify_project_access(project_id, user_id, session)
     rows, _ = await service.repo.list_audits(
-        project_id, offset=offset, limit=limit, status=status_filter,
+        project_id,
+        offset=offset,
+        limit=limit,
+        status=status_filter,
     )
     return [AuditRead.model_validate(r) for r in rows]
 
@@ -754,7 +782,9 @@ async def update_audit(
 
 
 @router.post(
-    "/audits/{audit_id}/findings", response_model=AuditFindingRead, status_code=201,
+    "/audits/{audit_id}/findings",
+    response_model=AuditFindingRead,
+    status_code=201,
 )
 async def add_audit_finding(
     audit_id: uuid.UUID,
@@ -790,7 +820,8 @@ async def complete_audit(
     await verify_project_access(audit.project_id, user_id, session)
     try:
         audit = await service.complete_audit(
-            audit_id, overall_rating=overall_rating,
+            audit_id,
+            overall_rating=overall_rating,
         )
     except ValueError as exc:
         raise _bad(str(exc)) from exc
@@ -922,8 +953,11 @@ async def list_itp_templates(
     service: QMSService = Depends(_get_service),
 ) -> list[ITPTemplateRead]:
     rows, _ = await service.repo.list_itp_templates(
-        csi_division=csi_division, work_type=work_type,
-        active_only=active_only, offset=offset, limit=limit,
+        csi_division=csi_division,
+        work_type=work_type,
+        active_only=active_only,
+        offset=offset,
+        limit=limit,
     )
     return [ITPTemplateRead.model_validate(r) for r in rows]
 
@@ -985,7 +1019,9 @@ async def clone_itp_template(
     await verify_project_access(request.project_id, user_id, session)
     try:
         plan = await service.clone_itp_template_to_project(
-            tpl_id, request, user_id=user_id,
+            tpl_id,
+            request,
+            user_id=user_id,
         )
     except ValueError as exc:
         msg = str(exc)
@@ -1005,7 +1041,8 @@ async def list_calibrations(
     project_id: uuid.UUID | None = Query(default=None),
     instrument_type: str | None = Query(default=None, max_length=100),
     status_filter: str | None = Query(
-        default=None, alias="status",
+        default=None,
+        alias="status",
         pattern=r"^(valid|expired|withdrawn)$",
     ),
     offset: int = Query(default=0, ge=0),
@@ -1025,8 +1062,11 @@ async def list_calibrations(
         )
     await verify_project_access(project_id, user_id, session)
     rows, _ = await service.repo.list_calibrations(
-        project_id=project_id, instrument_type=instrument_type,
-        status=status_filter, offset=offset, limit=limit,
+        project_id=project_id,
+        instrument_type=instrument_type,
+        status=status_filter,
+        offset=offset,
+        limit=limit,
     )
     return [CalibrationRead.model_validate(r) for r in rows]
 
@@ -1063,16 +1103,14 @@ async def create_calibration(
             role == "admin"
             or "qms.calibration.tenant_write" in permissions
             or permission_registry.role_has_permission(
-                role, "qms.calibration.tenant_write",
+                role,
+                "qms.calibration.tenant_write",
             )
         )
         if not has_perm:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    "Tenant-wide calibration creation requires "
-                    "qms.calibration.tenant_write (MANAGER+)"
-                ),
+                detail=("Tenant-wide calibration creation requires qms.calibration.tenant_write (MANAGER+)"),
             )
     try:
         cal = await service.create_calibration(data, user_id=user_id)

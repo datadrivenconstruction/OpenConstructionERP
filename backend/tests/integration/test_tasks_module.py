@@ -176,9 +176,7 @@ async def test_legal_status_transition_chain(client, auth, project_id):
     # draft -> open -> in_progress
     r1 = await client.patch(f"{TASKS}/{tid}", json={"status": "open"}, headers=auth)
     assert r1.status_code == 200, r1.text
-    r2 = await client.patch(
-        f"{TASKS}/{tid}", json={"status": "in_progress"}, headers=auth
-    )
+    r2 = await client.patch(f"{TASKS}/{tid}", json={"status": "in_progress"}, headers=auth)
     assert r2.status_code == 200, r2.text
     assert r2.json()["status"] == "in_progress"
 
@@ -238,9 +236,7 @@ async def test_double_complete_rejected(client, auth, project_id):
 async def test_cannot_edit_completed_task(client, auth, project_id):
     created = (await _create_task(client, auth, project_id)).json()
     await client.post(f"{TASKS}/{created['id']}/complete/", headers=auth)
-    resp = await client.patch(
-        f"{TASKS}/{created['id']}", json={"title": "new"}, headers=auth
-    )
+    resp = await client.patch(f"{TASKS}/{created['id']}", json={"title": "new"}, headers=auth)
     assert resp.status_code == 400
 
 
@@ -250,11 +246,7 @@ async def test_cannot_edit_completed_task(client, auth, project_id):
 @pytest.mark.asyncio
 async def test_complete_blocked_by_incomplete_dependency(client, auth, project_id):
     pred = (await _create_task(client, auth, project_id, title="Predecessor")).json()
-    dep = (
-        await _create_task(
-            client, auth, project_id, title="Dependent", depends_on=pred["id"]
-        )
-    ).json()
+    dep = (await _create_task(client, auth, project_id, title="Dependent", depends_on=pred["id"])).json()
     resp = await client.post(f"{TASKS}/{dep['id']}/complete/", headers=auth)
     assert resp.status_code == 409
     assert "blocked by" in resp.text.lower()
@@ -266,9 +258,7 @@ async def test_complete_blocked_by_incomplete_dependency(client, auth, project_i
 
 
 @pytest.mark.asyncio
-async def test_create_completed_with_incomplete_dependency_rejected(
-    client, auth, project_id
-):
+async def test_create_completed_with_incomplete_dependency_rejected(client, auth, project_id):
     pred = (await _create_task(client, auth, project_id, title="Pred2")).json()
     resp = await _create_task(
         client,
@@ -296,13 +286,9 @@ async def test_self_dependency_rejected(client, auth, project_id):
 @pytest.mark.asyncio
 async def test_dependency_cycle_rejected(client, auth, project_id):
     a = (await _create_task(client, auth, project_id, title="A")).json()
-    b = (
-        await _create_task(client, auth, project_id, title="B", depends_on=a["id"])
-    ).json()
+    b = (await _create_task(client, auth, project_id, title="B", depends_on=a["id"])).json()
     # a -> b would close the loop a->b->a
-    resp = await client.patch(
-        f"{TASKS}/{a['id']}", json={"depends_on": b["id"]}, headers=auth
-    )
+    resp = await client.patch(f"{TASKS}/{a['id']}", json={"depends_on": b["id"]}, headers=auth)
     assert resp.status_code == 400
     assert "cycle" in resp.text.lower()
 
@@ -312,9 +298,7 @@ async def test_dependency_cycle_rejected(client, auth, project_id):
 
 @pytest.mark.asyncio
 async def test_assigned_to_name_resolved(client, auth, project_id, user_id):
-    resp = await _create_task(
-        client, auth, project_id, title="Assigned", responsible_id=user_id
-    )
+    resp = await _create_task(client, auth, project_id, title="Assigned", responsible_id=user_id)
     assert resp.status_code == 201, resp.text
     body = resp.json()
     assert body["assigned_to"] == user_id
@@ -330,11 +314,7 @@ async def test_assigned_to_name_resolved(client, auth, project_id, user_id):
 
 @pytest.mark.asyncio
 async def test_my_tasks_returns_only_callers_tasks(client, auth, project_id, user_id):
-    mine = (
-        await _create_task(
-            client, auth, project_id, title="Mine!", responsible_id=user_id
-        )
-    ).json()
+    mine = (await _create_task(client, auth, project_id, title="Mine!", responsible_id=user_id)).json()
     resp = await client.get(f"{TASKS}/my-tasks/", headers=auth)
     assert resp.status_code == 200
     ids = {t["id"] for t in resp.json()}
@@ -379,10 +359,7 @@ async def test_stats_endpoint(client, auth, project_id):
 async def test_export_returns_xlsx(client, auth, project_id):
     resp = await client.get(f"{TASKS}/export/?project_id={project_id}", headers=auth)
     assert resp.status_code == 200
-    assert (
-        resp.headers["content-type"]
-        == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    assert resp.headers["content-type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     assert resp.content[:2] == b"PK"  # xlsx is a zip
 
 
@@ -433,11 +410,7 @@ async def test_import_rejects_unsupported_type(client, auth, project_id):
 @pytest.mark.asyncio
 async def test_private_task_hidden_from_other_user(client, auth, project_id):
     """A second admin cannot see another user's private task."""
-    priv = (
-        await _create_task(
-            client, auth, project_id, title="Secret", is_private=True
-        )
-    ).json()
+    priv = (await _create_task(client, auth, project_id, title="Secret", is_private=True)).json()
 
     unique = uuid.uuid4().hex[:8]
     email = f"tasks-other-{unique}@test.io"

@@ -117,9 +117,25 @@ ALLOWED_IMAGE_TYPES = {
     "image/tiff",
 }
 BLOCKED_EXTENSIONS = {
-    ".exe", ".bat", ".cmd", ".sh", ".ps1", ".com", ".scr",
-    ".msi", ".dll", ".vbs", ".js", ".ws", ".wsf", ".pif",
-    ".hta", ".cpl", ".msp", ".mst", ".reg",
+    ".exe",
+    ".bat",
+    ".cmd",
+    ".sh",
+    ".ps1",
+    ".com",
+    ".scr",
+    ".msi",
+    ".dll",
+    ".vbs",
+    ".js",
+    ".ws",
+    ".wsf",
+    ".pif",
+    ".hta",
+    ".cpl",
+    ".msp",
+    ".mst",
+    ".reg",
 }
 
 
@@ -293,10 +309,7 @@ class DocumentService:
         if detected_type is not None and detected_type in BANNED_SIGNATURE_TOKENS:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Executable/script content is not allowed "
-                    f"(detected: {detected_type})."
-                ),
+                detail=(f"Executable/script content is not allowed (detected: {detected_type})."),
             )
         if detected_type is not None and detected_type not in allowed_signatures:
             raise HTTPException(
@@ -381,9 +394,7 @@ class DocumentService:
                 source_module="oe_documents",
             )
         except Exception as exc:
-            logger.debug(
-                "Failed to publish documents.document.created event: %s", exc
-            )
+            logger.debug("Failed to publish documents.document.created event: %s", exc)
 
         logger.info(
             "Document uploaded: %s (%d bytes) for project %s",
@@ -468,10 +479,7 @@ class DocumentService:
         if len(content) > MAX_FILE_SIZE:
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=(
-                    f"File too large: {len(content)} bytes "
-                    f"(max {MAX_FILE_SIZE} bytes)."
-                ),
+                detail=(f"File too large: {len(content)} bytes (max {MAX_FILE_SIZE} bytes)."),
             )
 
         from app.core.file_signature import (
@@ -488,16 +496,12 @@ class DocumentService:
         if detected is not None and detected in BANNED_SIGNATURE_TOKENS:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Executable/script content is not allowed (detected: {detected})."
-                ),
+                detail=(f"Executable/script content is not allowed (detected: {detected})."),
             )
         if detected is not None and detected not in allowed:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Uploaded content does not match an allowed format (detected: {detected})."
-                ),
+                detail=(f"Uploaded content does not match an allowed format (detected: {detected})."),
             )
 
         stored_mime = _mime_for_signature(detected)
@@ -664,8 +668,7 @@ class DocumentService:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail=(
-                            f"Invalid CDE state transition: '{current_state}' -> '{new_state}'. "
-                            f"Allowed: {allowed}"
+                            f"Invalid CDE state transition: '{current_state}' -> '{new_state}'. Allowed: {allowed}"
                         ),
                     )
 
@@ -677,9 +680,7 @@ class DocumentService:
         # Reject the second update with 409 so the client retries against
         # the row that won.
         if fields.get("is_current_revision") is True:
-            parent_id = fields.get(
-                "parent_document_id", document.parent_document_id
-            )
+            parent_id = fields.get("parent_document_id", document.parent_document_id)
             if parent_id is not None:
                 stmt = select(Document).where(
                     Document.parent_document_id == parent_id,
@@ -737,9 +738,7 @@ class DocumentService:
                 source_module="oe_documents",
             )
         except Exception as exc:
-            logger.debug(
-                "Failed to publish documents.document.updated event: %s", exc
-            )
+            logger.debug("Failed to publish documents.document.updated event: %s", exc)
 
         return document
 
@@ -791,9 +790,7 @@ class DocumentService:
                 source_module="oe_documents",
             )
         except Exception as exc:
-            logger.debug(
-                "Failed to publish documents.document.deleted event: %s", exc
-            )
+            logger.debug("Failed to publish documents.document.deleted event: %s", exc)
 
         # Then remove file from disk (best-effort)
         try:
@@ -940,16 +937,10 @@ class PhotoService:
         )
 
         detected_photo_type = _sig_detect(content[:SIGNATURE_BYTES_REQUIRED])
-        if (
-            detected_photo_type is not None
-            and detected_photo_type in BANNED_SIGNATURE_TOKENS
-        ):
+        if detected_photo_type is not None and detected_photo_type in BANNED_SIGNATURE_TOKENS:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Executable/script content is not allowed "
-                    f"(detected: {detected_photo_type})."
-                ),
+                detail=(f"Executable/script content is not allowed (detected: {detected_photo_type})."),
             )
         if detected_photo_type is None or detected_photo_type not in ALLOWED_PHOTO_TYPES:
             raise HTTPException(
@@ -1050,10 +1041,17 @@ class PhotoService:
                     "VALUES (:id, :pid, :name, :desc, :cat, :fsize, :mime, :fpath, 1, :by, :tags, '{}', :now, :now)"
                 ),
                 {
-                    "id": doc_id, "pid": str(project_id), "name": safe_name,
-                    "desc": caption or "", "cat": "photo", "fsize": len(content),
-                    "mime": stored_mime, "fpath": str(file_path), "by": user_id or "",
-                    "tags": tags_json, "now": now,
+                    "id": doc_id,
+                    "pid": str(project_id),
+                    "name": safe_name,
+                    "desc": caption or "",
+                    "cat": "photo",
+                    "fsize": len(content),
+                    "mime": stored_mime,
+                    "fpath": str(file_path),
+                    "by": user_id or "",
+                    "tags": tags_json,
+                    "now": now,
                 },
             )
             logger.info("Cross-linked photo → document %s (tags: photo, %s)", doc_id, category)
@@ -1167,14 +1165,18 @@ class PhotoService:
         # cross-link is not a real FK.
         if file_path_str:
             cross_linked = (
-                await self.session.execute(
-                    select(Document).where(
-                        Document.project_id == photo.project_id,
-                        Document.category == "photo",
-                        Document.file_path == file_path_str,
+                (
+                    await self.session.execute(
+                        select(Document).where(
+                            Document.project_id == photo.project_id,
+                            Document.category == "photo",
+                            Document.file_path == file_path_str,
+                        )
                     )
                 )
-            ).scalars().all()
+                .scalars()
+                .all()
+            )
             for doc in cross_linked:
                 await self.session.delete(doc)
             if cross_linked:

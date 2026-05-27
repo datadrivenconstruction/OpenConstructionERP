@@ -37,9 +37,7 @@ class _BaseRepo:
         await self.session.flush()
         return obj
 
-    async def update_fields(
-        self, entity_id: uuid.UUID, **fields: object
-    ) -> None:
+    async def update_fields(self, entity_id: uuid.UUID, **fields: object) -> None:
         if not fields:
             return
         stmt = (
@@ -65,7 +63,8 @@ class GeoAnchorRepository(_BaseRepo):
     model = GeoAnchor
 
     async def get_by_project(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> GeoAnchor | None:
         stmt = select(GeoAnchor).where(GeoAnchor.project_id == project_id)
         res = await self.session.execute(stmt)
@@ -114,10 +113,7 @@ class TilesetRepository(_BaseRepo):
             # via SQLAlchemy's portable JSON accessor — no Postgres-only
             # SQL leaks into the dev-friendly SQLite path.
             try:
-                meta_match = (
-                    Tileset.metadata_["development_id"].as_string()
-                    == development_id
-                )
+                meta_match = Tileset.metadata_["development_id"].as_string() == development_id
             except Exception:  # noqa: BLE001 — JSON accessor not supported
                 meta_match = None
             native_match = and_(
@@ -125,9 +121,7 @@ class TilesetRepository(_BaseRepo):
                 Tileset.source_id == development_id,
             )
             stmt = stmt.where(
-                or_(native_match, meta_match)
-                if meta_match is not None
-                else native_match,
+                or_(native_match, meta_match) if meta_match is not None else native_match,
             )
         stmt = stmt.order_by(Tileset.created_at.desc()).offset(offset).limit(limit)
         res = await self.session.execute(stmt)
@@ -149,11 +143,7 @@ class TilesetRepository(_BaseRepo):
         Internal callers (event-bus subscribers that already know they
         are operating on a trusted payload) may omit it.
         """
-        stmt = (
-            select(Tileset)
-            .where(Tileset.source_kind == source_kind)
-            .where(Tileset.source_id == source_id)
-        )
+        stmt = select(Tileset).where(Tileset.source_kind == source_kind).where(Tileset.source_id == source_id)
         if project_id is not None:
             stmt = stmt.where(Tileset.project_id == project_id)
         stmt = stmt.order_by(Tileset.created_at.desc())
@@ -206,12 +196,16 @@ class TerrainSourceRepository(_BaseRepo):
     model = TerrainSource
 
     async def list_all(
-        self, *, offset: int = 0, limit: int = 100,
+        self,
+        *,
+        offset: int = 0,
+        limit: int = 100,
     ) -> list[TerrainSource]:
         stmt = (
             select(TerrainSource)
             .order_by(
-                TerrainSource.is_default.desc(), TerrainSource.name.asc(),
+                TerrainSource.is_default.desc(),
+                TerrainSource.name.asc(),
             )
             .offset(offset)
             .limit(limit)
@@ -220,20 +214,12 @@ class TerrainSourceRepository(_BaseRepo):
         return list(res.scalars().all())
 
     async def get_default(self) -> TerrainSource | None:
-        stmt = (
-            select(TerrainSource)
-            .where(TerrainSource.is_default.is_(True))
-            .order_by(TerrainSource.created_at.asc())
-        )
+        stmt = select(TerrainSource).where(TerrainSource.is_default.is_(True)).order_by(TerrainSource.created_at.asc())
         res = await self.session.execute(stmt)
         return res.scalars().first()
 
     async def clear_default(self) -> None:
-        stmt = (
-            update(TerrainSource)
-            .where(TerrainSource.is_default.is_(True))
-            .values(is_default=False)
-        )
+        stmt = update(TerrainSource).where(TerrainSource.is_default.is_(True)).values(is_default=False)
         await self.session.execute(stmt)
         await self.session.flush()
 
@@ -299,7 +285,8 @@ class GeoRasterOverlayRepository(_BaseRepo):
     model = GeoRasterOverlay
 
     async def get_active(
-        self, entity_id: uuid.UUID,
+        self,
+        entity_id: uuid.UUID,
     ) -> GeoRasterOverlay | None:
         """Return the row only when it isn't soft-deleted."""
         obj = await self.get_by_id(entity_id)
@@ -365,16 +352,13 @@ class TileJobRepository(_BaseRepo):
         )
         if state:
             stmt = stmt.where(TileGenerationJob.state == state)
-        stmt = (
-            stmt.order_by(TileGenerationJob.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = stmt.order_by(TileGenerationJob.created_at.desc()).offset(offset).limit(limit)
         res = await self.session.execute(stmt)
         return list(res.scalars().all())
 
     async def list_active_for_project(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> list[TileGenerationJob]:
         """Queued + running jobs for the map-config bundle."""
         stmt = (

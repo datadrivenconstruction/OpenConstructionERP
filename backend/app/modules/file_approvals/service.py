@@ -37,9 +37,7 @@ _STAMP_KEY_PREFIX = "approvals"
 # ── Stamp burning ─────────────────────────────────────────────────────────
 
 
-def _expand_svg_placeholders(
-    svg: str, *, text: str, approver: str, decision_date: str
-) -> str:
+def _expand_svg_placeholders(svg: str, *, text: str, approver: str, decision_date: str) -> str:
     """Expand the canonical ``{{text}}``/``{{date}}``/``{{approver}}``
     placeholders inside the SVG template.
 
@@ -71,9 +69,9 @@ def _burn_pdf_stamp(
         from io import BytesIO
 
         from pypdf import PdfReader, PdfWriter
-        from reportlab.pdfgen import canvas
         from reportlab.lib.colors import HexColor
         from reportlab.lib.pagesizes import LETTER
+        from reportlab.pdfgen import canvas
     except Exception:  # noqa: BLE001 — optional deps
         logger.debug(
             "pypdf / reportlab unavailable; sidecar fallback for stamp",
@@ -204,9 +202,7 @@ class ApprovalService:
             stmt = stmt.where(FileApprovalWorkflow.status == status_filter)
         return list((await self.session.execute(stmt)).scalars().all())
 
-    async def get_workflow(
-        self, workflow_id: uuid.UUID
-    ) -> FileApprovalWorkflow:
+    async def get_workflow(self, workflow_id: uuid.UUID) -> FileApprovalWorkflow:
         stmt = (
             select(FileApprovalWorkflow)
             .where(FileApprovalWorkflow.id == workflow_id)
@@ -222,15 +218,11 @@ class ApprovalService:
 
     # ── Create ─────────────────────────────────────────────────────────
 
-    async def submit(
-        self, data: ApprovalWorkflowCreate, submitted_by_id: str | None
-    ) -> FileApprovalWorkflow:
+    async def submit(self, data: ApprovalWorkflowCreate, submitted_by_id: str | None) -> FileApprovalWorkflow:
         """Create a new workflow with N ordered steps in ``in_review``."""
         # Validate stamp template (if provided) is global or in this project.
         if data.stamp_template_id is not None:
-            tmpl = await self.session.get(
-                FileStampTemplate, data.stamp_template_id
-            )
+            tmpl = await self.session.get(FileStampTemplate, data.stamp_template_id)
             if tmpl is None:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -310,9 +302,7 @@ class ApprovalService:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail=(
-                        f"Previous step (#{prior.sort_order}) is "
-                        f"'{prior.decision}'; current step is not yet "
-                        "actionable"
+                        f"Previous step (#{prior.sort_order}) is '{prior.decision}'; current step is not yet actionable"
                     ),
                 )
 
@@ -349,10 +339,7 @@ class ApprovalService:
             workflow.final_decision_by_id = actor_uuid
         elif decision_data.decision == "approved":
             # Approved final step? Roll to ``approved`` and burn stamp.
-            remaining = [
-                s for s in workflow.steps
-                if s.id != step.id and s.decision != "approved"
-            ]
+            remaining = [s for s in workflow.steps if s.id != step.id and s.decision != "approved"]
             if not remaining:
                 workflow.status = "approved"
                 workflow.final_decision_at = now
@@ -376,9 +363,7 @@ class ApprovalService:
 
     # ── Stamp templates ────────────────────────────────────────────────
 
-    async def list_templates(
-        self, project_id: uuid.UUID | None
-    ) -> list[FileStampTemplate]:
+    async def list_templates(self, project_id: uuid.UUID | None) -> list[FileStampTemplate]:
         """List globals + project-scoped templates (project first if given)."""
         from sqlalchemy import or_
 
@@ -398,9 +383,7 @@ class ApprovalService:
         )
         return list((await self.session.execute(stmt)).scalars().all())
 
-    async def create_template(
-        self, data: StampTemplateCreate
-    ) -> FileStampTemplate:
+    async def create_template(self, data: StampTemplateCreate) -> FileStampTemplate:
         """Persist a new stamp template (project-scoped or global)."""
         row = FileStampTemplate(
             project_id=data.project_id,
@@ -433,9 +416,7 @@ class ApprovalService:
 
         template: FileStampTemplate | None = None
         if workflow.stamp_template_id is not None:
-            template = await self.session.get(
-                FileStampTemplate, workflow.stamp_template_id
-            )
+            template = await self.session.get(FileStampTemplate, workflow.stamp_template_id)
 
         approver_label = await self._resolve_approver_label(approver_id)
         decision_date = decision_at.date().isoformat()
@@ -458,10 +439,7 @@ class ApprovalService:
 
         try:
             if stamped is not None:
-                key = (
-                    f"{_STAMP_KEY_PREFIX}/{workflow.id}/"
-                    f"{workflow.file_id}__stamped.pdf"
-                )
+                key = f"{_STAMP_KEY_PREFIX}/{workflow.id}/{workflow.file_id}__stamped.pdf"
                 await backend.put(key, stamped)
                 workflow.stamped_artifact_path = key
             else:
@@ -472,10 +450,7 @@ class ApprovalService:
                     approver=approver_label,
                     decision_date=decision_date,
                 )
-                key = (
-                    f"{_STAMP_KEY_PREFIX}/{workflow.id}/"
-                    f"{workflow.file_id}__stamped.json"
-                )
+                key = f"{_STAMP_KEY_PREFIX}/{workflow.id}/{workflow.file_id}__stamped.json"
                 await backend.put(key, sidecar)
                 workflow.stamped_artifact_path = key
         except Exception:  # noqa: BLE001 — never crash final approval
@@ -485,9 +460,7 @@ class ApprovalService:
             )
             workflow.stamped_artifact_path = None
 
-    async def _read_source_file(
-        self, workflow: FileApprovalWorkflow
-    ) -> bytes | None:
+    async def _read_source_file(self, workflow: FileApprovalWorkflow) -> bytes | None:
         """Best-effort read of the source file bytes via the storage backend.
 
         Different file kinds live in different storage prefixes; we probe
@@ -522,9 +495,7 @@ class ApprovalService:
         try:
             from app.modules.users.repository import UserRepository
 
-            user = await UserRepository(self.session).get_by_id(
-                uuid.UUID(str(approver_id))
-            )
+            user = await UserRepository(self.session).get_by_id(uuid.UUID(str(approver_id)))
             if user is not None:
                 if user.full_name:
                     return user.full_name

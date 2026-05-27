@@ -28,7 +28,6 @@ _TMP_DB = _TMP_DIR / "coord_idor.db"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}"
 os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 
-import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
@@ -104,19 +103,11 @@ async def test_dashboard_cross_user_returns_404(app_factory, db_session):
     _owner_id, victim_project = await _seed_user_and_project(db_session)
     attacker_id, _attacker_project = await _seed_user_and_project(db_session)
 
-    _override_payload(
-        app, attacker_id, role="editor", perms=["coordination.read"]
-    )
+    _override_payload(app, attacker_id, role="editor", perms=["coordination.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/coordination/projects/{victim_project}/dashboard"
-            )
-        assert resp.status_code == 404, (
-            f"Expected 404 for cross-project dashboard, got {resp.status_code}: {resp.text}"
-        )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/coordination/projects/{victim_project}/dashboard")
+        assert resp.status_code == 404, f"Expected 404 for cross-project dashboard, got {resp.status_code}: {resp.text}"
     finally:
         app.dependency_overrides.clear()
 
@@ -126,16 +117,10 @@ async def test_dashboard_owner_succeeds(app_factory, db_session):
     app = app_factory
     owner_id, project_id = await _seed_user_and_project(db_session)
 
-    _override_payload(
-        app, owner_id, role="editor", perms=["coordination.read"]
-    )
+    _override_payload(app, owner_id, role="editor", perms=["coordination.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/coordination/projects/{project_id}/dashboard"
-            )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/coordination/projects/{project_id}/dashboard")
         assert resp.status_code == 200, resp.text
     finally:
         app.dependency_overrides.clear()
@@ -150,19 +135,11 @@ async def test_trade_matrix_cross_user_returns_404(app_factory, db_session):
     _owner_id, victim_project = await _seed_user_and_project(db_session)
     attacker_id, _ = await _seed_user_and_project(db_session)
 
-    _override_payload(
-        app, attacker_id, role="editor", perms=["coordination.read"]
-    )
+    _override_payload(app, attacker_id, role="editor", perms=["coordination.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/coordination/projects/{victim_project}/trade-matrix"
-            )
-        assert resp.status_code == 404, (
-            f"Expected 404 for cross-project trade-matrix, got {resp.status_code}"
-        )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/coordination/projects/{victim_project}/trade-matrix")
+        assert resp.status_code == 404, f"Expected 404 for cross-project trade-matrix, got {resp.status_code}"
     finally:
         app.dependency_overrides.clear()
 
@@ -176,19 +153,11 @@ async def test_timeline_cross_user_returns_404(app_factory, db_session):
     _owner_id, victim_project = await _seed_user_and_project(db_session)
     attacker_id, _ = await _seed_user_and_project(db_session)
 
-    _override_payload(
-        app, attacker_id, role="editor", perms=["coordination.read"]
-    )
+    _override_payload(app, attacker_id, role="editor", perms=["coordination.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/coordination/projects/{victim_project}/timeline"
-            )
-        assert resp.status_code == 404, (
-            f"Expected 404 for cross-project timeline, got {resp.status_code}"
-        )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/coordination/projects/{victim_project}/timeline")
+        assert resp.status_code == 404, f"Expected 404 for cross-project timeline, got {resp.status_code}"
     finally:
         app.dependency_overrides.clear()
 
@@ -202,19 +171,11 @@ async def test_thresholds_get_cross_user_returns_404(app_factory, db_session):
     _owner_id, victim_project = await _seed_user_and_project(db_session)
     attacker_id, _ = await _seed_user_and_project(db_session)
 
-    _override_payload(
-        app, attacker_id, role="editor", perms=["coordination.read"]
-    )
+    _override_payload(app, attacker_id, role="editor", perms=["coordination.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/coordination/projects/{victim_project}/thresholds"
-            )
-        assert resp.status_code == 404, (
-            f"Expected 404 for cross-project thresholds GET, got {resp.status_code}"
-        )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/coordination/projects/{victim_project}/thresholds")
+        assert resp.status_code == 404, f"Expected 404 for cross-project thresholds GET, got {resp.status_code}"
     finally:
         app.dependency_overrides.clear()
 
@@ -232,16 +193,12 @@ async def test_thresholds_put_cross_user_returns_404(app_factory, db_session):
         perms=["coordination.read", "coordination.write"],
     )
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.put(
                 f"/api/v1/coordination/projects/{victim_project}/thresholds/open_clashes_total",
                 json={"warn_value": "100", "error_value": "200", "enabled": True},
             )
-        assert resp.status_code == 404, (
-            f"Expected 404 for cross-project thresholds PUT, got {resp.status_code}"
-        )
+        assert resp.status_code == 404, f"Expected 404 for cross-project thresholds PUT, got {resp.status_code}"
     finally:
         app.dependency_overrides.clear()
 
@@ -270,16 +227,10 @@ async def test_admin_can_access_any_project_dashboard(app_factory, db_session):
     await db_session.commit()
     await db_session.refresh(admin_user)
 
-    _override_payload(
-        app, admin_user.id, role="admin", perms=["coordination.read"]
-    )
+    _override_payload(app, admin_user.id, role="admin", perms=["coordination.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/coordination/projects/{project_id}/dashboard"
-            )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/coordination/projects/{project_id}/dashboard")
         assert resp.status_code == 200, (
             f"Admin should access any project dashboard, got {resp.status_code}: {resp.text}"
         )

@@ -113,10 +113,7 @@ class LeadRepository:
         if not normalised:
             return None
         stmt = (
-            select(Lead)
-            .where(func.lower(Lead.contact_email) == normalised)
-            .order_by(Lead.created_at.desc())
-            .limit(1)
+            select(Lead).where(func.lower(Lead.contact_email) == normalised).order_by(Lead.created_at.desc()).limit(1)
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
@@ -320,16 +317,12 @@ class StageHistoryRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def create(
-        self, history: OpportunityStageHistory
-    ) -> OpportunityStageHistory:
+    async def create(self, history: OpportunityStageHistory) -> OpportunityStageHistory:
         self.session.add(history)
         await self.session.flush()
         return history
 
-    async def list_for_opportunity(
-        self, opportunity_id: uuid.UUID
-    ) -> list[OpportunityStageHistory]:
+    async def list_for_opportunity(self, opportunity_id: uuid.UUID) -> list[OpportunityStageHistory]:
         stmt = (
             select(OpportunityStageHistory)
             .where(OpportunityStageHistory.opportunity_id == opportunity_id)
@@ -407,9 +400,7 @@ class ForecastRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_by_period(
-        self, period: str, owner_user_id: uuid.UUID | None = None
-    ) -> Forecast | None:
+    async def get_by_period(self, period: str, owner_user_id: uuid.UUID | None = None) -> Forecast | None:
         stmt = select(Forecast).where(Forecast.period == period)
         if owner_user_id is None:
             stmt = stmt.where(Forecast.owner_user_id.is_(None))

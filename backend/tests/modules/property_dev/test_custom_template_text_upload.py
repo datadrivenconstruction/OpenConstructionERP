@@ -22,7 +22,6 @@ from httpx import AsyncClient
 
 from .conftest import _register_user
 
-
 # ── Fixtures ────────────────────────────────────────────────────────────
 
 
@@ -75,9 +74,7 @@ async def viewer_carol(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_save_text_html_round_trip(
-    client: AsyncClient, admin_alice: dict
-) -> None:
+async def test_save_text_html_round_trip(client: AsyncClient, admin_alice: dict) -> None:
     html = "<html><body><h1>Hello {{buyer.full_name}}</h1></body></html>"
     save = await client.post(
         "/api/v1/property-dev/document-templates/save-text",
@@ -114,9 +111,7 @@ async def test_save_text_html_round_trip(
 
 
 @pytest.mark.asyncio
-async def test_save_text_markdown_round_trip(
-    client: AsyncClient, admin_alice: dict
-) -> None:
+async def test_save_text_markdown_round_trip(client: AsyncClient, admin_alice: dict) -> None:
     md = "# Heading\n\nBuyer: {{buyer.full_name}}\n"
     save = await client.post(
         "/api/v1/property-dev/document-templates/save-text",
@@ -137,9 +132,7 @@ async def test_save_text_markdown_round_trip(
 
 
 @pytest.mark.asyncio
-async def test_save_text_update_in_place(
-    client: AsyncClient, admin_alice: dict
-) -> None:
+async def test_save_text_update_in_place(client: AsyncClient, admin_alice: dict) -> None:
     # Create
     v1 = await client.post(
         "/api/v1/property-dev/document-templates/save-text",
@@ -187,9 +180,7 @@ async def test_save_text_update_in_place(
 
 
 @pytest.mark.asyncio
-async def test_save_text_rejects_empty_content(
-    client: AsyncClient, admin_alice: dict
-) -> None:
+async def test_save_text_rejects_empty_content(client: AsyncClient, admin_alice: dict) -> None:
     res = await client.post(
         "/api/v1/property-dev/document-templates/save-text",
         json={
@@ -206,9 +197,7 @@ async def test_save_text_rejects_empty_content(
 
 
 @pytest.mark.asyncio
-async def test_save_text_rejects_binary_content_type(
-    client: AsyncClient, admin_alice: dict
-) -> None:
+async def test_save_text_rejects_binary_content_type(client: AsyncClient, admin_alice: dict) -> None:
     res = await client.post(
         "/api/v1/property-dev/document-templates/save-text",
         json={
@@ -225,9 +214,7 @@ async def test_save_text_rejects_binary_content_type(
 
 
 @pytest.mark.asyncio
-async def test_save_text_rejects_missing_name(
-    client: AsyncClient, admin_alice: dict
-) -> None:
+async def test_save_text_rejects_missing_name(client: AsyncClient, admin_alice: dict) -> None:
     res = await client.post(
         "/api/v1/property-dev/document-templates/save-text",
         json={
@@ -247,9 +234,7 @@ async def test_save_text_rejects_missing_name(
 
 
 @pytest.mark.asyncio
-async def test_save_text_viewer_role_rejected(
-    client: AsyncClient, viewer_carol: dict
-) -> None:
+async def test_save_text_viewer_role_rejected(client: AsyncClient, viewer_carol: dict) -> None:
     res = await client.post(
         "/api/v1/property-dev/document-templates/save-text",
         json={
@@ -269,9 +254,7 @@ async def test_save_text_viewer_role_rejected(
 
 
 @pytest.mark.asyncio
-async def test_get_content_cross_tenant_404(
-    client: AsyncClient, admin_alice: dict, editor_bob: dict
-) -> None:
+async def test_get_content_cross_tenant_404(client: AsyncClient, admin_alice: dict, editor_bob: dict) -> None:
     save = await client.post(
         "/api/v1/property-dev/document-templates/save-text",
         json={
@@ -296,9 +279,7 @@ async def test_get_content_cross_tenant_404(
 
 
 @pytest.mark.asyncio
-async def test_save_text_update_cross_tenant_404(
-    client: AsyncClient, admin_alice: dict, editor_bob: dict
-) -> None:
+async def test_save_text_update_cross_tenant_404(client: AsyncClient, admin_alice: dict, editor_bob: dict) -> None:
     save = await client.post(
         "/api/v1/property-dev/document-templates/save-text",
         json={
@@ -331,9 +312,7 @@ async def test_save_text_update_cross_tenant_404(
 
 
 @pytest.mark.asyncio
-async def test_get_content_missing_id_404(
-    client: AsyncClient, admin_alice: dict
-) -> None:
+async def test_get_content_missing_id_404(client: AsyncClient, admin_alice: dict) -> None:
     fake = uuid.uuid4()
     res = await client.get(
         f"/api/v1/property-dev/document-templates/custom/{fake}/content",
@@ -343,9 +322,7 @@ async def test_get_content_missing_id_404(
 
 
 @pytest.mark.asyncio
-async def test_get_content_binary_template_415(
-    client: AsyncClient, admin_alice: dict
-) -> None:
+async def test_get_content_binary_template_415(client: AsyncClient, admin_alice: dict) -> None:
     """A row whose content_type is binary (e.g. a real .docx upload)
     must NOT be opened in the editor — return 415, not the raw bytes."""
     # Upload a fake .docx (which the upload endpoint rejects via magic
@@ -381,9 +358,7 @@ async def test_get_content_binary_template_415(
 
 
 @pytest.mark.asyncio
-async def test_save_text_filename_is_sanitised(
-    client: AsyncClient, admin_alice: dict
-) -> None:
+async def test_save_text_filename_is_sanitised(client: AsyncClient, admin_alice: dict) -> None:
     """A pathological `name` must not escape the templates directory or
     end up with a fake extension."""
     res = await client.post(

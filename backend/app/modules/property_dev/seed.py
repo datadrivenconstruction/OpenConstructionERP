@@ -164,16 +164,12 @@ _OPTION_GROUP_SPEC: Sequence[dict[str, object]] = (
 )
 
 
-def _maybe_existing_dev(
-    session_sync_or_async: object, code: str
-) -> Development | None:
+def _maybe_existing_dev(session_sync_or_async: object, code: str) -> Development | None:
     """‌⁠‍Sync wrapper around the async lookup not needed — caller awaits us."""
     raise NotImplementedError  # placeholder, real lookup is below
 
 
-async def seed_property_dev_demo(
-    session: AsyncSession, project_ids: Iterable[uuid.UUID]
-) -> Development | None:
+async def seed_property_dev_demo(session: AsyncSession, project_ids: Iterable[uuid.UUID]) -> Development | None:
     """‌⁠‍Seed a deterministic demo development for the first project in the list.
 
     Args:
@@ -191,9 +187,7 @@ async def seed_property_dev_demo(
     project_id = ids[0]
 
     code = "DEV-DEMO-01"
-    existing = await session.execute(
-        select(Development).where(Development.code == code)
-    )
+    existing = await session.execute(select(Development).where(Development.code == code))
     dev = existing.scalar_one_or_none()
     if dev is not None:
         return dev
@@ -301,9 +295,7 @@ async def seed_property_dev_demo(
             house_type_variant_id=v.id,
             orientation=rng.choice(["N", "S", "E", "W"]),
             area_m2=Decimal(str(rng.uniform(280.0, 540.0))).quantize(Decimal("0.01")),
-            garden_area_m2=Decimal(str(rng.uniform(40.0, 220.0))).quantize(
-                Decimal("0.01")
-            ),
+            garden_area_m2=Decimal(str(rng.uniform(40.0, 220.0))).quantize(Decimal("0.01")),
             price_base=ht.base_price,
             currency="EUR",
             status=plot_status,
@@ -325,13 +317,7 @@ async def seed_property_dev_demo(
         plots.append(plot)
 
     # 5. Buyers — 32 total. Mix of statuses.
-    buyer_statuses = (
-        ["lead"] * 10
-        + ["reserved"] * 8
-        + ["contracted"] * 10
-        + ["completed"] * 2
-        + ["cancelled"] * 2
-    )
+    buyer_statuses = ["lead"] * 10 + ["reserved"] * 8 + ["contracted"] * 10 + ["completed"] * 2 + ["cancelled"] * 2
     buyers: list[Buyer] = []
     sold_plots = [p for p in plots if p.status in {"reserved", "sold", "handed_over"}]
     for i, b_status in enumerate(buyer_statuses):
@@ -351,9 +337,7 @@ async def seed_property_dev_demo(
             ),
             currency="EUR",
             contract_signed_at="2026-02-15" if b_status in {"contracted", "completed"} else None,
-            freeze_deadline=(
-                "2026-12-31" if b_status in {"reserved", "contracted"} else None
-            ),
+            freeze_deadline=("2026-12-31" if b_status in {"reserved", "contracted"} else None),
         )
         session.add(buyer)
         await session.flush()
@@ -363,9 +347,7 @@ async def seed_property_dev_demo(
     eligible_buyers = [b for b in buyers if b.status in {"reserved", "contracted"}]
     item_count = 0
     target_items = 80
-    flat_options: list[BuyerOption] = [
-        o for opts in options_by_group.values() for o in opts
-    ]
+    flat_options: list[BuyerOption] = [o for opts in options_by_group.values() for o in opts]
     for buyer in eligible_buyers:
         sel = BuyerSelection(
             buyer_id=buyer.id,
@@ -425,9 +407,7 @@ async def seed_property_dev_demo(
         h = rng.choice(handovers)
         snag = Snag(
             handover_id=h.id,
-            location_in_plot=rng.choice(
-                ["Kitchen", "Bathroom 1", "Bathroom 2", "Living room", "Bedroom 1"]
-            ),
+            location_in_plot=rng.choice(["Kitchen", "Bathroom 1", "Bathroom 2", "Living room", "Bedroom 1"]),
             severity=rng.choice(severities),
             description=f"Snag #{snag_count + 1:02d}",
             status=rng.choice(snag_statuses),

@@ -50,17 +50,11 @@ async def _index_element(event: Event) -> None:
 
     try:
         async with async_session_factory() as session:
-            stmt = (
-                select(BIMElement)
-                .options(selectinload(BIMElement.model))
-                .where(BIMElement.id == element_id)
-            )
+            stmt = select(BIMElement).options(selectinload(BIMElement.model)).where(BIMElement.id == element_id)
             row = (await session.execute(stmt)).scalar_one_or_none()
             if row is None:
                 # Race: row was deleted between publish and handler.
-                await vector_delete_one(
-                    bim_element_vector_adapter, str(element_id)
-                )
+                await vector_delete_one(bim_element_vector_adapter, str(element_id))
                 return
             project_id = None
             if row.model is not None and row.model.project_id is not None:

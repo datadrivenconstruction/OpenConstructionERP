@@ -44,7 +44,9 @@ async def engine_factory() -> AsyncGenerator[tuple[Any, Any, Path], None]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
     yield engine, factory, tmp_db
     await engine.dispose()
@@ -176,7 +178,8 @@ async def test_ttl_eviction(project_with_region) -> None:
 
 @pytest.mark.asyncio
 async def test_concurrent_gets_share_one_db_fetch(
-    project_with_region, monkeypatch: pytest.MonkeyPatch,
+    project_with_region,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """50 concurrent gets on a cold cache key issue exactly one DB fetch."""
     project_id, expected_region, factory = project_with_region

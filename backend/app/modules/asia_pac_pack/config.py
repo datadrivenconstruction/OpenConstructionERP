@@ -27,8 +27,7 @@ PACK_CONFIG: dict[str, Any] = {
             "name": "Rawlinsons Australian Construction Handbook",
             "country": "AU",
             "description": (
-                "Annual cost reference for Australian construction, "
-                "including elemental cost plans and trade rates"
+                "Annual cost reference for Australian construction, including elemental cost plans and trade rates"
             ),
         },
         {
@@ -36,8 +35,7 @@ PACK_CONFIG: dict[str, Any] = {
             "name": "NATSPEC — National Specification System",
             "country": "AU",
             "description": (
-                "National building specification system maintained by "
-                "Construction Information Systems Limited"
+                "National building specification system maintained by Construction Information Systems Limited"
             ),
         },
         {

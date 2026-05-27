@@ -25,7 +25,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3099_rfi"
 down_revision: Union[str, Sequence[str], None] = "v3099_eac"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -48,7 +47,9 @@ def _has_column(inspector: sa.engine.reflection.Inspector, table: str, col: str)
 
 
 def _has_unique_constraint(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if table not in inspector.get_table_names():
         return False
@@ -72,7 +73,9 @@ def upgrade() -> None:
         inspector = sa.inspect(bind)
 
     if _has_table(inspector, _TABLE) and not _has_unique_constraint(
-        inspector, _TABLE, _UQ_NAME,
+        inspector,
+        _TABLE,
+        _UQ_NAME,
     ):
         try:
             with op.batch_alter_table(_TABLE) as batch:

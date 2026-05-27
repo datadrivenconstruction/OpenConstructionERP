@@ -136,16 +136,10 @@ def upgrade() -> None:
         col_list = ", ".join(columns)
         if dialect == "postgresql":
             op.execute("COMMIT")
-            op.execute(
-                f"CREATE INDEX CONCURRENTLY IF NOT EXISTS {index_name} "
-                f"ON {table} ({col_list})"
-            )
+            op.execute(f"CREATE INDEX CONCURRENTLY IF NOT EXISTS {index_name} ON {table} ({col_list})")
             op.execute("BEGIN")
         else:
-            op.execute(
-                f"CREATE INDEX IF NOT EXISTS {index_name} "
-                f"ON {table} ({col_list})"
-            )
+            op.execute(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({col_list})")
 
 
 def downgrade() -> None:

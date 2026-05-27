@@ -53,12 +53,8 @@ class Schedule(Base):
     start_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     end_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
-    data_date: Mapped[str | None] = mapped_column(
-        String(20), nullable=True
-    )  # current data/status date
-    created_by: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True
-    )
+    data_date: Mapped[str | None] = mapped_column(String(20), nullable=True)  # current data/status date
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -133,23 +129,17 @@ class Activity(Base):
     late_finish: Mapped[str | None] = mapped_column(String(20), nullable=True)
     total_float: Mapped[int | None] = mapped_column(Integer, nullable=True)
     free_float: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    is_critical: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    is_critical: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
 
     # ── Constraints ──────────────────────────────────────────────────────────
     constraint_type: Mapped[str | None] = mapped_column(
         String(50), nullable=True
     )  # as_soon_as_possible / as_late_as_possible / must_start_on / must_finish_on
     #   start_no_earlier / start_no_later / finish_no_earlier / finish_no_later
-    constraint_date: Mapped[str | None] = mapped_column(
-        String(20), nullable=True
-    )  # ISO date
+    constraint_date: Mapped[str | None] = mapped_column(String(20), nullable=True)  # ISO date
 
     # Auto-generated activity code
-    activity_code: Mapped[str | None] = mapped_column(
-        String(50), nullable=True
-    )  # ACT-001, ACT-002
+    activity_code: Mapped[str | None] = mapped_column(String(50), nullable=True)  # ACT-001, ACT-002
 
     # BIM integration
     bim_element_ids: Mapped[list | None] = mapped_column(  # type: ignore[assignment]
@@ -260,9 +250,7 @@ class ScheduleRelationship(Base):
     """
 
     __tablename__ = "oe_schedule_relationship"
-    __table_args__ = (
-        UniqueConstraint("predecessor_id", "successor_id", name="uq_schedule_rel_pred_succ"),
-    )
+    __table_args__ = (UniqueConstraint("predecessor_id", "successor_id", name="uq_schedule_rel_pred_succ"),)
 
     schedule_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -282,9 +270,7 @@ class ScheduleRelationship(Base):
         nullable=False,
         index=True,
     )
-    relationship_type: Mapped[str] = mapped_column(
-        String(10), nullable=False, default="FS"
-    )
+    relationship_type: Mapped[str] = mapped_column(String(10), nullable=False, default="FS")
     lag_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -327,9 +313,7 @@ class ScheduleBaseline(Base):
         JSON,
         nullable=False,
     )
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1"
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
     created_by: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         nullable=True,
@@ -469,10 +453,7 @@ class EacScheduleLink(Base):
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug repr
-        return (
-            f"<EacScheduleLink task={self.task_id} mode={self.mode} "
-            f"matched={self.matched_element_count}>"
-        )
+        return f"<EacScheduleLink task={self.task_id} mode={self.mode} matched={self.matched_element_count}>"
 
 
 class ScheduleProgressEntry(Base):
@@ -489,9 +470,7 @@ class ScheduleProgressEntry(Base):
     """
 
     __tablename__ = "oe_schedule_progress_entry"
-    __table_args__ = (
-        Index("ix_schedule_progress_entry_task_recorded", "task_id", "recorded_at"),
-    )
+    __table_args__ = (Index("ix_schedule_progress_entry_task_recorded", "task_id", "recorded_at"),)
 
     task_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -544,7 +523,4 @@ class ScheduleProgressEntry(Base):
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug repr
-        return (
-            f"<ScheduleProgressEntry task={self.task_id} "
-            f"recorded_at={self.recorded_at} pct={self.progress_percent}>"
-        )
+        return f"<ScheduleProgressEntry task={self.task_id} recorded_at={self.recorded_at} pct={self.progress_percent}>"

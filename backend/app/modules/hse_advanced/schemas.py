@@ -28,8 +28,7 @@ def _validate_safe_url(value: str | None) -> str | None:
     # is rejected — keeps relative paths working but blocks javascript:.
     if ":" in stripped.split("/", 1)[0]:
         raise ValueError(
-            "URL must use http(s):// or be a relative path; "
-            "javascript:/data:/file: URIs are not allowed",
+            "URL must use http(s):// or be a relative path; javascript:/data:/file: URIs are not allowed",
         )
     return stripped
 
@@ -48,9 +47,7 @@ class InvestigationCreate(BaseModel):
     method: str = Field(default="5_whys", pattern=r"^(5_whys|fishbone|timeline|swot)$")
     findings: str = Field(default="", max_length=20000)
     recommendations: str = Field(default="", max_length=20000)
-    status: str = Field(
-        default="in_progress", pattern=r"^(in_progress|completed|abandoned)$"
-    )
+    status: str = Field(default="in_progress", pattern=r"^(in_progress|completed|abandoned)$")
     report_url: str | None = Field(default=None, max_length=1000)
 
     @field_validator("report_url")
@@ -66,14 +63,10 @@ class InvestigationUpdate(BaseModel):
 
     investigation_lead: UUID | None = None
     completed_at: datetime | None = None
-    method: str | None = Field(
-        default=None, pattern=r"^(5_whys|fishbone|timeline|swot)$"
-    )
+    method: str | None = Field(default=None, pattern=r"^(5_whys|fishbone|timeline|swot)$")
     findings: str | None = Field(default=None, max_length=20000)
     recommendations: str | None = Field(default=None, max_length=20000)
-    status: str | None = Field(
-        default=None, pattern=r"^(in_progress|completed|abandoned)$"
-    )
+    status: str | None = Field(default=None, pattern=r"^(in_progress|completed|abandoned)$")
     report_url: str | None = Field(default=None, max_length=1000)
 
 
@@ -339,14 +332,10 @@ class ToolboxAttendanceEntry(BaseModel):
 
     attendee_name: str = Field(..., min_length=1, max_length=255)
     attendee_company: str | None = Field(default=None, max_length=255)
-    attendee_role: str = Field(
-        default="worker", pattern=r"^(worker|foreman|visitor)$"
-    )
+    attendee_role: str = Field(default="worker", pattern=r"^(worker|foreman|visitor)$")
     signature_ref: str | None = Field(default=None, max_length=500)
     signed_at: datetime | None = None
-    attendance_status: str = Field(
-        default="present", pattern=r"^(present|absent|late)$"
-    )
+    attendance_status: str = Field(default="present", pattern=r"^(present|absent|late)$")
 
 
 class ToolboxTalkCreate(BaseModel):
@@ -583,9 +572,7 @@ class AuditFindingPayload(BaseModel):
     item_description: str = Field(..., min_length=1, max_length=2000)
     category: str = Field(
         default="other",
-        pattern=(
-            r"^(PPE|permit|housekeeping|electrical|fire|environmental|other)$"
-        ),
+        pattern=(r"^(PPE|permit|housekeeping|electrical|fire|environmental|other)$"),
     )
     severity: str = Field(default="low", pattern=r"^(low|med|high|critical)$")
     is_passed: bool = True
@@ -674,9 +661,7 @@ class CAPACreate(BaseModel):
     )
     root_cause_category: str | None = Field(
         default=None,
-        pattern=(
-            r"^(manpower|method|material|machine|environment|management|other)$"
-        ),
+        pattern=(r"^(manpower|method|material|machine|environment|management|other)$"),
     )
 
 
@@ -696,9 +681,7 @@ class CAPAUpdate(BaseModel):
     verification_notes: str | None = Field(default=None, max_length=10000)
     root_cause_category: str | None = Field(
         default=None,
-        pattern=(
-            r"^(manpower|method|material|machine|environment|management|other)$"
-        ),
+        pattern=(r"^(manpower|method|material|machine|environment|management|other)$"),
     )
 
 
@@ -725,9 +708,7 @@ class CAPAFiveWhysPayload(BaseModel):
     steps: list[FiveWhyStep] = Field(default_factory=list)
     root_cause_category: str | None = Field(
         default=None,
-        pattern=(
-            r"^(manpower|method|material|machine|environment|management|other)$"
-        ),
+        pattern=(r"^(manpower|method|material|machine|environment|management|other)$"),
     )
 
 
@@ -799,9 +780,7 @@ class CertificationCreate(BaseModel):
     issue_date: date
     valid_until: date
     document_url: str | None = Field(default=None, max_length=1000)
-    status: str = Field(
-        default="valid", pattern=r"^(valid|expired|revoked)$"
-    )
+    status: str = Field(default="valid", pattern=r"^(valid|expired|revoked)$")
 
 
 class CertificationUpdate(BaseModel):
@@ -814,9 +793,7 @@ class CertificationUpdate(BaseModel):
     issued_by: str | None = Field(default=None, max_length=255)
     valid_until: date | None = None
     document_url: str | None = Field(default=None, max_length=1000)
-    status: str | None = Field(
-        default=None, pattern=r"^(valid|expired|revoked)$"
-    )
+    status: str | None = Field(default=None, pattern=r"^(valid|expired|revoked)$")
 
 
 class CertificationResponse(BaseModel):
@@ -943,7 +920,8 @@ class CATransitionRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     to_status: str = Field(
-        ..., pattern=r"^(pending|in_progress|verified|closed)$",
+        ...,
+        pattern=r"^(pending|in_progress|verified|closed)$",
     )
     verification_notes: str | None = Field(default=None, max_length=10000)
 

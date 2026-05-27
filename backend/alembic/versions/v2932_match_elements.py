@@ -43,7 +43,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -124,13 +126,9 @@ def upgrade() -> None:
             ),
         )
     if not _has_index(inspector, _SESSION_TABLE, "ix_match_session_project"):
-        op.create_index(
-            "ix_match_session_project", _SESSION_TABLE, ["project_id"]
-        )
+        op.create_index("ix_match_session_project", _SESSION_TABLE, ["project_id"])
     if not _has_index(inspector, _SESSION_TABLE, "ix_match_session_catalogue"):
-        op.create_index(
-            "ix_match_session_catalogue", _SESSION_TABLE, ["catalogue_id"]
-        )
+        op.create_index("ix_match_session_catalogue", _SESSION_TABLE, ["catalogue_id"])
 
     # ── oe_match_elements_group ──────────────────────────────────────────
     if not _has_table(inspector, _GROUP_TABLE):
@@ -178,7 +176,9 @@ def upgrade() -> None:
                 server_default="{}",
             ),
             sa.Column(
-                "chosen_candidate_id", sa.String(length=36), nullable=True,
+                "chosen_candidate_id",
+                sa.String(length=36),
+                nullable=True,
             ),
             sa.Column("chosen_method", sa.String(length=20), nullable=True),
             sa.Column("confidence", sa.String(length=10), nullable=True),
@@ -192,7 +192,9 @@ def upgrade() -> None:
             sa.Column("signature_fields", sa.JSON(), nullable=True),
             sa.Column("confirmed_by", sa.String(length=36), nullable=True),
             sa.Column(
-                "confirmed_at", sa.DateTime(timezone=True), nullable=True,
+                "confirmed_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column(
@@ -207,28 +209,22 @@ def upgrade() -> None:
                 ondelete="CASCADE",
             ),
             sa.UniqueConstraint(
-                "session_id", "group_key", name="uq_match_group_session_key",
+                "session_id",
+                "group_key",
+                name="uq_match_group_session_key",
             ),
         )
     if not _has_index(inspector, _GROUP_TABLE, "ix_match_group_session"):
-        op.create_index(
-            "ix_match_group_session", _GROUP_TABLE, ["session_id"]
-        )
-    if not _has_index(
-        inspector, _GROUP_TABLE, "ix_match_group_session_status"
-    ):
+        op.create_index("ix_match_group_session", _GROUP_TABLE, ["session_id"])
+    if not _has_index(inspector, _GROUP_TABLE, "ix_match_group_session_status"):
         op.create_index(
             "ix_match_group_session_status",
             _GROUP_TABLE,
             ["session_id", "status"],
         )
     if not _has_index(inspector, _GROUP_TABLE, "ix_match_group_signature"):
-        op.create_index(
-            "ix_match_group_signature", _GROUP_TABLE, ["signature"]
-        )
-    if not _has_index(
-        inspector, _GROUP_TABLE, "ix_match_group_chosen_candidate"
-    ):
+        op.create_index("ix_match_group_signature", _GROUP_TABLE, ["signature"])
+    if not _has_index(inspector, _GROUP_TABLE, "ix_match_group_chosen_candidate"):
         op.create_index(
             "ix_match_group_chosen_candidate",
             _GROUP_TABLE,
@@ -262,7 +258,9 @@ def upgrade() -> None:
             sa.Column("signature", sa.String(length=64), nullable=False),
             sa.Column("label", sa.String(length=500), nullable=True),
             sa.Column(
-                "cwicr_position_id", sa.String(length=36), nullable=False,
+                "cwicr_position_id",
+                sa.String(length=36),
+                nullable=False,
             ),
             sa.Column(
                 "source_fields",
@@ -277,7 +275,9 @@ def upgrade() -> None:
                 server_default="1",
             ),
             sa.Column(
-                "last_used_at", sa.DateTime(timezone=True), nullable=True,
+                "last_used_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column("created_by", sa.String(length=36), nullable=True),
             sa.Column(
@@ -298,18 +298,10 @@ def upgrade() -> None:
             ),
         )
     if not _has_index(inspector, _TEMPLATE_TABLE, "ix_match_template_tenant"):
-        op.create_index(
-            "ix_match_template_tenant", _TEMPLATE_TABLE, ["tenant_id"]
-        )
-    if not _has_index(
-        inspector, _TEMPLATE_TABLE, "ix_match_template_signature"
-    ):
-        op.create_index(
-            "ix_match_template_signature", _TEMPLATE_TABLE, ["signature"]
-        )
-    if not _has_index(
-        inspector, _TEMPLATE_TABLE, "ix_match_template_cwicr_position"
-    ):
+        op.create_index("ix_match_template_tenant", _TEMPLATE_TABLE, ["tenant_id"])
+    if not _has_index(inspector, _TEMPLATE_TABLE, "ix_match_template_signature"):
+        op.create_index("ix_match_template_signature", _TEMPLATE_TABLE, ["signature"])
+    if not _has_index(inspector, _TEMPLATE_TABLE, "ix_match_template_cwicr_position"):
         op.create_index(
             "ix_match_template_cwicr_position",
             _TEMPLATE_TABLE,

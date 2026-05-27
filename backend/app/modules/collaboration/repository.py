@@ -84,22 +84,14 @@ class CommentRepository:
         edited_at: object,
     ) -> None:
         """Update the text of a comment."""
-        stmt = (
-            update(Comment)
-            .where(Comment.id == comment_id)
-            .values(text=text, edited_at=edited_at)
-        )
+        stmt = update(Comment).where(Comment.id == comment_id).values(text=text, edited_at=edited_at)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()
 
     async def soft_delete(self, comment_id: uuid.UUID) -> None:
         """Soft-delete a comment (set is_deleted=True, clear text)."""
-        stmt = (
-            update(Comment)
-            .where(Comment.id == comment_id)
-            .values(is_deleted=True, text="[deleted]")
-        )
+        stmt = update(Comment).where(Comment.id == comment_id).values(is_deleted=True, text="[deleted]")
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()

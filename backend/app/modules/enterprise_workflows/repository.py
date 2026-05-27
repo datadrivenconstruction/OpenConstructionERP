@@ -58,11 +58,7 @@ class WorkflowRepository:
 
     async def update(self, workflow_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on a workflow."""
-        stmt = (
-            update(ApprovalWorkflow)
-            .where(ApprovalWorkflow.id == workflow_id)
-            .values(**fields)
-        )
+        stmt = update(ApprovalWorkflow).where(ApprovalWorkflow.id == workflow_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()
@@ -121,11 +117,7 @@ class ApprovalRequestRepository:
 
     async def update(self, request_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on an approval request."""
-        stmt = (
-            update(ApprovalRequest)
-            .where(ApprovalRequest.id == request_id)
-            .values(**fields)
-        )
+        stmt = update(ApprovalRequest).where(ApprovalRequest.id == request_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()

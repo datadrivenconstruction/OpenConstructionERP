@@ -159,7 +159,8 @@ def _create_index_safe(
 
 
 def _create_indexes_for(
-    inspector: sa.engine.reflection.Inspector, table: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
 ) -> None:
     for name, cols, unique in _INDEXES.get(table, ()):
         if _has_index(inspector, table, name):
@@ -171,9 +172,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     common_audit_cols = (
         sa.Column("id", guid_type, primary_key=True),
@@ -200,7 +199,8 @@ def upgrade() -> None:
                 "project_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -218,7 +218,10 @@ def upgrade() -> None:
                 server_default="{}",
             ),
             sa.Column(
-                "labour_count", sa.Integer(), nullable=False, server_default="0",
+                "labour_count",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
                 "equipment_count",
@@ -234,7 +237,9 @@ def upgrade() -> None:
             ),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column(
-                "closed_at", sa.DateTime(timezone=True), nullable=True,
+                "closed_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
                 "closed_by",
@@ -244,7 +249,9 @@ def upgrade() -> None:
             ),
             sa.Column("owner_signature_ref", sa.String(255), nullable=True),
             sa.Column(
-                "supervisor_signature_ref", sa.String(255), nullable=True,
+                "supervisor_signature_ref",
+                sa.String(255),
+                nullable=True,
             ),
             sa.Column("pdf_export_ref", guid_type, nullable=True),
             sa.Column(
@@ -264,12 +271,15 @@ def upgrade() -> None:
                 "project_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "captured_at", sa.DateTime(timezone=True), nullable=False,
+                "captured_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
             ),
             sa.Column(
                 "source",
@@ -304,16 +314,22 @@ def upgrade() -> None:
                 "diary_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_daily_diary_diary.id", ondelete="CASCADE",
+                    "oe_daily_diary_diary.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column("entry_type", sa.String(32), nullable=False),
             sa.Column(
-                "entry_time", sa.DateTime(timezone=True), nullable=False,
+                "entry_time",
+                sa.DateTime(timezone=True),
+                nullable=False,
             ),
             sa.Column(
-                "title", sa.String(500), nullable=False, server_default="",
+                "title",
+                sa.String(500),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("description", sa.Text(), nullable=True),
             sa.Column("source_module", sa.String(64), nullable=True),
@@ -347,7 +363,8 @@ def upgrade() -> None:
                 "diary_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_daily_diary_diary.id", ondelete="SET NULL",
+                    "oe_daily_diary_diary.id",
+                    ondelete="SET NULL",
                 ),
                 nullable=True,
             ),
@@ -355,12 +372,15 @@ def upgrade() -> None:
                 "project_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "taken_at", sa.DateTime(timezone=True), nullable=False,
+                "taken_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
             ),
             sa.Column(
                 "photographer_id",
@@ -427,7 +447,8 @@ def upgrade() -> None:
                 "diary_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_daily_diary_diary.id", ondelete="SET NULL",
+                    "oe_daily_diary_diary.id",
+                    ondelete="SET NULL",
                 ),
                 nullable=True,
             ),
@@ -435,12 +456,15 @@ def upgrade() -> None:
                 "project_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "recorded_at", sa.DateTime(timezone=True), nullable=False,
+                "recorded_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
             ),
             sa.Column("file_url", sa.String(2000), nullable=False),
             sa.Column("thumbnail_url", sa.String(2000), nullable=True),
@@ -480,7 +504,8 @@ def upgrade() -> None:
                 "project_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -511,12 +536,15 @@ def upgrade() -> None:
                 "project_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "captured_at", sa.DateTime(timezone=True), nullable=False,
+                "captured_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
             ),
             sa.Column(
                 "capture_type",
@@ -548,7 +576,8 @@ def upgrade() -> None:
                 "diary_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_daily_diary_diary.id", ondelete="CASCADE",
+                    "oe_daily_diary_diary.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),

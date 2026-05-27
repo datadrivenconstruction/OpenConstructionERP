@@ -39,7 +39,6 @@ from app.modules.file_tags.service import (
     assign_tag,
     create_tag,
     delete_tag,
-    get_tag,
     list_tags,
     seed_default_tags,
     tags_for_file,
@@ -109,9 +108,7 @@ async def update_project_tag(
     await verify_project_access(project_id, user_id, session)
     result = await update_tag(session, project_id, tag_id, payload)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found")
     return result
 
 
@@ -130,10 +127,8 @@ async def delete_project_tag(
     await verify_project_access(project_id, user_id, session)
     ok = await delete_tag(session, project_id, tag_id)
     if not ok:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
-        )
-    return None
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found")
+    return
 
 
 @router.post(
@@ -160,9 +155,7 @@ async def assign_tag_route(
             _coerce_user_id(user_id),
         )
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
 @router.post(
@@ -188,9 +181,7 @@ async def unassign_tag_route(
             payload.file_ids,
         )
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
 @router.get(

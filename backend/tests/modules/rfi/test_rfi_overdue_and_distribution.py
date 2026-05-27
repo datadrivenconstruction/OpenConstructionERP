@@ -100,6 +100,7 @@ def _build_app(db_session, *, caller_id: str, role: str = "admin") -> FastAPI:
     async def _project_access_override(project_id, user_id, session) -> None:
         from fastapi import HTTPException
         from fastapi import status as st
+
         from app.modules.projects.models import Project as _P
 
         row = await session.get(_P, project_id)
@@ -164,7 +165,7 @@ class _StubRFIRepo:
         rows = [r for r in self.rows.values() if r.project_id == project_id]
         if status is not None:
             rows = [r for r in rows if r.status == status]
-        return rows[offset: offset + limit], len(rows)
+        return rows[offset : offset + limit], len(rows)
 
     async def update_fields(self, rfi_id: uuid.UUID, **fields: Any) -> None:
         obj = self.rows.get(rfi_id)
@@ -230,8 +231,9 @@ class TestOverdueFilter:
     @pytest.mark.asyncio
     async def test_overdue_computed_field_is_true_for_past_due_open(self) -> None:
         """_compute_rfi_fields returns is_overdue=True for open + past due."""
-        from app.modules.rfi.router import _compute_rfi_fields
         from dataclasses import dataclass
+
+        from app.modules.rfi.router import _compute_rfi_fields
 
         @dataclass
         class _Row:
@@ -251,8 +253,9 @@ class TestOverdueFilter:
 
     @pytest.mark.asyncio
     async def test_overdue_computed_field_false_for_no_due_date(self) -> None:
-        from app.modules.rfi.router import _compute_rfi_fields
         from dataclasses import dataclass
+
+        from app.modules.rfi.router import _compute_rfi_fields
 
         @dataclass
         class _Row:
@@ -352,9 +355,7 @@ class TestClosePastDueDate:
         assert "official response" in exc.value.detail.lower()
 
     @pytest.mark.asyncio
-    async def test_close_emits_structured_state_change_log(
-        self, caplog
-    ) -> None:
+    async def test_close_emits_structured_state_change_log(self, caplog) -> None:
         """close_rfi must emit rfi.state_change with transition='close'."""
         caplog.set_level(logging.INFO, logger="app.modules.rfi.service")
         service = _make_service()
@@ -372,9 +373,9 @@ class TestClosePastDueDate:
         await service.close_rfi(rfi.id, closed_by="mgr-1")
 
         close_records = [
-            r for r in caplog.records
-            if r.getMessage() == "rfi.state_change"
-            and getattr(r, "transition", None) == "close"
+            r
+            for r in caplog.records
+            if r.getMessage() == "rfi.state_change" and getattr(r, "transition", None) == "close"
         ]
         assert close_records, "Expected rfi.state_change with transition='close'"
         rec = close_records[-1]
@@ -431,7 +432,7 @@ class TestDistributionList:
 
         # Each assignee responds to their own RFI.
         results = []
-        for rfi, assignee in zip(rfis, [architect, structural, mep]):
+        for rfi, assignee in zip(rfis, [architect, structural, mep], strict=False):
             responded = await service.respond_to_rfi(
                 rfi.id,
                 f"Response from {assignee[:8]}",
@@ -520,9 +521,7 @@ class TestRFIStatsOverdueCount:
     """get_stats returns the correct overdue count. Uses a real SQLite DB."""
 
     @pytest.mark.asyncio
-    async def test_stats_overdue_count_matches_open_past_due(
-        self, db_session
-    ) -> None:
+    async def test_stats_overdue_count_matches_open_past_due(self, db_session) -> None:
         owner_id = await _make_user(db_session)
         project_id = await _make_project(db_session, owner_id)
         service = RFIService(db_session)
@@ -554,9 +553,7 @@ class TestRFIStatsOverdueCount:
         await db_session.commit()
 
         stats = await service.get_stats(project_id)
-        assert stats.overdue == 2, (
-            f"Expected 2 overdue RFIs, got {stats.overdue}"
-        )
+        assert stats.overdue == 2, f"Expected 2 overdue RFIs, got {stats.overdue}"
         assert stats.open == 3  # 2 overdue + 1 not-yet-due
         assert stats.total == 4
 
@@ -570,14 +567,10 @@ class TestRFIAttachmentOLE:
     """
 
     @pytest.mark.asyncio
-    async def test_ole_rfi_attachment_accepted(
-        self, db_session, tmp_path, monkeypatch
-    ) -> None:
+    async def test_ole_rfi_attachment_accepted(self, db_session, tmp_path, monkeypatch) -> None:
         from app.modules.rfi import router as rfi_router_mod
 
-        monkeypatch.setattr(
-            rfi_router_mod, "ATTACHMENTS_DIR", tmp_path / "attachments"
-        )
+        monkeypatch.setattr(rfi_router_mod, "ATTACHMENTS_DIR", tmp_path / "attachments")
 
         owner_id = await _make_user(db_session)
         owner = str(owner_id)

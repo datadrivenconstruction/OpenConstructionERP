@@ -113,6 +113,7 @@ _BUNDLE_TABLES_DWG: list[tuple[str, str, str, bool]] = [
 
 def _import_class(module_path: str, class_name: str) -> type | None:
     import importlib
+
     try:
         mod = importlib.import_module(module_path)
         return getattr(mod, class_name)
@@ -130,32 +131,40 @@ def _options_from_scope(opts: ExportOptions) -> ExportOptions:
     if scope == "metadata_only":
         return opts
     if scope == "documents":
-        return opts.model_copy(update={
-            "include_documents": True,
-            "include_photos": True,
-            "include_sheets": True,
-        })
+        return opts.model_copy(
+            update={
+                "include_documents": True,
+                "include_photos": True,
+                "include_sheets": True,
+            }
+        )
     if scope == "bim":
-        return opts.model_copy(update={
-            "include_bim_models": True,
-            "include_bim_geometry": True,
-        })
+        return opts.model_copy(
+            update={
+                "include_bim_models": True,
+                "include_bim_geometry": True,
+            }
+        )
     if scope == "dwg":
-        return opts.model_copy(update={
-            "include_dwg_drawings": True,
-        })
+        return opts.model_copy(
+            update={
+                "include_dwg_drawings": True,
+            }
+        )
     if scope == "full":
-        return opts.model_copy(update={
-            "include_documents": True,
-            "include_photos": True,
-            "include_sheets": True,
-            "include_bim_models": True,
-            "include_bim_geometry": True,
-            "include_bim_elements": True,
-            "include_dwg_drawings": True,
-            "include_takeoff": True,
-            "include_reports": True,
-        })
+        return opts.model_copy(
+            update={
+                "include_documents": True,
+                "include_photos": True,
+                "include_sheets": True,
+                "include_bim_models": True,
+                "include_bim_geometry": True,
+                "include_bim_elements": True,
+                "include_dwg_drawings": True,
+                "include_takeoff": True,
+                "include_reports": True,
+            }
+        )
     return opts
 
 
@@ -200,124 +209,183 @@ async def _rows_for_table(
 
     if key == "projects":
         rows = (
-            await session.execute(
-                select(cls).where(cls.id == project_id),
+            (
+                await session.execute(
+                    select(cls).where(cls.id == project_id),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
     elif key == "bim_elements":
         BIMModel = _import_class("app.modules.bim_hub.models", "BIMModel")
         if BIMModel is None:
             return []
         model_ids = (
-            await session.execute(
-                select(BIMModel.id).where(BIMModel.project_id == project_id),
+            (
+                await session.execute(
+                    select(BIMModel.id).where(BIMModel.project_id == project_id),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         if not model_ids:
             return []
         rows = (
-            await session.execute(
-                select(cls).where(cls.model_id.in_(model_ids)),
+            (
+                await session.execute(
+                    select(cls).where(cls.model_id.in_(model_ids)),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
     elif key == "assembly_components":
         Assembly = _import_class("app.modules.assemblies.models", "Assembly")
         if Assembly is None:
             return []
         assembly_ids = (
-            await session.execute(
-                select(Assembly.id).where(Assembly.project_id == project_id),
+            (
+                await session.execute(
+                    select(Assembly.id).where(Assembly.project_id == project_id),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         if not assembly_ids:
             return []
         rows = (
-            await session.execute(
-                select(cls).where(cls.assembly_id.in_(assembly_ids)),
+            (
+                await session.execute(
+                    select(cls).where(cls.assembly_id.in_(assembly_ids)),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
     elif key == "change_order_items":
         ChangeOrder = _import_class(
-            "app.modules.changeorders.models", "ChangeOrder",
+            "app.modules.changeorders.models",
+            "ChangeOrder",
         )
         if ChangeOrder is None:
             return []
         co_ids = (
-            await session.execute(
-                select(ChangeOrder.id).where(
-                    ChangeOrder.project_id == project_id,
-                ),
+            (
+                await session.execute(
+                    select(ChangeOrder.id).where(
+                        ChangeOrder.project_id == project_id,
+                    ),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         if not co_ids:
             return []
         rows = (
-            await session.execute(
-                select(cls).where(cls.change_order_id.in_(co_ids)),
+            (
+                await session.execute(
+                    select(cls).where(cls.change_order_id.in_(co_ids)),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
     elif key == "tender_bids":
         TenderPackage = _import_class(
-            "app.modules.tendering.models", "TenderPackage",
+            "app.modules.tendering.models",
+            "TenderPackage",
         )
         if TenderPackage is None:
             return []
         pkg_ids = (
-            await session.execute(
-                select(TenderPackage.id).where(
-                    TenderPackage.project_id == project_id,
-                ),
+            (
+                await session.execute(
+                    select(TenderPackage.id).where(
+                        TenderPackage.project_id == project_id,
+                    ),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         if not pkg_ids:
             return []
         rows = (
-            await session.execute(
-                select(cls).where(cls.package_id.in_(pkg_ids)),
+            (
+                await session.execute(
+                    select(cls).where(cls.package_id.in_(pkg_ids)),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
     elif key == "dwg_drawing_versions":
         DwgDrawing = _import_class(
-            "app.modules.dwg_takeoff.models", "DwgDrawing",
+            "app.modules.dwg_takeoff.models",
+            "DwgDrawing",
         )
         if DwgDrawing is None:
             return []
         drw_ids = (
-            await session.execute(
-                select(DwgDrawing.id).where(
-                    DwgDrawing.project_id == project_id,
-                ),
+            (
+                await session.execute(
+                    select(DwgDrawing.id).where(
+                        DwgDrawing.project_id == project_id,
+                    ),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         if not drw_ids:
             return []
         rows = (
-            await session.execute(
-                select(cls).where(cls.drawing_id.in_(drw_ids)),
+            (
+                await session.execute(
+                    select(cls).where(cls.drawing_id.in_(drw_ids)),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
     elif key == "document_bim_links":
         Document = _import_class("app.modules.documents.models", "Document")
         if Document is None:
             return []
         doc_ids = (
-            await session.execute(
-                select(Document.id).where(Document.project_id == project_id),
+            (
+                await session.execute(
+                    select(Document.id).where(Document.project_id == project_id),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         if not doc_ids:
             return []
         rows = (
-            await session.execute(
-                select(cls).where(cls.document_id.in_(doc_ids)),
+            (
+                await session.execute(
+                    select(cls).where(cls.document_id.in_(doc_ids)),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
     elif pid_col is not None:
         rows = (
-            await session.execute(
-                select(cls).where(cls.project_id == project_id),
+            (
+                await session.execute(
+                    select(cls).where(cls.project_id == project_id),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
     else:
         return []
 
@@ -363,8 +431,7 @@ async def _collect_attachment_paths(
         if Document is not None:
             rows = (
                 await session.execute(
-                    select(Document.id, Document.file_path, Document.name)
-                    .where(Document.project_id == project_id),
+                    select(Document.id, Document.file_path, Document.name).where(Document.project_id == project_id),
                 )
             ).all()
             for doc_id, path, name in rows:
@@ -375,7 +442,8 @@ async def _collect_attachment_paths(
 
     if opts.include_photos:
         ProjectPhoto = _import_class(
-            "app.modules.documents.models", "ProjectPhoto",
+            "app.modules.documents.models",
+            "ProjectPhoto",
         )
         if ProjectPhoto is not None:
             rows = (
@@ -401,8 +469,7 @@ async def _collect_attachment_paths(
         if Sheet is not None:
             rows = (
                 await session.execute(
-                    select(Sheet.id, Sheet.thumbnail_path)
-                    .where(Sheet.project_id == project_id),
+                    select(Sheet.id, Sheet.thumbnail_path).where(Sheet.project_id == project_id),
                 )
             ).all()
             for sid, thumb in rows:
@@ -414,8 +481,7 @@ async def _collect_attachment_paths(
         if BIMModel is not None:
             rows = (
                 await session.execute(
-                    select(BIMModel.id, BIMModel.canonical_file_path)
-                    .where(BIMModel.project_id == project_id),
+                    select(BIMModel.id, BIMModel.canonical_file_path).where(BIMModel.project_id == project_id),
                 )
             ).all()
             for mid, canonical in rows:
@@ -427,7 +493,8 @@ async def _collect_attachment_paths(
 
     if opts.include_dwg_drawings:
         DwgDrawing = _import_class(
-            "app.modules.dwg_takeoff.models", "DwgDrawing",
+            "app.modules.dwg_takeoff.models",
+            "DwgDrawing",
         )
         if DwgDrawing is not None:
             rows = (
@@ -470,11 +537,7 @@ async def export_bundle(
     if opts.include_documents or opts.include_photos or opts.include_sheets:
         all_tables += _BUNDLE_TABLES_DOCUMENTS
     if opts.include_bim_models:
-        all_tables += [
-            row
-            for row in _BUNDLE_TABLES_BIM
-            if row[0] != "bim_elements" or opts.include_bim_elements
-        ]
+        all_tables += [row for row in _BUNDLE_TABLES_BIM if row[0] != "bim_elements" or opts.include_bim_elements]
     if opts.include_dwg_drawings:
         all_tables += _BUNDLE_TABLES_DWG
 
@@ -518,22 +581,26 @@ async def export_bundle(
             digest, size = _sha256_of(abs_path)
             if size == 0 and not digest:
                 # File vanished between scan and write; record the gap.
-                attachments_index.append({
-                    "path": arc,
-                    "original_path": abs_path,
-                    "size_bytes": 0,
-                    "sha256": "",
-                    "missing": True,
-                })
+                attachments_index.append(
+                    {
+                        "path": arc,
+                        "original_path": abs_path,
+                        "size_bytes": 0,
+                        "sha256": "",
+                        "missing": True,
+                    }
+                )
                 continue
             zf.write(abs_path, arc)
             total_bytes += size
-            attachments_index.append({
-                "path": arc,
-                "original_path": abs_path,
-                "size_bytes": size,
-                "sha256": digest,
-            })
+            attachments_index.append(
+                {
+                    "path": arc,
+                    "original_path": abs_path,
+                    "size_bytes": size,
+                    "sha256": digest,
+                }
+            )
 
         manifest.attachment_total_bytes = total_bytes
         zf.writestr(
@@ -568,11 +635,7 @@ async def preview_bundle(
     if opts.include_documents or opts.include_photos or opts.include_sheets:
         all_tables += _BUNDLE_TABLES_DOCUMENTS
     if opts.include_bim_models:
-        all_tables += [
-            row
-            for row in _BUNDLE_TABLES_BIM
-            if row[0] != "bim_elements" or opts.include_bim_elements
-        ]
+        all_tables += [row for row in _BUNDLE_TABLES_BIM if row[0] != "bim_elements" or opts.include_bim_elements]
     if opts.include_dwg_drawings:
         all_tables += _BUNDLE_TABLES_DWG
 
@@ -620,15 +683,13 @@ def _readme_md(manifest: BundleManifest, attachment_count: int) -> str:
         "",
         "## How to open",
         "",
-        "1. Install OpenConstructionERP — `pip install openconstructionerp` "
-        "or download from openconstructionerp.com.",
+        "1. Install OpenConstructionERP — `pip install openconstructionerp` or download from openconstructionerp.com.",
         "2. Run `openestimate serve` and sign in.",
         "3. Use **Files → Import project bundle** and select this `.ocep` file.",
         "",
         "## Compatibility",
         "",
-        f"Format version: {manifest.format_version} · "
-        f"Minimum app version: {manifest.compat_min_app_version}.",
+        f"Format version: {manifest.format_version} · Minimum app version: {manifest.compat_min_app_version}.",
     ]
     return "\n".join(lines)
 

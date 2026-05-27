@@ -97,20 +97,15 @@ async def _create_po_from_award(event: Event) -> None:
     try:
         async with async_session_factory() as session:
             package = (
-                await session.execute(
-                    select(TenderPackage).where(TenderPackage.id == package_id)
-                )
+                await session.execute(select(TenderPackage).where(TenderPackage.id == package_id))
             ).scalar_one_or_none()
-            bid = (
-                await session.execute(
-                    select(TenderBid).where(TenderBid.id == bid_id)
-                )
-            ).scalar_one_or_none()
+            bid = (await session.execute(select(TenderBid).where(TenderBid.id == bid_id))).scalar_one_or_none()
 
             if package is None or bid is None:
                 logger.warning(
                     "tender.awarded handler: package=%s or bid=%s not found",
-                    package_id, bid_id,
+                    package_id,
+                    bid_id,
                 )
                 return
 
@@ -119,18 +114,17 @@ async def _create_po_from_award(event: Event) -> None:
             # and SQLite (JSON1 extension).
             po_repo = PurchaseOrderRepository(session)
             existing_pos = (
-                await session.execute(
-                    select(PurchaseOrder)
-                    .where(PurchaseOrder.project_id == package.project_id)
-                )
-            ).scalars().all()
+                (await session.execute(select(PurchaseOrder).where(PurchaseOrder.project_id == package.project_id)))
+                .scalars()
+                .all()
+            )
             for po in existing_pos:
                 md = po.metadata_ if isinstance(po.metadata_, dict) else {}
                 if md.get("tender_package_id") == str(package_id):
                     logger.info(
-                        "tender.awarded: PO %s already exists for package %s "
-                        "(idempotent skip)",
-                        po.po_number, package_id,
+                        "tender.awarded: PO %s already exists for package %s (idempotent skip)",
+                        po.po_number,
+                        package_id,
                     )
                     return
 
@@ -186,10 +180,7 @@ async def _create_po_from_award(event: Event) -> None:
                 amount_total=str(subtotal),
                 status="draft",
                 payment_terms=None,
-                notes=(
-                    f"Auto-created from awarded tender: {package.name} "
-                    f"— bid by {bid.company_name}"
-                )[:5000],
+                notes=(f"Auto-created from awarded tender: {package.name} — bid by {bid.company_name}")[:5000],
                 created_by=None,
                 metadata_={
                     "tender_package_id": str(package_id),
@@ -211,16 +202,19 @@ async def _create_po_from_award(event: Event) -> None:
 
             await session.commit()
             logger.info(
-                "Auto-PO created from tender award: po=%s package=%s bid=%s "
-                "items=%d subtotal=%s %s",
-                po.po_number, package_id, bid_id,
-                len(po_items), subtotal, bid.currency or "",
+                "Auto-PO created from tender award: po=%s package=%s bid=%s items=%d subtotal=%s %s",
+                po.po_number,
+                package_id,
+                bid_id,
+                len(po_items),
+                subtotal,
+                bid.currency or "",
             )
     except Exception:
         logger.exception(
-            "tender.awarded auto-PO failed for package=%s bid=%s "
-            "— tender award itself was unaffected",
-            package_id, bid_id,
+            "tender.awarded auto-PO failed for package=%s bid=%s — tender award itself was unaffected",
+            package_id,
+            bid_id,
         )
 
 
@@ -248,7 +242,10 @@ async def _on_supplier_rating_update(event: Event) -> None:
         "procurement.supplier_rating_update received "
         "(stub — TODO v4.2.2 audit): ncr_id=%s project_id=%s "
         "supplier_id=%s defect_severity=%s",
-        ncr_id, project_id, supplier_id, severity,
+        ncr_id,
+        project_id,
+        supplier_id,
+        severity,
     )
 
 
@@ -256,5 +253,6 @@ async def _on_supplier_rating_update(event: Event) -> None:
 # automatically when ``oe_procurement`` is loaded.
 event_bus.subscribe("tendering.package.awarded", _on_tender_awarded)
 event_bus.subscribe(
-    "procurement.supplier_rating_update", _on_supplier_rating_update,
+    "procurement.supplier_rating_update",
+    _on_supplier_rating_update,
 )

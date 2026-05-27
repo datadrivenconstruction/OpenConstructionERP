@@ -71,6 +71,7 @@ async def req_bim_auth(req_bim_client: AsyncClient) -> dict[str, str]:
     assert reg.status_code == 201, f"Registration failed: {reg.text}"
 
     from ._auth_helpers import promote_to_admin
+
     await promote_to_admin(email)
 
     token = ""
@@ -110,9 +111,7 @@ async def _create_project(client: AsyncClient, auth: dict[str, str]) -> str:
     return resp.json()["id"]
 
 
-async def _create_requirement_set(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> str:
+async def _create_requirement_set(client: AsyncClient, auth: dict[str, str], project_id: str) -> str:
     resp = await client.post(
         "/api/v1/requirements/",
         json={
@@ -127,9 +126,7 @@ async def _create_requirement_set(
     return resp.json()["id"]
 
 
-async def _add_requirement(
-    client: AsyncClient, auth: dict[str, str], set_id: str
-) -> str:
+async def _add_requirement(client: AsyncClient, auth: dict[str, str], set_id: str) -> str:
     resp = await client.post(
         f"/api/v1/requirements/{set_id}/requirements/",
         json={
@@ -147,9 +144,7 @@ async def _add_requirement(
     return resp.json()["id"]
 
 
-async def _create_bim_model(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> str:
+async def _create_bim_model(client: AsyncClient, auth: dict[str, str], project_id: str) -> str:
     resp = await client.post(
         "/api/v1/bim_hub/",
         json={
@@ -165,9 +160,7 @@ async def _create_bim_model(
     return resp.json()["id"]
 
 
-async def _bulk_import_elements(
-    client: AsyncClient, auth: dict[str, str], model_id: str
-) -> list[str]:
+async def _bulk_import_elements(client: AsyncClient, auth: dict[str, str], model_id: str) -> list[str]:
     """Seed the model with two distinct elements and return their ids."""
     resp = await client.post(
         f"/api/v1/bim_hub/models/{model_id}/elements/",
@@ -207,9 +200,7 @@ async def _bulk_import_elements(
 class TestRequirementsBimCrossModule:
     """End-to-end coverage of the Requirements ↔ BIM cross-module link."""
 
-    async def test_full_cross_module_flow(
-        self, req_bim_client: AsyncClient, req_bim_auth: dict[str, str]
-    ) -> None:
+    async def test_full_cross_module_flow(self, req_bim_client: AsyncClient, req_bim_auth: dict[str, str]) -> None:
         client = req_bim_client
         auth = req_bim_auth
 
@@ -230,9 +221,7 @@ class TestRequirementsBimCrossModule:
         assert resp.status_code == 200, f"bim-links PATCH failed: {resp.text}"
         body = resp.json()
         stored = (body.get("metadata") or {}).get("bim_element_ids") or []
-        assert pinned_element_id in stored, (
-            f"Expected {pinned_element_id} in stored ids, got {stored}"
-        )
+        assert pinned_element_id in stored, f"Expected {pinned_element_id} in stored ids, got {stored}"
 
         # ── 3. PATCH /bim-links/ — additive merge ────────────────────
         # Re-PATCH with a fresh id (replace=False is the default).  Both
@@ -257,9 +246,7 @@ class TestRequirementsBimCrossModule:
         )
         assert resp.status_code == 200, resp.text
         stored = (resp.json().get("metadata") or {}).get("bim_element_ids") or []
-        assert stored == [pinned_element_id], (
-            f"Expected replace to wipe prior ids, got {stored}"
-        )
+        assert stored == [pinned_element_id], f"Expected replace to wipe prior ids, got {stored}"
 
         # ── 5. GET /by-bim-element/ — reverse query ──────────────────
         resp = await client.get(
@@ -269,9 +256,7 @@ class TestRequirementsBimCrossModule:
         )
         assert resp.status_code == 200, resp.text
         hits = resp.json()
-        assert any(h["id"] == req_id for h in hits), (
-            f"Expected requirement {req_id} in reverse hits, got {hits}"
-        )
+        assert any(h["id"] == req_id for h in hits), f"Expected requirement {req_id} in reverse hits, got {hits}"
 
         # ── 6. Reverse query for the UNPINNED element must be empty ──
         resp = await client.get(
@@ -280,10 +265,7 @@ class TestRequirementsBimCrossModule:
             headers=auth,
         )
         assert resp.status_code == 200, resp.text
-        assert resp.json() == [], (
-            f"Unpinned element should have no linked requirements, "
-            f"got {resp.json()}"
-        )
+        assert resp.json() == [], f"Unpinned element should have no linked requirements, got {resp.json()}"
 
         # ── 7. GET /bim_hub/models/{id}/elements/ — Step 6.5 eager load ─
         # This is the money shot — ``BIMHubService.list_elements_with_links``
@@ -303,8 +285,7 @@ class TestRequirementsBimCrossModule:
 
         pinned_reqs = pinned.get("linked_requirements", [])
         assert len(pinned_reqs) == 1, (
-            f"Pinned element should surface 1 requirement, "
-            f"got {len(pinned_reqs)}: {pinned_reqs}"
+            f"Pinned element should surface 1 requirement, got {len(pinned_reqs)}: {pinned_reqs}"
         )
         brief = pinned_reqs[0]
         assert brief["id"] == req_id
@@ -336,9 +317,7 @@ class TestRequirementsBimCrossModule:
             json={"bim_element_ids": [str(uuid.uuid4())]},
             headers=auth,
         )
-        assert resp.status_code == 400, (
-            f"Expected 400 for mismatched set, got {resp.status_code}: {resp.text}"
-        )
+        assert resp.status_code == 400, f"Expected 400 for mismatched set, got {resp.status_code}: {resp.text}"
 
     async def test_orphan_bim_ids_stripped_on_element_delete(
         self, req_bim_client: AsyncClient, req_bim_auth: dict[str, str]
@@ -447,10 +426,7 @@ class TestRequirementsBimCrossModule:
             headers=auth,
         )
         assert resp.status_code == 200, resp.text
-        assert resp.json() == [], (
-            f"Task still references deleted element {target_element_id}: "
-            f"{resp.json()}"
-        )
+        assert resp.json() == [], f"Task still references deleted element {target_element_id}: {resp.json()}"
 
         # The requirement reverse query should also return empty.
         resp = await client.get(
@@ -459,10 +435,7 @@ class TestRequirementsBimCrossModule:
             headers=auth,
         )
         assert resp.status_code == 200, resp.text
-        assert resp.json() == [], (
-            f"Requirement still references deleted element {target_element_id}: "
-            f"{resp.json()}"
-        )
+        assert resp.json() == [], f"Requirement still references deleted element {target_element_id}: {resp.json()}"
 
         # And the requirement row itself should have the id stripped
         # from its metadata array (defensive double-check).
@@ -473,6 +446,6 @@ class TestRequirementsBimCrossModule:
         assert resp.status_code == 200, resp.text
         detail = resp.json()
         req = next(r for r in detail["requirements"] if r["id"] == req_id)
-        assert target_element_id not in (
-            (req.get("metadata") or {}).get("bim_element_ids") or []
-        ), "Requirement.metadata still carries the orphaned element id"
+        assert target_element_id not in ((req.get("metadata") or {}).get("bim_element_ids") or []), (
+            "Requirement.metadata still carries the orphaned element id"
+        )

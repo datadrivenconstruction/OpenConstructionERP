@@ -26,7 +26,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3101_qms"
 down_revision: Union[str, Sequence[str], None] = "v3100_sched"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -55,7 +54,8 @@ def upgrade() -> None:
     if not _has_table(inspector, _TABLE):
         return
     op.alter_column(
-        _TABLE, _COLUMN,
+        _TABLE,
+        _COLUMN,
         existing_type=sa.Numeric(15, 2),
         type_=sa.Numeric(18, 2),
         existing_nullable=True,
@@ -70,7 +70,8 @@ def downgrade() -> None:
     if not _has_table(inspector, _TABLE):
         return
     op.alter_column(
-        _TABLE, _COLUMN,
+        _TABLE,
+        _COLUMN,
         existing_type=sa.Numeric(18, 2),
         type_=sa.Numeric(15, 2),
         existing_nullable=True,

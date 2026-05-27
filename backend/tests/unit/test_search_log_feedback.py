@@ -22,7 +22,6 @@ import uuid
 
 from app.modules.match_elements.service import _derive_picked_rank_and_code
 
-
 # ── _derive_picked_rank_and_code — happy path + edge cases ──────────────
 
 
@@ -37,7 +36,9 @@ def test_derive_picked_rank_finds_first_candidate() -> None:
         ],
     }
     rank, code = _derive_picked_rank_and_code(
-        methods, chosen_method="vector", chosen_candidate_id=cid,
+        methods,
+        chosen_method="vector",
+        chosen_candidate_id=cid,
     )
     assert rank == 1
     assert code == "FER46-01-001"
@@ -57,7 +58,9 @@ def test_derive_picked_rank_finds_third_candidate() -> None:
         ],
     }
     rank, code = _derive_picked_rank_and_code(
-        methods, chosen_method="vector", chosen_candidate_id=target,
+        methods,
+        chosen_method="vector",
+        chosen_candidate_id=target,
     )
     assert rank == 3
     assert code == "C"
@@ -75,7 +78,9 @@ def test_derive_picked_rank_returns_none_for_manual_override() -> None:
         ],
     }
     rank, code = _derive_picked_rank_and_code(
-        methods, chosen_method="vector", chosen_candidate_id=uuid.uuid4(),
+        methods,
+        chosen_method="vector",
+        chosen_candidate_id=uuid.uuid4(),
     )
     assert rank is None
     assert code is None
@@ -97,10 +102,14 @@ def test_derive_picked_rank_handles_missing_methods_dict() -> None:
     return (None, None) — no crash, no false rank."""
     cid = uuid.uuid4()
     assert _derive_picked_rank_and_code(
-        None, chosen_method="vector", chosen_candidate_id=cid,
+        None,
+        chosen_method="vector",
+        chosen_candidate_id=cid,
     ) == (None, None)
     assert _derive_picked_rank_and_code(
-        {}, chosen_method="vector", chosen_candidate_id=cid,
+        {},
+        chosen_method="vector",
+        chosen_candidate_id=cid,
     ) == (None, None)
 
 
@@ -112,7 +121,9 @@ def test_derive_picked_rank_skips_non_dict_entries() -> None:
         "vector": ["not-a-dict", 42, None, {"id": str(cid), "code": "GOOD"}],
     }
     rank, code = _derive_picked_rank_and_code(
-        methods, chosen_method="vector", chosen_candidate_id=cid,
+        methods,
+        chosen_method="vector",
+        chosen_candidate_id=cid,
     )
     # Index 4 (1-based) — the only valid dict matching the cid.
     assert rank == 4
@@ -127,6 +138,8 @@ def test_derive_picked_rank_handles_chosen_method_not_in_methods() -> None:
         "vector": [{"id": str(cid), "code": "A"}],
     }
     rank, code = _derive_picked_rank_and_code(
-        methods, chosen_method="lexical", chosen_candidate_id=cid,
+        methods,
+        chosen_method="lexical",
+        chosen_candidate_id=cid,
     )
     assert (rank, code) == (None, None)

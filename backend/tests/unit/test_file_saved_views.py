@@ -59,7 +59,6 @@ from app.modules.file_saved_views.service import (  # noqa: E402
 from app.modules.projects.models import Project  # noqa: E402
 from app.modules.users.models import User  # noqa: E402
 
-
 # ── DB fixture ─────────────────────────────────────────────────────────────
 
 
@@ -68,7 +67,8 @@ async def db_session() -> AsyncSession:
     """A real AsyncSession over a fresh temp SQLite with our tables only."""
     db_path = _TMP_DIR / f"sv-{uuid.uuid4().hex[:8]}.db"
     engine = create_async_engine(
-        f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False,
+        f"sqlite+aiosqlite:///{db_path.as_posix()}",
+        echo=False,
     )
     async with engine.begin() as conn:
         # Only the three tables this suite touches. Building Project +
@@ -337,7 +337,9 @@ async def test_non_owner_cannot_update_or_delete_shared_view(db_session):
 
     with pytest.raises(SavedViewNotFoundError):
         await svc.update(
-            shared.id, SavedViewUpdate(name="Hijacked"), other_id,
+            shared.id,
+            SavedViewUpdate(name="Hijacked"),
+            other_id,
         )
     with pytest.raises(SavedViewNotFoundError):
         await svc.delete(shared.id, other_id)

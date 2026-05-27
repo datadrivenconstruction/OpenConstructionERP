@@ -54,7 +54,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -80,9 +82,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     is_sqlite = bind.dialect.name == "sqlite"
     # GUID() TypeDecorator: VARCHAR(36) on SQLite, native UUID on PostgreSQL.
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
     inspector = sa.inspect(bind)
 
     # ── oe_service_sla_definition ────────────────────────────────────────
@@ -90,10 +90,12 @@ def upgrade() -> None:
         op.create_table(
             "oe_service_sla_definition",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
             sa.Column("name", sa.String(120), nullable=False),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
             sa.Column("response_time_minutes", sa.Integer(), nullable=False, server_default="240"),
@@ -108,10 +110,12 @@ def upgrade() -> None:
         op.create_table(
             "oe_service_checklist",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
             sa.Column("name", sa.String(255), nullable=False),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
             sa.Column("asset_type", sa.String(64), nullable=True),
@@ -122,25 +126,28 @@ def upgrade() -> None:
 
     # Refresh inspector cache once after first batch
     inspector = sa.inspect(bind)
-    _ensure_index(inspector, "oe_service_checklist",
-                  "ix_oe_service_checklist_asset_type", ["asset_type"])
+    _ensure_index(inspector, "oe_service_checklist", "ix_oe_service_checklist_asset_type", ["asset_type"])
 
     # ── oe_service_contract ──────────────────────────────────────────────
     if not _has_table(inspector, "oe_service_contract"):
         op.create_table(
             "oe_service_contract",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
             sa.Column(
-                "customer_id", guid_type,
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "customer_id",
+                guid_type,
                 sa.ForeignKey("oe_contacts_contact.id", ondelete="RESTRICT"),
                 nullable=False,
             ),
             sa.Column(
-                "project_id", guid_type,
+                "project_id",
+                guid_type,
                 sa.ForeignKey("oe_projects_project.id", ondelete="SET NULL"),
                 nullable=True,
             ),
@@ -150,7 +157,8 @@ def upgrade() -> None:
             sa.Column("period_start", sa.String(20), nullable=False),
             sa.Column("period_end", sa.String(20), nullable=False),
             sa.Column(
-                "sla_definition_id", guid_type,
+                "sla_definition_id",
+                guid_type,
                 sa.ForeignKey("oe_service_sla_definition.id", ondelete="SET NULL"),
                 nullable=True,
             ),
@@ -164,26 +172,25 @@ def upgrade() -> None:
         )
 
     inspector = sa.inspect(bind)
-    _ensure_index(inspector, "oe_service_contract",
-                  "ix_oe_service_contract_customer_id", ["customer_id"])
-    _ensure_index(inspector, "oe_service_contract",
-                  "ix_oe_service_contract_project_id", ["project_id"])
-    _ensure_index(inspector, "oe_service_contract",
-                  "ix_oe_service_contract_status", ["status"])
-    _ensure_index(inspector, "oe_service_contract",
-                  "ix_oe_service_contract_sla_definition_id", ["sla_definition_id"])
+    _ensure_index(inspector, "oe_service_contract", "ix_oe_service_contract_customer_id", ["customer_id"])
+    _ensure_index(inspector, "oe_service_contract", "ix_oe_service_contract_project_id", ["project_id"])
+    _ensure_index(inspector, "oe_service_contract", "ix_oe_service_contract_status", ["status"])
+    _ensure_index(inspector, "oe_service_contract", "ix_oe_service_contract_sla_definition_id", ["sla_definition_id"])
 
     # ── oe_service_asset ─────────────────────────────────────────────────
     if not _has_table(inspector, "oe_service_asset"):
         op.create_table(
             "oe_service_asset",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
             sa.Column(
-                "contract_id", guid_type,
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "contract_id",
+                guid_type,
                 sa.ForeignKey("oe_service_contract.id", ondelete="CASCADE"),
                 nullable=False,
             ),
@@ -201,29 +208,30 @@ def upgrade() -> None:
         )
 
     inspector = sa.inspect(bind)
-    _ensure_index(inspector, "oe_service_asset",
-                  "ix_oe_service_asset_contract_id", ["contract_id"])
-    _ensure_index(inspector, "oe_service_asset",
-                  "ix_oe_service_asset_asset_type", ["asset_type"])
-    _ensure_index(inspector, "oe_service_asset",
-                  "ix_oe_service_asset_status", ["status"])
+    _ensure_index(inspector, "oe_service_asset", "ix_oe_service_asset_contract_id", ["contract_id"])
+    _ensure_index(inspector, "oe_service_asset", "ix_oe_service_asset_asset_type", ["asset_type"])
+    _ensure_index(inspector, "oe_service_asset", "ix_oe_service_asset_status", ["status"])
 
     # ── oe_service_ticket ────────────────────────────────────────────────
     if not _has_table(inspector, "oe_service_ticket"):
         op.create_table(
             "oe_service_ticket",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
             sa.Column(
-                "contract_id", guid_type,
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "contract_id",
+                guid_type,
                 sa.ForeignKey("oe_service_contract.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column(
-                "asset_id", guid_type,
+                "asset_id",
+                guid_type,
                 sa.ForeignKey("oe_service_asset.id", ondelete="SET NULL"),
                 nullable=True,
             ),
@@ -242,30 +250,27 @@ def upgrade() -> None:
         )
 
     inspector = sa.inspect(bind)
-    _ensure_index(inspector, "oe_service_ticket",
-                  "ix_oe_service_ticket_contract_id", ["contract_id"])
-    _ensure_index(inspector, "oe_service_ticket",
-                  "ix_oe_service_ticket_asset_id", ["asset_id"])
-    _ensure_index(inspector, "oe_service_ticket",
-                  "ix_oe_service_ticket_priority", ["priority"])
-    _ensure_index(inspector, "oe_service_ticket",
-                  "ix_oe_service_ticket_status", ["status"])
-    _ensure_index(inspector, "oe_service_ticket",
-                  "ix_oe_service_ticket_assigned_to", ["assigned_to"])
-    _ensure_index(inspector, "oe_service_ticket",
-                  "ix_oe_service_ticket_sla_due_at", ["sla_due_at"])
+    _ensure_index(inspector, "oe_service_ticket", "ix_oe_service_ticket_contract_id", ["contract_id"])
+    _ensure_index(inspector, "oe_service_ticket", "ix_oe_service_ticket_asset_id", ["asset_id"])
+    _ensure_index(inspector, "oe_service_ticket", "ix_oe_service_ticket_priority", ["priority"])
+    _ensure_index(inspector, "oe_service_ticket", "ix_oe_service_ticket_status", ["status"])
+    _ensure_index(inspector, "oe_service_ticket", "ix_oe_service_ticket_assigned_to", ["assigned_to"])
+    _ensure_index(inspector, "oe_service_ticket", "ix_oe_service_ticket_sla_due_at", ["sla_due_at"])
 
     # ── oe_service_work_order ────────────────────────────────────────────
     if not _has_table(inspector, "oe_service_work_order"):
         op.create_table(
             "oe_service_work_order",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
             sa.Column(
-                "ticket_id", guid_type,
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "ticket_id",
+                guid_type,
                 sa.ForeignKey("oe_service_ticket.id", ondelete="CASCADE"),
                 nullable=False,
             ),
@@ -283,24 +288,24 @@ def upgrade() -> None:
         )
 
     inspector = sa.inspect(bind)
-    _ensure_index(inspector, "oe_service_work_order",
-                  "ix_oe_service_work_order_ticket_id", ["ticket_id"])
-    _ensure_index(inspector, "oe_service_work_order",
-                  "ix_oe_service_work_order_status", ["status"])
-    _ensure_index(inspector, "oe_service_work_order",
-                  "ix_oe_service_work_order_technician_id", ["technician_id"])
+    _ensure_index(inspector, "oe_service_work_order", "ix_oe_service_work_order_ticket_id", ["ticket_id"])
+    _ensure_index(inspector, "oe_service_work_order", "ix_oe_service_work_order_status", ["status"])
+    _ensure_index(inspector, "oe_service_work_order", "ix_oe_service_work_order_technician_id", ["technician_id"])
 
     # ── oe_service_work_order_item ───────────────────────────────────────
     if not _has_table(inspector, "oe_service_work_order_item"):
         op.create_table(
             "oe_service_work_order_item",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
             sa.Column(
-                "work_order_id", guid_type,
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "work_order_id",
+                guid_type,
                 sa.ForeignKey("oe_service_work_order.id", ondelete="CASCADE"),
                 nullable=False,
             ),
@@ -314,20 +319,24 @@ def upgrade() -> None:
         )
 
     inspector = sa.inspect(bind)
-    _ensure_index(inspector, "oe_service_work_order_item",
-                  "ix_oe_service_work_order_item_work_order_id", ["work_order_id"])
+    _ensure_index(
+        inspector, "oe_service_work_order_item", "ix_oe_service_work_order_item_work_order_id", ["work_order_id"]
+    )
 
     # ── oe_service_debrief ───────────────────────────────────────────────
     if not _has_table(inspector, "oe_service_debrief"):
         op.create_table(
             "oe_service_debrief",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
             sa.Column(
-                "work_order_id", guid_type,
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "work_order_id",
+                guid_type,
                 sa.ForeignKey("oe_service_work_order.id", ondelete="CASCADE"),
                 nullable=False,
             ),
@@ -340,20 +349,22 @@ def upgrade() -> None:
         )
 
     inspector = sa.inspect(bind)
-    _ensure_index(inspector, "oe_service_debrief",
-                  "ix_oe_service_debrief_work_order_id", ["work_order_id"])
+    _ensure_index(inspector, "oe_service_debrief", "ix_oe_service_debrief_work_order_id", ["work_order_id"])
 
     # ── oe_service_schedule ──────────────────────────────────────────────
     if not _has_table(inspector, "oe_service_schedule"):
         op.create_table(
             "oe_service_schedule",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
             sa.Column(
-                "asset_id", guid_type,
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "asset_id",
+                guid_type,
                 sa.ForeignKey("oe_service_asset.id", ondelete="CASCADE"),
                 nullable=False,
             ),
@@ -361,7 +372,8 @@ def upgrade() -> None:
             sa.Column("next_due_date", sa.String(20), nullable=False),
             sa.Column("last_completed_at", sa.String(40), nullable=True),
             sa.Column(
-                "checklist_template_id", guid_type,
+                "checklist_template_id",
+                guid_type,
                 sa.ForeignKey("oe_service_checklist.id", ondelete="SET NULL"),
                 nullable=True,
             ),
@@ -370,10 +382,8 @@ def upgrade() -> None:
         )
 
     inspector = sa.inspect(bind)
-    _ensure_index(inspector, "oe_service_schedule",
-                  "ix_oe_service_schedule_asset_id", ["asset_id"])
-    _ensure_index(inspector, "oe_service_schedule",
-                  "ix_oe_service_schedule_next_due_date", ["next_due_date"])
+    _ensure_index(inspector, "oe_service_schedule", "ix_oe_service_schedule_asset_id", ["asset_id"])
+    _ensure_index(inspector, "oe_service_schedule", "ix_oe_service_schedule_next_due_date", ["next_due_date"])
 
 
 def downgrade() -> None:

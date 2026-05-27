@@ -6,9 +6,7 @@ that were previously ignored, causing the 'matrix of prismoidal objects'
 rendering bug (GitHub issue #52).
 """
 
-import textwrap
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
@@ -17,7 +15,6 @@ from app.modules.bim_hub.ifc_processor import (
     _simplify_type,
     process_ifc_file,
 )
-
 
 # ── Discipline classification ──────────────────────────────────────────────
 
@@ -214,13 +211,8 @@ def test_civil_ifc_elements_have_geometry(tmp_path: Path) -> None:
     # When DDC converter is available, elements may have mesh_ref from the
     # converter output.  When using the text parser fallback, elements get
     # bounding_box from placeholder COLLADA generation.
-    has_geo = [
-        e for e in result["elements"]
-        if e.get("bounding_box") or e.get("mesh_ref")
-    ]
-    assert len(has_geo) >= 1, (
-        f"Expected ≥1 elements with geometry info, got {len(has_geo)}"
-    )
+    has_geo = [e for e in result["elements"] if e.get("bounding_box") or e.get("mesh_ref")]
+    assert len(has_geo) >= 1, f"Expected ≥1 elements with geometry info, got {len(has_geo)}"
 
 
 def test_civil_ifc_geometry_generated(tmp_path: Path) -> None:

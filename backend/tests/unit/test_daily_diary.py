@@ -45,7 +45,6 @@ from app.modules.daily_diary.service import (
     validate_diary_immutability,
 )
 
-
 # ── Stubs ────────────────────────────────────────────────────────────────
 
 
@@ -96,7 +95,9 @@ class _BaseStubRepo:
 
 class _StubDiaryRepo(_BaseStubRepo):
     async def get_by_date_and_project(
-        self, project_id: uuid.UUID, diary_date: str,
+        self,
+        project_id: uuid.UUID,
+        diary_date: str,
     ) -> Any:
         for row in self.rows.values():
             if row.project_id == project_id and row.diary_date == diary_date:
@@ -113,17 +114,16 @@ class _StubDiaryRepo(_BaseStubRepo):
         limit: int = 100,
         status: str | None = None,
     ) -> tuple[list[Any], int]:
-        rows = [
-            r for r in self.rows.values()
-            if r.project_id == project_id
-            and (status is None or r.status == status)
-        ]
-        return rows[offset: offset + limit], len(rows)
+        rows = [r for r in self.rows.values() if r.project_id == project_id and (status is None or r.status == status)]
+        return rows[offset : offset + limit], len(rows)
 
 
 class _StubEntryRepo(_BaseStubRepo):
     async def list_for_diary(
-        self, diary_id: uuid.UUID, *, entry_type: str | None = None,
+        self,
+        diary_id: uuid.UUID,
+        *,
+        entry_type: str | None = None,
     ) -> list[Any]:
         rows = [r for r in self.rows.values() if r.diary_id == diary_id]
         if entry_type is not None:
@@ -131,12 +131,11 @@ class _StubEntryRepo(_BaseStubRepo):
         return rows
 
     async def entries_by_source_module(
-        self, diary_id: uuid.UUID, source_module: str,
+        self,
+        diary_id: uuid.UUID,
+        source_module: str,
     ) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if r.diary_id == diary_id and r.source_module == source_module
-        ]
+        return [r for r in self.rows.values() if r.diary_id == diary_id and r.source_module == source_module]
 
     async def bulk_create(self, entries: list[Any]) -> list[Any]:
         for e in entries:
@@ -155,13 +154,10 @@ class _StubPhotoRepo(_BaseStubRepo):
         limit: int = 500,
     ) -> tuple[list[Any], int]:
         rows = [r for r in self.rows.values() if r.project_id == project_id]
-        return rows[offset: offset + limit], len(rows)
+        return rows[offset : offset + limit], len(rows)
 
     async def photos_for_diary(self, diary_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "diary_id", None) == diary_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "diary_id", None) == diary_id]
 
 
 class _StubSignatureRepo(_BaseStubRepo):
@@ -183,12 +179,7 @@ class _StubWeatherRepo(_BaseStubRepo):
         day_start: datetime,
         day_end: datetime,
     ) -> list[Any]:
-        rows = [
-            r
-            for r in self.rows.values()
-            if r.project_id == project_id
-            and day_start <= r.captured_at < day_end
-        ]
+        rows = [r for r in self.rows.values() if r.project_id == project_id and day_start <= r.captured_at < day_end]
         return sorted(rows, key=lambda r: r.captured_at, reverse=True)
 
 
@@ -201,7 +192,7 @@ class _StubGenericProjectRepo(_BaseStubRepo):
         limit: int = 100,
     ) -> tuple[list[Any], int]:
         rows = [r for r in self.rows.values() if r.project_id == project_id]
-        return rows[offset: offset + limit], len(rows)
+        return rows[offset : offset + limit], len(rows)
 
 
 def _make_service() -> DailyDiaryService:
@@ -422,13 +413,19 @@ def test_compute_photo_timeline_groups_by_day() -> None:
 
 def test_compute_before_after_pairs_by_proximity() -> None:
     p_before = _fake_photo(
-        taken_at=datetime(2026, 4, 10, 9, tzinfo=UTC), lat=52.520, lng=13.400,
+        taken_at=datetime(2026, 4, 10, 9, tzinfo=UTC),
+        lat=52.520,
+        lng=13.400,
     )
     p_after = _fake_photo(
-        taken_at=datetime(2026, 4, 20, 9, tzinfo=UTC), lat=52.520001, lng=13.400001,
+        taken_at=datetime(2026, 4, 20, 9, tzinfo=UTC),
+        lat=52.520001,
+        lng=13.400001,
     )
     p_far = _fake_photo(
-        taken_at=datetime(2026, 4, 20, 9, tzinfo=UTC), lat=53.0, lng=14.0,
+        taken_at=datetime(2026, 4, 20, 9, tzinfo=UTC),
+        lat=53.0,
+        lng=14.0,
     )
     pairs = compute_before_after(
         [p_before, p_after, p_far],
@@ -443,10 +440,14 @@ def test_compute_before_after_pairs_by_proximity() -> None:
 
 def test_compute_before_after_returns_empty_when_no_matches() -> None:
     p1 = _fake_photo(
-        taken_at=datetime(2026, 4, 10, tzinfo=UTC), lat=52.5, lng=13.4,
+        taken_at=datetime(2026, 4, 10, tzinfo=UTC),
+        lat=52.5,
+        lng=13.4,
     )
     p2 = _fake_photo(
-        taken_at=datetime(2026, 4, 20, tzinfo=UTC), lat=53.0, lng=14.0,
+        taken_at=datetime(2026, 4, 20, tzinfo=UTC),
+        lat=53.0,
+        lng=14.0,
     )
     pairs = compute_before_after(
         [p1, p2],
@@ -507,6 +508,7 @@ async def test_create_diary_duplicate_date_raises_409() -> None:
     svc = _make_service()
     await svc.create_diary(_diary_payload(), user_id="u")
     from fastapi import HTTPException
+
     with pytest.raises(HTTPException) as exc:
         await svc.create_diary(_diary_payload(), user_id="u")
     assert exc.value.status_code == 409
@@ -535,9 +537,13 @@ async def test_close_diary_cannot_regress_from_signed() -> None:
     with patch("app.modules.daily_diary.service.event_bus.publish_detached"):
         await svc.close_diary(diary.id, user_id="u")
         await svc.sign_diary(
-            diary.id, signer_role="supervisor", signer_name="A", user_id="u",
+            diary.id,
+            signer_role="supervisor",
+            signer_name="A",
+            user_id="u",
         )
     from fastapi import HTTPException
+
     with pytest.raises(HTTPException) as exc:
         await svc.close_diary(diary.id, user_id="u")
     assert exc.value.status_code == 409
@@ -569,10 +575,16 @@ async def test_sign_diary_idempotent_increments_revision() -> None:
     diary = await svc.create_diary(_diary_payload(), user_id="u")
     with patch("app.modules.daily_diary.service.event_bus.publish_detached"):
         sig1 = await svc.sign_diary(
-            diary.id, signer_role="supervisor", signer_name="A", user_id="u",
+            diary.id,
+            signer_role="supervisor",
+            signer_name="A",
+            user_id="u",
         )
         sig2 = await svc.sign_diary(
-            diary.id, signer_role="supervisor", signer_name="A", user_id="u",
+            diary.id,
+            signer_role="supervisor",
+            signer_name="A",
+            user_id="u",
         )
     assert sig2.revision == sig1.revision + 1
 
@@ -586,7 +598,10 @@ async def test_archive_diary_emits_event() -> None:
     ) as bus:
         await svc.close_diary(diary.id, user_id="u")
         await svc.sign_diary(
-            diary.id, signer_role="owner", signer_name="O", user_id="u",
+            diary.id,
+            signer_role="owner",
+            signer_name="O",
+            user_id="u",
         )
         archived = await svc.archive_diary(diary.id, user_id="u")
     assert archived.status == "archived"
@@ -601,10 +616,14 @@ async def test_archive_diary_cannot_be_regressed() -> None:
     with patch("app.modules.daily_diary.service.event_bus.publish_detached"):
         await svc.close_diary(diary.id, user_id="u")
         await svc.sign_diary(
-            diary.id, signer_role="owner", signer_name="O", user_id="u",
+            diary.id,
+            signer_role="owner",
+            signer_name="O",
+            user_id="u",
         )
         await svc.archive_diary(diary.id, user_id="u")
     from fastapi import HTTPException
+
     with pytest.raises(HTTPException):
         await svc.close_diary(diary.id, user_id="u")
 
@@ -616,10 +635,15 @@ async def test_update_signed_diary_rejected() -> None:
     with patch("app.modules.daily_diary.service.event_bus.publish_detached"):
         await svc.close_diary(diary.id, user_id="u")
         await svc.sign_diary(
-            diary.id, signer_role="owner", signer_name="O", user_id="u",
+            diary.id,
+            signer_role="owner",
+            signer_name="O",
+            user_id="u",
         )
     from fastapi import HTTPException
+
     from app.modules.daily_diary.schemas import DailyDiaryUpdate
+
     with pytest.raises(HTTPException) as exc:
         await svc.update_diary(diary.id, DailyDiaryUpdate(notes="cheating"))
     assert exc.value.status_code == 409
@@ -630,6 +654,7 @@ async def test_create_future_dated_diary_rejected() -> None:
     """A contemporaneous record cannot be opened ahead of the site date."""
     svc = _make_service()
     from fastapi import HTTPException
+
     future = (datetime.now(UTC) + timedelta(days=10)).date().isoformat()
     with pytest.raises(HTTPException) as exc:
         await svc.create_diary(_diary_payload(diary_date=future), user_id="u")
@@ -666,10 +691,12 @@ async def test_immutable_hash_scoped_to_diary_photos_only() -> None:
     """
     svc = _make_service()
     diary_a = await svc.create_diary(
-        _diary_payload(diary_date="2026-04-09"), user_id="u",
+        _diary_payload(diary_date="2026-04-09"),
+        user_id="u",
     )
     diary_b = await svc.create_diary(
-        _diary_payload(diary_date="2026-04-10"), user_id="u",
+        _diary_payload(diary_date="2026-04-10"),
+        user_id="u",
     )
 
     # Attach one photo to each diary; both share the same project.
@@ -678,26 +705,30 @@ async def test_immutable_hash_scoped_to_diary_photos_only() -> None:
         project_id=PROJECT_ID,
         diary_id=diary_a.id,
         taken_at=datetime(2026, 4, 9, 12, tzinfo=UTC),
-        lat=52.0, lng=13.0,
-        file_url="http://x/a.jpg", mime_type="image/jpeg",
-        is_360=False, is_drone=False,
+        lat=52.0,
+        lng=13.0,
+        file_url="http://x/a.jpg",
+        mime_type="image/jpeg",
+        is_360=False,
+        is_drone=False,
     )
     photo_b = SimpleNamespace(
         id=uuid.uuid4(),
         project_id=PROJECT_ID,
         diary_id=diary_b.id,
         taken_at=datetime(2026, 4, 10, 12, tzinfo=UTC),
-        lat=52.0, lng=13.0,
-        file_url="http://x/b.jpg", mime_type="image/jpeg",
-        is_360=False, is_drone=False,
+        lat=52.0,
+        lng=13.0,
+        file_url="http://x/b.jpg",
+        mime_type="image/jpeg",
+        is_360=False,
+        is_drone=False,
     )
     svc.photo_repo.rows[photo_a.id] = photo_a
     svc.photo_repo.rows[photo_b.id] = photo_b
 
     hash_b = await svc.immutable_payload_hash(diary_b.id)
-    assert hash_b["payload_preview"]["photos_count"] == 1, (
-        "diary B's hash must include only its own photo, not photo A"
-    )
+    assert hash_b["payload_preview"]["photos_count"] == 1, "diary B's hash must include only its own photo, not photo A"
 
 
 @pytest.mark.asyncio
@@ -706,6 +737,7 @@ async def test_archive_unsigned_diary_rejected() -> None:
     svc = _make_service()
     diary = await svc.create_diary(_diary_payload(), user_id="u")
     from fastapi import HTTPException
+
     with patch("app.modules.daily_diary.service.event_bus.publish_detached"):
         await svc.close_diary(diary.id, user_id="u")
         with pytest.raises(HTTPException) as exc:
@@ -729,9 +761,13 @@ async def test_update_entry_blocked_when_diary_sealed() -> None:
     with patch("app.modules.daily_diary.service.event_bus.publish_detached"):
         await svc.close_diary(diary.id, user_id="u")
         await svc.sign_diary(
-            diary.id, signer_role="owner", signer_name="O", user_id="u",
+            diary.id,
+            signer_role="owner",
+            signer_name="O",
+            user_id="u",
         )
     from fastapi import HTTPException
+
     with pytest.raises(HTTPException) as exc:
         await svc.update_entry(entry.id, {"title": "tampered"})
     assert exc.value.status_code == 409
@@ -768,9 +804,13 @@ async def test_delete_entry_blocked_when_diary_sealed() -> None:
     with patch("app.modules.daily_diary.service.event_bus.publish_detached"):
         await svc.close_diary(diary.id, user_id="u")
         await svc.sign_diary(
-            diary.id, signer_role="owner", signer_name="O", user_id="u",
+            diary.id,
+            signer_role="owner",
+            signer_name="O",
+            user_id="u",
         )
     from fastapi import HTTPException
+
     with pytest.raises(HTTPException) as exc:
         await svc.delete_entry(entry.id)
     assert exc.value.status_code == 409
@@ -794,9 +834,7 @@ async def test_register_photo_emits_event() -> None:
     ) as bus:
         photo = await svc.register_photo(payload)
     assert photo.id is not None
-    assert any(
-        c.args[0] == "daily_diary.photo.registered" for c in bus.call_args_list
-    )
+    assert any(c.args[0] == "daily_diary.photo.registered" for c in bus.call_args_list)
 
 
 @pytest.mark.asyncio
@@ -828,9 +866,7 @@ async def test_attach_drone_survey_emits_event() -> None:
     ) as bus:
         survey = await svc.attach_drone_survey(payload)
     assert survey.id is not None
-    assert any(
-        c.args[0] == "daily_diary.drone.attached" for c in bus.call_args_list
-    )
+    assert any(c.args[0] == "daily_diary.drone.attached" for c in bus.call_args_list)
 
 
 @pytest.mark.asyncio
@@ -847,10 +883,7 @@ async def test_attach_reality_capture_emits_event() -> None:
     ) as bus:
         ds = await svc.attach_reality_capture(payload)
     assert ds.id is not None
-    assert any(
-        c.args[0] == "daily_diary.reality_capture.attached"
-        for c in bus.call_args_list
-    )
+    assert any(c.args[0] == "daily_diary.reality_capture.attached" for c in bus.call_args_list)
 
 
 # ── Service: weather + entries repository basics ─────────────────────────
@@ -911,6 +944,7 @@ async def test_delete_diary() -> None:
     diary = await svc.create_diary(_diary_payload(), user_id="u")
     await svc.delete_diary(diary.id)
     from fastapi import HTTPException
+
     with pytest.raises(HTTPException):
         await svc.get_diary(diary.id)
 
@@ -919,6 +953,7 @@ async def test_delete_diary() -> None:
 async def test_get_diary_404_when_missing() -> None:
     svc = _make_service()
     from fastapi import HTTPException
+
     with pytest.raises(HTTPException) as exc:
         await svc.get_diary(uuid.uuid4())
     assert exc.value.status_code == 404
@@ -987,11 +1022,15 @@ def test_status_machine_order() -> None:
 def test_compute_before_after_uses_radius_strictly() -> None:
     # Two photos exactly at the radius boundary (~15 m apart along lat).
     near = _fake_photo(
-        taken_at=datetime(2026, 4, 10, tzinfo=UTC), lat=52.5, lng=13.4,
+        taken_at=datetime(2026, 4, 10, tzinfo=UTC),
+        lat=52.5,
+        lng=13.4,
     )
     # Roughly 1.5km away
     far = _fake_photo(
-        taken_at=datetime(2026, 4, 20, tzinfo=UTC), lat=52.51, lng=13.4,
+        taken_at=datetime(2026, 4, 20, tzinfo=UTC),
+        lat=52.51,
+        lng=13.4,
     )
     pairs = compute_before_after(
         [near, far],
@@ -1087,8 +1126,12 @@ def test_list_supported_trades_includes_core_set() -> None:
 
     trades = list_supported_trades()
     for needed in (
-        "concrete", "roofing", "steel_erection",
-        "earthworks", "finishes_interior", "mep_roughin",
+        "concrete",
+        "roofing",
+        "steel_erection",
+        "earthworks",
+        "finishes_interior",
+        "mep_roughin",
     ):
         assert needed in trades
 
@@ -1320,6 +1363,7 @@ async def test_update_drone_survey_rejects_partial_inversion() -> None:
     from fastapi import HTTPException
 
     from app.modules.daily_diary.schemas import DroneSurveyUpdate
+
     with pytest.raises(HTTPException) as exc:
         await svc.update_drone_survey(
             survey.id,
@@ -1337,18 +1381,33 @@ async def test_workforce_summary_aggregates_entries() -> None:
     diary = await svc.create_diary(_diary_payload(), user_id="u")
     # Add two entries each carrying labour/equipment counts in metadata.
     e1 = SimpleNamespace(
-        id=uuid.uuid4(), diary_id=diary.id, entry_type="visitor",
-        entry_time=datetime.now(UTC), title="A", description=None,
-        source_module=None, source_ref=None, author_id=None,
-        photo_ids=[], metadata_={"labour_count": 8, "company": "Alpha"},
+        id=uuid.uuid4(),
+        diary_id=diary.id,
+        entry_type="visitor",
+        entry_time=datetime.now(UTC),
+        title="A",
+        description=None,
+        source_module=None,
+        source_ref=None,
+        author_id=None,
+        photo_ids=[],
+        metadata_={"labour_count": 8, "company": "Alpha"},
     )
     e2 = SimpleNamespace(
-        id=uuid.uuid4(), diary_id=diary.id, entry_type="visitor",
-        entry_time=datetime.now(UTC), title="B", description=None,
-        source_module=None, source_ref=None, author_id=None,
+        id=uuid.uuid4(),
+        diary_id=diary.id,
+        entry_type="visitor",
+        entry_time=datetime.now(UTC),
+        title="B",
+        description=None,
+        source_module=None,
+        source_ref=None,
+        author_id=None,
         photo_ids=[],
         metadata_={
-            "labour_count": 5, "equipment_count": 2, "company": "Beta",
+            "labour_count": 5,
+            "equipment_count": 2,
+            "company": "Beta",
         },
     )
     svc.entry_repo.rows[e1.id] = e1
@@ -1376,11 +1435,17 @@ async def test_workforce_summary_stable_after_close() -> None:
     diary = await svc.create_diary(_diary_payload(), user_id="u")
     # Pre-existing entry that carries a labour count.
     entry = SimpleNamespace(
-        id=uuid.uuid4(), diary_id=diary.id, entry_type="visitor",
+        id=uuid.uuid4(),
+        diary_id=diary.id,
+        entry_type="visitor",
         entry_time=datetime(2026, 4, 10, 9, tzinfo=UTC),
-        title="Crew", description=None,
-        source_module=None, source_ref=None, author_id=None,
-        photo_ids=[], metadata_={"labour_count": 4, "company": "Alpha"},
+        title="Crew",
+        description=None,
+        source_module=None,
+        source_ref=None,
+        author_id=None,
+        photo_ids=[],
+        metadata_={"labour_count": 4, "company": "Alpha"},
     )
     svc.entry_repo.rows[entry.id] = entry
 
@@ -1417,9 +1482,12 @@ async def test_emit_workforce_summary_publishes_event() -> None:
 async def test_scl_bundle_manifest_validates_date_range() -> None:
     svc = _make_service()
     from fastapi import HTTPException
+
     with pytest.raises(HTTPException) as exc:
         await svc.build_scl_bundle_manifest(
-            PROJECT_ID, date_from="2026-04-20", date_to="2026-04-10",
+            PROJECT_ID,
+            date_from="2026-04-20",
+            date_to="2026-04-10",
         )
     assert exc.value.status_code == 422
 
@@ -1429,10 +1497,14 @@ async def test_scl_bundle_manifest_returns_deterministic_hash() -> None:
     svc = _make_service()
     # Manifest should produce a stable hash for an empty range
     a = await svc.build_scl_bundle_manifest(
-        PROJECT_ID, date_from="2026-04-10", date_to="2026-04-12",
+        PROJECT_ID,
+        date_from="2026-04-10",
+        date_to="2026-04-12",
     )
     b = await svc.build_scl_bundle_manifest(
-        PROJECT_ID, date_from="2026-04-10", date_to="2026-04-12",
+        PROJECT_ID,
+        date_from="2026-04-10",
+        date_to="2026-04-12",
     )
     assert a["bundle_sha256"] == b["bundle_sha256"]
     assert len(a["bundle_sha256"]) == 64
@@ -1484,7 +1556,7 @@ def test_summarise_open_meteo_with_realistic_payload() -> None:
         },
         "daily": {
             "sunrise": ["2026-04-10T05:30"],
-            "sunset":  ["2026-04-10T19:45"],
+            "sunset": ["2026-04-10T19:45"],
         },
     }
     out = _summarise_open_meteo(payload, _date(2026, 4, 10))
@@ -1504,8 +1576,8 @@ async def test_diary_closed_subscriber_fans_out_actuals_and_kpi() -> None:
     import asyncio
     import uuid as _uuid
 
-    from app.core.events import Event
     from app.core import events as _ev_module
+    from app.core.events import Event
     from app.modules.daily_diary.events import _on_diary_closed
 
     captured: list[tuple[str, dict]] = []
@@ -1546,8 +1618,8 @@ async def test_diary_signed_subscriber_emits_kpi_recompute() -> None:
     import asyncio
     import uuid as _uuid
 
-    from app.core.events import Event
     from app.core import events as _ev_module
+    from app.core.events import Event
     from app.modules.daily_diary.events import _on_diary_signed
 
     captured: list[tuple[str, dict]] = []

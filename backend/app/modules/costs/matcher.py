@@ -85,9 +85,7 @@ class MatchResult(BaseModel):
     unit: str = Field(..., description="Unit of measurement (m, m2, m3, ...)")
     unit_rate: float = Field(..., description="Numeric unit rate (0 if unparseable)")
     currency: str = Field(default="EUR", description="ISO 4217 currency code")
-    score: float = Field(
-        ..., ge=0.0, le=1.0, description="Relevance score 0..1 (higher = better)"
-    )
+    score: float = Field(..., ge=0.0, le=1.0, description="Relevance score 0..1 (higher = better)")
     source: str = Field(
         default="lexical",
         description="Which matching channel produced this result: lexical | semantic | hybrid",
@@ -166,9 +164,7 @@ async def match_cwicr_items(
         effective_mode = "hybrid"
 
     # ── Load candidates (lexical OR-ILIKE prefilter) ─────────────────────
-    candidates = await _load_candidates(
-        session, q, region=region, source=source, cap=_CANDIDATE_CAP
-    )
+    candidates = await _load_candidates(session, q, region=region, source=source, cap=_CANDIDATE_CAP)
     if not candidates:
         return []
 
@@ -196,10 +192,7 @@ async def match_cwicr_items(
             score = cand.semantic
             channel = "semantic"
         else:  # hybrid
-            score = (
-                _LEXICAL_WEIGHT_HYBRID * cand.lexical
-                + _SEMANTIC_WEIGHT_HYBRID * cand.semantic
-            )
+            score = _LEXICAL_WEIGHT_HYBRID * cand.lexical + _SEMANTIC_WEIGHT_HYBRID * cand.semantic
             channel = "hybrid"
         if score <= 0.0:
             continue
@@ -208,10 +201,7 @@ async def match_cwicr_items(
     # Sort by score desc, then by code asc for stable output.
     final.sort(key=lambda t: (-t[0], t[2].item.code))
 
-    return [
-        _to_match_result(cand.item, score=score, channel=channel)
-        for score, channel, cand in final[:top_k]
-    ]
+    return [_to_match_result(cand.item, score=score, channel=channel) for score, channel, cand in final[:top_k]]
 
 
 # ── Position-driven entry point ────────────────────────────────────────────
@@ -486,9 +476,7 @@ def _cosine(a: list[float] | Any, b: list[float] | Any) -> float:
 # ── Result construction ────────────────────────────────────────────────────
 
 
-def _to_match_result(
-    item: CostItem, *, score: float, channel: str
-) -> MatchResult:
+def _to_match_result(item: CostItem, *, score: float, channel: str) -> MatchResult:
     """Coerce a SQLAlchemy :class:`CostItem` into a public MatchResult."""
     try:
         rate_val = float(item.rate)

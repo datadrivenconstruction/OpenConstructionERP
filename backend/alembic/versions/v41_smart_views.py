@@ -43,7 +43,8 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _existing_index_names(
-    inspector: sa.engine.reflection.Inspector, table: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
 ) -> set[str]:
     if not _has_table(inspector, table):
         return set()
@@ -54,9 +55,7 @@ def upgrade() -> None:
     """Create the ``oe_smart_view`` table."""
     bind = op.get_bind()
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
     inspector = sa.inspect(bind)
 
     if not _has_table(inspector, _SMART_VIEW_TABLE):

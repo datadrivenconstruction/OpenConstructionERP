@@ -40,7 +40,6 @@ from fastapi import (
 from sqlalchemy import select
 
 from app.config import get_settings
-from app.database import async_session_factory
 from app.dependencies import (
     CurrentUserId,
     CurrentUserPayload,
@@ -106,9 +105,7 @@ async def list_notifications(
     offset: int = Query(default=0, ge=0),
 ) -> NotificationListResponse:
     """‌⁠‍List current user's notifications (paginated)."""
-    items, total = await service.list_for_user(
-        user_id, is_read=is_read, limit=limit, offset=offset
-    )
+    items, total = await service.list_for_user(user_id, is_read=is_read, limit=limit, offset=offset)
     unread = await service.count_unread(user_id)
     return NotificationListResponse(
         items=[_to_response(i) for i in items],

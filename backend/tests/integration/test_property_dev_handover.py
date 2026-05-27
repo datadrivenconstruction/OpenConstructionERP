@@ -70,11 +70,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -179,9 +175,7 @@ async def tenant_stranger(http_client):
 
 
 @pytest.mark.asyncio
-async def test_create_handover_returns_201_and_persists(
-    http_client: AsyncClient, tenant_owner: dict
-) -> None:
+async def test_create_handover_returns_201_and_persists(http_client: AsyncClient, tenant_owner: dict) -> None:
     """POST /handovers/ creates a row scoped to the caller's plot."""
     plot_id = tenant_owner["plots"][0]
 
@@ -208,9 +202,7 @@ async def test_create_handover_returns_201_and_persists(
 
 
 @pytest.mark.asyncio
-async def test_list_handovers_filters_by_plot(
-    http_client: AsyncClient, tenant_owner: dict
-) -> None:
+async def test_list_handovers_filters_by_plot(http_client: AsyncClient, tenant_owner: dict) -> None:
     """GET /handovers/?plot_id=… returns only rows for the given plot."""
     # Use plots[1] (second plot from fixture — first one already had a
     # handover seeded by test_create_handover_returns_201_and_persists,
@@ -317,9 +309,7 @@ async def test_stranger_cannot_list_or_create_against_owner_plot(
     )
 )
 @pytest.mark.asyncio
-async def test_complete_handover_round_trip(
-    http_client: AsyncClient, tenant_owner: dict
-) -> None:
+async def test_complete_handover_round_trip(http_client: AsyncClient, tenant_owner: dict) -> None:
     """POST /handovers/{id}/complete returns the persisted completion fields.
 
     Note: ``complete_handover`` is a multi-table write — it patches the

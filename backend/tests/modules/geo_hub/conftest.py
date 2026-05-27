@@ -17,12 +17,8 @@ from pathlib import Path
 # fixture.
 _TMP_DIR = Path(tempfile.mkdtemp(prefix="oe-geo-overlay-"))
 _TMP_DB = _TMP_DIR / "geo_overlay.db"
-os.environ.setdefault(
-    "DATABASE_URL", f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}"
-)
-os.environ.setdefault(
-    "DATABASE_SYNC_URL", f"sqlite:///{_TMP_DB.as_posix()}"
-)
+os.environ.setdefault("DATABASE_URL", f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}")
+os.environ.setdefault("DATABASE_SYNC_URL", f"sqlite:///{_TMP_DB.as_posix()}")
 
 import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
@@ -86,11 +82,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -106,7 +98,9 @@ async def _register(client: AsyncClient, label: str) -> tuple[str, str]:
 
 
 async def _login(
-    client: AsyncClient, email: str, password: str,
+    client: AsyncClient,
+    email: str,
+    password: str,
 ) -> dict[str, str]:
     res = await client.post(
         "/api/v1/users/auth/login",

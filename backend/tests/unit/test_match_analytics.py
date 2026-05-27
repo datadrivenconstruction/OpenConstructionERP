@@ -33,7 +33,6 @@ from app.modules.match_elements.analytics import (
 )
 from app.modules.match_elements.models import MatchSearchLog
 
-
 # ── Pure helpers ────────────────────────────────────────────────────────
 
 
@@ -71,9 +70,12 @@ def test_get_alert_thresholds_exposes_env_overridable_keys() -> None:
     /thresholds debug surface."""
     out = get_alert_thresholds()
     assert set(out) == {
-        "low_score_value", "low_score_pct",
-        "high_rank_value", "high_rank_pct",
-        "zero_hit_pct", "min_sample",
+        "low_score_value",
+        "low_score_pct",
+        "high_rank_value",
+        "high_rank_pct",
+        "zero_hit_pct",
+        "min_sample",
     }
 
 
@@ -145,16 +147,44 @@ async def test_basic_aggregates(session_factory) -> None:
     """Seed 4 rows → assert totals, score distribution, tier histogram."""
     pid = uuid.uuid4()
     now = datetime.now(tz=UTC)
-    await _seed(session_factory, project_id=pid, rows=[
-        {"hits_count": 5, "top_score": 0.9, "took_ms": 100, "relax_tier_used": 0,
-         "top_confidence_band": "high", "created_at": now},
-        {"hits_count": 3, "top_score": 0.7, "took_ms": 200, "relax_tier_used": 1,
-         "top_confidence_band": "medium", "created_at": now},
-        {"hits_count": 1, "top_score": 0.5, "took_ms": 300, "relax_tier_used": 2,
-         "top_confidence_band": "low", "created_at": now},
-        {"hits_count": 0, "top_score": None, "took_ms": 400, "relax_tier_used": 3,
-         "top_confidence_band": None, "created_at": now},
-    ])
+    await _seed(
+        session_factory,
+        project_id=pid,
+        rows=[
+            {
+                "hits_count": 5,
+                "top_score": 0.9,
+                "took_ms": 100,
+                "relax_tier_used": 0,
+                "top_confidence_band": "high",
+                "created_at": now,
+            },
+            {
+                "hits_count": 3,
+                "top_score": 0.7,
+                "took_ms": 200,
+                "relax_tier_used": 1,
+                "top_confidence_band": "medium",
+                "created_at": now,
+            },
+            {
+                "hits_count": 1,
+                "top_score": 0.5,
+                "took_ms": 300,
+                "relax_tier_used": 2,
+                "top_confidence_band": "low",
+                "created_at": now,
+            },
+            {
+                "hits_count": 0,
+                "top_score": None,
+                "took_ms": 400,
+                "relax_tier_used": 3,
+                "top_confidence_band": None,
+                "created_at": now,
+            },
+        ],
+    )
     async with session_factory() as db:
         out = await compute_match_analytics(db, days=7, project_id=pid)
     assert out.total_searches == 4
@@ -172,11 +202,15 @@ async def test_window_excludes_old_rows(session_factory) -> None:
     """Rows older than ``days`` must NOT contribute to totals."""
     pid = uuid.uuid4()
     now = datetime.now(tz=UTC)
-    await _seed(session_factory, project_id=pid, rows=[
-        {"hits_count": 5, "top_score": 0.9, "created_at": now},
-        # 100 days old — way outside any reasonable window
-        {"hits_count": 5, "top_score": 0.9, "created_at": now - timedelta(days=100)},
-    ])
+    await _seed(
+        session_factory,
+        project_id=pid,
+        rows=[
+            {"hits_count": 5, "top_score": 0.9, "created_at": now},
+            # 100 days old — way outside any reasonable window
+            {"hits_count": 5, "top_score": 0.9, "created_at": now - timedelta(days=100)},
+        ],
+    )
     async with session_factory() as db:
         out = await compute_match_analytics(db, days=7, project_id=pid)
     assert out.total_searches == 1
@@ -195,13 +229,21 @@ async def test_project_id_filter_isolates_rows(session_factory) -> None:
     pid_a = uuid.uuid4()
     pid_b = uuid.uuid4()
     now = datetime.now(tz=UTC)
-    await _seed(session_factory, project_id=pid_a, rows=[
-        {"hits_count": 5, "top_score": 0.9, "created_at": now},
-        {"hits_count": 5, "top_score": 0.9, "created_at": now},
-    ])
-    await _seed(session_factory, project_id=pid_b, rows=[
-        {"hits_count": 1, "top_score": 0.1, "created_at": now},
-    ])
+    await _seed(
+        session_factory,
+        project_id=pid_a,
+        rows=[
+            {"hits_count": 5, "top_score": 0.9, "created_at": now},
+            {"hits_count": 5, "top_score": 0.9, "created_at": now},
+        ],
+    )
+    await _seed(
+        session_factory,
+        project_id=pid_b,
+        rows=[
+            {"hits_count": 1, "top_score": 0.1, "created_at": now},
+        ],
+    )
     async with session_factory() as db:
         out_a = await compute_match_analytics(db, days=7, project_id=pid_a)
         out_b = await compute_match_analytics(db, days=7, project_id=pid_b)
@@ -217,15 +259,19 @@ async def test_pick_rate_and_picked_rank_aggregates(session_factory) -> None:
     """Pick rate must reflect picked_at presence; mean rank only over picks."""
     pid = uuid.uuid4()
     now = datetime.now(tz=UTC)
-    await _seed(session_factory, project_id=pid, rows=[
-        # 3 picks at ranks 1, 2, 3
-        {"hits_count": 5, "top_score": 0.9, "picked_at": now, "picked_rank": 1, "created_at": now},
-        {"hits_count": 5, "top_score": 0.8, "picked_at": now, "picked_rank": 2, "created_at": now},
-        {"hits_count": 5, "top_score": 0.7, "picked_at": now, "picked_rank": 3, "created_at": now},
-        # 2 unpicked
-        {"hits_count": 5, "top_score": 0.6, "created_at": now},
-        {"hits_count": 5, "top_score": 0.6, "created_at": now},
-    ])
+    await _seed(
+        session_factory,
+        project_id=pid,
+        rows=[
+            # 3 picks at ranks 1, 2, 3
+            {"hits_count": 5, "top_score": 0.9, "picked_at": now, "picked_rank": 1, "created_at": now},
+            {"hits_count": 5, "top_score": 0.8, "picked_at": now, "picked_rank": 2, "created_at": now},
+            {"hits_count": 5, "top_score": 0.7, "picked_at": now, "picked_rank": 3, "created_at": now},
+            # 2 unpicked
+            {"hits_count": 5, "top_score": 0.6, "created_at": now},
+            {"hits_count": 5, "top_score": 0.6, "created_at": now},
+        ],
+    )
     async with session_factory() as db:
         out = await compute_match_analytics(db, days=7, project_id=pid)
     assert out.total_searches == 5
@@ -294,11 +340,9 @@ async def test_alert_high_picked_rank_fires(session_factory) -> None:
     rows = []
     # 10 picks at rank 1-3, 10 picks at rank 6 → 50% above rank 4
     for _ in range(10):
-        rows.append({"hits_count": 5, "top_score": 0.9, "picked_at": now,
-                     "picked_rank": 1, "created_at": now})
+        rows.append({"hits_count": 5, "top_score": 0.9, "picked_at": now, "picked_rank": 1, "created_at": now})
     for _ in range(10):
-        rows.append({"hits_count": 5, "top_score": 0.9, "picked_at": now,
-                     "picked_rank": 6, "created_at": now})
+        rows.append({"hits_count": 5, "top_score": 0.9, "picked_at": now, "picked_rank": 6, "created_at": now})
     # Pad to clear MIN_SAMPLE on the un-picked side too
     for _ in range(5):
         rows.append({"hits_count": 5, "top_score": 0.9, "created_at": now})
@@ -316,17 +360,23 @@ async def test_alert_over_restrictive_filter_fires_critical_above_25(session_fac
     rows = []
     # 25 filtered + zero-hit + 75 filtered + happy → 25% zero-hit
     for _ in range(25):
-        rows.append({
-            "hits_count": 0, "top_score": None,
-            "hard_filters": {"country": "DE"},
-            "created_at": now,
-        })
+        rows.append(
+            {
+                "hits_count": 0,
+                "top_score": None,
+                "hard_filters": {"country": "DE"},
+                "created_at": now,
+            }
+        )
     for _ in range(75):
-        rows.append({
-            "hits_count": 5, "top_score": 0.8,
-            "hard_filters": {"country": "DE"},
-            "created_at": now,
-        })
+        rows.append(
+            {
+                "hits_count": 5,
+                "top_score": 0.8,
+                "hard_filters": {"country": "DE"},
+                "created_at": now,
+            }
+        )
     await _seed(session_factory, project_id=pid, rows=rows)
     async with session_factory() as db:
         out = await compute_match_analytics(db, days=7, project_id=pid)
@@ -339,11 +389,15 @@ async def test_catalog_id_filter_narrows_results(session_factory) -> None:
     """Catalog-scoped query must exclude other catalogues."""
     pid = uuid.uuid4()
     now = datetime.now(tz=UTC)
-    await _seed(session_factory, project_id=pid, rows=[
-        {"hits_count": 5, "top_score": 0.9, "catalog_id": "cwicr_DE", "created_at": now},
-        {"hits_count": 5, "top_score": 0.9, "catalog_id": "cwicr_DE", "created_at": now},
-        {"hits_count": 5, "top_score": 0.9, "catalog_id": "cwicr_RU", "created_at": now},
-    ])
+    await _seed(
+        session_factory,
+        project_id=pid,
+        rows=[
+            {"hits_count": 5, "top_score": 0.9, "catalog_id": "cwicr_DE", "created_at": now},
+            {"hits_count": 5, "top_score": 0.9, "catalog_id": "cwicr_DE", "created_at": now},
+            {"hits_count": 5, "top_score": 0.9, "catalog_id": "cwicr_RU", "created_at": now},
+        ],
+    )
     async with session_factory() as db:
         out_de = await compute_match_analytics(db, days=7, project_id=pid, catalog_id="cwicr_DE")
         out_ru = await compute_match_analytics(db, days=7, project_id=pid, catalog_id="cwicr_RU")
@@ -355,16 +409,16 @@ async def test_rerank_pct_counters(session_factory) -> None:
     """``bge_rerank_used`` / ``llm_rerank_used`` flags roll up to percentages."""
     pid = uuid.uuid4()
     now = datetime.now(tz=UTC)
-    await _seed(session_factory, project_id=pid, rows=[
-        {"hits_count": 5, "top_score": 0.9, "bge_rerank_used": True,
-         "llm_rerank_used": False, "created_at": now},
-        {"hits_count": 5, "top_score": 0.9, "bge_rerank_used": True,
-         "llm_rerank_used": True, "created_at": now},
-        {"hits_count": 5, "top_score": 0.9, "bge_rerank_used": False,
-         "llm_rerank_used": False, "created_at": now},
-        {"hits_count": 5, "top_score": 0.9, "bge_rerank_used": False,
-         "llm_rerank_used": False, "created_at": now},
-    ])
+    await _seed(
+        session_factory,
+        project_id=pid,
+        rows=[
+            {"hits_count": 5, "top_score": 0.9, "bge_rerank_used": True, "llm_rerank_used": False, "created_at": now},
+            {"hits_count": 5, "top_score": 0.9, "bge_rerank_used": True, "llm_rerank_used": True, "created_at": now},
+            {"hits_count": 5, "top_score": 0.9, "bge_rerank_used": False, "llm_rerank_used": False, "created_at": now},
+            {"hits_count": 5, "top_score": 0.9, "bge_rerank_used": False, "llm_rerank_used": False, "created_at": now},
+        ],
+    )
     async with session_factory() as db:
         out = await compute_match_analytics(db, days=7, project_id=pid)
     assert out.bge_rerank_pct == pytest.approx(0.5)

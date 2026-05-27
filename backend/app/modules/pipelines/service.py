@@ -54,16 +54,12 @@ class PipelineService:
         from app.modules.users.repository import UserRepository
 
         try:
-            user = await UserRepository(self.session).get_by_id(
-                uuid.UUID(str(user_id))
-            )
+            user = await UserRepository(self.session).get_by_id(uuid.UUID(str(user_id)))
         except (ValueError, TypeError):
             return False
         return user is not None and getattr(user, "role", "") == "admin"
 
-    async def _assert_can_access(
-        self, pipeline: Pipeline, user_id: str | None
-    ) -> None:
+    async def _assert_can_access(self, pipeline: Pipeline, user_id: str | None) -> None:
         """Raise 403 unless the caller created the pipeline, owns its
         bound project, or is an admin.
 
@@ -81,12 +77,8 @@ class PipelineService:
         if pipeline.project_id is not None and actor is not None:
             from app.modules.projects.repository import ProjectRepository
 
-            project = await ProjectRepository(self.session).get_by_id(
-                pipeline.project_id
-            )
-            if project is not None and getattr(
-                project, "owner_id", None
-            ) == actor:
+            project = await ProjectRepository(self.session).get_by_id(pipeline.project_id)
+            if project is not None and getattr(project, "owner_id", None) == actor:
                 return
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -124,9 +116,7 @@ class PipelineService:
     async def get(self, pipeline_id: uuid.UUID) -> Pipeline | None:
         return await self.repo.get(pipeline_id)
 
-    async def get_authorized(
-        self, pipeline_id: uuid.UUID, user_id: str | None
-    ) -> Pipeline | None:
+    async def get_authorized(self, pipeline_id: uuid.UUID, user_id: str | None) -> Pipeline | None:
         """Load a pipeline only if the caller is allowed to see it.
 
         Returns ``None`` when the row does not exist (router maps that to
@@ -150,12 +140,8 @@ class PipelineService:
         sees only the pipelines they created (so the list endpoint can't
         be used to enumerate other tenants' automations).
         """
-        created_by = (
-            None if await self._is_admin(user_id) else _as_uuid(user_id)
-        )
-        return await self.repo.list(
-            project_id=_as_uuid(project_id), created_by=created_by
-        )
+        created_by = None if await self._is_admin(user_id) else _as_uuid(user_id)
+        return await self.repo.list(project_id=_as_uuid(project_id), created_by=created_by)
 
     async def update(
         self,
@@ -218,9 +204,7 @@ class PipelineService:
         )
         if report.has_errors:
             messages = "; ".join(r.message for r in report.errors)
-            raise GraphValidationError(
-                f"Pipeline graph fails the structural gate: {messages}"
-            )
+            raise GraphValidationError(f"Pipeline graph fails the structural gate: {messages}")
 
     # ── Runs ─────────────────────────────────────────────────────────────
 
@@ -273,9 +257,7 @@ class PipelineService:
     async def get_run(self, run_id: uuid.UUID) -> PipelineRun | None:
         return await self.repo.get_run(run_id)
 
-    async def get_run_authorized(
-        self, run_id: uuid.UUID, user_id: str | None
-    ) -> PipelineRun | None:
+    async def get_run_authorized(self, run_id: uuid.UUID, user_id: str | None) -> PipelineRun | None:
         """Load a run only if the caller may access its parent pipeline.
 
         A run's node outputs embed project BOQ rows, so the same IDOR
@@ -314,12 +296,8 @@ class PipelineService:
                 "output": dict(ns.output or {}),
                 "error": ns.error,
                 "took_ms": ns.took_ms,
-                "started_at": ns.started_at.isoformat()
-                if ns.started_at
-                else None,
-                "finished_at": ns.finished_at.isoformat()
-                if ns.finished_at
-                else None,
+                "started_at": ns.started_at.isoformat() if ns.started_at else None,
+                "finished_at": ns.finished_at.isoformat() if ns.finished_at else None,
             }
             for ns in node_states
         ]
@@ -329,16 +307,8 @@ class PipelineService:
         error: str | None = None
         if job is not None and job.error_jsonb:
             error = job.error_jsonb.get("message")
-        started_at = (
-            job.started_at.isoformat()
-            if job is not None and job.started_at
-            else None
-        )
-        finished_at = (
-            job.completed_at.isoformat()
-            if job is not None and job.completed_at
-            else None
-        )
+        started_at = job.started_at.isoformat() if job is not None and job.started_at else None
+        finished_at = job.completed_at.isoformat() if job is not None and job.completed_at else None
 
         return {
             "id": str(run.id),
@@ -362,11 +332,7 @@ class PipelineService:
             "id": str(run.id),
             "status": job.status if job is not None else "pending",
             "trigger": dict(run.trigger or {}),
-            "started_at": job.started_at.isoformat()
-            if job is not None and job.started_at
-            else None,
-            "finished_at": job.completed_at.isoformat()
-            if job is not None and job.completed_at
-            else None,
+            "started_at": job.started_at.isoformat() if job is not None and job.started_at else None,
+            "finished_at": job.completed_at.isoformat() if job is not None and job.completed_at else None,
             "progress_percent": job.progress_percent if job is not None else 0,
         }

@@ -126,7 +126,8 @@ class DuckDBPool:
                     await asyncio.to_thread(entry.conn.close)
                 except Exception as exc:  # pragma: no cover — last-ditch
                     logger.warning(
-                        "duckdb_pool.close failed: %s", type(exc).__name__,
+                        "duckdb_pool.close failed: %s",
+                        type(exc).__name__,
                         exc_info=True,
                     )
 
@@ -145,7 +146,8 @@ class DuckDBPool:
             except Exception as exc:  # pragma: no cover
                 logger.warning(
                     "duckdb_pool.invalidate close failed: %s",
-                    type(exc).__name__, exc_info=True,
+                    type(exc).__name__,
+                    exc_info=True,
                 )
 
     # -- query surface ----------------------------------------------------
@@ -228,7 +230,9 @@ class DuckDBPool:
                 except Exception as exc:  # pragma: no cover
                     logger.warning(
                         "duckdb_pool.evict close failed snapshot_id=%s: %s",
-                        evict_sid, type(exc).__name__, exc_info=True,
+                        evict_sid,
+                        type(exc).__name__,
+                        exc_info=True,
                     )
 
         return entry
@@ -283,13 +287,13 @@ class DuckDBPool:
             except FileNotFoundError as exc:
                 if kind == "entities":
                     raise SnapshotHasNoEntitiesError(
-                        f"Snapshot {sid} has no entities.parquet at key "
-                        f"{parquet_key(pid, sid, 'entities')}"
+                        f"Snapshot {sid} has no entities.parquet at key {parquet_key(pid, sid, 'entities')}"
                     ) from exc
                 # Non-entities files are optional — skip them silently.
                 logger.debug(
                     "duckdb_pool.register_view skip missing kind=%s snapshot_id=%s",
-                    kind, sid,
+                    kind,
+                    sid,
                 )
                 continue
             except ParquetNotLocalError:
@@ -304,19 +308,16 @@ class DuckDBPool:
             # defensively anyway so a pathological base_dir with
             # apostrophes can't break out of the literal.
             escaped_path = path.replace("'", "''")
-            view_sql = (
-                f"CREATE OR REPLACE VIEW {kind} AS "
-                f"SELECT * FROM read_parquet('{escaped_path}')"
-            )
+            view_sql = f"CREATE OR REPLACE VIEW {kind} AS SELECT * FROM read_parquet('{escaped_path}')"
             try:
                 await asyncio.to_thread(entry.conn.execute, view_sql)
             except Exception as exc:
                 _CONNECT_ERROR_LOGGER.warn(
-                    f"duckdb_pool.register_view({kind})", sid, exc,
+                    f"duckdb_pool.register_view({kind})",
+                    sid,
+                    exc,
                 )
-                raise DuckDBPoolError(
-                    f"Failed to register view {kind} for snapshot {sid}: {exc}"
-                ) from exc
+                raise DuckDBPoolError(f"Failed to register view {kind} for snapshot {sid}: {exc}") from exc
             entry.registered_kinds.add(kind)
 
     @staticmethod
@@ -326,6 +327,7 @@ class DuckDBPool:
         parameters: list | tuple | None,
     ) -> list[tuple[Any, ...]]:
         async with entry.lock:
+
             def _run() -> list[tuple[Any, ...]]:
                 cursor = entry.conn.execute(sql, parameters or [])
                 return cursor.fetchall()

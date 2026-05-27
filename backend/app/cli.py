@@ -47,6 +47,7 @@ def _stdout_supports_unicode() -> bool:
     enc = (getattr(sys.stdout, "encoding", "") or "").lower()
     return "utf" in enc
 
+
 DEFAULT_DATA_DIR = Path.home() / ".openestimate"
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8080
@@ -352,10 +353,7 @@ def check_core_tabular_deps() -> list[Check]:
     """
     from importlib.util import find_spec
 
-    hint = (
-        "Cost database import requires pandas + pyarrow. "
-        "Reinstall with: pip install --upgrade openconstructionerp"
-    )
+    hint = "Cost database import requires pandas + pyarrow. Reinstall with: pip install --upgrade openconstructionerp"
     out: list[Check] = []
     for mod in ("pandas", "pyarrow"):
         try:
@@ -459,9 +457,7 @@ def check_optional_extras() -> list[Check]:
     # Semantic embeddings (sentence-transformers + Qdrant client).
     # Renamed from `[ai]` in v1.3.14 — the old extra is still an alias.
     if _present("sentence_transformers"):
-        out.append(
-            Check("Semantic search [semantic]", "ok", "sentence-transformers installed")
-        )
+        out.append(Check("Semantic search [semantic]", "ok", "sentence-transformers installed"))
     else:
         out.append(
             Check(
@@ -533,8 +529,16 @@ def cmd_serve(args: argparse.Namespace) -> None:
     ]
     blocking = [c for c in fatal_checks if c.status == "error"]
     if blocking:
-        print(_red(_bold(_u("Cannot start OpenConstructionERP \u2014 pre-flight checks failed:",
-                              "Cannot start OpenConstructionERP - pre-flight checks failed:"))))
+        print(
+            _red(
+                _bold(
+                    _u(
+                        "Cannot start OpenConstructionERP \u2014 pre-flight checks failed:",
+                        "Cannot start OpenConstructionERP - pre-flight checks failed:",
+                    )
+                )
+            )
+        )
         print()
         for c in fatal_checks:
             c.print()
@@ -563,8 +567,14 @@ def cmd_serve(args: argparse.Namespace) -> None:
             data_dir=data_dir,
             serve_frontend=True,
         )
-        print(_dim(_u("  Starting server… first run may take up to 30 seconds.",
-                       "  Starting server... first run may take up to 30 seconds.")))
+        print(
+            _dim(
+                _u(
+                    "  Starting server… first run may take up to 30 seconds.",
+                    "  Starting server... first run may take up to 30 seconds.",
+                )
+            )
+        )
         print()
 
     if args.open:
@@ -599,9 +609,7 @@ def cmd_serve(args: argparse.Namespace) -> None:
         print(_red(_bold("Server failed to start:")) + f" {exc}")
         arrow = _u("\u2192", "->")
         if "address already in use" in str(exc).lower() or "10048" in str(exc):
-            print(
-                _dim(f"  {arrow} Port {args.port} is already in use. Try: openestimate serve --port {args.port + 1}")
-            )
+            print(_dim(f"  {arrow} Port {args.port} is already in use. Try: openestimate serve --port {args.port + 1}"))
         else:
             print(_dim(f"  {arrow} See: {TROUBLESHOOTING_URL}"))
         sys.exit(1)
@@ -635,14 +643,13 @@ def cmd_init_db(args: argparse.Namespace) -> None:
         print(_amber(f"Reset: deleted previous DB at {db_path}"))
     elif db_path.exists():
         # Friendly warning, non-blocking — matches the spec.
-        print(
-            _yellow(f"Existing database at {db_path} — re-using.")
-            + _dim(" Use --reset to start fresh.")
-        )
+        print(_yellow(f"Existing database at {db_path} — re-using.") + _dim(" Use --reset to start fresh."))
 
-    print(_u("Initialising data directory at ", "Initialising data directory at ")
-          + f"{_bold(str(data_dir))}"
-          + _u("…", "..."))
+    print(
+        _u("Initialising data directory at ", "Initialising data directory at ")
+        + f"{_bold(str(data_dir))}"
+        + _u("…", "...")
+    )
     _setup_env(data_dir, DEFAULT_HOST, DEFAULT_PORT)
 
     # Trigger the same SQLite auto-migration that main.py does on startup,
@@ -653,15 +660,49 @@ def cmd_init_db(args: argparse.Namespace) -> None:
     # Mirrors the list in main.py's startup hook — keep the two lists in
     # sync when adding a new module.
     _module_names = [
-        "ai", "assemblies", "bim_hub", "boq", "catalog", "cde",
-        "changeorders", "collaboration", "contacts", "correspondence",
-        "costmodel", "costs", "documents", "enterprise_workflows",
-        "erp_chat", "fieldreports", "finance", "full_evm",
-        "i18n_foundation", "inspections", "integrations", "markups",
-        "meetings", "ncr", "notifications", "procurement", "projects",
-        "punchlist", "reporting", "requirements", "rfi", "rfq_bidding",
-        "risk", "safety", "schedule", "submittals", "takeoff", "tasks",
-        "teams", "tendering", "transmittals", "users", "validation",
+        "ai",
+        "assemblies",
+        "bim_hub",
+        "boq",
+        "catalog",
+        "cde",
+        "changeorders",
+        "collaboration",
+        "contacts",
+        "correspondence",
+        "costmodel",
+        "costs",
+        "documents",
+        "enterprise_workflows",
+        "erp_chat",
+        "fieldreports",
+        "finance",
+        "full_evm",
+        "i18n_foundation",
+        "inspections",
+        "integrations",
+        "markups",
+        "meetings",
+        "ncr",
+        "notifications",
+        "procurement",
+        "projects",
+        "punchlist",
+        "reporting",
+        "requirements",
+        "rfi",
+        "rfq_bidding",
+        "risk",
+        "safety",
+        "schedule",
+        "submittals",
+        "takeoff",
+        "tasks",
+        "teams",
+        "tendering",
+        "transmittals",
+        "users",
+        "validation",
     ]
 
     # Track import failures so we can report them loudly. Silently
@@ -721,11 +762,7 @@ def cmd_init_db(args: argparse.Namespace) -> None:
         for name, err in failed_imports:
             print(f"    - {_bold(name)}: {_dim(err)}")
         print()
-        print(
-            _red(
-                "Schema may be incomplete. Reinstall the package or check the error above."
-            )
-        )
+        print(_red("Schema may be incomplete. Reinstall the package or check the error above."))
         print(_dim(f"  {_u('\u2192', '->')} pip install --upgrade --force-reinstall openconstructionerp"))
         print(_dim(f"  {_u('\u2192', '->')} Then run 'openestimate doctor' to verify."))
         sys.exit(1)
@@ -763,7 +800,10 @@ def cmd_doctor(args: argparse.Namespace) -> None:
         print(_dim(f"Docs: {TROUBLESHOOTING_URL}"))
         sys.exit(1)
     elif warns:
-        print(_yellow(_bold(f"  {len(warns)} warning(s)")) + _dim(_u(" \u2014 non-fatal, server will run", " - non-fatal, server will run")))
+        print(
+            _yellow(_bold(f"  {len(warns)} warning(s)"))
+            + _dim(_u(" \u2014 non-fatal, server will run", " - non-fatal, server will run"))
+        )
         print()
         print(f"Run: {_amber('openestimate serve')}")
     else:
@@ -905,10 +945,7 @@ def _prompt_open_browser(url: str, default_open: bool = True) -> bool:
         return default_open
 
     default_hint = "[O/n]" if default_open else "[o/N]"
-    prompt = (
-        f"  {_bold('Open')} {_amber(url)} "
-        f"{_dim('in your browser now?')} {_dim(default_hint)} "
-    )
+    prompt = f"  {_bold('Open')} {_amber(url)} {_dim('in your browser now?')} {_dim(default_hint)} "
     try:
         answer = input(prompt).strip().lower()
     except (EOFError, KeyboardInterrupt):

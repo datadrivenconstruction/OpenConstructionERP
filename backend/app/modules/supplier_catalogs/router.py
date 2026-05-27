@@ -514,7 +514,9 @@ async def ingest_peppol_invoice(
     """
     raw = await file.read()
     return await service.ingest_peppol_invoice(
-        raw, user_id=user_id, auto_match=auto_match,
+        raw,
+        user_id=user_id,
+        auto_match=auto_match,
     )
 
 

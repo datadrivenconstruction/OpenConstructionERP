@@ -26,7 +26,6 @@ from decimal import Decimal
 
 import pytest
 
-
 # ── Pure helper: cost arithmetic ───────────────────────────────────────────
 
 

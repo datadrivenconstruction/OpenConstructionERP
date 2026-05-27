@@ -92,10 +92,7 @@ class TestListSnapshotsForProject:
 
     def test_limit_caps_results(self) -> None:
         base = datetime(2026, 4, 27, tzinfo=UTC)
-        rows = [
-            _make_row(label=f"#{i}", created_at=base - timedelta(hours=i))
-            for i in range(10)
-        ]
+        rows = [_make_row(label=f"#{i}", created_at=base - timedelta(hours=i)) for i in range(10)]
         out = list_snapshots_for_project(rows, limit=3)
         assert len(out) == 3
         assert [m.label for m in out] == ["#0", "#1", "#2"]
@@ -166,7 +163,8 @@ class TestDiffTwoSnapshots:
             row_count=100,
         )
         diff = diff_two_snapshots(
-            sa, sb,
+            sa,
+            sb,
             a_label="Baseline",
             b_label="With fire-rating",
             a_created_at=datetime(2026, 4, 1, tzinfo=UTC),
@@ -190,7 +188,8 @@ class TestDiffTwoSnapshots:
             row_count=10,
         )
         diff = diff_two_snapshots(
-            sa, sb,
+            sa,
+            sb,
             a_label="Pre-clean",
             b_label="Post-clean",
             a_created_at=datetime(2026, 4, 1, tzinfo=UTC),
@@ -217,7 +216,8 @@ class TestDiffTwoSnapshots:
             row_count=12,
         )
         diff = diff_two_snapshots(
-            sa, sb,
+            sa,
+            sb,
             a_label="A",
             b_label="B",
             a_created_at=datetime(2026, 4, 1, tzinfo=UTC),
@@ -245,7 +245,8 @@ class TestDiffTwoSnapshots:
             schema_hash="hash-A",
         )
         diff = diff_two_snapshots(
-            sa, sb,
+            sa,
+            sb,
             a_label="Day 1",
             b_label="Day 2",
             a_created_at=datetime(2026, 4, 1, tzinfo=UTC),
@@ -271,7 +272,8 @@ class TestDiffTwoSnapshots:
             row_count=180,
         )
         diff = diff_two_snapshots(
-            sa, sb,
+            sa,
+            sb,
             a_label="Before purge",
             b_label="After purge",
             a_created_at=datetime(2026, 4, 1, tzinfo=UTC),
@@ -298,7 +300,8 @@ class TestDiffTwoSnapshots:
             schema_hash=None,  # missing on B
         )
         diff = diff_two_snapshots(
-            sa, sb,
+            sa,
+            sb,
             a_label="A",
             b_label="B",
             a_created_at=datetime(2026, 4, 1, tzinfo=UTC),
@@ -321,7 +324,8 @@ class TestDiffTwoSnapshots:
             row_count=15,
         )
         diff = diff_two_snapshots(
-            sa, sb,
+            sa,
+            sb,
             a_label="A",
             b_label="B",
             a_created_at=datetime(2026, 4, 1, tzinfo=UTC),
@@ -399,23 +403,33 @@ class TestSnapshotDiffInvariants:
         # only ``rows_removed`` should be. This is a property test in
         # spirit — exercise both sides explicitly.
         sa = SchemaSnapshot(
-            snapshot_id=uuid.uuid4(), columns={"x": "int64"}, row_count=10,
+            snapshot_id=uuid.uuid4(),
+            columns={"x": "int64"},
+            row_count=10,
         )
         sb_grown = SchemaSnapshot(
-            snapshot_id=uuid.uuid4(), columns={"x": "int64"}, row_count=15,
+            snapshot_id=uuid.uuid4(),
+            columns={"x": "int64"},
+            row_count=15,
         )
         sb_shrunk = SchemaSnapshot(
-            snapshot_id=uuid.uuid4(), columns={"x": "int64"}, row_count=5,
+            snapshot_id=uuid.uuid4(),
+            columns={"x": "int64"},
+            row_count=5,
         )
         d_grown = diff_two_snapshots(
-            sa, sb_grown,
-            a_label="A", b_label="B",
+            sa,
+            sb_grown,
+            a_label="A",
+            b_label="B",
             a_created_at=datetime(2026, 4, 1, tzinfo=UTC),
             b_created_at=datetime(2026, 4, 2, tzinfo=UTC),
         )
         d_shrunk = diff_two_snapshots(
-            sa, sb_shrunk,
-            a_label="A", b_label="B",
+            sa,
+            sb_shrunk,
+            a_label="A",
+            b_label="B",
             a_created_at=datetime(2026, 4, 1, tzinfo=UTC),
             b_created_at=datetime(2026, 4, 2, tzinfo=UTC),
         )
@@ -424,14 +438,20 @@ class TestSnapshotDiffInvariants:
 
     def test_isinstance_diff(self) -> None:
         sa = SchemaSnapshot(
-            snapshot_id=uuid.uuid4(), columns={"x": "int64"}, row_count=10,
+            snapshot_id=uuid.uuid4(),
+            columns={"x": "int64"},
+            row_count=10,
         )
         sb = SchemaSnapshot(
-            snapshot_id=uuid.uuid4(), columns={"x": "int64"}, row_count=10,
+            snapshot_id=uuid.uuid4(),
+            columns={"x": "int64"},
+            row_count=10,
         )
         diff = diff_two_snapshots(
-            sa, sb,
-            a_label="A", b_label="B",
+            sa,
+            sb,
+            a_label="A",
+            b_label="B",
             a_created_at=datetime(2026, 4, 1, tzinfo=UTC),
             b_created_at=datetime(2026, 4, 2, tzinfo=UTC),
         )

@@ -60,7 +60,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -170,7 +172,8 @@ def _set_acting_user(user_id: uuid.UUID, role: str = "estimator") -> None:
 
 @pytest.mark.asyncio
 async def test_get_creates_default_row_on_first_call(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     user_id, project_id = await project_owned_by()
     _set_acting_user(user_id)
@@ -190,7 +193,8 @@ async def test_get_creates_default_row_on_first_call(
 
 @pytest.mark.asyncio
 async def test_get_is_idempotent(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """Two GETs return the same row id (no duplicate rows)."""
     user_id, project_id = await project_owned_by()
@@ -205,7 +209,8 @@ async def test_get_is_idempotent(
 
 @pytest.mark.asyncio
 async def test_patch_rejects_invalid_classifier(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     user_id, project_id = await project_owned_by()
     _set_acting_user(user_id)
@@ -219,7 +224,8 @@ async def test_patch_rejects_invalid_classifier(
 
 @pytest.mark.asyncio
 async def test_patch_rejects_invalid_mode(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     user_id, project_id = await project_owned_by()
     _set_acting_user(user_id)
@@ -233,7 +239,8 @@ async def test_patch_rejects_invalid_mode(
 
 @pytest.mark.asyncio
 async def test_patch_clamps_threshold_via_pydantic_bounds(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """Pydantic bounds reject >1 / <0 outright (422); in-range clamps no-op."""
     user_id, project_id = await project_owned_by()
@@ -257,7 +264,8 @@ async def test_patch_clamps_threshold_via_pydantic_bounds(
 
 @pytest.mark.asyncio
 async def test_patch_accepts_valid_payload_and_persists(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     user_id, project_id = await project_owned_by()
     _set_acting_user(user_id)
@@ -290,7 +298,9 @@ async def test_patch_accepts_valid_payload_and_persists(
 
 @pytest.mark.asyncio
 async def test_patch_writes_audit_log_entry(
-    client: AsyncClient, project_owned_by, temp_engine_and_factory,
+    client: AsyncClient,
+    project_owned_by,
+    temp_engine_and_factory,
 ) -> None:
     """Audit entry must include before+after snapshots."""
     _engine, factory, _tmp = temp_engine_and_factory
@@ -310,13 +320,17 @@ async def test_patch_writes_audit_log_entry(
 
     async with factory() as session:
         rows = (
-            await session.execute(
-                select(AuditEntry).where(
-                    AuditEntry.entity_type == "project_match_settings",
-                    AuditEntry.entity_id == str(project_id),
+            (
+                await session.execute(
+                    select(AuditEntry).where(
+                        AuditEntry.entity_type == "project_match_settings",
+                        AuditEntry.entity_id == str(project_id),
+                    )
                 )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
     assert len(rows) == 1
     entry = rows[0]
@@ -333,7 +347,9 @@ async def test_patch_writes_audit_log_entry(
 
 @pytest.mark.asyncio
 async def test_reset_returns_settings_to_defaults(
-    client: AsyncClient, project_owned_by, temp_engine_and_factory,
+    client: AsyncClient,
+    project_owned_by,
+    temp_engine_and_factory,
 ) -> None:
     _engine, factory, _tmp = temp_engine_and_factory
     user_id, project_id = await project_owned_by()
@@ -369,14 +385,18 @@ async def test_reset_returns_settings_to_defaults(
 
     async with factory() as session:
         rows = (
-            await session.execute(
-                select(AuditEntry).where(
-                    AuditEntry.entity_type == "project_match_settings",
-                    AuditEntry.entity_id == str(project_id),
-                    AuditEntry.action == "reset",
+            (
+                await session.execute(
+                    select(AuditEntry).where(
+                        AuditEntry.entity_type == "project_match_settings",
+                        AuditEntry.entity_id == str(project_id),
+                        AuditEntry.action == "reset",
+                    )
                 )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
     assert len(rows) == 1
     details = rows[0].details
@@ -386,7 +406,8 @@ async def test_reset_returns_settings_to_defaults(
 
 @pytest.mark.asyncio
 async def test_get_returns_404_for_nonexistent_project(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """A real authenticated user asking for an unknown project_id → 404."""
     user_id, _project_id = await project_owned_by()
@@ -399,7 +420,8 @@ async def test_get_returns_404_for_nonexistent_project(
 
 @pytest.mark.asyncio
 async def test_non_owner_gets_403(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """A different user attempting to read settings of someone else's project."""
     _owner_id, project_id = await project_owned_by()
@@ -419,7 +441,8 @@ async def test_non_owner_gets_403(
 
 @pytest.mark.asyncio
 async def test_admin_bypass_can_read_other_projects(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """Admin role bypasses the ownership check (existing _verify_project_owner)."""
     _owner_id, project_id = await project_owned_by()
@@ -436,7 +459,8 @@ async def test_admin_bypass_can_read_other_projects(
 
 @pytest.mark.asyncio
 async def test_default_cost_database_id_is_null(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """Fresh projects start with no catalogue picked — UI shows the picker."""
     user_id, project_id = await project_owned_by()
@@ -449,7 +473,8 @@ async def test_default_cost_database_id_is_null(
 
 @pytest.mark.asyncio
 async def test_patch_cost_database_id_round_trip(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """PATCH writes cost_database_id; subsequent GET reads it back."""
     user_id, project_id = await project_owned_by()
@@ -468,7 +493,8 @@ async def test_patch_cost_database_id_round_trip(
 
 @pytest.mark.asyncio
 async def test_patch_cost_database_id_can_clear(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """Sending null clears the binding — returns project to no_catalog_selected."""
     user_id, project_id = await project_owned_by()
@@ -488,7 +514,8 @@ async def test_patch_cost_database_id_can_clear(
 
 @pytest.mark.asyncio
 async def test_patch_rejects_oversized_cost_database_id(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """The 32-char Pydantic bound matches the SQL column width."""
     user_id, project_id = await project_owned_by()
@@ -503,7 +530,8 @@ async def test_patch_rejects_oversized_cost_database_id(
 
 @pytest.mark.asyncio
 async def test_reset_clears_cost_database_id(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """``reset`` returns cost_database_id to ``None`` along with everything else."""
     user_id, project_id = await project_owned_by()

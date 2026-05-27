@@ -163,16 +163,10 @@ def test_resolve_50_synonyms_under_10ms() -> None:
     """50 synonyms × 100-property element must resolve under 10 ms (RFC 35)."""
     alias = _Alias()
     # 50 synonyms — last one matches.
-    syns = [
-        _Synonym(pattern=f"NoMatch{idx}", priority=idx)
-        for idx in range(49)
-    ]
+    syns = [_Synonym(pattern=f"NoMatch{idx}", priority=idx) for idx in range(49)]
     syns.append(_Synonym(pattern="WinningProp", priority=999))
 
-    element = {
-        "properties": {f"prop_{idx}": idx for idx in range(99)}
-        | {"WinningProp": "found"}
-    }
+    element = {"properties": {f"prop_{idx}": idx for idx in range(99)} | {"WinningProp": "found"}}
 
     # Warm up so JIT/page-faults don't dominate.
     resolve_alias(alias, syns, element)

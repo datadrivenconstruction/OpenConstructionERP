@@ -204,10 +204,7 @@ def _resolve_currency(
                 mapped = _REGION_CURRENCY.get(normalized)
                 if mapped:
                     return mapped
-                msg = (
-                    f"Unknown region {normalized!r} — no entry in "
-                    f"_REGION_CURRENCY; currency falls back to EUR."
-                )
+                msg = f"Unknown region {normalized!r} — no entry in _REGION_CURRENCY; currency falls back to EUR."
                 logger.warning(msg)
                 if warnings is not None and msg not in warnings:
                     warnings.append(msg)
@@ -405,9 +402,7 @@ async def autocomplete_cost_items(
                         items_from_db = await service.get_by_codes(codes)
                         for db_item in items_from_db:
                             components_map[db_item.code] = db_item.components or []
-                            metadata_map[db_item.code] = (
-                                db_item.metadata_ or {}
-                            )
+                            metadata_map[db_item.code] = db_item.metadata_ or {}
                     except Exception:
                         logger.debug("Cost search: component lookup failed", exc_info=True)
 
@@ -431,9 +426,7 @@ async def autocomplete_cost_items(
                                 description=r.get("description", ""),
                                 unit=r.get("unit", ""),
                                 rate=float(r.get("rate", 0)),
-                                currency=_resolve_currency(
-                                    r.get("currency"), r.get("region")
-                                ),
+                                currency=_resolve_currency(r.get("currency"), r.get("region")),
                                 region=r.get("region"),
                                 classification=cls,
                                 components=comps,
@@ -673,7 +666,8 @@ async def search_cost_items(
 
     if skip_count_via_cache:
         items, _, has_more, next_cursor = await service.search_costs_paginated(
-            query, skip_count=True,
+            query,
+            skip_count=True,
         )
         total = cached_total
     else:
@@ -702,7 +696,9 @@ async def search_cost_items(
             row_region = getattr(i, "region", None)
             if not (isinstance(row_currency, str) and row_currency.strip()):
                 resolved = _resolve_currency(
-                    row_currency, row_region, warnings=currency_warnings,
+                    row_currency,
+                    row_region,
+                    warnings=currency_warnings,
                 )
                 # Stamp the resolved value onto the ORM instance so the
                 # schema validator (which can't see ``warnings``) sees a
@@ -714,7 +710,8 @@ async def search_cost_items(
         except Exception:
             logger.debug("Currency warning capture skipped", exc_info=True)
         payload = _localize_response_payload(
-            CostItemResponse.model_validate(i), resolved_locale,
+            CostItemResponse.model_validate(i),
+            resolved_locale,
         )
         if lite:
             comps = payload.get("components") or []
@@ -1040,9 +1037,7 @@ async def vector_v3_status(
                     "bound_language": "",
                 }
             else:
-                payload["language_mismatch"] = await _detect_language_mismatch(
-                    db, project_id
-                )
+                payload["language_mismatch"] = await _detect_language_mismatch(db, project_id)
 
     if not payload["connected"]:
         payload["error"] = base.get("error", "")
@@ -1134,11 +1129,7 @@ async def _detect_language_mismatch(
 
         # MatchProjectSettings uses an ``id`` PK with a unique FK on
         # ``project_id``; ``db.get`` cannot be used here.
-        result = await db.execute(
-            select(MatchProjectSettings).where(
-                MatchProjectSettings.project_id == project_id
-            )
-        )
+        result = await db.execute(select(MatchProjectSettings).where(MatchProjectSettings.project_id == project_id))
         settings = result.scalar_one_or_none()
         if not settings or not settings.cost_database_id:
             out["status"] = "unbound"
@@ -1147,9 +1138,7 @@ async def _detect_language_mismatch(
         out["bound_language"] = language_for(settings.cost_database_id)
 
         if out["project_language"] and out["bound_language"]:
-            out["status"] = (
-                "ok" if out["project_language"] == out["bound_language"] else "mismatch"
-            )
+            out["status"] = "ok" if out["project_language"] == out["bound_language"] else "mismatch"
     except Exception:  # pragma: no cover — defensive
         logger.debug("language mismatch probe failed", exc_info=True)
     return out
@@ -1200,6 +1189,7 @@ async def embedder_status() -> dict[str, Any]:
     installed = False
     try:
         import FlagEmbedding  # type: ignore[import-not-found]  # noqa: F401, PLC0415
+
         installed = True
     except ImportError:
         missing.append("FlagEmbedding")
@@ -1297,9 +1287,7 @@ async def qdrant_smoke_search(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:  # noqa: BLE001
         logger.exception("CWICR Qdrant smoke search failed")
-        raise HTTPException(
-            status_code=500, detail="qdrant search failed (see server logs)"
-        ) from exc
+        raise HTTPException(status_code=500, detail="qdrant search failed (see server logs)") from exc
 
     rate_codes = [h.rate_code for h in hits]
     full_rows = await lookup_full_rows(country=country, rate_codes=rate_codes)
@@ -1894,7 +1882,7 @@ def _snapshot_error_hint(err: str) -> str | None:
             "Windows Defender is locking files in Qdrant's storage folder during "
             "fsync. The download succeeded — only the final disk write was blocked. "
             "Fix: open PowerShell AS ADMINISTRATOR and run:\n"
-            "  Add-MpPreference -ExclusionPath \"$env:USERPROFILE\\.openestimator\"\n"
+            '  Add-MpPreference -ExclusionPath "$env:USERPROFILE\\.openestimator"\n'
             "Then click Install again. (No restart needed — Qdrant picks it up "
             "on the next attempt.) GUI alternative: Settings → Update & Security → "
             "Windows Security → Virus & threat protection → Manage settings → "
@@ -2129,8 +2117,7 @@ async def install_v3_catalogue(
             status.HTTP_502_BAD_GATEWAY,
             (
                 f"Qdrant could not restore the snapshot from {snapshot_url}.\n"
-                f"Qdrant said: {qdrant_err}"
-                + (f"\nHint: {hint}" if hint else "")
+                f"Qdrant said: {qdrant_err}" + (f"\nHint: {hint}" if hint else "")
             ),
         ) from exc
     except RuntimeError as exc:
@@ -2150,9 +2137,7 @@ async def install_v3_catalogue(
     poll_deadline = time.monotonic() + 30.0
     poll_delay = 0.5
     while time.monotonic() < poll_deadline:
-        collections_after = await loop.run_in_executor(
-            None, lambda: server_collections(qdrant_url=qdrant_url)
-        )
+        collections_after = await loop.run_in_executor(None, lambda: server_collections(qdrant_url=qdrant_url))
         if cat.collection in collections_after:
             appeared = True
             break
@@ -2740,10 +2725,7 @@ async def import_cost_file(
             # recognised as a container is a mismatch.
             raise HTTPException(
                 status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=(
-                    f"File extension is .csv but the content is a {signature} "
-                    "container. Re-upload as a real CSV."
-                ),
+                detail=(f"File extension is .csv but the content is a {signature} container. Re-upload as a real CSV."),
             )
         if b"\x00" in head:
             raise HTTPException(
@@ -3401,18 +3383,16 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
                 if v <= 0:
                     continue
                 variable_part = lbl[:200]
-                full_label = (
-                    f"{common_start} {variable_part}".strip()
-                    if common_start
-                    else variable_part
-                )[:400]
-                variants_l.append({
-                    "index": i,
-                    "label": variable_part,
-                    "full_label": full_label,
-                    "price": round(v, 2),
-                    "price_per_unit": round(_safe_float(pu_vals[i]), 4) if i < len(pu_vals) else None,
-                })
+                full_label = (f"{common_start} {variable_part}".strip() if common_start else variable_part)[:400]
+                variants_l.append(
+                    {
+                        "index": i,
+                        "label": variable_part,
+                        "full_label": full_label,
+                        "price": round(v, 2),
+                        "price_per_unit": round(_safe_float(pu_vals[i]), 4) if i < len(pu_vals) else None,
+                    }
+                )
             if not variants_l:
                 continue
             abstract_variants_by_pair[(rc, rescode)] = {
@@ -3458,7 +3438,14 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
     resources_by_code: dict[str, list[dict]] = {}
     if "resource_name" in df.columns and _cost_col in df.columns:
         # Filter rows that have resource data (non-empty name, non-zero cost)
-        res_df = df[available_res_cols + (["price_abstract_resource_variable_parts"] if "price_abstract_resource_variable_parts" in df.columns else [])].copy()
+        res_df = df[
+            available_res_cols
+            + (
+                ["price_abstract_resource_variable_parts"]
+                if "price_abstract_resource_variable_parts" in df.columns
+                else []
+            )
+        ].copy()
         res_df = res_df[res_df["resource_name"].fillna("").str.len() > 0]
         if _cost_col in res_df.columns:
             # Keep abstract-resource rows even with cost==0 — they're a
@@ -3467,12 +3454,8 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
             # silently dropped and the user loses one of their variant
             # picks.
             if "price_abstract_resource_variable_parts" in res_df.columns:
-                _is_abstract = (
-                    res_df["price_abstract_resource_variable_parts"].fillna("").astype(str).str.len() > 0
-                )
-                res_df = res_df[
-                    (res_df[_cost_col].fillna(0).astype(float).abs() > 0.001) | _is_abstract
-                ]
+                _is_abstract = res_df["price_abstract_resource_variable_parts"].fillna("").astype(str).str.len() > 0
+                res_df = res_df[(res_df[_cost_col].fillna(0).astype(float).abs() > 0.001) | _is_abstract]
             else:
                 res_df = res_df[res_df[_cost_col].fillna(0).astype(float).abs() > 0.001]
         if "row_type" in res_df.columns:
@@ -3510,8 +3493,16 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
 
             # Compute ctype vectorized
             _row_type = res_df.get("row_type", pd.Series([""] * len(res_df), index=res_df.index)).fillna("").astype(str)
-            _is_mach = res_df.get("is_machine", pd.Series([False] * len(res_df), index=res_df.index)).fillna(False).astype(bool)
-            _is_mat = res_df.get("is_material", pd.Series([False] * len(res_df), index=res_df.index)).fillna(False).astype(bool)
+            _is_mach = (
+                res_df.get("is_machine", pd.Series([False] * len(res_df), index=res_df.index))
+                .fillna(False)
+                .astype(bool)
+            )
+            _is_mat = (
+                res_df.get("is_material", pd.Series([False] * len(res_df), index=res_df.index))
+                .fillna(False)
+                .astype(bool)
+            )
             _unit_lc = res_df["_unit"].str.lower()
             _is_labor_unit = _unit_lc.isin(_LABOR_UNITS)
 
@@ -3673,11 +3664,7 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
                 if v <= 0:
                     continue
                 variable_part = lbl[:200]
-                full_label = (
-                    f"{common_start} {variable_part}".strip()
-                    if common_start
-                    else variable_part
-                )[:400]
+                full_label = (f"{common_start} {variable_part}".strip() if common_start else variable_part)[:400]
                 variants.append(
                     {
                         "index": i,
@@ -4022,11 +4009,7 @@ async def export_cost_database(
     # Fetch in batches to avoid loading 50K+ rows into memory at once
     batch_size = 1000
     offset = 0
-    base_stmt = (
-        select(CostItem)
-        .where(CostItem.is_active.is_(True))
-        .order_by(CostItem.code)
-    )
+    base_stmt = select(CostItem).where(CostItem.is_active.is_(True)).order_by(CostItem.code)
 
     while True:
         result = await session.execute(base_stmt.offset(offset).limit(batch_size))
@@ -4039,15 +4022,17 @@ async def export_cost_database(
                 rate_val = float(item.rate)
             except (ValueError, TypeError):
                 rate_val = 0
-            ws.append([
-                item.code,
-                item.description,
-                item.unit,
-                rate_val,
-                item.currency,
-                item.source,
-                getattr(item, "region", ""),
-            ])
+            ws.append(
+                [
+                    item.code,
+                    item.description,
+                    item.unit,
+                    rate_val,
+                    item.currency,
+                    item.source,
+                    getattr(item, "region", ""),
+                ]
+            )
 
         if len(items) < batch_size:
             break
@@ -4133,9 +4118,7 @@ async def suggest_costs_for_element_by_id(
     if isinstance(meta, dict):
         candidate = meta.get("classification")
         if isinstance(candidate, dict):
-            classification = {
-                k: str(v) for k, v in candidate.items() if isinstance(v, (str, int))
-            }
+            classification = {k: str(v) for k, v in candidate.items() if isinstance(v, (str, int))}
 
     # Quantities may contain non-float entries in practice; coerce safely.
     quantities_raw = getattr(element, "quantities", None) or {}
@@ -4211,9 +4194,7 @@ async def match_cwicr_from_position(
             region=request.region,
         )
     except LookupError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
 # ── Cost Intelligence (v3.12.0 — Stream B) ────────────────────────────────
@@ -4228,9 +4209,7 @@ async def regional_adjust(
     # Round-7: ``Decimal`` for money — FastAPI parses the query string
     # without going through ``float``. The response model serialises
     # the values back out as strings so JS clients keep exact precision.
-    base_rate: Decimal = Query(
-        ..., ge=0, description="Unit rate in the catalogue's currency"
-    ),
+    base_rate: Decimal = Query(..., ge=0, description="Unit rate in the catalogue's currency"),
     subcategory: str | None = Query(
         default=None,
         max_length=64,
@@ -4250,9 +4229,7 @@ async def regional_adjust(
     """
     _ = user  # accept anonymous
     svc = RegionalIndexService(session)
-    adjusted, factor, source, effective = await svc.adjust(
-        region, category, base_rate, subcategory=subcategory
-    )
+    adjusted, factor, source, effective = await svc.adjust(region, category, base_rate, subcategory=subcategory)
     return RegionalAdjustResponse(
         region=region.strip().upper(),
         category=category.strip().lower(),
@@ -4308,9 +4285,7 @@ async def get_cost_item_certainty(
     try:
         data = await svc.compute(item_id)
     except LookupError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     return CertaintyBadge.model_validate(data)
 
 
@@ -4336,9 +4311,7 @@ async def record_cost_item_usage(
     """
     # Verify cost item exists so we can give a precise 404 rather than
     # letting the FK CASCADE constraint do it at commit time.
-    item_check = await session.execute(
-        select(CostItem).where(CostItem.id == item_id).limit(1)
-    )
+    item_check = await session.execute(select(CostItem).where(CostItem.id == item_id).limit(1))
     if item_check.scalar_one_or_none() is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

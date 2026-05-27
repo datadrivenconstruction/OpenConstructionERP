@@ -50,7 +50,6 @@ from app.modules.cost_match.messages import (
 )
 from app.modules.cost_match.router import router
 
-
 # ── Manifest identity ──────────────────────────────────────────────────────
 
 
@@ -104,7 +103,7 @@ class TestRouter:
 
 class TestEvents:
     def test_source_module_matches_manifest(self) -> None:
-        assert events.SOURCE_MODULE == manifest.name
+        assert manifest.name == events.SOURCE_MODULE
 
     def test_lifecycle_event_names_are_stable(self) -> None:
         # Subscribers (finance roll-up, dashboards refresh, audit log)
@@ -117,14 +116,7 @@ class TestEvents:
 
 
 def _load_locale_keys(locale: str) -> set[str]:
-    path = (
-        Path(__file__).resolve().parents[2]
-        / "app"
-        / "modules"
-        / "cost_match"
-        / "messages"
-        / f"{locale}.json"
-    )
+    path = Path(__file__).resolve().parents[2] / "app" / "modules" / "cost_match" / "messages" / f"{locale}.json"
     with path.open(encoding="utf-8") as fh:
         return set(json.load(fh).keys())
 
@@ -143,12 +135,8 @@ class TestMessages:
         en_keys = _load_locale_keys("en")
         de_keys = _load_locale_keys("de")
         ru_keys = _load_locale_keys("ru")
-        assert en_keys == de_keys, (
-            f"DE missing: {en_keys - de_keys}; DE extra: {de_keys - en_keys}"
-        )
-        assert en_keys == ru_keys, (
-            f"RU missing: {en_keys - ru_keys}; RU extra: {ru_keys - en_keys}"
-        )
+        assert en_keys == de_keys, f"DE missing: {en_keys - de_keys}; DE extra: {de_keys - en_keys}"
+        assert en_keys == ru_keys, f"RU missing: {en_keys - ru_keys}; RU extra: {ru_keys - en_keys}"
 
     def test_translate_resolves_known_key(self) -> None:
         # The semantic-not-installed hint is the only user-facing
@@ -187,13 +175,8 @@ class TestStubState:
     def test_no_business_routes_yet(self) -> None:
         """Only the loader health-check is wired today. Any new route
         must arrive alongside auth + Decimal-money + i18n + tests."""
-        non_health = [
-            route.path for route in router.routes if route.path != "/cost-match/_health"
-        ]
-        assert non_health == [], (
-            f"new cost_match routes shipped without matching test coverage: "
-            f"{non_health}"
-        )
+        non_health = [route.path for route in router.routes if route.path != "/cost-match/_health"]
+        assert non_health == [], f"new cost_match routes shipped without matching test coverage: {non_health}"
 
     def test_models_module_not_yet_present(self) -> None:
         """Once T12 lands this import will succeed and this test should

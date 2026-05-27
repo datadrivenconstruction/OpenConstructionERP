@@ -23,11 +23,26 @@ logger = logging.getLogger(__name__)
 
 # ACI (AutoCAD Color Index) → hex color
 _ACI_COLORS: dict[int, str] = {
-    0: "#000000", 1: "#ff0000", 2: "#ffff00", 3: "#00ff00",
-    4: "#00ffff", 5: "#0000ff", 6: "#ff00ff", 7: "#ffffff",
-    8: "#808080", 9: "#c0c0c0", 10: "#ff5555", 11: "#ffff55",
-    12: "#55ff55", 13: "#55ffff", 14: "#5555ff", 15: "#ff55ff",
-    16: "#555555", 40: "#cc8800", 160: "#00cc88", 256: "#cccccc",
+    0: "#000000",
+    1: "#ff0000",
+    2: "#ffff00",
+    3: "#00ff00",
+    4: "#00ffff",
+    5: "#0000ff",
+    6: "#ff00ff",
+    7: "#ffffff",
+    8: "#808080",
+    9: "#c0c0c0",
+    10: "#ff5555",
+    11: "#ffff55",
+    12: "#55ff55",
+    13: "#55ffff",
+    14: "#5555ff",
+    15: "#ff55ff",
+    16: "#555555",
+    40: "#cc8800",
+    160: "#00cc88",
+    256: "#cccccc",
 }
 
 
@@ -40,7 +55,9 @@ def _aci_to_hex(aci_str: str | int | None) -> str:
     m = re.search(r"(\d+)", s)
     if m:
         idx = int(m.group(1))
-        return _ACI_COLORS.get(idx, f"#{min(idx * 37 % 256, 255):02x}{min(idx * 73 % 256, 255):02x}{min(idx * 113 % 256, 255):02x}")
+        return _ACI_COLORS.get(
+            idx, f"#{min(idx * 37 % 256, 255):02x}{min(idx * 73 % 256, 255):02x}{min(idx * 113 % 256, 255):02x}"
+        )
     return "#cccccc"
 
 
@@ -89,6 +106,7 @@ def _parse_angle(s: str | None) -> float:
     if s_str.endswith("d"):
         try:
             import math
+
             return float(s_str[:-1]) * math.pi / 180.0
         except (ValueError, TypeError):
             return 0.0
@@ -233,8 +251,10 @@ def _resolve_dwg_units(
             return None
         # Numeric INSUNITS code ("4", "4.0", "INSUNITS 4").
         m = re.search(r"-?\d+", s)
-        if m and _INSUNITS_MAP.get(int(m.group(0))) and not re.search(
-            r"[a-df-zA-DF-Z]", s.replace("INSUNITS", "").replace("insunits", "")
+        if (
+            m
+            and _INSUNITS_MAP.get(int(m.group(0)))
+            and not re.search(r"[a-df-zA-DF-Z]", s.replace("INSUNITS", "").replace("insunits", ""))
         ):
             mapped = _INSUNITS_MAP.get(int(m.group(0)))
             if mapped:
@@ -429,15 +449,17 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
             sp = _parse_coord(get(row, "StartPoint") or get(row, "Start Point"))
             ep = _parse_coord(get(row, "EndPoint") or get(row, "End Point"))
             if sp and ep:
-                entities.append({
-                    "entity_type": "LINE",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "start": {"x": sp[0], "y": sp[1]},
-                        "end": {"x": ep[0], "y": ep[1]},
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "LINE",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "start": {"x": sp[0], "y": sp[1]},
+                            "end": {"x": ep[0], "y": ep[1]},
+                        },
+                    }
+                )
                 expand(sp[0], sp[1])
                 expand(ep[0], ep[1])
                 if layer in layers_map:
@@ -457,15 +479,17 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
                         deduped.append(v)
 
                 points = [{"x": v[0], "y": v[1]} for v in deduped]
-                entities.append({
-                    "entity_type": "LWPOLYLINE",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "points": points,
-                        "closed": closed,
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "LWPOLYLINE",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "points": points,
+                            "closed": closed,
+                        },
+                    }
+                )
                 for v in deduped:
                     expand(v[0], v[1])
                 if layer in layers_map:
@@ -483,17 +507,19 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
             sa = _parse_angle(get(row, "Start Angle") or get(row, "StartAngle"))
             ea = _parse_angle(get(row, "End Angle") or get(row, "EndAngle"))
             if center and radius:
-                entities.append({
-                    "entity_type": "ARC",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "center": {"x": center[0], "y": center[1]},
-                        "radius": radius,
-                        "start_angle": sa,
-                        "end_angle": ea,
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "ARC",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "center": {"x": center[0], "y": center[1]},
+                            "radius": radius,
+                            "start_angle": sa,
+                            "end_angle": ea,
+                        },
+                    }
+                )
                 expand(center[0] - radius, center[1] - radius)
                 expand(center[0] + radius, center[1] + radius)
                 if layer in layers_map:
@@ -509,15 +535,17 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
                 except (ValueError, TypeError):
                     pass
             if center and radius:
-                entities.append({
-                    "entity_type": "CIRCLE",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "center": {"x": center[0], "y": center[1]},
-                        "radius": radius,
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "CIRCLE",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "center": {"x": center[0], "y": center[1]},
+                            "radius": radius,
+                        },
+                    }
+                )
                 expand(center[0] - radius, center[1] - radius)
                 expand(center[0] + radius, center[1] + radius)
                 if layer in layers_map:
@@ -534,26 +562,30 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
             if center and (major_r or (major_axis and ratio)):
                 if not major_r and major_axis:
                     import math as _math
+
                     major_r = _math.sqrt(major_axis[0] ** 2 + major_axis[1] ** 2)
                 if not minor_r and major_r and ratio:
                     minor_r = major_r * ratio
                 rotation = 0.0
                 if major_axis:
                     import math as _math
+
                     rotation = _math.atan2(major_axis[1], major_axis[0])
-                entities.append({
-                    "entity_type": "ELLIPSE",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "center": {"x": center[0], "y": center[1]},
-                        "major_radius": major_r or 1.0,
-                        "minor_radius": minor_r or 1.0,
-                        "rotation": rotation,
-                        "start_angle": sa,
-                        "end_angle": ea,
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "ELLIPSE",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "center": {"x": center[0], "y": center[1]},
+                            "major_radius": major_r or 1.0,
+                            "minor_radius": minor_r or 1.0,
+                            "rotation": rotation,
+                            "start_angle": sa,
+                            "end_angle": ea,
+                        },
+                    }
+                )
                 r = major_r or 1.0
                 expand(center[0] - r, center[1] - r)
                 expand(center[0] + r, center[1] + r)
@@ -570,39 +602,44 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
             if closed and min_ext and max_ext:
                 # Closed spline — approximate as ellipse from bounding box
                 import math as _math
+
                 cx = (min_ext[0] + max_ext[0]) / 2
                 cy = (min_ext[1] + max_ext[1]) / 2
                 rx = (max_ext[0] - min_ext[0]) / 2
                 ry = (max_ext[1] - min_ext[1]) / 2
                 if rx > 0 and ry > 0:
-                    entities.append({
-                        "entity_type": "ELLIPSE",
-                        "layer": layer,
-                        "color": color,
-                        "geometry_data": {
-                            "center": {"x": cx, "y": cy},
-                            "major_radius": max(rx, ry),
-                            "minor_radius": min(rx, ry),
-                            "rotation": 0.0 if rx >= ry else _math.pi / 2,
-                            "start_angle": 0.0,
-                            "end_angle": _math.pi * 2,
-                        },
-                    })
+                    entities.append(
+                        {
+                            "entity_type": "ELLIPSE",
+                            "layer": layer,
+                            "color": color,
+                            "geometry_data": {
+                                "center": {"x": cx, "y": cy},
+                                "major_radius": max(rx, ry),
+                                "minor_radius": min(rx, ry),
+                                "rotation": 0.0 if rx >= ry else _math.pi / 2,
+                                "start_angle": 0.0,
+                                "end_angle": _math.pi * 2,
+                            },
+                        }
+                    )
                     expand(min_ext[0], min_ext[1])
                     expand(max_ext[0], max_ext[1])
                     if layer in layers_map:
                         layers_map[layer]["entity_count"] += 1
             elif sp and ep and sp != ep:
                 # Open spline — draw chord from start to end
-                entities.append({
-                    "entity_type": "LINE",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "start": {"x": sp[0], "y": sp[1]},
-                        "end": {"x": ep[0], "y": ep[1]},
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "LINE",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "start": {"x": sp[0], "y": sp[1]},
+                            "end": {"x": ep[0], "y": ep[1]},
+                        },
+                    }
+                )
                 expand(sp[0], sp[1])
                 expand(ep[0], ep[1])
                 if layer in layers_map:
@@ -621,41 +658,43 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
                     {"x": max_ext[0], "y": max_ext[1]},
                     {"x": min_ext[0], "y": max_ext[1]},
                 ]
-                entities.append({
-                    "entity_type": "HATCH",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "points": points,
-                        "closed": True,
-                        "pattern_name": pattern,
-                        "is_solid": is_solid,
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "HATCH",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "points": points,
+                            "closed": True,
+                            "pattern_name": pattern,
+                            "is_solid": is_solid,
+                        },
+                    }
+                )
                 expand(min_ext[0], min_ext[1])
                 expand(max_ext[0], max_ext[1])
                 if layer in layers_map:
                     layers_map[layer]["entity_count"] += 1
 
         elif desc == "<AcDbText>":
-            pos = _parse_coord(
-                get(row, "Position") or get(row, "Text Position")
-            )
+            pos = _parse_coord(get(row, "Position") or get(row, "Text Position"))
             text = str(get(row, "Text String") or get(row, "TextString") or "")
             height = _safe_float(get(row, "Height") or get(row, "TextHeight")) or 2.5
             rotation = _safe_float(get(row, "Rotation")) or 0.0
             if pos and text:
-                entities.append({
-                    "entity_type": "TEXT",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "insert": {"x": pos[0], "y": pos[1]},
-                        "text": text,
-                        "height": height,
-                        "rotation": rotation,
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "TEXT",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "insert": {"x": pos[0], "y": pos[1]},
+                            "text": text,
+                            "height": height,
+                            "rotation": rotation,
+                        },
+                    }
+                )
                 expand(pos[0], pos[1])
                 if layer in layers_map:
                     layers_map[layer]["entity_count"] += 1
@@ -666,22 +705,22 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
             # Strip MText formatting codes
             text = re.sub(r"\\[A-Za-z][^;]*;", "", text)
             text = re.sub(r"[{}]", "", text).strip()
-            height = _safe_float(
-                get(row, "TextHeight") or get(row, "ActualHeight") or get(row, "Actual Height")
-            ) or 2.5
+            height = _safe_float(get(row, "TextHeight") or get(row, "ActualHeight") or get(row, "Actual Height")) or 2.5
             rotation = _safe_float(get(row, "Rotation")) or 0.0
             if loc and text:
-                entities.append({
-                    "entity_type": "MTEXT",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "insert": {"x": loc[0], "y": loc[1]},
-                        "text": text,
-                        "height": height,
-                        "rotation": rotation,
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "MTEXT",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "insert": {"x": loc[0], "y": loc[1]},
+                            "text": text,
+                            "height": height,
+                            "rotation": rotation,
+                        },
+                    }
+                )
                 expand(loc[0], loc[1])
                 if layer in layers_map:
                     layers_map[layer]["entity_count"] += 1
@@ -698,18 +737,20 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
                     x_scale = _safe_float(parts[0].strip()) or 1.0
                     y_scale = _safe_float(parts[1].strip()) or 1.0
             if pos:
-                entities.append({
-                    "entity_type": "INSERT",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "insert": {"x": pos[0], "y": pos[1]},
-                        "block_name": block_name,
-                        "x_scale": x_scale,
-                        "y_scale": y_scale,
-                        "rotation": rotation,
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "INSERT",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "insert": {"x": pos[0], "y": pos[1]},
+                            "block_name": block_name,
+                            "x_scale": x_scale,
+                            "y_scale": y_scale,
+                            "rotation": rotation,
+                        },
+                    }
+                )
                 expand(pos[0], pos[1])
                 if layer in layers_map:
                     layers_map[layer]["entity_count"] += 1
@@ -719,17 +760,19 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
             text = str(get(row, "TextString") or get(row, "Text String") or "")
             height = _safe_float(get(row, "TextHeight") or get(row, "Height")) or 2.5
             if pos and text:
-                entities.append({
-                    "entity_type": "TEXT",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "insert": {"x": pos[0], "y": pos[1]},
-                        "text": text,
-                        "height": height,
-                        "rotation": 0.0,
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "TEXT",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "insert": {"x": pos[0], "y": pos[1]},
+                            "text": text,
+                            "height": height,
+                            "rotation": 0.0,
+                        },
+                    }
+                )
                 expand(pos[0], pos[1])
                 if layer in layers_map:
                     layers_map[layer]["entity_count"] += 1
@@ -738,15 +781,17 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
             p1 = _parse_coord(get(row, "Extension Line 1 Point"))
             p2 = _parse_coord(get(row, "Extension Line 2 Point"))
             if p1 and p2:
-                entities.append({
-                    "entity_type": "LINE",
-                    "layer": layer,
-                    "color": color,
-                    "geometry_data": {
-                        "start": {"x": p1[0], "y": p1[1]},
-                        "end": {"x": p2[0], "y": p2[1]},
-                    },
-                })
+                entities.append(
+                    {
+                        "entity_type": "LINE",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "start": {"x": p1[0], "y": p1[1]},
+                            "end": {"x": p2[0], "y": p2[1]},
+                        },
+                    }
+                )
                 expand(p1[0], p1[1])
                 expand(p2[0], p2[1])
                 if layer in layers_map:
@@ -765,7 +810,12 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
     layers = sorted(layers_map.values(), key=lambda layer: layer["name"])
     logger.info(
         "DDC DWG parsed: %d entities, %d layers, extents %.1f,%.1f → %.1f,%.1f",
-        len(entities), len(layers), min_x, min_y, max_x, max_y,
+        len(entities),
+        len(layers),
+        min_x,
+        min_y,
+        max_x,
+        max_y,
     )
 
     # Sort layouts: *Model_Space first, then alphabetical

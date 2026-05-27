@@ -21,7 +21,6 @@ from app.modules.bim_hub.ifc_processor import (
     process_ifc_file,
 )
 
-
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
 
@@ -51,16 +50,17 @@ END-ISO-10303-21;
 """
 
 
-@pytest.fixture()
+@pytest.fixture
 def temp_dir():
     """Provide a fresh temp directory for each test."""
     d = Path(tempfile.mkdtemp(prefix="bim_test_"))
     yield d
     import shutil
+
     shutil.rmtree(d, ignore_errors=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def minimal_ifc_file(temp_dir):
     """Write a minimal IFC file and return its path."""
     f = temp_dir / "test.ifc"

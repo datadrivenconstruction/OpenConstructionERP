@@ -26,6 +26,8 @@ from app.core.file_signature import (
     ALLOWED_PHOTO_TYPES,
     SIGNATURE_BYTES_REQUIRED,
     FileSignatureMismatch,
+)
+from app.core.file_signature import (
     require as require_signature,
 )
 from app.core.i18n import get_locale
@@ -217,9 +219,22 @@ async def test_ai_connection(
     Returns success status and response latency.
     """
     _VALID_PROVIDERS = (
-        "anthropic", "openai", "gemini", "openrouter", "mistral", "groq", "deepseek",
-        "together", "fireworks", "perplexity", "cohere", "ai21", "xai",
-        "ollama", "kimi", "vllm",
+        "anthropic",
+        "openai",
+        "gemini",
+        "openrouter",
+        "mistral",
+        "groq",
+        "deepseek",
+        "together",
+        "fireworks",
+        "perplexity",
+        "cohere",
+        "ai21",
+        "xai",
+        "ollama",
+        "kimi",
+        "vllm",
     )
     provider = body.get("provider", "").strip()
     if provider not in _VALID_PROVIDERS:
@@ -1016,7 +1031,8 @@ async def advisor_chat(
         # localized fallback — never the raw upstream message.
         logger.warning(
             "advisor_chat: AI call failed for user=%s provider-error=%r",
-            user_id, exc,
+            user_id,
+            exc,
         )
         # ai_client raises a sanitized ValueError (only the model id +
         # truncated provider text — no credentials) when the provider

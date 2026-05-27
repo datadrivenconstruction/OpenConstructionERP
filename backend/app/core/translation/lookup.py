@@ -99,9 +99,7 @@ def _load_tsv(path_str: str) -> dict[str, tuple[str, float]]:
     return out
 
 
-def _dictionary_path(
-    dictionary: str, src: str, tgt: str, root: str | None = None
-) -> Path:
+def _dictionary_path(dictionary: str, src: str, tgt: str, root: str | None = None) -> Path:
     return dictionary_dir(root) / dictionary / f"{src}-{tgt}.tsv"
 
 
@@ -121,9 +119,7 @@ async def lookup_phrase(
     path = _dictionary_path(dictionary, src, tgt, root)
 
     # File I/O off the event loop — TSVs may be 100k+ lines.
-    table = await asyncio.get_running_loop().run_in_executor(
-        None, _load_tsv, str(path)
-    )
+    table = await asyncio.get_running_loop().run_in_executor(None, _load_tsv, str(path))
     if not table:
         return None
 
@@ -143,9 +139,7 @@ async def lookup_phrase(
         from rapidfuzz import fuzz, process
 
         keys = list(table.keys())
-        match = process.extractOne(
-            norm, keys, scorer=fuzz.ratio, score_cutoff=90
-        )
+        match = process.extractOne(norm, keys, scorer=fuzz.ratio, score_cutoff=90)
         if match is not None:
             best_key, score, _ = match
             translated, _w = table[best_key]

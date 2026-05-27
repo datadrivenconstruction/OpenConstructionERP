@@ -490,9 +490,12 @@ async def test_finalize_inventory_emits_structured_log(
         CarbonInventoryCreate(project_id=ctx["project_a"].id, name="freeze-me"),
         user_id=None,
     )
-    with patch(
-        "app.modules.carbon.service.event_bus.publish_detached",
-    ), patch("app.modules.carbon.service.logger") as log_mock:
+    with (
+        patch(
+            "app.modules.carbon.service.event_bus.publish_detached",
+        ),
+        patch("app.modules.carbon.service.logger") as log_mock,
+    ):
         await ctx["service"].finalize_inventory(inv.id, status_value="baseline")
     # The info-level structured log MUST be the carbon.inventory.finalized
     # event with project_id+inventory_id+total_kg_co2e fields.

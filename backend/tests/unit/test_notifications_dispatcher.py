@@ -16,10 +16,8 @@ SQLite — never ``backend/openestimate.db``.
 
 from __future__ import annotations
 
-import asyncio
 import tempfile
 import uuid
-from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -173,7 +171,9 @@ async def test_file_comment_mention_creates_notification(session) -> None:
             await session.execute(
                 select(Notification).where(Notification.user_id == mentioned_user_id),
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
     assert len(rows) == 1
     assert rows[0].notification_type == "file_comment_mention"
@@ -188,9 +188,7 @@ async def test_file_comment_mention_creates_notification(session) -> None:
 def test_known_event_types_have_unique_names() -> None:
     """Catalogue entries must not duplicate (frontend dedupe key)."""
     names = [e["event_type"] for e in KNOWN_EVENT_TYPES]
-    assert len(names) == len(set(names)), (
-        f"duplicate event types in KNOWN_EVENT_TYPES: {sorted(names)}"
-    )
+    assert len(names) == len(set(names)), f"duplicate event types in KNOWN_EVENT_TYPES: {sorted(names)}"
 
 
 def test_known_event_types_have_required_fields() -> None:

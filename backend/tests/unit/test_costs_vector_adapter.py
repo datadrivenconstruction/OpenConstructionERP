@@ -128,20 +128,14 @@ def test_to_text_classifier_keys_sorted_for_stable_output() -> None:
     same embedding.
     """
     adapter = CostItemVectorAdapter()
-    row_a = _make_row(
-        classification={"din276": "330", "masterformat": "03 30 00", "nrm": "2.6.1"}
-    )
-    row_b = _make_row(
-        classification={"nrm": "2.6.1", "din276": "330", "masterformat": "03 30 00"}
-    )
+    row_a = _make_row(classification={"din276": "330", "masterformat": "03 30 00", "nrm": "2.6.1"})
+    row_b = _make_row(classification={"nrm": "2.6.1", "din276": "330", "masterformat": "03 30 00"})
     assert adapter.to_text(row_a) == adapter.to_text(row_b)
 
 
 def test_to_text_skips_empty_classification_values() -> None:
     adapter = CostItemVectorAdapter()
-    text = adapter.to_text(
-        _make_row(classification={"din276": "330", "nrm": "", "mf": None})
-    )
+    text = adapter.to_text(_make_row(classification={"din276": "330", "nrm": "", "mf": None}))
     assert "din276:330" in text
     assert "nrm:" not in text
     assert "mf:" not in text
@@ -156,9 +150,7 @@ def test_to_text_handles_non_dict_classification() -> None:
 
 def test_to_text_empty_row_returns_empty_string() -> None:
     adapter = CostItemVectorAdapter()
-    text = adapter.to_text(
-        _make_row(description="", unit="", classification={})
-    )
+    text = adapter.to_text(_make_row(description="", unit="", classification={}))
     assert text == ""
 
 
@@ -239,9 +231,7 @@ def test_to_payload_language_falls_back_to_english() -> None:
 def test_to_payload_explicit_language_metadata_wins() -> None:
     """An explicit ``metadata.language`` overrides region-derived inference."""
     adapter = CostItemVectorAdapter()
-    payload = adapter.to_payload(
-        _make_row(region="DE_BERLIN", metadata_={"language": "es"})
-    )
+    payload = adapter.to_payload(_make_row(region="DE_BERLIN", metadata_={"language": "es"}))
     assert payload["language"] == "es"
 
 
@@ -321,13 +311,9 @@ def test_module_imports_without_lancedb() -> None:
     # they MUST still not be there after — the adapter must not have
     # imported them at module level.
     if pre_lancedb is None:
-        assert "lancedb" not in sys.modules, (
-            "vector_adapter must not import lancedb at module level"
-        )
+        assert "lancedb" not in sys.modules, "vector_adapter must not import lancedb at module level"
     if pre_fastembed is None:
-        assert "fastembed" not in sys.modules, (
-            "vector_adapter must not import fastembed at module level"
-        )
+        assert "fastembed" not in sys.modules, "vector_adapter must not import fastembed at module level"
 
 
 # ── upsert ───────────────────────────────────────────────────────────────
@@ -798,10 +784,10 @@ def test_looks_like_fixture_detects_test_hex_codes() -> None:
     from BYO catalogues. The heuristic now only catches markers a real
     catalogue would NEVER use, so short alpha-digit codes pass through.
     """
-    from app.modules.costs.vector_adapter import _looks_like_fixture
-
     # Reset the lazy regex so a previous test can't leave it in place.
     import app.modules.costs.vector_adapter as va
+    from app.modules.costs.vector_adapter import _looks_like_fixture
+
     va._FIXTURE_CODE_RE = None
 
     # Real-looking BYO codes — must NOT be flagged anymore.
@@ -815,43 +801,58 @@ def test_looks_like_fixture_detects_test_hex_codes() -> None:
 def test_looks_like_fixture_detects_canned_descriptions() -> None:
     """Even with a real-looking code, canned fixture descriptions trip
     the heuristic so we don't serve seed data to end users."""
-    from app.modules.costs.vector_adapter import _looks_like_fixture
     import app.modules.costs.vector_adapter as va
+    from app.modules.costs.vector_adapter import _looks_like_fixture
+
     va._FIXTURE_CODE_RE = None
 
-    assert _looks_like_fixture(
-        {"code": "330.10.020", "description": "desc some sample"},
-    ) is True
-    assert _looks_like_fixture(
-        {"code": "330.10.020", "description": "Test concrete C30/37"},
-    ) is True
+    assert (
+        _looks_like_fixture(
+            {"code": "330.10.020", "description": "desc some sample"},
+        )
+        is True
+    )
+    assert (
+        _looks_like_fixture(
+            {"code": "330.10.020", "description": "Test concrete C30/37"},
+        )
+        is True
+    )
 
 
 def test_looks_like_fixture_passes_real_cwicr_codes() -> None:
     """Real CWICR codes use multi-segment hyphens / underscores and full
     descriptions — they must not be flagged as fixtures."""
-    from app.modules.costs.vector_adapter import _looks_like_fixture
     import app.modules.costs.vector_adapter as va
+    from app.modules.costs.vector_adapter import _looks_like_fixture
+
     va._FIXTURE_CODE_RE = None
 
-    assert _looks_like_fixture(
-        {
-            "code": "KAPU-ME-KARI-KASA",
-            "description": "Heavy concrete mixes",
-        },
-    ) is False
-    assert _looks_like_fixture(
-        {
-            "code": "330.10.020",
-            "description": "Stahlbetonwand C30/37, 24cm",
-        },
-    ) is False
+    assert (
+        _looks_like_fixture(
+            {
+                "code": "KAPU-ME-KARI-KASA",
+                "description": "Heavy concrete mixes",
+            },
+        )
+        is False
+    )
+    assert (
+        _looks_like_fixture(
+            {
+                "code": "330.10.020",
+                "description": "Stahlbetonwand C30/37, 24cm",
+            },
+        )
+        is False
+    )
 
 
 def test_looks_like_fixture_handles_missing_code() -> None:
     """Empty / missing code short-circuits to False — no false-positive."""
-    from app.modules.costs.vector_adapter import _looks_like_fixture
     import app.modules.costs.vector_adapter as va
+    from app.modules.costs.vector_adapter import _looks_like_fixture
+
     va._FIXTURE_CODE_RE = None
 
     assert _looks_like_fixture({}) is False

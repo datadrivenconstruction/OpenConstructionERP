@@ -77,13 +77,13 @@ def _holidays_de(year: int) -> set[date]:
     """
     e = easter(year)
     return {
-        date(year, 1, 1),    # Neujahrstag
+        date(year, 1, 1),  # Neujahrstag
         e - timedelta(days=2),  # Karfreitag (Good Friday)
         e + timedelta(days=1),  # Ostermontag (Easter Monday)
-        date(year, 5, 1),    # Tag der Arbeit
+        date(year, 5, 1),  # Tag der Arbeit
         e + timedelta(days=39),  # Christi Himmelfahrt (Ascension)
         e + timedelta(days=50),  # Pfingstmontag (Whit Monday)
-        date(year, 10, 3),   # Tag der Deutschen Einheit
+        date(year, 10, 3),  # Tag der Deutschen Einheit
         date(year, 12, 25),  # 1. Weihnachtstag
         date(year, 12, 26),  # 2. Weihnachtstag
     }
@@ -104,12 +104,12 @@ def _holidays_uk(year: int) -> set[date]:
     summer_bank = _nth_weekday(year, 8, 0, -1)
 
     return {
-        date(year, 1, 1),    # New Year's Day
+        date(year, 1, 1),  # New Year's Day
         e - timedelta(days=2),  # Good Friday
         e + timedelta(days=1),  # Easter Monday
-        early_may,           # Early May bank holiday
-        spring_bank,         # Spring bank holiday
-        summer_bank,         # Summer bank holiday
+        early_may,  # Early May bank holiday
+        spring_bank,  # Spring bank holiday
+        summer_bank,  # Summer bank holiday
         date(year, 12, 25),  # Christmas Day
         date(year, 12, 26),  # Boxing Day
     }
@@ -121,6 +121,7 @@ def _holidays_us(year: int) -> set[date]:
     When a fixed holiday falls on Saturday, observed on Friday.
     When on Sunday, observed on Monday.
     """
+
     def _observed(d: date) -> date:
         if d.weekday() == 5:  # Saturday → Friday
             return d - timedelta(days=1)
@@ -129,17 +130,17 @@ def _holidays_us(year: int) -> set[date]:
         return d
 
     fixed = [
-        date(year, 1, 1),    # New Year's Day
-        date(year, 6, 19),   # Juneteenth
-        date(year, 7, 4),    # Independence Day
+        date(year, 1, 1),  # New Year's Day
+        date(year, 6, 19),  # Juneteenth
+        date(year, 7, 4),  # Independence Day
         date(year, 11, 11),  # Veterans Day
         date(year, 12, 25),  # Christmas Day
     ]
     computed = [
-        _nth_weekday(year, 1, 0, 3),   # MLK Day — 3rd Monday January
-        _nth_weekday(year, 2, 0, 3),   # Presidents' Day — 3rd Monday February
+        _nth_weekday(year, 1, 0, 3),  # MLK Day — 3rd Monday January
+        _nth_weekday(year, 2, 0, 3),  # Presidents' Day — 3rd Monday February
         _nth_weekday(year, 5, 0, -1),  # Memorial Day — last Monday May
-        _nth_weekday(year, 9, 0, 1),   # Labor Day — 1st Monday September
+        _nth_weekday(year, 9, 0, 1),  # Labor Day — 1st Monday September
         _nth_weekday(year, 10, 0, 2),  # Columbus Day — 2nd Monday October
         _nth_weekday(year, 11, 3, 4),  # Thanksgiving — 4th Thursday November
     ]
@@ -156,23 +157,23 @@ def _holidays_me(year: int) -> set[date]:
           the approximate window as non-working.
     """
     holidays: set[date] = {
-        date(year, 1, 1),    # New Year's Day (Gregorian)
-        date(year, 12, 2),   # UAE National Day
-        date(year, 12, 3),   # UAE National Day (2nd day)
+        date(year, 1, 1),  # New Year's Day (Gregorian)
+        date(year, 12, 2),  # UAE National Day
+        date(year, 12, 3),  # UAE National Day (2nd day)
     }
     # Eid al-Fitr stub (end of Ramadan): approximately late March / early April
     # in 2026 the lunar calendar places it around ~March 30.
     # TODO: Use a Hijri library for accurate calculation.
     holidays.add(date(year, 3, 30))  # Eid al-Fitr approx Day 1
     holidays.add(date(year, 3, 31))  # Eid al-Fitr approx Day 2
-    holidays.add(date(year, 4, 1))   # Eid al-Fitr approx Day 3
+    holidays.add(date(year, 4, 1))  # Eid al-Fitr approx Day 3
 
     # Eid al-Adha stub: approximately early June 2026.
     # TODO: Use a Hijri library for accurate calculation.
-    holidays.add(date(year, 6, 6))   # Eid al-Adha approx Day 1
-    holidays.add(date(year, 6, 7))   # Eid al-Adha approx Day 2
-    holidays.add(date(year, 6, 8))   # Eid al-Adha approx Day 3
-    holidays.add(date(year, 6, 9))   # Eid al-Adha approx Day 4
+    holidays.add(date(year, 6, 6))  # Eid al-Adha approx Day 1
+    holidays.add(date(year, 6, 7))  # Eid al-Adha approx Day 2
+    holidays.add(date(year, 6, 8))  # Eid al-Adha approx Day 3
+    holidays.add(date(year, 6, 9))  # Eid al-Adha approx Day 4
 
     return holidays
 
@@ -185,9 +186,9 @@ def _holidays_in(year: int) -> set[date]:
     TODO: Replace stubs with a proper Hindu panchang calculation.
     """
     holidays: set[date] = {
-        date(year, 1, 26),   # Republic Day
-        date(year, 8, 15),   # Independence Day
-        date(year, 10, 2),   # Gandhi Jayanti
+        date(year, 1, 26),  # Republic Day
+        date(year, 8, 15),  # Independence Day
+        date(year, 10, 2),  # Gandhi Jayanti
         date(year, 12, 25),  # Christmas Day
     }
     # Holi stub: ~approx March 13 for 2026 (Phalgun Purnima)
@@ -208,6 +209,7 @@ def _holidays_jp(year: int) -> set[date]:
     Substitution rule: when a holiday falls on Sunday, the next Monday
     is a substitute holiday.
     """
+
     def _sub(d: date) -> set[date]:
         if d.weekday() == 6:  # Sunday → substitute holiday on Monday
             return {d, d + timedelta(days=1)}
@@ -215,19 +217,19 @@ def _holidays_jp(year: int) -> set[date]:
 
     days: set[date] = set()
     for d in [
-        date(year, 1, 1),    # New Year's Day (元旦)
+        date(year, 1, 1),  # New Year's Day (元旦)
         _nth_weekday(year, 1, 0, 2),  # Coming of Age Day — 2nd Monday Jan
-        date(year, 2, 11),   # National Foundation Day (建国記念の日)
-        date(year, 2, 23),   # Emperor's Birthday (天皇誕生日)
-        date(year, 4, 29),   # Showa Day (昭和の日) — start of Golden Week
-        date(year, 5, 3),    # Constitution Memorial Day (憲法記念日)
-        date(year, 5, 4),    # Greenery Day (みどりの日)
-        date(year, 5, 5),    # Children's Day (こどもの日) — end of Golden Week
+        date(year, 2, 11),  # National Foundation Day (建国記念の日)
+        date(year, 2, 23),  # Emperor's Birthday (天皇誕生日)
+        date(year, 4, 29),  # Showa Day (昭和の日) — start of Golden Week
+        date(year, 5, 3),  # Constitution Memorial Day (憲法記念日)
+        date(year, 5, 4),  # Greenery Day (みどりの日)
+        date(year, 5, 5),  # Children's Day (こどもの日) — end of Golden Week
         _nth_weekday(year, 7, 0, 3),  # Marine Day — 3rd Monday July
-        date(year, 8, 11),   # Mountain Day (山の日)
+        date(year, 8, 11),  # Mountain Day (山の日)
         _nth_weekday(year, 9, 0, 3),  # Respect for the Aged Day — 3rd Monday Sep
         date(year, 10, 14),  # Sports Day (スポーツの日) — 2nd Monday Oct (approx)
-        date(year, 11, 3),   # Culture Day (文化の日)
+        date(year, 11, 3),  # Culture Day (文化の日)
         date(year, 11, 23),  # Labour Thanksgiving Day (勤労感謝の日)
     ]:
         days |= _sub(d)
@@ -248,18 +250,18 @@ def _holidays_br(year: int) -> set[date]:
     carnaval_monday = e - timedelta(days=48)  # Monday
     carnaval_tuesday = e - timedelta(days=47)  # Tuesday (Mardi Gras)
     return {
-        date(year, 1, 1),    # Confraternização Universal (New Year's)
-        carnaval_monday,     # Carnaval (segunda-feira)
-        carnaval_tuesday,    # Carnaval (terça-feira)
+        date(year, 1, 1),  # Confraternização Universal (New Year's)
+        carnaval_monday,  # Carnaval (segunda-feira)
+        carnaval_tuesday,  # Carnaval (terça-feira)
         e - timedelta(days=2),  # Paixão de Cristo (Good Friday)
         date(year, 4, 21),  # Tiradentes
-        date(year, 5, 1),   # Dia do Trabalho
-        date(year, 9, 7),   # Independência do Brasil
-        date(year, 10, 12), # Nossa Senhora Aparecida
+        date(year, 5, 1),  # Dia do Trabalho
+        date(year, 9, 7),  # Independência do Brasil
+        date(year, 10, 12),  # Nossa Senhora Aparecida
         date(year, 11, 2),  # Finados
-        date(year, 11, 15), # Proclamação da República
-        date(year, 11, 20), # Consciência Negra (national since 2023)
-        date(year, 12, 25), # Natal
+        date(year, 11, 15),  # Proclamação da República
+        date(year, 11, 20),  # Consciência Negra (national since 2023)
+        date(year, 12, 25),  # Natal
     }
 
 
@@ -273,12 +275,12 @@ def _holidays_ru(year: int) -> set[date]:
         date(year, 1, 4),
         date(year, 1, 5),
         date(year, 1, 6),
-        date(year, 1, 7),   # Orthodox Christmas
+        date(year, 1, 7),  # Orthodox Christmas
         date(year, 1, 8),
         date(year, 2, 23),  # День защитника Отечества
-        date(year, 3, 8),   # Международный женский день
-        date(year, 5, 1),   # Праздник Весны и Труда
-        date(year, 5, 9),   # День Победы
+        date(year, 3, 8),  # Международный женский день
+        date(year, 5, 1),  # Праздник Весны и Труда
+        date(year, 5, 9),  # День Победы
         date(year, 6, 12),  # День России
         date(year, 11, 4),  # День народного единства
     }
@@ -320,7 +322,7 @@ _HOLIDAY_FUNCS: dict[str, Any] = {
     "GB": _holidays_uk,
     "UK": _holidays_uk,
     "US": _holidays_us,
-    "CA": _holidays_us,   # simplified; close enough for MVP
+    "CA": _holidays_us,  # simplified; close enough for MVP
     "AE": _holidays_me,
     "SA": _holidays_me,
     "QA": _holidays_me,

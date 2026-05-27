@@ -70,8 +70,12 @@ async def test_overlap_full_inside_other_rejected(
     assert r1.status_code == 201, r1.text
 
     r2 = await _book(
-        client, header, room_id,
-        check_in="2026-07-12", check_out="2026-07-15", name="Overlapper",
+        client,
+        header,
+        room_id,
+        check_in="2026-07-12",
+        check_out="2026-07-15",
+        name="Overlapper",
     )
     assert r2.status_code == 409, r2.text
 

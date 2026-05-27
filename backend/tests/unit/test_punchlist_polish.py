@@ -30,7 +30,7 @@ PROJECT_ID = uuid.uuid4()
 class _FakeNested:
     """Async context manager mimicking ``session.begin_nested()``."""
 
-    async def __aenter__(self) -> "object":
+    async def __aenter__(self) -> object:
         return self
 
     async def __aexit__(self, exc_type: Any, *args: Any) -> None:
@@ -98,7 +98,9 @@ class _StubPunchRepo:
         return [r for r in self.rows.values() if r.project_id == project_id]
 
     async def count_open_critical(
-        self, project_id: uuid.UUID, exclude_id: uuid.UUID | None = None,
+        self,
+        project_id: uuid.UUID,
+        exclude_id: uuid.UUID | None = None,
     ) -> int:
         return self._open_critical_count
 
@@ -151,21 +153,13 @@ async def test_reopen_history_records_terminal_to_active() -> None:
 
     # Walk the item all the way to closed using the regular transition flow.
     # open -> in_progress
-    await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="in_progress"), user_id="worker"
-    )
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="in_progress"), user_id="worker")
     # in_progress -> resolved
-    await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="resolved"), user_id="worker"
-    )
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="resolved"), user_id="worker")
     # resolved -> verified (must be a different user)
-    await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="verified"), user_id="inspector"
-    )
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="verified"), user_id="inspector")
     # verified -> closed
-    await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="closed"), user_id="manager"
-    )
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="closed"), user_id="manager")
 
     # Sanity — no reopen yet
     assert getattr(item, "reopen_history", []) == []
@@ -194,9 +188,7 @@ async def test_reopen_history_unchanged_for_normal_forward_transitions() -> None
     svc = _make_service()
     item = await svc.create_item(_create_data(), user_id="creator")
 
-    await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="in_progress"), user_id="worker"
-    )
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="in_progress"), user_id="worker")
 
     assert list(item.reopen_history) == []
 
@@ -219,18 +211,10 @@ async def test_bulk_close_summary_split() -> None:
 
     # Walk item 0 all the way to closed via the regular pipeline.
     target = items[0]
-    await svc.transition_status(
-        target.id, PunchStatusTransition(new_status="in_progress"), user_id="w"
-    )
-    await svc.transition_status(
-        target.id, PunchStatusTransition(new_status="resolved"), user_id="w"
-    )
-    await svc.transition_status(
-        target.id, PunchStatusTransition(new_status="verified"), user_id="i"
-    )
-    await svc.transition_status(
-        target.id, PunchStatusTransition(new_status="closed"), user_id="m"
-    )
+    await svc.transition_status(target.id, PunchStatusTransition(new_status="in_progress"), user_id="w")
+    await svc.transition_status(target.id, PunchStatusTransition(new_status="resolved"), user_id="w")
+    await svc.transition_status(target.id, PunchStatusTransition(new_status="verified"), user_id="i")
+    await svc.transition_status(target.id, PunchStatusTransition(new_status="closed"), user_id="m")
 
     assert target.status == "closed"
 
@@ -262,9 +246,7 @@ async def test_bulk_close_project_mismatch_returns_error() -> None:
         user_id="u1",
     )
 
-    result = await svc.bulk_close(
-        PROJECT_ID, [a.id, b.id], user_id="m"
-    )
+    result = await svc.bulk_close(PROJECT_ID, [a.id, b.id], user_id="m")
 
     assert result["closed"] == 1
     assert result["skipped"] == 0

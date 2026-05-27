@@ -26,7 +26,6 @@ from app.core.match_service.config import (
 )
 from app.core.match_service.envelope import confidence_band_for
 
-
 # ── v2 back-compat: pure threshold mode ──────────────────────────────────
 
 
@@ -176,15 +175,13 @@ def test_hard_filter_relaxation_never_inverts_low_into_medium_band() -> None:
     [
         # Cases insensitive to where the bands are pinned (use the
         # well-defined hard-filter bonus floors of 0.75 / 0.60 instead).
-        (0.99, 0, None, "high"),       # clean HIGH regardless of tuning
-        (0.78, 3, None, "high"),       # 3 hard filters promote → HIGH (≥ 0.75 floor)
-        (0.61, 1, None, "medium"),     # 1 hard filter promotes → MEDIUM (≥ 0.60 floor)
-        (0.55, 10, "high", "low"),     # below MEDIUM floor 0.60 — no promotion
+        (0.99, 0, None, "high"),  # clean HIGH regardless of tuning
+        (0.78, 3, None, "high"),  # 3 hard filters promote → HIGH (≥ 0.75 floor)
+        (0.61, 1, None, "medium"),  # 1 hard filter promotes → MEDIUM (≥ 0.60 floor)
+        (0.55, 10, "high", "low"),  # below MEDIUM floor 0.60 — no promotion
     ],
 )
-def test_band_derivation_matrix_threshold_insensitive(
-    score: float, hard: int, cls: str | None, expected: str
-) -> None:
+def test_band_derivation_matrix_threshold_insensitive(score: float, hard: int, cls: str | None, expected: str) -> None:
     """Cases pinned on the HARD-FILTER floors (0.75 / 0.60), not on
     ``CONFIDENCE_*_THRESHOLD`` — survive future re-pinning."""
     assert confidence_band_for(score, hard_filters_matched=hard, classification_confidence=cls) == expected

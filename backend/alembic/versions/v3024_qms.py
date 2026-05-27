@@ -30,12 +30,15 @@ depends_on: Union[str, Sequence[str], None] = None
 
 # ── Helpers ─────────────────────────────────────────────────────────
 
+
 def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
     return name in inspector.get_table_names()
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -95,9 +98,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     def _id_cols() -> list[sa.Column]:
         return [
@@ -126,10 +127,16 @@ def upgrade() -> None:
             sa.Column("work_type", sa.String(100), nullable=False),
             sa.Column("wbs_ref", sa.String(100), nullable=True),
             sa.Column(
-                "status", sa.String(32), nullable=False, server_default="draft",
+                "status",
+                sa.String(32),
+                nullable=False,
+                server_default="draft",
             ),
             sa.Column(
-                "version", sa.Integer(), nullable=False, server_default="1",
+                "version",
+                sa.Integer(),
+                nullable=False,
+                server_default="1",
             ),
             sa.Column("created_by", sa.String(36), nullable=True),
         )
@@ -146,7 +153,10 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column(
-                "sequence", sa.Integer(), nullable=False, server_default="0",
+                "sequence",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column("control_point_name", sa.String(255), nullable=False),
             sa.Column("criteria", sa.Text(), nullable=True),
@@ -242,7 +252,10 @@ def upgrade() -> None:
             ),
             sa.Column("root_cause", sa.Text(), nullable=True),
             sa.Column(
-                "status", sa.String(32), nullable=False, server_default="open",
+                "status",
+                sa.String(32),
+                nullable=False,
+                server_default="open",
             ),
             sa.Column(
                 "cost_impact_currency",
@@ -295,7 +308,10 @@ def upgrade() -> None:
             sa.Column("drawing_ref", sa.String(255), nullable=True),
             sa.Column("bim_element_ref", sa.String(255), nullable=True),
             sa.Column(
-                "status", sa.String(32), nullable=False, server_default="open",
+                "status",
+                sa.String(32),
+                nullable=False,
+                server_default="open",
             ),
             sa.Column(
                 "severity",
@@ -368,7 +384,10 @@ def upgrade() -> None:
             sa.Column("clause_ref", sa.String(64), nullable=True),
             sa.Column("corrective_action_required", sa.Text(), nullable=True),
             sa.Column(
-                "status", sa.String(32), nullable=False, server_default="open",
+                "status",
+                sa.String(32),
+                nullable=False,
+                server_default="open",
             ),
             sa.Column("due_date", sa.String(32), nullable=True),
             sa.Column("closed_at", sa.String(32), nullable=True),

@@ -59,7 +59,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -67,7 +69,9 @@ def _has_index(
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -99,9 +103,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── PriceList ───────────────────────────────────────────────────────
     if not _has_table(inspector, "oe_property_dev_price_list"):
@@ -113,12 +115,16 @@ def upgrade() -> None:
                 "development_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_development.id", ondelete="CASCADE",
+                    "oe_property_dev_development.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "name", sa.String(255), nullable=False, server_default="",
+                "name",
+                sa.String(255),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
                 "effective_from",
@@ -128,7 +134,10 @@ def upgrade() -> None:
             ),
             sa.Column("effective_to", sa.String(20), nullable=True),
             sa.Column(
-                "currency", sa.String(8), nullable=False, server_default="",
+                "currency",
+                sa.String(8),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
                 "status",
@@ -180,7 +189,8 @@ def upgrade() -> None:
                 "price_list_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_price_list.id", ondelete="CASCADE",
+                    "oe_property_dev_price_list.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -188,7 +198,8 @@ def upgrade() -> None:
                 "plot_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_plot.id", ondelete="CASCADE",
+                    "oe_property_dev_plot.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -199,7 +210,8 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.UniqueConstraint(
-                "price_list_id", "plot_id",
+                "price_list_id",
+                "plot_id",
                 name="uq_oe_property_dev_price_list_entry_list_plot",
             ),
         )
@@ -234,12 +246,16 @@ def upgrade() -> None:
                 "price_list_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_price_list.id", ondelete="CASCADE",
+                    "oe_property_dev_price_list.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "name", sa.String(255), nullable=False, server_default="",
+                "name",
+                sa.String(255),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
                 "rule_type",
@@ -267,7 +283,10 @@ def upgrade() -> None:
                 server_default="100",
             ),
             sa.Column(
-                "active", sa.Boolean(), nullable=False, server_default=sa.text("1") if is_sqlite else sa.text("true"),
+                "active",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.text("1") if is_sqlite else sa.text("true"),
             ),
             sa.Column(
                 "effective_from",
@@ -322,7 +341,9 @@ def upgrade() -> None:
     # for the NOT NULL step; on Postgres we use a server_default to fill
     # existing rows in a single statement.
     if not _has_column(
-        inspector, "oe_property_dev_reservation", "price_breakdown_snapshot",
+        inspector,
+        "oe_property_dev_reservation",
+        "price_breakdown_snapshot",
     ):
         if is_sqlite:
             # SQLite path: add NOT NULL + server_default in one go — the
@@ -384,7 +405,9 @@ def downgrade() -> None:
 
     # Reservation column — drop first, before tables it references can disappear.
     if _has_column(
-        inspector, "oe_property_dev_reservation", "price_breakdown_snapshot",
+        inspector,
+        "oe_property_dev_reservation",
+        "price_breakdown_snapshot",
     ):
         if is_sqlite:
             with op.batch_alter_table(
@@ -393,7 +416,8 @@ def downgrade() -> None:
                 batch_op.drop_column("price_breakdown_snapshot")
         else:
             op.drop_column(
-                "oe_property_dev_reservation", "price_breakdown_snapshot",
+                "oe_property_dev_reservation",
+                "price_breakdown_snapshot",
             )
 
     for table in (

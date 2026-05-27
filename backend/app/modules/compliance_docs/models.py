@@ -46,24 +46,34 @@ class ComplianceDoc(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     issuer: Mapped[str | None] = mapped_column(String(255), nullable=True)
     policy_number: Mapped[str | None] = mapped_column(
-        String(100), nullable=True,
+        String(100),
+        nullable=True,
     )
 
     # ── Coverage / amount ──────────────────────────────────────────────
     coverage_amount: Mapped[Decimal | None] = mapped_column(
-        Numeric(15, 2), nullable=True,
+        Numeric(15, 2),
+        nullable=True,
     )
     currency: Mapped[str] = mapped_column(
-        String(3), nullable=False, default="", server_default="",
+        String(3),
+        nullable=False,
+        default="",
+        server_default="",
     )
 
     # ── Lifecycle dates ────────────────────────────────────────────────
     effective_date: Mapped[_date] = mapped_column(Date, nullable=False)
     expires_at: Mapped[_date] = mapped_column(
-        Date, nullable=False, index=True,
+        Date,
+        nullable=False,
+        index=True,
     )
     notify_days_before: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=30, server_default="30",
+        Integer,
+        nullable=False,
+        default=30,
+        server_default="30",
     )
 
     # ── Derived status (recomputed on every write) ────────────────────
@@ -87,7 +97,10 @@ class ComplianceDoc(Base):
 
     # ── Free-form ──────────────────────────────────────────────────────
     notes: Mapped[str] = mapped_column(
-        Text, nullable=False, default="", server_default="",
+        Text,
+        nullable=False,
+        default="",
+        server_default="",
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -99,7 +112,8 @@ class ComplianceDoc(Base):
 
     # ── Audit ─────────────────────────────────────────────────────────
     created_by: Mapped[str | None] = mapped_column(
-        String(36), nullable=True,
+        String(36),
+        nullable=True,
     )
     # ``updated_by`` is recorded on every PATCH inside ``metadata_``
     # under the ``"updated_by"`` key — kept off the SQL schema so this
@@ -108,11 +122,7 @@ class ComplianceDoc(Base):
     # same reason; see :mod:`service` for the read/write helpers.
 
     def __repr__(self) -> str:  # pragma: no cover — debug only
-        return (
-            f"<ComplianceDoc {self.doc_type} "
-            f"{self.name[:30]!r} expires={self.expires_at} "
-            f"status={self.status}>"
-        )
+        return f"<ComplianceDoc {self.doc_type} {self.name[:30]!r} expires={self.expires_at} status={self.status}>"
 
 
 __all__ = ["ComplianceDoc"]

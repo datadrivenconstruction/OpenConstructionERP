@@ -64,11 +64,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -175,9 +171,7 @@ async def _create_spa(
 
 
 @pytest.mark.asyncio
-async def test_template_catalogue_lists_five_templates(
-    http_client, admin_session
-) -> None:
+async def test_template_catalogue_lists_five_templates(http_client, admin_session) -> None:
     resp = await http_client.get(
         "/api/v1/property-dev/payment-schedule-templates/",
         headers=admin_session["headers"],
@@ -198,9 +192,7 @@ async def test_template_catalogue_lists_five_templates(
 
 
 @pytest.mark.asyncio
-async def test_generate_from_template_30_30_40(
-    http_client, admin_session
-) -> None:
+async def test_generate_from_template_30_30_40(http_client, admin_session) -> None:
     ctx = await _create_spa(
         http_client,
         admin_session["headers"],
@@ -263,9 +255,7 @@ async def test_generate_from_template_30_30_40(
 
 
 @pytest.mark.asyncio
-async def test_generate_from_template_rejects_unknown(
-    http_client, admin_session
-) -> None:
+async def test_generate_from_template_rejects_unknown(http_client, admin_session) -> None:
     ctx = await _create_spa(
         http_client,
         admin_session["headers"],
@@ -286,9 +276,7 @@ async def test_generate_from_template_rejects_unknown(
 
 
 @pytest.mark.asyncio
-async def test_generate_refuses_active_schedule(
-    http_client, admin_session
-) -> None:
+async def test_generate_refuses_active_schedule(http_client, admin_session) -> None:
     """Re-running the generator against an active schedule must 409."""
     ctx = await _create_spa(
         http_client,
@@ -311,9 +299,7 @@ async def test_generate_refuses_active_schedule(
 
 
 @pytest.mark.asyncio
-async def test_list_sales_contracts_by_development(
-    http_client, admin_session
-) -> None:
+async def test_list_sales_contracts_by_development(http_client, admin_session) -> None:
     ctx = await _create_spa(
         http_client,
         admin_session["headers"],
@@ -332,9 +318,7 @@ async def test_list_sales_contracts_by_development(
 
 
 @pytest.mark.asyncio
-async def test_list_payment_schedules_by_development(
-    http_client, admin_session
-) -> None:
+async def test_list_payment_schedules_by_development(http_client, admin_session) -> None:
     dev_id = admin_session["development_id"]
     resp = await http_client.get(
         f"/api/v1/property-dev/payment-schedules/?development_id={dev_id}",
@@ -347,9 +331,7 @@ async def test_list_payment_schedules_by_development(
 
 
 @pytest.mark.asyncio
-async def test_list_schedules_requires_a_filter(
-    http_client, admin_session
-) -> None:
+async def test_list_schedules_requires_a_filter(http_client, admin_session) -> None:
     """422 when neither sales_contract_id nor development_id supplied."""
     resp = await http_client.get(
         "/api/v1/property-dev/payment-schedules/",
@@ -359,9 +341,7 @@ async def test_list_schedules_requires_a_filter(
 
 
 @pytest.mark.asyncio
-async def test_list_sales_contracts_requires_a_filter(
-    http_client, admin_session
-) -> None:
+async def test_list_sales_contracts_requires_a_filter(http_client, admin_session) -> None:
     resp = await http_client.get(
         "/api/v1/property-dev/sales-contracts/",
         headers=admin_session["headers"],

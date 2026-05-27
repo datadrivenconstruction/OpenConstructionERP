@@ -46,7 +46,15 @@ SCOPE_TYPES: tuple[str, ...] = ("user", "project", "federation")
 #: ``in`` checks set-membership against ``value`` (a list). ``exists``
 #: ignores ``value`` and just asserts presence of the property.
 OPERATORS: tuple[str, ...] = (
-    "eq", "neq", "contains", "regex", "gt", "lt", "in", "exists", "between",
+    "eq",
+    "neq",
+    "contains",
+    "regex",
+    "gt",
+    "lt",
+    "in",
+    "exists",
+    "between",
 )
 
 #: Permitted rule actions. ``isolate`` is a shorthand for
@@ -88,9 +96,20 @@ class SmartViewSelector(BaseModel):
     # ``BIMElement.properties``). Required for every operator other than
     # ``ifc_class``-only selectors — enforced by the model_validator.
     property: str | None = Field(default=None, max_length=200)
-    operator: Literal[
-        "eq", "neq", "contains", "regex", "gt", "lt", "in", "exists", "between",
-    ] | None = None
+    operator: (
+        Literal[
+            "eq",
+            "neq",
+            "contains",
+            "regex",
+            "gt",
+            "lt",
+            "in",
+            "exists",
+            "between",
+        ]
+        | None
+    ) = None
     # Whatever the operator compares against. ``None`` is legal for
     # ``exists`` and for ``ifc_class``-only selectors.
     value: Any = None
@@ -102,9 +121,7 @@ class SmartViewSelector(BaseModel):
         if isinstance(v, str) and len(v) > 4096:
             raise ValueError("selector.value string is too long (max 4096 chars)")
         if isinstance(v, list) and len(v) > MAX_IN_LIST_SIZE:
-            raise ValueError(
-                f"selector.value list is too long (max {MAX_IN_LIST_SIZE} items)"
-            )
+            raise ValueError(f"selector.value list is too long (max {MAX_IN_LIST_SIZE} items)")
         return v
 
     @model_validator(mode="after")
@@ -113,9 +130,7 @@ class SmartViewSelector(BaseModel):
         # An empty selector is meaningless. Require at least one of
         # ifc_class / property to be set.
         if not self.ifc_class and not self.property:
-            raise ValueError(
-                "selector must define at least one of 'ifc_class' or 'property'"
-            )
+            raise ValueError("selector must define at least one of 'ifc_class' or 'property'")
 
         if self.operator is None:
             # Bare ``ifc_class`` selector — no operator/value/property
@@ -125,9 +140,7 @@ class SmartViewSelector(BaseModel):
         if self.operator in {"exists"}:
             # ``exists`` ignores ``value`` but needs a property name.
             if not self.property:
-                raise ValueError(
-                    "operator 'exists' requires a non-empty 'property' name"
-                )
+                raise ValueError("operator 'exists' requires a non-empty 'property' name")
             return self
 
         if self.operator in {"gt", "lt"}:
@@ -136,39 +149,29 @@ class SmartViewSelector(BaseModel):
             # Defer the coercion to the evaluator so non-finite values
             # are rejected centrally; just sanity-check the type here.
             if isinstance(self.value, (list, dict, tuple)):
-                raise ValueError(
-                    f"operator {self.operator!r} requires a scalar 'value'"
-                )
+                raise ValueError(f"operator {self.operator!r} requires a scalar 'value'")
             return self
 
         if self.operator == "between":
             if not (isinstance(self.value, (list, tuple)) and len(self.value) == 2):
-                raise ValueError(
-                    "operator 'between' requires a [low, high] pair as 'value'"
-                )
+                raise ValueError("operator 'between' requires a [low, high] pair as 'value'")
             return self
 
         if self.operator == "in":
             if not isinstance(self.value, list):
-                raise ValueError(
-                    "operator 'in' requires a list as 'value'"
-                )
+                raise ValueError("operator 'in' requires a list as 'value'")
             return self
 
         if self.operator == "regex":
             if not isinstance(self.value, str):
                 raise ValueError("operator 'regex' requires a string pattern")
             if len(self.value) > MAX_REGEX_LENGTH:
-                raise ValueError(
-                    f"operator 'regex' pattern too long (max {MAX_REGEX_LENGTH} chars)"
-                )
+                raise ValueError(f"operator 'regex' pattern too long (max {MAX_REGEX_LENGTH} chars)")
             return self
 
         # eq / neq / contains — value is required.
         if self.value is None:
-            raise ValueError(
-                f"operator {self.operator!r} requires a non-null 'value'"
-            )
+            raise ValueError(f"operator {self.operator!r} requires a non-null 'value'")
         return self
 
 
@@ -253,9 +256,7 @@ class SmartViewBase(BaseModel):
     @classmethod
     def _bound_rules(cls, v: list[SmartViewRule]) -> list[SmartViewRule]:
         if len(v) > MAX_RULES_PER_VIEW:
-            raise ValueError(
-                f"smart view has too many rules ({len(v)}, max {MAX_RULES_PER_VIEW})"
-            )
+            raise ValueError(f"smart view has too many rules ({len(v)}, max {MAX_RULES_PER_VIEW})")
         return v
 
 
@@ -284,13 +285,9 @@ class SmartViewUpdate(BaseModel):
 
     @field_validator("rules")
     @classmethod
-    def _bound_rules(
-        cls, v: list[SmartViewRule] | None
-    ) -> list[SmartViewRule] | None:
+    def _bound_rules(cls, v: list[SmartViewRule] | None) -> list[SmartViewRule] | None:
         if v is not None and len(v) > MAX_RULES_PER_VIEW:
-            raise ValueError(
-                f"smart view has too many rules ({len(v)}, max {MAX_RULES_PER_VIEW})"
-            )
+            raise ValueError(f"smart view has too many rules ({len(v)}, max {MAX_RULES_PER_VIEW})")
         return v
 
 

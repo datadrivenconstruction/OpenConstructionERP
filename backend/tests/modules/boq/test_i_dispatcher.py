@@ -65,7 +65,7 @@ _BC3_MINIMAL_UTF8 = (
     "~C|01.01|m3|Hormigón en masa HM-20|65.00||0|\n"
     "~T|01.01|Hormigón en masa HM-20/P/40/I, de central, vertido directo desde camión.|\n"
     "~M|01\\01.01|1|24.5|\n"
-).encode("utf-8")
+).encode()
 
 
 def _minimal_xlsx_bytes() -> bytes:

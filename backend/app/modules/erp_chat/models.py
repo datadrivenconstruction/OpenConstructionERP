@@ -116,7 +116,8 @@ class ChatTurnFeedback(Base):
     __tablename__ = "oe_erp_chat_turn_feedback"
     __table_args__ = (
         UniqueConstraint(
-            "message_id", "user_id",
+            "message_id",
+            "user_id",
             name="uq_oe_erp_chat_turn_feedback_message_user",
         ),
         CheckConstraint(

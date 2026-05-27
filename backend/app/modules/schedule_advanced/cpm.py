@@ -318,9 +318,7 @@ def compute_cpm(network: TaskNetwork) -> dict[Any, CPMResult]:
         # immediate successor's ES. For a sink it's the slack to its
         # component finish.
         fs_succs = [
-            es[s_id] - int(lag)
-            for s_id, dep_type, lag in network.successors(aid)
-            if dep_type == "FS" and s_id in es
+            es[s_id] - int(lag) for s_id, dep_type, lag in network.successors(aid) if dep_type == "FS" and s_id in es
         ]
         if fs_succs:
             free_float = min(fs_succs) - ef[aid]

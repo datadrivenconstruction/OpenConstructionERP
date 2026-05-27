@@ -52,7 +52,6 @@ from sqlalchemy.ext.asyncio import (  # noqa: E402
 # conftest.py eagerly imports module models).
 import app.modules.pipelines.pipeline_nodes  # noqa: E402,F401
 
-
 # ── In-memory executor harness ─────────────────────────────────────────────
 
 
@@ -82,9 +81,7 @@ async def _seed_run(maker, graph: dict) -> uuid.UUID:
         p = Pipeline(name="t", graph=graph, policy={})
         s.add(p)
         await s.flush()
-        run = PipelineRun(
-            pipeline_id=p.id, graph_snapshot=graph, trigger={"type": "manual"}
-        )
+        run = PipelineRun(pipeline_id=p.id, graph_snapshot=graph, trigger={"type": "manual"})
         s.add(run)
         await s.commit()
         return run.id
@@ -251,9 +248,7 @@ async def test_node_source_project_and_boq(mem_factory) -> None:
         )
         db.add(owner)
         await db.flush()
-        proj = Project(
-            name="Proj X", owner_id=owner.id, status="active"
-        )
+        proj = Project(name="Proj X", owner_id=owner.id, status="active")
         db.add(proj)
         await db.flush()
         boq = BOQ(project_id=proj.id, name="B1")
@@ -300,9 +295,7 @@ async def test_node_transform_filter() -> None:
     assert out["count"] == 2
     assert out["dropped"] == 1
     # Empty predicate is identity pass-through.
-    out2 = await _run_transform_filter(
-        _ctx(params={}, inputs={"up": {"rows": rows}})
-    )
+    out2 = await _run_transform_filter(_ctx(params={}, inputs={"up": {"rows": rows}}))
     assert out2["count"] == 3
 
 
@@ -322,9 +315,7 @@ async def test_node_gate_validation_passes_clean_rows() -> None:
             "unit_rate": "100",
         }
     ]
-    out = await _run_gate_validation(
-        _ctx(params={"rule_sets": ["boq_quality"]}, inputs={"up": {"rows": rows}})
-    )
+    out = await _run_gate_validation(_ctx(params={"rule_sets": ["boq_quality"]}, inputs={"up": {"rows": rows}}))
     assert out["count"] == 1
     assert "validation" in out
 
@@ -387,9 +378,7 @@ async def http_client():
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         transport = ASGITransport(app=app)
-        async with AsyncClient(
-            transport=transport, base_url="http://test"
-        ) as ac:
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
             yield ac
 
 
@@ -400,11 +389,7 @@ async def _activate(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(
-                is_active=True
-            )
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
 
@@ -417,9 +402,7 @@ async def _register_login(client, tag: str) -> dict[str, str]:
     )
     assert reg.status_code in (200, 201), reg.text
     await _activate(email)
-    login = await client.post(
-        "/api/v1/users/auth/login", json={"email": email, "password": pw}
-    )
+    login = await client.post("/api/v1/users/auth/login", json={"email": email, "password": pw})
     assert login.status_code == 200, login.text
     return {"Authorization": f"Bearer {login.json()['access_token']}"}
 
@@ -441,9 +424,7 @@ async def test_pipeline_idor_owner_isolation(http_client) -> None:
     # B sees it in neither the global list nor by id.
     b_list = await http_client.get("/api/v1/pipelines/", headers=b)
     assert b_list.status_code == 200
-    assert all(p["id"] != pid for p in b_list.json()), (
-        "B must not enumerate A's pipeline"
-    )
+    assert all(p["id"] != pid for p in b_list.json()), "B must not enumerate A's pipeline"
 
     for method, path, body in [
         ("GET", f"/api/v1/pipelines/{pid}", None),
@@ -453,9 +434,7 @@ async def test_pipeline_idor_owner_isolation(http_client) -> None:
         ("DELETE", f"/api/v1/pipelines/{pid}", None),
     ]:
         r = await http_client.request(method, path, headers=b, json=body)
-        assert r.status_code in (403, 404), (
-            f"B {method} {path} must be denied, got {r.status_code}"
-        )
+        assert r.status_code in (403, 404), f"B {method} {path} must be denied, got {r.status_code}"
 
     # A still has full access (pipeline was not mutated/deleted by B).
     a_get = await http_client.get(f"/api/v1/pipelines/{pid}", headers=a)

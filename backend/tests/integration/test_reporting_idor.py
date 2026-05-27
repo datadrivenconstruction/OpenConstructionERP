@@ -52,7 +52,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -98,9 +97,7 @@ async def _activate_user(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
 
@@ -116,9 +113,7 @@ async def _register_and_login(
         "/api/v1/users/auth/register",
         json={"email": email, "password": password, "full_name": f"Tenant {tenant}"},
     )
-    assert reg.status_code in (200, 201), (
-        f"register failed for {tenant}: {reg.status_code} {reg.text}"
-    )
+    assert reg.status_code in (200, 201), f"register failed for {tenant}: {reg.status_code} {reg.text}"
     user_id = reg.json()["id"]
 
     await _activate_user(email)
@@ -141,10 +136,12 @@ async def two_reporting_tenants(http_client):
     ``projects.create``). B is left as a viewer.
     """
     a_uid, a_email, a_password, a_headers = await _register_and_login(
-        http_client, tenant="a",
+        http_client,
+        tenant="a",
     )
     b_uid, b_email, _b_password, b_headers = await _register_and_login(
-        http_client, tenant="b",
+        http_client,
+        tenant="b",
     )
 
     # Promote A so they can hit ``POST /projects/`` (admin role grants
@@ -155,11 +152,7 @@ async def two_reporting_tenants(http_client):
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == a_email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == a_email.lower()).values(role="admin", is_active=True))
         await s.commit()
 
     # Re-login A so the JWT carries the freshly-promoted admin role.
@@ -260,8 +253,7 @@ async def test_tenant_b_cannot_get_tenant_a_report(http_client, two_reporting_te
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B got status {resp.status_code} on tenant A's "
-        f"generated report. Body: {resp.text!r}"
+        f"LEAK: tenant B got status {resp.status_code} on tenant A's generated report. Body: {resp.text!r}"
     )
     # Belt-and-braces: even if the status code is somehow a non-error
     # variant, the body must not contain A's secret payload.
@@ -280,8 +272,7 @@ async def test_tenant_a_can_still_get_own_report(http_client, two_reporting_tena
         headers=a["headers"],
     )
     assert resp.status_code == 200, (
-        f"REGRESSION: tenant A got {resp.status_code} on their OWN report. "
-        f"Body: {resp.text!r}"
+        f"REGRESSION: tenant A got {resp.status_code} on their OWN report. Body: {resp.text!r}"
     )
     body = resp.json()
     assert body["id"] == a["report_id"]
@@ -298,14 +289,14 @@ async def test_tenant_b_cannot_get_tenant_a_kpi(http_client, two_reporting_tenan
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B got status {resp.status_code} on tenant A's "
-        f"latest KPI. Body: {resp.text!r}"
+        f"LEAK: tenant B got status {resp.status_code} on tenant A's latest KPI. Body: {resp.text!r}"
     )
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_list_tenant_a_kpi_history(
-    http_client, two_reporting_tenants,
+    http_client,
+    two_reporting_tenants,
 ):
     """``GET /reporting/kpi/history/?project_id=X`` must reject foreign id."""
     a = two_reporting_tenants["a"]
@@ -316,14 +307,14 @@ async def test_tenant_b_cannot_list_tenant_a_kpi_history(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B got status {resp.status_code} on tenant A's "
-        f"KPI history. Body: {resp.text!r}"
+        f"LEAK: tenant B got status {resp.status_code} on tenant A's KPI history. Body: {resp.text!r}"
     )
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_list_tenant_a_reports(
-    http_client, two_reporting_tenants,
+    http_client,
+    two_reporting_tenants,
 ):
     """``GET /reporting/reports/?project_id=X`` must reject foreign id."""
     a = two_reporting_tenants["a"]
@@ -334,14 +325,14 @@ async def test_tenant_b_cannot_list_tenant_a_reports(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B got status {resp.status_code} listing tenant A's "
-        f"reports. Body: {resp.text!r}"
+        f"LEAK: tenant B got status {resp.status_code} listing tenant A's reports. Body: {resp.text!r}"
     )
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_reschedule_tenant_a_template(
-    http_client, two_reporting_tenants,
+    http_client,
+    two_reporting_tenants,
 ):
     """``POST /reporting/templates/{id}/schedule/`` must reject foreign templates.
 
@@ -376,17 +367,14 @@ async def test_tenant_b_cannot_reschedule_tenant_a_template(
     async with async_session_factory() as s:
         tmpl = await s.get(ReportTemplate, uuid.UUID(a["template_id"]))
         assert tmpl is not None
-        assert tmpl.is_scheduled is True, (
-            "tenant B's schedule call actually cleared tenant A's template"
-        )
-        assert tmpl.schedule_cron == "0 9 * * 1", (
-            "tenant B's schedule call mutated tenant A's cron expression"
-        )
+        assert tmpl.is_scheduled is True, "tenant B's schedule call actually cleared tenant A's template"
+        assert tmpl.schedule_cron == "0 9 * * 1", "tenant B's schedule call mutated tenant A's cron expression"
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_scheduled_templates_excludes_tenant_a(
-    http_client, two_reporting_tenants,
+    http_client,
+    two_reporting_tenants,
 ):
     """``GET /reporting/templates/scheduled/`` must filter out A's templates.
 
@@ -405,6 +393,5 @@ async def test_tenant_b_scheduled_templates_excludes_tenant_a(
     items = resp.json()
     leaked = [t for t in items if t.get("id") == a["template_id"]]
     assert leaked == [], (
-        f"LEAK: tenant B's scheduled-template list contains tenant A's "
-        f"project-scoped template: {leaked!r}"
+        f"LEAK: tenant B's scheduled-template list contains tenant A's project-scoped template: {leaked!r}"
     )

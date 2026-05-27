@@ -90,11 +90,7 @@ class _BaseRepo:
         if self.project_field is None:  # pragma: no cover -- defensive
             return {}
         col = getattr(self.model, self.project_field)
-        stmt = (
-            select(self.model.status, func.count())
-            .where(col == project_id)
-            .group_by(self.model.status)
-        )
+        stmt = select(self.model.status, func.count()).where(col == project_id).group_by(self.model.status)
         rows = (await self.session.execute(stmt)).all()
         return {str(s): int(c) for s, c in rows}
 
@@ -104,11 +100,7 @@ class NoticeRepository(_BaseRepo):
     project_field = "project_id"
 
     async def next_code(self, project_id: uuid.UUID) -> str:
-        stmt = (
-            select(func.count())
-            .select_from(Notice)
-            .where(Notice.project_id == project_id)
-        )
+        stmt = select(func.count()).select_from(Notice).where(Notice.project_id == project_id)
         count = (await self.session.execute(stmt)).scalar_one()
         return f"NOT-{count + 1:04d}"
 
@@ -118,11 +110,7 @@ class VariationRequestRepository(_BaseRepo):
     project_field = "project_id"
 
     async def next_code(self, project_id: uuid.UUID) -> str:
-        stmt = (
-            select(func.count())
-            .select_from(VariationRequest)
-            .where(VariationRequest.project_id == project_id)
-        )
+        stmt = select(func.count()).select_from(VariationRequest).where(VariationRequest.project_id == project_id)
         count = (await self.session.execute(stmt)).scalar_one()
         return f"VR-{count + 1:04d}"
 
@@ -140,11 +128,7 @@ class VariationOrderRepository(_BaseRepo):
     project_field = "project_id"
 
     async def next_code(self, project_id: uuid.UUID) -> str:
-        stmt = (
-            select(func.count())
-            .select_from(VariationOrder)
-            .where(VariationOrder.project_id == project_id)
-        )
+        stmt = select(func.count()).select_from(VariationOrder).where(VariationOrder.project_id == project_id)
         count = (await self.session.execute(stmt)).scalar_one()
         return f"VO-{count + 1:04d}"
 
@@ -162,7 +146,8 @@ class VariationOrderRepository(_BaseRepo):
         return list(result.scalars().all())
 
     async def list_valued_for_project(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> list[VariationOrder]:
         """VOs that count toward the contract sum (everything but voided).
 
@@ -201,9 +186,7 @@ class VariationOrderRepository(_BaseRepo):
 
     async def schedule_days_sum(self, project_id: uuid.UUID) -> int:
         """SQL ``SUM(final_schedule_days)`` over non-voided VOs (no N+1)."""
-        stmt = select(
-            func.coalesce(func.sum(VariationOrder.final_schedule_days), 0)
-        ).where(
+        stmt = select(func.coalesce(func.sum(VariationOrder.final_schedule_days), 0)).where(
             VariationOrder.project_id == project_id,
             VariationOrder.status != "voided",
         )
@@ -214,9 +197,7 @@ class VariationCostImpactRepository(_BaseRepo):
     model = VariationCostImpact
 
     async def list_for_order(self, vo_id: uuid.UUID) -> list[VariationCostImpact]:
-        stmt = select(VariationCostImpact).where(
-            VariationCostImpact.variation_order_id == vo_id
-        )
+        stmt = select(VariationCostImpact).where(VariationCostImpact.variation_order_id == vo_id)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -225,9 +206,7 @@ class VariationScheduleImpactRepository(_BaseRepo):
     model = VariationScheduleImpact
 
     async def list_for_order(self, vo_id: uuid.UUID) -> list[VariationScheduleImpact]:
-        stmt = select(VariationScheduleImpact).where(
-            VariationScheduleImpact.variation_order_id == vo_id
-        )
+        stmt = select(VariationScheduleImpact).where(VariationScheduleImpact.variation_order_id == vo_id)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -242,11 +221,7 @@ class DayworkSheetRepository(_BaseRepo):
     project_field = "project_id"
 
     async def next_sheet_number(self, project_id: uuid.UUID) -> str:
-        stmt = (
-            select(func.count())
-            .select_from(DayworkSheet)
-            .where(DayworkSheet.project_id == project_id)
-        )
+        stmt = select(func.count()).select_from(DayworkSheet).where(DayworkSheet.project_id == project_id)
         count = (await self.session.execute(stmt)).scalar_one()
         return f"DW-{count + 1:04d}"
 
@@ -308,9 +283,13 @@ class DisruptionClaimRepository(_BaseRepo):
         Replaces ``len(await pending_claims(...))`` which materialises the
         full result set just to discard the rows.
         """
-        stmt = select(func.count()).select_from(DisruptionClaim).where(
-            DisruptionClaim.project_id == project_id,
-            DisruptionClaim.status.in_(["submitted", "under_review"]),
+        stmt = (
+            select(func.count())
+            .select_from(DisruptionClaim)
+            .where(
+                DisruptionClaim.project_id == project_id,
+                DisruptionClaim.status.in_(["submitted", "under_review"]),
+            )
         )
         return int((await self.session.execute(stmt)).scalar_one() or 0)
 
@@ -329,9 +308,13 @@ class ExtensionOfTimeClaimRepository(_BaseRepo):
 
     async def pending_count(self, project_id: uuid.UUID) -> int:
         """R5 audit: ``COUNT(*)`` over pending EOT claims. See DisruptionClaim."""
-        stmt = select(func.count()).select_from(ExtensionOfTimeClaim).where(
-            ExtensionOfTimeClaim.project_id == project_id,
-            ExtensionOfTimeClaim.status.in_(["submitted", "under_review"]),
+        stmt = (
+            select(func.count())
+            .select_from(ExtensionOfTimeClaim)
+            .where(
+                ExtensionOfTimeClaim.project_id == project_id,
+                ExtensionOfTimeClaim.status.in_(["submitted", "under_review"]),
+            )
         )
         return int((await self.session.execute(stmt)).scalar_one() or 0)
 

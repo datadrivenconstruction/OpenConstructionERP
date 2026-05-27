@@ -11,13 +11,14 @@ import sys
 import urllib.parse
 import urllib.request
 
-
 BASE = "http://localhost:8000"
 
 
 def _post(path: str, body: dict) -> dict:
     req = urllib.request.Request(
-        f"{BASE}{path}", data=json.dumps(body).encode(), method="POST",
+        f"{BASE}{path}",
+        data=json.dumps(body).encode(),
+        method="POST",
     )
     req.add_header("Content-Type", "application/json")
     with urllib.request.urlopen(req, timeout=10) as r:
@@ -44,10 +45,7 @@ def main() -> int:
     token = auth["access_token"]
     if len(sys.argv) >= 3:
         gk = sys.argv[2]
-        path = (
-            f"/api/v1/match_elements/sessions/{session_id}/group?"
-            f"group_key={urllib.parse.quote(gk, safe='')}"
-        )
+        path = f"/api/v1/match_elements/sessions/{session_id}/group?group_key={urllib.parse.quote(gk, safe='')}"
         detail = _get(path, token)
         print(json.dumps(detail, ensure_ascii=False, indent=2)[:4000])
         return 0
@@ -60,10 +58,7 @@ def main() -> int:
         return 1
     for grp in list_resp.get("groups", [])[:1]:
         gk = grp["group_key"]
-        path = (
-            f"/api/v1/match_elements/sessions/{session_id}/group?"
-            f"group_key={urllib.parse.quote(gk, safe='')}"
-        )
+        path = f"/api/v1/match_elements/sessions/{session_id}/group?group_key={urllib.parse.quote(gk, safe='')}"
         detail = _get(path, token)
         if isinstance(detail, dict):
             print("group_key:", gk)

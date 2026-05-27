@@ -111,10 +111,7 @@ def build_envelope_base(
     extracted from a non-English BIM model that just happened to lack
     a language tag, degrading recall on RU / DE / ES projects.
     """
-    raw_lang = (
-        source_lang
-        or str(raw.get("language") or raw.get("source_lang") or "")
-    ).strip().lower()
+    raw_lang = (source_lang or str(raw.get("language") or raw.get("source_lang") or "")).strip().lower()
     lang = raw_lang  # may be ""; downstream is empty-tolerant
     final_props = dict(properties or {})
     final_quantities = quantities if quantities is not None else extract_quantities(raw)

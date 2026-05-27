@@ -37,17 +37,37 @@ from app.modules.schedule_advanced.models import (
 _RNG_SEED = 42
 
 _CONSTRAINT_TYPES = (
-    "info", "material", "labor", "equipment", "permit",
-    "predecessor", "weather", "other",
+    "info",
+    "material",
+    "labor",
+    "equipment",
+    "permit",
+    "predecessor",
+    "weather",
+    "other",
 )
 _CONSTRAINT_STATUSES = ("open", "in_progress", "cleared", "escalated", "cannot_clear")
 _COMMITMENT_STATUSES = (
-    "completed", "completed", "completed", "completed",
-    "missed", "missed", "in_progress", "committed", "at_risk",
+    "completed",
+    "completed",
+    "completed",
+    "completed",
+    "missed",
+    "missed",
+    "in_progress",
+    "committed",
+    "at_risk",
 )
 _RNC_CATEGORIES = (
-    "manpower", "material", "equipment", "info", "weather",
-    "predecessor", "changes", "quality", "other",
+    "manpower",
+    "material",
+    "equipment",
+    "info",
+    "weather",
+    "predecessor",
+    "changes",
+    "quality",
+    "other",
 )
 
 
@@ -118,8 +138,14 @@ async def seed_schedule_advanced_demo(
 
     # ── Phase plans (12 total — 4 per master) ───────────────────────────
     phase_names = (
-        "Site Preparation", "Foundations", "Superstructure", "MEP Rough-in",
-        "Cladding", "Fit-out", "Commissioning", "Handover",
+        "Site Preparation",
+        "Foundations",
+        "Superstructure",
+        "MEP Rough-in",
+        "Cladding",
+        "Fit-out",
+        "Commissioning",
+        "Handover",
     )
     for m in masters:
         for i in range(4):
@@ -163,11 +189,7 @@ async def seed_schedule_advanced_demo(
             ctype = rng.choice(_CONSTRAINT_TYPES)
             cstatus = rng.choice(_CONSTRAINT_STATUSES)
             target = today + timedelta(days=rng.randint(-30, 60))
-            cleared_at = (
-                datetime.now(UTC) - timedelta(days=rng.randint(1, 30))
-                if cstatus == "cleared"
-                else None
-            )
+            cleared_at = datetime.now(UTC) - timedelta(days=rng.randint(1, 30)) if cstatus == "cleared" else None
             c = Constraint(
                 look_ahead_id=la.id,
                 task_ref=uuid.uuid4(),
@@ -239,9 +261,7 @@ async def seed_schedule_advanced_demo(
     missed_commitment_ids = []
     from sqlalchemy import select
 
-    res = await session.execute(
-        select(Commitment.id).where(Commitment.status == "missed")
-    )
+    res = await session.execute(select(Commitment.id).where(Commitment.status == "missed"))
     missed_commitment_ids = [r[0] for r in res.all()]
 
     # ── RNCs (~50, attached to a subset of missed commitments) ────────

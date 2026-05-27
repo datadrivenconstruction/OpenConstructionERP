@@ -176,11 +176,7 @@ class TextAdapter:
                 if skip:
                     continue
 
-            ref = (
-                str(self.match_session.id)
-                if self.match_session is not None
-                else None
-            )
+            ref = str(self.match_session.id) if self.match_session is not None else None
             out.append(
                 SourceElement(
                     id=f"text:{idx}",

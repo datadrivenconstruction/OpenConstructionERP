@@ -82,15 +82,21 @@ async def test_set_preference_creates_then_updates(session):
     """Upserting the same (user, event_type, channel) replaces digest."""
     svc = NotificationService(session)
     p1 = await svc.set_preference(
-        USER_ID, "boq.position.created", "email",
-        enabled=True, digest="hourly",
+        USER_ID,
+        "boq.position.created",
+        "email",
+        enabled=True,
+        digest="hourly",
     )
     assert p1.digest == "hourly"
     assert p1.enabled is True
 
     p2 = await svc.set_preference(
-        USER_ID, "boq.position.created", "email",
-        enabled=False, digest="daily",
+        USER_ID,
+        "boq.position.created",
+        "email",
+        enabled=False,
+        digest="daily",
     )
     # Same row, updated in place.
     assert p2.id == p1.id
@@ -109,8 +115,11 @@ async def test_realtime_pref_dispatches_immediately(session):
     """realtime pref → in-app row, no digest queue row."""
     svc = NotificationService(session)
     await svc.set_preference(
-        USER_ID, "boq.position.created", "inapp",
-        enabled=True, digest="realtime",
+        USER_ID,
+        "boq.position.created",
+        "inapp",
+        enabled=True,
+        digest="realtime",
     )
 
     outcome = await svc.enqueue_or_dispatch(
@@ -130,17 +139,15 @@ async def test_realtime_pref_dispatches_immediately(session):
             await session.execute(
                 select(Notification).where(Notification.user_id == USER_ID),
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
     assert len(rows) == 1
     assert rows[0].notification_type == "boq.position.created"
 
     # Digest queue empty.
-    queued = list(
-        (
-            await session.execute(select(NotificationDigestQueue))
-        ).scalars().all()
-    )
+    queued = list((await session.execute(select(NotificationDigestQueue))).scalars().all())
     assert queued == []
 
 
@@ -166,7 +173,9 @@ async def test_default_no_pref_dispatches_realtime_inapp(session):
                 await session.execute(
                     select(Notification).where(Notification.user_id == USER_ID),
                 )
-            ).scalars().all()
+            )
+            .scalars()
+            .all()
         )
     )
     assert notif_count == 1
@@ -180,8 +189,11 @@ async def test_hourly_pref_queues_no_immediate_dispatch(session):
     """hourly digest pref → row appended, in-app store stays empty."""
     svc = NotificationService(session)
     await svc.set_preference(
-        USER_ID, "changeorders.approval.advanced", "email",
-        enabled=True, digest="hourly",
+        USER_ID,
+        "changeorders.approval.advanced",
+        "email",
+        enabled=True,
+        digest="hourly",
     )
 
     outcome = await svc.enqueue_or_dispatch(
@@ -192,11 +204,7 @@ async def test_hourly_pref_queues_no_immediate_dispatch(session):
     )
     assert outcome == "queued"
 
-    queue_rows = list(
-        (
-            await session.execute(select(NotificationDigestQueue))
-        ).scalars().all()
-    )
+    queue_rows = list((await session.execute(select(NotificationDigestQueue))).scalars().all())
     assert len(queue_rows) == 1
     row = queue_rows[0]
     assert row.event_type == "changeorders.approval.advanced"
@@ -216,7 +224,9 @@ async def test_hourly_pref_queues_no_immediate_dispatch(session):
             await session.execute(
                 select(Notification).where(Notification.user_id == USER_ID),
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
     assert notifs == []
 
@@ -229,23 +239,22 @@ async def test_disabled_pref_suppresses(session):
     """enabled=False → nothing dispatched, nothing queued."""
     svc = NotificationService(session)
     await svc.set_preference(
-        USER_ID, "rfi.assigned", "email",
-        enabled=False, digest="realtime",
+        USER_ID,
+        "rfi.assigned",
+        "email",
+        enabled=False,
+        digest="realtime",
     )
 
     outcome = await svc.enqueue_or_dispatch(
-        "rfi.assigned", USER_ID, {"rfi_id": "r-1"}, channel="email",
+        "rfi.assigned",
+        USER_ID,
+        {"rfi_id": "r-1"},
+        channel="email",
     )
     assert outcome == "suppressed"
 
-    assert (
-        list(
-            (
-                await session.execute(select(NotificationDigestQueue))
-            ).scalars().all()
-        )
-        == []
-    )
+    assert list((await session.execute(select(NotificationDigestQueue))).scalars().all()) == []
 
 
 # ── flush_digest_queue → marks rows sent + one combined per user/channel ───
@@ -256,12 +265,18 @@ async def test_flush_digest_queue_marks_sent_and_groups(session):
     """At scheduled time, every queued row is sent + grouped per user."""
     svc = NotificationService(session)
     await svc.set_preference(
-        USER_ID, "boq.position.created", "inapp",
-        enabled=True, digest="hourly",
+        USER_ID,
+        "boq.position.created",
+        "inapp",
+        enabled=True,
+        digest="hourly",
     )
     await svc.set_preference(
-        USER_ID, "boq.position.updated", "inapp",
-        enabled=True, digest="hourly",
+        USER_ID,
+        "boq.position.updated",
+        "inapp",
+        enabled=True,
+        digest="hourly",
     )
 
     # Enqueue three events.
@@ -271,7 +286,10 @@ async def test_flush_digest_queue_marks_sent_and_groups(session):
         "boq.position.created",
     ):
         outcome = await svc.enqueue_or_dispatch(
-            event, USER_ID, {"position_id": uuid.uuid4().hex}, channel="inapp",
+            event,
+            USER_ID,
+            {"position_id": uuid.uuid4().hex},
+            channel="inapp",
         )
         assert outcome == "queued"
 
@@ -283,7 +301,9 @@ async def test_flush_digest_queue_marks_sent_and_groups(session):
                     NotificationDigestQueue.sent_at.is_(None),
                 ),
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
     assert len(pending) == 3
 
@@ -300,7 +320,9 @@ async def test_flush_digest_queue_marks_sent_and_groups(session):
                     NotificationDigestQueue.sent_at.is_(None),
                 ),
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
     assert still_pending == []
 
@@ -312,7 +334,9 @@ async def test_flush_digest_queue_marks_sent_and_groups(session):
                     Notification.notification_type == "notifications.digest",
                 ),
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
     assert len(digest_notifs) == 1
     n = digest_notifs[0]
@@ -328,12 +352,18 @@ async def test_flush_skips_rows_with_future_schedule(session):
     """Rows whose scheduled_for > cutoff are not flushed."""
     svc = NotificationService(session)
     await svc.set_preference(
-        USER_ID, "risk.simulated", "email",
-        enabled=True, digest="daily",
+        USER_ID,
+        "risk.simulated",
+        "email",
+        enabled=True,
+        digest="daily",
     )
 
     await svc.enqueue_or_dispatch(
-        "risk.simulated", USER_ID, {"run_id": "r-1"}, channel="email",
+        "risk.simulated",
+        USER_ID,
+        {"run_id": "r-1"},
+        channel="email",
     )
 
     # Cutoff well before the scheduled time — nothing should be sent.
@@ -349,7 +379,9 @@ async def test_flush_skips_rows_with_future_schedule(session):
                     NotificationDigestQueue.sent_at.is_(None),
                 ),
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
     assert len(pending) == 1
 
@@ -359,12 +391,18 @@ async def test_set_preference_unique_per_user_event_channel(session):
     """Same (user, event_type) on different channels → two rows."""
     svc = NotificationService(session)
     await svc.set_preference(
-        USER_ID, "boq.position.created", "email",
-        enabled=True, digest="hourly",
+        USER_ID,
+        "boq.position.created",
+        "email",
+        enabled=True,
+        digest="hourly",
     )
     await svc.set_preference(
-        USER_ID, "boq.position.created", "inapp",
-        enabled=True, digest="realtime",
+        USER_ID,
+        "boq.position.created",
+        "inapp",
+        enabled=True,
+        digest="realtime",
     )
     prefs = await svc.get_preferences(USER_ID)
     assert len(prefs) == 2
@@ -398,8 +436,11 @@ async def test_preference_pydantic_response_serialises(session):
 
     svc = NotificationService(session)
     pref = await svc.set_preference(
-        USER_ID, "boq.position.created", "email",
-        enabled=True, digest="hourly",
+        USER_ID,
+        "boq.position.created",
+        "email",
+        enabled=True,
+        digest="hourly",
     )
     resp = PreferenceResponse.model_validate(pref)
     assert resp.event_type == "boq.position.created"
@@ -417,25 +458,14 @@ async def test_channel_none_suppresses(session):
     """Passing channel='none' short-circuits everything."""
     svc = NotificationService(session)
     outcome = await svc.enqueue_or_dispatch(
-        "rfi.assigned", USER_ID, {}, channel="none",
+        "rfi.assigned",
+        USER_ID,
+        {},
+        channel="none",
     )
     assert outcome == "suppressed"
-    assert (
-        list(
-            (
-                await session.execute(select(Notification))
-            ).scalars().all()
-        )
-        == []
-    )
-    assert (
-        list(
-            (
-                await session.execute(select(NotificationDigestQueue))
-            ).scalars().all()
-        )
-        == []
-    )
+    assert list((await session.execute(select(Notification))).scalars().all()) == []
+    assert list((await session.execute(select(NotificationDigestQueue))).scalars().all()) == []
 
 
 # ── Ensure NotificationPreference can be filtered (Index sanity) ───────────
@@ -448,6 +478,7 @@ async def test_get_preferences_filters_by_user(session):
     other_user_id = uuid.uuid4()
     # Insert a sibling User row so the FK constraint holds.
     from app.modules.users.models import User
+
     session.add(
         User(
             id=other_user_id,

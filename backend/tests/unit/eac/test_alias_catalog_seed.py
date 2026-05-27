@@ -27,9 +27,7 @@ def test_each_alias_has_at_least_9_synonyms() -> None:
     catalog = _load_catalog()
     for alias in catalog["aliases"]:
         synonyms = alias.get("synonyms") or []
-        assert (
-            len(synonyms) >= 9
-        ), f"{alias['name']} has only {len(synonyms)} synonyms"
+        assert len(synonyms) >= 9, f"{alias['name']} has only {len(synonyms)} synonyms"
 
 
 def test_no_duplicate_priorities_per_alias() -> None:
@@ -41,18 +39,14 @@ def test_no_duplicate_priorities_per_alias() -> None:
     catalog = _load_catalog()
     for alias in catalog["aliases"]:
         priorities = [s["priority"] for s in alias.get("synonyms") or []]
-        assert len(priorities) == len(
-            set(priorities)
-        ), f"{alias['name']} has duplicate priorities: {priorities}"
+        assert len(priorities) == len(set(priorities)), f"{alias['name']} has duplicate priorities: {priorities}"
 
 
 def test_canonical_names_unique() -> None:
     """Every alias must have a unique canonical name across the catalog."""
     catalog = _load_catalog()
     names = [a["name"] for a in catalog["aliases"]]
-    assert len(names) == len(
-        set(names)
-    ), f"Duplicate canonical names detected: {names}"
+    assert len(names) == len(set(names)), f"Duplicate canonical names detected: {names}"
 
 
 def test_each_alias_has_required_fields() -> None:
@@ -69,6 +63,4 @@ def test_synonym_patterns_unique_within_alias() -> None:
     catalog = _load_catalog()
     for alias in catalog["aliases"]:
         patterns = [s["pattern"] for s in alias.get("synonyms") or []]
-        assert len(patterns) == len(
-            set(patterns)
-        ), f"{alias['name']} has duplicate synonym patterns"
+        assert len(patterns) == len(set(patterns)), f"{alias['name']} has duplicate synonym patterns"

@@ -18,6 +18,7 @@ import pytest
 
 from app.config import get_settings
 from app.modules.costs.qdrant_adapter import (
+    _RELAX_TIERS,
     QdrantHit,
     _build_filter,
     _collection_vectors,
@@ -27,7 +28,6 @@ from app.modules.costs.qdrant_adapter import (
     _enumerate_target_codes,
     _filters_after_relax,
     _normalise_unit_dim,
-    _RELAX_TIERS,
     base_code,
     country_filter_for,
     country_to_collection,
@@ -222,21 +222,19 @@ def test_empty_collection_version_strips_suffix(monkeypatch: pytest.MonkeyPatch)
         ("DE_BERLIN", "DE"),
         ("MX_MEXICO", "MX"),
         ("BR_SAOPAULO", "BR"),
-        ("AT_VIENNA", "AT"),       # different country in same lang collection
+        ("AT_VIENNA", "AT"),  # different country in same lang collection
         ("CH_ZURICH", "CH"),
         # v3.0.5: 3-letter heads remap to the 2-letter code DDC writes
         # into the snapshot's ``country`` payload. ``USA_USD`` would
         # otherwise filter to literal ``"USA"`` and exclude every US
         # rate (the snapshot has ``country: "US"``).
         ("USA_USD", "US"),
-        ("ENG_TORONTO", "CA"),       # Canadian-English file DDC ships
-        ("GBR_LONDON", "GB"),        # defensive
-        ("ru_stpetersburg", "RU"),   # case-normalisation
+        ("ENG_TORONTO", "CA"),  # Canadian-English file DDC ships
+        ("GBR_LONDON", "GB"),  # defensive
+        ("ru_stpetersburg", "RU"),  # case-normalisation
     ],
 )
-def test_country_filter_pins_specific_region_within_language_collection(
-    region: str, expected: str
-) -> None:
+def test_country_filter_pins_specific_region_within_language_collection(region: str, expected: str) -> None:
     """``MX_MEXICO`` → ``country_filter_for`` returns ``"MX"`` so the
     Spanish collection only surfaces Mexican rates, not ES + AR rates."""
     assert country_filter_for(region) == expected
@@ -305,8 +303,8 @@ def test_build_filter_recognises_all_nine_boolean_payload_fields(bool_key: str) 
     [
         (True, True),
         (False, False),
-        ("true", True),       # truthy string coerced
-        ("false", True),      # non-empty string is truthy by Python rules
+        ("true", True),  # truthy string coerced
+        ("false", True),  # non-empty string is truthy by Python rules
         (1, True),
         (0, False),
         (1.0, True),
@@ -350,9 +348,7 @@ def test_build_filter_coerces_boolean_inputs_with_python_bool(raw: object, expec
         ("nominal_size_mm", 240),
     ],
 )
-def test_build_filter_recognises_all_22_scalar_payload_fields(
-    scalar_key: str, value: object
-) -> None:
+def test_build_filter_recognises_all_22_scalar_payload_fields(scalar_key: str, value: object) -> None:
     """All scalar fields from §2.2 must produce MatchValue(value) predicates."""
     from qdrant_client.http.models import MatchValue
 
@@ -411,17 +407,38 @@ def test_build_filter_preserves_v3_field_count_invariant() -> None:
     # 29 indexed ones documented in MAPPING_PROCESS.md.)
     expected_known = {
         # Booleans
-        "is_abstract", "is_external", "is_loadbearing", "is_structural",
-        "is_machine", "is_material", "is_finishing", "is_temporary",
+        "is_abstract",
+        "is_external",
+        "is_loadbearing",
+        "is_structural",
+        "is_machine",
+        "is_material",
+        "is_finishing",
+        "is_temporary",
         "is_compound",
         # Scalars / lists
-        "country", "ifc_class", "ifc_predefined_type", "ost_category",
-        "applies_to_ifc_classes", "masterformat_division", "csi_division_2",
-        "category_type", "collection_name", "department_code",
-        "subsection_code", "unit_type", "unit_dim", "rate_unit",
-        "material_class", "installation_method", "construction_stage",
-        "uniformat_group", "equipment_class", "classification_confidence",
-        "rate_code", "nominal_size_mm",
+        "country",
+        "ifc_class",
+        "ifc_predefined_type",
+        "ost_category",
+        "applies_to_ifc_classes",
+        "masterformat_division",
+        "csi_division_2",
+        "category_type",
+        "collection_name",
+        "department_code",
+        "subsection_code",
+        "unit_type",
+        "unit_dim",
+        "rate_unit",
+        "material_class",
+        "installation_method",
+        "construction_stage",
+        "uniformat_group",
+        "equipment_class",
+        "classification_confidence",
+        "rate_code",
+        "nominal_size_mm",
     }
     payload = {key: (False if key.startswith("is_") else "x") for key in expected_known}
     qf = _build_filter(payload)
@@ -437,7 +454,7 @@ def test_build_filter_preserves_v3_field_count_invariant() -> None:
     [
         ("m³", "m3"),
         ("м³", "m3"),
-        ("M3", "m3"),                # case-insensitive
+        ("M3", "m3"),  # case-insensitive
         ("cubic_meter", "m3"),
         ("m²", "m2"),
         ("square_metre", "m2"),
@@ -492,7 +509,7 @@ def test_dedup_hits_handles_empty_input() -> None:
 def test_relax_tiers_progressively_widen_filter_relaxation() -> None:
     """Each successive tier must drop a strict superset of the previous —
     no relax tier should re-add a filter the prior tier dropped."""
-    for prev, curr in zip(_RELAX_TIERS, _RELAX_TIERS[1:]):
+    for prev, curr in zip(_RELAX_TIERS, _RELAX_TIERS[1:], strict=False):
         assert set(prev).issubset(set(curr))
 
 
@@ -541,14 +558,9 @@ async def test_search_with_fallback_returns_tier_zero_when_full_filters_match(
     ``search_with_fallback`` stops at tier 0 and never relaxes."""
     calls: list[dict[str, object]] = []
 
-    async def fake_search(
-        *, country, core_query, resources_query=None, filters=None, limit=30, prefetch_limit=50
-    ):
+    async def fake_search(*, country, core_query, resources_query=None, filters=None, limit=30, prefetch_limit=50):
         calls.append({"filters": filters, "limit": limit})
-        return [
-            QdrantHit(rate_code=f"R{i}", country="DE", score=0.9 - i * 0.01)
-            for i in range(10)
-        ]
+        return [QdrantHit(rate_code=f"R{i}", country="DE", score=0.9 - i * 0.01) for i in range(10)]
 
     monkeypatch.setattr("app.modules.costs.qdrant_adapter.search", fake_search)
 
@@ -573,9 +585,7 @@ async def test_search_with_fallback_walks_until_threshold_satisfied(
     relax."""
     call_filters: list[dict | None] = []
 
-    async def fake_search(
-        *, country, core_query, resources_query=None, filters=None, limit=30, prefetch_limit=50
-    ):
+    async def fake_search(*, country, core_query, resources_query=None, filters=None, limit=30, prefetch_limit=50):
         call_filters.append(dict(filters or {}))
         # Empty result until ifc_predefined_type is dropped
         if "ifc_predefined_type" in (filters or {}):
@@ -636,9 +646,7 @@ async def test_search_with_fallback_dedupes_results(monkeypatch: pytest.MonkeyPa
 
     monkeypatch.setattr("app.modules.costs.qdrant_adapter.search", fake_search)
 
-    hits, _ = await search_with_fallback(
-        country="DE_BERLIN", core_query="wall", limit=10
-    )
+    hits, _ = await search_with_fallback(country="DE_BERLIN", core_query="wall", limit=10)
     assert [h.rate_code for h in hits] == ["A", "B", "C"]
 
 
@@ -651,9 +659,7 @@ async def test_substitute_abstract_parents_replaces_section_header_with_children
     is_abstract=False and splices the children at the header's rank."""
     children_calls: list[dict | None] = []
 
-    async def fake_search(
-        *, country, core_query, resources_query=None, filters=None, limit=30, prefetch_limit=50
-    ):
+    async def fake_search(*, country, core_query, resources_query=None, filters=None, limit=30, prefetch_limit=50):
         children_calls.append(dict(filters or {}))
         return [
             QdrantHit(rate_code="03.330.10", country="DE", score=0.85),
@@ -672,12 +678,8 @@ async def test_substitute_abstract_parents_replaces_section_header_with_children
         QdrantHit(rate_code="03.340.50", country="DE", score=0.6, payload={}),
     ]
 
-    out = await substitute_abstract_parents(
-        country="DE_BERLIN", core_query="wand", hits=hits
-    )
-    assert children_calls == [
-        {"is_abstract": False, "subsection_code": "330"}
-    ]
+    out = await substitute_abstract_parents(country="DE_BERLIN", core_query="wand", hits=hits)
+    assert children_calls == [{"is_abstract": False, "subsection_code": "330"}]
     rate_codes = [h.rate_code for h in out]
     assert rate_codes == ["03.330.10", "03.330.11", "03.340.50"]
 
@@ -732,9 +734,7 @@ async def test_substitute_abstract_parents_caps_substitutions(
             payload={"is_abstract": True, "subsection_code": "340"},
         ),
     ]
-    out = await substitute_abstract_parents(
-        country="DE", core_query="x", hits=hits, max_substitutions=1
-    )
+    out = await substitute_abstract_parents(country="DE", core_query="x", hits=hits, max_substitutions=1)
     assert call_count["n"] == 1
     rate_codes = [h.rate_code for h in out]
     # First abstract → expanded; second → left in place
@@ -771,9 +771,7 @@ async def test_substitute_abstract_parents_prefers_subsection_over_department(
     """When both codes are present, the more specific subsection is used."""
     calls: list[dict] = []
 
-    async def fake_search(
-        *, country, core_query, resources_query=None, filters=None, limit=30, prefetch_limit=50
-    ):
+    async def fake_search(*, country, core_query, resources_query=None, filters=None, limit=30, prefetch_limit=50):
         calls.append(dict(filters or {}))
         return []
 
@@ -1040,10 +1038,7 @@ async def test_cross_language_search_caps_output_at_limit(
     is truncated to 3 after dedup."""
 
     async def fake_search(*, country, **_: object):
-        return [
-            QdrantHit(rate_code=f"R-{country}-{i}", country=country, score=0.9 - i * 0.05)
-            for i in range(5)
-        ]
+        return [QdrantHit(rate_code=f"R-{country}-{i}", country=country, score=0.9 - i * 0.05) for i in range(5)]
 
     monkeypatch.setattr("app.modules.costs.qdrant_adapter.search", fake_search)
 
@@ -1114,7 +1109,8 @@ async def test_cross_lang_lookup_returns_target_lang_rate_code(
     suffix, scroll on cwicr_ru_v3 finds the matching RU variant."""
     fake = _FakeQdrantClient([_FakeScrollPoint("03.330.10.ru.m3")])
     monkeypatch.setattr(
-        "app.modules.costs.qdrant_adapter._get_client", lambda: fake,
+        "app.modules.costs.qdrant_adapter._get_client",
+        lambda: fake,
     )
 
     out = await cross_lang_lookup(
@@ -1135,7 +1131,8 @@ async def test_cross_lang_lookup_returns_none_when_no_match(
     """Empty scroll response → None (caller can fall back to semantic)."""
     fake = _FakeQdrantClient([])
     monkeypatch.setattr(
-        "app.modules.costs.qdrant_adapter._get_client", lambda: fake,
+        "app.modules.costs.qdrant_adapter._get_client",
+        lambda: fake,
     )
 
     out = await cross_lang_lookup(
@@ -1156,7 +1153,8 @@ async def test_cross_lang_lookup_handles_qdrant_failure_gracefully(
             raise RuntimeError("Qdrant unreachable")
 
     monkeypatch.setattr(
-        "app.modules.costs.qdrant_adapter._get_client", lambda: _Boom(),
+        "app.modules.costs.qdrant_adapter._get_client",
+        lambda: _Boom(),
     )
 
     out = await cross_lang_lookup(
@@ -1170,10 +1168,7 @@ async def test_cross_lang_lookup_handles_qdrant_failure_gracefully(
 async def test_cross_lang_lookup_returns_none_on_empty_inputs() -> None:
     """Empty source code or target country → None without any I/O."""
     assert await cross_lang_lookup(source_rate_code="", target_country="RU") is None
-    assert (
-        await cross_lang_lookup(source_rate_code="03.330.10.en.m3", target_country="")
-        is None
-    )
+    assert await cross_lang_lookup(source_rate_code="03.330.10.en.m3", target_country="") is None
 
 
 @pytest.mark.asyncio
@@ -1185,7 +1180,8 @@ async def test_cross_lang_lookup_pins_country_for_multi_region_languages(
     the Mexican variant is returned, not a Spanish one."""
     fake = _FakeQdrantClient([_FakeScrollPoint("03.330.10.es.m3")])
     monkeypatch.setattr(
-        "app.modules.costs.qdrant_adapter._get_client", lambda: fake,
+        "app.modules.costs.qdrant_adapter._get_client",
+        lambda: fake,
     )
 
     await cross_lang_lookup(
@@ -1252,7 +1248,8 @@ def test_collection_vectors_returns_dense_sparse_for_v3_snapshot(
     )
     client = _CapClient(info=info)
     monkeypatch.setattr(
-        "app.modules.costs.qdrant_adapter._get_client", lambda: client,
+        "app.modules.costs.qdrant_adapter._get_client",
+        lambda: client,
     )
 
     out = _collection_vectors("cwicr_en_v3")
@@ -1270,7 +1267,8 @@ def test_collection_vectors_includes_resources_when_present(
     )
     client = _CapClient(info=info)
     monkeypatch.setattr(
-        "app.modules.costs.qdrant_adapter._get_client", lambda: client,
+        "app.modules.costs.qdrant_adapter._get_client",
+        lambda: client,
     )
 
     out = _collection_vectors("cwicr_de_v3")
@@ -1284,7 +1282,8 @@ def test_collection_vectors_caches_per_collection(
     info = _FakeCollectionInfo(vectors={"dense": object()}, sparse_vectors={"sparse": object()})
     client = _CapClient(info=info)
     monkeypatch.setattr(
-        "app.modules.costs.qdrant_adapter._get_client", lambda: client,
+        "app.modules.costs.qdrant_adapter._get_client",
+        lambda: client,
     )
 
     _collection_vectors("cwicr_en_v3")
@@ -1300,7 +1299,8 @@ def test_collection_vectors_returns_empty_on_qdrant_failure(
     """Unreachable Qdrant / missing collection → empty frozenset (no raise)."""
     client = _CapClient(raises=True)
     monkeypatch.setattr(
-        "app.modules.costs.qdrant_adapter._get_client", lambda: client,
+        "app.modules.costs.qdrant_adapter._get_client",
+        lambda: client,
     )
 
     out = _collection_vectors("cwicr_xx_v9")

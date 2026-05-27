@@ -243,6 +243,7 @@ async def run_template_now(
     if template.project_id_scope is None:
         from fastapi import HTTPException
         from fastapi import status as http_status
+
         raise HTTPException(
             status_code=http_status.HTTP_400_BAD_REQUEST,
             detail="Portfolio-wide run-now is not supported yet; set project_id_scope first",

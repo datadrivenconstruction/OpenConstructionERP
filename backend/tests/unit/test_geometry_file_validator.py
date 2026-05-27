@@ -18,6 +18,7 @@ Two unrelated user reports hit the BIM viewer in v3.0.5:
 
 These tests pin both behaviours.
 """
+
 from __future__ import annotations
 
 import struct
@@ -76,9 +77,7 @@ def test_validator_rejects_dae_without_visual_scene(tmp_path: Path) -> None:
     # for the missing <visual_scene>, not for being too small.
     padded = _DAE_NO_VISUAL_SCENE.replace(
         "<library_geometries/>",
-        "<library_geometries>"
-        + ("<geometry id='g'/>" * 30)
-        + "</library_geometries>",
+        "<library_geometries>" + ("<geometry id='g'/>" * 30) + "</library_geometries>",
     )
     p.write_text(padded, encoding="utf-8")
     assert p.stat().st_size > 200

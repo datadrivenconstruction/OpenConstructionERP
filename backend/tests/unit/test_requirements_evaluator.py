@@ -89,7 +89,15 @@ def test_european_decimal_separator() -> None:
 def test_all_operators_covered_by_matrix() -> None:
     # Sanity: matrix must touch every supported operator
     matrix_ops = {
-        "equals", "not_equals", "contains", "not_contains",
-        "min", "max", "range", "regex", "exists", "not_exists",
+        "equals",
+        "not_equals",
+        "contains",
+        "not_contains",
+        "min",
+        "max",
+        "range",
+        "regex",
+        "exists",
+        "not_exists",
     }
     assert matrix_ops == set(OPERATORS)

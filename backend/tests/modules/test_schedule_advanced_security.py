@@ -171,12 +171,10 @@ class _StubRepo:
         self.rows.pop(instance_id, None)
 
     async def commitments_for_week(
-        self, week_plan_id: uuid.UUID,
+        self,
+        week_plan_id: uuid.UUID,
     ) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "week_plan_id", None) == week_plan_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "week_plan_id", None) == week_plan_id]
 
 
 def _make_service() -> ScheduleAdvancedService:
@@ -226,10 +224,12 @@ def _patch_project_repo(
             return SimpleNamespace(role="editor")
 
     monkeypatch.setattr(
-        "app.modules.projects.repository.ProjectRepository", _StubProjectRepo,
+        "app.modules.projects.repository.ProjectRepository",
+        _StubProjectRepo,
     )
     monkeypatch.setattr(
-        "app.modules.users.repository.UserRepository", _StubUserRepo,
+        "app.modules.users.repository.UserRepository",
+        _StubUserRepo,
     )
 
 
@@ -249,7 +249,9 @@ async def test_idor_master_schedule_blocks_cross_tenant(
 
     svc = _make_service()
     master = SimpleNamespace(
-        id=uuid.uuid4(), project_id=PROJECT_A, name="A-confidential",
+        id=uuid.uuid4(),
+        project_id=PROJECT_A,
+        name="A-confidential",
     )
     svc.master_repo.rows[master.id] = master
     _patch_project_repo(monkeypatch, owners={PROJECT_A: USER_A, PROJECT_B: USER_B})
@@ -262,8 +264,7 @@ async def test_idor_master_schedule_blocks_cross_tenant(
     with pytest.raises(HTTPException) as exc:
         await verify_project_access(PROJECT_A, USER_B, svc.session)
     assert exc.value.status_code == 404, (
-        "cross-tenant master-schedule access must 404 (not 403) — "
-        f"got {exc.value.status_code}: {exc.value.detail!r}"
+        f"cross-tenant master-schedule access must 404 (not 403) — got {exc.value.status_code}: {exc.value.detail!r}"
     )
 
 
@@ -331,10 +332,7 @@ async def test_idor_resolver_missing_resource_404s_not_500() -> None:
     ):
         with pytest.raises(HTTPException) as exc:
             await helper(bogus, svc)
-        assert exc.value.status_code == 404, (
-            f"{helper.__name__} should 404 for unknown id, "
-            f"got {exc.value.status_code}"
-        )
+        assert exc.value.status_code == 404, f"{helper.__name__} should 404 for unknown id, got {exc.value.status_code}"
 
 
 @pytest.mark.asyncio
@@ -405,9 +403,7 @@ def test_no_float_columns_in_orm_models() -> None:
         for col in cls.__table__.columns:
             if isinstance(col.type, Float):
                 offenders.append(f"{name}.{col.name}")
-    assert offenders == [], (
-        "Float columns leak precision; switch to Numeric: " + ", ".join(offenders)
-    )
+    assert offenders == [], "Float columns leak precision; switch to Numeric: " + ", ".join(offenders)
 
 
 def test_numeric_quantity_columns_use_decimal() -> None:
@@ -423,9 +419,7 @@ def test_numeric_quantity_columns_use_decimal() -> None:
     hours = sa_models.Calendar.__table__.c.work_hours_per_day
 
     for col in (qty, actual, ppc, hours):
-        assert isinstance(col.type, Numeric), (
-            f"{col.name} must be Numeric (Decimal), got {type(col.type).__name__}"
-        )
+        assert isinstance(col.type, Numeric), f"{col.name} must be Numeric (Decimal), got {type(col.type).__name__}"
 
 
 def test_commitment_response_serializes_decimal_as_string() -> None:
@@ -473,7 +467,8 @@ async def test_fsm_phase_rejects_skip_in_planning_to_completed() -> None:
 
     with pytest.raises(HTTPException) as exc:
         await svc.update_phase_plan(
-            phase.id, PhasePlanUpdate(pulled_status="completed"),
+            phase.id,
+            PhasePlanUpdate(pulled_status="completed"),
         )
     assert exc.value.status_code == 400
     assert "transition" in str(exc.value.detail).lower()
@@ -525,7 +520,8 @@ async def test_fsm_commitment_rejects_skip_planned_to_completed() -> None:
 
     with pytest.raises(HTTPException) as exc:
         await svc.update_commitment(
-            commit.id, CommitmentUpdate(status="completed"),
+            commit.id,
+            CommitmentUpdate(status="completed"),
         )
     assert exc.value.status_code == 400
     assert "transition" in str(exc.value.detail).lower()
@@ -606,9 +602,8 @@ def test_rbac_write_endpoints_require_permission() -> None:
         if not found:
             missing.append(f"{','.join(sorted(methods))} {route.path}")
 
-    assert missing == [], (
-        "Write endpoints missing RequirePermission gate (RBAC bypass risk):\n  "
-        + "\n  ".join(missing)
+    assert missing == [], "Write endpoints missing RequirePermission gate (RBAC bypass risk):\n  " + "\n  ".join(
+        missing
     )
 
 
@@ -635,9 +630,7 @@ def test_rbac_permission_constants_registered() -> None:
         "schedule_advanced.capture_baseline",
     }
     registered = set(permission_registry._permissions.keys())  # noqa: SLF001
-    assert expected <= registered, (
-        f"missing permission keys: {expected - registered}"
-    )
+    assert expected <= registered, f"missing permission keys: {expected - registered}"
 
 
 # ── Regression: happy-path FSM transitions still work ────────────────────

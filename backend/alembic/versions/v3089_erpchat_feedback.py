@@ -43,7 +43,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "v3089_erpchat_feedback"
 down_revision: Union[str, Sequence[str], None] = "v3087_merge_wave2_heads"
@@ -67,7 +66,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -75,7 +76,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -90,36 +93,36 @@ def upgrade() -> None:
     if _has_table(inspector, _MESSAGE_TABLE):
         needs = {
             "tokens_input": not _has_column(
-                inspector, _MESSAGE_TABLE, "tokens_input",
+                inspector,
+                _MESSAGE_TABLE,
+                "tokens_input",
             ),
             "tokens_output": not _has_column(
-                inspector, _MESSAGE_TABLE, "tokens_output",
+                inspector,
+                _MESSAGE_TABLE,
+                "tokens_output",
             ),
             "cache_hit": not _has_column(
-                inspector, _MESSAGE_TABLE, "cache_hit",
+                inspector,
+                _MESSAGE_TABLE,
+                "cache_hit",
             ),
             "latency_ms": not _has_column(
-                inspector, _MESSAGE_TABLE, "latency_ms",
+                inspector,
+                _MESSAGE_TABLE,
+                "latency_ms",
             ),
         }
         if any(needs.values()):
             with op.batch_alter_table(_MESSAGE_TABLE) as batch:
                 if needs["tokens_input"]:
-                    batch.add_column(
-                        sa.Column("tokens_input", sa.Integer(), nullable=True)
-                    )
+                    batch.add_column(sa.Column("tokens_input", sa.Integer(), nullable=True))
                 if needs["tokens_output"]:
-                    batch.add_column(
-                        sa.Column("tokens_output", sa.Integer(), nullable=True)
-                    )
+                    batch.add_column(sa.Column("tokens_output", sa.Integer(), nullable=True))
                 if needs["cache_hit"]:
-                    batch.add_column(
-                        sa.Column("cache_hit", sa.Boolean(), nullable=True)
-                    )
+                    batch.add_column(sa.Column("cache_hit", sa.Boolean(), nullable=True))
                 if needs["latency_ms"]:
-                    batch.add_column(
-                        sa.Column("latency_ms", sa.Integer(), nullable=True)
-                    )
+                    batch.add_column(sa.Column("latency_ms", sa.Integer(), nullable=True))
 
     # ── 2. Create the per-turn feedback table ────────────────────────────
     inspector = sa.inspect(bind)
@@ -143,7 +146,9 @@ def upgrade() -> None:
             # idempotent on partially-bootstrapped installs. The model will
             # still enforce the relationship at the ORM level.
             message_col = sa.Column(
-                "message_id", sa.String(length=36), nullable=False,
+                "message_id",
+                sa.String(length=36),
+                nullable=False,
             )
 
         if users_present:
@@ -159,7 +164,9 @@ def upgrade() -> None:
             )
         else:
             user_col = sa.Column(
-                "user_id", sa.String(length=36), nullable=True,
+                "user_id",
+                sa.String(length=36),
+                nullable=True,
             )
 
         op.create_table(
@@ -176,7 +183,8 @@ def upgrade() -> None:
             # also enforce it in the service. Skip on backends that don't
             # like inline CHECK in batch ops.
             sa.CheckConstraint(
-                "rating IN (-1, 1)", name="ck_oe_erp_chat_turn_feedback_rating",
+                "rating IN (-1, 1)",
+                name="ck_oe_erp_chat_turn_feedback_rating",
             ),
             sa.Column("comment", sa.Text(), nullable=True),
             sa.Column(
@@ -192,25 +200,23 @@ def upgrade() -> None:
                 server_default=sa.func.now(),
             ),
             sa.UniqueConstraint(
-                "message_id", "user_id", name=_UQ_FB_MSG_USER,
+                "message_id",
+                "user_id",
+                name=_UQ_FB_MSG_USER,
             ),
         )
 
     inspector = sa.inspect(bind)
-    if (
-        _has_table(inspector, _FEEDBACK_TABLE)
-        and not _has_index(inspector, _FEEDBACK_TABLE, _IX_FB_MESSAGE)
-    ):
+    if _has_table(inspector, _FEEDBACK_TABLE) and not _has_index(inspector, _FEEDBACK_TABLE, _IX_FB_MESSAGE):
         try:
             op.create_index(
-                _IX_FB_MESSAGE, _FEEDBACK_TABLE, ["message_id"],
+                _IX_FB_MESSAGE,
+                _FEEDBACK_TABLE,
+                ["message_id"],
             )
         except Exception:  # noqa: BLE001 — idempotent guard
             pass
-    if (
-        _has_table(inspector, _FEEDBACK_TABLE)
-        and not _has_index(inspector, _FEEDBACK_TABLE, _IX_FB_USER)
-    ):
+    if _has_table(inspector, _FEEDBACK_TABLE) and not _has_index(inspector, _FEEDBACK_TABLE, _IX_FB_USER):
         try:
             op.create_index(_IX_FB_USER, _FEEDBACK_TABLE, ["user_id"])
         except Exception:  # noqa: BLE001

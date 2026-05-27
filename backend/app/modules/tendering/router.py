@@ -200,9 +200,7 @@ async def list_tenders_root(
     if project_id is None:
         return []
     await _verify_tender_project_owner(session, project_id, user_id, payload)
-    packages, _ = await service.list_packages(
-        project_id=project_id, offset=offset, limit=limit
-    )
+    packages, _ = await service.list_packages(project_id=project_id, offset=offset, limit=limit)
     return [_package_to_response(p) for p in packages]
 
 

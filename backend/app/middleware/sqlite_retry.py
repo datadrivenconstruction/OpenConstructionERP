@@ -44,9 +44,7 @@ def _is_sqlite_lock(exc: BaseException) -> bool:
 class SQLiteLockRetryMiddleware(BaseHTTPMiddleware):
     """‌⁠‍Retry the request pipeline when SQLite reports a lock contention."""
 
-    async def dispatch(
-        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         last_exc: OperationalError | None = None
         for attempt in range(1, _MAX_ATTEMPTS + 1):
             try:

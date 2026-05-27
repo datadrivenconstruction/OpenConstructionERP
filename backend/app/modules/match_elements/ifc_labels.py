@@ -75,23 +75,23 @@ def _arch(label: str, key: str, din: str | None, mf: str | None = None, nrm: str
 _ARCH: dict[str, IfcClassMeta] = {
     # Walls — structural concrete vs CMU vs partitions all map to the
     # same head; the matcher uses material_class to disambiguate.
-    "IfcWall":                  _arch("Wall",            "ifc.wall",            "330", "04 21 00", "2.5"),
-    "IfcWallStandardCase":      _arch("Wall",            "ifc.wall",            "330", "04 21 00", "2.5"),
-    "IfcCurtainWall":           _arch("Curtain wall",    "ifc.curtain_wall",    "334", "08 44 00", "2.6"),
-    "IfcDoor":                  _arch("Door",            "ifc.door",            "334", "08 11 00", "2.6"),
-    "IfcWindow":                _arch("Window",          "ifc.window",          "334", "08 50 00", "2.6"),
-    "IfcRoof":                  _arch("Roof",            "ifc.roof",            "360", "07 00 00", "2.7"),
-    "IfcSlab":                  _arch("Slab",            "ifc.slab",            "350", "03 30 00", "2.4"),
-    "IfcStair":                 _arch("Stair",           "ifc.stair",           "351", "05 51 00", "2.5"),
-    "IfcStairFlight":           _arch("Stair flight",    "ifc.stair_flight",    "351", "05 51 00", "2.5"),
-    "IfcRamp":                  _arch("Ramp",            "ifc.ramp",            "351", "05 51 00", "2.5"),
-    "IfcRampFlight":            _arch("Ramp flight",     "ifc.ramp_flight",     "351", "05 51 00", "2.5"),
-    "IfcRailing":               _arch("Railing",         "ifc.railing",         "351", "05 52 00", "2.5"),
-    "IfcCovering":              _arch("Covering",        "ifc.covering",        "352", "09 00 00", "3.1"),
-    "IfcShadingDevice":         _arch("Shading device",  "ifc.shading_device",  "338", "10 71 00", "2.6"),
-    "IfcChimney":               _arch("Chimney",         "ifc.chimney",         "330", "04 51 00", "2.5"),
-    "IfcFurniture":             _arch("Furniture",       "ifc.furniture",       "611", "12 00 00", "4"),
-    "IfcFurnishingElement":     _arch("Furnishing",      "ifc.furnishing",      "611", "12 00 00", "4"),
+    "IfcWall": _arch("Wall", "ifc.wall", "330", "04 21 00", "2.5"),
+    "IfcWallStandardCase": _arch("Wall", "ifc.wall", "330", "04 21 00", "2.5"),
+    "IfcCurtainWall": _arch("Curtain wall", "ifc.curtain_wall", "334", "08 44 00", "2.6"),
+    "IfcDoor": _arch("Door", "ifc.door", "334", "08 11 00", "2.6"),
+    "IfcWindow": _arch("Window", "ifc.window", "334", "08 50 00", "2.6"),
+    "IfcRoof": _arch("Roof", "ifc.roof", "360", "07 00 00", "2.7"),
+    "IfcSlab": _arch("Slab", "ifc.slab", "350", "03 30 00", "2.4"),
+    "IfcStair": _arch("Stair", "ifc.stair", "351", "05 51 00", "2.5"),
+    "IfcStairFlight": _arch("Stair flight", "ifc.stair_flight", "351", "05 51 00", "2.5"),
+    "IfcRamp": _arch("Ramp", "ifc.ramp", "351", "05 51 00", "2.5"),
+    "IfcRampFlight": _arch("Ramp flight", "ifc.ramp_flight", "351", "05 51 00", "2.5"),
+    "IfcRailing": _arch("Railing", "ifc.railing", "351", "05 52 00", "2.5"),
+    "IfcCovering": _arch("Covering", "ifc.covering", "352", "09 00 00", "3.1"),
+    "IfcShadingDevice": _arch("Shading device", "ifc.shading_device", "338", "10 71 00", "2.6"),
+    "IfcChimney": _arch("Chimney", "ifc.chimney", "330", "04 51 00", "2.5"),
+    "IfcFurniture": _arch("Furniture", "ifc.furniture", "611", "12 00 00", "4"),
+    "IfcFurnishingElement": _arch("Furnishing", "ifc.furnishing", "611", "12 00 00", "4"),
     "IfcSystemFurnitureElement": _arch("System furniture", "ifc.system_furniture", "611", "12 60 00", "4"),
 }
 
@@ -105,20 +105,20 @@ def _struct(label: str, key: str, din: str | None, mf: str | None = None, nrm: s
 
 
 _STRUCT: dict[str, IfcClassMeta] = {
-    "IfcBeam":                   _struct("Beam",            "ifc.beam",            "320", "03 41 00", "2.5.1"),
-    "IfcBeamStandardCase":       _struct("Beam",            "ifc.beam",            "320", "03 41 00", "2.5.1"),
-    "IfcColumn":                 _struct("Column",          "ifc.column",          "320", "03 30 00", "2.5.1"),
-    "IfcColumnStandardCase":     _struct("Column",          "ifc.column",          "320", "03 30 00", "2.5.1"),
-    "IfcFooting":                _struct("Footing",         "ifc.footing",         "322", "03 30 00", "2.1"),
-    "IfcPile":                   _struct("Pile",            "ifc.pile",            "322", "31 62 00", "2.1"),
-    "IfcMember":                 _struct("Structural member","ifc.member",          "320", "05 12 00", "2.5"),
-    "IfcPlate":                  _struct("Structural plate","ifc.plate",           "320", "05 12 00", "2.5"),
-    "IfcReinforcingBar":         _struct("Rebar",           "ifc.rebar",           "320", "03 21 00", "2.5"),
-    "IfcReinforcingMesh":        _struct("Reinforcing mesh","ifc.rebar_mesh",      "320", "03 22 00", "2.5"),
-    "IfcTendon":                 _struct("Tendon",          "ifc.tendon",          "320", "03 23 00", "2.5"),
-    "IfcTendonAnchor":           _struct("Tendon anchor",   "ifc.tendon_anchor",   "320", "03 23 00", "2.5"),
-    "IfcStructuralCurveMember":  _struct("Curve member",    "ifc.curve_member",    "320", "05 12 00", "2.5"),
-    "IfcStructuralSurfaceMember": _struct("Surface member", "ifc.surface_member",  "320", "05 12 00", "2.5"),
+    "IfcBeam": _struct("Beam", "ifc.beam", "320", "03 41 00", "2.5.1"),
+    "IfcBeamStandardCase": _struct("Beam", "ifc.beam", "320", "03 41 00", "2.5.1"),
+    "IfcColumn": _struct("Column", "ifc.column", "320", "03 30 00", "2.5.1"),
+    "IfcColumnStandardCase": _struct("Column", "ifc.column", "320", "03 30 00", "2.5.1"),
+    "IfcFooting": _struct("Footing", "ifc.footing", "322", "03 30 00", "2.1"),
+    "IfcPile": _struct("Pile", "ifc.pile", "322", "31 62 00", "2.1"),
+    "IfcMember": _struct("Structural member", "ifc.member", "320", "05 12 00", "2.5"),
+    "IfcPlate": _struct("Structural plate", "ifc.plate", "320", "05 12 00", "2.5"),
+    "IfcReinforcingBar": _struct("Rebar", "ifc.rebar", "320", "03 21 00", "2.5"),
+    "IfcReinforcingMesh": _struct("Reinforcing mesh", "ifc.rebar_mesh", "320", "03 22 00", "2.5"),
+    "IfcTendon": _struct("Tendon", "ifc.tendon", "320", "03 23 00", "2.5"),
+    "IfcTendonAnchor": _struct("Tendon anchor", "ifc.tendon_anchor", "320", "03 23 00", "2.5"),
+    "IfcStructuralCurveMember": _struct("Curve member", "ifc.curve_member", "320", "05 12 00", "2.5"),
+    "IfcStructuralSurfaceMember": _struct("Surface member", "ifc.surface_member", "320", "05 12 00", "2.5"),
 }
 
 
@@ -127,54 +127,58 @@ _STRUCT: dict[str, IfcClassMeta] = {
 
 _MEP: dict[str, IfcClassMeta] = {
     # HVAC
-    "IfcAirTerminal":       IfcClassMeta("Air terminal",    "ifc.air_terminal",    "mep", "430"),
-    "IfcAirTerminalBox":    IfcClassMeta("Air terminal box","ifc.air_terminal_box","mep", "430"),
-    "IfcDuctSegment":       IfcClassMeta("Duct",            "ifc.duct_segment",    "mep", "430"),
-    "IfcDuctFitting":       IfcClassMeta("Duct fitting",    "ifc.duct_fitting",    "mep", "430"),
-    "IfcDuctSilencer":      IfcClassMeta("Duct silencer",   "ifc.duct_silencer",   "mep", "430"),
-    "IfcDamper":            IfcClassMeta("Damper",          "ifc.damper",          "mep", "430"),
-    "IfcFan":               IfcClassMeta("Fan",             "ifc.fan",             "mep", "430"),
-    "IfcChiller":           IfcClassMeta("Chiller",         "ifc.chiller",         "mep", "430"),
-    "IfcBoiler":            IfcClassMeta("Boiler",          "ifc.boiler",          "mep", "420"),
-    "IfcCoolingTower":      IfcClassMeta("Cooling tower",   "ifc.cooling_tower",   "mep", "430"),
-    "IfcAirToAirHeatRecovery": IfcClassMeta("Heat recovery","ifc.heat_recovery",  "mep", "430"),
-    "IfcCoil":              IfcClassMeta("Coil",            "ifc.coil",            "mep", "430"),
-    "IfcUnitaryEquipment":  IfcClassMeta("Unitary equipment","ifc.unitary_equipment", "mep", "430"),
-    "IfcSpaceHeater":       IfcClassMeta("Space heater",    "ifc.space_heater",    "mep", "420"),
+    "IfcAirTerminal": IfcClassMeta("Air terminal", "ifc.air_terminal", "mep", "430"),
+    "IfcAirTerminalBox": IfcClassMeta("Air terminal box", "ifc.air_terminal_box", "mep", "430"),
+    "IfcDuctSegment": IfcClassMeta("Duct", "ifc.duct_segment", "mep", "430"),
+    "IfcDuctFitting": IfcClassMeta("Duct fitting", "ifc.duct_fitting", "mep", "430"),
+    "IfcDuctSilencer": IfcClassMeta("Duct silencer", "ifc.duct_silencer", "mep", "430"),
+    "IfcDamper": IfcClassMeta("Damper", "ifc.damper", "mep", "430"),
+    "IfcFan": IfcClassMeta("Fan", "ifc.fan", "mep", "430"),
+    "IfcChiller": IfcClassMeta("Chiller", "ifc.chiller", "mep", "430"),
+    "IfcBoiler": IfcClassMeta("Boiler", "ifc.boiler", "mep", "420"),
+    "IfcCoolingTower": IfcClassMeta("Cooling tower", "ifc.cooling_tower", "mep", "430"),
+    "IfcAirToAirHeatRecovery": IfcClassMeta("Heat recovery", "ifc.heat_recovery", "mep", "430"),
+    "IfcCoil": IfcClassMeta("Coil", "ifc.coil", "mep", "430"),
+    "IfcUnitaryEquipment": IfcClassMeta("Unitary equipment", "ifc.unitary_equipment", "mep", "430"),
+    "IfcSpaceHeater": IfcClassMeta("Space heater", "ifc.space_heater", "mep", "420"),
     # Plumbing
-    "IfcPipeSegment":       IfcClassMeta("Pipe",            "ifc.pipe_segment",    "mep", "410"),
-    "IfcPipeFitting":       IfcClassMeta("Pipe fitting",    "ifc.pipe_fitting",    "mep", "410"),
-    "IfcSanitaryTerminal":  IfcClassMeta("Sanitary terminal","ifc.sanitary_terminal", "mep", "410"),
-    "IfcValve":             IfcClassMeta("Valve",           "ifc.valve",           "mep", "410"),
-    "IfcPump":              IfcClassMeta("Pump",            "ifc.pump",            "mep", "410"),
-    "IfcTank":              IfcClassMeta("Tank",            "ifc.tank",            "mep", "410"),
-    "IfcWasteTerminal":     IfcClassMeta("Waste terminal",  "ifc.waste_terminal",  "mep", "410"),
-    "IfcInterceptor":       IfcClassMeta("Interceptor",     "ifc.interceptor",     "mep", "410"),
-    "IfcStackTerminal":     IfcClassMeta("Stack terminal",  "ifc.stack_terminal",  "mep", "410"),
+    "IfcPipeSegment": IfcClassMeta("Pipe", "ifc.pipe_segment", "mep", "410"),
+    "IfcPipeFitting": IfcClassMeta("Pipe fitting", "ifc.pipe_fitting", "mep", "410"),
+    "IfcSanitaryTerminal": IfcClassMeta("Sanitary terminal", "ifc.sanitary_terminal", "mep", "410"),
+    "IfcValve": IfcClassMeta("Valve", "ifc.valve", "mep", "410"),
+    "IfcPump": IfcClassMeta("Pump", "ifc.pump", "mep", "410"),
+    "IfcTank": IfcClassMeta("Tank", "ifc.tank", "mep", "410"),
+    "IfcWasteTerminal": IfcClassMeta("Waste terminal", "ifc.waste_terminal", "mep", "410"),
+    "IfcInterceptor": IfcClassMeta("Interceptor", "ifc.interceptor", "mep", "410"),
+    "IfcStackTerminal": IfcClassMeta("Stack terminal", "ifc.stack_terminal", "mep", "410"),
     # Electrical
-    "IfcCableSegment":      IfcClassMeta("Cable",           "ifc.cable_segment",   "mep", "445"),
-    "IfcCableCarrierSegment": IfcClassMeta("Cable tray",    "ifc.cable_carrier",   "mep", "445"),
+    "IfcCableSegment": IfcClassMeta("Cable", "ifc.cable_segment", "mep", "445"),
+    "IfcCableCarrierSegment": IfcClassMeta("Cable tray", "ifc.cable_carrier", "mep", "445"),
     "IfcCableCarrierFitting": IfcClassMeta("Cable tray fitting", "ifc.cable_carrier_fitting", "mep", "445"),
-    "IfcCableFitting":      IfcClassMeta("Cable fitting",   "ifc.cable_fitting",   "mep", "445"),
-    "IfcLightFixture":      IfcClassMeta("Light fixture",   "ifc.light_fixture",   "mep", "445"),
-    "IfcSwitchingDevice":   IfcClassMeta("Switch",          "ifc.switching_device","mep", "445"),
-    "IfcOutlet":            IfcClassMeta("Outlet",          "ifc.outlet",          "mep", "445"),
+    "IfcCableFitting": IfcClassMeta("Cable fitting", "ifc.cable_fitting", "mep", "445"),
+    "IfcLightFixture": IfcClassMeta("Light fixture", "ifc.light_fixture", "mep", "445"),
+    "IfcSwitchingDevice": IfcClassMeta("Switch", "ifc.switching_device", "mep", "445"),
+    "IfcOutlet": IfcClassMeta("Outlet", "ifc.outlet", "mep", "445"),
     "IfcElectricDistributionBoard": IfcClassMeta("Distribution board", "ifc.distribution_board", "mep", "445"),
-    "IfcElectricAppliance": IfcClassMeta("Electric appliance","ifc.electric_appliance", "mep", "445"),
-    "IfcElectricMotor":     IfcClassMeta("Electric motor",  "ifc.electric_motor",  "mep", "445"),
-    "IfcTransformer":       IfcClassMeta("Transformer",     "ifc.transformer",     "mep", "445"),
-    "IfcMotorConnection":   IfcClassMeta("Motor connection","ifc.motor_connection","mep", "445"),
-    "IfcProtectiveDevice":  IfcClassMeta("Protective device","ifc.protective_device","mep", "445"),
+    "IfcElectricAppliance": IfcClassMeta("Electric appliance", "ifc.electric_appliance", "mep", "445"),
+    "IfcElectricMotor": IfcClassMeta("Electric motor", "ifc.electric_motor", "mep", "445"),
+    "IfcTransformer": IfcClassMeta("Transformer", "ifc.transformer", "mep", "445"),
+    "IfcMotorConnection": IfcClassMeta("Motor connection", "ifc.motor_connection", "mep", "445"),
+    "IfcProtectiveDevice": IfcClassMeta("Protective device", "ifc.protective_device", "mep", "445"),
     # Fire / Comms
     "IfcFireSuppressionTerminal": IfcClassMeta("Fire suppression terminal", "ifc.fire_terminal", "mep", "474"),
-    "IfcAlarm":             IfcClassMeta("Alarm",           "ifc.alarm",           "mep", "474"),
-    "IfcSensor":            IfcClassMeta("Sensor",          "ifc.sensor",          "mep", "474"),
+    "IfcAlarm": IfcClassMeta("Alarm", "ifc.alarm", "mep", "474"),
+    "IfcSensor": IfcClassMeta("Sensor", "ifc.sensor", "mep", "474"),
     "IfcCommunicationsAppliance": IfcClassMeta("Comms appliance", "ifc.comms_appliance", "mep", "445"),
-    "IfcFlowMeter":         IfcClassMeta("Flow meter",      "ifc.flow_meter",      "mep", "410"),
-    "IfcFlowController":    IfcClassMeta("Flow controller", "ifc.flow_controller", "mep", "410"),
+    "IfcFlowMeter": IfcClassMeta("Flow meter", "ifc.flow_meter", "mep", "410"),
+    "IfcFlowController": IfcClassMeta("Flow controller", "ifc.flow_controller", "mep", "410"),
     "IfcDistributionElement": IfcClassMeta("Distribution element", "ifc.distribution_element", "mep", "400"),
-    "IfcDistributionFlowElement": IfcClassMeta("Distribution flow element", "ifc.distribution_flow_element", "mep", "400"),
-    "IfcDistributionControlElement": IfcClassMeta("Distribution control element", "ifc.distribution_control_element", "mep", "400"),
+    "IfcDistributionFlowElement": IfcClassMeta(
+        "Distribution flow element", "ifc.distribution_flow_element", "mep", "400"
+    ),
+    "IfcDistributionControlElement": IfcClassMeta(
+        "Distribution control element", "ifc.distribution_control_element", "mep", "400"
+    ),
     "IfcEnergyConversionDevice": IfcClassMeta("Energy conversion device", "ifc.energy_conversion_device", "mep", "420"),
 }
 
@@ -183,19 +187,19 @@ _MEP: dict[str, IfcClassMeta] = {
 
 
 _CIVIL: dict[str, IfcClassMeta] = {
-    "IfcRoad":              IfcClassMeta("Road",            "ifc.road",            "civil", "560"),
-    "IfcRailway":           IfcClassMeta("Railway",         "ifc.railway",         "civil", "560"),
-    "IfcBridge":            IfcClassMeta("Bridge",          "ifc.bridge",          "civil", "560"),
-    "IfcTunnel":            IfcClassMeta("Tunnel",          "ifc.tunnel",          "civil", "560"),
-    "IfcPavement":          IfcClassMeta("Pavement",        "ifc.pavement",        "civil", "560"),
-    "IfcKerb":              IfcClassMeta("Kerb",            "ifc.kerb",            "civil", "560"),
-    "IfcCourse":            IfcClassMeta("Course",          "ifc.course",          "civil", "560"),
-    "IfcEarthworksFill":    IfcClassMeta("Earthworks fill", "ifc.earthworks_fill", "civil", "510"),
-    "IfcEarthworksCut":     IfcClassMeta("Earthworks cut",  "ifc.earthworks_cut",  "civil", "510"),
-    "IfcReinforcedSoil":    IfcClassMeta("Reinforced soil", "ifc.reinforced_soil", "civil", "510"),
-    "IfcGeographicElement": IfcClassMeta("Geographic element","ifc.geographic_element","civil", "510"),
-    "IfcAlignment":         IfcClassMeta("Alignment",       "ifc.alignment",       "civil", "560"),
-    "IfcRail":              IfcClassMeta("Rail",            "ifc.rail",            "civil", "560"),
+    "IfcRoad": IfcClassMeta("Road", "ifc.road", "civil", "560"),
+    "IfcRailway": IfcClassMeta("Railway", "ifc.railway", "civil", "560"),
+    "IfcBridge": IfcClassMeta("Bridge", "ifc.bridge", "civil", "560"),
+    "IfcTunnel": IfcClassMeta("Tunnel", "ifc.tunnel", "civil", "560"),
+    "IfcPavement": IfcClassMeta("Pavement", "ifc.pavement", "civil", "560"),
+    "IfcKerb": IfcClassMeta("Kerb", "ifc.kerb", "civil", "560"),
+    "IfcCourse": IfcClassMeta("Course", "ifc.course", "civil", "560"),
+    "IfcEarthworksFill": IfcClassMeta("Earthworks fill", "ifc.earthworks_fill", "civil", "510"),
+    "IfcEarthworksCut": IfcClassMeta("Earthworks cut", "ifc.earthworks_cut", "civil", "510"),
+    "IfcReinforcedSoil": IfcClassMeta("Reinforced soil", "ifc.reinforced_soil", "civil", "510"),
+    "IfcGeographicElement": IfcClassMeta("Geographic element", "ifc.geographic_element", "civil", "510"),
+    "IfcAlignment": IfcClassMeta("Alignment", "ifc.alignment", "civil", "560"),
+    "IfcRail": IfcClassMeta("Rail", "ifc.rail", "civil", "560"),
 }
 
 
@@ -203,12 +207,12 @@ _CIVIL: dict[str, IfcClassMeta] = {
 
 
 _SPATIAL: dict[str, IfcClassMeta] = {
-    "IfcProject":           IfcClassMeta("Project",         "ifc.project",         "spatial"),
-    "IfcSite":              IfcClassMeta("Site",            "ifc.site",            "spatial"),
-    "IfcBuilding":          IfcClassMeta("Building",        "ifc.building",        "spatial"),
-    "IfcBuildingStorey":    IfcClassMeta("Storey",          "ifc.storey",          "spatial"),
-    "IfcSpace":             IfcClassMeta("Space",           "ifc.space",           "spatial"),
-    "IfcZone":              IfcClassMeta("Zone",            "ifc.zone",            "spatial"),
+    "IfcProject": IfcClassMeta("Project", "ifc.project", "spatial"),
+    "IfcSite": IfcClassMeta("Site", "ifc.site", "spatial"),
+    "IfcBuilding": IfcClassMeta("Building", "ifc.building", "spatial"),
+    "IfcBuildingStorey": IfcClassMeta("Storey", "ifc.storey", "spatial"),
+    "IfcSpace": IfcClassMeta("Space", "ifc.space", "spatial"),
+    "IfcZone": IfcClassMeta("Zone", "ifc.zone", "spatial"),
 }
 
 
@@ -216,13 +220,13 @@ _SPATIAL: dict[str, IfcClassMeta] = {
 
 
 _SUBTRACTIVE: dict[str, IfcClassMeta] = {
-    "IfcOpeningElement":    IfcClassMeta("Opening void",    "ifc.opening_element", "subtractive", is_subtractive=True),
-    "IfcOpeningStandardCase": IfcClassMeta("Opening void",  "ifc.opening_element", "subtractive", is_subtractive=True),
-    "IfcVoidingFeature":    IfcClassMeta("Voiding feature", "ifc.voiding_feature", "subtractive", is_subtractive=True),
-    "IfcVirtualElement":    IfcClassMeta("Virtual separator","ifc.virtual_element","subtractive", is_subtractive=True),
-    "IfcAnnotation":        IfcClassMeta("Annotation",      "ifc.annotation",      "annotation",  is_subtractive=True),
-    "IfcGrid":              IfcClassMeta("Grid",            "ifc.grid",            "annotation",  is_subtractive=True),
-    "IfcGridAxis":          IfcClassMeta("Grid axis",       "ifc.grid_axis",       "annotation",  is_subtractive=True),
+    "IfcOpeningElement": IfcClassMeta("Opening void", "ifc.opening_element", "subtractive", is_subtractive=True),
+    "IfcOpeningStandardCase": IfcClassMeta("Opening void", "ifc.opening_element", "subtractive", is_subtractive=True),
+    "IfcVoidingFeature": IfcClassMeta("Voiding feature", "ifc.voiding_feature", "subtractive", is_subtractive=True),
+    "IfcVirtualElement": IfcClassMeta("Virtual separator", "ifc.virtual_element", "subtractive", is_subtractive=True),
+    "IfcAnnotation": IfcClassMeta("Annotation", "ifc.annotation", "annotation", is_subtractive=True),
+    "IfcGrid": IfcClassMeta("Grid", "ifc.grid", "annotation", is_subtractive=True),
+    "IfcGridAxis": IfcClassMeta("Grid axis", "ifc.grid_axis", "annotation", is_subtractive=True),
 }
 
 
@@ -231,11 +235,11 @@ _SUBTRACTIVE: dict[str, IfcClassMeta] = {
 
 _SUSPECT: dict[str, IfcClassMeta] = {
     "IfcBuildingElementProxy": IfcClassMeta("Generic element (proxy)", "ifc.proxy", "other"),
-    "IfcDiscreteAccessory":    IfcClassMeta("Accessory",      "ifc.accessory",      "other"),
-    "IfcMechanicalFastener":   IfcClassMeta("Fastener",       "ifc.fastener",       "other"),
-    "IfcFastener":             IfcClassMeta("Fastener",       "ifc.fastener",       "other"),
-    "IfcElementAssembly":      IfcClassMeta("Element assembly","ifc.element_assembly","other"),
-    "IfcBuiltElement":         IfcClassMeta("Built element",  "ifc.built_element",  "other"),
+    "IfcDiscreteAccessory": IfcClassMeta("Accessory", "ifc.accessory", "other"),
+    "IfcMechanicalFastener": IfcClassMeta("Fastener", "ifc.fastener", "other"),
+    "IfcFastener": IfcClassMeta("Fastener", "ifc.fastener", "other"),
+    "IfcElementAssembly": IfcClassMeta("Element assembly", "ifc.element_assembly", "other"),
+    "IfcBuiltElement": IfcClassMeta("Built element", "ifc.built_element", "other"),
 }
 
 
@@ -254,9 +258,7 @@ _TABLE: dict[str, IfcClassMeta] = {
 # never price a void or a grid axis, but they sometimes want to inspect
 # them — the settings rail offers a "show non-billable" toggle that
 # clears this list temporarily.
-DEFAULT_EXCLUDED_CATEGORIES: tuple[str, ...] = tuple(
-    cls for cls, meta in _TABLE.items() if meta.is_subtractive
-)
+DEFAULT_EXCLUDED_CATEGORIES: tuple[str, ...] = tuple(cls for cls, meta in _TABLE.items() if meta.is_subtractive)
 
 
 def lookup(ifc_class: str | None) -> IfcClassMeta:

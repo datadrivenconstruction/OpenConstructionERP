@@ -57,8 +57,7 @@ def test_collection_name_matches_adapter_routing():
     for cat in CWICR_V3_CATALOGUES:
         adapter_collection = country_to_collection(cat.region)
         assert cat.collection == adapter_collection, (
-            f"{cat.region}: registry says {cat.collection!r}, "
-            f"adapter routes to {adapter_collection!r}"
+            f"{cat.region}: registry says {cat.collection!r}, adapter routes to {adapter_collection!r}"
         )
 
 
@@ -67,8 +66,7 @@ def test_language_field_matches_region_language():
     for cat in CWICR_V3_CATALOGUES:
         expected = language_for(cat.region)
         assert cat.language == expected, (
-            f"{cat.region}: registry lang={cat.language!r}, "
-            f"region_language says {expected!r}"
+            f"{cat.region}: registry lang={cat.language!r}, region_language says {expected!r}"
         )
 
 
@@ -102,8 +100,7 @@ def test_ddc_path_filename_starts_with_region_or_alias():
             alias = _HF_PUBLISHED.get(cat.region)
             ok = bool(alias and filename.startswith(alias[1] + "_"))
         assert ok, (
-            f"{cat.region}: filename {filename!r} should start with the "
-            "region id or a registered HF-published alias"
+            f"{cat.region}: filename {filename!r} should start with the region id or a registered HF-published alias"
         )
 
 
@@ -112,7 +109,7 @@ def test_ddc_path_filename_starts_with_region_or_alias():
     [
         ("RU_STPETERSBURG", "RU_STPETERSBURG"),
         ("ru_stpetersburg", "RU_STPETERSBURG"),  # case-insensitive input
-        ("  DE_BERLIN  ", "DE_BERLIN"),          # whitespace-tolerant
+        ("  DE_BERLIN  ", "DE_BERLIN"),  # whitespace-tolerant
         ("USA_USD", "USA_USD"),
     ],
 )
@@ -128,8 +125,8 @@ def test_get_catalogue_resolves(lookup: str, expected_region: str):
         "",
         None,
         "UNKNOWN_REGION",
-        "UK_GBP",        # legacy alias — explicitly NOT resolved (would mis-route)
-        "ENG_TORONTO",   # mis-prefixed alias
+        "UK_GBP",  # legacy alias — explicitly NOT resolved (would mis-route)
+        "ENG_TORONTO",  # mis-prefixed alias
     ],
 )
 def test_get_catalogue_returns_none_for_unknown(lookup):
@@ -161,6 +158,4 @@ def test_collection_property_consistent_across_same_language():
         by_lang.setdefault(cat.language, []).append(cat)
     for lang, group in by_lang.items():
         collections = {c.collection for c in group}
-        assert len(collections) == 1, (
-            f"language {lang!r} has divergent collections: {collections}"
-        )
+        assert len(collections) == 1, f"language {lang!r} has divergent collections: {collections}"

@@ -95,9 +95,7 @@ async def list_meetings(
         max_length=200,
         description="Free-text search across title, agenda, minutes, and meeting number.",
     ),
-    sort_by: str | None = Query(
-        default=None, description="Sort field: date, meeting_date, status, created_at"
-    ),
+    sort_by: str | None = Query(default=None, description="Sort field: date, meeting_date, status, created_at"),
     sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     service: MeetingService = Depends(_get_service),
 ) -> list[MeetingResponse]:
@@ -1230,7 +1228,9 @@ async def materialize_meeting_series(
         )
     until_dt = datetime.strptime(body.until, "%Y-%m-%d").replace(tzinfo=UTC)
     new_occurrences = await service.generate_occurrences(
-        str(master.id), until_dt, user_id=str(user_id) if user_id else None,
+        str(master.id),
+        until_dt,
+        user_id=str(user_id) if user_id else None,
     )
     return MeetingSeriesResponse(
         series_id=master.id,
@@ -1309,7 +1309,8 @@ async def record_external_attendee(
     meeting = await service.get_meeting(meeting_id)
     await verify_project_access(meeting.project_id, str(user_id), session)
     row = await service.record_external_attendee(
-        meeting_id, body.name,
+        meeting_id,
+        body.name,
         signature_image_data=body.signature_image_data,
     )
     return _attendance_to_row(row)

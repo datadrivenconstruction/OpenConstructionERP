@@ -36,11 +36,9 @@ _TMP_DB = _TMP_DIR / "compliance_ai.db"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}"
 os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 
-import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from fastapi import HTTPException, status  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
-
 
 # ── Fixtures ──────────────────────────────────────────────────────────────
 
@@ -84,9 +82,7 @@ async def test_from_nl_requires_auth_returns_401(app_factory):
     app = app_factory
     # Ensure no payload override is in place.
     app.dependency_overrides.clear()
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         resp = await client.post(
             "/api/v1/compliance-ai/from-nl",
             json={"text": "all walls must have fire_rating"},
@@ -112,9 +108,7 @@ async def test_from_nl_happy_path_pattern_match(app_factory):
     user_id = uuid.uuid4()
     _override_payload(app, user_id)
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/api/v1/compliance-ai/from-nl",
                 json={
@@ -173,9 +167,7 @@ async def test_from_nl_rate_limit_returns_429(app_factory):
 
     app.dependency_overrides[check_ai_rate_limit] = _always_429
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/api/v1/compliance-ai/from-nl",
                 json={"text": "all walls must have fire_rating"},

@@ -83,10 +83,7 @@ class PresenceHub:
         async with state.lock:
             state.sockets.add(ws)
             state.users[user_id] = user_name
-            roster = [
-                {"user_id": str(uid), "user_name": name}
-                for uid, name in state.users.items()
-            ]
+            roster = [{"user_id": str(uid), "user_name": name} for uid, name in state.users.items()]
         return roster
 
     async def leave(self, key: PresenceKey, ws: WebSocket) -> uuid.UUID | None:

@@ -253,7 +253,9 @@ async def kpi_history(
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)
     points = await service.kpi_history(
-        code, project_id=project_id, limit=limit,
+        code,
+        project_id=project_id,
+        limit=limit,
     )
     return KPIHistoryResponse(kpi_code=code, history=points)
 
@@ -346,7 +348,8 @@ async def create_dashboard(
     service: BIDashboardsService = Depends(_service),
 ) -> DashboardRead:
     row = await service.create_dashboard(
-        payload, owner_user_id=_user_uuid(user_id),
+        payload,
+        owner_user_id=_user_uuid(user_id),
     )
     return DashboardRead.model_validate(row)
 
@@ -432,10 +435,7 @@ async def evaluate_dashboard(
     project_filter = filters.get("project_id")
     if project_filter:
         try:
-            project_uuid = (
-                project_filter if isinstance(project_filter, uuid.UUID)
-                else uuid.UUID(str(project_filter))
-            )
+            project_uuid = project_filter if isinstance(project_filter, uuid.UUID) else uuid.UUID(str(project_filter))
         except Exception as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -534,7 +534,8 @@ async def create_report(
     service: BIDashboardsService = Depends(_service),
 ) -> ReportDefinitionRead:
     row = await service.create_report(
-        payload, owner_user_id=_user_uuid(user_id),
+        payload,
+        owner_user_id=_user_uuid(user_id),
     )
     return ReportDefinitionRead.model_validate(row)
 
@@ -699,7 +700,8 @@ async def list_filters(
     module: str | None = Query(default=None),
 ) -> list[SavedFilterRead]:
     rows = await service.list_filters(
-        owner_user_id=_user_uuid(user_id), module=module,
+        owner_user_id=_user_uuid(user_id),
+        module=module,
     )
     return [SavedFilterRead.model_validate(r) for r in rows]
 
@@ -716,7 +718,8 @@ async def create_filter(
     service: BIDashboardsService = Depends(_service),
 ) -> SavedFilterRead:
     row = await service.create_filter(
-        payload, owner_user_id=_user_uuid(user_id),
+        payload,
+        owner_user_id=_user_uuid(user_id),
     )
     return SavedFilterRead.model_validate(row)
 
@@ -781,6 +784,7 @@ async def download_report_file(
     from pathlib import Path as _Path
 
     from app.modules.bi_dashboards.report_builder import _reports_dir
+
     resolved = _Path(run.file_path).resolve()
     base = _Path(_reports_dir()).resolve()
     try:
@@ -792,9 +796,7 @@ async def download_report_file(
 
     media_type = {
         "pdf": "application/pdf",
-        "xlsx": (
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        ),
+        "xlsx": ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
         "csv": "text/csv",
     }.get(run.output_format, "application/octet-stream")
     return FileResponse(

@@ -53,6 +53,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.ai.pricing import (
     DEFAULT_COST_PER_1K,
     MODEL_COSTS,
+)
+from app.core.ai.pricing import (
     estimate_cost_usd as _shared_estimate_cost_usd,
 )
 from app.modules.ai.ai_client import call_ai, extract_json, resolve_provider_key_model
@@ -217,9 +219,7 @@ async def _resolve_provider_settings(
     Raises :class:`ClashTriageUnavailable` (not ValueError) so the caller
     can map cleanly to a 503.
     """
-    result = await session.execute(
-        select(AISettings).where(AISettings.user_id == user_id)
-    )
+    result = await session.execute(select(AISettings).where(AISettings.user_id == user_id))
     settings = result.scalar_one_or_none()
     try:
         return resolve_provider_key_model(settings)
@@ -265,17 +265,13 @@ class ClashTriageService:
 
     async def _load_clash(self, clash_id: uuid.UUID) -> ClashResult:
         """Fetch a ClashResult by id or raise :class:`ClashSubjectNotFound`."""
-        result = await self.session.execute(
-            select(ClashResult).where(ClashResult.id == clash_id)
-        )
+        result = await self.session.execute(select(ClashResult).where(ClashResult.id == clash_id))
         clash = result.scalar_one_or_none()
         if clash is None:
             raise ClashSubjectNotFound(f"Clash {clash_id} not found")
         return clash
 
-    async def _resolve_subject(
-        self, clash: ClashResult
-    ) -> tuple[str, uuid.UUID]:
+    async def _resolve_subject(self, clash: ClashResult) -> tuple[str, uuid.UUID]:
         """Decide whether the triage targets a clash or a clash_issue.
 
         Polymorphism rule: if the clash row carries an ``issue_id`` AND
@@ -298,16 +294,12 @@ class ClashTriageService:
                 return "clash", clash.id
             return "clash_issue", issue_pk
         except (OperationalError, ProgrammingError, ImportError):
-            logger.debug(
-                "ClashIssue table unreachable — degrading to subject_type=clash"
-            )
+            logger.debug("ClashIssue table unreachable — degrading to subject_type=clash")
             return "clash", clash.id
 
     # ── Prior triage lookup (for re-run context) ────────────────────────
 
-    async def _latest_prior(
-        self, subject_id: uuid.UUID
-    ) -> Mapping[str, Any] | None:
+    async def _latest_prior(self, subject_id: uuid.UUID) -> Mapping[str, Any] | None:
         stmt = (
             select(ClashTriageResult)
             .where(ClashTriageResult.subject_id == subject_id)
@@ -354,15 +346,11 @@ class ClashTriageService:
         async with lock:
             # Resolve LLM provider FIRST so an unconfigured user gets a
             # 503 before we pay for a cache lookup.
-            provider, api_key, model_override = await _resolve_provider_settings(
-                self.session, user_id
-            )
+            provider, api_key, model_override = await _resolve_provider_settings(self.session, user_id)
             model_name = model_override or _default_model_name_for(provider)
 
             if not force_refresh:
-                cached = await self._get_cached(
-                    subject_id, PROMPT_VERSION, model_name
-                )
+                cached = await self._get_cached(subject_id, PROMPT_VERSION, model_name)
                 if cached is not None:
                     return cached
 
@@ -378,7 +366,7 @@ class ClashTriageService:
                         model=model_override,
                         user_prompt=user_prompt,
                     )
-            except asyncio.TimeoutError as exc:
+            except TimeoutError as exc:
                 msg = (
                     f"LLM call exceeded {_LLM_CALL_TIMEOUT_S:.0f}s on provider "
                     f"{provider} model={model_name}; aborted to free the worker."
@@ -395,8 +383,7 @@ class ClashTriageService:
                     confidence=0.0,
                     severity_suggested="medium",
                     explanation=(
-                        "LLM returned non-JSON response after retry. See "
-                        "raw_response for the original output."
+                        "LLM returned non-JSON response after retry. See raw_response for the original output."
                     ),
                     suggested_action=None,
                     model_evidence_used=[],
@@ -519,9 +506,7 @@ class ClashTriageService:
         ``new_prompt_version`` defaults to the current ``PROMPT_VERSION``
         in the repo.
         """
-        stmt = select(ClashTriageResult).where(
-            ClashTriageResult.id == triage_result_id
-        )
+        stmt = select(ClashTriageResult).where(ClashTriageResult.id == triage_result_id)
         existing = (await self.session.execute(stmt)).scalar_one_or_none()
         if existing is None:
             msg = f"Triage result {triage_result_id} not found"
@@ -536,9 +521,7 @@ class ClashTriageService:
         clash_id = existing.clash_id or existing.subject_id
         # Force the prompt_version stamp on the new row to ``target_version``
         # via a thin wrapper that temporarily overrides the constant.
-        return await self._triage_with_explicit_prompt_version(
-            clash_id, target_version, user_id=user_id
-        )
+        return await self._triage_with_explicit_prompt_version(clash_id, target_version, user_id=user_id)
 
     async def _triage_with_explicit_prompt_version(
         self,
@@ -556,9 +539,7 @@ class ClashTriageService:
         """
         clash = await self._load_clash(clash_id)
         subject_type, subject_id = await self._resolve_subject(clash)
-        provider, api_key, model_override = await _resolve_provider_settings(
-            self.session, user_id
-        )
+        provider, api_key, model_override = await _resolve_provider_settings(self.session, user_id)
         model_name = model_override or _default_model_name_for(provider)
         evidence = _build_evidence_from_clash(clash)
         prior = await self._latest_prior(subject_id)
@@ -571,7 +552,7 @@ class ClashTriageService:
                     model=model_override,
                     user_prompt=user_prompt,
                 )
-        except asyncio.TimeoutError as exc:
+        except TimeoutError as exc:
             msg = (
                 f"LLM call exceeded {_LLM_CALL_TIMEOUT_S:.0f}s on provider "
                 f"{provider} model={model_name}; replay aborted."
@@ -583,10 +564,7 @@ class ClashTriageService:
                 category="unclear",
                 confidence=0.0,
                 severity_suggested="medium",
-                explanation=(
-                    "LLM returned non-JSON response after retry. See "
-                    "raw_response for the original output."
-                ),
+                explanation=("LLM returned non-JSON response after retry. See raw_response for the original output."),
                 suggested_action=None,
                 model_evidence_used=[],
             )
@@ -719,10 +697,7 @@ async def _call_llm_with_retry(
         return text, int(tokens or 0)
     # Retry — combine the original prompt + the retry directive so the
     # model has the clash context AND the new constraint in the same call.
-    retry_prompt = (
-        f"{user_prompt}\n\n---\n{RETRY_PROMPT_V1}\n\nYour previous answer "
-        f"was:\n{text[:1000]}"
-    )
+    retry_prompt = f"{user_prompt}\n\n---\n{RETRY_PROMPT_V1}\n\nYour previous answer was:\n{text[:1000]}"
     text2, tokens2 = await call_ai(
         provider=provider,
         api_key=api_key,

@@ -149,9 +149,7 @@ async def test_create_template_emits_event(captured_events: list[Event]) -> None
 @pytest.mark.asyncio
 async def test_schedule_template_emits_event(captured_events: list[Event]) -> None:
     svc = _make_service()
-    template = await svc.create_template(
-        ReportTemplateCreate(name="Custom", report_type="cost_report")
-    )
+    template = await svc.create_template(ReportTemplateCreate(name="Custom", report_type="cost_report"))
     captured_events.clear()
 
     await svc.schedule_template(

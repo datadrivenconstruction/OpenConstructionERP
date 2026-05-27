@@ -51,7 +51,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -89,11 +88,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -147,10 +142,7 @@ async def _seed_tenant(
     headers = await _login(client, email, meta["_password"])
 
     async with async_session_factory() as s:
-        owner = (
-            (await s.execute(select(User).where(User.email == email.lower())))
-            .scalar_one()
-        )
+        owner = (await s.execute(select(User).where(User.email == email.lower()))).scalar_one()
 
         proj = Project(
             name=f"{label}-{uuid.uuid4().hex[:6]}",
@@ -342,9 +334,7 @@ async def test_snag_list_other_tenant_handover_404(http_client, tenant_a, tenant
 
 
 @pytest.mark.asyncio
-async def test_snag_create_under_other_tenant_handover_404(
-    http_client, tenant_a, tenant_b
-):
+async def test_snag_create_under_other_tenant_handover_404(http_client, tenant_a, tenant_b):
     """Tenant B POST /snags/ for a tenant A handover → 404."""
     res = await http_client.post(
         "/api/v1/property-dev/snags/",
@@ -427,9 +417,7 @@ async def test_warranty_close_other_tenant_404(http_client, tenant_a, tenant_b):
 
 
 @pytest.mark.asyncio
-async def test_warranty_list_for_other_tenant_buyer_404(
-    http_client, tenant_a, tenant_b
-):
+async def test_warranty_list_for_other_tenant_buyer_404(http_client, tenant_a, tenant_b):
     """Tenant B listing claims by tenant A's buyer_id → 404."""
     res = await http_client.get(
         "/api/v1/property-dev/warranty-claims/",
@@ -440,9 +428,7 @@ async def test_warranty_list_for_other_tenant_buyer_404(
 
 
 @pytest.mark.asyncio
-async def test_warranty_list_for_other_tenant_plot_404(
-    http_client, tenant_a, tenant_b
-):
+async def test_warranty_list_for_other_tenant_plot_404(http_client, tenant_a, tenant_b):
     """Tenant B listing claims by tenant A's plot_id → 404."""
     res = await http_client.get(
         "/api/v1/property-dev/warranty-claims/",
@@ -453,9 +439,7 @@ async def test_warranty_list_for_other_tenant_plot_404(
 
 
 @pytest.mark.asyncio
-async def test_warranty_create_for_other_tenant_plot_404(
-    http_client, tenant_a, tenant_b
-):
+async def test_warranty_create_for_other_tenant_plot_404(http_client, tenant_a, tenant_b):
     """Tenant B POSTing a new claim referencing tenant A's plot → 404."""
     res = await http_client.post(
         "/api/v1/property-dev/warranty-claims/",

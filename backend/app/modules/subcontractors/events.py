@@ -65,7 +65,10 @@ async def _bump(kind: str, event: Event) -> None:
             await session.commit()
     except Exception:
         logger.debug(
-            "subcontractors: rating bump for %s/%s failed", kind, sub_id, exc_info=True,
+            "subcontractors: rating bump for %s/%s failed",
+            kind,
+            sub_id,
+            exc_info=True,
         )
 
 

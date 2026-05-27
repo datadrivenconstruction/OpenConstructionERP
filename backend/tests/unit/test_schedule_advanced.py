@@ -134,10 +134,7 @@ class _StubLookAheadRepo(_StubRepo):
 
     async def current_for_master(self, master_schedule_id: uuid.UUID, today: date) -> Any:
         for r in self.rows.values():
-            if (
-                r.master_schedule_id == master_schedule_id
-                and r.period_start <= today <= r.period_end
-            ):
+            if r.master_schedule_id == master_schedule_id and r.period_start <= today <= r.period_end:
                 return r
         return None
 
@@ -151,8 +148,7 @@ class _StubConstraintRepo(_StubRepo):
 
     async def list_open_for_task(self, task_ref: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
-            if r.task_ref == task_ref and r.status in ("open", "in_progress", "escalated")
+            r for r in self.rows.values() if r.task_ref == task_ref and r.status in ("open", "in_progress", "escalated")
         ]
 
 
@@ -167,7 +163,9 @@ class _StubWeeklyRepo(_StubRepo):
         return None
 
     async def current_week_commitment_count(
-        self, project_id: uuid.UUID, today: date,  # noqa: ARG002
+        self,
+        project_id: uuid.UUID,
+        today: date,  # noqa: ARG002
     ) -> int:
         # Mirrors the real aggregate: commitments in current-week plans
         # of active masters. The stub weekly rows don't carry master
@@ -178,9 +176,7 @@ class _StubWeeklyRepo(_StubRepo):
         total = 0
         for w in self.rows.values():
             if w.week_start_date <= today <= w.week_end_date:
-                total += len(
-                    [c for c in commit_repo.rows.values() if c.week_plan_id == w.id]
-                )
+                total += len([c for c in commit_repo.rows.values() if c.week_plan_id == w.id])
         return total
 
     async def last_n_weeks_ppc(self, project_id: uuid.UUID, n: int = 12) -> list[Any]:  # noqa: ARG002
@@ -525,11 +521,10 @@ async def test_get_master_schedule_404() -> None:
 async def test_phase_plan_pull_emits_event() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
-    p = await svc.create_phase_plan(
-        PhasePlanCreate(master_schedule_id=m.id, name="P1")
-    )
+    p = await svc.create_phase_plan(PhasePlanCreate(master_schedule_id=m.id, name="P1"))
     with _patch_event_bus() as mock_bus:
         pulled = await svc.pull_phase(p.id, user_id="u")
     assert pulled.pulled_status == "pulled"
@@ -543,11 +538,10 @@ async def test_phase_plan_pull_emits_event() -> None:
 async def test_phase_plan_illegal_transition_rejected() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
-    p = await svc.create_phase_plan(
-        PhasePlanCreate(master_schedule_id=m.id, name="P1", pulled_status="completed")
-    )
+    p = await svc.create_phase_plan(PhasePlanCreate(master_schedule_id=m.id, name="P1", pulled_status="completed"))
     from fastapi import HTTPException
 
     with pytest.raises(HTTPException) as exc, _patch_event_bus():
@@ -559,7 +553,8 @@ async def test_phase_plan_illegal_transition_rejected() -> None:
 async def test_close_weekly_plan_computes_ppc_and_emits_event() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     w = await svc.create_weekly_plan(
         WeeklyWorkPlanCreate(
@@ -592,7 +587,8 @@ async def test_close_weekly_plan_computes_ppc_and_emits_event() -> None:
 async def test_commit_to_week_emits_event() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     w = await svc.create_weekly_plan(
         WeeklyWorkPlanCreate(
@@ -616,7 +612,8 @@ async def test_commit_to_week_emits_event() -> None:
 async def test_mark_commitment_complete_sets_actual_qty() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     w = await svc.create_weekly_plan(
         WeeklyWorkPlanCreate(
@@ -642,7 +639,8 @@ async def test_mark_commitment_complete_sets_actual_qty() -> None:
 async def test_mark_commitment_missed_creates_rnc() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     w = await svc.create_weekly_plan(
         WeeklyWorkPlanCreate(
@@ -658,9 +656,7 @@ async def test_mark_commitment_missed_creates_rnc() -> None:
             status="committed",
         )
     )
-    rnc_payload = RNCCreate(
-        commitment_id=c.id, category="material", description="No concrete"
-    )
+    rnc_payload = RNCCreate(commitment_id=c.id, category="material", description="No concrete")
     missed, rnc = await svc.mark_commitment_missed(c.id, rnc_payload)
     assert missed.status == "missed"
     assert rnc.category == "material"
@@ -690,7 +686,8 @@ async def test_clear_constraint_emits_event() -> None:
 async def test_capture_baseline_emits_event_and_persists_snapshot() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     snapshot = [
         {"task_ref": str(uuid.uuid4()), "planned_start": "2026-04-01", "planned_finish": "2026-04-10"},
@@ -706,7 +703,8 @@ async def test_capture_baseline_emits_event_and_persists_snapshot() -> None:
 async def test_compute_baseline_delta_orchestrator() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     t1 = uuid.uuid4()
     snapshot = [{"task_ref": str(t1), "planned_start": "2026-04-01", "planned_finish": "2026-04-10"}]
@@ -746,7 +744,8 @@ async def test_calendar_crud_basics() -> None:
 async def test_look_ahead_crud_basics() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     la = await svc.create_look_ahead(
         LookAheadCreate(
@@ -766,7 +765,8 @@ async def test_look_ahead_crud_basics() -> None:
 async def test_rnc_pareto_aggregation() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     w = await svc.create_weekly_plan(
         WeeklyWorkPlanCreate(
@@ -775,9 +775,7 @@ async def test_rnc_pareto_aggregation() -> None:
             week_end_date=date(2026, 5, 15),
         )
     )
-    c = await svc.create_commitment(
-        CommitmentCreate(week_plan_id=w.id, task_ref=uuid.uuid4(), status="committed")
-    )
+    c = await svc.create_commitment(CommitmentCreate(week_plan_id=w.id, task_ref=uuid.uuid4(), status="committed"))
     await svc.create_rnc(
         RNCCreate(commitment_id=c.id, category="manpower"),
         user_id=None,
@@ -787,7 +785,9 @@ async def test_rnc_pareto_aggregation() -> None:
         user_id=None,
     )
     out = await svc.rnc_pareto_for_project(
-        PROJECT_ID, date(2026, 4, 1), date(2026, 6, 1),
+        PROJECT_ID,
+        date(2026, 4, 1),
+        date(2026, 6, 1),
     )
     assert out["manpower"] == 1
     assert out["material"] == 1
@@ -801,7 +801,8 @@ async def test_pull_phase_idempotent_no_double_event() -> None:
     """Pulling an already-pulled phase is a no-op (no re-stamp, no re-emit)."""
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     p = await svc.create_phase_plan(PhasePlanCreate(master_schedule_id=m.id, name="P"))
     with _patch_event_bus() as mock_bus:
@@ -817,7 +818,8 @@ async def test_pull_phase_idempotent_no_double_event() -> None:
 async def test_commit_to_week_idempotent_no_double_event() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     w = await svc.create_weekly_plan(
         WeeklyWorkPlanCreate(
@@ -826,9 +828,7 @@ async def test_commit_to_week_idempotent_no_double_event() -> None:
             week_end_date=date(2026, 5, 15),
         )
     )
-    c = await svc.create_commitment(
-        CommitmentCreate(week_plan_id=w.id, task_ref=uuid.uuid4())
-    )
+    c = await svc.create_commitment(CommitmentCreate(week_plan_id=w.id, task_ref=uuid.uuid4()))
     with _patch_event_bus() as mock_bus:
         await svc.commit_to_week(c.id, user_id="u")
         made_at_1 = c.made_at
@@ -841,9 +841,7 @@ async def test_commit_to_week_idempotent_no_double_event() -> None:
 @pytest.mark.asyncio
 async def test_clear_constraint_idempotent_preserves_audit() -> None:
     svc = _make_service()
-    c = await svc.create_constraint(
-        ConstraintCreate(task_ref=uuid.uuid4(), constraint_type="material")
-    )
+    c = await svc.create_constraint(ConstraintCreate(task_ref=uuid.uuid4(), constraint_type="material"))
     u1 = str(uuid.uuid4())
     u2 = str(uuid.uuid4())
     with _patch_event_bus() as mock_bus:
@@ -862,7 +860,8 @@ async def test_clear_constraint_idempotent_preserves_audit() -> None:
 async def test_close_weekly_plan_idempotent_no_double_event() -> None:
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     w = await svc.create_weekly_plan(
         WeeklyWorkPlanCreate(
@@ -872,9 +871,7 @@ async def test_close_weekly_plan_idempotent_no_double_event() -> None:
             status="in_progress",
         )
     )
-    await svc.create_commitment(
-        CommitmentCreate(week_plan_id=w.id, task_ref=uuid.uuid4(), status="completed")
-    )
+    await svc.create_commitment(CommitmentCreate(week_plan_id=w.id, task_ref=uuid.uuid4(), status="completed"))
     with _patch_event_bus() as mock_bus:
         await svc.close_weekly_plan(w.id)
         again = await svc.close_weekly_plan(w.id)
@@ -895,7 +892,8 @@ async def test_lps_dashboard_counts_current_week_commitments() -> None:
     """
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     today = date(2026, 5, 13)  # Wednesday
     w = await svc.create_weekly_plan(
@@ -907,9 +905,7 @@ async def test_lps_dashboard_counts_current_week_commitments() -> None:
         )
     )
     for _ in range(3):
-        await svc.create_commitment(
-            CommitmentCreate(week_plan_id=w.id, task_ref=uuid.uuid4())
-        )
+        await svc.create_commitment(CommitmentCreate(week_plan_id=w.id, task_ref=uuid.uuid4()))
     payload = await svc.lps_dashboard_for_project(PROJECT_ID, today=today)
     assert payload["current_week_commitments"] == 3
     assert payload["active_master_schedules"] == 1
@@ -971,7 +967,8 @@ async def test_create_phase_plan_with_dates_persisted() -> None:
     """End-to-end create — verifies dates + notes flow through."""
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     p = await svc.create_phase_plan(
         PhasePlanCreate(
@@ -996,7 +993,8 @@ async def test_update_phase_plan_changes_dates_and_notes() -> None:
 
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     p = await svc.create_phase_plan(
         PhasePlanCreate(master_schedule_id=m.id, name="Phase A"),
@@ -1025,7 +1023,8 @@ async def test_update_phase_plan_rejects_illegal_status_transition() -> None:
 
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     p = await svc.create_phase_plan(
         PhasePlanCreate(master_schedule_id=m.id, name="P"),
@@ -1033,7 +1032,8 @@ async def test_update_phase_plan_rejects_illegal_status_transition() -> None:
     # in_planning → completed is NOT a legal transition
     with pytest.raises(HTTPException) as exc:
         await svc.update_phase_plan(
-            p.id, PhasePlanUpdate(pulled_status="completed"),
+            p.id,
+            PhasePlanUpdate(pulled_status="completed"),
         )
     assert exc.value.status_code == 400
 
@@ -1045,7 +1045,8 @@ async def test_delete_phase_plan_removes_row() -> None:
 
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     p = await svc.create_phase_plan(
         PhasePlanCreate(master_schedule_id=m.id, name="P"),
@@ -1072,7 +1073,8 @@ async def test_full_phase_lifecycle_planning_pulled_active_completed() -> None:
     """Walk every legal transition in one shot — mirrors the UI lifecycle buttons."""
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     p = await svc.create_phase_plan(
         PhasePlanCreate(master_schedule_id=m.id, name="P"),
@@ -1092,7 +1094,8 @@ async def test_phase_finish_before_start_currently_accepted_at_schema_level() ->
     """Pins current backend permissiveness — UI guards finish<start in PhaseFormModal."""
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     p = await svc.create_phase_plan(
         PhasePlanCreate(
@@ -1110,7 +1113,8 @@ async def test_phase_plans_listed_for_master() -> None:
     """list_for_master returns every phase created against the master id."""
     svc = _make_service()
     m = await svc.create_master_schedule(
-        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"), user_id="u",
+        MasterScheduleCreate(project_id=PROJECT_ID, name="MS"),
+        user_id="u",
     )
     await svc.create_phase_plan(
         PhasePlanCreate(master_schedule_id=m.id, name="Late", planned_start=date(2026, 12, 1)),

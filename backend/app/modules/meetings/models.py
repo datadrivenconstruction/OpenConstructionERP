@@ -147,14 +147,17 @@ class MeetingAttendance(Base):
     user_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     external_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     checked_in_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     signature_image_path: Mapped[str | None] = mapped_column(
-        String(500), nullable=True,
+        String(500),
+        nullable=True,
     )
 
     meeting: Mapped[Meeting] = relationship(
-        "Meeting", back_populates="attendance_records",
+        "Meeting",
+        back_populates="attendance_records",
     )
 
     def __repr__(self) -> str:

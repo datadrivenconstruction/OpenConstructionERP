@@ -88,10 +88,7 @@ PACK_CONFIG: dict[str, Any] = {
     "payment_application": {
         "format": "AIA_G702_G703",
         "name": "AIA G702/G703 Application and Certificate for Payment",
-        "description": (
-            "Standard payment application with Schedule of Values (G703) "
-            "and summary certificate (G702)"
-        ),
+        "description": ("Standard payment application with Schedule of Values (G703) and summary certificate (G702)"),
         "fields": [
             "application_number",
             "period_to",

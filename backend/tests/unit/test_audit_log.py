@@ -17,7 +17,6 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.audit_log import (
-    ActivityLog,
     get_activity_for_entity,
     get_recent_activity,
     log_activity,
@@ -107,12 +106,22 @@ async def test_log_activity_invalid_actor_string_becomes_null(session: AsyncSess
 async def test_get_activity_for_entity_orders_chronologically(session: AsyncSession) -> None:
     eid = str(uuid.uuid4())
     await log_activity(
-        session, actor_id=None, entity_type="boq", entity_id=eid,
-        action="status_changed", from_status="draft", to_status="final",
+        session,
+        actor_id=None,
+        entity_type="boq",
+        entity_id=eid,
+        action="status_changed",
+        from_status="draft",
+        to_status="final",
     )
     await log_activity(
-        session, actor_id=None, entity_type="boq", entity_id=eid,
-        action="status_changed", from_status="final", to_status="archived",
+        session,
+        actor_id=None,
+        entity_type="boq",
+        entity_id=eid,
+        action="status_changed",
+        from_status="final",
+        to_status="archived",
     )
     rows = await get_activity_for_entity(session, entity_type="boq", entity_id=eid)
     assert len(rows) == 2
@@ -126,12 +135,20 @@ async def test_get_activity_filters_by_entity(session: AsyncSession) -> None:
     eid1 = str(uuid.uuid4())
     eid2 = str(uuid.uuid4())
     await log_activity(
-        session, actor_id=None, entity_type="boq", entity_id=eid1,
-        action="status_changed", to_status="final",
+        session,
+        actor_id=None,
+        entity_type="boq",
+        entity_id=eid1,
+        action="status_changed",
+        to_status="final",
     )
     await log_activity(
-        session, actor_id=None, entity_type="boq", entity_id=eid2,
-        action="status_changed", to_status="final",
+        session,
+        actor_id=None,
+        entity_type="boq",
+        entity_id=eid2,
+        action="status_changed",
+        to_status="final",
     )
     rows = await get_activity_for_entity(session, entity_type="boq", entity_id=eid1)
     assert len(rows) == 1
@@ -143,15 +160,24 @@ async def test_get_recent_activity_filters(session: AsyncSession) -> None:
     actor1 = str(uuid.uuid4())
     actor2 = str(uuid.uuid4())
     await log_activity(
-        session, actor_id=actor1, entity_type="boq", entity_id="b1",
+        session,
+        actor_id=actor1,
+        entity_type="boq",
+        entity_id="b1",
         action="status_changed",
     )
     await log_activity(
-        session, actor_id=actor2, entity_type="invoice", entity_id="i1",
+        session,
+        actor_id=actor2,
+        entity_type="invoice",
+        entity_id="i1",
         action="status_changed",
     )
     await log_activity(
-        session, actor_id=actor1, entity_type="boq", entity_id="b2",
+        session,
+        actor_id=actor1,
+        entity_type="boq",
+        entity_id="b2",
         action="created",
     )
 
@@ -171,7 +197,10 @@ async def test_get_recent_activity_filters(session: AsyncSession) -> None:
 @pytest.mark.asyncio
 async def test_metadata_defaults_to_empty_dict(session: AsyncSession) -> None:
     row = await log_activity(
-        session, actor_id=None, entity_type="ncr", entity_id="x",
+        session,
+        actor_id=None,
+        entity_type="ncr",
+        entity_id="x",
         action="created",
     )
     assert row.metadata_ == {}
@@ -189,12 +218,20 @@ async def test_recent_activity_is_newest_first(session: AsyncSession) -> None:
     (which uses entity-scoped ASC ordering) for ordering correctness.
     """
     await log_activity(
-        session, actor_id=None, entity_type="boq", entity_id="b1",
-        action="created", metadata={"seq": 1},
+        session,
+        actor_id=None,
+        entity_type="boq",
+        entity_id="b1",
+        action="created",
+        metadata={"seq": 1},
     )
     await log_activity(
-        session, actor_id=None, entity_type="boq", entity_id="b1",
-        action="status_changed", metadata={"seq": 2},
+        session,
+        actor_id=None,
+        entity_type="boq",
+        entity_id="b1",
+        action="status_changed",
+        metadata={"seq": 2},
     )
     rows = await get_recent_activity(session, entity_type="boq")
     assert len(rows) == 2

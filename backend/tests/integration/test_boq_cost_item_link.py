@@ -24,7 +24,6 @@ from httpx import ASGITransport, AsyncClient
 
 from app.main import create_app
 
-
 # ── Shared fixtures (module-scoped — same pattern as other BOQ integration tests) ──
 
 
@@ -71,11 +70,7 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     token = ""
@@ -187,9 +182,7 @@ async def test_position_create_with_cwicr_and_cost_item_id_round_trips(
     assert created["metadata"].get("cost_item_id") == cost_item_id
 
     # GET must surface the same linkage.
-    get_resp = await client.get(
-        f"/api/v1/boq/positions/{created['id']}", headers=auth
-    )
+    get_resp = await client.get(f"/api/v1/boq/positions/{created['id']}", headers=auth)
     assert get_resp.status_code == 200, f"GET failed: {get_resp.text}"
     fetched = get_resp.json()
     assert fetched["source"] == "cwicr"

@@ -299,9 +299,7 @@ def _safe_text(text: str | None) -> str:
 
         embedder = get_embedder()
         tokenizer = getattr(embedder, "tokenizer", None) if embedder is not None else None
-        if tokenizer is not None and hasattr(tokenizer, "encode") and hasattr(
-            tokenizer, "decode"
-        ):
+        if tokenizer is not None and hasattr(tokenizer, "encode") and hasattr(tokenizer, "decode"):
             ids = tokenizer.encode(cleaned, add_special_tokens=False)
             if len(ids) > _TOKEN_BUDGET:
                 ids = ids[:_TOKEN_BUDGET]
@@ -431,9 +429,7 @@ async def index_many(
                     "vector": vec,
                     "text": text,
                     "tenant_id": tenant_id or "",
-                    "project_id": project_id
-                    or _coerce_id(adapter.project_id_of(row))
-                    or "",
+                    "project_id": project_id or _coerce_id(adapter.project_id_of(row)) or "",
                     "module": adapter.module_name,
                     "payload": json.dumps(payload, ensure_ascii=False, default=str),
                 }
@@ -531,11 +527,7 @@ async def search_collection(
     if not vectors:
         return []
 
-    collection = (
-        adapter_or_name
-        if isinstance(adapter_or_name, str)
-        else adapter_or_name.collection_name
-    )
+    collection = adapter_or_name if isinstance(adapter_or_name, str) else adapter_or_name.collection_name
     try:
         raw_hits = vector_search_collection(
             collection,
@@ -572,11 +564,7 @@ async def find_similar(
     if not text or not row_id:
         return []
 
-    project_filter = (
-        None
-        if cross_project
-        else (project_id or _coerce_id(adapter.project_id_of(row)) or None)
-    )
+    project_filter = None if cross_project else (project_id or _coerce_id(adapter.project_id_of(row)) or None)
     hits = await search_collection(
         adapter,
         text,
@@ -612,10 +600,7 @@ def reciprocal_rank_fusion(
             score_by_id[key] = score_by_id.get(key, 0.0) + 1.0 / (k + rank)
             if key not in hit_by_id:
                 hit_by_id[key] = hit
-    fused = [
-        (hit_by_id[key], score)
-        for key, score in score_by_id.items()
-    ]
+    fused = [(hit_by_id[key], score) for key, score in score_by_id.items()]
     fused.sort(key=lambda pair: pair[1], reverse=True)
     return [hit for hit, _ in fused]
 
@@ -674,9 +659,7 @@ def collection_status(collection_name: str) -> dict[str, Any]:
 def all_collection_status() -> dict[str, Any]:
     """Return per-collection status for the unified-search status endpoint."""
     overall = _vector_status_raw()
-    overall["multi_collection"] = {
-        c: collection_status(c) for c in ALL_COLLECTIONS
-    }
+    overall["multi_collection"] = {c: collection_status(c) for c in ALL_COLLECTIONS}
     return overall
 
 

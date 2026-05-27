@@ -111,20 +111,14 @@ class FieldReportRepository:
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def aggregates_for_project(
-        self, project_id: uuid.UUID
-    ) -> dict[str, object]:
+    async def aggregates_for_project(self, project_id: uuid.UUID) -> dict[str, object]:
         """Aggregate counts and totals for the project summary.
 
         Pushes status / report_type counts and the delay_hours sum into SQL
         instead of hydrating every FieldReport row in Python. Workforce
         hours still need a JSON pass — see ``workforce_for_project``.
         """
-        total_stmt = (
-            select(func.count())
-            .select_from(FieldReport)
-            .where(FieldReport.project_id == project_id)
-        )
+        total_stmt = select(func.count()).select_from(FieldReport).where(FieldReport.project_id == project_id)
         total = (await self.session.execute(total_stmt)).scalar_one()
 
         status_rows = (
@@ -145,8 +139,9 @@ class FieldReportRepository:
 
         delay_sum = (
             await self.session.execute(
-                select(func.coalesce(func.sum(FieldReport.delay_hours), 0.0))
-                .where(FieldReport.project_id == project_id)
+                select(func.coalesce(func.sum(FieldReport.delay_hours), 0.0)).where(
+                    FieldReport.project_id == project_id
+                )
             )
         ).scalar_one()
 
@@ -164,10 +159,7 @@ class FieldReportRepository:
         can't fully aggregate in SQL — but we can drop every other column
         and skip ORM hydration.
         """
-        stmt = (
-            select(FieldReport.workforce)
-            .where(FieldReport.project_id == project_id)
-        )
+        stmt = select(FieldReport.workforce).where(FieldReport.project_id == project_id)
         result = await self.session.execute(stmt)
         return [row[0] or [] for row in result.all()]
 
@@ -182,13 +174,9 @@ class FieldReportTemplateRepository:
         """Get a custom template by ID."""
         return await self.session.get(FieldReportTemplate, template_id)
 
-    async def list_for_project(
-        self, project_id: uuid.UUID, *, active_only: bool = False
-    ) -> list[FieldReportTemplate]:
+    async def list_for_project(self, project_id: uuid.UUID, *, active_only: bool = False) -> list[FieldReportTemplate]:
         """List all custom templates for a project (newest first)."""
-        stmt = select(FieldReportTemplate).where(
-            FieldReportTemplate.project_id == project_id
-        )
+        stmt = select(FieldReportTemplate).where(FieldReportTemplate.project_id == project_id)
         if active_only:
             stmt = stmt.where(FieldReportTemplate.is_active.is_(True))
         stmt = stmt.order_by(FieldReportTemplate.created_at.desc())
@@ -203,11 +191,7 @@ class FieldReportTemplateRepository:
 
     async def update_fields(self, template_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on a template."""
-        stmt = (
-            update(FieldReportTemplate)
-            .where(FieldReportTemplate.id == template_id)
-            .values(**fields)
-        )
+        stmt = update(FieldReportTemplate).where(FieldReportTemplate.id == template_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()

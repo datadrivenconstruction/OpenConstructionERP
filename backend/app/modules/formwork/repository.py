@@ -62,10 +62,7 @@ class FormworkSystemRepository(_CRUDBase):
         # Tenant scoping: a None tenant_id query matches global rows
         # (tenant_id IS NULL); a UUID matches that tenant only.
         if tenant_id is not None:
-            stmt = stmt.where(
-                (FormworkSystem.tenant_id == tenant_id)
-                | (FormworkSystem.tenant_id.is_(None))
-            )
+            stmt = stmt.where((FormworkSystem.tenant_id == tenant_id) | (FormworkSystem.tenant_id.is_(None)))
         if system_type:
             stmt = stmt.where(FormworkSystem.system_type == system_type)
         if material:
@@ -77,13 +74,12 @@ class FormworkSystemRepository(_CRUDBase):
         return list(result.scalars().all())
 
     async def list_names_for_tenant(
-        self, tenant_id: uuid.UUID | None,
+        self,
+        tenant_id: uuid.UUID | None,
     ) -> set[str]:
         """Used by the seed endpoint to skip already-installed defaults."""
         stmt = select(FormworkSystem.name).where(
-            (FormworkSystem.tenant_id == tenant_id)
-            if tenant_id is not None
-            else FormworkSystem.tenant_id.is_(None)
+            (FormworkSystem.tenant_id == tenant_id) if tenant_id is not None else FormworkSystem.tenant_id.is_(None)
         )
         result = await self.session.execute(stmt)
         return {row[0] for row in result.all()}
@@ -114,7 +110,8 @@ class FormworkScheduleLineRepository(_CRUDBase):
     model = FormworkScheduleLine
 
     async def list_for_assignment(
-        self, assignment_id: uuid.UUID,
+        self,
+        assignment_id: uuid.UUID,
     ) -> list[FormworkScheduleLine]:
         stmt = (
             select(FormworkScheduleLine)

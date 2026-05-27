@@ -305,8 +305,6 @@ async def test_s3_multipart_lifecycle() -> None:
         assert read_back == b"".join(chunks)
 
         # Presigned PUT URL is well-formed.
-        presigned = await backend.presigned_put_url(
-            "multipart/direct.bin", content_type="application/zip"
-        )
+        presigned = await backend.presigned_put_url("multipart/direct.bin", content_type="application/zip")
         assert presigned.method == "PUT"
         assert "multipart/direct.bin" in presigned.url

@@ -19,6 +19,7 @@ The cache is cleared on demand by :func:`clear_project_region_cache` (used
 by tests and by the project-update path so a region change is observable
 within one request after the PATCH commits).
 """
+
 from __future__ import annotations
 
 import asyncio

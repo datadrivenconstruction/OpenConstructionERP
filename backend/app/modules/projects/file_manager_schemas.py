@@ -38,14 +38,17 @@ class FileRow(BaseModel):
     size_bytes: int = Field(default=0, ge=0)
     mime_type: str | None = None
     extension: str | None = Field(
-        default=None, description="Lower-cased file extension without leading dot, or None",
+        default=None,
+        description="Lower-cased file extension without leading dot, or None",
     )
     modified_at: datetime | None = None
     physical_path: str = Field(
-        ..., description="Absolute on-disk path (or s3:// key) where this file lives",
+        ...,
+        description="Absolute on-disk path (or s3:// key) where this file lives",
     )
     relative_path: str = Field(
-        ..., description="Path relative to the storage root, suitable for breadcrumbs",
+        ...,
+        description="Path relative to the storage root, suitable for breadcrumbs",
     )
     storage_backend: Literal["local", "s3"] = "local"
     download_url: str | None = Field(
@@ -95,7 +98,8 @@ class StorageLocations(BaseModel):
     storage_path_override: str | None = None
     storage_backend: Literal["local", "s3"] = "local"
     db_path: str | None = Field(
-        default=None, description="Absolute path to the SQLite DB or driver URL summary",
+        default=None,
+        description="Absolute path to the SQLite DB or driver URL summary",
     )
     uploads_root: str | None = None
     photos_root: str | None = None
@@ -186,13 +190,9 @@ class BundleManifest(BaseModel):
     # bytes XOR-decode (key 0x55) to the project authorship marker. Purely
     # informational manifest metadata: the importer reads tables/attachments
     # by name and never branches on this field, so it changes no behaviour.
-    provenance: str = (
-        "OpenConstructionERP · DataDrivenConstruction · "
-        + bytes(
-            b ^ 0x55
-            for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
-        ).decode("ascii")
-    )
+    provenance: str = "OpenConstructionERP · DataDrivenConstruction · " + bytes(
+        b ^ 0x55 for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
+    ).decode("ascii")
 
 
 ImportMode = Literal["new_project", "merge_into_existing", "replace_existing"]

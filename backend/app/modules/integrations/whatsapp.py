@@ -49,12 +49,12 @@ async def send_whatsapp_notification(
     # Build the template component with parameters
     components: list[dict[str, Any]] = []
     if template_params:
-        components.append({
-            "type": "body",
-            "parameters": [
-                {"type": "text", "text": param} for param in template_params
-            ],
-        })
+        components.append(
+            {
+                "type": "body",
+                "parameters": [{"type": "text", "text": param} for param in template_params],
+            }
+        )
 
     payload: dict[str, Any] = {
         "messaging_product": "whatsapp",

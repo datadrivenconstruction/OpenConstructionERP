@@ -70,46 +70,73 @@ ACTIVITY_PRESET: dict[str, str] = {
 
 # ── Role → modules that role leans on (curated, doc §2.2 spirit) ─────────
 ROLE_AFFINITY: dict[str, frozenset[str]] = {
-    "client_owner": frozenset(
-        {"portal", "finance", "risk", "reporting", "project_intelligence"}
-    ),
+    "client_owner": frozenset({"portal", "finance", "risk", "reporting", "project_intelligence"}),
     "general_contractor": frozenset(
         {
-            "procurement", "subcontractors", "schedule", "schedule_advanced",
-            "fieldreports", "daily_diary", "finance", "changeorders",
-            "safety", "hse_advanced",
+            "procurement",
+            "subcontractors",
+            "schedule",
+            "schedule_advanced",
+            "fieldreports",
+            "daily_diary",
+            "finance",
+            "changeorders",
+            "safety",
+            "hse_advanced",
         }
     ),
     "bim_consultant": frozenset(
         {
-            "bim_hub", "bim_requirements", "validation", "compliance",
-            "compliance_ai", "compliance_docs", "cde", "opencde_api",
-            "markups", "match_elements",
+            "bim_hub",
+            "bim_requirements",
+            "validation",
+            "compliance",
+            "compliance_ai",
+            "compliance_docs",
+            "cde",
+            "opencde_api",
+            "markups",
+            "match_elements",
         }
     ),
     "bim_manager": frozenset(
         {
-            "bim_hub", "bim_requirements", "validation", "cde",
-            "match_elements", "markups", "ncr", "inspections",
+            "bim_hub",
+            "bim_requirements",
+            "validation",
+            "cde",
+            "match_elements",
+            "markups",
+            "ncr",
+            "inspections",
         }
     ),
-    "designer_architect": frozenset(
-        {"bim_hub", "bim_requirements", "validation", "markups", "cde"}
-    ),
-    "subcontractor": frozenset(
-        {"tendering", "rfq_bidding", "bid_management", "fieldreports", "rfi"}
-    ),
+    "designer_architect": frozenset({"bim_hub", "bim_requirements", "validation", "markups", "cde"}),
+    "subcontractor": frozenset({"tendering", "rfq_bidding", "bid_management", "fieldreports", "rfi"}),
     "cost_engineer": frozenset(
         {
-            "boq", "catalog", "costs", "costmodel", "assemblies",
-            "cost_match", "ai", "takeoff", "dwg_takeoff", "match_elements",
+            "boq",
+            "catalog",
+            "costs",
+            "costmodel",
+            "assemblies",
+            "cost_match",
+            "ai",
+            "takeoff",
+            "dwg_takeoff",
+            "match_elements",
             "tendering",
         }
     ),
     "developer": frozenset(
         {
-            "property_dev", "crm", "finance", "portal", "variations",
-            "project_intelligence", "carbon",
+            "property_dev",
+            "crm",
+            "finance",
+            "portal",
+            "variations",
+            "project_intelligence",
+            "carbon",
         }
     ),
 }
@@ -119,33 +146,62 @@ PHASE_AFFINITY: dict[str, frozenset[str]] = {
     "concept": frozenset({"project_intelligence", "crm", "property_dev"}),
     "design": frozenset(
         {
-            "bim_hub", "bim_requirements", "validation", "compliance",
-            "compliance_ai", "compliance_docs", "cde", "markups",
-            "match_elements", "requirements",
+            "bim_hub",
+            "bim_requirements",
+            "validation",
+            "compliance",
+            "compliance_ai",
+            "compliance_docs",
+            "cde",
+            "markups",
+            "match_elements",
+            "requirements",
         }
     ),
     "tender": frozenset(
         {
-            "tendering", "bid_management", "rfq_bidding", "boq", "catalog",
-            "costs", "costmodel", "assemblies", "ai", "takeoff",
-            "dwg_takeoff", "cost_match", "contracts", "submittals",
+            "tendering",
+            "bid_management",
+            "rfq_bidding",
+            "boq",
+            "catalog",
+            "costs",
+            "costmodel",
+            "assemblies",
+            "ai",
+            "takeoff",
+            "dwg_takeoff",
+            "cost_match",
+            "contracts",
+            "submittals",
         }
     ),
-    "procurement": frozenset(
-        {"procurement", "subcontractors", "contracts", "correspondence"}
-    ),
+    "procurement": frozenset({"procurement", "subcontractors", "contracts", "correspondence"}),
     "construction": frozenset(
         {
-            "schedule", "schedule_advanced", "finance", "changeorders",
-            "fieldreports", "daily_diary", "inspections", "ncr",
-            "punchlist", "safety", "hse_advanced", "meetings", "rfi",
-            "equipment", "resources", "jobs", "eac", "full_evm",
-            "transmittals", "variations",
+            "schedule",
+            "schedule_advanced",
+            "finance",
+            "changeorders",
+            "fieldreports",
+            "daily_diary",
+            "inspections",
+            "ncr",
+            "punchlist",
+            "safety",
+            "hse_advanced",
+            "meetings",
+            "rfi",
+            "equipment",
+            "resources",
+            "jobs",
+            "eac",
+            "full_evm",
+            "transmittals",
+            "variations",
         }
     ),
-    "handover": frozenset(
-        {"service", "qms", "carbon", "opencde_api", "submittals"}
-    ),
+    "handover": frozenset({"service", "qms", "carbon", "opencde_api", "submittals"}),
 }
 
 # Canonical phase order for global numbering (doc §3.2).
@@ -160,9 +216,7 @@ PHASE_ORDER: tuple[str, ...] = (
 )
 
 # Enterprise-tier modules only make sense at scale (size axis).
-ENTERPRISE_MODULES: frozenset[str] = frozenset(
-    {"full_evm", "enterprise_workflows", "rfq_bidding", "eac"}
-)
+ENTERPRISE_MODULES: frozenset[str] = frozenset({"full_evm", "enterprise_workflows", "rfq_bidding", "eac"})
 
 SIZE_BASE: dict[str, int] = {
     "small": 30,
@@ -278,15 +332,24 @@ def build_project_modules(
 
     for m in ALWAYS_ON:
         chosen[m] = ModuleAssignment(
-            module_name=m, enabled=True, tier="must", score=SCORE_CORE,
-            phase="setup", source="core", why="Core infrastructure",
+            module_name=m,
+            enabled=True,
+            tier="must",
+            score=SCORE_CORE,
+            phase="setup",
+            source="core",
+            why="Core infrastructure",
         )
 
     pack = REGION_PACK.get(region)
     if pack:
         chosen[pack] = ModuleAssignment(
-            module_name=pack, enabled=True, tier="must", score=SCORE_CORE,
-            phase="setup", source="region",
+            module_name=pack,
+            enabled=True,
+            tier="must",
+            score=SCORE_CORE,
+            phase="setup",
+            source="region",
             why=f"Regional pack for {region}",
         )
 
@@ -295,8 +358,12 @@ def build_project_modules(
             if m in chosen:
                 continue
             chosen[m] = ModuleAssignment(
-                module_name=m, enabled=True, tier="must", score=SCORE_PRESET,
-                phase=_phase_of(m), source="preset",
+                module_name=m,
+                enabled=True,
+                tier="must",
+                score=SCORE_PRESET,
+                phase=_phase_of(m),
+                source="preset",
                 why=f"Selected by preset “{preset}”",
             )
 
@@ -314,8 +381,12 @@ def build_project_modules(
             tier = "hidden"
             enabled = False
         chosen[m] = ModuleAssignment(
-            module_name=m, enabled=enabled, tier=tier, score=score,
-            phase=_phase_of(m), source="score",
+            module_name=m,
+            enabled=enabled,
+            tier=tier,
+            score=score,
+            phase=_phase_of(m),
+            source="score",
             why=f"Score {score} (activity/role/phase/size/region)",
         )
 

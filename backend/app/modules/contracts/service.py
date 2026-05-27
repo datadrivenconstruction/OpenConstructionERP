@@ -55,8 +55,13 @@ DEC_ZERO = Decimal("0")
 DEC_HUNDRED = Decimal("100")
 
 CONTRACT_TYPES = (
-    "lump_sum", "gmp", "cost_plus", "tm", "unit_price",
-    "design_build", "combination",
+    "lump_sum",
+    "gmp",
+    "cost_plus",
+    "tm",
+    "unit_price",
+    "design_build",
+    "combination",
 )
 
 # Type-specific required-keys map. Empty list = no extra required keys.
@@ -222,10 +227,7 @@ def compute_progress_claim_total(
     Net is ``gross - retention - prior_claims_paid`` (clamped to zero floor).
     """
     gross = sum(
-        (
-            Decimal(str(getattr(ln, "period_completed_value", 0) or 0))
-            for ln in claim_lines
-        ),
+        (Decimal(str(getattr(ln, "period_completed_value", 0) or 0)) for ln in claim_lines),
         DEC_ZERO,
     )
     pct = Decimal(str(retention_percent or 0))
@@ -267,9 +269,7 @@ def compute_gmp_gainshare(
     if actual < target:
         savings = target - actual
         owner_share = (savings * owner_pct / DEC_HUNDRED).quantize(Decimal("0.0001"))
-        contractor_share = (
-            savings * contractor_pct / DEC_HUNDRED
-        ).quantize(Decimal("0.0001"))
+        contractor_share = (savings * contractor_pct / DEC_HUNDRED).quantize(Decimal("0.0001"))
     elif actual > cap and cap > DEC_ZERO:
         overrun = actual - cap
 
@@ -315,13 +315,8 @@ def generate_lump_sum_claim(
     Returns a dict with ``claim_lines`` (list of ProgressClaimLine-shaped dicts),
     plus ``gross``, ``retention``, ``net`` totals.
     """
-    norm: dict[str, Decimal] = {
-        str(k): Decimal(str(v)) for k, v in (completion or {}).items()
-    }
-    parent_ids: set[uuid.UUID] = {
-        ln.parent_line_id for ln in lines
-        if getattr(ln, "parent_line_id", None) is not None
-    }
+    norm: dict[str, Decimal] = {str(k): Decimal(str(v)) for k, v in (completion or {}).items()}
+    parent_ids: set[uuid.UUID] = {ln.parent_line_id for ln in lines if getattr(ln, "parent_line_id", None) is not None}
 
     claim_lines: list[dict[str, Any]] = []
     for ln in lines:
@@ -334,16 +329,16 @@ def generate_lump_sum_claim(
             pct = DEC_HUNDRED
         line_total = compute_line_total(ln)
         value = (line_total * pct / DEC_HUNDRED).quantize(Decimal("0.0001"))
-        qty_progress = (
-            (Decimal(str(getattr(ln, "quantity", 0) or 0)) * pct) / DEC_HUNDRED
-        ).quantize(Decimal("0.0001"))
-        claim_lines.append({
-            "contract_line_id": getattr(ln, "id", None),
-            "period_completed_qty": qty_progress,
-            "period_completed_value": value,
-            "period_completed_pct": pct,
-            "cumulative_completed_value": value,
-        })
+        qty_progress = ((Decimal(str(getattr(ln, "quantity", 0) or 0)) * pct) / DEC_HUNDRED).quantize(Decimal("0.0001"))
+        claim_lines.append(
+            {
+                "contract_line_id": getattr(ln, "id", None),
+                "period_completed_qty": qty_progress,
+                "period_completed_value": value,
+                "period_completed_pct": pct,
+                "cumulative_completed_value": value,
+            }
+        )
 
     totals = compute_progress_claim_total(
         [type("L", (), c)() for c in claim_lines],
@@ -353,7 +348,8 @@ def generate_lump_sum_claim(
     # The synthesised objects above lose attribute access — recompute gross
     # directly off the dicts to be safe.
     gross = sum(
-        (c["period_completed_value"] for c in claim_lines), DEC_ZERO,
+        (c["period_completed_value"] for c in claim_lines),
+        DEC_ZERO,
     )
     pct = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
     retention = (gross * pct / DEC_HUNDRED).quantize(Decimal("0.0001"))
@@ -467,8 +463,7 @@ def generate_tm_claim(
             cap = None
         if cap is not None and (Decimal(str(prior_paid or 0)) + gross) > cap:
             raise NTECapExceededError(
-                f"T&M claim would exceed NTE cap: prior={prior_paid}, "
-                f"this={gross}, cap={cap}",
+                f"T&M claim would exceed NTE cap: prior={prior_paid}, this={gross}, cap={cap}",
             )
 
     pct = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
@@ -494,13 +489,8 @@ def generate_unit_price_claim(
     prior_paid: Decimal = DEC_ZERO,
 ) -> dict[str, Any]:
     """Compute a unit-price claim from per-line measured quantities."""
-    norm: dict[str, Decimal] = {
-        str(k): Decimal(str(v)) for k, v in (measurements or {}).items()
-    }
-    parent_ids: set[uuid.UUID] = {
-        ln.parent_line_id for ln in lines
-        if getattr(ln, "parent_line_id", None) is not None
-    }
+    norm: dict[str, Decimal] = {str(k): Decimal(str(v)) for k, v in (measurements or {}).items()}
+    parent_ids: set[uuid.UUID] = {ln.parent_line_id for ln in lines if getattr(ln, "parent_line_id", None) is not None}
     claim_lines: list[dict[str, Any]] = []
     for ln in lines:
         if getattr(ln, "id", None) in parent_ids:
@@ -509,16 +499,20 @@ def generate_unit_price_claim(
         rate = Decimal(str(getattr(ln, "unit_rate", 0) or 0))
         value = (measured * rate).quantize(Decimal("0.0001"))
         qty_contract = Decimal(str(getattr(ln, "quantity", 0) or 0))
-        pct = DEC_ZERO if qty_contract == DEC_ZERO else (
-            (measured / qty_contract * DEC_HUNDRED).quantize(Decimal("0.0001"))
+        pct = (
+            DEC_ZERO
+            if qty_contract == DEC_ZERO
+            else ((measured / qty_contract * DEC_HUNDRED).quantize(Decimal("0.0001")))
         )
-        claim_lines.append({
-            "contract_line_id": getattr(ln, "id", None),
-            "period_completed_qty": measured,
-            "period_completed_value": value,
-            "period_completed_pct": pct,
-            "cumulative_completed_value": value,
-        })
+        claim_lines.append(
+            {
+                "contract_line_id": getattr(ln, "id", None),
+                "period_completed_qty": measured,
+                "period_completed_value": value,
+                "period_completed_pct": pct,
+                "cumulative_completed_value": value,
+            }
+        )
 
     gross = sum((c["period_completed_value"] for c in claim_lines), DEC_ZERO)
     pct = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
@@ -601,7 +595,9 @@ class ContractsService:
         contract = await self.contract_repo.create(contract)
         logger.info(
             "Contract created: %s (%s) project=%s",
-            contract.code, contract.contract_type, data.project_id,
+            contract.code,
+            contract.contract_type,
+            data.project_id,
         )
         return contract
 
@@ -644,18 +640,13 @@ class ContractsService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "error": "status_not_directly_editable",
-                    "message": (
-                        "Use the sign / suspend / resume / terminate "
-                        "endpoints to change contract status"
-                    ),
+                    "message": ("Use the sign / suspend / resume / terminate endpoints to change contract status"),
                 },
             )
         fields.pop("status", None)
         # Once the contract leaves `draft`, its financial terms are frozen.
         if contract.status != "draft":
-            locked = sorted(
-                f for f in self._LOCKED_FINANCIAL_FIELDS if f in fields
-            )
+            locked = sorted(f for f in self._LOCKED_FINANCIAL_FIELDS if f in fields)
             if locked:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
@@ -766,8 +757,8 @@ class ContractsService:
             currency=source.currency,
             retention_percent=Decimal(str(source.retention_percent or 0)),
             retention_release_event=source.retention_release_event,
-            status="draft",          # cloned instrument starts as draft
-            signed_at=None,          # must be re-signed
+            status="draft",  # cloned instrument starts as draft
+            signed_at=None,  # must be re-signed
             terms=cloned_terms,
             created_by=user_id,
             metadata_=cloned_meta,
@@ -806,62 +797,64 @@ class ContractsService:
                 if new_parent is None:
                     continue
                 await self.line_repo.update_fields(
-                    id_map[ln.id], parent_line_id=new_parent,
+                    id_map[ln.id],
+                    parent_line_id=new_parent,
                 )
 
         # ── Sub-configurations ──────────────────────────────────────
         if copy_subconfigs:
             src_retention = await self.retention_repo.list_for_contract(source.id)
             for r in src_retention:
-                self.session.add(RetentionSchedule(
-                    contract_id=clone.id,
-                    accrual_rule=dict(r.accrual_rule or {}),
-                    release_rule=dict(r.release_rule or {}),
-                    notes=r.notes,
-                ))
+                self.session.add(
+                    RetentionSchedule(
+                        contract_id=clone.id,
+                        accrual_rule=dict(r.accrual_rule or {}),
+                        release_rule=dict(r.release_rule or {}),
+                        notes=r.notes,
+                    )
+                )
             src_fee = await self.fee_repo.get_for_contract(source.id)
             if src_fee is not None:
-                self.session.add(FeeStructure(
-                    contract_id=clone.id,
-                    fee_type=src_fee.fee_type,
-                    fee_percent=Decimal(str(src_fee.fee_percent or 0)),
-                    fee_fixed_amount=(
-                        None if src_fee.fee_fixed_amount is None
-                        else Decimal(str(src_fee.fee_fixed_amount))
-                    ),
-                    sliding_scale=list(src_fee.sliding_scale or []),
-                    max_fee=(
-                        None if src_fee.max_fee is None
-                        else Decimal(str(src_fee.max_fee))
-                    ),
-                ))
+                self.session.add(
+                    FeeStructure(
+                        contract_id=clone.id,
+                        fee_type=src_fee.fee_type,
+                        fee_percent=Decimal(str(src_fee.fee_percent or 0)),
+                        fee_fixed_amount=(
+                            None if src_fee.fee_fixed_amount is None else Decimal(str(src_fee.fee_fixed_amount))
+                        ),
+                        sliding_scale=list(src_fee.sliding_scale or []),
+                        max_fee=(None if src_fee.max_fee is None else Decimal(str(src_fee.max_fee))),
+                    )
+                )
             src_gain = await self.gainshare_repo.get_for_contract(source.id)
             if src_gain is not None:
-                self.session.add(GainshareConfiguration(
-                    contract_id=clone.id,
-                    target_cost=Decimal(str(src_gain.target_cost or 0)),
-                    gmp_cap=Decimal(str(src_gain.gmp_cap or 0)),
-                    savings_split_owner_pct=Decimal(
-                        str(src_gain.savings_split_owner_pct or 0),
-                    ),
-                    savings_split_contractor_pct=Decimal(
-                        str(src_gain.savings_split_contractor_pct or 0),
-                    ),
-                    overrun_responsibility=src_gain.overrun_responsibility,
-                ))
+                self.session.add(
+                    GainshareConfiguration(
+                        contract_id=clone.id,
+                        target_cost=Decimal(str(src_gain.target_cost or 0)),
+                        gmp_cap=Decimal(str(src_gain.gmp_cap or 0)),
+                        savings_split_owner_pct=Decimal(
+                            str(src_gain.savings_split_owner_pct or 0),
+                        ),
+                        savings_split_contractor_pct=Decimal(
+                            str(src_gain.savings_split_contractor_pct or 0),
+                        ),
+                        overrun_responsibility=src_gain.overrun_responsibility,
+                    )
+                )
             src_lds = await self.ld_repo.list_for_contract(source.id)
             for ld in src_lds:
-                self.session.add(LDClause(
-                    contract_id=clone.id,
-                    per_day_amount=Decimal(str(ld.per_day_amount or 0)),
-                    currency=ld.currency,
-                    max_amount=(
-                        None if ld.max_amount is None
-                        else Decimal(str(ld.max_amount))
-                    ),
-                    milestone_id=ld.milestone_id,
-                    enforcement_status=ld.enforcement_status,
-                ))
+                self.session.add(
+                    LDClause(
+                        contract_id=clone.id,
+                        per_day_amount=Decimal(str(ld.per_day_amount or 0)),
+                        currency=ld.currency,
+                        max_amount=(None if ld.max_amount is None else Decimal(str(ld.max_amount))),
+                        milestone_id=ld.milestone_id,
+                        enforcement_status=ld.enforcement_status,
+                    )
+                )
             await self.session.flush()
 
         event_bus.publish_detached(
@@ -877,7 +870,10 @@ class ContractsService:
         )
         logger.info(
             "Contract cloned: %s → %s (project %s → %s)",
-            source.code, clone.code, source.project_id, dest_project_id,
+            source.code,
+            clone.code,
+            source.project_id,
+            dest_project_id,
         )
         return clone
 
@@ -899,6 +895,7 @@ class ContractsService:
         fields: dict[str, Any] = {"status": target_status}
         if target_status == "active" and contract.status == "draft":
             from datetime import UTC, datetime
+
             fields["signed_at"] = datetime.now(UTC).isoformat()
             event_bus.publish_detached(
                 "contracts.contract.signed",
@@ -947,24 +944,28 @@ class ContractsService:
         for it in items:
             qty = Decimal(str(it.quantity or 0))
             rate = Decimal(str(it.unit_rate or 0))
-            lines.append(ContractLine(
-                contract_id=contract_id,
-                parent_line_id=it.parent_line_id,
-                code=it.code,
-                description=it.description,
-                scope_section=it.scope_section,
-                line_type=it.line_type,
-                unit=it.unit,
-                quantity=qty,
-                unit_rate=rate,
-                total_value=qty * rate,
-                order_index=it.order_index,
-                metadata_=it.metadata,
-            ))
+            lines.append(
+                ContractLine(
+                    contract_id=contract_id,
+                    parent_line_id=it.parent_line_id,
+                    code=it.code,
+                    description=it.description,
+                    scope_section=it.scope_section,
+                    line_type=it.line_type,
+                    unit=it.unit,
+                    quantity=qty,
+                    unit_rate=rate,
+                    total_value=qty * rate,
+                    order_index=it.order_index,
+                    metadata_=it.metadata,
+                )
+            )
         return await self.line_repo.bulk_create(lines)
 
     async def update_line(
-        self, line_id: uuid.UUID, data: Any,
+        self,
+        line_id: uuid.UUID,
+        data: Any,
     ) -> ContractLine:
         line = await self.line_repo.get_by_id(line_id)
         if line is None:
@@ -1020,6 +1021,7 @@ class ContractsService:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
         from datetime import UTC, datetime
+
         fields: dict[str, Any] = {"status": target_status}
         now = datetime.now(UTC).isoformat()
         if target_status == "submitted":
@@ -1123,11 +1125,17 @@ class ContractsService:
         result: dict[str, Any]
         if contract.contract_type == "lump_sum":
             result = generate_lump_sum_claim(
-                contract, lines, payload.completion or {}, prior_paid,
+                contract,
+                lines,
+                payload.completion or {},
+                prior_paid,
             )
         elif contract.contract_type == "unit_price":
             result = generate_unit_price_claim(
-                contract, lines, payload.measurements or {}, prior_paid,
+                contract,
+                lines,
+                payload.measurements or {},
+                prior_paid,
             )
         elif contract.contract_type == "cost_plus":
             result = generate_cost_plus_claim(
@@ -1155,7 +1163,10 @@ class ContractsService:
         else:
             # GMP / design_build / combination — default to lump-sum semantics
             result = generate_lump_sum_claim(
-                contract, lines, payload.completion or {}, prior_paid,
+                contract,
+                lines,
+                payload.completion or {},
+                prior_paid,
             )
 
         # Persist new claim lines (replacing any existing draft ones).
@@ -1164,16 +1175,18 @@ class ContractsService:
             await self.claim_line_repo.delete(ex.id)
         new_lines: list[ProgressClaimLine] = []
         for cl in result.get("claim_lines", []) or []:
-            new_lines.append(ProgressClaimLine(
-                progress_claim_id=claim_id,
-                contract_line_id=cl["contract_line_id"],
-                period_completed_qty=Decimal(str(cl["period_completed_qty"])),
-                period_completed_value=Decimal(str(cl["period_completed_value"])),
-                period_completed_pct=Decimal(str(cl["period_completed_pct"])),
-                cumulative_completed_value=Decimal(
-                    str(cl["cumulative_completed_value"]),
-                ),
-            ))
+            new_lines.append(
+                ProgressClaimLine(
+                    progress_claim_id=claim_id,
+                    contract_line_id=cl["contract_line_id"],
+                    period_completed_qty=Decimal(str(cl["period_completed_qty"])),
+                    period_completed_value=Decimal(str(cl["period_completed_value"])),
+                    period_completed_pct=Decimal(str(cl["period_completed_pct"])),
+                    cumulative_completed_value=Decimal(
+                        str(cl["cumulative_completed_value"]),
+                    ),
+                )
+            )
         if new_lines:
             await self.claim_line_repo.bulk_create(new_lines)
 
@@ -1294,11 +1307,13 @@ class ContractsService:
             except InvalidTransitionError:
                 logger.warning(
                     "Cannot mark contract %s completed from status %s",
-                    contract_id, contract.status,
+                    contract_id,
+                    contract.status,
                 )
             else:
                 await self.contract_repo.update_fields(
-                    contract_id, status="completed",
+                    contract_id,
+                    status="completed",
                 )
 
         event_bus.publish_detached(
@@ -1321,10 +1336,8 @@ class ContractsService:
         lines = await self.line_repo.list_for_contract(contract.id)
         # Single JOIN instead of N+1 (one claim-line query per claim).
         tagged_claim_lines: list[Any] = []
-        for cl, claim_status in (
-            await self.claim_line_repo.lines_with_status_for_contract(
-                contract.id,
-            )
+        for cl, claim_status in await self.claim_line_repo.lines_with_status_for_contract(
+            contract.id,
         ):
             try:
                 cl._claim_status = claim_status
@@ -1332,7 +1345,8 @@ class ContractsService:
                 pass
             tagged_claim_lines.append(cl)
         return compute_sov_status(
-            lines, tagged_claim_lines,
+            lines,
+            tagged_claim_lines,
             retention_percent=contract.retention_percent,
         )
 
@@ -1356,10 +1370,7 @@ class ContractsService:
         if contract.status not in ("active", "suspended", "completed"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Cannot release retention on contract in status "
-                    f"{contract.status!r}"
-                ),
+                detail=(f"Cannot release retention on contract in status {contract.status!r}"),
             )
         # Sum outstanding retention from claim repo (less anything already released).
         held = await self.claim_repo.outstanding_retention(contract_id)
@@ -1385,8 +1396,7 @@ class ContractsService:
                 },
             )
         already_released = sum(
-            (Decimal(str(r.get("amount_released", 0) or 0))
-             for r in prior_releases),
+            (Decimal(str(r.get("amount_released", 0) or 0)) for r in prior_releases),
             DEC_ZERO,
         )
         net_held = held - already_released
@@ -1405,10 +1415,7 @@ class ContractsService:
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail={
                             "error": "invalid_custom_schedule",
-                            "message": (
-                                f"custom_schedule[{key!r}] must be numeric, "
-                                f"got {val!r}"
-                            ),
+                            "message": (f"custom_schedule[{key!r}] must be numeric, got {val!r}"),
                         },
                     ) from None
                 if pct < DEC_ZERO or pct > DEC_HUNDRED:
@@ -1416,28 +1423,30 @@ class ContractsService:
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail={
                             "error": "invalid_custom_schedule",
-                            "message": (
-                                f"custom_schedule[{key!r}] must be between "
-                                f"0 and 100, got {val!r}"
-                            ),
+                            "message": (f"custom_schedule[{key!r}] must be between 0 and 100, got {val!r}"),
                         },
                     )
 
         result = plan_retention_release(
-            net_held, event, schedule=custom_schedule,
+            net_held,
+            event,
+            schedule=custom_schedule,
         )
         # Persist into metadata
         releases = list(meta.get("retention_releases", []) or [])
         from datetime import UTC
         from datetime import datetime as _dt
-        releases.append({
-            "event": event,
-            "released_at": _dt.now(UTC).isoformat(),
-            "released_by": actor_id,
-            "percent_released": str(result["percent_released"]),
-            "amount_released": str(result["amount_released"]),
-            "remaining": str(result["remaining"]),
-        })
+
+        releases.append(
+            {
+                "event": event,
+                "released_at": _dt.now(UTC).isoformat(),
+                "released_by": actor_id,
+                "percent_released": str(result["percent_released"]),
+                "amount_released": str(result["amount_released"]),
+                "remaining": str(result["remaining"]),
+            }
+        )
         meta["retention_releases"] = releases
         await self.contract_repo.update_fields(contract_id, metadata_=meta)
         await self.session.refresh(contract)
@@ -1507,6 +1516,7 @@ class ContractsService:
         waivers = list(meta.get("lien_waivers", []) or [])
         from datetime import UTC
         from datetime import datetime as _dt
+
         record = {
             "waiver_type": payload["waiver_type"],
             "through_date": payload["through_date"],
@@ -1549,7 +1559,9 @@ class ContractsService:
         paid = await self.claim_repo.paid_total(contract_id)
         retention = await self.claim_repo.outstanding_retention(contract_id)
         _claims, total_claims = await self.claim_repo.claims_for_contract(
-            contract_id, offset=0, limit=1,
+            contract_id,
+            offset=0,
+            limit=1,
         )
         gainshare_estimate: Decimal | None = None
         if contract.contract_type == "gmp":
@@ -1664,7 +1676,10 @@ def compute_sov_status(
         # Earned = anything that's at least submitted (i.e. recognised
         # as work-in-place by either party).
         if claim_status in (
-            "submitted", "approved", "certified", "paid",
+            "submitted",
+            "approved",
+            "certified",
+            "paid",
         ):
             by_line[lid]["earned"] += value
         if claim_status in ("approved", "certified", "paid"):
@@ -1687,10 +1702,7 @@ def compute_sov_status(
         paid = row["paid"]
         retained = (billed * pct / DEC_HUNDRED).quantize(Decimal("0.0001"))
         net_paid = paid - (paid * pct / DEC_HUNDRED).quantize(Decimal("0.0001"))
-        percent_complete = (
-            float((earned / scheduled) * Decimal("100"))
-            if scheduled > DEC_ZERO else 0.0
-        )
+        percent_complete = float((earned / scheduled) * Decimal("100")) if scheduled > DEC_ZERO else 0.0
         rows[lid] = {
             "scheduled": scheduled,
             "billed": billed,
@@ -1707,8 +1719,7 @@ def compute_sov_status(
         totals["retained"] += retained
 
     grand_pct = (
-        float((totals["earned"] / totals["scheduled"]) * Decimal("100"))
-        if totals["scheduled"] > DEC_ZERO else 0.0
+        float((totals["earned"] / totals["scheduled"]) * Decimal("100")) if totals["scheduled"] > DEC_ZERO else 0.0
     )
     return {
         "by_line": rows,
@@ -1950,8 +1961,11 @@ CONTRACT_CLAUSE_TEMPLATES: dict[str, dict[str, Any]] = {
 def list_contract_templates() -> list[dict[str, Any]]:
     """Pure: list every clause template available for selection."""
     return [
-        {"code": code, **{k: v for k, v in body.items() if k != "key_clauses"},
-         "clause_count": len(body["key_clauses"])}
+        {
+            "code": code,
+            **{k: v for k, v in body.items() if k != "key_clauses"},
+            "clause_count": len(body["key_clauses"]),
+        }
         for code, body in CONTRACT_CLAUSE_TEMPLATES.items()
     ]
 

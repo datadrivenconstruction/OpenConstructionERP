@@ -142,9 +142,7 @@ def test_dtkc003_tiny_quantities_do_not_vanish() -> None:
     summed zeros → grand total 0.0 (100% loss). The fix accumulates raw
     group sums; final display rounding to 4dp gives 0.015, NOT 0.0.
     """
-    elements = [
-        {"category": f"Ci-{i}", "volume": 0.00004999} for i in range(300)
-    ]
+    elements = [{"category": f"Ci-{i}", "volume": 0.00004999} for i in range(300)]
     out = group_cad_elements_dynamic(elements, ["category"], ["volume"])
     assert out["grand_totals"]["volume"] > 0.0
     # 300 * 0.00004999 = 0.014997 → round(_, 4) == 0.015

@@ -293,9 +293,7 @@ class TestCloseEndpointIDOR:
     """
 
     @pytest.mark.asyncio
-    async def test_close_endpoint_runs_verify_project_access(
-        self, monkeypatch
-    ) -> None:
+    async def test_close_endpoint_runs_verify_project_access(self, monkeypatch) -> None:
         from app.modules.rfi import router as rfi_router
 
         called: dict[str, Any] = {}
@@ -355,23 +353,18 @@ class TestStructuredStateChangeLog:
             )
         )
 
-        await service.respond_to_rfi(
-            rfi.id, "1.5 m", responded_by=assignee, actor_role="editor"
-        )
+        await service.respond_to_rfi(rfi.id, "1.5 m", responded_by=assignee, actor_role="editor")
 
         # Find the state_change record with the respond transition. Other
         # log records (e.g. ``rfi.created``) may also be in caplog.records.
         state_records = [
-            r for r in caplog.records
-            if getattr(r, "message", "") == "rfi.state_change"
-            or r.getMessage() == "rfi.state_change"
+            r
+            for r in caplog.records
+            if getattr(r, "message", "") == "rfi.state_change" or r.getMessage() == "rfi.state_change"
         ]
         assert state_records, "expected at least one rfi.state_change log"
         # Find the respond transition specifically.
-        respond_rec = next(
-            r for r in state_records
-            if getattr(r, "transition", None) == "respond"
-        )
+        respond_rec = next(r for r in state_records if getattr(r, "transition", None) == "respond")
         assert getattr(respond_rec, "status_from", None) == "open"
         assert getattr(respond_rec, "status_to", None) == "answered"
         assert getattr(respond_rec, "rfi_id", None) == str(rfi.id)

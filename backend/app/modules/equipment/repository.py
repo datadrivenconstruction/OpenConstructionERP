@@ -63,9 +63,7 @@ class EquipmentTypeRepository(_BaseRepository):
         return list(result.scalars().all())
 
     async def get_by_code(self, code: str) -> EquipmentType | None:
-        result = await self.session.execute(
-            select(EquipmentType).where(EquipmentType.code == code)
-        )
+        result = await self.session.execute(select(EquipmentType).where(EquipmentType.code == code))
         return result.scalar_one_or_none()
 
 
@@ -111,14 +109,8 @@ class EquipmentRepository(_BaseRepository):
     async def list_blocked(self, today: str) -> list[Equipment]:
         """List units blocked from assignment: non-active OR with expired inspection."""
         # Sub-query: equipment with at least one expired inspection.
-        expired_inspections = (
-            select(Inspection.equipment_id)
-            .where(Inspection.valid_until < today)
-            .distinct()
-        )
-        stmt = select(Equipment).where(
-            (Equipment.status != "active") | (Equipment.id.in_(expired_inspections))
-        )
+        expired_inspections = select(Inspection.equipment_id).where(Inspection.valid_until < today).distinct()
+        stmt = select(Equipment).where((Equipment.status != "active") | (Equipment.id.in_(expired_inspections)))
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -159,16 +151,12 @@ class MaintenanceScheduleRepository(_BaseRepository):
 
     async def list_for_equipment(self, equipment_id: uuid.UUID) -> list[MaintenanceSchedule]:
         result = await self.session.execute(
-            select(MaintenanceSchedule).where(
-                MaintenanceSchedule.equipment_id == equipment_id
-            )
+            select(MaintenanceSchedule).where(MaintenanceSchedule.equipment_id == equipment_id)
         )
         return list(result.scalars().all())
 
     async def list_active(self) -> list[MaintenanceSchedule]:
-        result = await self.session.execute(
-            select(MaintenanceSchedule).where(MaintenanceSchedule.active.is_(True))
-        )
+        result = await self.session.execute(select(MaintenanceSchedule).where(MaintenanceSchedule.active.is_(True)))
         return list(result.scalars().all())
 
 
@@ -194,9 +182,7 @@ class WorkOrderRepository(_BaseRepository):
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = (
-            base.order_by(desc(MaintenanceWorkOrder.created_at)).offset(offset).limit(limit)
-        )
+        stmt = base.order_by(desc(MaintenanceWorkOrder.created_at)).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), total
 
@@ -231,9 +217,7 @@ class InspectionRepository(_BaseRepository):
     model = Inspection
 
     async def list_for_equipment(self, equipment_id: uuid.UUID) -> list[Inspection]:
-        result = await self.session.execute(
-            select(Inspection).where(Inspection.equipment_id == equipment_id)
-        )
+        result = await self.session.execute(select(Inspection).where(Inspection.equipment_id == equipment_id))
         return list(result.scalars().all())
 
     async def expiring_within(self, today: str, days: int) -> list[Inspection]:
@@ -256,11 +240,7 @@ class InspectionRepository(_BaseRepository):
         return list(result.scalars().all())
 
     async def expired_for_equipment(self, equipment_id: uuid.UUID, today: str) -> list[Inspection]:
-        stmt = (
-            select(Inspection)
-            .where(Inspection.equipment_id == equipment_id)
-            .where(Inspection.valid_until < today)
-        )
+        stmt = select(Inspection).where(Inspection.equipment_id == equipment_id).where(Inspection.valid_until < today)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -295,11 +275,7 @@ class RentalRepository(_BaseRepository):
         return list(result.scalars().all()), total
 
     async def count_active(self) -> int:
-        stmt = (
-            select(func.count())
-            .select_from(EquipmentRental)
-            .where(EquipmentRental.status == "active")
-        )
+        stmt = select(func.count()).select_from(EquipmentRental).where(EquipmentRental.status == "active")
         return (await self.session.execute(stmt)).scalar_one()
 
 
@@ -426,9 +402,7 @@ async def utilization_for_equipment(
         return 0.0
     total_days = max(1, (end - start).days + 1)
 
-    result = await session.execute(
-        select(EquipmentRental).where(EquipmentRental.equipment_id == equipment_id)
-    )
+    result = await session.execute(select(EquipmentRental).where(EquipmentRental.equipment_id == equipment_id))
     rentals = list(result.scalars().all())
 
     busy_days = _busy_days_in_window(rentals, start, end)
@@ -499,11 +473,7 @@ async def fleet_utilization_avg(
         return 0.0
     total_days = max(1, (end - start).days + 1)
 
-    result = await session.execute(
-        select(EquipmentRental).where(
-            EquipmentRental.equipment_id.in_(equipment_ids)
-        )
-    )
+    result = await session.execute(select(EquipmentRental).where(EquipmentRental.equipment_id.in_(equipment_ids)))
     rentals = list(result.scalars().all())
 
     by_equipment: dict[uuid.UUID, list[Any]] = {}

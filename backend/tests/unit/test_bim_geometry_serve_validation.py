@@ -7,11 +7,10 @@ opaque Three.js errors. The serve-time guard in ``router.py`` peeks at the
 first ~4 KB of every geometry response and rejects payloads that do not
 match the format their extension promises.
 """
+
 from __future__ import annotations
 
 import json
-
-import pytest
 
 from app.modules.bim_hub.router import _quick_validate_geometry_bytes
 
@@ -66,9 +65,7 @@ class TestGeometryServeValidationDAE:
         assert "<ifcXML>" in reason or "<ifcxml>" in reason.lower()
 
     def test_html_error_page_rejected(self) -> None:
-        body = (
-            b"<!DOCTYPE html><html><head><title>502 Bad Gateway</title></head></html>"
-        ).ljust(300, b" ")
+        body = (b"<!DOCTYPE html><html><head><title>502 Bad Gateway</title></head></html>").ljust(300, b" ")
         ok, reason = _quick_validate_geometry_bytes(body, ".dae")
         assert ok is False
         assert "no <COLLADA> root" in reason

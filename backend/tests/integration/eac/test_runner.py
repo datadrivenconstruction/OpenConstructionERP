@@ -28,7 +28,6 @@ from app.modules.eac.engine.runner import (
 from app.modules.eac.models import (
     EacRule,
     EacRuleset,
-    EacRun,
     EacRunResultItem,
 )
 
@@ -200,11 +199,7 @@ async def test_run_ruleset_persists_run_and_results(session: AsyncSession) -> No
     assert run.summary_json is not None
     assert len(run.summary_json["rules"]) == 1
 
-    rows = (
-        await session.scalars(
-            select(EacRunResultItem).where(EacRunResultItem.run_id == run.id)
-        )
-    ).all()
+    rows = (await session.scalars(select(EacRunResultItem).where(EacRunResultItem.run_id == run.id))).all()
     assert len(rows) == 2
     by_id = {r.element_id: r for r in rows}
     assert by_id["wall_001"].pass_ is True
@@ -239,11 +234,7 @@ async def test_run_ruleset_aggregate_persists_synthetic_row(
     )
 
     assert run.status == "success"
-    rows = (
-        await session.scalars(
-            select(EacRunResultItem).where(EacRunResultItem.run_id == run.id)
-        )
-    ).all()
+    rows = (await session.scalars(select(EacRunResultItem).where(EacRunResultItem.run_id == run.id))).all()
     assert len(rows) == 1
     assert rows[0].element_id == "__aggregate__"
     assert rows[0].pass_ is None
@@ -286,11 +277,7 @@ async def test_run_ruleset_issue_mode_persists_failures(
         tenant_id=tenant_id,
         elements=_walls_canonical(),
     )
-    rows = (
-        await session.scalars(
-            select(EacRunResultItem).where(EacRunResultItem.run_id == run.id)
-        )
-    ).all()
+    rows = (await session.scalars(select(EacRunResultItem).where(EacRunResultItem.run_id == run.id))).all()
     assert len(rows) == 1
     assert rows[0].element_id == "wall_002"
     assert rows[0].pass_ is False

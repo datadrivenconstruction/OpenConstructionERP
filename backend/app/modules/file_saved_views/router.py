@@ -16,8 +16,8 @@ Endpoints:
 
 from __future__ import annotations
 
-import uuid
 import logging
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -82,10 +82,7 @@ async def list_saved_views(
     current_user_id: CurrentUserId,
     project_id: uuid.UUID | None = Query(
         default=None,
-        description=(
-            "Project to scope to. Omit for the user's global views "
-            "(`project_id IS NULL`)."
-        ),
+        description=("Project to scope to. Omit for the user's global views (`project_id IS NULL`)."),
     ),
 ) -> SavedViewListResponse:
     user_uuid = _user_uuid(current_user_id)
@@ -145,7 +142,8 @@ async def update_saved_view(
         view = await service.update(view_id, payload, user_uuid)
     except SavedViewNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Saved view not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Saved view not found",
         ) from exc
     except SavedViewConflictError as exc:
         raise HTTPException(
@@ -175,7 +173,8 @@ async def delete_saved_view(
         await service.delete(view_id, user_uuid)
     except SavedViewNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Saved view not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Saved view not found",
         ) from exc
 
 
@@ -199,7 +198,8 @@ async def use_saved_view(
         view = await service.use(view_id, user_uuid)
     except SavedViewNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Saved view not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Saved view not found",
         ) from exc
     return _to_response(view, current_user_id=user_uuid)
 
@@ -225,6 +225,7 @@ async def duplicate_saved_view(
         clone = await service.duplicate(view_id, user_uuid)
     except SavedViewNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Saved view not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Saved view not found",
         ) from exc
     return _to_response(clone, current_user_id=user_uuid)

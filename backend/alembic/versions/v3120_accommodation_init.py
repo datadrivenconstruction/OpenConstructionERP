@@ -33,9 +33,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3120_accommodation_init"
-down_revision: Union[str, Sequence[str], None] = (
-    "v3119_propdev_house_type_parking_spots"
-)
+down_revision: Union[str, Sequence[str], None] = "v3119_propdev_house_type_parking_spots"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -48,7 +46,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -80,9 +80,7 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── Accommodation ───────────────────────────────────────────────────
     if not _has_table(inspector, "oe_accommodation_accommodation"):
@@ -94,12 +92,16 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 "project_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "name", sa.String(255), nullable=False, server_default="",
+                "name",
+                sa.String(255),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
                 "kind",
@@ -121,10 +123,15 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("created_by", sa.String(36), nullable=True),
             sa.Column(
-                "deleted_at", sa.DateTime(timezone=True), nullable=True,
+                "deleted_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         if not _has_index(
@@ -175,7 +182,10 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
             ),
             sa.Column("label", sa.String(120), nullable=False),
             sa.Column(
-                "capacity", sa.Integer(), nullable=False, server_default="1",
+                "capacity",
+                sa.Integer(),
+                nullable=False,
+                server_default="1",
             ),
             sa.Column("bim_element_id", sa.String(120), nullable=True),
             sa.Column(
@@ -197,10 +207,14 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 server_default="available",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
-                "accommodation_id", "label",
+                "accommodation_id",
+                "label",
                 name="uq_oe_accommodation_room_accom_label",
             ),
         )
@@ -235,7 +249,8 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 "room_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_accommodation_room.id", ondelete="CASCADE",
+                    "oe_accommodation_room.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -243,7 +258,8 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 "occupant_contact_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_contacts_contact.id", ondelete="SET NULL",
+                    "oe_contacts_contact.id",
+                    ondelete="SET NULL",
                 ),
                 nullable=True,
             ),
@@ -264,7 +280,10 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
             ),
             sa.Column("created_by", sa.String(36), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         if not _has_index(
@@ -308,7 +327,8 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 "booking_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_accommodation_booking.id", ondelete="CASCADE",
+                    "oe_accommodation_booking.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -326,7 +346,10 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 server_default="0",
             ),
             sa.Column(
-                "currency", sa.String(3), nullable=False, server_default="",
+                "currency",
+                sa.String(3),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("period_start", sa.Date(), nullable=True),
             sa.Column("period_end", sa.Date(), nullable=True),
@@ -337,7 +360,10 @@ def upgrade() -> None:  # noqa: C901 — flat sequential CREATE TABLEs.
                 server_default="pending",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
         if not _has_index(

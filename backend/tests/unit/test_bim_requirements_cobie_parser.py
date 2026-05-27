@@ -61,19 +61,19 @@ class TestCOBieParser:
         """Parse a single COBie attribute row."""
         rows = [
             [
-                "FireRating",       # Name
-                "user@example.com", # CreatedBy
-                "2024-01-01",       # CreatedOn
-                "Fire Safety",      # Category
-                "Type",             # SheetName
-                "Wall-001",         # RowName
-                "REI60",            # Value
-                "",                 # Unit
-                "",                 # ExtSystem
-                "",                 # ExtObject
-                "",                 # ExtIdentifier
+                "FireRating",  # Name
+                "user@example.com",  # CreatedBy
+                "2024-01-01",  # CreatedOn
+                "Fire Safety",  # Category
+                "Type",  # SheetName
+                "Wall-001",  # RowName
+                "REI60",  # Value
+                "",  # Unit
+                "",  # ExtSystem
+                "",  # ExtObject
+                "",  # ExtIdentifier
                 "Fire resistance",  # Description
-                "REI60;REI90",      # AllowedValues
+                "REI60;REI90",  # AllowedValues
             ]
         ]
         path = _create_cobie_xlsx(rows)

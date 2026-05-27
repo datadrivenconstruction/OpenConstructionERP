@@ -107,10 +107,7 @@ class _StubLineRepo:
         self.rows: dict[uuid.UUID, Any] = {}
 
     async def list_for_contract(self, contract_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "contract_id", None) == contract_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "contract_id", None) == contract_id]
 
     async def create(self, item: Any) -> Any:
         if getattr(item, "id", None) is None:
@@ -132,10 +129,7 @@ class _StubGenericRepo:
         self.rows: dict[uuid.UUID, Any] = {}
 
     async def list_for_contract(self, contract_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "contract_id", None) == contract_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "contract_id", None) == contract_id]
 
     async def get_for_contract(self, contract_id: uuid.UUID) -> Any:
         for r in self.rows.values():
@@ -284,10 +278,12 @@ def _patch_project_repo(
             return SimpleNamespace(role="editor")
 
     monkeypatch.setattr(
-        "app.modules.projects.repository.ProjectRepository", _StubProjectRepo,
+        "app.modules.projects.repository.ProjectRepository",
+        _StubProjectRepo,
     )
     monkeypatch.setattr(
-        "app.modules.users.repository.UserRepository", _StubUserRepo,
+        "app.modules.users.repository.UserRepository",
+        _StubUserRepo,
     )
 
 
@@ -312,8 +308,7 @@ async def test_idor_get_contract_blocks_cross_tenant_caller(
     with pytest.raises(HTTPException) as exc:
         await _verify_contract_access(svc.session, source.id, USER_B)
     assert exc.value.status_code == 404, (
-        f"expected 404 leak-safe response for cross-tenant GET, "
-        f"got {exc.value.status_code}: {exc.value.detail!r}"
+        f"expected 404 leak-safe response for cross-tenant GET, got {exc.value.status_code}: {exc.value.detail!r}"
     )
 
 
@@ -365,9 +360,7 @@ async def test_clone_source_blocks_cross_tenant_caller(
     )
     # Defensive: no clone row materialised.
     assert source.code in svc.contract_repo.by_code
-    assert len(svc.contract_repo.rows) == 1, (
-        "no new contract should have been created after IDOR rejection"
-    )
+    assert len(svc.contract_repo.rows) == 1, "no new contract should have been created after IDOR rejection"
 
 
 # ── 3. IDOR on clone-DESTINATION ─────────────────────────────────────────
@@ -396,8 +389,7 @@ async def test_clone_destination_blocks_cross_tenant_target(
     with pytest.raises(HTTPException) as exc:
         await verify_project_access(PROJECT_B, USER_A, svc.session)
     assert exc.value.status_code == 404, (
-        "cross-tenant clone destination must 404; "
-        f"got {exc.value.status_code}: {exc.value.detail!r}"
+        f"cross-tenant clone destination must 404; got {exc.value.status_code}: {exc.value.detail!r}"
     )
 
 
@@ -428,14 +420,14 @@ async def test_clone_destination_allowed_same_project_no_extra_check(
     clone = await svc.clone_contract(
         source.id,
         new_code="TPL-001-CLONE",
-        target_project_id=None,        # same project
+        target_project_id=None,  # same project
         new_title="Cloned template",
         include_lines=True,
         copy_subconfigs=True,
         user_id=USER_A,
     )
     assert clone.project_id == PROJECT_A
-    assert clone.status == "draft"     # FSM safety: always starts draft
+    assert clone.status == "draft"  # FSM safety: always starts draft
     assert clone.signed_at is None
     # Terms copied by value, not by reference — mutating clone.terms
     # must not bleed back into source.terms.
@@ -508,8 +500,7 @@ def test_money_fields_serialize_as_decimal_strings_not_floats() -> None:
     # JSON-mode dump emits Decimal as a string — never a float — so
     # the over-the-wire representation is bit-exact.
     assert isinstance(payload["total_value"], str), (
-        f"total_value must serialize as string, got "
-        f"{type(payload['total_value']).__name__}: {payload['total_value']!r}"
+        f"total_value must serialize as string, got {type(payload['total_value']).__name__}: {payload['total_value']!r}"
     )
     assert payload["total_value"] == "123456789.1234"
     assert isinstance(payload["retention_percent"], str)
@@ -539,30 +530,33 @@ def test_no_float_columns_on_money_models() -> None:
         for col in table.columns:
             cname = col.name.lower()
             if any(
-                k in cname for k in (
-                    "value", "amount", "total", "rate", "cost",
-                    "fee", "percent", "share", "qty", "quantity",
-                    "balance", "paid", "held", "released",
+                k in cname
+                for k in (
+                    "value",
+                    "amount",
+                    "total",
+                    "rate",
+                    "cost",
+                    "fee",
+                    "percent",
+                    "share",
+                    "qty",
+                    "quantity",
+                    "balance",
+                    "paid",
+                    "held",
+                    "released",
                 )
             ):
                 money_columns.append((obj.__name__, col.name, type(col.type)))
 
     assert money_columns, "guard self-check: expected to find money-shaped columns"
-    floats = [
-        (cls, col)
-        for cls, col, typ in money_columns
-        if isinstance(typ, type) and issubclass(typ, Float)
-    ]
+    floats = [(cls, col) for cls, col, typ in money_columns if isinstance(typ, type) and issubclass(typ, Float)]
     assert not floats, (
-        f"Float columns leaked into the contracts money model: {floats!r}. "
-        "All money fields must use Numeric(p, q)."
+        f"Float columns leaked into the contracts money model: {floats!r}. All money fields must use Numeric(p, q)."
     )
     # And positive evidence: at least one Numeric column survives.
-    numerics = [
-        (cls, col)
-        for cls, col, typ in money_columns
-        if isinstance(typ, type) and issubclass(typ, Numeric)
-    ]
+    numerics = [(cls, col) for cls, col, typ in money_columns if isinstance(typ, type) and issubclass(typ, Numeric)]
     assert numerics, "expected at least one Numeric money column"
 
 
@@ -578,13 +572,16 @@ def test_rbac_viewer_cannot_update_contracts() -> None:
 
     register_contracts_permissions()
     assert not permission_registry.role_has_permission(
-        Role.VIEWER, "contracts.update",
+        Role.VIEWER,
+        "contracts.update",
     ), "VIEWER must NOT be able to mutate contracts"
     assert permission_registry.role_has_permission(
-        Role.EDITOR, "contracts.update",
+        Role.EDITOR,
+        "contracts.update",
     ), "EDITOR must be able to mutate contracts (RBAC regression)"
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "contracts.update",
+        Role.MANAGER,
+        "contracts.update",
     ), "MANAGER inherits EDITOR's update permission"
 
 
@@ -597,19 +594,23 @@ def test_rbac_clone_requires_manager_or_higher() -> None:
 
     register_contracts_permissions()
     assert not permission_registry.role_has_permission(
-        Role.VIEWER, "contracts.clone",
+        Role.VIEWER,
+        "contracts.clone",
     )
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "contracts.clone",
+        Role.EDITOR,
+        "contracts.clone",
     ), (
         "EDITOR must NOT carry contracts.clone — clone is a cross-tenant "
         "risk vector that requires manager-or-higher RBAC"
     )
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "contracts.clone",
+        Role.MANAGER,
+        "contracts.clone",
     )
     assert permission_registry.role_has_permission(
-        Role.ADMIN, "contracts.clone",
+        Role.ADMIN,
+        "contracts.clone",
     )
 
 

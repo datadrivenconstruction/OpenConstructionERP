@@ -83,9 +83,7 @@ class PunchListRepository:
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def summary_aggregates(
-        self, project_id: uuid.UUID
-    ) -> dict[str, object]:
+    async def summary_aggregates(self, project_id: uuid.UUID) -> dict[str, object]:
         """Return SQL aggregates for the punch-list summary.
 
         Counts and group-by-status/priority are pure SQL. The closed
@@ -94,11 +92,7 @@ class PunchListRepository:
         instead of hydrating full ORM rows.
         """
         total = (
-            await self.session.execute(
-                select(func.count(PunchItem.id)).where(
-                    PunchItem.project_id == project_id
-                )
-            )
+            await self.session.execute(select(func.count(PunchItem.id)).where(PunchItem.project_id == project_id))
         ).scalar_one()
 
         status_rows = (
@@ -163,13 +157,10 @@ class PunchListRepository:
 
         Optionally excludes a specific item (the one being transitioned).
         """
-        base = (
-            select(PunchItem)
-            .where(
-                PunchItem.project_id == project_id,
-                PunchItem.priority == "critical",
-                PunchItem.status.notin_(["verified", "closed"]),
-            )
+        base = select(PunchItem).where(
+            PunchItem.project_id == project_id,
+            PunchItem.priority == "critical",
+            PunchItem.status.notin_(["verified", "closed"]),
         )
         if exclude_id is not None:
             base = base.where(PunchItem.id != exclude_id)

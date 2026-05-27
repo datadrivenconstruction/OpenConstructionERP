@@ -70,16 +70,14 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
 async def _register_and_login(
-    client: AsyncClient, label: str, role: str = "admin",
+    client: AsyncClient,
+    label: str,
+    role: str = "admin",
 ) -> dict[str, str]:
     email = f"{label}-{uuid.uuid4().hex[:8]}@spa-tab.io"
     password = f"SpaTab{uuid.uuid4().hex[:6]}9!"
@@ -189,7 +187,8 @@ async def _new_reservation(client, tenant, plot_id: str, buyer_id: str) -> str:
 
 @pytest.mark.asyncio
 async def test_convert_reservation_to_spa_creates_party_and_schedule(
-    http_client, tenant,
+    http_client,
+    tenant,
 ):
     """Conversion path creates a usable SPA with primary party + schedule.
 
@@ -440,8 +439,7 @@ async def test_list_endpoints_idor_cross_tenant(http_client, tenant):
         headers=other["headers"],
     )
     assert res.status_code in (403, 404), (
-        f"expected 403/404 on cross-tenant SPA list, got {res.status_code}: "
-        f"{res.text}"
+        f"expected 403/404 on cross-tenant SPA list, got {res.status_code}: {res.text}"
     )
 
     res = await http_client.get(
@@ -450,6 +448,5 @@ async def test_list_endpoints_idor_cross_tenant(http_client, tenant):
         headers=other["headers"],
     )
     assert res.status_code in (403, 404), (
-        f"expected 403/404 on cross-tenant schedule list, "
-        f"got {res.status_code}: {res.text}"
+        f"expected 403/404 on cross-tenant schedule list, got {res.status_code}: {res.text}"
     )

@@ -30,6 +30,7 @@ def _serialise_money(v: Decimal | None) -> str | None:
         return "0"
     return format(v, "f")
 
+
 # ── Shared controlled vocabularies (single source of truth) ──────────────
 #
 # These tuples are the canonical vocabularies for risk severity and status.

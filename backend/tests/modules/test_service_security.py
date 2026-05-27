@@ -84,12 +84,10 @@ def _ensure_perms_registered():
 def test_money_column_is_numeric_not_float(model, column):
     col = model.__table__.columns[column]
     assert isinstance(col.type, SANumeric), (
-        f"{model.__name__}.{column} must be Numeric (Decimal), "
-        f"got {type(col.type).__name__}"
+        f"{model.__name__}.{column} must be Numeric (Decimal), got {type(col.type).__name__}"
     )
     assert not isinstance(col.type, SAFloat), (
-        f"{model.__name__}.{column} must NOT be Float — sub-cent drift "
-        "would corrupt invoicing"
+        f"{model.__name__}.{column} must NOT be Float — sub-cent drift would corrupt invoicing"
     )
 
 
@@ -123,10 +121,7 @@ def test_work_order_item_total_quantises_to_two_dp():
 )
 def test_write_permission_minimum_role(permission, minimum_role):
     _ensure_perms_registered()
-    assert (
-        permission_registry.role_has_permission(minimum_role, permission)
-        is True
-    )
+    assert permission_registry.role_has_permission(minimum_role, permission) is True
     # Admin always passes
     assert permission_registry.role_has_permission("admin", permission) is True
 
@@ -137,32 +132,22 @@ def test_write_permission_minimum_role(permission, minimum_role):
 )
 def test_write_permission_denied_for_editor(permission):
     _ensure_perms_registered()
-    assert (
-        permission_registry.role_has_permission("editor", permission)
-        is False
-    )
-    assert (
-        permission_registry.role_has_permission("viewer", permission)
-        is False
-    )
+    assert permission_registry.role_has_permission("editor", permission) is False
+    assert permission_registry.role_has_permission("viewer", permission) is False
 
 
 def test_service_read_open_to_viewer():
     _ensure_perms_registered()
-    assert (
-        permission_registry.role_has_permission("viewer", "service.read")
-        is True
-    )
+    assert permission_registry.role_has_permission("viewer", "service.read") is True
 
 
 def test_permission_registry_matches_constant():
     """Constant + actual registration agree (no drift)."""
     _ensure_perms_registered()
     for perm, min_role in SERVICE_PERMISSIONS.items():
-        assert (
-            permission_registry.role_has_permission(min_role.value, perm)
-            is True
-        ), f"{perm} should be granted at {min_role.value}"
+        assert permission_registry.role_has_permission(min_role.value, perm) is True, (
+            f"{perm} should be granted at {min_role.value}"
+        )
 
 
 # ── Ticket FSM ───────────────────────────────────────────────────────────
@@ -170,9 +155,7 @@ def test_permission_registry_matches_constant():
 
 def test_ticket_terminal_states_have_no_outgoing_transitions():
     for terminal in ("closed", "cancelled"):
-        assert allowed_ticket_transitions(terminal) == set(), (
-            f"ticket status '{terminal}' must be terminal"
-        )
+        assert allowed_ticket_transitions(terminal) == set(), f"ticket status '{terminal}' must be terminal"
 
 
 def test_ticket_assigned_can_go_back_to_new_for_dispatcher_unassign():

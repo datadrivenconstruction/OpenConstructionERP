@@ -37,8 +37,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.file_signature import (
-    FileSignatureMismatch,
     SIGNATURE_BYTES_REQUIRED,
+    FileSignatureMismatch,
+)
+from app.core.file_signature import (
     require as require_signature,
 )
 from app.core.rate_limiter import approval_limiter
@@ -83,16 +85,12 @@ def _contact_display_name(c: Contact) -> str:
     return full or c.email or ""
 
 
-async def _fetch_counterparty_names(
-    session: AsyncSession, contact_ids: Iterable[str | None]
-) -> dict[str, str]:
+async def _fetch_counterparty_names(session: AsyncSession, contact_ids: Iterable[str | None]) -> dict[str, str]:
     """‌⁠‍Resolve Invoice.contact_id → display name in one round trip."""
     ids = {cid for cid in contact_ids if cid}
     if not ids:
         return {}
-    rows = (
-        await session.execute(select(Contact).where(Contact.id.in_(ids)))
-    ).scalars().all()
+    rows = (await session.execute(select(Contact).where(Contact.id.in_(ids)))).scalars().all()
     return {str(c.id): _contact_display_name(c) for c in rows}
 
 
@@ -552,9 +550,7 @@ async def list_payments(
     """List payments with optional invoice filter."""
     if invoice_id is not None:
         await _require_invoice_access(session, invoice_id, user_id)
-    items, total = await service.list_payments(
-        invoice_id=invoice_id, limit=limit, offset=offset
-    )
+    items, total = await service.list_payments(invoice_id=invoice_id, limit=limit, offset=offset)
     return PaymentListResponse(
         items=[PaymentResponse.model_validate(p) for p in items],
         total=total,
@@ -896,14 +892,15 @@ async def import_budgets_file(
             # Parse category
             category = str(row.get("category", "")).strip().lower() or None
             if category and category not in _ALLOWED_BUDGET_CATEGORIES:
-                errors.append({
-                    "row": row_idx,
-                    "error": (
-                        f"Invalid category: '{category}'. "
-                        f"Allowed: {', '.join(sorted(_ALLOWED_BUDGET_CATEGORIES))}"
-                    ),
-                    "data": {k: str(v)[:100] for k, v in row.items()},
-                })
+                errors.append(
+                    {
+                        "row": row_idx,
+                        "error": (
+                            f"Invalid category: '{category}'. Allowed: {', '.join(sorted(_ALLOWED_BUDGET_CATEGORIES))}"
+                        ),
+                        "data": {k: str(v)[:100] for k, v in row.items()},
+                    }
+                )
                 continue
 
             # Parse amount
@@ -913,11 +910,13 @@ async def import_budgets_file(
             try:
                 float(original_budget)
             except (ValueError, TypeError):
-                errors.append({
-                    "row": row_idx,
-                    "error": f"Invalid budget amount: {row.get('original_budget')}",
-                    "data": {k: str(v)[:100] for k, v in row.items()},
-                })
+                errors.append(
+                    {
+                        "row": row_idx,
+                        "error": f"Invalid budget amount: {row.get('original_budget')}",
+                        "data": {k: str(v)[:100] for k, v in row.items()},
+                    }
+                )
                 continue
 
             # Skip rows with no data
@@ -936,11 +935,13 @@ async def import_budgets_file(
             imported_count += 1
 
         except Exception as exc:
-            errors.append({
-                "row": row_idx,
-                "error": str(exc),
-                "data": {k: str(v)[:100] for k, v in row.items()},
-            })
+            errors.append(
+                {
+                    "row": row_idx,
+                    "error": str(exc),
+                    "data": {k: str(v)[:100] for k, v in row.items()},
+                }
+            )
             logger.warning("Budget import error at row %d: %s", row_idx, exc)
 
     logger.info(
@@ -980,9 +981,7 @@ async def export_budgets(
 
     await _require_project_access(session, project_id, _user_id)
 
-    result = await session.execute(
-        select(ProjectBudget).where(ProjectBudget.project_id == project_id).limit(50000)
-    )
+    result = await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id).limit(50000))
     items = result.scalars().all()
 
     wb = Workbook()
@@ -1210,7 +1209,8 @@ async def approve_invoice(
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
     await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.approve_invoice(
-        invoice_id, actor_id=str(user_id) if user_id else None,
+        invoice_id,
+        actor_id=str(user_id) if user_id else None,
     )
     names = await _fetch_counterparty_names(session, [invoice.contact_id])
     return _invoice_to_response(invoice, names)
@@ -1245,7 +1245,8 @@ async def pay_invoice(
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
     await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.pay_invoice(
-        invoice_id, actor_id=str(user_id) if user_id else None,
+        invoice_id,
+        actor_id=str(user_id) if user_id else None,
     )
     names = await _fetch_counterparty_names(session, [invoice.contact_id])
     return _invoice_to_response(invoice, names)

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import uuid
 from decimal import Decimal
-from typing import Any
 
 import pytest
 
@@ -26,7 +25,8 @@ def _fake_result(
     source: str = "nominatim",
     display: str = "Hauptstraße 12, 10115 Berlin, Germany",
 ) -> GeocodeResult:
-    from datetime import UTC, datetime as _dt
+    from datetime import UTC
+    from datetime import datetime as _dt
 
     return GeocodeResult(
         lat=Decimal(lat),
@@ -42,6 +42,7 @@ def _fake_result(
 @pytest.fixture
 def patch_geocoder_ok(monkeypatch):
     """Replace ``geocode_address`` everywhere it's imported with a stub."""
+
     async def fake(_addr, *_args, **_kwargs):
         return _fake_result()
 
@@ -50,7 +51,9 @@ def patch_geocoder_ok(monkeypatch):
     monkeypatch.setattr(geo_events, "geocode_address", fake, raising=False)
     # Import-time references inside functions also need patching:
     monkeypatch.setattr(
-        "app.modules.geo_hub.geocoder.geocode_address", fake, raising=False,
+        "app.modules.geo_hub.geocoder.geocode_address",
+        fake,
+        raising=False,
     )
     return fake
 
@@ -64,7 +67,9 @@ def patch_geocoder_none(monkeypatch):
     monkeypatch.setattr(geo_service, "geocode_address", fake, raising=False)
     monkeypatch.setattr(geo_events, "geocode_address", fake, raising=False)
     monkeypatch.setattr(
-        "app.modules.geo_hub.geocoder.geocode_address", fake, raising=False,
+        "app.modules.geo_hub.geocoder.geocode_address",
+        fake,
+        raising=False,
     )
     return fake
 
@@ -101,15 +106,13 @@ async def fresh_project_with_address(http_client, tenant_a, monkeypatch):
     # the geocoder is disabled). Belt-and-braces: also delete any anchor
     # that may have slipped in.
     await _asyncio.sleep(0.05)
-    from app.database import async_session_factory
     from sqlalchemy import delete
 
+    from app.database import async_session_factory
     from app.modules.geo_hub.models import GeoAnchor
 
     async with async_session_factory() as session:
-        await session.execute(
-            delete(GeoAnchor).where(GeoAnchor.project_id == project_id)
-        )
+        await session.execute(delete(GeoAnchor).where(GeoAnchor.project_id == project_id))
         await session.commit()
     monkeypatch.delenv("OE_GEOCODER_DISABLED", raising=False)
     return project_id
@@ -117,7 +120,10 @@ async def fresh_project_with_address(http_client, tenant_a, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_idor_cross_tenant_returns_404(
-    http_client, tenant_a, tenant_b, patch_geocoder_ok,
+    http_client,
+    tenant_a,
+    tenant_b,
+    patch_geocoder_ok,
 ):
     res = await http_client.post(
         "/api/v1/geo-hub/anchors/from-address/",
@@ -129,7 +135,9 @@ async def test_idor_cross_tenant_returns_404(
 
 @pytest.mark.asyncio
 async def test_409_when_anchor_already_exists(
-    http_client, tenant_a, patch_geocoder_ok,
+    http_client,
+    tenant_a,
+    patch_geocoder_ok,
 ):
     # tenant_a fixture pre-anchors at lat 52.52 / lon 13.4050.
     res = await http_client.post(
@@ -145,7 +153,9 @@ async def test_409_when_anchor_already_exists(
 
 @pytest.mark.asyncio
 async def test_force_true_overwrites_existing_anchor(
-    http_client, tenant_a, patch_geocoder_ok,
+    http_client,
+    tenant_a,
+    patch_geocoder_ok,
 ):
     # Make sure the project has an address (the base fixture creates it
     # without one) so force=true can rebuild the anchor.
@@ -169,7 +179,9 @@ async def test_force_true_overwrites_existing_anchor(
 
 @pytest.mark.asyncio
 async def test_422_when_address_missing(
-    http_client, tenant_a, patch_geocoder_ok,
+    http_client,
+    tenant_a,
+    patch_geocoder_ok,
 ):
     # New project with NO address at all.
     proj = await http_client.post(
@@ -195,7 +207,9 @@ async def test_422_when_address_missing(
 
 @pytest.mark.asyncio
 async def test_422_when_address_has_no_country(
-    http_client, tenant_a, patch_geocoder_ok,
+    http_client,
+    tenant_a,
+    patch_geocoder_ok,
 ):
     proj = await http_client.post(
         "/api/v1/projects/",
@@ -218,7 +232,10 @@ async def test_422_when_address_has_no_country(
 
 @pytest.mark.asyncio
 async def test_502_when_geocoder_unavailable(
-    http_client, tenant_a, fresh_project_with_address, patch_geocoder_none,
+    http_client,
+    tenant_a,
+    fresh_project_with_address,
+    patch_geocoder_none,
 ):
     res = await http_client.post(
         "/api/v1/geo-hub/anchors/from-address/",
@@ -232,7 +249,10 @@ async def test_502_when_geocoder_unavailable(
 
 @pytest.mark.asyncio
 async def test_201_happy_path_returns_precision_and_source(
-    http_client, tenant_a, fresh_project_with_address, patch_geocoder_ok,
+    http_client,
+    tenant_a,
+    fresh_project_with_address,
+    patch_geocoder_ok,
 ):
     res = await http_client.post(
         "/api/v1/geo-hub/anchors/from-address/",
@@ -250,7 +270,10 @@ async def test_201_happy_path_returns_precision_and_source(
 
 @pytest.mark.asyncio
 async def test_anchor_metadata_records_geocode_provenance(
-    http_client, tenant_a, fresh_project_with_address, patch_geocoder_ok,
+    http_client,
+    tenant_a,
+    fresh_project_with_address,
+    patch_geocoder_ok,
 ):
     res = await http_client.post(
         "/api/v1/geo-hub/anchors/from-address/",
@@ -270,17 +293,24 @@ async def test_anchor_metadata_records_geocode_provenance(
 
 @pytest.mark.asyncio
 async def test_auto_anchor_event_fires_on_project_create_with_address(
-    http_client, tenant_a, monkeypatch,
+    http_client,
+    tenant_a,
+    monkeypatch,
 ):
     """The address_set subscriber should populate an anchor automatically."""
+
     # Patch the subscriber's geocoder to a stub.
     async def fake(*_args, **_kwargs):
         return _fake_result(
-            lat="48.1351000", lon="11.5820000", display="Munich, Germany",
+            lat="48.1351000",
+            lon="11.5820000",
+            display="Munich, Germany",
         )
 
     monkeypatch.setattr(
-        "app.modules.geo_hub.events.geocode_address", fake, raising=False,
+        "app.modules.geo_hub.events.geocode_address",
+        fake,
+        raising=False,
     )
     monkeypatch.setattr(geocoder_mod, "geocode_address", fake)
 
@@ -306,9 +336,7 @@ async def test_auto_anchor_event_fires_on_project_create_with_address(
         )
         assert anchors.status_code == 200
         rows = anchors.json()
-        if rows and (
-            rows[0]["lat"] != "0.0000000" or rows[0]["lon"] != "0.0000000"
-        ):
+        if rows and (rows[0]["lat"] != "0.0000000" or rows[0]["lon"] != "0.0000000"):
             assert rows[0]["lat"].startswith("48.13")
             assert rows[0]["lon"].startswith("11.58")
             break
@@ -319,16 +347,23 @@ async def test_auto_anchor_event_fires_on_project_create_with_address(
 
 @pytest.mark.asyncio
 async def test_auto_anchor_event_fires_on_address_update(
-    http_client, tenant_a, monkeypatch,
+    http_client,
+    tenant_a,
+    monkeypatch,
 ):
     """Updating a project's address should refresh an empty anchor."""
+
     async def fake(*_args, **_kwargs):
         return _fake_result(
-            lat="41.9028000", lon="12.4964000", display="Rome, Italy",
+            lat="41.9028000",
+            lon="12.4964000",
+            display="Rome, Italy",
         )
 
     monkeypatch.setattr(
-        "app.modules.geo_hub.events.geocode_address", fake, raising=False,
+        "app.modules.geo_hub.events.geocode_address",
+        fake,
+        raising=False,
     )
     monkeypatch.setattr(geocoder_mod, "geocode_address", fake)
 
@@ -369,18 +404,25 @@ async def test_auto_anchor_event_fires_on_address_update(
 
 @pytest.mark.asyncio
 async def test_bulk_endpoint_returns_counts(
-    http_client, tenant_a, monkeypatch,
+    http_client,
+    tenant_a,
+    monkeypatch,
 ):
     """Bulk endpoint summarises succeeded / skipped / failed."""
+
     # Patch the geocoder to succeed for all calls.
     async def fake(*_args, **_kwargs):
         return _fake_result()
 
     monkeypatch.setattr(
-        "app.modules.geo_hub.geocoder.geocode_address", fake, raising=False,
+        "app.modules.geo_hub.geocoder.geocode_address",
+        fake,
+        raising=False,
     )
     monkeypatch.setattr(
-        "app.modules.geo_hub.service.geocode_address", fake, raising=False,
+        "app.modules.geo_hub.service.geocode_address",
+        fake,
+        raising=False,
     )
     monkeypatch.setattr(geocoder_mod, "geocode_address", fake)
     # Disable the geocoder while we create the projects so the
@@ -405,15 +447,13 @@ async def test_bulk_endpoint_returns_counts(
     import asyncio as _asyncio
 
     await _asyncio.sleep(0.1)
-    from app.database import async_session_factory
     from sqlalchemy import delete
 
+    from app.database import async_session_factory
     from app.modules.geo_hub.models import GeoAnchor
 
     async with async_session_factory() as session:
-        await session.execute(
-            delete(GeoAnchor).where(GeoAnchor.project_id == p1.json()["id"])
-        )
+        await session.execute(delete(GeoAnchor).where(GeoAnchor.project_id == p1.json()["id"]))
         await session.commit()
 
     # Project 2 — no address — should land in "skipped".
@@ -460,7 +500,9 @@ async def test_bulk_endpoint_returns_counts(
 
 @pytest.mark.asyncio
 async def test_unauthenticated_anchor_from_address_returns_401_or_403(
-    http_client, tenant_a, patch_geocoder_ok,
+    http_client,
+    tenant_a,
+    patch_geocoder_ok,
 ):
     res = await http_client.post(
         "/api/v1/geo-hub/anchors/from-address/",

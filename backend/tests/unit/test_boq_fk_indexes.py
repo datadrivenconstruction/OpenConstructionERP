@@ -24,13 +24,10 @@ These tests:
 
 from __future__ import annotations
 
-import importlib
 import os
 import tempfile
 import uuid
 from pathlib import Path
-
-import pytest
 
 # ── Per-module DB isolation BEFORE any app imports ─────────────────────────
 _TMP_DIR = Path(tempfile.mkdtemp(prefix="oe-boq-fk-indexes-"))
@@ -71,8 +68,7 @@ def test_migration_chains_to_v3122() -> None:
     mod = _load_migration()
     assert mod.revision == "v3123_boq_fk_indexes"
     assert mod.down_revision == "v3122_crm_lead_active_email_unique", (
-        f"v3123 must chain on v3122, got {mod.down_revision}. "
-        f"Did a sibling agent insert another migration in between?"
+        f"v3123 must chain on v3122, got {mod.down_revision}. Did a sibling agent insert another migration in between?"
     )
 
 
@@ -104,17 +100,10 @@ def test_migration_declares_expected_indexes() -> None:
     }
 
     for name, (table, cols) in expected.items():
-        assert name in by_name, (
-            f"Migration must declare composite index {name}. "
-            f"Declared: {sorted(by_name)}"
-        )
+        assert name in by_name, f"Migration must declare composite index {name}. Declared: {sorted(by_name)}"
         actual_table, actual_cols = by_name[name]
-        assert actual_table == table, (
-            f"{name}: expected table {table}, got {actual_table}"
-        )
-        assert actual_cols == cols, (
-            f"{name}: expected columns {cols}, got {actual_cols}"
-        )
+        assert actual_table == table, f"{name}: expected table {table}, got {actual_table}"
+        assert actual_cols == cols, f"{name}: expected columns {cols}, got {actual_cols}"
 
 
 # ── Live SQLite end-to-end ────────────────────────────────────────────────
@@ -136,8 +125,8 @@ def test_indexes_land_in_sqlite_after_create_all() -> None:
     from sqlalchemy import create_engine, inspect
 
     import app.modules.boq.models  # noqa: F401  — registers tables
-    import app.modules.users.models  # noqa: F401  — FK target
     import app.modules.projects.models  # noqa: F401  — FK target
+    import app.modules.users.models  # noqa: F401  — FK target
     from app.database import Base
 
     db_path = _TMP_DIR / f"test-create-all-{uuid.uuid4().hex[:8]}.db"
@@ -163,10 +152,7 @@ def test_indexes_land_in_sqlite_after_create_all() -> None:
     for table, expected_indexes in expected_per_table.items():
         actual = {ix["name"] for ix in inspector.get_indexes(table)}
         missing = expected_indexes - actual
-        assert not missing, (
-            f"Missing composite indexes on {table}: {missing}. "
-            f"Actual: {actual}"
-        )
+        assert not missing, f"Missing composite indexes on {table}: {missing}. Actual: {actual}"
 
     engine.dispose()
 
@@ -183,8 +169,8 @@ def test_legacy_single_column_fk_indexes_still_present() -> None:
     from sqlalchemy import create_engine, inspect
 
     import app.modules.boq.models  # noqa: F401
-    import app.modules.users.models  # noqa: F401
     import app.modules.projects.models  # noqa: F401
+    import app.modules.users.models  # noqa: F401
     from app.database import Base
 
     db_path = _TMP_DIR / f"test-fk-legacy-{uuid.uuid4().hex[:8]}.db"
@@ -207,9 +193,7 @@ def test_legacy_single_column_fk_indexes_still_present() -> None:
 
     for table, fk_cols in expected_fk_columns.items():
         indexes = inspector.get_indexes(table)
-        single_col_index_cols = {
-            tuple(ix["column_names"]) for ix in indexes if len(ix["column_names"]) == 1
-        }
+        single_col_index_cols = {tuple(ix["column_names"]) for ix in indexes if len(ix["column_names"]) == 1}
         for col in fk_cols:
             assert (col,) in single_col_index_cols, (
                 f"FK column {table}.{col} must have a single-column "

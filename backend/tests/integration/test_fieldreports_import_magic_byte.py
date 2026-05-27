@@ -71,9 +71,7 @@ async def _activate_user(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
 
@@ -84,11 +82,7 @@ async def _promote_admin(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await s.commit()
 
 
@@ -151,18 +145,12 @@ async def test_executable_renamed_xlsx_is_rejected(http_client, owner_project):
     fake_exe = b"MZ" + b"\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00" + b"\x00" * 200
 
     resp = await http_client.post(
-        f"/api/v1/fieldreports/reports/import/file/"
-        f"?project_id={owner_project['project_id']}",
+        f"/api/v1/fieldreports/reports/import/file/?project_id={owner_project['project_id']}",
         headers=owner_project["headers"],
         files={"file": ("malicious.xlsx", fake_exe, "application/octet-stream")},
     )
-    assert resp.status_code == 400, (
-        f"executable accepted as xlsx: {resp.status_code} {resp.text!r}"
-    )
-    assert (
-        "content does not match" in resp.text.lower()
-        or "signature" in resp.text.lower()
-    )
+    assert resp.status_code == 400, f"executable accepted as xlsx: {resp.status_code} {resp.text!r}"
+    assert "content does not match" in resp.text.lower() or "signature" in resp.text.lower()
 
 
 @pytest.mark.asyncio
@@ -170,14 +158,11 @@ async def test_random_blob_renamed_xlsx_is_rejected(http_client, owner_project):
     """Random bytes pretending to be xlsx → rejected on magic byte mismatch."""
     blob = b"NOT-A-REAL-XLSX-this-is-just-random-text" * 4
     resp = await http_client.post(
-        f"/api/v1/fieldreports/reports/import/file/"
-        f"?project_id={owner_project['project_id']}",
+        f"/api/v1/fieldreports/reports/import/file/?project_id={owner_project['project_id']}",
         headers=owner_project["headers"],
         files={"file": ("plain.xlsx", blob, "application/octet-stream")},
     )
-    assert resp.status_code == 400, (
-        f"random blob accepted as xlsx: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code == 400, f"random blob accepted as xlsx: {resp.status_code} {resp.text!r}"
 
 
 @pytest.mark.asyncio
@@ -185,14 +170,11 @@ async def test_oversize_upload_rejected(http_client, owner_project):
     """A 26 MB upload must 400 before any parser allocates."""
     big = b"," * (26 * 1024 * 1024)
     resp = await http_client.post(
-        f"/api/v1/fieldreports/reports/import/file/"
-        f"?project_id={owner_project['project_id']}",
+        f"/api/v1/fieldreports/reports/import/file/?project_id={owner_project['project_id']}",
         headers=owner_project["headers"],
         files={"file": ("big.csv", big, "text/csv")},
     )
-    assert resp.status_code == 400, (
-        f"oversize upload accepted: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code == 400, f"oversize upload accepted: {resp.status_code} {resp.text!r}"
     assert "maximum size" in resp.text.lower() or "exceed" in resp.text.lower()
 
 
@@ -204,8 +186,7 @@ async def test_real_xlsx_is_accepted(http_client, owner_project):
     """A genuine openpyxl-produced xlsx passes the magic-byte check."""
     xlsx_bytes = _real_xlsx_bytes()
     resp = await http_client.post(
-        f"/api/v1/fieldreports/reports/import/file/"
-        f"?project_id={owner_project['project_id']}",
+        f"/api/v1/fieldreports/reports/import/file/?project_id={owner_project['project_id']}",
         headers=owner_project["headers"],
         files={
             "file": (
@@ -227,8 +208,7 @@ async def test_csv_is_accepted(http_client, owner_project):
     payload must still pass through end-to-end."""
     csv_body = b"Date,Weather,Description\n2026-05-23,clear,csv-smoke\n"
     resp = await http_client.post(
-        f"/api/v1/fieldreports/reports/import/file/"
-        f"?project_id={owner_project['project_id']}",
+        f"/api/v1/fieldreports/reports/import/file/?project_id={owner_project['project_id']}",
         headers=owner_project["headers"],
         files={"file": ("good.csv", csv_body, "text/csv")},
     )

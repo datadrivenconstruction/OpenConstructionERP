@@ -19,6 +19,7 @@ Revision ID: v191_cde_audit
 Revises: v191_meetings_document_ids
 Create Date: 2026-04-17
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -114,9 +115,7 @@ def upgrade() -> None:
             pass
 
     # 2. oe_cde_revision.document_id — cross-link column.
-    if _table_exists("oe_cde_revision") and not _has_column(
-        "oe_cde_revision", "document_id"
-    ):
+    if _table_exists("oe_cde_revision") and not _has_column("oe_cde_revision", "document_id"):
         op.add_column(
             "oe_cde_revision",
             sa.Column("document_id", sa.String(36), nullable=True),
@@ -132,16 +131,12 @@ def upgrade() -> None:
                 pass
 
     # 3. oe_transmittals_item.revision_id — CDE revision link.
-    if _table_exists("oe_transmittals_item") and not _has_column(
-        "oe_transmittals_item", "revision_id"
-    ):
+    if _table_exists("oe_transmittals_item") and not _has_column("oe_transmittals_item", "revision_id"):
         op.add_column(
             "oe_transmittals_item",
             sa.Column("revision_id", sa.String(36), nullable=True),
         )
-        if not _has_index(
-            "oe_transmittals_item", "ix_oe_transmittals_item_revision_id"
-        ):
+        if not _has_index("oe_transmittals_item", "ix_oe_transmittals_item_revision_id"):
             try:
                 op.create_index(
                     "ix_oe_transmittals_item_revision_id",

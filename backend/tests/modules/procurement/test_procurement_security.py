@@ -58,7 +58,6 @@ from app.modules.procurement.schemas import (
     GRItemCreate,
     POCreate,
     POItemCreate,
-    POListResponse,
     POResponse,
     POUpdate,
 )
@@ -100,9 +99,7 @@ class _StubPORepo:
     async def get(self, po_id: uuid.UUID) -> Any:
         po = self.rows.get(po_id)
         if po is not None and self._item_repo is not None:
-            po.items = [
-                it for it in self._item_repo.rows.values() if it.po_id == po_id
-            ]
+            po.items = [it for it in self._item_repo.rows.values() if it.po_id == po_id]
         return po
 
     async def list(
@@ -238,18 +235,19 @@ async def test_verify_project_access_returns_404_on_cross_tenant(
             return SimpleNamespace(id=user_id, role="user")
 
     monkeypatch.setattr(
-        "app.modules.projects.repository.ProjectRepository", _StubProjectRepo,
+        "app.modules.projects.repository.ProjectRepository",
+        _StubProjectRepo,
     )
     monkeypatch.setattr(
-        "app.modules.users.repository.UserRepository", _StubUserRepo,
+        "app.modules.users.repository.UserRepository",
+        _StubUserRepo,
     )
 
     # USER_B (no access) → 404, NOT 403
     with pytest.raises(HTTPException) as exc_info:
         await verify_project_access(PROJECT_A, USER_B, session=None)  # type: ignore[arg-type]
     assert exc_info.value.status_code == 404, (
-        f"cross-tenant access must return 404 to avoid existence leak, "
-        f"got {exc_info.value.status_code}"
+        f"cross-tenant access must return 404 to avoid existence leak, got {exc_info.value.status_code}"
     )
 
     # USER_A (owner) → no raise (None return)
@@ -313,9 +311,7 @@ def test_router_get_po_calls_verify_project_access() -> None:
 def test_router_update_po_calls_verify_project_access() -> None:
     """Same guard on PATCH /{po_id}."""
     src = inspect.getsource(procurement_router.update_purchase_order)
-    assert "verify_project_access" in src, (
-        "IDOR REGRESSION on PATCH PO."
-    )
+    assert "verify_project_access" in src, "IDOR REGRESSION on PATCH PO."
 
 
 def test_router_issue_po_calls_verify_project_access() -> None:
@@ -369,10 +365,7 @@ def test_po_response_money_fields_are_strings() -> None:
     fields = POResponse.model_fields
     for fname in ("amount_subtotal", "tax_amount", "amount_total"):
         ann = fields[fname].annotation
-        assert ann is str, (
-            f"POResponse.{fname} must be typed `str` for Decimal safety, "
-            f"got {ann!r}"
-        )
+        assert ann is str, f"POResponse.{fname} must be typed `str` for Decimal safety, got {ann!r}"
 
 
 def test_po_item_response_money_fields_are_strings() -> None:
@@ -382,9 +375,7 @@ def test_po_item_response_money_fields_are_strings() -> None:
     fields = POItemResponse.model_fields
     for fname in ("quantity", "unit_rate", "amount"):
         ann = fields[fname].annotation
-        assert ann is str, (
-            f"POItemResponse.{fname} must be typed `str`, got {ann!r}"
-        )
+        assert ann is str, f"POItemResponse.{fname} must be typed `str`, got {ann!r}"
 
 
 def test_po_create_rejects_negative_amount() -> None:
@@ -462,11 +453,14 @@ def test_po_status_transitions_table_covers_all_states() -> None:
     explicit allowlist decision.
     """
     expected_states = {
-        "draft", "issued", "partially_received", "completed", "cancelled",
+        "draft",
+        "issued",
+        "partially_received",
+        "completed",
+        "cancelled",
     }
     assert expected_states == _VALID_PO_STATUSES, (
-        f"PO state set drifted: expected {expected_states}, "
-        f"got {_VALID_PO_STATUSES}. Update transitions allowlist."
+        f"PO state set drifted: expected {expected_states}, got {_VALID_PO_STATUSES}. Update transitions allowlist."
     )
 
 
@@ -561,15 +555,15 @@ def test_create_invoice_permission_is_manager() -> None:
     # Re-register to make sure the fresh permission is in the registry.
     procurement_perms.register_procurement_permissions()
     perm_role = permission_registry.get_min_role("procurement.create_invoice")
-    assert perm_role is Role.MANAGER, (
-        f"procurement.create_invoice must require MANAGER, got {perm_role!r}"
-    )
+    assert perm_role is Role.MANAGER, f"procurement.create_invoice must require MANAGER, got {perm_role!r}"
     # And spell out the negative: EDITOR must NOT satisfy it.
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "procurement.create_invoice",
+        Role.EDITOR,
+        "procurement.create_invoice",
     ), "EDITOR can now commit PO → payable invoice — RBAC regression"
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "procurement.create_invoice",
+        Role.MANAGER,
+        "procurement.create_invoice",
     )
 
 
@@ -591,8 +585,7 @@ def test_router_create_invoice_uses_manager_permission() -> None:
     """
     src = inspect.getsource(procurement_router.create_invoice_from_po)
     assert 'RequirePermission("procurement.create_invoice")' in src, (
-        "create_invoice_from_po lost its MANAGER pin; EDITOR can now "
-        "commit financial obligations against the project."
+        "create_invoice_from_po lost its MANAGER pin; EDITOR can now commit financial obligations against the project."
     )
 
 
@@ -628,10 +621,7 @@ def test_router_create_invoice_audit_log_inside_savepoint() -> None:
             for sub in ast.walk(node):
                 if isinstance(sub, ast.Call):
                     fn = sub.func
-                    name = (
-                        fn.attr if isinstance(fn, ast.Attribute)
-                        else fn.id if isinstance(fn, ast.Name) else ""
-                    )
+                    name = fn.attr if isinstance(fn, ast.Attribute) else fn.id if isinstance(fn, ast.Name) else ""
                     if name == "log_activity":
                         found = True
     assert found, (

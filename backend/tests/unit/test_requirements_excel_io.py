@@ -33,8 +33,16 @@ def test_template_has_operators_legend() -> None:
     legend = wb["Operators"]
     operators_listed = {row[0] for row in legend.iter_rows(min_row=2, values_only=True) if row[0]}
     expected = {
-        "equals", "not_equals", "contains", "not_contains",
-        "min", "max", "range", "regex", "exists", "not_exists",
+        "equals",
+        "not_equals",
+        "contains",
+        "not_contains",
+        "min",
+        "max",
+        "range",
+        "regex",
+        "exists",
+        "not_exists",
     }
     assert expected.issubset(operators_listed)
 
@@ -63,10 +71,7 @@ def test_csv_quoted_value_with_comma() -> None:
 
 
 def test_unknown_operator_is_warned_and_defaulted() -> None:
-    csv_text = (
-        b"entity,attribute,constraint_type,constraint_value\n"
-        b"Walls,FireRating,greater_than,50\n"
-    )
+    csv_text = b"entity,attribute,constraint_type,constraint_value\nWalls,FireRating,greater_than,50\n"
     rows, warnings = parse_csv(csv_text)
     assert len(rows) == 1
     assert rows[0]["constraint_type"] == "equals"
@@ -82,10 +87,7 @@ def test_missing_required_column_yields_warning_and_no_rows() -> None:
 
 def test_empty_rows_are_skipped() -> None:
     csv_text = (
-        b"entity,attribute,constraint_type,constraint_value\n"
-        b"Walls,FireRating,equals,F90\n"
-        b",,,\n"
-        b"Doors,Width,min,800\n"
+        b"entity,attribute,constraint_type,constraint_value\nWalls,FireRating,equals,F90\n,,,\nDoors,Width,min,800\n"
     )
     rows, _ = parse_csv(csv_text)
     assert len(rows) == 2
@@ -132,7 +134,14 @@ def test_export_xlsx_roundtrips_through_parser() -> None:
 def test_columns_match_create_payload_keys() -> None:
     # The export contract must match the fields RequirementCreate expects.
     expected = {
-        "entity", "attribute", "constraint_type", "constraint_value",
-        "unit", "category", "priority", "source_ref", "notes",
+        "entity",
+        "attribute",
+        "constraint_type",
+        "constraint_value",
+        "unit",
+        "category",
+        "priority",
+        "source_ref",
+        "notes",
     }
     assert expected.issubset(set(COLUMNS))

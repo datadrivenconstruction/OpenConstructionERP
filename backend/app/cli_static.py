@@ -76,9 +76,7 @@ def mount_frontend(app: FastAPI) -> None:
         async def get_response(self, path: str, scope):  # noqa: ANN001, ANN202
             response = await super().get_response(path, scope)
             if response.status_code == 200:
-                response.headers["Cache-Control"] = (
-                    "public, max-age=31536000, immutable"
-                )
+                response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
             return response
 
     assets_dir = frontend_dir / "assets"
@@ -107,9 +105,24 @@ def mount_frontend(app: FastAPI) -> None:
     # Serve other root-level static files (e.g. manifest.json, robots.txt)
     # that may exist in the frontend dist directory.
     _root_static_extensions = {
-        ".ico", ".png", ".svg", ".webmanifest", ".json", ".txt", ".xml",
-        ".webp", ".avif", ".jpg", ".jpeg", ".gif", ".woff", ".woff2",
-        ".csv", ".tsv", ".xlsx", ".xls",
+        ".ico",
+        ".png",
+        ".svg",
+        ".webmanifest",
+        ".json",
+        ".txt",
+        ".xml",
+        ".webp",
+        ".avif",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".woff",
+        ".woff2",
+        ".csv",
+        ".tsv",
+        ".xlsx",
+        ".xls",
     }
 
     # ── Conventional API path aliases ────────────────────────────────────

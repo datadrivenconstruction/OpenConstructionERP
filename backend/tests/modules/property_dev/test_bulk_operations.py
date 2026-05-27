@@ -149,9 +149,7 @@ async def admin_b(client: AsyncClient):
 @pytest_asyncio.fixture(scope="module")
 async def editor_user(client: AsyncClient):
     """Non-admin editor — should get 403 on bulk endpoints (MANAGER+ gate)."""
-    _uid, email, headers = await _register_user(
-        client, role="editor", tag="ed-bulk"
-    )
+    _uid, email, headers = await _register_user(client, role="editor", tag="ed-bulk")
     return {"uid": _uid, "email": email, "headers": headers}
 
 
@@ -488,23 +486,48 @@ def _make_csv_bytes(rows: list[dict]) -> bytes:
     header = "full_name,email,phone,source,plot_type_interest,budget_min,budget_max,notes\n"
     body_lines = []
     for r in rows:
-        body_lines.append(",".join([
-            str(r.get(k, "")) for k in (
-                "full_name", "email", "phone", "source",
-                "plot_type_interest", "budget_min", "budget_max", "notes",
+        body_lines.append(
+            ",".join(
+                [
+                    str(r.get(k, ""))
+                    for k in (
+                        "full_name",
+                        "email",
+                        "phone",
+                        "source",
+                        "plot_type_interest",
+                        "budget_min",
+                        "budget_max",
+                        "notes",
+                    )
+                ]
             )
-        ]))
+        )
     return (header + "\n".join(body_lines) + "\n").encode("utf-8")
 
 
 @pytest.mark.asyncio
 async def test_bulk_lead_import_real_run_creates_rows(client, admin_a):
-    csv_bytes = _make_csv_bytes([
-        {"full_name": "L1", "email": f"l1-{uuid.uuid4().hex[:6]}@x.io", "source": "web_form",
-         "budget_min": "100000", "budget_max": "200000", "notes": "n1"},
-        {"full_name": "L2", "email": f"l2-{uuid.uuid4().hex[:6]}@x.io", "source": "broker",
-         "budget_min": "300000", "budget_max": "500000", "notes": "n2"},
-    ])
+    csv_bytes = _make_csv_bytes(
+        [
+            {
+                "full_name": "L1",
+                "email": f"l1-{uuid.uuid4().hex[:6]}@x.io",
+                "source": "web_form",
+                "budget_min": "100000",
+                "budget_max": "200000",
+                "notes": "n1",
+            },
+            {
+                "full_name": "L2",
+                "email": f"l2-{uuid.uuid4().hex[:6]}@x.io",
+                "source": "broker",
+                "budget_min": "300000",
+                "budget_max": "500000",
+                "notes": "n2",
+            },
+        ]
+    )
     files = {"file": ("leads.csv", csv_bytes, "text/csv")}
     res = await client.post(
         f"{API}/bulk/leads/bulk-import-csv/",
@@ -523,10 +546,7 @@ async def test_bulk_lead_import_real_run_creates_rows(client, admin_a):
 async def test_bulk_lead_import_dedupes_by_email(client, admin_a):
     """Re-importing the same email folds into existing Lead's notes."""
     dup_email = f"dup-{uuid.uuid4().hex[:6]}@x.io"
-    csv1 = _make_csv_bytes([
-        {"full_name": "Original", "email": dup_email, "source": "web_form",
-         "notes": "first"}
-    ])
+    csv1 = _make_csv_bytes([{"full_name": "Original", "email": dup_email, "source": "web_form", "notes": "first"}])
     r1 = await client.post(
         f"{API}/bulk/leads/bulk-import-csv/",
         files={"file": ("a.csv", csv1, "text/csv")},
@@ -536,10 +556,7 @@ async def test_bulk_lead_import_dedupes_by_email(client, admin_a):
     assert r1.status_code == 200, r1.text
     assert r1.json()["succeeded"] == 1
 
-    csv2 = _make_csv_bytes([
-        {"full_name": "Repeat", "email": dup_email, "source": "broker",
-         "notes": "second"}
-    ])
+    csv2 = _make_csv_bytes([{"full_name": "Repeat", "email": dup_email, "source": "broker", "notes": "second"}])
     r2 = await client.post(
         f"{API}/bulk/leads/bulk-import-csv/",
         files={"file": ("b.csv", csv2, "text/csv")},
@@ -583,9 +600,7 @@ async def test_bulk_lead_import_missing_header_rejects_400(client, admin_a):
 
 @pytest.mark.asyncio
 async def test_bulk_lead_import_editor_blocked_403(client, editor_user):
-    csv_bytes = _make_csv_bytes([
-        {"full_name": "L1", "email": "x@x.io", "source": "web_form"}
-    ])
+    csv_bytes = _make_csv_bytes([{"full_name": "L1", "email": "x@x.io", "source": "web_form"}])
     res = await client.post(
         f"{API}/bulk/leads/bulk-import-csv/",
         files={"file": ("leads.csv", csv_bytes, "text/csv")},
@@ -597,10 +612,7 @@ async def test_bulk_lead_import_editor_blocked_403(client, editor_user):
 @pytest.mark.asyncio
 async def test_bulk_lead_import_dry_run_no_writes(client, admin_a):
     new_email = f"dryrun-{uuid.uuid4().hex[:6]}@x.io"
-    csv_bytes = _make_csv_bytes([
-        {"full_name": "DR", "email": new_email, "source": "web_form",
-         "budget_min": "1000"}
-    ])
+    csv_bytes = _make_csv_bytes([{"full_name": "DR", "email": new_email, "source": "web_form", "budget_min": "1000"}])
     res = await client.post(
         f"{API}/bulk/leads/bulk-import-csv/?dry_run=true",
         files={"file": ("leads.csv", csv_bytes, "text/csv")},
@@ -624,8 +636,7 @@ async def test_bulk_lead_import_dry_run_no_writes(client, admin_a):
 @pytest.mark.asyncio
 async def test_bulk_lead_import_email_missing_row_failed(client, admin_a):
     csv_bytes = (
-        b"full_name,email,phone,source,plot_type_interest,budget_min,budget_max,notes\n"
-        b"NoEmail,,123,web_form,,,,\n"
+        b"full_name,email,phone,source,plot_type_interest,budget_min,budget_max,notes\nNoEmail,,123,web_form,,,,\n"
     )
     res = await client.post(
         f"{API}/bulk/leads/bulk-import-csv/",
@@ -743,10 +754,7 @@ async def test_bulk_buyer_merge_blocks_cross_development(client, admin_a):
     assert merge.status_code == 200, merge.text
     body = merge.json()
     assert body["succeeded"] == 0
-    assert any(
-        f["error_code"] == "cross_development_merge_blocked"
-        for f in body["failed"]
-    )
+    assert any(f["error_code"] == "cross_development_merge_blocked" for f in body["failed"])
 
 
 @pytest.mark.asyncio
@@ -805,9 +813,7 @@ async def test_bulk_buyer_merge_editor_blocked_403(client, admin_a, editor_user)
 
 
 @pytest.mark.asyncio
-async def test_bulk_buyer_merge_atomicity_rolls_back_on_hard_failure(
-    client, admin_a
-):
+async def test_bulk_buyer_merge_atomicity_rolls_back_on_hard_failure(client, admin_a):
     """If a hard FK error fires mid-batch, the SAVEPOINT rolls back every repoint.
 
     We construct a scenario where the second item in the batch will trip

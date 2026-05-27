@@ -252,9 +252,7 @@ def parse_definition(source: str | dict[str, Any]) -> RuleDefinition:
     rule_sets_raw = raw.get("rule_sets")
     rule_sets: tuple[str, ...] = ()
     if rule_sets_raw is not None:
-        if not isinstance(rule_sets_raw, list) or not all(
-            isinstance(s, str) for s in rule_sets_raw
-        ):
+        if not isinstance(rule_sets_raw, list) or not all(isinstance(s, str) for s in rule_sets_raw):
             raise DSLTypeError(
                 "rule_sets must be a list of strings.",
                 path="$.rule_sets",
@@ -393,8 +391,7 @@ def _parse_category(value: Any) -> RuleCategory:
         return RuleCategory(value.strip().lower())
     except ValueError as exc:
         raise DSLTypeError(
-            "category must be one of: structure, completeness, "
-            "consistency, compliance, quality, custom.",
+            "category must be one of: structure, completeness, consistency, compliance, quality, custom.",
             path="$.category",
             details={"value": value},
         ) from exc
@@ -426,7 +423,9 @@ def _parse_body(node: Any, *, path: str) -> RuleBody:
                 path=path,
             )
         predicate = _parse_expression(
-            node["assert"], path=f"{path}.assert", depth=0,
+            node["assert"],
+            path=f"{path}.assert",
+            depth=0,
         )
         return ForEachAssert(iter_var=iter_var, predicate=predicate)
 
@@ -438,7 +437,9 @@ def _parse_body(node: Any, *, path: str) -> RuleBody:
                 path=path,
             )
         predicate = _parse_expression(
-            node["assert"], path=f"{path}.assert", depth=0,
+            node["assert"],
+            path=f"{path}.assert",
+            depth=0,
         )
         return SingleAssert(predicate=predicate)
 
@@ -565,7 +566,11 @@ def _parse_atom(text: str, *, path: str) -> Expression:
 
 
 def _parse_logical(
-    op: str, operands: Any, *, path: str, depth: int,
+    op: str,
+    operands: Any,
+    *,
+    path: str,
+    depth: int,
 ) -> Logical:
     if op == "not":
         # Single operand — accept either a list-of-1 or a bare expression.
@@ -593,14 +598,17 @@ def _parse_logical(
             path=f"{path}.{op}",
         )
     parsed_ops = tuple(
-        _parse_expression(op_node, path=f"{path}.{op}[{i}]", depth=depth + 1)
-        for i, op_node in enumerate(operands)
+        _parse_expression(op_node, path=f"{path}.{op}[{i}]", depth=depth + 1) for i, op_node in enumerate(operands)
     )
     return Logical(op=op, operands=parsed_ops)
 
 
 def _parse_compare(
-    op: str, inner: Any, *, path: str, depth: int,
+    op: str,
+    inner: Any,
+    *,
+    path: str,
+    depth: int,
 ) -> Comparison:
     """Parse a structured comparison node — ``{">=": [a, b]}`` or
     ``{"in": {"value": x, "list": [...]}}``."""
@@ -617,10 +625,13 @@ def _parse_compare(
                 path=f"{path}.in",
             )
         value_node = _parse_expression(
-            inner["value"], path=f"{path}.in.value", depth=depth + 1,
+            inner["value"],
+            path=f"{path}.in.value",
+            depth=depth + 1,
         )
         list_node = _parse_literal_list(
-            inner["list"], path=f"{path}.in.list",
+            inner["list"],
+            path=f"{path}.in.list",
         )
         return Comparison(op=op, left=value_node, right=list_node)
 

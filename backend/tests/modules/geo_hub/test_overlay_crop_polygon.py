@@ -65,7 +65,9 @@ async def test_crop_polygon_round_trip(http_client, tenant_a, tiny_png):
 
 @pytest.mark.asyncio
 async def test_crop_polygon_must_be_valid_geojson(
-    http_client, tenant_a, tiny_png,
+    http_client,
+    tenant_a,
+    tiny_png,
 ):
     files = {"file": ("img2.png", tiny_png, "image/png")}
     create = await http_client.post(

@@ -50,7 +50,6 @@ from app.modules.clash_cost_impact.service import (  # noqa: E402
     _money_round,
 )
 
-
 # ── Fakes ────────────────────────────────────────────────────────────────
 
 
@@ -65,7 +64,7 @@ def _fake_position(total: str, *, cad_ids: list[str] | None = None) -> SimpleNam
         id=uuid.uuid4(),
         ordinal="01.01",
         description="Concrete wall, 240mm",
-        total=total,                       # canonical: STRING money on the ORM
+        total=total,  # canonical: STRING money on the ORM
         cad_element_ids=cad_ids or [],
     )
 
@@ -142,8 +141,10 @@ def test_compute_impact_no_boq_overlap_yields_labour_only_medium():
     svc = ClashCostImpactService(session=None)  # type: ignore[arg-type]
     project = _fake_project(currency="USD")
     clash = _fake_clash(
-        a_stable="STBL-X", b_stable="STBL-Y",
-        a_disc="architectural", b_disc="electrical",  # 4h
+        a_stable="STBL-X",
+        b_stable="STBL-Y",
+        a_disc="architectural",
+        b_disc="electrical",  # 4h
     )
     payload, total_decimal = svc._compute_impact(clash, project, [])
 
@@ -216,10 +217,7 @@ def test_rollup_returns_exact_decimal_no_accumulated_rounding(monkeypatch):
 
     # Three clashes whose computed totals each have a 0.005 tail that
     # would round half-up to a different value than the exact sum.
-    clashes = [
-        _fake_clash(a_stable=f"S-{i}", b_stable="", a_disc="x", b_disc="y")
-        for i in range(3)
-    ]
+    clashes = [_fake_clash(a_stable=f"S-{i}", b_stable="", a_disc="x", b_disc="y") for i in range(3)]
 
     # Patch _compute_impact to return our chosen tails.
     sub_cent = Decimal("0.005")
@@ -229,7 +227,7 @@ def test_rollup_returns_exact_decimal_no_accumulated_rounding(monkeypatch):
         # we still build it so the function honours its contract.
         return (
             {"total_estimate": _money_round(sub_cent)},  # = 0.01 per clash
-            sub_cent,                                    # exact Decimal
+            sub_cent,  # exact Decimal
         )
 
     monkeypatch.setattr(ClashCostImpactService, "_compute_impact", _fake_compute)
@@ -245,17 +243,12 @@ def test_rollup_returns_exact_decimal_no_accumulated_rounding(monkeypatch):
         return []
 
     monkeypatch.setattr(ClashCostImpactService, "_load_project", _fake_load_project)
-    monkeypatch.setattr(
-        ClashCostImpactService, "_open_clashes_for_project", _fake_open
-    )
-    monkeypatch.setattr(
-        ClashCostImpactService, "_positions_for_project", _fake_positions
-    )
+    monkeypatch.setattr(ClashCostImpactService, "_open_clashes_for_project", _fake_open)
+    monkeypatch.setattr(ClashCostImpactService, "_positions_for_project", _fake_positions)
 
     import asyncio
-    result = asyncio.get_event_loop().run_until_complete(
-        svc.rollup_for_project(project.id, status_filter="open")
-    )
+
+    result = asyncio.get_event_loop().run_until_complete(svc.rollup_for_project(project.id, status_filter="open"))
     assert result is not None
     # Exact sum: 3 × 0.005 = 0.015 → ROUND_HALF_UP → 0.02.
     # If we summed the rounded floats instead we'd get 0.01 + 0.01 + 0.01
@@ -286,9 +279,7 @@ def test_rollup_empty_project_uses_project_currency_not_eur_hardcode():
     svc._load_project = types.MethodType(_fake_load_project, svc)  # type: ignore[method-assign]
     svc._open_clashes_for_project = types.MethodType(_fake_open, svc)  # type: ignore[method-assign]
 
-    result = asyncio.get_event_loop().run_until_complete(
-        svc.rollup_for_project(project.id, status_filter="open")
-    )
+    result = asyncio.get_event_loop().run_until_complete(svc.rollup_for_project(project.id, status_filter="open"))
     assert result is not None
     assert result["currency"] == ""
     assert result["total_open_impact"] == 0.0
@@ -312,15 +303,11 @@ def unauth_client() -> TestClient:
 
 def test_clash_impact_unauthenticated_returns_401(unauth_client: TestClient):
     """``GET /clash/{id}/impact`` 401s when no JWT is presented."""
-    resp = unauth_client.get(
-        f"/api/v1/clash-cost-impact/clash/{uuid.uuid4()}/impact"
-    )
+    resp = unauth_client.get(f"/api/v1/clash-cost-impact/clash/{uuid.uuid4()}/impact")
     assert resp.status_code == 401, resp.text
 
 
 def test_project_rollup_unauthenticated_returns_401(unauth_client: TestClient):
     """``GET /project/{id}/rollup`` 401s when no JWT is presented."""
-    resp = unauth_client.get(
-        f"/api/v1/clash-cost-impact/project/{uuid.uuid4()}/rollup"
-    )
+    resp = unauth_client.get(f"/api/v1/clash-cost-impact/project/{uuid.uuid4()}/rollup")
     assert resp.status_code == 401, resp.text

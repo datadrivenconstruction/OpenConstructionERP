@@ -206,9 +206,7 @@ class _StubCertRepo:
         return [
             r
             for r in self.rows.values()
-            if r.status == "valid"
-            and r.valid_until is not None
-            and today_iso <= r.valid_until <= cutoff_iso
+            if r.status == "valid" and r.valid_until is not None and today_iso <= r.valid_until <= cutoff_iso
         ]
 
     async def create(self, c: Any) -> Any:
@@ -333,9 +331,7 @@ class _StubAssignmentRepo:
         project_id: uuid.UUID | None = None,
         resource_ids: list[uuid.UUID] | None = None,
     ) -> list[Any]:
-        out = [
-            a for a in self.rows.values() if a.start_at < end and a.end_at > start
-        ]
+        out = [a for a in self.rows.values() if a.start_at < end and a.end_at > start]
         if project_id is not None:
             out = [a for a in out if a.project_id == project_id]
         if resource_ids is not None:
@@ -421,11 +417,7 @@ class _StubLinkRepo:
         return self.rows.get(lid)
 
     async def list_for_resource(self, rid: uuid.UUID) -> list[Any]:
-        return [
-            r
-            for r in self.rows.values()
-            if r.primary_resource_id == rid or r.secondary_resource_id == rid
-        ]
+        return [r for r in self.rows.values() if r.primary_resource_id == rid or r.secondary_resource_id == rid]
 
     async def create(self, link: Any) -> Any:
         if getattr(link, "id", None) is None:
@@ -770,9 +762,7 @@ def test_validate_skill_requirements_all_present() -> None:
         SimpleNamespace(resource_id=rid, skill_id=s1, expires_at=None),
         SimpleNamespace(resource_id=rid, skill_id=s2, expires_at="2099-01-01"),
     ]
-    passes, missing = validate_skill_requirements(
-        rid, [s1, s2], rs, [], on_date=date(2026, 5, 12)
-    )
+    passes, missing = validate_skill_requirements(rid, [s1, s2], rs, [], on_date=date(2026, 5, 12))
     assert passes
     assert missing == []
 
@@ -781,9 +771,7 @@ def test_validate_skill_requirements_missing_skill() -> None:
     rid = uuid.uuid4()
     s1, s2 = uuid.uuid4(), uuid.uuid4()
     rs = [SimpleNamespace(resource_id=rid, skill_id=s1, expires_at=None)]
-    passes, missing = validate_skill_requirements(
-        rid, [s1, s2], rs, [], on_date=date(2026, 5, 12)
-    )
+    passes, missing = validate_skill_requirements(rid, [s1, s2], rs, [], on_date=date(2026, 5, 12))
     assert not passes
     assert any(m.startswith("missing_skill:") for m in missing)
 
@@ -792,9 +780,7 @@ def test_validate_skill_requirements_expired_skill() -> None:
     rid = uuid.uuid4()
     s1 = uuid.uuid4()
     rs = [SimpleNamespace(resource_id=rid, skill_id=s1, expires_at="2025-01-01")]
-    passes, missing = validate_skill_requirements(
-        rid, [s1], rs, [], on_date=date(2026, 5, 12)
-    )
+    passes, missing = validate_skill_requirements(rid, [s1], rs, [], on_date=date(2026, 5, 12))
     assert not passes
     assert any(m.startswith("expired_skill:") for m in missing)
 
@@ -876,9 +862,7 @@ def test_compute_resource_utilization_half_allocation() -> None:
 @pytest.mark.asyncio
 async def test_create_resource_returns_obj() -> None:
     svc = _make_service()
-    resource = await svc.create_resource(
-        ResourceCreate(code="P-1", name="Anna", resource_type="person")
-    )
+    resource = await svc.create_resource(ResourceCreate(code="P-1", name="Anna", resource_type="person"))
     assert resource.code == "P-1"
     assert resource.id is not None
 
@@ -890,9 +874,7 @@ async def test_create_resource_duplicate_code() -> None:
     from fastapi import HTTPException
 
     with pytest.raises(HTTPException) as exc_info:
-        await svc.create_resource(
-            ResourceCreate(code="P-1", name="Bob", resource_type="person")
-        )
+        await svc.create_resource(ResourceCreate(code="P-1", name="Bob", resource_type="person"))
     assert exc_info.value.status_code == 409
 
 
@@ -1198,9 +1180,7 @@ async def test_complete_assignment_rejects_actual_end_before_start() -> None:
     from fastapi import HTTPException
 
     with pytest.raises(HTTPException) as exc_info:
-        await svc.complete_assignment(
-            a.id, actual_end=datetime(2026, 5, 10, 6, 0, tzinfo=UTC)
-        )
+        await svc.complete_assignment(a.id, actual_end=datetime(2026, 5, 10, 6, 0, tzinfo=UTC))
     assert exc_info.value.status_code == 400
 
 
@@ -1286,12 +1266,8 @@ async def test_attach_skill_idempotent_updates_level() -> None:
     svc = _make_service()
     r = _make_resource(svc)
     skill = await svc.create_skill(SkillCreate(code="trade.x", name="X"))
-    await svc.attach_skill(
-        r.id, ResourceSkillCreate(skill_id=skill.id, level="basic")
-    )
-    second = await svc.attach_skill(
-        r.id, ResourceSkillCreate(skill_id=skill.id, level="expert")
-    )
+    await svc.attach_skill(r.id, ResourceSkillCreate(skill_id=skill.id, level="basic"))
+    second = await svc.attach_skill(r.id, ResourceSkillCreate(skill_id=skill.id, level="expert"))
     assert second.level == "expert"
 
 
@@ -1329,12 +1305,8 @@ async def test_list_expiring_certifications_filters_window() -> None:
     r = _make_resource(svc)
     soon = (datetime.now(UTC).date() + timedelta(days=10)).isoformat()
     far = (datetime.now(UTC).date() + timedelta(days=400)).isoformat()
-    await svc.create_certification(
-        CertificationCreate(resource_id=r.id, cert_type="A", valid_until=soon)
-    )
-    await svc.create_certification(
-        CertificationCreate(resource_id=r.id, cert_type="B", valid_until=far)
-    )
+    await svc.create_certification(CertificationCreate(resource_id=r.id, cert_type="A", valid_until=soon))
+    await svc.create_certification(CertificationCreate(resource_id=r.id, cert_type="B", valid_until=far))
     expiring = await svc.list_expiring_certifications(days=60)
     assert len(expiring) == 1
     assert expiring[0].cert_type == "A"
@@ -1481,9 +1453,7 @@ def test_permissions_registered() -> None:
 @pytest.mark.asyncio
 async def test_resource_repo_crud_roundtrip() -> None:
     svc = _make_service()
-    r = await svc.create_resource(
-        ResourceCreate(code="P-XYZ", name="Zed", resource_type="person")
-    )
+    r = await svc.create_resource(ResourceCreate(code="P-XYZ", name="Zed", resource_type="person"))
     fetched = await svc.get_resource(r.id)
     assert fetched.code == "P-XYZ"
     await svc.delete_resource(r.id)
@@ -1610,9 +1580,14 @@ async def test_emit_expiry_events_publishes_per_cert() -> None:
         cert_type="CSCS",
         valid_until=(today + timedelta(days=14)).isoformat(),
         status="valid",
-        cert_number=None, issued_by=None, issue_date=None,
-        document_url=None, notes="", metadata_={},
-        created_at=datetime.now(UTC), updated_at=datetime.now(UTC),
+        cert_number=None,
+        issued_by=None,
+        issue_date=None,
+        document_url=None,
+        notes="",
+        metadata_={},
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     svc.cert_repo.rows[cert.id] = cert
     with patch("app.modules.resources.service.event_bus.publish_detached") as p:
@@ -1904,9 +1879,7 @@ async def test_find_candidates_delegates_to_repository() -> None:
     svc.assignment_repo.find_available_resources = _fake  # type: ignore[assignment]
     start = datetime(2026, 7, 1, 8, 0, tzinfo=UTC)
     end = datetime(2026, 7, 1, 17, 0, tzinfo=UTC)
-    out = await svc.find_candidates(
-        [skill], start, end, exclude_ids=[sentinel.id], limit=5
-    )
+    out = await svc.find_candidates([skill], start, end, exclude_ids=[sentinel.id], limit=5)
     assert out == [sentinel]
     assert captured["skill_ids"] == [skill]
     assert captured["start"] == start

@@ -155,9 +155,7 @@ async def test_viewer_with_no_projects_sees_empty(session):
     await session.commit()
 
     repo = ProjectRepository(session)
-    viewer_list, viewer_total = await repo.list_for_user(
-        fresh_viewer.id, is_admin=False
-    )
+    viewer_list, viewer_total = await repo.list_for_user(fresh_viewer.id, is_admin=False)
 
     assert viewer_total == 0
     assert viewer_list == []

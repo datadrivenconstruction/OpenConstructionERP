@@ -227,6 +227,7 @@ async def update_moc_impact(
     # IDOR guard: impact must belong to the requested entry.
     if impact.moc_entry_id != entry_id:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="MoC impact not found")
     return MoCImpactResponse.model_validate(impact)
 
@@ -246,5 +247,6 @@ async def delete_moc_impact(
     impact = await svc.get_impact(impact_id)
     if impact.moc_entry_id != entry_id:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="MoC impact not found")
     await svc.delete_impact(impact_id)

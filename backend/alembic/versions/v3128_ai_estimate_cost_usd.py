@@ -47,7 +47,8 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _existing_columns(
-    inspector: sa.engine.reflection.Inspector, table: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
 ) -> set[str]:
     if not _has_table(inspector, table):
         return set()

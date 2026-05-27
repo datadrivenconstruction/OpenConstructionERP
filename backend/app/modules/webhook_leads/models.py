@@ -41,31 +41,19 @@ class WebhookSource(Base):
     # Optional delivery-project scope. Plain GUID, no DB FK (see header).
     project_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    slug: Mapped[str] = mapped_column(
-        String(64), nullable=False, unique=True, index=True
-    )
+    slug: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
     # api_key | hmac | jwt
-    auth_method: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="api_key", server_default="api_key"
-    )
+    auth_method: Mapped[str] = mapped_column(String(16), nullable=False, default="api_key", server_default="api_key")
     # SHA-256 hex digest of the shared secret / api key — never the plaintext.
-    secret_hash: Mapped[str] = mapped_column(
-        String(128), nullable=False, default="", server_default=""
-    )
+    secret_hash: Mapped[str] = mapped_column(String(128), nullable=False, default="", server_default="")
     # JSON array of allowed client IPs / CIDR-less exact strings. Empty = any.
     ip_allowlist: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=list, server_default="[]"
     )
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1", index=True
-    )
-    rate_limit_per_min: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=60, server_default="60"
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1", index=True)
+    rate_limit_per_min: Mapped[int] = mapped_column(Integer, nullable=False, default=60, server_default="60")
     # Default CRM lead source label applied when a mapping does not set it.
-    default_lead_source: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="web", server_default="web"
-    )
+    default_lead_source: Mapped[str] = mapped_column(String(32), nullable=False, default="web", server_default="web")
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
     def __repr__(self) -> str:
@@ -94,9 +82,7 @@ class PayloadMapping(Base):
     # or "items.0.name" (numeric segments index into lists).
     source_path: Mapped[str] = mapped_column(String(255), nullable=False)
     transform: Mapped[str | None] = mapped_column(String(32), nullable=True)
-    required: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    required: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
 
     def __repr__(self) -> str:
         return f"<PayloadMapping {self.source_path} → {self.target_field}>"
@@ -115,31 +101,24 @@ class WebhookLog(Base):
     )
     # Slug as supplied on the URL — kept even when the source is unknown so
     # probes against non-existent slugs are still auditable.
-    source_slug: Mapped[str] = mapped_column(
-        String(64), nullable=False, default="", server_default="", index=True
-    )
+    source_slug: Mapped[str] = mapped_column(String(64), nullable=False, default="", server_default="", index=True)
     received_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    remote_ip: Mapped[str] = mapped_column(
-        String(64), nullable=False, default="", server_default=""
-    )
+    remote_ip: Mapped[str] = mapped_column(String(64), nullable=False, default="", server_default="")
     # accepted | rejected | error
     status: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="rejected", server_default="rejected",
+        String(16),
+        nullable=False,
+        default="rejected",
+        server_default="rejected",
         index=True,
     )
-    http_status: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
+    http_status: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     # Size-capped raw payload snapshot (service truncates before persist).
     payload: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
     )
-    error_message: Mapped[str] = mapped_column(
-        Text, nullable=False, default="", server_default=""
-    )
-    created_lead_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True
-    )
+    error_message: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    created_lead_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
     def __repr__(self) -> str:
         return f"<WebhookLog {self.source_slug} {self.status} {self.http_status}>"

@@ -24,7 +24,6 @@ import pytest
 
 from app.modules.punchlist.schemas import (
     PunchItemCreate,
-    PunchItemUpdate,
     PunchStatusTransition,
 )
 from app.modules.punchlist.service import VALID_TRANSITIONS, PunchListService
@@ -44,19 +43,19 @@ def _make_service() -> PunchListService:
 
 class _StubSession:
     def __init__(self) -> None:
-        self._repo: "_StubRepo | None" = None  # set after construction
+        self._repo: _StubRepo | None = None  # set after construction
 
     async def refresh(self, obj: Any) -> None:
         pass
 
-    def begin_nested(self) -> "_FakeNested":
+    def begin_nested(self) -> _FakeNested:
         return _FakeNested()
 
 
 class _FakeNested:
     """Minimal async context manager mimicking ``session.begin_nested()``."""
 
-    async def __aenter__(self) -> "_FakeNested":
+    async def __aenter__(self) -> _FakeNested:
         return self
 
     async def __aexit__(self, exc_type: Any, *args: Any) -> None:
@@ -168,15 +167,9 @@ class _StubRepo:
 @pytest.mark.asyncio
 async def test_fsm_assigned_state_in_transitions() -> None:
     """VALID_TRANSITIONS must include 'assigned' as a reachable state."""
-    assert "assigned" in VALID_TRANSITIONS["open"], (
-        "'open' should allow transition to 'assigned'"
-    )
-    assert "in_progress" in VALID_TRANSITIONS["assigned"], (
-        "'assigned' should allow transition to 'in_progress'"
-    )
-    assert "open" in VALID_TRANSITIONS["assigned"], (
-        "'assigned' should allow transition back to 'open'"
-    )
+    assert "assigned" in VALID_TRANSITIONS["open"], "'open' should allow transition to 'assigned'"
+    assert "in_progress" in VALID_TRANSITIONS["assigned"], "'assigned' should allow transition to 'in_progress'"
+    assert "open" in VALID_TRANSITIONS["assigned"], "'assigned' should allow transition back to 'open'"
 
 
 @pytest.mark.asyncio
@@ -191,28 +184,20 @@ async def test_fsm_full_lifecycle_with_assigned() -> None:
     user_b = str(uuid.uuid4())
 
     # open → assigned
-    await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="assigned"), user_a
-    )
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="assigned"), user_a)
     assert item.status == "assigned"
 
     # assigned → in_progress
-    await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="in_progress"), user_a
-    )
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="in_progress"), user_a)
     assert item.status == "in_progress"
 
     # in_progress → verified (different user)
-    await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="verified"), user_b
-    )
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="verified"), user_b)
     assert item.status == "verified"
     assert item.verified_by == user_b
 
     # verified → closed
-    await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="closed"), user_b
-    )
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="closed"), user_b)
     assert item.status == "closed"
 
 
@@ -226,9 +211,7 @@ async def test_fsm_invalid_transition_blocked() -> None:
     item = repo._make_item(status="open")
 
     with pytest.raises(HTTPException) as exc_info:
-        await svc.transition_status(
-            item.id, PunchStatusTransition(new_status="verified"), str(uuid.uuid4())
-        )
+        await svc.transition_status(item.id, PunchStatusTransition(new_status="verified"), str(uuid.uuid4()))
     assert exc_info.value.status_code == 400
 
 
@@ -438,7 +421,5 @@ async def test_assigned_can_transition_back_to_open() -> None:
     repo: _StubRepo = svc.repo  # type: ignore[assignment]
     item = repo._make_item(status="assigned")
 
-    await svc.transition_status(
-        item.id, PunchStatusTransition(new_status="open"), str(uuid.uuid4())
-    )
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="open"), str(uuid.uuid4()))
     assert item.status == "open"

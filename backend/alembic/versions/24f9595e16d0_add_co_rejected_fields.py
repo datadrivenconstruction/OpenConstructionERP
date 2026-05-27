@@ -5,15 +5,15 @@ Revises: fee2e323c50c
 Create Date: 2026-04-19 10:10:54.732981
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '24f9595e16d0'
-down_revision: Union[str, None] = 'fee2e323c50c'
+revision: str = "24f9595e16d0"
+down_revision: Union[str, None] = "fee2e323c50c"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

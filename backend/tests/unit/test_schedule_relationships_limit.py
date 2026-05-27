@@ -41,7 +41,6 @@ os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 
 from app.database import Base  # noqa: E402
 from app.modules.schedule.models import (  # noqa: E402
-    Activity,
     Schedule,
     ScheduleRelationship,
 )
@@ -56,9 +55,7 @@ async def seeded_schedule_id() -> tuple[uuid.UUID, AsyncSession]:
     seeding twice.
     """
     db_path = _TMP_DIR / f"test-{uuid.uuid4().hex[:8]}.db"
-    engine = create_async_engine(
-        f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False
-    )
+    engine = create_async_engine(f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False)
     # ``app.database`` registers a global ``connect`` event listener
     # that flips ``PRAGMA foreign_keys=ON`` for every SQLite connection
     # produced by ANY engine. Layer a higher-priority listener here that
@@ -151,8 +148,7 @@ async def test_default_limit_caps_at_200(seeded_schedule_id) -> None:
         schedule_router._verify_schedule_owner = original  # type: ignore[assignment]
 
     assert len(rels) == 200, (
-        f"Default limit must cap at 200, got {len(rels)} of 700. "
-        "Did someone restore the unbounded fetch?"
+        f"Default limit must cap at 200, got {len(rels)} of 700. Did someone restore the unbounded fetch?"
     )
 
 
@@ -209,8 +205,7 @@ async def test_results_ordered_by_created_at_asc(seeded_schedule_id) -> None:
 
     timestamps = [r.created_at for r in rels]
     assert timestamps == sorted(timestamps), (
-        "Relationships must be ASC-ordered by created_at — pagination "
-        "stability depends on it."
+        "Relationships must be ASC-ordered by created_at — pagination stability depends on it."
     )
 
 
@@ -254,15 +249,10 @@ def test_limit_above_500_rejected_by_query_schema() -> None:
                 bounds[attr] = v
 
     assert bounds["le"] == 500, (
-        f"Expected ``limit`` upper bound of 500, got {bounds['le']}. "
-        "The cap is the whole point of this perf fix."
+        f"Expected ``limit`` upper bound of 500, got {bounds['le']}. The cap is the whole point of this perf fix."
     )
-    assert bounds["ge"] == 1, (
-        f"Expected ``limit`` lower bound of 1, got {bounds['ge']}."
-    )
-    assert bounds["default"] == 200, (
-        f"Expected ``limit`` default of 200, got {bounds['default']}."
-    )
+    assert bounds["ge"] == 1, f"Expected ``limit`` lower bound of 1, got {bounds['ge']}."
+    assert bounds["default"] == 200, f"Expected ``limit`` default of 200, got {bounds['default']}."
 
 
 import inspect  # noqa: E402  — used above

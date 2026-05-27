@@ -14,7 +14,6 @@ import uuid
 import pytest
 import pytest_asyncio
 from sqlalchemy import event, select
-from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Importing the ORM module registers the EAC tables with Base.metadata.
@@ -245,11 +244,7 @@ async def test_rule_version_history(session: AsyncSession) -> None:
     session.add_all([v1, v2])
     await session.flush()
 
-    stmt = (
-        select(EacRuleVersion)
-        .where(EacRuleVersion.rule_id == rule.id)
-        .order_by(EacRuleVersion.version_number)
-    )
+    stmt = select(EacRuleVersion).where(EacRuleVersion.rule_id == rule.id).order_by(EacRuleVersion.version_number)
     result = await session.execute(stmt)
     rows = list(result.scalars().all())
     assert [r.version_number for r in rows] == [1, 2]

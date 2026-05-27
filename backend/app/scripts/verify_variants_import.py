@@ -126,9 +126,7 @@ def section_a_synthetic() -> None:
     sample = {
         "rate_code": "TEST_001",
         "price_abstract_resource_variants": (
-            f"Concrete C30/37 ready-mix delivered {bul} "
-            f"Concrete C30/37 site-mixed {bul} "
-            f"Concrete C30/37 pumped"
+            f"Concrete C30/37 ready-mix delivered {bul} Concrete C30/37 site-mixed {bul} Concrete C30/37 pumped"
         ),
         "price_abstract_resource_all_values": f"125.50 {bul} 98.75 {bul} 142.00",
         "price_abstract_resource_position_count": f"42 {bul} 18 {bul} 7",

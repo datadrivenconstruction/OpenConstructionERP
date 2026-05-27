@@ -87,9 +87,7 @@ def test_roundtrip_is_lossless(version: str) -> None:
     assert bcf_xml.detect_version(archive) == version
 
     result = bcf_xml.parse_bcfzip(archive)
-    assert not result.has_errors, [
-        (i.severity, i.code, i.message) for i in result.issues
-    ]
+    assert not result.has_errors, [(i.severity, i.code, i.message) for i in result.issues]
     assert result.detected_version == version
     assert len(result.topics) == 1
 
@@ -122,9 +120,7 @@ def test_roundtrip_is_lossless(version: str) -> None:
     assert rvp.camera_type == "perspective"
     assert rvp.field_of_view == pytest.approx(55.0)
     assert rvp.camera["camera_view_point"] == {"x": 12.5, "y": -3.0, "z": 2.4}
-    assert sorted(rvp.components["selection"]) == sorted(
-        ["2O2Fr$t4X7Zf8NOew3FNr", "1xS3BCk291UvhgP2dvNsgp"]
-    )
+    assert sorted(rvp.components["selection"]) == sorted(["2O2Fr$t4X7Zf8NOew3FNr", "1xS3BCk291UvhgP2dvNsgp"])
     assert rvp.components["hidden"] == ["0aB9cD3eFGHijKlMnOpQrS"]
     assert rvp.components["default_visibility"] is True
     assert rvp.snapshot_bytes == _PNG
@@ -189,9 +185,7 @@ def test_orthogonal_camera_roundtrip() -> None:
             view_to_world_scale=2.5,
         )
     )
-    archive = bcf_xml.build_bcfzip(
-        version="3.0", project_id="p", project_name="n", topics=[topic]
-    )
+    archive = bcf_xml.build_bcfzip(version="3.0", project_id="p", project_name="n", topics=[topic])
     result = bcf_xml.parse_bcfzip(archive)
     assert not result.has_errors
     rvp = result.topics[0].viewpoints[0]
@@ -233,17 +227,13 @@ def test_parse_malformed_markup_xml_is_reported() -> None:
         zf.writestr("abc/markup.bcf", b"<Markup><Topic Guid='x'>unclosed")
     result = bcf_xml.parse_bcfzip(buf.getvalue())
     assert result.has_errors
-    assert any(
-        i.code in ("markup_xml_error", "markup_invalid") for i in result.issues
-    )
+    assert any(i.code in ("markup_xml_error", "markup_invalid") for i in result.issues)
 
 
 def test_version_mismatch_forced_parse() -> None:
     """A 2.1 archive can be force-parsed as 3.0 without crashing."""
     topic = _sample_topic()
-    archive = bcf_xml.build_bcfzip(
-        version="2.1", project_id="p", project_name="n", topics=[topic]
-    )
+    archive = bcf_xml.build_bcfzip(version="2.1", project_id="p", project_name="n", topics=[topic])
     result = bcf_xml.parse_bcfzip(archive, forced_version="3.0")
     assert result.detected_version == "3.0"
     assert not result.has_errors

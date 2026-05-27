@@ -80,17 +80,15 @@ def upgrade() -> None:
             sa.Column("relax_tier_used", sa.Integer(), nullable=False, server_default="0"),
             sa.Column("top_score", sa.Float(), nullable=True),
             sa.Column("top_confidence_band", sa.String(16), nullable=True),
-            sa.Column(
-                "bge_rerank_used", sa.Boolean(), nullable=False, server_default="0"
-            ),
-            sa.Column(
-                "llm_rerank_used", sa.Boolean(), nullable=False, server_default="0"
-            ),
+            sa.Column("bge_rerank_used", sa.Boolean(), nullable=False, server_default="0"),
+            sa.Column("llm_rerank_used", sa.Boolean(), nullable=False, server_default="0"),
             sa.Column("took_ms", sa.Integer(), nullable=True),
             sa.Column("status", sa.String(32), nullable=True),
             sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
             sa.ForeignKeyConstraint(
-                ["project_id"], ["oe_projects_project.id"], ondelete="CASCADE",
+                ["project_id"],
+                ["oe_projects_project.id"],
+                ondelete="CASCADE",
             ),
             sa.ForeignKeyConstraint(
                 ["session_id"],

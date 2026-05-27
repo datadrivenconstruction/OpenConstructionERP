@@ -27,11 +27,10 @@ from app.modules.bim_hub.ifc_processor import (
     process_ifc_file,
 )
 
-
 # ── Helpers ─────────────────────────────────────────────────────────
 
 
-@pytest.fixture()
+@pytest.fixture
 def workdir() -> Path:
     """A scratch dir for each test — parser writes its placeholder
     geometry into this directory, so we make a fresh one per test."""
@@ -133,13 +132,17 @@ def test_apostrophe_in_name_does_not_truncate_globalid(workdir: Path) -> None:
     before regex tokenisation, so the GUID survives intact and the name
     contains a single ASCII apostrophe.
     """
-    ifc = _IFC_HEADER + (
-        "#100= IFCBUILDINGSTOREY('2dEPbVfXn9bRTwS3l4kZ5G',#5,"
-        "'O''Brien Tower',$,$,$,$,$,.ELEMENT.,0.0);\n"
-        "#101= IFCWALL('1zZH5DqcvF7g5KkkN9mYTw',#5,'Wall',$,$,$,$,$,$);\n"
-        "#102= IFCRELCONTAINEDINSPATIALSTRUCTURE("
-        "'0relGUIDxxxxxxxxxxxxx',#5,$,$,(#101),#100);\n"
-    ) + _IFC_FOOTER
+    ifc = (
+        _IFC_HEADER
+        + (
+            "#100= IFCBUILDINGSTOREY('2dEPbVfXn9bRTwS3l4kZ5G',#5,"
+            "'O''Brien Tower',$,$,$,$,$,.ELEMENT.,0.0);\n"
+            "#101= IFCWALL('1zZH5DqcvF7g5KkkN9mYTw',#5,'Wall',$,$,$,$,$,$);\n"
+            "#102= IFCRELCONTAINEDINSPATIALSTRUCTURE("
+            "'0relGUIDxxxxxxxxxxxxx',#5,$,$,(#101),#100);\n"
+        )
+        + _IFC_FOOTER
+    )
 
     path = _write_ifc(ifc, workdir)
     result = process_ifc_file(path, workdir / "out")
@@ -154,9 +157,7 @@ def test_apostrophe_in_name_does_not_truncate_globalid(workdir: Path) -> None:
         f"expected wall.storey to be the apostrophised name, got {wall.get('storey')!r}"
     )
     # And the wall's GUID must still be 22 chars (compressed IFC GUID).
-    assert len(wall["stable_id"]) == 22, (
-        f"GUID truncated: {wall['stable_id']!r}"
-    )
+    assert len(wall["stable_id"]) == 22, f"GUID truncated: {wall['stable_id']!r}"
 
 
 # ── C5: multi-line entities must be picked up ────────────────────────
@@ -170,26 +171,25 @@ def test_multi_line_entity_is_parsed(workdir: Path) -> None:
     """
     # IFCRELCONTAINEDINSPATIALSTRUCTURE on three physical lines, valid
     # because STEP-21 only cares about ';' as a terminator.
-    ifc = _IFC_HEADER + (
-        "#100= IFCBUILDINGSTOREY('2dEPbVfXn9bRTwS3l4kZ5G',#5,'L1',$,$,$,$,$,.ELEMENT.,0.0);\n"
-        "#101= IFCWALL('1zZH5DqcvF7g5KkkN9mYTw',#5,'Wall1',$,$,$,$,$,$);\n"
-        "#102= IFCWALL('1AAH5DqcvF7g5KkkN9mYAA',#5,'Wall2',$,$,$,$,$,$);\n"
-        "#103= IFCRELCONTAINEDINSPATIALSTRUCTURE(\n"
-        "  '0qABCDeFghijklmnoPqRs5',\n"
-        "  #5,$,$,(#101,#102),#100);\n"
-    ) + _IFC_FOOTER
+    ifc = (
+        _IFC_HEADER
+        + (
+            "#100= IFCBUILDINGSTOREY('2dEPbVfXn9bRTwS3l4kZ5G',#5,'L1',$,$,$,$,$,.ELEMENT.,0.0);\n"
+            "#101= IFCWALL('1zZH5DqcvF7g5KkkN9mYTw',#5,'Wall1',$,$,$,$,$,$);\n"
+            "#102= IFCWALL('1AAH5DqcvF7g5KkkN9mYAA',#5,'Wall2',$,$,$,$,$,$);\n"
+            "#103= IFCRELCONTAINEDINSPATIALSTRUCTURE(\n"
+            "  '0qABCDeFghijklmnoPqRs5',\n"
+            "  #5,$,$,(#101,#102),#100);\n"
+        )
+        + _IFC_FOOTER
+    )
 
     path = _write_ifc(ifc, workdir)
     result = process_ifc_file(path, workdir / "out")
     elements = result.get("elements", [])
     # Both walls should have been assigned the storey "L1".
-    walls_with_storey = [
-        e for e in elements
-        if e["element_type"] == "Wall" and e.get("storey") == "L1"
-    ]
-    assert len(walls_with_storey) == 2, (
-        f"expected 2 walls in L1, got {walls_with_storey!r}"
-    )
+    walls_with_storey = [e for e in elements if e["element_type"] == "Wall" and e.get("storey") == "L1"]
+    assert len(walls_with_storey) == 2, f"expected 2 walls in L1, got {walls_with_storey!r}"
 
 
 # ── C7: IfcQuantity regex no longer captures #N references ─────────
@@ -233,9 +233,7 @@ def test_quantity_value_not_confused_with_ref_id() -> None:
         },
     }
     quantities = _extract_quantities_for_element(100, entities)
-    assert quantities.get("NetArea") == pytest.approx(42.5), (
-        f"expected NetArea=42.5, got {quantities!r}"
-    )
+    assert quantities.get("NetArea") == pytest.approx(42.5), f"expected NetArea=42.5, got {quantities!r}"
 
 
 # ── C8: RelDefinesByProperties no longer matches via OwnerHistory ────
@@ -292,9 +290,7 @@ def test_rel_defines_by_properties_does_not_leak_through_owner_history() -> None
     }
     # The OwnerHistory (#200) must NOT receive the door's quantities.
     qty_owner = _extract_quantities_for_element(200, entities)
-    assert qty_owner == {}, (
-        f"OwnerHistory leaked door quantities: {qty_owner!r}"
-    )
+    assert qty_owner == {}, f"OwnerHistory leaked door quantities: {qty_owner!r}"
     # The door (#100) must receive them.
     qty_door = _extract_quantities_for_element(100, entities)
     assert qty_door.get("NetArea") == pytest.approx(2.0)
@@ -310,11 +306,15 @@ def test_step_comments_are_stripped(workdir: Path) -> None:
     Without stripping these comments the regex tokenizer would match
     them as entities, producing duplicate IDs and corrupted parse state.
     """
-    ifc = _IFC_HEADER + (
-        "/* comment with #999= IFCWALL fake content */\n"
-        "#100= IFCBUILDINGSTOREY('2dEPbVfXn9bRTwS3l4kZ5G',#5,'L1',$,$,$,$,$,.ELEMENT.,0.0);\n"
-        "#101= IFCWALL('1zZH5DqcvF7g5KkkN9mYTw',#5,'Wall',$,$,$,$,$,$);\n"
-    ) + _IFC_FOOTER
+    ifc = (
+        _IFC_HEADER
+        + (
+            "/* comment with #999= IFCWALL fake content */\n"
+            "#100= IFCBUILDINGSTOREY('2dEPbVfXn9bRTwS3l4kZ5G',#5,'L1',$,$,$,$,$,.ELEMENT.,0.0);\n"
+            "#101= IFCWALL('1zZH5DqcvF7g5KkkN9mYTw',#5,'Wall',$,$,$,$,$,$);\n"
+        )
+        + _IFC_FOOTER
+    )
 
     path = _write_ifc(ifc, workdir)
     result = process_ifc_file(path, workdir / "out")
@@ -322,9 +322,7 @@ def test_step_comments_are_stripped(workdir: Path) -> None:
     # Exactly one wall must exist (the real #101), the comment must
     # not have produced a phantom #999 entity that shows up here.
     walls = [e for e in elements if e["element_type"] == "Wall"]
-    assert len(walls) == 1, (
-        f"comment block leaked a phantom wall: {walls!r}"
-    )
+    assert len(walls) == 1, f"comment block leaked a phantom wall: {walls!r}"
 
 
 # ── C2: IFC unit-assignment awareness ─────────────────────────────────
@@ -412,13 +410,17 @@ def test_full_parse_flags_unit_uncertain_when_units_missing(
     ``unit_uncertain=True`` AND propagate the flag at the model root
     so the bim_hub router can show a "Install DDC converter" banner.
     """
-    ifc = _IFC_HEADER + (
-        # IFCBUILDINGSTOREY + 1 wall, NO IFCSIUNIT / IFCUNITASSIGNMENT.
-        "#100= IFCBUILDINGSTOREY('2dEPbVfXn9bRTwS3l4kZ5G',#5,'L1',$,$,$,$,$,.ELEMENT.,0.0);\n"
-        "#101= IFCWALL('1zZH5DqcvF7g5KkkN9mYTw',#5,'Wall',$,$,$,$,$,$);\n"
-        "#102= IFCRELCONTAINEDINSPATIALSTRUCTURE("
-        "'0relGUIDxxxxxxxxxxxxx',#5,$,$,(#101),#100);\n"
-    ) + _IFC_FOOTER
+    ifc = (
+        _IFC_HEADER
+        + (
+            # IFCBUILDINGSTOREY + 1 wall, NO IFCSIUNIT / IFCUNITASSIGNMENT.
+            "#100= IFCBUILDINGSTOREY('2dEPbVfXn9bRTwS3l4kZ5G',#5,'L1',$,$,$,$,$,.ELEMENT.,0.0);\n"
+            "#101= IFCWALL('1zZH5DqcvF7g5KkkN9mYTw',#5,'Wall',$,$,$,$,$,$);\n"
+            "#102= IFCRELCONTAINEDINSPATIALSTRUCTURE("
+            "'0relGUIDxxxxxxxxxxxxx',#5,$,$,(#101),#100);\n"
+        )
+        + _IFC_FOOTER
+    )
 
     path = _write_ifc(ifc, workdir)
     result = process_ifc_file(path, workdir / "out")

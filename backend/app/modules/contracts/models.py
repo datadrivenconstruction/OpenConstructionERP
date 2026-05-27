@@ -34,22 +34,27 @@ class Contract(Base):
     """‌⁠‍A construction contract of any type (lump-sum / GMP / cost-plus / T&M / etc.)."""
 
     __tablename__ = "oe_contracts_contract"
-    __table_args__ = (
-        UniqueConstraint("code", name="uq_oe_contracts_contract_code"),
-    )
+    __table_args__ = (UniqueConstraint("code", name="uq_oe_contracts_contract_code"),)
 
     code: Mapped[str] = mapped_column(String(80), nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False, default="")
     contract_type: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="lump_sum", index=True,
+        String(40),
+        nullable=False,
+        default="lump_sum",
+        index=True,
     )
     counterparty_type: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="client",
+        String(40),
+        nullable=False,
+        default="client",
     )
     # Plain UUID — could reference oe_contacts_contact OR a subcontractor row.
     # Resolution is service-layer concern; deliberately NOT a ForeignKey.
     counterparty_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -65,27 +70,43 @@ class Contract(Base):
     start_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     end_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     total_value: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="")
     retention_percent: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2), nullable=False, default=Decimal("5.00"),
+        Numeric(5, 2),
+        nullable=False,
+        default=Decimal("5.00"),
     )
     retention_release_event: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="practical_completion",
+        String(50),
+        nullable=False,
+        default="practical_completion",
     )
     status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="draft", index=True,
+        String(40),
+        nullable=False,
+        default="draft",
+        index=True,
     )
     signed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     # Type-specific terms (gmp_cap, cost_plus_fee_percent, tm_nte_cap,
     # gainshare_split_pct, ld_per_day, target_cost, etc.).
     terms: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:
@@ -112,21 +133,33 @@ class ContractLine(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     scope_section: Mapped[str | None] = mapped_column(String(255), nullable=True)
     line_type: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="work",
+        String(40),
+        nullable=False,
+        default="work",
     )
     unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
     quantity: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     unit_rate: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     total_value: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:
@@ -139,17 +172,24 @@ class ContractTypeConfiguration(Base):
     __tablename__ = "oe_contracts_type_configuration"
     __table_args__ = (
         UniqueConstraint(
-            "contract_type", name="uq_oe_contracts_type_configuration_type",
+            "contract_type",
+            name="uq_oe_contracts_type_configuration_type",
         ),
     )
 
     contract_type: Mapped[str] = mapped_column(String(40), nullable=False)
     display_name: Mapped[str] = mapped_column(String(120), nullable=False)
     allowed_fields: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     default_fee_structure: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     schema_version: Mapped[str] = mapped_column(String(20), nullable=False, default="1.0")
 
@@ -169,10 +209,16 @@ class RetentionSchedule(Base):
         index=True,
     )
     accrual_rule: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     release_rule: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
@@ -189,16 +235,24 @@ class FeeStructure(Base):
         index=True,
     )
     fee_type: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="percent_of_cost",
+        String(40),
+        nullable=False,
+        default="percent_of_cost",
     )
     fee_percent: Mapped[Decimal] = mapped_column(
-        Numeric(8, 4), nullable=False, default=Decimal("0"),
+        Numeric(8, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     fee_fixed_amount: Mapped[Decimal | None] = mapped_column(
-        Numeric(18, 4), nullable=True,
+        Numeric(18, 4),
+        nullable=True,
     )
     sliding_scale: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     max_fee: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
 
@@ -215,19 +269,29 @@ class GainshareConfiguration(Base):
         index=True,
     )
     target_cost: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     gmp_cap: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     savings_split_owner_pct: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2), nullable=False, default=Decimal("50.00"),
+        Numeric(5, 2),
+        nullable=False,
+        default=Decimal("50.00"),
     )
     savings_split_contractor_pct: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2), nullable=False, default=Decimal("50.00"),
+        Numeric(5, 2),
+        nullable=False,
+        default=Decimal("50.00"),
     )
     overrun_responsibility: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="contractor",
+        String(40),
+        nullable=False,
+        default="contractor",
     )
 
 
@@ -243,16 +307,21 @@ class LDClause(Base):
         index=True,
     )
     per_day_amount: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="")
     max_amount: Mapped[Decimal | None] = mapped_column(
-        Numeric(18, 4), nullable=True,
+        Numeric(18, 4),
+        nullable=True,
     )
     # Plain UUID — milestone may live in planning/tasks/schedule modules.
     milestone_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     enforcement_status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="active",
+        String(40),
+        nullable=False,
+        default="active",
     )
 
 
@@ -272,26 +341,41 @@ class ProgressClaim(Base):
     period_end: Mapped[str | None] = mapped_column(String(20), nullable=True)
     claim_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     gross_amount: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     retention_amount: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     prior_claims_total: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     net_due: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="draft", index=True,
+        String(40),
+        nullable=False,
+        default="draft",
+        index=True,
     )
     submitted_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     approved_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     paid_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="")
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:
@@ -315,16 +399,24 @@ class ProgressClaimLine(Base):
         nullable=False,
     )
     period_completed_qty: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     period_completed_value: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     period_completed_pct: Mapped[Decimal] = mapped_column(
-        Numeric(7, 4), nullable=False, default=Decimal("0"),
+        Numeric(7, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     cumulative_completed_value: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
 
 
@@ -334,7 +426,8 @@ class FinalAccount(Base):
     __tablename__ = "oe_contracts_final_account"
     __table_args__ = (
         UniqueConstraint(
-            "contract_id", name="uq_oe_contracts_final_account_contract",
+            "contract_id",
+            name="uq_oe_contracts_final_account_contract",
         ),
     )
 
@@ -344,23 +437,36 @@ class FinalAccount(Base):
         nullable=False,
     )
     final_contract_value: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     total_paid: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     retention_held: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     retention_released: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     final_balance: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     sign_off_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     sign_off_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="draft", index=True,
+        String(40),
+        nullable=False,
+        default="draft",
+        index=True,
     )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)

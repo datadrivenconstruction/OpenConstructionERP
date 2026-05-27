@@ -8,14 +8,14 @@ Revision ID: v3098
 Revises: v3097_dwg_takeoff_decimal_quantities
 Create Date: 2026-05-21 23:51:36.155297
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
-
-revision: str = 'v3098'
-down_revision: Union[str, None] = 'v3097_dwg_takeoff_decimal_quantities'
+revision: str = "v3098"
+down_revision: Union[str, None] = "v3097_dwg_takeoff_decimal_quantities"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

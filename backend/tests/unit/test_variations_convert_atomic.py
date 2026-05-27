@@ -77,9 +77,7 @@ async def svc(session: AsyncSession) -> VariationsService:
     return VariationsService(session)
 
 
-async def _setup_approved_vr(
-    session: AsyncSession, svc: VariationsService
-) -> tuple[uuid.UUID, uuid.UUID, uuid.UUID]:
+async def _setup_approved_vr(session: AsyncSession, svc: VariationsService) -> tuple[uuid.UUID, uuid.UUID, uuid.UUID]:
     """Create a user, project, and an approved VR. Returns (user_id, project_id, vr_id)."""
     user = User(email=f"u{uuid.uuid4().hex[:8]}@a.com", hashed_password="x")
     session.add(user)
@@ -117,9 +115,7 @@ class TestConvertVRToVOAtomicity:
     """Verify the VR -> VO conversion is fully transactional."""
 
     @pytest.mark.asyncio
-    async def test_co_failure_rolls_back_entire_promotion(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_co_failure_rolls_back_entire_promotion(self, session: AsyncSession, svc: VariationsService) -> None:
         """If CO-mirror raises, NO VO row and NO VR-status-flip must persist.
 
         Implementation note: convert_vr_to_vo calls ``session.rollback()``
@@ -128,12 +124,8 @@ class TestConvertVRToVOAtomicity:
         """
         user_id, project_id, vr_id = await _setup_approved_vr(session, svc)
 
-        count_vo_before = (
-            await session.execute(select(VariationOrder))
-        ).scalars().all()
-        count_co_before = (
-            await session.execute(select(ChangeOrder))
-        ).scalars().all()
+        count_vo_before = (await session.execute(select(VariationOrder))).scalars().all()
+        count_co_before = (await session.execute(select(ChangeOrder))).scalars().all()
 
         with patch(
             "app.modules.changeorders.service.ChangeOrderService.create_order",
@@ -156,38 +148,27 @@ class TestConvertVRToVOAtomicity:
 
         # VR must NOT have transitioned to "converted_to_vo".
         vr_after = (
-            await session.execute(
-                select(VariationRequest).where(VariationRequest.id == vr_id)
-            )
+            await session.execute(select(VariationRequest).where(VariationRequest.id == vr_id))
         ).scalar_one_or_none()
         # After rollback the session may have lost the row — that's OK too,
         # the key assertion is it's NOT "converted_to_vo".
         if vr_after is not None:
             assert vr_after.status != "converted_to_vo", (
-                "VR.status was incorrectly flipped to 'converted_to_vo' "
-                "despite CO-mirror failure"
+                "VR.status was incorrectly flipped to 'converted_to_vo' despite CO-mirror failure"
             )
 
         # VO count must not have increased (or it was rolled back).
         # We check by counting any VOs whose title matches the failed attempt.
         vos_after = (
-            await session.execute(
-                select(VariationOrder).where(
-                    VariationOrder.project_id == project_id
-                )
-            )
-        ).scalars().all()
-        orphan_vos = [
-            v for v in vos_after if v.title == "Should be rolled back"
-        ]
-        assert len(orphan_vos) == 0, (
-            f"Found {len(orphan_vos)} orphan VO(s) that should have been rolled back"
+            (await session.execute(select(VariationOrder).where(VariationOrder.project_id == project_id)))
+            .scalars()
+            .all()
         )
+        orphan_vos = [v for v in vos_after if v.title == "Should be rolled back"]
+        assert len(orphan_vos) == 0, f"Found {len(orphan_vos)} orphan VO(s) that should have been rolled back"
 
     @pytest.mark.asyncio
-    async def test_both_writes_land_atomically_on_success(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_both_writes_land_atomically_on_success(self, session: AsyncSession, svc: VariationsService) -> None:
         """Happy path: VO and CO both exist after a successful conversion."""
         user_id, project_id, vr_id = await _setup_approved_vr(session, svc)
 
@@ -205,41 +186,25 @@ class TestConvertVRToVOAtomicity:
         await session.commit()
 
         # VO must exist.
-        vo_row = (
-            await session.execute(
-                select(VariationOrder).where(VariationOrder.id == vo.id)
-            )
-        ).scalar_one_or_none()
+        vo_row = (await session.execute(select(VariationOrder).where(VariationOrder.id == vo.id))).scalar_one_or_none()
         assert vo_row is not None, "VO not persisted after successful conversion"
 
         # CO mirror must exist (metadata.origin == "variations.convert_vr_to_vo").
-        cos = (
-            await session.execute(
-                select(ChangeOrder).where(ChangeOrder.project_id == project_id)
-            )
-        ).scalars().all()
+        cos = (await session.execute(select(ChangeOrder).where(ChangeOrder.project_id == project_id))).scalars().all()
         matching_co = [
             co
             for co in cos
             if isinstance(getattr(co, "metadata_", {}), dict)
             and co.metadata_.get("origin") == "variations.convert_vr_to_vo"
         ]
-        assert len(matching_co) == 1, (
-            f"Expected exactly 1 mirrored CO, found {len(matching_co)}"
-        )
+        assert len(matching_co) == 1, f"Expected exactly 1 mirrored CO, found {len(matching_co)}"
 
         # VR must now be "converted_to_vo".
-        vr_row = (
-            await session.execute(
-                select(VariationRequest).where(VariationRequest.id == vr_id)
-            )
-        ).scalar_one()
+        vr_row = (await session.execute(select(VariationRequest).where(VariationRequest.id == vr_id))).scalar_one()
         assert vr_row.status == "converted_to_vo"
 
     @pytest.mark.asyncio
-    async def test_only_approved_vr_can_be_converted(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_only_approved_vr_can_be_converted(self, session: AsyncSession, svc: VariationsService) -> None:
         """Attempting to convert a draft VR raises HTTP 409."""
         user = User(email=f"u{uuid.uuid4().hex[:8]}@a.com", hashed_password="x")
         session.add(user)
@@ -277,9 +242,7 @@ class TestConvertVRToVOAtomicity:
         assert exc_info.value.status_code == 409
 
     @pytest.mark.asyncio
-    async def test_convert_already_converted_vr_raises_409(
-        self, session: AsyncSession, svc: VariationsService
-    ) -> None:
+    async def test_convert_already_converted_vr_raises_409(self, session: AsyncSession, svc: VariationsService) -> None:
         """Double-converting raises 409 on the second call."""
         user_id, project_id, vr_id = await _setup_approved_vr(session, svc)
 
@@ -326,20 +289,12 @@ class TestConvertVRToVOAtomicity:
         await session.commit()
 
         # VO money field must be exact.
-        vo_row = (
-            await session.execute(
-                select(VariationOrder).where(VariationOrder.id == vo.id)
-            )
-        ).scalar_one()
+        vo_row = (await session.execute(select(VariationOrder).where(VariationOrder.id == vo.id))).scalar_one()
         vo_impact = Decimal(str(vo_row.final_cost_impact))
         assert vo_impact == exact, f"VO impact {vo_impact!r} != {exact!r}"
 
         # Mirrored CO cost_impact must also be exact.
-        cos = (
-            await session.execute(
-                select(ChangeOrder).where(ChangeOrder.project_id == project_id)
-            )
-        ).scalars().all()
+        cos = (await session.execute(select(ChangeOrder).where(ChangeOrder.project_id == project_id))).scalars().all()
         co = next(
             (
                 c

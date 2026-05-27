@@ -32,9 +32,6 @@ from app.modules.bcf.reader import (
     BCFReader,
     BCFSecurityError,
     ParsedBCF,
-    ParsedComment,
-    ParsedTopic,
-    ParsedViewpoint,
 )
 from app.modules.bcf.writer import (
     BCFComment,
@@ -42,7 +39,6 @@ from app.modules.bcf.writer import (
     BCFViewpoint,
     BCFWriter,
 )
-
 
 # A pre-baked 1×1 PNG so the snapshot round-trip is exact. Same magic
 # bytes the writer's PNG-sniff guard requires.
@@ -109,13 +105,10 @@ def _build_archive(
             creation_author=f"author{ti}@example.com",
             priority="Critical" if ti % 2 == 0 else "Normal",
             description=f"Description of topic #{ti}.",
-            server_assigned_id=f"CLASH-{ti+1:03d}",
+            server_assigned_id=f"CLASH-{ti + 1:03d}",
             assigned_to=f"assignee{ti}@example.com",
             labels=["bulk", f"set-{ti}"],
-            viewpoints=[
-                _vp(ti * 10 + v, with_snapshot=(v == 0))
-                for v in range(n_viewpoints)
-            ],
+            viewpoints=[_vp(ti * 10 + v, with_snapshot=(v == 0)) for v in range(n_viewpoints)],
             comments=[_comment(ti * 100 + c) for c in range(n_comments)],
         )
         writer.add_topic(topic)
@@ -160,11 +153,7 @@ def _parsed_to_summary(parsed: ParsedBCF) -> dict:
                         # switches to a fixed-precision formatter.
                         "view_point": tuple(round(c, 6) for c in v.camera_view_point),
                         "direction": tuple(round(c, 6) for c in v.camera_direction),
-                        "field_of_view": (
-                            round(v.field_of_view, 6)
-                            if v.field_of_view is not None
-                            else None
-                        ),
+                        "field_of_view": (round(v.field_of_view, 6) if v.field_of_view is not None else None),
                     }
                     for v in t.viewpoints
                 ],
@@ -228,9 +217,7 @@ def test_topic_ids_preserved_through_roundtrip() -> None:
 
 def test_timestamps_preserved_through_roundtrip() -> None:
     """Creation dates + comment dates round-trip at second precision (UTC)."""
-    blob, source_topics = _build_archive(
-        n_topics=2, n_viewpoints=1, n_comments=4
-    )
+    blob, source_topics = _build_archive(n_topics=2, n_viewpoints=1, n_comments=4)
     parsed = BCFReader.from_bytes(blob)
     by_sid = {t.server_assigned_id: t for t in parsed.topics}
     for src in source_topics:
@@ -329,8 +316,7 @@ def test_malformed_markup_xml_is_captured_per_topic() -> None:
     good_blob, _ = _build_archive(n_topics=1, n_viewpoints=1, n_comments=1)
     good_zip_buf = io.BytesIO(good_blob)
     out_buf = io.BytesIO()
-    with zipfile.ZipFile(good_zip_buf, "r") as src, \
-            zipfile.ZipFile(out_buf, "w", zipfile.ZIP_DEFLATED) as dst:
+    with zipfile.ZipFile(good_zip_buf, "r") as src, zipfile.ZipFile(out_buf, "w", zipfile.ZIP_DEFLATED) as dst:
         for info in src.infolist():
             dst.writestr(info.filename, src.read(info.filename))
         # Inject a malformed markup.bcf in a fresh topic folder.

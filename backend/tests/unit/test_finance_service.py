@@ -9,6 +9,7 @@ Scope:
 from __future__ import annotations
 
 import uuid
+from datetime import UTC
 from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any
@@ -71,9 +72,7 @@ class _StubInvoiceRepo:
             rows = [r for r in rows if r.status == status]
         return rows, len(rows)
 
-    async def next_invoice_number(
-        self, project_id: uuid.UUID, direction: str
-    ) -> str:
+    async def next_invoice_number(self, project_id: uuid.UUID, direction: str) -> str:
         self._counter += 1
         prefix = "INV-P" if direction == "payable" else "INV-R"
         return f"{prefix}-{self._counter:03d}"
@@ -144,9 +143,7 @@ class _StubBudgetRepo:
             rows = [r for r in rows if r.category == category]
         return rows, len(rows)
 
-    async def aggregate_for_dashboard(
-        self, *, project_id: uuid.UUID | None = None
-    ) -> dict[str, Any]:
+    async def aggregate_for_dashboard(self, *, project_id: uuid.UUID | None = None) -> dict[str, Any]:
         # EVM zero-input fallback path (service.create_evm_snapshot) calls
         # this when any of BAC/PV/EV/AC is "0". For unit tests we return
         # an empty aggregate so derived values stay zero and the test
@@ -169,8 +166,9 @@ class _StubEVMRepo:
         # SQLAlchemy server-side defaults don't fire without a real INSERT,
         # so emulate them here so EVMSnapshotResponse.model_validate(...)
         # doesn't choke on None timestamps.
-        from datetime import datetime, timezone
-        now = datetime.now(timezone.utc)
+        from datetime import datetime
+
+        now = datetime.now(UTC)
         if getattr(snapshot, "created_at", None) is None:
             snapshot.created_at = now
         if getattr(snapshot, "updated_at", None) is None:
@@ -483,17 +481,13 @@ class _ExecuteStubSession:
         return _Result(self.budgets)
 
 
-def _make_service_with_session(
-    paid_invoices: list[Any], budgets: list[Any]
-) -> FinanceService:
+def _make_service_with_session(paid_invoices: list[Any], budgets: list[Any]) -> FinanceService:
     service = _make_service()
     service.session = _ExecuteStubSession(paid_invoices, budgets)  # type: ignore[assignment]
     return service
 
 
-def _make_line_item(
-    *, amount: str, wbs_id: str | None = None, cost_category: str | None = None
-) -> SimpleNamespace:
+def _make_line_item(*, amount: str, wbs_id: str | None = None, cost_category: str | None = None) -> SimpleNamespace:
     return SimpleNamespace(
         id=uuid.uuid4(),
         amount=amount,
@@ -502,9 +496,7 @@ def _make_line_item(
     )
 
 
-def _make_paid_invoice(
-    *, project_id: uuid.UUID, amount_total: str, items: list[Any] | None = None
-) -> SimpleNamespace:
+def _make_paid_invoice(*, project_id: uuid.UUID, amount_total: str, items: list[Any] | None = None) -> SimpleNamespace:
     return SimpleNamespace(
         id=uuid.uuid4(),
         project_id=project_id,
@@ -680,8 +672,8 @@ async def test_create_evm_snapshot_etc_clamped_to_zero_when_over_budget() -> Non
             snapshot_date="2026-04-01",
             bac="10000",
             pv="5000",
-            ev="0",        # forces cpi=0 branch -> eac = ac + (bac - ev) = ac + bac
-            ac="50000",    # ac > bac, so eac = 50000 + 10000 = 60000 still > ac
+            ev="0",  # forces cpi=0 branch -> eac = ac + (bac - ev) = ac + bac
+            ac="50000",  # ac > bac, so eac = 50000 + 10000 = 60000 still > ac
         )
     )
     # Above scenario: eac = 60000, ac = 50000, etc raw = 10000 > 0 — safe.
@@ -695,8 +687,8 @@ async def test_create_evm_snapshot_etc_clamped_to_zero_when_over_budget() -> Non
             snapshot_date="2026-04-02",
             bac="10000",
             pv="10000",
-            ev="12000",    # over-performing — EV > BAC drives (BAC-EV) negative
-            ac="11000",    # CPI = 12000/11000 = 1.0909
+            ev="12000",  # over-performing — EV > BAC drives (BAC-EV) negative
+            ac="11000",  # CPI = 12000/11000 = 1.0909
         )
     )
     # EAC = 11000 + (10000 - 12000) / 1.0909 = 11000 - 1833.33 = 9166.67
@@ -747,9 +739,9 @@ async def test_approve_invoice_audit_failure_emits_warning(
         assert updated.status == "sent"
         # The warning fired and carries the operational metadata:
         warning_records = [
-            r for r in caplog.records
-            if r.levelno == _logging.WARNING
-            and "FSM audit log FAILED for invoice approve" in r.getMessage()
+            r
+            for r in caplog.records
+            if r.levelno == _logging.WARNING and "FSM audit log FAILED for invoice approve" in r.getMessage()
         ]
         assert warning_records, "Expected an audit-failure WARNING but none was emitted"
         msg = warning_records[0].getMessage()
@@ -767,7 +759,7 @@ async def test_update_invoice_line_items_replace_logs_audit_row(
     single audit row carrying the count + total delta — no per-item diff.
     We capture the helper call instead of running it for real to keep this
     fully stubbed."""
-    from app.modules.finance.schemas import InvoiceUpdate, InvoiceLineItemCreate
+    from app.modules.finance.schemas import InvoiceLineItemCreate, InvoiceUpdate
 
     service = _make_service()
     # Build a synthetic invoice row directly — the SQLAlchemy ORM-typed

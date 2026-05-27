@@ -149,9 +149,7 @@ async def list_violations_route(
         limit=limit,
         offset=offset,
     )
-    return NamingViolationListResponse(
-        items=items, total=total, limit=limit, offset=offset
-    )
+    return NamingViolationListResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.post(
@@ -168,9 +166,7 @@ async def acknowledge_violation_route(
     actor = _coerce_user_uuid(user_id)
     result = await acknowledge_violation(session, violation_id, actor)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Violation not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Violation not found")
     # IDOR guard — verify project access against the row we just loaded.
     await verify_project_access(result.project_id, user_id, session)
     return result
@@ -194,9 +190,7 @@ async def list_for_file_route(
     """Entities that reference a single file (the "Referenced in N" chip)."""
     _validate_kind(kind)
     await verify_project_access(project_id, user_id, session)
-    items, total = await list_references_for_file(
-        session, file_kind=kind, file_id=file_id
-    )
+    items, total = await list_references_for_file(session, file_kind=kind, file_id=file_id)
     return FileReferenceListResponse(items=items, total=total)
 
 
@@ -215,9 +209,7 @@ async def list_for_target_route(
     """Files that reference a given entity (e.g. files attached to an RFI)."""
     _validate_target_type(target_type)
     await verify_project_access(project_id, user_id, session)
-    items, total = await list_files_for_target(
-        session, target_type=target_type, target_id=target_id
-    )
+    items, total = await list_files_for_target(session, target_type=target_type, target_id=target_id)
     return FileReferenceListResponse(items=items, total=total)
 
 
@@ -238,9 +230,7 @@ async def create_reference_route(
     try:
         return await create_reference(session, payload, actor)
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
 
 @router.delete(
@@ -258,7 +248,5 @@ async def delete_reference_route(
     await verify_project_access(project_id, user_id, session)
     ok = await delete_reference(session, reference_id)
     if not ok:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Reference not found"
-        )
-    return None
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reference not found")
+    return

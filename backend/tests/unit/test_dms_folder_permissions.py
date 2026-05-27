@@ -30,9 +30,9 @@ import pytest
 from fastapi import HTTPException
 
 from app.modules.documents.folder_permissions_models import (
-    FOLDER_ROLE_VIEWER,
     FOLDER_ROLE_EDITOR,
     FOLDER_ROLE_OWNER,
+    FOLDER_ROLE_VIEWER,
     FOLDER_ROLES,
     role_satisfies,
 )
@@ -42,9 +42,7 @@ from app.modules.documents.folder_permissions_service import (
     effective_permissions_for,
     folder_access_for,
     require_read,
-    restricted_scopes_for_project,
 )
-
 
 # ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -86,11 +84,11 @@ def _make_session(*rows: Any) -> AsyncMock:
             def all(self) -> list[Any]:
                 return list(rows)
 
-            def scalars(self) -> "_ScalarResult":
+            def scalars(self) -> _ScalarResult:
                 return self
 
         class _Result:
-            def scalars(self) -> "_ScalarResult":
+            def scalars(self) -> _ScalarResult:
                 return _ScalarResult()
 
             def all(self) -> list[tuple[Any, ...]]:
@@ -106,19 +104,22 @@ def _make_session(*rows: Any) -> AsyncMock:
 # ── 1. role_satisfies helper ──────────────────────────────────────────────
 
 
-@pytest.mark.parametrize("actual,required,expected", [
-    (FOLDER_ROLE_VIEWER, FOLDER_ROLE_VIEWER, True),
-    (FOLDER_ROLE_EDITOR, FOLDER_ROLE_VIEWER, True),
-    (FOLDER_ROLE_OWNER,  FOLDER_ROLE_VIEWER, True),
-    (FOLDER_ROLE_VIEWER, FOLDER_ROLE_EDITOR, False),
-    (FOLDER_ROLE_EDITOR, FOLDER_ROLE_EDITOR, True),
-    (FOLDER_ROLE_OWNER,  FOLDER_ROLE_EDITOR, True),
-    (FOLDER_ROLE_VIEWER, FOLDER_ROLE_OWNER,  False),
-    (FOLDER_ROLE_EDITOR, FOLDER_ROLE_OWNER,  False),
-    (FOLDER_ROLE_OWNER,  FOLDER_ROLE_OWNER,  True),
-    (None,               FOLDER_ROLE_VIEWER, False),
-    ("unknown_role",     FOLDER_ROLE_VIEWER, False),
-])
+@pytest.mark.parametrize(
+    "actual,required,expected",
+    [
+        (FOLDER_ROLE_VIEWER, FOLDER_ROLE_VIEWER, True),
+        (FOLDER_ROLE_EDITOR, FOLDER_ROLE_VIEWER, True),
+        (FOLDER_ROLE_OWNER, FOLDER_ROLE_VIEWER, True),
+        (FOLDER_ROLE_VIEWER, FOLDER_ROLE_EDITOR, False),
+        (FOLDER_ROLE_EDITOR, FOLDER_ROLE_EDITOR, True),
+        (FOLDER_ROLE_OWNER, FOLDER_ROLE_EDITOR, True),
+        (FOLDER_ROLE_VIEWER, FOLDER_ROLE_OWNER, False),
+        (FOLDER_ROLE_EDITOR, FOLDER_ROLE_OWNER, False),
+        (FOLDER_ROLE_OWNER, FOLDER_ROLE_OWNER, True),
+        (None, FOLDER_ROLE_VIEWER, False),
+        ("unknown_role", FOLDER_ROLE_VIEWER, False),
+    ],
+)
 def test_role_satisfies(actual: str | None, required: str, expected: bool) -> None:
     assert role_satisfies(actual or "", required) == expected
 
@@ -190,7 +191,9 @@ async def test_effective_permissions_for_returns_strongest_role() -> None:
     session.execute = _execute
 
     result = await effective_permissions_for(
-        session, project_id=project_id, user_id=user_id,
+        session,
+        project_id=project_id,
+        user_id=user_id,
     )
     assert result.get(("document", "drawing")) == FOLDER_ROLE_EDITOR
 
@@ -208,7 +211,9 @@ async def test_effective_permissions_for_empty_returns_empty_dict() -> None:
 
     session.execute = _execute
     result = await effective_permissions_for(
-        session, project_id=_project_id(), user_id=_user_id(),
+        session,
+        project_id=_project_id(),
+        user_id=_user_id(),
     )
     assert result == {}
 
@@ -394,7 +399,9 @@ async def test_cross_project_grant_not_visible() -> None:
         ),
     ):
         result = await effective_permissions_for(
-            session, project_id=project_b, user_id=user_id,
+            session,
+            project_id=project_b,
+            user_id=user_id,
         )
     # No grants visible for project_b.
     assert result == {}

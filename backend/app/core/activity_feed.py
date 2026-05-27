@@ -92,19 +92,21 @@ async def get_activity_feed(
         title = _build_title(entry)
         user_id_str = str(entry.user_id) if entry.user_id else None
 
-        feed.append({
-            "type": entry.action,
-            "entity_type": entry.entity_type,
-            "entity_id": entry.entity_id,
-            "title": title,
-            "action": entry.action,
-            "user_id": user_id_str,
-            "user_name": user_names.get(user_id_str, "System") if user_id_str else "System",
-            "timestamp": entry.created_at.isoformat() if entry.created_at else None,
-            "url": url,
-            "icon": icon,
-            "details": entry.details,
-        })
+        feed.append(
+            {
+                "type": entry.action,
+                "entity_type": entry.entity_type,
+                "entity_id": entry.entity_id,
+                "title": title,
+                "action": entry.action,
+                "user_id": user_id_str,
+                "user_name": user_names.get(user_id_str, "System") if user_id_str else "System",
+                "timestamp": entry.created_at.isoformat() if entry.created_at else None,
+                "url": url,
+                "icon": icon,
+                "details": entry.details,
+            }
+        )
 
     return feed
 

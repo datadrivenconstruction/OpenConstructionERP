@@ -28,7 +28,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "v280_4d_schedule_eac"
 down_revision: Union[str, Sequence[str], None] = "v270_position_version_column"
@@ -40,9 +39,7 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
     return name in inspector.get_table_names()
 
 
-def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str
-) -> bool:
+def _has_column(inspector: sa.engine.reflection.Inspector, table: str, column: str) -> bool:
     if not _has_table(inspector, table):
         return False
     return column in {col["name"] for col in inspector.get_columns(table)}
@@ -57,13 +54,9 @@ def upgrade() -> None:
     if _has_table(inspector, "oe_schedule_activity"):
         with op.batch_alter_table("oe_schedule_activity") as batch_op:
             if not _has_column(inspector, "oe_schedule_activity", "cost_planned"):
-                batch_op.add_column(
-                    sa.Column("cost_planned", sa.Numeric(20, 4), nullable=True)
-                )
+                batch_op.add_column(sa.Column("cost_planned", sa.Numeric(20, 4), nullable=True))
             if not _has_column(inspector, "oe_schedule_activity", "cost_actual"):
-                batch_op.add_column(
-                    sa.Column("cost_actual", sa.Numeric(20, 4), nullable=True)
-                )
+                batch_op.add_column(sa.Column("cost_actual", sa.Numeric(20, 4), nullable=True))
 
     # ── 2. oe_schedule_eac_link ───────────────────────────────────────
     if not _has_table(inspector, "oe_schedule_eac_link"):
@@ -73,9 +66,7 @@ def upgrade() -> None:
             sa.Column(
                 "task_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_schedule_activity.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_schedule_activity.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column("rule_id", sa.String(length=36), nullable=True),
@@ -130,9 +121,7 @@ def upgrade() -> None:
             sa.Column(
                 "task_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_schedule_activity.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_schedule_activity.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column(

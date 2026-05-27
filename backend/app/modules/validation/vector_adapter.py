@@ -60,11 +60,9 @@ class ValidationReportAdapter:
     def to_payload(self, row: ValidationReport) -> dict[str, Any]:
         """Light metadata returned with every search hit."""
         return {
-            "title": (
-                f"{row.rule_set or 'validation'} • "
-                f"{row.target_type or 'unknown'} • "
-                f"{row.status or 'pending'}"
-            )[:160],
+            "title": (f"{row.rule_set or 'validation'} • {row.target_type or 'unknown'} • {row.status or 'pending'}")[
+                :160
+            ],
             "rule_set": row.rule_set or "",
             "target_type": row.target_type or "",
             "target_id": row.target_id or "",

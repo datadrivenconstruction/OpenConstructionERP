@@ -121,9 +121,7 @@ class TestDataFrameCascade:
             selected={"category": ["Concrete"]},
             target_column="material",
         )
-        assert [m.to_dict() for m in with_empty] == [
-            m.to_dict() for m in without_empty
-        ]
+        assert [m.to_dict() for m in with_empty] == [m.to_dict() for m in without_empty]
 
     def test_no_match_returns_empty(self, cascade_df: pd.DataFrame) -> None:
         # No rows have category=Steel AND supplier=BetaCo.
@@ -135,7 +133,8 @@ class TestDataFrameCascade:
         assert results == []
 
     def test_q_filter_intersected_with_selection(
-        self, cascade_df: pd.DataFrame,
+        self,
+        cascade_df: pd.DataFrame,
     ) -> None:
         # Concrete + q="C30" → only the two C30/37 entries (Acme + Beta).
         results = fetch_cascade_values_from_dataframe(
@@ -148,7 +147,8 @@ class TestDataFrameCascade:
         assert names == {"C30/37": 9}  # 5 (Acme) + 4 (Beta)
 
     def test_target_column_excluded_from_own_filter(
-        self, cascade_df: pd.DataFrame,
+        self,
+        cascade_df: pd.DataFrame,
     ) -> None:
         # When the user has chips on the supplier filter and is opening
         # the supplier picker again, the supplier filter must not gate
@@ -164,7 +164,8 @@ class TestDataFrameCascade:
         assert names == {"AcmeCo", "BetaCo", "GammaCo"}
 
     def test_selected_column_not_in_snapshot_raises(
-        self, cascade_df: pd.DataFrame,
+        self,
+        cascade_df: pd.DataFrame,
     ) -> None:
         with pytest.raises(InvalidSelectedColumnError):
             fetch_cascade_values_from_dataframe(
@@ -174,7 +175,8 @@ class TestDataFrameCascade:
             )
 
     def test_target_column_not_in_snapshot_raises(
-        self, cascade_df: pd.DataFrame,
+        self,
+        cascade_df: pd.DataFrame,
     ) -> None:
         with pytest.raises(ColumnNotFoundError):
             fetch_cascade_values_from_dataframe(
@@ -184,7 +186,8 @@ class TestDataFrameCascade:
             )
 
     def test_invalid_target_identifier_raises(
-        self, cascade_df: pd.DataFrame,
+        self,
+        cascade_df: pd.DataFrame,
     ) -> None:
         with pytest.raises(ColumnNotFoundError):
             fetch_cascade_values_from_dataframe(
@@ -203,7 +206,8 @@ class TestDataFrameCascade:
         assert len(results) == 2
 
     def test_oversized_selection_array_rejected(
-        self, cascade_df: pd.DataFrame,
+        self,
+        cascade_df: pd.DataFrame,
     ) -> None:
         many = [f"v{i}" for i in range(1000)]
         with pytest.raises(InvalidSelectedColumnError):
@@ -234,7 +238,11 @@ class TestDuckDBCascade:
         project_id = "proj-cascade"
         snapshot_id = str(uuid4())
         await write_parquet(
-            project_id, snapshot_id, "entities", df, backend=backend,
+            project_id,
+            snapshot_id,
+            "entities",
+            df,
+            backend=backend,
         )
         monkeypatch.setattr(
             "app.modules.dashboards.snapshot_storage.get_storage_backend",
@@ -249,7 +257,9 @@ class TestDuckDBCascade:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         project_id, snap_id = await self._write(
-            local_backend, cascade_df, monkeypatch,
+            local_backend,
+            cascade_df,
+            monkeypatch,
         )
         pool = DuckDBPool()
         try:
@@ -272,7 +282,9 @@ class TestDuckDBCascade:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         project_id, snap_id = await self._write(
-            local_backend, cascade_df, monkeypatch,
+            local_backend,
+            cascade_df,
+            monkeypatch,
         )
         pool = DuckDBPool()
         try:
@@ -304,7 +316,9 @@ class TestDuckDBCascade:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         project_id, snap_id = await self._write(
-            local_backend, cascade_df, monkeypatch,
+            local_backend,
+            cascade_df,
+            monkeypatch,
         )
         pool = DuckDBPool()
         try:
@@ -326,7 +340,9 @@ class TestDuckDBCascade:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         project_id, snap_id = await self._write(
-            local_backend, cascade_df, monkeypatch,
+            local_backend,
+            cascade_df,
+            monkeypatch,
         )
         pool = DuckDBPool()
         try:

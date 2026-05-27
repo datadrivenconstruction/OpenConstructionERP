@@ -175,7 +175,8 @@ async def test_ncr_full_lifecycle_open_to_closed(svc: QMSService) -> None:
 
     # Assign corrective action (NCR advances to action_pending)
     a1 = await svc.assign_ncr_action(
-        ncr.id, NCRActionCreate(description="Replace rebar with correct size"),
+        ncr.id,
+        NCRActionCreate(description="Replace rebar with correct size"),
     )
     ncr_ap = await svc.repo.get_ncr(ncr.id)
     assert ncr_ap is not None
@@ -183,7 +184,8 @@ async def test_ncr_full_lifecycle_open_to_closed(svc: QMSService) -> None:
 
     # Second action
     a2 = await svc.assign_ncr_action(
-        ncr.id, NCRActionCreate(description="Update site-delivery checklist"),
+        ncr.id,
+        NCRActionCreate(description="Update site-delivery checklist"),
     )
 
     # Verify first — NCR still action_pending (second action outstanding)
@@ -229,9 +231,7 @@ async def test_idempotent_close_raises_on_second_call(svc: QMSService) -> None:
 
     # Audit trail must NOT have grown
     log_after = await svc.repo.list_audit_log(ncr.id, entity_type="ncr")
-    assert len(log_after) == len(log_before), (
-        "Audit log grew despite idempotent-close rejection"
-    )
+    assert len(log_after) == len(log_before), "Audit log grew despite idempotent-close rejection"
 
 
 # ── Audit trail completeness ─────────────────────────────────────────────
@@ -317,8 +317,7 @@ async def test_ncr_cost_impact_serialised_as_string(
     body = resp.json()
     # Must be a string, not a float
     assert isinstance(body["cost_impact_amount"], str), (
-        f"Expected str, got {type(body['cost_impact_amount']).__name__}: "
-        f"{body['cost_impact_amount']!r}"
+        f"Expected str, got {type(body['cost_impact_amount']).__name__}: {body['cost_impact_amount']!r}"
     )
     assert body["cost_impact_amount"] == "9999999.99"
 

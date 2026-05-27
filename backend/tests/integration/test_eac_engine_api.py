@@ -189,9 +189,7 @@ async def _make_ruleset(
     return ruleset
 
 
-async def _create_ruleset_with_rule_via_http(
-    client: AsyncClient, auth_headers: dict
-) -> tuple[str, str]:
+async def _create_ruleset_with_rule_via_http(client: AsyncClient, auth_headers: dict) -> tuple[str, str]:
     rs_resp = await client.post(
         "/api/v1/eac/rulesets",
         json={"name": "engine_api_ruleset", "kind": "validation"},
@@ -218,9 +216,7 @@ async def _create_ruleset_with_rule_via_http(
 
 
 @pytest.mark.asyncio
-async def test_compile_endpoint_round_trips_with_describe_plan(
-    client: AsyncClient, auth_headers: dict
-) -> None:
+async def test_compile_endpoint_round_trips_with_describe_plan(client: AsyncClient, auth_headers: dict) -> None:
     """``POST /rules:compile`` produces a plan whose dict matches
     ``describe_plan`` output."""
     resp = await client.post(
@@ -241,9 +237,7 @@ async def test_compile_endpoint_round_trips_with_describe_plan(
 
 
 @pytest.mark.asyncio
-async def test_compile_endpoint_invalid_definition_returns_422(
-    client: AsyncClient, auth_headers: dict
-) -> None:
+async def test_compile_endpoint_invalid_definition_returns_422(client: AsyncClient, auth_headers: dict) -> None:
     resp = await client.post(
         "/api/v1/eac/rules:compile",
         json={"definition_json": {"schema_version": "2.0", "name": "x"}},
@@ -256,9 +250,7 @@ async def test_compile_endpoint_invalid_definition_returns_422(
 
 
 @pytest.mark.asyncio
-async def test_run_then_status_reports_completion(
-    client: AsyncClient, auth_headers: dict
-) -> None:
+async def test_run_then_status_reports_completion(client: AsyncClient, auth_headers: dict) -> None:
     ruleset_id, _ = await _create_ruleset_with_rule_via_http(client, auth_headers)
     run_resp = await client.post(
         f"/api/v1/eac/rulesets/{ruleset_id}:run",
@@ -299,9 +291,7 @@ async def test_engine_run_dry_run_true_does_not_persist(
         rules=[_boolean_rule_definition()],
     )
 
-    pre_count = len(
-        (await session.scalars(select(EacRun))).all()
-    )
+    pre_count = len((await session.scalars(select(EacRun))).all())
 
     result = await engine_api.run(
         session=session,
@@ -315,9 +305,7 @@ async def test_engine_run_dry_run_true_does_not_persist(
     assert len(result["rules"]) == 1
     assert result["rules"][0]["elements_matched"] == 2
 
-    post_count = len(
-        (await session.scalars(select(EacRun))).all()
-    )
+    post_count = len((await session.scalars(select(EacRun))).all())
     assert post_count == pre_count, "dry_run must not persist a run"
 
 
@@ -381,9 +369,7 @@ async def test_cancel_mid_run_terminates_within_5s(
 
     # Cancel the pre-staged row (status=running) — verifies the public
     # service surface flips status to cancelled and is idempotent.
-    accepted = await engine_api.cancel(
-        session, pre_run.id, tenant_id=tenant_id
-    )
+    accepted = await engine_api.cancel(session, pre_run.id, tenant_id=tenant_id)
     assert accepted is True
 
     refreshed = await session.get(EacRun, pre_run.id)
@@ -392,9 +378,7 @@ async def test_cancel_mid_run_terminates_within_5s(
     assert refreshed.finished_at is not None
 
     # Idempotent second call.
-    again = await engine_api.cancel(
-        session, pre_run.id, tenant_id=tenant_id
-    )
+    again = await engine_api.cancel(session, pre_run.id, tenant_id=tenant_id)
     assert again is True
 
     # Now actually drive run_ruleset with cancel pre-armed. The runner
@@ -428,10 +412,7 @@ async def test_cancel_via_armed_token_short_circuits_runner(
     ruleset = await _make_ruleset(
         session,
         tenant_id=tenant_id,
-        rules=[
-            {**_boolean_rule_definition(), "name": f"rule_{i}"}
-            for i in range(5)
-        ],
+        rules=[{**_boolean_rule_definition(), "name": f"rule_{i}"} for i in range(5)],
     )
 
     # Patch run_ruleset to arm the cancel token immediately after the
@@ -463,11 +444,7 @@ async def test_cancel_via_armed_token_short_circuits_runner(
     assert run.summary_json["rule_count"] == 0  # short-circuited at top
 
     # No result rows.
-    rows = (
-        await session.scalars(
-            select(EacRunResultItem).where(EacRunResultItem.run_id == run.id)
-        )
-    ).all()
+    rows = (await session.scalars(select(EacRunResultItem).where(EacRunResultItem.run_id == run.id))).all()
     assert len(rows) == 0
 
 
@@ -475,9 +452,7 @@ async def test_cancel_via_armed_token_short_circuits_runner(
 
 
 @pytest.mark.asyncio
-async def test_list_runs_pagination(
-    client: AsyncClient, auth_headers: dict
-) -> None:
+async def test_list_runs_pagination(client: AsyncClient, auth_headers: dict) -> None:
     ruleset_id, _ = await _create_ruleset_with_rule_via_http(client, auth_headers)
 
     # Create 3 runs.
@@ -515,9 +490,7 @@ async def test_list_runs_pagination(
 
 
 @pytest.mark.asyncio
-async def test_status_nonexistent_run_returns_404(
-    client: AsyncClient, auth_headers: dict
-) -> None:
+async def test_status_nonexistent_run_returns_404(client: AsyncClient, auth_headers: dict) -> None:
     fake_id = uuid.uuid4()
     resp = await client.get(
         f"/api/v1/eac/runs/{fake_id}/status",
@@ -530,9 +503,7 @@ async def test_status_nonexistent_run_returns_404(
 
 
 @pytest.mark.asyncio
-async def test_cancel_endpoint_idempotent_and_404_for_unknown(
-    client: AsyncClient, auth_headers: dict
-) -> None:
+async def test_cancel_endpoint_idempotent_and_404_for_unknown(client: AsyncClient, auth_headers: dict) -> None:
     # Unknown run -> 404
     resp = await client.post(
         f"/api/v1/eac/runs/{uuid.uuid4()}:cancel",
@@ -560,9 +531,7 @@ async def test_cancel_endpoint_idempotent_and_404_for_unknown(
 
 
 @pytest.mark.asyncio
-async def test_rerun_creates_fresh_run_and_diff_compares(
-    client: AsyncClient, auth_headers: dict
-) -> None:
+async def test_rerun_creates_fresh_run_and_diff_compares(client: AsyncClient, auth_headers: dict) -> None:
     ruleset_id, _ = await _create_ruleset_with_rule_via_http(client, auth_headers)
     run_a = await client.post(
         f"/api/v1/eac/rulesets/{ruleset_id}:run",
@@ -618,9 +587,7 @@ def test_derive_progress_terminal_states_report_full() -> None:
     assert engine_api._derive_progress(_FakeRun("running", 100)) == 0.0  # noqa: SLF001
 
     # Running with progress in summary -> derived ratio
-    progressed = _FakeRun(
-        "running", 100, summary={"persisted_result_items": 25}
-    )
+    progressed = _FakeRun("running", 100, summary={"persisted_result_items": 25})
     assert engine_api._derive_progress(progressed) == 0.25  # noqa: SLF001
 
     # Out-of-range ratios are clamped.
@@ -675,9 +642,7 @@ async def test_diff_rejects_runs_from_different_rulesets(
     )
 
     with pytest.raises(ExecutionError, match="different rulesets"):
-        await engine_api.diff(
-            session, run_a.id, run_b.id, tenant_id=tenant_id
-        )
+        await engine_api.diff(session, run_a.id, run_b.id, tenant_id=tenant_id)
 
 
 # Suppress unused import warning for asyncio (referenced indirectly via

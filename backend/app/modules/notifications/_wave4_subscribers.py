@@ -45,9 +45,7 @@ async def _on_bi_alert_triggered(event: Event) -> None:
         async with async_session_factory() as session:
             svc = NotificationService(session)
             severity = data.get("severity", "warning")
-            notification_type = (
-                "alert_critical" if severity == "critical" else "alert_warning"
-            )
+            notification_type = "alert_critical" if severity == "critical" else "alert_warning"
             body_context = {
                 "alert_name": data.get("alert_name", ""),
                 "kpi_code": data.get("kpi_code", ""),
@@ -309,16 +307,12 @@ async def _on_supplier_kyc_expiring(event: Event) -> None:
                 vendor = await session.get(Vendor, _uuid.UUID(str(vendor_id)))
             except Exception:
                 vendor = None
-            target = (
-                getattr(vendor, "contact_id", None) if vendor is not None else None
-            )
+            target = getattr(vendor, "contact_id", None) if vendor is not None else None
             if not target:
                 return
             await svc.create(
                 user_id=target,
-                notification_type=(
-                    "alert_critical" if is_expired else "alert_warning"
-                ),
+                notification_type=("alert_critical" if is_expired else "alert_warning"),
                 title_key=(
                     "notifications.supplier_catalogs.kyc.expired.title"
                     if is_expired
@@ -332,9 +326,7 @@ async def _on_supplier_kyc_expiring(event: Event) -> None:
                 body_context={
                     "doc_type": data.get("doc_type", ""),
                     "expires_on": str(
-                        data.get("expires_on")
-                        or data.get("expired_on")
-                        or "",
+                        data.get("expires_on") or data.get("expired_on") or "",
                     ),
                     "days_until_expiry": str(
                         data.get("days_until_expiry") or "",
@@ -347,7 +339,8 @@ async def _on_supplier_kyc_expiring(event: Event) -> None:
             await session.commit()
     except Exception:
         logger.debug(
-            "notifications: _on_supplier_kyc_expiring failed", exc_info=True,
+            "notifications: _on_supplier_kyc_expiring failed",
+            exc_info=True,
         )
 
 

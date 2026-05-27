@@ -60,7 +60,6 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import (
     BaseDocTemplate,
@@ -85,11 +84,33 @@ from reportlab.platypus import (
 #: the picker. Adding a new translation = drop a ``<code>.json`` file
 #: into ``data/document_locales/`` — no code change required.
 SUPPORTED_LOCALES: tuple[str, ...] = (
-    "en", "de", "ru", "fr", "ar", "es",
-    "it", "pt", "pl", "nl", "tr", "zh",
-    "ja", "ko", "cs", "da", "fi", "no",
-    "sv", "hi", "vi", "th", "id", "ro",
-    "bg", "hr", "mn",
+    "en",
+    "de",
+    "ru",
+    "fr",
+    "ar",
+    "es",
+    "it",
+    "pt",
+    "pl",
+    "nl",
+    "tr",
+    "zh",
+    "ja",
+    "ko",
+    "cs",
+    "da",
+    "fi",
+    "no",
+    "sv",
+    "hi",
+    "vi",
+    "th",
+    "id",
+    "ro",
+    "bg",
+    "hr",
+    "mn",
 )
 
 #: RTL locales — paragraph wordWrap set to ``RTL`` and alignment flipped.
@@ -375,9 +396,9 @@ def _build_page_handler(ctx: _PageContext):
         # Footer — doc ref + page X (real count appended by NumberedCanvas)
         canvas.setFont("Helvetica", 8)
         canvas.setFillColor(colors.HexColor("#6b7280"))
-        gen_str = _t(
-            ctx.locale, "common.generated_at", "Generated {timestamp} UTC"
-        ).replace("{timestamp}", ctx.generated_at)
+        gen_str = _t(ctx.locale, "common.generated_at", "Generated {timestamp} UTC").replace(
+            "{timestamp}", ctx.generated_at
+        )
         ref_label = _t(ctx.locale, "common.doc_ref", "Doc. Ref")
         ref_str = f"{ref_label}: {ctx.doc_ref}" if ctx.doc_ref else ""
 
@@ -423,9 +444,7 @@ class _NumberedCanvas(Canvas):
         self.setFont("Helvetica", 8)
         self.setFillColor(colors.HexColor("#6b7280"))
         template = _t(self._locale, "common.page_of", "Page {page} of {total}")
-        label = template.replace("{page}", str(self._pageNumber)).replace(
-            "{total}", str(n_pages)
-        )
+        label = template.replace("{page}", str(self._pageNumber)).replace("{total}", str(n_pages))
         self.drawRightString(
             A4[0] - PAGE_MARGIN_MM * mm,
             PAGE_MARGIN_MM * mm - 10 * mm,
@@ -596,8 +615,7 @@ def _grid_table_style() -> TableStyle:
             ("FONTSIZE", (0, 0), (-1, -1), 9),
             ("ALIGN", (0, 0), (-1, 0), "LEFT"),
             ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#d1d5db")),
-            ("ROWBACKGROUNDS", (0, 1), (-1, -1),
-             [colors.HexColor("#f9fafb"), colors.white]),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.HexColor("#f9fafb"), colors.white]),
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("LEFTPADDING", (0, 0), (-1, -1), 5),
             ("RIGHTPADDING", (0, 0), (-1, -1), 5),
@@ -643,17 +661,18 @@ def render_reservation_receipt_pdf(
     )
 
     story: list[Any] = [
-        Paragraph(_t(locale, "reservation_receipt.title", "Reservation Receipt"),
-                  styles["title"]),
+        Paragraph(_t(locale, "reservation_receipt.title", "Reservation Receipt"), styles["title"]),
         Spacer(1, 4 * mm),
         Paragraph(
-            _t(locale, "reservation_receipt.intro",
-               "This receipt confirms reservation of the property described below."),
+            _t(
+                locale,
+                "reservation_receipt.intro",
+                "This receipt confirms reservation of the property described below.",
+            ),
             styles["body"],
         ),
         Spacer(1, 4 * mm),
-        Paragraph(_t(locale, "reservation_receipt.headings.plot_details",
-                     "Plot Details"), styles["heading"]),
+        Paragraph(_t(locale, "reservation_receipt.headings.plot_details", "Plot Details"), styles["heading"]),
     ]
 
     # KV table — buyer / property / amounts.
@@ -671,19 +690,17 @@ def render_reservation_receipt_pdf(
 
     rows = [
         [
-            Paragraph(_t(locale, "reservation_receipt.headings.reservation_number",
-                         "Reservation No."), styles["label"]),
-            Paragraph(str(_attr(reservation, "reservation_number", "—")),
-                      styles["body"]),
+            Paragraph(
+                _t(locale, "reservation_receipt.headings.reservation_number", "Reservation No."), styles["label"]
+            ),
+            Paragraph(str(_attr(reservation, "reservation_number", "—")), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "reservation_receipt.headings.buyer", "Buyer"),
-                      styles["label"]),
+            Paragraph(_t(locale, "reservation_receipt.headings.buyer", "Buyer"), styles["label"]),
             Paragraph(buyer_lines or "—", styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "reservation_receipt.headings.property", "Property"),
-                      styles["label"]),
+            Paragraph(_t(locale, "reservation_receipt.headings.property", "Property"), styles["label"]),
             Paragraph(
                 f"{_development_name(development)} — "
                 f"{_attr(plot, 'plot_number', '')} "
@@ -692,25 +709,20 @@ def render_reservation_receipt_pdf(
             ),
         ],
         [
-            Paragraph(_t(locale, "reservation_receipt.headings.amount_paid",
-                         "Amount Paid"), styles["label"]),
-            Paragraph(f"{_format_money(deposit, locale)} {ccy}".strip(),
-                      styles["body"]),
+            Paragraph(_t(locale, "reservation_receipt.headings.amount_paid", "Amount Paid"), styles["label"]),
+            Paragraph(f"{_format_money(deposit, locale)} {ccy}".strip(), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "reservation_receipt.headings.cooling_off",
-                         "Cooling-off Period"), styles["label"]),
+            Paragraph(_t(locale, "reservation_receipt.headings.cooling_off", "Cooling-off Period"), styles["label"]),
             Paragraph(
-                _t(locale, "reservation_receipt.cooling_off_text",
-                   "{days} days from receipt of this document.").replace(
-                    "{days}", str(int(cooling_days or 0))
-                ),
+                _t(
+                    locale, "reservation_receipt.cooling_off_text", "{days} days from receipt of this document."
+                ).replace("{days}", str(int(cooling_days or 0))),
                 styles["body"],
             ),
         ],
         [
-            Paragraph(_t(locale, "reservation_receipt.headings.valid_until",
-                         "Valid Until"), styles["label"]),
+            Paragraph(_t(locale, "reservation_receipt.headings.valid_until", "Valid Until"), styles["label"]),
             Paragraph(
                 _format_date(expires_at or cooling_until, locale) or "—",
                 styles["body"],
@@ -724,22 +736,18 @@ def render_reservation_receipt_pdf(
     story.extend(
         [
             Spacer(1, 6 * mm),
-            Paragraph(_t(locale, "reservation_receipt.headings.next_step",
-                         "Next Step"), styles["heading"]),
+            Paragraph(_t(locale, "reservation_receipt.headings.next_step", "Next Step"), styles["heading"]),
             Paragraph(
-                _t(locale, "reservation_receipt.next_step_text",
-                   "Within {days} days the buyer must sign the SPA.").replace(
-                    "{days}", str(int(cooling_days or 0))
-                ),
+                _t(
+                    locale, "reservation_receipt.next_step_text", "Within {days} days the buyer must sign the SPA."
+                ).replace("{days}", str(int(cooling_days or 0))),
                 styles["body"],
             ),
             Spacer(1, 6 * mm),
-            Paragraph(_t(locale, "reservation_receipt.footer_note",
-                         ""), styles["small"]),
+            Paragraph(_t(locale, "reservation_receipt.footer_note", ""), styles["small"]),
             Spacer(1, 10 * mm),
             Paragraph(
-                f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: "
-                f"________________________________",
+                f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: ________________________________",
                 styles["body"],
             ),
         ]
@@ -792,20 +800,14 @@ def _resolve_clause_placeholders(text: str, contract: Any, development: Any) -> 
 
     defaults = {
         "rera_registration_no": str(merged.get("rera_registration_no", "TBD")),
-        "maharera_registration_no": str(
-            merged.get("maharera_registration_no", "TBD")
-        ),
+        "maharera_registration_no": str(merged.get("maharera_registration_no", "TBD")),
         "ddu_registration_no": str(merged.get("ddu_registration_no", "TBD")),
         "mof_approval_no": str(merged.get("mof_approval_no", "TBD")),
         "escrow_account_no": str(merged.get("escrow_account_no", "TBD")),
         "escrow_bank": str(merged.get("escrow_bank", "TBD")),
         "escrow_bank_inn": str(merged.get("escrow_bank_inn", "TBD")),
         "fund_contribution_amount": str(merged.get("fund_contribution_amount", "0")),
-        "completion_date": str(
-            merged.get("completion_date")
-            or _attr(development, "completion_date", "")
-            or "TBD"
-        ),
+        "completion_date": str(merged.get("completion_date") or _attr(development, "completion_date", "") or "TBD"),
         "carpet_area_m2": str(merged.get("carpet_area_m2", "TBD")),
         "jurisdiction_seat": str(merged.get("jurisdiction_seat", "TBD")),
     }
@@ -844,8 +846,12 @@ def render_sales_contract_pdf(
         author=_development_name(development) or "OpenConstructionERP",
         subject=f"SPA {_attr(contract, 'contract_number', '')}",
         keywords=[
-            "spa", "sales", "contract", "property",
-            doc_ref, str(_attr(contract, "contract_number", "")),
+            "spa",
+            "sales",
+            "contract",
+            "property",
+            doc_ref,
+            str(_attr(contract, "contract_number", "")),
         ],
     )
     ctx = _PageContext(
@@ -862,8 +868,7 @@ def render_sales_contract_pdf(
     subtitle = subtitle_tpl.replace("{number}", str(contract_number))
 
     story: list[Any] = [
-        Paragraph(_t(locale, "sales_contract.title", "Sale-Purchase Agreement"),
-                  styles["title"]),
+        Paragraph(_t(locale, "sales_contract.title", "Sale-Purchase Agreement"), styles["title"]),
         Paragraph(subtitle, styles["subtitle"]),
         Spacer(1, 6 * mm),
         Paragraph(_t(locale, "sales_contract.preamble", ""), styles["body"]),
@@ -872,22 +877,20 @@ def render_sales_contract_pdf(
 
     # ── Parties section ──
     story.append(
-        Paragraph(_t(locale, "sales_contract.headings.parties",
-                     "Parties to the Agreement"), styles["heading"])
+        Paragraph(_t(locale, "sales_contract.headings.parties", "Parties to the Agreement"), styles["heading"])
     )
-    story.append(
-        Paragraph(_t(locale, "sales_contract.parties_intro", ""), styles["body"])
-    )
+    story.append(Paragraph(_t(locale, "sales_contract.parties_intro", ""), styles["body"]))
 
-    party_rows: list[list[Any]] = [[
-        Paragraph(_t(locale, "sales_contract.party_columns.name", "Name"), styles["label"]),
-        Paragraph(_t(locale, "sales_contract.party_columns.role", "Role"), styles["label"]),
-        Paragraph(_t(locale, "sales_contract.party_columns.ownership_pct",
-                     "Ownership %"), styles["label"]),
-        Paragraph(_t(locale, "sales_contract.party_columns.email", "Email"), styles["label"]),
-    ]]
+    party_rows: list[list[Any]] = [
+        [
+            Paragraph(_t(locale, "sales_contract.party_columns.name", "Name"), styles["label"]),
+            Paragraph(_t(locale, "sales_contract.party_columns.role", "Role"), styles["label"]),
+            Paragraph(_t(locale, "sales_contract.party_columns.ownership_pct", "Ownership %"), styles["label"]),
+            Paragraph(_t(locale, "sales_contract.party_columns.email", "Email"), styles["label"]),
+        ]
+    ]
     total_pct = Decimal("0")
-    for p in (parties or []):
+    for p in parties or []:
         buyer_id = _attr(p, "buyer_id", None)
         buyer = (buyer_lookup or {}).get(buyer_id) if buyer_lookup else None
         name = _attr(buyer, "full_name", "") or _attr(p, "full_name", "") or "—"
@@ -898,12 +901,14 @@ def render_sales_contract_pdf(
             total_pct += Decimal(str(pct))
         except (ValueError, TypeError):
             pass
-        party_rows.append([
-            Paragraph(str(name), styles["body"]),
-            Paragraph(str(role), styles["body"]),
-            Paragraph(f"{pct}%", styles["body"]),
-            Paragraph(str(email), styles["body"]),
-        ])
+        party_rows.append(
+            [
+                Paragraph(str(name), styles["body"]),
+                Paragraph(str(role), styles["body"]),
+                Paragraph(f"{pct}%", styles["body"]),
+                Paragraph(str(email), styles["body"]),
+            ]
+        )
 
     if len(party_rows) > 1:
         tbl_parties = Table(
@@ -922,45 +927,45 @@ def render_sales_contract_pdf(
             )
 
     # ── Property section ──
-    story.extend([
-        Spacer(1, 4 * mm),
-        Paragraph(_t(locale, "sales_contract.headings.property", "The Property"),
-                  styles["heading"]),
-    ])
+    story.extend(
+        [
+            Spacer(1, 4 * mm),
+            Paragraph(_t(locale, "sales_contract.headings.property", "The Property"), styles["heading"]),
+        ]
+    )
     prop_rows = [
         [
-            Paragraph(_t(locale, "sales_contract.property_columns.plot_number",
-                         "Plot Number"), styles["label"]),
+            Paragraph(_t(locale, "sales_contract.property_columns.plot_number", "Plot Number"), styles["label"]),
             Paragraph(str(_attr(plot, "plot_number", "—")), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "sales_contract.property_columns.development",
-                         "Development"), styles["label"]),
+            Paragraph(_t(locale, "sales_contract.property_columns.development", "Development"), styles["label"]),
             Paragraph(_development_name(development), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "sales_contract.property_columns.area_m2",
-                         "Area (m²)"), styles["label"]),
+            Paragraph(_t(locale, "sales_contract.property_columns.area_m2", "Area (m²)"), styles["label"]),
             Paragraph(str(_attr(plot, "area_m2", "—")), styles["body"]),
         ],
     ]
     house_type_label = _attr(plot, "house_type_label", None)
     if house_type_label:
-        prop_rows.append([
-            Paragraph(_t(locale, "sales_contract.property_columns.house_type",
-                         "House Type"), styles["label"]),
-            Paragraph(str(house_type_label), styles["body"]),
-        ])
+        prop_rows.append(
+            [
+                Paragraph(_t(locale, "sales_contract.property_columns.house_type", "House Type"), styles["label"]),
+                Paragraph(str(house_type_label), styles["body"]),
+            ]
+        )
     tbl_prop = Table(prop_rows, colWidths=[55 * mm, 100 * mm])
     tbl_prop.setStyle(_kv_table_style())
     story.append(tbl_prop)
 
     # ── Price section ──
-    story.extend([
-        Spacer(1, 4 * mm),
-        Paragraph(_t(locale, "sales_contract.headings.price", "Purchase Price"),
-                  styles["heading"]),
-    ])
+    story.extend(
+        [
+            Spacer(1, 4 * mm),
+            Paragraph(_t(locale, "sales_contract.headings.price", "Purchase Price"), styles["heading"]),
+        ]
+    )
     ccy = _attr(contract, "currency", "") or ""
     total_value = _attr(contract, "total_value", Decimal("0"))
     story.append(
@@ -973,20 +978,19 @@ def render_sales_contract_pdf(
 
     breakdown = _attr(contract, "total_price_breakdown", None) or {}
     if isinstance(breakdown, dict) and breakdown:
-        story.append(
-            Paragraph(_t(locale, "sales_contract.breakdown_label", "Price Breakdown"),
-                      styles["label"])
-        )
+        story.append(Paragraph(_t(locale, "sales_contract.breakdown_label", "Price Breakdown"), styles["label"]))
         brk_rows: list[list[Any]] = []
         for key in ("base", "vat", "stamp_duty", "legal_fees", "options_value", "discounts"):
             if key in breakdown:
-                brk_rows.append([
-                    Paragraph(key.replace("_", " ").title(), styles["body"]),
-                    Paragraph(
-                        f"{_format_money(breakdown.get(key) or 0, locale)} {ccy}".strip(),
-                        styles["body"],
-                    ),
-                ])
+                brk_rows.append(
+                    [
+                        Paragraph(key.replace("_", " ").title(), styles["body"]),
+                        Paragraph(
+                            f"{_format_money(breakdown.get(key) or 0, locale)} {ccy}".strip(),
+                            styles["body"],
+                        ),
+                    ]
+                )
         if brk_rows:
             tbl_brk = Table(brk_rows, colWidths=[80 * mm, 75 * mm])
             tbl_brk.setStyle(_kv_table_style())
@@ -994,35 +998,34 @@ def render_sales_contract_pdf(
 
     # ── Payment Schedule + Instalments ──
     if instalments:
-        story.extend([
-            Spacer(1, 4 * mm),
-            Paragraph(_t(locale, "sales_contract.headings.instalments", "Instalments"),
-                      styles["heading"]),
-        ])
-        inst_rows: list[list[Any]] = [[
-            Paragraph(_t(locale, "sales_contract.instalment_columns.sequence", "#"),
-                      styles["label"]),
-            Paragraph(_t(locale, "sales_contract.instalment_columns.milestone",
-                         "Milestone"), styles["label"]),
-            Paragraph(_t(locale, "sales_contract.instalment_columns.due_date",
-                         "Due Date"), styles["label"]),
-            Paragraph(_t(locale, "sales_contract.instalment_columns.amount",
-                         "Amount"), styles["label"]),
-            Paragraph(_t(locale, "sales_contract.instalment_columns.currency",
-                         "Currency"), styles["label"]),
-        ]]
+        story.extend(
+            [
+                Spacer(1, 4 * mm),
+                Paragraph(_t(locale, "sales_contract.headings.instalments", "Instalments"), styles["heading"]),
+            ]
+        )
+        inst_rows: list[list[Any]] = [
+            [
+                Paragraph(_t(locale, "sales_contract.instalment_columns.sequence", "#"), styles["label"]),
+                Paragraph(_t(locale, "sales_contract.instalment_columns.milestone", "Milestone"), styles["label"]),
+                Paragraph(_t(locale, "sales_contract.instalment_columns.due_date", "Due Date"), styles["label"]),
+                Paragraph(_t(locale, "sales_contract.instalment_columns.amount", "Amount"), styles["label"]),
+                Paragraph(_t(locale, "sales_contract.instalment_columns.currency", "Currency"), styles["label"]),
+            ]
+        ]
         sched_ccy = _attr(payment_schedule, "currency", "") or ccy
         for inst in instalments:
-            inst_rows.append([
-                Paragraph(str(_attr(inst, "sequence", "")), styles["body"]),
-                Paragraph(str(_attr(inst, "milestone_label", "") or
-                              _attr(inst, "milestone_event", "")), styles["body"]),
-                Paragraph(_format_date(_attr(inst, "due_date", None), locale),
-                          styles["body"]),
-                Paragraph(_format_money(_attr(inst, "amount", Decimal("0")), locale),
-                          styles["body"]),
-                Paragraph(str(sched_ccy), styles["body"]),
-            ])
+            inst_rows.append(
+                [
+                    Paragraph(str(_attr(inst, "sequence", "")), styles["body"]),
+                    Paragraph(
+                        str(_attr(inst, "milestone_label", "") or _attr(inst, "milestone_event", "")), styles["body"]
+                    ),
+                    Paragraph(_format_date(_attr(inst, "due_date", None), locale), styles["body"]),
+                    Paragraph(_format_money(_attr(inst, "amount", Decimal("0")), locale), styles["body"]),
+                    Paragraph(str(sched_ccy), styles["body"]),
+                ]
+            )
         tbl_inst = Table(
             inst_rows,
             colWidths=[12 * mm, 60 * mm, 28 * mm, 35 * mm, 25 * mm],
@@ -1034,56 +1037,65 @@ def render_sales_contract_pdf(
     # ── Jurisdiction clauses ──
     regulator = _regulator(development)
     clause_data = _load_clauses(regulator, locale)
-    story.extend([
-        PageBreak(),
-        Paragraph(_t(locale, "sales_contract.headings.regulatory",
-                     "Regulatory Disclosures"), styles["heading"]),
-        Paragraph(
-            f"<b>{clause_data.get('title', '')}</b>",
-            styles["subtitle"],
-        ),
-        Paragraph(clause_data.get("intro", "") or "", styles["body"]),
-        Spacer(1, 3 * mm),
-    ])
-    for clause in clause_data.get("clauses", []) or []:
-        story.append(KeepTogether([
-            Paragraph(str(clause.get("heading", "") or ""), styles["clause_heading"]),
+    story.extend(
+        [
+            PageBreak(),
+            Paragraph(_t(locale, "sales_contract.headings.regulatory", "Regulatory Disclosures"), styles["heading"]),
             Paragraph(
-                _resolve_clause_placeholders(
-                    str(clause.get("text", "") or ""), contract, development,
-                ),
-                styles["clause"],
+                f"<b>{clause_data.get('title', '')}</b>",
+                styles["subtitle"],
             ),
-        ]))
+            Paragraph(clause_data.get("intro", "") or "", styles["body"]),
+            Spacer(1, 3 * mm),
+        ]
+    )
+    for clause in clause_data.get("clauses", []) or []:
+        story.append(
+            KeepTogether(
+                [
+                    Paragraph(str(clause.get("heading", "") or ""), styles["clause_heading"]),
+                    Paragraph(
+                        _resolve_clause_placeholders(
+                            str(clause.get("text", "") or ""),
+                            contract,
+                            development,
+                        ),
+                        styles["clause"],
+                    ),
+                ]
+            )
+        )
 
     # ── Signatures ──
     place = _attr(contract, "place", None) or "________________"
     signing_date = _format_date(_attr(contract, "signing_date", None), locale) or "________________"
-    note_tpl = _t(locale, "sales_contract.signature_note",
-                  "Signed in {place} on {date}.")
+    note_tpl = _t(locale, "sales_contract.signature_note", "Signed in {place} on {date}.")
     note = note_tpl.replace("{place}", place).replace("{date}", signing_date)
-    story.extend([
-        PageBreak(),
-        Paragraph(_t(locale, "sales_contract.headings.signatures", "Signatures"),
-                  styles["heading"]),
-        Paragraph(note, styles["body"]),
-        Spacer(1, 14 * mm),
-        Table(
-            [[
-                Paragraph(
-                    f"{_t(locale, 'common.buyer_signature', 'Buyer Signature')}<br/>"
-                    f"________________________________",
-                    styles["body"],
-                ),
-                Paragraph(
-                    f"{_t(locale, 'common.developer_signature', 'Developer Signature')}<br/>"
-                    f"________________________________",
-                    styles["body"],
-                ),
-            ]],
-            colWidths=[75 * mm, 75 * mm],
-        ),
-    ])
+    story.extend(
+        [
+            PageBreak(),
+            Paragraph(_t(locale, "sales_contract.headings.signatures", "Signatures"), styles["heading"]),
+            Paragraph(note, styles["body"]),
+            Spacer(1, 14 * mm),
+            Table(
+                [
+                    [
+                        Paragraph(
+                            f"{_t(locale, 'common.buyer_signature', 'Buyer Signature')}<br/>"
+                            f"________________________________",
+                            styles["body"],
+                        ),
+                        Paragraph(
+                            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}<br/>"
+                            f"________________________________",
+                            styles["body"],
+                        ),
+                    ]
+                ],
+                colWidths=[75 * mm, 75 * mm],
+            ),
+        ]
+    )
 
     return _render(doc, frame, story, ctx, buf)
 
@@ -1138,52 +1150,44 @@ def render_payment_receipt_pdf(
 
     rows = [
         [
-            Paragraph(_t(locale, "payment_receipt.headings.spa_ref",
-                         "Agreement No."), styles["label"]),
+            Paragraph(_t(locale, "payment_receipt.headings.spa_ref", "Agreement No."), styles["label"]),
             Paragraph(str(_attr(sales_contract, "contract_number", "—")), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "payment_receipt.headings.instalment", "Instalment"),
-                      styles["label"]),
+            Paragraph(_t(locale, "payment_receipt.headings.instalment", "Instalment"), styles["label"]),
             Paragraph(f"#{_attr(instalment, 'sequence', '')}", styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "payment_receipt.headings.milestone", "Milestone"),
-                      styles["label"]),
+            Paragraph(_t(locale, "payment_receipt.headings.milestone", "Milestone"), styles["label"]),
             Paragraph(
-                str(_attr(instalment, "milestone_label", "")
-                    or _attr(instalment, "milestone_event", "")),
+                str(_attr(instalment, "milestone_label", "") or _attr(instalment, "milestone_event", "")),
                 styles["body"],
             ),
         ],
         [
-            Paragraph(_t(locale, "payment_receipt.headings.amount_paid",
-                         "Amount Paid"), styles["label"]),
+            Paragraph(_t(locale, "payment_receipt.headings.amount_paid", "Amount Paid"), styles["label"]),
             Paragraph(
-                f"{_format_money(amount_paid, locale)} {ccy}".strip(), styles["body"],
+                f"{_format_money(amount_paid, locale)} {ccy}".strip(),
+                styles["body"],
             ),
         ],
         [
-            Paragraph(_t(locale, "payment_receipt.headings.payment_method",
-                         "Payment Method"), styles["label"]),
+            Paragraph(_t(locale, "payment_receipt.headings.payment_method", "Payment Method"), styles["label"]),
             Paragraph(str(payment_method or "—"), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "payment_receipt.headings.payment_ref",
-                         "Payment Reference"), styles["label"]),
+            Paragraph(_t(locale, "payment_receipt.headings.payment_ref", "Payment Reference"), styles["label"]),
             Paragraph(str(payment_ref or "—"), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "payment_receipt.headings.paid_at", "Paid On"),
-                      styles["label"]),
+            Paragraph(_t(locale, "payment_receipt.headings.paid_at", "Paid On"), styles["label"]),
             Paragraph(
                 _format_date(_attr(instalment, "paid_at", None), locale) or "—",
                 styles["body"],
             ),
         ],
         [
-            Paragraph(_t(locale, "payment_receipt.headings.outstanding",
-                         "Outstanding Balance"), styles["label"]),
+            Paragraph(_t(locale, "payment_receipt.headings.outstanding", "Outstanding Balance"), styles["label"]),
             Paragraph(
                 f"{_format_money(outstanding, locale)} {ccy}".strip(),
                 styles["body"],
@@ -1194,8 +1198,7 @@ def render_payment_receipt_pdf(
     tbl.setStyle(_kv_table_style())
 
     story: list[Any] = [
-        Paragraph(_t(locale, "payment_receipt.title", "Payment Receipt"),
-                  styles["title"]),
+        Paragraph(_t(locale, "payment_receipt.title", "Payment Receipt"), styles["title"]),
         Spacer(1, 4 * mm),
         Paragraph(_t(locale, "payment_receipt.intro", ""), styles["body"]),
         Spacer(1, 4 * mm),
@@ -1244,14 +1247,11 @@ def render_handover_certificate_pdf(
 
     rows = [
         [
-            Paragraph(_t(locale, "handover_certificate.headings.spa_ref",
-                         "Agreement No."), styles["label"]),
-            Paragraph(str(_attr(sales_contract, "contract_number", "—")),
-                      styles["body"]),
+            Paragraph(_t(locale, "handover_certificate.headings.spa_ref", "Agreement No."), styles["label"]),
+            Paragraph(str(_attr(sales_contract, "contract_number", "—")), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "handover_certificate.headings.completed_at",
-                         "Handover Date"), styles["label"]),
+            Paragraph(_t(locale, "handover_certificate.headings.completed_at", "Handover Date"), styles["label"]),
             Paragraph(
                 _format_date(_attr(handover, "completed_at", None), locale)
                 or _format_date(_attr(handover, "scheduled_at", None), locale)
@@ -1260,16 +1260,15 @@ def render_handover_certificate_pdf(
             ),
         ],
         [
-            Paragraph(_t(locale, "handover_certificate.headings.snag_count",
-                         "Open Snags"), styles["label"]),
+            Paragraph(_t(locale, "handover_certificate.headings.snag_count", "Open Snags"), styles["label"]),
             Paragraph(str(int(snag_count or 0)), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "handover_certificate.headings.keys_handed_over",
-                         "Keys Handed Over"), styles["label"]),
             Paragraph(
-                _format_date(_attr(handover, "keys_handed_over_at", None), locale)
-                or "—",
+                _t(locale, "handover_certificate.headings.keys_handed_over", "Keys Handed Over"), styles["label"]
+            ),
+            Paragraph(
+                _format_date(_attr(handover, "keys_handed_over_at", None), locale) or "—",
                 styles["body"],
             ),
         ],
@@ -1278,16 +1277,15 @@ def render_handover_certificate_pdf(
     tbl.setStyle(_kv_table_style())
 
     story: list[Any] = [
-        Paragraph(_t(locale, "handover_certificate.title", "Certificate of Handover"),
-                  styles["title"]),
+        Paragraph(_t(locale, "handover_certificate.title", "Certificate of Handover"), styles["title"]),
         Spacer(1, 4 * mm),
         Paragraph(_t(locale, "handover_certificate.intro", ""), styles["body"]),
         Spacer(1, 4 * mm),
         tbl,
         Spacer(1, 6 * mm),
         Paragraph(
-            _t(locale, "handover_certificate.headings.developer_declaration",
-               "Developer's Declaration"), styles["heading"],
+            _t(locale, "handover_certificate.headings.developer_declaration", "Developer's Declaration"),
+            styles["heading"],
         ),
         Paragraph(
             _t(locale, "handover_certificate.developer_declaration_text", ""),
@@ -1295,8 +1293,8 @@ def render_handover_certificate_pdf(
         ),
         Spacer(1, 4 * mm),
         Paragraph(
-            _t(locale, "handover_certificate.headings.buyer_acceptance",
-               "Buyer's Acceptance"), styles["heading"],
+            _t(locale, "handover_certificate.headings.buyer_acceptance", "Buyer's Acceptance"),
+            styles["heading"],
         ),
         Paragraph(
             _t(locale, "handover_certificate.buyer_acceptance_text", ""),
@@ -1309,18 +1307,20 @@ def render_handover_certificate_pdf(
         ),
         Spacer(1, 14 * mm),
         Table(
-            [[
-                Paragraph(
-                    f"{_t(locale, 'common.buyer_signature', 'Buyer Signature')}<br/>"
-                    "________________________________",
-                    styles["body"],
-                ),
-                Paragraph(
-                    f"{_t(locale, 'common.developer_signature', 'Developer Signature')}<br/>"
-                    "________________________________",
-                    styles["body"],
-                ),
-            ]],
+            [
+                [
+                    Paragraph(
+                        f"{_t(locale, 'common.buyer_signature', 'Buyer Signature')}<br/>"
+                        "________________________________",
+                        styles["body"],
+                    ),
+                    Paragraph(
+                        f"{_t(locale, 'common.developer_signature', 'Developer Signature')}<br/>"
+                        "________________________________",
+                        styles["body"],
+                    ),
+                ]
+            ],
             colWidths=[75 * mm, 75 * mm],
         ),
     ]
@@ -1376,28 +1376,27 @@ def render_warranty_certificate_pdf(
 
     rows = [
         [
-            Paragraph(_t(locale, "warranty_certificate.headings.spa_ref",
-                         "Agreement No."), styles["label"]),
+            Paragraph(_t(locale, "warranty_certificate.headings.spa_ref", "Agreement No."), styles["label"]),
             Paragraph(str(_attr(sales_contract, "contract_number", "—")), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "warranty_certificate.headings.handover_date",
-                         "Handover Date"), styles["label"]),
+            Paragraph(_t(locale, "warranty_certificate.headings.handover_date", "Handover Date"), styles["label"]),
             Paragraph(handover_iso or "—", styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "warranty_certificate.headings.structural_period",
-                         "Structural Period"), styles["label"]),
+            Paragraph(
+                _t(locale, "warranty_certificate.headings.structural_period", "Structural Period"), styles["label"]
+            ),
             Paragraph(f"{int(structural_warranty_years)}y", styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "warranty_certificate.headings.finishing_period",
-                         "Finishing Period"), styles["label"]),
+            Paragraph(
+                _t(locale, "warranty_certificate.headings.finishing_period", "Finishing Period"), styles["label"]
+            ),
             Paragraph(f"{int(finishing_warranty_years)}y", styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "warranty_certificate.headings.warranty_expiry",
-                         "Warranty Expiry"), styles["label"]),
+            Paragraph(_t(locale, "warranty_certificate.headings.warranty_expiry", "Warranty Expiry"), styles["label"]),
             Paragraph(expiry_iso or "—", styles["body"]),
         ],
     ]
@@ -1405,41 +1404,37 @@ def render_warranty_certificate_pdf(
     tbl.setStyle(_kv_table_style())
 
     story: list[Any] = [
-        Paragraph(_t(locale, "warranty_certificate.title", "Warranty Certificate"),
-                  styles["title"]),
+        Paragraph(_t(locale, "warranty_certificate.title", "Warranty Certificate"), styles["title"]),
         Spacer(1, 4 * mm),
         Paragraph(_t(locale, "warranty_certificate.intro", ""), styles["body"]),
         Spacer(1, 4 * mm),
         tbl,
         Spacer(1, 6 * mm),
-        Paragraph(_t(locale, "warranty_certificate.headings.structural",
-                     "Structural Warranty"), styles["heading"]),
+        Paragraph(_t(locale, "warranty_certificate.headings.structural", "Structural Warranty"), styles["heading"]),
         Paragraph(
             _t(locale, "warranty_certificate.structural_text", "").replace(
-                "{years}", str(int(structural_warranty_years)),
+                "{years}",
+                str(int(structural_warranty_years)),
             ),
             styles["body"],
         ),
         Spacer(1, 3 * mm),
-        Paragraph(_t(locale, "warranty_certificate.headings.finishing",
-                     "Finishing Warranty"), styles["heading"]),
+        Paragraph(_t(locale, "warranty_certificate.headings.finishing", "Finishing Warranty"), styles["heading"]),
         Paragraph(
             _t(locale, "warranty_certificate.finishing_text", "").replace(
-                "{years}", str(int(finishing_warranty_years)),
+                "{years}",
+                str(int(finishing_warranty_years)),
             ),
             styles["body"],
         ),
         Spacer(1, 3 * mm),
-        Paragraph(_t(locale, "warranty_certificate.headings.exclusions", "Exclusions"),
-                  styles["heading"]),
-        Paragraph(_t(locale, "warranty_certificate.exclusions_text", ""),
-                  styles["body"]),
+        Paragraph(_t(locale, "warranty_certificate.headings.exclusions", "Exclusions"), styles["heading"]),
+        Paragraph(_t(locale, "warranty_certificate.exclusions_text", ""), styles["body"]),
         Spacer(1, 3 * mm),
         Paragraph(_t(locale, "warranty_certificate.claim_procedure", ""), styles["small"]),
         Spacer(1, 14 * mm),
         Paragraph(
-            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: "
-            f"________________________________",
+            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: ________________________________",
             styles["body"],
         ),
     ]
@@ -1492,8 +1487,7 @@ def render_no_objection_certificate_pdf(
             Paragraph(str(_attr(sales_contract, "contract_number", "—")), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "noc.headings.requested_by", "Requested By"),
-                      styles["label"]),
+            Paragraph(_t(locale, "noc.headings.requested_by", "Requested By"), styles["label"]),
             Paragraph(str(requested_by or "—"), styles["body"]),
         ],
         [
@@ -1501,13 +1495,13 @@ def render_no_objection_certificate_pdf(
             Paragraph(issued_at, styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "noc.headings.validity", "Validity"),
-                      styles["label"]),
+            Paragraph(_t(locale, "noc.headings.validity", "Validity"), styles["label"]),
             Paragraph(
-                _t(locale, "noc.validity_text",
-                   "Valid for {days} days from the date of issue.").replace(
-                    "{days}", str(int(validity_days)),
-                ) + f" ({valid_until})",
+                _t(locale, "noc.validity_text", "Valid for {days} days from the date of issue.").replace(
+                    "{days}",
+                    str(int(validity_days)),
+                )
+                + f" ({valid_until})",
                 styles["body"],
             ),
         ],
@@ -1520,8 +1514,7 @@ def render_no_objection_certificate_pdf(
     tbl.setStyle(_kv_table_style())
 
     story: list[Any] = [
-        Paragraph(_t(locale, "noc.title", "No Objection Certificate"),
-                  styles["title"]),
+        Paragraph(_t(locale, "noc.title", "No Objection Certificate"), styles["title"]),
         Paragraph(_t(locale, "noc.subtitle", ""), styles["subtitle"]),
         Spacer(1, 4 * mm),
         Paragraph(_t(locale, "noc.intro", ""), styles["body"]),
@@ -1533,8 +1526,7 @@ def render_no_objection_certificate_pdf(
         Paragraph(_t(locale, "noc.developer_statement", ""), styles["body"]),
         Spacer(1, 14 * mm),
         Paragraph(
-            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: "
-            f"________________________________",
+            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: ________________________________",
             styles["body"],
         ),
     ]
@@ -1597,18 +1589,15 @@ def render_tenant_lease_agreement_pdf(
 
     rows = [
         [
-            Paragraph(_t(locale, "tenant_lease_agreement.headings.lease_number",
-                         "Lease No."), styles["label"]),
+            Paragraph(_t(locale, "tenant_lease_agreement.headings.lease_number", "Lease No."), styles["label"]),
             Paragraph(str(_attr(lease, "lease_number", "—")), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "tenant_lease_agreement.headings.tenant",
-                         "Tenant"), styles["label"]),
+            Paragraph(_t(locale, "tenant_lease_agreement.headings.tenant", "Tenant"), styles["label"]),
             Paragraph(tenant_lines or "—", styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "tenant_lease_agreement.headings.property",
-                         "Property"), styles["label"]),
+            Paragraph(_t(locale, "tenant_lease_agreement.headings.property", "Property"), styles["label"]),
             Paragraph(
                 f"{_development_name(development)} — "
                 f"{_attr(plot, 'plot_number', '')} "
@@ -1617,24 +1606,23 @@ def render_tenant_lease_agreement_pdf(
             ),
         ],
         [
-            Paragraph(_t(locale, "tenant_lease_agreement.headings.term",
-                         "Term"), styles["label"]),
+            Paragraph(_t(locale, "tenant_lease_agreement.headings.term", "Term"), styles["label"]),
             Paragraph(
                 f"{int(term_months or 0)} months — {start_date} → {end_date}",
                 styles["body"],
             ),
         ],
         [
-            Paragraph(_t(locale, "tenant_lease_agreement.headings.monthly_rent",
-                         "Monthly Rent"), styles["label"]),
+            Paragraph(_t(locale, "tenant_lease_agreement.headings.monthly_rent", "Monthly Rent"), styles["label"]),
             Paragraph(
                 f"{_format_money(monthly_rent, locale)} {ccy}".strip(),
                 styles["body"],
             ),
         ],
         [
-            Paragraph(_t(locale, "tenant_lease_agreement.headings.security_deposit",
-                         "Security Deposit"), styles["label"]),
+            Paragraph(
+                _t(locale, "tenant_lease_agreement.headings.security_deposit", "Security Deposit"), styles["label"]
+            ),
             Paragraph(
                 f"{_format_money(security_deposit, locale)} {ccy}".strip(),
                 styles["body"],
@@ -1645,39 +1633,34 @@ def render_tenant_lease_agreement_pdf(
     tbl.setStyle(_kv_table_style())
 
     story: list[Any] = [
-        Paragraph(_t(locale, "tenant_lease_agreement.title",
-                     "Tenant Lease Agreement"), styles["title"]),
+        Paragraph(_t(locale, "tenant_lease_agreement.title", "Tenant Lease Agreement"), styles["title"]),
         Spacer(1, 4 * mm),
         Paragraph(_t(locale, "tenant_lease_agreement.intro", ""), styles["body"]),
         Spacer(1, 4 * mm),
         tbl,
         Spacer(1, 6 * mm),
-        Paragraph(_t(locale, "tenant_lease_agreement.headings.use_clause",
-                     "Use of the Property"), styles["heading"]),
-        Paragraph(_t(locale, "tenant_lease_agreement.use_clause_text", ""),
-                  styles["body"]),
-        Paragraph(_t(locale, "tenant_lease_agreement.headings.maintenance",
-                     "Maintenance"), styles["heading"]),
-        Paragraph(_t(locale, "tenant_lease_agreement.maintenance_text", ""),
-                  styles["body"]),
-        Paragraph(_t(locale, "tenant_lease_agreement.headings.termination",
-                     "Termination"), styles["heading"]),
-        Paragraph(_t(locale, "tenant_lease_agreement.termination_text", ""),
-                  styles["body"]),
+        Paragraph(_t(locale, "tenant_lease_agreement.headings.use_clause", "Use of the Property"), styles["heading"]),
+        Paragraph(_t(locale, "tenant_lease_agreement.use_clause_text", ""), styles["body"]),
+        Paragraph(_t(locale, "tenant_lease_agreement.headings.maintenance", "Maintenance"), styles["heading"]),
+        Paragraph(_t(locale, "tenant_lease_agreement.maintenance_text", ""), styles["body"]),
+        Paragraph(_t(locale, "tenant_lease_agreement.headings.termination", "Termination"), styles["heading"]),
+        Paragraph(_t(locale, "tenant_lease_agreement.termination_text", ""), styles["body"]),
         Spacer(1, 14 * mm),
         Table(
-            [[
-                Paragraph(
-                    f"{_t(locale, 'tenant_lease_agreement.tenant_signature', 'Tenant Signature')}<br/>"
-                    "________________________________",
-                    styles["body"],
-                ),
-                Paragraph(
-                    f"{_t(locale, 'common.developer_signature', 'Developer Signature')}<br/>"
-                    "________________________________",
-                    styles["body"],
-                ),
-            ]],
+            [
+                [
+                    Paragraph(
+                        f"{_t(locale, 'tenant_lease_agreement.tenant_signature', 'Tenant Signature')}<br/>"
+                        "________________________________",
+                        styles["body"],
+                    ),
+                    Paragraph(
+                        f"{_t(locale, 'common.developer_signature', 'Developer Signature')}<br/>"
+                        "________________________________",
+                        styles["body"],
+                    ),
+                ]
+            ],
             colWidths=[75 * mm, 75 * mm],
         ),
     ]
@@ -1727,8 +1710,7 @@ def render_move_in_checklist_pdf(
     )
 
     story: list[Any] = [
-        Paragraph(_t(locale, "move_in_checklist.title", "Move-in Checklist"),
-                  styles["title"]),
+        Paragraph(_t(locale, "move_in_checklist.title", "Move-in Checklist"), styles["title"]),
         Spacer(1, 4 * mm),
         Paragraph(_t(locale, "move_in_checklist.intro", ""), styles["body"]),
         Spacer(1, 4 * mm),
@@ -1736,14 +1718,11 @@ def render_move_in_checklist_pdf(
 
     meta_rows = [
         [
-            Paragraph(_t(locale, "move_in_checklist.headings.spa_ref",
-                         "Agreement No."), styles["label"]),
-            Paragraph(str(_attr(sales_contract, "contract_number", "—")),
-                      styles["body"]),
+            Paragraph(_t(locale, "move_in_checklist.headings.spa_ref", "Agreement No."), styles["label"]),
+            Paragraph(str(_attr(sales_contract, "contract_number", "—")), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "move_in_checklist.headings.inspection_date",
-                         "Inspection Date"), styles["label"]),
+            Paragraph(_t(locale, "move_in_checklist.headings.inspection_date", "Inspection Date"), styles["label"]),
             Paragraph(
                 _format_date(_attr(handover, "completed_at", None), locale)
                 or _format_date(_attr(handover, "scheduled_at", None), locale)
@@ -1761,57 +1740,57 @@ def render_move_in_checklist_pdf(
         for room in rooms:
             room_name = _attr(room, "name", "") or "—"
             items = _attr(room, "items", None) or []
-            story.append(
-                Paragraph(str(room_name), styles["heading"])
-            )
-            room_rows: list[list[Any]] = [[
-                Paragraph(_t(locale, "move_in_checklist.columns.item",
-                             "Item"), styles["label"]),
-                Paragraph(_t(locale, "move_in_checklist.columns.condition",
-                             "Condition"), styles["label"]),
-                Paragraph(_t(locale, "move_in_checklist.columns.notes",
-                             "Notes"), styles["label"]),
-            ]]
+            story.append(Paragraph(str(room_name), styles["heading"]))
+            room_rows: list[list[Any]] = [
+                [
+                    Paragraph(_t(locale, "move_in_checklist.columns.item", "Item"), styles["label"]),
+                    Paragraph(_t(locale, "move_in_checklist.columns.condition", "Condition"), styles["label"]),
+                    Paragraph(_t(locale, "move_in_checklist.columns.notes", "Notes"), styles["label"]),
+                ]
+            ]
             for it in items:
-                room_rows.append([
-                    Paragraph(str(_attr(it, "label", "") or "—"), styles["body"]),
-                    Paragraph(str(_attr(it, "condition", "") or "—"),
-                              styles["body"]),
-                    Paragraph(str(_attr(it, "notes", "") or ""), styles["body"]),
-                ])
+                room_rows.append(
+                    [
+                        Paragraph(str(_attr(it, "label", "") or "—"), styles["body"]),
+                        Paragraph(str(_attr(it, "condition", "") or "—"), styles["body"]),
+                        Paragraph(str(_attr(it, "notes", "") or ""), styles["body"]),
+                    ]
+                )
             tbl = Table(
-                room_rows, colWidths=[55 * mm, 30 * mm, 70 * mm], repeatRows=1,
+                room_rows,
+                colWidths=[55 * mm, 30 * mm, 70 * mm],
+                repeatRows=1,
             )
             tbl.setStyle(_grid_table_style())
             story.append(tbl)
             story.append(Spacer(1, 3 * mm))
     else:
-        story.append(
-            Paragraph(_t(locale, "move_in_checklist.empty_rooms",
-                         "No room data supplied."), styles["small"])
-        )
+        story.append(Paragraph(_t(locale, "move_in_checklist.empty_rooms", "No room data supplied."), styles["small"]))
 
-    story.extend([
-        Spacer(1, 6 * mm),
-        Paragraph(_t(locale, "move_in_checklist.acceptance_text", ""),
-                  styles["body"]),
-        Spacer(1, 14 * mm),
-        Table(
-            [[
-                Paragraph(
-                    f"{_t(locale, 'common.buyer_signature', 'Buyer Signature')}<br/>"
-                    "________________________________",
-                    styles["body"],
-                ),
-                Paragraph(
-                    f"{_t(locale, 'common.developer_signature', 'Developer Signature')}<br/>"
-                    "________________________________",
-                    styles["body"],
-                ),
-            ]],
-            colWidths=[75 * mm, 75 * mm],
-        ),
-    ])
+    story.extend(
+        [
+            Spacer(1, 6 * mm),
+            Paragraph(_t(locale, "move_in_checklist.acceptance_text", ""), styles["body"]),
+            Spacer(1, 14 * mm),
+            Table(
+                [
+                    [
+                        Paragraph(
+                            f"{_t(locale, 'common.buyer_signature', 'Buyer Signature')}<br/>"
+                            "________________________________",
+                            styles["body"],
+                        ),
+                        Paragraph(
+                            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}<br/>"
+                            "________________________________",
+                            styles["body"],
+                        ),
+                    ]
+                ],
+                colWidths=[75 * mm, 75 * mm],
+            ),
+        ]
+    )
     return _render(doc, frame, story, ctx, buf)
 
 
@@ -1839,8 +1818,7 @@ def render_mortgage_clearance_letter_pdf(
 
     doc, frame = _build_doc(
         buf,
-        title=_t(locale, "mortgage_clearance_letter.title",
-                 "Mortgage Clearance Letter"),
+        title=_t(locale, "mortgage_clearance_letter.title", "Mortgage Clearance Letter"),
         author=_development_name(development) or "OpenConstructionERP",
         subject=f"Mortgage clearance for SPA {_attr(sales_contract, 'contract_number', '')}",
         keywords=["mortgage", "clearance", "letter", doc_ref],
@@ -1857,22 +1835,17 @@ def render_mortgage_clearance_letter_pdf(
     issued_at = date.today().isoformat()
     rows = [
         [
-            Paragraph(_t(locale, "mortgage_clearance_letter.headings.bank",
-                         "Issued To (Bank)"), styles["label"]),
+            Paragraph(_t(locale, "mortgage_clearance_letter.headings.bank", "Issued To (Bank)"), styles["label"]),
             Paragraph(str(bank_name or "—"), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "mortgage_clearance_letter.headings.spa_ref",
-                         "Agreement No."), styles["label"]),
-            Paragraph(str(_attr(sales_contract, "contract_number", "—")),
-                      styles["body"]),
+            Paragraph(_t(locale, "mortgage_clearance_letter.headings.spa_ref", "Agreement No."), styles["label"]),
+            Paragraph(str(_attr(sales_contract, "contract_number", "—")), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "mortgage_clearance_letter.headings.unit",
-                         "Unit"), styles["label"]),
+            Paragraph(_t(locale, "mortgage_clearance_letter.headings.unit", "Unit"), styles["label"]),
             Paragraph(
-                f"{_development_name(development)} — "
-                f"{_attr(plot, 'plot_number', '')}",
+                f"{_development_name(development)} — {_attr(plot, 'plot_number', '')}",
                 styles["body"],
             ),
         ],
@@ -1885,23 +1858,18 @@ def render_mortgage_clearance_letter_pdf(
     tbl.setStyle(_kv_table_style())
 
     story: list[Any] = [
-        Paragraph(_t(locale, "mortgage_clearance_letter.title",
-                     "Mortgage Clearance Letter"), styles["title"]),
+        Paragraph(_t(locale, "mortgage_clearance_letter.title", "Mortgage Clearance Letter"), styles["title"]),
         Spacer(1, 4 * mm),
-        Paragraph(_t(locale, "mortgage_clearance_letter.intro", ""),
-                  styles["body"]),
+        Paragraph(_t(locale, "mortgage_clearance_letter.intro", ""), styles["body"]),
         Spacer(1, 4 * mm),
         tbl,
         Spacer(1, 6 * mm),
-        Paragraph(_t(locale, "mortgage_clearance_letter.no_encumbrance_text", ""),
-                  styles["body"]),
+        Paragraph(_t(locale, "mortgage_clearance_letter.no_encumbrance_text", ""), styles["body"]),
         Spacer(1, 4 * mm),
-        Paragraph(_t(locale, "mortgage_clearance_letter.purpose_text", ""),
-                  styles["body"]),
+        Paragraph(_t(locale, "mortgage_clearance_letter.purpose_text", ""), styles["body"]),
         Spacer(1, 14 * mm),
         Paragraph(
-            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: "
-            "________________________________",
+            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: ________________________________",
             styles["body"],
         ),
     ]
@@ -1936,8 +1904,7 @@ def render_title_deed_transfer_request_pdf(
 
     doc, frame = _build_doc(
         buf,
-        title=_t(locale, "title_deed_transfer_request.title",
-                 "Title Deed Transfer Request"),
+        title=_t(locale, "title_deed_transfer_request.title", "Title Deed Transfer Request"),
         author=_development_name(development) or "OpenConstructionERP",
         subject=f"Title deed transfer for SPA {_attr(sales_contract, 'contract_number', '')}",
         keywords=["title", "deed", "transfer", doc_ref],
@@ -1952,7 +1919,7 @@ def render_title_deed_transfer_request_pdf(
     )
 
     party_names: list[str] = []
-    for p in (parties or []):
+    for p in parties or []:
         buyer_id = _attr(p, "buyer_id", None)
         buyer = (buyer_lookup or {}).get(buyer_id) if buyer_lookup else None
         name = _attr(buyer, "full_name", "") or _attr(p, "full_name", "") or "—"
@@ -1961,19 +1928,15 @@ def render_title_deed_transfer_request_pdf(
 
     rows = [
         [
-            Paragraph(_t(locale, "title_deed_transfer_request.headings.registry",
-                         "Land Registry"), styles["label"]),
+            Paragraph(_t(locale, "title_deed_transfer_request.headings.registry", "Land Registry"), styles["label"]),
             Paragraph(str(registry_name or "—"), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "title_deed_transfer_request.headings.spa_ref",
-                         "Agreement No."), styles["label"]),
-            Paragraph(str(_attr(sales_contract, "contract_number", "—")),
-                      styles["body"]),
+            Paragraph(_t(locale, "title_deed_transfer_request.headings.spa_ref", "Agreement No."), styles["label"]),
+            Paragraph(str(_attr(sales_contract, "contract_number", "—")), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "title_deed_transfer_request.headings.unit",
-                         "Unit"), styles["label"]),
+            Paragraph(_t(locale, "title_deed_transfer_request.headings.unit", "Unit"), styles["label"]),
             Paragraph(
                 f"{_development_name(development)} — "
                 f"{_attr(plot, 'plot_number', '')} "
@@ -1982,8 +1945,7 @@ def render_title_deed_transfer_request_pdf(
             ),
         ],
         [
-            Paragraph(_t(locale, "title_deed_transfer_request.headings.new_owners",
-                         "New Owner(s)"), styles["label"]),
+            Paragraph(_t(locale, "title_deed_transfer_request.headings.new_owners", "New Owner(s)"), styles["label"]),
             Paragraph(
                 "<br/>".join(party_names) if party_names else "—",
                 styles["body"],
@@ -1998,27 +1960,20 @@ def render_title_deed_transfer_request_pdf(
     tbl.setStyle(_kv_table_style())
 
     story: list[Any] = [
-        Paragraph(_t(locale, "title_deed_transfer_request.title",
-                     "Title Deed Transfer Request"), styles["title"]),
+        Paragraph(_t(locale, "title_deed_transfer_request.title", "Title Deed Transfer Request"), styles["title"]),
         Spacer(1, 4 * mm),
-        Paragraph(_t(locale, "title_deed_transfer_request.intro", ""),
-                  styles["body"]),
+        Paragraph(_t(locale, "title_deed_transfer_request.intro", ""), styles["body"]),
         Spacer(1, 4 * mm),
         tbl,
         Spacer(1, 6 * mm),
-        Paragraph(_t(locale, "title_deed_transfer_request.headings.request_body",
-                     "Request"), styles["heading"]),
-        Paragraph(_t(locale, "title_deed_transfer_request.request_text", ""),
-                  styles["body"]),
+        Paragraph(_t(locale, "title_deed_transfer_request.headings.request_body", "Request"), styles["heading"]),
+        Paragraph(_t(locale, "title_deed_transfer_request.request_text", ""), styles["body"]),
         Spacer(1, 4 * mm),
-        Paragraph(_t(locale, "title_deed_transfer_request.headings.attachments",
-                     "Attachments"), styles["heading"]),
-        Paragraph(_t(locale, "title_deed_transfer_request.attachments_text", ""),
-                  styles["body"]),
+        Paragraph(_t(locale, "title_deed_transfer_request.headings.attachments", "Attachments"), styles["heading"]),
+        Paragraph(_t(locale, "title_deed_transfer_request.attachments_text", ""), styles["body"]),
         Spacer(1, 14 * mm),
         Paragraph(
-            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: "
-            "________________________________",
+            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: ________________________________",
             styles["body"],
         ),
     ]
@@ -2048,8 +2003,7 @@ def render_escrow_release_authorization_pdf(
 
     doc, frame = _build_doc(
         buf,
-        title=_t(locale, "escrow_release_authorization.title",
-                 "Escrow Release Authorization"),
+        title=_t(locale, "escrow_release_authorization.title", "Escrow Release Authorization"),
         author=_development_name(development) or "OpenConstructionERP",
         subject=f"Escrow release for SPA {_attr(sales_contract, 'contract_number', '')}",
         keywords=["escrow", "release", "authorization", doc_ref],
@@ -2067,36 +2021,37 @@ def render_escrow_release_authorization_pdf(
 
     rows = [
         [
-            Paragraph(_t(locale, "escrow_release_authorization.headings.escrow_account",
-                         "Escrow Account No."), styles["label"]),
+            Paragraph(
+                _t(locale, "escrow_release_authorization.headings.escrow_account", "Escrow Account No."),
+                styles["label"],
+            ),
             Paragraph(str(escrow_account_no or "—"), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "escrow_release_authorization.headings.spa_ref",
-                         "Agreement No."), styles["label"]),
-            Paragraph(str(_attr(sales_contract, "contract_number", "—")),
-                      styles["body"]),
+            Paragraph(_t(locale, "escrow_release_authorization.headings.spa_ref", "Agreement No."), styles["label"]),
+            Paragraph(str(_attr(sales_contract, "contract_number", "—")), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "escrow_release_authorization.headings.unit",
-                         "Unit"), styles["label"]),
+            Paragraph(_t(locale, "escrow_release_authorization.headings.unit", "Unit"), styles["label"]),
             Paragraph(
-                f"{_development_name(development)} — "
-                f"{_attr(plot, 'plot_number', '')}",
+                f"{_development_name(development)} — {_attr(plot, 'plot_number', '')}",
                 styles["body"],
             ),
         ],
         [
-            Paragraph(_t(locale, "escrow_release_authorization.headings.amount_to_release",
-                         "Amount to Release"), styles["label"]),
+            Paragraph(
+                _t(locale, "escrow_release_authorization.headings.amount_to_release", "Amount to Release"),
+                styles["label"],
+            ),
             Paragraph(
                 f"{_format_money(amount, locale)} {ccy}".strip(),
                 styles["body"],
             ),
         ],
         [
-            Paragraph(_t(locale, "escrow_release_authorization.headings.release_reason",
-                         "Release Reason"), styles["label"]),
+            Paragraph(
+                _t(locale, "escrow_release_authorization.headings.release_reason", "Release Reason"), styles["label"]
+            ),
             Paragraph(str(release_reason or "—"), styles["body"]),
         ],
         [
@@ -2108,20 +2063,16 @@ def render_escrow_release_authorization_pdf(
     tbl.setStyle(_kv_table_style())
 
     story: list[Any] = [
-        Paragraph(_t(locale, "escrow_release_authorization.title",
-                     "Escrow Release Authorization"), styles["title"]),
+        Paragraph(_t(locale, "escrow_release_authorization.title", "Escrow Release Authorization"), styles["title"]),
         Spacer(1, 4 * mm),
-        Paragraph(_t(locale, "escrow_release_authorization.intro", ""),
-                  styles["body"]),
+        Paragraph(_t(locale, "escrow_release_authorization.intro", ""), styles["body"]),
         Spacer(1, 4 * mm),
         tbl,
         Spacer(1, 6 * mm),
-        Paragraph(_t(locale, "escrow_release_authorization.instruction_text", ""),
-                  styles["body"]),
+        Paragraph(_t(locale, "escrow_release_authorization.instruction_text", ""), styles["body"]),
         Spacer(1, 14 * mm),
         Paragraph(
-            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: "
-            "________________________________",
+            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: ________________________________",
             styles["body"],
         ),
     ]
@@ -2177,49 +2128,36 @@ def render_refund_authorization_pdf(
     )
 
     ccy = (
-        _attr(sales_contract, "currency", "")
-        or _attr(reservation, "currency", "")
-        or _attr(plot, "currency", "")
-        or ""
+        _attr(sales_contract, "currency", "") or _attr(reservation, "currency", "") or _attr(plot, "currency", "") or ""
     )
 
-    ref_value = (
-        _attr(sales_contract, "contract_number", "")
-        or _attr(reservation, "reservation_number", "")
-        or "—"
-    )
+    ref_value = _attr(sales_contract, "contract_number", "") or _attr(reservation, "reservation_number", "") or "—"
 
     rows = [
         [
-            Paragraph(_t(locale, "refund_authorization.headings.reference",
-                         "Reference"), styles["label"]),
+            Paragraph(_t(locale, "refund_authorization.headings.reference", "Reference"), styles["label"]),
             Paragraph(str(ref_value), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "refund_authorization.headings.unit",
-                         "Unit"), styles["label"]),
+            Paragraph(_t(locale, "refund_authorization.headings.unit", "Unit"), styles["label"]),
             Paragraph(
-                f"{_development_name(development)} — "
-                f"{_attr(plot, 'plot_number', '')}",
+                f"{_development_name(development)} — {_attr(plot, 'plot_number', '')}",
                 styles["body"],
             ),
         ],
         [
-            Paragraph(_t(locale, "refund_authorization.headings.amount",
-                         "Refund Amount"), styles["label"]),
+            Paragraph(_t(locale, "refund_authorization.headings.amount", "Refund Amount"), styles["label"]),
             Paragraph(
                 f"{_format_money(refund_amount, locale)} {ccy}".strip(),
                 styles["body"],
             ),
         ],
         [
-            Paragraph(_t(locale, "refund_authorization.headings.reason",
-                         "Reason"), styles["label"]),
+            Paragraph(_t(locale, "refund_authorization.headings.reason", "Reason"), styles["label"]),
             Paragraph(str(refund_reason or "—"), styles["body"]),
         ],
         [
-            Paragraph(_t(locale, "refund_authorization.headings.payment_method",
-                         "Payment Method"), styles["label"]),
+            Paragraph(_t(locale, "refund_authorization.headings.payment_method", "Payment Method"), styles["label"]),
             Paragraph(str(payment_method or "—"), styles["body"]),
         ],
         [
@@ -2231,19 +2169,16 @@ def render_refund_authorization_pdf(
     tbl.setStyle(_kv_table_style())
 
     story: list[Any] = [
-        Paragraph(_t(locale, "refund_authorization.title", "Refund Authorization"),
-                  styles["title"]),
+        Paragraph(_t(locale, "refund_authorization.title", "Refund Authorization"), styles["title"]),
         Spacer(1, 4 * mm),
         Paragraph(_t(locale, "refund_authorization.intro", ""), styles["body"]),
         Spacer(1, 4 * mm),
         tbl,
         Spacer(1, 6 * mm),
-        Paragraph(_t(locale, "refund_authorization.authorisation_text", ""),
-                  styles["body"]),
+        Paragraph(_t(locale, "refund_authorization.authorisation_text", ""), styles["body"]),
         Spacer(1, 14 * mm),
         Paragraph(
-            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: "
-            "________________________________",
+            f"{_t(locale, 'common.developer_signature', 'Developer Signature')}: ________________________________",
             styles["body"],
         ),
     ]

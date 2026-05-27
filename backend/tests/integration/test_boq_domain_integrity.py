@@ -75,11 +75,7 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     token = ""
@@ -167,9 +163,7 @@ async def _add_position(
 
 
 @pytest.mark.asyncio
-async def test_position_create_requires_quantity(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_position_create_requires_quantity(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """POST without ``quantity`` must be rejected with 422 (BUG-MATH02)."""
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
@@ -195,9 +189,7 @@ async def test_position_create_requires_quantity(
 
 
 @pytest.mark.asyncio
-async def test_position_create_rejects_unsafe_unit(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_position_create_rejects_unsafe_unit(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """Genuinely unsafe shapes (HTML / SQL chars, > 30 chars, control
     chars, non-letter / non-digit leading char) must still 422.
 
@@ -258,9 +250,7 @@ async def test_position_create_accepts_valid_units(
 
 
 @pytest.mark.asyncio
-async def test_position_decimal_precision(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_position_decimal_precision(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """``unit_rate=99.99999`` round-trips quantised to 4 dp (BUG-MATH01)."""
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
@@ -286,9 +276,7 @@ async def test_position_decimal_precision(
 
     # Total = quantity * unit_rate also at 4 dp boundary.
     total = float(pos["total"])
-    assert abs(total - stored_rate * 2.0) < 1e-3, (
-        f"total {total!r} should equal qty*rate ({stored_rate * 2.0!r})"
-    )
+    assert abs(total - stored_rate * 2.0) < 1e-3, f"total {total!r} should equal qty*rate ({stored_rate * 2.0!r})"
 
     # GET round-trip: fetch by id and confirm the same value persists.
     get_resp = await shared_client.get(
@@ -305,9 +293,7 @@ async def test_position_decimal_precision(
 
 
 @pytest.mark.asyncio
-async def test_audit_log_captures_field_diff(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_audit_log_captures_field_diff(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """PATCH unit_rate then query activity log; ``changes`` must contain
     ``{"unit_rate": {"old": ..., "new": ...}}`` (BUG-AUDIT01)."""
     project_id = await _create_project(shared_client, shared_auth)
@@ -339,15 +325,8 @@ async def test_audit_log_captures_field_diff(
     items = act_resp.json().get("items", [])
 
     # Find the position.updated entry referencing this position.
-    update_entries = [
-        e
-        for e in items
-        if e.get("target_id") == pos["id"]
-        and "update" in e.get("action", "").lower()
-    ]
-    assert update_entries, (
-        f"No position-update activity log entry found. items={items}"
-    )
+    update_entries = [e for e in items if e.get("target_id") == pos["id"] and "update" in e.get("action", "").lower()]
+    assert update_entries, f"No position-update activity log entry found. items={items}"
 
     diff = update_entries[0].get("changes") or {}
     assert "unit_rate" in diff, f"Expected unit_rate diff, got {diff}"
@@ -365,9 +344,7 @@ async def test_audit_log_captures_field_diff(
 
 
 @pytest.mark.asyncio
-async def test_concurrent_update_returns_409(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_concurrent_update_returns_409(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """Two PATCHes with the same starting ``version`` — second must 409
     (BUG-CONCURRENCY01)."""
     project_id = await _create_project(shared_client, shared_auth)
@@ -400,9 +377,7 @@ async def test_concurrent_update_returns_409(
         json={"description": "writer-B", "version": initial_version},
         headers=shared_auth,
     )
-    assert r2.status_code == 409, (
-        f"Stale-version PATCH should 409, got {r2.status_code}: {r2.text}"
-    )
+    assert r2.status_code == 409, f"Stale-version PATCH should 409, got {r2.status_code}: {r2.text}"
 
     # And the row's description is from writer-A (no lost update).
     get_resp = await shared_client.get(
@@ -419,9 +394,7 @@ async def test_concurrent_update_returns_409(
 
 
 @pytest.mark.asyncio
-async def test_get_position_by_id_returns_full_object(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_get_position_by_id_returns_full_object(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """GET /boq/positions/{id} must return all fields, not ``{}`` (BUG-API14)."""
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
@@ -473,6 +446,4 @@ async def test_get_position_by_id_returns_full_object(
         f"/api/v1/boq/positions/{bogus_id}",
         headers=shared_auth,
     )
-    assert resp_404.status_code == 404, (
-        f"Unknown position must 404, got {resp_404.status_code}: {resp_404.text}"
-    )
+    assert resp_404.status_code == 404, f"Unknown position must 404, got {resp_404.status_code}: {resp_404.text}"

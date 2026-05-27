@@ -435,28 +435,10 @@ async def diff(
     if run_a.tenant_id != tenant_id or run_b.tenant_id != tenant_id:
         raise ExecutionError("run/tenant mismatch")
     if run_a.ruleset_id != run_b.ruleset_id:
-        raise ExecutionError(
-            "runs belong to different rulesets — diff is not meaningful"
-        )
+        raise ExecutionError("runs belong to different rulesets — diff is not meaningful")
 
-    rows_a = list(
-        (
-            await session.scalars(
-                select(EacRunResultItem).where(
-                    EacRunResultItem.run_id == run_id_a
-                )
-            )
-        ).all()
-    )
-    rows_b = list(
-        (
-            await session.scalars(
-                select(EacRunResultItem).where(
-                    EacRunResultItem.run_id == run_id_b
-                )
-            )
-        ).all()
-    )
+    rows_a = list((await session.scalars(select(EacRunResultItem).where(EacRunResultItem.run_id == run_id_a))).all())
+    rows_b = list((await session.scalars(select(EacRunResultItem).where(EacRunResultItem.run_id == run_id_b))).all())
 
     map_a = {(r.rule_id, r.element_id): r for r in rows_a}
     map_b = {(r.rule_id, r.element_id): r for r in rows_b}

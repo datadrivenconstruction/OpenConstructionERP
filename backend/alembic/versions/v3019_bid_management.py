@@ -49,9 +49,7 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
     return name in inspector.get_table_names()
 
 
-def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str
-) -> bool:
+def _has_index(inspector: sa.engine.reflection.Inspector, table: str, index: str) -> bool:
     if not _has_table(inspector, table):
         return False
     return any(ix["name"] == index for ix in inspector.get_indexes(table))
@@ -84,9 +82,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── oe_bid_management_package ───────────────────────────────────
     if not _has_table(inspector, "oe_bid_management_package"):
@@ -115,9 +111,7 @@ def upgrade() -> None:
             sa.Column("tender_id", guid_type, nullable=True),
             sa.Column("code", sa.String(64), nullable=False),
             sa.Column("title", sa.String(500), nullable=False, server_default=""),
-            sa.Column(
-                "scope_description", sa.Text(), nullable=False, server_default=""
-            ),
+            sa.Column("scope_description", sa.Text(), nullable=False, server_default=""),
             sa.Column(
                 "instructions_to_bidders",
                 sa.Text(),
@@ -133,9 +127,7 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="0",
             ),
-            sa.Column(
-                "status", sa.String(32), nullable=False, server_default="draft"
-            ),
+            sa.Column("status", sa.String(32), nullable=False, server_default="draft"),
             sa.Column(
                 "confidentiality_level",
                 sa.String(32),
@@ -146,9 +138,7 @@ def upgrade() -> None:
             sa.Column("closed_at", sa.String(40), nullable=True),
             sa.Column("awarded_at", sa.String(40), nullable=True),
             sa.Column("created_by", sa.String(36), nullable=True),
-            sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}"
-            ),
+            sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),
             sa.UniqueConstraint("code", name="uq_oe_bid_management_package_code"),
         )
 
@@ -198,9 +188,7 @@ def upgrade() -> None:
             sa.Column("code", sa.String(64), nullable=False, server_default=""),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
             sa.Column("unit", sa.String(20), nullable=False, server_default=""),
-            sa.Column(
-                "quantity", sa.Numeric(18, 4), nullable=False, server_default="0"
-            ),
+            sa.Column("quantity", sa.Numeric(18, 4), nullable=False, server_default="0"),
             sa.Column(
                 "alternative_allowed",
                 sa.Boolean(),
@@ -211,9 +199,7 @@ def upgrade() -> None:
             sa.Column(
                 "parent_line_id",
                 guid_type,
-                sa.ForeignKey(
-                    "oe_bid_management_line_item.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_bid_management_line_item.id", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column("spec_attachment_url", sa.String(1024), nullable=True),
@@ -264,9 +250,7 @@ def upgrade() -> None:
             ),
             # bidder_ref_id — plain UUID, no FK across modules
             sa.Column("bidder_ref_id", guid_type, nullable=True),
-            sa.Column(
-                "invitee_email", sa.String(255), nullable=False, server_default=""
-            ),
+            sa.Column("invitee_email", sa.String(255), nullable=False, server_default=""),
             sa.Column(
                 "invitee_company_name",
                 sa.String(255),
@@ -278,9 +262,7 @@ def upgrade() -> None:
             sa.Column("submission_received_at", sa.String(40), nullable=True),
             sa.Column("declined_at", sa.String(40), nullable=True),
             sa.Column("decline_reason", sa.Text(), nullable=True),
-            sa.Column(
-                "status", sa.String(32), nullable=False, server_default="pending"
-            ),
+            sa.Column("status", sa.String(32), nullable=False, server_default="pending"),
             sa.Column("token_hash", sa.String(64), nullable=True),
         )
 
@@ -333,22 +315,12 @@ def upgrade() -> None:
                 sa.ForeignKey("oe_bid_management_package.id", ondelete="CASCADE"),
                 nullable=False,
             ),
-            sa.Column(
-                "company_name", sa.String(255), nullable=False, server_default=""
-            ),
-            sa.Column(
-                "contact_name", sa.String(255), nullable=False, server_default=""
-            ),
-            sa.Column(
-                "contact_email", sa.String(255), nullable=False, server_default=""
-            ),
-            sa.Column(
-                "contact_phone", sa.String(64), nullable=False, server_default=""
-            ),
+            sa.Column("company_name", sa.String(255), nullable=False, server_default=""),
+            sa.Column("contact_name", sa.String(255), nullable=False, server_default=""),
+            sa.Column("contact_email", sa.String(255), nullable=False, server_default=""),
+            sa.Column("contact_phone", sa.String(64), nullable=False, server_default=""),
             sa.Column("country", sa.String(64), nullable=False, server_default=""),
-            sa.Column(
-                "status", sa.String(32), nullable=False, server_default="active"
-            ),
+            sa.Column("status", sa.String(32), nullable=False, server_default="active"),
             sa.Column("disqualification_reason", sa.Text(), nullable=True),
             sa.Column("notes", sa.Text(), nullable=False, server_default=""),
         )
@@ -387,9 +359,7 @@ def upgrade() -> None:
             sa.Column(
                 "invitation_id",
                 guid_type,
-                sa.ForeignKey(
-                    "oe_bid_management_invitation.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_bid_management_invitation.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column(
@@ -399,9 +369,7 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column("submitted_at", sa.String(40), nullable=True),
-            sa.Column(
-                "total_amount", sa.Numeric(18, 2), nullable=False, server_default="0"
-            ),
+            sa.Column("total_amount", sa.Numeric(18, 2), nullable=False, server_default="0"),
             sa.Column("currency", sa.String(10), nullable=False, server_default=""),
             sa.Column(
                 "completeness_score",
@@ -409,15 +377,9 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="0",
             ),
-            sa.Column(
-                "notes_to_owner", sa.Text(), nullable=False, server_default=""
-            ),
-            sa.Column(
-                "exclusions", sa.JSON(), nullable=False, server_default="[]"
-            ),
-            sa.Column(
-                "qualifications", sa.JSON(), nullable=False, server_default="[]"
-            ),
+            sa.Column("notes_to_owner", sa.Text(), nullable=False, server_default=""),
+            sa.Column("exclusions", sa.JSON(), nullable=False, server_default="[]"),
+            sa.Column("qualifications", sa.JSON(), nullable=False, server_default="[]"),
             sa.Column(
                 "is_valid",
                 sa.Boolean(),
@@ -430,12 +392,8 @@ def upgrade() -> None:
                 nullable=False,
                 server_default=sa.text("0") if is_sqlite else sa.text("false"),
             ),
-            sa.Column(
-                "envelope_payload", sa.JSON(), nullable=False, server_default="{}"
-            ),
-            sa.UniqueConstraint(
-                "invitation_id", name="uq_oe_bid_management_submission_invitation_id"
-            ),
+            sa.Column("envelope_payload", sa.JSON(), nullable=False, server_default="{}"),
+            sa.UniqueConstraint("invitation_id", name="uq_oe_bid_management_submission_invitation_id"),
         )
 
     inspector = sa.inspect(bind)
@@ -472,31 +430,23 @@ def upgrade() -> None:
             sa.Column(
                 "submission_id",
                 guid_type,
-                sa.ForeignKey(
-                    "oe_bid_management_submission.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_bid_management_submission.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column(
                 "line_item_id",
                 guid_type,
-                sa.ForeignKey(
-                    "oe_bid_management_line_item.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_bid_management_line_item.id", ondelete="CASCADE"),
                 nullable=False,
             ),
-            sa.Column(
-                "unit_price", sa.Numeric(18, 4), nullable=False, server_default="0"
-            ),
+            sa.Column("unit_price", sa.Numeric(18, 4), nullable=False, server_default="0"),
             sa.Column(
                 "quantity_priced",
                 sa.Numeric(18, 4),
                 nullable=False,
                 server_default="0",
             ),
-            sa.Column(
-                "total_price", sa.Numeric(18, 2), nullable=False, server_default="0"
-            ),
+            sa.Column("total_price", sa.Numeric(18, 2), nullable=False, server_default="0"),
             sa.Column(
                 "alternative_offered",
                 sa.Boolean(),
@@ -557,9 +507,7 @@ def upgrade() -> None:
             ),
             sa.Column("question", sa.Text(), nullable=False, server_default=""),
             sa.Column("asked_at", sa.String(40), nullable=True),
-            sa.Column(
-                "asked_by_email", sa.String(255), nullable=False, server_default=""
-            ),
+            sa.Column("asked_by_email", sa.String(255), nullable=False, server_default=""),
             sa.Column("answer", sa.Text(), nullable=False, server_default=""),
             sa.Column("answered_at", sa.String(40), nullable=True),
             sa.Column("answered_by", sa.String(36), nullable=True),
@@ -648,17 +596,11 @@ def upgrade() -> None:
             sa.Column(
                 "recommended_bidder_id",
                 guid_type,
-                sa.ForeignKey(
-                    "oe_bid_management_bidder.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_bid_management_bidder.id", ondelete="SET NULL"),
                 nullable=True,
             ),
-            sa.Column(
-                "recommended_reason", sa.Text(), nullable=False, server_default=""
-            ),
-            sa.UniqueConstraint(
-                "package_id", name="uq_oe_bid_management_comparison_package_id"
-            ),
+            sa.Column("recommended_reason", sa.Text(), nullable=False, server_default=""),
+            sa.UniqueConstraint("package_id", name="uq_oe_bid_management_comparison_package_id"),
         )
 
     inspector = sa.inspect(bind)
@@ -689,9 +631,7 @@ def upgrade() -> None:
             sa.Column(
                 "comparison_id",
                 guid_type,
-                sa.ForeignKey(
-                    "oe_bid_management_comparison.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_bid_management_comparison.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column(
@@ -700,9 +640,7 @@ def upgrade() -> None:
                 sa.ForeignKey("oe_bid_management_bidder.id", ondelete="CASCADE"),
                 nullable=False,
             ),
-            sa.Column(
-                "raw_total", sa.Numeric(18, 2), nullable=False, server_default="0"
-            ),
+            sa.Column("raw_total", sa.Numeric(18, 2), nullable=False, server_default="0"),
             sa.Column(
                 "normalized_total",
                 sa.Numeric(18, 2),
@@ -721,9 +659,7 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="0",
             ),
-            sa.Column(
-                "total_score", sa.Numeric(8, 4), nullable=False, server_default="0"
-            ),
+            sa.Column("total_score", sa.Numeric(8, 4), nullable=False, server_default="0"),
             sa.Column("rank", sa.Integer(), nullable=False, server_default="0"),
             sa.Column(
                 "manual_adjustment",
@@ -789,9 +725,7 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column("currency", sa.String(10), nullable=False, server_default=""),
-            sa.Column(
-                "decision_summary", sa.Text(), nullable=False, server_default=""
-            ),
+            sa.Column("decision_summary", sa.Text(), nullable=False, server_default=""),
             sa.Column("decision_signed_by", sa.String(36), nullable=True),
             sa.Column("decision_signed_at", sa.String(40), nullable=True),
             sa.Column(
@@ -801,9 +735,7 @@ def upgrade() -> None:
                 server_default="",
             ),
             sa.Column("notified_others_at", sa.String(40), nullable=True),
-            sa.UniqueConstraint(
-                "package_id", name="uq_oe_bid_management_award_package_id"
-            ),
+            sa.UniqueConstraint("package_id", name="uq_oe_bid_management_award_package_id"),
         )
 
     inspector = sa.inspect(bind)
@@ -855,9 +787,7 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="other",
             ),
-            sa.Column(
-                "rejection_reason", sa.Text(), nullable=False, server_default=""
-            ),
+            sa.Column("rejection_reason", sa.Text(), nullable=False, server_default=""),
             sa.Column("notified_at", sa.String(40), nullable=True),
         )
 

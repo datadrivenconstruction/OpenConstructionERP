@@ -53,9 +53,7 @@ def _build_eac_metadata() -> sa.MetaData:
         sa.Column("tenant_id", sa.String(36), nullable=False),
         sa.Column("project_id", sa.String(36), nullable=True),
         sa.Column("is_template", sa.Boolean, nullable=False, server_default="0"),
-        sa.Column(
-            "is_public_in_marketplace", sa.Boolean, nullable=False, server_default="0"
-        ),
+        sa.Column("is_public_in_marketplace", sa.Boolean, nullable=False, server_default="0"),
         sa.Column("tags", sa.JSON, nullable=False, server_default="[]"),
         sa.Column(
             "created_at",
@@ -259,9 +257,7 @@ def test_migration_module_imports() -> None:
     migration_path = repo_root / "alembic" / "versions" / "v260_eac_v2_core.py"
     assert migration_path.exists(), f"migration file missing: {migration_path}"
 
-    spec = importlib.util.spec_from_file_location(
-        "alembic.versions.v260_eac_v2_core", migration_path
-    )
+    spec = importlib.util.spec_from_file_location("alembic.versions.v260_eac_v2_core", migration_path)
     assert spec is not None and spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -303,8 +299,8 @@ def test_orm_models_register_all_six_tables() -> None:
     Catches regressions where a new model is added but the migration
     isn't updated (or vice-versa).
     """
-    from app.database import Base
     import app.modules.eac.models  # noqa: F401 — register tables
+    from app.database import Base
 
     table_names = set(Base.metadata.tables.keys())
     for table in EAC_TABLES:

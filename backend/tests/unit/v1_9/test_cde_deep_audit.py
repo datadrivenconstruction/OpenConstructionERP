@@ -75,7 +75,9 @@ class _StubContainerRepo:
         return self.rows.get(container_id)
 
     async def get_by_code_and_project(
-        self, project_id: uuid.UUID, code: str,  # noqa: ARG002
+        self,
+        project_id: uuid.UUID,
+        code: str,  # noqa: ARG002
     ) -> Any:
         return None
 
@@ -87,9 +89,7 @@ class _StubContainerRepo:
         self.rows[container.id] = container
         return container
 
-    async def update_fields(
-        self, container_id: uuid.UUID, **fields: object
-    ) -> None:
+    async def update_fields(self, container_id: uuid.UUID, **fields: object) -> None:
         row = self.rows.get(container_id)
         if row is None:
             return
@@ -239,11 +239,7 @@ class TestRevisionDocumentCrossLink:
         )
 
         # Nothing added to the documents hub because storage_key is None.
-        doc_added = [
-            obj
-            for obj in session.added
-            if obj.__class__.__name__ == "Document"
-        ]
+        doc_added = [obj for obj in session.added if obj.__class__.__name__ == "Document"]
         assert doc_added == []
         # Revision is still persisted and has no document_id.
         assert rev.id in r_repo.rows
@@ -265,11 +261,7 @@ class TestRevisionDocumentCrossLink:
             user_id="user-1",
         )
 
-        doc_added = [
-            obj
-            for obj in session.added
-            if obj.__class__.__name__ == "Document"
-        ]
+        doc_added = [obj for obj in session.added if obj.__class__.__name__ == "Document"]
         assert len(doc_added) == 1
         doc = doc_added[0]
         assert doc.category == "cde"
@@ -361,11 +353,7 @@ class TestStateTransitionAuditLog:
             user_id="user-7",
         )
 
-        audit = [
-            obj
-            for obj in session.added
-            if obj.__class__.__name__ == "StateTransition"
-        ]
+        audit = [obj for obj in session.added if obj.__class__.__name__ == "StateTransition"]
         assert len(audit) == 1
         row = audit[0]
         assert row.from_state == "wip"
@@ -392,11 +380,7 @@ class TestStateTransitionAuditLog:
             user_id="user-9",
         )
 
-        audit = [
-            obj
-            for obj in session.added
-            if obj.__class__.__name__ == "StateTransition"
-        ]
+        audit = [obj for obj in session.added if obj.__class__.__name__ == "StateTransition"]
         assert len(audit) == 1
         assert audit[0].gate_code == "B"
         assert audit[0].signature == "S. Signed"
@@ -415,9 +399,5 @@ class TestStateTransitionAuditLog:
                 user_id="user-1",
             )
 
-        audit = [
-            obj
-            for obj in session.added
-            if obj.__class__.__name__ == "StateTransition"
-        ]
+        audit = [obj for obj in session.added if obj.__class__.__name__ == "StateTransition"]
         assert audit == []

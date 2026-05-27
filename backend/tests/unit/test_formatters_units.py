@@ -17,7 +17,6 @@ import pytest
 from app.core.validation.engine import RuleCategory, Severity, ValidationContext
 from app.core.validation.rules import BOQUnitSystemConsistencyRule
 
-
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 

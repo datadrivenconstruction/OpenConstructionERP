@@ -113,8 +113,9 @@ def _extract_ocr_text(payload: bytes, mime: str | None) -> tuple[str, int | None
     # PDF input → rasterise each page, OCR each one.
     if mime and "pdf" in mime.lower():
         try:
-            import fitz  # type: ignore[import-not-found]
             from io import BytesIO
+
+            import fitz  # type: ignore[import-not-found]
         except Exception:  # pragma: no cover - optional dep
             logger.debug("PyMuPDF not installed — cannot rasterise PDF for OCR")
             return "", None

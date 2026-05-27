@@ -119,10 +119,7 @@ class ImportReport:
             "created": self.created,
             "updated": self.updated,
             "skipped": self.skipped,
-            "errors": [
-                {"topic_guid": e.topic_guid, "message": e.message}
-                for e in self.errors
-            ],
+            "errors": [{"topic_guid": e.topic_guid, "message": e.message} for e in self.errors],
         }
 
 
@@ -170,22 +167,18 @@ class BCFImportService:
             )
         except Exception as exc:  # noqa: BLE001
             raise BCFImportFeatureUnavailable(
-                "Clash issue table requires the "
-                "v41_clash_signature_smart_issues migration"
+                "Clash issue table requires the v41_clash_signature_smart_issues migration"
             ) from exc
 
         # 2. Probe the table exists. ``run_sync`` keeps us inside the
         #    request's async session without spinning up a sync engine.
         try:
-            await self.session.execute(
-                select(ClashIssue).where(ClashIssue.id == uuid.uuid4()).limit(1)
-            )
+            await self.session.execute(select(ClashIssue).where(ClashIssue.id == uuid.uuid4()).limit(1))
         except Exception as exc:  # noqa: BLE001
             msg = str(exc).lower()
             if "no such table" in msg or "does not exist" in msg:
                 raise BCFImportFeatureUnavailable(
-                    "Clash issue table requires the "
-                    "v41_clash_signature_smart_issues migration"
+                    "Clash issue table requires the v41_clash_signature_smart_issues migration"
                 ) from exc
             raise
 
@@ -196,16 +189,12 @@ class BCFImportService:
 
         # 4. Pre-resolve every existing issue's lookup keys so the loop
         #    is O(N) inserts + a single SELECT for the keys we touch.
-        existing_by_serverid, existing_by_sig = await self._index_existing_issues(
-            ClashIssue, project_id
-        )
+        existing_by_serverid, existing_by_sig = await self._index_existing_issues(ClashIssue, project_id)
 
         # 5. Mint a "BCF import" ClashRun the new issues will reference.
         #    A re-import re-uses any prior import run for the same archive
         #    when no new rows are created — avoiding garbage runs.
-        run = await self._get_or_create_import_run(
-            ClashRun, project_id, current_user_id, archive_bytes=raw
-        )
+        run = await self._get_or_create_import_run(ClashRun, project_id, current_user_id, archive_bytes=raw)
 
         for ptopic in parsed.topics:
             if ptopic.parse_error:
@@ -266,9 +255,7 @@ class BCFImportService:
 
         Returns ``({}, {})`` when the table is empty.
         """
-        result = await self.session.execute(
-            select(ClashIssue).where(ClashIssue.project_id == project_id)
-        )
+        result = await self.session.execute(select(ClashIssue).where(ClashIssue.project_id == project_id))
         rows = list(result.scalars().all())
         by_serverid: dict[str, object] = {}
         by_sig: dict[str, object] = {}
@@ -296,9 +283,7 @@ class BCFImportService:
         archive_hash = hashlib.sha256(archive_bytes).hexdigest()[:16]
         run_name = f"BCF import {archive_hash}"
         existing = await self.session.execute(
-            select(ClashRun)
-            .where(ClashRun.project_id == project_id)
-            .where(ClashRun.name == run_name)
+            select(ClashRun).where(ClashRun.project_id == project_id).where(ClashRun.name == run_name)
         )
         row = existing.scalars().first()
         if row is not None:

@@ -68,27 +68,19 @@ async def _refresh_on_project_update(event: Event) -> None:
                 SmartView.scope_type == "project",
                 SmartView.scope_id == project_id_raw,
             )
-            project_views = list(
-                (await session.execute(proj_stmt)).scalars().all()
-            )
+            project_views = list((await session.execute(proj_stmt)).scalars().all())
 
             # Resolve federation-scoped views whose federation lives
             # under this project. Local import — keeps a soft dep on
             # bim_hub to module-load time, not to module-import time.
             from app.modules.bim_hub.models import BIMFederation
 
-            fed_subq = (
-                select(BIMFederation.id)
-                .where(BIMFederation.project_id == project_id_raw)
-                .scalar_subquery()
-            )
+            fed_subq = select(BIMFederation.id).where(BIMFederation.project_id == project_id_raw).scalar_subquery()
             fed_stmt = select(SmartView).where(
                 SmartView.scope_type == "federation",
                 SmartView.scope_id.in_(fed_subq),
             )
-            federation_views = list(
-                (await session.execute(fed_stmt)).scalars().all()
-            )
+            federation_views = list((await session.execute(fed_stmt)).scalars().all())
 
         # Publish outside the session — subscribers may open their own.
         for view in [*project_views, *federation_views]:

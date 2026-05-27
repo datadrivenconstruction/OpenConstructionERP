@@ -121,9 +121,9 @@ def upgrade() -> None:
                 server_default=sa.func.current_timestamp(),
             ),
         )
-        existing_idx = {
-            ix["name"] for ix in inspector.get_indexes(_CLUSTER)
-        } if _has_table(sa.inspect(bind), _CLUSTER) else set()
+        existing_idx = (
+            {ix["name"] for ix in inspector.get_indexes(_CLUSTER)} if _has_table(sa.inspect(bind), _CLUSTER) else set()
+        )
         if _CLUSTER_RUN_IDX not in existing_idx:
             op.create_index(_CLUSTER_RUN_IDX, _CLUSTER, ["run_id"])
         if _CLUSTER_RUN_CLUSTER_IDX not in existing_idx:

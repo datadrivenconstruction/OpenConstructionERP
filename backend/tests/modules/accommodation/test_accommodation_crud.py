@@ -73,7 +73,8 @@ async def test_get_accommodation_returns_nested_rooms(
     assert add_rooms.status_code == 201, add_rooms.text
 
     detail = await client.get(
-        f"/api/v1/accommodation/{accom_id}", headers=header,
+        f"/api/v1/accommodation/{accom_id}",
+        headers=header,
     )
     assert detail.status_code == 200
     payload = detail.json()
@@ -120,13 +121,15 @@ async def test_soft_delete_hides_from_list(
     accom_id = create.json()["id"]
 
     dele = await client.delete(
-        f"/api/v1/accommodation/{accom_id}", headers=header,
+        f"/api/v1/accommodation/{accom_id}",
+        headers=header,
     )
     assert dele.status_code == 204
 
     # Subsequent GET 404s (tombstone respected).
     miss = await client.get(
-        f"/api/v1/accommodation/{accom_id}", headers=header,
+        f"/api/v1/accommodation/{accom_id}",
+        headers=header,
     )
     assert miss.status_code == 404
 
@@ -164,11 +167,14 @@ async def test_idor_cannot_read_other_users_accommodation(
     from tests.modules.accommodation.conftest import _register_user
 
     _, _email, viewer_header = await _register_user(
-        client, role="viewer", tag=uuid.uuid4().hex[:6],
+        client,
+        role="viewer",
+        tag=uuid.uuid4().hex[:6],
     )
 
     probe = await client.get(
-        f"/api/v1/accommodation/{secret_id}", headers=viewer_header,
+        f"/api/v1/accommodation/{secret_id}",
+        headers=viewer_header,
     )
     # MUST be 404 — Wave-5 IDOR posture: don't reveal that the UUID exists.
     assert probe.status_code == 404, probe.text
@@ -182,7 +188,8 @@ async def test_idor_random_uuid_is_404(
     _, header = admin_auth
     bogus = uuid.uuid4()
     probe = await client.get(
-        f"/api/v1/accommodation/{bogus}", headers=header,
+        f"/api/v1/accommodation/{bogus}",
+        headers=header,
     )
     assert probe.status_code == 404
 

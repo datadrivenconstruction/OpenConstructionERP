@@ -24,11 +24,11 @@ Revision ID: v230_bim_element_asset_info
 Revises: v192_dwg_annotation_thickness_layer
 Create Date: 2026-04-22
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-
 
 revision: str = "v230_bim_element_asset_info"
 down_revision: Union[str, None] = "v192_dwg_annotation_thickness_layer"

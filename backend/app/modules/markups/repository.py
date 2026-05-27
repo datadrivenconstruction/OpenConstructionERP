@@ -247,16 +247,12 @@ class MarkupCommentRepository:
     async def list_for_markup(self, markup_id: uuid.UUID) -> list[MarkupComment]:
         """List all comments for a markup, oldest first (thread order)."""
         stmt = (
-            select(MarkupComment)
-            .where(MarkupComment.markup_id == markup_id)
-            .order_by(MarkupComment.created_at.asc())
+            select(MarkupComment).where(MarkupComment.markup_id == markup_id).order_by(MarkupComment.created_at.asc())
         )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def count_by_markup_ids(
-        self, markup_ids: list[uuid.UUID]
-    ) -> dict[uuid.UUID, int]:
+    async def count_by_markup_ids(self, markup_ids: list[uuid.UUID]) -> dict[uuid.UUID, int]:
         """Return a {markup_id: comment_count} map for bulk badge rendering."""
         if not markup_ids:
             return {}

@@ -23,7 +23,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3099_subm"
 down_revision: Union[str, Sequence[str], None] = "v3099_rfi"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -46,7 +45,10 @@ def upgrade() -> None:
     if _TABLE in inspector.get_table_names() and not _has_index(inspector, _TABLE, _INDEX):
         try:
             op.create_index(
-                _INDEX, _TABLE, ["project_id", "submittal_number"], unique=True,
+                _INDEX,
+                _TABLE,
+                ["project_id", "submittal_number"],
+                unique=True,
             )
         except sa.exc.IntegrityError:
             # Pre-existing duplicates would block the unique index. The

@@ -83,9 +83,7 @@ class BIMValidationService:
             msg = f"BIM model {model_id} not found"
             raise ValueError(msg)
 
-        elements, total = await self.element_repo.list_for_model(
-            model_id, offset=0, limit=1_000_000
-        )
+        elements, total = await self.element_repo.list_for_model(model_id, offset=0, limit=1_000_000)
 
         # 2. Resolve active rules
         rules: list[BIMElementRule] = get_rules_by_ids(rule_ids)
@@ -195,8 +193,7 @@ class BIMValidationService:
 
         duration_ms = round((time.monotonic() - started) * 1000, 2)
         logger.info(
-            "BIM validation done: model=%s elements=%d rules=%d checks=%d "
-            "passed=%d warn=%d err=%d duration=%.1fms",
+            "BIM validation done: model=%s elements=%d rules=%d checks=%d passed=%d warn=%d err=%d duration=%.1fms",
             model_id,
             total,
             len(rules),

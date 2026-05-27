@@ -129,27 +129,15 @@ class ValidationReport:
 
     @property
     def errors(self) -> list[RuleResult]:
-        return [
-            r
-            for r in self.results
-            if not r.passed and r.severity == Severity.ERROR and not r.is_engine_error
-        ]
+        return [r for r in self.results if not r.passed and r.severity == Severity.ERROR and not r.is_engine_error]
 
     @property
     def warnings(self) -> list[RuleResult]:
-        return [
-            r
-            for r in self.results
-            if not r.passed and r.severity == Severity.WARNING and not r.is_engine_error
-        ]
+        return [r for r in self.results if not r.passed and r.severity == Severity.WARNING and not r.is_engine_error]
 
     @property
     def infos(self) -> list[RuleResult]:
-        return [
-            r
-            for r in self.results
-            if not r.passed and r.severity == Severity.INFO and not r.is_engine_error
-        ]
+        return [r for r in self.results if not r.passed and r.severity == Severity.INFO and not r.is_engine_error]
 
     @property
     def engine_errors(self) -> list[RuleResult]:

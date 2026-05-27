@@ -119,13 +119,19 @@ def upgrade() -> None:
             ),
         )
         op.create_index(
-            "ix_file_saved_view_user", _SAVED_VIEW, ["user_id"],
+            "ix_file_saved_view_user",
+            _SAVED_VIEW,
+            ["user_id"],
         )
         op.create_index(
-            "ix_file_saved_view_project", _SAVED_VIEW, ["project_id"],
+            "ix_file_saved_view_project",
+            _SAVED_VIEW,
+            ["project_id"],
         )
         op.create_index(
-            "ix_file_saved_view_pinned", _SAVED_VIEW, ["is_pinned"],
+            "ix_file_saved_view_pinned",
+            _SAVED_VIEW,
+            ["is_pinned"],
         )
 
     # ── oe_file_distribution_list ────────────────────────────────────────
@@ -167,10 +173,14 @@ def upgrade() -> None:
             ),
         )
         op.create_index(
-            "ix_file_distribution_list_project", _DIST_LIST, ["project_id"],
+            "ix_file_distribution_list_project",
+            _DIST_LIST,
+            ["project_id"],
         )
         op.create_index(
-            "ix_file_distribution_list_owner", _DIST_LIST, ["owner_id"],
+            "ix_file_distribution_list_owner",
+            _DIST_LIST,
+            ["owner_id"],
         )
 
     # ── oe_file_distribution_member ──────────────────────────────────────
@@ -194,7 +204,8 @@ def upgrade() -> None:
                 "list_id",
                 sa.String(36),
                 sa.ForeignKey(
-                    "oe_file_distribution_list.id", ondelete="CASCADE",
+                    "oe_file_distribution_list.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -208,7 +219,9 @@ def upgrade() -> None:
             ),
         )
         op.create_index(
-            "ix_file_distribution_member_list", _DIST_MEMBER, ["list_id"],
+            "ix_file_distribution_member_list",
+            _DIST_MEMBER,
+            ["list_id"],
         )
 
     # ── oe_file_distribution_subscription ────────────────────────────────
@@ -287,7 +300,8 @@ def downgrade() -> None:
         existing_idx = {ix["name"] for ix in inspector.get_indexes(_DIST_SUB)}
         if "ix_file_distribution_subscription_user" in existing_idx:
             op.drop_index(
-                "ix_file_distribution_subscription_user", table_name=_DIST_SUB,
+                "ix_file_distribution_subscription_user",
+                table_name=_DIST_SUB,
             )
         if "ix_file_distribution_subscription_project_kind" in existing_idx:
             op.drop_index(
@@ -300,7 +314,8 @@ def downgrade() -> None:
         existing_idx = {ix["name"] for ix in inspector.get_indexes(_DIST_MEMBER)}
         if "ix_file_distribution_member_list" in existing_idx:
             op.drop_index(
-                "ix_file_distribution_member_list", table_name=_DIST_MEMBER,
+                "ix_file_distribution_member_list",
+                table_name=_DIST_MEMBER,
             )
         op.drop_table(_DIST_MEMBER)
 
@@ -308,11 +323,13 @@ def downgrade() -> None:
         existing_idx = {ix["name"] for ix in inspector.get_indexes(_DIST_LIST)}
         if "ix_file_distribution_list_owner" in existing_idx:
             op.drop_index(
-                "ix_file_distribution_list_owner", table_name=_DIST_LIST,
+                "ix_file_distribution_list_owner",
+                table_name=_DIST_LIST,
             )
         if "ix_file_distribution_list_project" in existing_idx:
             op.drop_index(
-                "ix_file_distribution_list_project", table_name=_DIST_LIST,
+                "ix_file_distribution_list_project",
+                table_name=_DIST_LIST,
             )
         op.drop_table(_DIST_LIST)
 
@@ -320,14 +337,17 @@ def downgrade() -> None:
         existing_idx = {ix["name"] for ix in inspector.get_indexes(_SAVED_VIEW)}
         if "ix_file_saved_view_pinned" in existing_idx:
             op.drop_index(
-                "ix_file_saved_view_pinned", table_name=_SAVED_VIEW,
+                "ix_file_saved_view_pinned",
+                table_name=_SAVED_VIEW,
             )
         if "ix_file_saved_view_project" in existing_idx:
             op.drop_index(
-                "ix_file_saved_view_project", table_name=_SAVED_VIEW,
+                "ix_file_saved_view_project",
+                table_name=_SAVED_VIEW,
             )
         if "ix_file_saved_view_user" in existing_idx:
             op.drop_index(
-                "ix_file_saved_view_user", table_name=_SAVED_VIEW,
+                "ix_file_saved_view_user",
+                table_name=_SAVED_VIEW,
             )
         op.drop_table(_SAVED_VIEW)

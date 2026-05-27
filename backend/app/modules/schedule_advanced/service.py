@@ -81,8 +81,15 @@ logger = logging.getLogger(__name__)
 # ── Constants ──────────────────────────────────────────────────────────────
 
 _RNC_CATEGORIES = (
-    "manpower", "material", "equipment", "info",
-    "weather", "predecessor", "changes", "quality", "other",
+    "manpower",
+    "material",
+    "equipment",
+    "info",
+    "weather",
+    "predecessor",
+    "changes",
+    "quality",
+    "other",
 )
 
 
@@ -577,16 +584,10 @@ def constraint_ready_state(
         c_task = getattr(c, "task_ref", None) if not isinstance(c, dict) else c.get("task_ref")
         if c_task is None or str(c_task) != ref:
             continue
-        c_status = (
-            getattr(c, "status", "open") if not isinstance(c, dict) else c.get("status", "open")
-        )
+        c_status = getattr(c, "status", "open") if not isinstance(c, dict) else c.get("status", "open")
         if c_status in ("cleared", "cannot_clear"):
             continue
-        target = (
-            getattr(c, "target_clear_date", None)
-            if not isinstance(c, dict)
-            else c.get("target_clear_date")
-        )
+        target = getattr(c, "target_clear_date", None) if not isinstance(c, dict) else c.get("target_clear_date")
         if isinstance(target, date) and not isinstance(target, datetime):
             target_str: str | None = target.isoformat()
         elif isinstance(target, datetime):
@@ -595,20 +596,14 @@ def constraint_ready_state(
             target_str = str(target)[:10]
         else:
             target_str = None
-        owner = (
-            getattr(c, "owner_user_id", None)
-            if not isinstance(c, dict)
-            else c.get("owner_user_id")
-        )
+        owner = getattr(c, "owner_user_id", None) if not isinstance(c, dict) else c.get("owner_user_id")
         blockers.append(
             {
                 "id": str(getattr(c, "id", "") if not isinstance(c, dict) else c.get("id", "")),
                 "type": getattr(c, "constraint_type", "other")
                 if not isinstance(c, dict)
                 else c.get("constraint_type", "other"),
-                "description": getattr(c, "description", "")
-                if not isinstance(c, dict)
-                else c.get("description", ""),
+                "description": getattr(c, "description", "") if not isinstance(c, dict) else c.get("description", ""),
                 "owner_user_id": str(owner) if owner else None,
                 "target_clear_date": target_str,
             }
@@ -801,7 +796,9 @@ class ScheduleAdvancedService:
     # ── Master schedule ────────────────────────────────────────────────
 
     async def create_master_schedule(
-        self, data: MasterScheduleCreate, user_id: str | None = None,
+        self,
+        data: MasterScheduleCreate,
+        user_id: str | None = None,
     ) -> MasterSchedule:
         m = MasterSchedule(
             project_id=data.project_id,
@@ -822,7 +819,9 @@ class ScheduleAdvancedService:
         return m
 
     async def update_master_schedule(
-        self, master_id: uuid.UUID, data: MasterScheduleUpdate,
+        self,
+        master_id: uuid.UUID,
+        data: MasterScheduleUpdate,
     ) -> MasterSchedule:
         m = await self.get_master_schedule(master_id)
         fields = data.model_dump(exclude_unset=True)
@@ -848,7 +847,9 @@ class ScheduleAdvancedService:
         return p
 
     async def update_phase_plan(
-        self, phase_id: uuid.UUID, data: PhasePlanUpdate,
+        self,
+        phase_id: uuid.UUID,
+        data: PhasePlanUpdate,
     ) -> PhasePlan:
         p = await self.get_phase_plan(phase_id)
         fields = data.model_dump(exclude_unset=True)
@@ -884,7 +885,9 @@ class ScheduleAdvancedService:
                 detail=f"Phase cannot be pulled from state {p.pulled_status}",
             )
         await self.phase_repo.update_fields(
-            phase_id, pulled_status="pulled", pull_session_at=datetime.now(UTC),
+            phase_id,
+            pulled_status="pulled",
+            pull_session_at=datetime.now(UTC),
         )
         await self.session.refresh(p)
         event_bus.publish_detached(
@@ -954,7 +957,9 @@ class ScheduleAdvancedService:
         return la
 
     async def update_look_ahead(
-        self, la_id: uuid.UUID, data: LookAheadUpdate,
+        self,
+        la_id: uuid.UUID,
+        data: LookAheadUpdate,
     ) -> LookAheadPlan:
         la = await self.get_look_ahead(la_id)
         fields = data.model_dump(exclude_unset=True)
@@ -980,7 +985,9 @@ class ScheduleAdvancedService:
                 detail=f"Look-ahead cannot be published from state {la.status}",
             )
         await self.look_ahead_repo.update_fields(
-            la_id, status="published", generated_at=datetime.now(UTC),
+            la_id,
+            status="published",
+            generated_at=datetime.now(UTC),
         )
         await self.session.refresh(la)
         return la
@@ -998,7 +1005,9 @@ class ScheduleAdvancedService:
         return c
 
     async def update_constraint(
-        self, cid: uuid.UUID, data: ConstraintUpdate,
+        self,
+        cid: uuid.UUID,
+        data: ConstraintUpdate,
     ) -> Constraint:
         c = await self.get_constraint(cid)
         fields = data.model_dump(exclude_unset=True)
@@ -1091,7 +1100,9 @@ class ScheduleAdvancedService:
         return w
 
     async def update_weekly_plan(
-        self, wp_id: uuid.UUID, data: WeeklyWorkPlanUpdate,
+        self,
+        wp_id: uuid.UUID,
+        data: WeeklyWorkPlanUpdate,
     ) -> WeeklyWorkPlan:
         w = await self.get_weekly_plan(wp_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1124,13 +1135,17 @@ class ScheduleAdvancedService:
                 detail=f"Weekly plan cannot be committed from {w.status}",
             )
         await self.weekly_repo.update_fields(
-            wp_id, status="committed", generated_at=datetime.now(UTC),
+            wp_id,
+            status="committed",
+            generated_at=datetime.now(UTC),
         )
         await self.session.refresh(w)
         return w
 
     async def close_weekly_plan(
-        self, wp_id: uuid.UUID, today: date | None = None,
+        self,
+        wp_id: uuid.UUID,
+        today: date | None = None,
     ) -> WeeklyWorkPlan:
         """Close a weekly plan, compute PPC, and emit the closed event.
 
@@ -1208,7 +1223,9 @@ class ScheduleAdvancedService:
         return c
 
     async def update_commitment(
-        self, cid: uuid.UUID, data: CommitmentUpdate,
+        self,
+        cid: uuid.UUID,
+        data: CommitmentUpdate,
     ) -> Commitment:
         c = await self.get_commitment(cid)
         fields = data.model_dump(exclude_unset=True)
@@ -1227,7 +1244,9 @@ class ScheduleAdvancedService:
         await self.commitment_repo.delete(cid)
 
     async def commit_to_week(
-        self, cid: uuid.UUID, user_id: str | None = None,
+        self,
+        cid: uuid.UUID,
+        user_id: str | None = None,
     ) -> Commitment:
         """Flip Commitment.status planned → committed; emit the event.
 
@@ -1281,9 +1300,7 @@ class ScheduleAdvancedService:
                 detail=f"Commitment cannot be completed from {c.status}",
             )
         completed_at = (
-            datetime.combine(today, datetime.min.time(), tzinfo=UTC)
-            if today is not None
-            else datetime.now(UTC)
+            datetime.combine(today, datetime.min.time(), tzinfo=UTC) if today is not None else datetime.now(UTC)
         )
         await self.commitment_repo.update_fields(
             cid,
@@ -1295,7 +1312,9 @@ class ScheduleAdvancedService:
         return c
 
     async def mark_commitment_missed(
-        self, cid: uuid.UUID, rnc_payload: dict[str, Any] | RNCCreate,
+        self,
+        cid: uuid.UUID,
+        rnc_payload: dict[str, Any] | RNCCreate,
     ) -> tuple[Commitment, ReasonForNonCompletion]:
         """Flip a commitment to ``missed`` and record the paired RNC."""
         c = await self.get_commitment(cid)
@@ -1326,7 +1345,9 @@ class ScheduleAdvancedService:
     # ── RNC ────────────────────────────────────────────────────────────
 
     async def create_rnc(
-        self, data: RNCCreate, user_id: str | None = None,
+        self,
+        data: RNCCreate,
+        user_id: str | None = None,
     ) -> ReasonForNonCompletion:
         recorded_by_uuid = None
         if user_id is not None:
@@ -1351,7 +1372,9 @@ class ScheduleAdvancedService:
         return r
 
     async def update_rnc(
-        self, rid: uuid.UUID, data: RNCUpdate,
+        self,
+        rid: uuid.UUID,
+        data: RNCUpdate,
     ) -> ReasonForNonCompletion:
         r = await self.get_rnc(rid)
         fields = data.model_dump(exclude_unset=True)
@@ -1432,7 +1455,9 @@ class ScheduleAdvancedService:
         return out
 
     async def create_baseline(
-        self, data: BaselineCreate, user_id: str | None = None,
+        self,
+        data: BaselineCreate,
+        user_id: str | None = None,
     ) -> Baseline:
         return await self.capture_baseline(
             data.master_schedule_id,
@@ -1444,11 +1469,16 @@ class ScheduleAdvancedService:
     async def get_baseline(self, bid: uuid.UUID) -> Baseline:
         b = await self.baseline_repo.get_by_id(bid)
         if b is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.baseline_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=translate("errors.baseline_not_found", locale=get_locale()),
+            )
         return b
 
     async def update_baseline(
-        self, bid: uuid.UUID, data: BaselineUpdate,
+        self,
+        bid: uuid.UUID,
+        data: BaselineUpdate,
     ) -> Baseline:
         b = await self.get_baseline(bid)
         fields = data.model_dump(exclude_unset=True)
@@ -1567,7 +1597,10 @@ class ScheduleAdvancedService:
         """Aggregate LPS dashboard data for a project."""
         today = today or datetime.now(UTC).date()
         master_schedules, _ = await self.master_repo.list_for_project(
-            project_id, offset=0, limit=200, status=None,
+            project_id,
+            offset=0,
+            limit=200,
+            status=None,
         )
         active_masters = [m for m in master_schedules if m.status == "active"]
 
@@ -1589,7 +1622,9 @@ class ScheduleAdvancedService:
 
         # RNC pareto for last 90 days
         rncs = await self.rnc_repo.list_for_project_period(
-            project_id, today - timedelta(days=90), today,
+            project_id,
+            today - timedelta(days=90),
+            today,
         )
         rnc_pareto = compute_rnc_pareto(rncs, today - timedelta(days=90), today)
 
@@ -1598,7 +1633,8 @@ class ScheduleAdvancedService:
         # Single aggregate query (was an N+1: one current_week_plan +
         # one commitments_for_week round trip per active master).
         current_week_count = await self.weekly_repo.current_week_commitment_count(
-            project_id, today,
+            project_id,
+            today,
         )
 
         return {
@@ -1615,7 +1651,8 @@ class ScheduleAdvancedService:
     # ── CPM / EVM / TIA endpoints ──────────────────────────────────────
 
     async def look_ahead_readiness(
-        self, la_id: uuid.UUID,
+        self,
+        la_id: uuid.UUID,
     ) -> list[dict[str, Any]]:
         """Per-task readiness summary for a Look-Ahead's constraints.
 
@@ -1646,7 +1683,9 @@ class ScheduleAdvancedService:
     ) -> dict[str, Any]:
         """Return Pareto-sorted RNC counts with cumulative %."""
         rncs = await self.rnc_repo.list_for_project_period(
-            project_id, period_start, period_end,
+            project_id,
+            period_start,
+            period_end,
         )
         rows = compute_rnc_pareto_sorted(rncs)
         return {

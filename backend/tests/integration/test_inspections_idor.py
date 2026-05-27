@@ -45,7 +45,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -85,9 +84,7 @@ async def _activate_user(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
 
@@ -117,9 +114,7 @@ async def _register_login_and_promote(
         from app.modules.users.models import User
 
         async with async_session_factory() as s:
-            await s.execute(
-                update(User).where(User.email == email.lower()).values(role=role)
-            )
+            await s.execute(update(User).where(User.email == email.lower()).values(role=role))
             await s.commit()
 
     login = await client.post(
@@ -135,7 +130,9 @@ async def _register_login_and_promote(
 async def two_tenants(http_client):
     """A owns a project + inspection; B is the attacker."""
     _a_uid, _a_email, _a_password, a_headers = await _register_login_and_promote(
-        http_client, tenant="a", role="admin",
+        http_client,
+        tenant="a",
+        role="admin",
     )
     # B is promoted to "editor" — it has inspections.update permission
     # (so the IDOR probe gets past ``RequirePermission`` and actually
@@ -143,7 +140,9 @@ async def two_tenants(http_client):
     # admin-bypass branch inside ``verify_project_access`` doesn't
     # mask the cross-tenant guard we're testing).
     _b_uid, _b_email, _b_password, b_headers = await _register_login_and_promote(
-        http_client, tenant="b", role="editor",
+        http_client,
+        tenant="b",
+        role="editor",
     )
 
     proj = await http_client.post(
@@ -199,9 +198,7 @@ async def test_tenant_b_cannot_complete_inspection(http_client, two_tenants):
         json={"result": "pass"},
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B completed A's inspection: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"WRITE-IDOR: B completed A's inspection: {resp.status_code} {resp.text!r}"
 
     # Confirm A's inspection still in scheduled state (not flipped to completed by B).
     after = await http_client.get(
@@ -210,8 +207,7 @@ async def test_tenant_b_cannot_complete_inspection(http_client, two_tenants):
     )
     assert after.status_code == 200, after.text
     assert after.json()["status"] != "completed", (
-        "A's inspection was mutated by B's IDOR call: "
-        f"status={after.json()['status']}"
+        f"A's inspection was mutated by B's IDOR call: status={after.json()['status']}"
     )
 
 
@@ -258,8 +254,7 @@ async def test_tenant_b_cannot_create_defect_from_inspection(http_client, two_te
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B created punchlist item from A's inspection: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B created punchlist item from A's inspection: {resp.status_code} {resp.text!r}"
     )
 
 
@@ -303,8 +298,7 @@ async def test_tenant_b_cannot_create_ncr_from_inspection(http_client, two_tenan
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B created NCR from A's inspection: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B created NCR from A's inspection: {resp.status_code} {resp.text!r}"
     )
 
 
@@ -320,9 +314,7 @@ async def test_tenant_b_cannot_read_inspection(http_client, two_tenants):
         f"/api/v1/inspections/{a['inspection_id']}",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"LEAK: B read A's inspection: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"LEAK: B read A's inspection: {resp.status_code} {resp.text!r}"
     assert "confidential" not in resp.text
 
 
@@ -335,9 +327,7 @@ async def test_tenant_b_cannot_list_a_inspections(http_client, two_tenants):
         f"/api/v1/inspections/?project_id={a['project_id']}",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"LEAK: B listed A's inspections: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"LEAK: B listed A's inspections: {resp.status_code} {resp.text!r}"
 
 
 @pytest.mark.asyncio
@@ -349,9 +339,7 @@ async def test_tenant_b_cannot_export_a_inspections(http_client, two_tenants):
         f"/api/v1/inspections/export/?project_id={a['project_id']}",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"LEAK: B exported A's inspections: {resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"LEAK: B exported A's inspections: {resp.status_code} {resp.text!r}"
 
 
 # ── Owner regression: A must still be able to do everything ───────────────

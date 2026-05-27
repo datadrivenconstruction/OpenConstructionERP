@@ -48,9 +48,7 @@ class RevitSPParser(BaseRequirementParser):
         try:
             text = self._read_source(source)
         except Exception as exc:
-            result.errors.append(
-                {"row": 0, "field": "file", "msg": f"Cannot read file: {exc}"}
-            )
+            result.errors.append({"row": 0, "field": "file", "msg": f"Cannot read file: {exc}"})
             return result
 
         lines = text.splitlines()
@@ -74,9 +72,7 @@ class RevitSPParser(BaseRequirementParser):
                     group_name = parts[2].strip()
                     groups[group_id] = group_name
                 except (ValueError, IndexError):
-                    result.warnings.append(
-                        {"row": line_num, "field": "GROUP", "msg": f"Invalid GROUP line: {line}"}
-                    )
+                    result.warnings.append({"row": line_num, "field": "GROUP", "msg": f"Invalid GROUP line: {line}"})
 
             elif record_type == "PARAM" and len(parts) >= 6:
                 try:
@@ -93,9 +89,7 @@ class RevitSPParser(BaseRequirementParser):
                     }
                     params.append(param)
                 except (ValueError, IndexError) as exc:
-                    result.warnings.append(
-                        {"row": line_num, "field": "PARAM", "msg": f"Invalid PARAM line: {exc}"}
-                    )
+                    result.warnings.append({"row": line_num, "field": "PARAM", "msg": f"Invalid PARAM line: {exc}"})
 
             elif record_type == "META":
                 # Store metadata version
@@ -105,9 +99,7 @@ class RevitSPParser(BaseRequirementParser):
         # Convert params to UniversalRequirement
         for param in params:
             group_name = groups.get(param["group_id"], "")
-            ifc_datatype = _REVIT_DATATYPE_MAP.get(
-                param["datatype"].upper(), param["datatype"]
-            )
+            ifc_datatype = _REVIT_DATATYPE_MAP.get(param["datatype"].upper(), param["datatype"])
 
             constraint_def: dict[str, Any] = {
                 "datatype": ifc_datatype,

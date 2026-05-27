@@ -168,8 +168,7 @@ class InspectionService:
 
         if "checklist_data" in fields and fields["checklist_data"] is not None:
             fields["checklist_data"] = [
-                entry.model_dump() if hasattr(entry, "model_dump") else entry
-                for entry in fields["checklist_data"]
+                entry.model_dump() if hasattr(entry, "model_dump") else entry for entry in fields["checklist_data"]
             ]
             _validate_checklist_structure(fields["checklist_data"])
 
@@ -253,8 +252,7 @@ class InspectionService:
             # Collect failed checklist items for the event payload
             checklist = inspection.checklist_data or []
             failed_items = [
-                item for item in checklist
-                if isinstance(item, dict) and item.get("response") in ("fail", "no", "false")
+                item for item in checklist if isinstance(item, dict) and item.get("response") in ("fail", "no", "false")
             ]
             event_bus.publish_detached(
                 "inspection.completed.failed",

@@ -111,9 +111,7 @@ async def _verify_project_access(
     except HTTPException:
         raise
     except Exception as exc:  # noqa: BLE001
-        logger.warning(
-            "Project Intelligence access check failed for %s: %s", project_id, exc
-        )
+        logger.warning("Project Intelligence access check failed for %s: %s", project_id, exc)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Authorization check failed",
@@ -208,12 +206,8 @@ async def get_score(
         overall=score.overall,
         overall_grade=score.overall_grade,
         domain_scores=score.domain_scores,
-        critical_gaps=[
-            CriticalGapResponse(**asdict(g)) for g in score.critical_gaps
-        ],
-        achievements=[
-            AchievementResponse(**asdict(a)) for a in score.achievements
-        ],
+        critical_gaps=[CriticalGapResponse(**asdict(g)) for g in score.critical_gaps],
+        achievements=[AchievementResponse(**asdict(a)) for a in score.achievements],
     )
 
 
@@ -262,12 +256,8 @@ async def get_summary(
             overall=score.overall,
             overall_grade=score.overall_grade,
             domain_scores=score.domain_scores,
-            critical_gaps=[
-                CriticalGapResponse(**asdict(g)) for g in score.critical_gaps
-            ],
-            achievements=[
-                AchievementResponse(**asdict(a)) for a in score.achievements
-            ],
+            critical_gaps=[CriticalGapResponse(**asdict(g)) for g in score.critical_gaps],
+            achievements=[AchievementResponse(**asdict(a)) for a in score.achievements],
         ),
     )
 

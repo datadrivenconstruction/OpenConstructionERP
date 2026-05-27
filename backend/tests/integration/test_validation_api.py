@@ -127,9 +127,7 @@ async def project_id(client: AsyncClient, auth: dict[str, str]) -> str:
 
 
 @pytest.mark.asyncio
-async def test_import_ids_endpoint_creates_rules(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_import_ids_endpoint_creates_rules(client: AsyncClient, auth: dict[str, str]) -> None:
     """Uploading the multi-spec fixture creates 3 rules in the registry."""
     fixture = FIXTURES / "ids_10_multi_specification.xml"
     files = {
@@ -153,9 +151,7 @@ async def test_import_ids_endpoint_creates_rules(
 
 
 @pytest.mark.asyncio
-async def test_import_ids_rejects_garbage(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_import_ids_rejects_garbage(client: AsyncClient, auth: dict[str, str]) -> None:
     """Malformed payload → 422 with a helpful detail."""
     files = {"file": ("not_ids.xml", b"<<<not xml>>>", "application/xml")}
     resp = await client.post(
@@ -172,9 +168,7 @@ async def test_import_ids_rejects_garbage(
 
 
 @pytest.mark.asyncio
-async def test_get_report_sarif(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_get_report_sarif(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     """Persist a synthetic ValidationReport then export it as SARIF JSON."""
     from app.database import async_session_factory
     from app.modules.validation.models import ValidationReport
@@ -241,9 +235,7 @@ async def test_get_report_sarif(
 
 
 @pytest.mark.asyncio
-async def test_get_report_sarif_404(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_get_report_sarif_404(client: AsyncClient, auth: dict[str, str]) -> None:
     """Unknown report id → 404."""
     resp = await client.get(
         f"/api/v1/validation/reports/{uuid.uuid4()}/sarif",

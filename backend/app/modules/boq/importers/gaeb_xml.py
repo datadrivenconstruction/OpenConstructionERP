@@ -27,7 +27,6 @@ import xml.etree.ElementTree as ET
 from typing import Any, ClassVar
 
 from app.modules.boq.importers._base import (
-    BOQImporter,
     ImportedBOQ,
     ImportedPosition,
     ImporterParseError,
@@ -226,9 +225,7 @@ class GAEBXMLImporter:
                 if top_body is not None:
                     break
         if top_body is None:
-            raise ImporterParseError(
-                "No <BoQBody> element found. Is this a valid GAEB DA XML?"
-            )
+            raise ImporterParseError("No <BoQBody> element found. Is this a valid GAEB DA XML?")
 
         # Capture currency from <Award><Cur> for round-trip metadata.
         award: ET.Element | None = None
@@ -261,9 +258,7 @@ class GAEBXMLImporter:
                     return (anc.get("ID") or "").strip()
             return ""
 
-        def _walk_and_collect(
-            el: ET.Element, ancestors: list[ET.Element]
-        ) -> list[tuple[ET.Element, str]]:
+        def _walk_and_collect(el: ET.Element, ancestors: list[ET.Element]) -> list[tuple[ET.Element, str]]:
             found: list[tuple[ET.Element, str]] = []
             for child in el:
                 if _local(child.tag) == "Item":
@@ -298,14 +293,10 @@ class GAEBXMLImporter:
 
             # Sanity caps — same bounds as the legacy inline parser.
             if not (0 <= quantity <= 1e9):
-                result.errors.append(
-                    {"ordinal": pos_ordinal, "error": f"Quantity out of range: {quantity}"}
-                )
+                result.errors.append({"ordinal": pos_ordinal, "error": f"Quantity out of range: {quantity}"})
                 continue
             if not (0 <= unit_rate <= 1e8):
-                result.errors.append(
-                    {"ordinal": pos_ordinal, "error": f"Unit rate out of range: {unit_rate}"}
-                )
+                result.errors.append({"ordinal": pos_ordinal, "error": f"Unit rate out of range: {unit_rate}"})
                 continue
 
             classification: dict[str, Any] = {}

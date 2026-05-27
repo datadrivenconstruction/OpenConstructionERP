@@ -27,8 +27,8 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
-
 # ── Shared fixture: FastAPI test client ──────────────────────────────────────
+
 
 @pytest_asyncio.fixture
 async def client():
@@ -70,9 +70,7 @@ async def _register_and_login(client: AsyncClient, suffix: str) -> dict[str, str
 # ── Seed helpers ─────────────────────────────────────────────────────────────
 
 
-async def _create_ruleset(
-    client: AsyncClient, headers: dict[str, str], name: str
-) -> str:
+async def _create_ruleset(client: AsyncClient, headers: dict[str, str], name: str) -> str:
     """Create a ruleset and return its ID string."""
     resp = await client.post(
         "/api/v1/eac/rulesets",
@@ -83,9 +81,7 @@ async def _create_ruleset(
     return resp.json()["id"]
 
 
-async def _create_rule(
-    client: AsyncClient, headers: dict[str, str], ruleset_id: str, name: str
-) -> str:
+async def _create_rule(client: AsyncClient, headers: dict[str, str], ruleset_id: str, name: str) -> str:
     """Create a boolean rule inside a ruleset and return its ID string."""
     resp = await client.post(
         "/api/v1/eac/rules",
@@ -124,9 +120,7 @@ _WALLS: list[dict[str, Any]] = [
 ]
 
 
-async def _trigger_run(
-    client: AsyncClient, headers: dict[str, str], ruleset_id: str
-) -> str:
+async def _trigger_run(client: AsyncClient, headers: dict[str, str], ruleset_id: str) -> str:
     """Trigger a ruleset run and return its ID string."""
     resp = await client.post(
         f"/api/v1/eac/rulesets/{ruleset_id}:run",
@@ -150,9 +144,7 @@ async def test_ruleset_cross_tenant_returns_404(client: AsyncClient) -> None:
 
     # Tenant B tries to fetch A's ruleset.
     resp = await client.get(f"/api/v1/eac/rulesets/{ruleset_id_a}", headers=headers_b)
-    assert resp.status_code == 404, (
-        f"Expected 404 for cross-tenant ruleset access, got {resp.status_code}: {resp.text}"
-    )
+    assert resp.status_code == 404, f"Expected 404 for cross-tenant ruleset access, got {resp.status_code}: {resp.text}"
 
     # Sanity: A can still access its own ruleset.
     own_resp = await client.get(f"/api/v1/eac/rulesets/{ruleset_id_a}", headers=headers_a)
@@ -169,9 +161,7 @@ async def test_rule_cross_tenant_returns_404(client: AsyncClient) -> None:
     rule_id_a = await _create_rule(client, headers_a, ruleset_id_a, "idor_rule")
 
     resp = await client.get(f"/api/v1/eac/rules/{rule_id_a}", headers=headers_b)
-    assert resp.status_code == 404, (
-        f"Expected 404 for cross-tenant rule access, got {resp.status_code}"
-    )
+    assert resp.status_code == 404, f"Expected 404 for cross-tenant rule access, got {resp.status_code}"
 
     # Sanity: owner can read it.
     own_resp = await client.get(f"/api/v1/eac/rules/{rule_id_a}", headers=headers_a)
@@ -189,9 +179,7 @@ async def test_run_cross_tenant_returns_404(client: AsyncClient) -> None:
     run_id_a = await _trigger_run(client, headers_a, ruleset_id_a)
 
     resp = await client.get(f"/api/v1/eac/runs/{run_id_a}", headers=headers_b)
-    assert resp.status_code == 404, (
-        f"Expected 404 for cross-tenant run access, got {resp.status_code}"
-    )
+    assert resp.status_code == 404, f"Expected 404 for cross-tenant run access, got {resp.status_code}"
 
     # Sanity: owner can read it.
     own_resp = await client.get(f"/api/v1/eac/runs/{run_id_a}", headers=headers_a)
@@ -209,9 +197,7 @@ async def test_run_results_cross_tenant_returns_404(client: AsyncClient) -> None
     run_id_a = await _trigger_run(client, headers_a, ruleset_id_a)
 
     resp = await client.get(f"/api/v1/eac/runs/{run_id_a}/results", headers=headers_b)
-    assert resp.status_code == 404, (
-        f"Expected 404 for cross-tenant run-results access, got {resp.status_code}"
-    )
+    assert resp.status_code == 404, f"Expected 404 for cross-tenant run-results access, got {resp.status_code}"
 
     # Sanity: owner can list results (may be empty list, still 200).
     own_resp = await client.get(f"/api/v1/eac/runs/{run_id_a}/results", headers=headers_a)
@@ -229,9 +215,7 @@ async def test_run_status_cross_tenant_returns_404(client: AsyncClient) -> None:
     run_id_a = await _trigger_run(client, headers_a, ruleset_id_a)
 
     resp = await client.get(f"/api/v1/eac/runs/{run_id_a}/status", headers=headers_b)
-    assert resp.status_code == 404, (
-        f"Expected 404 for cross-tenant run-status access, got {resp.status_code}"
-    )
+    assert resp.status_code == 404, f"Expected 404 for cross-tenant run-status access, got {resp.status_code}"
 
     own_resp = await client.get(f"/api/v1/eac/runs/{run_id_a}/status", headers=headers_a)
     assert own_resp.status_code == 200
@@ -247,12 +231,8 @@ async def test_cancel_run_cross_tenant_returns_404(client: AsyncClient) -> None:
     await _create_rule(client, headers_a, ruleset_id_a, "idor_cancel_rule")
     run_id_a = await _trigger_run(client, headers_a, ruleset_id_a)
 
-    resp = await client.post(
-        f"/api/v1/eac/runs/{run_id_a}:cancel", headers=headers_b
-    )
-    assert resp.status_code == 404, (
-        f"Expected 404 for cross-tenant cancel, got {resp.status_code}"
-    )
+    resp = await client.post(f"/api/v1/eac/runs/{run_id_a}:cancel", headers=headers_b)
+    assert resp.status_code == 404, f"Expected 404 for cross-tenant cancel, got {resp.status_code}"
 
 
 @pytest.mark.asyncio
@@ -269,9 +249,7 @@ async def test_update_rule_cross_tenant_returns_404(client: AsyncClient) -> None
         json={"name": "hacked_name"},
         headers=headers_b,
     )
-    assert resp.status_code == 404, (
-        f"Expected 404 for cross-tenant rule update, got {resp.status_code}"
-    )
+    assert resp.status_code == 404, f"Expected 404 for cross-tenant rule update, got {resp.status_code}"
 
 
 @pytest.mark.asyncio
@@ -284,9 +262,7 @@ async def test_delete_rule_cross_tenant_returns_404(client: AsyncClient) -> None
     rule_id_a = await _create_rule(client, headers_a, ruleset_id_a, "idor_del_rule")
 
     resp = await client.delete(f"/api/v1/eac/rules/{rule_id_a}", headers=headers_b)
-    assert resp.status_code == 404, (
-        f"Expected 404 for cross-tenant rule delete, got {resp.status_code}"
-    )
+    assert resp.status_code == 404, f"Expected 404 for cross-tenant rule delete, got {resp.status_code}"
 
     # Verify A's rule was NOT soft-deleted by B's request.
     own_resp = await client.get(f"/api/v1/eac/rules/{rule_id_a}", headers=headers_a)
@@ -307,9 +283,7 @@ async def test_update_ruleset_cross_tenant_returns_404(client: AsyncClient) -> N
         json={"name": "hacked"},
         headers=headers_b,
     )
-    assert resp.status_code == 404, (
-        f"Expected 404 for cross-tenant ruleset update, got {resp.status_code}"
-    )
+    assert resp.status_code == 404, f"Expected 404 for cross-tenant ruleset update, got {resp.status_code}"
 
 
 @pytest.mark.asyncio
@@ -321,9 +295,7 @@ async def test_delete_ruleset_cross_tenant_returns_404(client: AsyncClient) -> N
     ruleset_id_a = await _create_ruleset(client, headers_a, "idor_delrs_rs")
 
     resp = await client.delete(f"/api/v1/eac/rulesets/{ruleset_id_a}", headers=headers_b)
-    assert resp.status_code == 404, (
-        f"Expected 404 for cross-tenant ruleset delete, got {resp.status_code}"
-    )
+    assert resp.status_code == 404, f"Expected 404 for cross-tenant ruleset delete, got {resp.status_code}"
 
     # Still accessible to A.
     own_resp = await client.get(f"/api/v1/eac/rulesets/{ruleset_id_a}", headers=headers_a)
@@ -348,9 +320,7 @@ async def test_fabricated_uuid_returns_404(client: AsyncClient) -> None:
         f"/api/v1/eac/runs/{fake_id}/results",
     ]:
         resp = await client.get(path, headers=headers)
-        assert resp.status_code == 404, (
-            f"Fabricated UUID at {path} should return 404, got {resp.status_code}"
-        )
+        assert resp.status_code == 404, f"Fabricated UUID at {path} should return 404, got {resp.status_code}"
 
 
 @pytest.mark.asyncio
@@ -369,8 +339,7 @@ async def test_list_runs_does_not_leak_other_tenant(client: AsyncClient) -> None
     assert resp.status_code == 200
     ids_visible_to_b = {r["id"] for r in resp.json()}
     assert run_id_a not in ids_visible_to_b, (
-        f"Tenant B should not see tenant A's run {run_id_a}. "
-        f"Visible to B: {ids_visible_to_b}"
+        f"Tenant B should not see tenant A's run {run_id_a}. Visible to B: {ids_visible_to_b}"
     )
 
 

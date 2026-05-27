@@ -25,7 +25,6 @@ from fastapi import HTTPException
 from app.modules.takeoff import service as takeoff_service
 from app.modules.takeoff.service import TakeoffService
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -59,9 +58,7 @@ def _router_magic_byte_gate(content: bytes) -> None:
     if not content.startswith(b"%PDF-"):
         raise HTTPException(
             status_code=415,
-            detail=(
-                "File does not appear to be a valid PDF (missing %PDF- magic bytes)."
-            ),
+            detail=("File does not appear to be a valid PDF (missing %PDF- magic bytes)."),
         )
 
 
@@ -146,9 +143,7 @@ class TestMagicByteGateLogic:
 
 class TestServiceDoesNotDuplicateMagicByteCheck:
     @pytest.mark.asyncio
-    async def test_service_accepts_non_pdf_bytes_if_parseable(
-        self, monkeypatch, tmp_path
-    ) -> None:
+    async def test_service_accepts_non_pdf_bytes_if_parseable(self, monkeypatch, tmp_path) -> None:
         """The service itself does not re-validate magic bytes.
 
         The magic-byte gate is a router concern. The service trusts what

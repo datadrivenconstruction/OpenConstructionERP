@@ -113,11 +113,13 @@ class TestToFloatQty:
 
 class TestParseBoqXlsx:
     def test_minimal_english(self):
-        content = _build_xlsx([
-            ["Description", "Qty", "Unit"],
-            ["Concrete wall C30/37", 25.0, "m3"],
-            ["Plaster work", 100, "m2"],
-        ])
+        content = _build_xlsx(
+            [
+                ["Description", "Qty", "Unit"],
+                ["Concrete wall C30/37", 25.0, "m3"],
+                ["Plaster work", 100, "m2"],
+            ]
+        )
         rows = parse_boq_xlsx(content)
         assert len(rows) == 2
         assert rows[0] == {
@@ -128,10 +130,12 @@ class TestParseBoqXlsx:
         assert rows[1]["qty"] == 100.0
 
     def test_german_headers(self):
-        content = _build_xlsx([
-            ["Beschreibung", "Menge", "Einheit", "Gewerk"],
-            ["Stahlbetonwand C30/37", "25,5", "m3", "Rohbau"],
-        ])
+        content = _build_xlsx(
+            [
+                ["Beschreibung", "Menge", "Einheit", "Gewerk"],
+                ["Stahlbetonwand C30/37", "25,5", "m3", "Rohbau"],
+            ]
+        )
         rows = parse_boq_xlsx(content)
         assert len(rows) == 1
         assert rows[0]["description"] == "Stahlbetonwand C30/37"
@@ -140,10 +144,12 @@ class TestParseBoqXlsx:
         assert rows[0]["category"] == "Rohbau"
 
     def test_russian_headers(self):
-        content = _build_xlsx([
-            ["Наименование", "Количество", "Ед.изм.", "Код"],
-            ["Бетонная стена B25", 12.0, "м3", "ФЕР06-01-001"],
-        ])
+        content = _build_xlsx(
+            [
+                ["Наименование", "Количество", "Ед.изм.", "Код"],
+                ["Бетонная стена B25", 12.0, "м3", "ФЕР06-01-001"],
+            ]
+        )
         rows = parse_boq_xlsx(content)
         assert len(rows) == 1
         assert "Бетонная стена" in rows[0]["description"]
@@ -153,11 +159,13 @@ class TestParseBoqXlsx:
     def test_optional_columns_omitted(self):
         # Description-only spreadsheet — qty/unit absent. Should still
         # produce rows; matchers default to count=1.0 from BoqAdapter.
-        content = _build_xlsx([
-            ["Description"],
-            ["Wall"],
-            ["Floor"],
-        ])
+        content = _build_xlsx(
+            [
+                ["Description"],
+                ["Wall"],
+                ["Floor"],
+            ]
+        )
         rows = parse_boq_xlsx(content)
         assert len(rows) == 2
         assert rows[0] == {"description": "Wall"}
@@ -165,32 +173,38 @@ class TestParseBoqXlsx:
 
     def test_unknown_columns_dropped(self):
         # Tenant-specific extra columns shouldn't pollute the dict.
-        content = _build_xlsx([
-            ["Description", "Qty", "Supplier", "DeliveryWeek"],
-            ["Wall", 5, "Acme", 12],
-        ])
+        content = _build_xlsx(
+            [
+                ["Description", "Qty", "Supplier", "DeliveryWeek"],
+                ["Wall", 5, "Acme", 12],
+            ]
+        )
         rows = parse_boq_xlsx(content)
         assert rows[0] == {"description": "Wall", "qty": 5.0}
 
     def test_blank_description_skipped(self):
-        content = _build_xlsx([
-            ["Description", "Qty", "Unit"],
-            ["Valid wall", 10, "m3"],
-            [None, 5, "m2"],          # no description → skip
-            ["", 7, "m"],              # blank description → skip
-            ["   ", 8, "m"],          # whitespace only → skip
-            ["Another row", 1, "m"],
-        ])
+        content = _build_xlsx(
+            [
+                ["Description", "Qty", "Unit"],
+                ["Valid wall", 10, "m3"],
+                [None, 5, "m2"],  # no description → skip
+                ["", 7, "m"],  # blank description → skip
+                ["   ", 8, "m"],  # whitespace only → skip
+                ["Another row", 1, "m"],
+            ]
+        )
         rows = parse_boq_xlsx(content)
         assert len(rows) == 2
         assert rows[0]["description"] == "Valid wall"
         assert rows[1]["description"] == "Another row"
 
     def test_non_numeric_qty_dropped_but_row_kept(self):
-        content = _build_xlsx([
-            ["Description", "Qty", "Unit"],
-            ["Wall", "not-a-number", "m3"],
-        ])
+        content = _build_xlsx(
+            [
+                ["Description", "Qty", "Unit"],
+                ["Wall", "not-a-number", "m3"],
+            ]
+        )
         rows = parse_boq_xlsx(content)
         assert len(rows) == 1
         assert rows[0]["description"] == "Wall"
@@ -198,10 +212,12 @@ class TestParseBoqXlsx:
 
     def test_missing_description_column_raises(self):
         # No alias for "Quantity" matches "description".
-        content = _build_xlsx([
-            ["Position", "Qty", "Unit"],
-            ["Wall", 5, "m3"],
-        ])
+        content = _build_xlsx(
+            [
+                ["Position", "Qty", "Unit"],
+                ["Wall", 5, "m3"],
+            ]
+        )
         with pytest.raises(ValueError) as exc:
             parse_boq_xlsx(content)
         assert "Description" in str(exc.value)
@@ -216,35 +232,43 @@ class TestParseBoqXlsx:
             parse_boq_xlsx(b"this is not an xlsx file")
 
     def test_workbook_with_only_headers(self):
-        content = _build_xlsx([
-            ["Description", "Qty"],
-        ])
+        content = _build_xlsx(
+            [
+                ["Description", "Qty"],
+            ]
+        )
         # Header-only file → empty result, not an error.
         assert parse_boq_xlsx(content) == []
 
     def test_string_qty_with_unit_suffix(self):
         # Spreadsheet author put "12.5 m³" instead of just 12.5 in the
         # qty column — parser should still rescue the number.
-        content = _build_xlsx([
-            ["Description", "Qty"],
-            ["Wall", "12.5"],   # clean number works
-        ])
+        content = _build_xlsx(
+            [
+                ["Description", "Qty"],
+                ["Wall", "12.5"],  # clean number works
+            ]
+        )
         rows = parse_boq_xlsx(content)
         assert rows[0]["qty"] == 12.5
 
     def test_source_lang_passes_through(self):
-        content = _build_xlsx([
-            ["Description", "Qty", "Unit", "source_lang"],
-            ["Concrete wall", 25, "m3", "de"],
-        ])
+        content = _build_xlsx(
+            [
+                ["Description", "Qty", "Unit", "source_lang"],
+                ["Concrete wall", 25, "m3", "de"],
+            ]
+        )
         rows = parse_boq_xlsx(content)
         assert rows[0]["source_lang"] == "de"
 
     def test_strings_are_trimmed(self):
-        content = _build_xlsx([
-            ["Description", "Unit"],
-            ["  Concrete wall  ", "  m3  "],
-        ])
+        content = _build_xlsx(
+            [
+                ["Description", "Unit"],
+                ["  Concrete wall  ", "  m3  "],
+            ]
+        )
         rows = parse_boq_xlsx(content)
         assert rows[0]["description"] == "Concrete wall"
         assert rows[0]["unit"] == "m3"

@@ -125,9 +125,7 @@ class TestDevelopmentWarningPath:
         # warning emission opportunity.
         reset_jwt_dev_warning()
 
-    def test_dev_with_default_secret_logs_warning(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_dev_with_default_secret_logs_warning(self, caplog: pytest.LogCaptureFixture) -> None:
         with caplog.at_level(logging.WARNING, logger="openestimate.config"):
             s = _build(app_env="development", jwt_secret="openestimate-local-dev-key")
         assert s.jwt_secret == "openestimate-local-dev-key"
@@ -135,9 +133,7 @@ class TestDevelopmentWarningPath:
         matching = [
             r
             for r in caplog.records
-            if r.levelno == logging.WARNING
-            and "JWT_SECRET" in r.message
-            and "bundled development default" in r.message
+            if r.levelno == logging.WARNING and "JWT_SECRET" in r.message and "bundled development default" in r.message
         ]
         assert len(matching) == 1
         # The warning should report the length (26 chars for the bundled
@@ -157,19 +153,13 @@ class TestDevelopmentWarningPath:
         with caplog.at_level(logging.WARNING, logger="openestimate.config"):
             _build(app_env="development", jwt_secret="openestimate-local-dev-key")
             _build(app_env="development", jwt_secret="openestimate-local-dev-key")
-        matching = [
-            r for r in caplog.records if "bundled development default" in r.message
-        ]
+        matching = [r for r in caplog.records if "bundled development default" in r.message]
         assert len(matching) == 1
 
-    def test_dev_with_strong_secret_logs_nothing(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_dev_with_strong_secret_logs_nothing(self, caplog: pytest.LogCaptureFixture) -> None:
         with caplog.at_level(logging.WARNING, logger="openestimate.config"):
             _build(app_env="development", jwt_secret=_GOOD_SECRET)
-        matching = [
-            r for r in caplog.records if "bundled development default" in r.message
-        ]
+        matching = [r for r in caplog.records if "bundled development default" in r.message]
         assert matching == []
 
     def test_dev_with_short_secret_does_not_raise(self) -> None:

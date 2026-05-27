@@ -28,7 +28,6 @@ from app.modules.meetings.service import (
     _RRuleError,
 )
 
-
 # ── Helpers / stubs ───────────────────────────────────────────────────────
 
 
@@ -50,10 +49,7 @@ class _StubRepo:
             meeting.series_id = None
         if not hasattr(meeting, "recurrence_rule") or meeting.recurrence_rule is None:
             meeting.recurrence_rule = None
-        if (
-            not hasattr(meeting, "is_series_master")
-            or meeting.is_series_master is None
-        ):
+        if not hasattr(meeting, "is_series_master") or meeting.is_series_master is None:
             meeting.is_series_master = False
         self.meetings[meeting.id] = meeting
         return meeting
@@ -72,7 +68,9 @@ class _StubRepo:
                 setattr(obj, k, v)
 
     async def list_for_project(
-        self, project_id: uuid.UUID, **_kwargs: Any,
+        self,
+        project_id: uuid.UUID,
+        **_kwargs: Any,
     ) -> tuple[list[Any], int]:
         rows = [r for r in self.meetings.values() if r.project_id == project_id]
         return rows, len(rows)
@@ -102,6 +100,7 @@ class _StubSession:
         # service also adds AuditEntry / Task rows through _safe_audit and
         # complete_meeting; those are irrelevant to attendance assertions.
         from app.modules.meetings.models import MeetingAttendance
+
         if isinstance(obj, MeetingAttendance):
             self._pending.append(obj)
 
@@ -110,9 +109,7 @@ class _StubSession:
         for obj in self._pending:
             # Replace if a row with the same id is already present
             # (covers refresh-after-update flows).
-            self.attendance = [
-                a for a in self.attendance if a.id != obj.id
-            ]
+            self.attendance = [a for a in self.attendance if a.id != obj.id]
             self.attendance.append(obj)
         self._pending.clear()
 
@@ -144,24 +141,17 @@ class _StubSession:
             if "meeting_id_1" in params:
                 # filter by meeting_id (first WHERE clause)
                 wanted_meeting = params["meeting_id_1"]
-                rows = [
-                    r for r in rows
-                    if str(r.meeting_id) == str(wanted_meeting)
-                ]
+                rows = [r for r in rows if str(r.meeting_id) == str(wanted_meeting)]
             if "user_id_1" in params and params["user_id_1"] is not None:
                 wanted_user = params["user_id_1"]
-                rows = [
-                    r for r in rows if str(r.user_id) == str(wanted_user)
-                ]
+                rows = [r for r in rows if str(r.user_id) == str(wanted_user)]
             return _Scalars(rows)
 
         if entity is Meeting:
             rows = list(self._repo.meetings.values())
             if "series_id_1" in params:
                 wanted = params["series_id_1"]
-                rows = [
-                    r for r in rows if str(r.series_id) == str(wanted)
-                ]
+                rows = [r for r in rows if str(r.series_id) == str(wanted)]
             return _Scalars(rows)
 
         return _Scalars([])
@@ -171,7 +161,7 @@ class _Scalars:
     def __init__(self, rows: list[Any]) -> None:
         self._rows = rows
 
-    def scalars(self) -> "_Scalars":
+    def scalars(self) -> _Scalars:
         return self
 
     def all(self) -> list[Any]:
@@ -255,10 +245,7 @@ async def test_create_series_weekly_count4_makes_one_master_three_occurrences() 
     # The master date itself is the 1st occurrence; expander returns 4 dates;
     # 3 brand-new occurrences should be created.
     assert len(occurrences) == 3
-    series_rows = [
-        m for m in service.repo.meetings.values()
-        if m.series_id == str(master.id)
-    ]
+    series_rows = [m for m in service.repo.meetings.values() if m.series_id == str(master.id)]
     assert len(series_rows) == 4
     # Only one master in the set.
     assert sum(1 for m in series_rows if m.is_series_master) == 1
@@ -282,14 +269,13 @@ async def test_generate_occurrences_is_idempotent() -> None:
 
     horizon = datetime(2026, 12, 31, tzinfo=UTC)
     second_round = await service.generate_occurrences(
-        str(master.id), horizon, user_id="u1",
+        str(master.id),
+        horizon,
+        user_id="u1",
     )
     assert second_round == []
     # Total rows in the series is still 4 (master + 3).
-    series_rows = [
-        m for m in service.repo.meetings.values()
-        if m.series_id == str(master.id)
-    ]
+    series_rows = [m for m in service.repo.meetings.values() if m.series_id == str(master.id)]
     assert len(series_rows) == 4
 
 
@@ -320,7 +306,8 @@ async def test_check_in_first_call_creates_row_second_call_updates_same_row() ->
     assert row2.id == first_id
 
     all_rows = [
-        a for a in service.session.attendance  # type: ignore[attr-defined]
+        a
+        for a in service.session.attendance  # type: ignore[attr-defined]
         if a.meeting_id == meeting.id
     ]
     assert len(all_rows) == 1
@@ -348,7 +335,8 @@ async def test_record_external_attendee_creates_row_with_external_name() -> None
     row2 = await service.record_external_attendee(meeting.id, "Jane Walker")
     assert row2.id != row.id
     all_rows = [
-        a for a in service.session.attendance  # type: ignore[attr-defined]
+        a
+        for a in service.session.attendance  # type: ignore[attr-defined]
         if a.meeting_id == meeting.id
     ]
     assert len(all_rows) == 2

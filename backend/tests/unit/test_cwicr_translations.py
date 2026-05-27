@@ -25,7 +25,6 @@ from app.modules.costs.translations import (
     translate_unit_list,
 )
 
-
 # ── Translation table contents ───────────────────────────────────────────
 
 
@@ -39,9 +38,7 @@ class TestLoadTranslations:
         assert table, f"Locale {locale!r} produced an empty translation table"
         # At minimum, the four BG-spec tokens must be present.
         for de_token in ("Abteilung", "Abschnitt", "Ressource", "100 Stück"):
-            assert de_token in table, (
-                f"Locale {locale!r} is missing a translation for {de_token!r}"
-            )
+            assert de_token in table, f"Locale {locale!r} is missing a translation for {de_token!r}"
 
     def test_unknown_locale_returns_empty(self) -> None:
         # Defensive: an unsupported locale must not raise — the lookup

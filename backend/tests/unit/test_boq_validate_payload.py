@@ -90,8 +90,7 @@ def test_empty_unit_passes_when_unit_present() -> None:
     severity=error on every row.
     """
     positions = [
-        _row(pos_id=f"p{i}", ordinal=f"01.{i:03d}", unit="m3", quantity=10, unit_rate=110)
-        for i in range(1, 6)
+        _row(pos_id=f"p{i}", ordinal=f"01.{i:03d}", unit="m3", quantity=10, unit_rate=110) for i in range(1, 6)
     ]
     ctx = ValidationContext(data={"positions": positions})
 
@@ -142,9 +141,7 @@ def test_section_headers_skipped_by_leaf_rules() -> None:
         results = _run(rule, ctx)
         assert len(results) == 1, f"{rule.rule_id} must skip section headers"
         assert results[0].element_ref == "p1"
-        assert results[0].passed is True, (
-            f"{rule.rule_id} false-positive on populated leaf: {results[0].message}"
-        )
+        assert results[0].passed is True, f"{rule.rule_id} false-positive on populated leaf: {results[0].message}"
 
 
 # ── Audit: sibling boq_quality rules also need their fields ────────────────
@@ -168,9 +165,7 @@ def test_total_mismatch_uses_total_field() -> None:
 
     by_id = {r.element_ref: r for r in results}
     assert by_id["p1"].passed is True
-    assert by_id["p2"].passed is False, (
-        "total_mismatch must catch wrong stored total (requires total field on dict)"
-    )
+    assert by_id["p2"].passed is False, "total_mismatch must catch wrong stored total (requires total field on dict)"
 
 
 # ── Direct guard against the BUG-011 regression itself ────────────────────
@@ -190,6 +185,5 @@ def test_router_payload_must_carry_required_keys(missing_key: str) -> None:
 
     sample = _row(pos_id="p1", ordinal="01.001", unit="m3", quantity=1, unit_rate=1)
     assert missing_key in sample, (
-        f"BUG-011 sentinel: position dict must carry '{missing_key}' "
-        "for boq_quality rules to function"
+        f"BUG-011 sentinel: position dict must carry '{missing_key}' for boq_quality rules to function"
     )

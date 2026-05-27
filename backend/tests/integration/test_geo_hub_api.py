@@ -59,11 +59,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -79,7 +75,9 @@ async def _register(client: AsyncClient, label: str) -> tuple[str, dict[str, str
 
 
 async def _login(
-    client: AsyncClient, email: str, password: str,
+    client: AsyncClient,
+    email: str,
+    password: str,
 ) -> dict[str, str]:
     res = await client.post(
         "/api/v1/users/auth/login",
@@ -192,7 +190,9 @@ class TestAnchors:
 
     @pytest.mark.asyncio
     async def test_anchor_lat_lon_bounds_enforced(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         res = await http_client.post(
             "/api/v1/geo-hub/anchors/",
@@ -222,7 +222,10 @@ class TestAnchors:
 
     @pytest.mark.asyncio
     async def test_anchor_idor_cross_tenant_returns_404(
-        self, http_client, tenant_a, tenant_b,
+        self,
+        http_client,
+        tenant_a,
+        tenant_b,
     ):
         # tenant_b tries to mutate tenant_a's project anchor — must 404.
         anchors = await http_client.get(
@@ -239,7 +242,10 @@ class TestAnchors:
 
     @pytest.mark.asyncio
     async def test_anchor_idor_cross_tenant_get_returns_404(
-        self, http_client, tenant_a, tenant_b,
+        self,
+        http_client,
+        tenant_a,
+        tenant_b,
     ):
         anchors = await http_client.get(
             f"/api/v1/geo-hub/anchors/?project_id={tenant_a['project_id']}",
@@ -259,7 +265,9 @@ class TestAnchors:
 
     @pytest.mark.asyncio
     async def test_anchor_invalid_region_code_rejected(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         res = await http_client.post(
             "/api/v1/geo-hub/anchors/",
@@ -332,7 +340,9 @@ class TestTilesets:
 
     @pytest.mark.asyncio
     async def test_enqueue_tile_job_queues_and_pollable(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         source_id = str(uuid.uuid4())
         res = await http_client.post(
@@ -378,7 +388,9 @@ class TestTilesets:
 
     @pytest.mark.asyncio
     async def test_cancel_completed_job_returns_409(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         # Existing-tileset short-circuit produces a completed job.
         # First create a "ready" tileset by going through the FSM.
@@ -447,8 +459,7 @@ class TestTilesets:
     @pytest.mark.asyncio
     async def test_list_jobs_filtered_by_state(self, http_client, tenant_a):
         res = await http_client.get(
-            "/api/v1/geo-hub/jobs/"
-            f"?project_id={tenant_a['project_id']}&state=queued",
+            f"/api/v1/geo-hub/jobs/?project_id={tenant_a['project_id']}&state=queued",
             headers=tenant_a["headers"],
         )
         assert res.status_code == 200
@@ -477,7 +488,10 @@ class TestTilesets:
 
     @pytest.mark.asyncio
     async def test_generate_for_other_tenants_project_404(
-        self, http_client, tenant_a, tenant_b,
+        self,
+        http_client,
+        tenant_a,
+        tenant_b,
     ):
         res = await http_client.post(
             "/api/v1/geo-hub/tilesets/generate/",
@@ -492,7 +506,10 @@ class TestTilesets:
 
     @pytest.mark.asyncio
     async def test_generate_does_not_leak_other_tenants_tileset_uri(
-        self, http_client, tenant_a, tenant_b,
+        self,
+        http_client,
+        tenant_a,
+        tenant_b,
     ):
         """Cross-tenant reuse leak: tenant A owns a ``ready`` tileset for
         ``source_id=X``; tenant B then enqueues a job against THEIR own
@@ -543,9 +560,7 @@ class TestTilesets:
         job = res.json()
         # Critical: the reused tileset_id (if any) must belong to B, not A.
         assert job.get("tileset_id") != ts_id
-        assert job.get("output_uri") != (
-            "minio://oe/tilesets/tenant-a-secret/tileset.json"
-        )
+        assert job.get("output_uri") != ("minio://oe/tilesets/tenant-a-secret/tileset.json")
 
 
 # ── Imagery & Terrain (6 tests) ─────────────────────────────────────────
@@ -571,7 +586,9 @@ class TestImageryAndTerrain:
 
     @pytest.mark.asyncio
     async def test_only_one_default_imagery_per_project(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         # Add a second default — the first must be demoted.
         await http_client.post(
@@ -634,7 +651,9 @@ class TestImageryAndTerrain:
 
     @pytest.mark.asyncio
     async def test_terrain_source_token_never_returned(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         res = await http_client.post(
             "/api/v1/geo-hub/terrain-sources/",
@@ -702,11 +721,15 @@ _SAMPLE_GEOJSON = {
             "type": "Feature",
             "geometry": {
                 "type": "Polygon",
-                "coordinates": [[
-                    [13.40, 52.52], [13.41, 52.52],
-                    [13.41, 52.53], [13.40, 52.53],
-                    [13.40, 52.52],
-                ]],
+                "coordinates": [
+                    [
+                        [13.40, 52.52],
+                        [13.41, 52.52],
+                        [13.41, 52.53],
+                        [13.40, 52.53],
+                        [13.40, 52.52],
+                    ]
+                ],
             },
             "properties": {"name": "Plot A"},
         },
@@ -767,8 +790,7 @@ class TestOverlays:
     @pytest.mark.asyncio
     async def test_export_geojson_merges_overlays(self, http_client, tenant_a):
         res = await http_client.get(
-            "/api/v1/geo-hub/overlays/export-geojson/"
-            f"?project_id={tenant_a['project_id']}",
+            f"/api/v1/geo-hub/overlays/export-geojson/?project_id={tenant_a['project_id']}",
             headers=tenant_a["headers"],
         )
         assert res.status_code == 200
@@ -792,7 +814,9 @@ class TestOverlays:
 
     @pytest.mark.asyncio
     async def test_geojson_invalid_payload_rejected(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         res = await http_client.post(
             "/api/v1/geo-hub/overlays/import-geojson/",
@@ -864,7 +888,9 @@ class TestViewpoints:
 
     @pytest.mark.asyncio
     async def test_viewpoint_invalid_latitude_rejected(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         res = await http_client.post(
             "/api/v1/geo-hub/viewpoints/",
@@ -908,14 +934,15 @@ class TestMapConfig:
 
     @pytest.mark.asyncio
     async def test_map_config_unknown_development_returns_404(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         # ``development_id`` not under the project must 404 — IDOR closure
         # so the filter cannot be turned into a UUID-existence oracle.
         bogus = uuid.uuid4()
         res = await http_client.get(
-            f"/api/v1/geo-hub/map-config/{tenant_a['project_id']}"
-            f"?development_id={bogus}",
+            f"/api/v1/geo-hub/map-config/{tenant_a['project_id']}?development_id={bogus}",
             headers=tenant_a["headers"],
         )
         assert res.status_code == 404
@@ -927,7 +954,9 @@ class TestMapConfig:
 class TestAnchoredProjects:
     @pytest.mark.asyncio
     async def test_list_anchored_projects_returns_own(
-        self, http_client, tenant_a,
+        self,
+        http_client,
+        tenant_a,
     ):
         res = await http_client.get(
             "/api/v1/geo-hub/projects",
@@ -949,7 +978,10 @@ class TestAnchoredProjects:
 
     @pytest.mark.asyncio
     async def test_list_anchored_projects_excludes_other_tenants(
-        self, http_client, tenant_a, tenant_b,
+        self,
+        http_client,
+        tenant_a,
+        tenant_b,
     ):
         # tenant_b is a non-admin editor — tenant_a's anchored project
         # must NOT appear in tenant_b's list (single-tenant per-project).

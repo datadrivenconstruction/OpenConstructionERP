@@ -51,9 +51,19 @@ _INDEXES: tuple[tuple[str, str, tuple[str, ...], bool], ...] = (
     ("ix_oe_variations_order_variation_request_id", "oe_variations_order", ("variation_request_id",), False),
     ("ix_oe_variations_order_status", "oe_variations_order", ("status",), False),
     ("ix_oe_variations_cost_impact_variation_order_id", "oe_variations_cost_impact", ("variation_order_id",), False),
-    ("ix_oe_variations_schedule_impact_variation_order_id", "oe_variations_schedule_impact", ("variation_order_id",), False),
+    (
+        "ix_oe_variations_schedule_impact_variation_order_id",
+        "oe_variations_schedule_impact",
+        ("variation_order_id",),
+        False,
+    ),
     ("ix_oe_variations_site_measurement_project_id", "oe_variations_site_measurement", ("project_id",), False),
-    ("ix_oe_variations_site_measurement_variation_order_id", "oe_variations_site_measurement", ("variation_order_id",), False),
+    (
+        "ix_oe_variations_site_measurement_variation_order_id",
+        "oe_variations_site_measurement",
+        ("variation_order_id",),
+        False,
+    ),
     ("ix_oe_variations_daywork_sheet_project_id", "oe_variations_daywork_sheet", ("project_id",), False),
     ("ix_oe_variations_daywork_sheet_status", "oe_variations_daywork_sheet", ("status",), False),
     ("ix_oe_variations_daywork_line_sheet_id", "oe_variations_daywork_line", ("sheet_id",), False),
@@ -71,7 +81,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -87,9 +99,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
     money = _money_type(is_sqlite, 4)
     money6 = _money_type(is_sqlite, 6)
 
@@ -98,13 +108,15 @@ def upgrade() -> None:
         op.create_table(
             "oe_variations_notice",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("project_id", guid_type,
-                      sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
-                      nullable=False),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "project_id", guid_type, sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False
+            ),
             sa.Column("code", sa.String(50), nullable=False),
             sa.Column("title", sa.String(500), nullable=False, server_default=""),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
@@ -127,16 +139,18 @@ def upgrade() -> None:
         op.create_table(
             "oe_variations_request",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("project_id", guid_type,
-                      sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
-                      nullable=False),
-            sa.Column("notice_id", guid_type,
-                      sa.ForeignKey("oe_variations_notice.id", ondelete="SET NULL"),
-                      nullable=True),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "project_id", guid_type, sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False
+            ),
+            sa.Column(
+                "notice_id", guid_type, sa.ForeignKey("oe_variations_notice.id", ondelete="SET NULL"), nullable=True
+            ),
             sa.Column("code", sa.String(50), nullable=False),
             sa.Column("title", sa.String(500), nullable=False, server_default=""),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
@@ -161,16 +175,21 @@ def upgrade() -> None:
         op.create_table(
             "oe_variations_order",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("project_id", guid_type,
-                      sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
-                      nullable=False),
-            sa.Column("variation_request_id", guid_type,
-                      sa.ForeignKey("oe_variations_request.id", ondelete="SET NULL"),
-                      nullable=True),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "project_id", guid_type, sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False
+            ),
+            sa.Column(
+                "variation_request_id",
+                guid_type,
+                sa.ForeignKey("oe_variations_request.id", ondelete="SET NULL"),
+                nullable=True,
+            ),
             sa.Column("code", sa.String(50), nullable=False),
             sa.Column("title", sa.String(500), nullable=False, server_default=""),
             sa.Column("final_cost_impact", money, nullable=False, server_default="0"),
@@ -192,13 +211,18 @@ def upgrade() -> None:
         op.create_table(
             "oe_variations_cost_impact",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("variation_order_id", guid_type,
-                      sa.ForeignKey("oe_variations_order.id", ondelete="CASCADE"),
-                      nullable=False),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "variation_order_id",
+                guid_type,
+                sa.ForeignKey("oe_variations_order.id", ondelete="CASCADE"),
+                nullable=False,
+            ),
             sa.Column("category", sa.String(40), nullable=False, server_default="material"),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
             sa.Column("quantity", money6, nullable=False, server_default="0"),
@@ -214,18 +238,28 @@ def upgrade() -> None:
         op.create_table(
             "oe_variations_schedule_impact",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("variation_order_id", guid_type,
-                      sa.ForeignKey("oe_variations_order.id", ondelete="CASCADE"),
-                      nullable=False),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "variation_order_id",
+                guid_type,
+                sa.ForeignKey("oe_variations_order.id", ondelete="CASCADE"),
+                nullable=False,
+            ),
             sa.Column("affected_activity_ref", sa.String(255), nullable=False, server_default=""),
             sa.Column("original_finish_date", sa.String(20), nullable=True),
             sa.Column("revised_finish_date", sa.String(20), nullable=True),
             sa.Column("days_added", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("is_critical_path", sa.Boolean(), nullable=False, server_default=sa.text("0") if is_sqlite else sa.text("false")),
+            sa.Column(
+                "is_critical_path",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.text("0") if is_sqlite else sa.text("false"),
+            ),
             sa.Column("justification", sa.Text(), nullable=False, server_default=""),
         )
 
@@ -234,13 +268,15 @@ def upgrade() -> None:
         op.create_table(
             "oe_variations_site_measurement",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("project_id", guid_type,
-                      sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
-                      nullable=False),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "project_id", guid_type, sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False
+            ),
             sa.Column("recorded_at", sa.String(40), nullable=True),
             sa.Column("recorded_by", sa.String(36), nullable=True),
             sa.Column("location", sa.String(500), nullable=False, server_default=""),
@@ -253,9 +289,12 @@ def upgrade() -> None:
             sa.Column("notes", sa.Text(), nullable=False, server_default=""),
             # Plain UUID, no FK to oe_contracts_*.
             sa.Column("contract_line_id", guid_type, nullable=True),
-            sa.Column("variation_order_id", guid_type,
-                      sa.ForeignKey("oe_variations_order.id", ondelete="SET NULL"),
-                      nullable=True),
+            sa.Column(
+                "variation_order_id",
+                guid_type,
+                sa.ForeignKey("oe_variations_order.id", ondelete="SET NULL"),
+                nullable=True,
+            ),
         )
 
     # ── oe_variations_daywork_sheet ───────────────────────────────────────
@@ -263,13 +302,15 @@ def upgrade() -> None:
         op.create_table(
             "oe_variations_daywork_sheet",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("project_id", guid_type,
-                      sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
-                      nullable=False),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "project_id", guid_type, sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False
+            ),
             sa.Column("sheet_number", sa.String(50), nullable=False),
             sa.Column("work_date", sa.String(20), nullable=True),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
@@ -282,7 +323,8 @@ def upgrade() -> None:
             # Plain UUID, no FK.
             sa.Column("supplied_via_contract_id", guid_type, nullable=True),
             sa.UniqueConstraint(
-                "project_id", "sheet_number",
+                "project_id",
+                "sheet_number",
                 name="uq_oe_variations_daywork_project_sheet",
             ),
         )
@@ -292,13 +334,18 @@ def upgrade() -> None:
         op.create_table(
             "oe_variations_daywork_line",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("sheet_id", guid_type,
-                      sa.ForeignKey("oe_variations_daywork_sheet.id", ondelete="CASCADE"),
-                      nullable=False),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "sheet_id",
+                guid_type,
+                sa.ForeignKey("oe_variations_daywork_sheet.id", ondelete="CASCADE"),
+                nullable=False,
+            ),
             sa.Column("line_type", sa.String(20), nullable=False, server_default="labor"),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
             sa.Column("quantity", money6, nullable=False, server_default="0"),
@@ -314,13 +361,15 @@ def upgrade() -> None:
         op.create_table(
             "oe_variations_disruption_claim",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("project_id", guid_type,
-                      sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
-                      nullable=False),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "project_id", guid_type, sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False
+            ),
             sa.Column("raised_at", sa.String(40), nullable=True),
             sa.Column("raised_by", sa.String(36), nullable=True),
             sa.Column("claim_period_start", sa.String(20), nullable=True),
@@ -342,13 +391,15 @@ def upgrade() -> None:
         op.create_table(
             "oe_variations_eot_claim",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("project_id", guid_type,
-                      sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
-                      nullable=False),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "project_id", guid_type, sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False
+            ),
             sa.Column("raised_at", sa.String(40), nullable=True),
             sa.Column("raised_by", sa.String(36), nullable=True),
             sa.Column("claim_period_start", sa.String(20), nullable=True),
@@ -357,7 +408,12 @@ def upgrade() -> None:
             sa.Column("root_cause_category", sa.String(40), nullable=False, server_default="neutral"),
             sa.Column("requested_days", sa.Integer(), nullable=False, server_default="0"),
             sa.Column("granted_days", sa.Integer(), nullable=True),
-            sa.Column("critical_path_impact", sa.Boolean(), nullable=False, server_default=sa.text("0") if is_sqlite else sa.text("false")),
+            sa.Column(
+                "critical_path_impact",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.text("0") if is_sqlite else sa.text("false"),
+            ),
             sa.Column("status", sa.String(40), nullable=False, server_default="draft"),
             sa.Column("decision_at", sa.String(40), nullable=True),
             sa.Column("decision_notes", sa.Text(), nullable=False, server_default=""),
@@ -368,13 +424,15 @@ def upgrade() -> None:
         op.create_table(
             "oe_variations_final_account",
             sa.Column("id", guid_type, primary_key=True),
-            sa.Column("created_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("updated_at", sa.DateTime(timezone=True),
-                      server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-            sa.Column("project_id", guid_type,
-                      sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
-                      nullable=False),
+            sa.Column(
+                "created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False
+            ),
+            sa.Column(
+                "project_id", guid_type, sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False
+            ),
             sa.Column("original_contract_value", money, nullable=False, server_default="0"),
             sa.Column("variations_total", money, nullable=False, server_default="0"),
             sa.Column("daywork_total", money, nullable=False, server_default="0"),
@@ -387,7 +445,8 @@ def upgrade() -> None:
             sa.Column("agreed_at", sa.String(40), nullable=True),
             sa.Column("closed_at", sa.String(40), nullable=True),
             sa.UniqueConstraint(
-                "project_id", name="uq_oe_variations_final_account_project",
+                "project_id",
+                name="uq_oe_variations_final_account_project",
             ),
         )
 

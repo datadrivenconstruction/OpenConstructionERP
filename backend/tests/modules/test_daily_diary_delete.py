@@ -77,6 +77,7 @@ async def session() -> AsyncIterator[AsyncSession]:
     tests against PostgreSQL, not here.
     """
     from sqlalchemy import text
+
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", future=True)
     async with engine.begin() as conn:
         await conn.execute(text("PRAGMA foreign_keys = OFF"))

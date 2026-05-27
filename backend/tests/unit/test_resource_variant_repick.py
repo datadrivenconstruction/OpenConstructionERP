@@ -355,9 +355,7 @@ async def test_repick_emits_activity_log_when_actor_provided(
     stub_service_with_position,
 ) -> None:
     svc, _pos, _repo = stub_service_with_position(_make_metadata())
-    await svc.repick_resource_variant(
-        "pos-1", 0, "C25/30 ready-mix", actor_id="user-1"
-    )
+    await svc.repick_resource_variant("pos-1", 0, "C25/30 ready-mix", actor_id="user-1")
     assert len(svc._activity_log_calls) == 1  # type: ignore[attr-defined]
     call = svc._activity_log_calls[0]  # type: ignore[attr-defined]
     assert call["action"] == "position.resource_variant_repicked"

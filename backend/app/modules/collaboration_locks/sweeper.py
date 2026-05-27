@@ -84,9 +84,7 @@ async def _sweep_once() -> int:
 
 async def _sweeper_loop() -> None:
     """‌⁠‍Main loop. Safe to cancel."""
-    logger.info(
-        "collab lock sweeper started (interval=%ss)", SWEEP_INTERVAL_SECONDS
-    )
+    logger.info("collab lock sweeper started (interval=%ss)", SWEEP_INTERVAL_SECONDS)
     try:
         while True:
             try:

@@ -133,9 +133,7 @@ def _extract_vertices(geometry: dict[str, Any]) -> list[tuple[float, float, floa
     candidates: list[Any] = []
     if isinstance(geometry.get("vertices"), list):
         candidates = geometry["vertices"]
-    elif isinstance(geometry.get("mesh"), dict) and isinstance(
-        geometry["mesh"].get("vertices"), list
-    ):
+    elif isinstance(geometry.get("mesh"), dict) and isinstance(geometry["mesh"].get("vertices"), list):
         candidates = geometry["mesh"]["vertices"]
 
     out: list[tuple[float, float, float]] = []
@@ -216,12 +214,12 @@ def geometry_signature(element: dict[str, Any]) -> SignatureV1:
         mesh_hash = hashlib.sha256(element_id.encode("utf-8")).hexdigest()
 
     quantities = element.get("quantities") or {}
-    volume = _safe_float(
-        quantities.get("volume") if isinstance(quantities, dict) else None
-    ) or _safe_float(geometry.get("volume_m3"))
-    surface_area = _safe_float(
-        quantities.get("area") if isinstance(quantities, dict) else None
-    ) or _safe_float(geometry.get("area_m2"))
+    volume = _safe_float(quantities.get("volume") if isinstance(quantities, dict) else None) or _safe_float(
+        geometry.get("volume_m3")
+    )
+    surface_area = _safe_float(quantities.get("area") if isinstance(quantities, dict) else None) or _safe_float(
+        geometry.get("area_m2")
+    )
 
     # Bounding box: prefer explicit geometry.bbox, else derive from vertices.
     bbox_min: tuple[float, float, float]

@@ -99,11 +99,7 @@ def canonical_name_for(file_kind: str, entity: Any) -> str:
         # These kinds reuse Document/Photo storage at the moment, but
         # may grow their own tables. Accept either ``name`` or
         # ``filename`` so the helper survives a future schema split.
-        name = (
-            getattr(entity, "name", None)
-            or getattr(entity, "filename", None)
-            or ""
-        )
+        name = getattr(entity, "name", None) or getattr(entity, "filename", None) or ""
         return _strip(name) or "untitled"
 
     raise ValueError(f"Unknown file_kind for canonical_name_for: {file_kind!r}")

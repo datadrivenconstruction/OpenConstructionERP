@@ -249,9 +249,9 @@ class DwgAdapter:
             if row is not None:
                 return row
             logger.warning(
-                "DwgAdapter: CadExtractionSession %s not found, "
-                "falling back to latest for project %s",
-                bim_model_id, project_id,
+                "DwgAdapter: CadExtractionSession %s not found, falling back to latest for project %s",
+                bim_model_id,
+                project_id,
             )
 
         # Project_id on CadExtractionSession is String(255) not GUID,
@@ -368,22 +368,11 @@ class DwgAdapter:
             # the JSON list, prefixed with the cad session id so a
             # multi-session project doesn't collide).
             raw_id = (
-                elem.get("id")
-                or elem.get("Id")
-                or elem.get("element id")
-                or elem.get("elementid")
-                or elem.get("guid")
+                elem.get("id") or elem.get("Id") or elem.get("element id") or elem.get("elementid") or elem.get("guid")
             )
-            element_id = (
-                str(raw_id) if raw_id is not None
-                else f"{sess.id}:{idx}"
-            )
+            element_id = str(raw_id) if raw_id is not None else f"{sess.id}:{idx}"
 
-            name = (
-                attrs.get("name")
-                or attrs.get("type_name")
-                or elem.get("description")
-            )
+            name = attrs.get("name") or attrs.get("type_name") or elem.get("description")
 
             out.append(
                 SourceElement(

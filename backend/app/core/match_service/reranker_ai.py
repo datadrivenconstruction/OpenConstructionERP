@@ -60,6 +60,7 @@ def _dynamic_band_for_ai(score: float) -> ConfidenceBand:
         return "medium"
     return "low"
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -86,16 +87,18 @@ def _build_user_prompt(envelope: ElementEnvelope, candidates: list[MatchCandidat
     }
     candidate_payloads: list[dict[str, Any]] = []
     for c in candidates:
-        candidate_payloads.append({
-            "code": c.code,
-            "description": c.description,
-            "unit": c.unit,
-            "unit_rate": c.unit_rate,
-            "currency": c.currency,
-            "vector_score": round(c.vector_score, 4),
-            "boosted_score": round(c.score, 4),
-            "classification": c.classification,
-        })
+        candidate_payloads.append(
+            {
+                "code": c.code,
+                "description": c.description,
+                "unit": c.unit,
+                "unit_rate": c.unit_rate,
+                "currency": c.currency,
+                "vector_score": round(c.vector_score, 4),
+                "boosted_score": round(c.score, 4),
+                "classification": c.classification,
+            }
+        )
 
     return (
         "ELEMENT:\n"
@@ -174,7 +177,8 @@ async def rerank_top_k(
 
     try:
         provider, api_key = resolve_provider_and_key(
-            ai_settings, preferred_model=RERANK_MODEL_HINT,
+            ai_settings,
+            preferred_model=RERANK_MODEL_HINT,
         )
     except ValueError:
         return candidates, 0.0
@@ -215,11 +219,13 @@ async def rerank_top_k(
         except (TypeError, ValueError):
             new_score = cand.score
         clamped_score = max(0.0, min(1.0, new_score))
-        cand = cand.model_copy(update={
-            "score": clamped_score,
-            "confidence_band": _dynamic_band_for_ai(clamped_score),
-            "reasoning": str(entry.get("reasoning") or "")[:500] or None,
-        })
+        cand = cand.model_copy(
+            update={
+                "score": clamped_score,
+                "confidence_band": _dynamic_band_for_ai(clamped_score),
+                "reasoning": str(entry.get("reasoning") or "")[:500] or None,
+            }
+        )
         reordered.append(cand)
 
     # Append any candidates the LLM forgot to mention so the response

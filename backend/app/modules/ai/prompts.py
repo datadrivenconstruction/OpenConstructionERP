@@ -110,6 +110,7 @@ def fence_user_content(text: str, *, max_len: int = USER_FENCE_MAX_LEN) -> str:
         f"{_USER_FENCE_CLOSE}"
     )
 
+
 TEXT_ESTIMATE_PROMPT = """‌⁠‍\
 You are a professional construction cost estimator with 20+ years of experience.
 Based on the following project description, generate a detailed Bill of Quantities.

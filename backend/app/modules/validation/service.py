@@ -121,11 +121,7 @@ class ValidationModuleService:
             target_id=str(boq_id),
             rule_set="+".join(rule_sets),
             status=engine_report.status.value,
-            score=(
-                None
-                if engine_report.score is None
-                else str(round(engine_report.score, 4))
-            ),
+            score=(None if engine_report.score is None else str(round(engine_report.score, 4))),
             total_rules=len(engine_report.results),
             passed_count=len(engine_report.passed_rules),
             warning_count=len(engine_report.warnings),

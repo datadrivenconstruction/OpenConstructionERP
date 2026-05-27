@@ -36,7 +36,6 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-
 # ── Per-test isolated SQLite (see feedback_test_isolation.md) ─────────────
 
 
@@ -130,9 +129,7 @@ async def test_login_timing_parity_unknown_user_vs_bad_password(session: AsyncSe
     async def _bad_username() -> None:
         # Definitely-not-registered email — exercises the ``user is None`` branch.
         with suppress(HTTPException):
-            await svc.login(
-                LoginRequest(email=f"ghost-{uuid.uuid4().hex[:6]}@timing.io", password="WrongPass123!")
-            )
+            await svc.login(LoginRequest(email=f"ghost-{uuid.uuid4().hex[:6]}@timing.io", password="WrongPass123!"))
 
     async def _bad_password() -> None:
         # Real user, wrong password — exercises the ``verify_password`` branch.
@@ -169,7 +166,7 @@ async def test_login_timing_parity_unknown_user_vs_bad_password(session: AsyncSe
     ratio = max(a, b) / min(a, b)
 
     assert ratio < 3.0, (
-        f"Login timing leak detected: unknown-user={mean_unknown*1000:.0f}ms  "
-        f"bad-password={mean_badpw*1000:.0f}ms  ratio={ratio:.2f}x (should be <3x). "
+        f"Login timing leak detected: unknown-user={mean_unknown * 1000:.0f}ms  "
+        f"bad-password={mean_badpw * 1000:.0f}ms  ratio={ratio:.2f}x (should be <3x). "
         f"Likely cause: the dummy-bcrypt call in UserService.login was removed."
     )

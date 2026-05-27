@@ -87,9 +87,7 @@ async def test_schedule_cpm_route_exists(client, auth_headers, project_id):
     # 404 with a "no schedule" body would also be acceptable, as long as we
     # don't get a raw FastAPI 404 ("Not Found") OR a 422 saying
     # ``schedule_id`` is required.
-    assert resp.status_code in (200, 404), (
-        f"Expected 200 or 404 with body, got {resp.status_code}: {resp.text[:200]}"
-    )
+    assert resp.status_code in (200, 404), f"Expected 200 or 404 with body, got {resp.status_code}: {resp.text[:200]}"
     if resp.status_code == 404:
         # Must not be the bare framework 404 — should carry a JSON body.
         body = resp.json()
@@ -126,9 +124,7 @@ async def test_finance_invoices_collection_returns_list(client, auth_headers):
 
 
 @pytest.mark.asyncio
-async def test_finance_invoice_create_with_seed_payload_succeeds(
-    client, auth_headers, project_id
-):
+async def test_finance_invoice_create_with_seed_payload_succeeds(client, auth_headers, project_id):
     """Seed-shaped payload with blank ``invoice_date`` is accepted (BUG-FINANCE01)."""
     payload = {
         "project_id": project_id,
@@ -140,9 +136,7 @@ async def test_finance_invoice_create_with_seed_payload_succeeds(
         "tax_amount": "190.00",
         "amount_total": "1190.00",
     }
-    resp = await client.post(
-        "/api/v1/finance/", json=payload, headers=auth_headers
-    )
+    resp = await client.post("/api/v1/finance/", json=payload, headers=auth_headers)
     assert resp.status_code in (200, 201), f"{resp.status_code}: {resp.text[:300]}"
 
 

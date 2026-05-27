@@ -22,14 +22,12 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from unittest.mock import patch
 
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 
 from .conftest import _register_user
-
 
 # ── Shared fixture: a buyer wired to a reservation + SPA + payment schedule ──
 
@@ -43,7 +41,9 @@ async def _mk_buyer_with_full_chain(
     Returns ids the tests reuse.
     """
     _uid, _email, headers = await _register_user(
-        client, role="admin", tag=f"portal-{uuid.uuid4().hex[:6]}",
+        client,
+        role="admin",
+        tag=f"portal-{uuid.uuid4().hex[:6]}",
     )
 
     proj = await client.post(
@@ -122,7 +122,8 @@ async def portal_chain(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_issue_then_verify_roundtrip(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """Manager issues a magic link; the public verify endpoint accepts it."""
     res = await client.post(
@@ -152,7 +153,8 @@ async def test_issue_then_verify_roundtrip(
 
 @pytest.mark.asyncio
 async def test_issued_token_has_portal_scope(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """Sanity: the JWT we mint carries ``scope='portal'`` + ``type='portal''``."""
     from jose import jwt
@@ -167,7 +169,9 @@ async def test_issued_token_has_portal_scope(
     token = res.json()["token"]
     settings = get_settings()
     payload = jwt.decode(
-        token, settings.jwt_secret, algorithms=[settings.jwt_algorithm],
+        token,
+        settings.jwt_secret,
+        algorithms=[settings.jwt_algorithm],
     )
     assert payload["scope"] == "portal"
     assert payload["type"] == "portal"
@@ -274,12 +278,8 @@ async def test_two_buyer_tokens_are_isolated(client: AsyncClient):
     token_a = issue_a.json()["token"]
     token_b = issue_b.json()["token"]
 
-    verify_a = await client.post(
-        "/api/v1/property-dev/portal/verify/", json={"token": token_a}
-    )
-    verify_b = await client.post(
-        "/api/v1/property-dev/portal/verify/", json={"token": token_b}
-    )
+    verify_a = await client.post("/api/v1/property-dev/portal/verify/", json={"token": token_a})
+    verify_b = await client.post("/api/v1/property-dev/portal/verify/", json={"token": token_b})
     assert verify_a.status_code == 200
     assert verify_b.status_code == 200
     assert verify_a.json()["buyer_id"] == chain_a["buyer_id"]
@@ -292,7 +292,8 @@ async def test_two_buyer_tokens_are_isolated(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_overview_returns_buyer_data(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """``/buyer/{token}/overview/`` returns the buyer's summary."""
     issued = await client.post(
@@ -302,9 +303,7 @@ async def test_overview_returns_buyer_data(
     )
     token = issued.json()["token"]
 
-    overview = await client.get(
-        f"/api/v1/property-dev/portal/buyer/{token}/overview/"
-    )
+    overview = await client.get(f"/api/v1/property-dev/portal/buyer/{token}/overview/")
     assert overview.status_code == 200, overview.text
     body = overview.json()
     assert body["buyer_id"] == portal_chain["buyer_id"]
@@ -321,7 +320,8 @@ async def test_overview_returns_buyer_data(
 
 @pytest.mark.asyncio
 async def test_overview_money_fields_are_strings(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """Decimal money values come back as plain-decimal strings, not floats."""
     issued = await client.post(
@@ -330,9 +330,7 @@ async def test_overview_money_fields_are_strings(
         headers=portal_chain["headers"],
     )
     token = issued.json()["token"]
-    overview = await client.get(
-        f"/api/v1/property-dev/portal/buyer/{token}/overview/"
-    )
+    overview = await client.get(f"/api/v1/property-dev/portal/buyer/{token}/overview/")
     body = overview.json()
     for field in (
         "payment_schedule_total",
@@ -380,10 +378,7 @@ async def test_idor_cross_buyer_document_download_404(client: AsyncClient):
     doc_id_b = upload.json()["document_id"]
 
     # Buyer A tries to download Buyer B's doc — must 404.
-    sneak = await client.get(
-        f"/api/v1/property-dev/portal/buyer/{token_a}"
-        f"/documents/{doc_id_b}/download/"
-    )
+    sneak = await client.get(f"/api/v1/property-dev/portal/buyer/{token_a}/documents/{doc_id_b}/download/")
     assert sneak.status_code == 404, sneak.text
 
 
@@ -399,9 +394,7 @@ async def test_random_uuid_download_404(client: AsyncClient, portal_chain):
         headers=portal_chain["headers"],
     )
     token = issued.json()["token"]
-    res = await client.get(
-        f"/api/v1/property-dev/portal/buyer/{token}/documents/{uuid.uuid4()}/download/"
-    )
+    res = await client.get(f"/api/v1/property-dev/portal/buyer/{token}/documents/{uuid.uuid4()}/download/")
     assert res.status_code == 404, res.text
 
 
@@ -410,7 +403,8 @@ async def test_random_uuid_download_404(client: AsyncClient, portal_chain):
 
 @pytest.mark.asyncio
 async def test_kyc_upload_png_as_pdf_rejected(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """PNG magic bytes labelled as ``.pdf`` → 415, not silently stored."""
     issued = await client.post(
@@ -436,7 +430,8 @@ async def test_kyc_upload_png_as_pdf_rejected(
 
 @pytest.mark.asyncio
 async def test_kyc_upload_pdf_happy_path(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """Real PDF bytes → 201 + document_id."""
     issued = await client.post(
@@ -464,7 +459,8 @@ async def test_kyc_upload_pdf_happy_path(
 
 @pytest.mark.asyncio
 async def test_kyc_upload_invalid_type_rejected(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """An unsupported KYC code (e.g. arbitrary string) → 400."""
     issued = await client.post(
@@ -486,7 +482,8 @@ async def test_kyc_upload_invalid_type_rejected(
 
 @pytest.mark.asyncio
 async def test_overview_lists_uploaded_kyc(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """After upload, the document appears in ``overview.documents``."""
     issued = await client.post(
@@ -502,18 +499,14 @@ async def test_overview_lists_uploaded_kyc(
     )
     assert upload.status_code == 201, upload.text
 
-    overview = await client.get(
-        f"/api/v1/property-dev/portal/buyer/{token}/overview/"
-    )
+    overview = await client.get(f"/api/v1/property-dev/portal/buyer/{token}/overview/")
     body = overview.json()
     kyc_docs = [d for d in body["documents"] if d["doc_type"].startswith("kyc:")]
     assert len(kyc_docs) >= 1
     assert any(d["doc_type"] == "kyc:passport" for d in kyc_docs)
 
     # The corresponding KYC request is now marked uploaded.
-    passport_req = next(
-        (r for r in body["kyc_requests"] if r["code"] == "passport"), None
-    )
+    passport_req = next((r for r in body["kyc_requests"] if r["code"] == "passport"), None)
     assert passport_req is not None
     assert passport_req["is_uploaded"] is True
 
@@ -523,7 +516,8 @@ async def test_overview_lists_uploaded_kyc(
 
 @pytest.mark.asyncio
 async def test_contact_agent_creates_activity(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """Buyer message → CrmActivity row with [source=portal] in body."""
     issued = await client.post(
@@ -560,7 +554,8 @@ async def test_contact_agent_creates_activity(
 
 @pytest.mark.asyncio
 async def test_contact_agent_publishes_event(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """``crm.lead.message_received`` is published with the buyer id.
 
@@ -609,7 +604,8 @@ async def test_contact_agent_publishes_event(
 
 @pytest.mark.asyncio
 async def test_rate_limit_fires_on_31st_request(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """Burst of N+1 public-endpoint calls trips the per-token approval_limiter.
 
@@ -645,9 +641,7 @@ async def test_rate_limit_fires_on_31st_request(
         # before the limiter could fire. /overview/ stays multi-use
         # (session JWT semantics) so the limiter is the only thing
         # rejecting the 4th call — which is what this test pins.
-        overview_path = (
-            f"/api/v1/property-dev/portal/buyer/{token}/overview/"
-        )
+        overview_path = f"/api/v1/property-dev/portal/buyer/{token}/overview/"
         first = await client.get(overview_path)
         second = await client.get(overview_path)
         third = await client.get(overview_path)
@@ -669,7 +663,9 @@ async def test_rate_limit_fires_on_31st_request(
 async def test_rbac_editor_cannot_issue(client: AsyncClient, portal_chain):
     """Editor role gets 403 on POST /issue/."""
     _uid, _email, editor_headers = await _register_user(
-        client, role="editor", tag=f"port-ed-{uuid.uuid4().hex[:6]}",
+        client,
+        role="editor",
+        tag=f"port-ed-{uuid.uuid4().hex[:6]}",
     )
     res = await client.post(
         "/api/v1/property-dev/portal/issue/",
@@ -683,7 +679,9 @@ async def test_rbac_editor_cannot_issue(client: AsyncClient, portal_chain):
 async def test_rbac_manager_can_issue(client: AsyncClient):
     """Manager-role user (owning the project) can issue."""
     _uid, _email, headers = await _register_user(
-        client, role="manager", tag=f"port-mg-{uuid.uuid4().hex[:6]}",
+        client,
+        role="manager",
+        tag=f"port-mg-{uuid.uuid4().hex[:6]}",
     )
     proj = await client.post(
         "/api/v1/projects/",
@@ -729,7 +727,9 @@ async def test_cross_tenant_issuance_404(client: AsyncClient):
     """Tenant B cannot mint a portal link for tenant A's buyer."""
     chain_a = await _mk_buyer_with_full_chain(client)
     _uid, _email, headers_b = await _register_user(
-        client, role="manager", tag=f"port-xtnt-{uuid.uuid4().hex[:6]}",
+        client,
+        role="manager",
+        tag=f"port-xtnt-{uuid.uuid4().hex[:6]}",
     )
 
     res = await client.post(
@@ -745,7 +745,8 @@ async def test_cross_tenant_issuance_404(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_buyer_links_lists_active_tokens(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """``GET /buyer-links/{buyer_id}/`` reflects freshly-issued tokens."""
     await client.post(
@@ -769,7 +770,8 @@ async def test_buyer_links_lists_active_tokens(
 
 @pytest.mark.asyncio
 async def test_revoked_token_not_in_active_list(
-    client: AsyncClient, portal_chain,
+    client: AsyncClient,
+    portal_chain,
 ):
     """After revoke, the row disappears from the active list."""
     issued = await client.post(
@@ -805,9 +807,7 @@ async def test_verify_updates_last_used(client: AsyncClient, portal_chain):
     token = issued.json()["token"]
     row_id = issued.json()["row"]["id"]
 
-    await client.post(
-        "/api/v1/property-dev/portal/verify/", json={"token": token}
-    )
+    await client.post("/api/v1/property-dev/portal/verify/", json={"token": token})
 
     from app.database import async_session_factory
     from app.modules.property_dev.models import PortalToken
@@ -844,7 +844,5 @@ async def test_jwt_scope_tampering_rejected(client: AsyncClient):
         settings.jwt_secret,
         algorithm=settings.jwt_algorithm,
     )
-    res = await client.post(
-        "/api/v1/property-dev/portal/verify/", json={"token": forged}
-    )
+    res = await client.post("/api/v1/property-dev/portal/verify/", json={"token": forged})
     assert res.status_code == 401, res.text

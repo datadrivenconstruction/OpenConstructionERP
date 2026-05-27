@@ -63,9 +63,7 @@ async def session() -> AsyncSession:
     _register_models()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with factory() as s:
         from app.modules.projects.models import Project
         from app.modules.users.models import User
@@ -104,9 +102,7 @@ async def session() -> AsyncSession:
         pass
 
 
-async def _seed_view(
-    session: AsyncSession, owner_id: uuid.UUID, *, name: str = "V1"
-) -> uuid.UUID:
+async def _seed_view(session: AsyncSession, owner_id: uuid.UUID, *, name: str = "V1") -> uuid.UUID:
     service = SmartViewService(session)
     created = await service.create_view(
         SmartViewCreate(

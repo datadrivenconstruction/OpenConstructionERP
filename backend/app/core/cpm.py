@@ -241,14 +241,10 @@ async def calculate_cpm(
             es = max(es, candidate)
 
         act["early_start"] = max(es, 0)
-        act["early_finish"] = _add_working_days(
-            act["early_start"], act["duration"], work_days, exceptions, p_start
-        )
+        act["early_finish"] = _add_working_days(act["early_start"], act["duration"], work_days, exceptions, p_start)
 
     # ── Project duration ─────────────────────────────────────────────────
-    project_finish = max(
-        (act_map[aid]["early_finish"] for aid in act_map), default=0
-    )
+    project_finish = max((act_map[aid]["early_finish"] for aid in act_map), default=0)
 
     # ── Backward Pass ────────────────────────────────────────────────────
     # Initialize late finish to project duration
@@ -278,9 +274,7 @@ async def calculate_cpm(
             lf = min(lf, candidate)
 
         act["late_finish"] = lf
-        act["late_start"] = _sub_working_days(
-            act["late_finish"], act["duration"], work_days, exceptions, p_start
-        )
+        act["late_start"] = _sub_working_days(act["late_finish"], act["duration"], work_days, exceptions, p_start)
 
     # ── Float calculation ────────────────────────────────────────────────
     for aid in act_map:

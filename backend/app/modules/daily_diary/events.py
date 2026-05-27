@@ -93,7 +93,8 @@ async def _on_diary_signed(event: Event) -> None:
         )
     except Exception:
         logger.debug(
-            "daily_diary: kpi_recompute on signed failed", exc_info=True,
+            "daily_diary: kpi_recompute on signed failed",
+            exc_info=True,
         )
 
 

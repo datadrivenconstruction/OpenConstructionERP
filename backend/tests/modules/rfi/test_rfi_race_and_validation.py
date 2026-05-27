@@ -96,13 +96,9 @@ def _make_service_with_collisions(collisions: int) -> RFIService:
 class TestSchemaUniqueConstraint:
     def test_rfi_number_uniqueness_per_project_is_in_model(self) -> None:
         """The model carries the named UniqueConstraint we migrate to."""
-        names = {
-            getattr(c, "name", None)
-            for c in RFI.__table__.constraints
-        }
+        names = {getattr(c, "name", None) for c in RFI.__table__.constraints}
         assert "uq_rfi_project_number" in names, (
-            "Expected uq_rfi_project_number UniqueConstraint on oe_rfi_rfi. "
-            f"Found constraints: {names}"
+            f"Expected uq_rfi_project_number UniqueConstraint on oe_rfi_rfi. Found constraints: {names}"
         )
 
     def test_attachments_column_present(self) -> None:

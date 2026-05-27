@@ -64,11 +64,7 @@ async def _force_set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await session.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await session.commit()
 
 

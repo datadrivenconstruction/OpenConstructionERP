@@ -469,9 +469,7 @@ def can_modify_selection(buyer: Any, today: date) -> bool:
     return today < deadline
 
 
-def derive_plot_construction_progress(
-    plot_id: uuid.UUID, work_packages: Iterable[dict[str, Any]]
-) -> Decimal:
+def derive_plot_construction_progress(plot_id: uuid.UUID, work_packages: Iterable[dict[str, Any]]) -> Decimal:
     """Return overall construction % for a plot from a work-package list.
 
     Each work package is expected to be a dict with ``plot_id``, ``weight``
@@ -539,8 +537,7 @@ _DEPOSIT_FORFEITURE_RULES: dict[str, tuple[Decimal, str, str]] = {
     "US": (
         Decimal("1.00"),
         "Uniform Land Transactions Act (state-by-state)",
-        "Earnest money typically forfeited on buyer default; "
-        "state-specific overrides may reduce amount.",
+        "Earnest money typically forfeited on buyer default; state-specific overrides may reduce amount.",
     ),
     "DE": (
         Decimal("0.00"),
@@ -551,22 +548,19 @@ _DEPOSIT_FORFEITURE_RULES: dict[str, tuple[Decimal, str, str]] = {
     "FR": (
         Decimal("1.00"),
         "Code civil Art. 1590 — arrhes",
-        "Buyer forfeits arrhes on rescission; seller delivers 2x arrhes "
-        "if seller withdraws.",
+        "Buyer forfeits arrhes on rescission; seller delivers 2x arrhes if seller withdraws.",
     ),
     "AU": (
         Decimal("1.00"),
         "Conveyancing Act (state-by-state) — typically 10% deposit",
-        "Buyer forfeits deposit on default after cooling-off (typically "
-        "5 business days).",
+        "Buyer forfeits deposit on default after cooling-off (typically 5 business days).",
     ),
 }
 
 _DEFAULT_FORFEITURE_RULE: tuple[Decimal, str, str] = (
     Decimal("1.00"),
     "Generic common-law forfeiture",
-    "No jurisdiction-specific rule loaded; full deposit forfeited "
-    "on buyer-initiated cancellation (generic default).",
+    "No jurisdiction-specific rule loaded; full deposit forfeited on buyer-initiated cancellation (generic default).",
 )
 
 
@@ -593,10 +587,7 @@ def compute_deposit_forfeiture(
             "forfeited_amount": Decimal("0"),
             "refundable_amount": amount,
             "rule_citation": "Pre-contract / cooling-off period",
-            "rule_summary": (
-                "Cancellation before contract exchange — full refund "
-                "regardless of jurisdiction."
-            ),
+            "rule_summary": ("Cancellation before contract exchange — full refund regardless of jurisdiction."),
         }
 
     rule = _DEPOSIT_FORFEITURE_RULES.get(code, _DEFAULT_FORFEITURE_RULE)
@@ -657,23 +648,19 @@ def compute_residual_appraisal(
     prof_pct = Decimal(str(developer_profit_target_pct or 0))
     cont_pct = Decimal(str(contingency_pct or 0))
 
-    professional_fees = (cc * pf_pct / Decimal("100"))
-    contingency = (cc * cont_pct / Decimal("100"))
-    sales_costs = (gdv * sc_pct / Decimal("100"))
-    developer_profit = (gdv * prof_pct / Decimal("100"))
+    professional_fees = cc * pf_pct / Decimal("100")
+    contingency = cc * cont_pct / Decimal("100")
+    sales_costs = gdv * sc_pct / Decimal("100")
+    developer_profit = gdv * prof_pct / Decimal("100")
 
-    total_costs_excl_land = (
-        cc + professional_fees + contingency + fin + sales_costs + developer_profit
-    )
+    total_costs_excl_land = cc + professional_fees + contingency + fin + sales_costs + developer_profit
     residual_land_value = gdv - total_costs_excl_land
 
     q = Decimal("0.01")
     pct_q = Decimal("0.0001")
     total_dev_cost = cc + professional_fees + contingency + fin + sales_costs
     # Profit metrics use the developer-profit line as the numerator.
-    profit_on_cost = (
-        (developer_profit / total_dev_cost) if total_dev_cost > 0 else Decimal("0")
-    )
+    profit_on_cost = (developer_profit / total_dev_cost) if total_dev_cost > 0 else Decimal("0")
     profit_on_gdv = (developer_profit / gdv) if gdv > 0 else Decimal("0")
 
     viable = residual_land_value >= 0
@@ -822,9 +809,7 @@ PAYMENT_SCHEDULE_TEMPLATES: dict[str, dict[str, Any]] = {
     },
     "20_30_30_20": {
         "label": "20 % / 30 % / 30 % / 20 %",
-        "description": (
-            "20 % at signing, 30 % at slab, 30 % at top-out, 20 % at handover."
-        ),
+        "description": ("20 % at signing, 30 % at slab, 30 % at top-out, 20 % at handover."),
         "milestones": [
             {
                 "sequence": 1,
@@ -981,9 +966,7 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="Development not found")
         return obj
 
-    async def update_development(
-        self, dev_id: uuid.UUID, data: DevelopmentUpdate
-    ) -> Development:
+    async def update_development(self, dev_id: uuid.UUID, data: DevelopmentUpdate) -> Development:
         await self.get_development(dev_id)
         fields = _dump(data)
         await self.developments.update_fields(dev_id, **fields)
@@ -1020,9 +1003,7 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="HouseType not found")
         return obj
 
-    async def update_house_type(
-        self, ht_id: uuid.UUID, data: HouseTypeUpdate
-    ) -> HouseType:
+    async def update_house_type(self, ht_id: uuid.UUID, data: HouseTypeUpdate) -> HouseType:
         await self.get_house_type(ht_id)
         await self.house_types.update_fields(ht_id, **_dump(data))
         return await self.get_house_type(ht_id)
@@ -1094,16 +1075,11 @@ class PropertyDevService:
         # Optional project-ownership gate; if user_payload is None
         # (e.g. internal service call) we skip and return the union.
         if project_id is not None and user_payload is not None:
-            await self._verify_project_owner_for_house_type_catalogue(
-                project_id, user_payload
-            )
+            await self._verify_project_owner_for_house_type_catalogue(project_id, user_payload)
 
         clauses = []
         # Always include presets.
-        preset_clause = (
-            (PropertyDevHouseType.project_id.is_(None))
-            & (PropertyDevHouseType.is_preset.is_(True))
-        )
+        preset_clause = (PropertyDevHouseType.project_id.is_(None)) & (PropertyDevHouseType.is_preset.is_(True))
         clauses.append(preset_clause)
         if project_id is not None:
             clauses.append(PropertyDevHouseType.project_id == project_id)
@@ -1146,14 +1122,10 @@ class PropertyDevService:
     ) -> PropertyDevHouseType:
         obj = await self.session.get(PropertyDevHouseType, entry_id)
         if obj is None:
-            raise HTTPException(
-                status_code=404, detail="House type catalogue entry not found"
-            )
+            raise HTTPException(status_code=404, detail="House type catalogue entry not found")
         # Tenant-scoped entries are only visible to their owner.
         if obj.project_id is not None and user_payload is not None:
-            await self._verify_project_owner_for_house_type_catalogue(
-                obj.project_id, user_payload
-            )
+            await self._verify_project_owner_for_house_type_catalogue(obj.project_id, user_payload)
         return obj
 
     async def create_house_type_catalogue_entry(
@@ -1162,13 +1134,8 @@ class PropertyDevService:
         user_payload: dict[str, object] | None = None,
     ) -> PropertyDevHouseType:
         """Create a user-scoped catalogue entry. Presets stay migration-only."""
-        await self._verify_project_owner_for_house_type_catalogue(
-            data.project_id, user_payload
-        )
-        user_id_raw = (
-            (user_payload or {}).get("sub")
-            or (user_payload or {}).get("user_id")
-        )
+        await self._verify_project_owner_for_house_type_catalogue(data.project_id, user_payload)
+        user_id_raw = (user_payload or {}).get("sub") or (user_payload or {}).get("user_id")
         try:
             created_by = uuid.UUID(str(user_id_raw)) if user_id_raw else None
         except (ValueError, TypeError):
@@ -1185,34 +1152,20 @@ class PropertyDevService:
                 detail="typical_price_max must be ≥ typical_price_min",
             )
         currency = data.currency.upper() if data.currency else None
-        construction_type = (
-            data.construction_type.strip().lower() or None
-            if data.construction_type
-            else None
-        )
-        energy_class = (
-            data.energy_class.strip() or None if data.energy_class else None
-        )
-        sales_channel = (
-            data.sales_channel.strip().lower() or None
-            if data.sales_channel
-            else None
-        )
+        construction_type = data.construction_type.strip().lower() or None if data.construction_type else None
+        energy_class = data.energy_class.strip() or None if data.energy_class else None
+        sales_channel = data.sales_channel.strip().lower() or None if data.sales_channel else None
         # Tags: dedupe + strip + drop empties, preserve order.
         tags_clean: list[str] = []
-        for raw in (data.tags or []):
+        for raw in data.tags or []:
             t = (raw or "").strip()
             if t and t not in tags_clean:
                 tags_clean.append(t)
 
         obj = PropertyDevHouseType(
             project_id=data.project_id,
-            country_code=(
-                data.country_code.upper() if data.country_code else None
-            ),
-            region_label=(data.region_label.strip() or None)
-            if data.region_label
-            else None,
+            country_code=(data.country_code.upper() if data.country_code else None),
+            region_label=(data.region_label.strip() or None) if data.region_label else None,
             code=data.code.upper(),
             name=data.name,
             description=data.description,
@@ -1239,10 +1192,7 @@ class PropertyDevService:
             await self.session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    "A catalogue entry with this code already exists "
-                    "for this project / country"
-                ),
+                detail=("A catalogue entry with this code already exists for this project / country"),
             ) from exc
         return obj
 
@@ -1256,10 +1206,7 @@ class PropertyDevService:
         if obj.is_preset:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    "Cannot edit a preset catalogue entry; "
-                    "create a project-scoped override instead"
-                ),
+                detail=("Cannot edit a preset catalogue entry; create a project-scoped override instead"),
             )
         payload = data.model_dump(exclude_unset=True)
         if "country_code" in payload and payload["country_code"]:
@@ -1269,31 +1216,15 @@ class PropertyDevService:
         if "currency" in payload and payload["currency"]:
             payload["currency"] = payload["currency"].upper()
         if "construction_type" in payload and payload["construction_type"]:
-            payload["construction_type"] = (
-                payload["construction_type"].strip().lower() or None
-            )
+            payload["construction_type"] = payload["construction_type"].strip().lower() or None
         if "sales_channel" in payload and payload["sales_channel"]:
-            payload["sales_channel"] = (
-                payload["sales_channel"].strip().lower() or None
-            )
+            payload["sales_channel"] = payload["sales_channel"].strip().lower() or None
         if "energy_class" in payload and payload["energy_class"]:
             payload["energy_class"] = payload["energy_class"].strip() or None
         # Pricing sanity (against the merged effective values).
-        new_min = (
-            payload.get("typical_price_min")
-            if "typical_price_min" in payload
-            else obj.typical_price_min
-        )
-        new_max = (
-            payload.get("typical_price_max")
-            if "typical_price_max" in payload
-            else obj.typical_price_max
-        )
-        if (
-            new_min is not None
-            and new_max is not None
-            and new_max < new_min
-        ):
+        new_min = payload.get("typical_price_min") if "typical_price_min" in payload else obj.typical_price_min
+        new_max = payload.get("typical_price_max") if "typical_price_max" in payload else obj.typical_price_max
+        if new_min is not None and new_max is not None and new_max < new_min:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="typical_price_max must be ≥ typical_price_min",
@@ -1327,9 +1258,7 @@ class PropertyDevService:
 
     # ── Variant ─────────────────────────────────────────────────────────
 
-    async def create_variant(
-        self, data: HouseTypeVariantCreate
-    ) -> HouseTypeVariant:
+    async def create_variant(self, data: HouseTypeVariantCreate) -> HouseTypeVariant:
         obj = HouseTypeVariant(
             house_type_id=data.house_type_id,
             code=data.code,
@@ -1346,9 +1275,7 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="Variant not found")
         return obj
 
-    async def update_variant(
-        self, v_id: uuid.UUID, data: HouseTypeVariantUpdate
-    ) -> HouseTypeVariant:
+    async def update_variant(self, v_id: uuid.UUID, data: HouseTypeVariantUpdate) -> HouseTypeVariant:
         await self.get_variant(v_id)
         await self.variants.update_fields(v_id, **_dump(data))
         return await self.get_variant(v_id)
@@ -1400,9 +1327,7 @@ class PropertyDevService:
         fields = _dump(data)
         new_status = fields.get("status")
         if new_status:
-            _ensure_transition(
-                "plot", plot.status, new_status, allowed_plot_transitions
-            )
+            _ensure_transition("plot", plot.status, new_status, allowed_plot_transitions)
         await self.plots.update_fields(plot_id, **fields)
         return await self.get_plot(plot_id)
 
@@ -1410,9 +1335,7 @@ class PropertyDevService:
         await self.get_plot(plot_id)
         await self.plots.delete(plot_id)
 
-    async def reserve_plot(
-        self, plot_id: uuid.UUID, data: PlotReserveRequest
-    ) -> tuple[Plot, Buyer]:
+    async def reserve_plot(self, plot_id: uuid.UUID, data: PlotReserveRequest) -> tuple[Plot, Buyer]:
         """Reserve a plot for a buyer.
 
         Raises:
@@ -1429,11 +1352,9 @@ class PropertyDevService:
         # ``Buyer.plot_id`` UNIQUE constraint would otherwise raise an
         # opaque IntegrityError at flush. Surface a clean 409 instead.
         existing_buyer = await self.buyers.get_for_plot(plot_id)
-        if (
-            existing_buyer is not None
-            and data.buyer_id is not None
-            and existing_buyer.id != data.buyer_id
-        ) or (existing_buyer is not None and data.buyer_id is None):
+        if (existing_buyer is not None and data.buyer_id is not None and existing_buyer.id != data.buyer_id) or (
+            existing_buyer is not None and data.buyer_id is None
+        ):
             raise HTTPException(
                 status_code=409,
                 detail="Plot is already assigned to a buyer",
@@ -1456,9 +1377,7 @@ class PropertyDevService:
             if buyer.status not in {"lead", "reserved"}:
                 raise HTTPException(
                     status_code=409,
-                    detail=(
-                        f"Buyer in status '{buyer.status}' cannot reserve a plot"
-                    ),
+                    detail=(f"Buyer in status '{buyer.status}' cannot reserve a plot"),
                 )
             # If the buyer was reserved against another plot, release that
             # plot back to ``planned`` so it does not stay orphaned in
@@ -1466,12 +1385,8 @@ class PropertyDevService:
             if buyer.plot_id is not None and buyer.plot_id != plot_id:
                 old_plot = await self.plots.get_by_id(buyer.plot_id)
                 if old_plot is not None and old_plot.status == "reserved":
-                    await self.plots.update_fields(
-                        buyer.plot_id, status="planned", reservation_deadline=None
-                    )
-            await self.buyers.update_fields(
-                buyer.id, plot_id=plot_id, status="reserved"
-            )
+                    await self.plots.update_fields(buyer.plot_id, status="planned", reservation_deadline=None)
+            await self.buyers.update_fields(buyer.id, plot_id=plot_id, status="reserved")
             buyer = await self.buyers.get_by_id(buyer.id)
         else:
             buyer = Buyer(
@@ -1498,9 +1413,7 @@ class PropertyDevService:
 
     # ── Option Group / Option ───────────────────────────────────────────
 
-    async def create_option_group(
-        self, data: BuyerOptionGroupCreate
-    ) -> BuyerOptionGroup:
+    async def create_option_group(self, data: BuyerOptionGroupCreate) -> BuyerOptionGroup:
         obj = BuyerOptionGroup(
             development_id=data.development_id,
             code=data.code,
@@ -1520,9 +1433,7 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="OptionGroup not found")
         return obj
 
-    async def update_option_group(
-        self, g_id: uuid.UUID, data: BuyerOptionGroupUpdate
-    ) -> BuyerOptionGroup:
+    async def update_option_group(self, g_id: uuid.UUID, data: BuyerOptionGroupUpdate) -> BuyerOptionGroup:
         await self.get_option_group(g_id)
         await self.option_groups.update_fields(g_id, **_dump(data))
         return await self.get_option_group(g_id)
@@ -1554,9 +1465,7 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="Option not found")
         return obj
 
-    async def update_option(
-        self, o_id: uuid.UUID, data: BuyerOptionUpdate
-    ) -> BuyerOption:
+    async def update_option(self, o_id: uuid.UUID, data: BuyerOptionUpdate) -> BuyerOption:
         await self.get_option(o_id)
         await self.options.update_fields(o_id, **_dump(data))
         return await self.get_option(o_id)
@@ -1607,9 +1516,7 @@ class PropertyDevService:
             try:
                 from app.modules.contacts import bridge as _contacts_bridge
 
-                await _contacts_bridge.ensure_contact_for_buyer(
-                    self.session, created, tenant_id=tenant_id
-                )
+                await _contacts_bridge.ensure_contact_for_buyer(self.session, created, tenant_id=tenant_id)
             except Exception:  # noqa: BLE001 — bridge is best-effort
                 logger.exception(
                     "Contacts bridge failed for buyer %s; continuing without link",
@@ -1628,9 +1535,7 @@ class PropertyDevService:
         fields = _dump(data)
         new_status = fields.get("status")
         if new_status:
-            _ensure_transition(
-                "buyer", buyer.status, new_status, allowed_buyer_transitions
-            )
+            _ensure_transition("buyer", buyer.status, new_status, allowed_buyer_transitions)
         # plot_id consistency: if the caller sets plot_id, it must belong
         # to the same development. Closes a cross-development link bug
         # caught by task #134's plot-collision test. ``None`` is allowed
@@ -1646,10 +1551,7 @@ class PropertyDevService:
             if target_plot.development_id != buyer.development_id:
                 raise HTTPException(
                     status_code=422,
-                    detail=(
-                        "Plot belongs to a different development "
-                        f"({target_plot.development_id})"
-                    ),
+                    detail=(f"Plot belongs to a different development ({target_plot.development_id})"),
                 )
         # Normalise jurisdiction (ISO-3166 alpha-2) to upper-case so the
         # deposit-forfeiture rule lookup stays case-insensitive.
@@ -1669,39 +1571,27 @@ class PropertyDevService:
         # Mirror canonical fields back to the linked Contact if any of
         # name/email/phone were touched. Best-effort: a missing/broken
         # contact never breaks the buyer update flow.
-        if updated.contact_id is not None and any(
-            k in fields for k in ("full_name", "email", "phone")
-        ):
+        if updated.contact_id is not None and any(k in fields for k in ("full_name", "email", "phone")):
             try:
                 from app.modules.contacts import bridge as _contacts_bridge
 
-                await _contacts_bridge.mirror_buyer_fields_to_contact(
-                    self.session, updated
-                )
+                await _contacts_bridge.mirror_buyer_fields_to_contact(self.session, updated)
             except Exception:  # noqa: BLE001
-                logger.exception(
-                    "Contacts mirror failed for buyer %s; continuing", updated.id
-                )
+                logger.exception("Contacts mirror failed for buyer %s; continuing", updated.id)
         return updated
 
     async def delete_buyer(self, b_id: uuid.UUID) -> None:
         await self.get_buyer(b_id)
         await self.buyers.delete(b_id)
 
-    async def convert_buyer_to_contracted(
-        self, buyer_id: uuid.UUID, data: BuyerContractRequest
-    ) -> Buyer:
+    async def convert_buyer_to_contracted(self, buyer_id: uuid.UUID, data: BuyerContractRequest) -> Buyer:
         """Walk a buyer up the lead → reserved → contracted path."""
         buyer = await self.get_buyer(buyer_id)
         if buyer.status == "lead":
-            _ensure_transition(
-                "buyer", buyer.status, "reserved", allowed_buyer_transitions
-            )
+            _ensure_transition("buyer", buyer.status, "reserved", allowed_buyer_transitions)
             await self.buyers.update_fields(buyer_id, status="reserved")
             buyer.status = "reserved"
-        _ensure_transition(
-            "buyer", buyer.status, "contracted", allowed_buyer_transitions
-        )
+        _ensure_transition("buyer", buyer.status, "contracted", allowed_buyer_transitions)
 
         fields: dict[str, Any] = {
             "status": "contracted",
@@ -1735,9 +1625,7 @@ class PropertyDevService:
 
         return contracted
 
-    async def cancel_buyer(
-        self, buyer_id: uuid.UUID, data: BuyerCancelRequest
-    ) -> tuple[Buyer, dict[str, Any]]:
+    async def cancel_buyer(self, buyer_id: uuid.UUID, data: BuyerCancelRequest) -> tuple[Buyer, dict[str, Any]]:
         """Cancel a buyer and compute deposit forfeiture per jurisdiction.
 
         Returns ``(buyer, forfeiture_breakdown)``. Updates the buyer's
@@ -1758,11 +1646,7 @@ class PropertyDevService:
 
         # Pre-contract cancellations get full refund regardless of jurisdiction.
         cancelled_pre_contract = buyer.status in {"lead", "reserved"}
-        jurisdiction = (
-            data.jurisdiction_override.upper()
-            if data.jurisdiction_override
-            else (buyer.jurisdiction or "")
-        )
+        jurisdiction = data.jurisdiction_override.upper() if data.jurisdiction_override else (buyer.jurisdiction or "")
         forfeiture = compute_deposit_forfeiture(
             buyer.deposit_amount or Decimal("0"),
             jurisdiction,
@@ -1787,9 +1671,7 @@ class PropertyDevService:
         if buyer.plot_id:
             plot = await self.plots.get_by_id(buyer.plot_id)
             if plot is not None and plot.status == "reserved":
-                await self.plots.update_fields(
-                    buyer.plot_id, status="planned", reservation_deadline=None
-                )
+                await self.plots.update_fields(buyer.plot_id, status="planned", reservation_deadline=None)
             elif plot is not None and plot.status == "sold":
                 await self.plots.update_fields(buyer.plot_id, status="ready")
 
@@ -1811,9 +1693,7 @@ class PropertyDevService:
 
     # ── Selection ───────────────────────────────────────────────────────
 
-    async def create_selection(
-        self, data: BuyerSelectionCreate
-    ) -> BuyerSelection:
+    async def create_selection(self, data: BuyerSelectionCreate) -> BuyerSelection:
         obj = BuyerSelection(
             buyer_id=data.buyer_id,
             status=data.status,
@@ -1828,16 +1708,12 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="Selection not found")
         return obj
 
-    async def update_selection(
-        self, s_id: uuid.UUID, data: BuyerSelectionUpdate
-    ) -> BuyerSelection:
+    async def update_selection(self, s_id: uuid.UUID, data: BuyerSelectionUpdate) -> BuyerSelection:
         sel = await self.get_selection(s_id)
         fields = _dump(data)
         new_status = fields.get("status")
         if new_status:
-            _ensure_transition(
-                "selection", sel.status, new_status, allowed_selection_transitions
-            )
+            _ensure_transition("selection", sel.status, new_status, allowed_selection_transitions)
         await self.selections.update_fields(s_id, **fields)
         return await self.get_selection(s_id)
 
@@ -1845,9 +1721,7 @@ class PropertyDevService:
         await self.get_selection(s_id)
         await self.selections.delete(s_id)
 
-    async def add_selection_item(
-        self, selection_id: uuid.UUID, data: BuyerSelectionItemCreate
-    ) -> BuyerSelectionItem:
+    async def add_selection_item(self, selection_id: uuid.UUID, data: BuyerSelectionItemCreate) -> BuyerSelectionItem:
         sel = await self.get_selection(selection_id)
         if sel.status in {"locked", "cancelled"}:
             raise HTTPException(
@@ -1860,11 +1734,7 @@ class PropertyDevService:
                 status_code=409,
                 detail="Option is no longer available",
             )
-        unit_price = (
-            data.unit_price_snapshot
-            if data.unit_price_snapshot is not None
-            else option.price_delta
-        )
+        unit_price = data.unit_price_snapshot if data.unit_price_snapshot is not None else option.price_delta
         item = BuyerSelectionItem(
             selection_id=selection_id,
             option_id=data.option_id,
@@ -1898,24 +1768,16 @@ class PropertyDevService:
         await self.selection_items.delete(item_id)
         await self._recompute_selection_total(item.selection_id)
 
-    async def _recompute_selection_total(
-        self, selection_id: uuid.UUID
-    ) -> Decimal:
+    async def _recompute_selection_total(self, selection_id: uuid.UUID) -> Decimal:
         items = await self.selection_items.list_for_selection(selection_id)
         total = compute_buyer_selection_total(items)
-        await self.selections.update_fields(
-            selection_id, total_options_value=total
-        )
+        await self.selections.update_fields(selection_id, total_options_value=total)
         return total
 
     async def submit_selection(self, selection_id: uuid.UUID) -> BuyerSelection:
         sel = await self.get_selection(selection_id)
-        _ensure_transition(
-            "selection", sel.status, "submitted", allowed_selection_transitions
-        )
-        await self.selections.update_fields(
-            selection_id, status="submitted", submitted_at=_today_iso()
-        )
+        _ensure_transition("selection", sel.status, "submitted", allowed_selection_transitions)
+        await self.selections.update_fields(selection_id, status="submitted", submitted_at=_today_iso())
         return await self.get_selection(selection_id)
 
     async def lock_selection(self, selection_id: uuid.UUID) -> BuyerSelection:
@@ -1925,12 +1787,8 @@ class PropertyDevService:
         if sel.status == "locked":
             return sel
         if sel.status not in {"draft", "submitted"}:
-            _ensure_transition(
-                "selection", sel.status, "locked", allowed_selection_transitions
-            )
-        await self.selections.update_fields(
-            selection_id, status="locked", locked_at=_today_iso()
-        )
+            _ensure_transition("selection", sel.status, "locked", allowed_selection_transitions)
+        await self.selections.update_fields(selection_id, status="locked", locked_at=_today_iso())
         locked = await self.get_selection(selection_id)
         event_bus.publish_detached(
             "property_dev.selection.locked",
@@ -1944,18 +1802,14 @@ class PropertyDevService:
         )
         return locked
 
-    async def submit_for_production(
-        self, buyer_id: uuid.UUID
-    ) -> BuyerSelection:
+    async def submit_for_production(self, buyer_id: uuid.UUID) -> BuyerSelection:
         """Flag every line in the buyer's locked selection as
         ``included_in_production`` so downstream procurement can pick it up.
         """
         buyer = await self.get_buyer(buyer_id)
         sel = await self.selections.current_selection_for_buyer(buyer_id)
         if sel is None:
-            raise HTTPException(
-                status_code=404, detail="No selection for buyer"
-            )
+            raise HTTPException(status_code=404, detail="No selection for buyer")
         if sel.status != "locked":
             raise HTTPException(
                 status_code=409,
@@ -1963,9 +1817,7 @@ class PropertyDevService:
             )
         items = await self.selection_items.list_for_selection(sel.id)
         for item in items:
-            await self.selection_items.update_fields(
-                item.id, included_in_production=True
-            )
+            await self.selection_items.update_fields(item.id, included_in_production=True)
 
         event_bus.publish_detached(
             "property_dev.selection.submitted_for_production",
@@ -1998,9 +1850,7 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="Handover not found")
         return obj
 
-    async def update_handover(
-        self, h_id: uuid.UUID, data: HandoverUpdate
-    ) -> Handover:
+    async def update_handover(self, h_id: uuid.UUID, data: HandoverUpdate) -> Handover:
         await self.get_handover(h_id)
         await self.handovers.update_fields(h_id, **_dump(data))
         return await self.get_handover(h_id)
@@ -2009,9 +1859,7 @@ class PropertyDevService:
         await self.get_handover(h_id)
         await self.handovers.delete(h_id)
 
-    async def complete_handover(
-        self, h_id: uuid.UUID, data: HandoverCompleteRequest
-    ) -> Handover:
+    async def complete_handover(self, h_id: uuid.UUID, data: HandoverCompleteRequest) -> Handover:
         handover = await self.get_handover(h_id)
         if handover.completed_at:
             return handover
@@ -2105,24 +1953,16 @@ class PropertyDevService:
         await self.get_snag(s_id)
         await self.snags.delete(s_id)
 
-    async def mark_snag_fixed(
-        self, s_id: uuid.UUID, *, fix_notes: str | None = None
-    ) -> Snag:
+    async def mark_snag_fixed(self, s_id: uuid.UUID, *, fix_notes: str | None = None) -> Snag:
         snag = await self.get_snag(s_id)
         if snag.status == "fixed":
             return snag
-        await self.snags.update_fields(
-            s_id, status="fixed", fixed_at=_today_iso(), fix_notes=fix_notes
-        )
+        await self.snags.update_fields(s_id, status="fixed", fixed_at=_today_iso(), fix_notes=fix_notes)
         return await self.get_snag(s_id)
 
-    async def mark_snag_wont_fix(
-        self, s_id: uuid.UUID, *, fix_notes: str | None = None
-    ) -> Snag:
+    async def mark_snag_wont_fix(self, s_id: uuid.UUID, *, fix_notes: str | None = None) -> Snag:
         await self.get_snag(s_id)
-        await self.snags.update_fields(
-            s_id, status="wont_fix", fix_notes=fix_notes
-        )
+        await self.snags.update_fields(s_id, status="wont_fix", fix_notes=fix_notes)
         return await self.get_snag(s_id)
 
     async def add_snag_photo(self, s_id: uuid.UUID, photo_path: str) -> Snag:
@@ -2164,9 +2004,7 @@ class PropertyDevService:
                 )
 
                 row = (
-                    await self.session.execute(
-                        _select(_Handover).where(_Handover.plot_id == plot_id)
-                    )
+                    await self.session.execute(_select(_Handover).where(_Handover.plot_id == plot_id))
                 ).scalar_one_or_none()
                 if row is not None:
                     handover_id = row.id
@@ -2196,12 +2034,8 @@ class PropertyDevService:
                 "claim_id": str(claim.id),
                 "plot_id": str(plot_id),
                 "buyer_id": str(buyer_id),
-                "handover_id": (
-                    str(handover_id) if handover_id else None
-                ),
-                "source_snag_id": (
-                    str(data.source_snag_id) if data.source_snag_id else None
-                ),
+                "handover_id": (str(handover_id) if handover_id else None),
+                "source_snag_id": (str(data.source_snag_id) if data.source_snag_id else None),
                 "category": data.category,
                 "severity": data.severity,
                 "description": data.description[:200],
@@ -2210,30 +2044,22 @@ class PropertyDevService:
         )
         return claim
 
-    async def assign_warranty(
-        self, w_id: uuid.UUID, assignee_id: uuid.UUID | None
-    ) -> WarrantyClaim:
+    async def assign_warranty(self, w_id: uuid.UUID, assignee_id: uuid.UUID | None) -> WarrantyClaim:
         """Assign or unassign a warranty claim's contractor / PM owner."""
         await self.get_warranty(w_id)
-        await self.warranty.update_fields(
-            w_id, assigned_to_user_id=assignee_id
-        )
+        await self.warranty.update_fields(w_id, assigned_to_user_id=assignee_id)
         claim = await self.get_warranty(w_id)
         event_bus.publish_detached(
             "property_dev.warranty.assigned",
             data={
                 "claim_id": str(claim.id),
-                "assigned_to_user_id": (
-                    str(assignee_id) if assignee_id else None
-                ),
+                "assigned_to_user_id": (str(assignee_id) if assignee_id else None),
             },
             source_module="property_dev",
         )
         return claim
 
-    async def add_warranty_photo(
-        self, w_id: uuid.UUID, photo_path: str
-    ) -> WarrantyClaim:
+    async def add_warranty_photo(self, w_id: uuid.UUID, photo_path: str) -> WarrantyClaim:
         """Append a relative photo path to ``warranty_claim.photos``.
 
         Mirrors :meth:`add_snag_photo` — the router validates magic
@@ -2279,9 +2105,7 @@ class PropertyDevService:
             cutoff = completed.replace(year=completed.year + years)
         except ValueError:
             # Feb-29 + N years on a non-leap year → fall back to Feb-28.
-            cutoff = completed.replace(
-                year=completed.year + years, day=28
-            )
+            cutoff = completed.replace(year=completed.year + years, day=28)
         return raised <= cutoff
 
     async def warranty_response(self, claim: WarrantyClaim):
@@ -2299,16 +2123,12 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="WarrantyClaim not found")
         return obj
 
-    async def update_warranty(
-        self, w_id: uuid.UUID, data: WarrantyClaimUpdate
-    ) -> WarrantyClaim:
+    async def update_warranty(self, w_id: uuid.UUID, data: WarrantyClaimUpdate) -> WarrantyClaim:
         claim = await self.get_warranty(w_id)
         fields = _dump(data)
         new_status = fields.get("status")
         if new_status:
-            _ensure_transition(
-                "warranty", claim.status, new_status, allowed_warranty_transitions
-            )
+            _ensure_transition("warranty", claim.status, new_status, allowed_warranty_transitions)
         await self.warranty.update_fields(w_id, **fields)
         return await self.get_warranty(w_id)
 
@@ -2318,57 +2138,35 @@ class PropertyDevService:
 
     async def warranty_accept(self, w_id: uuid.UUID) -> WarrantyClaim:
         claim = await self.get_warranty(w_id)
-        _ensure_transition(
-            "warranty", claim.status, "accepted", allowed_warranty_transitions
-        )
-        await self.warranty.update_fields(
-            w_id, status="accepted", accepted_at=_today_iso()
-        )
+        _ensure_transition("warranty", claim.status, "accepted", allowed_warranty_transitions)
+        await self.warranty.update_fields(w_id, status="accepted", accepted_at=_today_iso())
         return await self.get_warranty(w_id)
 
     async def warranty_reject(self, w_id: uuid.UUID) -> WarrantyClaim:
         claim = await self.get_warranty(w_id)
-        _ensure_transition(
-            "warranty", claim.status, "rejected", allowed_warranty_transitions
-        )
+        _ensure_transition("warranty", claim.status, "rejected", allowed_warranty_transitions)
         await self.warranty.update_fields(w_id, status="rejected")
         return await self.get_warranty(w_id)
 
     async def warranty_close(self, w_id: uuid.UUID) -> WarrantyClaim:
         claim = await self.get_warranty(w_id)
-        _ensure_transition(
-            "warranty", claim.status, "closed", allowed_warranty_transitions
-        )
-        await self.warranty.update_fields(
-            w_id, status="closed", closed_at=_today_iso()
-        )
+        _ensure_transition("warranty", claim.status, "closed", allowed_warranty_transitions)
+        await self.warranty.update_fields(w_id, status="closed", closed_at=_today_iso())
         return await self.get_warranty(w_id)
 
     # ── Dashboards ──────────────────────────────────────────────────────
 
-    async def development_sales_dashboard(
-        self, dev_id: uuid.UUID
-    ) -> dict[str, Any]:
+    async def development_sales_dashboard(self, dev_id: uuid.UUID) -> dict[str, Any]:
         dev = await self.get_development(dev_id)
         plots_by_status = await self.plots.count_for_development_by_status(dev_id)
         buyers_by_status = await self.buyers.count_for_development_by_status(dev_id)
-        contracted_value = await self.buyers.sum_contract_value(
-            dev_id, status_in=["contracted", "completed"]
-        )
+        contracted_value = await self.buyers.sum_contract_value(dev_id, status_in=["contracted", "completed"])
         open_snags = await self.snags.count_open_for_development(dev_id)
         open_warranty = await self.warranty.count_open_for_development(dev_id)
-        completed_handovers, scheduled_handovers = (
-            await self.handovers.count_progress_for_development(dev_id)
-        )
+        completed_handovers, scheduled_handovers = await self.handovers.count_progress_for_development(dev_id)
         total_plots = sum(plots_by_status.values()) or 0
-        sold = plots_by_status.get("sold", 0) + plots_by_status.get(
-            "handed_over", 0
-        )
-        sell_through = (
-            Decimal(sold) / Decimal(total_plots) * Decimal("100")
-            if total_plots
-            else Decimal("0")
-        )
+        sold = plots_by_status.get("sold", 0) + plots_by_status.get("handed_over", 0)
+        sell_through = Decimal(sold) / Decimal(total_plots) * Decimal("100") if total_plots else Decimal("0")
         return {
             "development_id": dev.id,
             "total_plots": total_plots,
@@ -2384,9 +2182,7 @@ class PropertyDevService:
 
     # ── Handover docs ───────────────────────────────────────────────────
 
-    async def create_handover_doc(
-        self, data: HandoverDocCreate
-    ) -> HandoverDoc:
+    async def create_handover_doc(self, data: HandoverDocCreate) -> HandoverDoc:
         await self.get_handover(data.handover_id)
         obj = HandoverDoc(
             handover_id=data.handover_id,
@@ -2406,9 +2202,7 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="HandoverDoc not found")
         return obj
 
-    async def update_handover_doc(
-        self, doc_id: uuid.UUID, data: HandoverDocUpdate
-    ) -> HandoverDoc:
+    async def update_handover_doc(self, doc_id: uuid.UUID, data: HandoverDocUpdate) -> HandoverDoc:
         doc = await self.get_handover_doc(doc_id)
         fields = _dump(data)
         # Stamp delivered_at when flipping is_delivered → True.
@@ -2447,14 +2241,12 @@ class PropertyDevService:
         # Stable column order for the UI.
         column_order = ("lead", "reserved", "contracted", "completed", "cancelled")
         columns: dict[str, dict[str, Any]] = {
-            s: {"status": s, "buyers": [], "count": 0, "total_value": Decimal("0")}
-            for s in column_order
+            s: {"status": s, "buyers": [], "count": 0, "total_value": Decimal("0")} for s in column_order
         }
         for buyer, plot in rows:
             col = columns.setdefault(
                 buyer.status,
-                {"status": buyer.status, "buyers": [], "count": 0,
-                 "total_value": Decimal("0")},
+                {"status": buyer.status, "buyers": [], "count": 0, "total_value": Decimal("0")},
             )
             col["buyers"].append(
                 {
@@ -2486,7 +2278,9 @@ class PropertyDevService:
         """Upcoming reservation + freeze + contract deadlines."""
         await self.get_development(dev_id)
         rows = await self.pipeline.reservation_calendar(
-            dev_id, period_start, period_end,
+            dev_id,
+            period_start,
+            period_end,
         )
         entries: list[dict[str, Any]] = []
         for plot, buyer in rows:
@@ -2557,9 +2351,7 @@ class PropertyDevService:
                     contract_buyer_count += 1
                 if buyer.status in {"reserved", "contracted"}:
                     deposits_held += Decimal(str(buyer.deposit_amount or 0))
-                deposits_forfeited += Decimal(
-                    str(buyer.deposit_forfeited or 0)
-                )
+                deposits_forfeited += Decimal(str(buyer.deposit_forfeited or 0))
             if plot is not None and plot.status == "sold":
                 plot_count_sold += 1
             if plot is not None and plot.status == "handed_over":
@@ -2569,9 +2361,9 @@ class PropertyDevService:
         # the count of *sold plots* (mismatched populations: a contracted
         # buyer's plot is usually still under construction, not "sold").
         avg_sale = (
-            (contract_revenue_total / Decimal(contract_buyer_count))
-            .quantize(Decimal("0.01"))
-            if contract_buyer_count else Decimal("0")
+            (contract_revenue_total / Decimal(contract_buyer_count)).quantize(Decimal("0.01"))
+            if contract_buyer_count
+            else Decimal("0")
         )
         open_warranty = await self.warranty.count_open_for_development(dev_id)
         open_snags = await self.snags.count_open_for_development(dev_id)
@@ -2589,10 +2381,6 @@ class PropertyDevService:
             "open_warranty_count": open_warranty,
             "open_snag_count": open_snags,
         }
-
-
-
-
 
     # ════════════════════════════════════════════════════════════════════
     # R6 — Lead / Reservation / SPA / PaymentSchedule / ContractParty
@@ -2620,15 +2408,11 @@ class PropertyDevService:
         if data.preferred_house_type_id is not None:
             ht = await self.house_types.get_by_id(data.preferred_house_type_id)
             if ht is None:
-                raise HTTPException(
-                    status_code=422, detail="preferred_house_type not found"
-                )
+                raise HTTPException(status_code=422, detail="preferred_house_type not found")
         if data.development_id is not None:
             dev = await self.developments.get_by_id(data.development_id)
             if dev is None:
-                raise HTTPException(
-                    status_code=422, detail="development not found"
-                )
+                raise HTTPException(status_code=422, detail="development not found")
         obj = Lead(
             development_id=data.development_id,
             tenant_id=data.tenant_id,
@@ -2654,17 +2438,11 @@ class PropertyDevService:
             # otherwise fall back to data.tenant_id (legacy payload
             # form). The bridge writes the FK back onto ``lead`` and
             # flushes so the next read sees the link.
-            resolved_tenant = (
-                tenant_id
-                if tenant_id is not None
-                else (str(data.tenant_id) if data.tenant_id else None)
-            )
+            resolved_tenant = tenant_id if tenant_id is not None else (str(data.tenant_id) if data.tenant_id else None)
             try:
                 from app.modules.contacts import bridge as _contacts_bridge
 
-                await _contacts_bridge.ensure_contact_for_lead(
-                    self.session, lead, tenant_id=resolved_tenant
-                )
+                await _contacts_bridge.ensure_contact_for_lead(self.session, lead, tenant_id=resolved_tenant)
             except Exception:  # noqa: BLE001
                 logger.exception(
                     "Contacts bridge failed for lead %s; continuing without link",
@@ -2674,9 +2452,7 @@ class PropertyDevService:
             "property_dev.lead.created",
             data={
                 "lead_id": str(lead.id),
-                "development_id": (
-                    str(lead.development_id) if lead.development_id else None
-                ),
+                "development_id": (str(lead.development_id) if lead.development_id else None),
                 "source": lead.source,
                 "status": lead.status,
                 "email": lead.email,
@@ -2691,32 +2467,22 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="Lead not found")
         return obj
 
-    async def update_lead(
-        self, lead_id: uuid.UUID, data: LeadUpdate
-    ) -> Lead:
+    async def update_lead(self, lead_id: uuid.UUID, data: LeadUpdate) -> Lead:
         lead = await self.get_lead(lead_id)
         fields = _dump(data)
         new_status = fields.get("status")
         if new_status:
-            _ensure_transition(
-                "lead", lead.status, new_status, allowed_lead_transitions
-            )
+            _ensure_transition("lead", lead.status, new_status, allowed_lead_transitions)
         await self.leads.update_fields(lead_id, **fields)
         updated = await self.get_lead(lead_id)
         # Mirror canonical fields back to the linked Contact (best-effort).
-        if updated.contact_id is not None and any(
-            k in fields for k in ("full_name", "email", "phone")
-        ):
+        if updated.contact_id is not None and any(k in fields for k in ("full_name", "email", "phone")):
             try:
                 from app.modules.contacts import bridge as _contacts_bridge
 
-                await _contacts_bridge.mirror_lead_fields_to_contact(
-                    self.session, updated
-                )
+                await _contacts_bridge.mirror_lead_fields_to_contact(self.session, updated)
             except Exception:  # noqa: BLE001
-                logger.exception(
-                    "Contacts mirror failed for lead %s; continuing", updated.id
-                )
+                logger.exception("Contacts mirror failed for lead %s; continuing", updated.id)
         return updated
 
     async def delete_lead(self, lead_id: uuid.UUID) -> None:
@@ -2845,9 +2611,7 @@ class PropertyDevService:
         if reservation_number is None:
             reservation_number = await self._next_reservation_number(plot)
         today = datetime.now(UTC).date()
-        cooling_off_until = (
-            today + timedelta(days=cooling_off_days)
-        ).isoformat()
+        cooling_off_until = (today + timedelta(days=cooling_off_days)).isoformat()
         # Capture pricing snapshot from the active PriceList (if any).
         # This is the audit-trail entry surfaced in the Quote History tab.
         # Falls back to a base-only quote when no active price list exists
@@ -2947,9 +2711,7 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="Reservation not found")
         return obj
 
-    async def update_reservation(
-        self, r_id: uuid.UUID, data: ReservationUpdate
-    ) -> Reservation:
+    async def update_reservation(self, r_id: uuid.UUID, data: ReservationUpdate) -> Reservation:
         res = await self.get_reservation(r_id)
         if res.status != "active":
             raise HTTPException(
@@ -3041,9 +2803,7 @@ class PropertyDevService:
             )
         plot = await self.plots.get_by_id(res.plot_id)
         if plot is None:
-            raise HTTPException(
-                status_code=409, detail="Plot for reservation has gone away"
-            )
+            raise HTTPException(status_code=409, detail="Plot for reservation has gone away")
         # Snapshot every attribute the rest of this function touches; any
         # later update_fields() expires its row's ORM identity-map entry and
         # would force a lazy-load on subsequent attribute access (trips
@@ -3053,9 +2813,7 @@ class PropertyDevService:
         res_tenant_id_snap = res.tenant_id
         res_buyer_id_snap = res.buyer_id
 
-        contract_number = data.contract_number or await self._next_contract_number(
-            plot
-        )
+        contract_number = data.contract_number or await self._next_contract_number(plot)
         obj = SalesContract(
             contract_number=contract_number,
             plot_id=plot_id_snap,
@@ -3135,9 +2893,7 @@ class PropertyDevService:
         seq = await self.sales_contracts.next_sequence_for_plot(plot.id)
         return f"SPA-{dev_code}-{seq:05d}"
 
-    async def _create_default_payment_schedule(
-        self, spa: SalesContract
-    ) -> PaymentSchedule:
+    async def _create_default_payment_schedule(self, spa: SalesContract) -> PaymentSchedule:
         """Create a single-line ``spa_signed`` schedule by default."""
         schedule_obj = PaymentSchedule(
             sales_contract_id=spa.id,
@@ -3165,9 +2921,7 @@ class PropertyDevService:
         plot = await self.plots.get_by_id(data.plot_id)
         if plot is None:
             raise HTTPException(status_code=422, detail="plot not found")
-        contract_number = data.contract_number or await self._next_contract_number(
-            plot
-        )
+        contract_number = data.contract_number or await self._next_contract_number(plot)
         obj = SalesContract(
             contract_number=contract_number,
             plot_id=plot.id,
@@ -3202,12 +2956,12 @@ class PropertyDevService:
     async def get_spa(self, spa_id: uuid.UUID) -> SalesContract:
         obj = await self.sales_contracts.get_by_id(spa_id)
         if obj is None:
-            raise HTTPException(status_code=404, detail=translate("errors.salescontract_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.salescontract_not_found", locale=get_locale())
+            )
         return obj
 
-    async def update_spa(
-        self, spa_id: uuid.UUID, data: SalesContractUpdate
-    ) -> SalesContract:
+    async def update_spa(self, spa_id: uuid.UUID, data: SalesContractUpdate) -> SalesContract:
         spa = await self.get_spa(spa_id)
         if spa.status not in {"draft", "sent_for_signature"}:
             raise HTTPException(
@@ -3263,9 +3017,7 @@ class PropertyDevService:
         )
         return sent
 
-    async def sign_spa(
-        self, spa_id: uuid.UUID, data: SalesContractSignRequest
-    ) -> SalesContract:
+    async def sign_spa(self, spa_id: uuid.UUID, data: SalesContractSignRequest) -> SalesContract:
         """Counter-sign the SPA on the developer side."""
         spa = await self.get_spa(spa_id)
         # Allow counter-sign from signed → countersigned (typical path)
@@ -3307,16 +3059,12 @@ class PropertyDevService:
 
     async def cancel_spa(self, spa_id: uuid.UUID) -> SalesContract:
         spa = await self.get_spa(spa_id)
-        _ensure_transition(
-            "spa", spa.status, "cancelled", allowed_spa_transitions
-        )
+        _ensure_transition("spa", spa.status, "cancelled", allowed_spa_transitions)
         await self.sales_contracts.update_fields(spa_id, status="cancelled")
         # Suspend the schedule.
         schedule = await self.payment_schedules.get_for_contract(spa_id)
         if schedule is not None and schedule.status == "active":
-            await self.payment_schedules.update_fields(
-                schedule.id, status="cancelled"
-            )
+            await self.payment_schedules.update_fields(schedule.id, status="cancelled")
         event_bus.publish_detached(
             "property_dev.spa.cancelled",
             data={"spa_id": str(spa_id)},
@@ -3394,15 +3142,9 @@ class PropertyDevService:
             plot = await self.get_plot(spa.plot_id)
             dev = await self.get_development(plot.development_id)
             md = dev.metadata_ or {}
-            resolved_jurisdiction = (
-                md.get("country_code")
-                or md.get("jurisdiction")
-                or ""
-            ).strip().upper() or None
+            resolved_jurisdiction = (md.get("country_code") or md.get("jurisdiction") or "").strip().upper() or None
             if resolved_subcode is None:
-                resolved_subcode = (
-                    md.get("region_subcode") or md.get("state") or None
-                )
+                resolved_subcode = md.get("region_subcode") or md.get("state") or None
                 if isinstance(resolved_subcode, str):
                     resolved_subcode = resolved_subcode.strip().upper()
 
@@ -3417,9 +3159,7 @@ class PropertyDevService:
         # ── 2. Collect overdue instalments for late-interest accrual ──
         overdue_lines: list[dict[str, Any]] = []
         if include_overdue:
-            schedule = await self.payment_schedules.get_for_contract(
-                contract_id
-            )
+            schedule = await self.payment_schedules.get_for_contract(contract_id)
             if schedule is not None:
                 rows = await self.instalments.list_for_schedule(schedule.id)
                 today = date.today()
@@ -3489,10 +3229,7 @@ class PropertyDevService:
         if template_key not in PAYMENT_SCHEDULE_TEMPLATES:
             raise HTTPException(
                 status_code=422,
-                detail=(
-                    f"Unknown template_key '{template_key}'. Known: "
-                    f"{sorted(PAYMENT_SCHEDULE_TEMPLATES.keys())}"
-                ),
+                detail=(f"Unknown template_key '{template_key}'. Known: {sorted(PAYMENT_SCHEDULE_TEMPLATES.keys())}"),
             )
         spa = await self.get_spa(contract_id)
         existing = await self.payment_schedules.get_for_contract(spa.id)
@@ -3507,8 +3244,7 @@ class PropertyDevService:
             existing_md = dict(existing.metadata_ or {})
             ins_rows = await self.instalments.list_for_schedule(existing.id)
             has_real_activity = any(
-                r.status in {"paid", "waived", "overdue", "due"}
-                or (r.amount_paid and Decimal(str(r.amount_paid)) > 0)
+                r.status in {"paid", "waived", "overdue", "due"} or (r.amount_paid and Decimal(str(r.amount_paid)) > 0)
                 for r in ins_rows
             )
             if not (existing_md.get("auto_created") and not has_real_activity):
@@ -3532,9 +3268,7 @@ class PropertyDevService:
             if i == len(tmpl["milestones"]) - 1:
                 amt = (total_value - running).quantize(Decimal("0.01"))
             else:
-                amt = (total_value * pct / Decimal("100")).quantize(
-                    Decimal("0.01")
-                )
+                amt = (total_value * pct / Decimal("100")).quantize(Decimal("0.01"))
                 running += amt
             per_line.append(amt)
 
@@ -3544,11 +3278,7 @@ class PropertyDevService:
         else:
             start_anchor = start_date
 
-        lfp = (
-            Decimal(str(late_fee_pct))
-            if late_fee_pct is not None
-            else Decimal("0")
-        )
+        lfp = Decimal(str(late_fee_pct)) if late_fee_pct is not None else Decimal("0")
         gpd = int(grace_period_days) if grace_period_days is not None else 0
 
         # Replace-in-place when a non-live schedule exists; else create.
@@ -3597,7 +3327,7 @@ class PropertyDevService:
             )
             schedule = await self.get_payment_schedule(existing_id)
 
-        for m, amt in zip(tmpl["milestones"], per_line):
+        for m, amt in zip(tmpl["milestones"], per_line, strict=False):
             due_iso: str | None = None
             try:
                 due_iso = _add_days_iso(start_anchor, int(m["offset_days"]))
@@ -3630,9 +3360,7 @@ class PropertyDevService:
         )
         return schedule
 
-    async def create_payment_schedule(
-        self, data: PaymentScheduleCreate
-    ) -> PaymentSchedule:
+    async def create_payment_schedule(self, data: PaymentScheduleCreate) -> PaymentSchedule:
         spa = await self.get_spa(data.sales_contract_id)
         existing = await self.payment_schedules.get_for_contract(spa.id)
         if existing is not None:
@@ -3652,28 +3380,20 @@ class PropertyDevService:
         )
         return await self.payment_schedules.create(obj)
 
-    async def get_payment_schedule(
-        self, schedule_id: uuid.UUID
-    ) -> PaymentSchedule:
+    async def get_payment_schedule(self, schedule_id: uuid.UUID) -> PaymentSchedule:
         obj = await self.payment_schedules.get_by_id(schedule_id)
         if obj is None:
-            raise HTTPException(
-                status_code=404, detail="PaymentSchedule not found"
-            )
+            raise HTTPException(status_code=404, detail="PaymentSchedule not found")
         return obj
 
-    async def update_payment_schedule(
-        self, schedule_id: uuid.UUID, data: PaymentScheduleUpdate
-    ) -> PaymentSchedule:
+    async def update_payment_schedule(self, schedule_id: uuid.UUID, data: PaymentScheduleUpdate) -> PaymentSchedule:
         await self.get_payment_schedule(schedule_id)
         fields = _dump(data)
         if fields:
             await self.payment_schedules.update_fields(schedule_id, **fields)
         return await self.get_payment_schedule(schedule_id)
 
-    async def activate_payment_schedule(
-        self, schedule_id: uuid.UUID
-    ) -> PaymentSchedule:
+    async def activate_payment_schedule(self, schedule_id: uuid.UUID) -> PaymentSchedule:
         """Activate a suspended schedule and mark the first pending line due."""
         schedule = await self.get_payment_schedule(schedule_id)
         if schedule.status == "active":
@@ -3699,9 +3419,7 @@ class PropertyDevService:
         )
         return activated
 
-    async def suspend_payment_schedule(
-        self, schedule_id: uuid.UUID
-    ) -> PaymentSchedule:
+    async def suspend_payment_schedule(self, schedule_id: uuid.UUID) -> PaymentSchedule:
         schedule = await self.get_payment_schedule(schedule_id)
         _ensure_transition(
             "payment_schedule",
@@ -3709,9 +3427,7 @@ class PropertyDevService:
             "suspended",
             allowed_payment_schedule_transitions,
         )
-        await self.payment_schedules.update_fields(
-            schedule_id, status="suspended"
-        )
+        await self.payment_schedules.update_fields(schedule_id, status="suspended")
         return await self.get_payment_schedule(schedule_id)
 
     async def _mark_first_pending_due(self, schedule_id: uuid.UUID) -> None:
@@ -3749,9 +3465,7 @@ class PropertyDevService:
             raise HTTPException(status_code=404, detail="Instalment not found")
         return obj
 
-    async def update_instalment(
-        self, ins_id: uuid.UUID, data: InstalmentUpdate
-    ) -> Instalment:
+    async def update_instalment(self, ins_id: uuid.UUID, data: InstalmentUpdate) -> Instalment:
         ins = await self.get_instalment(ins_id)
         if ins.status in {"paid", "waived", "cancelled"}:
             raise HTTPException(
@@ -3776,9 +3490,7 @@ class PropertyDevService:
             )
         amount = Decimal(str(data.amount))
         if amount <= 0:
-            raise HTTPException(
-                status_code=422, detail="amount must be > 0"
-            )
+            raise HTTPException(status_code=422, detail="amount must be > 0")
         current_paid = Decimal(str(ins.amount_paid or 0))
         new_paid = current_paid + amount
         owed = Decimal(str(ins.amount or 0))
@@ -3786,10 +3498,7 @@ class PropertyDevService:
         if new_paid > owed + Decimal("0.01"):
             raise HTTPException(
                 status_code=422,
-                detail=(
-                    f"payment {amount} exceeds outstanding "
-                    f"{owed - current_paid}"
-                ),
+                detail=(f"payment {amount} exceeds outstanding {owed - current_paid}"),
             )
         new_status = "paid" if new_paid >= owed - Decimal("0.01") else ins.status
         if new_status == "paid":
@@ -3804,9 +3513,7 @@ class PropertyDevService:
         }
         if new_status == "paid":
             fields["status"] = "paid"
-            fields["paid_at"] = (
-                data.paid_at or datetime.now(UTC)
-            )
+            fields["paid_at"] = data.paid_at or datetime.now(UTC)
         if data.invoice_ref:
             fields["invoice_ref"] = data.invoice_ref
         await self.instalments.update_fields(ins_id, **fields)
@@ -3840,9 +3547,7 @@ class PropertyDevService:
         )
         return updated
 
-    async def issue_instalment_demand(
-        self, ins_id: uuid.UUID
-    ) -> Instalment:
+    async def issue_instalment_demand(self, ins_id: uuid.UUID) -> Instalment:
         """Emit a demand-letter event for the correspondence module.
 
         The correspondence module subscribes to
@@ -3858,11 +3563,7 @@ class PropertyDevService:
             )
         # Mark overdue if past due_date.
         today = datetime.now(UTC).date().isoformat()
-        if (
-            ins.due_date
-            and ins.due_date < today
-            and ins.status in {"pending", "due"}
-        ):
+        if ins.due_date and ins.due_date < today and ins.status in {"pending", "due"}:
             _ensure_transition(
                 "instalment",
                 ins.status,
@@ -3877,10 +3578,7 @@ class PropertyDevService:
                 "template": "INSTALMENT_DEMAND",
                 "instalment_id": str(ins_id),
                 "schedule_id": str(ins.schedule_id),
-                "amount_outstanding": str(
-                    Decimal(str(ins.amount or 0))
-                     - Decimal(str(ins.amount_paid or 0))
-                ),
+                "amount_outstanding": str(Decimal(str(ins.amount or 0)) - Decimal(str(ins.amount_paid or 0))),
                 "due_date": ins.due_date,
                 "milestone_label": ins.milestone_label,
             },
@@ -3888,9 +3586,7 @@ class PropertyDevService:
         )
         return await self.get_instalment(ins_id)
 
-    async def waive_instalment(
-        self, ins_id: uuid.UUID, data: InstalmentWaiveRequest
-    ) -> Instalment:
+    async def waive_instalment(self, ins_id: uuid.UUID, data: InstalmentWaiveRequest) -> Instalment:
         ins = await self.get_instalment(ins_id)
         _ensure_transition(
             "instalment",
@@ -3901,9 +3597,7 @@ class PropertyDevService:
         md = dict(ins.metadata_ or {})
         md["waiver_reason"] = data.reason
         md["waived_at"] = datetime.now(UTC).isoformat()
-        await self.instalments.update_fields(
-            ins_id, status="waived", metadata_=md
-        )
+        await self.instalments.update_fields(ins_id, status="waived", metadata_=md)
         await self._maybe_complete_schedule(ins.schedule_id)
         event_bus.publish_detached(
             "property_dev.instalment.waived",
@@ -3941,19 +3635,14 @@ class PropertyDevService:
             today_d = date.fromisoformat(today)
             if (today_d - due).days <= grace:
                 continue
-            outstanding = (
-                Decimal(str(ins.amount or 0))
-                - Decimal(str(ins.amount_paid or 0))
-            )
+            outstanding = Decimal(str(ins.amount or 0)) - Decimal(str(ins.amount_paid or 0))
             if outstanding <= 0:
                 continue
-            delta = (outstanding * pct / Decimal("100") / Decimal("365"))
+            delta = outstanding * pct / Decimal("100") / Decimal("365")
             delta = delta.quantize(Decimal("0.01"))
             if delta <= 0:
                 continue
-            new_accrued = (
-                Decimal(str(ins.late_fee_accrued or 0)) + delta
-            ).quantize(Decimal("0.01"))
+            new_accrued = (Decimal(str(ins.late_fee_accrued or 0)) + delta).quantize(Decimal("0.01"))
             # Move pending → overdue if not already.
             new_status = "overdue" if ins.status != "overdue" else ins.status
             await self.instalments.update_fields(
@@ -3974,18 +3663,14 @@ class PropertyDevService:
         if not items:
             return
         if all(i.status in {"paid", "waived", "cancelled"} for i in items):
-            await self.payment_schedules.update_fields(
-                schedule_id, status="completed"
-            )
+            await self.payment_schedules.update_fields(schedule_id, status="completed")
             event_bus.publish_detached(
                 "property_dev.payment_schedule.completed",
                 data={"schedule_id": str(schedule_id)},
                 source_module="property_dev",
             )
 
-    async def _fire_milestone(
-        self, spa_id: uuid.UUID, milestone_event: str
-    ) -> int:
+    async def _fire_milestone(self, spa_id: uuid.UUID, milestone_event: str) -> int:
         """Mark every pending instalment matching ``milestone_event`` as due.
 
         Returns the number of instalments touched.
@@ -3994,38 +3679,26 @@ class PropertyDevService:
         ins_rows = await self.instalments.list_for_contract(spa_id)
         touched = 0
         for ins in ins_rows:
-            if (
-                ins.milestone_event == milestone_event
-                and ins.status == "pending"
-            ):
+            if ins.milestone_event == milestone_event and ins.status == "pending":
                 await self.instalments.update_fields(ins.id, status="due")
                 touched += 1
         return touched
 
     # ── ContractParty ──────────────────────────────────────────────────
 
-    async def add_contract_party(
-        self, data: ContractPartyCreate
-    ) -> ContractParty:
+    async def add_contract_party(self, data: ContractPartyCreate) -> ContractParty:
         spa = await self.get_spa(data.sales_contract_id)
         if spa.status not in {"draft", "sent_for_signature"}:
             raise HTTPException(
                 status_code=409,
-                detail=(
-                    f"SalesContract in status '{spa.status}' is "
-                    "locked — no party changes"
-                ),
+                detail=(f"SalesContract in status '{spa.status}' is locked — no party changes"),
             )
         buyer = await self.buyers.get_by_id(data.buyer_id)
         if buyer is None:
             raise HTTPException(status_code=422, detail="buyer not found")
-        existing = await self.contract_parties.find_existing(
-            spa.id, data.buyer_id
-        )
+        existing = await self.contract_parties.find_existing(spa.id, data.buyer_id)
         if existing is not None:
-            raise HTTPException(
-                status_code=409, detail="Buyer is already a party"
-            )
+            raise HTTPException(status_code=409, detail="Buyer is already a party")
         # Validate sum of ownership_pct including the new row.
         parties = await self.contract_parties.list_for_contract(spa.id)
         current_total = sum(
@@ -4036,9 +3709,7 @@ class PropertyDevService:
         if new_total > Decimal("100"):
             raise HTTPException(
                 status_code=422,
-                detail=(
-                    f"ownership_pct sum would be {new_total} > 100"
-                ),
+                detail=(f"ownership_pct sum would be {new_total} > 100"),
             )
         obj = ContractParty(
             sales_contract_id=spa.id,
@@ -4067,14 +3738,10 @@ class PropertyDevService:
     async def get_contract_party(self, party_id: uuid.UUID) -> ContractParty:
         obj = await self.contract_parties.get_by_id(party_id)
         if obj is None:
-            raise HTTPException(
-                status_code=404, detail="ContractParty not found"
-            )
+            raise HTTPException(status_code=404, detail="ContractParty not found")
         return obj
 
-    async def update_contract_party(
-        self, party_id: uuid.UUID, data: ContractPartyUpdate
-    ) -> ContractParty:
+    async def update_contract_party(self, party_id: uuid.UUID, data: ContractPartyUpdate) -> ContractParty:
         party = await self.get_contract_party(party_id)
         fields = _dump(data)
         # Validate ownership-sum if pct is changing.
@@ -4083,14 +3750,9 @@ class PropertyDevService:
             if spa.status not in {"draft", "sent_for_signature"}:
                 raise HTTPException(
                     status_code=409,
-                    detail=(
-                        f"SPA in status '{spa.status}' — ownership "
-                        "is locked"
-                    ),
+                    detail=(f"SPA in status '{spa.status}' — ownership is locked"),
                 )
-            parties = await self.contract_parties.list_for_contract(
-                party.sales_contract_id
-            )
+            parties = await self.contract_parties.list_for_contract(party.sales_contract_id)
             new_total = Decimal("0")
             for p in parties:
                 if p.id == party_id:
@@ -4100,9 +3762,7 @@ class PropertyDevService:
             if new_total > Decimal("100"):
                 raise HTTPException(
                     status_code=422,
-                    detail=(
-                        f"ownership_pct sum would be {new_total} > 100"
-                    ),
+                    detail=(f"ownership_pct sum would be {new_total} > 100"),
                 )
         await self.contract_parties.update_fields(party_id, **fields)
         return await self.get_contract_party(party_id)
@@ -4113,10 +3773,7 @@ class PropertyDevService:
         if spa.status not in {"draft", "sent_for_signature"}:
             raise HTTPException(
                 status_code=409,
-                detail=(
-                    f"SPA in status '{spa.status}' — parties are "
-                    "locked"
-                ),
+                detail=(f"SPA in status '{spa.status}' — parties are locked"),
             )
         await self.contract_parties.delete(party_id)
         event_bus.publish_detached(
@@ -4138,7 +3795,8 @@ class PropertyDevService:
     # rows render even before they are wired to the new entities.
 
     async def dashboard_inventory_heatmap(
-        self, dev_id: uuid.UUID,
+        self,
+        dev_id: uuid.UUID,
     ) -> dict[str, Any]:
         """Plot grid grouped by Phase -> Block (heat-map data source).
 
@@ -4154,7 +3812,9 @@ class PropertyDevService:
         phases = await self.phases.list_for_dev_ordered(dev_id)
         blocks = await self.blocks.list_for_development(dev_id)
         plots, _ = await self.plots.list_for_development(
-            dev_id, offset=0, limit=10_000,
+            dev_id,
+            offset=0,
+            limit=10_000,
         )
         # House-type names (legacy fallback display).
         house_types = await self.house_types.list_for_development(dev_id)
@@ -4192,9 +3852,7 @@ class PropertyDevService:
                 "currency": plot.currency or "",
                 "level_in_block": plot.level_in_block,
                 "position_on_floor": plot.position_on_floor,
-                "house_type_id": (
-                    str(plot.house_type_id) if plot.house_type_id else None
-                ),
+                "house_type_id": (str(plot.house_type_id) if plot.house_type_id else None),
             }
 
         phase_rows: list[dict[str, Any]] = []
@@ -4344,11 +4002,10 @@ class PropertyDevService:
             bucket["units"] += 1
             bucket["area_m2"] += Decimal(str(plot.area_m2 or 0))
             cur_revenue = bucket["revenue_by_currency"].setdefault(
-                currency, Decimal("0"),
+                currency,
+                Decimal("0"),
             )
-            bucket["revenue_by_currency"][currency] = (
-                cur_revenue + Decimal(str(spa.total_value or 0))
-            )
+            bucket["revenue_by_currency"][currency] = cur_revenue + Decimal(str(spa.total_value or 0))
 
         # Legacy Buyer fallback — skip any buyer whose plot already has a
         # signed SPA above.
@@ -4374,11 +4031,10 @@ class PropertyDevService:
             if plot is not None:
                 bucket["area_m2"] += Decimal(str(plot.area_m2 or 0))
             cur_revenue = bucket["revenue_by_currency"].setdefault(
-                currency, Decimal("0"),
+                currency,
+                Decimal("0"),
             )
-            bucket["revenue_by_currency"][currency] = (
-                cur_revenue + Decimal(str(buyer.contract_value or 0))
-            )
+            bucket["revenue_by_currency"][currency] = cur_revenue + Decimal(str(buyer.contract_value or 0))
 
         series = sorted(buckets.values(), key=lambda b: b["period"])
         # Project revenue dict -> list for JSON friendliness.
@@ -4395,14 +4051,14 @@ class PropertyDevService:
 
         total_units = sum(int(s["units"]) for s in series)
         total_area = sum(
-            (Decimal(s["area_m2"]) for s in series), start=Decimal("0"),
+            (Decimal(s["area_m2"]) for s in series),
+            start=Decimal("0"),
         )
         total_by_currency: dict[str, Decimal] = {}
         for s in series:
             for entry in s["revenue"]:
-                total_by_currency[entry["currency"]] = (
-                    total_by_currency.get(entry["currency"], Decimal("0"))
-                    + Decimal(str(entry["amount"]))
+                total_by_currency[entry["currency"]] = total_by_currency.get(entry["currency"], Decimal("0")) + Decimal(
+                    str(entry["amount"])
                 )
 
         _ = _select  # keep the import alias alive across method scope
@@ -4498,10 +4154,7 @@ class PropertyDevService:
             currency = spa.currency or ""
             currencies_seen.add(currency)
             sched = buckets[key]["scheduled_by_currency"]
-            sched[currency] = (
-                sched.get(currency, Decimal("0"))
-                + Decimal(str(ins.amount or 0))
-            )
+            sched[currency] = sched.get(currency, Decimal("0")) + Decimal(str(ins.amount or 0))
 
         # Fetch all escrow transactions for this development.
         esc_stmt = (
@@ -4528,10 +4181,7 @@ class PropertyDevService:
                 if tx.direction == "credit"
                 else buckets[key]["disbursed_by_currency"]
             )
-            target[currency] = (
-                target.get(currency, Decimal("0"))
-                + Decimal(str(tx.amount or 0))
-            )
+            target[currency] = target.get(currency, Decimal("0")) + Decimal(str(tx.amount or 0))
 
         def _flatten(by_cur: dict[str, Decimal]) -> list[dict[str, Any]]:
             return [
@@ -4549,17 +4199,11 @@ class PropertyDevService:
         for k in month_keys:
             b = buckets[k]
             for cur, amt in b["scheduled_by_currency"].items():
-                totals_scheduled[cur] = (
-                    totals_scheduled.get(cur, Decimal("0")) + amt
-                )
+                totals_scheduled[cur] = totals_scheduled.get(cur, Decimal("0")) + amt
             for cur, amt in b["collected_by_currency"].items():
-                totals_collected[cur] = (
-                    totals_collected.get(cur, Decimal("0")) + amt
-                )
+                totals_collected[cur] = totals_collected.get(cur, Decimal("0")) + amt
             for cur, amt in b["disbursed_by_currency"].items():
-                totals_disbursed[cur] = (
-                    totals_disbursed.get(cur, Decimal("0")) + amt
-                )
+                totals_disbursed[cur] = totals_disbursed.get(cur, Decimal("0")) + amt
             series.append(
                 {
                     "month": k,
@@ -4584,7 +4228,8 @@ class PropertyDevService:
         }
 
     async def dashboard_inventory_ageing(
-        self, dev_id: uuid.UUID,
+        self,
+        dev_id: uuid.UUID,
     ) -> dict[str, Any]:
         """Days-on-market histogram for unsold inventory.
 
@@ -4598,7 +4243,9 @@ class PropertyDevService:
 
         await self.get_development(dev_id)
         plots, _ = await self.plots.list_for_development(
-            dev_id, offset=0, limit=10_000,
+            dev_id,
+            offset=0,
+            limit=10_000,
         )
         today = datetime.now(UTC).date()
         today_iso = today.isoformat()
@@ -4610,10 +4257,7 @@ class PropertyDevService:
             .join(Plot, Plot.id == Reservation.plot_id)
             .where(Plot.development_id == dev_id)
             .where(Reservation.status == "active")
-            .where(
-                (Reservation.expires_at.is_(None))
-                | (Reservation.expires_at >= today_iso)
-            )
+            .where((Reservation.expires_at.is_(None)) | (Reservation.expires_at >= today_iso))
         )
         active_res_plot_ids: set[Any] = set(
             (await self.session.execute(active_res_stmt)).scalars().all(),
@@ -4623,10 +4267,7 @@ class PropertyDevService:
             .join(Plot, Plot.id == SalesContract.plot_id)
             .where(Plot.development_id == dev_id)
             .where(
-                SalesContract.status.in_(
-                    ("signed", "countersigned", "draft", "sent_for_signature",
-                     "partially_signed")
-                )
+                SalesContract.status.in_(("signed", "countersigned", "draft", "sent_for_signature", "partially_signed"))
             )
         )
         with_spa_plot_ids: set[Any] = set(
@@ -4650,19 +4291,12 @@ class PropertyDevService:
             if plot.status in {"sold", "handed_over"}:
                 continue
             # Reserved-but-no-contract takes priority over ageing buckets.
-            if (
-                plot.id in active_res_plot_ids
-                and plot.id not in with_spa_plot_ids
-            ):
+            if plot.id in active_res_plot_ids and plot.id not in with_spa_plot_ids:
                 key = "reserved_no_contract"
             else:
                 listed_attr = getattr(plot, "listed_at", None) or plot.created_at
                 try:
-                    listed_date = (
-                        listed_attr.date()
-                        if hasattr(listed_attr, "date")
-                        else today
-                    )
+                    listed_date = listed_attr.date() if hasattr(listed_attr, "date") else today
                 except Exception:  # noqa: BLE001
                     listed_date = today
                 days = (today - listed_date).days
@@ -4677,11 +4311,7 @@ class PropertyDevService:
             buckets[key]["count"] += 1
             listed_attr = getattr(plot, "listed_at", None) or plot.created_at
             try:
-                listed_date = (
-                    listed_attr.date()
-                    if hasattr(listed_attr, "date")
-                    else today
-                )
+                listed_date = listed_attr.date() if hasattr(listed_attr, "date") else today
             except Exception:  # noqa: BLE001
                 listed_date = today
             days_on_market = (today - listed_date).days
@@ -4691,12 +4321,8 @@ class PropertyDevService:
                     "plot_number": plot.plot_number,
                     "status": plot.status,
                     "days_on_market": int(days_on_market),
-                    "block_id": (
-                        str(plot.block_id) if plot.block_id else None
-                    ),
-                    "house_type_id": (
-                        str(plot.house_type_id) if plot.house_type_id else None
-                    ),
+                    "block_id": (str(plot.block_id) if plot.block_id else None),
+                    "house_type_id": (str(plot.house_type_id) if plot.house_type_id else None),
                     "price_base": Decimal(str(plot.price_base or 0)),
                     "currency": plot.currency or "",
                 }
@@ -4770,10 +4396,7 @@ class PropertyDevService:
                 .join(Plot, Plot.id == SalesContract.plot_id)
                 .where(Plot.development_id == dev_id)
                 .where(SalesContract.status.in_(("signed", "countersigned")))
-                .where(
-                    (SalesContract.signing_date.is_not(None))
-                    & (SalesContract.signing_date >= cutoff_iso)
-                )
+                .where((SalesContract.signing_date.is_not(None)) & (SalesContract.signing_date >= cutoff_iso))
             )
         ).scalar_one() or 0
 
@@ -4792,9 +4415,7 @@ class PropertyDevService:
         def _drop(prev: int, cur: int) -> Decimal:
             if prev <= 0:
                 return Decimal("0")
-            return (
-                Decimal(prev - cur) / Decimal(prev) * Decimal("100")
-            ).quantize(Decimal("0.1"))
+            return (Decimal(prev - cur) / Decimal(prev) * Decimal("100")).quantize(Decimal("0.1"))
 
         stages = [
             {
@@ -4831,8 +4452,7 @@ class PropertyDevService:
 
         # Final conversion = handover / lead.
         conv = (
-            (Decimal(int(handover_count)) / Decimal(int(lead_count)) * Decimal("100"))
-            .quantize(Decimal("0.1"))
+            (Decimal(int(handover_count)) / Decimal(int(lead_count)) * Decimal("100")).quantize(Decimal("0.1"))
             if lead_count > 0
             else Decimal("0")
         )
@@ -4848,7 +4468,8 @@ class PropertyDevService:
         }
 
     async def dashboard_buyer_journey(
-        self, buyer_id: uuid.UUID,
+        self,
+        buyer_id: uuid.UUID,
     ) -> dict[str, Any]:
         """Cross-entity chronological timeline for one buyer.
 
@@ -4902,11 +4523,7 @@ class PropertyDevService:
             )
             lead_row = (await self.session.execute(lead_stmt)).scalar_one_or_none()
         if lead_row is not None:
-            ts = (
-                lead_row.created_at.isoformat()
-                if hasattr(lead_row.created_at, "isoformat")
-                else None
-            )
+            ts = lead_row.created_at.isoformat() if hasattr(lead_row.created_at, "isoformat") else None
             _push(
                 "lead_created",
                 "Lead created",
@@ -4917,11 +4534,7 @@ class PropertyDevService:
                 detail={"source": lead_row.source, "status": lead_row.status},
             )
         else:
-            ts = (
-                buyer.created_at.isoformat()
-                if hasattr(buyer.created_at, "isoformat")
-                else None
-            )
+            ts = buyer.created_at.isoformat() if hasattr(buyer.created_at, "isoformat") else None
             _push(
                 "lead_created",
                 "Lead created",
@@ -4932,23 +4545,13 @@ class PropertyDevService:
             )
 
         # 2) Reservation — via ContractParty? simpler: by buyer_id on Reservation.
-        res_stmt = (
-            _select(Reservation)
-            .where(Reservation.buyer_id == buyer_id)
-            .order_by(Reservation.created_at)
-        )
-        reservations = list(
-            (await self.session.execute(res_stmt)).scalars().all()
-        )
+        res_stmt = _select(Reservation).where(Reservation.buyer_id == buyer_id).order_by(Reservation.created_at)
+        reservations = list((await self.session.execute(res_stmt)).scalars().all())
         for res in reservations:
             ts = (
                 res.deposit_paid_at.isoformat()
                 if res.deposit_paid_at is not None
-                else (
-                    res.created_at.isoformat()
-                    if hasattr(res.created_at, "isoformat")
-                    else None
-                )
+                else (res.created_at.isoformat() if hasattr(res.created_at, "isoformat") else None)
             )
             res_state = "completed" if res.status != "active" else "in_progress"
             _push(
@@ -4982,11 +4585,7 @@ class PropertyDevService:
             sig_state = (
                 "completed"
                 if spa.status in {"signed", "countersigned"}
-                else (
-                    "in_progress"
-                    if spa.status in {"sent_for_signature", "partially_signed"}
-                    else "upcoming"
-                )
+                else ("in_progress" if spa.status in {"sent_for_signature", "partially_signed"} else "upcoming")
             )
             _push(
                 "spa_signed" if spa.status in {"signed", "countersigned"} else "spa_draft",
@@ -5006,13 +4605,8 @@ class PropertyDevService:
 
         # 4) PaymentSchedule + Instalments (clustered, not one-per-line).
         if spa_ids:
-            sched_stmt = (
-                _select(PaymentSchedule)
-                .where(PaymentSchedule.sales_contract_id.in_(spa_ids))
-            )
-            schedules = list(
-                (await self.session.execute(sched_stmt)).scalars().all()
-            )
+            sched_stmt = _select(PaymentSchedule).where(PaymentSchedule.sales_contract_id.in_(spa_ids))
+            schedules = list((await self.session.execute(sched_stmt)).scalars().all())
             for sched in schedules:
                 instalments = await self.instalments.list_for_schedule(sched.id)
                 paid = sum(
@@ -5020,15 +4614,9 @@ class PropertyDevService:
                     start=0,
                 )
                 total = len(instalments)
-                state = (
-                    "completed" if paid == total and total > 0
-                    else "in_progress" if paid > 0
-                    else "upcoming"
-                )
+                state = "completed" if paid == total and total > 0 else "in_progress" if paid > 0 else "upcoming"
                 # Anchor timestamp = earliest pending due_date else last paid_at.
-                upcoming_dates = [
-                    ins.due_date for ins in instalments if ins.due_date
-                ]
+                upcoming_dates = [ins.due_date for ins in instalments if ins.due_date]
                 anchor_ts = min(upcoming_dates) if upcoming_dates else None
                 _push(
                     "payment_schedule",
@@ -5071,11 +4659,7 @@ class PropertyDevService:
                 snags = await self.snags.list_for_handover(h.id)
                 for s in snags:
                     if s.reported_at:
-                        s_state = (
-                            "completed"
-                            if s.status in {"fixed", "wont_fix"}
-                            else "in_progress"
-                        )
+                        s_state = "completed" if s.status in {"fixed", "wont_fix"} else "in_progress"
                         _push(
                             "snag_raised",
                             f"Snag ({s.severity})",
@@ -5118,7 +4702,6 @@ class PropertyDevService:
             "events": events,
             "event_count": len(events),
         }
-
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -5180,9 +4763,7 @@ def compute_commission_amount(
     if structure_type == "ladder":
         tiers = structure.get("tiers") or []
         # Sort ascending by threshold; the largest threshold ≤ base wins.
-        sorted_tiers = sorted(
-            tiers, key=lambda t: Decimal(str(t.get("threshold", 0) or 0))
-        )
+        sorted_tiers = sorted(tiers, key=lambda t: Decimal(str(t.get("threshold", 0) or 0)))
         applicable_pct = Decimal("0")
         for tier in sorted_tiers:
             threshold = Decimal(str(tier.get("threshold", 0) or 0))
@@ -5211,7 +4792,11 @@ def compute_withholding(
 
 
 def _rule_matches(
-    factor_type: str, condition: dict[str, Any], plot: Any, *, on_date: str,
+    factor_type: str,
+    condition: dict[str, Any],
+    plot: Any,
+    *,
+    on_date: str,
 ) -> bool:
     """Return True if a single PriceMatrix rule applies to ``plot``."""
     md = _attr(plot, "metadata_", {}) or _attr(plot, "metadata", {}) or {}
@@ -5329,7 +4914,9 @@ async def _svc_get_broker(svc: PropertyDevService, broker_id: uuid.UUID) -> Brok
 
 
 async def _svc_update_broker(
-    svc: PropertyDevService, broker_id: uuid.UUID, data: Any,
+    svc: PropertyDevService,
+    broker_id: uuid.UUID,
+    data: Any,
 ) -> Broker:
     await _svc_get_broker(svc, broker_id)
     fields = _dump(data)
@@ -5341,20 +4928,20 @@ async def _svc_update_broker(
 
 
 async def _svc_verify_broker_kyc(
-    svc: PropertyDevService, broker_id: uuid.UUID,
+    svc: PropertyDevService,
+    broker_id: uuid.UUID,
 ) -> Broker:
     broker = await _svc_get_broker(svc, broker_id)
     if broker.kyc_status == "verified":
         return broker
     now = datetime.now(UTC)
-    await svc.brokers.update_fields(
-        broker_id, kyc_status="verified", kyc_verified_at=now
-    )
+    await svc.brokers.update_fields(broker_id, kyc_status="verified", kyc_verified_at=now)
     return await _svc_get_broker(svc, broker_id)
 
 
 async def _svc_create_agreement(
-    svc: PropertyDevService, data: Any,
+    svc: PropertyDevService,
+    data: Any,
 ) -> CommissionAgreement:
     await _svc_get_broker(svc, data.broker_id)
     if data.development_id is not None:
@@ -5378,7 +4965,8 @@ async def _svc_create_agreement(
 
 
 async def _svc_get_agreement(
-    svc: PropertyDevService, agreement_id: uuid.UUID,
+    svc: PropertyDevService,
+    agreement_id: uuid.UUID,
 ) -> CommissionAgreement:
     obj = await svc.commission_agreements.get_by_id(agreement_id)
     if obj is None:
@@ -5387,7 +4975,9 @@ async def _svc_get_agreement(
 
 
 async def _svc_update_agreement(
-    svc: PropertyDevService, agreement_id: uuid.UUID, data: Any,
+    svc: PropertyDevService,
+    agreement_id: uuid.UUID,
+    data: Any,
 ) -> CommissionAgreement:
     await _svc_get_agreement(svc, agreement_id)
     fields = _dump(data)
@@ -5430,10 +5020,13 @@ async def _svc_compute_commission_on_event(
             if plot_id is None or str(plot_id) not in allowed:
                 continue
         commission_amount = compute_commission_amount(
-            base_amount, agreement.structure_type, agreement.structure or {},
+            base_amount,
+            agreement.structure_type,
+            agreement.structure or {},
         )
         withholding, net = compute_withholding(
-            commission_amount, agreement.withholding_tax_pct or 0,
+            commission_amount,
+            agreement.withholding_tax_pct or 0,
         )
         now = datetime.now(UTC)
         accrual = CommissionAccrual(
@@ -5476,7 +5069,9 @@ async def _svc_approve_commission(
 ) -> CommissionAccrual:
     accrual = await svc.commission_accruals.get_by_id(accrual_id)
     if accrual is None:
-        raise HTTPException(status_code=404, detail=translate("errors.commission_accrual_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=404, detail=translate("errors.commission_accrual_not_found", locale=get_locale())
+        )
     target = "approved"
     if target == accrual.state:
         return accrual
@@ -5515,7 +5110,9 @@ async def _svc_pay_commission(
 ) -> CommissionAccrual:
     accrual = await svc.commission_accruals.get_by_id(accrual_id)
     if accrual is None:
-        raise HTTPException(status_code=404, detail=translate("errors.commission_accrual_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=404, detail=translate("errors.commission_accrual_not_found", locale=get_locale())
+        )
     target = "paid"
     if target not in allowed_commission_transitions(accrual.state):
         raise HTTPException(
@@ -5551,7 +5148,8 @@ async def _svc_pay_commission(
 
 
 async def _svc_create_escrow_account(
-    svc: PropertyDevService, data: Any,
+    svc: PropertyDevService,
+    data: Any,
 ) -> EscrowAccount:
     await svc.get_development(data.development_id)
     obj = EscrowAccount(
@@ -5570,7 +5168,8 @@ async def _svc_create_escrow_account(
 
 
 async def _svc_get_escrow_account(
-    svc: PropertyDevService, account_id: uuid.UUID,
+    svc: PropertyDevService,
+    account_id: uuid.UUID,
 ) -> EscrowAccount:
     obj = await svc.escrow_accounts.get_by_id(account_id)
     if obj is None:
@@ -5579,7 +5178,9 @@ async def _svc_get_escrow_account(
 
 
 async def _svc_update_escrow_account(
-    svc: PropertyDevService, account_id: uuid.UUID, data: Any,
+    svc: PropertyDevService,
+    account_id: uuid.UUID,
+    data: Any,
 ) -> EscrowAccount:
     await _svc_get_escrow_account(svc, account_id)
     await svc.escrow_accounts.update_fields(account_id, **_dump(data))
@@ -5587,16 +5188,14 @@ async def _svc_update_escrow_account(
 
 
 async def _svc_create_escrow_transaction(
-    svc: PropertyDevService, data: Any,
+    svc: PropertyDevService,
+    data: Any,
 ) -> EscrowTransaction:
     account = await _svc_get_escrow_account(svc, data.escrow_account_id)
     if account.currency and data.currency.upper() != account.currency.upper():
         raise HTTPException(
             status_code=422,
-            detail=(
-                f"Transaction currency {data.currency} does not match "
-                f"escrow account currency {account.currency}"
-            ),
+            detail=(f"Transaction currency {data.currency} does not match escrow account currency {account.currency}"),
         )
     obj = EscrowTransaction(
         escrow_account_id=data.escrow_account_id,
@@ -5639,15 +5238,10 @@ async def _svc_reconcile_escrow_transaction(
     target = "matched"
     if target == tx.reconciliation_state:
         return tx
-    if target not in allowed_escrow_reconciliation_transitions(
-        tx.reconciliation_state
-    ):
+    if target not in allowed_escrow_reconciliation_transitions(tx.reconciliation_state):
         raise HTTPException(
             status_code=409,
-            detail=(
-                f"Invalid reconciliation transition: "
-                f"{tx.reconciliation_state} -> {target}"
-            ),
+            detail=(f"Invalid reconciliation transition: {tx.reconciliation_state} -> {target}"),
         )
     await svc.escrow_transactions.update_fields(
         tx_id,
@@ -5677,7 +5271,8 @@ async def _svc_compute_escrow_balance(
 ) -> dict[str, Any]:
     account = await _svc_get_escrow_account(svc, account_id)
     breakdown = await svc.escrow_transactions.compute_balance(
-        account_id, as_of_date=as_of_date,
+        account_id,
+        as_of_date=as_of_date,
     )
     breakdown["escrow_account_id"] = account.id
     breakdown["currency"] = account.currency
@@ -5689,7 +5284,8 @@ async def _svc_compute_escrow_balance(
 
 
 async def _svc_create_price_matrix(
-    svc: PropertyDevService, data: Any,
+    svc: PropertyDevService,
+    data: Any,
 ) -> PriceMatrix:
     await svc.get_development(data.development_id)
     rules_dump: list[dict[str, Any]] = []
@@ -5717,7 +5313,8 @@ async def _svc_create_price_matrix(
 
 
 async def _svc_get_price_matrix(
-    svc: PropertyDevService, matrix_id: uuid.UUID,
+    svc: PropertyDevService,
+    matrix_id: uuid.UUID,
 ) -> PriceMatrix:
     obj = await svc.price_matrices.get_by_id(matrix_id)
     if obj is None:
@@ -5726,7 +5323,9 @@ async def _svc_get_price_matrix(
 
 
 async def _svc_update_price_matrix(
-    svc: PropertyDevService, matrix_id: uuid.UUID, data: Any,
+    svc: PropertyDevService,
+    matrix_id: uuid.UUID,
+    data: Any,
 ) -> PriceMatrix:
     await _svc_get_price_matrix(svc, matrix_id)
     fields = _dump(data)
@@ -5755,7 +5354,8 @@ async def _svc_update_price_matrix(
 
 
 async def _svc_activate_price_matrix(
-    svc: PropertyDevService, matrix_id: uuid.UUID,
+    svc: PropertyDevService,
+    matrix_id: uuid.UUID,
 ) -> PriceMatrix:
     matrix = await _svc_get_price_matrix(svc, matrix_id)
     if matrix.status == "active":
@@ -5788,7 +5388,8 @@ async def _svc_compute_plot_price(
         matrix = await _svc_get_price_matrix(svc, matrix_id)
     else:
         matrix = await svc.price_matrices.find_active_for_dev_on_date(
-            plot.development_id, target_date,
+            plot.development_id,
+            target_date,
         )
     if matrix is None:
         # No active matrix → return zero-rule breakdown with the explicit
@@ -5815,7 +5416,8 @@ async def _svc_compute_plot_price(
 
 
 async def _svc_bulk_recompute_dev_prices(
-    svc: PropertyDevService, dev_id: uuid.UUID,
+    svc: PropertyDevService,
+    dev_id: uuid.UUID,
 ) -> dict[str, Any]:
     dev = await svc.get_development(dev_id)
     dev_id_value = dev.id
@@ -5828,7 +5430,9 @@ async def _svc_bulk_recompute_dev_prices(
         )
     matrix_id_value = matrix.id
     rows, _ = await svc.plots.list_for_development(
-        dev_id, offset=0, limit=10_000,
+        dev_id,
+        offset=0,
+        limit=10_000,
     )
     # Snapshot all needed attributes BEFORE the first update_fields call —
     # ``_BaseRepo.update_fields`` runs ``session.expire_all`` after every
@@ -5840,11 +5444,7 @@ async def _svc_bulk_recompute_dev_prices(
         snapshots.append(
             (
                 plot.id,
-                (
-                    Decimal(str(plot.computed_price))
-                    if plot.computed_price is not None
-                    else None
-                ),
+                (Decimal(str(plot.computed_price)) if plot.computed_price is not None else None),
                 compute_plot_price_breakdown(plot, matrix, on_date=today),
             )
         )
@@ -5891,7 +5491,9 @@ async def _svc_get_phase(svc: PropertyDevService, phase_id: uuid.UUID) -> Phase:
 
 
 async def _svc_update_phase(
-    svc: PropertyDevService, phase_id: uuid.UUID, data: Any,
+    svc: PropertyDevService,
+    phase_id: uuid.UUID,
+    data: Any,
 ) -> Phase:
     await _svc_get_phase(svc, phase_id)
     await svc.phases.update_fields(phase_id, **_dump(data))
@@ -5922,7 +5524,9 @@ async def _svc_get_block(svc: PropertyDevService, block_id: uuid.UUID) -> Block:
 
 
 async def _svc_update_block(
-    svc: PropertyDevService, block_id: uuid.UUID, data: Any,
+    svc: PropertyDevService,
+    block_id: uuid.UUID,
+    data: Any,
 ) -> Block:
     await _svc_get_block(svc, block_id)
     await svc.blocks.update_fields(block_id, **_dump(data))
@@ -5979,8 +5583,7 @@ def _render_regulator_pdf(
         ),
         Spacer(1, 0.6 * cm),
         Paragraph(
-            f"<b>Development:</b> {development_name} "
-            f"(<font face='Courier'>{development_code}</font>)",
+            f"<b>Development:</b> {development_name} (<font face='Courier'>{development_code}</font>)",
             styles["Normal"],
         ),
         Paragraph(
@@ -6004,8 +5607,7 @@ def _render_regulator_pdf(
                 ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                 ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
                 ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1),
-                 [colors.HexColor("#f3f4f6"), colors.white]),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.HexColor("#f3f4f6"), colors.white]),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
                 ("LEFTPADDING", (0, 0), (-1, -1), 6),
                 ("RIGHTPADDING", (0, 0), (-1, -1), 6),
@@ -6027,14 +5629,17 @@ def _render_regulator_pdf(
 
 
 async def _svc_collect_regulator_summary(
-    svc: PropertyDevService, dev_id: uuid.UUID, quarter: str,
+    svc: PropertyDevService,
+    dev_id: uuid.UUID,
+    quarter: str,
 ) -> tuple[Development, dict[str, Any]]:
     """Aggregate the disclosure metrics for one development + quarter."""
     dev = await svc.get_development(dev_id)
     plots_by_status = await svc.plots.count_for_development_by_status(dev_id)
     buyers_by_status = await svc.buyers.count_for_development_by_status(dev_id)
     contracted_value = await svc.buyers.sum_contract_value(
-        dev_id, status_in=["contracted", "completed"],
+        dev_id,
+        status_in=["contracted", "completed"],
     )
     accounts = await svc.escrow_accounts.list_for_development(dev_id)
     escrow_summary: dict[str, dict[str, Any]] = {}
@@ -6069,7 +5674,10 @@ async def _svc_collect_regulator_summary(
 
 
 async def _svc_generate_regulator_report(
-    svc: PropertyDevService, dev_id: uuid.UUID, quarter: str, regulator: str,
+    svc: PropertyDevService,
+    dev_id: uuid.UUID,
+    quarter: str,
+    regulator: str,
 ) -> dict[str, Any]:
     """Generic per-regulator report generator. RERA / MAHARERA / 214-ФЗ
     differ in title + label set but the data extraction logic is shared.
@@ -6171,19 +5779,25 @@ PropertyDevService.generate_regulator_report = (  # type: ignore[attr-defined]
 
 
 async def _svc_generate_regulator_report_RERA(
-    svc: PropertyDevService, dev_id: uuid.UUID, quarter: str,
+    svc: PropertyDevService,
+    dev_id: uuid.UUID,
+    quarter: str,
 ) -> dict[str, Any]:
     return await _svc_generate_regulator_report(svc, dev_id, quarter, "RERA")
 
 
 async def _svc_generate_regulator_report_MAHARERA(
-    svc: PropertyDevService, dev_id: uuid.UUID, quarter: str,
+    svc: PropertyDevService,
+    dev_id: uuid.UUID,
+    quarter: str,
 ) -> dict[str, Any]:
     return await _svc_generate_regulator_report(svc, dev_id, quarter, "MAHARERA")
 
 
 async def _svc_generate_regulator_report_214FZ(
-    svc: PropertyDevService, dev_id: uuid.UUID, quarter: str,
+    svc: PropertyDevService,
+    dev_id: uuid.UUID,
+    quarter: str,
 ) -> dict[str, Any]:
     return await _svc_generate_regulator_report(svc, dev_id, quarter, "214_FZ")
 
@@ -6202,18 +5816,20 @@ PropertyDevService.generate_regulator_report_214FZ = (  # type: ignore[attr-defi
 # ── PDF document generation (#138 follow-up) ───────────────────────────
 
 
-_VALID_DOC_TYPES: frozenset[str] = frozenset({
-    "reservation_receipt",
-    "sales_contract",
-    "payment_receipt",
-    "handover_certificate",
-    "warranty_certificate",
-    "noc",
-})
+_VALID_DOC_TYPES: frozenset[str] = frozenset(
+    {
+        "reservation_receipt",
+        "sales_contract",
+        "payment_receipt",
+        "handover_certificate",
+        "warranty_certificate",
+        "noc",
+    }
+)
 
 
 async def _svc_generate_document(
-    svc: "PropertyDevService",
+    svc: PropertyDevService,
     *,
     doc_type: str,
     contract_id: uuid.UUID | None = None,
@@ -6272,7 +5888,11 @@ async def _svc_generate_document(
             if buyer is not None:
                 buyers.append(buyer)
         return render_reservation_receipt_pdf(
-            reservation, plot, development, buyers, locale=locale,
+            reservation,
+            plot,
+            development,
+            buyers,
+            locale=locale,
         )
 
     if doc_type == "sales_contract":
@@ -6280,7 +5900,9 @@ async def _svc_generate_document(
             raise HTTPException(status_code=400, detail="contract_id required")
         contract = await svc.sales_contracts.get_by_id(contract_id)
         if contract is None:
-            raise HTTPException(status_code=404, detail=translate("errors.salescontract_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.salescontract_not_found", locale=get_locale())
+            )
         plot = await svc.plots.get_by_id(contract.plot_id)
         if plot is None:
             raise HTTPException(status_code=404, detail=translate("errors.plot_not_found", locale=get_locale()))
@@ -6288,11 +5910,7 @@ async def _svc_generate_document(
         if development is None:
             raise HTTPException(status_code=404, detail="Development not found")
         payment_schedule = await svc.payment_schedules.get_for_contract(contract_id)
-        instalments = (
-            await svc.instalments.list_for_contract(contract_id)
-            if payment_schedule is not None
-            else []
-        )
+        instalments = await svc.instalments.list_for_contract(contract_id) if payment_schedule is not None else []
         parties = await svc.contract_parties.list_for_contract(contract_id)
         # Resolve buyer rows for parties (single per-contract resolution —
         # no N+1 because we only fetch unique buyer_ids).
@@ -6324,13 +5942,11 @@ async def _svc_generate_document(
             raise HTTPException(status_code=404, detail="PaymentSchedule not found")
         contract = await svc.sales_contracts.get_by_id(schedule.sales_contract_id)
         if contract is None:
-            raise HTTPException(status_code=404, detail=translate("errors.salescontract_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.salescontract_not_found", locale=get_locale())
+            )
         plot = await svc.plots.get_by_id(contract.plot_id)
-        development = (
-            await svc.developments.get_by_id(plot.development_id)
-            if plot is not None
-            else None
-        )
+        development = await svc.developments.get_by_id(plot.development_id) if plot is not None else None
         return render_payment_receipt_pdf(
             instalment,
             contract,
@@ -6357,11 +5973,7 @@ async def _svc_generate_document(
 
         from app.modules.property_dev.models import SalesContract as _SC
 
-        stmt = (
-            _select(_SC)
-            .where(_SC.plot_id == plot.id)
-            .order_by(_SC.revision_number.desc())
-        )
+        stmt = _select(_SC).where(_SC.plot_id == plot.id).order_by(_SC.revision_number.desc())
         rows = (await svc.session.execute(stmt)).scalars().all()
         contract = next(
             (r for r in rows if r.status in {"signed", "completed", "executed"}),
@@ -6379,9 +5991,7 @@ async def _svc_generate_document(
                 .where(_Snag.handover_id == handover.id)
                 .where(_Snag.status.in_(("open", "in_progress")))
             )
-            open_snags = int(
-                (await svc.session.execute(cnt_stmt)).scalar() or 0
-            )
+            open_snags = int((await svc.session.execute(cnt_stmt)).scalar() or 0)
         except Exception:  # noqa: BLE001 — best-effort snag count
             open_snags = int(_attr(handover, "snag_count_at_handover", 0) or 0)
         return render_handover_certificate_pdf(
@@ -6400,20 +6010,12 @@ async def _svc_generate_document(
         if handover is None:
             raise HTTPException(status_code=404, detail="Handover not found")
         plot = await svc.plots.get_by_id(handover.plot_id)
-        development = (
-            await svc.developments.get_by_id(plot.development_id)
-            if plot is not None
-            else None
-        )
+        development = await svc.developments.get_by_id(plot.development_id) if plot is not None else None
         from sqlalchemy import select as _select
 
         from app.modules.property_dev.models import SalesContract as _SC
 
-        stmt = (
-            _select(_SC)
-            .where(_SC.plot_id == handover.plot_id)
-            .order_by(_SC.revision_number.desc())
-        )
+        stmt = _select(_SC).where(_SC.plot_id == handover.plot_id).order_by(_SC.revision_number.desc())
         rows = (await svc.session.execute(stmt)).scalars().all()
         contract = next(iter(rows), None)
         return render_warranty_certificate_pdf(
@@ -6431,7 +6033,9 @@ async def _svc_generate_document(
             raise HTTPException(status_code=400, detail="contract_id required")
         contract = await svc.sales_contracts.get_by_id(contract_id)
         if contract is None:
-            raise HTTPException(status_code=404, detail=translate("errors.salescontract_not_found", locale=get_locale()))
+            raise HTTPException(
+                status_code=404, detail=translate("errors.salescontract_not_found", locale=get_locale())
+            )
         plot = await svc.plots.get_by_id(contract.plot_id)
         if plot is None:
             raise HTTPException(status_code=404, detail=translate("errors.plot_not_found", locale=get_locale()))
@@ -6504,11 +6108,7 @@ def _derive_unit_code(plot: Plot, block_code: str | None) -> str:
     (legacy plots without ``block_id`` / ``level_in_block``). Keeps the
     sales-floor display deterministic — never returns an empty string.
     """
-    if (
-        block_code
-        and plot.level_in_block is not None
-        and (plot.position_on_floor or plot.plot_number)
-    ):
+    if block_code and plot.level_in_block is not None and (plot.position_on_floor or plot.plot_number):
         floor_part = f"{int(plot.level_in_block):02d}"
         pos_part = (plot.position_on_floor or plot.plot_number).strip() or "00"
         return f"{block_code}-{floor_part}-{pos_part}"
@@ -6516,7 +6116,7 @@ def _derive_unit_code(plot: Plot, block_code: str | None) -> str:
 
 
 async def _svc_inventory_map(
-    svc: "PropertyDevService",
+    svc: PropertyDevService,
     dev_id: uuid.UUID,
 ) -> dict[str, Any]:
     """Render the Inventory Map payload for one Development.
@@ -6529,7 +6129,9 @@ async def _svc_inventory_map(
     """
     dev = await svc.get_development(dev_id)
     plots, _ = await svc.plots.list_for_development(
-        dev_id, offset=0, limit=10_000,
+        dev_id,
+        offset=0,
+        limit=10_000,
     )
     blocks = await svc.blocks.list_for_development(dev_id)
     blocks_by_id: dict[Any, Any] = {b.id: b for b in blocks}
@@ -6548,9 +6150,7 @@ async def _svc_inventory_map(
         if key not in block_meta:
             block_meta[key] = {
                 "block_code": block_code,
-                "block_id": (
-                    block.id if block else None
-                ),
+                "block_id": (block.id if block else None),
                 "name": (block.name if block else "Unassigned"),
             }
         floor = int(plot.level_in_block) if plot.level_in_block is not None else 0
@@ -6589,11 +6189,7 @@ async def _svc_inventory_map(
                             "floor": floor,
                             "base_price": Decimal(str(p.price_base or 0)),
                             "area_m2": Decimal(str(p.area_m2 or 0)),
-                            "currency": (
-                                p.currency
-                                or dev.currency
-                                or ""
-                            ),
+                            "currency": (p.currency or dev.currency or ""),
                             "bedrooms": int(p.bedrooms or 0),
                             "bathrooms": int(p.bathrooms or 0),
                         }
@@ -6620,7 +6216,7 @@ async def _svc_inventory_map(
 
 
 async def _svc_inventory_bulk_hold(
-    svc: "PropertyDevService",
+    svc: PropertyDevService,
     dev_id: uuid.UUID,
     plot_ids: list[uuid.UUID],
     hold_reason: str,
@@ -6685,9 +6281,7 @@ async def _svc_inventory_bulk_hold(
                     continue
                 if plot.status == "held":
                     # Idempotent — already in the requested state.
-                    skipped.append(
-                        {"plot_id": str(pid), "reason": "already_held"}
-                    )
+                    skipped.append({"plot_id": str(pid), "reason": "already_held"})
                     continue
                 if plot.status not in _INVENTORY_AVAILABLE_STATUSES:
                     # Hard reject — a reserved / sold / handed-over plot
@@ -6696,10 +6290,7 @@ async def _svc_inventory_bulk_hold(
                     # — better to fail loud than half-apply.
                     raise HTTPException(
                         status_code=409,
-                        detail=(
-                            f"Plot {plot.plot_number} is in status "
-                            f"'{plot.status}' and cannot be held"
-                        ),
+                        detail=(f"Plot {plot.plot_number} is in status '{plot.status}' and cannot be held"),
                     )
                 # Stash hold metadata on Plot.metadata — no schema migration
                 # needed because metadata is JSON. Audit trail is also
@@ -6753,7 +6344,7 @@ async def _svc_inventory_bulk_hold(
 
 
 async def _svc_inventory_bulk_release(
-    svc: "PropertyDevService",
+    svc: PropertyDevService,
     dev_id: uuid.UUID,
     plot_ids: list[uuid.UUID],
     actor_id: uuid.UUID | str | None = None,
@@ -6796,16 +6387,12 @@ async def _svc_inventory_bulk_release(
             for pid in dedup_ids:
                 plot = await svc.plots.get_by_id(pid)
                 if plot is None or plot.development_id != dev_id:
-                    skipped.append(
-                        {"plot_id": str(pid), "reason": "not_in_development"}
-                    )
+                    skipped.append({"plot_id": str(pid), "reason": "not_in_development"})
                     continue
                 if plot.status != "held":
                     # Idempotent — anything that isn't currently held
                     # (including ``blocked``) is a soft skip.
-                    skipped.append(
-                        {"plot_id": str(pid), "reason": "not_held"}
-                    )
+                    skipped.append({"plot_id": str(pid), "reason": "not_held"})
                     continue
                 new_metadata = dict(plot.metadata_ or {})
                 new_metadata.pop("hold", None)
@@ -6856,7 +6443,7 @@ PropertyDevService.inventory_bulk_release = (  # type: ignore[attr-defined]
 
 
 async def _svc_resolve_development_owner(
-    svc: "PropertyDevService",
+    svc: PropertyDevService,
     *,
     contract_id: uuid.UUID | None = None,
     reservation_id: uuid.UUID | None = None,
@@ -6943,7 +6530,11 @@ async def _svc_create_price_list(
     """Create a draft PriceList with optional entries + rules."""
     from app.modules.property_dev.models import (
         SalesPriceList as _PL,
+    )
+    from app.modules.property_dev.models import (
         SalesPriceListEntry as _PLE,
+    )
+    from app.modules.property_dev.models import (
         SalesPricingRule as _PR,
     )
 
@@ -6987,10 +6578,7 @@ async def _svc_create_price_list(
                 rule_type=r.rule_type,
                 condition_json=r.condition_json,
                 adjustment_pct=Decimal(str(r.adjustment_pct)),
-                adjustment_fixed=(
-                    Decimal(str(r.adjustment_fixed))
-                    if r.adjustment_fixed is not None else None
-                ),
+                adjustment_fixed=(Decimal(str(r.adjustment_fixed)) if r.adjustment_fixed is not None else None),
                 priority=r.priority,
                 active=r.active,
                 effective_from=r.effective_from or "",
@@ -7004,7 +6592,8 @@ async def _svc_create_price_list(
 
 
 async def _svc_activate_price_list(
-    svc: PropertyDevService, price_list_id: uuid.UUID,
+    svc: PropertyDevService,
+    price_list_id: uuid.UUID,
 ) -> Any:
     """Atomically activate a price list, superseding the previously
     active one for the same development.
@@ -7047,12 +6636,14 @@ async def _svc_activate_price_list(
     if dialect == "postgresql" and svc.session.in_transaction():
         async with svc.session.begin_nested():
             await svc.price_lists.supersede_other_active(
-                pl_development_id, keep_id=pl_id,
+                pl_development_id,
+                keep_id=pl_id,
             )
             await svc.price_lists.update_fields(pl_id, status="active")
     else:
         await svc.price_lists.supersede_other_active(
-            pl_development_id, keep_id=pl_id,
+            pl_development_id,
+            keep_id=pl_id,
         )
         await svc.price_lists.update_fields(pl_id, status="active")
 
@@ -7092,8 +6683,9 @@ async def _svc_compute_price_quote(
     if buyer_id is not None:
         buyer = await svc.buyers.get_by_id(buyer_id)
         if buyer is not None:
-            prior_purchases = await svc.reservations.count_for_buyer(buyer_id) \
-                if hasattr(svc.reservations, "count_for_buyer") else 0
+            prior_purchases = (
+                await svc.reservations.count_for_buyer(buyer_id) if hasattr(svc.reservations, "count_for_buyer") else 0
+            )
 
     rules = await svc.pricing_rules.list_active_for_price_list(pl.id)
 
@@ -7104,10 +6696,7 @@ async def _svc_compute_price_quote(
     else:
         base_price = Decimal(str(plot.price_base or 0))
 
-    qd = (
-        date.fromisoformat(quote_date)
-        if quote_date else datetime.now(UTC).date()
-    )
+    qd = date.fromisoformat(quote_date) if quote_date else datetime.now(UTC).date()
 
     basket = None
     if basket_plot_ids:
@@ -7140,10 +6729,7 @@ async def _svc_effective_rules_on_date(
     pl = await svc.price_lists.get_by_id(price_list_id)
     if pl is None:
         raise HTTPException(status_code=404, detail="PriceList not found")
-    target = (
-        date.fromisoformat(on_date)
-        if on_date else datetime.now(UTC).date()
-    )
+    target = date.fromisoformat(on_date) if on_date else datetime.now(UTC).date()
     rules = await svc.pricing_rules.list_for_price_list(pl.id)
     out: list[Any] = []
     for r in rules:

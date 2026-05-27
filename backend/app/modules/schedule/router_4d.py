@@ -43,9 +43,7 @@ logger = logging.getLogger(__name__)
 
 
 schedules_v2_router = APIRouter(prefix="/schedules", tags=["4D Schedules"])
-eac_schedule_links_router = APIRouter(
-    prefix="/eac/schedule-links", tags=["4D EAC Schedule Links"]
-)
+eac_schedule_links_router = APIRouter(prefix="/eac/schedule-links", tags=["4D EAC Schedule Links"])
 
 
 # ── Pydantic schemas (router-local — kept here to avoid bloating the v1 module) ──
@@ -67,9 +65,7 @@ class EacScheduleLinkCreate(BaseModel):
         if self.rule_id is None and self.predicate_json is None:
             raise ValueError("either rule_id or predicate_json is required")
         if self.mode not in EAC_LINK_MODES:
-            raise ValueError(
-                f"mode must be one of {EAC_LINK_MODES}, got {self.mode!r}"
-            )
+            raise ValueError(f"mode must be one of {EAC_LINK_MODES}, got {self.mode!r}")
         return self
 
 
@@ -186,17 +182,11 @@ async def import_schedule(
         text = raw.decode("utf-8", errors="replace")
 
     try:
-        outcome = await import_schedule_csv(
-            session, schedule_id=schedule_id, csv_text=text
-        )
+        outcome = await import_schedule_csv(session, schedule_id=schedule_id, csv_text=text)
     except LookupError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
     await session.commit()
     return CsvImportResponse(
@@ -232,13 +222,9 @@ async def record_progress(
             actual_finish_date=body.actual_finish_date,
         )
     except LookupError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
     await session.commit()
     await session.refresh(entry)
@@ -295,9 +281,7 @@ async def get_snapshot(
         )
     target = _parse_as_of(as_of_date)
     service = ScheduleSnapshotService(session)
-    statuses = await service.snapshot(
-        schedule_id, target, model_version_id
-    )
+    statuses = await service.snapshot(schedule_id, target, model_version_id)
     return {
         "schedule_id": str(schedule_id),
         "as_of_date": target.isoformat(),
@@ -357,9 +341,7 @@ async def create_link(
             model_version_id=body.model_version_id,
         )
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
     await session.commit()
     await session.refresh(link)
@@ -399,9 +381,7 @@ async def delete_link(
     await session.commit()
 
 
-@eac_schedule_links_router.post(
-    "/{link_id}:dry-run", response_model=DryRunResponse
-)
+@eac_schedule_links_router.post("/{link_id}:dry-run", response_model=DryRunResponse)
 async def dry_run_link(
     link_id: uuid.UUID,
     session: SessionDep,

@@ -150,7 +150,8 @@ def test_ensure_high_value_authorised_none_payload_skips() -> None:
     service-level tests that don't simulate a JWT.
     """
     ensure_high_value_authorised(
-        HIGH_VALUE_APPROVAL_THRESHOLD + Decimal("1"), payload=None,
+        HIGH_VALUE_APPROVAL_THRESHOLD + Decimal("1"),
+        payload=None,
     )
 
 
@@ -186,8 +187,7 @@ async def test_vr_lifecycle_draft_to_approved_logs_decision(caplog) -> None:
     assert decided.decided_by == "approver-1"
     # Structured-log decision record exists.
     assert any(
-        "variations.request.approved" in str(rec.message)
-        or rec.name.endswith("variations.service")
+        "variations.request.approved" in str(rec.message) or rec.name.endswith("variations.service")
         for rec in caplog.records
     )
 
@@ -259,7 +259,8 @@ async def test_vr_cannot_be_edited_after_approved() -> None:
 
     with pytest.raises(HTTPException) as exc:
         await svc.update_request(
-            vr.id, VariationRequestUpdate(estimated_cost_impact=Decimal("999999")),
+            vr.id,
+            VariationRequestUpdate(estimated_cost_impact=Decimal("999999")),
         )
     assert exc.value.status_code == 409
 

@@ -28,8 +28,7 @@ class TaskCreate(BaseModel):
         min_length=1,
         max_length=50,
         description=(
-            "Built-in types: task, topic, information, decision, personal."
-            " Custom category strings are also accepted."
+            "Built-in types: task, topic, information, decision, personal. Custom category strings are also accepted."
         ),
     )
     title: str = Field(..., min_length=1, max_length=500)
@@ -72,8 +71,7 @@ class TaskUpdate(BaseModel):
         min_length=1,
         max_length=50,
         description=(
-            "Built-in types: task, topic, information, decision, personal."
-            " Custom category strings are also accepted."
+            "Built-in types: task, topic, information, decision, personal. Custom category strings are also accepted."
         ),
     )
     title: str | None = Field(default=None, min_length=1, max_length=500)

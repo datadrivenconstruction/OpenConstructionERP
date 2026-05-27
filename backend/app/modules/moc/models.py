@@ -27,9 +27,7 @@ class MoCEntry(Base):
     """Management-of-Change entry — the change proposal header."""
 
     __tablename__ = "oe_moc_entry"
-    __table_args__ = (
-        UniqueConstraint("project_id", "code", name="uq_oe_moc_entry_project_code"),
-    )
+    __table_args__ = (UniqueConstraint("project_id", "code", name="uq_oe_moc_entry_project_code"),)
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -41,13 +39,9 @@ class MoCEntry(Base):
     title: Mapped[str] = mapped_column(String(500), nullable=False, default="")
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     # Category of change: engineering / safety / design / contract / other
-    change_category: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="engineering"
-    )
+    change_category: Mapped[str] = mapped_column(String(40), nullable=False, default="engineering")
     # Risk classification: low / medium / high / critical
-    risk_level: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="medium"
-    )
+    risk_level: Mapped[str] = mapped_column(String(20), nullable=False, default="medium")
     proposed_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     proposed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     reviewed_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
@@ -60,25 +54,15 @@ class MoCEntry(Base):
     implemented_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     # Total cost impact of implementing this MoC (String/MoneyType, per
     # platform rule: money as Decimal-string, never float).
-    cost_impact: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
+    cost_impact: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
     # Schedule delta in days (positive = delay, negative = acceleration).
     schedule_delta_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="proposed", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="proposed", index=True)
     # Soft cross-module links (no DB FK — avoids circular module dependency).
-    variation_request_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
-    variation_order_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
-    change_order_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    variation_request_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    variation_order_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    change_order_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -117,9 +101,7 @@ class MoCImpact(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     # Severity: low / medium / high / critical
     severity: Mapped[str] = mapped_column(String(20), nullable=False, default="medium")
-    cost_impact: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
+    cost_impact: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
     schedule_delta_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
     mitigation: Mapped[str] = mapped_column(Text, nullable=False, default="")

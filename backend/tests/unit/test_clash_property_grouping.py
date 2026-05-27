@@ -63,9 +63,7 @@ def test_in_set_property_value_is_string_coerced_and_trimmed():
     """Numeric / whitespace-padded property values still match."""
     spec = {"properties": {"Floor": ["3"]}}
     assert _in_set(_PropElement({"Floor": 3}), "Generic", "Structural", spec)
-    assert _in_set(
-        _PropElement({"Floor": " 3 "}), "Generic", "Structural", spec
-    )
+    assert _in_set(_PropElement({"Floor": " 3 "}), "Generic", "Structural", spec)
 
 
 def test_in_set_property_is_a_union_with_the_builtins():
@@ -75,17 +73,11 @@ def test_in_set_property_is_a_union_with_the_builtins():
         "properties": {"Phase": ["Existing"]},
     }
     # Matches purely on the property even though element_type differs.
-    assert _in_set(
-        _PropElement({"Phase": "Existing"}), "Generic", "Structural", spec
-    )
+    assert _in_set(_PropElement({"Phase": "Existing"}), "Generic", "Structural", spec)
     # Matches purely on the builtin even with no matching property.
-    assert _in_set(
-        _PropElement({"Phase": "New"}), "Wall", "Structural", spec
-    )
+    assert _in_set(_PropElement({"Phase": "New"}), "Wall", "Structural", spec)
     # Matches neither → not in set.
-    assert not _in_set(
-        _PropElement({"Phase": "New"}), "Generic", "Structural", spec
-    )
+    assert not _in_set(_PropElement({"Phase": "New"}), "Generic", "Structural", spec)
 
 
 def test_in_set_property_is_defensive():
@@ -93,10 +85,7 @@ def test_in_set_property_is_defensive():
     spec = {"properties": {"Manufacturer": ["Acme"]}}
     assert _in_set(_PropElement(None), "Generic", "Structural", spec) is False
     assert _in_set(_PropElement({}), "Generic", "Structural", spec) is False
-    assert (
-        _in_set(_PropElement("not-a-dict"), "Generic", "Structural", spec)
-        is False
-    )
+    assert _in_set(_PropElement("not-a-dict"), "Generic", "Structural", spec) is False
     # Non-scalar value for the key → no match (no crash).
     assert (
         _in_set(
@@ -121,25 +110,17 @@ def test_in_set_property_is_defensive():
 
 def test_legacy_selection_set_without_properties_still_validates():
     """A payload WITHOUT ``properties`` validates + behaves as before."""
-    legacy = ClashSelectionSet.model_validate(
-        {"element_types": ["Wall"], "disciplines": ["Structural"]}
-    )
+    legacy = ClashSelectionSet.model_validate({"element_types": ["Wall"], "disciplines": ["Structural"]})
     assert legacy.properties == {}
     assert legacy.is_empty is False
     # Engine path: builtin union still resolves exactly as it used to.
     spec = legacy.model_dump()
-    assert _in_set(
-        _PropElement({"any": "thing"}), "Wall", "Mechanical", spec
-    )
-    assert not _in_set(
-        _PropElement({"any": "thing"}), "Beam", "Mechanical", spec
-    )
+    assert _in_set(_PropElement({"any": "thing"}), "Wall", "Mechanical", spec)
+    assert not _in_set(_PropElement({"any": "thing"}), "Beam", "Mechanical", spec)
     # A truly empty set (no builtins, no properties) is still empty.
     assert ClashSelectionSet().is_empty is True
     # A set carrying only a properties chip is NOT empty.
-    assert (
-        ClashSelectionSet(properties={"Phase": ["New"]}).is_empty is False
-    )
+    assert ClashSelectionSet(properties={"Phase": ["New"]}).is_empty is False
 
 
 # ── DB-backed: per-property enumeration + property:<key> faceting ──────────
@@ -179,9 +160,7 @@ async def _seed_model(session) -> uuid.UUID:
     project = Project(name="Clash Prop Project", owner_id=user.id)
     session.add(project)
     await session.flush()
-    model = BIMModel(
-        project_id=project.id, name="Prop Model", status="ready"
-    )
+    model = BIMModel(project_id=project.id, name="Prop Model", status="ready")
     session.add(model)
     await session.flush()
     return model.id
@@ -189,8 +168,12 @@ async def _seed_model(session) -> uuid.UUID:
 
 def _bbox() -> dict:
     return {
-        "min_x": 0.0, "min_y": 0.0, "min_z": 0.0,
-        "max_x": 1.0, "max_y": 1.0, "max_z": 1.0,
+        "min_x": 0.0,
+        "min_y": 0.0,
+        "min_z": 0.0,
+        "max_x": 1.0,
+        "max_y": 1.0,
+        "max_z": 1.0,
     }
 
 
@@ -264,9 +247,7 @@ async def test_property_key_enumeration_excludes_builtins_and_noise(
     await db_session.flush()
 
     repo = ClashRepository(db_session)
-    _chosen, avail, props = await repo.grouping_facets_for_models(
-        [model_id], "type"
-    )
+    _chosen, avail, props = await repo.grouping_facets_for_models([model_id], "type")
     keys = {k for k, _ in props}
     assert "FireRating" in keys
     assert "Phase" in keys
@@ -311,9 +292,7 @@ async def test_property_key_distinct_and_topn_caps(db_session):
     await db_session.flush()
 
     repo = ClashRepository(db_session)
-    _chosen, _avail, props = await repo.grouping_facets_for_models(
-        [model_id], "type"
-    )
+    _chosen, _avail, props = await repo.grouping_facets_for_models([model_id], "type")
     keys = [k for k, _ in props]
     assert "UniqueId" not in keys  # > 500 distinct → excluded
     assert len(keys) <= 60  # top-N cap honoured
@@ -331,9 +310,7 @@ async def test_group_by_property_key_returns_distinct_value_items(
     from app.modules.clash.repository import ClashRepository
 
     model_id = await _seed_model(db_session)
-    layout = (
-        ["F90"] * 5 + ["F120"] * 3 + ["F30"] * 2 + [None] * 2
-    )  # 2 with no FireRating at all
+    layout = ["F90"] * 5 + ["F120"] * 3 + ["F30"] * 2 + [None] * 2  # 2 with no FireRating at all
     for i, fr in enumerate(layout):
         props: dict = {"Phase": "New"}
         if fr is not None:
@@ -352,9 +329,7 @@ async def test_group_by_property_key_returns_distinct_value_items(
     await db_session.flush()
 
     repo = ClashRepository(db_session)
-    chosen, _avail, props = await repo.grouping_facets_for_models(
-        [model_id], "property:FireRating"
-    )
+    chosen, _avail, props = await repo.grouping_facets_for_models([model_id], "property:FireRating")
     # Sorted by count desc then value: F90(5), F120(3), F30(2).
     assert chosen == [("F90", 5), ("F120", 3), ("F30", 2)]
     # The selector list still enumerates FireRating + Phase as keys.

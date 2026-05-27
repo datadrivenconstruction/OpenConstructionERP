@@ -91,9 +91,7 @@ async def _resolve_original_path(model_id: uuid.UUID) -> tuple[dict, Path] | Non
     from app.modules.bim_hub.models import BIMModel
 
     async with async_session_factory() as session:
-        model = (
-            await session.execute(select(BIMModel).where(BIMModel.id == model_id))
-        ).scalar_one_or_none()
+        model = (await session.execute(select(BIMModel).where(BIMModel.id == model_id))).scalar_one_or_none()
         if model is None:
             return None
         info = {
@@ -146,9 +144,11 @@ def _ddc_invocation_v18(
             [
                 str(converter),
                 str(input_path),
-                "-x", str(xlsx_out),
+                "-x",
+                str(xlsx_out),
                 "--no-dae",
-                "-m", "standard",
+                "-m",
+                "standard",
             ],
             xlsx_out,
         ),
@@ -156,7 +156,8 @@ def _ddc_invocation_v18(
             [
                 str(converter),
                 str(input_path),
-                "-d", str(dae_out),
+                "-d",
+                str(dae_out),
                 "--no-xlsx",
             ],
             dae_out,
@@ -236,13 +237,14 @@ def _run_ddc_extraction(
     cli_style = _probe_ddc_cli_style(converter)
     logger.info(
         "Fallback DDC invocation: cli_style=%s, converter=%s",
-        cli_style, converter,
+        cli_style,
+        converter,
     )
     xlsx_out = (tmp_dir / "ddc_direct.xlsx").resolve()
     dae_out = (tmp_dir / "geometry.dae").resolve()
-    invocations = (
-        _ddc_invocation_v18 if cli_style == "v18" else _ddc_invocation_legacy
-    )(converter, original_path, xlsx_out, dae_out)
+    invocations = (_ddc_invocation_v18 if cli_style == "v18" else _ddc_invocation_legacy)(
+        converter, original_path, xlsx_out, dae_out
+    )
 
     for args, expected_output in invocations:
         logger.info("Direct DDC call: %s", args)
@@ -310,11 +312,7 @@ async def _replace_elements(
 
     async with async_session_factory() as session:
         # 1) Count + (optionally) back up existing rows.
-        existing = (
-            await session.execute(
-                select(BIMElement).where(BIMElement.model_id == model_id)
-            )
-        ).scalars().all()
+        existing = (await session.execute(select(BIMElement).where(BIMElement.model_id == model_id))).scalars().all()
         old_count = len(existing)
         old_null_mesh_ref = sum(1 for e in existing if e.mesh_ref is None)
 
@@ -376,9 +374,7 @@ async def _replace_elements(
 
         # 3) Mutate inside one transaction.
         try:
-            await session.execute(
-                delete(BIMElement).where(BIMElement.model_id == model_id)
-            )
+            await session.execute(delete(BIMElement).where(BIMElement.model_id == model_id))
             for el in new_elements:
                 session.add(
                     BIMElement(
@@ -397,11 +393,7 @@ async def _replace_elements(
                 )
 
             # 4) Refresh the model row's denormalised counts.
-            model = (
-                await session.execute(
-                    select(BIMModel).where(BIMModel.id == model_id)
-                )
-            ).scalar_one_or_none()
+            model = (await session.execute(select(BIMModel).where(BIMModel.id == model_id))).scalar_one_or_none()
             if model is not None:
                 model.element_count = new_count
                 model.storey_count = len(result.get("storeys") or [])
@@ -415,7 +407,9 @@ async def _replace_elements(
                     model.status = "ready"
                     model.error_message = None
                     for stale in (
-                        "degraded", "warning", "error_code",
+                        "degraded",
+                        "warning",
+                        "error_code",
                         "suggested_actions",
                     ):
                         meta.pop(stale, None)
@@ -457,18 +451,17 @@ async def reingest_one(
     info, original_path = resolved
     logger.info(
         "Re-ingesting model %s (%s, format=%s) from %s",
-        info["id"], info["name"], info["model_format"], original_path,
+        info["id"],
+        info["name"],
+        info["model_format"],
+        original_path,
     )
 
     backup_path: Path | None = None
     if backup_rows:
         ts = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
         # Repo data/ dir — same location used by other admin scripts.
-        backup_path = (
-            Path(__file__).resolve().parents[3]
-            / "data"
-            / f"reingest_backup_{info['id']}_{ts}.json"
-        )
+        backup_path = Path(__file__).resolve().parents[3] / "data" / f"reingest_backup_{info['id']}_{ts}.json"
 
     with tempfile.TemporaryDirectory(prefix="oe-reingest-") as tmp_str:
         tmp_dir = Path(tmp_str)
@@ -484,7 +477,8 @@ async def reingest_one(
         element_count = result.get("element_count", 0)
         logger.info(
             "DDC extraction produced %d elements (geometry_quality=%s)",
-            element_count, result.get("geometry_quality"),
+            element_count,
+            result.get("geometry_quality"),
         )
 
         if element_count == 0:
@@ -512,7 +506,7 @@ async def reingest_one(
     new_with_mesh = summary.get("new_with_mesh_ref")
     print()
     print("-" * 72)
-    safe_name = (info.get('name') or '').encode('ascii', 'replace').decode('ascii')
+    safe_name = (info.get("name") or "").encode("ascii", "replace").decode("ascii")
     print(f"  Model:    {info['id']}  ({safe_name})")
     print(f"  Format:   {info['model_format']}")
     print(f"  Status:   {summary['status']}")
@@ -523,9 +517,9 @@ async def reingest_one(
     print()
     print("  Sample of new rows:")
     for row in summary.get("sample", []):
-        sample_name = (str(row.get('name') or '')).encode('ascii', 'replace').decode('ascii')
-        sample_family = (str(row.get('family') or '')).encode('ascii', 'replace').decode('ascii')
-        sample_type = (str(row.get('type_name') or '')).encode('ascii', 'replace').decode('ascii')
+        sample_name = (str(row.get("name") or "")).encode("ascii", "replace").decode("ascii")
+        sample_family = (str(row.get("family") or "")).encode("ascii", "replace").decode("ascii")
+        sample_type = (str(row.get("type_name") or "")).encode("ascii", "replace").decode("ascii")
         print(
             f"    - stable_id={row['stable_id']}  "
             f"mesh_ref={row['mesh_ref']}  "
@@ -560,7 +554,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
-        "--verbose", "-v",
+        "--verbose",
+        "-v",
         action="store_true",
         help="Enable DEBUG logging.",
     )

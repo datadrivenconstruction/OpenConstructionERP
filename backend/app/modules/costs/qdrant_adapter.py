@@ -158,10 +158,7 @@ def _available_cwicr_collections() -> frozenset[str]:
         return frozenset()
 
     now = _t.perf_counter()
-    if (
-        _available_cwicr_cache is not None
-        and now - _available_cwicr_cache[0] < _AVAILABLE_CWICR_TTL_SEC
-    ):
+    if _available_cwicr_cache is not None and now - _available_cwicr_cache[0] < _AVAILABLE_CWICR_TTL_SEC:
         return _available_cwicr_cache[1]
 
     names: set[str] = set()
@@ -207,9 +204,7 @@ def _pick_fallback_cwicr(want: str, available: frozenset[str]) -> str | None:
         if stem.endswith(tail):
             stem = stem[: -len(tail)]
     base = stem.rsplit("_v", 1)[0] if "_v" in stem else stem
-    siblings = sorted(
-        n for n in available if n == base or n.rsplit("_v", 1)[0] == base
-    )
+    siblings = sorted(n for n in available if n == base or n.rsplit("_v", 1)[0] == base)
     if siblings:
         return siblings[0]
 
@@ -290,8 +285,7 @@ def country_to_collection(country: str | None) -> str:
     fallback = _pick_fallback_cwicr(want, available)
     if fallback is not None:
         logger.info(
-            "qdrant_adapter: collection %r absent for region %r — "
-            "falling back to %r (multilingual BGE-M3 recall)",
+            "qdrant_adapter: collection %r absent for region %r — falling back to %r (multilingual BGE-M3 recall)",
             want,
             country,
             fallback,
@@ -396,9 +390,9 @@ def _language_fallback_active(country: str) -> bool:
             naive = f"{naive}_enriched"
         resolved = country_to_collection(country)
         # Treat enriched/plain of the same language as "not a fallback".
-        return resolved.rsplit("_v", 1)[0].removesuffix("_enriched") != naive.rsplit(
-            "_v", 1
-        )[0].removesuffix("_enriched")
+        return resolved.rsplit("_v", 1)[0].removesuffix("_enriched") != naive.rsplit("_v", 1)[0].removesuffix(
+            "_enriched"
+        )
     except Exception:  # noqa: BLE001 — degrade to legacy pinning
         return False
 
@@ -441,8 +435,7 @@ def _get_client() -> Any:
         from qdrant_client import QdrantClient
     except ImportError as exc:  # pragma: no cover — optional [semantic] extra
         raise RuntimeError(
-            "qdrant-client is not installed; install the [semantic] extra: "
-            "pip install openconstructionerp[semantic]"
+            "qdrant-client is not installed; install the [semantic] extra: pip install openconstructionerp[semantic]"
         ) from exc
 
     s = get_settings()
@@ -452,9 +445,7 @@ def _get_client() -> Any:
         _client = QdrantClient(url=url)
         return _client
 
-    path = getattr(s, "cwicr_qdrant_path", "") or os.path.expanduser(
-        "~/.openestimator/qdrant_cwicr"
-    )
+    path = getattr(s, "cwicr_qdrant_path", "") or os.path.expanduser("~/.openestimator/qdrant_cwicr")
     Path(path).mkdir(parents=True, exist_ok=True)
     logger.info("CWICR Qdrant: opening embedded store at %s", path)
     _client = QdrantClient(path=path)
@@ -554,8 +545,7 @@ def _load_encoder_locked(BGEM3FlagModel: Any) -> Any:  # noqa: N803
             _encoder = BGEM3FlagModel(model_id, use_fp16=not is_int8)
             if last_exc is not None:
                 logger.warning(
-                    "CWICR encoder: recovered on FP32 fallback %s after "
-                    "INT8 load failed (%s)",
+                    "CWICR encoder: recovered on FP32 fallback %s after INT8 load failed (%s)",
                     model_id,
                     last_exc,
                 )
@@ -756,19 +746,11 @@ def _qdrant_collection_points(collection_name: str) -> int:
         try:
             info = client.get_collection(collection_name)
         except Exception:
-            base = (
-                collection_name.rsplit("_v", 1)[0]
-                if "_v" in collection_name
-                else collection_name
-            )
+            base = collection_name.rsplit("_v", 1)[0] if "_v" in collection_name else collection_name
             if base == collection_name:
                 return 0
             info = client.get_collection(base)
-        return int(
-            getattr(info, "points_count", None)
-            or getattr(info, "vectors_count", 0)
-            or 0
-        )
+        return int(getattr(info, "points_count", None) or getattr(info, "vectors_count", 0) or 0)
     except Exception as exc:  # pragma: no cover — defensive
         logger.debug(
             "qdrant_adapter: point count for %s failed: %s",
@@ -930,13 +912,10 @@ async def search(
     # when the vector isn't there saves a BGE-M3 forward pass on every
     # match request against a snapshot install.
     vectors_available = _collection_vectors(collection)
-    use_resources = bool(
-        resources_query and (not vectors_available or "resources" in vectors_available)
-    )
+    use_resources = bool(resources_query and (not vectors_available or "resources" in vectors_available))
     if resources_query and not use_resources:
         logger.debug(
-            "qdrant_adapter: collection %s has no 'resources' named vector "
-            "(available=%s); skipping resources prefetch",
+            "qdrant_adapter: collection %s has no 'resources' named vector (available=%s); skipping resources prefetch",
             collection,
             sorted(vectors_available) if vectors_available else "unknown",
         )
@@ -1135,17 +1114,35 @@ async def search_by_filter(
 # A ``None`` entry means "no relaxation" (final tier yields the full
 # original filter set).
 _RELAX_TIERS: tuple[tuple[str, ...], ...] = (
-    (),                                                       # tier 0 — full filter set
-    ("ifc_predefined_type",),                                  # tier 1 — drop subtype
-    ("ifc_predefined_type", "construction_stage"),             # tier 2 — drop stage too
-    ("ifc_predefined_type", "construction_stage",
-     "is_external", "is_loadbearing", "is_structural"),        # tier 3 — drop Psets
-    ("ifc_predefined_type", "construction_stage",
-     "is_external", "is_loadbearing", "is_structural",
-     "department_code", "subsection_code"),                    # tier 4 — drop trade bucket
-    ("ifc_predefined_type", "construction_stage",
-     "is_external", "is_loadbearing", "is_structural",
-     "department_code", "subsection_code", "unit_dim"),        # tier 5 — drop unit dim
+    (),  # tier 0 — full filter set
+    ("ifc_predefined_type",),  # tier 1 — drop subtype
+    ("ifc_predefined_type", "construction_stage"),  # tier 2 — drop stage too
+    (
+        "ifc_predefined_type",
+        "construction_stage",
+        "is_external",
+        "is_loadbearing",
+        "is_structural",
+    ),  # tier 3 — drop Psets
+    (
+        "ifc_predefined_type",
+        "construction_stage",
+        "is_external",
+        "is_loadbearing",
+        "is_structural",
+        "department_code",
+        "subsection_code",
+    ),  # tier 4 — drop trade bucket
+    (
+        "ifc_predefined_type",
+        "construction_stage",
+        "is_external",
+        "is_loadbearing",
+        "is_structural",
+        "department_code",
+        "subsection_code",
+        "unit_dim",
+    ),  # tier 5 — drop unit dim
 )
 
 
@@ -1154,13 +1151,34 @@ _RELAX_TIERS: tuple[tuple[str, ...], ...] = (
 # here are the *canonical* form returned to the ranker so downstream
 # boost / dedup logic can rely on a single representation.
 _UNIT_DIM_ALIASES: dict[str, str] = {
-    "m³": "m3", "м³": "m3", "cubic_meter": "m3", "cubic_metre": "m3",
-    "m²": "m2", "м²": "m2", "square_meter": "m2", "square_metre": "m2",
-    "m": "m", "м": "m", "linear_meter": "m", "linear_metre": "m",
-    "kg": "kg", "кг": "kg", "kilogram": "kg",
-    "t": "t", "ton": "t", "tonne": "t", "tonnes": "t", "т": "t",
-    "pcs": "pcs", "шт": "pcs", "piece": "pcs", "pieces": "pcs", "stk": "pcs",
-    "lsum": "lsum", "ls": "lsum", "lump_sum": "lsum",
+    "m³": "m3",
+    "м³": "m3",
+    "cubic_meter": "m3",
+    "cubic_metre": "m3",
+    "m²": "m2",
+    "м²": "m2",
+    "square_meter": "m2",
+    "square_metre": "m2",
+    "m": "m",
+    "м": "m",
+    "linear_meter": "m",
+    "linear_metre": "m",
+    "kg": "kg",
+    "кг": "kg",
+    "kilogram": "kg",
+    "t": "t",
+    "ton": "t",
+    "tonne": "t",
+    "tonnes": "t",
+    "т": "t",
+    "pcs": "pcs",
+    "шт": "pcs",
+    "piece": "pcs",
+    "pieces": "pcs",
+    "stk": "pcs",
+    "lsum": "lsum",
+    "ls": "lsum",
+    "lump_sum": "lsum",
 }
 
 
@@ -1208,9 +1226,7 @@ def _dedup_hits(hits: list[QdrantHit]) -> list[QdrantHit]:
     return out
 
 
-def _filters_after_relax(
-    filters: dict[str, Any] | None, drop_keys: tuple[str, ...]
-) -> dict[str, Any]:
+def _filters_after_relax(filters: dict[str, Any] | None, drop_keys: tuple[str, ...]) -> dict[str, Any]:
     """Return a shallow copy of ``filters`` with ``drop_keys`` removed.
 
     Used by :func:`search_with_fallback` to walk the relax ladder

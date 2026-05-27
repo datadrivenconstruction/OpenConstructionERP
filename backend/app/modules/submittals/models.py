@@ -23,7 +23,8 @@ class Submittal(Base):
     # raises ``IntegrityError`` and the service layer retries.
     __table_args__ = (
         UniqueConstraint(
-            "project_id", "submittal_number",
+            "project_id",
+            "submittal_number",
             name="uq_oe_submittals_submittal_project_number",
         ),
     )

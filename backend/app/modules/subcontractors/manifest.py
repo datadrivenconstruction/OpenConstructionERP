@@ -7,8 +7,7 @@ manifest = ModuleManifest(
     version="0.1.0",
     display_name="Subcontractor Management",
     description=(
-        "Subcontractor lifecycle: prequalification, certificates, agreements, "
-        "payment applications, retention, rating"
+        "Subcontractor lifecycle: prequalification, certificates, agreements, payment applications, retention, rating"
     ),
     author="OpenConstructionERP Core Team",
     category="business",

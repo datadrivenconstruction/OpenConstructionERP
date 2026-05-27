@@ -21,7 +21,6 @@ from app.modules.boq.importers.excel import (
     _parse_rows_from_excel,
 )
 
-
 # ── Column-alias mapping ───────────────────────────────────────────────────
 
 

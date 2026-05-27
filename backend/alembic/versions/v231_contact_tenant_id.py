@@ -30,6 +30,7 @@ Revision ID: v231_contact_tenant_id
 Revises: v230_reporting_schedule
 Create Date: 2026-04-22
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -83,11 +84,7 @@ def upgrade() -> None:
     # are safe because the WHERE clause only touches rows that still have
     # NULL tenant_id.
     op.execute(
-        sa.text(
-            f"UPDATE {TABLE_NAME} "
-            "SET tenant_id = created_by "
-            "WHERE tenant_id IS NULL AND created_by IS NOT NULL"
-        ),
+        sa.text(f"UPDATE {TABLE_NAME} SET tenant_id = created_by WHERE tenant_id IS NULL AND created_by IS NOT NULL"),
     )
 
     if not _has_index(TABLE_NAME, INDEX_NAME):

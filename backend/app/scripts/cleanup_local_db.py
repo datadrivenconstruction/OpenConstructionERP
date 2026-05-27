@@ -192,7 +192,7 @@ def _ids_in(con: sqlite3.Connection, table: str, where_col: str, values: list[st
         return []
     placeholders = ",".join(["?"] * len(values))
     cur = con.execute(
-        f"SELECT id FROM \"{table}\" WHERE {where_col} IN ({placeholders})",
+        f'SELECT id FROM "{table}" WHERE {where_col} IN ({placeholders})',
         values,
     )
     return [row[0] for row in cur.fetchall()]
@@ -204,7 +204,7 @@ def _delete_in(con: sqlite3.Connection, table: str, where_col: str, values: list
         return 0
     placeholders = ",".join(["?"] * len(values))
     cur = con.execute(
-        f"DELETE FROM \"{table}\" WHERE {where_col} IN ({placeholders})",
+        f'DELETE FROM "{table}" WHERE {where_col} IN ({placeholders})',
         values,
     )
     return cur.rowcount
@@ -327,7 +327,7 @@ def main(argv: list[str] | None = None) -> int:
     total_rows = 0
     for tbl in proj_tables:
         cur = con.execute(
-            f"SELECT COUNT(*) FROM \"{tbl}\" WHERE project_id IN ({','.join(['?'] * len(project_ids))})",
+            f'SELECT COUNT(*) FROM "{tbl}" WHERE project_id IN ({",".join(["?"] * len(project_ids))})',
             project_ids,
         )
         n = cur.fetchone()[0]
@@ -338,7 +338,7 @@ def main(argv: list[str] | None = None) -> int:
         if not boq_ids:
             continue
         cur = con.execute(
-            f"SELECT COUNT(*) FROM \"{tbl}\" WHERE boq_id IN ({','.join(['?'] * len(boq_ids))})",
+            f'SELECT COUNT(*) FROM "{tbl}" WHERE boq_id IN ({",".join(["?"] * len(boq_ids))})',
             boq_ids,
         )
         n = cur.fetchone()[0]

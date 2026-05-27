@@ -103,15 +103,11 @@ def upgrade() -> None:
                 nullable=False,
                 server_default=sa.func.now(),
             ),
-            sa.UniqueConstraint(
-                "scope", "scope_id", "name", name=ALIAS_SCOPE_NAME_UQ
-            ),
+            sa.UniqueConstraint("scope", "scope_id", "name", name=ALIAS_SCOPE_NAME_UQ),
         )
         op.create_index(ALIAS_TENANT_DEFAULT_IX, ALIAS_TABLE, ["tenant_id"])
         op.create_index(ALIAS_TENANT_IX, ALIAS_TABLE, ["tenant_id"])
-        op.create_index(
-            ALIAS_SCOPE_IX, ALIAS_TABLE, ["scope", "scope_id"]
-        )
+        op.create_index(ALIAS_SCOPE_IX, ALIAS_TABLE, ["scope", "scope_id"])
 
     # ── Alias synonym ───────────────────────────────────────────────
     if not _table_exists(SYNONYM_TABLE):
@@ -208,9 +204,7 @@ def upgrade() -> None:
                 server_default=sa.func.now(),
             ),
         )
-        op.create_index(
-            SNAPSHOT_SCOPE_IX, SNAPSHOT_TABLE, ["scope", "scope_id"]
-        )
+        op.create_index(SNAPSHOT_SCOPE_IX, SNAPSHOT_TABLE, ["scope", "scope_id"])
 
 
 def downgrade() -> None:

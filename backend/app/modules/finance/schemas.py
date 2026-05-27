@@ -69,6 +69,7 @@ def _decimal_to_str(v: object) -> object:
         return format(v, "f")
     return v
 
+
 # ── Invoice ──────────────────────────────────────────────────────────────────
 
 
@@ -104,9 +105,7 @@ class InvoiceCreate(BaseModel):
         pattern=r"^(payable|receivable)$",
         examples=["payable"],
     )
-    invoice_number: str | None = Field(
-        default=None, max_length=50, examples=["INV-2026-0042"]
-    )
+    invoice_number: str | None = Field(default=None, max_length=50, examples=["INV-2026-0042"])
     # Phase 2.5: invoice_date may be empty when an invoice is being drafted
     # (TBD) — seeded data and frontend drafts both produce "". Validate format
     # only when a value is supplied. (BUG-FINANCE01)
@@ -193,9 +192,9 @@ class InvoiceLineItemResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    _coerce_decimal = field_validator(
-        "quantity", "unit_rate", "amount", mode="before"
-    )(lambda cls, v: _decimal_to_str(v))
+    _coerce_decimal = field_validator("quantity", "unit_rate", "amount", mode="before")(
+        lambda cls, v: _decimal_to_str(v)
+    )
 
 
 class InvoiceResponse(BaseModel):
@@ -227,7 +226,10 @@ class InvoiceResponse(BaseModel):
     updated_at: datetime
 
     _coerce_decimal = field_validator(
-        "amount_subtotal", "tax_amount", "retention_amount", "amount_total",
+        "amount_subtotal",
+        "tax_amount",
+        "retention_amount",
+        "amount_total",
         mode="before",
     )(lambda cls, v: _decimal_to_str(v))
 
@@ -291,9 +293,9 @@ class PaymentResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    _coerce_decimal = field_validator(
-        "amount", "exchange_rate_snapshot", mode="before"
-    )(lambda cls, v: _decimal_to_str(v))
+    _coerce_decimal = field_validator("amount", "exchange_rate_snapshot", mode="before")(
+        lambda cls, v: _decimal_to_str(v)
+    )
 
 
 class PaymentListResponse(BaseModel):
@@ -323,7 +325,11 @@ class BudgetCreate(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator(
-        "original_budget", "revised_budget", "committed", "actual", "forecast_final",
+        "original_budget",
+        "revised_budget",
+        "committed",
+        "actual",
+        "forecast_final",
     )
     @classmethod
     def _check_non_negative_decimal(cls, v: str) -> str:
@@ -346,7 +352,11 @@ class BudgetUpdate(BaseModel):
     metadata: dict[str, Any] | None = None
 
     @field_validator(
-        "original_budget", "revised_budget", "committed", "actual", "forecast_final",
+        "original_budget",
+        "revised_budget",
+        "committed",
+        "actual",
+        "forecast_final",
     )
     @classmethod
     def _check_non_negative_decimal(cls, v: str | None) -> str | None:
@@ -527,9 +537,15 @@ class FinanceDashboardResponse(BaseModel):
     currency: str = ""
 
     @field_serializer(
-        "total_payable", "total_receivable", "total_overdue",
-        "total_budget_original", "total_budget_revised", "total_committed",
-        "total_actual", "total_variance", "total_payments",
+        "total_payable",
+        "total_receivable",
+        "total_overdue",
+        "total_budget_original",
+        "total_budget_revised",
+        "total_committed",
+        "total_actual",
+        "total_variance",
+        "total_payments",
         when_used="json",
     )
     def _ser_money(self, v: Decimal) -> str | None:
@@ -589,9 +605,7 @@ class LedgerEntryResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    _coerce_decimal = field_validator(
-        "debit_amount", "credit_amount", mode="before"
-    )(lambda cls, v: _decimal_to_str(v))
+    _coerce_decimal = field_validator("debit_amount", "credit_amount", mode="before")(lambda cls, v: _decimal_to_str(v))
 
 
 class LedgerTransactionResponse(BaseModel):

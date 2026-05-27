@@ -215,6 +215,6 @@ def test_permissions_registered_at_admin_role():
     # the live registry after the app has already booted must not
     # raise and must leave the gate at ADMIN.
     register_architecture_map_permissions()
-    assert (
-        permission_registry.get_min_role("architecture.read") == Role.ADMIN
-    ), "architecture.read must require Role.ADMIN"
+    assert permission_registry.get_min_role("architecture.read") == Role.ADMIN, (
+        "architecture.read must require Role.ADMIN"
+    )

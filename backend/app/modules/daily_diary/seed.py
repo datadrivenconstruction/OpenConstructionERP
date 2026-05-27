@@ -101,9 +101,7 @@ async def seed_daily_diary_demo(
         return {}
 
     rng = random.Random(deterministic_seed)
-    base = base_date or datetime.now(UTC).replace(
-        hour=8, minute=0, second=0, microsecond=0
-    )
+    base = base_date or datetime.now(UTC).replace(hour=8, minute=0, second=0, microsecond=0)
 
     diaries: list[DailyDiary] = []
     weather_records: list[WeatherRecord] = []
@@ -163,9 +161,7 @@ async def seed_daily_diary_demo(
                         id=uuid.uuid4(),
                         project_id=project_id,
                         captured_at=day + timedelta(hours=w * 4),
-                        source=rng.choice(
-                            ["open_meteo", "manual", "sensor"]
-                        ),
+                        source=rng.choice(["open_meteo", "manual", "sensor"]),
                         temperature_c=Decimal(str(round(rng.uniform(-10, 38), 2))),
                         humidity_pct=Decimal(str(round(rng.uniform(20, 99), 2))),
                         wind_speed_kmh=Decimal(str(round(rng.uniform(0, 60), 2))),
@@ -189,9 +185,7 @@ async def seed_daily_diary_demo(
                         entry_time=day + timedelta(hours=8 + e),
                         title=f"{entry_type.replace('_', ' ').title()} #{e + 1}",
                         description=f"Seeded {entry_type} entry on {diary_date}",
-                        source_module=rng.choice(
-                            [None, "hse", "procurement", "quality", "schedule"]
-                        ),
+                        source_module=rng.choice([None, "hse", "procurement", "quality", "schedule"]),
                         source_ref=None,
                         author_id=None,
                         photo_ids=[],
@@ -205,12 +199,8 @@ async def seed_daily_diary_demo(
                 if pid != project_id:
                     continue
                 if diary.status in ("signed", "archived"):
-                    diary_entries = [
-                        e for e in entries if e.diary_id == diary.id
-                    ]
-                    payload = compute_immutable_payload(
-                        diary, diary_entries, []
-                    )
+                    diary_entries = [e for e in entries if e.diary_id == diary.id]
+                    payload = compute_immutable_payload(diary, diary_entries, [])
                     signatures.append(
                         DiaryArchiveSignature(
                             id=uuid.uuid4(),
@@ -233,15 +223,10 @@ async def seed_daily_diary_demo(
     if diary_list:
         for _ in range(photo_pool_remaining):
             diary = rng.choice(diary_list)
-            lat_centre, lng_centre = _DEFAULT_CENTRES[
-                list(project_ids).index(diary.project_id)
-                % len(_DEFAULT_CENTRES)
-            ]
+            lat_centre, lng_centre = _DEFAULT_CENTRES[list(project_ids).index(diary.project_id) % len(_DEFAULT_CENTRES)]
             jitter_lat = rng.uniform(-0.001, 0.001)
             jitter_lng = rng.uniform(-0.001, 0.001)
-            day_dt = datetime.fromisoformat(diary.diary_date + "T12:00:00").replace(
-                tzinfo=UTC
-            )
+            day_dt = datetime.fromisoformat(diary.diary_date + "T12:00:00").replace(tzinfo=UTC)
             photos.append(
                 DiaryPhoto(
                     id=uuid.uuid4(),
@@ -251,17 +236,13 @@ async def seed_daily_diary_demo(
                     photographer_id=None,
                     lat=lat_centre + jitter_lat,
                     lng=lng_centre + jitter_lng,
-                    location_label=rng.choice(
-                        ["Block A", "Block B", "Crane Pad", "Site Office"]
-                    ),
+                    location_label=rng.choice(["Block A", "Block B", "Crane Pad", "Site Office"]),
                     file_url=f"https://seed.local/photos/{uuid.uuid4()}.jpg",
                     thumbnail_url=None,
                     mime_type="image/jpeg",
                     file_size_bytes=rng.randint(500_000, 8_000_000),
                     description="Seed photo",
-                    tags=rng.sample(
-                        ["progress", "safety", "quality", "drone", "concrete"], k=2
-                    ),
+                    tags=rng.sample(["progress", "safety", "quality", "drone", "concrete"], k=2),
                     is_360=rng.random() < 0.05,
                     is_drone=rng.random() < 0.10,
                 )
@@ -269,9 +250,7 @@ async def seed_daily_diary_demo(
 
         for _ in range(video_pool_remaining):
             diary = rng.choice(diary_list)
-            day_dt = datetime.fromisoformat(diary.diary_date + "T12:00:00").replace(
-                tzinfo=UTC
-            )
+            day_dt = datetime.fromisoformat(diary.diary_date + "T12:00:00").replace(tzinfo=UTC)
             videos.append(
                 DiaryVideo(
                     id=uuid.uuid4(),

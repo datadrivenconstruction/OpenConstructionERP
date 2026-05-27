@@ -55,7 +55,8 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _existing_indexes(
-    inspector: sa.engine.reflection.Inspector, table: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
 ) -> set[str]:
     if not _has_table(inspector, table):
         return set()
@@ -87,7 +88,8 @@ def upgrade() -> None:
                 "project_id",
                 sa.String(36),
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -101,7 +103,10 @@ def upgrade() -> None:
             sa.Column("weather", sa.String(64), nullable=True),
             sa.Column("temperature_c", sa.Numeric(6, 2), nullable=True),
             sa.Column(
-                "headcount", sa.Integer(), nullable=False, server_default="0",
+                "headcount",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column("notes_md", sa.Text(), nullable=True),
             sa.Column(
@@ -111,10 +116,14 @@ def upgrade() -> None:
                 server_default="draft",
             ),
             sa.Column(
-                "submitted_at", sa.DateTime(timezone=True), nullable=True,
+                "submitted_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
-                "approved_at", sa.DateTime(timezone=True), nullable=True,
+                "approved_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
                 "approved_by",
@@ -129,7 +138,9 @@ def upgrade() -> None:
                 server_default="{}",
             ),
             sa.UniqueConstraint(
-                "project_id", "author_id", "entry_date",
+                "project_id",
+                "author_id",
+                "entry_date",
                 name="uq_oe_field_diary_entry_proj_author_date",
             ),
         )
@@ -167,7 +178,8 @@ def upgrade() -> None:
                 "entry_id",
                 sa.String(36),
                 sa.ForeignKey(
-                    f"{_ENTRY}.id", ondelete="CASCADE",
+                    f"{_ENTRY}.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -176,10 +188,14 @@ def upgrade() -> None:
             sa.Column("hours", sa.Numeric(6, 2), nullable=True),
             sa.Column("location", sa.String(255), nullable=True),
             sa.Column(
-                "started_at", sa.DateTime(timezone=True), nullable=True,
+                "started_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
-                "ended_at", sa.DateTime(timezone=True), nullable=True,
+                "ended_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
                 "metadata",
@@ -224,7 +240,10 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column(
-                "filename", sa.String(255), nullable=False, server_default="",
+                "filename",
+                sa.String(255),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
                 "mime_type",
@@ -281,7 +300,8 @@ def upgrade() -> None:
                 "project_id",
                 sa.String(36),
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -298,13 +318,19 @@ def upgrade() -> None:
                 nullable=True,
             ),
             sa.Column(
-                "granted_at", sa.DateTime(timezone=True), nullable=False,
+                "granted_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
             ),
             sa.Column(
-                "expires_at", sa.DateTime(timezone=True), nullable=True,
+                "expires_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
-                "revoked_at", sa.DateTime(timezone=True), nullable=True,
+                "revoked_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
         )
         existing_ix = _existing_indexes(inspector, _GRANT)
@@ -366,7 +392,8 @@ def upgrade() -> None:
                 "project_id",
                 sa.String(36),
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -377,10 +404,16 @@ def upgrade() -> None:
                 server_default="field_diary",
             ),
             sa.Column(
-                "phone", sa.String(40), nullable=False, server_default="",
+                "phone",
+                sa.String(40),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "token_hash", sa.String(128), nullable=False, unique=True,
+                "token_hash",
+                sa.String(128),
+                nullable=False,
+                unique=True,
             ),
             sa.Column("pin_hash", sa.String(128), nullable=False),
             sa.Column(
@@ -390,10 +423,14 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column(
-                "expires_at", sa.DateTime(timezone=True), nullable=False,
+                "expires_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
             ),
             sa.Column(
-                "consumed_at", sa.DateTime(timezone=True), nullable=True,
+                "consumed_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
         )
         existing_ix = _existing_indexes(inspector, _MAGIC)
@@ -436,7 +473,8 @@ def upgrade() -> None:
                 "project_id",
                 sa.String(36),
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -454,13 +492,19 @@ def upgrade() -> None:
             ),
             sa.Column("pin_hash", sa.String(128), nullable=False),
             sa.Column(
-                "expires_at", sa.DateTime(timezone=True), nullable=False,
+                "expires_at",
+                sa.DateTime(timezone=True),
+                nullable=False,
             ),
             sa.Column(
-                "revoked_at", sa.DateTime(timezone=True), nullable=True,
+                "revoked_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
-                "last_seen_at", sa.DateTime(timezone=True), nullable=True,
+                "last_seen_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
         )
         existing_ix = _existing_indexes(inspector, _SESSION)

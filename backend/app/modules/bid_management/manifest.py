@@ -6,10 +6,7 @@ manifest = ModuleManifest(
     name="oe_bid_management",
     version="0.1.0",
     display_name="Bid Management",
-    description=(
-        "Bid packages, invitations, Q&A, submissions, leveling, award workflow "
-        "— sister module to tendering"
-    ),
+    description=("Bid packages, invitations, Q&A, submissions, leveling, award workflow — sister module to tendering"),
     author="OpenConstructionERP Core Team",
     category="business",
     depends=["oe_users", "oe_projects"],

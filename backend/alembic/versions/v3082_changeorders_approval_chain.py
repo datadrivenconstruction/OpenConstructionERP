@@ -41,7 +41,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "v3082_changeorders_approval_chain"
 down_revision: Union[str, Sequence[str], None] = "v3071_merge_clash_and_files"
@@ -65,7 +64,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -73,7 +74,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -181,9 +184,7 @@ def upgrade() -> None:
     if _has_table(inspector, _CO_TABLE):
         needs_linked_po = not _has_column(inspector, _CO_TABLE, "linked_po_ids")
         needs_linked_rfi = not _has_column(inspector, _CO_TABLE, "linked_rfi_ids")
-        needs_cursor = not _has_column(
-            inspector, _CO_TABLE, "current_approval_step"
-        )
+        needs_cursor = not _has_column(inspector, _CO_TABLE, "current_approval_step")
         if needs_linked_po or needs_linked_rfi or needs_cursor:
             with op.batch_alter_table(_CO_TABLE) as batch:
                 if needs_linked_po:
@@ -215,14 +216,9 @@ def upgrade() -> None:
 
     # Re-inspect because batch_alter_table on SQLite re-creates the table.
     inspector = sa.inspect(bind)
-    if (
-        _has_column(inspector, _CO_TABLE, "current_approval_step")
-        and not _has_index(inspector, _CO_TABLE, _IX_CURSOR)
-    ):
+    if _has_column(inspector, _CO_TABLE, "current_approval_step") and not _has_index(inspector, _CO_TABLE, _IX_CURSOR):
         try:
-            op.create_index(
-                _IX_CURSOR, _CO_TABLE, ["current_approval_step"]
-            )
+            op.create_index(_IX_CURSOR, _CO_TABLE, ["current_approval_step"])
         except Exception:  # noqa: BLE001
             pass
 

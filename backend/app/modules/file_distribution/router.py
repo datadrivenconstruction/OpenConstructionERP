@@ -74,9 +74,10 @@ async def _resolve_accessible_project_ids(
     callback used here can be expanded; for now ownership is the safe
     minimum.
     """
+    from sqlalchemy import select as _select
+
     from app.modules.projects.models import Project
     from app.modules.users.models import User
-    from sqlalchemy import select as _select
 
     user = await session.get(User, user_id)
     is_admin = bool(user is not None and getattr(user, "role", "") == "admin")
@@ -104,18 +105,13 @@ async def search_files(
     q: str = Query(..., min_length=1, max_length=255),
     kinds: str | None = Query(
         default=None,
-        description=(
-            "Comma-separated subset of `document,sheet,photo`. "
-            "Omit to search all three."
-        ),
+        description=("Comma-separated subset of `document,sheet,photo`. Omit to search all three."),
     ),
     limit: int = Query(default=50, ge=1, le=200),
 ) -> SearchResponse:
     user_uuid = _user_uuid(current_user_id)
     allowed = await _resolve_accessible_project_ids(session, user_uuid)
-    kinds_list = (
-        [k.strip() for k in kinds.split(",") if k.strip()] if kinds else None
-    )
+    kinds_list = [k.strip() for k in kinds.split(",") if k.strip()] if kinds else None
     service = CrossProjectSearchService(session)
     hits, used_index = await service.search(
         q=q,
@@ -130,7 +126,9 @@ async def search_files(
 
 
 def _list_to_response(
-    row, *, current_user_id: uuid.UUID,
+    row,
+    *,
+    current_user_id: uuid.UUID,
 ) -> DistributionListResponse:
     return DistributionListResponse(
         id=row.id,
@@ -194,7 +192,8 @@ async def create_distribution_list(
         row = await service.create(payload, user_uuid)
     except DistributionConflictError as exc:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(exc),
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
         ) from exc
     return _list_to_response(row, current_user_id=user_uuid)
 
@@ -217,11 +216,13 @@ async def update_distribution_list(
         row = await service.update(list_id, payload, user_uuid)
     except DistributionNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="List not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="List not found",
         ) from exc
     except DistributionConflictError as exc:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(exc),
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
         ) from exc
     return _list_to_response(row, current_user_id=user_uuid)
 
@@ -243,7 +244,8 @@ async def delete_distribution_list(
         await service.delete(list_id, user_uuid)
     except DistributionNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="List not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="List not found",
         ) from exc
 
 
@@ -269,11 +271,13 @@ async def add_distribution_member(
         member = await service.add_member(list_id, payload, user_uuid)
     except DistributionNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="List not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="List not found",
         ) from exc
     except DistributionConflictError as exc:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(exc),
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
         ) from exc
     return DistributionMemberResponse(
         id=member.id,
@@ -303,7 +307,8 @@ async def remove_distribution_member(
         await service.remove_member(list_id, member_id, user_uuid)
     except DistributionNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Member not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Member not found",
         ) from exc
 
 
@@ -341,7 +346,8 @@ async def list_subscriptions(
         rows = await service.list_for_user_global(user_id=user_uuid)
     else:
         rows = await service.list_for_project(
-            project_id=project_id, user_id=user_uuid,
+            project_id=project_id,
+            user_id=user_uuid,
         )
     return SubscriptionListResponse(
         items=[_sub_to_response(r) for r in rows],
@@ -367,11 +373,13 @@ async def create_subscription(
         sub = await service.create(payload, user_uuid)
     except DistributionValidationError as exc:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc),
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
         ) from exc
     except DistributionConflictError as exc:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(exc),
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
         ) from exc
     return _sub_to_response(sub)
 
@@ -393,5 +401,6 @@ async def delete_subscription(
         await service.delete(subscription_id, user_uuid)
     except DistributionNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Subscription not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscription not found",
         ) from exc

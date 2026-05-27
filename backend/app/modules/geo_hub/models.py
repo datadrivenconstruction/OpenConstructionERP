@@ -53,7 +53,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
 
-
 # ── GeoAnchor ────────────────────────────────────────────────────────────
 
 
@@ -61,9 +60,7 @@ class GeoAnchor(Base):
     """WGS84 anchor for a project — exactly one per project."""
 
     __tablename__ = "oe_geo_hub_anchor"
-    __table_args__ = (
-        UniqueConstraint("project_id", name="uq_oe_geo_hub_anchor_project"),
-    )
+    __table_args__ = (UniqueConstraint("project_id", name="uq_oe_geo_hub_anchor_project"),)
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -76,15 +73,21 @@ class GeoAnchor(Base):
     # construction-scale anchoring without burning storage on float64
     # rounding bugs.
     lat: Mapped[Decimal] = mapped_column(
-        Numeric(10, 7), nullable=False, default=Decimal("0"),
+        Numeric(10, 7),
+        nullable=False,
+        default=Decimal("0"),
     )
     lon: Mapped[Decimal] = mapped_column(
-        Numeric(10, 7), nullable=False, default=Decimal("0"),
+        Numeric(10, 7),
+        nullable=False,
+        default=Decimal("0"),
     )
     # Ellipsoidal height in metres. Negative values allowed (Dead Sea
     # construction is a real customer scenario).
     alt: Mapped[Decimal] = mapped_column(
-        Numeric(8, 2), nullable=False, default=Decimal("0"),
+        Numeric(8, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     # EPSG code of the *source* coordinate reference system. 4326 =
     # WGS84 geographic. 3857 = Web Mercator. 25832 = ETRS89 / UTM 32N
@@ -92,7 +95,9 @@ class GeoAnchor(Base):
     # too — we only validate the integer-positive range; the actual
     # transform is done at view time via pyproj if installed.
     epsg_code: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=4326,
+        Integer,
+        nullable=False,
+        default=4326,
     )
     # ISO 3166-2 region code, e.g. ``DE-BE`` (Berlin), ``GB-LND``
     # (London), ``US-CA``. Optional — drives imagery defaults.
@@ -102,10 +107,15 @@ class GeoAnchor(Base):
     # anchor was geocoded from a street address". The frontend may
     # display a small uncertainty disc on the map for non-null values.
     accuracy_m: Mapped[Decimal | None] = mapped_column(
-        Numeric(6, 2), nullable=True,
+        Numeric(6, 2),
+        nullable=True,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:  # pragma: no cover — display only
@@ -147,51 +157,80 @@ class Tileset(Base):
         index=True,
     )
     source_kind: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="bim_model", index=True,
+        String(32),
+        nullable=False,
+        default="bim_model",
+        index=True,
     )
     source_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True,
+        GUID(),
+        nullable=False,
+        index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     bucket: Mapped[str] = mapped_column(
-        String(100), nullable=False, default="",
+        String(100),
+        nullable=False,
+        default="",
     )
     prefix: Mapped[str] = mapped_column(
-        String(500), nullable=False, default="",
+        String(500),
+        nullable=False,
+        default="",
     )
     tileset_json_uri: Mapped[str | None] = mapped_column(
-        String(2000), nullable=True,
+        String(2000),
+        nullable=True,
     )
     # Cesium-native bounding-volume shape. One of:
     #     {"box":   [cx, cy, cz, dx, 0, 0, 0, dy, 0, 0, 0, dz]}
     #     {"region": [west, south, east, north, min_h, max_h]}
     #     {"sphere": [cx, cy, cz, r]}
     bounding_volume: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=True,
+        JSON,
+        nullable=True,
     )
     geometric_error: Mapped[Decimal] = mapped_column(
-        Numeric(10, 2), nullable=False, default=Decimal("0"),
+        Numeric(10, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     tile_format: Mapped[str] = mapped_column(
-        String(8), nullable=False, default="b3dm",
+        String(8),
+        nullable=False,
+        default="b3dm",
     )
     tile_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0,
+        Integer,
+        nullable=False,
+        default=0,
     )
     total_bytes: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0,
+        Integer,
+        nullable=False,
+        default=0,
     )
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="draft", index=True,
+        String(20),
+        nullable=False,
+        default="draft",
+        index=True,
     )
     generated_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     generation_job_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -214,25 +253,42 @@ class ImageryLayer(Base):
     )
     name: Mapped[str] = mapped_column(String(120), nullable=False, default="")
     provider: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="osm",
+        String(16),
+        nullable=False,
+        default="osm",
     )
     url_template: Mapped[str] = mapped_column(
-        String(2000), nullable=False, default="",
+        String(2000),
+        nullable=False,
+        default="",
     )
     attribution: Mapped[str] = mapped_column(
-        String(500), nullable=False, default="",
+        String(500),
+        nullable=False,
+        default="",
     )
     requires_api_key: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False,
+        Boolean,
+        nullable=False,
+        default=False,
     )
     default_for_project: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, index=True,
+        Boolean,
+        nullable=False,
+        default=False,
+        index=True,
     )
     is_visible: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True,
+        Boolean,
+        nullable=False,
+        default=True,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
 
@@ -251,29 +307,38 @@ class TerrainSource(Base):
     """
 
     __tablename__ = "oe_geo_hub_terrain_source"
-    __table_args__ = (
-        UniqueConstraint("name", name="uq_oe_geo_hub_terrain_source_name"),
-    )
+    __table_args__ = (UniqueConstraint("name", name="uq_oe_geo_hub_terrain_source_name"),)
 
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     provider: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="ellipsoid",
+        String(32),
+        nullable=False,
+        default="ellipsoid",
     )
     endpoint: Mapped[str | None] = mapped_column(
-        String(2000), nullable=True,
+        String(2000),
+        nullable=True,
     )
     # ion access token, when ``provider == "cesium_world"``. Stored
     # encrypted-at-rest by the storage backend, never returned in API
     # responses — the frontend constructs the Cesium ion URL itself
     # using a short-lived token endpoint (out of scope of v1).
     ion_token: Mapped[str | None] = mapped_column(
-        String(500), nullable=True,
+        String(500),
+        nullable=True,
     )
     is_default: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, index=True,
+        Boolean,
+        nullable=False,
+        default=False,
+        index=True,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
 
@@ -300,28 +365,45 @@ class GeoViewpoint(Base):
     name: Mapped[str] = mapped_column(String(120), nullable=False, default="")
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     camera_lat: Mapped[Decimal] = mapped_column(
-        Numeric(10, 7), nullable=False, default=Decimal("0"),
+        Numeric(10, 7),
+        nullable=False,
+        default=Decimal("0"),
     )
     camera_lon: Mapped[Decimal] = mapped_column(
-        Numeric(10, 7), nullable=False, default=Decimal("0"),
+        Numeric(10, 7),
+        nullable=False,
+        default=Decimal("0"),
     )
     camera_alt: Mapped[Decimal] = mapped_column(
-        Numeric(8, 2), nullable=False, default=Decimal("0"),
+        Numeric(8, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     heading: Mapped[Decimal] = mapped_column(
-        Numeric(7, 3), nullable=False, default=Decimal("0"),
+        Numeric(7, 3),
+        nullable=False,
+        default=Decimal("0"),
     )
     pitch: Mapped[Decimal] = mapped_column(
-        Numeric(7, 3), nullable=False, default=Decimal("0"),
+        Numeric(7, 3),
+        nullable=False,
+        default=Decimal("0"),
     )
     roll: Mapped[Decimal] = mapped_column(
-        Numeric(7, 3), nullable=False, default=Decimal("0"),
+        Numeric(7, 3),
+        nullable=False,
+        default=Decimal("0"),
     )
     created_by: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
 
@@ -341,31 +423,49 @@ class GeoOverlay(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     kind: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="boundary", index=True,
+        String(32),
+        nullable=False,
+        default="boundary",
+        index=True,
     )
     geojson: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     source_file: Mapped[str | None] = mapped_column(
-        String(500), nullable=True,
+        String(500),
+        nullable=True,
     )
     # Cesium PolygonGraphics-compatible style hints, e.g.::
     #   {"fillColor": "#3399FF", "outlineColor": "#1166AA",
     #    "extrudedHeight": 6, "fillOpacity": 0.35}
     style: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     is_visible: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True,
+        Boolean,
+        nullable=False,
+        default=True,
     )
     # Cross-module dedup: when a subscriber creates an overlay from
     # an event (clash detected, risk zone flagged, ...), the originating
     # event id is stamped here so a replay does not duplicate the row.
     source_event_id: Mapped[str | None] = mapped_column(
-        String(64), nullable=True, index=True,
+        String(64),
+        nullable=True,
+        index=True,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
 
@@ -390,30 +490,46 @@ class TileGenerationJob(Base):
         index=True,
     )
     source_kind: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="bim_model",
+        String(32),
+        nullable=False,
+        default="bim_model",
     )
     source_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True,
+        GUID(),
+        nullable=False,
+        index=True,
     )
     requested_by: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
     state: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="queued", index=True,
+        String(20),
+        nullable=False,
+        default="queued",
+        index=True,
     )
     progress_pct: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0,
+        Integer,
+        nullable=False,
+        default=0,
     )
     started_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     output_uri: Mapped[str | None] = mapped_column(String(2000), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
 
@@ -460,58 +576,93 @@ class GeoRasterOverlay(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     # One of ``pdf``, ``dwg``, ``image`` — Pydantic enforces the enum.
     source_kind: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="image", index=True,
+        String(16),
+        nullable=False,
+        default="image",
+        index=True,
     )
     source_blob_url: Mapped[str | None] = mapped_column(
-        String(500), nullable=True,
+        String(500),
+        nullable=True,
     )
     # 1-based PDF page index. Always 1 for non-PDF kinds.
     source_page: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=1, server_default="1",
+        Integer,
+        nullable=False,
+        default=1,
+        server_default="1",
     )
     raster_blob_url: Mapped[str | None] = mapped_column(
-        String(500), nullable=True,
+        String(500),
+        nullable=True,
     )
     raster_width_px: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     raster_height_px: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     # GeoJSON-style coord array: [[nw_lon, nw_lat], [ne_lon, ne_lat],
     # [se_lon, se_lat], [sw_lon, sw_lat]]. Defaults to an empty list so
     # the create-from-upload path can stamp the project anchor's bbox.
     corners_geojson: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     rotation_deg: Mapped[Decimal] = mapped_column(
-        Numeric(7, 3), nullable=False, default=Decimal("0"),
+        Numeric(7, 3),
+        nullable=False,
+        default=Decimal("0"),
         server_default="0",
     )
     opacity: Mapped[Decimal] = mapped_column(
-        Numeric(4, 3), nullable=False, default=Decimal("0.7"),
+        Numeric(4, 3),
+        nullable=False,
+        default=Decimal("0.7"),
         server_default="0.7",
     )
     # GeoJSON Polygon (with type/coordinates) or NULL when no crop set.
     crop_polygon_geojson: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=True,
+        JSON,
+        nullable=True,
     )
     z_order: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     visible: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1",
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="1",
     )
     created_by: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
     # Soft-delete sentinel. Endpoints filter out non-null rows; a
     # purge sweep can later hard-delete after a grace period.
     deleted_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, index=True,
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -539,47 +690,69 @@ class GeocodeCache(Base):
     __tablename__ = "oe_geo_hub_geocode_cache"
     __table_args__ = (
         UniqueConstraint(
-            "query_hash", name="uq_oe_geo_hub_geocode_cache_query_hash",
+            "query_hash",
+            name="uq_oe_geo_hub_geocode_cache_query_hash",
         ),
     )
 
     query_hash: Mapped[str] = mapped_column(
-        String(64), nullable=False, default="", server_default="",
+        String(64),
+        nullable=False,
+        default="",
+        server_default="",
         index=True,
     )
     query_text: Mapped[str] = mapped_column(
-        String(500), nullable=False, default="", server_default="",
+        String(500),
+        nullable=False,
+        default="",
+        server_default="",
     )
     lat: Mapped[Decimal] = mapped_column(
-        Numeric(10, 7), nullable=False,
-        default=Decimal("0"), server_default="0",
+        Numeric(10, 7),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
     )
     lon: Mapped[Decimal] = mapped_column(
-        Numeric(10, 7), nullable=False,
-        default=Decimal("0"), server_default="0",
+        Numeric(10, 7),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
     )
     precision: Mapped[str] = mapped_column(
-        String(20), nullable=False,
-        default="address", server_default="address",
+        String(20),
+        nullable=False,
+        default="address",
+        server_default="address",
     )
     display_name: Mapped[str] = mapped_column(
-        String(500), nullable=False, default="", server_default="",
+        String(500),
+        nullable=False,
+        default="",
+        server_default="",
     )
     bbox_min_lat: Mapped[Decimal | None] = mapped_column(
-        Numeric(10, 7), nullable=True,
+        Numeric(10, 7),
+        nullable=True,
     )
     bbox_min_lon: Mapped[Decimal | None] = mapped_column(
-        Numeric(10, 7), nullable=True,
+        Numeric(10, 7),
+        nullable=True,
     )
     bbox_max_lat: Mapped[Decimal | None] = mapped_column(
-        Numeric(10, 7), nullable=True,
+        Numeric(10, 7),
+        nullable=True,
     )
     bbox_max_lon: Mapped[Decimal | None] = mapped_column(
-        Numeric(10, 7), nullable=True,
+        Numeric(10, 7),
+        nullable=True,
     )
     source: Mapped[str] = mapped_column(
-        String(20), nullable=False,
-        default="nominatim", server_default="nominatim",
+        String(20),
+        nullable=False,
+        default="nominatim",
+        server_default="nominatim",
     )
     cached_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -588,14 +761,14 @@ class GeocodeCache(Base):
         index=True,
     )
     hit_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
 
     def __repr__(self) -> str:  # pragma: no cover — display only
-        return (
-            f"<GeocodeCache {self.query_hash[:8]}… "
-            f"({self.lat},{self.lon}) {self.precision}>"
-        )
+        return f"<GeocodeCache {self.query_hash[:8]}… ({self.lat},{self.lon}) {self.precision}>"
 
 
 __all__ = [

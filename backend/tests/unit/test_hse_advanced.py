@@ -122,25 +122,27 @@ class _StubRepo:
 
 class _FindingRepo(_StubRepo):
     async def list_for_audit(self, audit_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "audit_id", None) == audit_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "audit_id", None) == audit_id]
 
 
 class _JSATemplateRepo(_StubRepo):
     async def list_templates(
-        self, *,
-        trade: str | None = None, region: str | None = None,
-        active_only: bool = True, offset: int = 0, limit: int = 100,
+        self,
+        *,
+        trade: str | None = None,
+        region: str | None = None,
+        active_only: bool = True,
+        offset: int = 0,
+        limit: int = 100,
     ) -> tuple[list[Any], int]:
         rows = [
-            r for r in self.rows.values()
+            r
+            for r in self.rows.values()
             if (trade is None or getattr(r, "trade", None) == trade)
             and (region is None or getattr(r, "region", None) == region)
             and (not active_only or getattr(r, "is_active", True))
         ]
-        return rows[offset: offset + limit], len(rows)
+        return rows[offset : offset + limit], len(rows)
 
 
 def _make_service() -> HSEAdvancedService:
@@ -274,22 +276,21 @@ def test_days_without_lti_never() -> None:
 
 
 def test_days_without_lti_simple() -> None:
-    assert days_without_lti(
-        [date(2026, 5, 1)], today=date(2026, 5, 12)
-    ) == 11
+    assert days_without_lti([date(2026, 5, 1)], today=date(2026, 5, 12)) == 11
 
 
 def test_days_without_lti_string_dates() -> None:
-    assert days_without_lti(
-        ["2026-04-01"], today=date(2026, 5, 12)
-    ) == 41
+    assert days_without_lti(["2026-04-01"], today=date(2026, 5, 12)) == 41
 
 
 def test_days_without_lti_picks_latest() -> None:
-    assert days_without_lti(
-        [date(2026, 1, 1), date(2026, 5, 10), date(2026, 3, 4)],
-        today=date(2026, 5, 12),
-    ) == 2
+    assert (
+        days_without_lti(
+            [date(2026, 1, 1), date(2026, 5, 10), date(2026, 3, 4)],
+            today=date(2026, 5, 12),
+        )
+        == 2
+    )
 
 
 # ── Pure helpers: audit score ────────────────────────────────────────────
@@ -415,7 +416,9 @@ def test_is_user_blocked_all_valid() -> None:
 
 def test_is_user_blocked_empty_required_returns_false() -> None:
     blocked, missing = is_user_blocked_for_work(
-        uuid.uuid4(), required_cert_types=[], certifications=[],
+        uuid.uuid4(),
+        required_cert_types=[],
+        certifications=[],
     )
     assert blocked is False
     assert missing == []
@@ -473,9 +476,7 @@ async def test_submit_jsa_emits_event() -> None:
     )
     await svc.jsa_repo.create(jsa)
 
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ) as mock_pub:
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached") as mock_pub:
         result = await svc.submit_jsa(jsa.id)
 
     assert result.status == "under_review"
@@ -498,9 +499,7 @@ async def test_submit_jsa_invalid_transition_raises() -> None:
     )
     await svc.jsa_repo.create(jsa)
 
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ):
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached"):
         with pytest.raises(HTTPException) as exc_info:
             await svc.submit_jsa(jsa.id)
     assert exc_info.value.status_code == 409
@@ -522,9 +521,7 @@ async def test_approve_jsa_emits_event() -> None:
     await svc.jsa_repo.create(jsa)
 
     approver = uuid.uuid4()
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ) as mock_pub:
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached") as mock_pub:
         result = await svc.approve_jsa(jsa.id, approver_id=approver)
 
     assert result.status == "approved"
@@ -542,13 +539,14 @@ async def test_create_jsa_computes_risk_score() -> None:
         hazards=[
             JSAHazardEntry(step="step1", hazard="Fall", severity=5, likelihood=4),
             JSAHazardEntry(
-                step="step2", hazard="Pinch", severity=2, likelihood=2,
+                step="step2",
+                hazard="Pinch",
+                severity=2,
+                likelihood=2,
             ),
         ],
     )
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ):
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached"):
         jsa = await svc.create_jsa(data, user_id="u1")
     assert jsa.risk_score == 20  # max(5*4, 2*2)
     assert jsa.created_by == "u1"
@@ -568,9 +566,7 @@ async def test_request_permit_emits_event() -> None:
         work_start=now,
         work_end=now + timedelta(hours=4),
     )
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ) as mock_pub:
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached") as mock_pub:
         permit = await svc.request_permit(data, user_id="u1")
 
     assert permit.status == "requested"
@@ -589,9 +585,7 @@ async def test_request_permit_rejects_bad_window() -> None:
         work_start=now,
         work_end=now - timedelta(hours=1),  # end before start
     )
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ):
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached"):
         with pytest.raises(HTTPException) as exc_info:
             await svc.request_permit(data, user_id="u1")
     assert exc_info.value.status_code == 422
@@ -616,9 +610,7 @@ async def test_approve_permit_emits_event() -> None:
     )
     await svc.permit_repo.create(permit)
 
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ) as mock_pub:
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached") as mock_pub:
         result = await svc.approve_permit(permit.id, approver_id=uuid.uuid4())
 
     assert result.status == "approved"
@@ -649,9 +641,7 @@ async def test_activate_permit_emits_event() -> None:
     )
     await svc.permit_repo.create(permit)
 
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ) as mock_pub:
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached") as mock_pub:
         result = await svc.activate_permit(permit.id)
     assert result.status == "active"
     assert mock_pub.call_args.args[0] == "hse.permit.activated"
@@ -676,9 +666,7 @@ async def test_close_permit_requires_checklist_pass() -> None:
     )
     await svc.permit_repo.create(permit)
 
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ):
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached"):
         with pytest.raises(HTTPException) as exc_info:
             await svc.close_permit(
                 permit.id,
@@ -713,9 +701,7 @@ async def test_close_permit_invalid_state_raises() -> None:
     )
     await svc.permit_repo.create(permit)
 
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ):
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached"):
         with pytest.raises(HTTPException) as exc_info:
             await svc.close_permit(
                 permit.id,
@@ -757,16 +743,22 @@ async def test_conduct_audit_creates_capa_per_failure() -> None:
 
     payload = [
         AuditFindingCreate(
-            item_description="PPE not worn", category="PPE",
-            severity="high", is_passed=False,
+            item_description="PPE not worn",
+            category="PPE",
+            severity="high",
+            is_passed=False,
         ),
         AuditFindingCreate(
-            item_description="MSDS available", category="other",
-            severity="low", is_passed=True,
+            item_description="MSDS available",
+            category="other",
+            severity="low",
+            is_passed=True,
         ),
         AuditFindingCreate(
-            item_description="Permit missing", category="permit",
-            severity="critical", is_passed=False,
+            item_description="Permit missing",
+            category="permit",
+            severity="critical",
+            is_passed=False,
         ),
     ]
     await svc.conduct_audit(audit.id, payload, user_id="auditor-1")
@@ -805,9 +797,7 @@ async def test_complete_audit_emits_event() -> None:
     )
     await svc.finding_repo.create(f)
 
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ) as mock_pub:
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached") as mock_pub:
         result = await svc.complete_audit(audit.id)
     assert result.status == "completed"
     assert mock_pub.call_args.args[0] == "hse.audit.completed"
@@ -856,9 +846,7 @@ async def test_close_capa_emits_event_and_transitions() -> None:
         status="open",
     )
     await svc.capa_repo.create(capa)
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ) as mock_pub:
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached") as mock_pub:
         result = await svc.close_capa(capa.id, verification_notes="Done")
     assert result.status == "completed"
     assert mock_pub.call_args.args[0] == "hse.capa.completed"
@@ -893,9 +881,7 @@ async def test_escalate_capa_emits_event() -> None:
         status="open",
     )
     await svc.capa_repo.create(capa)
-    with patch(
-        "app.modules.hse_advanced.service.event_bus.publish_detached"
-    ) as mock_pub:
+    with patch("app.modules.hse_advanced.service.event_bus.publish_detached") as mock_pub:
         result = await svc.escalate_capa(capa.id)
     assert result.status == "overdue"
     assert mock_pub.call_args.args[0] == "hse.capa.escalated"
@@ -992,18 +978,10 @@ def test_register_hse_advanced_permissions_registers_min_set() -> None:
 def test_register_hse_advanced_permissions_roles() -> None:
     register_hse_advanced_permissions()
     # Manager role should have all hse_advanced permissions; Viewer only read.
-    assert permission_registry.role_has_permission(
-        Role.VIEWER, "hse_advanced.read"
-    )
-    assert not permission_registry.role_has_permission(
-        Role.VIEWER, "hse_advanced.create"
-    )
-    assert permission_registry.role_has_permission(
-        Role.MANAGER, "hse_advanced.delete"
-    )
-    assert permission_registry.role_has_permission(
-        Role.MANAGER, "hse_advanced.approve_jsa"
-    )
+    assert permission_registry.role_has_permission(Role.VIEWER, "hse_advanced.read")
+    assert not permission_registry.role_has_permission(Role.VIEWER, "hse_advanced.create")
+    assert permission_registry.role_has_permission(Role.MANAGER, "hse_advanced.delete")
+    assert permission_registry.role_has_permission(Role.MANAGER, "hse_advanced.approve_jsa")
 
 
 # ── PTW prerequisites matrix ─────────────────────────────────────────────
@@ -1034,8 +1012,9 @@ def test_ptw_required_prereqs_unknown_type_falls_back_to_jsa() -> None:
 
 
 def test_check_ptw_prerequisites_returns_missing() -> None:
-    from app.modules.hse_advanced.service import check_ptw_prerequisites
     from types import SimpleNamespace
+
+    from app.modules.hse_advanced.service import check_ptw_prerequisites
 
     permit = SimpleNamespace(
         permit_type="hot_work",
@@ -1125,7 +1104,8 @@ def test_incident_escalation_matrix_unknown_regime_falls_back() -> None:
 async def test_set_capa_five_whys_records_chain() -> None:
     from app.modules.hse_advanced.models import CorrectiveAction
     from app.modules.hse_advanced.schemas import (
-        CAPAFiveWhysPayload, FiveWhyStep,
+        CAPAFiveWhysPayload,
+        FiveWhyStep,
     )
     from tests.unit.test_hse_advanced import _make_service as _ms
 
@@ -1145,11 +1125,11 @@ async def test_set_capa_five_whys_records_chain() -> None:
     await svc.capa_repo.create(capa)
     payload = CAPAFiveWhysPayload(
         steps=[
-            FiveWhyStep(why="Why was cover low?",   answer="Spacers wrong size"),
-            FiveWhyStep(why="Why wrong spacers?",   answer="Wrong batch from supplier"),
-            FiveWhyStep(why="Why wrong batch?",     answer="No incoming inspection"),
-            FiveWhyStep(why="Why no inspection?",   answer="Procedure not enforced"),
-            FiveWhyStep(why="Why not enforced?",    answer="Training gap on QA team"),
+            FiveWhyStep(why="Why was cover low?", answer="Spacers wrong size"),
+            FiveWhyStep(why="Why wrong spacers?", answer="Wrong batch from supplier"),
+            FiveWhyStep(why="Why wrong batch?", answer="No incoming inspection"),
+            FiveWhyStep(why="Why no inspection?", answer="Procedure not enforced"),
+            FiveWhyStep(why="Why not enforced?", answer="Training gap on QA team"),
         ],
         root_cause_category="method",
     )
@@ -1162,7 +1142,8 @@ async def test_set_capa_five_whys_records_chain() -> None:
 async def test_set_capa_five_whys_rejects_too_few_steps() -> None:
     from app.modules.hse_advanced.models import CorrectiveAction
     from app.modules.hse_advanced.schemas import (
-        CAPAFiveWhysPayload, FiveWhyStep,
+        CAPAFiveWhysPayload,
+        FiveWhyStep,
     )
     from tests.unit.test_hse_advanced import _make_service as _ms
 
@@ -1256,7 +1237,8 @@ async def test_verify_capa_effectiveness_requires_completed() -> None:
     await svc.capa_repo.create(capa)
     with pytest.raises(HTTPException) as exc:
         await svc.verify_capa_effectiveness(
-            capa.id, CAPAEffectivenessPayload(effective=True),
+            capa.id,
+            CAPAEffectivenessPayload(effective=True),
         )
     assert exc.value.status_code == 409
 
@@ -1276,10 +1258,8 @@ async def test_create_jsa_template_persists_hazards() -> None:
             name="Slab on grade pour",
             task_description="Pour 30m³ slab",
             hazards=[
-                {"step": "Setup", "hazard": "Slip", "severity": 2, "likelihood": 3,
-                 "controls": "Mark wet areas"},
-                {"step": "Pour", "hazard": "Splash", "severity": 3, "likelihood": 2,
-                 "controls": "PPE goggles"},
+                {"step": "Setup", "hazard": "Slip", "severity": 2, "likelihood": 3, "controls": "Mark wet areas"},
+                {"step": "Pour", "hazard": "Splash", "severity": 3, "likelihood": 2, "controls": "PPE goggles"},
             ],
             required_ppe=["hard_hat", "safety_boots", "gloves"],
             region="DE",
@@ -1295,7 +1275,8 @@ async def test_create_jsa_template_persists_hazards() -> None:
 @pytest.mark.asyncio
 async def test_clone_jsa_template_creates_project_jsa() -> None:
     from app.modules.hse_advanced.schemas import (
-        JSATemplateCloneRequest, JSATemplateCreate,
+        JSATemplateCloneRequest,
+        JSATemplateCreate,
     )
     from tests.unit.test_hse_advanced import _make_service as _ms
 
@@ -1306,8 +1287,7 @@ async def test_clone_jsa_template_creates_project_jsa() -> None:
             name="Panel work",
             task_description="LOTO before opening panel",
             hazards=[
-                {"step": "Open", "hazard": "Shock", "severity": 5, "likelihood": 2,
-                 "controls": "LOTO"},
+                {"step": "Open", "hazard": "Shock", "severity": 5, "likelihood": 2, "controls": "LOTO"},
             ],
             required_ppe=["arc_flash_suit"],
         ),
@@ -1316,7 +1296,8 @@ async def test_clone_jsa_template_creates_project_jsa() -> None:
     jsa = await svc.clone_jsa_template_to_project(
         tpl.id,
         JSATemplateCloneRequest(
-            project_id=new_project, work_date="2026-05-15",
+            project_id=new_project,
+            work_date="2026-05-15",
             location="Panel A",
         ),
         user_id="u-2",
@@ -1332,15 +1313,19 @@ async def test_clone_jsa_template_creates_project_jsa() -> None:
 @pytest.mark.asyncio
 async def test_clone_inactive_jsa_template_rejected() -> None:
     from app.modules.hse_advanced.schemas import (
-        JSATemplateCloneRequest, JSATemplateCreate,
+        JSATemplateCloneRequest,
+        JSATemplateCreate,
     )
     from tests.unit.test_hse_advanced import _make_service as _ms
 
     svc = _ms()
     tpl = await svc.create_jsa_template(
         JSATemplateCreate(
-            trade="welding", name="Weld test",
-            task_description="x", hazards=[], required_ppe=[],
+            trade="welding",
+            name="Weld test",
+            task_description="x",
+            hazards=[],
+            required_ppe=[],
             is_active=False,
         ),
     )
@@ -1363,8 +1348,8 @@ async def test_safety_incident_subscriber_fans_out() -> None:
     """``safety.incident.created`` → risk_register_update + kpi_recompute."""
     import asyncio
 
-    from app.core.events import Event
     from app.core import events as _ev_module
+    from app.core.events import Event
     from app.modules.hse_advanced.events import _on_safety_incident_created
 
     captured: list[tuple[str, dict]] = []
@@ -1409,8 +1394,8 @@ async def test_qms_ncr_safety_check_filters_non_safety() -> None:
     """Non-safety NCR (no safety keyword, low severity) → no fanout."""
     import asyncio
 
-    from app.core.events import Event
     from app.core import events as _ev_module
+    from app.core.events import Event
     from app.modules.hse_advanced.events import _on_qms_ncr_safety_check
 
     captured: list[tuple[str, dict]] = []
@@ -1445,8 +1430,8 @@ async def test_qms_ncr_safety_check_fans_out_on_critical() -> None:
     """Critical NCR → publishes hse_advanced.if_safety_related."""
     import asyncio
 
-    from app.core.events import Event
     from app.core import events as _ev_module
+    from app.core.events import Event
     from app.modules.hse_advanced.events import _on_qms_ncr_safety_check
 
     captured: list[tuple[str, dict]] = []

@@ -14,10 +14,10 @@ normalisation, and ``ALTER COLUMN TYPE`` would require a ``batch_alter_table``
 rebuild that churns every row for zero storage benefit. Dev DBs keep
 working against the new ORM definitions unchanged.
 """
+
 from typing import Sequence, Union
 
 from alembic import op
-
 
 revision: str = "7f3ab0f2d4e1"
 down_revision: Union[str, None] = "85f7cfa6eecf"
@@ -79,9 +79,9 @@ def upgrade() -> None:
         # NULLIF handles empty strings that sometimes slip in from legacy
         # import paths; they become NULL rather than blowing up the cast.
         op.execute(
-            f'ALTER TABLE {table} '
-            f'ALTER COLUMN {column} TYPE NUMERIC({precision}, {scale}) '
-            f'USING NULLIF({column}, \'\')::NUMERIC({precision}, {scale})'
+            f"ALTER TABLE {table} "
+            f"ALTER COLUMN {column} TYPE NUMERIC({precision}, {scale}) "
+            f"USING NULLIF({column}, '')::NUMERIC({precision}, {scale})"
         )
 
 
@@ -90,8 +90,4 @@ def downgrade() -> None:
         return
 
     for table, column, _precision, _scale in _MONEY_COLUMNS:
-        op.execute(
-            f'ALTER TABLE {table} '
-            f'ALTER COLUMN {column} TYPE VARCHAR(50) '
-            f'USING {column}::TEXT'
-        )
+        op.execute(f"ALTER TABLE {table} ALTER COLUMN {column} TYPE VARCHAR(50) USING {column}::TEXT")

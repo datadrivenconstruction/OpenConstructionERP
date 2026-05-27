@@ -36,7 +36,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -71,11 +70,7 @@ async def _activate_user(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await s.commit()
 
 
@@ -128,7 +123,8 @@ async def _create_project(
 
 @pytest.mark.asyncio
 async def test_report_currency_stamped_from_project_usd(
-    http_client, admin_headers,
+    http_client,
+    admin_headers,
 ):
     """A USD project's generated report must carry currency='USD' in data_snapshot."""
     project_id = await _create_project(http_client, admin_headers, "USD")
@@ -148,14 +144,13 @@ async def test_report_currency_stamped_from_project_usd(
 
     # data_snapshot must carry the stamped currency.
     snapshot = body.get("data_snapshot") or {}
-    assert snapshot.get("currency") == "USD", (
-        f"Expected currency='USD' in data_snapshot, got: {snapshot!r}"
-    )
+    assert snapshot.get("currency") == "USD", f"Expected currency='USD' in data_snapshot, got: {snapshot!r}"
 
 
 @pytest.mark.asyncio
 async def test_report_currency_stamped_from_project_eur(
-    http_client, admin_headers,
+    http_client,
+    admin_headers,
 ):
     """A EUR (DACH) project's report must carry currency='EUR'."""
     project_id = await _create_project(http_client, admin_headers, "EUR")
@@ -171,15 +166,14 @@ async def test_report_currency_stamped_from_project_eur(
         headers=admin_headers,
     )
     assert resp.status_code == 201, resp.text
-    snapshot = (resp.json().get("data_snapshot") or {})
-    assert snapshot.get("currency") == "EUR", (
-        f"Expected currency='EUR' in data_snapshot, got: {snapshot!r}"
-    )
+    snapshot = resp.json().get("data_snapshot") or {}
+    assert snapshot.get("currency") == "EUR", f"Expected currency='EUR' in data_snapshot, got: {snapshot!r}"
 
 
 @pytest.mark.asyncio
 async def test_override_currency_takes_precedence(
-    http_client, admin_headers,
+    http_client,
+    admin_headers,
 ):
     """override_currency='GBP' must win over the project's default 'USD'."""
     project_id = await _create_project(http_client, admin_headers, "USD")
@@ -196,15 +190,14 @@ async def test_override_currency_takes_precedence(
         headers=admin_headers,
     )
     assert resp.status_code == 201, resp.text
-    snapshot = (resp.json().get("data_snapshot") or {})
-    assert snapshot.get("currency") == "GBP", (
-        f"Expected override 'GBP' in data_snapshot, got: {snapshot!r}"
-    )
+    snapshot = resp.json().get("data_snapshot") or {}
+    assert snapshot.get("currency") == "GBP", f"Expected override 'GBP' in data_snapshot, got: {snapshot!r}"
 
 
 @pytest.mark.asyncio
 async def test_usd_report_no_euro_symbol_in_snapshot(
-    http_client, admin_headers,
+    http_client,
+    admin_headers,
 ):
     """USD project report: data_snapshot must not contain euro sign or 'EUR' as currency."""
     project_id = await _create_project(http_client, admin_headers, "USD")
@@ -227,14 +220,13 @@ async def test_usd_report_no_euro_symbol_in_snapshot(
     # The currency code must be USD, not EUR.
     assert snapshot.get("currency") == "USD", snapshot
     # The euro symbol must not appear in the JSON response text at all.
-    assert "€" not in resp.text, (
-        f"Euro sign leaked into USD report response: {resp.text!r}"
-    )
+    assert "€" not in resp.text, f"Euro sign leaked into USD report response: {resp.text!r}"
 
 
 @pytest.mark.asyncio
 async def test_eur_report_no_dollar_symbol_in_snapshot(
-    http_client, admin_headers,
+    http_client,
+    admin_headers,
 ):
     """EUR (DACH) project report: data_snapshot must not contain dollar sign or 'USD'."""
     project_id = await _create_project(http_client, admin_headers, "EUR")
@@ -251,17 +243,16 @@ async def test_eur_report_no_dollar_symbol_in_snapshot(
         headers=admin_headers,
     )
     assert resp.status_code == 201, resp.text
-    snapshot = (resp.json().get("data_snapshot") or {})
+    snapshot = resp.json().get("data_snapshot") or {}
 
     assert snapshot.get("currency") == "EUR", snapshot
-    assert "$" not in resp.text, (
-        f"Dollar sign leaked into EUR report response: {resp.text!r}"
-    )
+    assert "$" not in resp.text, f"Dollar sign leaked into EUR report response: {resp.text!r}"
 
 
 @pytest.mark.asyncio
 async def test_fallback_to_eur_when_project_currency_null(
-    http_client, admin_headers,
+    http_client,
+    admin_headers,
 ):
     """When a project has no currency set, the report must default to 'EUR'."""
     from sqlalchemy import update
@@ -274,9 +265,7 @@ async def test_fallback_to_eur_when_project_currency_null(
     project_id = await _create_project(http_client, admin_headers, "EUR")
     async with async_session_factory() as s:
         await s.execute(
-            update(Project)
-            .where(Project.id == uuid.UUID(project_id))
-            .values(currency="")  # empty string = "not set"
+            update(Project).where(Project.id == uuid.UUID(project_id)).values(currency="")  # empty string = "not set"
         )
         await s.commit()
 
@@ -291,15 +280,14 @@ async def test_fallback_to_eur_when_project_currency_null(
         headers=admin_headers,
     )
     assert resp.status_code == 201, resp.text
-    snapshot = (resp.json().get("data_snapshot") or {})
-    assert snapshot.get("currency") == "EUR", (
-        f"Expected EUR fallback, got: {snapshot!r}"
-    )
+    snapshot = resp.json().get("data_snapshot") or {}
+    assert snapshot.get("currency") == "EUR", f"Expected EUR fallback, got: {snapshot!r}"
 
 
 @pytest.mark.asyncio
 async def test_currency_persisted_on_generated_report_model(
-    http_client, admin_headers,
+    http_client,
+    admin_headers,
 ):
     """The resolved currency must be persisted in GeneratedReport.currency column."""
     project_id = await _create_project(http_client, admin_headers, "JPY")
@@ -324,14 +312,13 @@ async def test_currency_persisted_on_generated_report_model(
     async with async_session_factory() as s:
         row = await s.get(GeneratedReport, uuid.UUID(report_id))
         assert row is not None
-        assert row.currency == "JPY", (
-            f"Expected GeneratedReport.currency='JPY', got {row.currency!r}"
-        )
+        assert row.currency == "JPY", f"Expected GeneratedReport.currency='JPY', got {row.currency!r}"
 
 
 @pytest.mark.asyncio
 async def test_override_currency_normalised_to_uppercase(
-    http_client, admin_headers,
+    http_client,
+    admin_headers,
 ):
     """override_currency supplied in lowercase must be normalised to uppercase."""
     project_id = await _create_project(http_client, admin_headers, "EUR")
@@ -348,15 +335,14 @@ async def test_override_currency_normalised_to_uppercase(
         headers=admin_headers,
     )
     assert resp.status_code == 201, resp.text
-    snapshot = (resp.json().get("data_snapshot") or {})
-    assert snapshot.get("currency") == "CHF", (
-        f"Expected uppercase 'CHF', got: {snapshot!r}"
-    )
+    snapshot = resp.json().get("data_snapshot") or {}
+    assert snapshot.get("currency") == "CHF", f"Expected uppercase 'CHF', got: {snapshot!r}"
 
 
 @pytest.mark.asyncio
 async def test_invalid_override_currency_rejected(
-    http_client, admin_headers,
+    http_client,
+    admin_headers,
 ):
     """A non-ISO override (e.g. 4-letter code) must be rejected with 422."""
     project_id = await _create_project(http_client, admin_headers, "EUR")
@@ -372,6 +358,4 @@ async def test_invalid_override_currency_rejected(
         },
         headers=admin_headers,
     )
-    assert resp.status_code == 422, (
-        f"Expected 422 for invalid override_currency, got {resp.status_code}: {resp.text}"
-    )
+    assert resp.status_code == 422, f"Expected 422 for invalid override_currency, got {resp.status_code}: {resp.text}"

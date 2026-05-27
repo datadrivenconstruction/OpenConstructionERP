@@ -62,7 +62,9 @@ class CostItem(Base):
     unit: Mapped[str] = mapped_column(String(20), nullable=False)
     rate: Mapped[str] = mapped_column(String(50), nullable=False)  # Stored as string for SQLite compatibility
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
-    source: Mapped[str] = mapped_column(String(50), nullable=False, default="cwicr", index=True)  # cwicr, rsmeans, bki, custom
+    source: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="cwicr", index=True
+    )  # cwicr, rsmeans, bki, custom
     classification: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -119,12 +121,8 @@ class RegionalIndex(Base):
     region_code: Mapped[str] = mapped_column(String(64), nullable=False)
     category: Mapped[str] = mapped_column(String(64), nullable=False)
     subcategory: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    factor: Mapped[Decimal] = mapped_column(
-        Numeric(8, 4), nullable=False, default=Decimal("1.0")
-    )
-    source: Mapped[str] = mapped_column(
-        String(128), nullable=False, default="", server_default=""
-    )
+    factor: Mapped[Decimal] = mapped_column(Numeric(8, 4), nullable=False, default=Decimal("1.0"))
+    source: Mapped[str] = mapped_column(String(128), nullable=False, default="", server_default="")
     effective_date: Mapped[date] = mapped_column(Date(), nullable=False)
 
     def __repr__(self) -> str:
@@ -173,16 +171,9 @@ class CostItemUsage(Base):
         nullable=False,
     )
     used_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
-    unit_rate_at_use: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0")
-    )
+    unit_rate_at_use: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False, default=Decimal("0"))
     # "boq" | "assembly" | "tender"
-    context: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="boq", server_default="boq"
-    )
+    context: Mapped[str] = mapped_column(String(32), nullable=False, default="boq", server_default="boq")
 
     def __repr__(self) -> str:
-        return (
-            f"<CostItemUsage item={self.cost_item_id}"
-            f" project={self.project_id} at={self.used_at}>"
-        )
+        return f"<CostItemUsage item={self.cost_item_id} project={self.project_id} at={self.used_at}>"

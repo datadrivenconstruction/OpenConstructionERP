@@ -33,13 +33,15 @@ class _Hit:
 
 
 def test_description_from_payload_concatenates_known_fields():
-    desc = _description_from_payload({
-        "collection_name": "Stucco work",
-        "material_class": "Cement-based",
-        "ifc_class": "IfcCovering",
-        "category_type": "REPAIR AND CONSTRUCTION WORKS",
-        "masterformat_division": "09 24 00",
-    })
+    desc = _description_from_payload(
+        {
+            "collection_name": "Stucco work",
+            "material_class": "Cement-based",
+            "ifc_class": "IfcCovering",
+            "category_type": "REPAIR AND CONSTRUCTION WORKS",
+            "masterformat_division": "09 24 00",
+        }
+    )
     assert "Stucco work" in desc
     assert "Cement-based" in desc
     assert "IfcCovering" in desc
@@ -58,12 +60,14 @@ def test_description_from_payload_partial_payload_uses_available_fields():
 
 
 def test_description_from_payload_skips_none_and_empty_values():
-    desc = _description_from_payload({
-        "collection_name": "Walls",
-        "material_class": None,
-        "ifc_class": "",
-        "category_type": "BUILDING",
-    })
+    desc = _description_from_payload(
+        {
+            "collection_name": "Walls",
+            "material_class": None,
+            "ifc_class": "",
+            "category_type": "BUILDING",
+        }
+    )
     assert desc == "Walls — Building"
 
 

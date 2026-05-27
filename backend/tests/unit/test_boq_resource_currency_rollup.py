@@ -98,9 +98,7 @@ async def session():
 
 def test_resource_total_in_base_converts_foreign_resource():
     # One USD resource, base ARS, rate 1 USD = 1415 ARS.
-    resources = [
-        {"name": "Recurso_1", "quantity": 1, "unit_rate": 25000, "currency": "USD"}
-    ]
+    resources = [{"name": "Recurso_1", "quantity": 1, "unit_rate": 25000, "currency": "USD"}]
     out = _resource_total_in_base(resources, {"USD": "1415"}, "ARS")
     assert out == pytest.approx(25000 * 1415)  # 35_375_000
 

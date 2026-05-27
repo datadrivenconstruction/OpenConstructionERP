@@ -169,11 +169,7 @@ def translate_group_list(value: str, locale: str) -> str:
             continue
         if _GROUP_KV_SEP in part:
             key, _, val = part.partition(_GROUP_KV_SEP)
-            out.append(
-                f"{translate_token(key.strip(), locale)}"
-                f"{_GROUP_KV_SEP}"
-                f"{translate_token(val.strip(), locale)}"
-            )
+            out.append(f"{translate_token(key.strip(), locale)}{_GROUP_KV_SEP}{translate_token(val.strip(), locale)}")
         else:
             out.append(translate_token(part, locale))
     return _SEP.join(out)

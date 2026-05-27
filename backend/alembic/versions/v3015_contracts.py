@@ -46,7 +46,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -74,41 +76,29 @@ def _safe_create_index(
 
 _TABLE_INDEXES: tuple[tuple[str, str, tuple[str, ...], bool], ...] = (
     # (index_name, table, cols, unique)
-    ("ix_oe_contracts_contract_project_id", "oe_contracts_contract",
-     ("project_id",), False),
-    ("ix_oe_contracts_contract_status", "oe_contracts_contract",
-     ("status",), False),
-    ("ix_oe_contracts_contract_contract_type", "oe_contracts_contract",
-     ("contract_type",), False),
-    ("ix_oe_contracts_contract_counterparty_id", "oe_contracts_contract",
-     ("counterparty_id",), False),
-    ("ix_oe_contracts_contract_line_contract_id",
-     "oe_contracts_contract_line",
-     ("contract_id",), False),
-    ("ix_oe_contracts_retention_schedule_contract_id",
-     "oe_contracts_retention_schedule",
-     ("contract_id",), False),
-    ("ix_oe_contracts_fee_structure_contract_id",
-     "oe_contracts_fee_structure",
-     ("contract_id",), False),
-    ("ix_oe_contracts_gainshare_configuration_contract_id",
-     "oe_contracts_gainshare_configuration",
-     ("contract_id",), False),
-    ("ix_oe_contracts_ld_clause_contract_id",
-     "oe_contracts_ld_clause",
-     ("contract_id",), False),
-    ("ix_oe_contracts_progress_claim_contract_id",
-     "oe_contracts_progress_claim",
-     ("contract_id",), False),
-    ("ix_oe_contracts_progress_claim_status",
-     "oe_contracts_progress_claim",
-     ("status",), False),
-    ("ix_oe_contracts_progress_claim_line_progress_claim_id",
-     "oe_contracts_progress_claim_line",
-     ("progress_claim_id",), False),
-    ("ix_oe_contracts_final_account_status",
-     "oe_contracts_final_account",
-     ("status",), False),
+    ("ix_oe_contracts_contract_project_id", "oe_contracts_contract", ("project_id",), False),
+    ("ix_oe_contracts_contract_status", "oe_contracts_contract", ("status",), False),
+    ("ix_oe_contracts_contract_contract_type", "oe_contracts_contract", ("contract_type",), False),
+    ("ix_oe_contracts_contract_counterparty_id", "oe_contracts_contract", ("counterparty_id",), False),
+    ("ix_oe_contracts_contract_line_contract_id", "oe_contracts_contract_line", ("contract_id",), False),
+    ("ix_oe_contracts_retention_schedule_contract_id", "oe_contracts_retention_schedule", ("contract_id",), False),
+    ("ix_oe_contracts_fee_structure_contract_id", "oe_contracts_fee_structure", ("contract_id",), False),
+    (
+        "ix_oe_contracts_gainshare_configuration_contract_id",
+        "oe_contracts_gainshare_configuration",
+        ("contract_id",),
+        False,
+    ),
+    ("ix_oe_contracts_ld_clause_contract_id", "oe_contracts_ld_clause", ("contract_id",), False),
+    ("ix_oe_contracts_progress_claim_contract_id", "oe_contracts_progress_claim", ("contract_id",), False),
+    ("ix_oe_contracts_progress_claim_status", "oe_contracts_progress_claim", ("status",), False),
+    (
+        "ix_oe_contracts_progress_claim_line_progress_claim_id",
+        "oe_contracts_progress_claim_line",
+        ("progress_claim_id",),
+        False,
+    ),
+    ("ix_oe_contracts_final_account_status", "oe_contracts_final_account", ("status",), False),
 )
 
 
@@ -116,10 +106,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite
-        else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     def _common_cols() -> list[sa.Column]:
         return [
@@ -173,7 +160,10 @@ def upgrade() -> None:
             sa.Column("start_date", sa.String(20), nullable=True),
             sa.Column("end_date", sa.String(20), nullable=True),
             sa.Column(
-                "total_value", sa.Numeric(18, 4), nullable=False, server_default="0",
+                "total_value",
+                sa.Numeric(18, 4),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column("currency", sa.String(3), nullable=False, server_default=""),
             sa.Column(
@@ -189,15 +179,24 @@ def upgrade() -> None:
                 server_default="practical_completion",
             ),
             sa.Column(
-                "status", sa.String(40), nullable=False, server_default="draft",
+                "status",
+                sa.String(40),
+                nullable=False,
+                server_default="draft",
             ),
             sa.Column("signed_at", sa.String(40), nullable=True),
             sa.Column(
-                "terms", sa.JSON(), nullable=False, server_default="{}",
+                "terms",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column("created_by", sa.String(36), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint("code", name="uq_oe_contracts_contract_code"),
         )
@@ -217,7 +216,8 @@ def upgrade() -> None:
                 "parent_line_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_contracts_contract_line.id", ondelete="SET NULL",
+                    "oe_contracts_contract_line.id",
+                    ondelete="SET NULL",
                 ),
                 nullable=True,
             ),
@@ -225,14 +225,23 @@ def upgrade() -> None:
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
             sa.Column("scope_section", sa.String(255), nullable=True),
             sa.Column(
-                "line_type", sa.String(40), nullable=False, server_default="work",
+                "line_type",
+                sa.String(40),
+                nullable=False,
+                server_default="work",
             ),
             sa.Column("unit", sa.String(20), nullable=True),
             sa.Column(
-                "quantity", sa.Numeric(18, 4), nullable=False, server_default="0",
+                "quantity",
+                sa.Numeric(18, 4),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "unit_rate", sa.Numeric(18, 4), nullable=False, server_default="0",
+                "unit_rate",
+                sa.Numeric(18, 4),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
                 "total_value",
@@ -241,10 +250,16 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column(
-                "order_index", sa.Integer(), nullable=False, server_default="0",
+                "order_index",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
 
@@ -291,10 +306,16 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column(
-                "accrual_rule", sa.JSON(), nullable=False, server_default="{}",
+                "accrual_rule",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column(
-                "release_rule", sa.JSON(), nullable=False, server_default="{}",
+                "release_rule",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column("notes", sa.Text(), nullable=True),
         )
@@ -317,7 +338,10 @@ def upgrade() -> None:
                 server_default="percent_of_cost",
             ),
             sa.Column(
-                "fee_percent", sa.Numeric(8, 4), nullable=False, server_default="0",
+                "fee_percent",
+                sa.Numeric(8, 4),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column("fee_fixed_amount", sa.Numeric(18, 4), nullable=True),
             sa.Column(
@@ -414,13 +438,19 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column(
-                "claim_number", sa.String(40), nullable=False, server_default="",
+                "claim_number",
+                sa.String(40),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("period_start", sa.String(20), nullable=True),
             sa.Column("period_end", sa.String(20), nullable=True),
             sa.Column("claim_date", sa.String(20), nullable=True),
             sa.Column(
-                "gross_amount", sa.Numeric(18, 4), nullable=False, server_default="0",
+                "gross_amount",
+                sa.Numeric(18, 4),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
                 "retention_amount",
@@ -435,17 +465,26 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column(
-                "net_due", sa.Numeric(18, 4), nullable=False, server_default="0",
+                "net_due",
+                sa.Numeric(18, 4),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "status", sa.String(40), nullable=False, server_default="draft",
+                "status",
+                sa.String(40),
+                nullable=False,
+                server_default="draft",
             ),
             sa.Column("submitted_at", sa.String(40), nullable=True),
             sa.Column("approved_at", sa.String(40), nullable=True),
             sa.Column("paid_at", sa.String(40), nullable=True),
             sa.Column("currency", sa.String(3), nullable=False, server_default=""),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
 
@@ -458,7 +497,8 @@ def upgrade() -> None:
                 "progress_claim_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_contracts_progress_claim.id", ondelete="CASCADE",
+                    "oe_contracts_progress_claim.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -466,7 +506,8 @@ def upgrade() -> None:
                 "contract_line_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_contracts_contract_line.id", ondelete="CASCADE",
+                    "oe_contracts_contract_line.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -540,7 +581,10 @@ def upgrade() -> None:
             sa.Column("sign_off_date", sa.String(20), nullable=True),
             sa.Column("sign_off_by", sa.String(36), nullable=True),
             sa.Column(
-                "status", sa.String(40), nullable=False, server_default="draft",
+                "status",
+                sa.String(40),
+                nullable=False,
+                server_default="draft",
             ),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.UniqueConstraint(

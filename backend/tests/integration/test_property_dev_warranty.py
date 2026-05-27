@@ -75,11 +75,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -112,10 +108,7 @@ async def tenant(http_client):
     headers = await _login(http_client, email, pwd)
 
     async with async_session_factory() as s:
-        owner = (
-            (await s.execute(select(User).where(User.email == email.lower())))
-            .scalar_one()
-        )
+        owner = (await s.execute(select(User).where(User.email == email.lower()))).scalar_one()
 
         proj = Project(
             name=f"warranty-{uuid.uuid4().hex[:6]}",
@@ -191,9 +184,7 @@ async def tenant(http_client):
 
 
 @pytest.mark.asyncio
-async def test_create_warranty_claim_full_payload(
-    http_client: AsyncClient, tenant: dict
-):
+async def test_create_warranty_claim_full_payload(http_client: AsyncClient, tenant: dict):
     """POST /warranty-claims/ accepts the v3113 enriched payload + sets
     is_in_warranty=True when the linked Handover is recent."""
     payload = {
@@ -221,9 +212,7 @@ async def test_create_warranty_claim_full_payload(
 
 
 @pytest.mark.asyncio
-async def test_list_filters_by_development_and_status(
-    http_client: AsyncClient, tenant: dict
-):
+async def test_list_filters_by_development_and_status(http_client: AsyncClient, tenant: dict):
     """GET /warranty-claims/?development_id=... returns the dev's claims
     and honors status / severity narrowing without per-buyer drill-down."""
     # Raise two claims with different statuses.
@@ -299,9 +288,7 @@ async def test_list_filters_by_development_and_status(
 
 
 @pytest.mark.asyncio
-async def test_lifecycle_assign_accept_close(
-    http_client: AsyncClient, tenant: dict
-):
+async def test_lifecycle_assign_accept_close(http_client: AsyncClient, tenant: dict):
     """raised → assign → accept → close transitions hold + persist
     assigned_to_user_id."""
     base = "/api/v1/property-dev/warranty-claims/"
@@ -352,12 +339,9 @@ async def test_lifecycle_assign_accept_close(
 
 
 @pytest.mark.asyncio
-async def test_promote_snag_idempotent(
-    http_client: AsyncClient, tenant: dict
-):
+async def test_promote_snag_idempotent(http_client: AsyncClient, tenant: dict):
     """POST /warranty-claims/from-snag/{id} promotes a snag into a claim
     and returns the same claim on a second call (no duplicate)."""
-    from sqlalchemy import select
 
     from app.database import async_session_factory
     from app.modules.property_dev.models import Snag
@@ -377,15 +361,11 @@ async def test_promote_snag_idempotent(
         snag_id = str(snag.id)
 
     base = "/api/v1/property-dev/warranty-claims/from-snag"
-    first = await http_client.post(
-        f"{base}/{snag_id}", headers=tenant["headers"]
-    )
+    first = await http_client.post(f"{base}/{snag_id}", headers=tenant["headers"])
     assert first.status_code == 201, first.text
     first_id = first.json()["id"]
     assert first.json()["source_snag_id"] == snag_id
 
-    second = await http_client.post(
-        f"{base}/{snag_id}", headers=tenant["headers"]
-    )
+    second = await http_client.post(f"{base}/{snag_id}", headers=tenant["headers"])
     assert second.status_code == 201, second.text
     assert second.json()["id"] == first_id  # idempotent — same claim

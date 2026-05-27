@@ -377,18 +377,14 @@ class CostItemRepository:
         # ``json_array_length`` which mirrors it semantically (both return
         # 0 for ``[]`` and NULL for non-arrays / NULL).
         if "sqlite" in str(_engine.url):
-            comp_len = func.coalesce(
-                func.json_array_length(CostItem.components), 0
-            )
+            comp_len = func.coalesce(func.json_array_length(CostItem.components), 0)
         else:
             # ``jsonb_array_length`` on a TEXT JSON column requires an
             # explicit cast on Postgres; CostItem.components is declared
             # as plain ``JSON`` so we route through ``json_array_length``
             # which works on json (text-domain) and reuse the same
             # coalesce semantics so NULL rows sort AFTER empty arrays.
-            comp_len = func.coalesce(
-                func.json_array_length(CostItem.components), 0
-            )
+            comp_len = func.coalesce(func.json_array_length(CostItem.components), 0)
 
         # CASE(comp_len > 0 → 1 else 0) — items WITH components first.
         # DESC so the "1" rows lead.
@@ -396,10 +392,7 @@ class CostItemRepository:
 
         priority = case((comp_len > 0, 1), else_=0).label("priority")
 
-        stmt = (
-            base.order_by(priority.desc(), CostItem.code.asc())
-            .limit(limit)
-        )
+        stmt = base.order_by(priority.desc(), CostItem.code.asc()).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -445,9 +438,7 @@ class CostItemRepository:
         # (json_extract returns NULL for missing keys, which IS what we
         # want to detect) — we coerce in Python instead so empty strings
         # and missing keys collapse into the same sentinel.
-        all_cols = [
-            _classification_expr(key).label(key) for key in _CLASSIFICATION_DEPTHS
-        ]
+        all_cols = [_classification_expr(key).label(key) for key in _CLASSIFICATION_DEPTHS]
         cnt = func.count(CostItem.id).label("cnt")
 
         # Slice to requested depth.  The GROUP BY label list and the row
@@ -456,11 +447,7 @@ class CostItemRepository:
         active_cols = all_cols[:depth]
         active_keys = list(_CLASSIFICATION_DEPTHS[:depth])
 
-        stmt = (
-            select(*active_cols, cnt)
-            .where(CostItem.is_active.is_(True))
-            .group_by(*active_keys)
-        )
+        stmt = select(*active_cols, cnt).where(CostItem.is_active.is_(True)).group_by(*active_keys)
         if region:
             stmt = stmt.where(CostItem.region == region)
 

@@ -17,7 +17,6 @@ from app.modules.submittals.service import (
     _SUBMITTAL_STATUS_TRANSITIONS,
 )
 
-
 # Universe of statuses surfaced by both the API regex
 # (schemas.SubmittalCreate.status) and the FSM in service.py.
 ALL_STATUSES = {
@@ -76,9 +75,7 @@ def test_closed_is_terminal() -> None:
 )
 def test_known_transitions_are_allowed(src: str, dst: str) -> None:
     """Pin the transitions the UI banks on."""
-    assert dst in _SUBMITTAL_STATUS_TRANSITIONS[src], (
-        f"{src} → {dst} should be allowed"
-    )
+    assert dst in _SUBMITTAL_STATUS_TRANSITIONS[src], f"{src} → {dst} should be allowed"
 
 
 @pytest.mark.parametrize(
@@ -98,9 +95,7 @@ def test_known_transitions_are_allowed(src: str, dst: str) -> None:
 )
 def test_forbidden_transitions_are_blocked(src: str, dst: str) -> None:
     """Negative cases — the FSM must not allow these jumps."""
-    assert dst not in _SUBMITTAL_STATUS_TRANSITIONS[src], (
-        f"{src} → {dst} must be forbidden"
-    )
+    assert dst not in _SUBMITTAL_STATUS_TRANSITIONS[src], f"{src} → {dst} must be forbidden"
 
 
 # ── Role-gate allow-list ────────────────────────────────────────────────
@@ -120,6 +115,9 @@ def test_patch_allowed_statuses_keeps_safe_in_flight_writes() -> None:
     """Editors still need to drive ``draft`` / ``submitted`` /
     ``under_review`` via PATCH (e.g. fix a typo on a draft, or mark
     something for under-review triage). Pin the safe set."""
-    assert _PATCH_ALLOWED_STATUSES == frozenset(
-        {"draft", "submitted", "under_review"},
+    assert (
+        frozenset(
+            {"draft", "submitted", "under_review"},
+        )
+        == _PATCH_ALLOWED_STATUSES
     )

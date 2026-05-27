@@ -26,7 +26,6 @@ import pytest
 
 from app.modules.match_elements.service import _split_unit_multiplier
 
-
 # ── Helper contract ──────────────────────────────────────────────────────
 
 
@@ -61,7 +60,9 @@ from app.modules.match_elements.service import _split_unit_multiplier
     ],
 )
 def test_split_unit_multiplier_extracts_leading_factor(
-    raw: str, expected_mult: float, expected_unit: str,
+    raw: str,
+    expected_mult: float,
+    expected_unit: str,
 ) -> None:
     mult, unit = _split_unit_multiplier(raw)
     assert mult == expected_mult
@@ -116,7 +117,9 @@ def test_split_unit_multiplier_zero_factor_falls_back_to_identity() -> None:
     ],
 )
 def test_apply_pipeline_divides_rate_by_multiplier(
-    unit: str, raw_rate: Decimal, expected_per_unit_rate: Decimal,
+    unit: str,
+    raw_rate: Decimal,
+    expected_per_unit_rate: Decimal,
 ) -> None:
     """Mirror ``service.py:1915-1917`` so a refactor that drops the
     divide-by-multiplier step is caught here, not in production

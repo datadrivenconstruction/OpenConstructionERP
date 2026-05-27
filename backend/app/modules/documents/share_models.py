@@ -117,7 +117,4 @@ class DocumentShareLink(Base):
     )
 
     def __repr__(self) -> str:  # pragma: no cover — debug helper
-        return (
-            f"<DocumentShareLink token={self.token[:8]}…"
-            f" doc={self.document_id} revoked={self.revoked}>"
-        )
+        return f"<DocumentShareLink token={self.token[:8]}… doc={self.document_id} revoked={self.revoked}>"

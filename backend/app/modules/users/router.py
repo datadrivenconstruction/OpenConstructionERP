@@ -181,6 +181,7 @@ async def register(
 # is more robust than relying on slash redirects to behave correctly through
 # every reverse proxy in the wild.
 
+
 class DemoLoginRequest(BaseModel):
     """Request body for the password-free demo login.
 
@@ -204,9 +205,7 @@ _DEMO_EMAIL_WHITELIST: frozenset[str] = frozenset(
 
 
 @router.post("/auth/demo-login/", response_model=TokenResponse)
-@router.post(
-    "/auth/demo-login", response_model=TokenResponse, include_in_schema=False
-)
+@router.post("/auth/demo-login", response_model=TokenResponse, include_in_schema=False)
 async def demo_login(
     data: DemoLoginRequest,
     request: Request,
@@ -633,12 +632,8 @@ def _sanitise_tour_state(raw: object) -> dict[str, dict[str, str | None]]:
         dismissed = value.get("dismissed_at")
         completed = value.get("completed_at")
         out[tour_id] = {
-            "dismissed_at": (
-                str(dismissed)[:40] if isinstance(dismissed, str) and dismissed.strip() else None
-            ),
-            "completed_at": (
-                str(completed)[:40] if isinstance(completed, str) and completed.strip() else None
-            ),
+            "dismissed_at": (str(dismissed)[:40] if isinstance(dismissed, str) and dismissed.strip() else None),
+            "completed_at": (str(completed)[:40] if isinstance(completed, str) and completed.strip() else None),
         }
     return out
 
@@ -876,6 +871,7 @@ async def list_users(
     real users who signed up to try the product.
     """
     import os as _os
+
     users, _ = await service.list_users(offset=offset, limit=limit, is_active=is_active)
     responses = [UserResponse.model_validate(u) for u in users]
 

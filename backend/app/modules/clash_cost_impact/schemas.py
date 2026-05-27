@@ -52,8 +52,7 @@ class CostImpactComponents(BaseModel):
 
     rework_positions_total: float = Field(
         default=0.0,
-        description="Sum of the affected BOQ positions' ``total`` "
-        "(quantity × unit_rate) BEFORE the rework factor.",
+        description="Sum of the affected BOQ positions' ``total`` (quantity × unit_rate) BEFORE the rework factor.",
     )
     rework_factor_pct: float = Field(
         default=10.0,
@@ -72,8 +71,7 @@ class CostImpactComponents(BaseModel):
     )
     blended_rate: float = Field(
         default=0.0,
-        description="Project-level blended labour rate per hour in the "
-        "project's native currency (default 50.0).",
+        description="Project-level blended labour rate per hour in the project's native currency (default 50.0).",
     )
     labour_subtotal: Decimal = Field(
         default=Decimal("0"),

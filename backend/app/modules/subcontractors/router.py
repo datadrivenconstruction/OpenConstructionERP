@@ -854,7 +854,9 @@ async def submit_prequal(
     """
     svc = SubcontractorService(session)
     entity = await svc.submit_prequal(
-        sub_id, questionnaire_data=body.questionnaire, score=body.score,
+        sub_id,
+        questionnaire_data=body.questionnaire,
+        score=body.score,
     )
     return SubcontractorResponse.model_validate(entity)
 
@@ -886,11 +888,7 @@ async def check_insurance_expiry(
             id=r.id,
             legal_name=r.legal_name,
             insurance_expiry_date=r.insurance_expiry_date,
-            days_until_expiry=(
-                (r.insurance_expiry_date - today).days
-                if r.insurance_expiry_date
-                else 0
-            ),
+            days_until_expiry=((r.insurance_expiry_date - today).days if r.insurance_expiry_date else 0),
             is_blocked=bool(r.is_blocked),
         )
         for r in rows
@@ -1074,7 +1072,10 @@ async def upload_lien_waiver(
     # via the agreement → project chain. None means "free-standing W-9".
     if form_payload.payment_application_id is not None:
         await _verify_payment_application_project(
-            form_payload.payment_application_id, user_id, session, svc,
+            form_payload.payment_application_id,
+            user_id,
+            session,
+            svc,
         )
 
     # Disk write — per-subcontractor folder so listings stay cheap.

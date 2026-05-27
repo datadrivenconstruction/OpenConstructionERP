@@ -36,9 +36,7 @@ def test_hint_disk_full_returns_free_space_advice() -> None:
 
 
 def test_hint_404_returns_publish_advice() -> None:
-    hint = _snapshot_error_hint(
-        "Failed to download snapshot from https://hf.co/x: status - 404 Not Found"
-    )
+    hint = _snapshot_error_hint("Failed to download snapshot from https://hf.co/x: status - 404 Not Found")
     assert hint is not None
     assert "huggingface.co" in hint.lower() or "publish" in hint.lower()
 

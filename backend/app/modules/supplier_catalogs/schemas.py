@@ -10,7 +10,13 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 VALID_KYC_DOC_TYPES: tuple[str, ...] = (
-    "w9", "vat_cert", "gst", "trn", "coi", "iso", "other",
+    "w9",
+    "vat_cert",
+    "gst",
+    "trn",
+    "coi",
+    "iso",
+    "other",
 )
 VALID_COMMODITY_SCHEMES: tuple[str, ...] = ("unspsc", "eclass", "cpv")
 

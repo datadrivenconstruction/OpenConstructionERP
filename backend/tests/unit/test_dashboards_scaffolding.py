@@ -108,9 +108,7 @@ class TestDashboardsMessages:
         from app.modules.dashboards import messages
 
         messages.reload_bundle()
-        en_keys = {
-            k for k in _load_bundle_keys("dashboards", "en")
-        }
+        en_keys = {k for k in _load_bundle_keys("dashboards", "en")}
         de_keys = {k for k in _load_bundle_keys("dashboards", "de")}
         ru_keys = {k for k in _load_bundle_keys("dashboards", "ru")}
         assert en_keys == de_keys, f"DE missing: {en_keys - de_keys}; DE extra: {de_keys - en_keys}"
@@ -128,14 +126,7 @@ class TestDashboardsMessages:
 
 
 def _load_bundle_keys(module_name: str, locale: str) -> set[str]:
-    path = (
-        Path(__file__).resolve().parents[2]
-        / "app"
-        / "modules"
-        / module_name
-        / "messages"
-        / f"{locale}.json"
-    )
+    path = Path(__file__).resolve().parents[2] / "app" / "modules" / module_name / "messages" / f"{locale}.json"
     with path.open(encoding="utf-8") as fh:
         return set(json.load(fh).keys())
 
@@ -150,9 +141,7 @@ class TestSnapshotStorageKeys:
 
     def test_parquet_key_shape(self) -> None:
         assert parquet_key("p", "s", "entities") == "dashboards/p/s/entities.parquet"
-        assert parquet_key("p", "s", "attribute_value_index") == (
-            "dashboards/p/s/attribute_value_index.parquet"
-        )
+        assert parquet_key("p", "s", "attribute_value_index") == ("dashboards/p/s/attribute_value_index.parquet")
 
     def test_manifest_key_shape(self) -> None:
         assert manifest_key("p", "s") == "dashboards/p/s/manifest.json"
@@ -185,7 +174,8 @@ class TestSnapshotStorageIO:
         assert out == payload
 
     async def test_write_parquet_and_resolve_local_path(
-        self, local_backend: LocalStorageBackend,
+        self,
+        local_backend: LocalStorageBackend,
     ) -> None:
         project_id = "proj-1"
         snap_id = str(uuid4())
@@ -202,22 +192,33 @@ class TestSnapshotStorageIO:
         )
 
         key = await write_parquet(
-            project_id, snap_id, "entities", df, backend=local_backend,
+            project_id,
+            snap_id,
+            "entities",
+            df,
+            backend=local_backend,
         )
         assert key == f"dashboards/{project_id}/{snap_id}/entities.parquet"
 
         path = await resolve_local_parquet_path(
-            project_id, snap_id, "entities", backend=local_backend,
+            project_id,
+            snap_id,
+            "entities",
+            backend=local_backend,
         )
         assert Path(path).is_file()
         assert Path(path).stat().st_size > 0
 
     async def test_resolve_local_path_missing_file(
-        self, local_backend: LocalStorageBackend,
+        self,
+        local_backend: LocalStorageBackend,
     ) -> None:
         with pytest.raises(FileNotFoundError):
             await resolve_local_parquet_path(
-                "proj-1", "never-written", "entities", backend=local_backend,
+                "proj-1",
+                "never-written",
+                "entities",
+                backend=local_backend,
             )
 
     async def test_resolve_non_local_backend_raises(self) -> None:
@@ -234,11 +235,15 @@ class TestSnapshotStorageIO:
 
         with pytest.raises(ParquetNotLocalError):
             await resolve_local_parquet_path(
-                "p", "s", "entities", backend=_FakeBackend(),  # type: ignore[arg-type]
+                "p",
+                "s",
+                "entities",
+                backend=_FakeBackend(),  # type: ignore[arg-type]
             )
 
     async def test_delete_snapshot_files_removes_all(
-        self, local_backend: LocalStorageBackend,
+        self,
+        local_backend: LocalStorageBackend,
     ) -> None:
         project_id = "proj-1"
         snap_id = str(uuid4())
@@ -260,7 +265,9 @@ class TestSnapshotStorageIO:
 @pytest.mark.asyncio
 class TestDuckDBPool:
     async def test_execute_against_tiny_snapshot(
-        self, local_backend: LocalStorageBackend, monkeypatch: pytest.MonkeyPatch,
+        self,
+        local_backend: LocalStorageBackend,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         project_id = "proj-1"
         snap_id = str(uuid4())
@@ -283,14 +290,16 @@ class TestDuckDBPool:
         pool = DuckDBPool(max_size=4)
         try:
             rows = await pool.execute(
-                snap_id, project_id,
+                snap_id,
+                project_id,
                 "SELECT category, COUNT(*) FROM entities GROUP BY 1 ORDER BY 1",
             )
             assert rows == [("doors", 1), ("walls", 3)]
 
             # Second call hits warm entry — same result.
             rows2 = await pool.execute(
-                snap_id, project_id,
+                snap_id,
+                project_id,
                 "SELECT COUNT(*) FROM entities WHERE category = ?",
                 ["walls"],
             )
@@ -299,7 +308,9 @@ class TestDuckDBPool:
             await pool.close_all()
 
     async def test_missing_entities_parquet_raises(
-        self, local_backend: LocalStorageBackend, monkeypatch: pytest.MonkeyPatch,
+        self,
+        local_backend: LocalStorageBackend,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         monkeypatch.setattr(
             "app.modules.dashboards.snapshot_storage.get_storage_backend",
@@ -310,14 +321,17 @@ class TestDuckDBPool:
         try:
             with pytest.raises(SnapshotHasNoEntitiesError):
                 await pool.execute(
-                    "missing-snap", "proj-1",
+                    "missing-snap",
+                    "proj-1",
                     "SELECT COUNT(*) FROM entities",
                 )
         finally:
             await pool.close_all()
 
     async def test_lru_eviction(
-        self, local_backend: LocalStorageBackend, monkeypatch: pytest.MonkeyPatch,
+        self,
+        local_backend: LocalStorageBackend,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Inserting N + 1 snapshots into a pool sized N must evict the oldest."""
         monkeypatch.setattr(
@@ -343,7 +357,9 @@ class TestDuckDBPool:
             await pool.close_all()
 
     async def test_invalidate_closes_entry(
-        self, local_backend: LocalStorageBackend, monkeypatch: pytest.MonkeyPatch,
+        self,
+        local_backend: LocalStorageBackend,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         monkeypatch.setattr(
             "app.modules.dashboards.snapshot_storage.get_storage_backend",

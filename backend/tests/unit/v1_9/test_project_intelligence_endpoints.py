@@ -98,9 +98,7 @@ async def test_get_variance_happy_path() -> None:
             _make_position(total=200.0, unit_rate=10.0, quantity=20.0),
         ],
     )
-    service.session = SimpleNamespace(
-        execute=AsyncMock(return_value=_FakeExecuteResult(rows=[boq]))
-    )
+    service.session = SimpleNamespace(execute=AsyncMock(return_value=_FakeExecuteResult(rows=[boq])))
 
     resp = await service.get_variance(PROJECT_ID)
 
@@ -125,9 +123,7 @@ async def test_get_variance_detects_override() -> None:
             _make_position(total=1050.0, unit_rate=100.0, quantity=10.0),
         ],
     )
-    service.session = SimpleNamespace(
-        execute=AsyncMock(return_value=_FakeExecuteResult(rows=[boq]))
-    )
+    service.session = SimpleNamespace(execute=AsyncMock(return_value=_FakeExecuteResult(rows=[boq])))
 
     resp = await service.get_variance(PROJECT_ID)
     assert resp.budget == 1000.0
@@ -140,9 +136,7 @@ async def test_get_variance_detects_override() -> None:
 async def test_get_variance_empty_project() -> None:
     service = CostModelService.__new__(CostModelService)
     service._get_project_currency = AsyncMock(return_value="EUR")  # type: ignore[method-assign]
-    service.session = SimpleNamespace(
-        execute=AsyncMock(return_value=_FakeExecuteResult(rows=[]))
-    )
+    service.session = SimpleNamespace(execute=AsyncMock(return_value=_FakeExecuteResult(rows=[])))
 
     resp = await service.get_variance(PROJECT_ID)
     assert resp.budget == 0.0
@@ -156,9 +150,7 @@ async def test_get_variance_empty_project() -> None:
 
 def _make_boq_service(positions: list[SimpleNamespace]) -> BOQService:
     service = BOQService.__new__(BOQService)
-    service.session = SimpleNamespace(
-        execute=AsyncMock(return_value=_FakeExecuteResult(rows=positions))
-    )
+    service.session = SimpleNamespace(execute=AsyncMock(return_value=_FakeExecuteResult(rows=positions)))
     return service
 
 
@@ -299,9 +291,7 @@ async def test_get_bid_analysis_spread_and_vendors() -> None:
         _make_bid(130_000, "Delta"),
         _make_bid(500_000, "Sigma"),  # outlier by IQR rule
     ]
-    service.session = SimpleNamespace(
-        execute=AsyncMock(return_value=_FakeExecuteResult(rows=bids))
-    )
+    service.session = SimpleNamespace(execute=AsyncMock(return_value=_FakeExecuteResult(rows=bids)))
 
     resp = await service.get_bid_analysis(PROJECT_ID)
     assert resp.spread.sample_size == 5
@@ -316,9 +306,7 @@ async def test_get_bid_analysis_spread_and_vendors() -> None:
 @pytest.mark.asyncio
 async def test_get_bid_analysis_empty_project() -> None:
     service = TenderingService.__new__(TenderingService)
-    service.session = SimpleNamespace(
-        execute=AsyncMock(return_value=_FakeExecuteResult(rows=[]))
-    )
+    service.session = SimpleNamespace(execute=AsyncMock(return_value=_FakeExecuteResult(rows=[])))
     resp = await service.get_bid_analysis(PROJECT_ID)
     assert resp.vendors == []
     assert resp.outliers == []
@@ -372,11 +360,7 @@ async def test_labor_cost_by_phase_groups_by_wbs_prefix() -> None:
     ]
 
     # First execute call returns activities; second (if any) returns position totals
-    session = SimpleNamespace(
-        execute=AsyncMock(
-            side_effect=[_FakeExecuteResult(rows=activities)]
-        )
-    )
+    session = SimpleNamespace(execute=AsyncMock(side_effect=[_FakeExecuteResult(rows=activities)]))
     service.session = session
 
     resp = await service.get_labor_cost_by_phase(PROJECT_ID)
@@ -389,8 +373,6 @@ async def test_labor_cost_by_phase_groups_by_wbs_prefix() -> None:
 @pytest.mark.asyncio
 async def test_labor_cost_by_phase_empty_project() -> None:
     service = ScheduleService.__new__(ScheduleService)
-    service.session = SimpleNamespace(
-        execute=AsyncMock(return_value=_FakeExecuteResult(rows=[]))
-    )
+    service.session = SimpleNamespace(execute=AsyncMock(return_value=_FakeExecuteResult(rows=[])))
     resp = await service.get_labor_cost_by_phase(PROJECT_ID)
     assert resp.phases == []

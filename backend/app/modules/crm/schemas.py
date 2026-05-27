@@ -218,9 +218,7 @@ class LeadConvertRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=500)
     estimated_value: Decimal = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=8)
-    expected_close_date: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    expected_close_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     stage_id: UUID
     probability_percent: int = Field(default=0, ge=0, le=100)
     description: str = Field(default="", max_length=10000)
@@ -237,9 +235,7 @@ class OpportunityCreate(BaseModel):
     description: str = Field(default="", max_length=10000)
     estimated_value: Decimal = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=8)
-    expected_close_date: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    expected_close_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     probability_percent: int = Field(default=0, ge=0, le=100)
     stage_id: UUID
     source: str = Field(
@@ -264,9 +260,7 @@ class OpportunityUpdate(BaseModel):
     description: str | None = Field(default=None, max_length=10000)
     estimated_value: Decimal | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=8)
-    expected_close_date: str | None = Field(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    )
+    expected_close_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     probability_percent: int | None = Field(default=None, ge=0, le=100)
     stage_id: UUID | None = None
     source: str | None = Field(
@@ -354,9 +348,7 @@ class ActivityCreate(BaseModel):
 class ActivityUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    kind: str | None = Field(
-        default=None, pattern=r"^(call|meeting|email|task|note)$"
-    )
+    kind: str | None = Field(default=None, pattern=r"^(call|meeting|email|task|note)$")
     subject: str | None = Field(default=None, max_length=500)
     body: str | None = Field(default=None, max_length=20000)
     due_at: str | None = Field(default=None, max_length=40)

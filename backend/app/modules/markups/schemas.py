@@ -47,7 +47,9 @@ class MarkupCreate(BaseModel):
         pattern=r"^(active|resolved|archived)$",
     )
     label: str | None = Field(default=None, max_length=255)
-    measurement_value: float | None = Field(default=None, ge=-_MAX_MEASUREMENT, le=_MAX_MEASUREMENT, allow_inf_nan=False)
+    measurement_value: float | None = Field(
+        default=None, ge=-_MAX_MEASUREMENT, le=_MAX_MEASUREMENT, allow_inf_nan=False
+    )
     measurement_unit: str | None = Field(default=None, max_length=20)
     stamp_template_id: UUID | None = None
     linked_boq_position_id: str | None = Field(default=None, max_length=255)
@@ -77,7 +79,9 @@ class MarkupUpdate(BaseModel):
         pattern=r"^(active|resolved|archived)$",
     )
     label: str | None = Field(default=None, max_length=255)
-    measurement_value: float | None = Field(default=None, ge=-_MAX_MEASUREMENT, le=_MAX_MEASUREMENT, allow_inf_nan=False)
+    measurement_value: float | None = Field(
+        default=None, ge=-_MAX_MEASUREMENT, le=_MAX_MEASUREMENT, allow_inf_nan=False
+    )
     measurement_unit: str | None = Field(default=None, max_length=20)
     stamp_template_id: UUID | None = None
     linked_boq_position_id: str | None = Field(default=None, max_length=255)

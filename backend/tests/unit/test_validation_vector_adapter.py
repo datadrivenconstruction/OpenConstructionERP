@@ -86,9 +86,7 @@ def test_to_text_joins_messages_with_slash_separator() -> None:
 
 def test_to_text_caps_at_50_results() -> None:
     adapter = ValidationReportAdapter()
-    results = [
-        {"rule_id": f"r{i}", "message": f"msg{i}"} for i in range(120)
-    ]
+    results = [{"rule_id": f"r{i}", "message": f"msg{i}"} for i in range(120)]
     text = adapter.to_text(_make_row(results=results))
     assert "msg0" in text
     assert "msg49" in text

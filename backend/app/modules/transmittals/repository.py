@@ -82,10 +82,7 @@ class TransmittalRepository:
 
         Uses MAX-based extraction to avoid collisions after deletions.
         """
-        stmt = (
-            select(func.max(Transmittal.transmittal_number))
-            .where(Transmittal.project_id == project_id)
-        )
+        stmt = select(func.max(Transmittal.transmittal_number)).where(Transmittal.project_id == project_id)
         max_number = (await self.session.execute(stmt)).scalar_one()
         if max_number is None:
             return "TR-001"
@@ -110,11 +107,7 @@ class TransmittalRepository:
 
     async def update_recipient(self, recipient_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on a recipient."""
-        stmt = (
-            update(TransmittalRecipient)
-            .where(TransmittalRecipient.id == recipient_id)
-            .values(**fields)
-        )
+        stmt = update(TransmittalRecipient).where(TransmittalRecipient.id == recipient_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()
@@ -123,9 +116,7 @@ class TransmittalRepository:
         """Delete all recipients for a transmittal."""
         from sqlalchemy import delete
 
-        stmt = delete(TransmittalRecipient).where(
-            TransmittalRecipient.transmittal_id == transmittal_id
-        )
+        stmt = delete(TransmittalRecipient).where(TransmittalRecipient.transmittal_id == transmittal_id)
         await self.session.execute(stmt)
         await self.session.flush()
 
@@ -141,9 +132,7 @@ class TransmittalRepository:
         """Delete all items for a transmittal."""
         from sqlalchemy import delete
 
-        stmt = delete(TransmittalItem).where(
-            TransmittalItem.transmittal_id == transmittal_id
-        )
+        stmt = delete(TransmittalItem).where(TransmittalItem.transmittal_id == transmittal_id)
         await self.session.execute(stmt)
         await self.session.flush()
 

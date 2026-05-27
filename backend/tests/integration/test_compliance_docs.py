@@ -36,7 +36,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -78,14 +77,14 @@ async def _activate_user(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
 
 async def _register_login(
-    client: AsyncClient, *, tenant: str,
+    client: AsyncClient,
+    *,
+    tenant: str,
 ) -> tuple[str, dict[str, str]]:
     email = f"{tenant}-{uuid.uuid4().hex[:8]}@compliance-docs.io"
     password = f"CompDocs{uuid.uuid4().hex[:6]}9"
@@ -142,9 +141,7 @@ async def _promote_to_editor(client: AsyncClient, email: str, password: str) -> 
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(role="editor")
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role="editor"))
         await s.commit()
 
     resp = await client.post(
@@ -156,7 +153,9 @@ async def _promote_to_editor(client: AsyncClient, email: str, password: str) -> 
 
 
 async def _register_login_with_creds(
-    client: AsyncClient, *, tenant: str,
+    client: AsyncClient,
+    *,
+    tenant: str,
 ) -> tuple[str, str, str, dict[str, str]]:
     email = f"{tenant}-{uuid.uuid4().hex[:8]}@compliance-docs.io"
     password = f"CompDocs{uuid.uuid4().hex[:6]}9"
@@ -189,10 +188,12 @@ async def two_tenants(http_client):
     checks that B cannot reach into A's project.
     """
     a_uid, _a_email, _a_pw, a_hdr = await _register_login_with_creds(
-        http_client, tenant="a",
+        http_client,
+        tenant="a",
     )
     b_uid, b_email, b_password, _b_hdr_initial = await _register_login_with_creds(
-        http_client, tenant="b",
+        http_client,
+        tenant="b",
     )
     b_hdr = await _promote_to_editor(http_client, b_email, b_password)
 
@@ -232,7 +233,9 @@ async def test_create_insurance_60d_is_active(http_client, two_tenants):
         "notify_days_before": 30,
     }
     resp = await http_client.post(
-        "/api/v1/compliance_docs/", json=body, headers=a["headers"],
+        "/api/v1/compliance_docs/",
+        json=body,
+        headers=a["headers"],
     )
     assert resp.status_code == 201, resp.text
     out = resp.json()
@@ -253,7 +256,9 @@ async def test_create_permit_15d_is_expiring_soon(http_client, two_tenants):
         "notify_days_before": 30,
     }
     resp = await http_client.post(
-        "/api/v1/compliance_docs/", json=body, headers=a["headers"],
+        "/api/v1/compliance_docs/",
+        json=body,
+        headers=a["headers"],
     )
     assert resp.status_code == 201, resp.text
     out = resp.json()
@@ -273,7 +278,9 @@ async def test_create_cert_already_expired(http_client, two_tenants):
         "notify_days_before": 30,
     }
     resp = await http_client.post(
-        "/api/v1/compliance_docs/", json=body, headers=a["headers"],
+        "/api/v1/compliance_docs/",
+        json=body,
+        headers=a["headers"],
     )
     assert resp.status_code == 201, resp.text
     out = resp.json()
@@ -294,7 +301,9 @@ async def test_patch_expires_at_recomputes_status(http_client, two_tenants):
         "notify_days_before": 30,
     }
     created = await http_client.post(
-        "/api/v1/compliance_docs/", json=create_body, headers=a["headers"],
+        "/api/v1/compliance_docs/",
+        json=create_body,
+        headers=a["headers"],
     )
     assert created.status_code == 201, created.text
     doc_id = created.json()["id"]
@@ -323,8 +332,7 @@ async def test_non_owner_cannot_list(http_client, two_tenants):
     # Router uses verify_project_access → 404 (not a UUID-existence oracle).
     # Either 403 or 404 is acceptable as a denial.
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B was able to list A's compliance docs "
-        f"(status {resp.status_code}). Body: {resp.text!r}"
+        f"LEAK: tenant B was able to list A's compliance docs (status {resp.status_code}). Body: {resp.text!r}"
     )
 
 
@@ -352,28 +360,31 @@ async def test_non_owner_cannot_delete(http_client, two_tenants):
 
     # B's DELETE must be rejected.
     resp = await http_client.delete(
-        f"/api/v1/compliance_docs/{doc_id}/", headers=b["headers"],
+        f"/api/v1/compliance_docs/{doc_id}/",
+        headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"LEAK: tenant B was able to delete A's doc "
-        f"(status {resp.status_code}). Body: {resp.text!r}"
+        f"LEAK: tenant B was able to delete A's doc (status {resp.status_code}). Body: {resp.text!r}"
     )
 
     # The owner can still see + delete it (proves the row wasn't wiped).
     still_there = await http_client.get(
-        f"/api/v1/compliance_docs/{doc_id}/", headers=a["headers"],
+        f"/api/v1/compliance_docs/{doc_id}/",
+        headers=a["headers"],
     )
     assert still_there.status_code == 200, still_there.text
 
     final = await http_client.delete(
-        f"/api/v1/compliance_docs/{doc_id}/", headers=a["headers"],
+        f"/api/v1/compliance_docs/{doc_id}/",
+        headers=a["headers"],
     )
     assert final.status_code == 204, final.text
 
 
 @pytest.mark.asyncio
 async def test_cross_project_list_returns_only_own_project(
-    http_client, two_tenants,
+    http_client,
+    two_tenants,
 ):
     """A's GET for A's project must NOT include B's rows."""
     a = two_tenants["a"]
@@ -403,9 +414,7 @@ async def test_cross_project_list_returns_only_own_project(
     )
     assert a_list.status_code == 200, a_list.text
     ids = {row["id"] for row in a_list.json()}
-    assert b_doc_id not in ids, (
-        "LEAK: A's project listing returned B-owned compliance doc"
-    )
+    assert b_doc_id not in ids, "LEAK: A's project listing returned B-owned compliance doc"
 
 
 @pytest.mark.asyncio
@@ -448,10 +457,7 @@ async def test_attachment_must_belong_to_same_project(http_client, two_tenants):
         },
         headers=a["headers"],
     )
-    assert resp.status_code == 400, (
-        f"Cross-project attachment was accepted (status "
-        f"{resp.status_code}): {resp.text!r}"
-    )
+    assert resp.status_code == 400, f"Cross-project attachment was accepted (status {resp.status_code}): {resp.text!r}"
 
 
 @pytest.mark.asyncio

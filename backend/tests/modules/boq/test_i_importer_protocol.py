@@ -99,6 +99,4 @@ def test_importer_parse_error_is_value_error() -> None:
 def test_protocol_is_runtime_checkable() -> None:
     """Sanity: BOQImporter is a runtime-checkable Protocol so isinstance
     can be used in tests (though we mostly duck-type)."""
-    assert hasattr(BOQImporter, "_is_runtime_protocol") or hasattr(
-        BOQImporter, "__class_getitem__"
-    )
+    assert hasattr(BOQImporter, "_is_runtime_protocol") or hasattr(BOQImporter, "__class_getitem__")

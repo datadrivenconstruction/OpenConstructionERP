@@ -25,7 +25,6 @@ from app.modules.validation.sarif_exporter import (
     report_to_sarif,
 )
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 
@@ -39,7 +38,9 @@ def _make_report(*results: RuleResult, target_type: str = "boq", target_id: str 
     )
 
 
-def _r(rule_id: str, severity: Severity, *, passed: bool, message: str = "msg", element_ref: str | None = None) -> RuleResult:
+def _r(
+    rule_id: str, severity: Severity, *, passed: bool, message: str = "msg", element_ref: str | None = None
+) -> RuleResult:
     return RuleResult(
         rule_id=rule_id,
         rule_name=rule_id.replace(".", " ").title(),
@@ -285,8 +286,5 @@ def test_orm_row_shape_input() -> None:
     levels = [r["level"] for r in sarif["runs"][0]["results"]]
     assert sorted(levels) == ["error", "warning"]
     # The suggestion surfaces in properties.
-    has_fix_property = any(
-        r.get("properties", {}).get("suggestion") == "fix it"
-        for r in sarif["runs"][0]["results"]
-    )
+    has_fix_property = any(r.get("properties", {}).get("suggestion") == "fix it" for r in sarif["runs"][0]["results"])
     assert has_fix_property

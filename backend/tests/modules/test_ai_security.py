@@ -78,7 +78,6 @@ from app.modules.ai.service import AIService  # noqa: E402
 from app.modules.projects.models import Project  # noqa: E402
 from app.modules.users.models import User  # noqa: E402
 
-
 # ── Fixtures ────────────────────────────────────────────────────────────
 
 
@@ -283,7 +282,8 @@ async def test_create_boq_from_estimate_cross_user_returns_404(
 
     service = AIService(session)
     req = CreateBOQFromEstimateRequest(
-        project_id=project.id, boq_name="Hacked BOQ",
+        project_id=project.id,
+        boq_name="Hacked BOQ",
     )
     with pytest.raises(HTTPException) as exc_info:
         await service.create_boq_from_estimate(
@@ -310,7 +310,8 @@ async def test_create_boq_rejects_cross_tenant_project(
 
     service = AIService(session)
     req = CreateBOQFromEstimateRequest(
-        project_id=foreign_project.id, boq_name="Cross-tenant BOQ",
+        project_id=foreign_project.id,
+        boq_name="Cross-tenant BOQ",
     )
     with pytest.raises(HTTPException) as exc_info:
         await service.create_boq_from_estimate(
@@ -336,7 +337,8 @@ async def test_create_boq_admin_bypasses_project_check(
 
     service = AIService(session)
     req = CreateBOQFromEstimateRequest(
-        project_id=foreign_project.id, boq_name="Admin BOQ",
+        project_id=foreign_project.id,
+        boq_name="Admin BOQ",
     )
     out = await service.create_boq_from_estimate(
         user_id=str(admin.id),
@@ -358,7 +360,8 @@ async def test_create_boq_rejects_non_completed_job(
 
     service = AIService(session)
     req = CreateBOQFromEstimateRequest(
-        project_id=project.id, boq_name="Premature BOQ",
+        project_id=project.id,
+        boq_name="Premature BOQ",
     )
     with pytest.raises(HTTPException) as exc_info:
         await service.create_boq_from_estimate(
@@ -390,6 +393,7 @@ def test_rate_limit_dependency_present_on_quick_estimate() -> None:
         "/api/v1/ai/file-estimate/",
         "/api/v1/ai/advisor/chat/",
     }
+
     def _dep_name(call: object) -> str:
         # FastAPI dependencies can be classes (instances callable via
         # ``__call__``) or bare functions. Prefer ``__name__`` when the
@@ -414,9 +418,7 @@ def test_rate_limit_dependency_present_on_quick_estimate() -> None:
         seen[path] = deps
     assert set(seen.keys()) == guarded, f"Missing paid endpoints: {guarded - set(seen)}"
     for path, deps in seen.items():
-        assert check_ai_rate_limit.__name__ in deps, (
-            f"{path} dropped check_ai_rate_limit dependency (got: {deps})"
-        )
+        assert check_ai_rate_limit.__name__ in deps, f"{path} dropped check_ai_rate_limit dependency (got: {deps})"
 
 
 # ── 5. Magic-byte gate on photo-estimate ──────────────────────────────
@@ -431,8 +433,7 @@ async def test_photo_estimate_rejects_html_masquerading_as_png(
     so the test fails loudly if the magic-byte gate is removed and
     the bytes reach the provider stub.
     """
-    from fastapi import UploadFile, status
-    from starlette.datastructures import Headers
+    from fastapi import status
 
     from app.modules.ai.router import photo_estimate
 
@@ -518,7 +519,8 @@ def test_smart_import_prompt_funnels_text_through_fence() -> None:
     """
     fenced = fence_user_content("body")
     formatted = SMART_IMPORT_PROMPT.format(
-        filename=sanitize_user_text("evil.pdf"), text=fenced,
+        filename=sanitize_user_text("evil.pdf"),
+        text=fenced,
     )
     assert "<<<UNTRUSTED_USER_CONTENT>>>" in formatted
     assert "<<<END_UNTRUSTED_USER_CONTENT>>>" in formatted

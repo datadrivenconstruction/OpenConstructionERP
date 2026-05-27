@@ -288,9 +288,7 @@ class TestScoreHonesty:
 
         positions = [{"id": str(i), "description": "ok"} for i in range(20)]
         positions[0]["description"] = ""  # one hard error
-        report = await engine.validate(
-            data={"positions": positions}, rule_sets=["test_boq2"]
-        )
+        report = await engine.validate(data={"positions": positions}, rule_sets=["test_boq2"])
         assert report.status == ValidationStatus.ERRORS
         assert len(report.errors) == 1
         # The naive per-result weighted ratio would be ~0.9926. The cap must
@@ -346,9 +344,7 @@ class TestEmptyDataHandling:
         if not builtin_registry.get_rule("boq_quality.position_has_quantity"):
             register_builtin_rules()
 
-        report = await validation_engine.validate(
-            data={"positions": []}, rule_sets=["boq_quality"]
-        )
+        report = await validation_engine.validate(data={"positions": []}, rule_sets=["boq_quality"])
         assert report.status == ValidationStatus.SKIPPED
         assert report.score == 1.0
         assert len(report.results) == 0

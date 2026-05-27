@@ -78,8 +78,11 @@ async def test_list_for_accommodation_paginated(
     """Create 7 bookings across 3 rooms → list returns all 7 with room_label."""
     _, header = admin_auth
     accom_id, room_ids = await _create_accom_with_rooms(
-        client, header, project_id,
-        name="List-A", labels=["LA-1", "LA-2", "LA-3"],
+        client,
+        header,
+        project_id,
+        name="List-A",
+        labels=["LA-1", "LA-2", "LA-3"],
     )
 
     # 3 bookings on LA-1, 2 on LA-2, 2 on LA-3 = 7 total.
@@ -97,7 +100,9 @@ async def test_list_for_accommodation_paginated(
             check_in = f"2026-{month:02d}-01"
             check_out = f"2026-{month:02d}-15"
             bid = await _make_booking(
-                client, header, rid,
+                client,
+                header,
+                rid,
                 name=f"{label}-occ-{i}",
                 check_in=check_in,
                 check_out=check_out,
@@ -132,20 +137,27 @@ async def test_list_filters_by_status(
     """``?status=reserved`` returns only reserved bookings; multi-value works too."""
     _, header = admin_auth
     accom_id, room_ids = await _create_accom_with_rooms(
-        client, header, project_id,
-        name="List-Status", labels=["LS-1", "LS-2"],
+        client,
+        header,
+        project_id,
+        name="List-Status",
+        labels=["LS-1", "LS-2"],
     )
 
     # 1 reserved on LS-1, 1 checked_in on LS-2.
     bid_reserved = await _make_booking(
-        client, header, room_ids[0],
+        client,
+        header,
+        room_ids[0],
         name="reserved-occupant",
         check_in="2027-01-01",
         check_out="2027-01-05",
         status_="reserved",
     )
     bid_checked_in = await _make_booking(
-        client, header, room_ids[1],
+        client,
+        header,
+        room_ids[1],
         name="checked-in-occupant",
         check_in="2027-02-01",
         check_out="2027-02-05",
@@ -163,8 +175,7 @@ async def test_list_filters_by_status(
 
     # Multi-value: both reserved + checked_in.
     resp = await client.get(
-        f"/api/v1/accommodation/{accom_id}/bookings"
-        f"?status=reserved&status=checked_in",
+        f"/api/v1/accommodation/{accom_id}/bookings?status=reserved&status=checked_in",
         headers=header,
     )
     assert resp.status_code == 200, resp.text
@@ -190,18 +201,25 @@ async def test_list_filters_by_date_overlap(
     fully outside its range."""
     _, header = admin_auth
     accom_id, room_ids = await _create_accom_with_rooms(
-        client, header, project_id,
-        name="List-Dates", labels=["LD-1"],
+        client,
+        header,
+        project_id,
+        name="List-Dates",
+        labels=["LD-1"],
     )
     bid = await _make_booking(
-        client, header, room_ids[0],
+        client,
+        header,
+        room_ids[0],
         name="window-occupant",
         check_in="2026-06-01",
         check_out="2026-06-15",
     )
     # Also create one that doesn't overlap at all.
     bid_other = await _make_booking(
-        client, header, room_ids[0],
+        client,
+        header,
+        room_ids[0],
         name="other-occupant",
         check_in="2027-01-01",
         check_out="2027-01-05",
@@ -209,8 +227,7 @@ async def test_list_filters_by_date_overlap(
 
     # Overlapping window — should include bid but not bid_other.
     overlap = await client.get(
-        f"/api/v1/accommodation/{accom_id}/bookings"
-        f"?from_date=2026-06-10&to_date=2026-06-12",
+        f"/api/v1/accommodation/{accom_id}/bookings?from_date=2026-06-10&to_date=2026-06-12",
         headers=header,
     )
     assert overlap.status_code == 200, overlap.text
@@ -220,8 +237,7 @@ async def test_list_filters_by_date_overlap(
 
     # Window entirely before both bookings — empty result.
     miss = await client.get(
-        f"/api/v1/accommodation/{accom_id}/bookings"
-        f"?from_date=2025-01-01&to_date=2025-12-31",
+        f"/api/v1/accommodation/{accom_id}/bookings?from_date=2025-01-01&to_date=2025-12-31",
         headers=header,
     )
     assert miss.status_code == 200, miss.text
@@ -241,11 +257,16 @@ async def test_list_idor_404(
     """
     _, header_a = admin_auth
     accom_id, room_ids = await _create_accom_with_rooms(
-        client, header_a, project_id,
-        name="IDOR-target", labels=["IX-1"],
+        client,
+        header_a,
+        project_id,
+        name="IDOR-target",
+        labels=["IX-1"],
     )
     await _make_booking(
-        client, header_a, room_ids[0],
+        client,
+        header_a,
+        room_ids[0],
         name="secret-occupant",
         check_in="2026-06-01",
         check_out="2026-06-02",
@@ -255,7 +276,9 @@ async def test_list_idor_404(
     from tests.modules.accommodation.conftest import _register_user
 
     _, _email, viewer_header = await _register_user(
-        client, role="viewer", tag=f"lb-{uuid.uuid4().hex[:6]}",
+        client,
+        role="viewer",
+        tag=f"lb-{uuid.uuid4().hex[:6]}",
     )
 
     resp = await client.get(

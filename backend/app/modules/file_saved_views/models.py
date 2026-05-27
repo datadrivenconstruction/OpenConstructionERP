@@ -89,27 +89,37 @@ class FileSavedView(Base):
         server_default="{}",
     )
     sort_order: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     is_pinned: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
     is_shared: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
     # Usage telemetry — bumped via POST /{id}/use/. The frontend rail
     # surfaces ``use_count`` as a soft badge so the user can spot which
     # views they actually rely on.
     last_used_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, default=None,
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
     )
     use_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
 
     def __repr__(self) -> str:  # pragma: no cover — debug helper
-        return (
-            f"<FileSavedView {self.name!r} "
-            f"user={self.user_id} project={self.project_id} "
-            f"pinned={self.is_pinned}>"
-        )
+        return f"<FileSavedView {self.name!r} user={self.user_id} project={self.project_id} pinned={self.is_pinned}>"

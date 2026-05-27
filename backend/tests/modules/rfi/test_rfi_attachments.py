@@ -132,9 +132,7 @@ class TestMagicByteGateConstant:
         from app.modules.rfi.router import ALLOWED_ATTACHMENT_TYPES
 
         pdf_head = b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n"
-        detected = require_signature(
-            pdf_head, ALLOWED_ATTACHMENT_TYPES, filename="reply.pdf"
-        )
+        detected = require_signature(pdf_head, ALLOWED_ATTACHMENT_TYPES, filename="reply.pdf")
         assert detected == "pdf"
 
     def test_html_payload_disguised_as_png_is_rejected(self) -> None:
@@ -145,9 +143,7 @@ class TestMagicByteGateConstant:
 
         fake_png = b"<html><script>alert('xss')</script></html>"
         with pytest.raises(FileSignatureMismatch):
-            require_signature(
-                fake_png, ALLOWED_ATTACHMENT_TYPES, filename="evil.png"
-            )
+            require_signature(fake_png, ALLOWED_ATTACHMENT_TYPES, filename="evil.png")
 
 
 # ── 3 + 4. End-to-end upload via the router ──────────────────────────────
@@ -155,15 +151,11 @@ class TestMagicByteGateConstant:
 
 class TestAttachmentUploadEndpoint:
     @pytest.mark.asyncio
-    async def test_real_pdf_is_stored_with_server_derived_name(
-        self, db_session, tmp_path, monkeypatch
-    ) -> None:
+    async def test_real_pdf_is_stored_with_server_derived_name(self, db_session, tmp_path, monkeypatch) -> None:
         """Happy path: a real PDF gets a server-controlled filename."""
         from app.modules.rfi import router as rfi_router_mod
 
-        monkeypatch.setattr(
-            rfi_router_mod, "ATTACHMENTS_DIR", tmp_path / "attachments"
-        )
+        monkeypatch.setattr(rfi_router_mod, "ATTACHMENTS_DIR", tmp_path / "attachments")
 
         owner_id = await _make_user(db_session)
         owner = str(owner_id)
@@ -199,16 +191,12 @@ class TestAttachmentUploadEndpoint:
         assert "reply.pdf" not in stored
 
     @pytest.mark.asyncio
-    async def test_html_disguised_as_png_returns_415(
-        self, db_session, tmp_path, monkeypatch
-    ) -> None:
+    async def test_html_disguised_as_png_returns_415(self, db_session, tmp_path, monkeypatch) -> None:
         """The router refuses the request and writes nothing to disk."""
         from app.modules.rfi import router as rfi_router_mod
 
         attachments_dir = tmp_path / "attachments"
-        monkeypatch.setattr(
-            rfi_router_mod, "ATTACHMENTS_DIR", attachments_dir
-        )
+        monkeypatch.setattr(rfi_router_mod, "ATTACHMENTS_DIR", attachments_dir)
 
         owner_id = await _make_user(db_session)
         owner = str(owner_id)
@@ -238,15 +226,11 @@ class TestAttachmentUploadEndpoint:
             assert list(attachments_dir.iterdir()) == []
 
     @pytest.mark.asyncio
-    async def test_empty_upload_returns_400(
-        self, db_session, tmp_path, monkeypatch
-    ) -> None:
+    async def test_empty_upload_returns_400(self, db_session, tmp_path, monkeypatch) -> None:
         """Zero-byte file is a 400, not a 415 — distinguishes operator error."""
         from app.modules.rfi import router as rfi_router_mod
 
-        monkeypatch.setattr(
-            rfi_router_mod, "ATTACHMENTS_DIR", tmp_path / "attachments"
-        )
+        monkeypatch.setattr(rfi_router_mod, "ATTACHMENTS_DIR", tmp_path / "attachments")
 
         owner_id = await _make_user(db_session)
         owner = str(owner_id)

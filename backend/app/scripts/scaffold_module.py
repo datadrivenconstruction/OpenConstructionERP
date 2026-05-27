@@ -50,20 +50,19 @@ _MODULES_DIR = _REPO_ROOT / "backend" / "app" / "modules"
 def _validate_name(name: str) -> None:
     if not _NAME_RE.match(name):
         raise SystemExit(
-            f"Invalid module name: {name!r}\n"
-            "  Must match snake_case with an 'oe_' prefix, e.g. oe_tendering.",
+            f"Invalid module name: {name!r}\n  Must match snake_case with an 'oe_' prefix, e.g. oe_tendering.",
         )
 
 
 def _display_name_from(name: str) -> str:
     """``oe_field_ops`` → ``Field Ops``."""
-    short = name[len("oe_"):]
+    short = name[len("oe_") :]
     return short.replace("_", " ").title()
 
 
 def _short_name(name: str) -> str:
     """Package directory name — manifest ``oe_projects`` ⇄ pkg ``projects``."""
-    return name[len("oe_"):]
+    return name[len("oe_") :]
 
 
 def _is_text_file(path: Path) -> bool:
@@ -146,8 +145,7 @@ def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"-h", "--help"}:
         sys.stderr.write(
-            "Usage: python -m app.scripts.scaffold_module <oe_module_name> "
-            "[author]\n",
+            "Usage: python -m app.scripts.scaffold_module <oe_module_name> [author]\n",
         )
         return 2
 

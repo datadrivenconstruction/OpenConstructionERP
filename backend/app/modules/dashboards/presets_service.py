@@ -279,7 +279,8 @@ class DashboardPresetService:
         except Exception as exc:  # pragma: no cover — defensive
             logger.warning(
                 "dashboards.preset.delete event failed: %s",
-                type(exc).__name__, exc_info=True,
+                type(exc).__name__,
+                exc_info=True,
             )
 
     # -- validators --------------------------------------------------------
@@ -333,7 +334,8 @@ class DashboardPresetService:
         except Exception as exc:  # pragma: no cover — defensive
             logger.warning(
                 "dashboards.preset.saved event failed: %s",
-                type(exc).__name__, exc_info=True,
+                type(exc).__name__,
+                exc_info=True,
             )
 
 

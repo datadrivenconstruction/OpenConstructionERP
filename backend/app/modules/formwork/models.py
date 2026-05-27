@@ -38,20 +38,30 @@ class FormworkSystem(Base):
 
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     system_type: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="wall", index=True,
+        String(40),
+        nullable=False,
+        default="wall",
+        index=True,
     )
     supplier: Mapped[str | None] = mapped_column(String(255), nullable=True)
     material: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="plywood", index=True,
+        String(40),
+        nullable=False,
+        default="plywood",
+        index=True,
     )
     reuses_max: Mapped[int] = mapped_column(Integer, nullable=False, default=30)
     unit_rate: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0"),
+        Numeric(18, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="")
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
 
     def __repr__(self) -> str:
@@ -83,7 +93,9 @@ class FormworkAssignment(Base):
     # row survives a re-import / re-numbering of the BOQ (resolution is
     # service-layer, mirroring contracts.counterparty_id pattern).
     boq_position_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
     formwork_system_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -92,28 +104,35 @@ class FormworkAssignment(Base):
         index=True,
     )
     area_m2: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0"),
+        Numeric(18, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     reuse_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     waste_pct: Mapped[Decimal] = mapped_column(
-        Numeric(6, 2), nullable=False, default=Decimal("5.00"),
+        Numeric(6, 2),
+        nullable=False,
+        default=Decimal("5.00"),
     )
     computed_unit_cost: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0"),
+        Numeric(18, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     computed_total: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0"),
+        Numeric(18, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<FormworkAssignment project={self.project_id} "
-            f"area={self.area_m2}m2 total={self.computed_total}>"
-        )
+        return f"<FormworkAssignment project={self.project_id} area={self.area_m2}m2 total={self.computed_total}>"
 
 
 class FormworkScheduleLine(Base):
@@ -142,12 +161,11 @@ class FormworkScheduleLine(Base):
     pour_date: Mapped[str | None] = mapped_column(Date, nullable=True)
     level_label: Mapped[str] = mapped_column(String(120), nullable=False, default="")
     area_m2: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0"),
+        Numeric(18, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     def __repr__(self) -> str:
-        return (
-            f"<FormworkScheduleLine #{self.pour_no} {self.level_label} "
-            f"{self.area_m2}m2>"
-        )
+        return f"<FormworkScheduleLine #{self.pour_no} {self.level_label} {self.area_m2}m2>"

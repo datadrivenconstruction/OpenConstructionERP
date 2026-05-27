@@ -133,9 +133,7 @@ def _create_transmittal_tables(
                 server_default="sent",
             ),
             sa.Column("notes", sa.Text(), nullable=True),
-            sa.Column(
-                "cover_sheet_path", sa.String(length=512), nullable=True
-            ),
+            sa.Column("cover_sheet_path", sa.String(length=512), nullable=True),
             sa.UniqueConstraint(
                 "project_id",
                 "number",
@@ -176,9 +174,7 @@ def _create_transmittal_tables(
             sa.Column(
                 "transmittal_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_file_transmittal.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_file_transmittal.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column("file_kind", sa.String(length=32), nullable=False),
@@ -234,9 +230,7 @@ def _create_transmittal_tables(
             sa.Column(
                 "transmittal_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_file_transmittal.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_file_transmittal.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column("email", sa.String(length=255), nullable=False),
@@ -247,9 +241,7 @@ def _create_transmittal_tables(
                 sa.DateTime(timezone=True),
                 nullable=True,
             ),
-            sa.Column(
-                "acknowledge_token", sa.String(length=64), nullable=True
-            ),
+            sa.Column("acknowledge_token", sa.String(length=64), nullable=True),
             sa.UniqueConstraint(
                 "transmittal_id",
                 "email",
@@ -257,9 +249,7 @@ def _create_transmittal_tables(
             ),
         )
 
-    if not _has_index(
-        inspector, _T_RECIP, "ix_oe_file_transmittal_recipient_token"
-    ):
+    if not _has_index(inspector, _T_RECIP, "ix_oe_file_transmittal_recipient_token"):
         try:
             op.create_index(
                 "ix_oe_file_transmittal_recipient_token",
@@ -293,9 +283,7 @@ def _create_approval_tables(
             sa.Column(
                 "project_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
                 nullable=True,
             ),
             sa.Column("name", sa.String(length=128), nullable=False),
@@ -339,9 +327,7 @@ def _create_approval_tables(
             sa.Column(
                 "project_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column("file_kind", sa.String(length=32), nullable=False),
@@ -382,9 +368,7 @@ def _create_approval_tables(
             sa.Column(
                 "stamp_template_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_file_stamp_template.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_file_stamp_template.id", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column(
@@ -409,9 +393,7 @@ def _create_approval_tables(
         except Exception:  # noqa: BLE001
             pass
 
-    if not _has_index(
-        inspector, _A_WORKFLOW, "ix_oe_file_approval_workflow_file"
-    ):
+    if not _has_index(inspector, _A_WORKFLOW, "ix_oe_file_approval_workflow_file"):
         try:
             op.create_index(
                 "ix_oe_file_approval_workflow_file",
@@ -440,9 +422,7 @@ def _create_approval_tables(
             sa.Column(
                 "workflow_id",
                 sa.String(length=36),
-                sa.ForeignKey(
-                    "oe_file_approval_workflow.id", ondelete="CASCADE"
-                ),
+                sa.ForeignKey("oe_file_approval_workflow.id", ondelete="CASCADE"),
                 nullable=False,
             ),
             sa.Column("sort_order", sa.Integer(), nullable=False),
@@ -472,9 +452,7 @@ def _create_approval_tables(
             ),
         )
 
-    if not _has_index(
-        inspector, _A_STEP, "ix_oe_file_approval_step_approver"
-    ):
+    if not _has_index(inspector, _A_STEP, "ix_oe_file_approval_step_approver"):
         try:
             op.create_index(
                 "ix_oe_file_approval_step_approver",
@@ -489,9 +467,7 @@ def _seed_stamp_templates() -> None:
     """Insert the four global stamp templates if the table is empty."""
     bind = op.get_bind()
     # Skip seeding if rows already exist (re-run or operator-customised).
-    existing = bind.execute(
-        sa.text(f"SELECT COUNT(*) FROM {_A_STAMP}")
-    ).scalar_one()
+    existing = bind.execute(sa.text(f"SELECT COUNT(*) FROM {_A_STAMP}")).scalar_one()
     if existing and int(existing) > 0:
         return
 

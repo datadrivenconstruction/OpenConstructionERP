@@ -55,20 +55,17 @@ class RFIRepository:
         from sqlalchemy.sql import func as sqlfunc
 
         # Extract numeric suffix from existing RFI numbers (e.g. 'RFI-007' -> 7)
-        stmt = (
-            select(
-                sqlfunc.coalesce(
-                    sqlfunc.max(
-                        cast(
-                            func.substr(RFI.rfi_number, 5),
-                            SAInteger,
-                        )
-                    ),
-                    0,
-                )
+        stmt = select(
+            sqlfunc.coalesce(
+                sqlfunc.max(
+                    cast(
+                        func.substr(RFI.rfi_number, 5),
+                        SAInteger,
+                    )
+                ),
+                0,
             )
-            .where(RFI.project_id == project_id)
-        )
+        ).where(RFI.project_id == project_id)
         max_num = (await self.session.execute(stmt)).scalar_one()
         return f"RFI-{max_num + 1:03d}"
 

@@ -103,7 +103,8 @@ async def test_bootstrap_creates_rooms_then_is_idempotent(
 
     # Confirm rooms exist with the expected labels.
     rooms = await client.get(
-        f"/api/v1/accommodation/{accom_id}/rooms", headers=header,
+        f"/api/v1/accommodation/{accom_id}/rooms",
+        headers=header,
     )
     labels = {r["label"] for r in rooms.json()}
     assert labels == set(plot_numbers)
@@ -124,7 +125,8 @@ async def test_bootstrap_creates_rooms_then_is_idempotent(
 
     # The room count on the accommodation must equal the original plot count.
     rooms2 = await client.get(
-        f"/api/v1/accommodation/{accom_id}/rooms", headers=header,
+        f"/api/v1/accommodation/{accom_id}/rooms",
+        headers=header,
     )
     assert len({r["label"] for r in rooms2.json()}) == len(plot_numbers)
 

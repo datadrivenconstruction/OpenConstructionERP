@@ -55,13 +55,10 @@ import struct
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from decimal import Decimal
 from typing import Any, Awaitable, Callable, Iterable, Sequence
 
 from app.modules.geo_hub.coord_transforms import (
-    ecef_to_enu,
     enu_to_ecef,
-    wgs84_to_ecef,
 )
 
 logger = logging.getLogger(__name__)
@@ -99,13 +96,9 @@ class TileAABB:
     max_z: float = 0.0
 
     def is_empty(self) -> bool:
-        return (
-            self.min_x >= self.max_x
-            or self.min_y >= self.max_y
-            or self.min_z >= self.max_z
-        )
+        return self.min_x >= self.max_x or self.min_y >= self.max_y or self.min_z >= self.max_z
 
-    def union(self, other: "TileAABB") -> "TileAABB":
+    def union(self, other: TileAABB) -> TileAABB:
         return TileAABB(
             min(self.min_x, other.min_x),
             min(self.min_y, other.min_y),
@@ -232,7 +225,9 @@ def _element_geometry_aabb(element: dict[str, Any]) -> TileAABB | None:
         else:
             return None
     return TileAABB(
-        x, y, z,
+        x,
+        y,
+        z,
         x + max(length, 0.1),
         y + max(width, 0.1),
         z + max(height, 0.1),
@@ -356,14 +351,20 @@ def _emit_box_mesh(
     # 12 triangles = 36 indices.
     triangles = [
         # bottom
-        (0, 1, 2), (0, 2, 3),
+        (0, 1, 2),
+        (0, 2, 3),
         # top
-        (4, 6, 5), (4, 7, 6),
+        (4, 6, 5),
+        (4, 7, 6),
         # sides
-        (0, 4, 5), (0, 5, 1),
-        (1, 5, 6), (1, 6, 2),
-        (2, 6, 7), (2, 7, 3),
-        (3, 7, 4), (3, 4, 0),
+        (0, 4, 5),
+        (0, 5, 1),
+        (1, 5, 6),
+        (1, 6, 2),
+        (2, 6, 7),
+        (2, 7, 3),
+        (3, 7, 4),
+        (3, 4, 0),
     ]
     for tri in triangles:
         for v in tri:
@@ -427,7 +428,11 @@ def build_gltf_for_tile(
             continue
         vert_start_bytes = len(binary)
         new_vo, new_io = _emit_box_mesh(
-            sub, feature_index, binary, vertex_offset, index_offset,
+            sub,
+            feature_index,
+            binary,
+            vertex_offset,
+            index_offset,
         )
         # Indices follow vertices + featureIds + padding. Carve out
         # the offsets after _emit_box_mesh has written them.
@@ -438,55 +443,67 @@ def build_gltf_for_tile(
         index_bytes = 36 * 4  # 36 uint32
         # buffer-view: positions
         position_bv_index = len(buffer_views)
-        buffer_views.append({
-            "buffer": 0,
-            "byteOffset": vert_start_bytes,
-            "byteLength": vert_bytes,
-            "target": _ARRAY_BUFFER,
-        })
+        buffer_views.append(
+            {
+                "buffer": 0,
+                "byteOffset": vert_start_bytes,
+                "byteLength": vert_bytes,
+                "target": _ARRAY_BUFFER,
+            }
+        )
         # buffer-view: feature ids
         feature_bv_index = len(buffer_views)
-        buffer_views.append({
-            "buffer": 0,
-            "byteOffset": vert_start_bytes + vert_bytes,
-            "byteLength": feature_bytes,
-            "target": _ARRAY_BUFFER,
-        })
+        buffer_views.append(
+            {
+                "buffer": 0,
+                "byteOffset": vert_start_bytes + vert_bytes,
+                "byteLength": feature_bytes,
+                "target": _ARRAY_BUFFER,
+            }
+        )
         # buffer-view: indices
         index_bv_index = len(buffer_views)
-        buffer_views.append({
-            "buffer": 0,
-            "byteOffset": vert_start_bytes + vert_bytes + feature_bytes + feature_padding,
-            "byteLength": index_bytes,
-            "target": _ELEMENT_ARRAY_BUFFER,
-        })
+        buffer_views.append(
+            {
+                "buffer": 0,
+                "byteOffset": vert_start_bytes + vert_bytes + feature_bytes + feature_padding,
+                "byteLength": index_bytes,
+                "target": _ELEMENT_ARRAY_BUFFER,
+            }
+        )
 
         position_accessor_index = len(accessors)
-        accessors.append({
-            "bufferView": position_bv_index,
-            "byteOffset": 0,
-            "componentType": _COMPONENT_TYPE_FLOAT,
-            "count": 8,
-            "type": "VEC3",
-            "min": [sub.min_x, sub.min_y, sub.min_z],
-            "max": [sub.max_x, sub.max_y, sub.max_z],
-        })
+        accessors.append(
+            {
+                "bufferView": position_bv_index,
+                "byteOffset": 0,
+                "componentType": _COMPONENT_TYPE_FLOAT,
+                "count": 8,
+                "type": "VEC3",
+                "min": [sub.min_x, sub.min_y, sub.min_z],
+                "max": [sub.max_x, sub.max_y, sub.max_z],
+            }
+        )
         feature_accessor_index = len(accessors)
-        accessors.append({
-            "bufferView": feature_bv_index,
-            "byteOffset": 0,
-            "componentType": _COMPONENT_TYPE_UNSIGNED_SHORT,
-            "count": 8,
-            "type": "SCALAR",
-        })
+        accessors.append(
+            {
+                "bufferView": feature_bv_index,
+                "byteOffset": 0,
+                "componentType": _COMPONENT_TYPE_UNSIGNED_SHORT,
+                "count": 8,
+                "type": "SCALAR",
+            }
+        )
         index_accessor_index = len(accessors)
-        accessors.append({
-            "bufferView": index_bv_index,
-            "byteOffset": 0,
-            "componentType": _COMPONENT_TYPE_UNSIGNED_INT,
-            "count": 36,
-            "type": "SCALAR",
-        })
+        accessors.append(
+            {
+                "bufferView": index_bv_index,
+                "byteOffset": 0,
+                "componentType": _COMPONENT_TYPE_UNSIGNED_INT,
+                "count": 36,
+                "type": "SCALAR",
+            }
+        )
 
         primitive: dict[str, Any] = {
             "attributes": {
@@ -572,8 +589,7 @@ def build_gltf_for_tile(
                         "Element": {
                             "name": "Element",
                             "description": (
-                                "Canonical BIM / CAD element exported to "
-                                "3D Tiles by openconstructionerp.geo_hub"
+                                "Canonical BIM / CAD element exported to 3D Tiles by openconstructionerp.geo_hub"
                             ),
                             "properties": {
                                 "element_id": {"type": "STRING"},
@@ -678,31 +694,22 @@ def write_b3dm(
 
     feature_table_json_obj = feature_table or {"BATCH_LENGTH": 0}
     feature_table_json = json.dumps(
-        feature_table_json_obj, separators=(",", ":"),
+        feature_table_json_obj,
+        separators=(",", ":"),
     ).encode("utf-8")
     while (28 + len(feature_table_json)) % 8 != 0:
         feature_table_json += b" "
 
     feature_table_binary = b""  # No binary feature table in v1.
-    batch_table_json = (
-        json.dumps(batch_table or {}, separators=(",", ":")).encode("utf-8")
-        if batch_table
-        else b""
-    )
+    batch_table_json = json.dumps(batch_table or {}, separators=(",", ":")).encode("utf-8") if batch_table else b""
     while batch_table_json and (
-        (28 + len(feature_table_json) + len(feature_table_binary) + len(batch_table_json))
-        % 8
-        != 0
+        (28 + len(feature_table_json) + len(feature_table_binary) + len(batch_table_json)) % 8 != 0
     ):
         batch_table_json += b" "
     batch_table_binary = b""
 
     payload_offset = (
-        28
-        + len(feature_table_json)
-        + len(feature_table_binary)
-        + len(batch_table_json)
-        + len(batch_table_binary)
+        28 + len(feature_table_json) + len(feature_table_binary) + len(batch_table_json) + len(batch_table_binary)
     )
     # glb itself must start at an 8-byte boundary inside the file.
     while payload_offset % 8 != 0:
@@ -713,11 +720,7 @@ def write_b3dm(
         else:
             feature_table_json += b" "
         payload_offset = (
-            28
-            + len(feature_table_json)
-            + len(feature_table_binary)
-            + len(batch_table_json)
-            + len(batch_table_binary)
+            28 + len(feature_table_json) + len(feature_table_binary) + len(batch_table_json) + len(batch_table_binary)
         )
 
     total = payload_offset + len(glb)
@@ -731,14 +734,7 @@ def write_b3dm(
         len(batch_table_json),
         len(batch_table_binary),
     )
-    return (
-        header
-        + feature_table_json
-        + feature_table_binary
-        + batch_table_json
-        + batch_table_binary
-        + glb
-    )
+    return header + feature_table_json + feature_table_binary + batch_table_json + batch_table_binary + glb
 
 
 # ── Stage 6: tileset.json ───────────────────────────────────────────────
@@ -819,7 +815,10 @@ def build_tileset_json(
             tile_aabb.diagonal_m / 4.0,
         )
     region = _bounding_region_for_aabb(
-        tile_aabb, anchor_lat, anchor_lon, anchor_alt,
+        tile_aabb,
+        anchor_lat,
+        anchor_lon,
+        anchor_alt,
     )
     return {
         "asset": {"version": "1.1", "tilesetVersion": "1.0"},

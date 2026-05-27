@@ -24,6 +24,8 @@ from app.core.file_signature import (
     SIGNATURE_BYTES_REQUIRED,
     FileSignatureMismatch,
     mime_for_signature,
+)
+from app.core.file_signature import (
     require as require_signature,
 )
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access

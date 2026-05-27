@@ -47,39 +47,27 @@ class FileTrash(Base):
     )
     original_kind: Mapped[str] = mapped_column(String(32), nullable=False)
     original_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    canonical_name: Mapped[str] = mapped_column(
-        String(255), nullable=False, default=""
-    )
+    canonical_name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     payload_json: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
     )
-    trashed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
+    trashed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     trashed_by_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )
-    retention_days: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=30, server_default="30"
-    )
-    restored_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, default=None
-    )
+    retention_days: Mapped[int] = mapped_column(Integer, nullable=False, default=30, server_default="30")
+    restored_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
     restored_by_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )
-    purged_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, default=None
-    )
-    restore_token: Mapped[str] = mapped_column(
-        String(64), nullable=False, default=_default_restore_token
-    )
+    purged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+    restore_token: Mapped[str] = mapped_column(String(64), nullable=False, default=_default_restore_token)
 
     def __repr__(self) -> str:
         return (

@@ -106,7 +106,9 @@ def _active_encoder_id() -> str | None:
 
         s = get_settings()
         model = getattr(s, "cwicr_embedding_model", None) or getattr(
-            s, "embedding_model_name", None,
+            s,
+            "embedding_model_name",
+            None,
         )
         if model:
             # encoder_profiles.json keys are short labels ("bge-m3",
@@ -180,9 +182,7 @@ def _dynamic_confidence_band(
 # ``alembic upgrade`` / catalogue install / vectorise still gets picked up
 # without a backend restart.
 _CATALOG_STATUS_CACHE_TTL_SEC: float = 30.0
-_catalog_status_cache: dict[
-    str | None, tuple[float, tuple[MatchStatus, int, int]]
-] = {}
+_catalog_status_cache: dict[str | None, tuple[float, tuple[MatchStatus, int, int]]] = {}
 
 
 async def _resolve_catalog_status(
@@ -216,15 +216,12 @@ async def _resolve_catalog_status(
     if not catalog_id:
         try:
             total_loaded = (
-                await db.execute(
-                    select(func.count(CostItem.id)).where(CostItem.is_active.is_(True))
-                )
+                await db.execute(select(func.count(CostItem.id)).where(CostItem.is_active.is_(True)))
             ).scalar() or 0
         except Exception:
             total_loaded = 0
         result: tuple[MatchStatus, int, int] = (
-            ("no_catalogs_loaded", 0, 0) if total_loaded == 0
-            else ("no_catalog_selected", 0, 0)
+            ("no_catalogs_loaded", 0, 0) if total_loaded == 0 else ("no_catalog_selected", 0, 0)
         )
         _catalog_status_cache[catalog_id] = (now, result)
         return result
@@ -232,9 +229,7 @@ async def _resolve_catalog_status(
     try:
         sql_count = (
             await db.execute(
-                select(func.count(CostItem.id))
-                .where(CostItem.is_active.is_(True))
-                .where(CostItem.region == catalog_id)
+                select(func.count(CostItem.id)).where(CostItem.is_active.is_(True)).where(CostItem.region == catalog_id)
             )
         ).scalar() or 0
     except Exception as exc:
@@ -259,16 +254,11 @@ async def _resolve_catalog_status(
     if sql_count == 0:
         try:
             total_loaded = (
-                await db.execute(
-                    select(func.count(CostItem.id)).where(CostItem.is_active.is_(True))
-                )
+                await db.execute(select(func.count(CostItem.id)).where(CostItem.is_active.is_(True)))
             ).scalar() or 0
         except Exception:
             total_loaded = 0
-        result = (
-            ("no_catalogs_loaded", 0, 0) if total_loaded == 0
-            else ("no_catalog_selected", 0, 0)
-        )
+        result = ("no_catalogs_loaded", 0, 0) if total_loaded == 0 else ("no_catalog_selected", 0, 0)
         _catalog_status_cache[catalog_id] = (now, result)
         return result
 
@@ -367,40 +357,132 @@ async def _maybe_translate(
 
 _COUNTRY_DEFAULT_CURRENCY: dict[str, str] = {
     # North America
-    "US": "USD", "USA": "USD", "CA": "CAD", "MX": "MXN",
+    "US": "USD",
+    "USA": "USD",
+    "CA": "CAD",
+    "MX": "MXN",
     # Central & South America
-    "BR": "BRL", "AR": "ARS", "CL": "CLP", "CO": "COP", "PE": "PEN",
-    "UY": "UYU", "VE": "VES", "BO": "BOB", "PY": "PYG", "EC": "USD",
-    "GT": "GTQ", "DO": "DOP", "CR": "CRC", "PA": "PAB",
+    "BR": "BRL",
+    "AR": "ARS",
+    "CL": "CLP",
+    "CO": "COP",
+    "PE": "PEN",
+    "UY": "UYU",
+    "VE": "VES",
+    "BO": "BOB",
+    "PY": "PYG",
+    "EC": "USD",
+    "GT": "GTQ",
+    "DO": "DOP",
+    "CR": "CRC",
+    "PA": "PAB",
     # Western & Northern Europe (Eurozone first, then non-EUR)
-    "DE": "EUR", "FR": "EUR", "IT": "EUR", "ES": "EUR", "PT": "EUR",
-    "NL": "EUR", "BE": "EUR", "AT": "EUR", "IE": "EUR", "FI": "EUR",
-    "GR": "EUR", "LU": "EUR", "MT": "EUR", "CY": "EUR", "SK": "EUR",
-    "SI": "EUR", "EE": "EUR", "LV": "EUR", "LT": "EUR",
-    "GB": "GBP", "UK": "GBP", "CH": "CHF", "NO": "NOK", "SE": "SEK",
-    "DK": "DKK", "IS": "ISK", "LI": "CHF",
+    "DE": "EUR",
+    "FR": "EUR",
+    "IT": "EUR",
+    "ES": "EUR",
+    "PT": "EUR",
+    "NL": "EUR",
+    "BE": "EUR",
+    "AT": "EUR",
+    "IE": "EUR",
+    "FI": "EUR",
+    "GR": "EUR",
+    "LU": "EUR",
+    "MT": "EUR",
+    "CY": "EUR",
+    "SK": "EUR",
+    "SI": "EUR",
+    "EE": "EUR",
+    "LV": "EUR",
+    "LT": "EUR",
+    "GB": "GBP",
+    "UK": "GBP",
+    "CH": "CHF",
+    "NO": "NOK",
+    "SE": "SEK",
+    "DK": "DKK",
+    "IS": "ISK",
+    "LI": "CHF",
     # Eastern Europe / CIS
-    "PL": "PLN", "CZ": "CZK", "HU": "HUF", "RO": "RON", "BG": "BGN",
-    "HR": "EUR", "RS": "RSD", "UA": "UAH", "RU": "RUB", "BY": "BYN",
-    "MD": "MDL", "AL": "ALL", "MK": "MKD", "BA": "BAM",
+    "PL": "PLN",
+    "CZ": "CZK",
+    "HU": "HUF",
+    "RO": "RON",
+    "BG": "BGN",
+    "HR": "EUR",
+    "RS": "RSD",
+    "UA": "UAH",
+    "RU": "RUB",
+    "BY": "BYN",
+    "MD": "MDL",
+    "AL": "ALL",
+    "MK": "MKD",
+    "BA": "BAM",
     # Middle East & North Africa
-    "AE": "AED", "SA": "SAR", "QA": "QAR", "KW": "KWD", "BH": "BHD",
-    "OM": "OMR", "IL": "ILS", "TR": "TRY", "EG": "EGP", "MA": "MAD",
-    "DZ": "DZD", "TN": "TND", "JO": "JOD", "LB": "LBP", "IR": "IRR",
+    "AE": "AED",
+    "SA": "SAR",
+    "QA": "QAR",
+    "KW": "KWD",
+    "BH": "BHD",
+    "OM": "OMR",
+    "IL": "ILS",
+    "TR": "TRY",
+    "EG": "EGP",
+    "MA": "MAD",
+    "DZ": "DZD",
+    "TN": "TND",
+    "JO": "JOD",
+    "LB": "LBP",
+    "IR": "IRR",
     "IQ": "IQD",
     # Sub-Saharan Africa
-    "ZA": "ZAR", "NG": "NGN", "KE": "KES", "GH": "GHS", "ET": "ETB",
-    "TZ": "TZS", "UG": "UGX", "RW": "RWF", "CI": "XOF", "SN": "XOF",
-    "CM": "XAF", "AO": "AOA", "MZ": "MZN", "ZM": "ZMW", "ZW": "ZWL",
-    "BW": "BWP", "MU": "MUR", "NA": "NAD",
+    "ZA": "ZAR",
+    "NG": "NGN",
+    "KE": "KES",
+    "GH": "GHS",
+    "ET": "ETB",
+    "TZ": "TZS",
+    "UG": "UGX",
+    "RW": "RWF",
+    "CI": "XOF",
+    "SN": "XOF",
+    "CM": "XAF",
+    "AO": "AOA",
+    "MZ": "MZN",
+    "ZM": "ZMW",
+    "ZW": "ZWL",
+    "BW": "BWP",
+    "MU": "MUR",
+    "NA": "NAD",
     # Asia-Pacific
-    "CN": "CNY", "HK": "HKD", "TW": "TWD", "JP": "JPY", "KR": "KRW",
-    "SG": "SGD", "MY": "MYR", "TH": "THB", "ID": "IDR", "PH": "PHP",
-    "VN": "VND", "IN": "INR", "BD": "BDT", "PK": "PKR", "LK": "LKR",
-    "NP": "NPR", "MN": "MNT", "KZ": "KZT", "UZ": "UZS", "AZ": "AZN",
-    "GE": "GEL", "AM": "AMD",
+    "CN": "CNY",
+    "HK": "HKD",
+    "TW": "TWD",
+    "JP": "JPY",
+    "KR": "KRW",
+    "SG": "SGD",
+    "MY": "MYR",
+    "TH": "THB",
+    "ID": "IDR",
+    "PH": "PHP",
+    "VN": "VND",
+    "IN": "INR",
+    "BD": "BDT",
+    "PK": "PKR",
+    "LK": "LKR",
+    "NP": "NPR",
+    "MN": "MNT",
+    "KZ": "KZT",
+    "UZ": "UZS",
+    "AZ": "AZN",
+    "GE": "GEL",
+    "AM": "AMD",
     # Oceania
-    "AU": "AUD", "NZ": "NZD", "FJ": "FJD", "PG": "PGK",
+    "AU": "AUD",
+    "NZ": "NZD",
+    "FJ": "FJD",
+    "PG": "PGK",
 }
 
 
@@ -500,10 +582,7 @@ def _hit_to_candidate(
         description = _description_from_payload(payload)
     unit = str(full.get("rate_unit") or payload.get("rate_unit") or "")
     unit_rate = float(
-        full.get("total_cost_per_position")
-        or full.get("unit_cost")
-        or payload.get("unit_cost", 0.0)
-        or 0.0
+        full.get("total_cost_per_position") or full.get("unit_cost") or payload.get("unit_cost", 0.0) or 0.0
     )
     currency = str(full.get("currency") or payload.get("currency") or "")
     region_code = str(full.get("country") or payload.get("country") or hit.country)
@@ -512,9 +591,7 @@ def _hit_to_candidate(
     # leave currency empty so the UI can flag the gap rather than
     # surfacing a wrong default.
     if not currency and region_code:
-        currency = _COUNTRY_DEFAULT_CURRENCY.get(
-            region_code.strip().upper(), ""
-        )
+        currency = _COUNTRY_DEFAULT_CURRENCY.get(region_code.strip().upper(), "")
 
     return MatchCandidate(
         id=rate_code or None,
@@ -527,7 +604,8 @@ def _hit_to_candidate(
         vector_score=raw_score,
         boosts_applied={},
         confidence_band=_dynamic_confidence_band(
-            raw_score, encoder_id=_active_encoder_id(),
+            raw_score,
+            encoder_id=_active_encoder_id(),
         ),
         region_code=region_code,
         source=str(payload.get("source") or "cwicr"),
@@ -635,12 +713,37 @@ def _apply_soft_boosts(
 # scores around 1.0 but never gets auto-confirmed without human review.
 # A future vector run on the same envelope will overwrite the score.
 
-_GENERIC_TOKEN_STOP = frozenset({
-    "ifc", "wall", "door", "window", "slab", "beam", "column", "stair",
-    "space", "covering", "pipe", "duct", "fitting", "element", "type",
-    "standard", "case", "and", "or", "of", "the", "a", "an", "with",
-    "is", "as", "for",
-})
+_GENERIC_TOKEN_STOP = frozenset(
+    {
+        "ifc",
+        "wall",
+        "door",
+        "window",
+        "slab",
+        "beam",
+        "column",
+        "stair",
+        "space",
+        "covering",
+        "pipe",
+        "duct",
+        "fitting",
+        "element",
+        "type",
+        "standard",
+        "case",
+        "and",
+        "or",
+        "of",
+        "the",
+        "a",
+        "an",
+        "with",
+        "is",
+        "as",
+        "for",
+    }
+)
 
 
 def _tokenise(text: str | None) -> set[str]:
@@ -690,8 +793,7 @@ def _score_payload_against_envelope(
     env_tokens = _tokenise(" ".join(env_text_parts))
 
     pay_text = " ".join(
-        str(payload.get(k) or "")
-        for k in ("collection_name", "category_type", "ost_category", "material_class")
+        str(payload.get(k) or "") for k in ("collection_name", "category_type", "ost_category", "material_class")
     )
     pay_tokens = _tokenise(pay_text)
 
@@ -723,12 +825,7 @@ def _score_payload_against_envelope(
         if env_mat_tokens and pay_mat_tokens and (env_mat_tokens & pay_mat_tokens):
             material_score = 1.0
 
-    score = (
-        0.45 * lexical
-        + 0.25 * unit_score
-        + 0.15 * region_score
-        + 0.15 * material_score
-    )
+    score = 0.45 * lexical + 0.25 * unit_score + 0.15 * region_score + 0.15 * material_score
 
     return score, {
         "lexical": round(lexical, 3),
@@ -792,7 +889,9 @@ async def _metadata_only_candidates(
     scored: list[tuple[float, dict[str, float], QdrantHit]] = []
     for h in raw_hits:
         score, breakdown = _score_payload_against_envelope(
-            h.payload or {}, envelope=envelope, project_region=project_region,
+            h.payload or {},
+            envelope=envelope,
+            project_region=project_region,
         )
         scored.append((score, breakdown, h))
 
@@ -837,9 +936,7 @@ async def rank(
     cost_usd = 0.0
 
     project_uuid: uuid.UUID = (
-        req.project_id
-        if isinstance(req.project_id, uuid.UUID)
-        else uuid.UUID(str(req.project_id))
+        req.project_id if isinstance(req.project_id, uuid.UUID) else uuid.UUID(str(req.project_id))
     )
     try:
         settings = await get_or_create_match_settings(db, project_uuid)
@@ -867,6 +964,7 @@ async def rank(
             MATCH_DEFAULT_SOURCES,
             MATCH_DEFAULT_TARGET_LANGUAGE,
         )
+
         settings = SimpleNamespace(
             project_id=project_uuid,
             target_language=MATCH_DEFAULT_TARGET_LANGUAGE,
@@ -1020,7 +1118,8 @@ async def rank(
             )
         except Exception as fallback_exc:  # pragma: no cover — defensive
             logger.warning(
-                "ranker_qdrant: metadata fallback also failed (%s)", fallback_exc,
+                "ranker_qdrant: metadata fallback also failed (%s)",
+                fallback_exc,
             )
             hits = []
     except Exception as exc:  # pragma: no cover — defensive
@@ -1093,7 +1192,9 @@ async def rank(
     soft_deltas_by_code: dict[str, dict[str, float]] = {}
     for hit in hits:
         adjusted, soft_deltas = _apply_soft_boosts(
-            hit, full_rows.get(hit.rate_code), plan.soft_boosts,
+            hit,
+            full_rows.get(hit.rate_code),
+            plan.soft_boosts,
         )
         hit.score = adjusted
         if soft_deltas:
@@ -1105,7 +1206,9 @@ async def rank(
         candidate = _hit_to_candidate(hit, full_rows.get(hit.rate_code))
         soft_deltas = soft_deltas_by_code.get(hit.rate_code, {})
         narrow_deltas = _apply_narrow_boosts(
-            translated_envelope, candidate, settings_with_project,
+            translated_envelope,
+            candidate,
+            settings_with_project,
         )
         merged_deltas: dict[str, float] = {**soft_deltas, **narrow_deltas}
         if merged_deltas:
@@ -1164,7 +1267,9 @@ async def rank(
             from app.core.match_service.reranker_ai import rerank_top_k
 
             candidates, rerank_cost = await rerank_top_k(
-                candidates, translated_envelope, ai_settings=ai_settings,
+                candidates,
+                translated_envelope,
+                ai_settings=ai_settings,
             )
             cost_usd += float(rerank_cost or 0.0)
         except Exception as exc:  # pragma: no cover — defensive
@@ -1269,10 +1374,7 @@ async def _write_search_log(
     if plan is not None:
         core_query = (getattr(plan, "dense_query", "") or "")[:2000]
         hard_filters = dict(getattr(plan, "hard_filters", None) or {})
-        soft_boosts = [
-            {"key": k, "value": v, "weight": w}
-            for k, v, w in (getattr(plan, "soft_boosts", None) or [])
-        ]
+        soft_boosts = [{"key": k, "value": v, "weight": w} for k, v, w in (getattr(plan, "soft_boosts", None) or [])]
 
     # Envelope-derived analytics columns. Source/IFC are read-only on
     # the envelope; country is the region head pinned for the search
@@ -1281,11 +1383,9 @@ async def _write_search_log(
     source_type: str | None = None
     ifc_class: str | None = None
     if envelope is not None:
-        source_type = (getattr(envelope, "source", "") or None)
-        ifc_class = (getattr(envelope, "ifc_class", "") or None)
-    country = country_filter_for(catalog_id) or (
-        catalog_id.split("_", 1)[0] if catalog_id else None
-    )
+        source_type = getattr(envelope, "source", "") or None
+        ifc_class = getattr(envelope, "ifc_class", "") or None
+    country = country_filter_for(catalog_id) or (catalog_id.split("_", 1)[0] if catalog_id else None)
 
     # Carry the top-N rate_codes through to the log row so ``confirm``
     # can compute picked_rank without another search. Truncate to the
@@ -1347,26 +1447,14 @@ def _build_exact_candidate(
     surface "matched by source-supplied code, not by similarity".
     """
 
-    description = (
-        row.get("rate_original_name")
-        or row.get("rate_final_name")
-        or row.get("description")
-        or ""
-    )
+    description = row.get("rate_original_name") or row.get("rate_final_name") or row.get("description") or ""
     unit = row.get("rate_unit") or row.get("unit") or ""
-    raw_rate = (
-        row.get("rate_total")
-        or row.get("unit_rate")
-        or row.get("rate")
-        or 0.0
-    )
+    raw_rate = row.get("rate_total") or row.get("unit_rate") or row.get("rate") or 0.0
     try:
         unit_rate = float(raw_rate)
     except (TypeError, ValueError):
         unit_rate = 0.0
-    currency = (
-        row.get("currency") or row.get("rate_currency") or row.get("ccy") or ""
-    )
+    currency = row.get("currency") or row.get("rate_currency") or row.get("ccy") or ""
     region = row.get("country") or row.get("region") or catalog_id or ""
 
     classification: dict[str, str] = {}
@@ -1386,9 +1474,7 @@ def _build_exact_candidate(
         vector_score=1.0,
         boosts_applied={"exact_code": 1.0},
         confidence_band="high",
-        reasoning=(
-            "Direct match by rate_code from source (e.g., BoQ Code column)."
-        ),
+        reasoning=("Direct match by rate_code from source (e.g., BoQ Code column)."),
         region_code=str(region),
         source="exact_code",
         language=str(row.get("language") or ""),
@@ -1433,7 +1519,9 @@ async def _try_exact_code_short_circuit(
         rows = await lookup_full_rows(country=catalog_id, rate_codes=[code])
     except Exception as exc:  # pragma: no cover — parquet missing is OK
         logger.debug(
-            "ranker_qdrant: exact_code parquet lookup failed for %r: %s", code, exc,
+            "ranker_qdrant: exact_code parquet lookup failed for %r: %s",
+            code,
+            exc,
         )
         return None
 
@@ -1448,7 +1536,9 @@ async def _try_exact_code_short_circuit(
     )
 
     candidate = _build_exact_candidate(
-        rate_code=code, row=matching, catalog_id=catalog_id,
+        rate_code=code,
+        row=matching,
+        catalog_id=catalog_id,
     )
     auto_linked: MatchCandidate | None = candidate
 

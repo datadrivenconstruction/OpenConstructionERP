@@ -125,13 +125,9 @@ def test_restore_snapshot_round_trip(throwaway_collection: str, tmp_path: Path) 
     import httpx
 
     headers = {"api-key": QDRANT_API_KEY} if QDRANT_API_KEY else {}
-    download_url = (
-        QDRANT_URL.rstrip("/") + f"/collections/{src}/snapshots/{snap_name}"
-    )
+    download_url = QDRANT_URL.rstrip("/") + f"/collections/{src}/snapshots/{snap_name}"
     local_path = tmp_path / "round_trip.snapshot"
-    with httpx.stream(
-        "GET", download_url, headers=headers, timeout=60.0
-    ) as r:
+    with httpx.stream("GET", download_url, headers=headers, timeout=60.0) as r:
         r.raise_for_status()
         with local_path.open("wb") as fh:
             for chunk in r.iter_bytes():

@@ -96,20 +96,15 @@ class SnapshotRepository:
         if tenant_id is not None:
             base = base.where(Snapshot.tenant_id == str(tenant_id))
 
-        total = (
-            await self.session.execute(
-                select(func.count()).select_from(base.subquery())
-            )
-        ).scalar_one()
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
 
-        rows_stmt = (
-            base.order_by(Snapshot.created_at.desc()).limit(limit).offset(offset)
-        )
+        rows_stmt = base.order_by(Snapshot.created_at.desc()).limit(limit).offset(offset)
         rows = (await self.session.execute(rows_stmt)).scalars().all()
         return list(rows), total
 
     async def list_source_files(
-        self, snapshot_id: uuid.UUID | str,
+        self,
+        snapshot_id: uuid.UUID | str,
     ) -> list[SnapshotSourceFile]:
         """Return every source-file row for a snapshot, oldest first."""
         stmt = (
@@ -130,7 +125,8 @@ class SnapshotRepository:
         return snapshot
 
     async def add_source_files(
-        self, rows: Iterable[SnapshotSourceFile],
+        self,
+        rows: Iterable[SnapshotSourceFile],
     ) -> list[SnapshotSourceFile]:
         rows = list(rows)
         if not rows:

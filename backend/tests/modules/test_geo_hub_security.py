@@ -52,10 +52,12 @@ from pathlib import Path
 _TMP_DIR = Path(tempfile.mkdtemp(prefix="oe-geo-r7-"))
 _TMP_DB = _TMP_DIR / "geo_r7.db"
 os.environ.setdefault(
-    "DATABASE_URL", f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}",
+    "DATABASE_URL",
+    f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}",
 )
 os.environ.setdefault(
-    "DATABASE_SYNC_URL", f"sqlite:///{_TMP_DB.as_posix()}",
+    "DATABASE_SYNC_URL",
+    f"sqlite:///{_TMP_DB.as_posix()}",
 )
 
 import pytest  # noqa: E402
@@ -98,11 +100,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -118,7 +116,9 @@ async def _register(client: AsyncClient, label: str) -> tuple[str, str]:
 
 
 async def _login(
-    client: AsyncClient, email: str, password: str,
+    client: AsyncClient,
+    email: str,
+    password: str,
 ) -> dict[str, str]:
     res = await client.post(
         "/api/v1/users/auth/login",
@@ -129,7 +129,9 @@ async def _login(
 
 
 async def _make_project(
-    client: AsyncClient, headers: dict[str, str], label: str,
+    client: AsyncClient,
+    headers: dict[str, str],
+    label: str,
 ) -> str:
     res = await client.post(
         "/api/v1/projects/",
@@ -208,7 +210,9 @@ async def editor_member(http_client):
 
 @pytest.mark.asyncio
 async def test_idor_anchor_get_cross_tenant_is_404(
-    http_client, tenant_a, tenant_b,
+    http_client,
+    tenant_a,
+    tenant_b,
 ):
     """Tenant B hitting A's anchor by id must see 404, never 403."""
     res = await http_client.get(
@@ -220,7 +224,9 @@ async def test_idor_anchor_get_cross_tenant_is_404(
 
 @pytest.mark.asyncio
 async def test_idor_anchor_list_cross_tenant_is_404(
-    http_client, tenant_a, tenant_b,
+    http_client,
+    tenant_a,
+    tenant_b,
 ):
     """``GET /anchors/?project_id=<A>`` from B must 404, not return empty."""
     res = await http_client.get(
@@ -232,7 +238,9 @@ async def test_idor_anchor_list_cross_tenant_is_404(
 
 @pytest.mark.asyncio
 async def test_idor_viewpoint_get_cross_tenant_is_404(
-    http_client, tenant_a, tenant_b,
+    http_client,
+    tenant_a,
+    tenant_b,
 ):
     """Tenant B hitting A's viewpoint by id must see 404."""
     # Create a viewpoint on A.
@@ -260,7 +268,9 @@ async def test_idor_viewpoint_get_cross_tenant_is_404(
 
 @pytest.mark.asyncio
 async def test_idor_overlay_get_cross_tenant_is_404(
-    http_client, tenant_a, tenant_b,
+    http_client,
+    tenant_a,
+    tenant_b,
 ):
     """B hitting A's vector overlay must 404 (pin / survey IDOR)."""
     # Create a boundary overlay on A.
@@ -396,7 +406,8 @@ async def test_geojson_import_caps_feature_count(http_client, tenant_a):
 
 @pytest.mark.asyncio
 async def test_anchor_create_rejects_out_of_range_latitude(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     """|lat| > 90 must 422 (schema validator path also serves bbox queries)."""
     res = await http_client.post(
@@ -413,7 +424,8 @@ async def test_anchor_create_rejects_out_of_range_latitude(
 
 @pytest.mark.asyncio
 async def test_anchor_create_rejects_out_of_range_longitude(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     """|lon| > 180 must 422."""
     res = await http_client.post(
@@ -430,7 +442,8 @@ async def test_anchor_create_rejects_out_of_range_longitude(
 
 @pytest.mark.asyncio
 async def test_anchor_create_rejects_malformed_coord_string(
-    http_client, tenant_a,
+    http_client,
+    tenant_a,
 ):
     """Garbage in a Decimal coord field is rejected (422), not silently coerced."""
     res = await http_client.post(
@@ -450,7 +463,9 @@ async def test_anchor_create_rejects_malformed_coord_string(
 
 @pytest.mark.asyncio
 async def test_viewer_role_cannot_patch_viewpoint(
-    http_client, tenant_a, viewer_user,
+    http_client,
+    tenant_a,
+    viewer_user,
 ):
     """A pure VIEWER must be 403'd on PATCH (geo_hub.write = EDITOR+)."""
     vp = await http_client.post(
@@ -483,7 +498,9 @@ async def test_viewer_role_cannot_patch_viewpoint(
 
 @pytest.mark.asyncio
 async def test_editor_cannot_delete_overlay_requires_manager(
-    http_client, tenant_a, editor_member,
+    http_client,
+    tenant_a,
+    editor_member,
 ):
     """EDITOR can create/patch overlays but NOT delete (R7 split)."""
     geojson = {

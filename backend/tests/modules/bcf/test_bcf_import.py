@@ -37,7 +37,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── helpers ───────────────────────────────────────────────────────────────
 
 
@@ -55,23 +54,11 @@ def _make_bcfzip(topics: list[dict]) -> bytes:
             b'<?xml version="1.0" encoding="utf-8"?><Version VersionId="3.0"/>',
         )
         for t in topics:
-            sai = (
-                f' ServerAssignedId="{t["server_assigned_id"]}"'
-                if t.get("server_assigned_id")
-                else ""
-            )
+            sai = f' ServerAssignedId="{t["server_assigned_id"]}"' if t.get("server_assigned_id") else ""
             labels_xml = ""
             if t.get("labels"):
-                labels_xml = (
-                    "<Labels>"
-                    + "".join(f"<Label>{lab}</Label>" for lab in t["labels"])
-                    + "</Labels>"
-                )
-            priority_xml = (
-                f"<Priority>{t['priority']}</Priority>"
-                if t.get("priority")
-                else ""
-            )
+                labels_xml = "<Labels>" + "".join(f"<Label>{lab}</Label>" for lab in t["labels"]) + "</Labels>"
+            priority_xml = f"<Priority>{t['priority']}</Priority>" if t.get("priority") else ""
             body = (
                 f'<?xml version="1.0" encoding="utf-8"?><Markup>'
                 f'<Topic Guid="{t["guid"]}" TopicType="Clash" '
@@ -81,7 +68,7 @@ def _make_bcfzip(topics: list[dict]) -> bytes:
                 f"<CreationDate>2026-05-21T10:00:00Z</CreationDate>"
                 f"<CreationAuthor>alice@example.com</CreationAuthor>"
                 f"</Topic></Markup>"
-            ).encode("utf-8")
+            ).encode()
             zf.writestr(f"{t['guid']}/markup.bcf", body)
     return buf.getvalue()
 
@@ -115,9 +102,7 @@ async def client(app_instance):
         yield ac
 
 
-async def _register_user(
-    client: AsyncClient, tag: str = "owner", role: str = "admin"
-) -> tuple[dict[str, str], str]:
+async def _register_user(client: AsyncClient, tag: str = "owner", role: str = "admin") -> tuple[dict[str, str], str]:
     """Register + (optionally) promote a user; return (auth_header, email)."""
     from sqlalchemy import update
 
@@ -143,9 +128,7 @@ async def _register_user(
         await promote_to_admin(email)
     else:
         async with async_session_factory() as session:
-            await session.execute(
-                update(User).where(User.email == email.lower()).values(is_active=True)
-            )
+            await session.execute(update(User).where(User.email == email.lower()).values(is_active=True))
             await session.commit()
 
     login = await client.post(
@@ -235,12 +218,10 @@ async def test_import_3_topics_creates_3_clash_issues(
 
     async with async_session_factory() as session:
         rows = (
-            await session.execute(
-                select(ClashIssue).where(
-                    ClashIssue.project_id == uuid.UUID(project_id)
-                )
-            )
-        ).scalars().all()
+            (await session.execute(select(ClashIssue).where(ClashIssue.project_id == uuid.UUID(project_id))))
+            .scalars()
+            .all()
+        )
         # Could be 3 (or 3 + other tests' rows — assert at least 3 in this proj).
         assert len(rows) >= 3
         sids = {(r.server_assigned_id or "") for r in rows}
@@ -353,12 +334,16 @@ async def test_status_change_triggers_update(
 
     async with async_session_factory() as session:
         row = (
-            await session.execute(
-                select(ClashIssue)
-                .where(ClashIssue.project_id == uuid.UUID(project_id))
-                .where(ClashIssue.server_assigned_id == sai)
+            (
+                await session.execute(
+                    select(ClashIssue)
+                    .where(ClashIssue.project_id == uuid.UUID(project_id))
+                    .where(ClashIssue.server_assigned_id == sai)
+                )
             )
-        ).scalars().first()
+            .scalars()
+            .first()
+        )
         assert row is not None
         assert row.status == "resolved"
 
@@ -456,9 +441,7 @@ async def test_non_zip_payload_returns_422(
 
 
 @pytest.mark.asyncio
-async def test_missing_auth_returns_401(
-    client: AsyncClient, project_id: str
-) -> None:
+async def test_missing_auth_returns_401(client: AsyncClient, project_id: str) -> None:
     resp = await client.post(
         "/api/v1/bcf/import/clashes",
         params={"project_id": project_id},

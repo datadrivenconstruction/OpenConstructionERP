@@ -92,9 +92,7 @@ class TestContactCrudRoundTrip:
         items_active, total_active = await service.list_contacts(owner_id=user_id)
         assert total_active == 0
         # And still listable via is_active=False — soft-delete, not purge.
-        items_archive, total_archive = await service.list_contacts(
-            owner_id=user_id, is_active=False
-        )
+        items_archive, total_archive = await service.list_contacts(owner_id=user_id, is_active=False)
         assert total_archive == 1
 
     @pytest.mark.asyncio
@@ -153,12 +151,8 @@ class TestPiiNotInLogs:
         )
 
         blob = "\n".join(rec.getMessage() for rec in caplog.records)
-        assert "alice.private@secret-domain.example" not in blob, (
-            f"raw e-mail leaked into log stream: {blob!r}"
-        )
-        assert "+49 170 99999999" not in blob, (
-            f"raw phone leaked into log stream: {blob!r}"
-        )
+        assert "alice.private@secret-domain.example" not in blob, f"raw e-mail leaked into log stream: {blob!r}"
+        assert "+49 170 99999999" not in blob, f"raw phone leaked into log stream: {blob!r}"
         # The safe label (company name) is allowed.
         assert "Visible Co" in blob
 
@@ -211,18 +205,12 @@ class TestExportPermissions:
     def test_route_requires_contacts_read_permission(self) -> None:
         from app.modules.contacts import router as contacts_router
 
-        export_route = next(
-            r for r in contacts_router.router.routes if getattr(r, "path", "") == "/export/"
-        )
+        export_route = next(r for r in contacts_router.router.routes if getattr(r, "path", "") == "/export/")
         # FastAPI flattens Depends() into ``dependant.dependencies``;
         # ``RequirePermission`` exposes ``permission`` on the callable so
         # we can introspect without invoking it.
-        perms = {
-            getattr(d.call, "permission", None) for d in export_route.dependant.dependencies
-        }
-        assert "contacts.read" in perms, (
-            f"/contacts/export/ lost its permission guard; saw {perms}"
-        )
+        perms = {getattr(d.call, "permission", None) for d in export_route.dependant.dependencies}
+        assert "contacts.read" in perms, f"/contacts/export/ lost its permission guard; saw {perms}"
 
     @pytest.mark.asyncio
     async def test_export_query_is_tenant_scoped(self, session: AsyncSession) -> None:
@@ -237,35 +225,39 @@ class TestExportPermissions:
 
         alice = str(uuid.uuid4())
         bob = str(uuid.uuid4())
-        session.add_all([
-            Contact(
-                contact_type="supplier",
-                company_name="Alice Co",
-                tenant_id=alice,
-                created_by=alice,
-                is_active=True,
-            ),
-            Contact(
-                contact_type="supplier",
-                company_name="Bob Co",
-                tenant_id=bob,
-                created_by=bob,
-                is_active=True,
-            ),
-        ])
+        session.add_all(
+            [
+                Contact(
+                    contact_type="supplier",
+                    company_name="Alice Co",
+                    tenant_id=alice,
+                    created_by=alice,
+                    is_active=True,
+                ),
+                Contact(
+                    contact_type="supplier",
+                    company_name="Bob Co",
+                    tenant_id=bob,
+                    created_by=bob,
+                    is_active=True,
+                ),
+            ]
+        )
         await session.flush()
 
-        stmt = select(Contact).where(Contact.is_active.is_(True)).where(
-            or_(
-                Contact.tenant_id == alice,
-                and_(Contact.tenant_id.is_(None), Contact.created_by == alice),
+        stmt = (
+            select(Contact)
+            .where(Contact.is_active.is_(True))
+            .where(
+                or_(
+                    Contact.tenant_id == alice,
+                    and_(Contact.tenant_id.is_(None), Contact.created_by == alice),
+                )
             )
         )
         rows = (await session.execute(stmt)).scalars().all()
         names = sorted(c.company_name for c in rows)
-        assert names == ["Alice Co"], (
-            f"Tenant-scope filter regressed — Alice saw {names}"
-        )
+        assert names == ["Alice Co"], f"Tenant-scope filter regressed — Alice saw {names}"
 
 
 # ---------------------------------------------------------------------------
@@ -337,14 +329,18 @@ class TestAuditCarriesUserId:
         )
 
         rows = (
-            await session.execute(
-                select(AuditEntry).where(
-                    AuditEntry.entity_type == "contact",
-                    AuditEntry.entity_id == str(created.id),
-                    AuditEntry.action == "update",
+            (
+                await session.execute(
+                    select(AuditEntry).where(
+                        AuditEntry.entity_type == "contact",
+                        AuditEntry.entity_id == str(created.id),
+                        AuditEntry.action == "update",
+                    )
                 )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         assert len(rows) == 1
         # GUID column returns a UUID instance — compare on str both sides
         # to stay platform-agnostic.

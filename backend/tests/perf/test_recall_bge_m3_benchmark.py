@@ -117,7 +117,7 @@ _INLINE_FALLBACK_GOLDEN: list[dict[str, Any]] = [
         "target_language": "de",
         "query": "Mauerwerk Kalksandstein KS 12-1.4, 17.5cm dick",
         "country": "DE_BERLIN",
-        "expected_codes": ["331.20.010", "331.20.011"]
+        "expected_codes": ["331.20.010", "331.20.011"],
     },
     {
         "id": "fallback-de-003",
@@ -314,10 +314,7 @@ def _qdrant_available() -> bool:
     import error.
     """
 
-    if not (
-        os.environ.get("CWICR_QDRANT_URL")
-        or os.environ.get("CWICR_QDRANT_PATH")
-    ):
+    if not (os.environ.get("CWICR_QDRANT_URL") or os.environ.get("CWICR_QDRANT_PATH")):
         return False
     try:
         from app.modules.costs.qdrant_adapter import _get_client
@@ -389,7 +386,7 @@ async def test_bge_m3_recall_per_language() -> None:
 
     # ── Print markdown ──────────────────────────────────────────────────
     print("\n\n## BGE-M3 + Qdrant recall benchmark\n")
-    print(f"Collection scheme: `cwicr_<lang>_v3` (resolved via `country_to_collection`)")
+    print("Collection scheme: `cwicr_<lang>_v3` (resolved via `country_to_collection`)")
     print(f"Total cases: {sum(len(v) for v in ranks_by_lang.values())}")
     print()
     print("| Language | N | recall@1 | recall@5 | recall@10 |")
@@ -410,9 +407,7 @@ async def test_bge_m3_recall_per_language() -> None:
         # operator sees a misrouted lang immediately.
         sample_country = next(c["country"] for c in cases if c["target_language"] == lang)
         coll = country_to_collection(sample_country)
-        print(
-            f"| {lang} ({coll}) | {n} | {h1 / n:.2%} | {h5 / n:.2%} | {h10 / n:.2%} |"
-        )
+        print(f"| {lang} ({coll}) | {n} | {h1 / n:.2%} | {h5 / n:.2%} | {h10 / n:.2%} |")
         total_hits_at_1 += h1
         total_hits_at_5 += h5
         total_hits_at_10 += h10
@@ -468,9 +463,12 @@ def test_country_for_language_routes_to_correct_collection() -> None:
     """Pin the helper so a future REGION_LANGUAGE refactor can't silently
     break the benchmark's collection routing."""
 
-    assert country_to_collection(_country_for_language("en")).endswith("_en_v3") or \
-        country_to_collection(_country_for_language("en")).endswith("_en")
-    assert country_to_collection(_country_for_language("de")).endswith("_de_v3") or \
-        country_to_collection(_country_for_language("de")).endswith("_de")
-    assert country_to_collection(_country_for_language("ru")).endswith("_ru_v3") or \
-        country_to_collection(_country_for_language("ru")).endswith("_ru")
+    assert country_to_collection(_country_for_language("en")).endswith("_en_v3") or country_to_collection(
+        _country_for_language("en")
+    ).endswith("_en")
+    assert country_to_collection(_country_for_language("de")).endswith("_de_v3") or country_to_collection(
+        _country_for_language("de")
+    ).endswith("_de")
+    assert country_to_collection(_country_for_language("ru")).endswith("_ru_v3") or country_to_collection(
+        _country_for_language("ru")
+    ).endswith("_ru")

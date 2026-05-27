@@ -114,10 +114,7 @@ def decode_access_token(
             if token_type != expected_type:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=(
-                        f"Invalid token: wrong type (expected '{expected_type}', "
-                        f"got '{token_type or 'none'}')"
-                    ),
+                    detail=(f"Invalid token: wrong type (expected '{expected_type}', got '{token_type or 'none'}')"),
                 )
         return payload
     except JWTError as exc:
@@ -306,7 +303,8 @@ class RequirePermission:
             user_id = payload.get("sub", "unknown")
             logger.debug(
                 "Permission granted via admin role: permission=%s user=%s",
-                self.permission, user_id,
+                self.permission,
+                user_id,
             )
             return
 
@@ -318,10 +316,12 @@ class RequirePermission:
             # role→permission mapping for stale tokens. Admin already
             # short-circuited above; this only widens for non-admins.
             from app.core.permissions import permission_registry as _reg
+
             if _reg.role_has_permission(role, self.permission):
                 logger.debug(
                     "Permission granted via live-registry fallback (stale JWT): permission=%s role=%s",
-                    self.permission, role,
+                    self.permission,
+                    role,
                 )
                 return
             # BUG-RBAC05: log denials at DEBUG, not WARN. Viewer accounts
@@ -333,7 +333,9 @@ class RequirePermission:
             user_id = payload.get("sub", "unknown")
             logger.debug(
                 "Permission denied: permission=%s user=%s role=%s",
-                self.permission, user_id, role,
+                self.permission,
+                user_id,
+                role,
             )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -504,7 +506,8 @@ OptionalUserPayload = Annotated[dict[str, Any] | None, Depends(get_optional_user
 
 async def audit_context_dep(
     payload: Annotated[
-        dict[str, Any] | None, Depends(get_optional_user_payload),
+        dict[str, Any] | None,
+        Depends(get_optional_user_payload),
     ] = None,
 ) -> None:
     """Enrich the per-request :class:`AuditContext` with resolved identity.

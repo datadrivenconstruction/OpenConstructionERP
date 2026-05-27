@@ -54,11 +54,7 @@ async def auth_headers(shared_client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     login = await shared_client.post(
@@ -140,24 +136,16 @@ async def test_boq_unit_system_consistency_rule_fires_warning(
     # ── Assertions ────────────────────────────────────────────────────────────
     assert len(results) == 1, f"Expected 1 result, got {len(results)}"
     result = results[0]
-    assert result.passed is False, (
-        f"Rule should have fired a WARNING, but passed=True. message={result.message}"
-    )
-    assert result.severity == Severity.WARNING, (
-        f"Expected WARNING severity, got {result.severity}"
-    )
+    assert result.passed is False, f"Rule should have fired a WARNING, but passed=True. message={result.message}"
+    assert result.severity == Severity.WARNING, f"Expected WARNING severity, got {result.severity}"
     assert "imperial" in result.message.lower() or "metric" in result.message.lower(), (
         f"Expected unit system name in message: {result.message}"
     )
-    assert result.details.get("mismatch_count") == 1, (
-        f"Expected 1 mismatch, got: {result.details}"
-    )
+    assert result.details.get("mismatch_count") == 1, f"Expected 1 mismatch, got: {result.details}"
 
 
 @pytest.mark.asyncio
-async def test_imperial_project_imperial_units_passes(
-    shared_client: AsyncClient, auth_headers: dict[str, str]
-) -> None:
+async def test_imperial_project_imperial_units_passes(shared_client: AsyncClient, auth_headers: dict[str, str]) -> None:
     """Imperial project with sqft unit must not trigger the rule."""
     from app.core.validation.engine import ValidationContext
     from app.core.validation.rules import BOQUnitSystemConsistencyRule
@@ -174,15 +162,11 @@ async def test_imperial_project_imperial_units_passes(
         }
     )
     results = await rule.validate(ctx)
-    assert results[0].passed is True, (
-        f"Should pass for imperial units in imperial project: {results[0].message}"
-    )
+    assert results[0].passed is True, f"Should pass for imperial units in imperial project: {results[0].message}"
 
 
 @pytest.mark.asyncio
-async def test_metric_project_metric_units_passes(
-    shared_client: AsyncClient, auth_headers: dict[str, str]
-) -> None:
+async def test_metric_project_metric_units_passes(shared_client: AsyncClient, auth_headers: dict[str, str]) -> None:
     """Metric project with m², m³, kg must not trigger the rule."""
     from app.core.validation.engine import ValidationContext
     from app.core.validation.rules import BOQUnitSystemConsistencyRule
@@ -199,6 +183,4 @@ async def test_metric_project_metric_units_passes(
         }
     )
     results = await rule.validate(ctx)
-    assert results[0].passed is True, (
-        f"Should pass for metric units in metric project: {results[0].message}"
-    )
+    assert results[0].passed is True, f"Should pass for metric units in metric project: {results[0].message}"

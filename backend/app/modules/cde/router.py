@@ -316,7 +316,10 @@ async def transition_state(
     existing = await service.get_container(container_id)
     await verify_project_access(existing.project_id, user_id, session)
     container = await service.transition_state(
-        container_id, data, user_role=user_role, user_id=user_id,
+        container_id,
+        data,
+        user_role=user_role,
+        user_id=user_id,
     )
     return _container_to_response(container)
 

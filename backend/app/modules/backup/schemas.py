@@ -42,8 +42,7 @@ class ExportRequest(BaseModel):
         ge=0,
         le=9,
         description=(
-            "DEFLATE compression level (0 = store, 9 = best). Default 6 "
-            "matches Python's ``zipfile`` default."
+            "DEFLATE compression level (0 = store, 9 = best). Default 6 matches Python's ``zipfile`` default."
         ),
     )
 

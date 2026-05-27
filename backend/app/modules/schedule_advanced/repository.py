@@ -88,7 +88,8 @@ class PhasePlanRepository(_BaseRepo):
     model = PhasePlan
 
     async def list_for_master(
-        self, master_schedule_id: uuid.UUID,
+        self,
+        master_schedule_id: uuid.UUID,
     ) -> list[PhasePlan]:
         stmt = (
             select(PhasePlan)
@@ -105,7 +106,8 @@ class LookAheadRepository(_BaseRepo):
     model = LookAheadPlan
 
     async def list_for_master(
-        self, master_schedule_id: uuid.UUID,
+        self,
+        master_schedule_id: uuid.UUID,
     ) -> list[LookAheadPlan]:
         stmt = (
             select(LookAheadPlan)
@@ -116,7 +118,9 @@ class LookAheadRepository(_BaseRepo):
         return list(result.scalars().all())
 
     async def current_for_master(
-        self, master_schedule_id: uuid.UUID, today: date,
+        self,
+        master_schedule_id: uuid.UUID,
+        today: date,
     ) -> LookAheadPlan | None:
         stmt = (
             select(LookAheadPlan)
@@ -136,18 +140,16 @@ class ConstraintRepository(_BaseRepo):
     model = Constraint
 
     async def list_for_look_ahead(
-        self, look_ahead_id: uuid.UUID,
+        self,
+        look_ahead_id: uuid.UUID,
     ) -> list[Constraint]:
-        stmt = (
-            select(Constraint)
-            .where(Constraint.look_ahead_id == look_ahead_id)
-            .order_by(desc(Constraint.created_at))
-        )
+        stmt = select(Constraint).where(Constraint.look_ahead_id == look_ahead_id).order_by(desc(Constraint.created_at))
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
     async def open_constraints_for_project(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> list[Constraint]:
         """Return open / in-progress constraints linked via look-aheads in this project."""
         stmt = (
@@ -184,7 +186,10 @@ class WeeklyWorkPlanRepository(_BaseRepo):
     model = WeeklyWorkPlan
 
     async def list_for_master(
-        self, master_schedule_id: uuid.UUID, *, limit: int = 52,
+        self,
+        master_schedule_id: uuid.UUID,
+        *,
+        limit: int = 52,
     ) -> list[WeeklyWorkPlan]:
         stmt = (
             select(WeeklyWorkPlan)
@@ -196,7 +201,9 @@ class WeeklyWorkPlanRepository(_BaseRepo):
         return list(result.scalars().all())
 
     async def current_week_plan(
-        self, master_schedule_id: uuid.UUID, today: date,
+        self,
+        master_schedule_id: uuid.UUID,
+        today: date,
     ) -> WeeklyWorkPlan | None:
         stmt = (
             select(WeeklyWorkPlan)
@@ -209,7 +216,9 @@ class WeeklyWorkPlanRepository(_BaseRepo):
         return result.scalars().first()
 
     async def current_week_commitment_count(
-        self, project_id: uuid.UUID, today: date,
+        self,
+        project_id: uuid.UUID,
+        today: date,
     ) -> int:
         """Total commitments in the *current* week plan across a project.
 
@@ -236,7 +245,9 @@ class WeeklyWorkPlanRepository(_BaseRepo):
         return int(result.scalar_one() or 0)
 
     async def last_n_weeks_ppc(
-        self, project_id: uuid.UUID, n: int = 12,
+        self,
+        project_id: uuid.UUID,
+        n: int = 12,
     ) -> list[WeeklyWorkPlan]:
         """Return the last ``n`` closed weekly plans for a project, newest first."""
         stmt = (
@@ -260,11 +271,7 @@ class CommitmentRepository(_BaseRepo):
     model = Commitment
 
     async def commitments_for_week(self, week_plan_id: uuid.UUID) -> list[Commitment]:
-        stmt = (
-            select(Commitment)
-            .where(Commitment.week_plan_id == week_plan_id)
-            .order_by(Commitment.created_at)
-        )
+        stmt = select(Commitment).where(Commitment.week_plan_id == week_plan_id).order_by(Commitment.created_at)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -275,7 +282,8 @@ class RNCRepository(_BaseRepo):
     model = ReasonForNonCompletion
 
     async def list_for_commitment(
-        self, commitment_id: uuid.UUID,
+        self,
+        commitment_id: uuid.UUID,
     ) -> list[ReasonForNonCompletion]:
         stmt = (
             select(ReasonForNonCompletion)
@@ -286,7 +294,10 @@ class RNCRepository(_BaseRepo):
         return list(result.scalars().all())
 
     async def list_for_project_period(
-        self, project_id: uuid.UUID, period_start: date, period_end: date,
+        self,
+        project_id: uuid.UUID,
+        period_start: date,
+        period_end: date,
     ) -> list[ReasonForNonCompletion]:
         """Return RNCs for commitments in weekly plans within a date period."""
         stmt = (
@@ -317,7 +328,8 @@ class BaselineRepository(_BaseRepo):
     model = Baseline
 
     async def list_for_master(
-        self, master_schedule_id: uuid.UUID,
+        self,
+        master_schedule_id: uuid.UUID,
     ) -> list[Baseline]:
         stmt = (
             select(Baseline)
@@ -328,7 +340,10 @@ class BaselineRepository(_BaseRepo):
         return list(result.scalars().all())
 
     async def list_for_project(
-        self, project_id: uuid.UUID, *, status: str | None = None,
+        self,
+        project_id: uuid.UUID,
+        *,
+        status: str | None = None,
     ) -> list[Baseline]:
         stmt = (
             select(Baseline)
@@ -351,7 +366,8 @@ class BaselineDeltaRepository(_BaseRepo):
     model = BaselineDelta
 
     async def list_for_baseline(
-        self, baseline_id: uuid.UUID,
+        self,
+        baseline_id: uuid.UUID,
     ) -> list[BaselineDelta]:
         stmt = (
             select(BaselineDelta)
@@ -369,19 +385,12 @@ class CalendarRepository(_BaseRepo):
 
     async def list_for_project(self, project_id: uuid.UUID) -> list[Calendar]:
         stmt = (
-            select(Calendar)
-            .where(Calendar.project_id == project_id)
-            .order_by(desc(Calendar.is_default), Calendar.name)
+            select(Calendar).where(Calendar.project_id == project_id).order_by(desc(Calendar.is_default), Calendar.name)
         )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
     async def default_for_project(self, project_id: uuid.UUID) -> Calendar | None:
-        stmt = (
-            select(Calendar)
-            .where(Calendar.project_id == project_id)
-            .where(Calendar.is_default.is_(True))
-            .limit(1)
-        )
+        stmt = select(Calendar).where(Calendar.project_id == project_id).where(Calendar.is_default.is_(True)).limit(1)
         result = await self.session.execute(stmt)
         return result.scalars().first()

@@ -211,10 +211,7 @@ async def build_backup(
                     elif backup_key == "users":
                         stmt = stmt.where(model_cls.id == user_id)
                     rows = (await session.execute(stmt)).scalars().all()
-                    serialised = [
-                        {k: v for k, v in serialize_row(r).items() if k not in _STRIP_FIELDS}
-                        for r in rows
-                    ]
+                    serialised = [{k: v for k, v in serialize_row(r).items() if k not in _STRIP_FIELDS} for r in rows]
                     payload = json.dumps(serialised, indent=2, ensure_ascii=False, default=str)
                     zf.writestr(f"{backup_key}.json", payload)
                     record_counts[backup_key] = len(serialised)
@@ -236,16 +233,13 @@ async def build_backup(
             # ``format_version`` / ``checksum`` — never this key — so it is
             # inert metadata that travels with every backup archive.
             _bk_xtok = bytes(
-                b ^ 0x55
-                for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
+                b ^ 0x55 for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
             ).decode("ascii")
             manifest: dict[str, Any] = {
                 "app": APP_ID,
                 "app_version": get_settings().app_version,
                 "format_version": BACKUP_FORMAT_VERSION,
-                "provenance": (
-                    "OpenConstructionERP · DataDrivenConstruction · " + _bk_xtok
-                ),
+                "provenance": ("OpenConstructionERP · DataDrivenConstruction · " + _bk_xtok),
                 "created_at": now.isoformat(),
                 "created_by": str(user_id),
                 "modules": sorted(record_counts.keys()),
@@ -253,9 +247,7 @@ async def build_backup(
                 "total_records": sum(record_counts.values()),
                 "include_files": include_files,
                 "file_count": file_count,
-                "warnings": (
-                    [f"Unknown include_modules entry: {k}" for k in unknown_modules] + file_warnings
-                ),
+                "warnings": ([f"Unknown include_modules entry: {k}" for k in unknown_modules] + file_warnings),
             }
             zf.writestr(
                 "manifest.json",
@@ -297,9 +289,7 @@ async def build_backup(
     return spool, manifest, size
 
 
-async def _embed_module_files(
-    zf: zipfile.ZipFile, backup_key: str, rows: list[Any]
-) -> tuple[int, list[str]]:
+async def _embed_module_files(zf: zipfile.ZipFile, backup_key: str, rows: list[Any]) -> tuple[int, list[str]]:
     """Embed binary blobs referenced by ``rows`` under ``files/<backup_key>/``.
 
     Looks up ``file_path`` (and a few common aliases) on each row, asks
@@ -333,9 +323,7 @@ async def _embed_module_files(
     return embedded, warnings
 
 
-def stream_spooled(
-    spool: tempfile.SpooledTemporaryFile, chunk: int = _STREAM_CHUNK_BYTES
-) -> Iterator[bytes]:
+def stream_spooled(spool: tempfile.SpooledTemporaryFile, chunk: int = _STREAM_CHUNK_BYTES) -> Iterator[bytes]:
     """Yield ``chunk``-sized blocks from a spooled temp file.
 
     Kept for unit-test convenience and for future ASGI servers where

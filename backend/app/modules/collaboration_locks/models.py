@@ -30,9 +30,7 @@ class CollabLock(Base):
 
     __tablename__ = "oe_collab_lock"
     __table_args__ = (
-        UniqueConstraint(
-            "entity_type", "entity_id", name="uq_collab_lock_entity"
-        ),
+        UniqueConstraint("entity_type", "entity_id", name="uq_collab_lock_entity"),
         Index("ix_collab_lock_expires", "expires_at"),
         Index("ix_collab_lock_user", "user_id"),
         Index("ix_collab_lock_entity_lookup", "entity_type", "entity_id"),
@@ -40,9 +38,7 @@ class CollabLock(Base):
 
     # Multi-tenant scope.  Nullable because the current user model has no
     # organisation column — when one is added, the service fills it in.
-    org_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    org_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
     entity_type: Mapped[str] = mapped_column(String(64), nullable=False)
     entity_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
@@ -53,15 +49,9 @@ class CollabLock(Base):
         nullable=False,
     )
 
-    locked_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
-    heartbeat_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
-    expires_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
+    locked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    heartbeat_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

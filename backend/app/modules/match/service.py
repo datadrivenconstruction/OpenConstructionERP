@@ -366,9 +366,7 @@ async def accept_match(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="existing_position_id does not belong to the supplied boq_id",
             )
-        merged_metadata: dict[str, Any] = (
-            dict(existing.metadata_) if isinstance(existing.metadata_, dict) else {}
-        )
+        merged_metadata: dict[str, Any] = dict(existing.metadata_) if isinstance(existing.metadata_, dict) else {}
         merged_metadata.update(match_metadata)
 
         update_payload = PositionUpdate(
@@ -380,7 +378,9 @@ async def accept_match(
             metadata=merged_metadata,
         )
         position = await boq_service.update_position(
-            existing_position_id, update_payload, actor_id=actor_id,
+            existing_position_id,
+            update_payload,
+            actor_id=actor_id,
         )
         created = False
         cost_link_created = True
@@ -390,7 +390,9 @@ async def accept_match(
         # collides with manual MasterFormat/DIN ordinals (03, 32.07.1)
         # and signals at-a-glance that the row came from automation.
         positions, _total = await boq_service.position_repo.list_for_boq(
-            boq_id, offset=0, limit=10000,
+            boq_id,
+            offset=0,
+            limit=10000,
         )
         ordinal = _build_match_ordinal(positions)
 
@@ -436,7 +438,9 @@ async def accept_match(
         user_id=user_id or None,
     )
     audit_entry_id = await _resolve_audit_entry_id(
-        db, project_id=project_id, user_id=user_id or None,
+        db,
+        project_id=project_id,
+        user_id=user_id or None,
     )
 
     return {

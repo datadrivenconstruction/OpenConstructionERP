@@ -67,17 +67,18 @@ async def _safe_publish(name: str, data: dict, source_module: str = "oe_punchlis
     except Exception:
         _logger_ev.debug("Event publish skipped: %s", name)
 
+
 # Valid status transitions: current_status -> list of allowed next statuses
 # Valid status transitions: current_status -> list of allowed next statuses
 # FSM: open → assigned → in_progress → resolved → verified → closed
 # ``reopened`` is a display alias that always resolves to ``open`` in service code.
 VALID_TRANSITIONS: dict[str, list[str]] = {
-    "open": ["assigned", "in_progress"],              # direct assign or fast-track
-    "assigned": ["in_progress", "open"],              # accepted or unassigned
+    "open": ["assigned", "in_progress"],  # direct assign or fast-track
+    "assigned": ["in_progress", "open"],  # accepted or unassigned
     "in_progress": ["resolved", "verified", "assigned", "open"],  # done via either path
-    "resolved": ["verified", "open"],                 # legacy pre-verify step
-    "verified": ["closed", "open"],                   # approved or re-opened
-    "closed": ["open"],                               # can always reopen
+    "resolved": ["verified", "open"],  # legacy pre-verify step
+    "verified": ["closed", "open"],  # approved or re-opened
+    "closed": ["open"],  # can always reopen
 }
 
 # Terminal statuses trigger a reopen_history entry when transitioning back
@@ -255,7 +256,10 @@ class PunchListService:
             if transition.notes:
                 update_fields["resolution_notes"] = transition.notes
             self._record_reopen_if_needed(
-                item, new_status="open", user=user_id, reason=transition.notes,
+                item,
+                new_status="open",
+                user=user_id,
+                reason=transition.notes,
                 update_fields=update_fields,
             )
             await self.repo.update_fields(item_id, **update_fields)
@@ -348,7 +352,10 @@ class PunchListService:
         # moves a terminal item back to an active status without going via
         # the explicit "open" reopen branch above (defence in depth).
         self._record_reopen_if_needed(
-            item, new_status=target, user=user_id, reason=transition.notes,
+            item,
+            new_status=target,
+            user=user_id,
+            reason=transition.notes,
             update_fields=update_fields,
         )
 
@@ -462,16 +469,12 @@ class PunchListService:
 
                 # Critical-with-open-peers guard mirrors transition_status().
                 if item.priority == "critical":
-                    open_critical = await self.repo.count_open_critical(
-                        project_id, exclude_id=item_id
-                    )
+                    open_critical = await self.repo.count_open_critical(project_id, exclude_id=item_id)
                     if open_critical > 0:
                         errors.append(
                             {
                                 "id": str(item_id),
-                                "error": (
-                                    f"critical_blocked:{open_critical}_other_open"
-                                ),
+                                "error": (f"critical_blocked:{open_critical}_other_open"),
                             }
                         )
                         continue
@@ -647,7 +650,6 @@ class PunchListService:
         )
         return pdf
 
-
     async def export_excel(self, project_id: uuid.UUID) -> bytes:
         """Generate an Excel report with all punch list items.
 
@@ -703,9 +705,7 @@ class PunchListService:
             wb.save(output)
             excel_bytes = output.getvalue()
 
-            logger.info(
-                "Punch list Excel exported for project %s (%d items)", project_id, len(items)
-            )
+            logger.info("Punch list Excel exported for project %s (%d items)", project_id, len(items))
             return excel_bytes
 
         # Fallback: return CSV bytes if openpyxl is not installed
@@ -714,24 +714,37 @@ class PunchListService:
 
         output = _io.StringIO()
         writer = csv.writer(output)
-        writer.writerow([
-            "No.", "Title", "Status", "Priority", "Category", "Trade",
-            "Assigned To", "Due Date", "Description", "Resolution Notes", "Created",
-        ])
+        writer.writerow(
+            [
+                "No.",
+                "Title",
+                "Status",
+                "Priority",
+                "Category",
+                "Trade",
+                "Assigned To",
+                "Due Date",
+                "Description",
+                "Resolution Notes",
+                "Created",
+            ]
+        )
         for idx, item in enumerate(items, 1):
-            writer.writerow([
-                idx,
-                item.title,
-                item.status,
-                item.priority,
-                item.category or "",
-                item.trade or "",
-                item.assigned_to or "",
-                str(item.due_date) if item.due_date else "",
-                (item.description or "")[:500],
-                (item.resolution_notes or "")[:500],
-                str(item.created_at) if item.created_at else "",
-            ])
+            writer.writerow(
+                [
+                    idx,
+                    item.title,
+                    item.status,
+                    item.priority,
+                    item.category or "",
+                    item.trade or "",
+                    item.assigned_to or "",
+                    str(item.due_date) if item.due_date else "",
+                    (item.description or "")[:500],
+                    (item.resolution_notes or "")[:500],
+                    str(item.created_at) if item.created_at else "",
+                ]
+            )
         logger.info(
             "Punch list CSV exported (openpyxl not available) for project %s (%d items)",
             project_id,
@@ -865,11 +878,14 @@ def _build_reportlab_pdf(project_id: uuid.UUID, items: list[PunchItem]) -> bytes
     # Lazy-import — only paid when ReportLab is actually used.
     import io
 
+    from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import mm
     from reportlab.platypus import (
         Image as RLImage,
+    )
+    from reportlab.platypus import (
         PageBreak,
         Paragraph,
         SimpleDocTemplate,
@@ -877,7 +893,6 @@ def _build_reportlab_pdf(project_id: uuid.UUID, items: list[PunchItem]) -> bytes
         Table,
         TableStyle,
     )
-    from reportlab.lib import colors
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -1004,17 +1019,11 @@ def _build_reportlab_pdf(project_id: uuid.UUID, items: list[PunchItem]) -> bytes
                 story.append(img)
             except Exception:  # noqa: BLE001 - defensive
                 # If reportlab can't decode the image we silently skip it.
-                story.append(
-                    Paragraph(
-                        f"[photo {disk_path.name} could not be embedded]", small
-                    )
-                )
+                story.append(Paragraph(f"[photo {disk_path.name} could not be embedded]", small))
 
         if item.resolution_notes:
             story.append(Spacer(1, 1 * mm))
-            story.append(
-                Paragraph(f"<b>Resolution:</b> {item.resolution_notes[:500]}", small)
-            )
+            story.append(Paragraph(f"<b>Resolution:</b> {item.resolution_notes[:500]}", small))
 
         # Reopen-history chronology (defensive: schema may not yet be migrated).
         history = list(getattr(item, "reopen_history", None) or [])

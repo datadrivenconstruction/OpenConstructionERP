@@ -195,7 +195,9 @@ async def tenant_b(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_idor_get_plot_collapses_to_404(
-    client: AsyncClient, tenant_a, tenant_b,
+    client: AsyncClient,
+    tenant_a,
+    tenant_b,
 ):
     """Tenant B trying to read tenant A's plot must get 404, not 403."""
     res = await client.get(
@@ -207,7 +209,9 @@ async def test_idor_get_plot_collapses_to_404(
 
 @pytest.mark.asyncio
 async def test_idor_patch_house_type_collapses_to_404(
-    client: AsyncClient, tenant_a, tenant_b,
+    client: AsyncClient,
+    tenant_a,
+    tenant_b,
 ):
     """Tenant B trying to mutate tenant A's house type must get 404."""
     res = await client.patch(
@@ -220,7 +224,9 @@ async def test_idor_patch_house_type_collapses_to_404(
 
 @pytest.mark.asyncio
 async def test_idor_get_escrow_account_collapses_to_404(
-    client: AsyncClient, tenant_a, tenant_b,
+    client: AsyncClient,
+    tenant_a,
+    tenant_b,
 ):
     """Tenant B trying to read tenant A's escrow account must get 404.
 
@@ -237,7 +243,9 @@ async def test_idor_get_escrow_account_collapses_to_404(
 
 @pytest.mark.asyncio
 async def test_idor_list_plots_blocks_cross_tenant_development(
-    client: AsyncClient, tenant_a, tenant_b,
+    client: AsyncClient,
+    tenant_a,
+    tenant_b,
 ):
     """Listing plots with another tenant's development_id query → 404."""
     res = await client.get(
@@ -249,7 +257,8 @@ async def test_idor_list_plots_blocks_cross_tenant_development(
 
 @pytest.mark.asyncio
 async def test_idor_get_random_uuid_also_404(
-    client: AsyncClient, tenant_b,
+    client: AsyncClient,
+    tenant_b,
 ):
     """Confirm a non-existent UUID returns the SAME 404 as a cross-tenant
     one — proves the gate doesn't act as an existence oracle."""
@@ -266,7 +275,9 @@ async def test_idor_get_random_uuid_also_404(
 
 @pytest.mark.asyncio
 async def test_member_denied_patch_buyer(
-    client: AsyncClient, tenant_a, tenant_b,
+    client: AsyncClient,
+    tenant_a,
+    tenant_b,
 ):
     """A non-owner editor in another tenant must NOT mutate tenant A's
     buyer; collapses to 404 instead of 403."""
@@ -283,7 +294,8 @@ async def test_member_denied_patch_buyer(
 
 @pytest.mark.asyncio
 async def test_money_fields_serialized_as_strings(
-    client: AsyncClient, tenant_a,
+    client: AsyncClient,
+    tenant_a,
 ):
     """Plot money fields must arrive as JSON strings — never floats.
 
@@ -363,7 +375,8 @@ async def _make_snag(client: AsyncClient, tenant_a, tag: str) -> str:
 
 @pytest.mark.asyncio
 async def test_snag_photo_upload_rejects_non_image(
-    client: AsyncClient, tenant_a,
+    client: AsyncClient,
+    tenant_a,
 ):
     """A .jpg upload containing shell-script bytes must be rejected 415.
 
@@ -385,7 +398,8 @@ async def test_snag_photo_upload_rejects_non_image(
 
 @pytest.mark.asyncio
 async def test_snag_photo_upload_accepts_valid_jpeg(
-    client: AsyncClient, tenant_a,
+    client: AsyncClient,
+    tenant_a,
 ):
     """The same endpoint must accept a minimal valid JPEG (FF D8 FF magic).
 
@@ -413,7 +427,8 @@ async def test_snag_photo_upload_accepts_valid_jpeg(
 
 @pytest.mark.asyncio
 async def test_fsm_rejects_invalid_plot_transition(
-    client: AsyncClient, tenant_a,
+    client: AsyncClient,
+    tenant_a,
 ):
     """planned → handed_over skips reserved/sold and must 409.
 
@@ -436,7 +451,8 @@ async def test_fsm_rejects_invalid_plot_transition(
 
 @pytest.mark.asyncio
 async def test_fsm_accepts_valid_plot_transition(
-    client: AsyncClient, tenant_a,
+    client: AsyncClient,
+    tenant_a,
 ):
     """planned → reserved is in the allowlist and must succeed.
 

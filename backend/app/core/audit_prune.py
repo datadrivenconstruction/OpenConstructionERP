@@ -51,8 +51,7 @@ async def prune_audit_pii(
         update(ActivityLog)
         .where(ActivityLog.created_at < threshold)
         .where(
-            (ActivityLog.ip_address.isnot(None))
-            | (ActivityLog.user_agent.isnot(None)),
+            (ActivityLog.ip_address.isnot(None)) | (ActivityLog.user_agent.isnot(None)),
         )
         .values(ip_address=None, user_agent=None)
         # ``synchronize_session=False`` skips the ORM-side row evaluator,
@@ -67,7 +66,8 @@ async def prune_audit_pii(
     affected = int(result.rowcount or 0)
     logger.info(
         "audit_prune: scrubbed IP+UA on %d activity-log rows older than %s",
-        affected, threshold.isoformat(),
+        affected,
+        threshold.isoformat(),
     )
     return affected
 
@@ -90,7 +90,9 @@ def register_prune_task() -> None:
         return
 
     @celery_app.task(name="oe.audit_prune_pii")  # type: ignore[misc]
-    def _prune_audit_pii_celery(retention_days: int = DEFAULT_PII_RETENTION_DAYS) -> int:  # pragma: no cover — exercised at worker level
+    def _prune_audit_pii_celery(
+        retention_days: int = DEFAULT_PII_RETENTION_DAYS,
+    ) -> int:  # pragma: no cover — exercised at worker level
         import asyncio
 
         from app.database import async_session_factory
@@ -98,7 +100,8 @@ def register_prune_task() -> None:
         async def _run() -> int:
             async with async_session_factory() as session:
                 count = await prune_audit_pii(
-                    session, retention_days=retention_days,
+                    session,
+                    retention_days=retention_days,
                 )
                 await session.commit()
                 return count

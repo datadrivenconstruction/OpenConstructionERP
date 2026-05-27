@@ -85,6 +85,7 @@ def _safe_ident(name: str) -> str:
         raise ValueError(f"unsafe SQL identifier: {name!r}")
     return name
 
+
 # revision identifiers, used by Alembic.
 revision: str = "v3033_audit_log"
 down_revision: Union[str, Sequence[str], None] = "v3032_wave_merge"
@@ -100,7 +101,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -230,8 +233,7 @@ def upgrade() -> None:
         for old_value, new_value in mapping.items():
             op.execute(
                 sa.text(
-                    f"UPDATE {safe_table} SET {safe_column} = :new "
-                    f"WHERE {safe_column} = :old",
+                    f"UPDATE {safe_table} SET {safe_column} = :new WHERE {safe_column} = :old",
                 ).bindparams(new=new_value, old=old_value)
             )
 
@@ -251,9 +253,7 @@ def upgrade() -> None:
         # Bulk insert via SELECT … NOT EXISTS so re-runs are no-ops.
         # We use NEWID()-style UUIDs by binding via Python so this works
         # the same way on SQLite + Postgres.
-        rows = bind.execute(
-            sa.text(f"SELECT id, status FROM {safe_table}")
-        ).fetchall()
+        rows = bind.execute(sa.text(f"SELECT id, status FROM {safe_table}")).fetchall()
         now = datetime.now(UTC)
         empty_meta = json.dumps({"source": "v3033_audit_log_backfill"})
         for row in rows:

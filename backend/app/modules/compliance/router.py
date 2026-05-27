@@ -108,10 +108,7 @@ async def validate_syntax(
     if (body.definition_yaml is None) == (body.definition is None):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=(
-                "Provide exactly one of 'definition_yaml' or "
-                "'definition'."
-            ),
+            detail=("Provide exactly one of 'definition_yaml' or 'definition'."),
         )
 
     source = body.definition_yaml if body.definition_yaml is not None else body.definition
@@ -228,7 +225,9 @@ async def delete_rule(
     )
     try:
         await service.delete(
-            rule_pk, tenant_id=tenant_id, owner_user_id=user_id,
+            rule_pk,
+            tenant_id=tenant_id,
+            owner_user_id=user_id,
         )
     except ComplianceError as exc:
         _raise_compliance_http(exc)

@@ -289,43 +289,45 @@ class TestApplyToHits:
         monkeypatch.delenv("OE_MATCH_MAGNET_FILTER", raising=False)
         env = _envelope_concrete_wall()
         hits = [
-            _hit("KAME_KAPU_KAMEDX_KAME", 0.50,
-                 masterformat_division="26 20 00",
-                 ifc_class="IfcElectricDistributionBoard",
-                 unit_type="Count"),
-            _hit("VALID_CONCRETE", 0.40,
-                 masterformat_division="03 30 00",
-                 ifc_class="IfcWall",
-                 unit_type="Area"),
+            _hit(
+                "KAME_KAPU_KAMEDX_KAME",
+                0.50,
+                masterformat_division="26 20 00",
+                ifc_class="IfcElectricDistributionBoard",
+                unit_type="Count",
+            ),
+            _hit("VALID_CONCRETE", 0.40, masterformat_division="03 30 00", ifc_class="IfcWall", unit_type="Area"),
         ]
         out = mf.apply_to_hits(env, hits)
         assert len(out) == 2
         assert [h.rate_code for h in out] == [h.rate_code for h in hits]
 
     def test_enabled_drops_real_magnets_on_concrete_wall(
-        self, monkeypatch: pytest.MonkeyPatch,
+        self,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """With env var ON, the actual bench-observed magnets get dropped."""
         monkeypatch.setenv("OE_MATCH_MAGNET_FILTER", "1")
         env = _envelope_concrete_wall()
         hits = [
             # Real magnets from magnet_analysis.json:
-            _hit("KAME_KAPU_KAMEDX_KAME", 0.50,
-                 masterformat_division="26 20 00",
-                 ifc_class="IfcElectricDistributionBoard",
-                 unit_type="Count"),
-            _hit("KARI_KARI_KAKATO_KASA", 0.45,
-                 masterformat_division="33 05 00",
-                 ifc_class="IfcReinforcingBar",
-                 unit_type="Count"),
-            _hit("KANE_KAME_KAKALI_KATOm", 0.40,
-                 masterformat_division="48 00 00",
-                 unit_type="Mass"),
+            _hit(
+                "KAME_KAPU_KAMEDX_KAME",
+                0.50,
+                masterformat_division="26 20 00",
+                ifc_class="IfcElectricDistributionBoard",
+                unit_type="Count",
+            ),
+            _hit(
+                "KARI_KARI_KAKATO_KASA",
+                0.45,
+                masterformat_division="33 05 00",
+                ifc_class="IfcReinforcingBar",
+                unit_type="Count",
+            ),
+            _hit("KANE_KAME_KAKALI_KATOm", 0.40, masterformat_division="48 00 00", unit_type="Mass"),
             # The valid concrete wall candidate:
-            _hit("VALID_CONCRETE_WALL", 0.30,
-                 masterformat_division="03 30 00",
-                 ifc_class="IfcWall",
-                 unit_type="Area"),
+            _hit("VALID_CONCRETE_WALL", 0.30, masterformat_division="03 30 00", ifc_class="IfcWall", unit_type="Area"),
         ]
         out = mf.apply_to_hits(env, hits)
         codes = [h.rate_code for h in out]
@@ -338,20 +340,21 @@ class TestApplyToHits:
         assert "KANE_KAME_KAKALI_KATOm" not in codes
 
     def test_enabled_no_op_on_sparse_envelope(
-        self, monkeypatch: pytest.MonkeyPatch,
+        self,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Sparse envelope (low confidence) → no candidates dropped even when ON."""
         monkeypatch.setenv("OE_MATCH_MAGNET_FILTER", "1")
         env = _envelope_sparse()
         hits = [
-            _hit("KAME_KAPU_KAMEDX_KAME", 0.50,
-                 masterformat_division="26 20 00",
-                 ifc_class="IfcElectricDistributionBoard",
-                 unit_type="Count"),
-            _hit("VALID_CONCRETE", 0.40,
-                 masterformat_division="03 30 00",
-                 ifc_class="IfcWall",
-                 unit_type="Area"),
+            _hit(
+                "KAME_KAPU_KAMEDX_KAME",
+                0.50,
+                masterformat_division="26 20 00",
+                ifc_class="IfcElectricDistributionBoard",
+                unit_type="Count",
+            ),
+            _hit("VALID_CONCRETE", 0.40, masterformat_division="03 30 00", ifc_class="IfcWall", unit_type="Area"),
         ]
         out = mf.apply_to_hits(env, hits)
         assert len(out) == 2  # both pass through
@@ -363,7 +366,8 @@ class TestApplyToHits:
         assert out == []
 
     def test_penalise_mode_preserves_candidate_with_score_delta(
-        self, monkeypatch: pytest.MonkeyPatch,
+        self,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """In medium-confidence band: candidates stay, score is reduced."""
         monkeypatch.setenv("OE_MATCH_MAGNET_FILTER", "1")
@@ -376,17 +380,21 @@ class TestApplyToHits:
             source_lang="en",
         )
         hits = [
-            _hit("MAGNET_BOX", 0.50,
-                 masterformat_division="26 20 00",
-                 ifc_class="IfcElectricDistributionBoard",
-                 unit_type="Count"),
+            _hit(
+                "MAGNET_BOX",
+                0.50,
+                masterformat_division="26 20 00",
+                ifc_class="IfcElectricDistributionBoard",
+                unit_type="Count",
+            ),
         ]
         out = mf.apply_to_hits(env, hits)
         assert len(out) == 1  # not dropped, penalised
         assert out[0].score < 0.50  # score reduced by the penalty
 
     def test_parquet_fallback_lookup_when_payload_sparse(
-        self, monkeypatch: pytest.MonkeyPatch,
+        self,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """If hit.payload lacks ifc_class but full_rows carries it → uses parquet."""
         monkeypatch.setenv("OE_MATCH_MAGNET_FILTER", "1")

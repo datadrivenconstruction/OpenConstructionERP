@@ -31,10 +31,10 @@ def _validate_https_url(value: str | None) -> str | None:
     lowered = stripped.lower()
     if not (lowered.startswith("http://") or lowered.startswith("https://")):
         raise ValueError(
-            "URL must use http or https scheme "
-            "(javascript:/data:/file: rejected)",
+            "URL must use http or https scheme (javascript:/data:/file: rejected)",
         )
     return stripped
+
 
 # ── ITP Plan ──────────────────────────────────────────────────────────────
 
@@ -49,7 +49,8 @@ class ITPPlanCreate(BaseModel):
     work_type: str = Field(..., min_length=1, max_length=100)
     wbs_ref: str | None = Field(default=None, max_length=100)
     status: str = Field(
-        default="draft", pattern=r"^(draft|active|superseded|closed)$",
+        default="draft",
+        pattern=r"^(draft|active|superseded|closed)$",
     )
     version: int = Field(default=1, ge=1)
 
@@ -63,7 +64,8 @@ class ITPPlanUpdate(BaseModel):
     work_type: str | None = Field(default=None, min_length=1, max_length=100)
     wbs_ref: str | None = Field(default=None, max_length=100)
     status: str | None = Field(
-        default=None, pattern=r"^(draft|active|superseded|closed)$",
+        default=None,
+        pattern=r"^(draft|active|superseded|closed)$",
     )
     version: int | None = Field(default=None, ge=1)
 
@@ -100,7 +102,8 @@ class ITPItemCreate(BaseModel):
     method: str | None = Field(default=None, max_length=100)
     acceptance_criteria: str | None = Field(default=None, max_length=5000)
     hold_witness_point: str = Field(
-        default="review", pattern=r"^(hold|witness|review)$",
+        default="review",
+        pattern=r"^(hold|witness|review)$",
     )
     responsible_role: str | None = Field(default=None, max_length=100)
     signatories_required: int = Field(default=1, ge=1, le=10)
@@ -195,10 +198,12 @@ class InspectionSignatureCreate(BaseModel):
 
     signer_user_id: UUID
     signer_role: str = Field(
-        ..., pattern=r"^(GC|designer|client|subcontractor|inspector|other)$",
+        ...,
+        pattern=r"^(GC|designer|client|subcontractor|inspector|other)$",
     )
     signature_method: str = Field(
-        default="electronic", pattern=r"^(electronic|wet|biometric)$",
+        default="electronic",
+        pattern=r"^(electronic|wet|biometric)$",
     )
     comments: str | None = Field(default=None, max_length=2000)
 
@@ -231,7 +236,8 @@ class NCRCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=500)
     description: str = Field(..., min_length=1, max_length=10000)
     severity: str = Field(
-        default="minor", pattern=r"^(minor|major|critical)$",
+        default="minor",
+        pattern=r"^(minor|major|critical)$",
     )
     root_cause: str | None = Field(default=None, max_length=5000)
     cost_impact_currency: str = Field(default="", max_length=3)
@@ -247,7 +253,8 @@ class NCRUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=500)
     description: str | None = Field(default=None, min_length=1, max_length=10000)
     severity: str | None = Field(
-        default=None, pattern=r"^(minor|major|critical)$",
+        default=None,
+        pattern=r"^(minor|major|critical)$",
     )
     root_cause: str | None = Field(default=None, max_length=5000)
     status: str | None = Field(
@@ -305,7 +312,8 @@ class NCRActionUpdate(BaseModel):
     responsible_user_id: UUID | None = None
     due_date: datetime | None = None
     status: str | None = Field(
-        default=None, pattern=r"^(assigned|in_progress|done)$",
+        default=None,
+        pattern=r"^(assigned|in_progress|done)$",
     )
     verification_method: str | None = Field(default=None, max_length=255)
 
@@ -344,13 +352,15 @@ class PunchItemCreate(BaseModel):
     drawing_ref: str | None = Field(default=None, max_length=255)
     bim_element_ref: str | None = Field(default=None, max_length=255)
     severity: str = Field(
-        default="minor", pattern=r"^(minor|major|critical)$",
+        default="minor",
+        pattern=r"^(minor|major|critical)$",
     )
     assigned_to: UUID | None = None
     due_date: datetime | None = None
     photos_json: list[dict[str, Any]] = Field(default_factory=list)
     source: str = Field(
-        default="manual", pattern=r"^(manual|inspection|walkthrough)$",
+        default="manual",
+        pattern=r"^(manual|inspection|walkthrough)$",
     )
     category: str | None = Field(
         default=None,
@@ -373,7 +383,8 @@ class PunchItemUpdate(BaseModel):
         pattern=r"^(open|assigned|in_progress|ready_for_inspection|closed|rejected)$",
     )
     severity: str | None = Field(
-        default=None, pattern=r"^(minor|major|critical)$",
+        default=None,
+        pattern=r"^(minor|major|critical)$",
     )
     assigned_to: UUID | None = None
     due_date: datetime | None = None
@@ -420,7 +431,8 @@ class AuditCreate(BaseModel):
 
     project_id: UUID
     audit_type: str = Field(
-        default="internal", pattern=r"^(internal|external|supplier)$",
+        default="internal",
+        pattern=r"^(internal|external|supplier)$",
     )
     planned_date: datetime | None = None
     auditor_user_id: UUID | None = None
@@ -434,7 +446,8 @@ class AuditUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     audit_type: str | None = Field(
-        default=None, pattern=r"^(internal|external|supplier)$",
+        default=None,
+        pattern=r"^(internal|external|supplier)$",
     )
     planned_date: datetime | None = None
     performed_at: datetime | None = None
@@ -442,7 +455,8 @@ class AuditUpdate(BaseModel):
     audit_scope: str | None = Field(default=None, max_length=5000)
     standard_ref: str | None = Field(default=None, max_length=64)
     status: str | None = Field(
-        default=None, pattern=r"^(planned|in_progress|completed|closed)$",
+        default=None,
+        pattern=r"^(planned|in_progress|completed|closed)$",
     )
     overall_rating: int | None = Field(default=None, ge=1, le=5)
 
@@ -490,13 +504,15 @@ class AuditFindingUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     finding_type: str | None = Field(
-        default=None, pattern=r"^(observation|minor|major|critical)$",
+        default=None,
+        pattern=r"^(observation|minor|major|critical)$",
     )
     description: str | None = Field(default=None, min_length=1, max_length=5000)
     clause_ref: str | None = Field(default=None, max_length=64)
     corrective_action_required: str | None = Field(default=None, max_length=5000)
     status: str | None = Field(
-        default=None, pattern=r"^(open|in_progress|verified|closed)$",
+        default=None,
+        pattern=r"^(open|in_progress|verified|closed)$",
     )
     due_date: datetime | None = None
 
@@ -589,7 +605,8 @@ class ITPTemplateItemSpec(BaseModel):
     method: str | None = Field(default=None, max_length=100)
     acceptance_criteria: str | None = Field(default=None, max_length=5000)
     hold_witness_point: str = Field(
-        default="review", pattern=r"^(hold|witness|review)$",
+        default="review",
+        pattern=r"^(hold|witness|review)$",
     )
     responsible_role: str | None = Field(default=None, max_length=100)
     signatories_required: int = Field(default=1, ge=1, le=10)
@@ -694,7 +711,8 @@ class CalibrationUpdate(BaseModel):
     measurement_uncertainty: str | None = Field(default=None, max_length=255)
     owner_user_id: UUID | None = None
     status: str | None = Field(
-        default=None, pattern=r"^(valid|expired|withdrawn)$",
+        default=None,
+        pattern=r"^(valid|expired|withdrawn)$",
     )
     notes: str | None = Field(default=None, max_length=5000)
 
@@ -772,6 +790,8 @@ class SupplierAuditLink(BaseModel):
     audit_id: UUID
     subcontractor_id: UUID
     rating_delta: int = Field(
-        default=0, ge=-5, le=5,
+        default=0,
+        ge=-5,
+        le=5,
         description="Adjustment to the subcontractor's quality rating (-5..+5)",
     )

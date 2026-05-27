@@ -69,7 +69,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -190,7 +192,8 @@ def _set_acting_user(user_id: uuid.UUID, role: str = "estimator") -> None:
 
 @pytest.mark.asyncio
 async def test_module_presence_returns_all_false_on_empty_project(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """Fresh project + minimal schema → every module reads False, no 500."""
     user_id, project_id = await project_owned_by()
@@ -211,7 +214,9 @@ async def test_module_presence_returns_all_false_on_empty_project(
 
 @pytest.mark.asyncio
 async def test_module_presence_flips_true_when_module_table_has_row(
-    client: AsyncClient, project_owned_by, temp_engine_and_factory,
+    client: AsyncClient,
+    project_owned_by,
+    temp_engine_and_factory,
 ) -> None:
     """Insert one BOQ row → ``boq`` (+ alias ``estimation_dashboard``) flip True.
 
@@ -254,7 +259,8 @@ async def test_module_presence_flips_true_when_module_table_has_row(
 
 @pytest.mark.asyncio
 async def test_module_presence_requires_authentication(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """No JWT → 401, not 200 or 500."""
     _user_id, project_id = await project_owned_by()
@@ -267,7 +273,8 @@ async def test_module_presence_requires_authentication(
 
 @pytest.mark.asyncio
 async def test_module_presence_403_for_non_owner(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """Authenticated stranger (non-admin) → 403, not 200."""
     _owner_id, project_id = await project_owned_by()
@@ -280,7 +287,8 @@ async def test_module_presence_403_for_non_owner(
 
 @pytest.mark.asyncio
 async def test_module_presence_missing_table_does_not_500(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """All module tables absent → 200 with False everywhere.
 
@@ -301,7 +309,8 @@ async def test_module_presence_missing_table_does_not_500(
 
 @pytest.mark.asyncio
 async def test_module_presence_probes_run_concurrently(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """asyncio.gather must wrap the probe coroutines.
 
@@ -339,7 +348,8 @@ async def test_module_presence_probes_run_concurrently(
 
 @pytest.mark.asyncio
 async def test_module_presence_is_cached_within_ttl(
-    client: AsyncClient, project_owned_by,
+    client: AsyncClient,
+    project_owned_by,
 ) -> None:
     """Second call within TTL must NOT re-run the probes.
 
@@ -368,9 +378,7 @@ async def test_module_presence_is_cached_within_ttl(
 
     assert r1.status_code == 200
     assert r2.status_code == 200
-    assert first_count == len(mp.PRESENCE_PROBES), (
-        f"first call should run all probes, got {first_count}"
-    )
+    assert first_count == len(mp.PRESENCE_PROBES), f"first call should run all probes, got {first_count}"
     assert second_count == first_count, (
         f"second call should hit cache (0 extra runs), got {second_count - first_count} extra"
     )

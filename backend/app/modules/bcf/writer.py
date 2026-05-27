@@ -178,9 +178,7 @@ def _safe_dir(guid: str) -> str:
     g = _normalize_guid(guid)
     if _GUID_RE.match(g) or _HEX_SIG_RE.match(g):
         return g
-    raise ValueError(
-        f"BCF topic GUID {guid!r} is not a valid RFC 4122 UUID or hex signature"
-    )
+    raise ValueError(f"BCF topic GUID {guid!r} is not a valid RFC 4122 UUID or hex signature")
 
 
 def _serialise(root: ET.Element) -> bytes:
@@ -235,11 +233,7 @@ def build_extensions_xml(lists: dict[str, tuple[str, ...]]) -> bytes:
             "Priorities": "Priority",
             "TopicStatuses": "TopicStatus",
         }
-        singular = (
-            _IRREGULAR[kind]
-            if kind in _IRREGULAR
-            else kind[:-1] if kind.endswith("s") else kind
-        )
+        singular = _IRREGULAR[kind] if kind in _IRREGULAR else kind[:-1] if kind.endswith("s") else kind
         for v in values:
             ET.SubElement(container, singular).text = v
     return _serialise(root)
@@ -303,17 +297,13 @@ def build_markup_xml(topic: BCFTopic) -> bytes:
         if c.modified_author:
             ET.SubElement(c_el, "ModifiedAuthor").text = c.modified_author
         if c.viewpoint_guid:
-            ET.SubElement(c_el, "Viewpoint").set(
-                "Guid", _normalize_guid(c.viewpoint_guid)
-            )
+            ET.SubElement(c_el, "Viewpoint").set("Guid", _normalize_guid(c.viewpoint_guid))
 
     # Viewpoints — one <Viewpoints><DocumentReference>-style block in 3.0.
     if topic.viewpoints:
         vps_el = ET.SubElement(topic_el, "Viewpoints")
         for vp in topic.viewpoints:
-            vp_el = ET.SubElement(
-                vps_el, "ViewPoint", {"Guid": _normalize_guid(vp.guid)}
-            )
+            vp_el = ET.SubElement(vps_el, "ViewPoint", {"Guid": _normalize_guid(vp.guid)})
             ET.SubElement(vp_el, "Viewpoint").text = f"{_normalize_guid(vp.guid)}.bcfv"
             if vp.snapshot_png is not None:
                 ET.SubElement(vp_el, "Snapshot").text = "snapshot.png"
@@ -376,9 +366,7 @@ def build_visinfo_xml(vp: BCFViewpoint) -> bytes:
         _vec(cam_el, "CameraViewPoint", vp.camera_view_point)
         _vec(cam_el, "CameraDirection", vp.camera_direction)
         _vec(cam_el, "CameraUpVector", vp.camera_up_vector)
-        ET.SubElement(cam_el, "ViewToWorldScale").text = repr(
-            float(vp.view_to_world_scale)
-        )
+        ET.SubElement(cam_el, "ViewToWorldScale").text = repr(float(vp.view_to_world_scale))
         ET.SubElement(cam_el, "AspectRatio").text = repr(float(vp.aspect_ratio))
     else:
         cam_el = ET.SubElement(root, "PerspectiveCamera")
@@ -428,9 +416,7 @@ class BCFWriter:
         self._project_name = str(project_name or "")
         return self
 
-    def add_extension_list(
-        self, kind: str, values: list[str] | tuple[str, ...]
-    ) -> BCFWriter:
+    def add_extension_list(self, kind: str, values: list[str] | tuple[str, ...]) -> BCFWriter:
         """Override a default extension enum list.
 
         Args:
@@ -442,10 +428,7 @@ class BCFWriter:
             ValueError: if ``kind`` is unknown.
         """
         if kind not in _DEFAULT_EXTENSIONS:
-            raise ValueError(
-                f"Unknown extension list {kind!r}; "
-                f"expected one of {sorted(_DEFAULT_EXTENSIONS)}"
-            )
+            raise ValueError(f"Unknown extension list {kind!r}; expected one of {sorted(_DEFAULT_EXTENSIONS)}")
         # Stable de-duplication preserving first-seen order.
         seen: set[str] = set()
         cleaned: list[str] = []
@@ -482,20 +465,13 @@ class BCFWriter:
         for c in topic.comments:
             _safe_dir(c.guid)
             if not c.date:
-                raise ValueError(
-                    f"comment {c.guid!r} on topic {guid!r}: date is required"
-                )
+                raise ValueError(f"comment {c.guid!r} on topic {guid!r}: date is required")
             if not c.author:
-                raise ValueError(
-                    f"comment {c.guid!r} on topic {guid!r}: author is required"
-                )
+                raise ValueError(f"comment {c.guid!r} on topic {guid!r}: author is required")
         for v in topic.viewpoints:
             _safe_dir(v.guid)
             if v.camera_type not in ("perspective", "orthogonal"):
-                raise ValueError(
-                    f"viewpoint {v.guid!r} on topic {guid!r}: "
-                    f"unknown camera_type {v.camera_type!r}"
-                )
+                raise ValueError(f"viewpoint {v.guid!r} on topic {guid!r}: unknown camera_type {v.camera_type!r}")
         self._topics.append(topic)
         self._seen_guids.add(guid)
         return self
@@ -514,9 +490,7 @@ class BCFWriter:
             if self._project_id is not None:
                 zf.writestr(
                     "project.bcfp",
-                    build_project_xml(
-                        self._project_id, self._project_name or self._project_id
-                    ),
+                    build_project_xml(self._project_id, self._project_name or self._project_id),
                 )
             for topic in self._topics:
                 folder = _safe_dir(topic.guid)
@@ -529,9 +503,7 @@ class BCFWriter:
                     )
                     if vp.snapshot_png is not None:
                         if not vp.snapshot_png.startswith(b"\x89PNG\r\n\x1a\n"):
-                            raise ValueError(
-                                f"viewpoint {vp.guid!r}: snapshot_png is not a PNG"
-                            )
+                            raise ValueError(f"viewpoint {vp.guid!r}: snapshot_png is not a PNG")
                         zf.writestr(f"{folder}/snapshot.png", vp.snapshot_png)
         return buf.getvalue()
 

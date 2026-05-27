@@ -55,7 +55,8 @@ async def session_factory():
     from app.database import Base
 
     engine = create_async_engine(
-        f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}", echo=False,
+        f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}",
+        echo=False,
     )
     # Per-test isolation: drop + recreate so leftover Position / Project
     # rows from a previous case never bleed into the next ("no row was
@@ -136,10 +137,14 @@ async def test_manager_can_create_boq_item(session_factory):
     assert TOOL_PERMISSIONS["create_boq_item"] == "write"
 
     manager_id = await _make_user(
-        session_factory, email="mgr@test.io", role="manager",
+        session_factory,
+        email="mgr@test.io",
+        role="manager",
     )
     project_id = await _make_project(
-        session_factory, owner_id=manager_id, name="Mgr Project",
+        session_factory,
+        owner_id=manager_id,
+        name="Mgr Project",
     )
     await _make_boq(session_factory, project_id=project_id)
 
@@ -163,9 +168,7 @@ async def test_manager_can_create_boq_item(session_factory):
     assert result["data"]["description"] == "Concrete wall C30/37"
 
     async with session_factory() as session:
-        rows = (
-            await session.execute(select(Position))
-        ).scalars().all()
+        rows = (await session.execute(select(Position))).scalars().all()
         assert len(rows) == 1
         assert rows[0].description == "Concrete wall C30/37"
 
@@ -186,15 +189,21 @@ async def test_member_cannot_create_boq_item(session_factory):
 
     # Owner = admin (so the project exists + member can read it later).
     admin_id = await _make_user(
-        session_factory, email="owner@test.io", role="admin",
+        session_factory,
+        email="owner@test.io",
+        role="admin",
     )
     project_id = await _make_project(
-        session_factory, owner_id=admin_id, name="Shared Project",
+        session_factory,
+        owner_id=admin_id,
+        name="Shared Project",
     )
     await _make_boq(session_factory, project_id=project_id)
 
     member_id = await _make_user(
-        session_factory, email="member@test.io", role="editor",
+        session_factory,
+        email="member@test.io",
+        role="editor",
     )
 
     args = {
@@ -209,15 +218,16 @@ async def test_member_cannot_create_boq_item(session_factory):
     async with session_factory() as session:
         with pytest.raises(ToolPermissionDenied) as ei:
             await check_tool_permission(
-                session, "create_boq_item", args, member_id,
+                session,
+                "create_boq_item",
+                args,
+                member_id,
             )
         assert ei.value.i18n_key == "chat.error.manager_required"
 
     # And no Position row was created (gate ran before handler).
     async with session_factory() as session:
-        rows = (
-            await session.execute(select(Position))
-        ).scalars().all()
+        rows = (await session.execute(select(Position))).scalars().all()
         assert rows == []
 
 
@@ -232,14 +242,20 @@ async def test_member_can_read_boq_items(session_factory):
     assert TOOL_PERMISSIONS["get_boq_items"] == "read"
 
     admin_id = await _make_user(
-        session_factory, email="adm-read@test.io", role="admin",
+        session_factory,
+        email="adm-read@test.io",
+        role="admin",
     )
     project_id = await _make_project(
-        session_factory, owner_id=admin_id, name="Readable Project",
+        session_factory,
+        owner_id=admin_id,
+        name="Readable Project",
     )
 
     member_id = await _make_user(
-        session_factory, email="reader@test.io", role="editor",
+        session_factory,
+        email="reader@test.io",
+        role="editor",
     )
 
     args = {"project_id": project_id}
@@ -259,16 +275,22 @@ async def test_cross_tenant_manager_gets_404_not_403(session_factory):
 
     # Tenant A owns the project.
     tenant_a_id = await _make_user(
-        session_factory, email="tenant-a@test.io", role="admin",
+        session_factory,
+        email="tenant-a@test.io",
+        role="admin",
     )
     project_id = await _make_project(
-        session_factory, owner_id=tenant_a_id, name="Tenant A Project",
+        session_factory,
+        owner_id=tenant_a_id,
+        name="Tenant A Project",
     )
     await _make_boq(session_factory, project_id=project_id)
 
     # Tenant B is a manager — but NOT on this project.
     tenant_b_id = await _make_user(
-        session_factory, email="tenant-b@test.io", role="manager",
+        session_factory,
+        email="tenant-b@test.io",
+        role="manager",
     )
 
     # The IDOR check (which the dispatcher runs FIRST for write tools)
@@ -277,7 +299,9 @@ async def test_cross_tenant_manager_gets_404_not_403(session_factory):
     async with session_factory() as session:
         with pytest.raises(ToolAuthError) as ei:
             await _require_project_access(
-                session, uuid.UUID(project_id), tenant_b_id,
+                session,
+                uuid.UUID(project_id),
+                tenant_b_id,
             )
         # The message must not include the words "manager" or "permission"
         # so the cross-tenant card is indistinguishable from "project
@@ -339,14 +363,19 @@ async def _dispatch_one(service, tool_name, tool_args, user_id):
         if project_id is not None:
             try:
                 await _require_project_access(
-                    service.session, project_id, user_id,
+                    service.session,
+                    project_id,
+                    user_id,
                 )
             except ToolAuthError as te:
                 tool_result = _auth_error(str(te))
         if tool_result is None:
             try:
                 await check_tool_permission(
-                    service.session, tool_name, tool_args, user_id,
+                    service.session,
+                    tool_name,
+                    tool_args,
+                    user_id,
                 )
             except ToolPermissionDenied:
                 tool_result = manager_permission_error_result()

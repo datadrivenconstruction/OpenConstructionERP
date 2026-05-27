@@ -79,9 +79,7 @@ class InvoiceRepository:
         await self.session.flush()
         self.session.expire_all()
 
-    async def next_invoice_number(
-        self, project_id: uuid.UUID, direction: str
-    ) -> str:
+    async def next_invoice_number(self, project_id: uuid.UUID, direction: str) -> str:
         """Generate the next invoice number for a project and direction.
 
         Uses MAX of existing invoice numbers to avoid race conditions where
@@ -107,7 +105,6 @@ class InvoiceRepository:
             return f"{prefix}-{suffix + 1:03d}"
 
         return f"{prefix}-001"
-
 
     async def aggregate_for_dashboard(
         self,
@@ -137,7 +134,11 @@ class InvoiceRepository:
         total_payable = 0.0
         total_receivable = 0.0
         status_counts: dict[str, int] = {
-            "draft": 0, "pending": 0, "approved": 0, "paid": 0, "cancelled": 0,
+            "draft": 0,
+            "pending": 0,
+            "approved": 0,
+            "paid": 0,
+            "cancelled": 0,
         }
 
         for direction, status, cnt, total in rows:
@@ -255,9 +256,7 @@ class PaymentRepository:
         """
         from sqlalchemy import Numeric, cast
 
-        base = select(
-            func.coalesce(func.sum(cast(Payment.amount, Numeric)), 0)
-        )
+        base = select(func.coalesce(func.sum(cast(Payment.amount, Numeric)), 0))
         if invoice_id is not None:
             base = base.where(Payment.invoice_id == invoice_id)
         result = (await self.session.execute(base)).scalar_one()
@@ -269,11 +268,7 @@ class PaymentRepository:
         Used by create_payment() to implement idempotency: a second POST
         with the same key returns the existing row without writing a duplicate.
         """
-        stmt = (
-            select(Payment)
-            .where(Payment.idempotency_key == key)
-            .limit(1)
-        )
+        stmt = select(Payment).where(Payment.idempotency_key == key).limit(1)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 

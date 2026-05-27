@@ -28,9 +28,7 @@ class Notice(Base):
     """‌⁠‍Early-warning notice raised to recipient on a project."""
 
     __tablename__ = "oe_variations_notice"
-    __table_args__ = (
-        UniqueConstraint("project_id", "code", name="uq_oe_variations_notice_project_code"),
-    )
+    __table_args__ = (UniqueConstraint("project_id", "code", name="uq_oe_variations_notice_project_code"),)
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -48,13 +46,9 @@ class Notice(Base):
     target_response_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     response_received_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     response_summary: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="issued", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="issued", index=True)
     # Soft link to oe_changeorders_change_order.id (plain UUID, no DB FK)
-    reference_change_order_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True
-    )
+    reference_change_order_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -71,9 +65,7 @@ class VariationRequest(Base):
     """‌⁠‍Formal variation request submitted for approval."""
 
     __tablename__ = "oe_variations_request"
-    __table_args__ = (
-        UniqueConstraint("project_id", "code", name="uq_oe_variations_request_project_code"),
-    )
+    __table_args__ = (UniqueConstraint("project_id", "code", name="uq_oe_variations_request_project_code"),)
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -92,32 +84,20 @@ class VariationRequest(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     requested_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     requested_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    classification: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="scope_change"
-    )
+    classification: Mapped[str] = mapped_column(String(40), nullable=False, default="scope_change")
     urgency: Mapped[str] = mapped_column(String(20), nullable=False, default="med")
-    estimated_cost_impact: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
-    estimated_schedule_days: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0
-    )
+    estimated_cost_impact: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
+    estimated_schedule_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="draft", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="draft", index=True)
     submitted_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     decision_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     decision_notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
     decided_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     # Contract standard + sub-clause reference (FIDIC 13.x / JCT 5.x /
     # NEC4 60-65). Free string so unsupported standards still record.
-    contract_standard: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="", server_default=""
-    )
-    contract_clause_ref: Mapped[str] = mapped_column(
-        String(60), nullable=False, default="", server_default=""
-    )
+    contract_standard: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")
+    contract_clause_ref: Mapped[str] = mapped_column(String(60), nullable=False, default="", server_default="")
     # NEC4 Cl. 62.3 — Contractor's quotation deadline (8 weeks default).
     quotation_due_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     # NEC4 Cl. 62.5 — Project Manager's assessment deadline (4 weeks
@@ -139,9 +119,7 @@ class VariationOrder(Base):
     """Issued variation order — the formal contract-changing document."""
 
     __tablename__ = "oe_variations_order"
-    __table_args__ = (
-        UniqueConstraint("project_id", "code", name="uq_oe_variations_order_project_code"),
-    )
+    __table_args__ = (UniqueConstraint("project_id", "code", name="uq_oe_variations_order_project_code"),)
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -157,33 +135,21 @@ class VariationOrder(Base):
     )
     code: Mapped[str] = mapped_column(String(50), nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False, default="")
-    final_cost_impact: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
+    final_cost_impact: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
     final_schedule_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
     agreed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     signed_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="issued", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="issued", index=True)
     # Soft link (plain UUID, no DB FK to oe_changeorders_*)
-    reference_change_order_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True
-    )
+    reference_change_order_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     # Plain UUID soft link to oe_contracts.contract — set when VO bumps a
     # contract's total_value. NO DB FK across modules.
-    affected_contract_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    affected_contract_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     # Contract standard + sub-clause reference (carried through from VR
     # or set explicitly when an Engineer-issued VO has no upstream VR).
-    contract_standard: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="", server_default=""
-    )
-    contract_clause_ref: Mapped[str] = mapped_column(
-        String(60), nullable=False, default="", server_default=""
-    )
+    contract_standard: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")
+    contract_clause_ref: Mapped[str] = mapped_column(String(60), nullable=False, default="", server_default="")
     implementation_started_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     implementation_completed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
@@ -222,16 +188,10 @@ class VariationCostImpact(Base):
     )
     category: Mapped[str] = mapped_column(String(40), nullable=False, default="material")
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    quantity: Mapped[Decimal] = mapped_column(
-        MoneyType(scale=6), nullable=False, default=Decimal("0")
-    )
+    quantity: Mapped[Decimal] = mapped_column(MoneyType(scale=6), nullable=False, default=Decimal("0"))
     unit: Mapped[str] = mapped_column(String(20), nullable=False, default="")
-    unit_rate: Mapped[Decimal] = mapped_column(
-        MoneyType(scale=6), nullable=False, default=Decimal("0")
-    )
-    total: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
+    unit_rate: Mapped[Decimal] = mapped_column(MoneyType(scale=6), nullable=False, default=Decimal("0"))
+    total: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
     source: Mapped[str] = mapped_column(String(40), nullable=False, default="manual")
 
@@ -282,9 +242,7 @@ class SiteMeasurement(Base):
     location: Mapped[str] = mapped_column(String(500), nullable=False, default="")
     item_description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     unit: Mapped[str] = mapped_column(String(20), nullable=False, default="")
-    measured_quantity: Mapped[Decimal] = mapped_column(
-        MoneyType(scale=6), nullable=False, default=Decimal("0")
-    )
+    measured_quantity: Mapped[Decimal] = mapped_column(MoneyType(scale=6), nullable=False, default=Decimal("0"))
     agreed_with_owner_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     owner_signature_ref: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     photos: Mapped[list] = mapped_column(  # type: ignore[assignment]
@@ -317,7 +275,8 @@ class DayworkSheet(Base):
     __tablename__ = "oe_variations_daywork_sheet"
     __table_args__ = (
         UniqueConstraint(
-            "project_id", "sheet_number",
+            "project_id",
+            "sheet_number",
             name="uq_oe_variations_daywork_project_sheet",
         ),
     )
@@ -337,20 +296,14 @@ class DayworkSheet(Base):
     markup_percent: Mapped[Decimal] = mapped_column(
         MoneyType(scale=2), nullable=False, default=Decimal("0"), server_default="0"
     )
-    total_amount: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
+    total_amount: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="draft", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="draft", index=True)
     signed_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     signed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     owner_signature_ref: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     # Plain UUID link to a contract (no DB FK).
-    supplied_via_contract_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True
-    )
+    supplied_via_contract_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
     lines: Mapped[list["DayworkSheetLine"]] = relationship(
         back_populates="sheet",
@@ -375,16 +328,10 @@ class DayworkSheetLine(Base):
     )
     line_type: Mapped[str] = mapped_column(String(20), nullable=False, default="labor")
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    quantity: Mapped[Decimal] = mapped_column(
-        MoneyType(scale=6), nullable=False, default=Decimal("0")
-    )
+    quantity: Mapped[Decimal] = mapped_column(MoneyType(scale=6), nullable=False, default=Decimal("0"))
     unit: Mapped[str] = mapped_column(String(20), nullable=False, default="")
-    unit_rate: Mapped[Decimal] = mapped_column(
-        MoneyType(scale=6), nullable=False, default=Decimal("0")
-    )
-    total: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
+    unit_rate: Mapped[Decimal] = mapped_column(MoneyType(scale=6), nullable=False, default=Decimal("0"))
+    total: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
     worker_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     equipment_code: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
@@ -418,33 +365,21 @@ class DisruptionClaim(Base):
     claim_period_end: Mapped[str | None] = mapped_column(String(20), nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     root_cause: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    cost_amount: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
+    cost_amount: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
     schedule_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
     evidence_refs: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=list, server_default="[]"
     )
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="draft", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="draft", index=True)
     decision_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     decided_amount: Mapped[Decimal | None] = mapped_column(MoneyType(), nullable=True)
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
     # AICPA measured-mile fields — units per hour at baseline vs impacted.
-    baseline_productivity: Mapped[Decimal | None] = mapped_column(
-        MoneyType(scale=6), nullable=True
-    )
-    impacted_productivity: Mapped[Decimal | None] = mapped_column(
-        MoneyType(scale=6), nullable=True
-    )
-    unit_of_measure: Mapped[str] = mapped_column(
-        String(30), nullable=False, default="", server_default=""
-    )
-    labour_hours_lost: Mapped[Decimal | None] = mapped_column(
-        MoneyType(scale=2), nullable=True
-    )
+    baseline_productivity: Mapped[Decimal | None] = mapped_column(MoneyType(scale=6), nullable=True)
+    impacted_productivity: Mapped[Decimal | None] = mapped_column(MoneyType(scale=6), nullable=True)
+    unit_of_measure: Mapped[str] = mapped_column(String(30), nullable=False, default="", server_default="")
+    labour_hours_lost: Mapped[Decimal | None] = mapped_column(MoneyType(scale=2), nullable=True)
 
     def __repr__(self) -> str:
         return f"<DisruptionClaim {self.id} ({self.status})>"
@@ -472,24 +407,16 @@ class ExtensionOfTimeClaim(Base):
     claim_period_start: Mapped[str | None] = mapped_column(String(20), nullable=True)
     claim_period_end: Mapped[str | None] = mapped_column(String(20), nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    root_cause_category: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="neutral"
-    )
+    root_cause_category: Mapped[str] = mapped_column(String(40), nullable=False, default="neutral")
     requested_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     granted_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    critical_path_impact: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="draft", index=True
-    )
+    critical_path_impact: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="draft", index=True)
     decision_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     decision_notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
     # Affected schedule-activity (string ref so we don't FK across module
     # boundary). Either a UUID-string of oe_tasks_task or a free name.
-    affected_activity_ref: Mapped[str] = mapped_column(
-        String(255), nullable=False, default="", server_default=""
-    )
+    affected_activity_ref: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
     # TIA result — days the project completion is forecast to slip.
     tia_delta_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
     tia_computed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
@@ -504,7 +431,8 @@ class FinalAccount(Base):
     __tablename__ = "oe_variations_final_account"
     __table_args__ = (
         UniqueConstraint(
-            "project_id", name="uq_oe_variations_final_account_project",
+            "project_id",
+            name="uq_oe_variations_final_account_project",
         ),
     )
 
@@ -514,31 +442,15 @@ class FinalAccount(Base):
         nullable=False,
         index=True,
     )
-    original_contract_value: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
-    variations_total: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
-    daywork_total: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
-    claims_total: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
-    retention_held: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
-    retention_released: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
-    final_value: Mapped[Decimal] = mapped_column(
-        MoneyType(), nullable=False, default=Decimal("0")
-    )
+    original_contract_value: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
+    variations_total: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
+    daywork_total: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
+    claims_total: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
+    retention_held: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
+    retention_released: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
+    final_value: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="draft", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="draft", index=True)
     agreed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     closed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
 

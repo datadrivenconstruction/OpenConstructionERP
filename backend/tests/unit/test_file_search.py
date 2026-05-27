@@ -34,12 +34,12 @@ os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 
-# Force ORM registration of every module the index references.
-import app.modules.projects.models  # noqa: E402, F401
-import app.modules.users.models  # noqa: E402, F401
 import app.modules.documents.models  # noqa: E402, F401
 import app.modules.file_search.models  # noqa: E402, F401
 
+# Force ORM registration of every module the index references.
+import app.modules.projects.models  # noqa: E402, F401
+import app.modules.users.models  # noqa: E402, F401
 from app.modules.file_search.extractors import extract_text  # noqa: E402
 from app.modules.file_search.models import FileSearchIndex  # noqa: E402
 from app.modules.file_search.service import (  # noqa: E402
@@ -49,7 +49,6 @@ from app.modules.file_search.service import (  # noqa: E402
     reindex_project,
     search_content,
 )
-
 
 # ── Pure: extract_text graceful degradation ───────────────────────────────
 
@@ -64,7 +63,7 @@ def test_extract_text_empty_payload_returns_none_engine() -> None:
 
 def test_extract_text_plaintext_decodes_utf8() -> None:
     """Plain text payloads ought to decode UTF-8 directly."""
-    payload = "Foundation level structural calculation page".encode("utf-8")
+    payload = b"Foundation level structural calculation page"
     result = extract_text(payload, "text/plain")
     assert "Foundation" in result.text
     assert result.engine == "plaintext"
@@ -82,11 +81,7 @@ def test_extract_text_unknown_binary_yields_empty() -> None:
 
 
 def test_build_snippet_returns_window_around_match() -> None:
-    text = (
-        "alpha beta " * 50
-        + "the magical needle is here "
-        + "gamma delta " * 50
-    )
+    text = "alpha beta " * 50 + "the magical needle is here " + "gamma delta " * 50
     snippet = _build_snippet(text, "needle")
     assert "needle" in snippet
     # Window is bounded; we should not get the whole text back.
@@ -195,9 +190,7 @@ async def test_index_file_persists_extracted_text(db_session) -> None:
 async def test_index_file_is_idempotent_upsert(db_session) -> None:
     """Re-indexing the same file overwrites the existing row, no duplicate."""
     project_id = await _seed_project(db_session)
-    doc, file_path = await _seed_document(
-        db_session, project_id, "doc.txt", "first version of the body"
-    )
+    doc, file_path = await _seed_document(db_session, project_id, "doc.txt", "first version of the body")
     await index_file(db_session, project_id, "document", str(doc.id))
     # Mutate file → re-index.
     file_path.write_text("second version of the body", encoding="utf-8")
@@ -206,10 +199,10 @@ async def test_index_file_is_idempotent_upsert(db_session) -> None:
     from sqlalchemy import select
 
     count = (
-        await db_session.execute(
-            select(FileSearchIndex).where(FileSearchIndex.file_id == str(doc.id))
-        )
-    ).scalars().all()
+        (await db_session.execute(select(FileSearchIndex).where(FileSearchIndex.file_id == str(doc.id))))
+        .scalars()
+        .all()
+    )
     assert len(count) == 1
     assert "second version" in count[0].content_text
 
@@ -218,9 +211,7 @@ async def test_index_file_is_idempotent_upsert(db_session) -> None:
 async def test_index_file_handles_missing_file_on_disk(db_session) -> None:
     """File row exists but the bytes are gone → row still indexed (empty)."""
     project_id = await _seed_project(db_session)
-    doc, file_path = await _seed_document(
-        db_session, project_id, "ghost.txt", "ephemeral body"
-    )
+    doc, file_path = await _seed_document(db_session, project_id, "ghost.txt", "ephemeral body")
     file_path.unlink()  # remove the bytes
     row = await index_file(db_session, project_id, "document", str(doc.id))
 
@@ -246,9 +237,7 @@ async def test_search_content_returns_matching_hit_with_snippet(db_session) -> N
     doc, _ = await _seed_document(db_session, project_id, "spec.txt", body)
     await index_file(db_session, project_id, "document", str(doc.id))
 
-    hits = await search_content(
-        db_session, project_id, "B500B", mode="content"
-    )
+    hits = await search_content(db_session, project_id, "B500B", mode="content")
     assert len(hits) >= 1
     h = hits[0]
     assert h.file_id == str(doc.id)
@@ -261,14 +250,10 @@ async def test_search_content_returns_matching_hit_with_snippet(db_session) -> N
 async def test_search_filename_mode_returns_by_canonical_name(db_session) -> None:
     """mode=filename hits the canonical name even with no indexed row."""
     project_id = await _seed_project(db_session)
-    doc, _ = await _seed_document(
-        db_session, project_id, "S-101-piles-rev-A.pdf", "irrelevant body"
-    )
+    doc, _ = await _seed_document(db_session, project_id, "S-101-piles-rev-A.pdf", "irrelevant body")
     # Deliberately do NOT index — filename mode must still work.
 
-    hits = await search_content(
-        db_session, project_id, "piles", mode="filename"
-    )
+    hits = await search_content(db_session, project_id, "piles", mode="filename")
     assert len(hits) == 1
     assert hits[0].file_id == str(doc.id)
     assert "piles" in hits[0].canonical_name.lower()
@@ -286,9 +271,7 @@ async def test_search_other_project_isolation(db_session) -> None:
     """Search must NEVER return hits from a different project."""
     project_a = await _seed_project(db_session)
     project_b = await _seed_project(db_session)
-    doc_a, _ = await _seed_document(
-        db_session, project_a, "a.txt", "secret token zebra-mango-quartz"
-    )
+    doc_a, _ = await _seed_document(db_session, project_a, "a.txt", "secret token zebra-mango-quartz")
     await index_file(db_session, project_a, "document", str(doc_a.id))
 
     hits = await search_content(db_session, project_b, "zebra-mango-quartz")
@@ -299,9 +282,7 @@ async def test_search_other_project_isolation(db_session) -> None:
 async def test_delete_index_for_file_removes_row(db_session) -> None:
     """delete_index_for_file → row gone; search no longer hits."""
     project_id = await _seed_project(db_session)
-    doc, _ = await _seed_document(
-        db_session, project_id, "removable.txt", "transient body about gamma-irrelevant-text"
-    )
+    doc, _ = await _seed_document(db_session, project_id, "removable.txt", "transient body about gamma-irrelevant-text")
     await index_file(db_session, project_id, "document", str(doc.id))
 
     deleted = await delete_index_for_file(db_session, project_id, str(doc.id))

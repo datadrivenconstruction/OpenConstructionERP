@@ -221,7 +221,9 @@ class TestEmailService:
         mem = MemoryEmailBackend()
         service = EmailService(mem)
         await service.send_password_reset(
-            to="x@y", reset_url="https://x.y/r?token=T", recipient_name=None,
+            to="x@y",
+            reset_url="https://x.y/r?token=T",
+            recipient_name=None,
         )
         assert "Hello" in mem.sent[0].html_body
 
@@ -325,7 +327,8 @@ class TestTemplates:
 
     def test_password_reset_no_name(self):
         _, html = template_password_reset(
-            recipient_name=None, reset_url="https://x/r?token=T",
+            recipient_name=None,
+            reset_url="https://x/r?token=T",
         )
         assert "Hello" in html
 

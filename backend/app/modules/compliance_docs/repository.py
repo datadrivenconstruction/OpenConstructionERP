@@ -18,7 +18,8 @@ class ComplianceDocRepository:
         self.session = session
 
     async def get_by_id(
-        self, doc_id: uuid.UUID,
+        self,
+        doc_id: uuid.UUID,
     ) -> ComplianceDoc | None:
         return await self.session.get(ComplianceDoc, doc_id)
 
@@ -29,9 +30,7 @@ class ComplianceDocRepository:
         status: str | None = None,
         doc_type: str | None = None,
     ) -> list[ComplianceDoc]:
-        stmt = select(ComplianceDoc).where(
-            ComplianceDoc.project_id == project_id
-        )
+        stmt = select(ComplianceDoc).where(ComplianceDoc.project_id == project_id)
         if status is not None:
             stmt = stmt.where(ComplianceDoc.status == status)
         if doc_type is not None:
@@ -67,13 +66,11 @@ class ComplianceDocRepository:
         return doc
 
     async def update_fields(
-        self, doc_id: uuid.UUID, **fields: object,
+        self,
+        doc_id: uuid.UUID,
+        **fields: object,
     ) -> None:
-        stmt = (
-            update(ComplianceDoc)
-            .where(ComplianceDoc.id == doc_id)
-            .values(**fields)
-        )
+        stmt = update(ComplianceDoc).where(ComplianceDoc.id == doc_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()

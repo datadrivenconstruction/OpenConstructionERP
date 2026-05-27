@@ -78,9 +78,7 @@ async def session_factory(tmp_path):
                 PipelineNodeState.__table__,
             ],
         )
-    maker = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     yield maker
     await engine.dispose()
 
@@ -171,9 +169,7 @@ def test_validate_graph_rejects_unregistered_node_type():
 
 def test_validate_graph_accepts_registered_types():
     # All six Phase-1 types are registered at import — no raise.
-    assert validate_graph(_linear_graph()) == topological_order(
-        _linear_graph()
-    )
+    assert validate_graph(_linear_graph()) == topological_order(_linear_graph())
 
 
 def test_register_node_and_lookup_roundtrip():
@@ -207,17 +203,7 @@ async def test_execute_run_persists_every_node_state(session_factory):
     assert summary["error"] == 0
 
     async with session_factory() as db:
-        states = (
-            (
-                await db.execute(
-                    select(PipelineNodeState).where(
-                        PipelineNodeState.run_id == run_id
-                    )
-                )
-            )
-            .scalars()
-            .all()
-        )
+        states = (await db.execute(select(PipelineNodeState).where(PipelineNodeState.run_id == run_id))).scalars().all()
     by_node = {s.node_id: s for s in states}
     assert set(by_node) == {"t", "s", "g", "x"}
     assert all(s.status == "done" for s in states)
@@ -245,17 +231,7 @@ async def test_rerun_marks_downstream_stale(session_factory):
             upstream={},
             graph=graph,
         )
-        states = (
-            (
-                await db.execute(
-                    select(PipelineNodeState).where(
-                        PipelineNodeState.run_id == run_id
-                    )
-                )
-            )
-            .scalars()
-            .all()
-        )
+        states = (await db.execute(select(PipelineNodeState).where(PipelineNodeState.run_id == run_id))).scalars().all()
     by_node = {s.node_id: s.status for s in states}
     assert by_node["s"] == "done"
     assert by_node["g"] == "stale"
@@ -291,9 +267,7 @@ async def test_run_is_a_jobrun(session_factory):
                 return_value=session_factory,
             ),
         ):
-            run, job = await svc.submit_run(
-                pipeline, trigger={"type": "manual"}, actor_id=None
-            )
+            run, job = await svc.submit_run(pipeline, trigger={"type": "manual"}, actor_id=None)
 
     assert job.kind == "pipeline.run"
     assert run.job_run_id == job.id
@@ -303,9 +277,7 @@ async def test_run_is_a_jobrun(session_factory):
     async with session_factory() as db:
         from app.core.pipeline.executor import _run_pipeline_job
 
-        result = await _run_pipeline_job(
-            job, {"run_id": str(run.id)}, session_factory=session_factory
-        )
+        result = await _run_pipeline_job(job, {"run_id": str(run.id)}, session_factory=session_factory)
     assert result["done"] == 4
 
 
@@ -366,13 +338,7 @@ async def test_failing_node_skips_its_descendants(session_factory):
     async with session_factory() as db:
         states = {
             s.node_id: s.status
-            for s in (
-                await db.execute(
-                    select(PipelineNodeState).where(
-                        PipelineNodeState.run_id == run_id
-                    )
-                )
-            )
+            for s in (await db.execute(select(PipelineNodeState).where(PipelineNodeState.run_id == run_id)))
             .scalars()
             .all()
         }

@@ -22,7 +22,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
 
-
 # Mirrors the kind whitelist used by every other file_* module.
 FAVORITE_KINDS: tuple[str, ...] = (
     "document",
@@ -86,7 +85,4 @@ class FileFavorite(Base):
 
     def __repr__(self) -> str:
         flag = "pinned" if self.pinned else "starred"
-        return (
-            f"<FileFavorite user={self.user_id} {self.file_kind}:{self.file_id} "
-            f"{flag}>"
-        )
+        return f"<FileFavorite user={self.user_id} {self.file_kind}:{self.file_id} {flag}>"

@@ -144,9 +144,7 @@ def _quick_validate_geometry_bytes(blob: bytes, ext: str) -> tuple[bool, str]:
     ext_norm = ext.lower()
     if ext_norm == ".glb":
         if blob[:4] != b"glTF":
-            return False, (
-                f"GLB magic mismatch — first 4 bytes are {blob[:4]!r}, expected b'glTF'"
-            )
+            return False, (f"GLB magic mismatch — first 4 bytes are {blob[:4]!r}, expected b'glTF'")
         # Version is the 4-byte LE integer at offset 4.
         if len(blob) >= 12:
             version = int.from_bytes(blob[4:8], "little", signed=False)
@@ -169,18 +167,12 @@ def _quick_validate_geometry_bytes(blob: bytes, ext: str) -> tuple[bool, str]:
             head_text = head.decode("utf-8", errors="replace")
         except Exception as exc:  # pragma: no cover — utf-8 with errors='replace' can't raise
             return False, f"DAE head undecodable: {exc}"
-        if not _re.search(
-            r"<(?:[a-zA-Z_][\w.-]*:)?COLLADA\b", head_text, _re.IGNORECASE
-        ):
+        if not _re.search(r"<(?:[a-zA-Z_][\w.-]*:)?COLLADA\b", head_text, _re.IGNORECASE):
             # Surface what we DID find so the user/admin can recognise it
             # (e.g. "<ifcxml", "<gbxml", "<!doctype html").
             first_tag_match = _re.search(r"<([a-zA-Z_:][\w:.-]{0,40})", head_text)
-            first_tag = (
-                f"<{first_tag_match.group(1)}>" if first_tag_match else "no root tag"
-            )
-            return False, (
-                f"DAE has no <COLLADA> root in first 4 KB (first tag found: {first_tag})"
-            )
+            first_tag = f"<{first_tag_match.group(1)}>" if first_tag_match else "no root tag"
+            return False, (f"DAE has no <COLLADA> root in first 4 KB (first tag found: {first_tag})")
         return True, "ok"
 
     if ext_norm == ".gltf":
@@ -216,6 +208,7 @@ def _to_qty_float(val: object) -> float:
     if f != f or f in (float("inf"), float("-inf")):
         return 0.0
     return f
+
 
 # Legacy on-disk path kept only for backward compatibility with any
 # external code that may still import ``_BIM_DATA_DIR``.  New code MUST
@@ -412,34 +405,70 @@ _BIM_COLUMN_ALIASES: dict[str, list[str]] = {
         "geometryref",
     ],
     "bbox_min_x": [
-        "bbox_min_x", "bboxminx", "min_x", "minx",
-        "bounding_box_min_x", "boundingboxminx",
-        "bb_min_x", "bbminx", "xmin",
+        "bbox_min_x",
+        "bboxminx",
+        "min_x",
+        "minx",
+        "bounding_box_min_x",
+        "boundingboxminx",
+        "bb_min_x",
+        "bbminx",
+        "xmin",
     ],
     "bbox_min_y": [
-        "bbox_min_y", "bboxminy", "min_y", "miny",
-        "bounding_box_min_y", "boundingboxminy",
-        "bb_min_y", "bbminy", "ymin",
+        "bbox_min_y",
+        "bboxminy",
+        "min_y",
+        "miny",
+        "bounding_box_min_y",
+        "boundingboxminy",
+        "bb_min_y",
+        "bbminy",
+        "ymin",
     ],
     "bbox_min_z": [
-        "bbox_min_z", "bboxminz", "min_z", "minz",
-        "bounding_box_min_z", "boundingboxminz",
-        "bb_min_z", "bbminz", "zmin",
+        "bbox_min_z",
+        "bboxminz",
+        "min_z",
+        "minz",
+        "bounding_box_min_z",
+        "boundingboxminz",
+        "bb_min_z",
+        "bbminz",
+        "zmin",
     ],
     "bbox_max_x": [
-        "bbox_max_x", "bboxmaxx", "max_x", "maxx",
-        "bounding_box_max_x", "boundingboxmaxx",
-        "bb_max_x", "bbmaxx", "xmax",
+        "bbox_max_x",
+        "bboxmaxx",
+        "max_x",
+        "maxx",
+        "bounding_box_max_x",
+        "boundingboxmaxx",
+        "bb_max_x",
+        "bbmaxx",
+        "xmax",
     ],
     "bbox_max_y": [
-        "bbox_max_y", "bboxmaxy", "max_y", "maxy",
-        "bounding_box_max_y", "boundingboxmaxy",
-        "bb_max_y", "bbmaxy", "ymax",
+        "bbox_max_y",
+        "bboxmaxy",
+        "max_y",
+        "maxy",
+        "bounding_box_max_y",
+        "boundingboxmaxy",
+        "bb_max_y",
+        "bbmaxy",
+        "ymax",
     ],
     "bbox_max_z": [
-        "bbox_max_z", "bboxmaxz", "max_z", "maxz",
-        "bounding_box_max_z", "boundingboxmaxz",
-        "bb_max_z", "bbmaxz", "zmax",
+        "bbox_max_z",
+        "bboxmaxz",
+        "max_z",
+        "maxz",
+        "bounding_box_max_z",
+        "boundingboxmaxz",
+        "bb_max_z",
+        "bbmaxz",
+        "zmax",
     ],
     "bounding_box": [
         "bounding_box",
@@ -541,9 +570,18 @@ _STOREY_PROPERTY_FALLBACK_KEYS: tuple[str, ...] = (
 # Literal-string sentinels that mean "no storey assigned" — Revit
 # exports often write "None" / "<None>" instead of leaving the cell
 # blank.  Matched case-insensitively after stripping.
-_STOREY_NULL_LITERALS: frozenset[str] = frozenset({
-    "", "none", "null", "<none>", "n/a", "na", "-", "—",
-})
+_STOREY_NULL_LITERALS: frozenset[str] = frozenset(
+    {
+        "",
+        "none",
+        "null",
+        "<none>",
+        "n/a",
+        "na",
+        "-",
+        "—",
+    }
+)
 
 
 def _normalise_storey(raw: Any) -> str | None:
@@ -756,8 +794,7 @@ def _rows_to_elements(
             except (json.JSONDecodeError, ValueError, TypeError):
                 pass
         if bbox is None:
-            bbox_keys = ("bbox_min_x", "bbox_min_y", "bbox_min_z",
-                         "bbox_max_x", "bbox_max_y", "bbox_max_z")
+            bbox_keys = ("bbox_min_x", "bbox_min_y", "bbox_min_z", "bbox_max_x", "bbox_max_y", "bbox_max_z")
             if any(row.get(k) is not None for k in bbox_keys):
                 bbox = {
                     "min_x": _safe_float(row.get("bbox_min_x")),
@@ -794,13 +831,28 @@ def _rows_to_elements(
 
         # Collect any extra columns not in known canonical keys as properties
         bbox_col_keys = {
-            "bounding_box", "bbox_min_x", "bbox_min_y", "bbox_min_z",
-            "bbox_max_x", "bbox_max_y", "bbox_max_z",
+            "bounding_box",
+            "bbox_min_x",
+            "bbox_min_y",
+            "bbox_min_z",
+            "bbox_max_x",
+            "bbox_max_y",
+            "bbox_max_z",
         }
-        known_keys = {
-            "element_id", "element_type", "name", "storey",
-            "discipline", "properties", "mesh_ref",
-        } | quantity_keys | bbox_col_keys | set(_PROMOTE_TO_PROPS.keys())
+        known_keys = (
+            {
+                "element_id",
+                "element_type",
+                "name",
+                "storey",
+                "discipline",
+                "properties",
+                "mesh_ref",
+            }
+            | quantity_keys
+            | bbox_col_keys
+            | set(_PROMOTE_TO_PROPS.keys())
+        )
         for k, v in row.items():
             if k not in known_keys and v is not None and str(v).strip():
                 props[k] = v
@@ -844,9 +896,7 @@ async def upload_bim_data(
     name: str = Query(default="Imported Model", max_length=255),
     discipline: str = Query(default="architecture", max_length=50),
     data_file: UploadFile = File(..., description="CSV or Excel file with element data"),
-    geometry_file: UploadFile | None = File(
-        default=None, description="DAE/COLLADA geometry file"
-    ),
+    geometry_file: UploadFile | None = File(default=None, description="DAE/COLLADA geometry file"),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("bim.create")),
     service: BIMHubService = Depends(_get_service),
@@ -1093,8 +1143,7 @@ def _surface_parquet_failure(
     _PARQUET_FAILURE_COUNTER[fmt_key] = _PARQUET_FAILURE_COUNTER.get(fmt_key, 0) + 1
 
     logger.error(
-        "bim_parquet_write_failed model=%s project=%s format=%s rows=%d "
-        "exc=%s msg=%s",
+        "bim_parquet_write_failed model=%s project=%s format=%s rows=%d exc=%s msg=%s",
         model_id,
         project_id,
         fmt_key,
@@ -1199,16 +1248,12 @@ async def _process_cad_in_background(
                         "smoke test failed. Open Settings → BIM Converters "
                         "and click Reinstall, then click Retry on this model."
                     )
-                    suggested_actions = list(health["suggested_actions"]) or [
-                        "reinstall_converter"
-                    ]
+                    suggested_actions = list(health["suggested_actions"]) or ["reinstall_converter"]
 
             if failure_code:
                 async with async_session_factory() as session:
                     model = (
-                        await session.execute(
-                            select(BIMModel).where(BIMModel.id == model_uuid)
-                        )
+                        await session.execute(select(BIMModel).where(BIMModel.id == model_uuid))
                     ).scalar_one_or_none()
                     if model is not None:
                         model.status = "needs_converter"
@@ -1217,12 +1262,8 @@ async def _process_cad_in_background(
                         meta["error_code"] = failure_code
                         meta["converter_id"] = converter_id
                         meta["suggested_actions"] = suggested_actions
-                        meta["install_endpoint"] = (
-                            f"/api/v1/takeoff/converters/{converter_id}/install/"
-                        )
-                        meta["verify_endpoint"] = (
-                            f"/api/v1/takeoff/converters/{converter_id}/verify/"
-                        )
+                        meta["install_endpoint"] = f"/api/v1/takeoff/converters/{converter_id}/install/"
+                        meta["verify_endpoint"] = f"/api/v1/takeoff/converters/{converter_id}/verify/"
                         model.metadata_ = meta
                         await session.commit()
                 logger.warning(
@@ -1242,9 +1283,7 @@ async def _process_cad_in_background(
             _tmp_cad_path = _tmp_dir / f"original{ext}"
             await asyncio.to_thread(_tmp_cad_path.write_bytes, content)
 
-            result = await asyncio.to_thread(
-                process_ifc_file, _tmp_cad_path, _tmp_dir, conversion_depth
-            )
+            result = await asyncio.to_thread(process_ifc_file, _tmp_cad_path, _tmp_dir, conversion_depth)
             element_count = result["element_count"]
 
             geo_key: str | None = None
@@ -1273,9 +1312,7 @@ async def _process_cad_in_background(
                         ext=".glb",
                         content=_glb_bytes,
                     )
-                    logger.info(
-                        "GLB geometry saved: %s (%d bytes)", glb_key, len(_glb_bytes)
-                    )
+                    logger.info("GLB geometry saved: %s (%d bytes)", glb_key, len(_glb_bytes))
 
             raw_elements = result.get("raw_elements", [])
             parquet_status, parquet_error = _record_parquet_attempt_init()
@@ -1310,18 +1347,12 @@ async def _process_cad_in_background(
             # pool churn during a heavy upload burst.
             model = None
             for _attempt in range(5):
-                model = (
-                    await session.execute(
-                        select(BIMModel).where(BIMModel.id == model_uuid)
-                    )
-                ).scalar_one_or_none()
+                model = (await session.execute(select(BIMModel).where(BIMModel.id == model_uuid))).scalar_one_or_none()
                 if model is not None:
                     break
                 await asyncio.sleep(0.2)
             if model is None:
-                logger.error(
-                    "Background processor: model %s vanished mid-conversion", model_id
-                )
+                logger.error("Background processor: model %s vanished mid-conversion", model_id)
                 return
 
             if element_count > 0:
@@ -1345,9 +1376,7 @@ async def _process_cad_in_background(
                     if elem_data.get("is_placeholder") or result_quality == "placeholder":
                         el_props["is_placeholder"] = True
                     el_quantities = elem_data.get("quantities", {}) or {}
-                    if el_quantities and any(
-                        _to_qty_float(v) for v in el_quantities.values()
-                    ):
+                    if el_quantities and any(_to_qty_float(v) for v in el_quantities.values()):
                         any_quantities = True
                     el = BIMElement(
                         model_id=model_uuid,
@@ -1391,33 +1420,22 @@ async def _process_cad_in_background(
                     # geometry" banner — set to "placeholder" when DDC
                     # cad2data is unavailable and we synthesized boxes.
                     "geometry_quality": result.get(
-                        "geometry_quality", result.get("geometry_type", "unknown"),
+                        "geometry_quality",
+                        result.get("geometry_type", "unknown"),
                     ),
                     # DDC converter version stamp — drives the "Processed
                     # with DDC v{X}" badge on the BIM model card and the
                     # /about page. Both keys are optional: missing values
                     # leave the badge hidden (v3.12.0 / Stream D).
-                    **(
-                        {"converter_version": result["converter_version"]}
-                        if result.get("converter_version")
-                        else {}
-                    ),
-                    **(
-                        {"converter_source": result["converter_source"]}
-                        if result.get("converter_source")
-                        else {}
-                    ),
+                    **({"converter_version": result["converter_version"]} if result.get("converter_version") else {}),
+                    **({"converter_source": result["converter_source"]} if result.get("converter_source") else {}),
                     # Honesty signal — set when the import only succeeded
                     # because the runtime stripped modern CLI args (or
                     # retried without them) to accommodate an older DDC
                     # binary.  Drives the post-success "converter
                     # outdated" nudge in the BIM viewer.  Conversion
                     # itself is fine; the warning is informational only.
-                    **(
-                        {"converter_cli_outdated": True}
-                        if result.get("converter_cli_outdated")
-                        else {}
-                    ),
+                    **({"converter_cli_outdated": True} if result.get("converter_cli_outdated") else {}),
                     # Parquet sidecar status — non-fatal for the model
                     # itself, but operators want to know how often the
                     # sidecar write fails so the analytics surface
@@ -1474,20 +1492,22 @@ async def _process_cad_in_background(
                     meta_warn["warning"] = warn_msg
                     meta_warn["degraded"] = True
                     meta_warn["converter_id"] = "ifc"
-                    meta_warn["install_endpoint"] = (
-                        "/api/v1/takeoff/converters/ifc/install/"
-                    )
+                    meta_warn["install_endpoint"] = "/api/v1/takeoff/converters/ifc/install/"
                     model.metadata_ = meta_warn
                     logger.warning(
                         "Background CAD processed but DEGRADED (converter_absent=%s "
                         "no_quantities=%s): %d elements → model %s degraded",
-                        converter_absent, no_quantities, element_count, model_id,
+                        converter_absent,
+                        no_quantities,
+                        element_count,
+                        model_id,
                     )
                 else:
                     logger.info(
-                        "Background CAD processed: %d elements, %d storeys → "
-                        "model %s ready",
-                        element_count, len(result["storeys"]), model_id,
+                        "Background CAD processed: %d elements, %d storeys → model %s ready",
+                        element_count,
+                        len(result["storeys"]),
+                        model_id,
                     )
 
                 # Storage policy — drop the raw upload after a *successful*
@@ -1533,10 +1553,7 @@ async def _process_cad_in_background(
                         # the user sees the fix before the surrounding
                         # diagnostics.  The full stderr line still goes
                         # into metadata_ below for the support panel.
-                        parts.append(
-                            "Your installed converter is older than the "
-                            "platform expects."
-                        )
+                        parts.append("Your installed converter is older than the platform expects.")
                     if rvt_app:
                         parts.append(
                             f"File saved with {rvt_app}"
@@ -1545,10 +1562,7 @@ async def _process_cad_in_background(
                     if conv_version:
                         parts.append(f"Installed RVT converter: {conv_version}.")
                     if cause == "converter_outdated":
-                        parts.append(
-                            "Open Settings → BIM Converters and click "
-                            "Reinstall to fetch the latest version."
-                        )
+                        parts.append("Open Settings → BIM Converters and click Reinstall to fetch the latest version.")
                     else:
                         parts.append(
                             "The converter produced no elements from this file. "
@@ -1564,21 +1578,14 @@ async def _process_cad_in_background(
                             parts.append(f"Converter said: {first_line}")
                     if cause != "converter_outdated":
                         parts.append(
-                            "Try updating the RVT converter (Settings → BIM "
-                            "Converters → Reinstall) and clicking Retry."
+                            "Try updating the RVT converter (Settings → BIM Converters → Reinstall) and clicking Retry."
                         )
                     model.error_message = " ".join(parts)
 
-                    meta["error_code"] = (
-                        "converter_outdated"
-                        if cause == "converter_outdated"
-                        else "ddc_failed"
-                    )
+                    meta["error_code"] = "converter_outdated" if cause == "converter_outdated" else "ddc_failed"
                     meta["cause"] = cause
                     meta["converter_id"] = "rvt"
-                    meta["install_endpoint"] = (
-                        "/api/v1/takeoff/converters/rvt/install/"
-                    )
+                    meta["install_endpoint"] = "/api/v1/takeoff/converters/rvt/install/"
                     # Structured diagnostic info for the frontend to render
                     # a dedicated "version mismatch" panel if it wants to.
                     meta["diagnostics"] = {
@@ -1616,11 +1623,7 @@ async def _process_cad_in_background(
         logger.exception("Background CAD processing failed for model %s: %s", model_id, exc)
         try:
             async with async_session_factory() as session:
-                model = (
-                    await session.execute(
-                        select(BIMModel).where(BIMModel.id == model_uuid)
-                    )
-                ).scalar_one_or_none()
+                model = (await session.execute(select(BIMModel).where(BIMModel.id == model_uuid))).scalar_one_or_none()
                 if model is not None:
                     model.status = "error"
                     model.error_message = (
@@ -1737,7 +1740,9 @@ async def _generate_pdf_in_background(
                     await session.commit()
                     logger.info(
                         "PDF sheets saved as Document for model %s: %s (%d bytes)",
-                        model_id, pdf_storage_key, len(pdf_bytes),
+                        model_id,
+                        pdf_storage_key,
+                        len(pdf_bytes),
                     )
             except Exception as exc:
                 logger.warning("PDF sheets → Document linkage failed: %s", exc)
@@ -1802,10 +1807,7 @@ async def upload_cad_file(
     if ext not in _ALLOWED_CAD_EXTENSIONS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                f"Unsupported file type '{ext}'. "
-                f"Accepted: {', '.join(sorted(_ALLOWED_CAD_EXTENSIONS))}"
-            ),
+            detail=(f"Unsupported file type '{ext}'. Accepted: {', '.join(sorted(_ALLOWED_CAD_EXTENSIONS))}"),
         )
 
     # Stream the upload to a temp file in 1 MB chunks instead of buffering
@@ -1843,7 +1845,11 @@ async def upload_cad_file(
             if find_converter(ext.lstrip(".")) is None:
                 new_model_id = uuid.uuid4()
                 saved_cad_key = await bim_file_storage.save_original_cad_from_path(
-                    project_uuid, new_model_id, ext, upload.path, size=upload.size,
+                    project_uuid,
+                    new_model_id,
+                    ext,
+                    upload.path,
+                    size=upload.size,
                 )
                 display_name = (name or pathlib.Path(filename).stem).strip() or filename
                 from app.modules.bim_hub.schemas import BIMModelCreate
@@ -1878,12 +1884,13 @@ async def upload_cad_file(
 
                 logger.info(
                     "Saved %s upload pending converter — model=%s, key=%s, %d bytes",
-                    ext, new_model_id, saved_cad_key, upload.size,
+                    ext,
+                    new_model_id,
+                    saved_cad_key,
+                    upload.size,
                 )
 
-                install_endpoint = (
-                    f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/"
-                )
+                install_endpoint = f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/"
                 return JSONResponse(
                     status_code=status.HTTP_202_ACCEPTED,
                     content={
@@ -1907,9 +1914,9 @@ async def upload_cad_file(
                     headers={
                         "Retry-After": "60",
                         "Link": (
-                            f"<{install_endpoint}>; rel=\"install-converter\", "
+                            f'<{install_endpoint}>; rel="install-converter", '
                             f"</api/v1/bim_hub/{new_model_id}/retry/>; "
-                            f"rel=\"reprocess-model\""
+                            f'rel="reprocess-model"'
                         ),
                     },
                 )
@@ -2041,14 +2048,14 @@ async def upload_cad_file(
         )
         logger.info(
             "CAD upload accepted, processing scheduled in background: %s → model %s",
-            filename, model_id,
+            filename,
+            model_id,
         )
     else:
         # Non-processable format (DWG, DGN, FBX, etc.) — needs converter
         model.status = "needs_converter"
         model.error_message = (
-            f"{ext.upper().lstrip('.')} files require an external converter. "
-            "Convert to IFC first, then re-upload."
+            f"{ext.upper().lstrip('.')} files require an external converter. Convert to IFC first, then re-upload."
         )
         await service.session.flush()
         final_status = "needs_converter"
@@ -2064,8 +2071,7 @@ async def upload_cad_file(
         "geometry_type": (model.metadata_ or {}).get("geometry_type", "unknown"),
         "converter_id": ext.lstrip(".") if final_status == "needs_converter" else None,
         "install_endpoint": (
-            f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/"
-            if final_status == "needs_converter" else None
+            f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/" if final_status == "needs_converter" else None
         ),
     }
 
@@ -2194,10 +2200,7 @@ async def retry_model_processing(
     if not await backend_store.exists(cad_storage_key):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=(
-                "Original CAD file is no longer available — re-upload the "
-                "model to retry."
-            ),
+            detail=("Original CAD file is no longer available — re-upload the model to retry."),
         )
 
     # Clear previous error state before re-scheduling so the frontend's
@@ -2275,17 +2278,12 @@ async def retry_parquet_write(
 
     # Pull the rows back out of the DB — same projection the converter
     # would have produced for the Parquet write (one dict per element).
-    rows_q = await service.session.execute(
-        select(BIMElement).where(BIMElement.model_id == model_id)
-    )
+    rows_q = await service.session.execute(select(BIMElement).where(BIMElement.model_id == model_id))
     elements = rows_q.scalars().all()
     if not elements:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                "Model has no elements in the database — cannot retry "
-                "Parquet write. Re-upload the model instead."
-            ),
+            detail=("Model has no elements in the database — cannot retry Parquet write. Re-upload the model instead."),
         )
 
     rows: list[dict[str, Any]] = []
@@ -2491,16 +2489,12 @@ async def get_model_geometry(
     # When ?fmt=dae is passed, force DAE format (useful when GLB has
     # scrambled node names from an older trimesh conversion).
     if fmt and fmt.lower() == "dae":
-        found = await bim_file_storage.find_geometry_key(
-            project_id, model_id, prefer_ext=".dae"
-        )
+        found = await bim_file_storage.find_geometry_key(project_id, model_id, prefer_ext=".dae")
     else:
         found = await bim_file_storage.find_geometry_key(project_id, model_id)
     if found is not None:
         key, ext = found
-        media_type = bim_file_storage.GEOMETRY_MEDIA_TYPES.get(
-            ext, "application/octet-stream"
-        )
+        media_type = bim_file_storage.GEOMETRY_MEDIA_TYPES.get(ext, "application/octet-stream")
         cache_headers = {
             # No caching — geometry may be re-generated with patched node names.
             "Cache-Control": "no-store, no-cache, must-revalidate",
@@ -2537,15 +2531,14 @@ async def get_model_geometry(
             # detail to support without revealing the file contents.
             head_bytes = _geo_bytes[:8]
             head_hex = " ".join(f"{b:02x}" for b in head_bytes)
-            head_ascii = "".join(
-                chr(b) if 0x20 <= b < 0x7F else "." for b in head_bytes
-            )
+            head_ascii = "".join(chr(b) if 0x20 <= b < 0x7F else "." for b in head_bytes)
             # Surface the first identifiable XML root tag for the common
             # "stored DAE turned out to be IFC-XML / gbXML / HTML 404 page"
             # failure mode — gives support a one-glance diagnosis.
             first_tag: str | None = None
             if ext.lower() == ".dae":
                 import re as _re_diag
+
                 try:
                     _head_text = _geo_bytes[:4096].decode("utf-8", errors="replace")
                     _m = _re_diag.search(r"<([a-zA-Z_:][\w:.-]{0,40})", _head_text)
@@ -2587,7 +2580,10 @@ async def get_model_geometry(
                     "converter service was unreachable during processing."
                 )
             elif first_tag and first_tag.lower() in (
-                "<ifcxml>", "<gbxml>", "<xml>", "<?xml>",
+                "<ifcxml>",
+                "<gbxml>",
+                "<xml>",
+                "<?xml>",
             ):
                 cause = (
                     f"The stored file is {first_tag} (XML data) instead of "
@@ -2603,8 +2599,7 @@ async def get_model_geometry(
                 )
             elif "unsupported glb version" in reason_lower:
                 cause = (
-                    "The file is an older glTF format version that our "
-                    "viewer doesn't support (we require glTF 2.0)."
+                    "The file is an older glTF format version that our viewer doesn't support (we require glTF 2.0)."
                 )
             else:
                 cause = (
@@ -2616,8 +2611,14 @@ async def get_model_geometry(
                 "BIM geometry served from %s failed serve-time validation: %s "
                 "(request_id=%s, model_id=%s, size=%d, head=%s, "
                 "first_tag=%s, ext=%s)",
-                key, reason_serve, request_id, model_id, len(_geo_bytes),
-                head_hex, first_tag, ext,
+                key,
+                reason_serve,
+                request_id,
+                model_id,
+                len(_geo_bytes),
+                head_hex,
+                first_tag,
+                ext,
             )
             diagnostic = {
                 "error": "geometry_invalid",
@@ -2642,9 +2643,7 @@ async def get_model_geometry(
                     "info@datadrivenconstruction.io and quote the "
                     "Request ID shown below."
                 ),
-                "message": (
-                    f"Geometry file is not a valid {ext} payload: {reason_serve}"
-                ),
+                "message": (f"Geometry file is not a valid {ext} payload: {reason_serve}"),
             }
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -2664,10 +2663,7 @@ async def get_model_geometry(
 
         display_name = f"{model.name}{ext}"
         ascii_fallback = display_name.encode("ascii", "replace").decode("ascii")
-        cd_header = (
-            f'inline; filename="{ascii_fallback}"; '
-            f"filename*=UTF-8''{_qs(display_name)}"
-        )
+        cd_header = f"inline; filename=\"{ascii_fallback}\"; filename*=UTF-8''{_qs(display_name)}"
 
         return Response(
             content=compressed,
@@ -2684,9 +2680,10 @@ async def get_model_geometry(
         )
 
     logger.warning(
-        "BIM geometry not found on storage (request_id=%s, model_id=%s, "
-        "project_id=%s)",
-        request_id, model_id, project_id,
+        "BIM geometry not found on storage (request_id=%s, model_id=%s, project_id=%s)",
+        request_id,
+        model_id,
+        project_id,
     )
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -2695,10 +2692,7 @@ async def get_model_geometry(
             "category": "not_found",
             "request_id": request_id,
             "model_id": str(model_id),
-            "message": (
-                "No 3D geometry file is attached to this model on the "
-                "server."
-            ),
+            "message": ("No 3D geometry file is attached to this model on the server."),
             "remediation": (
                 "Either the model was uploaded but the CAD converter never "
                 "produced a 3D mesh (the source file may be 2D-only or "
@@ -2760,8 +2754,7 @@ async def list_models(
             )
         except Exception:  # noqa: BLE001  # never break listing on storage hiccups
             logger.exception(
-                "bulk_model_storage_summary failed for project=%s; "
-                "falling back to per-model probes.",
+                "bulk_model_storage_summary failed for project=%s; falling back to per-model probes.",
                 project_id,
             )
             use_bulk = False
@@ -2773,7 +2766,8 @@ async def list_models(
         has_geom = bool(model_obj.canonical_file_path)
         try:
             size_bytes = await bim_file_storage.compute_artifact_size_bytes(
-                model_obj.project_id, model_obj.id,
+                model_obj.project_id,
+                model_obj.id,
             )
         except Exception:  # noqa: BLE001
             logger.exception("artifact-size probe failed for model=%s", model_obj.id)
@@ -2781,7 +2775,9 @@ async def list_models(
         if ext_raw:
             try:
                 has_orig = await bim_file_storage.has_original_cad(
-                    model_obj.project_id, model_obj.id, ext=f".{ext_raw}",
+                    model_obj.project_id,
+                    model_obj.id,
+                    ext=f".{ext_raw}",
                 )
             except Exception:  # noqa: BLE001
                 logger.exception("has_original probe failed for model=%s", model_obj.id)
@@ -2847,7 +2843,9 @@ async def list_models(
                 try:
                     backend = bim_file_storage._backend()
                     key = bim_file_storage.original_cad_key(
-                        model_obj.project_id, model_obj.id, ext=f".{ext_raw}",
+                        model_obj.project_id,
+                        model_obj.id,
+                        ext=f".{ext_raw}",
                     )
                     total_original_bytes += await backend.size(key)
                 except Exception:  # noqa: BLE001
@@ -2883,6 +2881,7 @@ async def create_model(
 #     422 by the path validator). The handlers and the `_summarise_asset`
 #     helper live further down in the file under the "Asset Register
 #     (v2.3.0)" section header — only the route registrations move up. ───
+
 
 @router.get("/assets", response_model=AssetListResponse)
 async def list_assets(
@@ -2964,7 +2963,8 @@ async def get_model(
     # artifact size + ``has_original`` to the frontend.
     try:
         size_bytes = await bim_file_storage.compute_artifact_size_bytes(
-            model.project_id, model.id,
+            model.project_id,
+            model.id,
         )
         resp.conversion_artifact_size_mb = round(size_bytes / (1024 * 1024), 3)
     except Exception:  # noqa: BLE001
@@ -2973,7 +2973,9 @@ async def get_model(
     if ext_raw:
         try:
             resp.has_original = await bim_file_storage.has_original_cad(
-                model.project_id, model.id, ext=f".{ext_raw}",
+                model.project_id,
+                model.id,
+                ext=f".{ext_raw}",
             )
         except Exception:  # noqa: BLE001
             logger.exception("has_original probe failed for model=%s", model.id)
@@ -2985,7 +2987,8 @@ async def get_model(
         try:
             resp.has_geometry = (
                 await bim_file_storage.find_geometry_key(
-                    project_id=str(model.project_id), model_id=str(model.id),
+                    project_id=str(model.project_id),
+                    model_id=str(model.id),
                 )
             ) is not None
         except Exception:  # noqa: BLE001
@@ -3186,30 +3189,13 @@ async def list_elements(
 
     responses: list[BIMElementResponse] = []
     for elem in items:
-        boq_briefs = [
-            BOQElementLinkBrief.model_validate(b)
-            for b in boq_links_by_id.get(elem.id, [])
-        ]
-        doc_briefs = [
-            DocumentLinkBrief.model_validate(b)
-            for b in doc_links_by_id.get(elem.id, [])
-        ]
-        task_briefs = [
-            TaskBrief.model_validate(b)
-            for b in task_links_by_id.get(elem.id, [])
-        ]
-        activity_briefs = [
-            ActivityBrief.model_validate(b)
-            for b in activity_briefs_by_id.get(elem.id, [])
-        ]
-        requirement_briefs = [
-            RequirementBrief.model_validate(b)
-            for b in requirement_briefs_by_id.get(elem.id, [])
-        ]
+        boq_briefs = [BOQElementLinkBrief.model_validate(b) for b in boq_links_by_id.get(elem.id, [])]
+        doc_briefs = [DocumentLinkBrief.model_validate(b) for b in doc_links_by_id.get(elem.id, [])]
+        task_briefs = [TaskBrief.model_validate(b) for b in task_links_by_id.get(elem.id, [])]
+        activity_briefs = [ActivityBrief.model_validate(b) for b in activity_briefs_by_id.get(elem.id, [])]
+        requirement_briefs = [RequirementBrief.model_validate(b) for b in requirement_briefs_by_id.get(elem.id, [])]
         raw_val = validation_summaries_by_id.get(elem.id, [])
-        validation_summaries = [
-            ElementValidationSummary.model_validate(v) for v in raw_val
-        ]
+        validation_summaries = [ElementValidationSummary.model_validate(v) for v in raw_val]
         # Derive worst-severity status; 'unchecked' iff no report exists
         # at all (any element had at least one entry → report_exists).
         if not report_exists:
@@ -3288,9 +3274,7 @@ async def get_elements_by_ids(
         .where(BIMElement.model_id == model_id)
         .where(
             or_(
-                BIMElement.id.in_(
-                    [uuid.UUID(eid) for eid in element_ids if len(eid) == 36]
-                ),
+                BIMElement.id.in_([uuid.UUID(eid) for eid in element_ids if len(eid) == 36]),
                 BIMElement.stable_id.in_(element_ids),
             )
         )
@@ -3415,9 +3399,7 @@ async def export_cobie_xlsx(
     xlsx_bytes, filename = await service.export_cobie(model_id)
     return StreamingResponse(
         io.BytesIO(xlsx_bytes),
-        media_type=(
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        ),
+        media_type=("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
             "Content-Length": str(len(xlsx_bytes)),
@@ -3447,11 +3429,7 @@ async def _verify_boq_position_access(
     from app.modules.boq.models import BOQ as BOQModel  # noqa: N811
     from app.modules.boq.models import Position
 
-    stmt = (
-        select(BOQModel.project_id)
-        .join(Position, Position.boq_id == BOQModel.id)
-        .where(Position.id == position_id)
-    )
+    stmt = select(BOQModel.project_id).join(Position, Position.boq_id == BOQModel.id).where(Position.id == position_id)
     result = await service.session.execute(stmt)
     project_id = result.scalar_one_or_none()
     if project_id is None:
@@ -3908,9 +3886,7 @@ async def bim_vector_reindex(
     if model_id is not None:
         stmt = stmt.where(BIMElement.model_id == model_id)
     elif project_id is not None:
-        stmt = stmt.join(BIMModel, BIMElement.model_id == BIMModel.id).where(
-            BIMModel.project_id == project_id
-        )
+        stmt = stmt.join(BIMModel, BIMElement.model_id == BIMModel.id).where(BIMModel.project_id == project_id)
 
     rows = list((await session.execute(stmt)).scalars().all())
     return await reindex_collection(
@@ -3967,26 +3943,20 @@ async def bim_element_similar(
     from app.modules.bim_hub.models import BIMElement, BIMModel
     from app.modules.bim_hub.vector_adapter import bim_element_vector_adapter
 
-    stmt = (
-        select(BIMElement)
-        .options(selectinload(BIMElement.model))
-        .where(BIMElement.id == element_id)
-    )
+    stmt = select(BIMElement).options(selectinload(BIMElement.model)).where(BIMElement.id == element_id)
     row = (await session.execute(stmt)).scalar_one_or_none()
     if row is None:
         raise HTTPException(status_code=404, detail="BIM element not found")
 
-    project_id = (
-        str(row.model.project_id)
-        if row.model is not None and row.model.project_id is not None
-        else None
-    )
+    project_id = str(row.model.project_id) if row.model is not None and row.model.project_id is not None else None
 
     # Audit B3 — gate the source element on project access. Foreign
     # element ids now 404 the same way a missing one does.
     if project_id is not None:
         await _verify_project_access(
-            session, uuid.UUID(project_id), _user_id,
+            session,
+            uuid.UUID(project_id),
+            _user_id,
         )
     hits = await find_similar(
         bim_element_vector_adapter,
@@ -4006,9 +3976,7 @@ async def bim_element_similar(
         for h in hits:
             mid_raw = (h.payload or {}).get("model_id") if hasattr(h, "payload") else None
             try:
-                hit_models[uuid.UUID(str(h.id))] = (
-                    uuid.UUID(str(mid_raw)) if mid_raw else None
-                )
+                hit_models[uuid.UUID(str(h.id))] = uuid.UUID(str(mid_raw)) if mid_raw else None
             except (ValueError, TypeError):
                 continue
         # Bulk-load all referenced models in one go to avoid N+1
@@ -4108,9 +4076,7 @@ async def bim_coverage_summary(
         .join(BIMModel, BIMElement.model_id == BIMModel.id)
         .where(BIMModel.project_id == project_id)
     )
-    elements_linked_to_boq = int(
-        (await session.execute(boq_linked_stmt)).scalar() or 0
-    )
+    elements_linked_to_boq = int((await session.execute(boq_linked_stmt)).scalar() or 0)
 
     # Documents — uses DocumentBIMLink if the table exists.  Wrapped in
     # try/except so that a missing/optional module doesn't 500 the call.
@@ -4127,9 +4093,7 @@ async def bim_coverage_summary(
             .join(BIMModel, BIMElement.model_id == BIMModel.id)
             .where(BIMModel.project_id == project_id)
         )
-        elements_with_documents = int(
-            (await session.execute(docs_stmt)).scalar() or 0
-        )
+        elements_with_documents = int((await session.execute(docs_stmt)).scalar() or 0)
     except (ImportError, AttributeError, SQLAlchemyError):
         elements_with_documents = 0
 
@@ -4141,9 +4105,7 @@ async def bim_coverage_summary(
     try:
         from app.modules.tasks.models import Task
 
-        task_stmt = _select(Task.bim_element_ids).where(
-            Task.project_id == project_id
-        )
+        task_stmt = _select(Task.bim_element_ids).where(Task.project_id == project_id)
         bim_id_set: set[str] = set()
         for row in (await session.execute(task_stmt)).all():
             ids = row[0] or []
@@ -4456,7 +4418,9 @@ async def list_federations(
     await _verify_project_access(session, project_id, _user_id)
     service = BIMHubService(session)
     items, total = await service.list_federations(
-        project_id, offset=offset, limit=limit,
+        project_id,
+        offset=offset,
+        limit=limit,
     )
     return FederationListResponse(items=items, total=total)
 

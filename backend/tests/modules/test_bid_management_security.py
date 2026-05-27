@@ -105,19 +105,16 @@ class _StubPackageRepo(_StubRepo):
         status: str | None = None,
     ) -> tuple[list[Any], int]:
         rows = [
-            r for r in self.rows.values()
-            if getattr(r, "project_id", None) == project_id
-            and (status is None or getattr(r, "status", "") == status)
+            r
+            for r in self.rows.values()
+            if getattr(r, "project_id", None) == project_id and (status is None or getattr(r, "status", "") == status)
         ]
         return rows[offset : offset + limit], len(rows)
 
 
 class _StubLineRepo(_StubRepo):
     async def list_for_package(self, package_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "package_id", None) == package_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "package_id", None) == package_id]
 
     async def bulk_create(self, items: list[Any]) -> list[Any]:
         for item in items:
@@ -127,17 +124,21 @@ class _StubLineRepo(_StubRepo):
 
 class _StubInvitationRepo(_StubRepo):
     async def list_for_package(
-        self, package_id: uuid.UUID, *, status: str | None = None,
+        self,
+        package_id: uuid.UUID,
+        *,
+        status: str | None = None,
     ) -> list[Any]:
         return [
-            r for r in self.rows.values()
-            if getattr(r, "package_id", None) == package_id
-            and (status is None or getattr(r, "status", "") == status)
+            r
+            for r in self.rows.values()
+            if getattr(r, "package_id", None) == package_id and (status is None or getattr(r, "status", "") == status)
         ]
 
     async def invitations_pending(self, package_id: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
+            r
+            for r in self.rows.values()
             if getattr(r, "package_id", None) == package_id
             and getattr(r, "status", "") in ("pending", "sent", "opened")
         ]
@@ -145,10 +146,7 @@ class _StubInvitationRepo(_StubRepo):
 
 class _StubBidderRepo(_StubRepo):
     async def list_for_package(self, package_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "package_id", None) == package_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "package_id", None) == package_id]
 
 
 class _StubSubmissionRepo(_StubRepo):
@@ -166,10 +164,7 @@ class _StubSubmissionRepo(_StubRepo):
 
 class _StubSubmissionLineRepo(_StubRepo):
     async def list_for_submission(self, submission_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "submission_id", None) == submission_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "submission_id", None) == submission_id]
 
     async def bulk_create(self, items: list[Any]) -> list[Any]:
         for item in items:
@@ -179,10 +174,7 @@ class _StubSubmissionLineRepo(_StubRepo):
 
 class _StubQARepo(_StubRepo):
     async def q_and_a_for_package(self, package_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "package_id", None) == package_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "package_id", None) == package_id]
 
 
 class _StubAwardRepo(_StubRepo):
@@ -195,10 +187,7 @@ class _StubAwardRepo(_StubRepo):
 
 class _StubRejectionRepo(_StubRepo):
     async def list_for_package(self, package_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "package_id", None) == package_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "package_id", None) == package_id]
 
 
 class _StubComparisonRepo(_StubRepo):
@@ -211,16 +200,10 @@ class _StubComparisonRepo(_StubRepo):
 
 class _StubLevelingRepo(_StubRepo):
     async def levelings_for_comparison(self, comparison_id: uuid.UUID) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if getattr(r, "comparison_id", None) == comparison_id
-        ]
+        return [r for r in self.rows.values() if getattr(r, "comparison_id", None) == comparison_id]
 
     async def delete_for_comparison(self, comparison_id: uuid.UUID) -> None:
-        keep = {
-            k: v for k, v in self.rows.items()
-            if getattr(v, "comparison_id", None) != comparison_id
-        }
+        keep = {k: v for k, v in self.rows.items() if getattr(v, "comparison_id", None) != comparison_id}
         self.rows = keep
 
 
@@ -410,10 +393,12 @@ def _patch_project_repo(
             return SimpleNamespace(role="editor")
 
     monkeypatch.setattr(
-        "app.modules.projects.repository.ProjectRepository", _StubProjectRepo,
+        "app.modules.projects.repository.ProjectRepository",
+        _StubProjectRepo,
     )
     monkeypatch.setattr(
-        "app.modules.users.repository.UserRepository", _StubUserRepo,
+        "app.modules.users.repository.UserRepository",
+        _StubUserRepo,
     )
 
 
@@ -441,8 +426,7 @@ async def test_owner_idor_get_package_blocks_cross_tenant_caller(
     with pytest.raises(HTTPException) as exc:
         await _verify_package_access(svc.session, pkg_b.id, USER_A)
     assert exc.value.status_code == 404, (
-        f"cross-tenant GET on package must 404, got {exc.value.status_code}: "
-        f"{exc.value.detail!r}"
+        f"cross-tenant GET on package must 404, got {exc.value.status_code}: {exc.value.detail!r}"
     )
 
 
@@ -640,12 +624,14 @@ async def test_cross_package_line_item_on_submission_line_rejected() -> None:
     pkg_b = _seed_package(svc, project_id=PROJECT_B, code="B-LI")
     inv_a = _seed_invitation(svc, package_id=pkg_a.id)
     bidder_a = _seed_bidder(svc, package_id=pkg_a.id)
-    sub_a = await svc.record_submission(BidSubmissionCreate(
-        invitation_id=inv_a.id,
-        bidder_id=bidder_a.id,
-        total_amount=Decimal("0"),
-        currency="EUR",
-    ))
+    sub_a = await svc.record_submission(
+        BidSubmissionCreate(
+            invitation_id=inv_a.id,
+            bidder_id=bidder_a.id,
+            total_amount=Decimal("0"),
+            currency="EUR",
+        )
+    )
     line_on_b = _seed_line_item(svc, package_id=pkg_b.id)
 
     data = BidSubmissionLineCreate(
@@ -720,28 +706,26 @@ def test_no_float_columns_on_bid_management_money_models() -> None:
         for col in table.columns:
             cname = col.name.lower()
             if any(
-                k in cname for k in (
-                    "amount", "total", "price", "score", "adjustment",
-                    "quantity", "budget", "rate",
+                k in cname
+                for k in (
+                    "amount",
+                    "total",
+                    "price",
+                    "score",
+                    "adjustment",
+                    "quantity",
+                    "budget",
+                    "rate",
                 )
             ):
                 money_columns.append((obj.__name__, col.name, type(col.type)))
 
     assert money_columns, "guard self-check: expected to find money columns"
-    floats = [
-        (cls, col)
-        for cls, col, typ in money_columns
-        if isinstance(typ, type) and issubclass(typ, Float)
-    ]
+    floats = [(cls, col) for cls, col, typ in money_columns if isinstance(typ, type) and issubclass(typ, Float)]
     assert not floats, (
-        f"Float columns leaked into bid_management money model: {floats!r}. "
-        "All money fields must use Numeric(p, q)."
+        f"Float columns leaked into bid_management money model: {floats!r}. All money fields must use Numeric(p, q)."
     )
-    numerics = [
-        (cls, col)
-        for cls, col, typ in money_columns
-        if isinstance(typ, type) and issubclass(typ, Numeric)
-    ]
+    numerics = [(cls, col) for cls, col, typ in money_columns if isinstance(typ, type) and issubclass(typ, Numeric)]
     assert numerics, "expected at least one Numeric money column"
 
 
@@ -876,9 +860,7 @@ def test_rbac_viewer_cannot_mutate_or_award() -> None:
         "bid_management.cancel",
         "bid_management.record_scorecard",
     ):
-        assert not permission_registry.role_has_permission(Role.VIEWER, perm), (
-            f"VIEWER must NOT carry {perm}"
-        )
+        assert not permission_registry.role_has_permission(Role.VIEWER, perm), f"VIEWER must NOT carry {perm}"
 
 
 def test_rbac_editor_can_create_but_not_award_or_score() -> None:
@@ -927,9 +909,7 @@ def test_rbac_manager_carries_award_and_scorecard() -> None:
         "bid_management.disqualify_bidder",
         "bid_management.cancel",
     ):
-        assert permission_registry.role_has_permission(Role.MANAGER, perm), (
-            f"MANAGER must carry {perm}"
-        )
+        assert permission_registry.role_has_permission(Role.MANAGER, perm), f"MANAGER must carry {perm}"
 
 
 # ── 9. Self-check on FSM transition map shape ────────────────────────────
@@ -956,9 +936,7 @@ def test_invitation_fsm_map_complete_and_closed() -> None:
     for nexts in INVITATION_TRANSITIONS.values():
         referenced.update(nexts)
     missing = referenced - declared
-    assert not missing, (
-        f"INVITATION_TRANSITIONS references undeclared states: {missing}"
-    )
+    assert not missing, f"INVITATION_TRANSITIONS references undeclared states: {missing}"
 
 
 # ── 10. Schema validator pinning ─────────────────────────────────────────

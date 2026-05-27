@@ -123,8 +123,7 @@ def _guard_transition(
     allowed = table.get(current, set())
     if new not in allowed:
         raise ValueError(
-            f"Illegal {entity} transition: '{current}' → '{new}'. "
-            f"Allowed: {sorted(allowed) or 'none'}",
+            f"Illegal {entity} transition: '{current}' → '{new}'. Allowed: {sorted(allowed) or 'none'}",
         )
 
 
@@ -138,7 +137,10 @@ class QMSService:
     # ── ITP plan ───────────────────────────────────────────────────────
 
     async def create_itp_plan(
-        self, data: ITPPlanCreate, *, user_id: str | None = None,
+        self,
+        data: ITPPlanCreate,
+        *,
+        user_id: str | None = None,
     ) -> ITPPlan:
         plan = ITPPlan(
             project_id=data.project_id,
@@ -154,7 +156,9 @@ class QMSService:
         return plan
 
     async def update_itp_plan(
-        self, plan_id: uuid.UUID, data: ITPPlanUpdate,
+        self,
+        plan_id: uuid.UUID,
+        data: ITPPlanUpdate,
     ) -> ITPPlan:
         plan = await self.repo.get_itp_plan(plan_id)
         if plan is None:
@@ -164,7 +168,9 @@ class QMSService:
         if new_status is not None and new_status != plan.status:
             _guard_transition(
                 _ITP_STATUS_TRANSITIONS,
-                current=plan.status, new=new_status, entity="ITP",
+                current=plan.status,
+                new=new_status,
+                entity="ITP",
             )
         if fields:
             await self.repo.update_itp_plan_fields(plan_id, **fields)
@@ -172,7 +178,9 @@ class QMSService:
         return plan
 
     async def add_itp_item(
-        self, plan_id: uuid.UUID, data: ITPItemCreate,
+        self,
+        plan_id: uuid.UUID,
+        data: ITPItemCreate,
     ) -> ITPItem:
         plan = await self.repo.get_itp_plan(plan_id)
         if plan is None:
@@ -202,7 +210,9 @@ class QMSService:
             raise ValueError(f"ITP plan {plan_id} not found")
         _guard_transition(
             _ITP_STATUS_TRANSITIONS,
-            current=plan.status, new="active", entity="ITP",
+            current=plan.status,
+            new="active",
+            entity="ITP",
         )
         items = await self.repo.list_itp_items(plan_id)
         if not items:
@@ -225,7 +235,10 @@ class QMSService:
     # ── Inspection ─────────────────────────────────────────────────────
 
     async def schedule_inspection(
-        self, data: InspectionCreate, *, user_id: str | None = None,
+        self,
+        data: InspectionCreate,
+        *,
+        user_id: str | None = None,
     ) -> QMSInspection:
         del user_id  # accepted for symmetry; field stored as inspector_user_id
         inspection = QMSInspection(
@@ -243,15 +256,16 @@ class QMSService:
         return await self.repo.create_inspection(inspection)
 
     async def update_inspection(
-        self, inspection_id: uuid.UUID, data: InspectionUpdate,
+        self,
+        inspection_id: uuid.UUID,
+        data: InspectionUpdate,
     ) -> QMSInspection:
         inspection = await self.repo.get_inspection(inspection_id)
         if inspection is None:
             raise ValueError(f"Inspection {inspection_id} not found")
         if inspection.status in ("passed", "failed"):
             raise ValueError(
-                f"Cannot edit an inspection in terminal status "
-                f"'{inspection.status}'",
+                f"Cannot edit an inspection in terminal status '{inspection.status}'",
             )
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         new_status = fields.get("status")
@@ -261,12 +275,13 @@ class QMSService:
             # is enforced. A plain PATCH must not be able to skip it.
             if new_status in ("passed", "failed", "conditional"):
                 raise ValueError(
-                    "Use the inspection 'complete' action to set a "
-                    "result; it enforces the required sign-offs",
+                    "Use the inspection 'complete' action to set a result; it enforces the required sign-offs",
                 )
             _guard_transition(
                 _INSPECTION_STATUS_TRANSITIONS,
-                current=inspection.status, new=new_status, entity="inspection",
+                current=inspection.status,
+                new=new_status,
+                entity="inspection",
             )
         for key in ("scheduled_at", "performed_at"):
             value = fields.get(key)
@@ -284,10 +299,13 @@ class QMSService:
         prior_status = inspection.status
         _guard_transition(
             _INSPECTION_STATUS_TRANSITIONS,
-            current=inspection.status, new="in_progress", entity="inspection",
+            current=inspection.status,
+            new="in_progress",
+            entity="inspection",
         )
         await self.repo.update_inspection_fields(
-            inspection_id, status="in_progress",
+            inspection_id,
+            status="in_progress",
         )
         await self.session.refresh(inspection)
         await self.repo.append_audit(
@@ -300,7 +318,9 @@ class QMSService:
         return inspection
 
     async def add_signature(
-        self, inspection_id: uuid.UUID, data: InspectionSignatureCreate,
+        self,
+        inspection_id: uuid.UUID,
+        data: InspectionSignatureCreate,
     ) -> QMSInspectionSignature:
         inspection = await self.repo.get_inspection(inspection_id)
         if inspection is None:
@@ -314,13 +334,9 @@ class QMSService:
         # designer reviewer when one person wears both hats).
         existing = await self.repo.list_signatures(inspection_id)
         for prior in existing:
-            if (
-                prior.signer_user_id == data.signer_user_id
-                and prior.signer_role == data.signer_role
-            ):
+            if prior.signer_user_id == data.signer_user_id and prior.signer_role == data.signer_role:
                 raise ValueError(
-                    "Signer has already signed this inspection in role "
-                    f"'{data.signer_role}'",
+                    f"Signer has already signed this inspection in role '{data.signer_role}'",
                 )
         sig = QMSInspectionSignature(
             inspection_id=inspection_id,
@@ -346,8 +362,7 @@ class QMSService:
         """
         if result not in ("passed", "failed", "conditional"):
             raise ValueError(
-                f"Invalid completion result '{result}'; "
-                "expected one of passed/failed/conditional",
+                f"Invalid completion result '{result}'; expected one of passed/failed/conditional",
             )
 
         inspection = await self.repo.get_inspection(inspection_id)
@@ -357,7 +372,9 @@ class QMSService:
         prior_status = inspection.status
         _guard_transition(
             _INSPECTION_STATUS_TRANSITIONS,
-            current=inspection.status, new=result, entity="inspection",
+            current=inspection.status,
+            new=result,
+            entity="inspection",
         )
 
         required_sigs = 1
@@ -369,8 +386,7 @@ class QMSService:
         sigs = await self.repo.list_signatures(inspection_id)
         if len(sigs) < required_sigs:
             raise ValueError(
-                f"Cannot complete inspection: {len(sigs)}/{required_sigs} "
-                "required signatures collected",
+                f"Cannot complete inspection: {len(sigs)}/{required_sigs} required signatures collected",
             )
 
         update_fields: dict[str, Any] = {
@@ -391,33 +407,34 @@ class QMSService:
             after_state={"result": result},
         )
 
-        event_name = (
-            "qms.inspection.passed" if result == "passed"
-            else "qms.inspection.failed"
-        )
+        event_name = "qms.inspection.passed" if result == "passed" else "qms.inspection.failed"
         event_bus.publish_detached(
             event_name,
             {
                 "inspection_id": str(inspection_id),
                 "project_id": str(inspection.project_id),
-                "itp_item_id": str(inspection.itp_item_id)
-                if inspection.itp_item_id else None,
+                "itp_item_id": str(inspection.itp_item_id) if inspection.itp_item_id else None,
                 "result": result,
             },
             source_module="qms",
         )
         logger.info(
-            "QMS inspection completed: project=%s id=%s result=%s "
-            "signatures=%d/%d",
-            inspection.project_id, inspection_id, result,
-            len(sigs), required_sigs,
+            "QMS inspection completed: project=%s id=%s result=%s signatures=%d/%d",
+            inspection.project_id,
+            inspection_id,
+            result,
+            len(sigs),
+            required_sigs,
         )
         return inspection
 
     # ── NCR ────────────────────────────────────────────────────────────
 
     async def raise_ncr(
-        self, data: NCRCreate, *, user_id: str | None = None,
+        self,
+        data: NCRCreate,
+        *,
+        user_id: str | None = None,
     ) -> QMSNCR:
         raised_by_uuid: uuid.UUID | None = None
         if user_id:
@@ -429,14 +446,9 @@ class QMSService:
         # Money / currency consistency. Either both empty or both set;
         # silent acceptance of an amount without a currency makes COPQ
         # rollups currency-blind, which masks FX errors downstream.
-        if (
-            data.cost_impact_amount is not None
-            and data.cost_impact_amount > 0
-            and not data.cost_impact_currency
-        ):
+        if data.cost_impact_amount is not None and data.cost_impact_amount > 0 and not data.cost_impact_currency:
             raise ValueError(
-                "cost_impact_currency is required when cost_impact_amount "
-                "is provided",
+                "cost_impact_currency is required when cost_impact_amount is provided",
             )
 
         ncr = QMSNCR(
@@ -468,9 +480,10 @@ class QMSService:
         )
 
         logger.info(
-            "QMS NCR raised: project=%s id=%s severity=%s "
-            "cost_impact=%s %s",
-            ncr.project_id, ncr.id, ncr.severity,
+            "QMS NCR raised: project=%s id=%s severity=%s cost_impact=%s %s",
+            ncr.project_id,
+            ncr.id,
+            ncr.severity,
             ncr.cost_impact_amount if ncr.cost_impact_amount is not None else "0",
             ncr.cost_impact_currency or "-",
         )
@@ -482,10 +495,7 @@ class QMSService:
                 "project_id": str(ncr.project_id),
                 "title": ncr.title,
                 "severity": ncr.severity,
-                "cost_impact_amount": (
-                    str(ncr.cost_impact_amount)
-                    if ncr.cost_impact_amount is not None else None
-                ),
+                "cost_impact_amount": (str(ncr.cost_impact_amount) if ncr.cost_impact_amount is not None else None),
                 "cost_impact_currency": ncr.cost_impact_currency,
             },
             source_module="qms",
@@ -493,7 +503,9 @@ class QMSService:
         return ncr
 
     async def update_ncr(
-        self, ncr_id: uuid.UUID, data: NCRUpdate,
+        self,
+        ncr_id: uuid.UUID,
+        data: NCRUpdate,
     ) -> QMSNCR:
         ncr = await self.repo.get_ncr(ncr_id)
         if ncr is None:
@@ -510,12 +522,13 @@ class QMSService:
             # ``qms.ncr.closed`` event are not bypassed by a raw PATCH.
             if new_status == "closed":
                 raise ValueError(
-                    "Use the NCR 'close' action to close an NCR; it "
-                    "enforces corrective-action completion",
+                    "Use the NCR 'close' action to close an NCR; it enforces corrective-action completion",
                 )
             _guard_transition(
                 _NCR_STATUS_TRANSITIONS,
-                current=ncr.status, new=new_status, entity="NCR",
+                current=ncr.status,
+                new=new_status,
+                entity="NCR",
             )
         if fields:
             await self.repo.update_ncr_fields(ncr_id, **fields)
@@ -523,7 +536,9 @@ class QMSService:
         return ncr
 
     async def assign_ncr_action(
-        self, ncr_id: uuid.UUID, data: NCRActionCreate,
+        self,
+        ncr_id: uuid.UUID,
+        data: NCRActionCreate,
     ) -> QMSNCRAction:
         ncr = await self.repo.get_ncr(ncr_id)
         if ncr is None:
@@ -560,8 +575,7 @@ class QMSService:
         parent = await self.repo.get_ncr(action.ncr_id)
         if parent is not None and parent.status in ("closed", "cancelled"):
             raise ValueError(
-                f"Cannot verify an action on an NCR in status "
-                f"'{parent.status}'",
+                f"Cannot verify an action on an NCR in status '{parent.status}'",
             )
         now = _utc_now_iso()
         await self.repo.update_ncr_action_fields(
@@ -578,7 +592,8 @@ class QMSService:
             siblings = await self.repo.list_ncr_actions(action.ncr_id)
             if siblings and all(s.status == "done" for s in siblings):
                 await self.repo.update_ncr_fields(
-                    action.ncr_id, status="verifying",
+                    action.ncr_id,
+                    status="verifying",
                 )
         return action
 
@@ -599,7 +614,9 @@ class QMSService:
         prior_status = ncr.status
         _guard_transition(
             _NCR_STATUS_TRANSITIONS,
-            current=ncr.status, new="closed", entity="NCR",
+            current=ncr.status,
+            new="closed",
+            entity="NCR",
         )
         await self.repo.update_ncr_fields(ncr_id, status="closed")
         await self.session.refresh(ncr)
@@ -622,16 +639,21 @@ class QMSService:
             source_module="qms",
         )
         logger.info(
-            "QMS NCR closed: project=%s id=%s severity=%s actions=%d "
-            "cost_impact=%s %s",
-            ncr.project_id, ncr_id, ncr.severity, len(actions),
+            "QMS NCR closed: project=%s id=%s severity=%s actions=%d cost_impact=%s %s",
+            ncr.project_id,
+            ncr_id,
+            ncr.severity,
+            len(actions),
             ncr.cost_impact_amount if ncr.cost_impact_amount is not None else "0",
             ncr.cost_impact_currency or "-",
         )
         return ncr
 
     async def escalate_ncr_to_variation(
-        self, ncr_id: uuid.UUID, *, variation_id: uuid.UUID | None = None,
+        self,
+        ncr_id: uuid.UUID,
+        *,
+        variation_id: uuid.UUID | None = None,
     ) -> QMSNCR:
         """Link an NCR with cost impact to a variation order."""
         ncr = await self.repo.get_ncr(ncr_id)
@@ -647,8 +669,7 @@ class QMSService:
             )
         if ncr.linked_variation_id is not None and variation_id is None:
             raise ValueError(
-                "NCR is already linked to a variation; pass an explicit "
-                "variation_id to re-link",
+                "NCR is already linked to a variation; pass an explicit variation_id to re-link",
             )
         # Generate a UUID if caller did not supply one — production glue
         # code would replace this with a real ChangeOrder lookup.
@@ -661,10 +682,7 @@ class QMSService:
             {
                 "ncr_id": str(ncr_id),
                 "project_id": str(ncr.project_id),
-                "cost_impact": (
-                    str(ncr.cost_impact_amount)
-                    if ncr.cost_impact_amount is not None else None
-                ),
+                "cost_impact": (str(ncr.cost_impact_amount) if ncr.cost_impact_amount is not None else None),
                 "cost_impact_currency": ncr.cost_impact_currency,
                 "linked_variation_id": str(var_id),
             },
@@ -675,7 +693,10 @@ class QMSService:
     # ── Punch list ─────────────────────────────────────────────────────
 
     async def add_punch_item(
-        self, data: PunchItemCreate, *, user_id: str | None = None,
+        self,
+        data: PunchItemCreate,
+        *,
+        user_id: str | None = None,
     ) -> QMSPunchItem:
         raised_by_uuid: uuid.UUID | None = None
         if user_id:
@@ -715,7 +736,9 @@ class QMSService:
         return punch
 
     async def update_punch_item(
-        self, punch_id: uuid.UUID, data: PunchItemUpdate,
+        self,
+        punch_id: uuid.UUID,
+        data: PunchItemUpdate,
     ) -> QMSPunchItem:
         punch = await self.repo.get_punch(punch_id)
         if punch is None:
@@ -727,7 +750,9 @@ class QMSService:
         if new_status is not None and new_status != punch.status:
             _guard_transition(
                 _PUNCH_STATUS_TRANSITIONS,
-                current=punch.status, new=new_status, entity="punch",
+                current=punch.status,
+                new=new_status,
+                entity="punch",
             )
         if "due_date" in fields and isinstance(fields["due_date"], datetime):
             fields["due_date"] = fields["due_date"].isoformat()
@@ -737,33 +762,44 @@ class QMSService:
         return punch
 
     async def assign_punch_item(
-        self, punch_id: uuid.UUID, *, assigned_to: uuid.UUID,
+        self,
+        punch_id: uuid.UUID,
+        *,
+        assigned_to: uuid.UUID,
     ) -> QMSPunchItem:
         punch = await self.repo.get_punch(punch_id)
         if punch is None:
             raise ValueError(f"Punch item {punch_id} not found")
         _guard_transition(
             _PUNCH_STATUS_TRANSITIONS,
-            current=punch.status, new="assigned", entity="punch",
+            current=punch.status,
+            new="assigned",
+            entity="punch",
         )
         await self.repo.update_punch_fields(
-            punch_id, status="assigned", assigned_to=assigned_to,
+            punch_id,
+            status="assigned",
+            assigned_to=assigned_to,
         )
         await self.session.refresh(punch)
         return punch
 
     async def mark_ready_for_inspection(
-        self, punch_id: uuid.UUID,
+        self,
+        punch_id: uuid.UUID,
     ) -> QMSPunchItem:
         punch = await self.repo.get_punch(punch_id)
         if punch is None:
             raise ValueError(f"Punch item {punch_id} not found")
         _guard_transition(
             _PUNCH_STATUS_TRANSITIONS,
-            current=punch.status, new="ready_for_inspection", entity="punch",
+            current=punch.status,
+            new="ready_for_inspection",
+            entity="punch",
         )
         await self.repo.update_punch_fields(
-            punch_id, status="ready_for_inspection",
+            punch_id,
+            status="ready_for_inspection",
         )
         await self.session.refresh(punch)
         return punch
@@ -774,10 +810,14 @@ class QMSService:
             raise ValueError(f"Punch item {punch_id} not found")
         _guard_transition(
             _PUNCH_STATUS_TRANSITIONS,
-            current=punch.status, new="closed", entity="punch",
+            current=punch.status,
+            new="closed",
+            entity="punch",
         )
         await self.repo.update_punch_fields(
-            punch_id, status="closed", closed_at=_utc_now_iso(),
+            punch_id,
+            status="closed",
+            closed_at=_utc_now_iso(),
         )
         await self.session.refresh(punch)
         event_bus.publish_detached(
@@ -791,7 +831,10 @@ class QMSService:
         return punch
 
     async def reject_punch_item(
-        self, punch_id: uuid.UUID, *, reason: str | None = None,
+        self,
+        punch_id: uuid.UUID,
+        *,
+        reason: str | None = None,
     ) -> QMSPunchItem:
         del reason  # reserved for future use
         punch = await self.repo.get_punch(punch_id)
@@ -799,7 +842,9 @@ class QMSService:
             raise ValueError(f"Punch item {punch_id} not found")
         _guard_transition(
             _PUNCH_STATUS_TRANSITIONS,
-            current=punch.status, new="rejected", entity="punch",
+            current=punch.status,
+            new="rejected",
+            entity="punch",
         )
         await self.repo.update_punch_fields(punch_id, status="rejected")
         await self.session.refresh(punch)
@@ -820,7 +865,9 @@ class QMSService:
         return await self.repo.create_audit(audit)
 
     async def update_audit(
-        self, audit_id: uuid.UUID, data: AuditUpdate,
+        self,
+        audit_id: uuid.UUID,
+        data: AuditUpdate,
     ) -> QMSAudit:
         audit = await self.repo.get_audit(audit_id)
         if audit is None:
@@ -830,7 +877,9 @@ class QMSService:
         if new_status is not None and new_status != audit.status:
             _guard_transition(
                 _AUDIT_STATUS_TRANSITIONS,
-                current=audit.status, new=new_status, entity="audit",
+                current=audit.status,
+                new=new_status,
+                entity="audit",
             )
         for key in ("planned_date", "performed_at"):
             value = fields.get(key)
@@ -847,14 +896,18 @@ class QMSService:
             raise ValueError(f"Audit {audit_id} not found")
         _guard_transition(
             _AUDIT_STATUS_TRANSITIONS,
-            current=audit.status, new="in_progress", entity="audit",
+            current=audit.status,
+            new="in_progress",
+            entity="audit",
         )
         await self.repo.update_audit_fields(audit_id, status="in_progress")
         await self.session.refresh(audit)
         return audit
 
     async def add_finding(
-        self, audit_id: uuid.UUID, data: AuditFindingCreate,
+        self,
+        audit_id: uuid.UUID,
+        data: AuditFindingCreate,
     ) -> QMSAuditFinding:
         audit = await self.repo.get_audit(audit_id)
         if audit is None:
@@ -890,20 +943,27 @@ class QMSService:
         if finding.status == "closed":
             raise ValueError("Finding already closed")
         await self.repo.update_finding_fields(
-            finding_id, status="closed", closed_at=_utc_now_iso(),
+            finding_id,
+            status="closed",
+            closed_at=_utc_now_iso(),
         )
         await self.session.refresh(finding)
         return finding
 
     async def complete_audit(
-        self, audit_id: uuid.UUID, *, overall_rating: int | None = None,
+        self,
+        audit_id: uuid.UUID,
+        *,
+        overall_rating: int | None = None,
     ) -> QMSAudit:
         audit = await self.repo.get_audit(audit_id)
         if audit is None:
             raise ValueError(f"Audit {audit_id} not found")
         _guard_transition(
             _AUDIT_STATUS_TRANSITIONS,
-            current=audit.status, new="completed", entity="audit",
+            current=audit.status,
+            new="completed",
+            entity="audit",
         )
         updates: dict[str, Any] = {
             "status": "completed",
@@ -929,7 +989,9 @@ class QMSService:
     # ── Analytics ──────────────────────────────────────────────────────
 
     async def _resolve_project_currency(
-        self, project_id: uuid.UUID, fallback: str,
+        self,
+        project_id: uuid.UUID,
+        fallback: str,
     ) -> str:
         """Resolve the active currency for a COPQ-style report.
 
@@ -980,12 +1042,16 @@ class QMSService:
         copq_total = ncr_total + rework_total
 
         resolved_currency = await self._resolve_project_currency(
-            project_id, currency,
+            project_id,
+            currency,
         )
 
         logger.info(
             "QMS COPQ computed: project=%s ncr=%s rework=%s total=%s %s",
-            project_id, ncr_total, rework_total, copq_total,
+            project_id,
+            ncr_total,
+            rework_total,
+            copq_total,
             resolved_currency or "-",
         )
 
@@ -999,7 +1065,8 @@ class QMSService:
         }
 
     async def compute_first_pass_yield(
-        self, project_id: uuid.UUID,
+        self,
+        project_id: uuid.UUID,
     ) -> dict[str, Any]:
         """Inspections that passed on first attempt / total inspections."""
         total = await self.repo.count_inspections(project_id)
@@ -1038,14 +1105,19 @@ class QMSService:
         copq_total = ncr_total + rework_total + warranty + delay
 
         resolved_currency = await self._resolve_project_currency(
-            project_id, currency,
+            project_id,
+            currency,
         )
 
         logger.info(
-            "QMS COPQ-detailed: project=%s ncr=%s rework=%s warranty=%s "
-            "delay=%s total=%s %s",
-            project_id, ncr_total, rework_total, warranty, delay,
-            copq_total, resolved_currency or "-",
+            "QMS COPQ-detailed: project=%s ncr=%s rework=%s warranty=%s delay=%s total=%s %s",
+            project_id,
+            ncr_total,
+            rework_total,
+            warranty,
+            delay,
+            copq_total,
+            resolved_currency or "-",
         )
 
         return {
@@ -1085,7 +1157,8 @@ class QMSService:
         work_type_plan_ids: set[uuid.UUID] | None = None
         if work_type is not None:
             plans, _ = await self.repo.list_itp_plans(
-                project_id, limit=10_000,
+                project_id,
+                limit=10_000,
             )
             work_type_plan_ids = {p.id for p in plans if p.work_type == work_type}
             if not work_type_plan_ids:
@@ -1106,11 +1179,14 @@ class QMSService:
             window_end = today - timedelta(days=i * period_days)
             window_start = window_end - timedelta(days=period_days - 1)
             start_iso = datetime.combine(
-                window_start, datetime.min.time(), tzinfo=UTC,
+                window_start,
+                datetime.min.time(),
+                tzinfo=UTC,
             ).isoformat()
             end_iso = datetime.combine(
                 window_end + timedelta(days=1),
-                datetime.min.time(), tzinfo=UTC,
+                datetime.min.time(),
+                tzinfo=UTC,
             ).isoformat()
             inspections = await self.repo.list_inspections_in_period(
                 project_id,
@@ -1138,13 +1214,15 @@ class QMSService:
             total = len(inspections)
             passed = sum(1 for ins in inspections if ins.status == "passed")
             ratio = (passed / total) if total else 0.0
-            buckets.append({
-                "period_start": window_start.isoformat(),
-                "period_end": window_end.isoformat(),
-                "inspections_total": total,
-                "inspections_passed_first_time": passed,
-                "first_pass_yield": round(ratio, 4),
-            })
+            buckets.append(
+                {
+                    "period_start": window_start.isoformat(),
+                    "period_end": window_end.isoformat(),
+                    "inspections_total": total,
+                    "inspections_passed_first_time": passed,
+                    "first_pass_yield": round(ratio, 4),
+                }
+            )
 
         return {
             "project_id": project_id,
@@ -1170,32 +1248,48 @@ class QMSService:
         if period_to < period_from:
             raise ValueError("period_to must be on or after period_from")
         start_iso = datetime.combine(
-            period_from, datetime.min.time(), tzinfo=UTC,
+            period_from,
+            datetime.min.time(),
+            tzinfo=UTC,
         ).isoformat()
         # exclusive upper bound = period_to + 1 day
         end_iso = datetime.combine(
-            period_to + timedelta(days=1), datetime.min.time(), tzinfo=UTC,
+            period_to + timedelta(days=1),
+            datetime.min.time(),
+            tzinfo=UTC,
         ).isoformat()
 
         audits = await self.repo.count_audits_in_period(
-            project_id, date_from_iso=start_iso, date_to_iso=end_iso,
+            project_id,
+            date_from_iso=start_iso,
+            date_to_iso=end_iso,
         )
         findings_open = await self.repo.count_open_findings_in_period(
-            project_id, date_from_iso=start_iso, date_to_iso=end_iso,
+            project_id,
+            date_from_iso=start_iso,
+            date_to_iso=end_iso,
         )
         findings_closed = await self.repo.count_closed_findings_in_period(
-            project_id, date_from_iso=start_iso, date_to_iso=end_iso,
+            project_id,
+            date_from_iso=start_iso,
+            date_to_iso=end_iso,
         )
         ncrs_raised = await self.repo.count_ncrs_in_period(
-            project_id, date_from_iso=start_iso, date_to_iso=end_iso,
+            project_id,
+            date_from_iso=start_iso,
+            date_to_iso=end_iso,
         )
         ncrs_closed = await self.repo.count_ncrs_in_period(
-            project_id, date_from_iso=start_iso, date_to_iso=end_iso,
+            project_id,
+            date_from_iso=start_iso,
+            date_to_iso=end_iso,
             only_closed=True,
         )
 
         inspections = await self.repo.list_inspections_in_period(
-            project_id, period_start_iso=start_iso, period_end_iso=end_iso,
+            project_id,
+            period_start_iso=start_iso,
+            period_end_iso=end_iso,
         )
         inspections_total = len(inspections)
         inspections_passed = sum(1 for i in inspections if i.status == "passed")
@@ -1213,8 +1307,7 @@ class QMSService:
         recs: list[str] = []
         if fpy < 0.85 and inspections_total > 0:
             recs.append(
-                f"First-pass yield {fpy:.2%} below 85% target — "
-                "review inspector training and rework root causes."
+                f"First-pass yield {fpy:.2%} below 85% target — review inspector training and rework root causes."
             )
         if findings_open > findings_closed:
             recs.append(
@@ -1223,13 +1316,11 @@ class QMSService:
             )
         if ncrs_raised > 0 and ncrs_closed / max(ncrs_raised, 1) < 0.5:
             recs.append(
-                f"Only {ncrs_closed}/{ncrs_raised} NCRs closed in period — "
-                "escalate ageing NCRs to senior leadership."
+                f"Only {ncrs_closed}/{ncrs_raised} NCRs closed in period — escalate ageing NCRs to senior leadership."
             )
         if open_punch > 50:
             recs.append(
-                f"{open_punch} open punch items — schedule a rolling "
-                "punch-down sprint before final inspection."
+                f"{open_punch} open punch items — schedule a rolling punch-down sprint before final inspection."
             )
         if not recs:
             recs.append("QMS performance within thresholds — maintain current cadence.")
@@ -1256,7 +1347,10 @@ class QMSService:
     # ── ITP template library ──────────────────────────────────────────
 
     async def create_itp_template(
-        self, data: ITPTemplateCreate, *, user_id: str | None = None,
+        self,
+        data: ITPTemplateCreate,
+        *,
+        user_id: str | None = None,
     ) -> ITPTemplate:
         tpl = ITPTemplate(
             csi_division=data.csi_division,
@@ -1274,7 +1368,9 @@ class QMSService:
         return tpl
 
     async def update_itp_template(
-        self, tpl_id: uuid.UUID, data: ITPTemplateUpdate,
+        self,
+        tpl_id: uuid.UUID,
+        data: ITPTemplateUpdate,
     ) -> ITPTemplate:
         tpl = await self.repo.get_itp_template(tpl_id)
         if tpl is None:
@@ -1282,10 +1378,7 @@ class QMSService:
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         items = fields.pop("items", None)
         if items is not None:
-            fields["items_json"] = [
-                i.model_dump() if hasattr(i, "model_dump") else i
-                for i in items
-            ]
+            fields["items_json"] = [i.model_dump() if hasattr(i, "model_dump") else i for i in items]
         if fields:
             await self.repo.update_itp_template_fields(tpl_id, **fields)
             await self.session.refresh(tpl)
@@ -1354,7 +1447,10 @@ class QMSService:
     # ── Calibration tracking ──────────────────────────────────────────
 
     async def create_calibration(
-        self, data: CalibrationCreate, *, user_id: str | None = None,
+        self,
+        data: CalibrationCreate,
+        *,
+        user_id: str | None = None,
     ) -> QMSCalibration:
         del user_id  # accepted for symmetry; not stored on this entity
         if data.valid_until <= data.calibration_date:
@@ -1379,7 +1475,9 @@ class QMSService:
         return await self.repo.create_calibration(cal)
 
     async def update_calibration(
-        self, cal_id: uuid.UUID, data: CalibrationUpdate,
+        self,
+        cal_id: uuid.UUID,
+        data: CalibrationUpdate,
     ) -> QMSCalibration:
         cal = await self.repo.get_calibration(cal_id)
         if cal is None:
@@ -1415,7 +1513,8 @@ class QMSService:
             today = date.today()
         cutoff = today + timedelta(days=days)
         rows = await self.repo.expiring_calibrations(
-            before=cutoff, project_id=project_id,
+            before=cutoff,
+            project_id=project_id,
         )
         if rows and publish_event:
             event_bus.publish_detached(

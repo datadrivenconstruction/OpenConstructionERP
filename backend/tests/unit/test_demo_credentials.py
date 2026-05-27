@@ -15,14 +15,10 @@ from __future__ import annotations
 
 import json
 import os
-import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 from app.main import _persist_demo_credentials, _resolve_demo_password
-
 
 # ─────────────────────────────────────────────────────────────────────────
 # _resolve_demo_password
@@ -96,9 +92,7 @@ def test_persist_falls_back_to_home_when_no_cli_dir(tmp_path: Path):
 
     env = os.environ.copy()
     env.pop("OE_CLI_DATA_DIR", None)
-    with patch.dict(os.environ, env, clear=True), patch(
-        "app.main.Path.home", return_value=tmp_path
-    ):
+    with patch.dict(os.environ, env, clear=True), patch("app.main.Path.home", return_value=tmp_path):
         path = _persist_demo_credentials(creds)
 
     assert path is not None

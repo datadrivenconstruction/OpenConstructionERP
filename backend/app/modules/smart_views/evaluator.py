@@ -310,9 +310,7 @@ def evaluate_rules(
         sid = _stable_id_of(el)
         if not sid:
             continue
-        states[sid] = ElementState(
-            visible=start_visible, color=None, opacity=1.0
-        )
+        states[sid] = ElementState(visible=start_visible, color=None, opacity=1.0)
 
     # 2. Normalise rules — accept either Pydantic objects or raw dicts
     #    (so the evaluator works in service code without re-validating).

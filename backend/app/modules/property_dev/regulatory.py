@@ -124,9 +124,7 @@ def quarter_bounds(year: int, q: int) -> tuple[str, str]:
     return start, end
 
 
-async def _compute_escrow_snapshot(
-    session: AsyncSession, dev_id: uuid.UUID
-) -> list[dict[str, Any]]:
+async def _compute_escrow_snapshot(session: AsyncSession, dev_id: uuid.UUID) -> list[dict[str, Any]]:
     """Build the escrow account list from EscrowAccount + EscrowTransaction.
 
     Each entry is a regulator-friendly summary; balances are computed live
@@ -163,9 +161,7 @@ async def _compute_escrow_snapshot(
                 debit = Decimal(str(total or 0))
         balance = credit - debit
         meta = acc.metadata_ or {}
-        declared_balance = (
-            meta.get("ledger_balance") if isinstance(meta, dict) else None
-        )
+        declared_balance = meta.get("ledger_balance") if isinstance(meta, dict) else None
         snapshot.append(
             {
                 "account_id": str(acc.id),
@@ -206,14 +202,9 @@ async def _load_aggregates(
 
     # Plot counts by status.
     plot_count_stmt = (
-        select(Plot.status, func.count(Plot.id))
-        .where(Plot.development_id == dev_id)
-        .group_by(Plot.status)
+        select(Plot.status, func.count(Plot.id)).where(Plot.development_id == dev_id).group_by(Plot.status)
     )
-    plot_counts = {
-        row[0]: int(row[1])
-        for row in (await session.execute(plot_count_stmt)).all()
-    }
+    plot_counts = {row[0]: int(row[1]) for row in (await session.execute(plot_count_stmt)).all()}
     total_plots = sum(plot_counts.values())
     sold = plot_counts.get("sold", 0) + plot_counts.get("handed_over", 0)
     reserved = plot_counts.get("reserved", 0)
@@ -221,9 +212,9 @@ async def _load_aggregates(
     handed_over = plot_counts.get("handed_over", 0)
 
     # Average construction percent (weighted by plot — every plot one vote).
-    progress_stmt = select(
-        func.coalesce(func.avg(Plot.construction_status_percent), 0)
-    ).where(Plot.development_id == dev_id)
+    progress_stmt = select(func.coalesce(func.avg(Plot.construction_status_percent), 0)).where(
+        Plot.development_id == dev_id
+    )
     avg_progress_raw = (await session.execute(progress_stmt)).scalar() or 0
     avg_progress = Decimal(str(avg_progress_raw)).quantize(Decimal("0.01"))
 
@@ -241,9 +232,7 @@ async def _load_aggregates(
     sales_by_currency: dict[str, Decimal] = {}
     for total, ccy in sales_rows:
         key = (ccy or "").upper()
-        sales_by_currency[key] = sales_by_currency.get(key, Decimal("0")) + Decimal(
-            str(total)
-        )
+        sales_by_currency[key] = sales_by_currency.get(key, Decimal("0")) + Decimal(str(total))
 
     # Quarterly buyer activity (contracted/reserved IN the quarter).
     contracted_q_stmt = (
@@ -253,9 +242,7 @@ async def _load_aggregates(
         .where(Buyer.contract_signed_at >= period_start)
         .where(Buyer.contract_signed_at <= period_end)
     )
-    contracted_in_quarter = int(
-        (await session.execute(contracted_q_stmt)).scalar() or 0
-    )
+    contracted_in_quarter = int((await session.execute(contracted_q_stmt)).scalar() or 0)
 
     # Quarterly SalesContract activity (R6 signed contracts via Plot FK).
     spa_q_stmt = (
@@ -266,9 +253,7 @@ async def _load_aggregates(
         .where(SalesContract.signing_date >= period_start)
         .where(SalesContract.signing_date <= period_end)
     )
-    spas_in_quarter = int(
-        (await session.execute(spa_q_stmt)).scalar() or 0
-    )
+    spas_in_quarter = int((await session.execute(spa_q_stmt)).scalar() or 0)
 
     # Handovers completed in quarter.
     handover_q_stmt = (
@@ -279,9 +264,7 @@ async def _load_aggregates(
         .where(Handover.completed_at >= period_start)
         .where(Handover.completed_at <= period_end)
     )
-    handovers_in_quarter = int(
-        (await session.execute(handover_q_stmt)).scalar() or 0
-    )
+    handovers_in_quarter = int((await session.execute(handover_q_stmt)).scalar() or 0)
 
     # Live escrow snapshot from EscrowAccount + EscrowTransaction.
     escrow_accounts = await _compute_escrow_snapshot(session, dev_id)
@@ -302,9 +285,8 @@ async def _load_aggregates(
             "fz214_project_id": (meta.get("fz214_project_id") if isinstance(meta, dict) else "") or "",
             "cma_licence_no": (meta.get("cma_licence_no") if isinstance(meta, dict) else "") or "",
             "authorised_signatory": (meta.get("authorised_signatory") if isinstance(meta, dict) else "") or "",
-            "estimated_cost_to_completion": (
-                meta.get("estimated_cost_to_completion") if isinstance(meta, dict) else ""
-            ) or "",
+            "estimated_cost_to_completion": (meta.get("estimated_cost_to_completion") if isinstance(meta, dict) else "")
+            or "",
         },
         "period": {
             "quarter": quarter,
@@ -321,10 +303,7 @@ async def _load_aggregates(
             "avg_progress_percent": str(avg_progress),
         },
         "sales": {
-            "by_currency": {
-                k: str(v.quantize(Decimal("0.01")))
-                for k, v in sales_by_currency.items()
-            },
+            "by_currency": {k: str(v.quantize(Decimal("0.01"))) for k, v in sales_by_currency.items()},
             "contracted_in_quarter": contracted_in_quarter,
             "spas_in_quarter": spas_in_quarter,
             "handovers_in_quarter": handovers_in_quarter,
@@ -588,20 +567,12 @@ async def generate_regulator_report_maharera(
     # Carpet vs built-up: sum from Plot.metadata when supplied.
     carpet_total = Decimal("0")
     built_up_total = Decimal("0")
-    rows = (
-        await session.execute(
-            select(Plot).where(Plot.development_id == dev_uuid)
-        )
-    ).scalars().all()
+    rows = (await session.execute(select(Plot).where(Plot.development_id == dev_uuid))).scalars().all()
     for plot in rows:
         pmeta = plot.metadata_ or {}
         try:
-            carpet_total += Decimal(
-                str(pmeta.get("carpet_area_m2", "0") or "0")
-            )
-            built_up_total += Decimal(
-                str(pmeta.get("built_up_area_m2", "0") or plot.area_m2 or "0")
-            )
+            carpet_total += Decimal(str(pmeta.get("carpet_area_m2", "0") or "0"))
+            built_up_total += Decimal(str(pmeta.get("built_up_area_m2", "0") or plot.area_m2 or "0"))
         except Exception:  # noqa: BLE001 — defensive parser
             continue
 
@@ -718,11 +689,7 @@ async def generate_regulator_report_214fz(
 
     residential_total = Decimal("0")
     non_residential_total = Decimal("0")
-    rows = (
-        await session.execute(
-            select(Plot).where(Plot.development_id == dev_uuid)
-        )
-    ).scalars().all()
+    rows = (await session.execute(select(Plot).where(Plot.development_id == dev_uuid))).scalars().all()
     for plot in rows:
         pmeta = plot.metadata_ or {}
         try:
@@ -863,10 +830,7 @@ async def generate_regulator_report_cma(
     sales = agg["sales"]
     period = agg["period"]
     sar_sales = sales["by_currency"].get("SAR", "0.00")
-    sales_velocity = (
-        f"{sales['contracted_in_quarter']} contracts / "
-        f"{sales['handovers_in_quarter']} handovers"
-    )
+    sales_velocity = f"{sales['contracted_in_quarter']} contracts / {sales['handovers_in_quarter']} handovers"
 
     # Complaints register from Development.metadata.complaints (best-effort).
     dev = await session.get(Development, dev_uuid)
@@ -989,10 +953,7 @@ async def generate_regulator_report(
         return await generate_regulator_report_214fz(session, dev_id, quarter)
     if code == "CMA":
         return await generate_regulator_report_cma(session, dev_id, quarter)
-    raise ValueError(
-        f"Unsupported regulator '{regulator}'. Supported: "
-        f"{', '.join(SUPPORTED_REGULATORS)}"
-    )
+    raise ValueError(f"Unsupported regulator '{regulator}'. Supported: {', '.join(SUPPORTED_REGULATORS)}")
 
 
 __all__ = [

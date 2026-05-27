@@ -68,12 +68,18 @@ _CUBE_V = np.array(
 )
 _CUBE_F = np.array(
     [
-        [0, 1, 2], [0, 2, 3],   # bottom
-        [4, 6, 5], [4, 7, 6],   # top
-        [0, 4, 5], [0, 5, 1],   # front
-        [1, 5, 6], [1, 6, 2],   # right
-        [2, 6, 7], [2, 7, 3],   # back
-        [3, 7, 4], [3, 4, 0],   # left
+        [0, 1, 2],
+        [0, 2, 3],  # bottom
+        [4, 6, 5],
+        [4, 7, 6],  # top
+        [0, 4, 5],
+        [0, 5, 1],  # front
+        [1, 5, 6],
+        [1, 6, 2],  # right
+        [2, 6, 7],
+        [2, 7, 3],  # back
+        [3, 7, 4],
+        [3, 4, 0],  # left
     ],
     dtype=np.int64,
 )
@@ -96,8 +102,12 @@ def _box(
         name=f"Box {eid}",
         discipline=discipline,
         aabb=(
-            float(mn[0]), float(mn[1]), float(mn[2]),
-            float(mx[0]), float(mx[1]), float(mx[2]),
+            float(mn[0]),
+            float(mn[1]),
+            float(mn[2]),
+            float(mx[0]),
+            float(mx[1]),
+            float(mx[2]),
         ),
         vertices=v,
         faces=_CUBE_F.copy(),
@@ -125,8 +135,12 @@ def _mesh(
         name=f"Mesh {eid}",
         discipline=discipline,
         aabb=(
-            float(mn[0]), float(mn[1]), float(mn[2]),
-            float(mx[0]), float(mx[1]), float(mx[2]),
+            float(mn[0]),
+            float(mn[1]),
+            float(mn[2]),
+            float(mx[0]),
+            float(mx[1]),
+            float(mx[2]),
         ),
         vertices=v,
         faces=f,
@@ -152,8 +166,12 @@ class _FakeElement:
         self.discipline = geom.discipline
         self.element_type = "Generic"
         self.bounding_box = {
-            "min_x": geom.aabb[0], "min_y": geom.aabb[1], "min_z": geom.aabb[2],
-            "max_x": geom.aabb[3], "max_y": geom.aabb[4], "max_z": geom.aabb[5],
+            "min_x": geom.aabb[0],
+            "min_y": geom.aabb[1],
+            "min_z": geom.aabb[2],
+            "max_x": geom.aabb[3],
+            "max_y": geom.aabb[4],
+            "max_z": geom.aabb[5],
         }
 
 
@@ -208,9 +226,10 @@ def _labelled_cases() -> list[_Case]:
     cases.append(
         _Case(
             "deep_overlap_0p3m",
-            (_box("A1", (0, 0, 0), (1, 1, 1)),
-             _box("B1", (0.7, 0, 0), (1, 1, 1))),
-            tol=0.005, clr=0.0, expect_hard=True,
+            (_box("A1", (0, 0, 0), (1, 1, 1)), _box("B1", (0.7, 0, 0), (1, 1, 1))),
+            tol=0.005,
+            clr=0.0,
+            expect_hard=True,
         )
     )
 
@@ -218,9 +237,10 @@ def _labelled_cases() -> list[_Case]:
     cases.append(
         _Case(
             "shallow_overlap_0p02m_above_tol",
-            (_box("A2", (0, 0, 0), (1, 1, 1)),
-             _box("B2", (0.98, 0, 0), (1, 1, 1))),
-            tol=0.005, clr=0.0, expect_hard=True,
+            (_box("A2", (0, 0, 0), (1, 1, 1)), _box("B2", (0.98, 0, 0), (1, 1, 1))),
+            tol=0.005,
+            clr=0.0,
+            expect_hard=True,
         )
     )
 
@@ -228,9 +248,10 @@ def _labelled_cases() -> list[_Case]:
     cases.append(
         _Case(
             "disjoint_2m",
-            (_box("A3", (0, 0, 0), (1, 1, 1)),
-             _box("B3", (3.0, 0, 0), (1, 1, 1))),
-            tol=0.005, clr=0.0, expect_hard=False,
+            (_box("A3", (0, 0, 0), (1, 1, 1)), _box("B3", (3.0, 0, 0), (1, 1, 1))),
+            tol=0.005,
+            clr=0.0,
+            expect_hard=False,
         )
     )
 
@@ -243,9 +264,10 @@ def _labelled_cases() -> list[_Case]:
     cases.append(
         _Case(
             "diagonal_tri_aabb_overlap_no_tri_hit",
-            (_mesh("T4", diag_v, diag_f),
-             _box("B4", (0.1, 3.0, 3.0), (0.5, 0.5, 0.5))),
-            tol=0.005, clr=0.0, expect_hard=False,
+            (_mesh("T4", diag_v, diag_f), _box("B4", (0.1, 3.0, 3.0), (0.5, 0.5, 0.5))),
+            tol=0.005,
+            clr=0.0,
+            expect_hard=False,
         )
     )
 
@@ -253,22 +275,26 @@ def _labelled_cases() -> list[_Case]:
     #    straight through a horizontal slab. Genuine interpenetration.
     blade_v = np.array(
         [
-            [1.0, 0.5, -1.0], [3.0, 0.5, -1.0], [2.0, 0.5, 3.0],
-            [1.0, 0.6, -1.0], [3.0, 0.6, -1.0], [2.0, 0.6, 3.0],
+            [1.0, 0.5, -1.0],
+            [3.0, 0.5, -1.0],
+            [2.0, 0.5, 3.0],
+            [1.0, 0.6, -1.0],
+            [3.0, 0.6, -1.0],
+            [2.0, 0.6, 3.0],
         ],
         np.float64,
     )
     blade_f = np.array(
-        [[0, 1, 2], [3, 5, 4], [0, 3, 4], [0, 4, 1],
-         [1, 4, 5], [1, 5, 2], [2, 5, 3], [2, 3, 0]],
+        [[0, 1, 2], [3, 5, 4], [0, 3, 4], [0, 4, 1], [1, 4, 5], [1, 5, 2], [2, 5, 3], [2, 3, 0]],
         np.int64,
     )
     cases.append(
         _Case(
             "edge_pierces_face",
-            (_mesh("T5", blade_v, blade_f),
-             _box("S5", (0.0, 0.0, -0.1), (4.0, 4.0, 0.2))),
-            tol=0.005, clr=0.0, expect_hard=True,
+            (_mesh("T5", blade_v, blade_f), _box("S5", (0.0, 0.0, -0.1), (4.0, 4.0, 0.2))),
+            tol=0.005,
+            clr=0.0,
+            expect_hard=True,
         )
     )
 
@@ -279,9 +305,10 @@ def _labelled_cases() -> list[_Case]:
     cases.append(
         _Case(
             "shared_face_touch_not_hard",
-            (_box("A6", (0, 0, 0), (1, 1, 1)),
-             _box("B6", (1.0, 0, 0), (1, 1, 1))),
-            tol=0.005, clr=0.0, expect_hard=False,
+            (_box("A6", (0, 0, 0), (1, 1, 1)), _box("B6", (1.0, 0, 0), (1, 1, 1))),
+            tol=0.005,
+            clr=0.0,
+            expect_hard=False,
         )
     )
 
@@ -295,13 +322,17 @@ def _labelled_cases() -> list[_Case]:
     cases.append(
         _Case(
             "bar_through_block",
-            (_mesh(
-                "T7",
-                _CUBE_V * np.array([2.0, 0.3, 0.3]) + np.array([-0.2, 0.4, 0.4]),
-                _CUBE_F.copy(),
-             ),
-             _box("K7", (0.4, 0.0, 0.0), (1.2, 1.2, 1.2))),
-            tol=0.005, clr=0.0, expect_hard=True,
+            (
+                _mesh(
+                    "T7",
+                    _CUBE_V * np.array([2.0, 0.3, 0.3]) + np.array([-0.2, 0.4, 0.4]),
+                    _CUBE_F.copy(),
+                ),
+                _box("K7", (0.4, 0.0, 0.0), (1.2, 1.2, 1.2)),
+            ),
+            tol=0.005,
+            clr=0.0,
+            expect_hard=True,
         )
     )
 
@@ -310,9 +341,10 @@ def _labelled_cases() -> list[_Case]:
     cases.append(
         _Case(
             "subtolerance_overlap_1mm",
-            (_box("A8", (0, 0, 0), (1, 1, 1)),
-             _box("B8", (0.999, 0, 0), (1, 1, 1))),
-            tol=0.005, clr=0.0, expect_hard=False,
+            (_box("A8", (0, 0, 0), (1, 1, 1)), _box("B8", (0.999, 0, 0), (1, 1, 1))),
+            tol=0.005,
+            clr=0.0,
+            expect_hard=False,
         )
     )
 
@@ -376,27 +408,13 @@ def test_narrow_phase_tri_tri_precision_recall_one() -> None:
         return np.array([p], np.float64)  # (1,3,3)
 
     labelled: list[tuple[str, np.ndarray, np.ndarray, bool]] = [
-        ("coplanar_overlap",
-         t((0, 0, 0), (2, 0, 0), (0, 2, 0)),
-         t((1, 1, 0), (3, 1, 0), (1, 3, 0)), True),
-        ("coplanar_disjoint",
-         t((0, 0, 0), (1, 0, 0), (0, 1, 0)),
-         t((5, 5, 0), (6, 5, 0), (5, 6, 0)), False),
-        ("edge_pierces_face",
-         t((-1, 0.5, -1), (3, 0.5, -1), (1, 0.5, 3)),
-         t((0, 0, 0), (2, 0, 0), (0, 2, 0)), True),
-        ("parallel_planes_apart",
-         t((0, 0, 0), (1, 0, 0), (0, 1, 0)),
-         t((0, 0, 5), (1, 0, 5), (0, 1, 5)), False),
-        ("shared_edge_touch",
-         t((0, 0, 0), (1, 0, 0), (0, 1, 0)),
-         t((0, 0, 0), (1, 0, 0), (0, -1, 0)), True),
-        ("one_tri_above_other_plane",
-         t((0, 0, 1), (1, 0, 1), (0, 1, 1)),
-         t((0, 0, 0), (1, 0, 0), (0, 1, 0)), False),
-        ("genuine_interpenetration",
-         t((-1, 0, 0), (1, 0, 0), (0, 0, 2)),
-         t((0, -1, 1), (0, 1, 1), (0, 0, -1)), True),
+        ("coplanar_overlap", t((0, 0, 0), (2, 0, 0), (0, 2, 0)), t((1, 1, 0), (3, 1, 0), (1, 3, 0)), True),
+        ("coplanar_disjoint", t((0, 0, 0), (1, 0, 0), (0, 1, 0)), t((5, 5, 0), (6, 5, 0), (5, 6, 0)), False),
+        ("edge_pierces_face", t((-1, 0.5, -1), (3, 0.5, -1), (1, 0.5, 3)), t((0, 0, 0), (2, 0, 0), (0, 2, 0)), True),
+        ("parallel_planes_apart", t((0, 0, 0), (1, 0, 0), (0, 1, 0)), t((0, 0, 5), (1, 0, 5), (0, 1, 5)), False),
+        ("shared_edge_touch", t((0, 0, 0), (1, 0, 0), (0, 1, 0)), t((0, 0, 0), (1, 0, 0), (0, -1, 0)), True),
+        ("one_tri_above_other_plane", t((0, 0, 1), (1, 0, 1), (0, 1, 1)), t((0, 0, 0), (1, 0, 0), (0, 1, 0)), False),
+        ("genuine_interpenetration", t((-1, 0, 0), (1, 0, 0), (0, 0, 2)), t((0, -1, 1), (0, 1, 1), (0, 0, -1)), True),
     ]
 
     tp = fp = fn = tn = 0
@@ -456,9 +474,7 @@ def test_wholly_interior_solid_is_a_documented_non_detection() -> None:
     ("gap_m", "tol_gap_m"),
     [(0.40, 0.02), (0.10, 0.02), (0.75, 0.02)],
 )
-def test_clearance_distance_accuracy_within_2cm(
-    gap_m: float, tol_gap_m: float
-) -> None:
+def test_clearance_distance_accuracy_within_2cm(gap_m: float, tol_gap_m: float) -> None:
     """Reported clearance gap matches the analytic gap to ±2 cm.
 
     Two unit cubes separated by a known air gap on X; the clearance pass
@@ -478,8 +494,7 @@ def test_clearance_distance_accuracy_within_2cm(
     r = clearance[0]
     assert r.penetration_m == 0.0
     assert abs(r.distance_m - gap_m) <= tol_gap_m, (
-        f"measured gap {r.distance_m} m vs analytic {gap_m} m "
-        f"(tol {tol_gap_m} m)"
+        f"measured gap {r.distance_m} m vs analytic {gap_m} m (tol {tol_gap_m} m)"
     )
 
 
@@ -493,12 +508,12 @@ def test_determinism_same_input_identical_output_twice() -> None:
     """
     scene = [
         _box("D0", (0, 0, 0), (1, 1, 1), "Structural"),
-        _box("D1", (0.7, 0, 0), (1, 1, 1), "Mechanical"),     # hard vs D0
+        _box("D1", (0.7, 0, 0), (1, 1, 1), "Mechanical"),  # hard vs D0
         _box("D2", (5, 0, 0), (1, 1, 1), "Electrical"),
-        _box("D3", (6.3, 0, 0), (1, 1, 1), "Plumbing"),        # hard vs D2
+        _box("D3", (6.3, 0, 0), (1, 1, 1), "Plumbing"),  # hard vs D2
         _box("D4", (10, 0, 0), (1, 1, 1), "Structural"),
-        _box("D5", (11.2, 0, 0), (1, 1, 1), "Mechanical"),     # clearance vs D4
-        _box("D6", (40, 0, 0), (1, 1, 1), "Structural"),       # isolated
+        _box("D5", (11.2, 0, 0), (1, 1, 1), "Mechanical"),  # clearance vs D4
+        _box("D6", (40, 0, 0), (1, 1, 1), "Structural"),  # isolated
     ]
 
     def signature(rows: list) -> list[tuple]:
@@ -528,19 +543,30 @@ def test_degenerate_and_empty_mesh_never_crashes() -> None:
     """Empty / collinear meshes must not raise and must not fabricate HARD."""
     good = _box("G", (0, 0, 0), (1, 1, 1), "Structural")
     empty = ElementGeom(
-        element_id="E", stable_id="E", name="Empty", discipline="Mechanical",
+        element_id="E",
+        stable_id="E",
+        name="Empty",
+        discipline="Mechanical",
         aabb=(0.0, 0.0, 0.0, 1.0, 1.0, 1.0),
-        vertices=np.zeros((0, 3)), faces=np.zeros((0, 3), dtype=np.int64),
-        obb_center=np.zeros(3), obb_axes=np.eye(3), obb_half=np.ones(3),
+        vertices=np.zeros((0, 3)),
+        faces=np.zeros((0, 3), dtype=np.int64),
+        obb_center=np.zeros(3),
+        obb_axes=np.eye(3),
+        obb_half=np.ones(3),
         storey=0,
     )
     collinear = ElementGeom(
-        element_id="C", stable_id="C", name="Line", discipline="Electrical",
+        element_id="C",
+        stable_id="C",
+        name="Line",
+        discipline="Electrical",
         aabb=(0.0, 0.0, 0.0, 2.0, 0.0, 0.0),
         vertices=np.array([[0, 0, 0], [1, 0, 0], [2, 0, 0]], np.float64),
         faces=np.array([[0, 1, 2]], np.int64),
-        obb_center=np.array([1.0, 0.0, 0.0]), obb_axes=np.eye(3),
-        obb_half=np.array([1.0, 0.0, 0.0]), storey=0,
+        obb_center=np.array([1.0, 0.0, 0.0]),
+        obb_axes=np.eye(3),
+        obb_half=np.array([1.0, 0.0, 0.0]),
+        storey=0,
     )
     run = _FakeRun(tolerance_m=0.005, clearance_m=1.0, mode="all")
     res = _detect(run, [good, empty, collinear])  # must not raise

@@ -11,13 +11,13 @@ from __future__ import annotations
 
 import pytest
 
-from app.modules.boq.units import APPROVED_UNITS, is_approved_unit, normalise_unit
-
-
 # ── Canonical catalogue round-trips ────────────────────────────────────
-
-
-from app.modules.boq.units import _UNIT_ALIASES  # noqa: E402  (test internal)
+from app.modules.boq.units import (
+    _UNIT_ALIASES,  # noqa: E402  (test internal)
+    APPROVED_UNITS,
+    is_approved_unit,
+    normalise_unit,
+)
 
 
 @pytest.mark.parametrize(

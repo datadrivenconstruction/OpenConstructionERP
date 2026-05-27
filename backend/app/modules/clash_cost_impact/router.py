@@ -121,9 +121,7 @@ async def get_clash_impact(
 #: by the clash module. Anything else returns 400 — silently accepting
 #: arbitrary strings used to produce empty rollups that looked like a
 #: clean project, which is misleading on a money endpoint.
-_ALLOWED_STATUS_FILTERS = frozenset(
-    {"open", "all", "new", "active", "reviewed", "approved", "resolved", "ignored"}
-)
+_ALLOWED_STATUS_FILTERS = frozenset({"open", "all", "new", "active", "reviewed", "approved", "resolved", "ignored"})
 
 
 @router.get(
@@ -151,17 +149,12 @@ async def get_project_rollup(
     if status_filter not in _ALLOWED_STATUS_FILTERS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                f"Invalid status filter {status_filter!r}; "
-                f"allowed: {sorted(_ALLOWED_STATUS_FILTERS)}"
-            ),
+            detail=(f"Invalid status filter {status_filter!r}; allowed: {sorted(_ALLOWED_STATUS_FILTERS)}"),
         )
     user_id = payload.get("sub", "")
     await verify_project_access(project_id, user_id, session)
 
-    rollup = await service.rollup_for_project(
-        project_id, status_filter=status_filter
-    )
+    rollup = await service.rollup_for_project(project_id, status_filter=status_filter)
     if rollup is None:
         # Should never fire — verify_project_access 404s already — but
         # keep the safety net so a transient race doesn't crash the call.

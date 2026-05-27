@@ -62,9 +62,7 @@ BACKEND_DIR = REPO_ROOT / "backend"
 DB_PATH = BACKEND_DIR / "openestimate.db"
 
 _default_cad = REPO_ROOT / "data" / "cad2data" / "Sample_Projects" / "test"
-CAD_SOURCE_DIR = pathlib.Path(
-    os.environ.get("OE_CAD_SAMPLES_DIR", str(_default_cad))
-)
+CAD_SOURCE_DIR = pathlib.Path(os.environ.get("OE_CAD_SAMPLES_DIR", str(_default_cad)))
 
 # Stable tag we put in metadata.source for everything we create here.
 SOURCE_TAG = "enrich_v2"
@@ -110,49 +108,117 @@ PROJECT_SPECS: dict[str, dict[str, Any]] = {
         "boq_name": "Bill of Quantities — Main Trades",
         "boq_description": "Element-by-element quantity takeoff derived from the BIM model, organized per MasterFormat division.",
         "sections": [
-            ("03 30 00", "Cast-in-Place Concrete", [
-                ("Concrete walls — 5,000 psi cast-in-place", "sf", 28.50, {"masterformat": "03 30 00", "csi": "Division 03"}, ["Wall"]),
-                ("Concrete slabs on grade — 6 in thick", "sf", 12.00, {"masterformat": "03 30 00"}, ["Slab"]),
-                ("Concrete footings — spread + strip", "cy", 285.00, {"masterformat": "03 31 00"}, ["Footing"]),
-                ("Concrete columns — 24x24 in", "ea", 1450.00, {"masterformat": "03 30 00"}, ["Column"]),
-            ]),
-            ("04 20 00", "Unit Masonry", [
-                ("CMU walls — 8 in nominal", "sf", 18.50, {"masterformat": "04 22 00"}, ["WallStandard"]),
-                ("Brick veneer — modular", "sf", 24.00, {"masterformat": "04 21 00"}, ["WallStandard"]),
-            ]),
-            ("05 12 00", "Structural Steel Framing", [
-                ("Wide flange beams — A992 grade 50", "lf", 65.00, {"masterformat": "05 12 00"}, ["Beam"]),
-                ("Steel members — secondary framing", "ea", 185.00, {"masterformat": "05 12 00"}, ["Member"]),
-                ("Curtain wall mullions — alum", "lf", 75.00, {"masterformat": "08 44 16"}, ["Mullion"]),
-            ]),
-            ("05 50 00", "Metal Fabrications", [
-                ("Steel railings — guard, picket", "lf", 95.00, {"masterformat": "05 52 00"}, ["Railing"]),
-                ("Stair stringers — channel form", "ea", 1150.00, {"masterformat": "05 51 00"}, ["Stair"]),
-            ]),
-            ("07 50 00", "Membrane Roofing", [
-                ("TPO roofing membrane — 60 mil", "sf", 14.00, {"masterformat": "07 54 23"}, ["Roof"]),
-            ]),
-            ("08 11 00", "Metal Doors and Frames", [
-                ("Hollow-metal doors — 3'-0\"x7'-0\"", "ea", 950.00, {"masterformat": "08 11 13"}, ["Door"]),
-                ("Door openings — frame allowance", "ea", 285.00, {"masterformat": "08 11 00"}, ["Opening"]),
-            ]),
-            ("08 50 00", "Windows", [
-                ("Aluminum-frame windows — fixed", "ea", 720.00, {"masterformat": "08 51 13"}, ["Window"]),
-                ("Curtain wall panels — IGU", "sf", 105.00, {"masterformat": "08 44 13"}, ["CurtainPanel", "Curtain Panels", "Panel"]),
-            ]),
-            ("09 50 00", "Ceilings", [
-                ("Suspended acoustical ceiling tile", "sf", 8.50, {"masterformat": "09 51 13"}, ["Ceiling", "Covering"]),
-            ]),
-            ("12 50 00", "Furnishings", [
-                ("Office furniture — workstation pkg", "ea", 480.00, {"masterformat": "12 56 00"}, ["Furnishing", "Furniture"]),
-            ]),
-            ("01 10 00", "General Requirements", [
-                ("Spaces — informational rollup", "sf", 0.10, {"masterformat": "01 10 00"}, ["Space"]),
-                ("Coordination & meetings — lump", "ls", 25000.00, {"masterformat": "01 31 00"}, []),
-            ]),
-            ("31 10 00", "Site Clearing", [
-                ("Site grading & clearing — lump", "ls", 18500.00, {"masterformat": "31 10 00"}, []),
-            ]),
+            (
+                "03 30 00",
+                "Cast-in-Place Concrete",
+                [
+                    (
+                        "Concrete walls — 5,000 psi cast-in-place",
+                        "sf",
+                        28.50,
+                        {"masterformat": "03 30 00", "csi": "Division 03"},
+                        ["Wall"],
+                    ),
+                    ("Concrete slabs on grade — 6 in thick", "sf", 12.00, {"masterformat": "03 30 00"}, ["Slab"]),
+                    ("Concrete footings — spread + strip", "cy", 285.00, {"masterformat": "03 31 00"}, ["Footing"]),
+                    ("Concrete columns — 24x24 in", "ea", 1450.00, {"masterformat": "03 30 00"}, ["Column"]),
+                ],
+            ),
+            (
+                "04 20 00",
+                "Unit Masonry",
+                [
+                    ("CMU walls — 8 in nominal", "sf", 18.50, {"masterformat": "04 22 00"}, ["WallStandard"]),
+                    ("Brick veneer — modular", "sf", 24.00, {"masterformat": "04 21 00"}, ["WallStandard"]),
+                ],
+            ),
+            (
+                "05 12 00",
+                "Structural Steel Framing",
+                [
+                    ("Wide flange beams — A992 grade 50", "lf", 65.00, {"masterformat": "05 12 00"}, ["Beam"]),
+                    ("Steel members — secondary framing", "ea", 185.00, {"masterformat": "05 12 00"}, ["Member"]),
+                    ("Curtain wall mullions — alum", "lf", 75.00, {"masterformat": "08 44 16"}, ["Mullion"]),
+                ],
+            ),
+            (
+                "05 50 00",
+                "Metal Fabrications",
+                [
+                    ("Steel railings — guard, picket", "lf", 95.00, {"masterformat": "05 52 00"}, ["Railing"]),
+                    ("Stair stringers — channel form", "ea", 1150.00, {"masterformat": "05 51 00"}, ["Stair"]),
+                ],
+            ),
+            (
+                "07 50 00",
+                "Membrane Roofing",
+                [
+                    ("TPO roofing membrane — 60 mil", "sf", 14.00, {"masterformat": "07 54 23"}, ["Roof"]),
+                ],
+            ),
+            (
+                "08 11 00",
+                "Metal Doors and Frames",
+                [
+                    ("Hollow-metal doors — 3'-0\"x7'-0\"", "ea", 950.00, {"masterformat": "08 11 13"}, ["Door"]),
+                    ("Door openings — frame allowance", "ea", 285.00, {"masterformat": "08 11 00"}, ["Opening"]),
+                ],
+            ),
+            (
+                "08 50 00",
+                "Windows",
+                [
+                    ("Aluminum-frame windows — fixed", "ea", 720.00, {"masterformat": "08 51 13"}, ["Window"]),
+                    (
+                        "Curtain wall panels — IGU",
+                        "sf",
+                        105.00,
+                        {"masterformat": "08 44 13"},
+                        ["CurtainPanel", "Curtain Panels", "Panel"],
+                    ),
+                ],
+            ),
+            (
+                "09 50 00",
+                "Ceilings",
+                [
+                    (
+                        "Suspended acoustical ceiling tile",
+                        "sf",
+                        8.50,
+                        {"masterformat": "09 51 13"},
+                        ["Ceiling", "Covering"],
+                    ),
+                ],
+            ),
+            (
+                "12 50 00",
+                "Furnishings",
+                [
+                    (
+                        "Office furniture — workstation pkg",
+                        "ea",
+                        480.00,
+                        {"masterformat": "12 56 00"},
+                        ["Furnishing", "Furniture"],
+                    ),
+                ],
+            ),
+            (
+                "01 10 00",
+                "General Requirements",
+                [
+                    ("Spaces — informational rollup", "sf", 0.10, {"masterformat": "01 10 00"}, ["Space"]),
+                    ("Coordination & meetings — lump", "ls", 25000.00, {"masterformat": "01 31 00"}, []),
+                ],
+            ),
+            (
+                "31 10 00",
+                "Site Clearing",
+                [
+                    ("Site grading & clearing — lump", "ls", 18500.00, {"masterformat": "31 10 00"}, []),
+                ],
+            ),
         ],
     },
     "de": {
@@ -162,40 +228,84 @@ PROJECT_SPECS: dict[str, dict[str, Any]] = {
         "boq_name": "Leistungsverzeichnis — Hauptgewerke",
         "boq_description": "Element-Mengenermittlung aus dem BIM-Modell, gegliedert nach Kostengruppen DIN 276.",
         "sections": [
-            ("320", "Gründung", [
-                ("Streifenfundamente C25/30 inkl. Bewehrung", "m³", 285.00, {"din276": "322"}, ["Footing"]),
-                ("Bodenplatte 25 cm C30/37 wasserundurchlässig", "m²", 110.00, {"din276": "324"}, ["Slab"]),
-            ]),
-            ("330", "Außenwände", [
-                ("Stahlbetonwand 24 cm C30/37 mit Schalung", "m²", 95.00, {"din276": "331"}, ["Wall", "WallStandard"]),
-                ("Wärmedämmverbundsystem 14 cm Mineralwolle", "m²", 78.00, {"din276": "335"}, ["Wall"]),
-                ("Fenster Holz-Alu, 3-fach Verglasung", "Stk", 720.00, {"din276": "334"}, ["Window"]),
-                ("Vorhangfassade — Pfosten-Riegel-System", "m²", 380.00, {"din276": "334"}, ["CurtainPanel", "Member"]),
-            ]),
-            ("340", "Innenwände", [
-                ("Tragende Innenwand Stahlbeton 20 cm", "m²", 88.00, {"din276": "341"}, ["Wall"]),
-                ("Innentüren CPL, 1-flügelig 88,5 cm", "Stk", 420.00, {"din276": "344"}, ["Door"]),
-                ("Türöffnungen — Zargenpauschale", "Stk", 145.00, {"din276": "344"}, ["Opening"]),
-            ]),
-            ("350", "Decken", [
-                ("Stahlbetondecke 22 cm C25/30 zweiseitig gespannt", "m²", 110.00, {"din276": "351"}, ["Slab"]),
-                ("Treppenanlage Stahlbeton inkl. Geländer", "Stk", 4200.00, {"din276": "351"}, ["Stair"]),
-                ("Geländer Stahl, feuerverzinkt", "m", 145.00, {"din276": "352"}, ["Railing"]),
-            ]),
-            ("360", "Dächer", [
-                ("Flachdachabdichtung 2-lagig + Dämmung 22 cm", "m²", 165.00, {"din276": "361"}, ["Roof"]),
-            ]),
-            ("370", "Baukonstruktive Einbauten", [
-                ("Allgemeine Ausstattung, Möblierung", "Stk", 280.00, {"din276": "611"}, ["Furnishing"]),
-            ]),
-            ("390", "Sonstige Maßnahmen", [
-                ("Tragende Bauteile — sonstige Träger", "m", 1450.00, {"din276": "331"}, ["Beam"]),
-                ("Hilfsgeometrie und virtuelle Elemente", "Stk", 25.00, {"din276": "390"}, ["Virtual"]),
-            ]),
-            ("100", "Grundstück / Spaces", [
-                ("Räume — informativ (BGF Rollup)", "m²", 0.10, {"din276": "100"}, ["Space"]),
-                ("Beschriftungen / Annotation", "Stk", 0.00, {"din276": "100"}, ["Annotation"]),
-            ]),
+            (
+                "320",
+                "Gründung",
+                [
+                    ("Streifenfundamente C25/30 inkl. Bewehrung", "m³", 285.00, {"din276": "322"}, ["Footing"]),
+                    ("Bodenplatte 25 cm C30/37 wasserundurchlässig", "m²", 110.00, {"din276": "324"}, ["Slab"]),
+                ],
+            ),
+            (
+                "330",
+                "Außenwände",
+                [
+                    (
+                        "Stahlbetonwand 24 cm C30/37 mit Schalung",
+                        "m²",
+                        95.00,
+                        {"din276": "331"},
+                        ["Wall", "WallStandard"],
+                    ),
+                    ("Wärmedämmverbundsystem 14 cm Mineralwolle", "m²", 78.00, {"din276": "335"}, ["Wall"]),
+                    ("Fenster Holz-Alu, 3-fach Verglasung", "Stk", 720.00, {"din276": "334"}, ["Window"]),
+                    (
+                        "Vorhangfassade — Pfosten-Riegel-System",
+                        "m²",
+                        380.00,
+                        {"din276": "334"},
+                        ["CurtainPanel", "Member"],
+                    ),
+                ],
+            ),
+            (
+                "340",
+                "Innenwände",
+                [
+                    ("Tragende Innenwand Stahlbeton 20 cm", "m²", 88.00, {"din276": "341"}, ["Wall"]),
+                    ("Innentüren CPL, 1-flügelig 88,5 cm", "Stk", 420.00, {"din276": "344"}, ["Door"]),
+                    ("Türöffnungen — Zargenpauschale", "Stk", 145.00, {"din276": "344"}, ["Opening"]),
+                ],
+            ),
+            (
+                "350",
+                "Decken",
+                [
+                    ("Stahlbetondecke 22 cm C25/30 zweiseitig gespannt", "m²", 110.00, {"din276": "351"}, ["Slab"]),
+                    ("Treppenanlage Stahlbeton inkl. Geländer", "Stk", 4200.00, {"din276": "351"}, ["Stair"]),
+                    ("Geländer Stahl, feuerverzinkt", "m", 145.00, {"din276": "352"}, ["Railing"]),
+                ],
+            ),
+            (
+                "360",
+                "Dächer",
+                [
+                    ("Flachdachabdichtung 2-lagig + Dämmung 22 cm", "m²", 165.00, {"din276": "361"}, ["Roof"]),
+                ],
+            ),
+            (
+                "370",
+                "Baukonstruktive Einbauten",
+                [
+                    ("Allgemeine Ausstattung, Möblierung", "Stk", 280.00, {"din276": "611"}, ["Furnishing"]),
+                ],
+            ),
+            (
+                "390",
+                "Sonstige Maßnahmen",
+                [
+                    ("Tragende Bauteile — sonstige Träger", "m", 1450.00, {"din276": "331"}, ["Beam"]),
+                    ("Hilfsgeometrie und virtuelle Elemente", "Stk", 25.00, {"din276": "390"}, ["Virtual"]),
+                ],
+            ),
+            (
+                "100",
+                "Grundstück / Spaces",
+                [
+                    ("Räume — informativ (BGF Rollup)", "m²", 0.10, {"din276": "100"}, ["Space"]),
+                    ("Beschriftungen / Annotation", "Stk", 0.00, {"din276": "100"}, ["Annotation"]),
+                ],
+            ),
         ],
     },
     "es": {
@@ -205,43 +315,103 @@ PROJECT_SPECS: dict[str, dict[str, Any]] = {
         "boq_name": "Mediciones y Presupuesto — Obras Principales",
         "boq_description": "Mediciones automáticas extraídas del modelo BIM, organizadas por capítulos según la estructura del proyecto.",
         "sections": [
-            ("1.1", "Movimiento de tierras y cimentación", [
-                ("Hormigón armado HA-25 en zapatas", "m³", 245.00, {"custom": "1.1.1"}, ["Footing"]),
-                ("Solera de hormigón HA-25, e=15 cm", "m²", 92.00, {"custom": "1.1.2"}, ["Slab"]),
-                ("Replanteo y nivelación general", "ud", 850.00, {"custom": "1.1.3"}, []),
-            ]),
-            ("1.2", "Estructura de hormigón", [
-                ("Muro de hormigón armado HA-30, e=24 cm", "m²", 105.00, {"custom": "1.2.1"}, ["Wall", "WallStandard"]),
-                ("Pilares de hormigón armado", "ud", 1250.00, {"custom": "1.2.2"}, ["Column"]),
-                ("Vigas de hormigón armado HA-30", "m", 78.00, {"custom": "1.2.3"}, ["Beam"]),
-            ]),
-            ("1.3", "Forjados y losas", [
-                ("Forjado unidireccional, canto 30 cm", "m²", 92.00, {"custom": "1.3.1"}, ["Slab"]),
-                ("Escalera de hormigón armado", "ud", 3800.00, {"custom": "1.3.2"}, ["Stair"]),
-            ]),
-            ("1.4", "Cubiertas", [
-                ("Cubierta plana invertida, lámina EPDM", "m²", 138.00, {"custom": "1.4.1"}, ["Roof"]),
-            ]),
-            ("1.5", "Cerramientos exteriores", [
-                ("Fachada de fábrica vista de ladrillo", "m²", 95.00, {"custom": "1.5.1"}, ["WallStandard"]),
-                ("Carpintería exterior aluminio RPT", "ud", 380.00, {"custom": "1.5.2"}, ["Window"]),
-                ("Muro cortina — paneles de vidrio", "m²", 320.00, {"custom": "1.5.3"}, ["CurtainPanel", "Curtain Panels"]),
-            ]),
-            ("1.6", "Carpintería interior", [
-                ("Puerta de paso DM lacada blanca", "ud", 380.00, {"custom": "1.6.1"}, ["Door"]),
-                ("Huecos de paso — premarcos", "ud", 95.00, {"custom": "1.6.2"}, ["Opening"]),
-            ]),
-            ("1.7", "Acabados y revestimientos", [
-                ("Falso techo de placa de yeso laminado", "m²", 28.00, {"custom": "1.7.1"}, ["Ceiling", "Covering"]),
-            ]),
-            ("1.8", "Equipamiento", [
-                ("Mobiliario y equipamiento general", "ud", 240.00, {"custom": "1.8.1"}, ["Furnishing"]),
-                ("Barandillas de acero inoxidable", "m", 145.00, {"custom": "1.8.2"}, ["Railing"]),
-            ]),
-            ("1.9", "Instalaciones (informativo)", [
-                ("Espacios y zonificación — informativo", "m²", 0.10, {"custom": "1.9.1"}, ["Space"]),
-                ("Elementos auxiliares — montantes muro cortina", "m", 75.00, {"custom": "1.9.2"}, ["Member", "Mullion"]),
-            ]),
+            (
+                "1.1",
+                "Movimiento de tierras y cimentación",
+                [
+                    ("Hormigón armado HA-25 en zapatas", "m³", 245.00, {"custom": "1.1.1"}, ["Footing"]),
+                    ("Solera de hormigón HA-25, e=15 cm", "m²", 92.00, {"custom": "1.1.2"}, ["Slab"]),
+                    ("Replanteo y nivelación general", "ud", 850.00, {"custom": "1.1.3"}, []),
+                ],
+            ),
+            (
+                "1.2",
+                "Estructura de hormigón",
+                [
+                    (
+                        "Muro de hormigón armado HA-30, e=24 cm",
+                        "m²",
+                        105.00,
+                        {"custom": "1.2.1"},
+                        ["Wall", "WallStandard"],
+                    ),
+                    ("Pilares de hormigón armado", "ud", 1250.00, {"custom": "1.2.2"}, ["Column"]),
+                    ("Vigas de hormigón armado HA-30", "m", 78.00, {"custom": "1.2.3"}, ["Beam"]),
+                ],
+            ),
+            (
+                "1.3",
+                "Forjados y losas",
+                [
+                    ("Forjado unidireccional, canto 30 cm", "m²", 92.00, {"custom": "1.3.1"}, ["Slab"]),
+                    ("Escalera de hormigón armado", "ud", 3800.00, {"custom": "1.3.2"}, ["Stair"]),
+                ],
+            ),
+            (
+                "1.4",
+                "Cubiertas",
+                [
+                    ("Cubierta plana invertida, lámina EPDM", "m²", 138.00, {"custom": "1.4.1"}, ["Roof"]),
+                ],
+            ),
+            (
+                "1.5",
+                "Cerramientos exteriores",
+                [
+                    ("Fachada de fábrica vista de ladrillo", "m²", 95.00, {"custom": "1.5.1"}, ["WallStandard"]),
+                    ("Carpintería exterior aluminio RPT", "ud", 380.00, {"custom": "1.5.2"}, ["Window"]),
+                    (
+                        "Muro cortina — paneles de vidrio",
+                        "m²",
+                        320.00,
+                        {"custom": "1.5.3"},
+                        ["CurtainPanel", "Curtain Panels"],
+                    ),
+                ],
+            ),
+            (
+                "1.6",
+                "Carpintería interior",
+                [
+                    ("Puerta de paso DM lacada blanca", "ud", 380.00, {"custom": "1.6.1"}, ["Door"]),
+                    ("Huecos de paso — premarcos", "ud", 95.00, {"custom": "1.6.2"}, ["Opening"]),
+                ],
+            ),
+            (
+                "1.7",
+                "Acabados y revestimientos",
+                [
+                    (
+                        "Falso techo de placa de yeso laminado",
+                        "m²",
+                        28.00,
+                        {"custom": "1.7.1"},
+                        ["Ceiling", "Covering"],
+                    ),
+                ],
+            ),
+            (
+                "1.8",
+                "Equipamiento",
+                [
+                    ("Mobiliario y equipamiento general", "ud", 240.00, {"custom": "1.8.1"}, ["Furnishing"]),
+                    ("Barandillas de acero inoxidable", "m", 145.00, {"custom": "1.8.2"}, ["Railing"]),
+                ],
+            ),
+            (
+                "1.9",
+                "Instalaciones (informativo)",
+                [
+                    ("Espacios y zonificación — informativo", "m²", 0.10, {"custom": "1.9.1"}, ["Space"]),
+                    (
+                        "Elementos auxiliares — montantes muro cortina",
+                        "m",
+                        75.00,
+                        {"custom": "1.9.2"},
+                        ["Member", "Mullion"],
+                    ),
+                ],
+            ),
         ],
     },
     "br": {
@@ -251,47 +421,105 @@ PROJECT_SPECS: dict[str, dict[str, Any]] = {
         "boq_name": "Planilha Orçamentária — Serviços Principais",
         "boq_description": "Quantitativos extraídos do modelo BIM, organizados por macro-serviços segundo padrão SINAPI.",
         "sections": [
-            ("01.01", "Serviços preliminares", [
-                ("Locação e topografia da obra", "vb", 4200.00, {"custom": "01.01.001"}, []),
-                ("Instalação do canteiro de obras", "vb", 18500.00, {"custom": "01.01.002"}, []),
-            ]),
-            ("01.02", "Fundações", [
-                ("Fundação direta — sapatas de concreto", "m³", 740.00, {"custom": "01.02.001"}, ["Foundation"]),
-                ("Lastro de concreto magro e=5 cm", "m²", 92.00, {"custom": "01.02.002"}, []),
-            ]),
-            ("01.03", "Estrutura de concreto", [
-                ("Pilares estruturais de concreto armado", "un", 3200.00, {"custom": "01.03.001"}, ["Column"]),
-                ("Lajes maciças de concreto armado", "m²", 220.00, {"custom": "01.03.002"}, ["Floors", "Slab"]),
-                ("Vigas de concreto armado", "m", 280.00, {"custom": "01.03.003"}, ["Beam"]),
-            ]),
-            ("01.04", "Alvenaria e fechamentos", [
-                ("Alvenaria de bloco cerâmico 14 cm", "m²", 165.00, {"custom": "01.04.001"}, ["Wall"]),
-                ("Pele de vidro / fachada cortina", "m²", 850.00, {"custom": "01.04.002"}, ["Curtain Wall Panels", "Panel"]),
-                ("Montantes de fachada metálicos", "m", 285.00, {"custom": "01.04.003"}, ["Curtain Wall Mullions", "Mullion"]),
-            ]),
-            ("01.05", "Cobertura e impermeabilização", [
-                ("Cobertura impermeabilizada com manta EPDM", "m²", 285.00, {"custom": "01.05.001"}, ["Roof"]),
-            ]),
-            ("01.06", "Esquadrias", [
-                ("Porta interna em madeira maciça", "un", 920.00, {"custom": "01.06.001"}, ["Door"]),
-                ("Janela em alumínio com vidro temperado", "un", 850.00, {"custom": "01.06.002"}, ["Window"]),
-            ]),
-            ("01.07", "Acabamentos internos", [
-                ("Forro de gesso acartonado", "m²", 78.00, {"custom": "01.07.001"}, ["Ceilings", "Ceiling"]),
-            ]),
-            ("01.08", "Equipamentos e mobiliário", [
-                ("Mobiliário fixo — armários planejados", "un", 540.00, {"custom": "01.08.001"}, ["Furniture"]),
-                ("Guarda-corpos em aço pintado", "m", 285.00, {"custom": "01.08.002"}, ["Stairs Railing", "Railing"]),
-                ("Instalações elétricas — luminárias", "un", 320.00, {"custom": "01.08.003"}, ["Lighting"]),
-            ]),
-            ("01.09", "Hidráulica e instalações", [
-                ("Aparelhos sanitários — louça e metais", "un", 1850.00, {"custom": "01.09.001"}, ["Plumbing"]),
-                ("Tubulações e conexões — diversas", "vb", 22000.00, {"custom": "01.09.002"}, ["Wire", "Fluids"]),
-            ]),
-            ("01.10", "Diversos / informativo", [
-                ("Ambientes e zoneamento — informativo", "m²", 0.10, {"custom": "01.10.001"}, ["Rooms"]),
-                ("Modelos genéricos e itens auxiliares", "un", 60.00, {"custom": "01.10.002"}, ["Generic"]),
-            ]),
+            (
+                "01.01",
+                "Serviços preliminares",
+                [
+                    ("Locação e topografia da obra", "vb", 4200.00, {"custom": "01.01.001"}, []),
+                    ("Instalação do canteiro de obras", "vb", 18500.00, {"custom": "01.01.002"}, []),
+                ],
+            ),
+            (
+                "01.02",
+                "Fundações",
+                [
+                    ("Fundação direta — sapatas de concreto", "m³", 740.00, {"custom": "01.02.001"}, ["Foundation"]),
+                    ("Lastro de concreto magro e=5 cm", "m²", 92.00, {"custom": "01.02.002"}, []),
+                ],
+            ),
+            (
+                "01.03",
+                "Estrutura de concreto",
+                [
+                    ("Pilares estruturais de concreto armado", "un", 3200.00, {"custom": "01.03.001"}, ["Column"]),
+                    ("Lajes maciças de concreto armado", "m²", 220.00, {"custom": "01.03.002"}, ["Floors", "Slab"]),
+                    ("Vigas de concreto armado", "m", 280.00, {"custom": "01.03.003"}, ["Beam"]),
+                ],
+            ),
+            (
+                "01.04",
+                "Alvenaria e fechamentos",
+                [
+                    ("Alvenaria de bloco cerâmico 14 cm", "m²", 165.00, {"custom": "01.04.001"}, ["Wall"]),
+                    (
+                        "Pele de vidro / fachada cortina",
+                        "m²",
+                        850.00,
+                        {"custom": "01.04.002"},
+                        ["Curtain Wall Panels", "Panel"],
+                    ),
+                    (
+                        "Montantes de fachada metálicos",
+                        "m",
+                        285.00,
+                        {"custom": "01.04.003"},
+                        ["Curtain Wall Mullions", "Mullion"],
+                    ),
+                ],
+            ),
+            (
+                "01.05",
+                "Cobertura e impermeabilização",
+                [
+                    ("Cobertura impermeabilizada com manta EPDM", "m²", 285.00, {"custom": "01.05.001"}, ["Roof"]),
+                ],
+            ),
+            (
+                "01.06",
+                "Esquadrias",
+                [
+                    ("Porta interna em madeira maciça", "un", 920.00, {"custom": "01.06.001"}, ["Door"]),
+                    ("Janela em alumínio com vidro temperado", "un", 850.00, {"custom": "01.06.002"}, ["Window"]),
+                ],
+            ),
+            (
+                "01.07",
+                "Acabamentos internos",
+                [
+                    ("Forro de gesso acartonado", "m²", 78.00, {"custom": "01.07.001"}, ["Ceilings", "Ceiling"]),
+                ],
+            ),
+            (
+                "01.08",
+                "Equipamentos e mobiliário",
+                [
+                    ("Mobiliário fixo — armários planejados", "un", 540.00, {"custom": "01.08.001"}, ["Furniture"]),
+                    (
+                        "Guarda-corpos em aço pintado",
+                        "m",
+                        285.00,
+                        {"custom": "01.08.002"},
+                        ["Stairs Railing", "Railing"],
+                    ),
+                    ("Instalações elétricas — luminárias", "un", 320.00, {"custom": "01.08.003"}, ["Lighting"]),
+                ],
+            ),
+            (
+                "01.09",
+                "Hidráulica e instalações",
+                [
+                    ("Aparelhos sanitários — louça e metais", "un", 1850.00, {"custom": "01.09.001"}, ["Plumbing"]),
+                    ("Tubulações e conexões — diversas", "vb", 22000.00, {"custom": "01.09.002"}, ["Wire", "Fluids"]),
+                ],
+            ),
+            (
+                "01.10",
+                "Diversos / informativo",
+                [
+                    ("Ambientes e zoneamento — informativo", "m²", 0.10, {"custom": "01.10.001"}, ["Rooms"]),
+                    ("Modelos genéricos e itens auxiliares", "un", 60.00, {"custom": "01.10.002"}, ["Generic"]),
+                ],
+            ),
         ],
     },
     "cn": {
@@ -301,40 +529,74 @@ PROJECT_SPECS: dict[str, dict[str, Any]] = {
         "boq_name": "工程量清单 — 主要分部分项",
         "boq_description": "由 BIM 模型自动提取的工程量,按主要分部分项组织。",
         "sections": [
-            ("甲", "土建结构工程", [
-                ("钢筋混凝土剪力墙 C30, 厚度 240mm", "m²", 480.00, {"custom": "甲.1"}, ["Walls", "Wall"]),
-                ("钢筋混凝土柱 C30, 截面 600x600", "根", 8500.00, {"custom": "甲.2"}, ["Structural Columns", "Column"]),
-                ("钢筋混凝土梁 C30", "m", 380.00, {"custom": "甲.3"}, ["Structural Framing", "Beam"]),
-                ("钢筋混凝土楼板 C30, 厚度 120mm", "m²", 320.00, {"custom": "甲.4"}, ["Floors", "Slab"]),
-            ]),
-            ("乙", "幕墙与外围护工程", [
-                ("玻璃幕墙板单元 (含五金)", "块", 1850.00, {"custom": "乙.1"}, ["Curtain Wall Panels"]),
-                ("幕墙竖向龙骨 — 铝合金型材", "m", 285.00, {"custom": "乙.2"}, ["Curtain Wall Mullions"]),
-                ("幕墙横向龙骨", "m", 245.00, {"custom": "乙.3"}, ["Curtain Grids Wall"]),
-                ("屋面幕墙网格", "m", 280.00, {"custom": "乙.4"}, ["Curtain Grids Roof"]),
-            ]),
-            ("丙", "门窗工程", [
-                ("木门 + 五金 — 标准房间门", "樘", 1850.00, {"custom": "丙.1"}, ["Doors"]),
-                ("断桥铝合金窗 (含玻璃)", "樘", 2400.00, {"custom": "丙.2"}, ["Windows"]),
-            ]),
-            ("丁", "楼梯及栏杆", [
-                ("楼梯踏步及防滑条", "m", 480.00, {"custom": "丁.1"}, ["Stairs Sketch Riser Lines"]),
-                ("楼梯边界放样线 — 信息化处理", "m", 0.50, {"custom": "丁.2"}, ["Stairs Sketch Boundary Lines"]),
-                ("楼梯栏杆 + 立柱 (栏杆扶手成套)", "m", 685.00, {"custom": "丁.3"}, ["Stairs Railing"]),
-                ("栏杆立柱", "根", 220.00, {"custom": "丁.4"}, ["Stairs Railing Baluster"]),
-            ]),
-            ("戊", "顶棚与装饰", [
-                ("吊顶 — 矿棉板吊顶", "m²", 165.00, {"custom": "戊.1"}, ["Ceilings"]),
-                ("通用模型 / 装饰构件", "件", 240.00, {"custom": "戊.2"}, ["Generic Model"]),
-            ]),
-            ("己", "机电与设备", [
-                ("照明灯具 — 标准房间配置", "套", 480.00, {"custom": "己.1"}, ["Lighting Fixtures"]),
-                ("家具 (含办公及生活)", "件", 1850.00, {"custom": "己.2"}, ["Furniture"]),
-            ]),
-            ("庚", "总图及配套", [
-                ("停车位 / 划线", "个", 850.00, {"custom": "庚.1"}, ["Parking"]),
-                ("房间 / 空间 — 信息汇总", "m²", 0.10, {"custom": "庚.2"}, ["Rooms"]),
-            ]),
+            (
+                "甲",
+                "土建结构工程",
+                [
+                    ("钢筋混凝土剪力墙 C30, 厚度 240mm", "m²", 480.00, {"custom": "甲.1"}, ["Walls", "Wall"]),
+                    (
+                        "钢筋混凝土柱 C30, 截面 600x600",
+                        "根",
+                        8500.00,
+                        {"custom": "甲.2"},
+                        ["Structural Columns", "Column"],
+                    ),
+                    ("钢筋混凝土梁 C30", "m", 380.00, {"custom": "甲.3"}, ["Structural Framing", "Beam"]),
+                    ("钢筋混凝土楼板 C30, 厚度 120mm", "m²", 320.00, {"custom": "甲.4"}, ["Floors", "Slab"]),
+                ],
+            ),
+            (
+                "乙",
+                "幕墙与外围护工程",
+                [
+                    ("玻璃幕墙板单元 (含五金)", "块", 1850.00, {"custom": "乙.1"}, ["Curtain Wall Panels"]),
+                    ("幕墙竖向龙骨 — 铝合金型材", "m", 285.00, {"custom": "乙.2"}, ["Curtain Wall Mullions"]),
+                    ("幕墙横向龙骨", "m", 245.00, {"custom": "乙.3"}, ["Curtain Grids Wall"]),
+                    ("屋面幕墙网格", "m", 280.00, {"custom": "乙.4"}, ["Curtain Grids Roof"]),
+                ],
+            ),
+            (
+                "丙",
+                "门窗工程",
+                [
+                    ("木门 + 五金 — 标准房间门", "樘", 1850.00, {"custom": "丙.1"}, ["Doors"]),
+                    ("断桥铝合金窗 (含玻璃)", "樘", 2400.00, {"custom": "丙.2"}, ["Windows"]),
+                ],
+            ),
+            (
+                "丁",
+                "楼梯及栏杆",
+                [
+                    ("楼梯踏步及防滑条", "m", 480.00, {"custom": "丁.1"}, ["Stairs Sketch Riser Lines"]),
+                    ("楼梯边界放样线 — 信息化处理", "m", 0.50, {"custom": "丁.2"}, ["Stairs Sketch Boundary Lines"]),
+                    ("楼梯栏杆 + 立柱 (栏杆扶手成套)", "m", 685.00, {"custom": "丁.3"}, ["Stairs Railing"]),
+                    ("栏杆立柱", "根", 220.00, {"custom": "丁.4"}, ["Stairs Railing Baluster"]),
+                ],
+            ),
+            (
+                "戊",
+                "顶棚与装饰",
+                [
+                    ("吊顶 — 矿棉板吊顶", "m²", 165.00, {"custom": "戊.1"}, ["Ceilings"]),
+                    ("通用模型 / 装饰构件", "件", 240.00, {"custom": "戊.2"}, ["Generic Model"]),
+                ],
+            ),
+            (
+                "己",
+                "机电与设备",
+                [
+                    ("照明灯具 — 标准房间配置", "套", 480.00, {"custom": "己.1"}, ["Lighting Fixtures"]),
+                    ("家具 (含办公及生活)", "件", 1850.00, {"custom": "己.2"}, ["Furniture"]),
+                ],
+            ),
+            (
+                "庚",
+                "总图及配套",
+                [
+                    ("停车位 / 划线", "个", 850.00, {"custom": "庚.1"}, ["Parking"]),
+                    ("房间 / 空间 — 信息汇总", "m²", 0.10, {"custom": "庚.2"}, ["Rooms"]),
+                ],
+            ),
         ],
     },
 }
@@ -353,56 +615,91 @@ LOCALE_PROGRESS = {
 # RFI templates per locale
 RFI_TEMPLATES: dict[str, list[tuple[str, str, str | None]]] = {
     "en": [
-        ("Clearance between curtain wall anchor and perimeter beam",
-         "Drawing A-301 shows 50mm clearance but structural BIM gives 35mm. Please confirm acceptable tolerance.", "answered"),
-        ("Substitution request — TPO membrane manufacturer",
-         "Architect-specified manufacturer has 14-week lead time. Approved equal alternate?", "open"),
-        ("Foundation — pile cap reinforcement at column line D-3",
-         "Conflicting rebar layouts between drawings S-201 and S-203. Which shall govern?", "answered"),
-        ("Door schedule clarification — type HM-3 hardware group",
-         "Door HM-3 missing closer in hardware group on schedule sheet. Please confirm.", "closed"),
-        ("MEP coordination — duct routing through transfer beam at L3",
-         "Mechanical drawings show 18in duct passing through structural transfer beam. Coordination needed.", "open"),
+        (
+            "Clearance between curtain wall anchor and perimeter beam",
+            "Drawing A-301 shows 50mm clearance but structural BIM gives 35mm. Please confirm acceptable tolerance.",
+            "answered",
+        ),
+        (
+            "Substitution request — TPO membrane manufacturer",
+            "Architect-specified manufacturer has 14-week lead time. Approved equal alternate?",
+            "open",
+        ),
+        (
+            "Foundation — pile cap reinforcement at column line D-3",
+            "Conflicting rebar layouts between drawings S-201 and S-203. Which shall govern?",
+            "answered",
+        ),
+        (
+            "Door schedule clarification — type HM-3 hardware group",
+            "Door HM-3 missing closer in hardware group on schedule sheet. Please confirm.",
+            "closed",
+        ),
+        (
+            "MEP coordination — duct routing through transfer beam at L3",
+            "Mechanical drawings show 18in duct passing through structural transfer beam. Coordination needed.",
+            "open",
+        ),
     ],
     "de": [
-        ("Lichte Höhe zwischen Pfosten und Brüstung",
-         "Detail D-22 zeigt 1,10 m, Statik fordert 1,15 m. Bitte freigeben oder Anpassung anweisen.", "answered"),
-        ("Materialwahl — Wärmepumpe statt Fernwärme",
-         "Wirtschaftlichkeitsvergleich liegt vor. Bauherrenentscheid bis Werkplanung erforderlich.", "open"),
-        ("Bewehrung Bodenplatte — Achse 3-A",
-         "Statik-Plan und Schalplan widersprüchlich. Welcher gilt?", "answered"),
-        ("Türliste — Zargenmaße TX-12",
-         "TX-12 in Türliste ohne Zargen-Detail. Bitte ergänzen.", "closed"),
+        (
+            "Lichte Höhe zwischen Pfosten und Brüstung",
+            "Detail D-22 zeigt 1,10 m, Statik fordert 1,15 m. Bitte freigeben oder Anpassung anweisen.",
+            "answered",
+        ),
+        (
+            "Materialwahl — Wärmepumpe statt Fernwärme",
+            "Wirtschaftlichkeitsvergleich liegt vor. Bauherrenentscheid bis Werkplanung erforderlich.",
+            "open",
+        ),
+        ("Bewehrung Bodenplatte — Achse 3-A", "Statik-Plan und Schalplan widersprüchlich. Welcher gilt?", "answered"),
+        ("Türliste — Zargenmaße TX-12", "TX-12 in Türliste ohne Zargen-Detail. Bitte ergänzen.", "closed"),
     ],
     "es": [
-        ("Distancia entre anclaje de muro cortina y viga perimetral",
-         "El plano A-301 muestra 50mm pero el BIM estructural da 35mm. Confirmar tolerancia.", "answered"),
-        ("Solicitud de sustitución — sistema de aerotermia",
-         "Comparativa económica entregada. Decisión del promotor antes de visado.", "open"),
-        ("Cimentación — armado en encepado pilar 3-D",
-         "Discrepancia entre planos S-201 y S-203. ¿Cuál prevalece?", "answered"),
-        ("Memoria de calidades — pavimento baños",
-         "El plano dice gres porcelánico, pero la memoria menciona porcelánico rectificado.", "closed"),
+        (
+            "Distancia entre anclaje de muro cortina y viga perimetral",
+            "El plano A-301 muestra 50mm pero el BIM estructural da 35mm. Confirmar tolerancia.",
+            "answered",
+        ),
+        (
+            "Solicitud de sustitución — sistema de aerotermia",
+            "Comparativa económica entregada. Decisión del promotor antes de visado.",
+            "open",
+        ),
+        (
+            "Cimentación — armado en encepado pilar 3-D",
+            "Discrepancia entre planos S-201 y S-203. ¿Cuál prevalece?",
+            "answered",
+        ),
+        (
+            "Memoria de calidades — pavimento baños",
+            "El plano dice gres porcelánico, pero la memoria menciona porcelánico rectificado.",
+            "closed",
+        ),
     ],
     "pt": [
-        ("Compatibilidade entre ancoragem da pele de vidro e viga",
-         "Detalhamento estrutural mostra 30mm e desenho de fachada exige 50mm. Confirmar.", "answered"),
-        ("Substituição — sistema de climatização",
-         "Análise comparativa apresentada. Decisão do contratante necessária.", "open"),
-        ("Fundação — armadura no bloco do pilar P-12",
-         "Pranchas estruturais com indicações divergentes. Qual prevalece?", "answered"),
-        ("Esquadrias internas — kit de ferragens",
-         "Tipo PI-3 sem mola hidráulica no caderno. Confirmar.", "closed"),
+        (
+            "Compatibilidade entre ancoragem da pele de vidro e viga",
+            "Detalhamento estrutural mostra 30mm e desenho de fachada exige 50mm. Confirmar.",
+            "answered",
+        ),
+        (
+            "Substituição — sistema de climatização",
+            "Análise comparativa apresentada. Decisão do contratante necessária.",
+            "open",
+        ),
+        (
+            "Fundação — armadura no bloco do pilar P-12",
+            "Pranchas estruturais com indicações divergentes. Qual prevalece?",
+            "answered",
+        ),
+        ("Esquadrias internas — kit de ferragens", "Tipo PI-3 sem mola hidráulica no caderno. Confirmar.", "closed"),
     ],
     "zh": [
-        ("幕墙锚固件与外圈梁的间距",
-         "建筑图A-301标注50mm,结构BIM给出35mm,请确认允差。", "answered"),
-        ("材料替代申请 — 屋面防水膜厂家",
-         "设计指定厂家供货周期长。是否可批准等同替代?", "open"),
-        ("基础 — D-3轴桩承台配筋",
-         "S-201与S-203两张图配筋不一致,以哪张为准?", "answered"),
-        ("门窗表 — HM-3型号五金组",
-         "HM-3门表中漏闭门器,请补充确认。", "closed"),
+        ("幕墙锚固件与外圈梁的间距", "建筑图A-301标注50mm,结构BIM给出35mm,请确认允差。", "answered"),
+        ("材料替代申请 — 屋面防水膜厂家", "设计指定厂家供货周期长。是否可批准等同替代?", "open"),
+        ("基础 — D-3轴桩承台配筋", "S-201与S-203两张图配筋不一致,以哪张为准?", "answered"),
+        ("门窗表 — HM-3型号五金组", "HM-3门表中漏闭门器,请补充确认。", "closed"),
     ],
 }
 
@@ -411,54 +708,104 @@ RFI_TEMPLATES: dict[str, list[tuple[str, str, str | None]]] = {
 CO_TEMPLATES: dict[str, list[tuple[str, str, float, list[tuple[str, str, float, float]]]]] = {
     # (code_suffix, title, total_cost_impact, [(item_desc, unit, qty, rate)])
     "en": [
-        ("CO-001", "Owner-requested upgrade — premium curtain wall glazing", 145000.00, [
-            ("Upgrade IGU to triple-pane low-e", "sf", 4200.0, 28.50),
-            ("Additional structural anchorage", "ea", 24.0, 850.00),
-        ]),
-        ("CO-002", "Field-found unsuitable soil — additional excavation", 38500.00, [
-            ("Unsuitable soil removal & disposal", "cy", 285.0, 95.00),
-            ("Engineered fill replacement", "cy", 285.0, 42.50),
-        ]),
+        (
+            "CO-001",
+            "Owner-requested upgrade — premium curtain wall glazing",
+            145000.00,
+            [
+                ("Upgrade IGU to triple-pane low-e", "sf", 4200.0, 28.50),
+                ("Additional structural anchorage", "ea", 24.0, 850.00),
+            ],
+        ),
+        (
+            "CO-002",
+            "Field-found unsuitable soil — additional excavation",
+            38500.00,
+            [
+                ("Unsuitable soil removal & disposal", "cy", 285.0, 95.00),
+                ("Engineered fill replacement", "cy", 285.0, 42.50),
+            ],
+        ),
     ],
     "de": [
-        ("NA-001", "Bauherrenwunsch — höherwertige Fassadenverglasung", 28500.00, [
-            ("Upgrade auf 3-fach Verglasung Ug 0,5", "m²", 240.0, 95.00),
-            ("Zusatzaufwand Befestigung Pfostenrieg", "Stk", 18.0, 320.00),
-        ]),
-        ("NA-002", "Erschwerte Gründung — Bodenaustausch", 18200.00, [
-            ("Bodenaustausch unterhalb Bodenplatte", "m³", 145.0, 95.00),
-            ("Verdichtetes Trag- und Frostschutzmaterial", "m³", 145.0, 30.00),
-        ]),
+        (
+            "NA-001",
+            "Bauherrenwunsch — höherwertige Fassadenverglasung",
+            28500.00,
+            [
+                ("Upgrade auf 3-fach Verglasung Ug 0,5", "m²", 240.0, 95.00),
+                ("Zusatzaufwand Befestigung Pfostenrieg", "Stk", 18.0, 320.00),
+            ],
+        ),
+        (
+            "NA-002",
+            "Erschwerte Gründung — Bodenaustausch",
+            18200.00,
+            [
+                ("Bodenaustausch unterhalb Bodenplatte", "m³", 145.0, 95.00),
+                ("Verdichtetes Trag- und Frostschutzmaterial", "m³", 145.0, 30.00),
+            ],
+        ),
     ],
     "es": [
-        ("CO-001", "Modificación a petición del promotor — calidad acabados", 12500.00, [
-            ("Mejora pavimento gres porcelánico", "m²", 180.0, 45.00),
-            ("Sanitarios gama alta", "ud", 6.0, 720.00),
-        ]),
-        ("CO-002", "Imprevistos en cimentación — refuerzo zapatas", 8800.00, [
-            ("Excavación adicional", "m³", 32.0, 85.00),
-            ("Hormigón armado adicional HA-25", "m³", 14.0, 245.00),
-        ]),
+        (
+            "CO-001",
+            "Modificación a petición del promotor — calidad acabados",
+            12500.00,
+            [
+                ("Mejora pavimento gres porcelánico", "m²", 180.0, 45.00),
+                ("Sanitarios gama alta", "ud", 6.0, 720.00),
+            ],
+        ),
+        (
+            "CO-002",
+            "Imprevistos en cimentación — refuerzo zapatas",
+            8800.00,
+            [
+                ("Excavación adicional", "m³", 32.0, 85.00),
+                ("Hormigón armado adicional HA-25", "m³", 14.0, 245.00),
+            ],
+        ),
     ],
     "pt": [
-        ("CT-001", "Modificação a pedido do contratante — pele de vidro premium", 38500.00, [
-            ("Substituição por vidro insulado low-e", "m²", 85.0, 320.00),
-            ("Ancoragens estruturais adicionais", "un", 18.0, 685.00),
-        ]),
-        ("CT-002", "Solo inadequado — substituição em parte do terreno", 22000.00, [
-            ("Remoção e bota-fora de solo mole", "m³", 95.0, 145.00),
-            ("Aterro estabilizado granular", "m³", 95.0, 85.00),
-        ]),
+        (
+            "CT-001",
+            "Modificação a pedido do contratante — pele de vidro premium",
+            38500.00,
+            [
+                ("Substituição por vidro insulado low-e", "m²", 85.0, 320.00),
+                ("Ancoragens estruturais adicionais", "un", 18.0, 685.00),
+            ],
+        ),
+        (
+            "CT-002",
+            "Solo inadequado — substituição em parte do terreno",
+            22000.00,
+            [
+                ("Remoção e bota-fora de solo mole", "m³", 95.0, 145.00),
+                ("Aterro estabilizado granular", "m³", 95.0, 85.00),
+            ],
+        ),
     ],
     "zh": [
-        ("BG-001", "业主变更 — 幕墙玻璃升级为三玻两腔", 285000.00, [
-            ("玻璃升级 Low-E 三玻两腔", "块", 320.0, 580.00),
-            ("增加幕墙锚固构件", "件", 80.0, 1250.00),
-        ]),
-        ("BG-002", "地基不良 — 软基处理", 86500.00, [
-            ("软土外运及处置", "m³", 220.0, 185.00),
-            ("级配碎石回填", "m³", 220.0, 95.00),
-        ]),
+        (
+            "BG-001",
+            "业主变更 — 幕墙玻璃升级为三玻两腔",
+            285000.00,
+            [
+                ("玻璃升级 Low-E 三玻两腔", "块", 320.0, 580.00),
+                ("增加幕墙锚固构件", "件", 80.0, 1250.00),
+            ],
+        ),
+        (
+            "BG-002",
+            "地基不良 — 软基处理",
+            86500.00,
+            [
+                ("软土外运及处置", "m³", 220.0, 185.00),
+                ("级配碎石回填", "m³", 220.0, 95.00),
+            ],
+        ),
     ],
 }
 
@@ -678,7 +1025,10 @@ def aggregate_quantity(elements: list[tuple[str, dict, dict]], unit: str) -> flo
 
 
 async def ensure_dwg_drawing(
-    client: httpx.AsyncClient, headers: dict, project_id: str, dwg_path: pathlib.Path,
+    client: httpx.AsyncClient,
+    headers: dict,
+    project_id: str,
+    dwg_path: pathlib.Path,
     conn: sqlite3.Connection,
 ) -> str | None:
     """Upload a DWG drawing if none with our source tag exists for this project."""
@@ -722,7 +1072,10 @@ async def ensure_dwg_drawing(
 
 
 async def ensure_pdf_document(
-    client: httpx.AsyncClient, headers: dict, project_id: str, pdf_path: pathlib.Path,
+    client: httpx.AsyncClient,
+    headers: dict,
+    project_id: str,
+    pdf_path: pathlib.Path,
     conn: sqlite3.Connection,
 ) -> str | None:
     cur = conn.cursor()
@@ -767,8 +1120,12 @@ async def ensure_pdf_document(
 
 
 def insert_boq_content(
-    conn: sqlite3.Connection, boq_id: str, project_id: str, model_id: str,
-    spec: dict, demo_user_id: str,
+    conn: sqlite3.Connection,
+    boq_id: str,
+    project_id: str,
+    model_id: str,
+    spec: dict,
+    demo_user_id: str,
 ) -> tuple[int, int, int]:
     """Insert sections + leaves + BIM links into the database.
 
@@ -805,9 +1162,14 @@ def insert_boq_content(
                 VALUES (?, ?, NULL, ?, ?, 'section', '0', '0', '0', '{}',
                         'manual', '[]', 'pending', ?, ?, 0, ?, ?)""",
                 (
-                    section_id, boq_id, section_code, section_label,
+                    section_id,
+                    boq_id,
+                    section_code,
+                    section_label,
                     json.dumps({"source": SOURCE_TAG, "kind": "section"}),
-                    sort_order, now, now,
+                    sort_order,
+                    now,
+                    now,
                 ),
             )
             sections_n += 1
@@ -823,7 +1185,13 @@ def insert_boq_content(
                 qty = 1.0
             total = round(qty * rate, 2)
 
-            ordinal = f"{section_code}.{li:03d}" if "." in section_code or section_code.isdigit() or section_code in {"甲", "乙", "丙", "丁", "戊", "己", "庚"} else f"{section_code} - {li:02d}"
+            ordinal = (
+                f"{section_code}.{li:03d}"
+                if "." in section_code
+                or section_code.isdigit()
+                or section_code in {"甲", "乙", "丙", "丁", "戊", "己", "庚"}
+                else f"{section_code} - {li:02d}"
+            )
             # Choose source label
             source_label = "cad_import" if elements else ("dwg_takeoff" if li % 3 == 0 else "manual")
             classif = dict(classification or {})
@@ -840,18 +1208,30 @@ def insert_boq_content(
                  created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'passed', ?, ?, 0, ?, ?)""",
                 (
-                    leaf_id, boq_id, section_id, ordinal, desc, unit,
-                    f"{qty:.4f}", f"{rate:.4f}", f"{total:.4f}",
-                    json.dumps(classif), source_label,
+                    leaf_id,
+                    boq_id,
+                    section_id,
+                    ordinal,
+                    desc,
+                    unit,
+                    f"{qty:.4f}",
+                    f"{rate:.4f}",
+                    f"{total:.4f}",
+                    json.dumps(classif),
+                    source_label,
                     "high" if elements else None,
                     json.dumps(cad_ids_list),
-                    json.dumps({
-                        "source": SOURCE_TAG,
-                        "section_code": section_code,
-                        "bim_element_count": len(elements),
-                        "type_match": type_match,
-                    }),
-                    sort_order, now, now,
+                    json.dumps(
+                        {
+                            "source": SOURCE_TAG,
+                            "section_code": section_code,
+                            "bim_element_count": len(elements),
+                            "type_match": type_match,
+                        }
+                    ),
+                    sort_order,
+                    now,
+                    now,
                 ),
             )
             leaves_n += 1
@@ -868,9 +1248,14 @@ def insert_boq_content(
                          rule_id, created_by, metadata, created_at, updated_at)
                         VALUES (?, ?, ?, 'auto', 'high', ?, ?, ?, ?, ?)""",
                         (
-                            link_id, leaf_id, eid, "enrich_v2_match",
-                            demo_user_id, json.dumps({"source": SOURCE_TAG}),
-                            now, now,
+                            link_id,
+                            leaf_id,
+                            eid,
+                            "enrich_v2_match",
+                            demo_user_id,
+                            json.dumps({"source": SOURCE_TAG}),
+                            now,
+                            now,
                         ),
                     )
                     links_n += 1
@@ -909,8 +1294,11 @@ def get_section_ids(conn: sqlite3.Connection, boq_id: str) -> list[tuple[str, st
 
 
 def insert_dwg_annotations(
-    conn: sqlite3.Connection, project_id: str, drawing_id: str | None,
-    leaf_rows: list[tuple[str, str, str, str]], demo_user_id: str,
+    conn: sqlite3.Connection,
+    project_id: str,
+    drawing_id: str | None,
+    leaf_rows: list[tuple[str, str, str, str]],
+    demo_user_id: str,
 ) -> int:
     """Create 5-10 DWG annotations linked to BOQ leaf positions."""
     if drawing_id is None or not leaf_rows:
@@ -933,7 +1321,10 @@ def insert_dwg_annotations(
         y0 = 100 + (i % 3) * 80
         geometry = {
             "type": "rectangle",
-            "x": x0, "y": y0, "width": 50, "height": 30,
+            "x": x0,
+            "y": y0,
+            "width": 50,
+            "height": 30,
             "page": 1,
         }
         ann_type = "rectangle" if i % 2 == 0 else "polyline"
@@ -946,12 +1337,19 @@ def insert_dwg_annotations(
             VALUES (?, ?, ?, NULL, ?, ?, ?, '#3b82f6', 2, 2.0, 'TAKEOFF_LINK',
                     ?, ?, ?, ?, ?, ?, ?)""",
             (
-                ann_id, project_id, drawing_id, ann_type,
+                ann_id,
+                project_id,
+                drawing_id,
+                ann_type,
                 json.dumps(geometry),
                 f"{ordinal} — {desc[:60]}",
-                round(10 + i * 2.5, 2), unit, leaf_id, demo_user_id,
+                round(10 + i * 2.5, 2),
+                unit,
+                leaf_id,
+                demo_user_id,
                 json.dumps({"source": SOURCE_TAG, "leaf_ordinal": ordinal}),
-                now, now,
+                now,
+                now,
             ),
         )
         n += 1
@@ -963,8 +1361,11 @@ def insert_dwg_annotations(
 
 
 def insert_pdf_measurements(
-    conn: sqlite3.Connection, project_id: str, doc_id: str | None,
-    leaf_rows: list[tuple[str, str, str, str]], demo_user_id: str,
+    conn: sqlite3.Connection,
+    project_id: str,
+    doc_id: str | None,
+    leaf_rows: list[tuple[str, str, str, str]],
+    demo_user_id: str,
 ) -> int:
     if doc_id is None or not leaf_rows:
         return 0
@@ -991,8 +1392,10 @@ def insert_pdf_measurements(
             value = 12.5 + i * 1.7
         elif m_type == "area":
             points = [
-                {"x": x, "y": y}, {"x": x + 180, "y": y},
-                {"x": x + 180, "y": y + 90}, {"x": x, "y": y + 90},
+                {"x": x, "y": y},
+                {"x": x + 180, "y": y},
+                {"x": x + 180, "y": y + 90},
+                {"x": x, "y": y + 90},
             ]
             value = 16.2 + i * 3.4
         elif m_type == "polyline":
@@ -1008,12 +1411,21 @@ def insert_pdf_measurements(
              linked_boq_position_id, metadata, created_by, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, '#10B981', ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                m_id, project_id, doc_id, page, m_type, "BOQ Linked",
+                m_id,
+                project_id,
+                doc_id,
+                page,
+                m_type,
+                "BOQ Linked",
                 f"{ordinal} — {desc[:60]}",
-                json.dumps(points), value, unit if m_type != "count" else "ea",
+                json.dumps(points),
+                value,
+                unit if m_type != "count" else "ea",
                 leaf_id,
                 json.dumps({"source": SOURCE_TAG, "leaf_ordinal": ordinal}),
-                demo_user_id, now, now,
+                demo_user_id,
+                now,
+                now,
             ),
         )
         n += 1
@@ -1025,8 +1437,11 @@ def insert_pdf_measurements(
 
 
 def insert_schedule(
-    conn: sqlite3.Connection, project_id: str, locale: str,
-    section_rows: list[tuple[str, str, str]], leaf_rows: list[tuple[str, str, str, str]],
+    conn: sqlite3.Connection,
+    project_id: str,
+    locale: str,
+    section_rows: list[tuple[str, str, str]],
+    leaf_rows: list[tuple[str, str, str, str]],
     demo_user_id: str,
 ) -> tuple[int, int, int]:
     """Create one schedule + 5-8 activities + 3-4 EAC links to BOQ sections."""
@@ -1054,13 +1469,17 @@ def insert_schedule(
              status, data_date, created_by, metadata, created_at, updated_at)
             VALUES (?, ?, ?, 'master', ?, ?, ?, 'active', ?, ?, ?, ?, ?)""",
             (
-                sched_id, project_id, "Master Schedule",
+                sched_id,
+                project_id,
+                "Master Schedule",
                 "Project master schedule, 8 high-level activities.",
                 (TODAY).isoformat(),
                 (TODAY + dt.timedelta(days=365)).isoformat(),
-                TODAY.isoformat(), demo_user_id,
+                TODAY.isoformat(),
+                demo_user_id,
                 json.dumps({"source": SOURCE_TAG}),
-                now, now,
+                now,
+                now,
             ),
         )
 
@@ -1088,10 +1507,23 @@ def insert_schedule(
             VALUES (?, ?, NULL, ?, '', ?, ?, ?, ?, ?, ?, 'task', '[]', '[]', '[]',
                     '#0071e3', ?, ?, ?, NULL, ?, ?, ?, ?, ?)""",
             (
-                act_id, sched_id, name, wbs, start.isoformat(), end.isoformat(),
-                dur, progress, status, i, is_critical, f"ACT-{i+1:03d}",
-                json.dumps({"source": SOURCE_TAG, "wbs": wbs}), now, now,
-                str(cost_planned), str(cost_actual),
+                act_id,
+                sched_id,
+                name,
+                wbs,
+                start.isoformat(),
+                end.isoformat(),
+                dur,
+                progress,
+                status,
+                i,
+                is_critical,
+                f"ACT-{i + 1:03d}",
+                json.dumps({"source": SOURCE_TAG, "wbs": wbs}),
+                now,
+                now,
+                str(cost_planned),
+                str(cost_actual),
             ),
         )
         activities_n += 1
@@ -1108,13 +1540,18 @@ def insert_schedule(
                  last_resolved_at, updated_by_user_id, created_at, updated_at)
                 VALUES (?, ?, NULL, ?, 'partial_match', 0, NULL, ?, ?, ?)""",
                 (
-                    link_id, act_id,
-                    json.dumps({
-                        "boq_section_ordinal": sec_ord,
-                        "source": SOURCE_TAG,
-                        "wbs": wbs,
-                    }),
-                    demo_user_id, now, now,
+                    link_id,
+                    act_id,
+                    json.dumps(
+                        {
+                            "boq_section_ordinal": sec_ord,
+                            "source": SOURCE_TAG,
+                            "wbs": wbs,
+                        }
+                    ),
+                    demo_user_id,
+                    now,
+                    now,
                 ),
             )
             eac_links_n += 1
@@ -1127,8 +1564,12 @@ def insert_schedule(
 
 
 def insert_rfis(
-    conn: sqlite3.Connection, project_id: str, locale: str,
-    leaf_rows: list[tuple[str, str, str, str]], demo_user_id: str, model_id: str,
+    conn: sqlite3.Connection,
+    project_id: str,
+    locale: str,
+    leaf_rows: list[tuple[str, str, str, str]],
+    demo_user_id: str,
+    model_id: str,
 ) -> int:
     cur = conn.cursor()
     cur.execute(
@@ -1143,9 +1584,7 @@ def insert_rfis(
     n = 0
     for i, (subject, question, status) in enumerate(templates):
         # Get next RFI number
-        cur.execute(
-            "SELECT COUNT(*) FROM oe_rfi_rfi WHERE project_id = ?", (project_id,)
-        )
+        cur.execute("SELECT COUNT(*) FROM oe_rfi_rfi WHERE project_id = ?", (project_id,))
         next_num = cur.fetchone()[0] + 1
         rfi_id = str(uuid.uuid4())
         target_leaf = leaf_rows[i % len(leaf_rows)] if leaf_rows else None
@@ -1154,7 +1593,8 @@ def insert_rfis(
         responded_at = now if status in {"answered", "closed"} else None
         official = (
             "Confirmed and accepted as detailed in the response. See attached coordination drawing."
-            if status in {"answered", "closed"} else None
+            if status in {"answered", "closed"}
+            else None
         )
         cur.execute(
             """INSERT INTO oe_rfi_rfi
@@ -1166,9 +1606,17 @@ def insert_rfis(
             VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '[]', NULL,
                     ?, ?, ?, ?)""",
             (
-                rfi_id, project_id, f"RFI-{next_num:03d}", subject, question,
-                demo_user_id, status, demo_user_id if status == "open" else None,
-                official, demo_user_id if responded_at else None, responded_at,
+                rfi_id,
+                project_id,
+                f"RFI-{next_num:03d}",
+                subject,
+                question,
+                demo_user_id,
+                status,
+                demo_user_id if status == "open" else None,
+                official,
+                demo_user_id if responded_at else None,
+                responded_at,
                 1 if cost_impact else 0,
                 str(round(2500 + i * 1200, 2)) if cost_impact else None,
                 1 if sched_impact else 0,
@@ -1176,12 +1624,15 @@ def insert_rfis(
                 (TODAY + dt.timedelta(days=7)).isoformat(),
                 (TODAY + dt.timedelta(days=10)).isoformat(),
                 demo_user_id,
-                json.dumps({
-                    "source": SOURCE_TAG,
-                    "linked_boq_position_id": target_leaf[0] if target_leaf else None,
-                    "linked_bim_model_id": model_id,
-                }),
-                now, now,
+                json.dumps(
+                    {
+                        "source": SOURCE_TAG,
+                        "linked_boq_position_id": target_leaf[0] if target_leaf else None,
+                        "linked_bim_model_id": model_id,
+                    }
+                ),
+                now,
+                now,
             ),
         )
         n += 1
@@ -1193,8 +1644,12 @@ def insert_rfis(
 
 
 def insert_change_orders(
-    conn: sqlite3.Connection, project_id: str, locale: str, currency: str,
-    section_rows: list[tuple[str, str, str]], demo_user_id: str,
+    conn: sqlite3.Connection,
+    project_id: str,
+    locale: str,
+    currency: str,
+    section_rows: list[tuple[str, str, str]],
+    demo_user_id: str,
 ) -> tuple[int, int]:
     cur = conn.cursor()
     cur.execute(
@@ -1232,20 +1687,33 @@ def insert_change_orders(
             VALUES (?, ?, ?, ?, ?, 'client_request', ?, ?, ?, NULL, ?, ?, NULL,
                     ?, ?, ?, 'change_order', 'lump_sum', ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                co_id, project_id, co_code, title,
+                co_id,
+                project_id,
+                co_code,
+                title,
                 f"Change order linked to section {target_section[1] if target_section else 'N/A'}.",
-                status, demo_user_id,
+                status,
+                demo_user_id,
                 demo_user_id if status == "approved" else None,
-                now, now if status == "approved" else None,
-                f"{total:.2f}", 5 + i * 3, currency,
-                now, f"{total:.2f}", f"{total * 0.95:.2f}",
+                now,
+                now if status == "approved" else None,
+                f"{total:.2f}",
+                5 + i * 3,
+                currency,
+                now,
+                f"{total:.2f}",
+                f"{total * 0.95:.2f}",
                 f"{total:.2f}" if status == "approved" else None,
-                5 + i * 3, 5 + i * 3 if status == "approved" else None,
-                json.dumps({
-                    "source": SOURCE_TAG,
-                    "linked_section_ordinal": target_section[1] if target_section else None,
-                }),
-                now, now,
+                5 + i * 3,
+                5 + i * 3 if status == "approved" else None,
+                json.dumps(
+                    {
+                        "source": SOURCE_TAG,
+                        "linked_section_ordinal": target_section[1] if target_section else None,
+                    }
+                ),
+                now,
+                now,
             ),
         )
         co_n += 1
@@ -1259,11 +1727,17 @@ def insert_change_orders(
                  sort_order, metadata, created_at, updated_at)
                 VALUES (?, ?, ?, 'added', '0.000000', ?, '0.000000', ?, ?, ?, ?, ?, ?, ?)""",
                 (
-                    item_id, co_id, desc,
-                    f"{qty:.6f}", f"{rate:.6f}", f"{cost_delta:.2f}",
-                    unit, j,
+                    item_id,
+                    co_id,
+                    desc,
+                    f"{qty:.6f}",
+                    f"{rate:.6f}",
+                    f"{cost_delta:.2f}",
+                    unit,
+                    j,
                     json.dumps({"source": SOURCE_TAG}),
-                    now, now,
+                    now,
+                    now,
                 ),
             )
             items_n += 1
@@ -1275,7 +1749,10 @@ def insert_change_orders(
 
 
 def insert_cost_snapshots(
-    conn: sqlite3.Connection, project_id: str, boq_id: str, demo_user_id: str,
+    conn: sqlite3.Connection,
+    project_id: str,
+    boq_id: str,
+    demo_user_id: str,
 ) -> int:
     cur = conn.cursor()
     cur.execute(
@@ -1300,10 +1777,26 @@ def insert_cost_snapshots(
     # Two snapshots: baseline (3 months ago) + current (today)
     n = 0
     snapshots = [
-        ("baseline", (TODAY - dt.timedelta(days=90)).strftime("%Y-%m"),
-         boq_total, boq_total * 0.05, boq_total * 0.04, boq_total * 1.02, "1.00", "1.05"),
-        ("current", TODAY.strftime("%Y-%m"),
-         boq_total, boq_total * 0.42, boq_total * 0.45, boq_total * 1.06, "0.96", "0.93"),
+        (
+            "baseline",
+            (TODAY - dt.timedelta(days=90)).strftime("%Y-%m"),
+            boq_total,
+            boq_total * 0.05,
+            boq_total * 0.04,
+            boq_total * 1.02,
+            "1.00",
+            "1.05",
+        ),
+        (
+            "current",
+            TODAY.strftime("%Y-%m"),
+            boq_total,
+            boq_total * 0.42,
+            boq_total * 0.45,
+            boq_total * 1.06,
+            "0.96",
+            "0.93",
+        ),
     ]
     for kind, period, planned, earned, actual, eac, spi, cpi in snapshots:
         snap_id = str(uuid.uuid4())
@@ -1313,12 +1806,19 @@ def insert_cost_snapshots(
              forecast_eac, spi, cpi, notes, metadata, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                snap_id, project_id, period,
-                f"{planned:.2f}", f"{earned:.2f}", f"{actual:.2f}",
-                f"{eac:.2f}", spi, cpi,
+                snap_id,
+                project_id,
+                period,
+                f"{planned:.2f}",
+                f"{earned:.2f}",
+                f"{actual:.2f}",
+                f"{eac:.2f}",
+                spi,
+                cpi,
                 f"{kind.title()} — auto-generated by enrich_v2.",
                 json.dumps({"source": SOURCE_TAG, "kind": kind}),
-                now, now,
+                now,
+                now,
             ),
         )
         n += 1
@@ -1330,7 +1830,10 @@ def insert_cost_snapshots(
 
 
 def insert_validation_reports(
-    conn: sqlite3.Connection, project_id: str, boq_id: str, model_id: str,
+    conn: sqlite3.Connection,
+    project_id: str,
+    boq_id: str,
+    model_id: str,
     demo_user_id: str,
 ) -> int:
     cur = conn.cursor()
@@ -1345,37 +1848,75 @@ def insert_validation_reports(
     n = 0
     for kind, target_type, target_id, rule_set, results in [
         (
-            "boq_quality", "boq", boq_id, "boq_quality",
+            "boq_quality",
+            "boq",
+            boq_id,
+            "boq_quality",
             [
-                {"rule_id": "boq_quality.no_zero_price", "status": "passed",
-                 "message": "All positions have non-zero unit rates", "element_ref": None,
-                 "details": {}},
-                {"rule_id": "boq_quality.no_duplicate_ordinal", "status": "passed",
-                 "message": "All ordinals unique within BOQ", "element_ref": None,
-                 "details": {}},
-                {"rule_id": "boq_quality.unit_rate_within_range", "status": "warning",
-                 "message": "2 positions have unit rates above the 95th percentile benchmark",
-                 "element_ref": None, "details": {"position_count": 2}},
-                {"rule_id": "boq_quality.classification_assigned", "status": "passed",
-                 "message": "Every leaf has a classification code", "element_ref": None,
-                 "details": {}},
+                {
+                    "rule_id": "boq_quality.no_zero_price",
+                    "status": "passed",
+                    "message": "All positions have non-zero unit rates",
+                    "element_ref": None,
+                    "details": {},
+                },
+                {
+                    "rule_id": "boq_quality.no_duplicate_ordinal",
+                    "status": "passed",
+                    "message": "All ordinals unique within BOQ",
+                    "element_ref": None,
+                    "details": {},
+                },
+                {
+                    "rule_id": "boq_quality.unit_rate_within_range",
+                    "status": "warning",
+                    "message": "2 positions have unit rates above the 95th percentile benchmark",
+                    "element_ref": None,
+                    "details": {"position_count": 2},
+                },
+                {
+                    "rule_id": "boq_quality.classification_assigned",
+                    "status": "passed",
+                    "message": "Every leaf has a classification code",
+                    "element_ref": None,
+                    "details": {},
+                },
             ],
         ),
         (
-            "bim_compliance", "cad_import", model_id, "bim_compliance",
+            "bim_compliance",
+            "cad_import",
+            model_id,
+            "bim_compliance",
             [
-                {"rule_id": "bim_compliance.elements_present", "status": "passed",
-                 "message": "Model contains > 100 elements", "element_ref": None,
-                 "details": {}},
-                {"rule_id": "bim_compliance.required_properties", "status": "warning",
-                 "message": "5% of elements missing FireRating property", "element_ref": None,
-                 "details": {"missing_pct": 5}},
-                {"rule_id": "bim_compliance.classification_mapped", "status": "warning",
-                 "message": "Some element types not mapped to standard classification",
-                 "element_ref": None, "details": {}},
-                {"rule_id": "bim_compliance.no_zero_geometry", "status": "passed",
-                 "message": "All elements have non-zero bounding box", "element_ref": None,
-                 "details": {}},
+                {
+                    "rule_id": "bim_compliance.elements_present",
+                    "status": "passed",
+                    "message": "Model contains > 100 elements",
+                    "element_ref": None,
+                    "details": {},
+                },
+                {
+                    "rule_id": "bim_compliance.required_properties",
+                    "status": "warning",
+                    "message": "5% of elements missing FireRating property",
+                    "element_ref": None,
+                    "details": {"missing_pct": 5},
+                },
+                {
+                    "rule_id": "bim_compliance.classification_mapped",
+                    "status": "warning",
+                    "message": "Some element types not mapped to standard classification",
+                    "element_ref": None,
+                    "details": {},
+                },
+                {
+                    "rule_id": "bim_compliance.no_zero_geometry",
+                    "status": "passed",
+                    "message": "All elements have non-zero bounding box",
+                    "element_ref": None,
+                    "details": {},
+                },
             ],
         ),
     ]:
@@ -1398,11 +1939,22 @@ def insert_validation_reports(
              created_by, metadata, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                rep_id, project_id, target_type, target_id, rule_set,
-                status, f"{score:.2f}", total, passed, warns, errs,
-                json.dumps(results), demo_user_id,
+                rep_id,
+                project_id,
+                target_type,
+                target_id,
+                rule_set,
+                status,
+                f"{score:.2f}",
+                total,
+                passed,
+                warns,
+                errs,
+                json.dumps(results),
+                demo_user_id,
                 json.dumps({"source": SOURCE_TAG, "kind": kind}),
-                now, now,
+                now,
+                now,
             ),
         )
         n += 1
@@ -1414,7 +1966,10 @@ def insert_validation_reports(
 
 
 async def enrich_project(
-    client: httpx.AsyncClient, headers: dict, key: str, spec: dict,
+    client: httpx.AsyncClient,
+    headers: dict,
+    key: str,
+    spec: dict,
     failures: dict[str, list[str]],
 ) -> dict[str, int]:
     """Enrich one project. Each call uses its own DB connection."""
@@ -1464,17 +2019,13 @@ async def enrich_project(
         meas_n = insert_pdf_measurements(conn, project_id, doc_id, leaf_rows, demo_user_id)
 
         # 6. Schedule + 4D EAC links
-        sched_n, act_n, eac_n = insert_schedule(
-            conn, project_id, locale, section_rows, leaf_rows, demo_user_id
-        )
+        sched_n, act_n, eac_n = insert_schedule(conn, project_id, locale, section_rows, leaf_rows, demo_user_id)
 
         # 7. RFIs
         rfi_n = insert_rfis(conn, project_id, locale, leaf_rows, demo_user_id, model_id)
 
         # 8. Change orders
-        co_n, co_items_n = insert_change_orders(
-            conn, project_id, locale, currency, section_rows, demo_user_id
-        )
+        co_n, co_items_n = insert_change_orders(conn, project_id, locale, currency, section_rows, demo_user_id)
 
         # 9. Cost snapshots
         snap_n = insert_cost_snapshots(conn, project_id, boq_id, demo_user_id)
@@ -1534,10 +2085,7 @@ async def main() -> None:
             return
 
         # Run all 5 in parallel — each uses its own DB connection.
-        tasks = [
-            enrich_project(client, headers, key, spec, failures)
-            for key, spec in PROJECT_SPECS.items()
-        ]
+        tasks = [enrich_project(client, headers, key, spec, failures) for key, spec in PROJECT_SPECS.items()]
         outputs = await asyncio.gather(*tasks, return_exceptions=True)
         for key, out in zip(PROJECT_SPECS.keys(), outputs, strict=False):
             if isinstance(out, Exception):

@@ -73,38 +73,38 @@ _UNIT_TYPE: dict[str, str] = {
     "sft": "Area",
     "sqft": "Area",
     # Length → "Linear"
-    "m":   "Linear",
-    "lm":  "Linear",
-    "rm":  "Linear",
+    "m": "Linear",
+    "lm": "Linear",
+    "rm": "Linear",
     "lfm": "Linear",
-    "lf":  "Linear",
-    "ft":  "Linear",
-    "in":  "Linear",
+    "lf": "Linear",
+    "ft": "Linear",
+    "in": "Linear",
     # Mass → "Mass"
-    "kg":    "Mass",
-    "t":     "Mass",
-    "to":    "Mass",
-    "ton":   "Mass",
+    "kg": "Mass",
+    "t": "Mass",
+    "to": "Mass",
+    "ton": "Mass",
     "tonne": "Mass",
-    "lb":    "Mass",
-    "lbs":   "Mass",
+    "lb": "Mass",
+    "lbs": "Mass",
     # Count → "Count"
-    "pcs":   "Count",
-    "ea":    "Count",
-    "stk":   "Count",
-    "stck":  "Count",
-    "nr":    "Count",
-    "no":    "Count",
-    "u":     "Count",
+    "pcs": "Count",
+    "ea": "Count",
+    "stk": "Count",
+    "stck": "Count",
+    "nr": "Count",
+    "no": "Count",
+    "u": "Count",
     "piece": "Count",
     # Time → "Time"
-    "h":    "Time",
-    "hr":   "Time",
+    "h": "Time",
+    "hr": "Time",
     "hour": "Time",
-    "d":    "Time",
-    "day":  "Time",
+    "d": "Time",
+    "day": "Time",
     # Lump sum — never filter, drop instead
-    "ls":   "",
+    "ls": "",
     "psch": "",
     "lsum": "",
 }
@@ -142,29 +142,29 @@ _UNIT_DIM: dict[str, str] = {
     "sqm": "area",
     "sm": "area",
     # Length
-    "m":  "length",
+    "m": "length",
     "lm": "length",
     "rm": "length",
     "lfm": "length",
     # Mass
     "kg": "mass",
-    "t":  "mass",
+    "t": "mass",
     "to": "mass",
     "ton": "mass",
     # Count
-    "pcs":  "count",
-    "ea":   "count",
-    "stk":  "count",
+    "pcs": "count",
+    "ea": "count",
+    "stk": "count",
     "stck": "count",
-    "nr":   "count",
-    "no":   "count",
-    "u":    "count",
+    "nr": "count",
+    "no": "count",
+    "u": "count",
     # Time
-    "h":  "time",
+    "h": "time",
     "hr": "time",
-    "d":  "time",
+    "d": "time",
     # Lump sum — never filter, drop instead
-    "ls":   "",
+    "ls": "",
     "psch": "",
     "lsum": "",
 }
@@ -219,14 +219,14 @@ def department_code_for(din276_hint: str | None) -> str | None:
 # either consumes that exact resource or doesn't.
 
 _RESOURCE_PATTERNS = (
-    re.compile(r"\bC\d{2,3}/\d{2,3}\b", re.IGNORECASE),    # concrete grades C30/37, C25/30
-    re.compile(r"\bB\d{3,4}[A-Z]?\b"),                       # rebar grades B500B, B500A, B420
-    re.compile(r"\bDN\s?\d{2,4}\b", re.IGNORECASE),          # pipe nominals DN200, DN 100
-    re.compile(r"\bM\d{1,3}(?:x\d{1,3})?\b"),                # bolt sizes M16, M16x60
-    re.compile(r"\b(?:HEB|IPE|HEA|UPN|HEM)\d{2,4}\b"),       # steel profiles
-    re.compile(r"\bF\s?\d{2,3}\b"),                          # fire ratings F30, F90
-    re.compile(r"\bS\d{3}[A-Z]?\b"),                         # steel grades S235, S355JR
-    re.compile(r"\bØ\s?\d{1,4}\b"),                          # diameter Ø14, Ø 25
+    re.compile(r"\bC\d{2,3}/\d{2,3}\b", re.IGNORECASE),  # concrete grades C30/37, C25/30
+    re.compile(r"\bB\d{3,4}[A-Z]?\b"),  # rebar grades B500B, B500A, B420
+    re.compile(r"\bDN\s?\d{2,4}\b", re.IGNORECASE),  # pipe nominals DN200, DN 100
+    re.compile(r"\bM\d{1,3}(?:x\d{1,3})?\b"),  # bolt sizes M16, M16x60
+    re.compile(r"\b(?:HEB|IPE|HEA|UPN|HEM)\d{2,4}\b"),  # steel profiles
+    re.compile(r"\bF\s?\d{2,3}\b"),  # fire ratings F30, F90
+    re.compile(r"\bS\d{3}[A-Z]?\b"),  # steel grades S235, S355JR
+    re.compile(r"\bØ\s?\d{1,4}\b"),  # diameter Ø14, Ø 25
 )
 
 
@@ -439,9 +439,7 @@ def build_search_plan(
     if drop_abstract:
         hard["is_abstract"] = False
 
-    if include_department_filter and _collection_carries(
-        catalog_id, "department_code"
-    ):
+    if include_department_filter and _collection_carries(catalog_id, "department_code"):
         din = (envelope.classifier_hint or {}).get("din276")
         dept = department_code_for(din)
         if dept:
@@ -485,13 +483,9 @@ def build_search_plan(
         and _collection_carries(catalog_id, "ifc_class")
     ):
         hard["ifc_class"] = envelope.ifc_class
-    if envelope.ifc_predefined_type and _collection_carries(
-        catalog_id, "ifc_predefined_type"
-    ):
+    if envelope.ifc_predefined_type and _collection_carries(catalog_id, "ifc_predefined_type"):
         hard["ifc_predefined_type"] = envelope.ifc_predefined_type
-    if envelope.construction_stage_hint and _collection_carries(
-        catalog_id, "construction_stage"
-    ):
+    if envelope.construction_stage_hint and _collection_carries(catalog_id, "construction_stage"):
         hard["construction_stage"] = envelope.construction_stage_hint
     # Trinary booleans — only forward when the source explicitly said
     # ``True``. ``False`` is rarely useful as a hard filter (most rates

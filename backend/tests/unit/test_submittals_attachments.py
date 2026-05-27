@@ -178,9 +178,7 @@ class TestAttachmentUpload:
         assert payload["label"] == "drawing.pdf"
 
     @pytest.mark.asyncio
-    async def test_fake_pdf_with_html_payload_is_rejected(
-        self, db_session, tmp_path, monkeypatch
-    ):
+    async def test_fake_pdf_with_html_payload_is_rejected(self, db_session, tmp_path, monkeypatch):
         from app.modules.submittals import router as sub_router
 
         monkeypatch.setattr(sub_router, "ATTACHMENTS_DIR", tmp_path / "attachments")
@@ -216,9 +214,7 @@ class TestAttachmentUpload:
             assert list(d.iterdir()) == []
 
     @pytest.mark.asyncio
-    async def test_disguised_executable_is_rejected(
-        self, db_session, tmp_path, monkeypatch
-    ):
+    async def test_disguised_executable_is_rejected(self, db_session, tmp_path, monkeypatch):
         from app.modules.submittals import router as sub_router
 
         monkeypatch.setattr(sub_router, "ATTACHMENTS_DIR", tmp_path / "attachments")
@@ -228,7 +224,9 @@ class TestAttachmentUpload:
         service = SubmittalService(db_session)
         sub = await service.create_submittal(
             SubmittalCreate(
-                project_id=project_id, title="Cert", submittal_type="certificate",
+                project_id=project_id,
+                title="Cert",
+                submittal_type="certificate",
             ),
             user_id=owner,
         )
@@ -253,7 +251,9 @@ class TestAttachmentUpload:
         service = SubmittalService(db_session)
         sub = await service.create_submittal(
             SubmittalCreate(
-                project_id=project_id, title="X", submittal_type="sample",
+                project_id=project_id,
+                title="X",
+                submittal_type="sample",
             ),
             user_id=owner,
         )
@@ -267,9 +267,7 @@ class TestAttachmentUpload:
         assert resp.status_code == 400, resp.text
 
     @pytest.mark.asyncio
-    async def test_oversize_file_returns_413(
-        self, db_session, tmp_path, monkeypatch
-    ):
+    async def test_oversize_file_returns_413(self, db_session, tmp_path, monkeypatch):
         from app.modules.submittals import router as sub_router
 
         monkeypatch.setattr(sub_router, "ATTACHMENTS_DIR", tmp_path / "attachments")
@@ -282,7 +280,9 @@ class TestAttachmentUpload:
         service = SubmittalService(db_session)
         sub = await service.create_submittal(
             SubmittalCreate(
-                project_id=project_id, title="Big", submittal_type="shop_drawing",
+                project_id=project_id,
+                title="Big",
+                submittal_type="shop_drawing",
             ),
             user_id=owner,
         )
@@ -298,9 +298,7 @@ class TestAttachmentUpload:
         assert resp.status_code == 413, resp.text
 
     @pytest.mark.asyncio
-    async def test_closed_submittal_rejects_attachment(
-        self, db_session, tmp_path, monkeypatch
-    ):
+    async def test_closed_submittal_rejects_attachment(self, db_session, tmp_path, monkeypatch):
         from app.modules.submittals import router as sub_router
 
         monkeypatch.setattr(sub_router, "ATTACHMENTS_DIR", tmp_path / "attachments")
@@ -310,7 +308,9 @@ class TestAttachmentUpload:
         service = SubmittalService(db_session)
         sub = await service.create_submittal(
             SubmittalCreate(
-                project_id=project_id, title="Done", submittal_type="warranty",
+                project_id=project_id,
+                title="Done",
+                submittal_type="warranty",
             ),
             user_id=owner,
         )
@@ -334,9 +334,7 @@ class TestAttachmentUpload:
 
 class TestNumberCollision:
     @pytest.mark.asyncio
-    async def test_integrity_error_triggers_retry(
-        self, db_session, monkeypatch
-    ):
+    async def test_integrity_error_triggers_retry(self, db_session, monkeypatch):
         """Simulate a collision on the first attempt; the service must
         retry and the second attempt must succeed with the next number.
         """
@@ -364,7 +362,9 @@ class TestNumberCollision:
 
         sub = await service.create_submittal(
             SubmittalCreate(
-                project_id=project_id, title="Race", submittal_type="sample",
+                project_id=project_id,
+                title="Race",
+                submittal_type="sample",
             ),
             user_id=owner,
         )
@@ -373,9 +373,7 @@ class TestNumberCollision:
         assert calls["n"] >= 2
 
     @pytest.mark.asyncio
-    async def test_unresolvable_collision_returns_409(
-        self, db_session, monkeypatch
-    ):
+    async def test_unresolvable_collision_returns_409(self, db_session, monkeypatch):
         from fastapi import HTTPException
         from sqlalchemy.exc import IntegrityError
 
@@ -394,7 +392,9 @@ class TestNumberCollision:
         with pytest.raises(HTTPException) as exc_info:
             await service.create_submittal(
                 SubmittalCreate(
-                    project_id=project_id, title="Forever", submittal_type="sample",
+                    project_id=project_id,
+                    title="Forever",
+                    submittal_type="sample",
                 ),
                 user_id=owner,
             )
@@ -417,7 +417,9 @@ class TestPatchEscalationGuard:
         service = SubmittalService(db_session)
         sub = await service.create_submittal(
             SubmittalCreate(
-                project_id=project_id, title="Sneaky", submittal_type="sample",
+                project_id=project_id,
+                title="Sneaky",
+                submittal_type="sample",
             ),
             user_id=owner,
         )
@@ -429,7 +431,8 @@ class TestPatchEscalationGuard:
 
         with pytest.raises(HTTPException) as exc_info:
             await service.update_submittal(
-                sub.id, SubmittalUpdate(status="approved"),
+                sub.id,
+                SubmittalUpdate(status="approved"),
             )
         assert exc_info.value.status_code == 403
         assert "approve" in str(exc_info.value.detail).lower()
@@ -443,7 +446,9 @@ class TestPatchEscalationGuard:
         service = SubmittalService(db_session)
         sub = await service.create_submittal(
             SubmittalCreate(
-                project_id=project_id, title="Live", submittal_type="sample",
+                project_id=project_id,
+                title="Live",
+                submittal_type="sample",
             ),
             user_id=owner,
         )
@@ -451,7 +456,8 @@ class TestPatchEscalationGuard:
         await db_session.commit()
 
         updated = await service.update_submittal(
-            sub.id, SubmittalUpdate(status="under_review"),
+            sub.id,
+            SubmittalUpdate(status="under_review"),
         )
         assert updated.status == "under_review"
 
@@ -494,18 +500,14 @@ def test_permission_registry_has_all_four_submittals_permissions() -> None:
     register_submittals_permissions()
     keys = set(permission_registry.list_all().keys())
     for verb in ("create", "read", "update", "delete"):
-        assert f"submittals.{verb}" in keys, (
-            f"submittals.{verb} not registered — router calls would 403 at runtime"
-        )
+        assert f"submittals.{verb}" in keys, f"submittals.{verb} not registered — router calls would 403 at runtime"
 
 
 # ── 9. Structured state-change log ───────────────────────────────────────
 
 
 @pytest.mark.asyncio
-async def test_submit_emits_structured_state_change_log(
-    db_session, caplog
-) -> None:
+async def test_submit_emits_structured_state_change_log(db_session, caplog) -> None:
     """The submit handler must emit a ``submittal.state_change`` payload
     so the log shipper can index from/to/actor for the cycle dashboard.
     """
@@ -527,10 +529,7 @@ async def test_submit_emits_structured_state_change_log(
     with caplog.at_level(logging.INFO, logger="app.modules.submittals.service"):
         await service.submit_submittal(sub.id)
 
-    state_events = [
-        r for r in caplog.records
-        if "submittal.state_change" in r.getMessage()
-    ]
+    state_events = [r for r in caplog.records if "submittal.state_change" in r.getMessage()]
     assert state_events, "no structured state-change log emitted on submit"
     msg = state_events[-1].getMessage()
     assert "'from_status': 'draft'" in msg

@@ -97,8 +97,6 @@ def downgrade() -> None:
         op.drop_column(_TABLE, "link_group_id")
 
     if "ix_oe_boq_position_reference_code" in existing_indexes:
-        op.drop_index(
-            "ix_oe_boq_position_reference_code", table_name=_TABLE
-        )
+        op.drop_index("ix_oe_boq_position_reference_code", table_name=_TABLE)
     if "reference_code" in existing_cols:
         op.drop_column(_TABLE, "reference_code")

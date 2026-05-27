@@ -67,7 +67,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
     yield engine, factory, tmp_db
     await engine.dispose()
@@ -175,9 +177,7 @@ async def _ensure_user_and_project(
     from app.modules.users.models import User
 
     async with factory() as s:
-        existing_user = (
-            await s.execute(select(User).where(User.id == user_id))
-        ).scalar_one_or_none()
+        existing_user = (await s.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
         if existing_user is None:
             s.add(
                 User(
@@ -191,11 +191,7 @@ async def _ensure_user_and_project(
             await s.commit()
 
     async with factory() as s:
-        existing_project = (
-            await s.execute(
-                select(Project).where(Project.id == project_id)
-            )
-        ).scalar_one_or_none()
+        existing_project = (await s.execute(select(Project).where(Project.id == project_id))).scalar_one_or_none()
         if existing_project is None:
             s.add(
                 Project(
@@ -226,7 +222,9 @@ async def _seed_snapshot(
 ) -> uuid.UUID:
     """Insert a Snapshot row + write its entities parquet file."""
     await _ensure_user_and_project(
-        factory, user_id=user_id, project_id=project_id,
+        factory,
+        user_id=user_id,
+        project_id=project_id,
     )
 
     snapshot_id = uuid.uuid4()

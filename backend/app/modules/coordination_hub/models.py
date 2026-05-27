@@ -60,15 +60,9 @@ class CoordinationThreshold(Base):
     #: The canonical metric key — one of the values returned by
     #: :func:`default_thresholds` (extended over time by add-on modules).
     metric: Mapped[str] = mapped_column(String(64), nullable=False)
-    warn_value: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0")
-    )
-    error_value: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0")
-    )
-    enabled: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1"
-    )
+    warn_value: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False, default=Decimal("0"))
+    error_value: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False, default=Decimal("0"))
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
 
     def __repr__(self) -> str:  # pragma: no cover — debug only
         return (

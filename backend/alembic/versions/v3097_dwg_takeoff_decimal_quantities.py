@@ -63,7 +63,9 @@ _NUMERIC_COLUMNS: tuple[tuple[str, str, int, int, bool, str | None], ...] = (
 
 
 def _column_type(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> str | None:
     """Return the live column type as a lowercase string, or None."""
     if table not in inspector.get_table_names():
@@ -127,9 +129,7 @@ def upgrade() -> None:
                     type_=sa.Numeric(precision, scale),
                     existing_nullable=nullable,
                     existing_server_default=default,
-                    postgresql_using=(
-                        f"{column}::numeric({precision},{scale})"
-                    ),
+                    postgresql_using=(f"{column}::numeric({precision},{scale})"),
                 )
 
 

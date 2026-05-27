@@ -67,14 +67,23 @@ def upgrade() -> None:
             ),
             sa.Column("name", sa.String(255), nullable=False, server_default=""),
             sa.Column(
-                "system_type", sa.String(40), nullable=False, server_default="wall",
+                "system_type",
+                sa.String(40),
+                nullable=False,
+                server_default="wall",
             ),
             sa.Column("supplier", sa.String(255), nullable=True),
             sa.Column(
-                "material", sa.String(40), nullable=False, server_default="plywood",
+                "material",
+                sa.String(40),
+                nullable=False,
+                server_default="plywood",
             ),
             sa.Column(
-                "reuses_max", sa.Integer(), nullable=False, server_default="30",
+                "reuses_max",
+                sa.Integer(),
+                nullable=False,
+                server_default="30",
             ),
             sa.Column(
                 "unit_rate",
@@ -83,13 +92,18 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column(
-                "currency", sa.String(3), nullable=False, server_default="",
+                "currency",
+                sa.String(3),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("tenant_id", sa.String(36), nullable=True),
         )
         op.create_index(
-            f"ix_{_SYSTEM}_system_type", _SYSTEM, ["system_type"],
+            f"ix_{_SYSTEM}_system_type",
+            _SYSTEM,
+            ["system_type"],
         )
         op.create_index(f"ix_{_SYSTEM}_material", _SYSTEM, ["material"])
         op.create_index(f"ix_{_SYSTEM}_tenant_id", _SYSTEM, ["tenant_id"])
@@ -115,7 +129,8 @@ def upgrade() -> None:
                 "project_id",
                 sa.String(36),
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -124,7 +139,8 @@ def upgrade() -> None:
                 "formwork_system_id",
                 sa.String(36),
                 sa.ForeignKey(
-                    "oe_formwork_system.id", ondelete="RESTRICT",
+                    "oe_formwork_system.id",
+                    ondelete="RESTRICT",
                 ),
                 nullable=False,
             ),
@@ -135,7 +151,10 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column(
-                "reuse_count", sa.Integer(), nullable=False, server_default="1",
+                "reuse_count",
+                sa.Integer(),
+                nullable=False,
+                server_default="1",
             ),
             sa.Column(
                 "waste_pct",
@@ -159,7 +178,9 @@ def upgrade() -> None:
             sa.Column("tenant_id", sa.String(36), nullable=True),
         )
         op.create_index(
-            f"ix_{_ASSIGNMENT}_project_id", _ASSIGNMENT, ["project_id"],
+            f"ix_{_ASSIGNMENT}_project_id",
+            _ASSIGNMENT,
+            ["project_id"],
         )
         op.create_index(
             f"ix_{_ASSIGNMENT}_boq_position_id",
@@ -172,7 +193,9 @@ def upgrade() -> None:
             ["formwork_system_id"],
         )
         op.create_index(
-            f"ix_{_ASSIGNMENT}_tenant_id", _ASSIGNMENT, ["tenant_id"],
+            f"ix_{_ASSIGNMENT}_tenant_id",
+            _ASSIGNMENT,
+            ["tenant_id"],
         )
 
     # ── oe_formwork_schedule_line ──────────────────────────────────────
@@ -196,7 +219,8 @@ def upgrade() -> None:
                 "project_id",
                 sa.String(36),
                 sa.ForeignKey(
-                    "oe_projects_project.id", ondelete="CASCADE",
+                    "oe_projects_project.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -204,12 +228,16 @@ def upgrade() -> None:
                 "assignment_id",
                 sa.String(36),
                 sa.ForeignKey(
-                    "oe_formwork_assignment.id", ondelete="CASCADE",
+                    "oe_formwork_assignment.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "pour_no", sa.Integer(), nullable=False, server_default="1",
+                "pour_no",
+                sa.Integer(),
+                nullable=False,
+                server_default="1",
             ),
             sa.Column("pour_date", sa.Date(), nullable=True),
             sa.Column(
@@ -227,7 +255,9 @@ def upgrade() -> None:
             sa.Column("notes", sa.Text(), nullable=True),
         )
         op.create_index(
-            f"ix_{_SCHEDULE}_project_id", _SCHEDULE, ["project_id"],
+            f"ix_{_SCHEDULE}_project_id",
+            _SCHEDULE,
+            ["project_id"],
         )
         op.create_index(
             f"ix_{_SCHEDULE}_assignment_id",
@@ -248,10 +278,12 @@ def downgrade() -> None:
     if _has_table(inspector, _ASSIGNMENT):
         op.drop_index(f"ix_{_ASSIGNMENT}_tenant_id", table_name=_ASSIGNMENT)
         op.drop_index(
-            f"ix_{_ASSIGNMENT}_formwork_system_id", table_name=_ASSIGNMENT,
+            f"ix_{_ASSIGNMENT}_formwork_system_id",
+            table_name=_ASSIGNMENT,
         )
         op.drop_index(
-            f"ix_{_ASSIGNMENT}_boq_position_id", table_name=_ASSIGNMENT,
+            f"ix_{_ASSIGNMENT}_boq_position_id",
+            table_name=_ASSIGNMENT,
         )
         op.drop_index(f"ix_{_ASSIGNMENT}_project_id", table_name=_ASSIGNMENT)
         op.drop_table(_ASSIGNMENT)

@@ -14,11 +14,11 @@ Coverage:
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, date, datetime
+from datetime import date
 from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 import pytest_asyncio
@@ -35,20 +35,12 @@ from app.modules.carbon.models import (
     CarbonTarget,
     EmbodiedCarbonEntry,
     EPDRecord,
-    MaterialCarbonFactor,
-    Scope1Entry,
-    Scope2Entry,
-    Scope3Entry,
     SustainabilityReport,
 )
 from app.modules.carbon.repository import (
     EmbodiedEntryRepository,
     EPDRecordRepository,
     InventoryRepository,
-    MaterialFactorRepository,
-    Scope1EntryRepository,
-    Scope2EntryRepository,
-    Scope3EntryRepository,
     SustainabilityReportRepository,
     TargetRepository,
 )
@@ -66,7 +58,6 @@ from app.modules.carbon.service import (
     match_cost_item_to_epd,
     normalise_quantity_to_factor_unit,
 )
-
 
 # ── Tests: unit normalisation ────────────────────────────────────────────
 
@@ -90,14 +81,20 @@ def test_normalise_kg_to_t() -> None:
 def test_normalise_m3_to_kg_with_density() -> None:
     """m3 → kg requires density."""
     result = normalise_quantity_to_factor_unit(
-        2, "m3", "kg", density_kg_per_m3=2400,
+        2,
+        "m3",
+        "kg",
+        density_kg_per_m3=2400,
     )
     assert result == Decimal("4800")
 
 
 def test_normalise_kg_to_m3_with_density() -> None:
     result = normalise_quantity_to_factor_unit(
-        4800, "kg", "m3", density_kg_per_m3=2400,
+        4800,
+        "kg",
+        "m3",
+        density_kg_per_m3=2400,
     )
     assert result == Decimal("2")
 
@@ -120,14 +117,21 @@ def test_normalise_unrelated_units_raises() -> None:
 def test_compute_embodied_entry_carbon_basic() -> None:
     """qty * factor = carbon, same units."""
     assert compute_embodied_entry_carbon(
-        100, "kg", Decimal("0.13"), "kg",
+        100,
+        "kg",
+        Decimal("0.13"),
+        "kg",
     ) == Decimal("13.00")
 
 
 def test_compute_embodied_entry_carbon_with_density() -> None:
     """m3 quantity converted to kg via density before applying factor."""
     result = compute_embodied_entry_carbon(
-        2, "m3", Decimal("0.13"), "kg", density=2400,
+        2,
+        "m3",
+        Decimal("0.13"),
+        "kg",
+        density=2400,
     )
     assert result == Decimal("624.00")
 
@@ -135,7 +139,10 @@ def test_compute_embodied_entry_carbon_with_density() -> None:
 def test_compute_embodied_entry_carbon_decimal_precision() -> None:
     """Float-free math: 0.1 + 0.2 == 0.3 in Decimal."""
     result = compute_embodied_entry_carbon(
-        "100.50", "kg", "0.123", "kg",
+        "100.50",
+        "kg",
+        "0.123",
+        "kg",
     )
     assert result == Decimal("12.3615")
 
@@ -186,9 +193,14 @@ def test_match_cost_item_exact_strategy() -> None:
 def test_match_cost_item_exact_strategy_no_manufacturer_returns_none() -> None:
     """Exact requires a manufacturer in the cost item."""
     epds = [_epd("concrete", "Holcim", "EU")]
-    assert match_cost_item_to_epd(
-        {"material_class": "concrete"}, epds, strategy="exact",
-    ) is None
+    assert (
+        match_cost_item_to_epd(
+            {"material_class": "concrete"},
+            epds,
+            strategy="exact",
+        )
+        is None
+    )
 
 
 def test_match_cost_item_fuzzy_returns_first_class_hit() -> None:
@@ -198,7 +210,9 @@ def test_match_cost_item_fuzzy_returns_first_class_hit() -> None:
         _epd("steel", "ArcelorMittal"),
     ]
     match = match_cost_item_to_epd(
-        {"material_class": "concrete", "region": "FR"}, epds, strategy="fuzzy",
+        {"material_class": "concrete", "region": "FR"},
+        epds,
+        strategy="fuzzy",
     )
     assert match is not None
     assert match["manufacturer"] == "Lafarge"
@@ -206,9 +220,14 @@ def test_match_cost_item_fuzzy_returns_first_class_hit() -> None:
 
 def test_match_cost_item_no_match() -> None:
     epds = [_epd("steel", "ArcelorMittal")]
-    assert match_cost_item_to_epd(
-        {"material_class": "concrete"}, epds, strategy="fuzzy",
-    ) is None
+    assert (
+        match_cost_item_to_epd(
+            {"material_class": "concrete"},
+            epds,
+            strategy="fuzzy",
+        )
+        is None
+    )
 
 
 def test_match_cost_item_empty_class_returns_none() -> None:
@@ -513,7 +532,9 @@ async def test_finalize_archived_inventory_is_rejected(
     service = CarbonService(in_memory_session)
     inv = await service.create_inventory(
         CarbonInventoryCreate(
-            project_id=project.id, name="Old", status="archived",
+            project_id=project.id,
+            name="Old",
+            status="archived",
         ),
         user_id=None,
     )
@@ -608,8 +629,9 @@ def test_validate_en15978_stage_accepts_canonical() -> None:
 
 
 def test_validate_en15978_stage_rejects_unknown() -> None:
-    from app.modules.carbon.service import validate_en15978_stage
     import pytest as _pytest
+
+    from app.modules.carbon.service import validate_en15978_stage
 
     with _pytest.raises(ValueError):
         validate_en15978_stage("a99")
@@ -686,8 +708,9 @@ def test_parse_epd_identifier_environdec_url() -> None:
 
 
 def test_parse_epd_identifier_invalid_raises() -> None:
-    from app.modules.carbon.service import parse_epd_identifier
     import pytest as _pytest
+
+    from app.modules.carbon.service import parse_epd_identifier
 
     with _pytest.raises(ValueError):
         parse_epd_identifier("just_a_random_string")
@@ -736,8 +759,7 @@ def test_build_tcfd_report_body_has_required_sections() -> None:
     )
 
     body = build_tcfd_report_body(
-        {"scope1": "10", "scope2": "20", "scope3": "30",
-         "embodied_a1a5": "100", "total": "160"},
+        {"scope1": "10", "scope2": "20", "scope3": "30", "embodied_a1a5": "100", "total": "160"},
         project_name="Project X",
         period_start="2026-01-01",
         period_end="2026-12-31",

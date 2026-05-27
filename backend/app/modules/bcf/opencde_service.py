@@ -207,9 +207,7 @@ def parse_odata_filter(expr: str) -> list[_Clause]:
     if not expr or not expr.strip():
         return []
     if len(expr) > _FILTER_MAX_LEN:
-        raise ODataParseError(
-            f"$filter exceeds {_FILTER_MAX_LEN} characters"
-        )
+        raise ODataParseError(f"$filter exceeds {_FILTER_MAX_LEN} characters")
 
     # Split on `and` only — we deliberately reject `or` for the minimum
     # compliance profile (the spec says the server MAY accept any subset
@@ -248,11 +246,7 @@ def parse_odata_filter(expr: str) -> list[_Clause]:
             buf += ch
             i += 1
             continue
-        if (
-            depth == 0
-            and ch == " "
-            and expr[i : i + 5].lower() == " and "
-        ):
+        if depth == 0 and ch == " " and expr[i : i + 5].lower() == " and ":
             parts.append(buf)
             buf = ""
             i += 5
@@ -286,14 +280,8 @@ def _parse_clause(clause: str) -> _Clause:
         if not var:
             raise ODataParseError("Empty lambda variable in labels/any()")
         body_parts = body.split(maxsplit=2)
-        if (
-            len(body_parts) != 3
-            or body_parts[0] != var
-            or body_parts[1].lower() != "eq"
-        ):
-            raise ODataParseError(
-                "labels/any() body must be `<var> eq '<literal>'`"
-            )
+        if len(body_parts) != 3 or body_parts[0] != var or body_parts[1].lower() != "eq":
+            raise ODataParseError("labels/any() body must be `<var> eq '<literal>'`")
         value = _parse_value(body_parts[2])
         if not isinstance(value, str):
             raise ODataParseError("labels/any() expects a string literal")
@@ -321,9 +309,7 @@ def _parse_clause(clause: str) -> _Clause:
         list_part = clause[in_idx + len(needle) :].strip()
         values = _parse_in_list(list_part)
         if field not in _TOPIC_FIELDS_SCALAR:
-            raise ODataParseError(
-                f"Field '{field}' is not filterable"
-            )
+            raise ODataParseError(f"Field '{field}' is not filterable")
         return _Clause(field=field, op="in", value=values)
 
     for op in (" eq ", " ne ", " ge ", " le ", " gt ", " lt "):
@@ -333,9 +319,7 @@ def _parse_clause(clause: str) -> _Clause:
         field = clause[:idx].strip()
         rhs = clause[idx + len(op) :].strip()
         if field not in _TOPIC_FIELDS_SCALAR:
-            raise ODataParseError(
-                f"Field '{field}' is not filterable"
-            )
+            raise ODataParseError(f"Field '{field}' is not filterable")
         value = _parse_value(rhs)
         return _Clause(field=field, op=op.strip(), value=value)
     raise ODataParseError(f"Cannot parse $filter clause: {clause}")
@@ -358,17 +342,9 @@ def _clauses_to_sqla(clauses: list[_Clause]):
             # Also strip embedded double-quotes — a label is a scalar token,
             # never a JSON fragment, so a ``"`` in it would only ever be a
             # poisoning attempt against the LIKE pattern below.
-            safe = (
-                str(c.value)
-                .replace("\\", "\\\\")
-                .replace("%", "\\%")
-                .replace("_", "\\_")
-                .replace('"', "")
-            )
+            safe = str(c.value).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_").replace('"', "")
             quoted = f'"{safe}"'
-            sqla_clauses.append(
-                cast(BCFTopic.labels, String).like(sl(f"%{quoted}%"), escape="\\")
-            )
+            sqla_clauses.append(cast(BCFTopic.labels, String).like(sl(f"%{quoted}%"), escape="\\"))
             continue
         col = getattr(BCFTopic, c.field, None)
         if col is None:
@@ -489,9 +465,7 @@ class OpenCDEService:
 
     # ── Project ────────────────────────────────────────────────────
 
-    async def list_projects(
-        self, *, user_id: str, role: str
-    ) -> list[BCFProject]:
+    async def list_projects(self, *, user_id: str, role: str) -> list[BCFProject]:
         """Projects the caller can see, as OpenCDE Project records.
 
         Admin sees all; everyone else sees only owned projects (mirrors
@@ -513,16 +487,12 @@ class OpenCDEService:
             for p in projects
         ]
 
-    async def get_project(
-        self, project_id: uuid.UUID, *, role: str
-    ) -> BCFProject:
+    async def get_project(self, project_id: uuid.UUID, *, role: str) -> BCFProject:
         from app.modules.projects.models import Project
 
         proj = await self.session.get(Project, project_id)
         if proj is None:
-            raise OpenCDEServiceError(
-                "not_found", f"Project {project_id} not found", http_status=404
-            )
+            raise OpenCDEServiceError("not_found", f"Project {project_id} not found", http_status=404)
         return BCFProject(
             project_id=str(proj.id),
             name=str(getattr(proj, "name", "") or ""),
@@ -554,11 +524,7 @@ class OpenCDEService:
         base_where = [BCFTopic.project_id == project_id]
         base_where.extend(_clauses_to_sqla(clauses))
 
-        count_stmt = (
-            select(func.count())
-            .select_from(BCFTopic)
-            .where(and_(*base_where))
-        )
+        count_stmt = select(func.count()).select_from(BCFTopic).where(and_(*base_where))
         total_count = int((await self.session.execute(count_stmt)).scalar() or 0)
 
         stmt = (
@@ -600,14 +566,8 @@ class OpenCDEService:
         # just to count them.
         from sqlalchemy import func as _func
 
-        count_stmt = (
-            select(_func.count())
-            .select_from(BCFTopic)
-            .where(BCFTopic.project_id == project_id)
-        )
-        topic_index = int(
-            (await self.session.execute(count_stmt)).scalar() or 0
-        ) + 1
+        count_stmt = select(_func.count()).select_from(BCFTopic).where(BCFTopic.project_id == project_id)
+        topic_index = int((await self.session.execute(count_stmt)).scalar() or 0) + 1
         topic = BCFTopic(
             guid=str(uuid.uuid4()).lower(),
             project_id=project_id,
@@ -652,9 +612,7 @@ class OpenCDEService:
         for key, value in patch.items():
             if key == "bim_snippet":
                 meta = dict(topic.metadata_ or {})
-                meta["bim_snippet"] = (
-                    payload.bim_snippet.model_dump() if payload.bim_snippet else None
-                )
+                meta["bim_snippet"] = payload.bim_snippet.model_dump() if payload.bim_snippet else None
                 topic.metadata_ = meta
                 continue
             if key == "due_date":
@@ -681,9 +639,7 @@ class OpenCDEService:
 
     # ── Comments ───────────────────────────────────────────────────
 
-    async def list_comments(
-        self, project_id: uuid.UUID, topic_guid: str, *, role: str
-    ) -> list[BCFCommentResponse]:
+    async def list_comments(self, project_id: uuid.UUID, topic_guid: str, *, role: str) -> list[BCFCommentResponse]:
         topic = await self._load_topic_by_guid(project_id, topic_guid)
         comments = sorted(
             topic.comments,
@@ -703,10 +659,7 @@ class OpenCDEService:
     ) -> BCFCommentResponse:
         topic = await self._load_topic_by_guid(project_id, topic_guid)
         if payload.viewpoint_guid:
-            found = any(
-                v.guid.lower() == payload.viewpoint_guid.lower()
-                for v in topic.viewpoints
-            )
+            found = any(v.guid.lower() == payload.viewpoint_guid.lower() for v in topic.viewpoints)
             if not found:
                 raise OpenCDEServiceError(
                     "not_found",
@@ -714,10 +667,7 @@ class OpenCDEService:
                     http_status=404,
                 )
         if payload.reply_to_comment_guid:
-            found = any(
-                c.guid.lower() == payload.reply_to_comment_guid.lower()
-                for c in topic.comments
-            )
+            found = any(c.guid.lower() == payload.reply_to_comment_guid.lower() for c in topic.comments)
             if not found:
                 raise OpenCDEServiceError(
                     "not_found",
@@ -734,9 +684,7 @@ class OpenCDEService:
             date=now,
             modified_author=author,
             modified_date=now,
-            viewpoint_guid=payload.viewpoint_guid.lower()
-            if payload.viewpoint_guid
-            else None,
+            viewpoint_guid=payload.viewpoint_guid.lower() if payload.viewpoint_guid else None,
             created_by=str(user_id),
             metadata_=(
                 {"reply_to_comment_guid": payload.reply_to_comment_guid.lower()}
@@ -750,9 +698,7 @@ class OpenCDEService:
 
     # ── Viewpoints ─────────────────────────────────────────────────
 
-    async def list_viewpoints(
-        self, project_id: uuid.UUID, topic_guid: str
-    ) -> list[ViewpointResponse]:
+    async def list_viewpoints(self, project_id: uuid.UUID, topic_guid: str) -> list[ViewpointResponse]:
         topic = await self._load_topic_by_guid(project_id, topic_guid)
         return [_viewpoint_to_response(v) for v in topic.viewpoints]
 
@@ -783,15 +729,11 @@ class OpenCDEService:
         v2w: float | None = None
         if payload.perspective_camera is not None:
             camera_type = "perspective"
-            camera = payload.perspective_camera.model_dump(
-                exclude={"field_of_view"}
-            )
+            camera = payload.perspective_camera.model_dump(exclude={"field_of_view"})
             fov = payload.perspective_camera.field_of_view
         elif payload.orthogonal_camera is not None:
             camera_type = "orthogonal"
-            camera = payload.orthogonal_camera.model_dump(
-                exclude={"view_to_world_scale"}
-            )
+            camera = payload.orthogonal_camera.model_dump(exclude={"view_to_world_scale"})
             v2w = payload.orthogonal_camera.view_to_world_scale
 
         snapshot_key: str | None = None
@@ -800,9 +742,7 @@ class OpenCDEService:
             try:
                 import base64
 
-                raw = base64.b64decode(
-                    payload.snapshot.snapshot_data, validate=True
-                )
+                raw = base64.b64decode(payload.snapshot.snapshot_data, validate=True)
             except Exception as exc:  # noqa: BLE001
                 raise OpenCDEServiceError(
                     "bad_request",
@@ -832,9 +772,7 @@ class OpenCDEService:
             vp_index=await self.repo.next_viewpoint_index(topic.id),
             camera_type=camera_type,
             camera=camera,
-            components=(
-                payload.components.model_dump() if payload.components else {}
-            ),
+            components=(payload.components.model_dump() if payload.components else {}),
             lines=[ln.model_dump() for ln in payload.lines],
             clipping_planes=[cp.model_dump() for cp in payload.clipping_planes],
             field_of_view=fov,
@@ -862,23 +800,17 @@ class OpenCDEService:
             None,
         )
         if vp is None or not vp.snapshot_key:
-            raise OpenCDEServiceError(
-                "not_found", "Snapshot not found", http_status=404
-            )
+            raise OpenCDEServiceError("not_found", "Snapshot not found", http_status=404)
         from app.core.storage import get_storage_backend
 
         try:
             return await get_storage_backend().get(vp.snapshot_key)
         except FileNotFoundError as exc:
-            raise OpenCDEServiceError(
-                "not_found", "Snapshot not found", http_status=404
-            ) from exc
+            raise OpenCDEServiceError("not_found", "Snapshot not found", http_status=404) from exc
 
     # ── helpers ────────────────────────────────────────────────────
 
-    async def _load_topic_by_guid(
-        self, project_id: uuid.UUID, topic_guid: str
-    ) -> BCFTopic:
+    async def _load_topic_by_guid(self, project_id: uuid.UUID, topic_guid: str) -> BCFTopic:
         guid = topic_guid.strip().lower()
         stmt = (
             select(BCFTopic)
@@ -973,9 +905,7 @@ def _topic_to_response(topic: BCFTopic, role: str) -> BCFTopicResponse:
     meta = dict(topic.metadata_ or {})
     bim_snippet_blob = meta.get("bim_snippet") if isinstance(meta, dict) else None
     bim_snippet = BimSnippet(**bim_snippet_blob) if bim_snippet_blob else None
-    server_id = (
-        f"BCF-{topic.topic_index:04d}" if topic.topic_index is not None else None
-    )
+    server_id = f"BCF-{topic.topic_index:04d}" if topic.topic_index is not None else None
     return BCFTopicResponse(
         guid=_normalize_guid_lower(topic.guid),
         server_assigned_id=server_id,
@@ -998,9 +928,7 @@ def _topic_to_response(topic: BCFTopic, role: str) -> BCFTopicResponse:
     )
 
 
-def _comment_to_response(
-    comment: BCFComment, topic: BCFTopic, role: str
-) -> BCFCommentResponse:
+def _comment_to_response(comment: BCFComment, topic: BCFTopic, role: str) -> BCFCommentResponse:
     meta = dict(comment.metadata_ or {})
     reply = meta.get("reply_to_comment_guid")
     return BCFCommentResponse(
@@ -1011,11 +939,7 @@ def _comment_to_response(
         modified_author=comment.modified_author,
         comment=comment.comment_text,
         topic_guid=_normalize_guid_lower(topic.guid),
-        viewpoint_guid=(
-            _normalize_guid_lower(comment.viewpoint_guid)
-            if comment.viewpoint_guid
-            else None
-        ),
+        viewpoint_guid=(_normalize_guid_lower(comment.viewpoint_guid) if comment.viewpoint_guid else None),
         reply_to_comment_guid=_normalize_guid_lower(reply) if reply else None,
         authorization=_comment_authorization(role),
     )
@@ -1051,13 +975,11 @@ def _viewpoint_to_response(vp: BCFViewpoint) -> ViewpointResponse:
         # Normalise into Visibility wrapper if a flat selection was stored.
         vis_raw = components_dict.get("visibility")
         if isinstance(vis_raw, dict):
-            vis = Visibility(**{k: vis_raw.get(k) for k in vis_raw if k in {
-                "default_visibility", "exceptions", "view_setup_hints"
-            }})
-        else:
             vis = Visibility(
-                default_visibility=bool(components_dict.get("default_visibility", True))
+                **{k: vis_raw.get(k) for k in vis_raw if k in {"default_visibility", "exceptions", "view_setup_hints"}}
             )
+        else:
+            vis = Visibility(default_visibility=bool(components_dict.get("default_visibility", True)))
         components = Components(
             selection=list(components_dict.get("selection", []) or []),
             visibility=vis,

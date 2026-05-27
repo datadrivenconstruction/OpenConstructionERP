@@ -143,8 +143,8 @@ def _find_env_file() -> list[str]:
     """
     here = Path(__file__).resolve()
     candidates = [
-        here.parent.parent / ".env",        # backend/.env (app/ is one up)
-        here.parent.parent.parent / ".env", # repo root .env (optional)
+        here.parent.parent / ".env",  # backend/.env (app/ is one up)
+        here.parent.parent.parent / ".env",  # repo root .env (optional)
     ]
     return [str(p) for p in candidates if p.is_file()]
 

@@ -14,7 +14,6 @@ from app.modules.finance.br_invoice_pdf import (
     render_br_invoice_pdf,
 )
 
-
 # ── BRL formatter ────────────────────────────────────────────────────────
 
 
@@ -155,7 +154,9 @@ def test_render_br_invoice_pdf_with_missing_br_fields_still_renders() -> None:
         "metadata": {},
     }
     pdf_bytes = render_br_invoice_pdf(
-        invoice=invoice, line_items=[], project=None,
+        invoice=invoice,
+        line_items=[],
+        project=None,
     )
     assert pdf_bytes[:5] == b"%PDF-"
     # Even an empty invoice produces a header + disclaimer = ~1 KB minimum.

@@ -122,8 +122,7 @@ def _scan(parquet_path: str) -> Any:
         import polars as pl
     except ImportError as exc:  # pragma: no cover — optional [semantic] extra
         raise RuntimeError(
-            "polars is not installed; install the [semantic] extra: "
-            "pip install openconstructionerp[semantic]"
+            "polars is not installed; install the [semantic] extra: pip install openconstructionerp[semantic]"
         ) from exc
 
     return pl.scan_parquet(parquet_path)
@@ -147,9 +146,7 @@ async def lookup_rows(
 
     parquet_path = _parquet_for_country(country)
     if parquet_path is None:
-        logger.warning(
-            "CWICR parquet lookup skipped: no parquet for country=%s", country
-        )
+        logger.warning("CWICR parquet lookup skipped: no parquet for country=%s", country)
         return []
 
     try:

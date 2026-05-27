@@ -175,9 +175,7 @@ def test_to_payload_stringifies_uuid_fks() -> None:
     adapter = RequirementVectorAdapter()
     set_id = uuid.uuid4()
     pos_id = uuid.uuid4()
-    payload = adapter.to_payload(
-        _make_row(requirement_set_id=set_id, linked_position_id=pos_id)
-    )
+    payload = adapter.to_payload(_make_row(requirement_set_id=set_id, linked_position_id=pos_id))
     assert payload["requirement_set_id"] == str(set_id)
     assert payload["linked_position_id"] == str(pos_id)
 
@@ -186,26 +184,20 @@ def test_to_payload_defaults_empty_for_missing_fks() -> None:
     """Unset foreign keys must serialise to empty string, never
     ``None`` — so the frontend card template can concat safely."""
     adapter = RequirementVectorAdapter()
-    payload = adapter.to_payload(
-        _make_row(requirement_set_id=None, linked_position_id=None)
-    )
+    payload = adapter.to_payload(_make_row(requirement_set_id=None, linked_position_id=None))
     assert payload["requirement_set_id"] == ""
     assert payload["linked_position_id"] == ""
 
 
 def test_to_payload_constraint_joined_when_both_parts_present() -> None:
     adapter = RequirementVectorAdapter()
-    payload = adapter.to_payload(
-        _make_row(constraint_type="min", constraint_value="50")
-    )
+    payload = adapter.to_payload(_make_row(constraint_type="min", constraint_value="50"))
     assert payload["constraint"] == "min 50"
 
 
 def test_to_payload_constraint_bare_value_when_type_missing() -> None:
     adapter = RequirementVectorAdapter()
-    payload = adapter.to_payload(
-        _make_row(constraint_type="", constraint_value="IP54")
-    )
+    payload = adapter.to_payload(_make_row(constraint_type="", constraint_value="IP54"))
     assert payload["constraint"] == "IP54"
 
 

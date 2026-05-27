@@ -17,25 +17,25 @@ from app.core.i18n import get_locale
 from app.core.validation.messages import translate
 from app.dependencies import CurrentUserPayload, RequirePermission, SessionDep
 from app.modules.geo_hub.schemas import (
+    AnchoredProjectResponse,
     AnchorFromAddressRequest,
     AnchorFromAddressResponse,
-    AnchoredProjectResponse,
     BulkAnchorFromAddressResponse,
     CanonicalToTilesetRequest,
     DiaryPhotoPinResponse,
     GeoAnchorCreate,
     GeoAnchorResponse,
     GeoAnchorUpdate,
+    GeocodeCachePurgeResponse,
+    GeocodeCacheStatsResponse,
+    GeocodeSuggestionResponse,
+    GeocodeSuggestResponse,
     GeoJSONImportRequest,
     GeoOverlayCreate,
     GeoOverlayResponse,
     GeoOverlayUpdate,
     GeoRasterOverlayResponse,
     GeoRasterOverlayUpdate,
-    GeocodeCachePurgeResponse,
-    GeocodeCacheStatsResponse,
-    GeocodeSuggestionResponse,
-    GeocodeSuggestResponse,
     HSEPinResponse,
     ImageryLayerCreate,
     ImageryLayerResponse,
@@ -76,7 +76,9 @@ async def list_anchors(
     _perm: None = Depends(RequirePermission("geo_hub.read")),
 ) -> list[GeoAnchorResponse]:
     await service._verify_project_owner(
-        project_id, payload, not_found_detail=translate("errors.project_not_found", locale=get_locale()),
+        project_id,
+        payload,
+        not_found_detail=translate("errors.project_not_found", locale=get_locale()),
     )
     anchor = await service.get_anchor_for_project(project_id)
     if anchor is None:
@@ -85,7 +87,9 @@ async def list_anchors(
 
 
 @router.post(
-    "/anchors/", response_model=GeoAnchorResponse, status_code=201,
+    "/anchors/",
+    response_model=GeoAnchorResponse,
+    status_code=201,
 )
 async def create_anchor(
     data: GeoAnchorCreate,
@@ -106,7 +110,9 @@ async def get_anchor(
 ) -> GeoAnchorResponse:
     obj = await service.get_anchor(anchor_id)
     await service._verify_project_owner(
-        obj.project_id, payload, not_found_detail="Anchor not found",
+        obj.project_id,
+        payload,
+        not_found_detail="Anchor not found",
     )
     return GeoAnchorResponse.model_validate(obj)
 
@@ -149,7 +155,9 @@ async def anchor_from_address(
     * 201 with the new anchor + precision + source on success.
     """
     anchor, precision, source, display_name = await service.anchor_from_address(
-        data.project_id, payload=payload, force=force,
+        data.project_id,
+        payload=payload,
+        force=force,
     )
     return AnchorFromAddressResponse(
         anchor=GeoAnchorResponse.model_validate(anchor),
@@ -272,7 +280,8 @@ async def geocode_cache_purge(
 
     deleted = await purge_cache(session, older_than_days=older_than_days)
     return GeocodeCachePurgeResponse(
-        deleted=deleted, older_than_days=older_than_days,
+        deleted=deleted,
+        older_than_days=older_than_days,
     )
 
 
@@ -330,7 +339,9 @@ async def get_tileset(
 ) -> TilesetResponse:
     obj = await service.get_tileset(tileset_id)
     await service._verify_project_owner(
-        obj.project_id, payload, not_found_detail="Tileset not found",
+        obj.project_id,
+        payload,
+        not_found_detail="Tileset not found",
     )
     return TilesetResponse.model_validate(obj)
 
@@ -373,7 +384,9 @@ async def enqueue_tile_job(
 
 
 @router.post(
-    "/jobs/{job_id}/cancel", response_model=TileJobResponse, status_code=200,
+    "/jobs/{job_id}/cancel",
+    response_model=TileJobResponse,
+    status_code=200,
 )
 async def cancel_tile_job(
     job_id: uuid.UUID,
@@ -394,7 +407,9 @@ async def get_tile_job(
 ) -> TileJobResponse:
     job = await service.get_job(job_id)
     await service._verify_project_owner(
-        job.project_id, payload, not_found_detail="Job not found",
+        job.project_id,
+        payload,
+        not_found_detail="Job not found",
     )
     return TileJobResponse.model_validate(job)
 
@@ -461,7 +476,9 @@ async def list_imagery_layers(
 
 
 @router.post(
-    "/imagery-layers/", response_model=ImageryLayerResponse, status_code=201,
+    "/imagery-layers/",
+    response_model=ImageryLayerResponse,
+    status_code=201,
 )
 async def create_imagery_layer(
     data: ImageryLayerCreate,
@@ -474,7 +491,8 @@ async def create_imagery_layer(
 
 
 @router.patch(
-    "/imagery-layers/{layer_id}", response_model=ImageryLayerResponse,
+    "/imagery-layers/{layer_id}",
+    response_model=ImageryLayerResponse,
 )
 async def update_imagery_layer(
     layer_id: uuid.UUID,
@@ -511,7 +529,9 @@ async def list_terrain_sources(
 
 
 @router.post(
-    "/terrain-sources/", response_model=TerrainSourceResponse, status_code=201,
+    "/terrain-sources/",
+    response_model=TerrainSourceResponse,
+    status_code=201,
 )
 async def create_terrain_source(
     data: TerrainSourceCreate,
@@ -523,7 +543,8 @@ async def create_terrain_source(
 
 
 @router.patch(
-    "/terrain-sources/{src_id}", response_model=TerrainSourceResponse,
+    "/terrain-sources/{src_id}",
+    response_model=TerrainSourceResponse,
 )
 async def update_terrain_source(
     src_id: uuid.UUID,
@@ -560,7 +581,9 @@ async def list_viewpoints(
 
 
 @router.post(
-    "/viewpoints/", response_model=ViewpointResponse, status_code=201,
+    "/viewpoints/",
+    response_model=ViewpointResponse,
+    status_code=201,
 )
 async def create_viewpoint(
     data: ViewpointCreate,
@@ -611,7 +634,9 @@ async def list_overlays(
 
 
 @router.post(
-    "/overlays/", response_model=GeoOverlayResponse, status_code=201,
+    "/overlays/",
+    response_model=GeoOverlayResponse,
+    status_code=201,
 )
 async def create_overlay(
     data: GeoOverlayCreate,
@@ -624,7 +649,8 @@ async def create_overlay(
 
 
 @router.patch(
-    "/overlays/{overlay_id}", response_model=GeoOverlayResponse,
+    "/overlays/{overlay_id}",
+    response_model=GeoOverlayResponse,
 )
 async def update_overlay(
     overlay_id: uuid.UUID,
@@ -699,7 +725,8 @@ async def export_geojson(
 
 
 @router.get(
-    "/raster-overlays/", response_model=list[GeoRasterOverlayResponse],
+    "/raster-overlays/",
+    response_model=list[GeoRasterOverlayResponse],
 )
 async def list_raster_overlays(
     project_id: uuid.UUID = Query(...),
@@ -709,7 +736,9 @@ async def list_raster_overlays(
     _perm: None = Depends(RequirePermission("geo_hub.read")),
 ) -> list[GeoRasterOverlayResponse]:
     rows = await service.list_raster_overlays(
-        project_id, payload=payload, include_hidden=include_hidden,
+        project_id,
+        payload=payload,
+        include_hidden=include_hidden,
     )
     return [GeoRasterOverlayResponse.model_validate(r) for r in rows]
 
@@ -740,7 +769,9 @@ async def update_raster_overlay(
     _perm: None = Depends(RequirePermission("geo_hub.write")),
 ) -> GeoRasterOverlayResponse:
     obj = await service.update_raster_overlay(
-        overlay_id, data, payload=payload,
+        overlay_id,
+        data,
+        payload=payload,
     )
     return GeoRasterOverlayResponse.model_validate(obj)
 
@@ -896,7 +927,9 @@ async def get_map_config(
     tenant access is collapsed to 404 by the service IDOR helper.
     """
     bundle = await service.map_config(
-        project_id, payload=payload, development_id=development_id,
+        project_id,
+        payload=payload,
+        development_id=development_id,
     )
     return MapConfigResponse.model_validate(bundle)
 
@@ -933,7 +966,9 @@ async def list_punchlist_pins(
 ) -> list[PunchlistPinResponse]:
     """Geo-pinned punch list items for the project."""
     rows = await service.list_punchlist_pins(
-        project_id, payload=payload, limit=limit,
+        project_id,
+        payload=payload,
+        limit=limit,
     )
     return [PunchlistPinResponse.model_validate(r) for r in rows]
 
@@ -951,7 +986,9 @@ async def list_diary_photo_pins(
 ) -> list[DiaryPhotoPinResponse]:
     """Geo-tagged Daily Diary photos for the project."""
     rows = await service.list_diary_photo_pins(
-        project_id, payload=payload, limit=limit,
+        project_id,
+        payload=payload,
+        limit=limit,
     )
     return [DiaryPhotoPinResponse.model_validate(r) for r in rows]
 

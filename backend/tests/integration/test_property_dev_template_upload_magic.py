@@ -57,11 +57,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -137,9 +133,7 @@ async def test_docx_with_valid_zip_magic_accepted(http_client, tenant):
         tenant,
         filename="kyc.docx",
         content=_zip_bytes(),
-        content_type=(
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        ),
+        content_type=("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
     )
     assert res.status_code == 201, res.text
 
@@ -151,9 +145,7 @@ async def test_xlsx_with_valid_zip_magic_accepted(http_client, tenant):
         tenant,
         filename="rate-card.xlsx",
         content=_zip_bytes(),
-        content_type=(
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        ),
+        content_type=("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
     )
     assert res.status_code == 201, res.text
 
@@ -204,9 +196,7 @@ async def test_docx_with_jpeg_payload_rejected(http_client, tenant):
         tenant,
         filename="evil.docx",
         content=jpeg_body,
-        content_type=(
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        ),
+        content_type=("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
     )
     assert res.status_code == 415, res.text
 
@@ -219,9 +209,7 @@ async def test_exe_renamed_to_docx_rejected(http_client, tenant):
         tenant,
         filename="totally-not-malware.docx",
         content=mz_body,
-        content_type=(
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        ),
+        content_type=("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
     )
     assert res.status_code == 415, res.text
 

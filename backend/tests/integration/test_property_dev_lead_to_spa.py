@@ -78,11 +78,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -286,9 +282,7 @@ async def _convert_lead_to_reservation(
     return res.json()
 
 
-async def _convert_reservation_to_spa(
-    client: AsyncClient, tenant: dict, reservation_id: str, **overrides
-) -> dict:
+async def _convert_reservation_to_spa(client: AsyncClient, tenant: dict, reservation_id: str, **overrides) -> dict:
     payload = {
         "signing_date": "2026-06-01",
         "governing_law": "DE-BE",
@@ -394,9 +388,7 @@ async def test_lead_idor_get_blocked_for_tenant_b(http_client, tenant_a, tenant_
 
 
 @pytest.mark.asyncio
-async def test_lead_idor_update_blocked_for_tenant_b(
-    http_client, tenant_a, tenant_b
-):
+async def test_lead_idor_update_blocked_for_tenant_b(http_client, tenant_a, tenant_b):
     lead_id = await _fresh_lead(http_client, tenant_a)
     res = await http_client.patch(
         f"/api/v1/property-dev/leads/{lead_id}",
@@ -441,9 +433,7 @@ async def test_lead_fsm_valid_transition(http_client, tenant_a):
 async def test_lead_to_reservation_happy_path(http_client, tenant_a):
     lead_id = await _fresh_lead(http_client, tenant_a)
     plot_id = tenant_a["plots"][0]
-    reservation = await _convert_lead_to_reservation(
-        http_client, tenant_a, lead_id, plot_id
-    )
+    reservation = await _convert_lead_to_reservation(http_client, tenant_a, lead_id, plot_id)
     assert reservation["status"] == "active"
     assert reservation["plot_id"] == plot_id
     assert reservation["currency"] == "EUR"
@@ -452,9 +442,7 @@ async def test_lead_to_reservation_happy_path(http_client, tenant_a):
     assert reservation["cooling_off_days"] == 7
     assert reservation["cooling_off_until"] is not None
     # Lead should be marked converted now.
-    refreshed_lead = await http_client.get(
-        f"/api/v1/property-dev/leads/{lead_id}", headers=tenant_a["headers"]
-    )
+    refreshed_lead = await http_client.get(f"/api/v1/property-dev/leads/{lead_id}", headers=tenant_a["headers"])
     assert refreshed_lead.json()["status"] == "converted"
     assert refreshed_lead.json()["converted_to_buyer_id"] is not None
 
@@ -475,13 +463,9 @@ async def test_lead_to_reservation_invalid_currency(http_client, tenant_a):
 
 
 @pytest.mark.asyncio
-async def test_lead_already_converted_cannot_convert_again(
-    http_client, tenant_a
-):
+async def test_lead_already_converted_cannot_convert_again(http_client, tenant_a):
     lead_id = await _fresh_lead(http_client, tenant_a)
-    await _convert_lead_to_reservation(
-        http_client, tenant_a, lead_id, tenant_a["plots"][0]
-    )
+    await _convert_lead_to_reservation(http_client, tenant_a, lead_id, tenant_a["plots"][0])
     res = await http_client.post(
         f"/api/v1/property-dev/leads/{lead_id}/convert-to-reservation",
         json={
@@ -517,9 +501,7 @@ async def test_reservation_negative_deposit_rejected(http_client, tenant_a):
 @pytest.mark.asyncio
 async def test_reservation_manual_expire(http_client, tenant_a):
     lead_id = await _fresh_lead(http_client, tenant_a)
-    reservation = await _convert_lead_to_reservation(
-        http_client, tenant_a, lead_id, tenant_a["plots"][0]
-    )
+    reservation = await _convert_lead_to_reservation(http_client, tenant_a, lead_id, tenant_a["plots"][0])
     r_id = reservation["id"]
     res = await http_client.post(
         f"/api/v1/property-dev/reservations/{r_id}/expire",
@@ -532,9 +514,7 @@ async def test_reservation_manual_expire(http_client, tenant_a):
 @pytest.mark.asyncio
 async def test_reservation_cancel(http_client, tenant_a):
     lead_id = await _fresh_lead(http_client, tenant_a)
-    reservation = await _convert_lead_to_reservation(
-        http_client, tenant_a, lead_id, tenant_a["plots"][1]
-    )
+    reservation = await _convert_lead_to_reservation(http_client, tenant_a, lead_id, tenant_a["plots"][1])
     res = await http_client.post(
         f"/api/v1/property-dev/reservations/{reservation['id']}/cancel",
         headers=tenant_a["headers"],
@@ -546,9 +526,7 @@ async def test_reservation_cancel(http_client, tenant_a):
 @pytest.mark.asyncio
 async def test_reservation_terminal_state_is_read_only(http_client, tenant_a):
     lead_id = await _fresh_lead(http_client, tenant_a)
-    reservation = await _convert_lead_to_reservation(
-        http_client, tenant_a, lead_id, tenant_a["plots"][0]
-    )
+    reservation = await _convert_lead_to_reservation(http_client, tenant_a, lead_id, tenant_a["plots"][0])
     # Cancel first.
     await http_client.post(
         f"/api/v1/property-dev/reservations/{reservation['id']}/cancel",
@@ -585,13 +563,9 @@ async def test_reservation_expire_overdue_batch(http_client, tenant_a):
 
 
 @pytest.mark.asyncio
-async def test_reservation_idor_blocked_for_tenant_b(
-    http_client, tenant_a, tenant_b
-):
+async def test_reservation_idor_blocked_for_tenant_b(http_client, tenant_a, tenant_b):
     lead_id = await _fresh_lead(http_client, tenant_a)
-    reservation = await _convert_lead_to_reservation(
-        http_client, tenant_a, lead_id, tenant_a["plots"][0]
-    )
+    reservation = await _convert_lead_to_reservation(http_client, tenant_a, lead_id, tenant_a["plots"][0])
     res = await http_client.get(
         f"/api/v1/property-dev/reservations/{reservation['id']}",
         headers=tenant_b["headers"],
@@ -607,12 +581,8 @@ async def test_reservation_idor_blocked_for_tenant_b(
 @pytest.mark.asyncio
 async def test_reservation_to_spa_happy_path(http_client, tenant_a):
     lead_id = await _fresh_lead(http_client, tenant_a)
-    reservation = await _convert_lead_to_reservation(
-        http_client, tenant_a, lead_id, tenant_a["plots"][0]
-    )
-    spa = await _convert_reservation_to_spa(
-        http_client, tenant_a, reservation["id"]
-    )
+    reservation = await _convert_lead_to_reservation(http_client, tenant_a, lead_id, tenant_a["plots"][0])
+    spa = await _convert_reservation_to_spa(http_client, tenant_a, reservation["id"])
     assert spa["status"] == "draft"
     assert spa["contract_number"].startswith("SPA-DEVA")
     assert spa["plot_id"] == tenant_a["plots"][0]
@@ -637,12 +607,8 @@ async def test_reservation_to_spa_happy_path(http_client, tenant_a):
 
 async def _spa_from_lead(http_client, tenant_a, plot_idx: int = 0) -> dict:
     lead_id = await _fresh_lead(http_client, tenant_a)
-    reservation = await _convert_lead_to_reservation(
-        http_client, tenant_a, lead_id, tenant_a["plots"][plot_idx]
-    )
-    return await _convert_reservation_to_spa(
-        http_client, tenant_a, reservation["id"]
-    )
+    reservation = await _convert_lead_to_reservation(http_client, tenant_a, lead_id, tenant_a["plots"][plot_idx])
+    return await _convert_reservation_to_spa(http_client, tenant_a, reservation["id"])
 
 
 @pytest.mark.asyncio
@@ -809,9 +775,7 @@ async def test_contract_party_invalid_role_rejected(http_client, tenant_a):
 
 
 @pytest.mark.asyncio
-async def test_contract_party_ownership_over_100_rejected_at_schema(
-    http_client, tenant_a
-):
+async def test_contract_party_ownership_over_100_rejected_at_schema(http_client, tenant_a):
     spa = await _spa_from_lead(http_client, tenant_a, plot_idx=1)
     res = await http_client.post(
         "/api/v1/property-dev/contract-parties/",
@@ -925,6 +889,7 @@ async def test_instalment_issue_demand_publishes_event(http_client, tenant_a):
 
     # The event-bus is async via publish_detached → let it settle.
     import asyncio
+
     await asyncio.sleep(0.05)
     matching = [c for c in captured if c.get("instalment_id") == ins_id]
     assert matching, "demand event not published"
@@ -933,9 +898,7 @@ async def test_instalment_issue_demand_publishes_event(http_client, tenant_a):
 
 
 @pytest.mark.asyncio
-async def test_instalment_idor_blocked_for_tenant_b(
-    http_client, tenant_a, tenant_b
-):
+async def test_instalment_idor_blocked_for_tenant_b(http_client, tenant_a, tenant_b):
     spa = await _spa_from_lead(http_client, tenant_a, plot_idx=1)
     instalments = await http_client.get(
         "/api/v1/property-dev/instalments/",
@@ -1028,9 +991,7 @@ async def test_spa_sign_requires_manager(http_client, tenant_a, viewer_user):
 
 
 @pytest.mark.asyncio
-async def test_instalment_waive_requires_manager(
-    http_client, tenant_a, viewer_user
-):
+async def test_instalment_waive_requires_manager(http_client, tenant_a, viewer_user):
     spa = await _spa_from_lead(http_client, tenant_a, plot_idx=1)
     instalments = await http_client.get(
         "/api/v1/property-dev/instalments/",

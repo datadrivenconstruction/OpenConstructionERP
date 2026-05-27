@@ -84,9 +84,7 @@ def _execution_result_to_rows(
                 "rule_id": rule_id_s,
                 "element_id": entry.element_id or "",
                 "pass_": entry.passed,
-                "attribute_snapshot_json": json.dumps(
-                    dict(entry.attribute_snapshot), default=str, sort_keys=True
-                ),
+                "attribute_snapshot_json": json.dumps(dict(entry.attribute_snapshot), default=str, sort_keys=True),
                 "result_value_json": "",
                 "error": entry.error or "",
                 "output_mode": "boolean",
@@ -108,9 +106,7 @@ def _execution_result_to_rows(
                 "rule_id": rule_id_s,
                 "element_id": issue.element_id or "",
                 "pass_": False,
-                "attribute_snapshot_json": json.dumps(
-                    dict(issue.attribute_snapshot), default=str, sort_keys=True
-                ),
+                "attribute_snapshot_json": json.dumps(dict(issue.attribute_snapshot), default=str, sort_keys=True),
                 "result_value_json": json.dumps(payload, default=str, sort_keys=True),
                 "error": "",
                 "output_mode": "issue",
@@ -184,9 +180,7 @@ def collect_overflow_rows(
     pure (no I/O) keeps the runner's hot loop simple — it just feeds
     us per-rule slices and the spool decides what's overflow.
     """
-    rows = list(
-        _execution_result_to_rows(run_id=run_id, rule_id=rule_id, result=result)
-    )
+    rows = list(_execution_result_to_rows(run_id=run_id, rule_id=rule_id, result=result))
     if skip >= len(rows):
         return []
     return rows[skip:]

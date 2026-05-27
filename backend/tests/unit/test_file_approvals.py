@@ -94,7 +94,7 @@ async def _seed_global_stamps(session) -> None:
                     f'fill="none" stroke="{color}" stroke-width="3"/>'
                     f'<text x="14" y="34" fill="{color}" '
                     f'font-size="16" font-weight="bold">{{{{text}}}}</text>'
-                    f'</svg>'
+                    f"</svg>"
                 ),
                 is_active=True,
             )
@@ -168,9 +168,7 @@ async def test_two_step_full_approval_burns_stamp(db_session):
     )
     from app.modules.file_approvals.service import ApprovalService
 
-    project_id, _owner_id, approver1, approver2 = (
-        await _seed_project_with_users(db_session)
-    )
+    project_id, _owner_id, approver1, approver2 = await _seed_project_with_users(db_session)
     service = ApprovalService(db_session)
     templates = await service.list_templates(project_id=None)
     template_id = templates[0].id
@@ -184,9 +182,7 @@ async def test_two_step_full_approval_burns_stamp(db_session):
             stamp_template_id=template_id,
             steps=[
                 ApprovalStepCreate(approver_id=approver1, role_label="Reviewer"),
-                ApprovalStepCreate(
-                    approver_id=approver2, role_label="Project Manager"
-                ),
+                ApprovalStepCreate(approver_id=approver2, role_label="Project Manager"),
             ],
         ),
         submitted_by_id=str(approver1),
@@ -236,9 +232,7 @@ async def test_reject_at_step1_short_circuits_workflow(db_session):
     )
     from app.modules.file_approvals.service import ApprovalService
 
-    project_id, _owner_id, approver1, approver2 = (
-        await _seed_project_with_users(db_session)
-    )
+    project_id, _owner_id, approver1, approver2 = await _seed_project_with_users(db_session)
     service = ApprovalService(db_session)
 
     workflow = await service.submit(
@@ -285,9 +279,7 @@ async def test_decide_out_of_order_rejected(db_session):
     )
     from app.modules.file_approvals.service import ApprovalService
 
-    project_id, _owner_id, approver1, approver2 = (
-        await _seed_project_with_users(db_session)
-    )
+    project_id, _owner_id, approver1, approver2 = await _seed_project_with_users(db_session)
     service = ApprovalService(db_session)
     workflow = await service.submit(
         ApprovalWorkflowCreate(
@@ -321,9 +313,7 @@ async def test_withdraw_in_review_workflow(db_session):
     )
     from app.modules.file_approvals.service import ApprovalService
 
-    project_id, _owner_id, approver1, _approver2 = (
-        await _seed_project_with_users(db_session)
-    )
+    project_id, _owner_id, approver1, _approver2 = await _seed_project_with_users(db_session)
     service = ApprovalService(db_session)
     workflow = await service.submit(
         ApprovalWorkflowCreate(
@@ -355,9 +345,7 @@ async def test_cannot_decide_on_completed_workflow(db_session):
     )
     from app.modules.file_approvals.service import ApprovalService
 
-    project_id, _owner_id, approver1, _approver2 = (
-        await _seed_project_with_users(db_session)
-    )
+    project_id, _owner_id, approver1, _approver2 = await _seed_project_with_users(db_session)
     service = ApprovalService(db_session)
     workflow = await service.submit(
         ApprovalWorkflowCreate(
@@ -393,9 +381,7 @@ async def test_create_custom_stamp_template(db_session):
     from app.modules.file_approvals.schemas import StampTemplateCreate
     from app.modules.file_approvals.service import ApprovalService
 
-    project_id, _owner_id, _a1, _a2 = await _seed_project_with_users(
-        db_session
-    )
+    project_id, _owner_id, _a1, _a2 = await _seed_project_with_users(db_session)
     service = ApprovalService(db_session)
 
     tmpl = await service.create_template(

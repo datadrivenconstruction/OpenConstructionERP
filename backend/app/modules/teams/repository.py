@@ -21,11 +21,7 @@ class TeamRepository:
 
     async def get(self, team_id: uuid.UUID) -> Team | None:
         """‌⁠‍Get team by ID (with memberships eager-loaded)."""
-        stmt = (
-            select(Team)
-            .where(Team.id == team_id)
-            .options(selectinload(Team.memberships))
-        )
+        stmt = select(Team).where(Team.id == team_id).options(selectinload(Team.memberships))
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -73,11 +69,7 @@ class MembershipRepository:
 
     async def list_for_team(self, team_id: uuid.UUID) -> list[TeamMembership]:
         """List all memberships for a team."""
-        stmt = (
-            select(TeamMembership)
-            .where(TeamMembership.team_id == team_id)
-            .order_by(TeamMembership.created_at)
-        )
+        stmt = select(TeamMembership).where(TeamMembership.team_id == team_id).order_by(TeamMembership.created_at)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 

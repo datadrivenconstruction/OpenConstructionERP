@@ -58,11 +58,7 @@ class WebhookSourceRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = (
-            base.order_by(WebhookSource.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = base.order_by(WebhookSource.created_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), total
 
@@ -91,9 +87,7 @@ class PayloadMappingRepository:
     async def get_by_id(self, mapping_id: uuid.UUID) -> PayloadMapping | None:
         return await self.session.get(PayloadMapping, mapping_id)
 
-    async def list_for_source(
-        self, source_id: uuid.UUID
-    ) -> list[PayloadMapping]:
+    async def list_for_source(self, source_id: uuid.UUID) -> list[PayloadMapping]:
         stmt = (
             select(PayloadMapping)
             .where(PayloadMapping.source_id == source_id)
@@ -107,9 +101,7 @@ class PayloadMappingRepository:
         await self.session.flush()
         return mapping
 
-    async def update_fields(
-        self, mapping_id: uuid.UUID, **fields: Any
-    ) -> None:
+    async def update_fields(self, mapping_id: uuid.UUID, **fields: Any) -> None:
         await _update_fields(self.session, PayloadMapping, mapping_id, **fields)
 
     async def delete(self, mapping_id: uuid.UUID) -> None:
@@ -146,11 +138,7 @@ class WebhookLogRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = (
-            base.order_by(WebhookLog.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = base.order_by(WebhookLog.created_at.desc()).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all()), total
 

@@ -27,6 +27,7 @@ matches ``expr`` and is strictly later than ``after``. Uses a minute-
 by-minute walk bounded at 366 days to guarantee termination on
 pathological inputs.
 """
+
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
@@ -91,9 +92,7 @@ def parse_cron(expr: str) -> tuple[set[int], set[int], set[int], set[int], set[i
     """
     fields = expr.strip().split()
     if len(fields) != 5:
-        raise CronParseError(
-            f"Expected 5 whitespace-separated cron fields, got {len(fields)}"
-        )
+        raise CronParseError(f"Expected 5 whitespace-separated cron fields, got {len(fields)}")
     minute, hour, dom, month, dow = fields
     return (
         _parse_field(minute, lo=0, hi=59),

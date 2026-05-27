@@ -35,6 +35,7 @@ from sqlalchemy.ext.asyncio import (
 def _bypass_catalog_gate(monkeypatch):
     """v2.8.2 — bypass the catalogue gate so concurrency tests exercise
     the real translation/cache/ranker paths instead of an early return."""
+
     async def _ok(*_args, **_kwargs):
         return "ok", 1, 1
 
@@ -59,7 +60,9 @@ async def engine_factory() -> AsyncGenerator[tuple[Any, Any, Path], None]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
     yield engine, factory, tmp_db
     await engine.dispose()
@@ -127,7 +130,9 @@ def _pct(values: list[float], p: float) -> float:
 
 @pytest.mark.asyncio
 async def test_10x_concurrent_under_1s_p95_mocked(
-    engine_factory, project_uuid, monkeypatch: pytest.MonkeyPatch,
+    engine_factory,
+    project_uuid,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """10× concurrent match requests with mocked vector layer: p95 < 1 s.
 
@@ -200,7 +205,9 @@ async def test_10x_concurrent_under_1s_p95_mocked(
 
 @pytest.mark.asyncio
 async def test_50x_concurrent_under_5s_p95_mocked(
-    engine_factory, project_uuid, monkeypatch: pytest.MonkeyPatch,
+    engine_factory,
+    project_uuid,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """50× concurrent match requests with mocked vector layer: p95 < 5 s.
 
@@ -268,7 +275,9 @@ async def test_50x_concurrent_under_5s_p95_mocked(
 
 @pytest.mark.asyncio
 async def test_region_cache_avoids_thundering_herd(
-    engine_factory, project_uuid, monkeypatch: pytest.MonkeyPatch,
+    engine_factory,
+    project_uuid,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """50× concurrent rank() calls trigger exactly one DB region lookup."""
     from app.core.match_service import match_element
@@ -315,7 +324,9 @@ async def test_region_cache_avoids_thundering_herd(
 @pytest.mark.slow
 @pytest.mark.asyncio
 async def test_50x_concurrent_real_pool_under_5s(
-    engine_factory, project_uuid, monkeypatch: pytest.MonkeyPatch,
+    engine_factory,
+    project_uuid,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """50× concurrent with real-ish vector pipeline (mocked search, real
     encoder).

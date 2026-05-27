@@ -84,18 +84,18 @@ class ServiceContract(Base):
     )
     sla_tier: Mapped[str] = mapped_column(String(50), nullable=False, default="standard")
 
-    status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="draft", index=True
-    )
-    value: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft", index=True)
+    value: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
 
     auto_renew: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     assets: Mapped[list["ServiceAsset"]] = relationship(
@@ -138,11 +138,13 @@ class ServiceAsset(Base):
     serial: Mapped[str | None] = mapped_column(String(255), nullable=True)
     install_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     warranty_until: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="active", index=True
-    )
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="active", index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     contract: Mapped[ServiceContract] = relationship(
@@ -166,7 +168,8 @@ class ServiceTicket(Base):
         # per contract), so the unique constraint is composite. Backfilled
         # by alembic v3101_service_number_uniques.
         UniqueConstraint(
-            "contract_id", "ticket_number",
+            "contract_id",
+            "ticket_number",
             name="uq_oe_service_ticket_contract_number",
         ),
     )
@@ -207,7 +210,11 @@ class ServiceTicket(Base):
     # vs phone-in tickets and to audit SLA reporting per channel.
     # One of: manual, portal, email, api, auto_ppm.
     source: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="manual", server_default="manual", index=True,
+        String(20),
+        nullable=False,
+        default="manual",
+        server_default="manual",
+        index=True,
     )
     reported_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     assigned_to: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
@@ -216,14 +223,16 @@ class ServiceTicket(Base):
     # Set once when the first SLA-breach event is emitted, so we don't re-emit
     # for the same ticket on every scan tick.
     sla_breach_notified_at: Mapped[str | None] = mapped_column(
-        String(40), nullable=True,
+        String(40),
+        nullable=True,
     )
     # ISO timestamp of when ``check_breaches()`` first observed this ticket
     # as breached. Distinct from sla_breach_notified_at because notification
     # delivery (events, email) may fail or be retried — sla_breached_at is the
     # ground-truth "breach happened" marker the dashboard uses.
     sla_breached_at: Mapped[str | None] = mapped_column(
-        String(40), nullable=True,
+        String(40),
+        nullable=True,
     )
     # Optional FK to a recurring schedule (RRULE-driven). NULL ⇒ ad-hoc ticket.
     # No DB-level FK declared so dropping a schedule never cascades into
@@ -234,7 +243,11 @@ class ServiceTicket(Base):
         index=True,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     contract: Mapped[ServiceContract] = relationship(
@@ -263,7 +276,8 @@ class ServiceWorkOrder(Base):
         # Race-safe: ``next_work_order_number()`` is tenant-wide. See
         # ``ServiceContract.__table_args__`` for the rationale.
         UniqueConstraint(
-            "work_order_number", name="uq_oe_service_work_order_number",
+            "work_order_number",
+            name="uq_oe_service_work_order_number",
         ),
     )
 
@@ -276,19 +290,19 @@ class ServiceWorkOrder(Base):
     work_order_number: Mapped[str] = mapped_column(String(50), nullable=False)
     scheduled_for: Mapped[str | None] = mapped_column(String(40), nullable=True)
     technician_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
-    status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="scheduled", index=True
-    )
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="scheduled", index=True)
     debrief_summary: Mapped[str] = mapped_column(Text, nullable=False, default="")
     customer_signature: Mapped[str | None] = mapped_column(Text, nullable=True)
-    billed_amount: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
+    billed_amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
     completed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     billed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     ticket: Mapped[ServiceTicket] = relationship(
@@ -325,20 +339,18 @@ class ServiceWorkOrderItem(Base):
     )
     item_type: Mapped[str] = mapped_column(String(20), nullable=False, default="labor")
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    quantity: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0")
-    )
+    quantity: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False, default=Decimal("0"))
     unit: Mapped[str] = mapped_column(String(20), nullable=False, default="")
-    unit_rate: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0")
-    )
+    unit_rate: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False, default=Decimal("0"))
     # Stored, not computed: lets you record an override price for a billable
     # line (e.g. warranty-covered labor at zero) without losing the rate.
-    total: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
+    total: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     work_order: Mapped[ServiceWorkOrder] = relationship(
@@ -374,7 +386,11 @@ class DebriefReport(Base):
     root_cause_category: Mapped[str | None] = mapped_column(String(64), nullable=True)
     follow_up_required: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     work_order: Mapped[ServiceWorkOrder] = relationship(
@@ -397,11 +413,18 @@ class SLADefinition(Base):
     resolution_time_minutes: Mapped[int] = mapped_column(Integer, nullable=False, default=1440)
     # JSON list/dict mapping severity → time targets (high, med, low...).
     severity_levels: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:
@@ -419,9 +442,7 @@ class ServiceSchedule(Base):
         nullable=False,
         index=True,
     )
-    frequency: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="quarterly"
-    )
+    frequency: Mapped[str] = mapped_column(String(20), nullable=False, default="quarterly")
     next_due_date: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
     last_completed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     checklist_template_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -431,7 +452,11 @@ class ServiceSchedule(Base):
     )
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:
@@ -450,11 +475,18 @@ class AssetInspectionChecklist(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     asset_type: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     items: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:
@@ -500,24 +532,34 @@ class ServiceRecurringSchedule(Base):
     rrule: Mapped[str] = mapped_column(String(200), nullable=False)
     # JSON payload used as the template for each materialised occurrence.
     template_ticket_data: Mapped[dict] = mapped_column(
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     # ISO datetime strings (matches the existing service-module convention).
     next_run_at: Mapped[str | None] = mapped_column(
-        String(40), nullable=True, index=True,
+        String(40),
+        nullable=True,
+        index=True,
     )
     last_run_at: Mapped[str | None] = mapped_column(
-        String(40), nullable=True,
+        String(40),
+        nullable=True,
     )
     enabled: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, index=True,
+        Boolean,
+        nullable=False,
+        default=True,
+        index=True,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<ServiceRecurringSchedule {self.name} rrule={self.rrule} "
-            f"enabled={self.enabled}>"
-        )
+        return f"<ServiceRecurringSchedule {self.name} rrule={self.rrule} enabled={self.enabled}>"

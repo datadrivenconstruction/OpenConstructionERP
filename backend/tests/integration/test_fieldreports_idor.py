@@ -48,7 +48,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -86,9 +85,7 @@ async def _activate_user(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
 
@@ -99,11 +96,7 @@ async def _promote_admin(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await s.commit()
 
 
@@ -114,16 +107,14 @@ async def _promote_editor(email: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role="editor", is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role="editor", is_active=True))
         await s.commit()
 
 
 async def _register_and_login(
-    client: AsyncClient, *, tenant: str,
+    client: AsyncClient,
+    *,
+    tenant: str,
 ) -> tuple[str, str, str, dict[str, str]]:
     email = f"{tenant}-{uuid.uuid4().hex[:8]}@fieldreports-idor.io"
     password = f"FieldReportsIdor{uuid.uuid4().hex[:6]}9"
@@ -132,9 +123,7 @@ async def _register_and_login(
         "/api/v1/users/auth/register",
         json={"email": email, "password": password, "full_name": f"Tenant {tenant}"},
     )
-    assert reg.status_code in (200, 201), (
-        f"register failed for {tenant}: {reg.status_code} {reg.text}"
-    )
+    assert reg.status_code in (200, 201), f"register failed for {tenant}: {reg.status_code} {reg.text}"
     user_id = reg.json()["id"]
 
     await _activate_user(email)
@@ -149,7 +138,10 @@ async def _register_and_login(
 
 
 async def _refresh_token(
-    client: AsyncClient, *, email: str, password: str,
+    client: AsyncClient,
+    *,
+    email: str,
+    password: str,
 ) -> dict[str, str]:
     login = await client.post(
         "/api/v1/users/auth/login",
@@ -168,10 +160,12 @@ async def two_fr_tenants(http_client):
     way the IDOR test exercises the ownership gate, not the role gate.
     """
     a_uid, a_email, a_password, _a_headers0 = await _register_and_login(
-        http_client, tenant="a",
+        http_client,
+        tenant="a",
     )
     b_uid, b_email, b_password, _b_headers0 = await _register_and_login(
-        http_client, tenant="b",
+        http_client,
+        tenant="b",
     )
 
     await _promote_admin(a_email)
@@ -248,7 +242,9 @@ async def two_fr_tenants(http_client):
             "equipment_id": equipment_id,
         },
         "b": {
-            "user_id": b_uid, "email": b_email, "headers": b_headers,
+            "user_id": b_uid,
+            "email": b_email,
+            "headers": b_headers,
         },
     }
 
@@ -265,10 +261,7 @@ async def test_tenant_b_cannot_list_workforce_logs(http_client, two_fr_tenants):
         f"/api/v1/fieldreports/reports/{a['report_id']}/workforce/",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"LEAK: B listed A's workforce logs: "
-        f"{resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"LEAK: B listed A's workforce logs: {resp.status_code} {resp.text!r}"
     assert "A-secret" not in resp.text
     assert "Confidential" not in resp.text
 
@@ -282,10 +275,7 @@ async def test_tenant_b_cannot_list_equipment_logs(http_client, two_fr_tenants):
         f"/api/v1/fieldreports/reports/{a['report_id']}/equipment/",
         headers=b["headers"],
     )
-    assert resp.status_code in (403, 404), (
-        f"LEAK: B listed A's equipment logs: "
-        f"{resp.status_code} {resp.text!r}"
-    )
+    assert resp.status_code in (403, 404), f"LEAK: B listed A's equipment logs: {resp.status_code} {resp.text!r}"
     assert "Liebherr" not in resp.text
     assert "confidential" not in resp.text
 
@@ -295,7 +285,8 @@ async def test_tenant_b_cannot_list_equipment_logs(http_client, two_fr_tenants):
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_create_workforce_on_a_report(
-    http_client, two_fr_tenants,
+    http_client,
+    two_fr_tenants,
 ):
     a = two_fr_tenants["a"]
     b = two_fr_tenants["b"]
@@ -312,14 +303,14 @@ async def test_tenant_b_cannot_create_workforce_on_a_report(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B injected workforce on A's report: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B injected workforce on A's report: {resp.status_code} {resp.text!r}"
     )
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_create_equipment_on_a_report(
-    http_client, two_fr_tenants,
+    http_client,
+    two_fr_tenants,
 ):
     a = two_fr_tenants["a"]
     b = two_fr_tenants["b"]
@@ -336,14 +327,14 @@ async def test_tenant_b_cannot_create_equipment_on_a_report(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B injected equipment on A's report: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B injected equipment on A's report: {resp.status_code} {resp.text!r}"
     )
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_update_workforce_entry(
-    http_client, two_fr_tenants,
+    http_client,
+    two_fr_tenants,
 ):
     a = two_fr_tenants["a"]
     b = two_fr_tenants["b"]
@@ -354,14 +345,14 @@ async def test_tenant_b_cannot_update_workforce_entry(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B updated A's workforce entry: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B updated A's workforce entry: {resp.status_code} {resp.text!r}"
     )
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_delete_workforce_entry(
-    http_client, two_fr_tenants,
+    http_client,
+    two_fr_tenants,
 ):
     a = two_fr_tenants["a"]
     b = two_fr_tenants["b"]
@@ -371,14 +362,14 @@ async def test_tenant_b_cannot_delete_workforce_entry(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B deleted A's workforce entry: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B deleted A's workforce entry: {resp.status_code} {resp.text!r}"
     )
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_update_equipment_entry(
-    http_client, two_fr_tenants,
+    http_client,
+    two_fr_tenants,
 ):
     a = two_fr_tenants["a"]
     b = two_fr_tenants["b"]
@@ -389,14 +380,14 @@ async def test_tenant_b_cannot_update_equipment_entry(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B updated A's equipment entry: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B updated A's equipment entry: {resp.status_code} {resp.text!r}"
     )
 
 
 @pytest.mark.asyncio
 async def test_tenant_b_cannot_delete_equipment_entry(
-    http_client, two_fr_tenants,
+    http_client,
+    two_fr_tenants,
 ):
     a = two_fr_tenants["a"]
     b = two_fr_tenants["b"]
@@ -406,8 +397,7 @@ async def test_tenant_b_cannot_delete_equipment_entry(
         headers=b["headers"],
     )
     assert resp.status_code in (403, 404), (
-        f"WRITE-IDOR: B deleted A's equipment entry: "
-        f"{resp.status_code} {resp.text!r}"
+        f"WRITE-IDOR: B deleted A's equipment entry: {resp.status_code} {resp.text!r}"
     )
 
 

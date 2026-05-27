@@ -300,9 +300,7 @@ async def download_requirements_template(
     payload = build_template_xlsx()
     return Response(
         content=payload,
-        media_type=(
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        ),
+        media_type=("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
         headers={
             "Content-Disposition": 'attachment; filename="requirements_template.xlsx"',
         },
@@ -363,9 +361,9 @@ async def _export_dispatch(
 ):
     item = await service.get_set(set_id)
     rows = _export_rows(item)
-    safe_name = (
-        getattr(item, "name", None) or f"requirements_{set_id}"
-    ).replace("/", "_").replace("\\", "_").strip() or f"requirements_{set_id}"
+    safe_name = (getattr(item, "name", None) or f"requirements_{set_id}").replace("/", "_").replace(
+        "\\", "_"
+    ).strip() or f"requirements_{set_id}"
 
     if fmt == "json":
         return JSONResponse(
@@ -381,9 +379,7 @@ async def _export_dispatch(
         payload = export_xlsx(rows, title=safe_name)
         return Response(
             content=payload,
-            media_type=(
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            ),
+            media_type=("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
             headers={
                 "Content-Disposition": f'attachment; filename="{safe_name}.xlsx"',
             },
@@ -575,12 +571,8 @@ async def bulk_delete_requirements(
     in sync.
     """
     try:
-        deleted, skipped = await service.bulk_delete_requirements(
-            set_id, data.requirement_ids
-        )
-        return RequirementBulkDeleteResult(
-            deleted_count=deleted, skipped_count=skipped
-        )
+        deleted, skipped = await service.bulk_delete_requirements(set_id, data.requirement_ids)
+        return RequirementBulkDeleteResult(deleted_count=deleted, skipped_count=skipped)
     except HTTPException:
         raise
     except Exception:
@@ -813,9 +805,7 @@ async def link_requirement_to_bim(
     standardized ``requirements.requirement.linked_bim`` event so the
     vector indexer refreshes the embedding to reflect the new links.
     """
-    item = await service.link_to_bim_elements(
-        req_id, body.bim_element_ids, replace=body.replace
-    )
+    item = await service.link_to_bim_elements(req_id, body.bim_element_ids, replace=body.replace)
     if item.requirement_set_id != set_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -951,11 +941,7 @@ async def requirement_similar(
     from app.modules.requirements.models import Requirement
     from app.modules.requirements.vector_adapter import requirement_vector_adapter
 
-    stmt = (
-        select(Requirement)
-        .options(selectinload(Requirement.requirement_set))
-        .where(Requirement.id == req_id)
-    )
+    stmt = select(Requirement).options(selectinload(Requirement.requirement_set)).where(Requirement.id == req_id)
     row = (await session.execute(stmt)).scalar_one_or_none()
     if row is None:
         raise HTTPException(status_code=404, detail="Requirement not found")
@@ -1026,9 +1012,7 @@ async def list_requirement_deliverables(
     service: RequirementsService = Depends(_get_service),
 ) -> list[DeliverableResponse]:
     """List EIR deliverables attached to a requirement."""
-    items = await service.list_deliverables(
-        requirement_id, deliverable_type=deliverable_type
-    )
+    items = await service.list_deliverables(requirement_id, deliverable_type=deliverable_type)
     return [_deliverable_to_response(i) for i in items]
 
 
@@ -1051,9 +1035,7 @@ async def create_requirement_deliverable(
     except HTTPException:
         raise
     except Exception:
-        logger.exception(
-            "Failed to add deliverable for requirement %s", requirement_id
-        )
+        logger.exception("Failed to add deliverable for requirement %s", requirement_id)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to add deliverable",
@@ -1104,10 +1086,7 @@ async def get_requirement_deliverable_coverage(
 ) -> DeliverableCoverage:
     """Coverage % roll-up for one requirement's EIR deliverables."""
     payload = await service.get_deliverable_coverage(requirement_id)
-    by_type = {
-        t: DeliverableTypeCoverage(**bucket)
-        for t, bucket in payload.get("by_type", {}).items()
-    }
+    by_type = {t: DeliverableTypeCoverage(**bucket) for t, bucket in payload.get("by_type", {}).items()}
     return DeliverableCoverage(
         requirement_id=payload["requirement_id"] or requirement_id,
         total=payload["total"],
@@ -1139,9 +1118,7 @@ async def get_project_eir_matrix(
     project's rows), cells carry the LOD/LOI/status triplet.
     """
     await verify_project_access(project_id, str(user_id), session)
-    payload = await service.get_project_matrix(
-        project_id, deliverable_type=deliverable_type
-    )
+    payload = await service.get_project_matrix(project_id, deliverable_type=deliverable_type)
     rows = [
         MatrixRow(
             requirement_id=row["requirement_id"],
@@ -1182,12 +1159,8 @@ from app.modules.requirements.vector_adapter import (  # noqa: E402
 )
 
 
-async def _requirements_loader(
-    session: Any, project_id: uuid.UUID | None
-) -> list[Any]:
-    stmt = select(_Requirement).options(
-        _selectinload(_Requirement.requirement_set)
-    )
+async def _requirements_loader(session: Any, project_id: uuid.UUID | None) -> list[Any]:
+    stmt = select(_Requirement).options(_selectinload(_Requirement.requirement_set))
     if project_id is not None:
         stmt = stmt.join(
             _RequirementSet,

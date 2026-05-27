@@ -64,7 +64,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ════════════════════════════════════════════════════════════════════════════
 # Faithful port of the production frontend SSE parser
 # (frontend/src/features/erp-chat/full-page/useChatFullPage.ts, post-#249).
@@ -262,9 +261,7 @@ async def openrouter_user(http_client):
     user_id = reg.json()["id"]
 
     await _activate(email)
-    login = await http_client.post(
-        "/api/v1/users/auth/login", json={"email": email, "password": password}
-    )
+    login = await http_client.post("/api/v1/users/auth/login", json={"email": email, "password": password})
     assert login.status_code == 200, login.text
     headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
 
@@ -317,9 +314,7 @@ class TestOpenRouterChatRendersEndToEnd:
     the real middleware stack and the real frontend parser."""
 
     @pytest.mark.asyncio
-    async def test_plain_openrouter_streams_nonzero_body(
-        self, http_client, openrouter_user, monkeypatch
-    ):
+    async def test_plain_openrouter_streams_nonzero_body(self, http_client, openrouter_user, monkeypatch):
         """#249 backend guard: the SSE body must be non-empty.
 
         On v3.6.1 the ``http.disconnect`` replay cancelled the stream and
@@ -327,9 +322,7 @@ class TestOpenRouterChatRendersEndToEnd:
         """
         captured = _install_fake_openrouter(monkeypatch, _OPENROUTER_PLAIN)
 
-        status, body = await _post_stream(
-            http_client, openrouter_user["headers"], "Estimate a concrete wall"
-        )
+        status, body = await _post_stream(http_client, openrouter_user["headers"], "Estimate a concrete wall")
 
         assert status == 200, body
         assert body, "SSE body is EMPTY — this is the v3.6.1 #138 regression"
@@ -343,16 +336,12 @@ class TestOpenRouterChatRendersEndToEnd:
         assert "\n\n" in body  # frame delimiters survived
 
     @pytest.mark.asyncio
-    async def test_plain_openrouter_renders_in_ui(
-        self, http_client, openrouter_user, monkeypatch
-    ):
+    async def test_plain_openrouter_renders_in_ui(self, http_client, openrouter_user, monkeypatch):
         """End-to-end: feed the captured bytes through the production
         ``useChatFullPage.ts`` parser port and assert text renders."""
         _install_fake_openrouter(monkeypatch, _OPENROUTER_PLAIN)
 
-        _status, body = await _post_stream(
-            http_client, openrouter_user["headers"], "Estimate a concrete wall"
-        )
+        _status, body = await _post_stream(http_client, openrouter_user["headers"], "Estimate a concrete wall")
         ui = _render_like_frontend(body)
 
         assert ui["error"] is None, f"unexpected error frame: {ui['error']}"
@@ -371,18 +360,14 @@ class TestOpenRouterChatRendersEndToEnd:
         assert ui["content"] == full, "rendered text != provider completion"
 
     @pytest.mark.asyncio
-    async def test_openrouter_reasoning_only_still_renders(
-        self, http_client, openrouter_user, monkeypatch
-    ):
+    async def test_openrouter_reasoning_only_still_renders(self, http_client, openrouter_user, monkeypatch):
         """OpenRouter reasoning models (deepseek-r1/o1) return the answer
         only in ``reasoning`` with empty ``content`` — and burn the massive
         token counts from the bug report. The completion the user PAID for
         must still render, never be silently dropped."""
         _install_fake_openrouter(monkeypatch, _OPENROUTER_REASONING_ONLY)
 
-        _status, body = await _post_stream(
-            http_client, openrouter_user["headers"], "How much concrete for the slab?"
-        )
+        _status, body = await _post_stream(http_client, openrouter_user["headers"], "How much concrete for the slab?")
         ui = _render_like_frontend(body)
 
         assert ui["error"] is None, f"reasoning completion was dropped: {ui['error']}"
@@ -392,20 +377,16 @@ class TestOpenRouterChatRendersEndToEnd:
         )
 
     @pytest.mark.asyncio
-    async def test_no_unconsumed_disconnect_truncation(
-        self, http_client, openrouter_user, monkeypatch
-    ):
+    async def test_no_unconsumed_disconnect_truncation(self, http_client, openrouter_user, monkeypatch):
         """Direct #249 middleware guard: the FULL stream (through to the
         terminal ``done`` frame) is delivered. A reintroduced
         ``http.disconnect`` replay would truncate before ``done``."""
         _install_fake_openrouter(monkeypatch, _OPENROUTER_PLAIN)
 
-        _status, body = await _post_stream(
-            http_client, openrouter_user["headers"], "ping"
-        )
+        _status, body = await _post_stream(http_client, openrouter_user["headers"], "ping")
         # The generator yields ``done`` LAST. Its presence proves the
         # stream was not cancelled mid-flight by a synthetic disconnect.
-        assert body.rstrip().endswith('event: done\ndata: {"session_id":'.split("\n")[0]) is False
+        assert body.rstrip().endswith(["event: done", 'data: {"session_id":'][0]) is False
         assert "event: done" in body
         done_idx = body.index("event: done")
         text_idx = body.index("event: text")

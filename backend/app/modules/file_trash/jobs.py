@@ -117,8 +117,7 @@ def register_jobs(
         # No event loop yet — the scheduler is purely informative
         # in environments (e.g. sync tests) that haven't bound one.
         logger.debug(
-            "file_trash.register_jobs: no running event loop; "
-            "scheduler not started",
+            "file_trash.register_jobs: no running event loop; scheduler not started",
         )
         return None
     task = loop.create_task(

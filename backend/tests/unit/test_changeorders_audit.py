@@ -25,7 +25,6 @@ from fastapi import HTTPException
 from app.modules.changeorders.repository import ChangeOrderRepository
 from app.modules.changeorders.service import ChangeOrderService
 
-
 # ── Shared stubs (mirrors test_changeorders_approval.py) ────────────────────
 
 
@@ -79,7 +78,7 @@ class _StubSession:
             def scalar_one(self) -> Any:
                 return self._v if self._v is not None else 0
 
-            def scalars(self) -> "_Result":
+            def scalars(self) -> _Result:
                 return self
 
             def all(self) -> list[Any]:
@@ -208,7 +207,7 @@ async def test_summary_rollup_uses_decimal_not_float() -> None:
                 def scalar_one(self) -> Any:
                     return self._v if self._v is not None else 0
 
-                def scalars(self) -> "_Result":
+                def scalars(self) -> _Result:
                     return self
 
                 def all(self) -> list[Any]:
@@ -273,7 +272,7 @@ async def test_start_approval_chain_handles_concurrent_start_collision(
             def scalar_one_or_none(self) -> Any:
                 return self._v
 
-            def scalars(self) -> "_R":
+            def scalars(self) -> _R:
                 return self
 
             def all(self) -> list[Any]:
@@ -293,9 +292,7 @@ async def test_start_approval_chain_handles_concurrent_start_collision(
 
     async def _flush() -> None:
         flush_calls["n"] += 1
-        raise IntegrityError(
-            "INSERT", {}, Exception("uq_oe_changeorder_approval_change_order_id_step_order")
-        )
+        raise IntegrityError("INSERT", {}, Exception("uq_oe_changeorder_approval_change_order_id_step_order"))
 
     monkeypatch.setattr(session, "flush", _flush)
 
@@ -319,7 +316,6 @@ async def test_concurrent_advance_approval_uses_conditional_update() -> None:
     ``step_order=cursor`` so exactly one caller wins; the loser sees
     a clean 409 without double-advancing the cursor.
     """
-    from app.modules.changeorders.service import ChangeOrderService
 
     pid = uuid.uuid4()
     approver_a = uuid.uuid4()
@@ -362,7 +358,7 @@ async def test_concurrent_advance_approval_uses_conditional_update() -> None:
             def scalar_one_or_none(self) -> Any:
                 return self._v
 
-            def scalars(self) -> "_R":
+            def scalars(self) -> _R:
                 return self
 
             def all(self) -> list[Any]:
@@ -405,19 +401,15 @@ async def test_concurrent_advance_approval_uses_conditional_update() -> None:
     # the column (the alternative — bare python-side mutation — would
     # never issue an UPDATE statement against the table).
     assert any(
-        "update" in s
-        and "oe_changeorder_approval" in s
-        and "decision =" in s.split("where", 1)[-1]
+        "update" in s and "oe_changeorder_approval" in s and "decision =" in s.split("where", 1)[-1]
         for s in update_statements
-    ), (
-        "advance_approval must use a conditional UPDATE … WHERE "
-        "decision=:pending to be race-safe; got: "
-        + repr(update_statements)
+    ), "advance_approval must use a conditional UPDATE … WHERE decision=:pending to be race-safe; got: " + repr(
+        update_statements
     )
     # Cursor must not have moved.
-    assert all(
-        fields.get("current_approval_step") != 2 for fields in cursor_writes
-    ), f"Cursor must NOT advance on lost race; got writes: {cursor_writes!r}"
+    assert all(fields.get("current_approval_step") != 2 for fields in cursor_writes), (
+        f"Cursor must NOT advance on lost race; got writes: {cursor_writes!r}"
+    )
     assert order.current_approval_step == 1
 
 
@@ -489,7 +481,9 @@ async def test_start_approval_chain_rejects_submitter_in_chain() -> None:
     pid = uuid.uuid4()
     submitter = uuid.uuid4()
     order = _make_order(
-        project_id=pid, status="submitted", submitted_by=str(submitter),
+        project_id=pid,
+        status="submitted",
+        submitted_by=str(submitter),
     )
     repo.orders[order.id] = order
 

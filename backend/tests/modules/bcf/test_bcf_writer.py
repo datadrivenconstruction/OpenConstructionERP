@@ -36,7 +36,6 @@ from app.modules.bcf.writer import (
     BCFTopic,
     BCFViewpoint,
     BCFWriter,
-    build_extensions_xml,
     build_markup_xml,
     build_project_xml,
     build_version_xml,
@@ -281,8 +280,8 @@ def test_visinfo_xml_orthogonal_camera() -> None:
 def test_visibility_visible_shorter_emits_visible_as_exceptions() -> None:
     vp = BCFViewpoint(
         guid=_new_guid(),
-        visible=["v1", "v2"],            # 2 entries
-        hidden=["h1", "h2", "h3", "h4"], # 4 entries → visible is shorter
+        visible=["v1", "v2"],  # 2 entries
+        hidden=["h1", "h2", "h3", "h4"],  # 4 entries → visible is shorter
     )
     raw = build_visinfo_xml(vp)
     root = ET.fromstring(raw)
@@ -361,9 +360,7 @@ def test_writer_deterministic_for_same_input() -> None:
     # XML members instead so we test our determinism, not zipfile's.
     with zipfile.ZipFile(io.BytesIO(a)) as za, zipfile.ZipFile(io.BytesIO(b)) as zb:
         for name in sorted(za.namelist()):
-            assert za.read(name) == zb.read(name), (
-                f"non-deterministic content for {name!r}"
-            )
+            assert za.read(name) == zb.read(name), f"non-deterministic content for {name!r}"
 
 
 # ── 8. GUID safety ───────────────────────────────────────────────────────
@@ -474,7 +471,5 @@ def test_synthesize_viewpoint_default_camera() -> None:
 
 
 def test_synthesize_viewpoint_with_selection() -> None:
-    vp = synthesize_viewpoint_from_centroid(
-        (0.0, 0.0, 0.0), selection=["IFC-1", "IFC-2"]
-    )
+    vp = synthesize_viewpoint_from_centroid((0.0, 0.0, 0.0), selection=["IFC-1", "IFC-2"])
     assert vp.selection == ["IFC-1", "IFC-2"]

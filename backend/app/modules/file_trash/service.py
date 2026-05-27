@@ -85,29 +85,37 @@ def _kind_model(kind: str) -> type:
     """
     if kind == "document":
         from app.modules.documents.models import Document
+
         return Document
     if kind == "photo":
         from app.modules.documents.models import ProjectPhoto
+
         return ProjectPhoto
     if kind == "sheet":
         from app.modules.documents.models import Sheet
+
         return Sheet
     if kind == "bim_model":
         from app.modules.bim_hub.models import BIMModel
+
         return BIMModel
     if kind == "dwg_drawing":
         from app.modules.dwg_takeoff.models import DwgDrawing
+
         return DwgDrawing
     if kind == "takeoff":
         from app.modules.takeoff.models import TakeoffMeasurement
+
         return TakeoffMeasurement
     if kind == "report":
         # The reporting module names its row class ``GeneratedReport``;
         # the file-manager surface labels the kind simply ``report``.
         from app.modules.reporting.models import GeneratedReport
+
         return GeneratedReport
     if kind == "markup":
         from app.modules.markups.models import Markup
+
         return Markup
     raise HTTPException(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -138,9 +146,7 @@ class FileTrashService:
         offset: int = 0,
         limit: int = 50,
     ) -> tuple[list[FileTrash], int]:
-        return await self.repo.list_for_project(
-            project_id, offset=offset, limit=limit
-        )
+        return await self.repo.list_for_project(project_id, offset=offset, limit=limit)
 
     async def soft_delete(
         self,
@@ -263,9 +269,7 @@ class FileTrashService:
         await self.session.flush()
         return row
 
-    async def purge(
-        self, trash_id: uuid.UUID, *, confirm_token: str
-    ) -> None:
+    async def purge(self, trash_id: uuid.UUID, *, confirm_token: str) -> None:
         """Hard-delete a trash row. Requires the matching restore token."""
         row = await self.get(trash_id)
         if confirm_token != row.restore_token:

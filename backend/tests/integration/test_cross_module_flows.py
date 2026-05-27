@@ -70,6 +70,7 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
     assert reg.status_code == 201, f"Registration failed: {reg.text}"
 
     from ._auth_helpers import promote_to_admin
+
     await promote_to_admin(email)
 
     token = ""
@@ -196,9 +197,7 @@ async def _create_boq_with_positions(
 class TestBOQLockCreatesBudget:
     """Lock a BOQ and create budget lines from its positions."""
 
-    async def test_boq_lock_creates_budget(
-        self, client: AsyncClient, auth: dict, user_id: str
-    ) -> None:
+    async def test_boq_lock_creates_budget(self, client: AsyncClient, auth: dict, user_id: str) -> None:
         # 1. Create project
         project_id = await _create_project(client, auth)
 
@@ -260,9 +259,7 @@ class TestBOQLockCreatesBudget:
 class TestRFICreatesVariation:
     """Create an RFI with cost impact, respond, then create a change order."""
 
-    async def test_rfi_creates_variation(
-        self, client: AsyncClient, auth: dict, user_id: str
-    ) -> None:
+    async def test_rfi_creates_variation(self, client: AsyncClient, auth: dict, user_id: str) -> None:
         # 1. Create project
         project_id = await _create_project(client, auth)
 
@@ -336,9 +333,7 @@ class TestRFICreatesVariation:
 class TestInspectionFailCreatesDefect:
     """Fail an inspection, then create a punchlist defect from it."""
 
-    async def test_inspection_fail_creates_defect(
-        self, client: AsyncClient, auth: dict, user_id: str
-    ) -> None:
+    async def test_inspection_fail_creates_defect(self, client: AsyncClient, auth: dict, user_id: str) -> None:
         # 1. Create project
         project_id = await _create_project(client, auth)
 
@@ -405,9 +400,7 @@ class TestInspectionFailCreatesDefect:
 class TestPOIssueUpdatesBudget:
     """Issue a PO and verify the finance dashboard reflects it."""
 
-    async def test_po_issue_updates_budget(
-        self, client: AsyncClient, auth: dict, user_id: str
-    ) -> None:
+    async def test_po_issue_updates_budget(self, client: AsyncClient, auth: dict, user_id: str) -> None:
         # 1. Create project
         project_id = await _create_project(client, auth)
 
@@ -492,9 +485,7 @@ class TestPOIssueUpdatesBudget:
 class TestMeetingCreatesTasks:
     """Complete a meeting with action items and verify tasks are created."""
 
-    async def test_meeting_creates_tasks(
-        self, client: AsyncClient, auth: dict, user_id: str
-    ) -> None:
+    async def test_meeting_creates_tasks(self, client: AsyncClient, auth: dict, user_id: str) -> None:
         # 1. Create project
         project_id = await _create_project(client, auth)
 
@@ -551,17 +542,16 @@ class TestMeetingCreatesTasks:
         # Filter tasks linked to this meeting
         meeting_tasks = [t for t in tasks if t.get("meeting_id") == str(meeting_id)]
         assert len(meeting_tasks) >= len(action_items), (
-            f"Expected at least {len(action_items)} tasks from meeting, "
-            f"got {len(meeting_tasks)}"
+            f"Expected at least {len(action_items)} tasks from meeting, got {len(meeting_tasks)}"
         )
 
         # 5. Verify task content matches action items
         task_titles = [t["title"] for t in meeting_tasks]
         for ai in action_items:
             desc = ai["description"]
-            assert any(
-                desc in title for title in task_titles
-            ), f"Action item '{desc}' not found in created tasks: {task_titles}"
+            assert any(desc in title for title in task_titles), (
+                f"Action item '{desc}' not found in created tasks: {task_titles}"
+            )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -572,9 +562,7 @@ class TestMeetingCreatesTasks:
 class TestNCRCreatesVariation:
     """Create an NCR with cost impact, then create a change order from it."""
 
-    async def test_ncr_creates_variation(
-        self, client: AsyncClient, auth: dict, user_id: str
-    ) -> None:
+    async def test_ncr_creates_variation(self, client: AsyncClient, auth: dict, user_id: str) -> None:
         # 1. Create project
         project_id = await _create_project(client, auth)
 
@@ -639,9 +627,7 @@ class TestNCRCreatesVariation:
 class TestGlobalSearch:
     """Search across multiple modules and verify results from different sources."""
 
-    async def test_global_search(
-        self, client: AsyncClient, auth: dict, user_id: str
-    ) -> None:
+    async def test_global_search(self, client: AsyncClient, auth: dict, user_id: str) -> None:
         # 1. Create project
         project_id = await _create_project(client, auth)
         search_tag = uuid.uuid4().hex[:8]
@@ -695,8 +681,7 @@ class TestGlobalSearch:
         modules_found = {r.get("module", r.get("type", "")) for r in results}
         # We should find results from at least 2 different modules
         assert len(modules_found) >= 2, (
-            f"Expected results from at least 2 modules, got {modules_found}. "
-            f"Results: {results}"
+            f"Expected results from at least 2 modules, got {modules_found}. Results: {results}"
         )
 
 
@@ -708,9 +693,7 @@ class TestGlobalSearch:
 class TestProjectDashboardAggregation:
     """Create data in multiple modules and verify the dashboard reflects it."""
 
-    async def test_project_dashboard_aggregation(
-        self, client: AsyncClient, auth: dict, user_id: str
-    ) -> None:
+    async def test_project_dashboard_aggregation(self, client: AsyncClient, auth: dict, user_id: str) -> None:
         # 1. Create project
         project_id = await _create_project(client, auth)
 
@@ -760,9 +743,7 @@ class TestProjectDashboardAggregation:
 
         # 6. Verify dashboard is a valid dict with aggregated data
         assert isinstance(dashboard, dict)
-        assert len(dashboard) > 3, (
-            "Dashboard appears too sparse despite having BOQ, tasks, and RFIs"
-        )
+        assert len(dashboard) > 3, "Dashboard appears too sparse despite having BOQ, tasks, and RFIs"
 
         # Dashboard should contain project info
         if "project" in dashboard:

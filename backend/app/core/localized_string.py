@@ -108,14 +108,9 @@ class LocalizedStr(BaseModel):
             ``True`` if completeness check passes.
         """
         if required_locales is not None:
-            return all(
-                bool(self.translations.get(loc))
-                for loc in required_locales
-            )
+            return all(bool(self.translations.get(loc)) for loc in required_locales)
         # No required list → every existing value must be non-empty.
-        return bool(self.translations) and all(
-            bool(v) for v in self.translations.values()
-        )
+        return bool(self.translations) and all(bool(v) for v in self.translations.values())
 
     # ------------------------------------------------------------------
     # Dunder methods

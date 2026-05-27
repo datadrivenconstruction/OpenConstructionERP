@@ -48,15 +48,11 @@ class COBieParser(BaseRequirementParser):
         try:
             rows, headers = self._read_attribute_sheet(source)
         except Exception as exc:
-            result.errors.append(
-                {"row": 0, "field": "file", "msg": f"Cannot read COBie file: {exc}"}
-            )
+            result.errors.append({"row": 0, "field": "file", "msg": f"Cannot read COBie file: {exc}"})
             return result
 
         if not rows:
-            result.warnings.append(
-                {"row": 0, "field": "data", "msg": "No data rows in Attribute sheet"}
-            )
+            result.warnings.append({"row": 0, "field": "data", "msg": "No data rows in Attribute sheet"})
             return result
 
         # Map header names to column indices
@@ -70,9 +66,7 @@ class COBieParser(BaseRequirementParser):
                 if req:
                     result.requirements.append(req)
             except Exception as exc:
-                result.errors.append(
-                    {"row": row_idx, "field": "", "msg": f"Error parsing row: {exc}"}
-                )
+                result.errors.append({"row": row_idx, "field": "", "msg": f"Error parsing row: {exc}"})
 
         logger.info(
             "COBie parsed: %d requirements from %d rows",
@@ -81,9 +75,7 @@ class COBieParser(BaseRequirementParser):
         )
         return result
 
-    def _read_attribute_sheet(
-        self, source: Path | str | bytes
-    ) -> tuple[list[list[Any]], list[str]]:
+    def _read_attribute_sheet(self, source: Path | str | bytes) -> tuple[list[list[Any]], list[str]]:
         """Read the Attribute sheet from a COBie Excel file.
 
         Returns:
@@ -96,9 +88,7 @@ class COBieParser(BaseRequirementParser):
         elif isinstance(source, bytes):
             import io
 
-            wb = openpyxl.load_workbook(
-                io.BytesIO(source), read_only=True, data_only=True
-            )
+            wb = openpyxl.load_workbook(io.BytesIO(source), read_only=True, data_only=True)
         else:
             raise TypeError(f"COBie parser requires a file path or bytes, got {type(source)}")
 
@@ -137,9 +127,7 @@ class COBieParser(BaseRequirementParser):
                     break
         return col_map
 
-    def _get_cell(
-        self, row: list[Any], col_map: dict[str, int], key: str
-    ) -> str:
+    def _get_cell(self, row: list[Any], col_map: dict[str, int], key: str) -> str:
         """Safely get a cell value from the row."""
         idx = col_map.get(key)
         if idx is None or idx >= len(row) or row[idx] is None:

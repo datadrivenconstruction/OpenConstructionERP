@@ -56,9 +56,7 @@ class BOQSummaryPayload(_Widget):
     total_boqs: int
     active_boqs: int = Field(
         default=0,
-        description=(
-            "BOQs whose status is NOT in archived/closed/cancelled/rejected."
-        ),
+        description=("BOQs whose status is NOT in archived/closed/cancelled/rejected."),
     )
     total_value_eur: str = Field(description="Sum across all projects, **EUR equivalent** as Decimal string.")
     position_count: int
@@ -443,40 +441,25 @@ class WidgetConfigItem(BaseModel):
         for key, value in v.items():
             if key not in spec:
                 allowed = ", ".join(sorted(spec)) or "(none)"
-                raise ValueError(
-                    f"Unknown config key {key!r} for widget_id={widget_id!r}. "
-                    f"Allowed: {allowed}"
-                )
+                raise ValueError(f"Unknown config key {key!r} for widget_id={widget_id!r}. Allowed: {allowed}")
             expected_type, lo, hi = spec[key]
             # bool is a subclass of int in Python, so check it first.
             if expected_type is bool:
                 if not isinstance(value, bool):
-                    raise ValueError(
-                        f"Config value for {widget_id!r}.{key!r} must be bool"
-                    )
+                    raise ValueError(f"Config value for {widget_id!r}.{key!r} must be bool")
                 continue
             if expected_type is int:
                 if isinstance(value, bool) or not isinstance(value, int):
-                    raise ValueError(
-                        f"Config value for {widget_id!r}.{key!r} must be int"
-                    )
+                    raise ValueError(f"Config value for {widget_id!r}.{key!r} must be int")
                 if lo is not None and hi is not None and not (lo <= value <= hi):
-                    raise ValueError(
-                        f"Config value for {widget_id!r}.{key!r} must be "
-                        f"between {lo} and {hi}"
-                    )
+                    raise ValueError(f"Config value for {widget_id!r}.{key!r} must be between {lo} and {hi}")
                 continue
             if expected_type is float:
                 if isinstance(value, bool) or not isinstance(value, int | float):
-                    raise ValueError(
-                        f"Config value for {widget_id!r}.{key!r} must be float"
-                    )
+                    raise ValueError(f"Config value for {widget_id!r}.{key!r} must be float")
                 fval = float(value)
                 if lo is not None and hi is not None and not (lo <= fval <= hi):
-                    raise ValueError(
-                        f"Config value for {widget_id!r}.{key!r} must be "
-                        f"between {lo} and {hi}"
-                    )
+                    raise ValueError(f"Config value for {widget_id!r}.{key!r} must be between {lo} and {hi}")
                 continue
         return v
 

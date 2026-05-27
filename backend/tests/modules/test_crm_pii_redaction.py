@@ -118,7 +118,9 @@ def test_viewer_is_owner_sees_full_pii():
     lead = _make_lead(assigned_to=owner)
     assert (
         viewer_can_see_lead_pii(
-            lead, viewer_id=str(owner), viewer_role="editor",
+            lead,
+            viewer_id=str(owner),
+            viewer_role="editor",
         )
         is True
     )
@@ -128,7 +130,9 @@ def test_admin_sees_full_pii_regardless_of_owner():
     lead = _make_lead(assigned_to=uuid.uuid4())
     assert (
         viewer_can_see_lead_pii(
-            lead, viewer_id=str(uuid.uuid4()), viewer_role="admin",
+            lead,
+            viewer_id=str(uuid.uuid4()),
+            viewer_role="admin",
         )
         is True
     )
@@ -138,7 +142,9 @@ def test_manager_sees_full_pii_regardless_of_owner():
     lead = _make_lead(assigned_to=uuid.uuid4())
     assert (
         viewer_can_see_lead_pii(
-            lead, viewer_id=str(uuid.uuid4()), viewer_role="manager",
+            lead,
+            viewer_id=str(uuid.uuid4()),
+            viewer_role="manager",
         )
         is True
     )
@@ -148,7 +154,9 @@ def test_editor_who_is_not_owner_cannot_see_pii():
     lead = _make_lead(assigned_to=uuid.uuid4())
     assert (
         viewer_can_see_lead_pii(
-            lead, viewer_id=str(uuid.uuid4()), viewer_role="editor",
+            lead,
+            viewer_id=str(uuid.uuid4()),
+            viewer_role="editor",
         )
         is False
     )
@@ -158,7 +166,9 @@ def test_unassigned_lead_hides_pii_from_non_admin():
     lead = _make_lead(assigned_to=None)
     assert (
         viewer_can_see_lead_pii(
-            lead, viewer_id=str(uuid.uuid4()), viewer_role="viewer",
+            lead,
+            viewer_id=str(uuid.uuid4()),
+            viewer_role="viewer",
         )
         is False
     )
@@ -171,7 +181,9 @@ def test_redact_lead_pii_owner_round_trip():
     owner = uuid.uuid4()
     lead = _make_lead(assigned_to=owner)
     email, phone = redact_lead_pii(
-        lead, viewer_id=str(owner), viewer_role="editor",
+        lead,
+        viewer_id=str(owner),
+        viewer_role="editor",
     )
     assert email == "alice@example.com"
     assert phone == "+491701234567"
@@ -180,7 +192,9 @@ def test_redact_lead_pii_owner_round_trip():
 def test_redact_lead_pii_non_owner_redacts_both_fields():
     lead = _make_lead(assigned_to=uuid.uuid4())
     email, phone = redact_lead_pii(
-        lead, viewer_id=str(uuid.uuid4()), viewer_role="editor",
+        lead,
+        viewer_id=str(uuid.uuid4()),
+        viewer_role="editor",
     )
     assert email == "a***@example.com"
     assert phone == "+49…567"
@@ -189,10 +203,14 @@ def test_redact_lead_pii_non_owner_redacts_both_fields():
 def test_redact_lead_pii_non_owner_with_missing_fields_returns_none():
     """Non-owner viewing a lead with no PII gets None, not ``<no-email>``."""
     lead = _make_lead(
-        assigned_to=uuid.uuid4(), email=None, phone=None,
+        assigned_to=uuid.uuid4(),
+        email=None,
+        phone=None,
     )
     email, phone = redact_lead_pii(
-        lead, viewer_id=str(uuid.uuid4()), viewer_role="viewer",
+        lead,
+        viewer_id=str(uuid.uuid4()),
+        viewer_role="viewer",
     )
     assert email is None
     assert phone is None
@@ -202,7 +220,9 @@ def test_redact_lead_pii_anonymous_viewer():
     """No JWT → no PII. Belt-and-braces: this path is also gated by auth."""
     lead = _make_lead(assigned_to=uuid.uuid4())
     email, phone = redact_lead_pii(
-        lead, viewer_id=None, viewer_role=None,
+        lead,
+        viewer_id=None,
+        viewer_role=None,
     )
     assert email == "a***@example.com"
     assert phone == "+49…567"

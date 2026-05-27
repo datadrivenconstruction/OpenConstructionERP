@@ -153,8 +153,7 @@ def main(argv: list[str] | None = None) -> int:
         # Walked the directory but nothing valid landed — likely the
         # operator pointed at a sub-tree without v3 snapshots.
         print(
-            "WARN: zero snapshots restored. Check that the directory "
-            "contains *_BGEM3_V3_DDC_CWICR.snapshot files.",
+            "WARN: zero snapshots restored. Check that the directory contains *_BGEM3_V3_DDC_CWICR.snapshot files.",
             file=sys.stderr,
         )
         return 4

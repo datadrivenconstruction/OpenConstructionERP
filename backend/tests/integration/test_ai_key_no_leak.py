@@ -17,6 +17,7 @@ import json
 import tempfile
 import uuid
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 import pytest_asyncio
@@ -26,6 +27,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+if TYPE_CHECKING:
+    from app.modules.ai.schemas import AISettingsUpdate
 
 # ── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -71,7 +74,7 @@ OPENAI_KEY = "sk-proj-OPENAI-NEVER-SHOW-ME-IN-RESPONSE-67890"
 GEMINI_KEY = "AIza-GEMINI-NEVER-SHOW-ME-IN-RESPONSE-abcdef"
 
 
-def _payload_with_keys() -> "AISettingsUpdate":  # type: ignore[name-defined]  # forward ref
+def _payload_with_keys() -> AISettingsUpdate:
     from app.modules.ai.schemas import AISettingsUpdate
 
     return AISettingsUpdate(
@@ -170,9 +173,7 @@ async def test_partial_update_does_not_clobber_other_keys(session, user_id):
 
     # Now update only the OpenAI key.
     new_openai = "sk-proj-OPENAI-ROTATED-99999"
-    response = await svc.update_ai_settings(
-        user_id, AISettingsUpdate(openai_api_key=new_openai)
-    )
+    response = await svc.update_ai_settings(user_id, AISettingsUpdate(openai_api_key=new_openai))
     await session.commit()
 
     payload = _serialize(response)

@@ -202,11 +202,7 @@ async def assert_no_booking_overlap(
     PATCH skip the row being edited so re-saving its own window is a
     no-op.
     """
-    stmt = (
-        select(Booking.id)
-        .where(Booking.room_id == room_id)
-        .where(Booking.status.in_(_LIVE_BOOKING_STATUSES))
-    )
+    stmt = select(Booking.id).where(Booking.room_id == room_id).where(Booking.status.in_(_LIVE_BOOKING_STATUSES))
     if exclude_booking_id is not None:
         stmt = stmt.where(Booking.id != exclude_booking_id)
 
@@ -258,21 +254,11 @@ async def bootstrap_from_propdev_block(
         )
 
     # Pull every plot under this block.
-    plot_rows = (
-        await session.execute(
-            select(Plot).where(Plot.block_id == block_id)
-        )
-    ).scalars().all()
+    plot_rows = (await session.execute(select(Plot).where(Plot.block_id == block_id))).scalars().all()
 
     # Pre-load existing room labels so we can dedupe in one pass.
     existing_labels: set[str] = set(
-        (
-            await session.execute(
-                select(Room.label).where(Room.accommodation_id == accommodation.id)
-            )
-        )
-        .scalars()
-        .all()
+        (await session.execute(select(Room.label).where(Room.accommodation_id == accommodation.id))).scalars().all()
     )
 
     created = 0
@@ -476,7 +462,10 @@ async def list_bookings_for_accommodation(
         .offset(offset)
     )
     stmt = _apply_booking_filters(
-        stmt, statuses=statuses, from_date=from_date, to_date=to_date,
+        stmt,
+        statuses=statuses,
+        from_date=from_date,
+        to_date=to_date,
     )
     rows = (await session.execute(stmt)).scalars().all()
     return list(rows), room_label_by_id
@@ -508,7 +497,10 @@ async def list_bookings_for_room(
         .offset(offset)
     )
     stmt = _apply_booking_filters(
-        stmt, statuses=statuses, from_date=from_date, to_date=to_date,
+        stmt,
+        statuses=statuses,
+        from_date=from_date,
+        to_date=to_date,
     )
     rows = (await session.execute(stmt)).scalars().all()
     return list(rows), {room.id: room.label}

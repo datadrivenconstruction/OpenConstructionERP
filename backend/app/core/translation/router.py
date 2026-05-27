@@ -46,10 +46,16 @@ class TranslateRequest(BaseModel):
     # subtags (e.g. ``zh-cn``) accepted. Restricted to alphabetic + a single
     # optional hyphen so callers can't smuggle paths or URL fragments.
     source_lang: str = Field(
-        ..., min_length=2, max_length=8, pattern=r"^[A-Za-z]{2,3}(-[A-Za-z]{2,4})?$",
+        ...,
+        min_length=2,
+        max_length=8,
+        pattern=r"^[A-Za-z]{2,3}(-[A-Za-z]{2,4})?$",
     )
     target_lang: str = Field(
-        ..., min_length=2, max_length=8, pattern=r"^[A-Za-z]{2,3}(-[A-Za-z]{2,4})?$",
+        ...,
+        min_length=2,
+        max_length=8,
+        pattern=r"^[A-Za-z]{2,3}(-[A-Za-z]{2,4})?$",
     )
     domain: str = Field(default="construction", max_length=64)
 
@@ -117,9 +123,7 @@ async def _run_muse(task_id: str, src: str, tgt: str) -> None:
         _record_task(task_id, status="failed", error=str(exc))
 
 
-async def _run_iate(
-    task_id: str, url: str | None, local_path: str | None
-) -> None:
+async def _run_iate(task_id: str, url: str | None, local_path: str | None) -> None:
     _record_task(task_id, status="running", progress=0.0)
     try:
         if local_path:
@@ -134,9 +138,7 @@ async def _run_iate(
             )
             paths = await process_iate_tbx(
                 tbx_path,
-                on_progress=lambda v: _record_task(
-                    task_id, progress=0.7 + 0.3 * float(v)
-                ),
+                on_progress=lambda v: _record_task(task_id, progress=0.7 + 0.3 * float(v)),
             )
         else:
             raise ValueError("either url or local_tbx_path is required for IATE")
@@ -233,9 +235,7 @@ async def trigger_download(
                     "and pass the local path."
                 ),
             )
-        background.add_task(
-            _run_iate, task_id, body.url, body.local_tbx_path
-        )
+        background.add_task(_run_iate, task_id, body.url, body.local_tbx_path)
 
     return DownloadResponse(task_id=task_id, kind=body.kind, status="queued")
 
@@ -263,7 +263,6 @@ async def lookup_status(
         in_flight=[
             {"task_id": tid, **{k: v for k, v in t.items() if k != "owner"}}
             for tid, t in _TASKS.items()
-            if t.get("status") in ("queued", "running")
-            and t.get("owner") == user_id
+            if t.get("status") in ("queued", "running") and t.get("owner") == user_id
         ],
     )

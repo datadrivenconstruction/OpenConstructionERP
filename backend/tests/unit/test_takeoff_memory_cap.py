@@ -27,7 +27,6 @@ from fastapi import HTTPException
 from app.modules.takeoff import service as takeoff_service
 from app.modules.takeoff.service import _max_upload_bytes
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -49,9 +48,7 @@ def _make_service():
 
 class TestUploadCap:
     @pytest.mark.asyncio
-    async def test_upload_above_100mb_rejected_when_cap_configured(
-        self, monkeypatch, tmp_path
-    ) -> None:
+    async def test_upload_above_100mb_rejected_when_cap_configured(self, monkeypatch, tmp_path) -> None:
         """When OE_TAKEOFF_MAX_UPLOAD_MB=100, a 101 MB payload returns 413."""
         monkeypatch.setenv("OE_TAKEOFF_MAX_UPLOAD_MB", "100")
         monkeypatch.setattr(
@@ -73,9 +70,7 @@ class TestUploadCap:
         assert exc.value.status_code == 413
 
     @pytest.mark.asyncio
-    async def test_upload_below_cap_passes_gate(
-        self, monkeypatch, tmp_path
-    ) -> None:
+    async def test_upload_below_cap_passes_gate(self, monkeypatch, tmp_path) -> None:
         """When OE_TAKEOFF_MAX_UPLOAD_MB=100, a 1 MB payload passes the cap gate."""
         monkeypatch.setenv("OE_TAKEOFF_MAX_UPLOAD_MB", "100")
         monkeypatch.setattr(
@@ -108,9 +103,7 @@ class TestUploadCap:
             )
             assert doc is not None
         except HTTPException as exc:
-            assert exc.status_code != 413, (
-                f"1 MB upload should not trigger 413 with 100 MB cap, got {exc.status_code}"
-            )
+            assert exc.status_code != 413, f"1 MB upload should not trigger 413 with 100 MB cap, got {exc.status_code}"
 
 
 # ---------------------------------------------------------------------------
@@ -133,10 +126,7 @@ class TestTextExtractionBudget:
 
         # Stub the page extractor to return 50 pages with 1 KB each.
         page_text = "A" * 1024  # 1 KB per page
-        fake_page_data = [
-            {"page": i + 1, "text": page_text, "tables": []}
-            for i in range(50)
-        ]
+        fake_page_data = [{"page": i + 1, "text": page_text, "tables": []} for i in range(50)]
 
         monkeypatch.setattr(takeoff_service, "_count_pdf_pages", lambda *a, **k: 50)
         monkeypatch.setattr(
@@ -167,9 +157,7 @@ class TestTextExtractionBudget:
 
         # The full_text should be ≤ 50 pages * 1 KB + separators, not 500 MB.
         text_size = len(doc.extracted_text or "")
-        assert text_size <= 100 * 1024, (
-            f"extracted_text is {text_size} bytes — should be ≤ 100 KB for 50×1 KB pages"
-        )
+        assert text_size <= 100 * 1024, f"extracted_text is {text_size} bytes — should be ≤ 100 KB for 50×1 KB pages"
 
     def test_cap_returns_correct_byte_count(self, monkeypatch) -> None:
         """_max_upload_bytes() returns correct byte count for env var."""
@@ -203,10 +191,7 @@ class TestLargePageCountMemorySafety:
         )
 
         page_text = "B" * 2048  # 2 KB per page
-        fake_page_data = [
-            {"page": i + 1, "text": page_text, "tables": []}
-            for i in range(100)
-        ]
+        fake_page_data = [{"page": i + 1, "text": page_text, "tables": []} for i in range(100)]
 
         monkeypatch.setattr(takeoff_service, "_count_pdf_pages", lambda *a, **k: 100)
         monkeypatch.setattr(
@@ -232,6 +217,4 @@ class TestLargePageCountMemorySafety:
         text_size = len(doc.extracted_text or "")
         # 100 pages * 2 KB = 200 KB + 99 * 2-char separators ≈ 200.2 KB
         # We allow up to 300 KB as headroom.
-        assert text_size <= 300 * 1024, (
-            f"extracted_text is {text_size} bytes — unexpectedly large for 100×2 KB pages"
-        )
+        assert text_size <= 300 * 1024, f"extracted_text is {text_size} bytes — unexpectedly large for 100×2 KB pages"

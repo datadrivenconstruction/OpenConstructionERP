@@ -76,9 +76,7 @@ class DailyDiary(Base):
     )
     labour_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     equipment_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="open", index=True
-    )
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="open", index=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     closed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True), nullable=True)
     closed_by: Mapped[uuid.UUID | None] = mapped_column(
@@ -122,9 +120,7 @@ class WeatherRecord(Base):
         index=True,
     )
     captured_at: Mapped[str] = mapped_column(DateTime(timezone=True), nullable=False)
-    source: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="manual"
-    )  # open_meteo / manual / sensor
+    source: Mapped[str] = mapped_column(String(32), nullable=False, default="manual")  # open_meteo / manual / sensor
     temperature_c: Mapped[float | None] = mapped_column(Numeric(6, 2), nullable=True)
     humidity_pct: Mapped[float | None] = mapped_column(Numeric(5, 2), nullable=True)
     wind_speed_kmh: Mapped[float | None] = mapped_column(Numeric(6, 2), nullable=True)
@@ -224,9 +220,7 @@ class DiaryPhoto(Base):
         nullable=False,
         index=True,
     )
-    taken_at: Mapped[str] = mapped_column(
-        DateTime(timezone=True), nullable=False, index=True
-    )
+    taken_at: Mapped[str] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
     photographer_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
@@ -405,9 +399,7 @@ class DiaryArchiveSignature(Base):
     """
 
     __tablename__ = "oe_daily_diary_archive_signature"
-    __table_args__ = (
-        UniqueConstraint("diary_id", name="uq_oe_daily_diary_archive_signature_diary"),
-    )
+    __table_args__ = (UniqueConstraint("diary_id", name="uq_oe_daily_diary_archive_signature_diary"),)
 
     diary_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -431,7 +423,4 @@ class DiaryArchiveSignature(Base):
     revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
     def __repr__(self) -> str:
-        return (
-            f"<DiaryArchiveSignature diary={self.diary_id} "
-            f"rev={self.revision} sha={self.content_sha256[:8]}>"
-        )
+        return f"<DiaryArchiveSignature diary={self.diary_id} rev={self.revision} sha={self.content_sha256[:8]}>"

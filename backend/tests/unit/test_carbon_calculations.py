@@ -38,15 +38,15 @@ from app.modules.carbon.service import (
     normalise_quantity_to_factor_unit,
 )
 
-
 # ── Reference constants ────────────────────────────────────────────────────
 
 # ICE DB v3.0: concrete (general) GWP ≈ 0.13 kgCO2e/kg
-_CONCRETE_FACTOR = Decimal("0.13")   # kgCO2e / kg
+_CONCRETE_FACTOR = Decimal("0.13")  # kgCO2e / kg
 _CONCRETE_DENSITY = Decimal("2400")  # kg / m³
 
 
 # ── Case 1: Classic BOQ concrete slab (the canonical reference) ────────────
+
 
 def test_concrete_100m3_basic_carbon() -> None:
     """100 m³ concrete @ 0.13 kgCO2e/kg, density 2400 kg/m³ → 31 200 kgCO2e.
@@ -67,16 +67,21 @@ def test_concrete_100m3_basic_carbon() -> None:
 
 # ── Case 2: Same calc via normalise_quantity_to_factor_unit separately ─────
 
+
 def test_normalise_then_multiply_matches_combined() -> None:
     """Splitting normalise + multiply must produce identical result."""
     normalised = normalise_quantity_to_factor_unit(
-        Decimal("100"), "m3", "kg", density_kg_per_m3=_CONCRETE_DENSITY,
+        Decimal("100"),
+        "m3",
+        "kg",
+        density_kg_per_m3=_CONCRETE_DENSITY,
     )
     carbon = normalised * _CONCRETE_FACTOR
     assert carbon == Decimal("31200.00")
 
 
 # ── Case 3: Multi-position sum ─────────────────────────────────────────────
+
 
 def test_multi_position_sum_three_materials() -> None:
     """Three BOQ positions; sum must match individual results, no float drift.
@@ -89,13 +94,24 @@ def test_multi_position_sum_three_materials() -> None:
         total                                              → 34 690 kgCO2e
     """
     concrete = compute_embodied_entry_carbon(
-        Decimal("100"), "m3", Decimal("0.13"), "kg", density=Decimal("2400"),
+        Decimal("100"),
+        "m3",
+        Decimal("0.13"),
+        "kg",
+        density=Decimal("2400"),
     )
     steel = compute_embodied_entry_carbon(
-        Decimal("500"), "kg", Decimal("1.46"), "kg",
+        Decimal("500"),
+        "kg",
+        Decimal("1.46"),
+        "kg",
     )
     timber = compute_embodied_entry_carbon(
-        Decimal("10"), "m3", Decimal("0.46"), "kg", density=Decimal("600"),
+        Decimal("10"),
+        "m3",
+        Decimal("0.46"),
+        "kg",
+        density=Decimal("600"),
     )
     total = concrete + steel + timber
     assert concrete == Decimal("31200.00")
@@ -105,6 +121,7 @@ def test_multi_position_sum_three_materials() -> None:
 
 
 # ── Case 4: Lifecycle stage breakdown (A1-A3/A4/A5/B/C/D) ─────────────────
+
 
 def _make_stage_entries() -> list[SimpleNamespace]:
     """Fabricate embodied entries across all six lifecycle buckets."""
@@ -137,12 +154,8 @@ def test_lifecycle_stage_breakdown_buckets() -> None:
     assert Decimal(totals["embodied_a1a3"]) == Decimal("23000")
     assert Decimal(totals["embodied_a4"]) == Decimal("44")
     assert Decimal(totals["embodied_a5"]) == Decimal("320")
-    assert Decimal(totals["embodied_b"]) == Decimal("700"), (
-        "b3 sub-code must fold into b bucket"
-    )
-    assert Decimal(totals["embodied_c"]) == Decimal("270"), (
-        "c4 sub-code must fold into c bucket"
-    )
+    assert Decimal(totals["embodied_b"]) == Decimal("700"), "b3 sub-code must fold into b bucket"
+    assert Decimal(totals["embodied_c"]) == Decimal("270"), "c4 sub-code must fold into c bucket"
     assert Decimal(totals["embodied_d"]) == Decimal("-1200"), (
         "D credits must be negative (benefits beyond system boundary)"
     )
@@ -169,9 +182,7 @@ def test_lifecycle_total_excludes_d_credits() -> None:
     b = Decimal("700")
     c = Decimal("270")
     expected_total = a1a5 + b + c  # scope 1/2/3 = 0 (not provided)
-    assert Decimal(totals["total"]) == expected_total, (
-        "D credits must not be added to the cradle-to-grave total"
-    )
+    assert Decimal(totals["total"]) == expected_total, "D credits must not be added to the cradle-to-grave total"
 
 
 def test_lifecycle_total_with_scopes() -> None:
@@ -193,28 +204,34 @@ def test_lifecycle_total_with_scopes() -> None:
 
 # ── Case 5: Very small factor — Decimal precision ──────────────────────────
 
+
 def test_tiny_factor_no_float_drift() -> None:
     """Factor 0.00012 kgCO2e/kg (e.g. a refrigerant trace) must not lose
     precision. In float: 1000000 × 0.00012 == 119.99999999999998.
     In Decimal: 1000000 × Decimal('0.00012') == 120.00000.
     """
     result = compute_embodied_entry_carbon(
-        Decimal("1000000"), "kg", Decimal("0.00012"), "kg",
+        Decimal("1000000"),
+        "kg",
+        Decimal("0.00012"),
+        "kg",
     )
-    assert result == Decimal("120.00000"), (
-        f"float drift detected — expected 120.00000, got {result}"
-    )
+    assert result == Decimal("120.00000"), f"float drift detected — expected 120.00000, got {result}"
 
 
 def test_very_small_factor_string_input() -> None:
     """Accepting factor as string '0.000075' must preserve full precision."""
     result = compute_embodied_entry_carbon(
-        "200000", "kg", "0.000075", "kg",
+        "200000",
+        "kg",
+        "0.000075",
+        "kg",
     )
     assert result == Decimal("15.000000")
 
 
 # ── Case 6: Tonne input → kg factor ───────────────────────────────────────
+
 
 def test_tonne_to_kg_factor_conversion() -> None:
     """50 t of structural steel × 1.46 kgCO2e/kg → 73 000 kgCO2e.
@@ -222,12 +239,16 @@ def test_tonne_to_kg_factor_conversion() -> None:
     Conversion path: 50 t → 50 000 kg (factor ×1000), then × 1.46.
     """
     result = compute_embodied_entry_carbon(
-        Decimal("50"), "t", Decimal("1.46"), "kg",
+        Decimal("50"),
+        "t",
+        Decimal("1.46"),
+        "kg",
     )
     assert result == Decimal("73000.00")
 
 
 # ── Case 7: Scope-1 diesel ──────────────────────────────────────────────────
+
 
 def test_scope1_diesel_2000L() -> None:
     """2000 L diesel × 2.68 kgCO2e/L = 5360 kgCO2e."""
@@ -237,6 +258,7 @@ def test_scope1_diesel_2000L() -> None:
 
 # ── Case 8: Scope-2 electricity ────────────────────────────────────────────
 
+
 def test_scope2_uk_electricity_2024() -> None:
     """50 000 kWh × 0.207 kgCO2e/kWh (DEFRA 2024 GB) = 10 350 kgCO2e."""
     result = compute_scope2_co2e(Decimal("50000"), Decimal("0.2070"))
@@ -244,6 +266,7 @@ def test_scope2_uk_electricity_2024() -> None:
 
 
 # ── Case 9: Intensity (kgCO2e / m²) ───────────────────────────────────────
+
 
 def test_intensity_per_m2() -> None:
     """31 200 kgCO2e / 2400 m² GFA = 13 kgCO2e/m²."""
@@ -258,6 +281,7 @@ def test_intensity_zero_area_returns_zero() -> None:
 
 
 # ── Case 10: Target-met logic ──────────────────────────────────────────────
+
 
 def test_target_met_when_current_le_target() -> None:
     """Current value at exactly target_value counts as met."""
@@ -276,15 +300,20 @@ def test_target_met_small_decimal() -> None:
 
 # ── Case 11: UnitMismatchError is raised (not silently wrong) ──────────────
 
+
 def test_m3_to_kg_without_density_raises() -> None:
     """m3 → kg without density must raise UnitMismatchError, not return 0."""
     with pytest.raises(UnitMismatchError, match="density"):
         compute_embodied_entry_carbon(
-            Decimal("100"), "m3", Decimal("0.13"), "kg",
+            Decimal("100"),
+            "m3",
+            Decimal("0.13"),
+            "kg",
         )
 
 
 # ── Case 12: compare_alternatives ranking ─────────────────────────────────
+
 
 def test_compare_alternatives_sorted_desc_by_savings() -> None:
     """Alternatives are ranked by savings_kg descending (best saving first)."""

@@ -6,13 +6,12 @@ All routes are RBAC-gated and mounted by the module loader at
 
 from __future__ import annotations
 
+import logging
 import re
 import uuid
 from decimal import Decimal
-from typing import Any
-
-import logging
 from pathlib import Path
+from typing import Any
 
 from fastapi import (
     APIRouter,
@@ -31,23 +30,36 @@ from app.core.file_signature import (
     SIGNATURE_BYTES_REQUIRED,
     FileSignatureMismatch,
     mime_for_signature,
+)
+from app.core.file_signature import (
     require as require_signature,
 )
 from app.core.i18n import get_locale
 from app.core.validation.messages import translate
 from app.dependencies import CurrentUserPayload, RequirePermission, SessionDep
 from app.modules.portal.dependencies import RequirePortalSession
+from app.modules.property_dev.bulk_operations import (
+    bulk_extend_reservation_expiry,
+    bulk_import_leads_csv,
+    bulk_merge_buyers,
+    bulk_plot_status_change,
+    bulk_regenerate_documents,
+)
 from app.modules.property_dev.schemas import (
     BlockCreate,
     BlockResponse,
     BlockUpdate,
     BrokerCreate,
+    BrokerPerformanceResponse,
     BrokerResponse,
     BrokerUpdate,
+    BulkResult,
+    BuyerBulkMerge,
     BuyerCancelRequest,
     BuyerConfiguratorResponse,
     BuyerContractRequest,
     BuyerCreate,
+    BuyerJourneyResponse,
     BuyerOptionCreate,
     BuyerOptionGroupCreate,
     BuyerOptionGroupResponse,
@@ -61,21 +73,28 @@ from app.modules.property_dev.schemas import (
     BuyerSelectionResponse,
     BuyerSelectionUpdate,
     BuyerUpdate,
+    CashflowWaterfallResponse,
+    CohortRetentionResponse,
     CommissionAccrualPayRequest,
     CommissionAccrualResponse,
     CommissionAgreementCreate,
     CommissionAgreementResponse,
     CommissionAgreementUpdate,
+    ComplianceDashboardResponse,
+    ComplianceRegulatorReportResponse,
+    ComplianceRuleResult,
     ContractPartyCreate,
     ContractPartyResponse,
     ContractPartyUpdate,
     ContractTaxQuote,
+    ConversionFunnelResponse,
     DepositForfeitureResponse,
     DevelopmentCreate,
     DevelopmentDashboard,
     DevelopmentPnLResponse,
     DevelopmentResponse,
     DevelopmentUpdate,
+    DocumentsBulkRegenerate,
     EscrowAccountCreate,
     EscrowAccountResponse,
     EscrowAccountUpdate,
@@ -84,6 +103,7 @@ from app.modules.property_dev.schemas import (
     EscrowTransactionReconcileRequest,
     EscrowTransactionResponse,
     EscrowTransactionUpdate,
+    FunnelConversionResponse,
     HandoverBundleResponse,
     HandoverCompleteRequest,
     HandoverCreate,
@@ -98,17 +118,17 @@ from app.modules.property_dev.schemas import (
     HouseTypeVariantCreate,
     HouseTypeVariantResponse,
     HouseTypeVariantUpdate,
-    PropertyDevHouseTypeCreate,
-    PropertyDevHouseTypeResponse,
-    PropertyDevHouseTypeUpdate,
     InstalmentCreate,
     InstalmentMarkPaidRequest,
     InstalmentResponse,
     InstalmentUpdate,
     InstalmentWaiveRequest,
+    InventoryAgeingResponse,
+    InventoryHeatmapResponse,
     LeadConvertToReservationRequest,
     LeadCreate,
     LeadResponse,
+    LeadSourceAttributionResponse,
     LeadUpdate,
     PaymentScheduleCreate,
     PaymentScheduleResponse,
@@ -116,6 +136,7 @@ from app.modules.property_dev.schemas import (
     PhaseCreate,
     PhaseResponse,
     PhaseUpdate,
+    PlotBulkStatusChange,
     PlotCreate,
     PlotPricingResponse,
     PlotReserveRequest,
@@ -126,7 +147,11 @@ from app.modules.property_dev.schemas import (
     PriceMatrixPreviewResponse,
     PriceMatrixResponse,
     PriceMatrixUpdate,
+    PropertyDevHouseTypeCreate,
+    PropertyDevHouseTypeResponse,
+    PropertyDevHouseTypeUpdate,
     RegulatorReportResponse,
+    ReservationBulkExtendExpiry,
     ReservationCalendarResponse,
     ReservationConvertToSpaRequest,
     ReservationCreate,
@@ -139,53 +164,21 @@ from app.modules.property_dev.schemas import (
     SalesContractSignRequest,
     SalesContractUpdate,
     SalesKanbanResponse,
+    SalesVelocityResponse,
     SnagCreate,
     SnagResponse,
     SnagUpdate,
     TaxQuotePayload,
+    TimeToCloseResponse,
     WarrantyClaimAssignRequest,
     WarrantyClaimCreate,
     WarrantyClaimResponse,
     WarrantyClaimUpdate,
 )
-from app.modules.property_dev.schemas import (
-    ComplianceDashboardResponse,
-    ComplianceRegulatorReportResponse,
-    ComplianceRuleResult,
-)
-from app.modules.property_dev.schemas import (
-    BuyerJourneyResponse,
-    CashflowWaterfallResponse,
-    FunnelConversionResponse,
-    InventoryAgeingResponse,
-    InventoryHeatmapResponse,
-    SalesVelocityResponse,
-)
-from app.modules.property_dev.schemas import (
-    BrokerPerformanceResponse,
-    CohortRetentionResponse,
-    ConversionFunnelResponse,
-    LeadSourceAttributionResponse,
-    TimeToCloseResponse,
-)
 from app.modules.property_dev.service import (
     PropertyDevService,
     compute_plot_final_price,
     supported_jurisdictions,
-)
-from app.modules.property_dev.bulk_operations import (
-    bulk_extend_reservation_expiry,
-    bulk_import_leads_csv,
-    bulk_merge_buyers,
-    bulk_plot_status_change,
-    bulk_regenerate_documents,
-)
-from app.modules.property_dev.schemas import (
-    BulkResult,
-    BuyerBulkMerge,
-    DocumentsBulkRegenerate,
-    PlotBulkStatusChange,
-    ReservationBulkExtendExpiry,
 )
 
 router = APIRouter()
@@ -215,9 +208,7 @@ async def _verify_buyer_owner(
     if user_id is None:
         # Should not happen — RequirePermission already ensures auth —
         # but be conservative and 401-style 404 the request.
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Buyer not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Buyer not found")
 
     from app.modules.projects.repository import ProjectRepository
     from app.modules.property_dev.repository import (
@@ -227,9 +218,7 @@ async def _verify_buyer_owner(
 
     buyer = await BuyerRepository(session).get_by_id(buyer_id)
     if buyer is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Buyer not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Buyer not found")
     if is_admin:
         return
 
@@ -237,17 +226,13 @@ async def _verify_buyer_owner(
         buyer.development_id,
     )
     if development is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Buyer not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Buyer not found")
     project = await ProjectRepository(session).get_by_id(development.project_id)
     if project is None or str(project.owner_id) != str(user_id):
         # 404 (not 403) — collapse "exists but not yours" into the same
         # response as "doesn't exist" so this endpoint can't be turned
         # into a UUID-existence oracle for other tenants' buyers.
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Buyer not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Buyer not found")
 
 
 # ── Developments ────────────────────────────────────────────────────────
@@ -362,9 +347,7 @@ async def list_plots(
     # R7 IDOR — gate the parent dev so we can't enumerate other tenants'
     # plots by guessing development UUIDs (the dev_id is a query param).
     await _verify_owner_via_development(session, development_id, user_payload)
-    rows, _ = await service.plots.list_for_development(
-        development_id, offset=offset, limit=limit, status=status
-    )
+    rows, _ = await service.plots.list_for_development(development_id, offset=offset, limit=limit, status=status)
     return [PlotResponse.model_validate(r) for r in rows]
 
 
@@ -453,49 +436,33 @@ async def plot_configurator(
     """
     await _verify_owner_via_plot(session, plot_id, user_payload)
     plot = await service.get_plot(plot_id)
-    house_type = (
-        await service.house_types.get_by_id(plot.house_type_id)
-        if plot.house_type_id
-        else None
-    )
-    variant = (
-        await service.variants.get_by_id(plot.house_type_variant_id)
-        if plot.house_type_variant_id
-        else None
-    )
+    house_type = await service.house_types.get_by_id(plot.house_type_id) if plot.house_type_id else None
+    variant = await service.variants.get_by_id(plot.house_type_variant_id) if plot.house_type_variant_id else None
 
     groups = await service.option_groups.list_for_development(plot.development_id)
     options_by_group: dict[str, list[BuyerOptionResponse]] = {}
     for g in groups:
         opts = await service.options.list_active_options_for_group(g.id)
-        options_by_group[str(g.id)] = [
-            BuyerOptionResponse.model_validate(o) for o in opts
-        ]
+        options_by_group[str(g.id)] = [BuyerOptionResponse.model_validate(o) for o in opts]
 
     buyer = await service.buyers.get_for_plot(plot_id)
     current_selection: Any = None
     current_items: list[Any] = []
     if buyer is not None:
-        current_selection = await service.selections.current_selection_for_buyer(
-            buyer.id
-        )
+        current_selection = await service.selections.current_selection_for_buyer(buyer.id)
         if current_selection is not None:
-            current_items = await service.selection_items.list_for_selection(
-                current_selection.id
-            )
+            current_items = await service.selection_items.list_for_selection(current_selection.id)
 
     pricing_total = compute_plot_final_price(plot, variant, current_items)
     pricing = PlotPricingResponse(
         plot_id=plot.id,
         base_price=Decimal(str(plot.price_base)),
         variant_modifier_value=(
-            (Decimal(str(plot.price_base)) * Decimal(str(variant.modifier_pct))
-             / Decimal("100"))
-            if variant else Decimal("0")
+            (Decimal(str(plot.price_base)) * Decimal(str(variant.modifier_pct)) / Decimal("100"))
+            if variant
+            else Decimal("0")
         ),
-        selections_total=sum(
-            (Decimal(str(i.total_price)) for i in current_items), Decimal("0")
-        ),
+        selections_total=sum((Decimal(str(i.total_price)) for i in current_items), Decimal("0")),
         final_price=pricing_total,
         currency=plot.currency or "",
     )
@@ -506,13 +473,8 @@ async def plot_configurator(
         variant=HouseTypeVariantResponse.model_validate(variant) if variant else None,
         option_groups=[BuyerOptionGroupResponse.model_validate(g) for g in groups],
         options_by_group=options_by_group,
-        current_selection=(
-            BuyerSelectionResponse.model_validate(current_selection)
-            if current_selection else None
-        ),
-        current_items=[
-            BuyerSelectionItemResponse.model_validate(i) for i in current_items
-        ],
+        current_selection=(BuyerSelectionResponse.model_validate(current_selection) if current_selection else None),
+        current_items=[BuyerSelectionItemResponse.model_validate(i) for i in current_items],
         pricing=pricing,
     )
 
@@ -534,7 +496,9 @@ async def list_house_types(
 
 
 @router.post(
-    "/house-types/", response_model=HouseTypeResponse, status_code=201,
+    "/house-types/",
+    response_model=HouseTypeResponse,
+    status_code=201,
 )
 async def create_house_type(
     data: HouseTypeCreate,
@@ -654,9 +618,7 @@ async def update_house_type_catalogue_entry(
     service: PropertyDevService = Depends(_svc),
     _perm: None = Depends(RequirePermission("property_dev.update")),
 ) -> PropertyDevHouseTypeResponse:
-    obj = await service.update_house_type_catalogue_entry(
-        entry_id, data, user_payload=payload
-    )
+    obj = await service.update_house_type_catalogue_entry(entry_id, data, user_payload=payload)
     return PropertyDevHouseTypeResponse.model_validate(obj)
 
 
@@ -671,7 +633,8 @@ async def delete_house_type_catalogue_entry(
 
 
 @router.get(
-    "/house-type-variants/", response_model=list[HouseTypeVariantResponse],
+    "/house-type-variants/",
+    response_model=list[HouseTypeVariantResponse],
 )
 async def list_variants(
     session: SessionDep,
@@ -698,13 +661,12 @@ async def create_variant(
     _perm: None = Depends(RequirePermission("property_dev.create")),
 ) -> HouseTypeVariantResponse:
     await _verify_owner_via_house_type(session, data.house_type_id, user_payload)
-    return HouseTypeVariantResponse.model_validate(
-        await service.create_variant(data)
-    )
+    return HouseTypeVariantResponse.model_validate(await service.create_variant(data))
 
 
 @router.get(
-    "/house-type-variants/{v_id}", response_model=HouseTypeVariantResponse,
+    "/house-type-variants/{v_id}",
+    response_model=HouseTypeVariantResponse,
 )
 async def get_variant(
     v_id: uuid.UUID,
@@ -718,7 +680,8 @@ async def get_variant(
 
 
 @router.patch(
-    "/house-type-variants/{v_id}", response_model=HouseTypeVariantResponse,
+    "/house-type-variants/{v_id}",
+    response_model=HouseTypeVariantResponse,
 )
 async def update_variant(
     v_id: uuid.UUID,
@@ -729,9 +692,7 @@ async def update_variant(
     _perm: None = Depends(RequirePermission("property_dev.update")),
 ) -> HouseTypeVariantResponse:
     await _verify_owner_via_variant(session, v_id, user_payload)
-    return HouseTypeVariantResponse.model_validate(
-        await service.update_variant(v_id, data)
-    )
+    return HouseTypeVariantResponse.model_validate(await service.update_variant(v_id, data))
 
 
 @router.delete("/house-type-variants/{v_id}", status_code=204)
@@ -763,7 +724,9 @@ async def list_option_groups(
 
 
 @router.post(
-    "/option-groups/", response_model=BuyerOptionGroupResponse, status_code=201,
+    "/option-groups/",
+    response_model=BuyerOptionGroupResponse,
+    status_code=201,
 )
 async def create_option_group(
     data: BuyerOptionGroupCreate,
@@ -773,9 +736,7 @@ async def create_option_group(
     _perm: None = Depends(RequirePermission("property_dev.create")),
 ) -> BuyerOptionGroupResponse:
     await _verify_owner_via_development(session, data.development_id, user_payload)
-    return BuyerOptionGroupResponse.model_validate(
-        await service.create_option_group(data)
-    )
+    return BuyerOptionGroupResponse.model_validate(await service.create_option_group(data))
 
 
 @router.get("/option-groups/{g_id}", response_model=BuyerOptionGroupResponse)
@@ -787,9 +748,7 @@ async def get_option_group(
     _perm: None = Depends(RequirePermission("property_dev.read")),
 ) -> BuyerOptionGroupResponse:
     await _verify_owner_via_option_group(session, g_id, user_payload)
-    return BuyerOptionGroupResponse.model_validate(
-        await service.get_option_group(g_id)
-    )
+    return BuyerOptionGroupResponse.model_validate(await service.get_option_group(g_id))
 
 
 @router.patch("/option-groups/{g_id}", response_model=BuyerOptionGroupResponse)
@@ -802,9 +761,7 @@ async def update_option_group(
     _perm: None = Depends(RequirePermission("property_dev.update")),
 ) -> BuyerOptionGroupResponse:
     await _verify_owner_via_option_group(session, g_id, user_payload)
-    return BuyerOptionGroupResponse.model_validate(
-        await service.update_option_group(g_id, data)
-    )
+    return BuyerOptionGroupResponse.model_validate(await service.update_option_group(g_id, data))
 
 
 @router.delete("/option-groups/{g_id}", status_code=204)
@@ -870,9 +827,7 @@ async def update_option(
     _perm: None = Depends(RequirePermission("property_dev.update")),
 ) -> BuyerOptionResponse:
     await _verify_owner_via_option(session, o_id, user_payload)
-    return BuyerOptionResponse.model_validate(
-        await service.update_option(o_id, data)
-    )
+    return BuyerOptionResponse.model_validate(await service.update_option(o_id, data))
 
 
 @router.delete("/options/{o_id}", status_code=204)
@@ -902,9 +857,7 @@ async def list_buyers(
     _perm: None = Depends(RequirePermission("property_dev.read")),
 ) -> list[BuyerResponse]:
     await _verify_owner_via_development(session, development_id, user_payload)
-    rows, _ = await service.buyers.list_for_development(
-        development_id, offset=offset, limit=limit, status=status
-    )
+    rows, _ = await service.buyers.list_for_development(development_id, offset=offset, limit=limit, status=status)
     return [BuyerResponse.model_validate(r) for r in rows]
 
 
@@ -985,9 +938,7 @@ async def contract_buyer(
     _perm: None = Depends(RequirePermission("property_dev.contract_buyer")),
 ) -> BuyerResponse:
     await _verify_owner_via_buyer(session, b_id, user_payload)
-    return BuyerResponse.model_validate(
-        await service.convert_buyer_to_contracted(b_id, data)
-    )
+    return BuyerResponse.model_validate(await service.convert_buyer_to_contracted(b_id, data))
 
 
 # ── Selections ──────────────────────────────────────────────────────────
@@ -1004,7 +955,9 @@ async def list_selections(
 
 
 @router.post(
-    "/selections/", response_model=BuyerSelectionResponse, status_code=201,
+    "/selections/",
+    response_model=BuyerSelectionResponse,
+    status_code=201,
 )
 async def create_selection(
     data: BuyerSelectionCreate,
@@ -1014,9 +967,7 @@ async def create_selection(
     _perm: None = Depends(RequirePermission("property_dev.create")),
 ) -> BuyerSelectionResponse:
     await _verify_owner_via_buyer(session, data.buyer_id, user_payload)
-    return BuyerSelectionResponse.model_validate(
-        await service.create_selection(data)
-    )
+    return BuyerSelectionResponse.model_validate(await service.create_selection(data))
 
 
 @router.get("/selections/{s_id}", response_model=BuyerSelectionResponse)
@@ -1041,9 +992,7 @@ async def update_selection(
     _perm: None = Depends(RequirePermission("property_dev.update")),
 ) -> BuyerSelectionResponse:
     await _verify_owner_via_selection(session, s_id, user_payload)
-    return BuyerSelectionResponse.model_validate(
-        await service.update_selection(s_id, data)
-    )
+    return BuyerSelectionResponse.model_validate(await service.update_selection(s_id, data))
 
 
 @router.delete("/selections/{s_id}", status_code=204)
@@ -1059,7 +1008,8 @@ async def delete_selection(
 
 
 @router.post(
-    "/selections/{s_id}/submit", response_model=BuyerSelectionResponse,
+    "/selections/{s_id}/submit",
+    response_model=BuyerSelectionResponse,
 )
 async def submit_selection(
     s_id: uuid.UUID,
@@ -1069,13 +1019,12 @@ async def submit_selection(
     _perm: None = Depends(RequirePermission("property_dev.update")),
 ) -> BuyerSelectionResponse:
     await _verify_owner_via_selection(session, s_id, user_payload)
-    return BuyerSelectionResponse.model_validate(
-        await service.submit_selection(s_id)
-    )
+    return BuyerSelectionResponse.model_validate(await service.submit_selection(s_id))
 
 
 @router.post(
-    "/selections/{s_id}/lock", response_model=BuyerSelectionResponse,
+    "/selections/{s_id}/lock",
+    response_model=BuyerSelectionResponse,
 )
 async def lock_selection(
     s_id: uuid.UUID,
@@ -1085,9 +1034,7 @@ async def lock_selection(
     _perm: None = Depends(RequirePermission("property_dev.lock_selection")),
 ) -> BuyerSelectionResponse:
     await _verify_owner_via_selection(session, s_id, user_payload)
-    return BuyerSelectionResponse.model_validate(
-        await service.lock_selection(s_id)
-    )
+    return BuyerSelectionResponse.model_validate(await service.lock_selection(s_id))
 
 
 @router.post(
@@ -1104,13 +1051,12 @@ async def add_selection_item(
     _perm: None = Depends(RequirePermission("property_dev.update")),
 ) -> BuyerSelectionItemResponse:
     await _verify_owner_via_selection(session, s_id, user_payload)
-    return BuyerSelectionItemResponse.model_validate(
-        await service.add_selection_item(s_id, data)
-    )
+    return BuyerSelectionItemResponse.model_validate(await service.add_selection_item(s_id, data))
 
 
 @router.delete(
-    "/selections/{s_id}/items/{item_id}", status_code=204,
+    "/selections/{s_id}/items/{item_id}",
+    status_code=204,
 )
 async def remove_selection_item(
     s_id: uuid.UUID,
@@ -1195,9 +1141,7 @@ async def update_handover(
     _perm: None = Depends(RequirePermission("property_dev.handover")),
 ) -> HandoverResponse:
     await _verify_owner_via_handover(session, h_id, user_payload)
-    return HandoverResponse.model_validate(
-        await service.update_handover(h_id, data)
-    )
+    return HandoverResponse.model_validate(await service.update_handover(h_id, data))
 
 
 @router.delete("/handovers/{h_id}", status_code=204)
@@ -1222,9 +1166,7 @@ async def complete_handover(
     _perm: None = Depends(RequirePermission("property_dev.handover")),
 ) -> HandoverResponse:
     await _verify_owner_via_handover(session, h_id, user_payload)
-    return HandoverResponse.model_validate(
-        await service.complete_handover(h_id, data)
-    )
+    return HandoverResponse.model_validate(await service.complete_handover(h_id, data))
 
 
 # ── Snags ───────────────────────────────────────────────────────────────
@@ -1304,9 +1246,7 @@ async def fix_snag(
 ) -> SnagResponse:
     await _verify_owner_via_snag(session, s_id, user_payload)
     fix_notes = (payload or {}).get("fix_notes")
-    return SnagResponse.model_validate(
-        await service.mark_snag_fixed(s_id, fix_notes=fix_notes)
-    )
+    return SnagResponse.model_validate(await service.mark_snag_fixed(s_id, fix_notes=fix_notes))
 
 
 @router.post("/snags/{s_id}/wont-fix", response_model=SnagResponse)
@@ -1320,9 +1260,7 @@ async def wont_fix_snag(
 ) -> SnagResponse:
     await _verify_owner_via_snag(session, s_id, user_payload)
     fix_notes = (payload or {}).get("fix_notes")
-    return SnagResponse.model_validate(
-        await service.mark_snag_wont_fix(s_id, fix_notes=fix_notes)
-    )
+    return SnagResponse.model_validate(await service.mark_snag_wont_fix(s_id, fix_notes=fix_notes))
 
 
 # Directory where snag photos live on disk. Mirrors punchlist's layout.
@@ -1421,9 +1359,7 @@ async def list_warranty_claims(
         await _verify_owner_via_plot(session, plot_id, user_payload)
         rows = await service.warranty.list_for_plot(plot_id, status=status)
     elif development_id is not None:
-        await _verify_owner_via_development(
-            session, development_id, user_payload
-        )
+        await _verify_owner_via_development(session, development_id, user_payload)
         rows = await service.warranty.list_for_development(
             development_id,
             status=status,
@@ -1441,19 +1377,16 @@ async def list_warranty_claims(
         owner_id = uuid.UUID(str(user_payload["sub"]))
         if proj.owner_id != owner_id:
             raise HTTPException(status_code=404, detail=translate("errors.resource_not_found", locale=get_locale()))
-        rows = await service.warranty.list_for_project(
-            project_id, status=status
-        )
+        rows = await service.warranty.list_for_project(project_id, status=status)
     else:
         rows = []
-    return [
-        await service.warranty_response(r)
-        for r in rows
-    ]
+    return [await service.warranty_response(r) for r in rows]
 
 
 @router.post(
-    "/warranty-claims/", response_model=WarrantyClaimResponse, status_code=201,
+    "/warranty-claims/",
+    response_model=WarrantyClaimResponse,
+    status_code=201,
 )
 async def create_warranty_claim(
     data: WarrantyClaimCreate,
@@ -1464,13 +1397,12 @@ async def create_warranty_claim(
 ) -> WarrantyClaimResponse:
     await _verify_owner_via_plot(session, data.plot_id, user_payload)
     await _verify_owner_via_buyer(session, data.buyer_id, user_payload)
-    return await service.warranty_response(
-        await service.raise_warranty_claim(data.plot_id, data.buyer_id, data)
-    )
+    return await service.warranty_response(await service.raise_warranty_claim(data.plot_id, data.buyer_id, data))
 
 
 @router.get(
-    "/warranty-claims/{w_id}", response_model=WarrantyClaimResponse,
+    "/warranty-claims/{w_id}",
+    response_model=WarrantyClaimResponse,
 )
 async def get_warranty_claim(
     w_id: uuid.UUID,
@@ -1484,7 +1416,8 @@ async def get_warranty_claim(
 
 
 @router.patch(
-    "/warranty-claims/{w_id}", response_model=WarrantyClaimResponse,
+    "/warranty-claims/{w_id}",
+    response_model=WarrantyClaimResponse,
 )
 async def update_warranty_claim(
     w_id: uuid.UUID,
@@ -1495,9 +1428,7 @@ async def update_warranty_claim(
     _perm: None = Depends(RequirePermission("property_dev.process_warranty")),
 ) -> WarrantyClaimResponse:
     await _verify_owner_via_warranty(session, w_id, user_payload)
-    return await service.warranty_response(
-        await service.update_warranty(w_id, data)
-    )
+    return await service.warranty_response(await service.update_warranty(w_id, data))
 
 
 @router.delete("/warranty-claims/{w_id}", status_code=204)
@@ -1526,13 +1457,12 @@ async def assign_warranty_claim(
 ) -> WarrantyClaimResponse:
     """Assign (or unassign with ``null``) a contractor / PM owner."""
     await _verify_owner_via_warranty(session, w_id, user_payload)
-    return await service.warranty_response(
-        await service.assign_warranty(w_id, data.assigned_to_user_id)
-    )
+    return await service.warranty_response(await service.assign_warranty(w_id, data.assigned_to_user_id))
 
 
 @router.post(
-    "/warranty/{w_id}/accept", response_model=WarrantyClaimResponse,
+    "/warranty/{w_id}/accept",
+    response_model=WarrantyClaimResponse,
 )
 async def accept_warranty_claim(
     w_id: uuid.UUID,
@@ -1546,7 +1476,8 @@ async def accept_warranty_claim(
 
 
 @router.post(
-    "/warranty/{w_id}/reject", response_model=WarrantyClaimResponse,
+    "/warranty/{w_id}/reject",
+    response_model=WarrantyClaimResponse,
 )
 async def reject_warranty_claim(
     w_id: uuid.UUID,
@@ -1560,7 +1491,8 @@ async def reject_warranty_claim(
 
 
 @router.post(
-    "/warranty/{w_id}/close", response_model=WarrantyClaimResponse,
+    "/warranty/{w_id}/close",
+    response_model=WarrantyClaimResponse,
 )
 async def close_warranty_claim(
     w_id: uuid.UUID,
@@ -1639,9 +1571,7 @@ async def warranty_claim_pdf(
             content=pdf_bytes,
             media_type="application/pdf",
             headers={
-                "Content-Disposition": (
-                    f'attachment; filename="warranty-claim-{w_id}.pdf"'
-                ),
+                "Content-Disposition": (f'attachment; filename="warranty-claim-{w_id}.pdf"'),
             },
         )
     except Exception:
@@ -1651,9 +1581,7 @@ async def warranty_claim_pdf(
             content=body.encode("utf-8"),
             media_type="text/plain; charset=utf-8",
             headers={
-                "Content-Disposition": (
-                    f'attachment; filename="warranty-claim-{w_id}.txt"'
-                ),
+                "Content-Disposition": (f'attachment; filename="warranty-claim-{w_id}.txt"'),
             },
         )
 
@@ -1697,11 +1625,7 @@ async def create_warranty_claim_from_snag(
 
         from app.modules.property_dev.models import Buyer as _Buyer
 
-        row = (
-            await session.execute(
-                _select(_Buyer).where(_Buyer.plot_id == plot_id).limit(1)
-            )
-        ).scalar_one_or_none()
+        row = (await session.execute(_select(_Buyer).where(_Buyer.plot_id == plot_id).limit(1))).scalar_one_or_none()
         if row is None:
             raise HTTPException(
                 status_code=409,
@@ -1762,7 +1686,8 @@ async def list_jurisdictions(
 
 
 @router.get(
-    "/handovers/{h_id}/docs", response_model=HandoverBundleResponse,
+    "/handovers/{h_id}/docs",
+    response_model=HandoverBundleResponse,
 )
 async def get_handover_bundle(
     h_id: uuid.UUID,
@@ -1791,13 +1716,12 @@ async def create_handover_doc(
     service: PropertyDevService = Depends(_svc),
     _perm: None = Depends(RequirePermission("property_dev.handover")),
 ) -> HandoverDocResponse:
-    return HandoverDocResponse.model_validate(
-        await service.create_handover_doc(data)
-    )
+    return HandoverDocResponse.model_validate(await service.create_handover_doc(data))
 
 
 @router.patch(
-    "/handover-docs/{doc_id}", response_model=HandoverDocResponse,
+    "/handover-docs/{doc_id}",
+    response_model=HandoverDocResponse,
 )
 async def update_handover_doc(
     doc_id: uuid.UUID,
@@ -1808,9 +1732,7 @@ async def update_handover_doc(
     _perm: None = Depends(RequirePermission("property_dev.handover")),
 ) -> HandoverDocResponse:
     await _verify_owner_via_handover_doc(session, doc_id, user_payload)
-    return HandoverDocResponse.model_validate(
-        await service.update_handover_doc(doc_id, data)
-    )
+    return HandoverDocResponse.model_validate(await service.update_handover_doc(doc_id, data))
 
 
 @router.delete("/handover-docs/{doc_id}", status_code=204)
@@ -1867,7 +1789,9 @@ async def reservation_calendar(
     """
     await _verify_owner_via_development(session, dev_id, user_payload)
     payload = await service.reservation_calendar(
-        dev_id, period_start, period_end,
+        dev_id,
+        period_start,
+        period_end,
     )
     return ReservationCalendarResponse(**payload)
 
@@ -1890,7 +1814,6 @@ async def development_pnl(
     await _verify_owner_via_development(session, dev_id, user_payload)
     payload = await service.development_pnl(dev_id)
     return DevelopmentPnLResponse(**payload)
-
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -2356,9 +2279,7 @@ async def list_leads(
     callers receive an empty list (admin bypasses).
     """
     if development_id is not None:
-        await _verify_owner_via_development(
-            session, development_id, user_payload
-        )
+        await _verify_owner_via_development(session, development_id, user_payload)
     elif user_payload.get("role") != "admin":
         # Non-admins MUST scope to a development they own; collapsing to
         # an empty list avoids leaking cross-tenant top-of-funnel leads.
@@ -2451,9 +2372,7 @@ async def convert_lead_to_reservation(
 ) -> ReservationResponse:
     await _verify_owner_via_lead(session, lead_id, payload)
     await _verify_owner_via_plot(session, data.plot_id, payload)
-    return ReservationResponse.model_validate(
-        await service.convert_lead_to_reservation(lead_id, data)
-    )
+    return ReservationResponse.model_validate(await service.convert_lead_to_reservation(lead_id, data))
 
 
 @router.get(
@@ -2481,9 +2400,7 @@ async def get_lead_contact(
 
     contact = await session.get(_Contact, lead.contact_id)
     if contact is None:
-        raise HTTPException(
-            status_code=404, detail="Linked contact has been deleted"
-        )
+        raise HTTPException(status_code=404, detail="Linked contact has been deleted")
     return {
         "id": str(contact.id),
         "contact_type": contact.contact_type,
@@ -2522,9 +2439,7 @@ async def get_buyer_contact(
 
     contact = await session.get(_Contact, buyer.contact_id)
     if contact is None:
-        raise HTTPException(
-            status_code=404, detail="Linked contact has been deleted"
-        )
+        raise HTTPException(status_code=404, detail="Linked contact has been deleted")
     return {
         "id": str(contact.id),
         "contact_type": contact.contact_type,
@@ -2563,9 +2478,7 @@ async def list_reservations(
     if plot_id is not None:
         await _verify_owner_via_plot(session, plot_id, user_payload)
     elif development_id is not None:
-        await _verify_owner_via_development(
-            session, development_id, user_payload
-        )
+        await _verify_owner_via_development(session, development_id, user_payload)
     elif user_payload.get("role") != "admin":
         return []
     rows, _ = await service.reservations.list_filtered(
@@ -2579,7 +2492,9 @@ async def list_reservations(
 
 
 @router.post(
-    "/reservations/", response_model=ReservationResponse, status_code=201,
+    "/reservations/",
+    response_model=ReservationResponse,
+    status_code=201,
 )
 async def create_reservation(
     data: ReservationCreate,
@@ -2589,9 +2504,7 @@ async def create_reservation(
     _perm: None = Depends(RequirePermission("property_dev.reservation.create")),
 ) -> ReservationResponse:
     await _verify_owner_via_plot(session, data.plot_id, payload)
-    return ReservationResponse.model_validate(
-        await service.create_reservation(data)
-    )
+    return ReservationResponse.model_validate(await service.create_reservation(data))
 
 
 @router.post(
@@ -2606,9 +2519,7 @@ async def expire_overdue_reservations(
     ``expires_at``. Idempotent + safe to schedule daily.
     """
     ids = await service.expire_overdue_reservations()
-    return ReservationExpiryBatchResponse(
-        expired_count=len(ids), expired_ids=ids
-    )
+    return ReservationExpiryBatchResponse(expired_count=len(ids), expired_ids=ids)
 
 
 @router.get("/reservations/{r_id}", response_model=ReservationResponse)
@@ -2620,9 +2531,7 @@ async def get_reservation(
     _perm: None = Depends(RequirePermission("property_dev.reservation.read")),
 ) -> ReservationResponse:
     await _verify_owner_via_reservation(session, r_id, payload)
-    return ReservationResponse.model_validate(
-        await service.get_reservation(r_id)
-    )
+    return ReservationResponse.model_validate(await service.get_reservation(r_id))
 
 
 @router.patch("/reservations/{r_id}", response_model=ReservationResponse)
@@ -2635,13 +2544,12 @@ async def update_reservation(
     _perm: None = Depends(RequirePermission("property_dev.reservation.update")),
 ) -> ReservationResponse:
     await _verify_owner_via_reservation(session, r_id, payload)
-    return ReservationResponse.model_validate(
-        await service.update_reservation(r_id, data)
-    )
+    return ReservationResponse.model_validate(await service.update_reservation(r_id, data))
 
 
 @router.post(
-    "/reservations/{r_id}/cancel", response_model=ReservationResponse,
+    "/reservations/{r_id}/cancel",
+    response_model=ReservationResponse,
 )
 async def cancel_reservation(
     r_id: uuid.UUID,
@@ -2651,13 +2559,12 @@ async def cancel_reservation(
     _perm: None = Depends(RequirePermission("property_dev.reservation.cancel")),
 ) -> ReservationResponse:
     await _verify_owner_via_reservation(session, r_id, payload)
-    return ReservationResponse.model_validate(
-        await service.cancel_reservation(r_id)
-    )
+    return ReservationResponse.model_validate(await service.cancel_reservation(r_id))
 
 
 @router.post(
-    "/reservations/{r_id}/expire", response_model=ReservationResponse,
+    "/reservations/{r_id}/expire",
+    response_model=ReservationResponse,
 )
 async def expire_reservation(
     r_id: uuid.UUID,
@@ -2667,9 +2574,7 @@ async def expire_reservation(
     _perm: None = Depends(RequirePermission("property_dev.reservation.expire")),
 ) -> ReservationResponse:
     await _verify_owner_via_reservation(session, r_id, payload)
-    return ReservationResponse.model_validate(
-        await service.expire_reservation(r_id)
-    )
+    return ReservationResponse.model_validate(await service.expire_reservation(r_id))
 
 
 @router.post(
@@ -2686,9 +2591,7 @@ async def convert_reservation_to_spa(
     _perm: None = Depends(RequirePermission("property_dev.spa.draft")),
 ) -> SalesContractResponse:
     await _verify_owner_via_reservation(session, r_id, payload)
-    return SalesContractResponse.model_validate(
-        await service.convert_reservation_to_spa(r_id, data)
-    )
+    return SalesContractResponse.model_validate(await service.convert_reservation_to_spa(r_id, data))
 
 
 # ── SalesContracts (SPAs) ───────────────────────────────────────────────
@@ -2714,14 +2617,10 @@ async def list_sales_contracts(
     """
     if plot_id is not None:
         await _verify_owner_via_plot(session, plot_id, payload)
-        rows = await service.sales_contracts.list_for_plot(
-            plot_id, status=status
-        )
+        rows = await service.sales_contracts.list_for_plot(plot_id, status=status)
     elif development_id is not None:
         await _verify_owner_via_development(session, development_id, payload)
-        rows = await service.sales_contracts.list_for_development(
-            development_id, status=status
-        )
+        rows = await service.sales_contracts.list_for_development(development_id, status=status)
     elif reservation_id is not None:
         await _verify_owner_via_reservation(session, reservation_id, payload)
         rows = await service.sales_contracts.list_for_reservation(reservation_id)
@@ -2752,7 +2651,8 @@ async def create_sales_contract(
 
 
 @router.get(
-    "/sales-contracts/{spa_id}", response_model=SalesContractResponse,
+    "/sales-contracts/{spa_id}",
+    response_model=SalesContractResponse,
 )
 async def get_sales_contract(
     spa_id: uuid.UUID,
@@ -2766,7 +2666,8 @@ async def get_sales_contract(
 
 
 @router.patch(
-    "/sales-contracts/{spa_id}", response_model=SalesContractResponse,
+    "/sales-contracts/{spa_id}",
+    response_model=SalesContractResponse,
 )
 async def update_sales_contract(
     spa_id: uuid.UUID,
@@ -2777,9 +2678,7 @@ async def update_sales_contract(
     _perm: None = Depends(RequirePermission("property_dev.spa.draft")),
 ) -> SalesContractResponse:
     await _verify_owner_via_spa(session, spa_id, payload)
-    return SalesContractResponse.model_validate(
-        await service.update_spa(spa_id, data)
-    )
+    return SalesContractResponse.model_validate(await service.update_spa(spa_id, data))
 
 
 @router.delete("/sales-contracts/{spa_id}", status_code=204)
@@ -2807,13 +2706,12 @@ async def send_spa_for_signature(
     _perm: None = Depends(RequirePermission("property_dev.spa.send")),
 ) -> SalesContractResponse:
     await _verify_owner_via_spa(session, spa_id, payload)
-    return SalesContractResponse.model_validate(
-        await service.send_spa_for_signature(spa_id, data)
-    )
+    return SalesContractResponse.model_validate(await service.send_spa_for_signature(spa_id, data))
 
 
 @router.post(
-    "/sales-contracts/{spa_id}/sign", response_model=SalesContractResponse,
+    "/sales-contracts/{spa_id}/sign",
+    response_model=SalesContractResponse,
 )
 async def sign_sales_contract(
     spa_id: uuid.UUID,
@@ -2824,13 +2722,12 @@ async def sign_sales_contract(
     _perm: None = Depends(RequirePermission("property_dev.spa.sign")),
 ) -> SalesContractResponse:
     await _verify_owner_via_spa(session, spa_id, payload)
-    return SalesContractResponse.model_validate(
-        await service.sign_spa(spa_id, data)
-    )
+    return SalesContractResponse.model_validate(await service.sign_spa(spa_id, data))
 
 
 @router.post(
-    "/sales-contracts/{spa_id}/cancel", response_model=SalesContractResponse,
+    "/sales-contracts/{spa_id}/cancel",
+    response_model=SalesContractResponse,
 )
 async def cancel_sales_contract(
     spa_id: uuid.UUID,
@@ -2938,15 +2835,11 @@ async def list_payment_schedules(
     """
     if sales_contract_id is not None:
         await _verify_owner_via_spa(session, sales_contract_id, payload)
-        existing = await service.payment_schedules.get_for_contract(
-            sales_contract_id
-        )
+        existing = await service.payment_schedules.get_for_contract(sales_contract_id)
         rows = [existing] if existing is not None else []
     elif development_id is not None:
         await _verify_owner_via_development(session, development_id, payload)
-        rows = await service.payment_schedules.list_for_development(
-            development_id, status=status
-        )
+        rows = await service.payment_schedules.list_for_development(development_id, status=status)
     else:
         raise HTTPException(
             status_code=422,
@@ -2967,9 +2860,7 @@ async def generate_payment_schedule_from_template(
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.payment_schedule.activate")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.payment_schedule.activate")),
 ) -> PaymentScheduleResponse:
     """Generate a payment schedule from a milestone template.
 
@@ -2999,7 +2890,8 @@ async def generate_payment_schedule_from_template(
         contract_id = uuid.UUID(str(raw_contract))
     except (ValueError, TypeError) as exc:
         raise HTTPException(
-            status_code=422, detail="invalid sales_contract_id",
+            status_code=422,
+            detail="invalid sales_contract_id",
         ) from exc
     await _verify_owner_via_spa(session, contract_id, payload)
 
@@ -3041,14 +2933,10 @@ async def create_payment_schedule(
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.payment_schedule.activate")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.payment_schedule.activate")),
 ) -> PaymentScheduleResponse:
     await _verify_owner_via_spa(session, data.sales_contract_id, payload)
-    return PaymentScheduleResponse.model_validate(
-        await service.create_payment_schedule(data)
-    )
+    return PaymentScheduleResponse.model_validate(await service.create_payment_schedule(data))
 
 
 @router.get(
@@ -3063,9 +2951,7 @@ async def get_payment_schedule(
     _perm: None = Depends(RequirePermission("property_dev.read")),
 ) -> PaymentScheduleResponse:
     await _verify_owner_via_schedule(session, schedule_id, payload)
-    return PaymentScheduleResponse.model_validate(
-        await service.get_payment_schedule(schedule_id)
-    )
+    return PaymentScheduleResponse.model_validate(await service.get_payment_schedule(schedule_id))
 
 
 @router.patch(
@@ -3078,14 +2964,10 @@ async def update_payment_schedule(
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.payment_schedule.activate")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.payment_schedule.activate")),
 ) -> PaymentScheduleResponse:
     await _verify_owner_via_schedule(session, schedule_id, payload)
-    return PaymentScheduleResponse.model_validate(
-        await service.update_payment_schedule(schedule_id, data)
-    )
+    return PaymentScheduleResponse.model_validate(await service.update_payment_schedule(schedule_id, data))
 
 
 @router.post(
@@ -3097,14 +2979,10 @@ async def activate_payment_schedule(
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.payment_schedule.activate")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.payment_schedule.activate")),
 ) -> PaymentScheduleResponse:
     await _verify_owner_via_schedule(session, schedule_id, payload)
-    return PaymentScheduleResponse.model_validate(
-        await service.activate_payment_schedule(schedule_id)
-    )
+    return PaymentScheduleResponse.model_validate(await service.activate_payment_schedule(schedule_id))
 
 
 @router.post(
@@ -3116,14 +2994,10 @@ async def suspend_payment_schedule(
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.payment_schedule.suspend")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.payment_schedule.suspend")),
 ) -> PaymentScheduleResponse:
     await _verify_owner_via_schedule(session, schedule_id, payload)
-    return PaymentScheduleResponse.model_validate(
-        await service.suspend_payment_schedule(schedule_id)
-    )
+    return PaymentScheduleResponse.model_validate(await service.suspend_payment_schedule(schedule_id))
 
 
 # ── Instalments ─────────────────────────────────────────────────────────
@@ -3141,9 +3015,7 @@ async def list_instalments(
 ) -> list[InstalmentResponse]:
     if schedule_id is not None:
         await _verify_owner_via_schedule(session, schedule_id, payload)
-        rows = await service.instalments.list_for_schedule(
-            schedule_id, status=status
-        )
+        rows = await service.instalments.list_for_schedule(schedule_id, status=status)
     elif sales_contract_id is not None:
         await _verify_owner_via_spa(session, sales_contract_id, payload)
         rows = await service.instalments.list_for_contract(sales_contract_id)
@@ -3158,21 +3030,19 @@ async def list_instalments(
 
 
 @router.post(
-    "/instalments/", response_model=InstalmentResponse, status_code=201,
+    "/instalments/",
+    response_model=InstalmentResponse,
+    status_code=201,
 )
 async def create_instalment(
     data: InstalmentCreate,
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.payment_schedule.activate")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.payment_schedule.activate")),
 ) -> InstalmentResponse:
     await _verify_owner_via_schedule(session, data.schedule_id, payload)
-    return InstalmentResponse.model_validate(
-        await service.create_instalment(data)
-    )
+    return InstalmentResponse.model_validate(await service.create_instalment(data))
 
 
 @router.get("/instalments/{ins_id}", response_model=InstalmentResponse)
@@ -3184,9 +3054,7 @@ async def get_instalment(
     _perm: None = Depends(RequirePermission("property_dev.read")),
 ) -> InstalmentResponse:
     await _verify_owner_via_instalment(session, ins_id, payload)
-    return InstalmentResponse.model_validate(
-        await service.get_instalment(ins_id)
-    )
+    return InstalmentResponse.model_validate(await service.get_instalment(ins_id))
 
 
 @router.patch("/instalments/{ins_id}", response_model=InstalmentResponse)
@@ -3196,14 +3064,10 @@ async def update_instalment(
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.payment_schedule.activate")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.payment_schedule.activate")),
 ) -> InstalmentResponse:
     await _verify_owner_via_instalment(session, ins_id, payload)
-    return InstalmentResponse.model_validate(
-        await service.update_instalment(ins_id, data)
-    )
+    return InstalmentResponse.model_validate(await service.update_instalment(ins_id, data))
 
 
 @router.post(
@@ -3216,36 +3080,30 @@ async def mark_instalment_paid(
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.instalment.mark_paid")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.instalment.mark_paid")),
 ) -> InstalmentResponse:
     await _verify_owner_via_instalment(session, ins_id, payload)
-    return InstalmentResponse.model_validate(
-        await service.mark_instalment_paid(ins_id, data)
-    )
+    return InstalmentResponse.model_validate(await service.mark_instalment_paid(ins_id, data))
 
 
 @router.post(
-    "/instalments/{ins_id}/issue-demand", response_model=InstalmentResponse,
+    "/instalments/{ins_id}/issue-demand",
+    response_model=InstalmentResponse,
 )
 async def issue_instalment_demand(
     ins_id: uuid.UUID,
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.instalment.issue_demand")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.instalment.issue_demand")),
 ) -> InstalmentResponse:
     await _verify_owner_via_instalment(session, ins_id, payload)
-    return InstalmentResponse.model_validate(
-        await service.issue_instalment_demand(ins_id)
-    )
+    return InstalmentResponse.model_validate(await service.issue_instalment_demand(ins_id))
 
 
 @router.post(
-    "/instalments/{ins_id}/waive", response_model=InstalmentResponse,
+    "/instalments/{ins_id}/waive",
+    response_model=InstalmentResponse,
 )
 async def waive_instalment(
     ins_id: uuid.UUID,
@@ -3253,14 +3111,10 @@ async def waive_instalment(
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.instalment.waive")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.instalment.waive")),
 ) -> InstalmentResponse:
     await _verify_owner_via_instalment(session, ins_id, payload)
-    return InstalmentResponse.model_validate(
-        await service.waive_instalment(ins_id, data)
-    )
+    return InstalmentResponse.model_validate(await service.waive_instalment(ins_id, data))
 
 
 @router.post(
@@ -3285,7 +3139,8 @@ async def accrue_late_fees(
 
 
 @router.get(
-    "/contract-parties/", response_model=list[ContractPartyResponse],
+    "/contract-parties/",
+    response_model=list[ContractPartyResponse],
 )
 async def list_contract_parties(
     session: SessionDep,
@@ -3309,18 +3164,15 @@ async def add_contract_party(
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.contract_party.add")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.contract_party.add")),
 ) -> ContractPartyResponse:
     await _verify_owner_via_spa(session, data.sales_contract_id, payload)
-    return ContractPartyResponse.model_validate(
-        await service.add_contract_party(data)
-    )
+    return ContractPartyResponse.model_validate(await service.add_contract_party(data))
 
 
 @router.patch(
-    "/contract-parties/{party_id}", response_model=ContractPartyResponse,
+    "/contract-parties/{party_id}",
+    response_model=ContractPartyResponse,
 )
 async def update_contract_party(
     party_id: uuid.UUID,
@@ -3328,14 +3180,10 @@ async def update_contract_party(
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.contract_party.update_ownership")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.contract_party.update_ownership")),
 ) -> ContractPartyResponse:
     await _verify_owner_via_party(session, party_id, payload)
-    return ContractPartyResponse.model_validate(
-        await service.update_contract_party(party_id, data)
-    )
+    return ContractPartyResponse.model_validate(await service.update_contract_party(party_id, data))
 
 
 @router.delete("/contract-parties/{party_id}", status_code=204)
@@ -3344,9 +3192,7 @@ async def remove_contract_party(
     session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.contract_party.remove")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.contract_party.remove")),
 ) -> None:
     await _verify_owner_via_party(session, party_id, payload)
     await service.remove_contract_party(party_id)
@@ -3427,9 +3273,7 @@ async def update_phase(
     _perm: None = Depends(RequirePermission("property_dev.update")),
 ) -> PhaseResponse:
     await _verify_owner_via_phase(session, phase_id, user_payload)
-    return PhaseResponse.model_validate(
-        await service.update_phase(phase_id, data)
-    )
+    return PhaseResponse.model_validate(await service.update_phase(phase_id, data))
 
 
 @router.delete("/phases/{phase_id}", status_code=204)
@@ -3495,9 +3339,7 @@ async def update_block(
     _perm: None = Depends(RequirePermission("property_dev.update")),
 ) -> BlockResponse:
     await _verify_owner_via_block(session, block_id, user_payload)
-    return BlockResponse.model_validate(
-        await service.update_block(block_id, data)
-    )
+    return BlockResponse.model_validate(await service.update_block(block_id, data))
 
 
 @router.delete("/blocks/{block_id}", status_code=204)
@@ -3535,9 +3377,7 @@ async def list_brokers(
             limit=limit,
         )
     else:
-        rows = await service.brokers.list_all(
-            tenant_id, offset=offset, limit=limit
-        )
+        rows = await service.brokers.list_all(tenant_id, offset=offset, limit=limit)
     return [BrokerResponse.model_validate(r) for r in rows]
 
 
@@ -3578,9 +3418,7 @@ async def update_broker(
 ) -> BrokerResponse:
     broker = await service.get_broker(broker_id)
     _ensure_broker_owner(broker, payload)
-    return BrokerResponse.model_validate(
-        await service.update_broker(broker_id, data)
-    )
+    return BrokerResponse.model_validate(await service.update_broker(broker_id, data))
 
 
 @router.delete("/brokers/{broker_id}", status_code=204)
@@ -3604,9 +3442,7 @@ async def verify_broker_kyc(
 ) -> BrokerResponse:
     broker = await service.get_broker(broker_id)
     _ensure_broker_owner(broker, payload)
-    return BrokerResponse.model_validate(
-        await service.verify_broker_kyc(broker_id)
-    )
+    return BrokerResponse.model_validate(await service.verify_broker_kyc(broker_id))
 
 
 def _ensure_broker_owner(broker: Any, payload: dict[str, Any]) -> None:
@@ -3629,7 +3465,8 @@ def _ensure_broker_owner(broker: Any, payload: dict[str, Any]) -> None:
 
 
 @router.get(
-    "/commission-agreements/", response_model=list[CommissionAgreementResponse],
+    "/commission-agreements/",
+    response_model=list[CommissionAgreementResponse],
 )
 async def list_commission_agreements(
     broker_id: uuid.UUID | None = Query(default=None),
@@ -3640,7 +3477,8 @@ async def list_commission_agreements(
 ) -> list[CommissionAgreementResponse]:
     if broker_id is not None and on_date is not None:
         rows = await service.commission_agreements.list_active_for_broker(
-            broker_id, on_date,
+            broker_id,
+            on_date,
         )
     elif development_id is not None and on_date is not None:
         rows = await service.commission_agreements.list_matching(
@@ -3657,9 +3495,7 @@ async def list_commission_agreements(
         )
 
         rs = await service.session.execute(
-            select(_CA).where(_CA.broker_id == broker_id).order_by(
-                _CA.created_at.desc()
-            )
+            select(_CA).where(_CA.broker_id == broker_id).order_by(_CA.created_at.desc())
         )
         rows = list(rs.scalars().all())
     else:
@@ -3680,9 +3516,7 @@ async def create_commission_agreement(
 ) -> CommissionAgreementResponse:
     broker = await service.get_broker(data.broker_id)
     _ensure_broker_owner(broker, payload)
-    return CommissionAgreementResponse.model_validate(
-        await service.create_agreement(data)
-    )
+    return CommissionAgreementResponse.model_validate(await service.create_agreement(data))
 
 
 @router.get(
@@ -3715,9 +3549,7 @@ async def update_commission_agreement(
     agreement = await service.get_agreement(agreement_id)
     broker = await service.get_broker(agreement.broker_id)
     _ensure_broker_owner(broker, payload)
-    return CommissionAgreementResponse.model_validate(
-        await service.update_agreement(agreement_id, data)
-    )
+    return CommissionAgreementResponse.model_validate(await service.update_agreement(agreement_id, data))
 
 
 @router.delete("/commission-agreements/{agreement_id}", status_code=204)
@@ -3737,7 +3569,8 @@ async def delete_commission_agreement(
 
 
 @router.get(
-    "/commission-accruals/", response_model=list[CommissionAccrualResponse],
+    "/commission-accruals/",
+    response_model=list[CommissionAccrualResponse],
 )
 async def list_commission_accruals(
     broker_id: uuid.UUID = Query(...),
@@ -3751,7 +3584,10 @@ async def list_commission_accruals(
     broker = await service.get_broker(broker_id)
     _ensure_broker_owner(broker, payload or {})
     rows = await service.commission_accruals.list_for_broker(
-        broker_id, state=state, offset=offset, limit=limit,
+        broker_id,
+        state=state,
+        offset=offset,
+        limit=limit,
     )
     return [CommissionAccrualResponse.model_validate(r) for r in rows]
 
@@ -3764,19 +3600,17 @@ async def approve_commission_accrual(
     accrual_id: uuid.UUID,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.commission.approve")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.commission.approve")),
 ) -> CommissionAccrualResponse:
     user_id = _payload_user_id(payload)
     accrual = await service.commission_accruals.get_by_id(accrual_id)
     if accrual is None:
-        raise HTTPException(status_code=404, detail=translate("errors.commission_accrual_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=404, detail=translate("errors.commission_accrual_not_found", locale=get_locale())
+        )
     broker = await service.get_broker(accrual.broker_id)
     _ensure_broker_owner(broker, payload)
-    return CommissionAccrualResponse.model_validate(
-        await service.approve_commission(accrual_id, user_id)
-    )
+    return CommissionAccrualResponse.model_validate(await service.approve_commission(accrual_id, user_id))
 
 
 @router.post(
@@ -3793,19 +3627,20 @@ async def pay_commission_accrual(
     user_id = _payload_user_id(payload)
     accrual = await service.commission_accruals.get_by_id(accrual_id)
     if accrual is None:
-        raise HTTPException(status_code=404, detail=translate("errors.commission_accrual_not_found", locale=get_locale()))
+        raise HTTPException(
+            status_code=404, detail=translate("errors.commission_accrual_not_found", locale=get_locale())
+        )
     broker = await service.get_broker(accrual.broker_id)
     _ensure_broker_owner(broker, payload)
-    return CommissionAccrualResponse.model_validate(
-        await service.pay_commission(accrual_id, data.payment_ref, user_id)
-    )
+    return CommissionAccrualResponse.model_validate(await service.pay_commission(accrual_id, data.payment_ref, user_id))
 
 
 # ── Escrow Accounts ────────────────────────────────────────────────────
 
 
 @router.get(
-    "/escrow-accounts/", response_model=list[EscrowAccountResponse],
+    "/escrow-accounts/",
+    response_model=list[EscrowAccountResponse],
 )
 async def list_escrow_accounts(
     session: SessionDep,
@@ -3821,7 +3656,9 @@ async def list_escrow_accounts(
 
 
 @router.post(
-    "/escrow-accounts/", response_model=EscrowAccountResponse, status_code=201,
+    "/escrow-accounts/",
+    response_model=EscrowAccountResponse,
+    status_code=201,
 )
 async def create_escrow_account(
     data: EscrowAccountCreate,
@@ -3831,13 +3668,12 @@ async def create_escrow_account(
     _perm: None = Depends(RequirePermission("property_dev.create")),
 ) -> EscrowAccountResponse:
     await _verify_owner_via_development(session, data.development_id, user_payload)
-    return EscrowAccountResponse.model_validate(
-        await service.create_escrow_account(data)
-    )
+    return EscrowAccountResponse.model_validate(await service.create_escrow_account(data))
 
 
 @router.get(
-    "/escrow-accounts/{account_id}", response_model=EscrowAccountResponse,
+    "/escrow-accounts/{account_id}",
+    response_model=EscrowAccountResponse,
 )
 async def get_escrow_account(
     account_id: uuid.UUID,
@@ -3847,13 +3683,12 @@ async def get_escrow_account(
     _perm: None = Depends(RequirePermission("property_dev.read")),
 ) -> EscrowAccountResponse:
     await _verify_owner_via_escrow_account(session, account_id, user_payload)
-    return EscrowAccountResponse.model_validate(
-        await service.get_escrow_account(account_id)
-    )
+    return EscrowAccountResponse.model_validate(await service.get_escrow_account(account_id))
 
 
 @router.patch(
-    "/escrow-accounts/{account_id}", response_model=EscrowAccountResponse,
+    "/escrow-accounts/{account_id}",
+    response_model=EscrowAccountResponse,
 )
 async def update_escrow_account(
     account_id: uuid.UUID,
@@ -3864,9 +3699,7 @@ async def update_escrow_account(
     _perm: None = Depends(RequirePermission("property_dev.update")),
 ) -> EscrowAccountResponse:
     await _verify_owner_via_escrow_account(session, account_id, user_payload)
-    return EscrowAccountResponse.model_validate(
-        await service.update_escrow_account(account_id, data)
-    )
+    return EscrowAccountResponse.model_validate(await service.update_escrow_account(account_id, data))
 
 
 @router.delete("/escrow-accounts/{account_id}", status_code=204)
@@ -3890,15 +3723,14 @@ async def escrow_account_balance(
     account_id: uuid.UUID,
     session: SessionDep,
     user_payload: CurrentUserPayload,
-    as_of_date: str | None = Query(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    ),
+    as_of_date: str | None = Query(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
     service: PropertyDevService = Depends(_svc),
     _perm: None = Depends(RequirePermission("property_dev.read")),
 ) -> EscrowBalanceResponse:
     await _verify_owner_via_escrow_account(session, account_id, user_payload)
     payload = await service.compute_escrow_balance(
-        account_id, as_of_date=as_of_date,
+        account_id,
+        as_of_date=as_of_date,
     )
     return EscrowBalanceResponse(
         escrow_account_id=payload["escrow_account_id"],
@@ -3916,7 +3748,8 @@ async def escrow_account_balance(
 
 
 @router.get(
-    "/escrow-transactions/", response_model=list[EscrowTransactionResponse],
+    "/escrow-transactions/",
+    response_model=list[EscrowTransactionResponse],
 )
 async def list_escrow_transactions(
     session: SessionDep,
@@ -3929,16 +3762,18 @@ async def list_escrow_transactions(
     _perm: None = Depends(RequirePermission("property_dev.read")),
 ) -> list[EscrowTransactionResponse]:
     await _verify_owner_via_escrow_account(
-        session, escrow_account_id, user_payload,
+        session,
+        escrow_account_id,
+        user_payload,
     )
     await service.get_escrow_account(escrow_account_id)
     if unreconciled_only:
-        rows = await service.escrow_transactions.list_unreconciled(
-            escrow_account_id
-        )
+        rows = await service.escrow_transactions.list_unreconciled(escrow_account_id)
     else:
         rows = await service.escrow_transactions.list_for_account(
-            escrow_account_id, offset=offset, limit=limit,
+            escrow_account_id,
+            offset=offset,
+            limit=limit,
         )
     return [EscrowTransactionResponse.model_validate(r) for r in rows]
 
@@ -3956,15 +3791,16 @@ async def create_escrow_transaction(
     _perm: None = Depends(RequirePermission("property_dev.create")),
 ) -> EscrowTransactionResponse:
     await _verify_owner_via_escrow_account(
-        session, data.escrow_account_id, user_payload,
+        session,
+        data.escrow_account_id,
+        user_payload,
     )
-    return EscrowTransactionResponse.model_validate(
-        await service.create_escrow_transaction(data)
-    )
+    return EscrowTransactionResponse.model_validate(await service.create_escrow_transaction(data))
 
 
 @router.get(
-    "/escrow-transactions/{tx_id}", response_model=EscrowTransactionResponse,
+    "/escrow-transactions/{tx_id}",
+    response_model=EscrowTransactionResponse,
 )
 async def get_escrow_transaction(
     tx_id: uuid.UUID,
@@ -3981,7 +3817,8 @@ async def get_escrow_transaction(
 
 
 @router.patch(
-    "/escrow-transactions/{tx_id}", response_model=EscrowTransactionResponse,
+    "/escrow-transactions/{tx_id}",
+    response_model=EscrowTransactionResponse,
 )
 async def update_escrow_transaction(
     tx_id: uuid.UUID,
@@ -4028,14 +3865,14 @@ async def reconcile_escrow_transaction(
     payload: CurrentUserPayload,
     session: SessionDep,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.escrow.reconcile")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.escrow.reconcile")),
 ) -> EscrowTransactionResponse:
     await _verify_owner_via_escrow_transaction(session, tx_id, payload)
     return EscrowTransactionResponse.model_validate(
         await service.reconcile_escrow_transaction(
-            tx_id, data.bank_reference, _payload_user_id(payload),
+            tx_id,
+            data.bank_reference,
+            _payload_user_id(payload),
         )
     )
 
@@ -4044,7 +3881,8 @@ async def reconcile_escrow_transaction(
 
 
 @router.get(
-    "/price-matrices/", response_model=list[PriceMatrixResponse],
+    "/price-matrices/",
+    response_model=list[PriceMatrixResponse],
 )
 async def list_price_matrices(
     session: SessionDep,
@@ -4060,7 +3898,9 @@ async def list_price_matrices(
 
 
 @router.post(
-    "/price-matrices/", response_model=PriceMatrixResponse, status_code=201,
+    "/price-matrices/",
+    response_model=PriceMatrixResponse,
+    status_code=201,
 )
 async def create_price_matrix(
     data: PriceMatrixCreate,
@@ -4070,13 +3910,12 @@ async def create_price_matrix(
     _perm: None = Depends(RequirePermission("property_dev.create")),
 ) -> PriceMatrixResponse:
     await _verify_owner_via_development(session, data.development_id, user_payload)
-    return PriceMatrixResponse.model_validate(
-        await service.create_price_matrix(data)
-    )
+    return PriceMatrixResponse.model_validate(await service.create_price_matrix(data))
 
 
 @router.get(
-    "/price-matrices/{matrix_id}", response_model=PriceMatrixResponse,
+    "/price-matrices/{matrix_id}",
+    response_model=PriceMatrixResponse,
 )
 async def get_price_matrix(
     matrix_id: uuid.UUID,
@@ -4086,13 +3925,12 @@ async def get_price_matrix(
     _perm: None = Depends(RequirePermission("property_dev.read")),
 ) -> PriceMatrixResponse:
     await _verify_owner_via_price_matrix(session, matrix_id, user_payload)
-    return PriceMatrixResponse.model_validate(
-        await service.get_price_matrix(matrix_id)
-    )
+    return PriceMatrixResponse.model_validate(await service.get_price_matrix(matrix_id))
 
 
 @router.patch(
-    "/price-matrices/{matrix_id}", response_model=PriceMatrixResponse,
+    "/price-matrices/{matrix_id}",
+    response_model=PriceMatrixResponse,
 )
 async def update_price_matrix(
     matrix_id: uuid.UUID,
@@ -4103,9 +3941,7 @@ async def update_price_matrix(
     _perm: None = Depends(RequirePermission("property_dev.update")),
 ) -> PriceMatrixResponse:
     await _verify_owner_via_price_matrix(session, matrix_id, user_payload)
-    return PriceMatrixResponse.model_validate(
-        await service.update_price_matrix(matrix_id, data)
-    )
+    return PriceMatrixResponse.model_validate(await service.update_price_matrix(matrix_id, data))
 
 
 @router.delete("/price-matrices/{matrix_id}", status_code=204)
@@ -4130,14 +3966,10 @@ async def activate_price_matrix(
     session: SessionDep,
     user_payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.price_matrix.activate")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.price_matrix.activate")),
 ) -> PriceMatrixResponse:
     await _verify_owner_via_price_matrix(session, matrix_id, user_payload)
-    return PriceMatrixResponse.model_validate(
-        await service.activate_price_matrix(matrix_id)
-    )
+    return PriceMatrixResponse.model_validate(await service.activate_price_matrix(matrix_id))
 
 
 @router.get(
@@ -4149,16 +3981,16 @@ async def preview_price_on_plot(
     plot_id: uuid.UUID,
     session: SessionDep,
     user_payload: CurrentUserPayload,
-    on_date: str | None = Query(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    ),
+    on_date: str | None = Query(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
     service: PropertyDevService = Depends(_svc),
     _perm: None = Depends(RequirePermission("property_dev.read")),
 ) -> PriceMatrixPreviewResponse:
     await _verify_owner_via_price_matrix(session, matrix_id, user_payload)
     await _verify_owner_via_plot(session, plot_id, user_payload)
     payload = await service.compute_plot_price(
-        plot_id, on_date=on_date, matrix_id=matrix_id,
+        plot_id,
+        on_date=on_date,
+        matrix_id=matrix_id,
     )
     return PriceMatrixPreviewResponse(**payload)
 
@@ -4172,9 +4004,7 @@ async def bulk_recompute_prices(
     session: SessionDep,
     user_payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.price_matrix.bulk_recompute")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.price_matrix.bulk_recompute")),
 ) -> PriceMatrixBulkRecomputeResponse:
     await _verify_owner_via_price_matrix(session, matrix_id, user_payload)
     matrix = await service.get_price_matrix(matrix_id)
@@ -4186,7 +4016,8 @@ async def bulk_recompute_prices(
 
 
 @router.get(
-    "/regulator-reports/RERA", response_model=RegulatorReportResponse,
+    "/regulator-reports/RERA",
+    response_model=RegulatorReportResponse,
 )
 async def regulator_report_rera(
     session: SessionDep,
@@ -4194,9 +4025,7 @@ async def regulator_report_rera(
     dev_id: uuid.UUID = Query(...),
     quarter: str = Query(..., pattern=r"^\d{4}-Q[1-4]$"),
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.regulator_report.generate")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.regulator_report.generate")),
 ) -> RegulatorReportResponse:
     """R8: cross-tenant IDOR closed via ``_verify_owner_via_development``."""
     await _verify_owner_via_development(session, dev_id, user_payload)
@@ -4205,7 +4034,8 @@ async def regulator_report_rera(
 
 
 @router.get(
-    "/regulator-reports/MAHARERA", response_model=RegulatorReportResponse,
+    "/regulator-reports/MAHARERA",
+    response_model=RegulatorReportResponse,
 )
 async def regulator_report_maharera(
     session: SessionDep,
@@ -4213,9 +4043,7 @@ async def regulator_report_maharera(
     dev_id: uuid.UUID = Query(...),
     quarter: str = Query(..., pattern=r"^\d{4}-Q[1-4]$"),
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.regulator_report.generate")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.regulator_report.generate")),
 ) -> RegulatorReportResponse:
     """R8: cross-tenant IDOR closed via ``_verify_owner_via_development``."""
     await _verify_owner_via_development(session, dev_id, user_payload)
@@ -4224,7 +4052,8 @@ async def regulator_report_maharera(
 
 
 @router.get(
-    "/regulator-reports/214-FZ", response_model=RegulatorReportResponse,
+    "/regulator-reports/214-FZ",
+    response_model=RegulatorReportResponse,
 )
 async def regulator_report_214fz(
     session: SessionDep,
@@ -4232,9 +4061,7 @@ async def regulator_report_214fz(
     dev_id: uuid.UUID = Query(...),
     quarter: str = Query(..., pattern=r"^\d{4}-Q[1-4]$"),
     service: PropertyDevService = Depends(_svc),
-    _perm: None = Depends(
-        RequirePermission("property_dev.regulator_report.generate")
-    ),
+    _perm: None = Depends(RequirePermission("property_dev.regulator_report.generate")),
 ) -> RegulatorReportResponse:
     """R8: cross-tenant IDOR closed via ``_verify_owner_via_development``."""
     await _verify_owner_via_development(session, dev_id, user_payload)
@@ -4286,9 +4113,7 @@ async def _enforce_propdev_doc_owner(
         return
     user_id = payload.get("sub") or payload.get("user_id")
     if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
     owner_id = await service.resolve_development_owner(
         contract_id=contract_id,
         reservation_id=reservation_id,
@@ -4296,9 +4121,7 @@ async def _enforce_propdev_doc_owner(
         instalment_id=instalment_id,
     )
     if owner_id is None or str(owner_id) != str(user_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 
 
 def _normalise_locale(locale: str) -> str:
@@ -4382,9 +4205,7 @@ async def stream_propdev_document(
         finishing_warranty_years=finishing_warranty_years,
         noc_validity_days=noc_validity_days,
     )
-    entity_id = (
-        contract_id or reservation_id or handover_id or instalment_id
-    )
+    entity_id = contract_id or reservation_id or handover_id or instalment_id
     filename = _filename_for(doc_type, entity_id)
     return Response(
         content=pdf_bytes,
@@ -4485,8 +4306,7 @@ _DOC_TEMPLATE_CATALOGUE: list[dict[str, Any]] = [
         "doc_type": "reservation_receipt",
         "title": "Reservation Receipt",
         "description": (
-            "Issued automatically when a buyer pays the reservation "
-            "deposit. Single A4 page, no watermark."
+            "Issued automatically when a buyer pays the reservation deposit. Single A4 page, no watermark."
         ),
         "trigger": "POST /reservations/ → deposit recorded",
         "entity": "reservation",
@@ -4507,10 +4327,7 @@ _DOC_TEMPLATE_CATALOGUE: list[dict[str, Any]] = [
     {
         "doc_type": "payment_receipt",
         "title": "Payment Receipt",
-        "description": (
-            "Issued per paid instalment. Shows outstanding balance and "
-            "milestone reference."
-        ),
+        "description": ("Issued per paid instalment. Shows outstanding balance and milestone reference."),
         "trigger": "POST /instalments/{id}/pay",
         "entity": "instalment",
         "pages": "1",
@@ -4519,8 +4336,7 @@ _DOC_TEMPLATE_CATALOGUE: list[dict[str, Any]] = [
         "doc_type": "handover_certificate",
         "title": "Handover Certificate",
         "description": (
-            "Signed at completion. Lists open snags + keys-handed-over "
-            "date so the buyer formally accepts the unit."
+            "Signed at completion. Lists open snags + keys-handed-over date so the buyer formally accepts the unit."
         ),
         "trigger": "POST /handovers/{id}/complete",
         "entity": "handover",
@@ -4530,8 +4346,7 @@ _DOC_TEMPLATE_CATALOGUE: list[dict[str, Any]] = [
         "doc_type": "warranty_certificate",
         "title": "Warranty Certificate",
         "description": (
-            "Issued on handover. Default 10y structural + 1y finishing. "
-            "Lists exclusions and the claim procedure."
+            "Issued on handover. Default 10y structural + 1y finishing. Lists exclusions and the claim procedure."
         ),
         "trigger": "GET /documents/warranty_certificate?handover_id=…",
         "entity": "handover",
@@ -4540,10 +4355,7 @@ _DOC_TEMPLATE_CATALOGUE: list[dict[str, Any]] = [
     {
         "doc_type": "noc",
         "title": "No Objection Certificate",
-        "description": (
-            "Developer's permission for the buyer to resell. Validity "
-            "30 days by default."
-        ),
+        "description": ("Developer's permission for the buyer to resell. Validity 30 days by default."),
         "trigger": "GET /documents/noc?contract_id=…",
         "entity": "sales_contract",
         "pages": "1",
@@ -4627,7 +4439,14 @@ _CUSTOM_TEMPLATES_DIR = Path("uploads/property_dev/custom_templates")
 _CUSTOM_TEMPLATE_MAX_MB = 10
 _CUSTOM_TEMPLATE_MAX_BYTES = _CUSTOM_TEMPLATE_MAX_MB * 1024 * 1024
 _ALLOWED_CUSTOM_TEMPLATE_EXTENSIONS: tuple[str, ...] = (
-    ".docx", ".html", ".htm", ".pdf", ".odt", ".md", ".txt", ".xlsx",
+    ".docx",
+    ".html",
+    ".htm",
+    ".pdf",
+    ".odt",
+    ".md",
+    ".txt",
+    ".xlsx",
 )
 
 _BINARY_EXT_TO_SIG: dict[str, frozenset[str]] = {
@@ -4660,19 +4479,15 @@ def _validate_custom_template_magic(ext: str, content: bytes, filename: str) -> 
         if b"\x00" in content[:_TEXT_NULL_SCAN_BYTES]:
             raise HTTPException(
                 status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=(
-                    f"File '{filename}' looks binary but the extension '{ext}' "
-                    "expects plain text."
-                ),
+                detail=(f"File '{filename}' looks binary but the extension '{ext}' expects plain text."),
             )
         return
     raise HTTPException(
         status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-        detail=(
-            f"Unsupported extension '{ext}'. Allowed: "
-            f"{', '.join(_ALLOWED_CUSTOM_TEMPLATE_EXTENSIONS)}"
-        ),
+        detail=(f"Unsupported extension '{ext}'. Allowed: {', '.join(_ALLOWED_CUSTOM_TEMPLATE_EXTENSIONS)}"),
     )
+
+
 # Suggested doc_type slugs. The settings page surfaces these as combobox
 # presets BUT the value is no longer constrained to this list — any
 # tenant (Brazil / Japan / Mexico / Australia / Vietnam / …) can supply
@@ -4702,8 +4517,17 @@ _DOC_TYPE_PRESETS: tuple[str, ...] = (
 # Suggested entity slugs. Same parameterization story as
 # ``_DOC_TYPE_PRESETS`` — combobox presets only, free-text accepted.
 _ENTITY_PRESETS: tuple[str, ...] = (
-    "custom", "reservation", "sales_contract", "instalment", "handover",
-    "snag", "broker", "buyer", "plot", "development", "tenant",
+    "custom",
+    "reservation",
+    "sales_contract",
+    "instalment",
+    "handover",
+    "snag",
+    "broker",
+    "buyer",
+    "plot",
+    "development",
+    "tenant",
 )
 
 # Backwards-compatible aliases — kept for any third-party module that
@@ -4719,16 +4543,12 @@ _ALLOWED_CUSTOM_ENTITIES: tuple[str, ...] = _ENTITY_PRESETS
 # ``PropertyDevCustomTemplate`` so the API rejects oversized values
 # before the DB driver does.
 _TEMPLATE_SLUG_MAX_LEN = 40
-_TEMPLATE_SLUG_RE = re.compile(
-    rf"^[a-z0-9][a-z0-9_.\-]{{0,{_TEMPLATE_SLUG_MAX_LEN - 1}}}$"
-)
+_TEMPLATE_SLUG_RE = re.compile(rf"^[a-z0-9][a-z0-9_.\-]{{0,{_TEMPLATE_SLUG_MAX_LEN - 1}}}$")
 
 # Slugs with built-in PDF renderers. Used to set ``has_pdf_renderer``
 # on each catalogue entry so the frontend gates the "Preview / Download
 # sample" buttons on real data instead of a hardcoded set.
-_BUILTIN_RENDERER_DOC_TYPES: frozenset[str] = frozenset({
-    entry["doc_type"] for entry in _DOC_TEMPLATE_CATALOGUE
-})
+_BUILTIN_RENDERER_DOC_TYPES: frozenset[str] = frozenset({entry["doc_type"] for entry in _DOC_TEMPLATE_CATALOGUE})
 
 _CUSTOM_TEMPLATE_LOG = logging.getLogger(__name__ + ".custom_templates")
 
@@ -4743,7 +4563,7 @@ def _serialize_custom_template_row(row: Any) -> dict[str, Any]:
     / .md / .txt) are renderable in-browser; binary uploads (.docx /
     .pdf / .odt) require the original download.
     """
-    content_type = (row.content_type or "")
+    content_type = row.content_type or ""
     return {
         "id": str(row.id),
         "doc_type": row.doc_type,
@@ -4757,9 +4577,7 @@ def _serialize_custom_template_row(row: Any) -> dict[str, Any]:
         "filename": row.filename,
         "content_type": row.content_type,
         "size_bytes": row.size_bytes,
-        "development_id": (
-            str(row.development_id) if row.development_id else None
-        ),
+        "development_id": (str(row.development_id) if row.development_id else None),
         "project_id": str(row.project_id) if row.project_id else None,
         "created_at": row.created_at.isoformat() if row.created_at else None,
     }
@@ -4887,9 +4705,7 @@ async def list_document_templates(
     is_admin = user_payload.get("role") == "admin"
     user_id = user_payload.get("sub") or user_payload.get("user_id")
 
-    stmt = select(PropertyDevCustomTemplate).order_by(
-        PropertyDevCustomTemplate.created_at.desc()
-    )
+    stmt = select(PropertyDevCustomTemplate).order_by(PropertyDevCustomTemplate.created_at.desc())
     if not is_admin and user_id is not None:
         from app.modules.projects.models import Project
 
@@ -4898,9 +4714,7 @@ async def list_document_templates(
         if not owned_ids:
             stmt = stmt.where(PropertyDevCustomTemplate.id == uuid.UUID(int=0))
         else:
-            stmt = stmt.where(
-                PropertyDevCustomTemplate.project_id.in_(owned_ids)
-            )
+            stmt = stmt.where(PropertyDevCustomTemplate.project_id.in_(owned_ids))
 
     if development_id is not None:
         stmt = stmt.where(
@@ -4909,9 +4723,7 @@ async def list_document_templates(
         )
 
     rows = (await session.execute(stmt)).scalars().all()
-    custom_entries: list[dict[str, Any]] = [
-        _serialize_custom_template_row(row) for row in rows
-    ]
+    custom_entries: list[dict[str, Any]] = [_serialize_custom_template_row(row) for row in rows]
 
     builtin_entries = [
         {
@@ -5038,7 +4850,10 @@ async def upload_custom_document_template(
     from app.modules.property_dev.models import PropertyDevCustomTemplate
 
     name, doc_type, entity, trigger = _validate_custom_template_metadata(
-        name, doc_type, entity, trigger,
+        name,
+        doc_type,
+        entity,
+        trigger,
     )
 
     raw_filename = file.filename or "template.bin"
@@ -5046,10 +4861,7 @@ async def upload_custom_document_template(
     if ext not in _ALLOWED_CUSTOM_TEMPLATE_EXTENSIONS:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail=(
-                f"Unsupported extension '{ext}'. Allowed: "
-                f"{', '.join(_ALLOWED_CUSTOM_TEMPLATE_EXTENSIONS)}"
-            ),
+            detail=(f"Unsupported extension '{ext}'. Allowed: {', '.join(_ALLOWED_CUSTOM_TEMPLATE_EXTENSIONS)}"),
         )
 
     try:
@@ -5069,9 +4881,7 @@ async def upload_custom_document_template(
     if len(content) > _CUSTOM_TEMPLATE_MAX_BYTES:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=(
-                f"Template exceeds {_CUSTOM_TEMPLATE_MAX_MB} MB limit"
-            ),
+            detail=(f"Template exceeds {_CUSTOM_TEMPLATE_MAX_MB} MB limit"),
         )
 
     _validate_custom_template_magic(ext, content, raw_filename)
@@ -5096,18 +4906,13 @@ async def upload_custom_document_template(
     else:
         first_proj = (
             await session.execute(
-                select(Project.id)
-                .where(Project.owner_id == user_id)
-                .limit(1),
+                select(Project.id).where(Project.owner_id == user_id).limit(1),
             )
         ).scalar_one_or_none()
         if first_proj is None and not is_admin:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
-                    "No project found for current user. Create a project "
-                    "before uploading templates."
-                ),
+                detail=("No project found for current user. Create a project before uploading templates."),
             )
         resolved_project_id = first_proj
 
@@ -5180,7 +4985,8 @@ async def delete_custom_document_template(
             path.unlink()
     except Exception:
         _CUSTOM_TEMPLATE_LOG.warning(
-            "Could not unlink custom template file at %s", row.storage_path,
+            "Could not unlink custom template file at %s",
+            row.storage_path,
             exc_info=True,
         )
 
@@ -5226,9 +5032,7 @@ async def download_custom_document_template(
         content=data,
         media_type=row.content_type or "application/octet-stream",
         headers={
-            "Content-Disposition": (
-                f'attachment; filename="{row.filename}"'
-            ),
+            "Content-Disposition": (f'attachment; filename="{row.filename}"'),
         },
     )
 
@@ -5247,13 +5051,19 @@ _TEXT_EXT_FOR_CONTENT_TYPE: dict[str, str] = {
     "text/plain": ".txt",
 }
 
-_ALLOWED_TEXT_CONTENT_TYPES: frozenset[str] = frozenset({
-    "text/html", "text/markdown", "text/plain",
-})
+_ALLOWED_TEXT_CONTENT_TYPES: frozenset[str] = frozenset(
+    {
+        "text/html",
+        "text/markdown",
+        "text/plain",
+    }
+)
 
 
 def _resolve_safe_text_filename(
-    name: str, doc_type: str, content_type: str,
+    name: str,
+    doc_type: str,
+    content_type: str,
 ) -> str:
     """Build a safe on-disk basename for a saved-text template.
 
@@ -5264,9 +5074,7 @@ def _resolve_safe_text_filename(
     """
     raw = (name or doc_type or "template").strip()
     # Drop any directory components and any leftover punctuation.
-    safe = "".join(
-        c if c.isalnum() or c in {"-", "_", " "} else "_" for c in raw
-    ).strip("_") or doc_type or "template"
+    safe = "".join(c if c.isalnum() or c in {"-", "_", " "} else "_" for c in raw).strip("_") or doc_type or "template"
     # Collapse whitespace.
     safe = "_".join(safe.split())[:80]  # 80 chars is plenty for a basename
     ext = _TEXT_EXT_FOR_CONTENT_TYPE.get(content_type, ".txt")
@@ -5327,15 +5135,17 @@ async def save_text_custom_document_template(
     template_id_raw = body.get("template_id")
 
     name, doc_type, entity, trigger = _validate_custom_template_metadata(
-        name, doc_type, entity, trigger,
+        name,
+        doc_type,
+        entity,
+        trigger,
     )
 
     if content_type not in _ALLOWED_TEXT_CONTENT_TYPES:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=(
-                f"content_type '{content_type}' is not allowed. Use "
-                f"{', '.join(sorted(_ALLOWED_TEXT_CONTENT_TYPES))}."
+                f"content_type '{content_type}' is not allowed. Use {', '.join(sorted(_ALLOWED_TEXT_CONTENT_TYPES))}."
             ),
         )
     if not isinstance(content_text, str):
@@ -5351,10 +5161,7 @@ async def save_text_custom_document_template(
     if len(content_text) > _CUSTOM_TEMPLATE_TEXT_MAX_CHARS:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=(
-                f"Template content exceeds {_CUSTOM_TEMPLATE_MAX_MB} MB "
-                "limit"
-            ),
+            detail=(f"Template content exceeds {_CUSTOM_TEMPLATE_MAX_MB} MB limit"),
         )
 
     is_admin = user_payload.get("role") == "admin"
@@ -5393,9 +5200,7 @@ async def save_text_custom_document_template(
             if proj is None or str(proj.owner_id) != str(user_id):
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=translate(
-                        "errors.template_not_found", locale=get_locale()
-                    ),
+                    detail=translate("errors.template_not_found", locale=get_locale()),
                 )
 
     # ── Project resolution (same logic as the upload endpoint) ──
@@ -5425,18 +5230,13 @@ async def save_text_custom_document_template(
     else:
         first_proj = (
             await session.execute(
-                select(Project.id)
-                .where(Project.owner_id == user_id)
-                .limit(1),
+                select(Project.id).where(Project.owner_id == user_id).limit(1),
             )
         ).scalar_one_or_none()
         if first_proj is None and not is_admin:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
-                    "No project found for current user. Create a project "
-                    "before saving templates."
-                ),
+                detail=("No project found for current user. Create a project before saving templates."),
             )
         resolved_project_id = first_proj
 
@@ -5464,7 +5264,8 @@ async def save_text_custom_document_template(
             except Exception:
                 _CUSTOM_TEMPLATE_LOG.warning(
                     "Could not delete previous text template at %s",
-                    target_path, exc_info=True,
+                    target_path,
+                    exc_info=True,
                 )
             target_path = _CUSTOM_TEMPLATES_DIR / f"{template_id.hex}_{new_basename}"
     else:
@@ -5561,8 +5362,7 @@ async def get_custom_document_template_content(
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail=(
-                "This template was uploaded as a binary file and cannot "
-                "be opened in the editor. Download it instead."
+                "This template was uploaded as a binary file and cannot be opened in the editor. Download it instead."
             ),
         )
 
@@ -5577,10 +5377,12 @@ async def get_custom_document_template_content(
         content_text = path.read_text(encoding="utf-8")
     except Exception:
         _CUSTOM_TEMPLATE_LOG.exception(
-            "Could not read text template at %s", row.storage_path,
+            "Could not read text template at %s",
+            row.storage_path,
         )
         raise HTTPException(
-            status_code=500, detail="Unable to read template — storage error",
+            status_code=500,
+            detail="Unable to read template — storage error",
         )
 
     return {
@@ -5594,9 +5396,7 @@ async def get_custom_document_template_content(
         "content_type": row.content_type,
         "size_bytes": row.size_bytes,
         "content_text": content_text,
-        "development_id": (
-            str(row.development_id) if row.development_id else None
-        ),
+        "development_id": (str(row.development_id) if row.development_id else None),
         "project_id": str(row.project_id) if row.project_id else None,
     }
 
@@ -5746,7 +5546,11 @@ async def sample_preview_document_template(
 
     if doc_type == "reservation_receipt":
         pdf_bytes = render_reservation_receipt_pdf(
-            reservation, plot, development, buyers, locale=locale,
+            reservation,
+            plot,
+            development,
+            buyers,
+            locale=locale,
         )
     elif doc_type == "sales_contract":
         pdf_bytes = render_sales_contract_pdf(
@@ -5801,50 +5605,78 @@ async def sample_preview_document_template(
             status="draft",
         )
         pdf_bytes = render_tenant_lease_agreement_pdf(
-            lease, plot, development, buyers, locale=locale,
+            lease,
+            plot,
+            development,
+            buyers,
+            locale=locale,
         )
     elif doc_type == "move_in_checklist":
         rooms = [
-            SimpleNamespace(name="Entry / Hallway", items=[
-                SimpleNamespace(label="Door & locks", condition="Good", notes=""),
-                SimpleNamespace(label="Walls & paint", condition="Good", notes=""),
-                SimpleNamespace(label="Light fittings", condition="Good", notes=""),
-            ]),
-            SimpleNamespace(name="Kitchen", items=[
-                SimpleNamespace(label="Oven", condition="New", notes="Test cooking only"),
-                SimpleNamespace(label="Fridge / freezer", condition="New", notes=""),
-                SimpleNamespace(label="Sink & taps", condition="Good", notes=""),
-                SimpleNamespace(label="Cabinets", condition="Good", notes=""),
-            ]),
-            SimpleNamespace(name="Bathroom", items=[
-                SimpleNamespace(label="Toilet", condition="Good", notes=""),
-                SimpleNamespace(label="Shower / bath", condition="Good", notes=""),
-                SimpleNamespace(label="Mirror & cabinet", condition="Good", notes=""),
-            ]),
-            SimpleNamespace(name="Living room", items=[
-                SimpleNamespace(label="Floor", condition="Good", notes=""),
-                SimpleNamespace(label="Windows & blinds", condition="Good", notes=""),
-            ]),
+            SimpleNamespace(
+                name="Entry / Hallway",
+                items=[
+                    SimpleNamespace(label="Door & locks", condition="Good", notes=""),
+                    SimpleNamespace(label="Walls & paint", condition="Good", notes=""),
+                    SimpleNamespace(label="Light fittings", condition="Good", notes=""),
+                ],
+            ),
+            SimpleNamespace(
+                name="Kitchen",
+                items=[
+                    SimpleNamespace(label="Oven", condition="New", notes="Test cooking only"),
+                    SimpleNamespace(label="Fridge / freezer", condition="New", notes=""),
+                    SimpleNamespace(label="Sink & taps", condition="Good", notes=""),
+                    SimpleNamespace(label="Cabinets", condition="Good", notes=""),
+                ],
+            ),
+            SimpleNamespace(
+                name="Bathroom",
+                items=[
+                    SimpleNamespace(label="Toilet", condition="Good", notes=""),
+                    SimpleNamespace(label="Shower / bath", condition="Good", notes=""),
+                    SimpleNamespace(label="Mirror & cabinet", condition="Good", notes=""),
+                ],
+            ),
+            SimpleNamespace(
+                name="Living room",
+                items=[
+                    SimpleNamespace(label="Floor", condition="Good", notes=""),
+                    SimpleNamespace(label="Windows & blinds", condition="Good", notes=""),
+                ],
+            ),
         ]
         pdf_bytes = render_move_in_checklist_pdf(
-            handover, contract, plot, development, rooms, locale=locale,
+            handover,
+            contract,
+            plot,
+            development,
+            rooms,
+            locale=locale,
         )
     elif doc_type == "mortgage_clearance_letter":
         pdf_bytes = render_mortgage_clearance_letter_pdf(
-            contract, plot, development,
+            contract,
+            plot,
+            development,
             bank_name="Sample Sparkasse Berlin",
             locale=locale,
         )
     elif doc_type == "title_deed_transfer_request":
         pdf_bytes = render_title_deed_transfer_request_pdf(
-            contract, plot, development, parties,
+            contract,
+            plot,
+            development,
+            parties,
             registry_name="Grundbuchamt Berlin",
             locale=locale,
             buyer_lookup={b.id: b for b in buyers},
         )
     elif doc_type == "escrow_release_authorization":
         pdf_bytes = render_escrow_release_authorization_pdf(
-            contract, plot, development,
+            contract,
+            plot,
+            development,
             escrow_account_no="DE89-3704-0044-0532-0130-00",
             amount=Decimal("84000.00"),
             release_reason="Foundation milestone certified",
@@ -5852,7 +5684,9 @@ async def sample_preview_document_template(
         )
     elif doc_type == "refund_authorization":
         pdf_bytes = render_refund_authorization_pdf(
-            contract, plot, development,
+            contract,
+            plot,
+            development,
             refund_amount=Decimal("5000.00"),
             refund_reason="Buyer cancellation within cooling-off period",
             payment_method="bank_transfer",
@@ -5894,7 +5728,9 @@ async def sample_preview_document_template(
 
 
 async def _run_property_dev_validation(
-    session: SessionDep, dev_id: uuid.UUID, locale: str = "en",
+    session: SessionDep,
+    dev_id: uuid.UUID,
+    locale: str = "en",
 ) -> Any:
     """Execute the ``property_dev`` rule set against a development."""
     from app.core.validation.engine import rule_registry, validation_engine
@@ -5921,7 +5757,8 @@ async def _run_property_dev_validation(
 
 
 def _report_to_response(
-    dev_id: uuid.UUID, report: Any,
+    dev_id: uuid.UUID,
+    report: Any,
 ) -> ComplianceDashboardResponse:
     """Materialise a ``ValidationReport`` into the dashboard response."""
     from datetime import UTC as _UTC
@@ -6011,9 +5848,7 @@ async def compliance_regulator_report(
     dev_id: uuid.UUID = Query(...),
     regulator: str = Query(...),
     quarter: str = Query(..., pattern=r"^\d{4}-Q[1-4]$"),
-    as_: str = Query(
-        default="json", alias="as", pattern=r"^(json|pdf|payload)$"
-    ),
+    as_: str = Query(default="json", alias="as", pattern=r"^(json|pdf|payload)$"),
     _perm: None = Depends(RequirePermission("property_dev.read")),
 ) -> Any:
     """Generate a regulator report for a development.
@@ -6040,14 +5875,14 @@ async def compliance_regulator_report(
     if reg_code not in {"RERA", "MAHARERA", "214FZ", "214-FZ", "214", "CMA"}:
         raise HTTPException(
             status_code=422,
-            detail=(
-                f"unsupported_regulator:{regulator} "
-                f"(supported: {', '.join(SUPPORTED_REGULATORS)})"
-            ),
+            detail=(f"unsupported_regulator:{regulator} (supported: {', '.join(SUPPORTED_REGULATORS)})"),
         )
     try:
         report = await generate_regulator_report(
-            session, dev_id=dev_id, regulator=reg_code, quarter=quarter,
+            session,
+            dev_id=dev_id,
+            regulator=reg_code,
+            quarter=quarter,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -6057,25 +5892,17 @@ async def compliance_regulator_report(
             content=report.pdf_bytes,
             media_type="application/pdf",
             headers={
-                "Content-Disposition": (
-                    f'attachment; filename="{report.regulator}_{report.quarter}.pdf"'
-                ),
+                "Content-Disposition": (f'attachment; filename="{report.regulator}_{report.quarter}.pdf"'),
             },
         )
     if as_ == "payload":
-        media = (
-            "application/xml"
-            if report.payload_format == "xml"
-            else "application/json"
-        )
+        media = "application/xml" if report.payload_format == "xml" else "application/json"
         ext = "xml" if report.payload_format == "xml" else "json"
         return Response(
             content=report.payload_bytes,
             media_type=media,
             headers={
-                "Content-Disposition": (
-                    f'attachment; filename="{report.regulator}_{report.quarter}.{ext}"'
-                ),
+                "Content-Disposition": (f'attachment; filename="{report.regulator}_{report.quarter}.{ext}"'),
             },
         )
     return ComplianceRegulatorReportResponse(
@@ -6254,7 +6081,9 @@ async def dashboard_cashflow_waterfall(
     """Monthly cash-flow: scheduled instalments + actual escrow flows."""
     await _verify_owner_via_development(session, dev_id, payload)
     data = await service.dashboard_cashflow_waterfall(
-        dev_id, start_month=start_month, months=months,
+        dev_id,
+        start_month=start_month,
+        months=months,
     )
     return CashflowWaterfallResponse.model_validate(data)
 
@@ -6291,7 +6120,8 @@ async def dashboard_funnel_conversion(
     """5-stage funnel: Lead -> Reservation -> SPA draft -> SPA signed -> Handover."""
     await _verify_owner_via_development(session, dev_id, payload)
     data = await service.dashboard_funnel_conversion(
-        dev_id, period_days=period_days,
+        dev_id,
+        period_days=period_days,
     )
     return FunnelConversionResponse.model_validate(data)
 
@@ -6357,7 +6187,9 @@ def _analytics_etag(payload: dict[str, Any], *, user_id: str) -> str:
     import json
 
     basis = json.dumps(
-        {"u": user_id, "p": payload}, sort_keys=True, default=str,
+        {"u": user_id, "p": payload},
+        sort_keys=True,
+        default=str,
     )
     return '"' + hashlib.sha256(basis.encode("utf-8")).hexdigest()[:16] + '"'
 
@@ -6372,9 +6204,7 @@ def _serve_analytics(
     """Build a JSON Response with ETag + Cache-Control + 304 short-circuit."""
     import json
 
-    response_payload = response_cls.model_validate(payload).model_dump(
-        mode="json"
-    )
+    response_payload = response_cls.model_validate(payload).model_dump(mode="json")
     etag = _analytics_etag(response_payload, user_id=user_id)
     headers = {
         "ETag": etag,
@@ -6391,7 +6221,8 @@ def _serve_analytics(
 
 
 async def _list_accessible_dev_ids(
-    session: SessionDep, user_payload: dict[str, Any],
+    session: SessionDep,
+    user_payload: dict[str, Any],
 ) -> list[uuid.UUID]:
     """Return every development_id the caller can see.
 
@@ -6465,14 +6296,20 @@ async def dashboard_cohort_retention(
 
     svc = AnalyticsService(session)
     raw = await svc.cohort_retention(
-        cohort_period=cohort_period, since=since, until=until,
+        cohort_period=cohort_period,
+        since=since,
+        until=until,
     )
     # Tenant-scope: filter cohorts to reservations on accessible plots.
     # The service returns aggregated cohorts already — we re-run with a
     # tenant-aware query when the caller isn't admin.
     if payload.get("role") != "admin":
         raw = await _tenant_scope_cohort_retention(
-            session, dev_ids, raw, since=since, until=until,
+            session,
+            dev_ids,
+            raw,
+            since=since,
+            until=until,
         )
     return _serve_analytics(
         raw,
@@ -6492,11 +6329,14 @@ async def _tenant_scope_cohort_retention(
 ) -> dict[str, Any]:
     """Re-run the cohort aggregation scoped to the caller's developments."""
     from datetime import UTC, datetime, timedelta
+
     from sqlalchemy import select as _select
 
     from app.modules.property_dev.analytics_service import AnalyticsService
     from app.modules.property_dev.models import (
         Plot as _Plot,
+    )
+    from app.modules.property_dev.models import (
         Reservation as _Res,
     )
 
@@ -6507,9 +6347,7 @@ async def _tenant_scope_cohort_retention(
     # Inject the dev-ids filter via an explicit subquery — keep the
     # analytics-service signature stable by replicating just the data
     # shape it expects.
-    accessible_plots_q = _select(_Plot.id).where(
-        _Plot.development_id.in_(dev_ids)
-    )
+    accessible_plots_q = _select(_Plot.id).where(_Plot.development_id.in_(dev_ids))
     stmt = _select(
         _Res.id,
         _Res.created_at,
@@ -6518,20 +6356,17 @@ async def _tenant_scope_cohort_retention(
         _Res.expires_at,
         _Res.metadata_,
     ).where(_Res.plot_id.in_(accessible_plots_q))
-    since_d = (
-        datetime.fromisoformat(since).date() if since else None
-    )
-    until_d = (
-        datetime.fromisoformat(until).date() if until else None
-    )
+    since_d = datetime.fromisoformat(since).date() if since else None
+    until_d = datetime.fromisoformat(until).date() if until else None
     if since_d is not None:
-        stmt = stmt.where(
-            _Res.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC)
-        )
+        stmt = stmt.where(_Res.created_at >= datetime.combine(since_d, datetime.min.time(), tzinfo=UTC))
     if until_d is not None:
         stmt = stmt.where(
-            _Res.created_at < datetime.combine(
-                until_d + timedelta(days=1), datetime.min.time(), tzinfo=UTC,
+            _Res.created_at
+            < datetime.combine(
+                until_d + timedelta(days=1),
+                datetime.min.time(),
+                tzinfo=UTC,
             )
         )
     rows = (await session.execute(stmt)).all()
@@ -6539,8 +6374,8 @@ async def _tenant_scope_cohort_retention(
     # analytics-service object's session and re-using its helpers. Cleaner
     # path is to delegate to a private projection function; we inline a
     # short reduction here to keep blast radius small.
-    from decimal import Decimal as _D
     from datetime import date as _date
+    from decimal import Decimal as _D
 
     today = datetime.now(UTC).date()
     cohorts: dict[str, dict[str, Any]] = {}
@@ -6575,10 +6410,7 @@ async def _tenant_scope_cohort_retention(
                         break
                     except ValueError:
                         continue
-        slot["events"].append(
-            {"status": st, "days_to_terminal": terminal_days,
-             "age_days": (today - created_d).days}
-        )
+        slot["events"].append({"status": st, "days_to_terminal": terminal_days, "age_days": (today - created_d).days})
 
     out: list[dict[str, Any]] = []
     for key in sorted(cohorts.keys()):
@@ -6597,15 +6429,17 @@ async def _tenant_scope_cohort_retention(
                 if dtt is None or dtt > off:
                     retained += 1
             pct[off] = (_D(retained) / _D(total) * _D("100")).quantize(_D("0.1"))
-        out.append({
-            "cohort_month": key,
-            "total": total,
-            "still_active": slot["still_active"],
-            "retention_pct_d30": pct[30],
-            "retention_pct_d60": pct[60],
-            "retention_pct_d90": pct[90],
-            "retention_pct_d180": pct[180],
-        })
+        out.append(
+            {
+                "cohort_month": key,
+                "total": total,
+                "still_active": slot["still_active"],
+                "retention_pct_d30": pct[30],
+                "retention_pct_d60": pct[60],
+                "retention_pct_d90": pct[90],
+                "retention_pct_d180": pct[180],
+            }
+        )
     return {
         "cohort_period": fallback.get("cohort_period", "month"),
         "since": since,
@@ -6661,7 +6495,10 @@ async def dashboard_time_to_close(
     # caller isn't admin.
     if payload.get("role") != "admin":
         raw = await _tenant_scope_time_to_close(
-            session, dev_ids, since=since, until=until,
+            session,
+            dev_ids,
+            since=since,
+            until=until,
         )
     return _serve_analytics(
         raw,
@@ -6679,23 +6516,32 @@ async def _tenant_scope_time_to_close(
     until: str | None,
 ) -> dict[str, Any]:
     """Re-run time-to-close scoped to the caller's developments."""
+    from datetime import date as _date
+    from datetime import datetime as _dt
+    from decimal import Decimal as _D
+
     from sqlalchemy import select as _select
 
     from app.modules.property_dev.analytics_service import (
-        AnalyticsService,
         _STAGE_BUCKETS,
         _bucket_for_days,
         _percentile,
     )
     from app.modules.property_dev.models import (
         Handover as _Ho,
+    )
+    from app.modules.property_dev.models import (
         Lead as _Lead,
+    )
+    from app.modules.property_dev.models import (
         Plot as _Plot,
+    )
+    from app.modules.property_dev.models import (
         Reservation as _Res,
+    )
+    from app.modules.property_dev.models import (
         SalesContract as _SPA,
     )
-    from datetime import date as _date, datetime as _dt
-    from decimal import Decimal as _D
 
     if not dev_ids:
         return {
@@ -6705,9 +6551,7 @@ async def _tenant_scope_time_to_close(
             "stages": [],
         }
 
-    accessible_plots_q = _select(_Plot.id).where(
-        _Plot.development_id.in_(dev_ids)
-    )
+    accessible_plots_q = _select(_Plot.id).where(_Plot.development_id.in_(dev_ids))
     stmt = (
         _select(
             _SPA.id,
@@ -6733,11 +6577,7 @@ async def _tenant_scope_time_to_close(
     lead_ids = {r.lead_id for r in spa_rows if r.lead_id is not None}
     lead_created: dict[uuid.UUID, _dt] = {}
     if lead_ids:
-        for lid, lc in (
-            await session.execute(
-                _select(_Lead.id, _Lead.created_at).where(_Lead.id.in_(lead_ids))
-            )
-        ).all():
+        for lid, lc in (await session.execute(_select(_Lead.id, _Lead.created_at).where(_Lead.id.in_(lead_ids)))).all():
             lead_created[lid] = lc
 
     def _to_d(v: Any) -> _date | None:
@@ -6775,11 +6615,7 @@ async def _tenant_scope_time_to_close(
     def _stage(label: str, samples: list[_D]) -> dict[str, Any]:
         s_sorted = sorted(samples)
         n = len(s_sorted)
-        mean_d = (
-            (sum(s_sorted, _D("0")) / _D(n)).quantize(_D("0.1"))
-            if n
-            else _D("0")
-        )
+        mean_d = (sum(s_sorted, _D("0")) / _D(n)).quantize(_D("0.1")) if n else _D("0")
         p50 = _percentile(s_sorted, 50).quantize(_D("0.1"))
         p90 = _percentile(s_sorted, 90).quantize(_D("0.1"))
         hist = {lab: 0 for lab, _lo, _hi in _STAGE_BUCKETS}
@@ -6792,8 +6628,7 @@ async def _tenant_scope_time_to_close(
             "p50_days": p50,
             "p90_days": p90,
             "buckets": [
-                {"label": lab, "lo_days": lo, "hi_days": hi, "count": hist[lab]}
-                for lab, lo, hi in _STAGE_BUCKETS
+                {"label": lab, "lo_days": lo, "hi_days": hi, "count": hist[lab]} for lab, lo, hi in _STAGE_BUCKETS
             ],
         }
 
@@ -6909,7 +6744,10 @@ async def dashboard_conversion_funnel(
 
     svc = AnalyticsService(session)
     raw = await svc.conversion_funnel(
-        since=since, until=until, dev_id=dev_id, plot_type=plot_type,
+        since=since,
+        until=until,
+        dev_id=dev_id,
+        plot_type=plot_type,
     )
     return _serve_analytics(
         raw,
@@ -6971,9 +6809,7 @@ async def dashboard_broker_performance(
 # level.
 
 
-async def _buyers_for_portal_user(
-    session: SessionDep, portal_user_id: uuid.UUID
-) -> list[uuid.UUID]:
+async def _buyers_for_portal_user(session: SessionDep, portal_user_id: uuid.UUID) -> list[uuid.UUID]:
     """Resolve every Buyer row linked to this portal user.
 
     A single email may have multiple Buyer rows (different developments
@@ -6984,9 +6820,7 @@ async def _buyers_for_portal_user(
 
     from app.modules.property_dev.models import Buyer as _Buyer
 
-    rows = await session.execute(
-        _select(_Buyer.id).where(_Buyer.portal_user_id == portal_user_id)
-    )
+    rows = await session.execute(_select(_Buyer.id).where(_Buyer.portal_user_id == portal_user_id))
     return [r for (r,) in rows.all()]
 
 
@@ -7027,7 +6861,7 @@ async def portal_list_my_snags(
 )
 async def portal_list_my_warranty_claims(
     session: SessionDep,
-    portal_user: "RequirePortalSession",  # noqa: F821
+    portal_user: RequirePortalSession,  # noqa: F821
     status: str | None = Query(default=None),
 ) -> list[WarrantyClaimResponse]:
     """List warranty claims raised by the calling buyer across every plot."""
@@ -7149,7 +6983,8 @@ async def create_price_list(
 
 
 @router.patch(
-    "/price-lists/{price_list_id}", response_model=PriceListResponse,
+    "/price-lists/{price_list_id}",
+    response_model=PriceListResponse,
 )
 async def update_price_list(
     price_list_id: uuid.UUID,
@@ -7167,9 +7002,7 @@ async def update_price_list(
             status_code=409,
             detail="Only draft price lists can be edited; clone to amend.",
         )
-    fields = _dump(data) if hasattr(data, "model_dump") else data.model_dump(
-        exclude_unset=True
-    )
+    fields = data.model_dump(exclude_unset=True)
     if fields:
         await service.price_lists.update_fields(price_list_id, **fields)
     pl = await service.price_lists.get_by_id(price_list_id)
@@ -7204,9 +7037,7 @@ async def quote_price(
     plot_id: uuid.UUID = Query(...),
     promo_code: str | None = Query(default=None, max_length=80),
     buyer_id: uuid.UUID | None = Query(default=None),
-    quote_date: str | None = Query(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"
-    ),
+    quote_date: str | None = Query(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
     service: PropertyDevService = Depends(_svc),
     _perm: None = Depends(RequirePermission("property_dev.read")),
 ) -> PriceQuoteResponse:
@@ -7257,7 +7088,9 @@ async def quote_basket(
         total += Decimal(str(q.total))
         currency = currency or q.currency
     return PriceQuoteBasketResponse(
-        quotes=quotes, total=total, currency=currency,
+        quotes=quotes,
+        total=total,
+        currency=currency,
     )
 
 
@@ -7270,7 +7103,9 @@ async def list_effective_rules(
     session: SessionDep,
     user_payload: CurrentUserPayload,
     on_date: str | None = Query(
-        default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", alias="date",
+        default=None,
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+        alias="date",
     ),
     service: PropertyDevService = Depends(_svc),
     _perm: None = Depends(RequirePermission("property_dev.read")),
@@ -7278,9 +7113,12 @@ async def list_effective_rules(
     """Return rules effective on ``date`` (with consumed counts)."""
     await _verify_owner_via_price_list(session, price_list_id, user_payload)
     rules = await service.effective_rules_on_date(
-        price_list_id, on_date=on_date,
+        price_list_id,
+        on_date=on_date,
     )
-    from datetime import datetime as _dt, UTC as _UTC
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+
     target = on_date or _dt.now(_UTC).date().isoformat()
     return EffectiveRulesResponse(
         price_list_id=price_list_id,
@@ -7330,10 +7168,7 @@ async def create_pricing_rule(
         rule_type=data.rule_type,
         condition_json=data.condition_json,
         adjustment_pct=Decimal(str(data.adjustment_pct)),
-        adjustment_fixed=(
-            Decimal(str(data.adjustment_fixed))
-            if data.adjustment_fixed is not None else None
-        ),
+        adjustment_fixed=(Decimal(str(data.adjustment_fixed)) if data.adjustment_fixed is not None else None),
         priority=data.priority,
         active=data.active,
         effective_from=data.effective_from or "",
@@ -7363,10 +7198,7 @@ async def update_pricing_rule(
     # Coerce Decimal-ish.
     if "adjustment_pct" in fields and fields["adjustment_pct"] is not None:
         fields["adjustment_pct"] = Decimal(str(fields["adjustment_pct"]))
-    if (
-        "adjustment_fixed" in fields
-        and fields["adjustment_fixed"] is not None
-    ):
+    if "adjustment_fixed" in fields and fields["adjustment_fixed"] is not None:
         fields["adjustment_fixed"] = Decimal(str(fields["adjustment_fixed"]))
     if fields:
         await service.pricing_rules.update_fields(rule_id, **fields)
@@ -7375,7 +7207,8 @@ async def update_pricing_rule(
 
 
 @router.delete(
-    "/price-lists/{price_list_id}/rules/{rule_id}", status_code=204,
+    "/price-lists/{price_list_id}/rules/{rule_id}",
+    status_code=204,
 )
 async def delete_pricing_rule(
     price_list_id: uuid.UUID,
@@ -7434,7 +7267,10 @@ async def bulk_plots_status_change(
     _perm: None = Depends(RequirePermission("property_dev.bulk.plot_status_change")),
 ) -> BulkResult:
     return await bulk_plot_status_change(
-        session, data, user_payload=user_payload, dry_run=dry_run,
+        session,
+        data,
+        user_payload=user_payload,
+        dry_run=dry_run,
     )
 
 
@@ -7458,7 +7294,10 @@ async def bulk_reservations_extend_expiry(
     _perm: None = Depends(RequirePermission("property_dev.bulk.reservation_extend")),
 ) -> BulkResult:
     return await bulk_extend_reservation_expiry(
-        session, data, user_payload=user_payload, dry_run=dry_run,
+        session,
+        data,
+        user_payload=user_payload,
+        dry_run=dry_run,
     )
 
 
@@ -7484,7 +7323,10 @@ async def bulk_documents_regenerate(
     _perm: None = Depends(RequirePermission("property_dev.bulk.document_regenerate")),
 ) -> BulkResult:
     return await bulk_regenerate_documents(
-        session, data, user_payload=user_payload, dry_run=dry_run,
+        session,
+        data,
+        user_payload=user_payload,
+        dry_run=dry_run,
     )
 
 
@@ -7546,5 +7388,8 @@ async def bulk_buyers_merge(
     _perm: None = Depends(RequirePermission("property_dev.bulk.buyer_merge")),
 ) -> BulkResult:
     return await bulk_merge_buyers(
-        session, data, user_payload=user_payload, dry_run=dry_run,
+        session,
+        data,
+        user_payload=user_payload,
+        dry_run=dry_run,
     )

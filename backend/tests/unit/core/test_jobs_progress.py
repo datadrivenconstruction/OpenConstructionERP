@@ -47,24 +47,26 @@ async def job_run(session_factory) -> JobRun:
 @pytest.mark.asyncio
 async def test_update_progress_sets_percent(session_factory, job_run) -> None:
     await update_progress(
-        job_run.id, percent=50, message="halfway", session_factory=session_factory,
+        job_run.id,
+        percent=50,
+        message="halfway",
+        session_factory=session_factory,
     )
     async with session_factory() as s:
-        row = (
-            await s.execute(select(JobRun).where(JobRun.id == job_run.id))
-        ).scalar_one()
+        row = (await s.execute(select(JobRun).where(JobRun.id == job_run.id))).scalar_one()
         assert row.progress_percent == 50
 
 
 @pytest.mark.asyncio
 async def test_update_progress_with_message_persists(session_factory, job_run) -> None:
     await update_progress(
-        job_run.id, percent=25, message="quarter done", session_factory=session_factory,
+        job_run.id,
+        percent=25,
+        message="quarter done",
+        session_factory=session_factory,
     )
     async with session_factory() as s:
-        row = (
-            await s.execute(select(JobRun).where(JobRun.id == job_run.id))
-        ).scalar_one()
+        row = (await s.execute(select(JobRun).where(JobRun.id == job_run.id))).scalar_one()
         # Message is recorded in the result_jsonb under "progress_message"
         # so it survives until the final result_jsonb gets written.
         assert row.progress_percent == 25
@@ -76,21 +78,23 @@ async def test_update_progress_with_message_persists(session_factory, job_run) -
 async def test_progress_clamps_to_0_100(session_factory, job_run) -> None:
     """Out-of-range percents are clamped to [0, 100]."""
     await update_progress(
-        job_run.id, percent=150, message=None, session_factory=session_factory,
+        job_run.id,
+        percent=150,
+        message=None,
+        session_factory=session_factory,
     )
     async with session_factory() as s:
-        row = (
-            await s.execute(select(JobRun).where(JobRun.id == job_run.id))
-        ).scalar_one()
+        row = (await s.execute(select(JobRun).where(JobRun.id == job_run.id))).scalar_one()
         assert row.progress_percent == 100
 
     await update_progress(
-        job_run.id, percent=-10, message=None, session_factory=session_factory,
+        job_run.id,
+        percent=-10,
+        message=None,
+        session_factory=session_factory,
     )
     async with session_factory() as s:
-        row = (
-            await s.execute(select(JobRun).where(JobRun.id == job_run.id))
-        ).scalar_one()
+        row = (await s.execute(select(JobRun).where(JobRun.id == job_run.id))).scalar_one()
         # Going down would be a regression, but we already established
         # the clamp at 100 — out-of-order updates must NOT decrease the
         # percent. See the next test for the explicit monotonic check.
@@ -101,16 +105,20 @@ async def test_progress_clamps_to_0_100(session_factory, job_run) -> None:
 async def test_progress_is_monotonic(session_factory, job_run) -> None:
     """A later, lower update_progress call must NOT regress progress_percent."""
     await update_progress(
-        job_run.id, percent=80, message="almost done", session_factory=session_factory,
+        job_run.id,
+        percent=80,
+        message="almost done",
+        session_factory=session_factory,
     )
     # Out-of-order, stale progress event — must be ignored.
     await update_progress(
-        job_run.id, percent=20, message="stale event", session_factory=session_factory,
+        job_run.id,
+        percent=20,
+        message="stale event",
+        session_factory=session_factory,
     )
     async with session_factory() as s:
-        row = (
-            await s.execute(select(JobRun).where(JobRun.id == job_run.id))
-        ).scalar_one()
+        row = (await s.execute(select(JobRun).where(JobRun.id == job_run.id))).scalar_one()
         assert row.progress_percent == 80
 
 
@@ -118,15 +126,19 @@ async def test_progress_is_monotonic(session_factory, job_run) -> None:
 async def test_progress_no_message_keeps_existing(session_factory, job_run) -> None:
     """update_progress(message=None) must not erase a previously-set message."""
     await update_progress(
-        job_run.id, percent=10, message="phase 1", session_factory=session_factory,
+        job_run.id,
+        percent=10,
+        message="phase 1",
+        session_factory=session_factory,
     )
     await update_progress(
-        job_run.id, percent=50, message=None, session_factory=session_factory,
+        job_run.id,
+        percent=50,
+        message=None,
+        session_factory=session_factory,
     )
     async with session_factory() as s:
-        row = (
-            await s.execute(select(JobRun).where(JobRun.id == job_run.id))
-        ).scalar_one()
+        row = (await s.execute(select(JobRun).where(JobRun.id == job_run.id))).scalar_one()
         assert row.progress_percent == 50
         # Previous message preserved (None is "no update", not "clear").
         assert row.result_jsonb.get("progress_message") == "phase 1"
@@ -141,5 +153,8 @@ async def test_progress_unknown_jobrun_id_is_noop(session_factory) -> None:
     # the JobRun row (e.g., test cleanup) and we don't want to crash the
     # task on a benign race.
     await update_progress(
-        uuid.uuid4(), percent=42, message="ghost", session_factory=session_factory,
+        uuid.uuid4(),
+        percent=42,
+        message="ghost",
+        session_factory=session_factory,
     )

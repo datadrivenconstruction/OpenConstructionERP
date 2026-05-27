@@ -55,9 +55,7 @@ async def test_pipeline_reads_require_auth(client: AsyncClient) -> None:
         ("GET", f"/api/v1/pipelines/runs/{pid}"),
     ]:
         resp = await client.request(method, path)
-        assert resp.status_code in (401, 403), (
-            f"{method} {path} must require auth, got {resp.status_code}"
-        )
+        assert resp.status_code in (401, 403), f"{method} {path} must require auth, got {resp.status_code}"
 
 
 @pytest.mark.asyncio
@@ -72,6 +70,4 @@ async def test_pipeline_mutations_require_auth(client: AsyncClient) -> None:
         ("POST", f"/api/v1/pipelines/{pid}/run", {}),
     ]:
         resp = await client.request(method, path, json=body)
-        assert resp.status_code in (401, 403), (
-            f"{method} {path} must require auth, got {resp.status_code}"
-        )
+        assert resp.status_code in (401, 403), f"{method} {path} must require auth, got {resp.status_code}"

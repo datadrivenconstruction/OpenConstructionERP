@@ -56,16 +56,15 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
     return name in inspector.get_table_names()
 
 
-def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str
-) -> bool:
+def _has_column(inspector: sa.engine.reflection.Inspector, table: str, column: str) -> bool:
     if not _has_table(inspector, table):
         return False
     return any(c["name"] == column for c in inspector.get_columns(table))
 
 
 def _existing_index_names(
-    inspector: sa.engine.reflection.Inspector, table: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
 ) -> set[str]:
     if not _has_table(inspector, table):
         return set()
@@ -76,9 +75,7 @@ def upgrade() -> None:
     """Create smart-issue tables + extend result/run with signature columns."""
     bind = op.get_bind()
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
     inspector = sa.inspect(bind)
 
     # ── oe_clash_issue ──
@@ -142,23 +139,33 @@ def upgrade() -> None:
                 server_default="strong",
             ),
             sa.ForeignKeyConstraint(
-                ["project_id"], ["oe_projects_project.id"], ondelete="CASCADE",
+                ["project_id"],
+                ["oe_projects_project.id"],
+                ondelete="CASCADE",
             ),
             sa.ForeignKeyConstraint(
-                ["first_seen_run_id"], [f"{_RUN_TABLE}.id"], ondelete="CASCADE",
+                ["first_seen_run_id"],
+                [f"{_RUN_TABLE}.id"],
+                ondelete="CASCADE",
             ),
             sa.ForeignKeyConstraint(
-                ["last_seen_run_id"], [f"{_RUN_TABLE}.id"], ondelete="CASCADE",
+                ["last_seen_run_id"],
+                [f"{_RUN_TABLE}.id"],
+                ondelete="CASCADE",
             ),
             sa.ForeignKeyConstraint(
-                ["resolved_run_id"], [f"{_RUN_TABLE}.id"], ondelete="SET NULL",
+                ["resolved_run_id"],
+                [f"{_RUN_TABLE}.id"],
+                ondelete="SET NULL",
             ),
             sa.UniqueConstraint(
-                "project_id", "signature_hash",
+                "project_id",
+                "signature_hash",
                 name="uq_clash_issue_project_sig",
             ),
             sa.UniqueConstraint(
-                "project_id", "server_assigned_id",
+                "project_id",
+                "server_assigned_id",
                 name="uq_clash_issue_project_serverid",
             ),
         )
@@ -202,14 +209,15 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="",
             ),
-            sa.Column(
-                "suppressed_by_user_id", guid_type, nullable=True
-            ),
+            sa.Column("suppressed_by_user_id", guid_type, nullable=True),
             sa.ForeignKeyConstraint(
-                ["project_id"], ["oe_projects_project.id"], ondelete="CASCADE",
+                ["project_id"],
+                ["oe_projects_project.id"],
+                ondelete="CASCADE",
             ),
             sa.UniqueConstraint(
-                "project_id", "signature_hash",
+                "project_id",
+                "signature_hash",
                 name="uq_clash_suppression_project_sig",
             ),
         )
@@ -228,9 +236,7 @@ def upgrade() -> None:
                     pass
 
     # ── oe_clash_run.spatial_grid_mm ──
-    if _has_table(inspector, _RUN_TABLE) and not _has_column(
-        inspector, _RUN_TABLE, "spatial_grid_mm"
-    ):
+    if _has_table(inspector, _RUN_TABLE) and not _has_column(inspector, _RUN_TABLE, "spatial_grid_mm"):
         with op.batch_alter_table(_RUN_TABLE) as batch:
             batch.add_column(
                 sa.Column(
@@ -275,9 +281,7 @@ def upgrade() -> None:
                     ),
                 )
             )
-        if not _has_column(
-            inspector, _RESULT_TABLE, "tolerance_at_signature_time_mm"
-        ):
+        if not _has_column(inspector, _RESULT_TABLE, "tolerance_at_signature_time_mm"):
             new_cols.append(
                 (
                     "tolerance_at_signature_time_mm",

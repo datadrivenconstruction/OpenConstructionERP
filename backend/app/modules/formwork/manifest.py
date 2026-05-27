@@ -6,10 +6,7 @@ manifest = ModuleManifest(
     name="oe_formwork",
     version="0.1.0",
     display_name="Formwork",
-    description=(
-        "Formwork system catalogue + per-BOQ assignments with "
-        "reuse-aware unit-cost computation"
-    ),
+    description=("Formwork system catalogue + per-BOQ assignments with reuse-aware unit-cost computation"),
     author="OpenConstructionERP Core Team",
     category="estimation",
     depends=["oe_projects", "oe_boq"],

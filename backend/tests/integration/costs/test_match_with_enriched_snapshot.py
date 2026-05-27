@@ -23,6 +23,7 @@ What this validates:
    empty description (snapshot-only install, no parquet sideload
    required).
 """
+
 from __future__ import annotations
 
 import os
@@ -34,10 +35,7 @@ ENRICHED_FLAG = os.environ.get("OE_MATCH_USE_ENRICHED", "").strip() in ("1", "tr
 
 pytestmark = pytest.mark.skipif(
     not (QDRANT_URL and ENRICHED_FLAG),
-    reason=(
-        "set CWICR_QDRANT_URL and OE_MATCH_USE_ENRICHED=1 with a built "
-        "cwicr_en_v3_enriched collection to run"
-    ),
+    reason=("set CWICR_QDRANT_URL and OE_MATCH_USE_ENRICHED=1 with a built cwicr_en_v3_enriched collection to run"),
 )
 
 
@@ -90,12 +88,8 @@ def test_enriched_collection_payload_carries_description_and_passage_text() -> N
         # Some rare rows where ALL descriptive fields are blank fall back
         # to ``rate_code`` — accept that, but the assertion bites if
         # >50% of the sample is empty.
-    non_empty_pass = sum(
-        1 for p in points if (p["payload"].get("passage_text") or "").strip()
-    )
-    assert non_empty_pass >= len(points) // 2, (
-        f"too many empty passages: {non_empty_pass}/{len(points)} non-empty"
-    )
+    non_empty_pass = sum(1 for p in points if (p["payload"].get("passage_text") or "").strip())
+    assert non_empty_pass >= len(points) // 2, f"too many empty passages: {non_empty_pass}/{len(points)} non-empty"
 
 
 @pytest.mark.asyncio

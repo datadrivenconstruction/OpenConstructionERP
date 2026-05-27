@@ -112,10 +112,7 @@ class _StubFieldReportRepo:
         return None
 
     async def get_for_month(self, project_id: uuid.UUID, year: int, month: int) -> list[Any]:
-        return [
-            r for r in self.rows.values()
-            if r.project_id == project_id
-        ]
+        return [r for r in self.rows.values() if r.project_id == project_id]
 
 
 # ── Create ───────────────────────────────────────────────────────────────
@@ -163,12 +160,8 @@ async def test_create_report_defaults_to_draft_status() -> None:
 async def test_list_reports_project_scoped() -> None:
     service = _make_service()
     pid = uuid.uuid4()
-    await service.create_report(
-        FieldReportCreate(project_id=pid, report_date=date(2026, 4, 10))
-    )
-    await service.create_report(
-        FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 10))
-    )
+    await service.create_report(FieldReportCreate(project_id=pid, report_date=date(2026, 4, 10)))
+    await service.create_report(FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 10)))
 
     rows, total = await service.list_reports(pid)
     assert total == 1
@@ -180,9 +173,7 @@ async def test_list_reports_project_scoped() -> None:
 @pytest.mark.asyncio
 async def test_submit_draft_report_succeeds() -> None:
     service = _make_service()
-    report = await service.create_report(
-        FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13))
-    )
+    report = await service.create_report(FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13)))
     result = await service.submit_report(report.id)
     assert result.status == "submitted"
 
@@ -192,9 +183,7 @@ async def test_submit_non_draft_raises_400() -> None:
     from fastapi import HTTPException
 
     service = _make_service()
-    report = await service.create_report(
-        FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13))
-    )
+    report = await service.create_report(FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13)))
     report.status = "submitted"
 
     with pytest.raises(HTTPException) as exc_info:
@@ -205,9 +194,7 @@ async def test_submit_non_draft_raises_400() -> None:
 @pytest.mark.asyncio
 async def test_approve_submitted_report_succeeds() -> None:
     service = _make_service()
-    report = await service.create_report(
-        FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13))
-    )
+    report = await service.create_report(FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13)))
     report.status = "submitted"
 
     result = await service.approve_report(report.id, user_id="mgr-1")
@@ -220,9 +207,7 @@ async def test_approve_non_submitted_raises_400() -> None:
     from fastapi import HTTPException
 
     service = _make_service()
-    report = await service.create_report(
-        FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13))
-    )
+    report = await service.create_report(FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13)))
     # still draft
 
     with pytest.raises(HTTPException) as exc_info:
@@ -235,9 +220,7 @@ async def test_update_approved_report_raises_400() -> None:
     from fastapi import HTTPException
 
     service = _make_service()
-    report = await service.create_report(
-        FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13))
-    )
+    report = await service.create_report(FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13)))
     report.status = "approved"
 
     with pytest.raises(HTTPException) as exc_info:
@@ -251,9 +234,7 @@ async def test_update_approved_report_raises_400() -> None:
 @pytest.mark.asyncio
 async def test_link_documents_merges_and_deduplicates() -> None:
     service = _make_service()
-    report = await service.create_report(
-        FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13))
-    )
+    report = await service.create_report(FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13)))
     report.document_ids = ["doc-1", "doc-2"]
 
     result = await service.link_documents(report.id, ["doc-2", "doc-3"])
@@ -340,16 +321,30 @@ async def test_get_summary_handles_empty_and_malformed_workforce() -> None:
     pid = uuid.uuid4()
 
     service.repo.rows[uuid.uuid4()] = SimpleNamespace(
-        id=uuid.uuid4(), project_id=pid, status="draft", report_type="daily",
-        report_date=date(2026, 4, 14), delay_hours=0.0, workforce=None,
+        id=uuid.uuid4(),
+        project_id=pid,
+        status="draft",
+        report_type="daily",
+        report_date=date(2026, 4, 14),
+        delay_hours=0.0,
+        workforce=None,
     )
     service.repo.rows[uuid.uuid4()] = SimpleNamespace(
-        id=uuid.uuid4(), project_id=pid, status="draft", report_type="daily",
-        report_date=date(2026, 4, 15), delay_hours=0.0, workforce=[],
+        id=uuid.uuid4(),
+        project_id=pid,
+        status="draft",
+        report_type="daily",
+        report_date=date(2026, 4, 15),
+        delay_hours=0.0,
+        workforce=[],
     )
     service.repo.rows[uuid.uuid4()] = SimpleNamespace(
-        id=uuid.uuid4(), project_id=pid, status="draft", report_type="daily",
-        report_date=date(2026, 4, 16), delay_hours=0.0,
+        id=uuid.uuid4(),
+        project_id=pid,
+        status="draft",
+        report_type="daily",
+        report_date=date(2026, 4, 16),
+        delay_hours=0.0,
         workforce=["not-a-dict", 42, None],  # malformed entries
     )
 
@@ -366,9 +361,7 @@ async def test_delete_report_removes_from_repo() -> None:
     from fastapi import HTTPException
 
     service = _make_service()
-    report = await service.create_report(
-        FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13))
-    )
+    report = await service.create_report(FieldReportCreate(project_id=uuid.uuid4(), report_date=date(2026, 4, 13)))
     await service.delete_report(report.id)
 
     with pytest.raises(HTTPException) as exc_info:

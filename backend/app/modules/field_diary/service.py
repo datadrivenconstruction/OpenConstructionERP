@@ -176,15 +176,14 @@ class FieldDiaryService:
         want to re-issue.
         """
         existing = await self.grant_repo.get_active(
-            data.user_id, data.project_id, data.module_key,
+            data.user_id,
+            data.project_id,
+            data.module_key,
         )
         if existing is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    "An active grant already exists for this "
-                    "(user, project, module) tuple"
-                ),
+                detail=("An active grant already exists for this (user, project, module) tuple"),
             )
         grant = FieldModuleGrant(
             user_id=data.user_id,
@@ -225,15 +224,14 @@ class FieldDiaryService:
     ) -> DiaryEntry:
         """Create a draft entry. ``(project, author, date)`` is unique."""
         existing = await self.entry_repo.get_by_unique(
-            data.project_id, author_id, data.entry_date,
+            data.project_id,
+            author_id,
+            data.entry_date,
         )
         if existing is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    "A diary entry for this author + date already exists "
-                    f"({existing.id})"
-                ),
+                detail=(f"A diary entry for this author + date already exists ({existing.id})"),
             )
         entry = DiaryEntry(
             project_id=data.project_id,
@@ -268,10 +266,7 @@ class FieldDiaryService:
         if entry.status != "draft":
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    f"Cannot edit a diary entry in status '{entry.status}' "
-                    "— only drafts are editable"
-                ),
+                detail=(f"Cannot edit a diary entry in status '{entry.status}' — only drafts are editable"),
             )
         fields = data.model_dump(exclude_unset=True)
         if fields:
@@ -303,14 +298,13 @@ class FieldDiaryService:
         if not (has_notes or activities or attachments):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    "Diary entry is empty — add notes, activities, or "
-                    "attachments before submitting"
-                ),
+                detail=("Diary entry is empty — add notes, activities, or attachments before submitting"),
             )
         now = now_utc()
         await self.entry_repo.update_fields(
-            entry_id, status="submitted", submitted_at=now,
+            entry_id,
+            status="submitted",
+            submitted_at=now,
         )
         await self.session.refresh(entry)
         event_bus.publish_detached(
@@ -335,10 +329,7 @@ class FieldDiaryService:
         if entry.status not in ("submitted", "approved"):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    "Only submitted entries can be approved "
-                    f"(current status: {entry.status})"
-                ),
+                detail=(f"Only submitted entries can be approved (current status: {entry.status})"),
             )
         if entry.status == "approved":
             return entry  # idempotent
@@ -546,13 +537,11 @@ class FieldDiaryService:
                 )
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=(
-                        "Too many failed PIN attempts — magic link "
-                        "invalidated"
-                    ),
+                    detail=("Too many failed PIN attempts — magic link invalidated"),
                 )
             await self.magic_repo.update_fields(
-                link_id, pin_attempts=new_attempts,
+                link_id,
+                pin_attempts=new_attempts,
             )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -576,7 +565,9 @@ class FieldDiaryService:
         return sess, plain_session
 
     async def verify_session(
-        self, session_token: str, pin: str,
+        self,
+        session_token: str,
+        pin: str,
     ) -> FieldSession | None:
         """Validate a field session by bearer token + PIN.
 

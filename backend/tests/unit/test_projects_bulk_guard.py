@@ -31,7 +31,6 @@ These tests pin:
 
 from __future__ import annotations
 
-import asyncio
 import os
 import tempfile
 import uuid
@@ -49,27 +48,22 @@ _TMP_DB = _TMP_DIR / "session.db"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}"
 os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 
-from app.config import Settings  # noqa: E402
-from app.database import Base  # noqa: E402
-from app.modules.projects import service as project_service_module  # noqa: E402
-from app.modules.projects.models import Project  # noqa: E402
-from app.modules.projects.repository import ProjectRepository  # noqa: E402
-from app.modules.projects.schemas import ProjectCreate  # noqa: E402
-from app.modules.projects.service import ProjectService  # noqa: E402
-
 # Project carries FKs to oe_users_user / oe_teams_team etc; the tests
 # only need the projects table for codegen but the FK referent must
 # exist when SQLite parses the CREATE TABLE. Pulling Base.metadata
 # entirely avoids the missing-referent class of error.
 import app.modules.users.models  # noqa: E402,F401
+from app.config import Settings  # noqa: E402
+from app.database import Base  # noqa: E402
+from app.modules.projects import service as project_service_module  # noqa: E402
+from app.modules.projects.models import Project  # noqa: E402
+from app.modules.projects.service import ProjectService  # noqa: E402
 
 
 @pytest_asyncio.fixture
 async def session() -> AsyncSession:
     db_path = _TMP_DIR / f"test-{uuid.uuid4().hex[:8]}.db"
-    engine = create_async_engine(
-        f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False
-    )
+    engine = create_async_engine(f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     Session = async_sessionmaker(engine, expire_on_commit=False)

@@ -22,7 +22,6 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-
 # ── Per-country definitions ───────────────────────────────────────────────────
 #
 # Each entry mirrors exactly what the regional pack config.py exposes so
@@ -245,8 +244,7 @@ def validate_address(
                     field="postcode",
                     code="invalid_format",
                     message=(
-                        f"Postcode '{postcode_value}' does not match the "
-                        f"expected format for country '{cc}'.{suffix}"
+                        f"Postcode '{postcode_value}' does not match the expected format for country '{cc}'.{suffix}"
                     ),
                 )
             )

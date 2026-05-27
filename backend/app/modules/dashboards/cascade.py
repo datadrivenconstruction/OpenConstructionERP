@@ -143,7 +143,11 @@ async def fetch_cascade_values(
 
     target_is_top_level = target_column in _TOP_LEVEL_COLUMNS
     await _ensure_target_exists(
-        pool, snapshot_id, project_id, target_column, target_is_top_level,
+        pool,
+        snapshot_id,
+        project_id,
+        target_column,
+        target_is_top_level,
     )
     await _ensure_selected_exist(pool, snapshot_id, project_id, cleaned)
 
@@ -155,11 +159,7 @@ async def fetch_cascade_values(
         limit=limit,
     )
     rows = await pool.execute(snapshot_id, project_id, sql, params)
-    return [
-        CascadeMatch(value=str(v), count=int(c))
-        for v, c in rows
-        if v is not None
-    ]
+    return [CascadeMatch(value=str(v), count=int(c)) for v, c in rows if v is not None]
 
 
 async def count_filtered_rows(
@@ -178,7 +178,9 @@ async def count_filtered_rows(
     await _ensure_selected_exist(pool, snapshot_id, project_id, cleaned)
 
     total_rows = await pool.execute(
-        snapshot_id, project_id, "SELECT COUNT(*) FROM entities",
+        snapshot_id,
+        project_id,
+        "SELECT COUNT(*) FROM entities",
     )
     total = int(total_rows[0][0]) if total_rows else 0
 
@@ -304,8 +306,7 @@ def _validate_and_clean_selected(
             continue
         if len(raw_values) > _MAX_VALUES_PER_COLUMN:
             raise InvalidSelectedColumnError(
-                f"Selected['{col}'] contains more than "
-                f"{_MAX_VALUES_PER_COLUMN} values.",
+                f"Selected['{col}'] contains more than {_MAX_VALUES_PER_COLUMN} values.",
             )
         # Coerce to strings; the underlying Parquet column is CAST to
         # VARCHAR before comparison so heterogenous types (int, bool)
@@ -325,8 +326,7 @@ async def _ensure_target_exists(
         rows = await pool.execute(
             snapshot_id,
             project_id,
-            "SELECT column_name FROM information_schema.columns "
-            "WHERE table_name = 'entities'",
+            "SELECT column_name FROM information_schema.columns WHERE table_name = 'entities'",
         )
         names = {str(r[0]) for r in rows}
         if column not in names:
@@ -356,8 +356,7 @@ async def _ensure_selected_exist(
                 rows = await pool.execute(
                     snapshot_id,
                     project_id,
-                    "SELECT column_name FROM information_schema.columns "
-                    "WHERE table_name = 'entities'",
+                    "SELECT column_name FROM information_schema.columns WHERE table_name = 'entities'",
                 )
                 top_level_names = {str(r[0]) for r in rows}
             if col not in top_level_names:
@@ -401,7 +400,7 @@ def _build_where_clause(
             # already verified the key is present in *some* form.
             key = _safe_key(col)
             predicates.append(
-                f'CAST(attributes[\'{key}\'] AS VARCHAR) IN ({placeholders})',
+                f"CAST(attributes['{key}'] AS VARCHAR) IN ({placeholders})",
             )
         params.extend(values)
     if not predicates:

@@ -44,12 +44,8 @@ _INSTANCE_ID = str(_instance_uuid.uuid4())
 # Build-pepper. Looks like opaque crypto material; the bytes XOR-decode to
 # the project authorship marker so removing it changes the published health
 # build hash (deterministic across rebuilds with the same INSTANCE_ID).
-_BUILD_PEPPER = bytes(b ^ 0x55 for b in (
-    b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
-))
-_BUILD_HASH = _hashlib.sha256(
-    _BUILD_PEPPER + f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()
-).hexdigest()[:16]
+_BUILD_PEPPER = bytes(b ^ 0x55 for b in (b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"))
+_BUILD_HASH = _hashlib.sha256(_BUILD_PEPPER + f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()).hexdigest()[:16]
 
 from datetime import UTC
 from pathlib import Path
@@ -242,9 +238,7 @@ async def _auto_backfill_vector_collections() -> None:
             try:
                 async with async_session_factory() as session:
                     # Step 1: cheap COUNT(*) — never materialises rows.
-                    live_total = (
-                        await session.execute(select(func.count()).select_from(model))
-                    ).scalar_one() or 0
+                    live_total = (await session.execute(select(func.count()).select_from(model))).scalar_one() or 0
 
                     if not live_total:
                         return
@@ -261,8 +255,7 @@ async def _auto_backfill_vector_collections() -> None:
                     if cap > 0 and live_total > cap:
                         limit_to = cap
                         logger.info(
-                            "Backfill %s: %d live rows exceeds cap (%d); "
-                            "indexing first %d",
+                            "Backfill %s: %d live rows exceeds cap (%d); indexing first %d",
                             label,
                             live_total,
                             cap,
@@ -386,17 +379,18 @@ async def _auto_backfill_vector_collections() -> None:
             )
             from app.modules.costs.models import CostItem as _CostItem
 
-            force_backfill = _os.environ.get(
-                "OE_COST_VECTOR_FORCE_BACKFILL", ""
-            ).strip() in ("1", "true", "True", "yes")
+            force_backfill = _os.environ.get("OE_COST_VECTOR_FORCE_BACKFILL", "").strip() in (
+                "1",
+                "true",
+                "True",
+                "yes",
+            )
 
             indexed_count = await _cost_vec.collection_count()
             async with async_session_factory() as _sess:
                 live_total = (
                     await _sess.execute(
-                        select(func.count())
-                        .select_from(_CostItem)
-                        .where(_CostItem.is_active.is_(True))
+                        select(func.count()).select_from(_CostItem).where(_CostItem.is_active.is_(True))
                     )
                 ).scalar_one() or 0
 
@@ -421,8 +415,7 @@ async def _auto_backfill_vector_collections() -> None:
                     )
                 indexed = await _cost_reindex_active()
                 logger.info(
-                    "Backfill Cost catalog: indexed=%d (live=%d, was=%d, "
-                    "force=%s)",
+                    "Backfill Cost catalog: indexed=%d (live=%d, was=%d, force=%s)",
                     indexed,
                     live_total,
                     indexed_count,
@@ -587,9 +580,7 @@ async def _seed_demo_account() -> None:
         async with async_session_factory() as session:
             demo: User | None = None
             for acct in demo_account_specs:
-                exists = (
-                    await session.execute(select(User).where(User.email == acct["email"]))
-                ).scalar_one_or_none()
+                exists = (await session.execute(select(User).where(User.email == acct["email"]))).scalar_one_or_none()
                 if exists is not None:
                     if acct["email"] == "demo@openestimator.io":
                         demo = exists
@@ -641,15 +632,11 @@ async def _seed_demo_account() -> None:
                 # Email -> env-var-name lookup so each per-account banner
                 # can name the exact variable that suppresses random
                 # generation for that account.
-                env_var_for_email = {
-                    spec["email"]: spec["env_var"] for spec in demo_account_specs
-                }
+                env_var_for_email = {spec["email"]: spec["env_var"] for spec in demo_account_specs}
                 for email, pw in generated_creds.items():
                     env_var = env_var_for_email.get(email, "DEMO_USER_PASSWORD")
                     logger.warning("[seed] Demo user created: %s / %s", email, pw)
-                    logger.warning(
-                        "[seed] Pre-set %s env to skip random generation", env_var
-                    )
+                    logger.warning("[seed] Pre-set %s env to skip random generation", env_var)
                 logger.warning(
                     "[seed] %d demo credential(s) also saved to %s",
                     len(generated_creds),
@@ -658,23 +645,17 @@ async def _seed_demo_account() -> None:
 
             # 2. Capture the demo user ids while the session is open.
             estimator_user = (
-                await session.execute(
-                    select(User).where(User.email == "estimator@openestimator.io")
-                )
+                await session.execute(select(User).where(User.email == "estimator@openestimator.io"))
             ).scalar_one_or_none()
             manager_user = (
-                await session.execute(
-                    select(User).where(User.email == "manager@openestimator.io")
-                )
+                await session.execute(select(User).where(User.email == "manager@openestimator.io"))
             ).scalar_one_or_none()
             demo_user_id = str(demo.id)
             estimator_user_id = str(estimator_user.id) if estimator_user else ""
             manager_user_id = str(manager_user.id) if manager_user else ""
 
             project_count = (
-                await session.execute(
-                    select(func.count()).select_from(Project).where(Project.owner_id == demo.id)
-                )
+                await session.execute(select(func.count()).select_from(Project).where(Project.owner_id == demo.id))
             ).scalar() or 0
 
             # Persist the demo users now so the showcase snapshot loader
@@ -713,9 +694,7 @@ async def _seed_demo_account() -> None:
                         manager_user_id,
                     )
                     logger.info("Showcase snapshot seed: %s", result)
-                    if result.get("status") in ("ok", "already") and result.get(
-                        "projects"
-                    ):
+                    if result.get("status") in ("ok", "already") and result.get("projects"):
                         showcase_done = True
 
             if not showcase_done:
@@ -817,16 +796,11 @@ def create_app() -> FastAPI:
             license_info=app.license_info,
         )
         _oa_tok = bytes(
-            b ^ 0x55
-            for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
+            b ^ 0x55 for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
         ).decode("ascii")
         schema.setdefault("info", {})
-        schema["info"]["x-ddc-origin"] = (
-            "OpenConstructionERP · DataDrivenConstruction · " + _oa_tok
-        )
-        schema["info"]["x-ddc-author"] = (
-            "Artem Boiko <info@datadrivenconstruction.io>"
-        )
+        schema["info"]["x-ddc-origin"] = "OpenConstructionERP · DataDrivenConstruction · " + _oa_tok
+        schema["info"]["x-ddc-author"] = "Artem Boiko <info@datadrivenconstruction.io>"
         app.openapi_schema = schema
         return schema
 
@@ -922,11 +896,7 @@ def create_app() -> FastAPI:
 
                     resp = JSONResponse(
                         status_code=422,
-                        content={
-                            "detail": (
-                                "NaN and Infinity are not accepted in numeric fields"
-                            )
-                        },
+                        content={"detail": ("NaN and Infinity are not accepted in numeric fields")},
                     )
                     await resp(scope, receive, send)
                     return
@@ -967,8 +937,6 @@ def create_app() -> FastAPI:
 
     # ── Request correlation ID (must precede SlowRequestLogger so its log
     # lines carry the ID via the RequestIDLogFilter context) ───────────────
-    from app.middleware.request_id import RequestIDMiddleware
-
     # ── Universal audit capture context (Epic H) ──────────────────────────
     # Sets the per-request AuditContext ContextVar so :func:`log_activity`
     # can persist the peer IP, User-Agent, and correlation ID without
@@ -978,6 +946,7 @@ def create_app() -> FastAPI:
     # this one so the request-id ContextVar is set BEFORE
     # ActorContextMiddleware reads it via ``get_request_id()``.
     from app.middleware.actor_context import ActorContextMiddleware
+    from app.middleware.request_id import RequestIDMiddleware
 
     app.add_middleware(ActorContextMiddleware)
 
@@ -1032,13 +1001,9 @@ def create_app() -> FastAPI:
     # full Pydantic detail is preserved everywhere so developers can still
     # see what they broke.
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(
-        request: Request, exc: RequestValidationError
-    ) -> JSONResponse:
+    async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
         errors = exc.errors()
-        path_only = bool(errors) and all(
-            (err.get("loc") or [None])[0] == "path" for err in errors
-        )
+        path_only = bool(errors) and all((err.get("loc") or [None])[0] == "path" for err in errors)
 
         if path_only and not settings.app_debug:
             # No detail leak — just acknowledge the URL is malformed.
@@ -1070,10 +1035,7 @@ def create_app() -> FastAPI:
         if settings.app_debug:
             safe_errors = [_scrub(e) for e in errors]
         else:
-            safe_errors = [
-                {k: v for k, v in _scrub(err).items() if k != "input"}
-                for err in errors
-            ]
+            safe_errors = [{k: v for k, v in _scrub(err).items() if k != "input"} for err in errors]
         return JSONResponse(
             status_code=422,
             content={"detail": safe_errors},
@@ -1605,28 +1567,29 @@ def create_app() -> FastAPI:
             if remote is not None:
                 network_ok = True
 
-            is_outdated = bool(
-                installed and remote and local_sha and remote.get("sha") and local_sha != remote["sha"]
-            )
+            is_outdated = bool(installed and remote and local_sha and remote.get("sha") and local_sha != remote["sha"])
             if is_outdated:
                 any_outdated = True
 
-            results.append({
-                "id": ext,
-                "name": display,
-                "exe": exe,
-                "installed": installed,
-                "installed_path": str(path) if path else None,
-                "installed_size": local_size,
-                "installed_sha": local_sha,
-                "latest_size": remote["size"] if remote else None,
-                "latest_sha": remote["sha"] if remote else None,
-                "is_outdated": is_outdated,
-                "download_url": remote["download_url"] if remote else None,
-                "html_url": remote["html_url"] if remote else None,
-            })
+            results.append(
+                {
+                    "id": ext,
+                    "name": display,
+                    "exe": exe,
+                    "installed": installed,
+                    "installed_path": str(path) if path else None,
+                    "installed_size": local_size,
+                    "installed_sha": local_sha,
+                    "latest_size": remote["size"] if remote else None,
+                    "latest_sha": remote["sha"] if remote else None,
+                    "is_outdated": is_outdated,
+                    "download_url": remote["download_url"] if remote else None,
+                    "html_url": remote["html_url"] if remote else None,
+                }
+            )
 
         from datetime import datetime as _dt
+
         response = {
             "converters": results,
             "any_outdated": any_outdated,
@@ -2340,9 +2303,7 @@ def create_app() -> FastAPI:
                         .group_by(CostItem.region)
                         .order_by(_func.count(CostItem.id).desc())
                     )
-                    _region_cache["stats"] = [
-                        {"region": row[0], "count": row[1]} for row in s.all()
-                    ]
+                    _region_cache["stats"] = [{"region": row[0], "count": row[1]} for row in s.all()]
 
                     # 3) Distinct top-level categories — drives the category
                     #    filter dropdown. Warm the all-regions list (the
@@ -2352,9 +2313,7 @@ def create_app() -> FastAPI:
                     from app.database import engine as __engine
 
                     if "sqlite" in str(__engine.url):
-                        coll_expr = __func.json_extract(
-                            CostItem.classification, "$.collection"
-                        )
+                        coll_expr = __func.json_extract(CostItem.classification, "$.collection")
                     else:
                         coll_expr = CostItem.classification["collection"].as_string()
                     c = await cost_session.execute(
@@ -2364,18 +2323,14 @@ def create_app() -> FastAPI:
                         .where(coll_expr != "")
                         .order_by(coll_expr)
                     )
-                    _region_cache["categories_all"] = [
-                        row[0] for row in c.all() if row[0]
-                    ]
+                    _region_cache["categories_all"] = [row[0] for row in c.all() if row[0]]
                     _region_cache["ts"] = _ptime.monotonic()
 
                     svc = CostItemService(cost_session)
                     for reg in regions:
                         try:
                             raw = await svc.category_tree(region=reg, depth=4)
-                            nodes = [
-                                CategoryTreeNode.model_validate(n) for n in raw
-                            ]
+                            nodes = [CategoryTreeNode.model_validate(n) for n in raw]
                             key = f"tree::{reg}::d=4::p="
                             _category_tree_cache[key] = {
                                 "nodes": nodes,
@@ -2448,7 +2403,8 @@ def create_app() -> FastAPI:
                                 await svc.mark_template_ran(template)
                             except Exception:
                                 logger.exception(
-                                    "Scheduled report %s failed", template.id,
+                                    "Scheduled report %s failed",
+                                    template.id,
                                 )
                         await rep_session.commit()
                 except Exception:

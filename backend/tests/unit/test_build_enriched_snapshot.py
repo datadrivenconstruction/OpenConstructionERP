@@ -5,6 +5,7 @@ via a path injection. We're testing the pure-function bits — payload-
 to-passage synthesis — not the network/Qdrant code (those are covered
 implicitly by the integration test against a real local server).
 """
+
 from __future__ import annotations
 
 import sys
@@ -25,7 +26,6 @@ from build_enriched_snapshot import (  # noqa: E402
     _normalise_text,
     _split_camelcase,
 )
-
 
 # ── _split_camelcase ─────────────────────────────────────────────────────
 

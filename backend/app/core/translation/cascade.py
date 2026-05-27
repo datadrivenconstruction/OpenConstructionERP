@@ -154,9 +154,7 @@ async def translate(
         (TierUsed.LOOKUP_IATE, "iate"),
     ):
         try:
-            hit = await lookup_phrase(
-                text_in, src, tgt, dictionary=dictionary, root=lookup_root
-            )
+            hit = await lookup_phrase(text_in, src, tgt, dictionary=dictionary, root=lookup_root)
         except Exception as exc:  # pragma: no cover — defensive
             logger.debug("Lookup tier %s failed: %s", tier, exc)
             hit = None
@@ -206,9 +204,7 @@ async def translate(
 
     # ── Tier 4: LLM ───────────────────────────────────────────────────
     try:
-        llm_hit = await llm_translate(
-            text_in, src, tgt, domain=domain, user_settings=user_settings
-        )
+        llm_hit = await llm_translate(text_in, src, tgt, domain=domain, user_settings=user_settings)
     except Exception as exc:
         # Network / API errors must never bubble up — the fallback tier
         # is the safety net.

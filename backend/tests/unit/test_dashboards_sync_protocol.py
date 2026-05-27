@@ -50,7 +50,9 @@ def baseline_meta() -> SnapshotMeta:
 
 class TestInSync:
     def test_empty_config_is_in_sync(
-        self, probe: PresetSyncProbe, baseline_meta: SnapshotMeta,
+        self,
+        probe: PresetSyncProbe,
+        baseline_meta: SnapshotMeta,
     ) -> None:
         report = probe.run({}, baseline_meta, preset_id="p-1")
         assert report.is_in_sync is True
@@ -58,7 +60,9 @@ class TestInSync:
         assert report.all_issues == []
 
     def test_matching_columns_no_issues(
-        self, probe: PresetSyncProbe, baseline_meta: SnapshotMeta,
+        self,
+        probe: PresetSyncProbe,
+        baseline_meta: SnapshotMeta,
     ) -> None:
         config = {
             "snapshot_id": "snap-A",
@@ -75,7 +79,8 @@ class TestInSync:
 
 class TestColumnRenames:
     def test_synonym_rename_qty_to_quantity(
-        self, probe: PresetSyncProbe,
+        self,
+        probe: PresetSyncProbe,
     ) -> None:
         old = SnapshotMeta(
             columns=("category", "qty"),
@@ -129,7 +134,9 @@ class TestColumnRenames:
 
 class TestDroppedColumns:
     def test_unrelated_drop_is_manual_error(
-        self, probe: PresetSyncProbe, baseline_meta: SnapshotMeta,
+        self,
+        probe: PresetSyncProbe,
+        baseline_meta: SnapshotMeta,
     ) -> None:
         config = {
             "columns": ["category", "fire_rating"],
@@ -142,7 +149,9 @@ class TestDroppedColumns:
         assert issue.suggested_fix == "manual"
 
     def test_chart_axis_reference_surfaces_drop(
-        self, probe: PresetSyncProbe, baseline_meta: SnapshotMeta,
+        self,
+        probe: PresetSyncProbe,
+        baseline_meta: SnapshotMeta,
     ) -> None:
         """Charts that pin x_field/y_field independently should still
         show up in the dropped-columns set."""
@@ -161,7 +170,9 @@ class TestDroppedColumns:
 
 class TestDroppedFilterValues:
     def test_partial_drop_within_present_column(
-        self, probe: PresetSyncProbe, baseline_meta: SnapshotMeta,
+        self,
+        probe: PresetSyncProbe,
+        baseline_meta: SnapshotMeta,
     ) -> None:
         config = {
             "filters": {
@@ -178,7 +189,8 @@ class TestDroppedFilterValues:
         assert issue.suggested_fix == "drop_filter"
 
     def test_no_drop_when_value_set_unknown(
-        self, probe: PresetSyncProbe,
+        self,
+        probe: PresetSyncProbe,
     ) -> None:
         """If snapshot meta has the column but no value_set, the probe
         skips the drop check rather than guessing."""
@@ -197,7 +209,8 @@ class TestDroppedFilterValues:
 
 class TestDtypeChange:
     def test_within_family_is_warning(
-        self, probe: PresetSyncProbe,
+        self,
+        probe: PresetSyncProbe,
     ) -> None:
         old = SnapshotMeta(
             columns=("qty",),
@@ -242,20 +255,25 @@ class TestDtypeChange:
 
 class TestStatus:
     def test_status_synced_when_no_issues(
-        self, probe: PresetSyncProbe, baseline_meta: SnapshotMeta,
+        self,
+        probe: PresetSyncProbe,
+        baseline_meta: SnapshotMeta,
     ) -> None:
         report = probe.run({"columns": ["category"]}, baseline_meta, preset_id="p")
         assert report.status == "synced"
 
     def test_status_needs_review_when_manual_present(
-        self, probe: PresetSyncProbe, baseline_meta: SnapshotMeta,
+        self,
+        probe: PresetSyncProbe,
+        baseline_meta: SnapshotMeta,
     ) -> None:
         config = {"columns": ["unknown_col"]}
         report = probe.run(config, baseline_meta, preset_id="p")
         assert report.status == "needs_review"
 
     def test_status_stale_when_only_auto_fixes(
-        self, probe: PresetSyncProbe,
+        self,
+        probe: PresetSyncProbe,
     ) -> None:
         old = SnapshotMeta(columns=("qty",), dtypes={"qty": "numeric"})
         new = SnapshotMeta(
@@ -356,7 +374,9 @@ class TestDiff:
 
 class TestSerialisation:
     def test_report_to_dict_round_trips_keys(
-        self, probe: PresetSyncProbe, baseline_meta: SnapshotMeta,
+        self,
+        probe: PresetSyncProbe,
+        baseline_meta: SnapshotMeta,
     ) -> None:
         config = {
             "filters": {"material": ["asbestos", "concrete"]},
@@ -376,7 +396,9 @@ class TestSerialisation:
 
 class TestEdgeCases:
     def test_filter_with_empty_list_no_issue(
-        self, probe: PresetSyncProbe, baseline_meta: SnapshotMeta,
+        self,
+        probe: PresetSyncProbe,
+        baseline_meta: SnapshotMeta,
     ) -> None:
         """Empty filter list = 'no filter' — should not produce a
         dropped-value issue."""
@@ -385,7 +407,9 @@ class TestEdgeCases:
         assert report.dropped_filter_values == []
 
     def test_malformed_snapshot_meta_treated_as_absent(
-        self, probe: PresetSyncProbe, baseline_meta: SnapshotMeta,
+        self,
+        probe: PresetSyncProbe,
+        baseline_meta: SnapshotMeta,
     ) -> None:
         config = {"snapshot_meta": "not-a-dict", "columns": ["category"]}
         # Malformed meta means we fall through to the coarser check.
@@ -393,7 +417,8 @@ class TestEdgeCases:
         assert report.is_in_sync
 
     def test_no_rename_when_two_candidates(
-        self, probe: PresetSyncProbe,
+        self,
+        probe: PresetSyncProbe,
     ) -> None:
         """Synonym ambiguity → fall back to manual."""
         old = SnapshotMeta(

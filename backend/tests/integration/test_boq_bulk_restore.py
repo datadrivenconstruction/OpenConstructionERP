@@ -69,11 +69,7 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     token = ""
@@ -97,9 +93,7 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
 # ── Helpers ──────────────────────────────────────────────────────────────
 
 
-async def _create_project_with_boq(
-    client: AsyncClient, auth: dict[str, str]
-) -> tuple[str, str]:
+async def _create_project_with_boq(client: AsyncClient, auth: dict[str, str]) -> tuple[str, str]:
     proj = await client.post(
         "/api/v1/projects/",
         json={
@@ -217,9 +211,7 @@ async def test_bulk_update_quantity_factor_and_total_recompute(
 
 
 @pytest.mark.asyncio
-async def test_bulk_update_set_unit_allowlist(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_bulk_update_set_unit_allowlist(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """Direct field set works for the allow-listed keys (here: ``unit``)."""
     client, auth = shared_client, shared_auth
     _, boq_id = await _create_project_with_boq(client, auth)
@@ -280,9 +272,7 @@ async def test_bulk_update_rejects_disallowed_updates_key(
 
 
 @pytest.mark.asyncio
-async def test_bulk_update_404_on_cross_boq_id_smuggle(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_bulk_update_404_on_cross_boq_id_smuggle(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """Position id from a different BOQ must yield 404, never silent write."""
     client, auth = shared_client, shared_auth
     _, boq_a = await _create_project_with_boq(client, auth)
@@ -375,11 +365,7 @@ async def test_restore_field_rejects_log_targeting_another_position(
         headers=auth,
     )
     act = await client.get(f"/api/v1/boq/boqs/{boq_id}/activity/", headers=auth)
-    candidate = next(
-        e
-        for e in act.json()["items"]
-        if e["action"] == "position.updated" and e.get("target_id") == p1
-    )
+    candidate = next(e for e in act.json()["items"] if e["action"] == "position.updated" and e.get("target_id") == p1)
 
     # Try to restore p1's log onto p2 — must be rejected.
     rest = await client.post(

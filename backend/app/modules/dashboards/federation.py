@@ -159,10 +159,7 @@ class FederatedView:
             "snapshot_count": self.snapshot_count,
             "row_count": self.row_count,
             "schema_align": self.schema_align,
-            "snapshots": [
-                {"snapshot_id": s.snapshot_id, "project_id": s.project_id}
-                for s in self.snapshots
-            ],
+            "snapshots": [{"snapshot_id": s.snapshot_id, "project_id": s.project_id} for s in self.snapshots],
         }
 
     async def close(self) -> None:
@@ -175,7 +172,8 @@ class FederatedView:
         except Exception as exc:  # pragma: no cover — last-ditch
             logger.warning(
                 "federation.close failed view=%s: %s",
-                self.view_name, type(exc).__name__,
+                self.view_name,
+                type(exc).__name__,
             )
         self._closed = True
 
@@ -249,8 +247,7 @@ def _validate_snapshot_ids(snapshot_ids: list[str]) -> list[str]:
         cleaned.append(s)
     if len(cleaned) > _MAX_SNAPSHOTS:
         raise TooManySnapshotsError(
-            f"At most {_MAX_SNAPSHOTS} snapshots per federation "
-            f"(got {len(cleaned)})",
+            f"At most {_MAX_SNAPSHOTS} snapshots per federation (got {len(cleaned)})",
         )
     return cleaned
 
@@ -351,7 +348,8 @@ def _quote_ident(name: str) -> str:
 
 
 async def _read_snapshot_schema(
-    project_id: str, snapshot_id: str,
+    project_id: str,
+    snapshot_id: str,
 ) -> tuple[str, list[tuple[str, str]]]:
     """Return ``(parquet_path, [(col_name, col_dtype), ...])`` for a snapshot.
 
@@ -361,7 +359,9 @@ async def _read_snapshot_schema(
     """
     try:
         path = await resolve_local_parquet_path(
-            project_id, snapshot_id, "entities",
+            project_id,
+            snapshot_id,
+            "entities",
         )
     except FileNotFoundError as exc:
         raise FederationParquetError(
@@ -399,8 +399,7 @@ def _resolve_columns(
         return [], {}
 
     name_to_dtype: list[dict[str, str]] = [
-        {col: dtype for col, dtype in cols if col not in _RESERVED_PROVENANCE_COLUMNS}
-        for cols in per_snapshot
+        {col: dtype for col, dtype in cols if col not in _RESERVED_PROVENANCE_COLUMNS} for cols in per_snapshot
     ]
     name_sets: list[set[str]] = [set(d.keys()) for d in name_to_dtype]
 
@@ -411,8 +410,7 @@ def _resolve_columns(
                 missing = sorted(first - ns)
                 extra = sorted(ns - first)
                 raise SchemaMismatchError(
-                    f"Snapshot #{idx} schema differs from snapshot #0 — "
-                    f"missing={missing!r}, extra={extra!r}",
+                    f"Snapshot #{idx} schema differs from snapshot #0 — missing={missing!r}, extra={extra!r}",
                 )
         ordered = [c for c, _ in per_snapshot[0] if c not in _RESERVED_PROVENANCE_COLUMNS]
         dtypes = dict(name_to_dtype[0])
@@ -424,10 +422,7 @@ def _resolve_columns(
             common &= ns
         # Preserve first-snapshot's column order so users see a stable
         # layout regardless of how many later snapshots they pile on.
-        ordered = [
-            c for c, _ in per_snapshot[0]
-            if c in common and c not in _RESERVED_PROVENANCE_COLUMNS
-        ]
+        ordered = [c for c, _ in per_snapshot[0] if c in common and c not in _RESERVED_PROVENANCE_COLUMNS]
         dtypes = {c: name_to_dtype[0][c] for c in ordered}
         return ordered, dtypes
 
@@ -666,8 +661,7 @@ def _compose_union_sql(
         # Path literal: same escaping rule the duckdb_pool uses.
         escaped_path = path.replace("'", "''")
         legs.append(
-            "SELECT " + ", ".join(select_parts)
-            + f" FROM read_parquet('{escaped_path}')",
+            "SELECT " + ", ".join(select_parts) + f" FROM read_parquet('{escaped_path}')",
         )
 
     union_body = "\nUNION ALL\n".join(legs)

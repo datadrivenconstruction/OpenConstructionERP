@@ -64,11 +64,7 @@ async def auth_headers(client: AsyncClient) -> dict[str, str]:
     assert reg.status_code == 201, reg.text
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     resp = await client.post(
@@ -270,8 +266,7 @@ async def test_documents_activity_rename_event(
     rename_idx = actions.index("renamed")
     upload_idx = actions.index("uploaded")
     assert rename_idx < upload_idx, (
-        f"rename (later) must come before upload (earlier) in newest-first "
-        f"ordering: actions={actions}"
+        f"rename (later) must come before upload (earlier) in newest-first ordering: actions={actions}"
     )
 
 

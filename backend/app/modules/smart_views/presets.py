@@ -160,8 +160,7 @@ BUILTIN_PRESETS: list[dict[str, Any]] = [
         "category": "doors",
         "name": "Fire-rated doors",
         "description": (
-            "Highlights fire-rated doors in green; doors without a "
-            "FireRating property fade to a ghost overlay."
+            "Highlights fire-rated doors in green; doors without a FireRating property fade to a ghost overlay."
         ),
         "default_action": "show_all",
         "rules": [
@@ -233,9 +232,7 @@ BUILTIN_PRESETS: list[dict[str, Any]] = [
         "preset_id": "spaces_by_zone",
         "category": "spaces",
         "name": "Spaces by zone",
-        "description": (
-            "Colours every IfcSpace by its LongName (room name / zone)."
-        ),
+        "description": ("Colours every IfcSpace by its LongName (room name / zone)."),
         "default_action": "show_all",
         "rules": [
             {

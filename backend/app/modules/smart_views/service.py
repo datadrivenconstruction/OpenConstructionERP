@@ -71,9 +71,7 @@ class SmartViewService:
         cached = getattr(self, "_share_signer_cache", None)
         if cached is None:
             settings = get_settings()
-            cached = URLSafeSerializer(
-                settings.jwt_secret, salt=_SHARE_SIGNER_SALT
-            )
+            cached = URLSafeSerializer(settings.jwt_secret, salt=_SHARE_SIGNER_SALT)
             self._share_signer_cache = cached  # type: ignore[attr-defined]
         return cached
 
@@ -107,9 +105,7 @@ class SmartViewService:
     # ── Response shaping ──────────────────────────────────────────────
 
     @staticmethod
-    def _response_for(
-        view: SmartView, *, viewer_id: uuid.UUID | None
-    ) -> SmartViewResponse:
+    def _response_for(view: SmartView, *, viewer_id: uuid.UUID | None) -> SmartViewResponse:
         """Build the response payload, redacting share_token for non-authors.
 
         The DB-level uniqueness on ``share_token`` already prevents an
@@ -125,9 +121,7 @@ class SmartViewService:
 
     # ── Helpers ────────────────────────────────────────────────────────
 
-    async def _accessible_project_ids(
-        self, user_id: uuid.UUID
-    ) -> list[uuid.UUID]:
+    async def _accessible_project_ids(self, user_id: uuid.UUID) -> list[uuid.UUID]:
         """Project IDs the user may read (owner-or-admin scope).
 
         We deliberately reuse the simple ownership model used across
@@ -240,9 +234,7 @@ class SmartViewService:
         the small list of views a single request handles).
         """
         if view.scope_type in {"user", "project"}:
-            return self._can_read(
-                view, user_id=user_id, accessible_project_ids=accessible_project_ids
-            )
+            return self._can_read(view, user_id=user_id, accessible_project_ids=accessible_project_ids)
         if view.scope_type == "federation":
             federation = await self.session.get(BIMFederation, view.scope_id)
             if federation is None:
@@ -290,9 +282,7 @@ class SmartViewService:
         except Exception:
             # Visibility re-emission is best-effort; never block the
             # transaction on a misbehaving subscriber.
-            logger.debug(
-                "smart_views.visibility_changed emit failed", exc_info=True
-            )
+            logger.debug("smart_views.visibility_changed emit failed", exc_info=True)
 
     # ── CRUD ───────────────────────────────────────────────────────────
 
@@ -356,18 +346,12 @@ class SmartViewService:
         """Fetch one view; 404 if not found / not visible."""
         view = await self.repo.get_by_id(view_id)
         if view is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found")
         project_ids = set(await self._accessible_project_ids(user_id))
-        if not await self._can_read_async(
-            view, user_id=user_id, accessible_project_ids=project_ids
-        ):
+        if not await self._can_read_async(view, user_id=user_id, accessible_project_ids=project_ids):
             # 404, not 403 — same UUID-existence-leak hardening the
             # other modules use.
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found")
         return self._response_for(view, viewer_id=user_id)
 
     async def update_view(
@@ -380,16 +364,10 @@ class SmartViewService:
         """Partial-update an existing view (authoring user only)."""
         view = await self.repo.get_by_id(view_id)
         if view is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found")
         project_ids = set(await self._accessible_project_ids(user_id))
-        if not await self._can_read_async(
-            view, user_id=user_id, accessible_project_ids=project_ids
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found"
-            )
+        if not await self._can_read_async(view, user_id=user_id, accessible_project_ids=project_ids):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found")
         if not self._can_write(view, user_id=user_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -427,16 +405,10 @@ class SmartViewService:
         """Hard-delete a view (authoring user only)."""
         view = await self.repo.get_by_id(view_id)
         if view is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found")
         project_ids = set(await self._accessible_project_ids(user_id))
-        if not await self._can_read_async(
-            view, user_id=user_id, accessible_project_ids=project_ids
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found"
-            )
+        if not await self._can_read_async(view, user_id=user_id, accessible_project_ids=project_ids):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found")
         if not self._can_write(view, user_id=user_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -459,30 +431,20 @@ class SmartViewService:
         """Run the view's rules against a specific BIM model's elements."""
         view = await self.repo.get_by_id(view_id)
         if view is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found")
         project_ids = set(await self._accessible_project_ids(user_id))
-        if not await self._can_read_async(
-            view, user_id=user_id, accessible_project_ids=project_ids
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found"
-            )
+        if not await self._can_read_async(view, user_id=user_id, accessible_project_ids=project_ids):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found")
 
         model: BIMModel | None = await self.repo.get_model(model_id)
         if model is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="BIM model not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BIM model not found")
         # Cross-project leak hardening: the model's project must be
         # one the caller may read. Federation-scoped views are read
         # via the federation's project (already enforced above).
         model_project_id: uuid.UUID = model.project_id
         if model_project_id not in project_ids:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="BIM model not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BIM model not found")
 
         elements = await self.repo.elements_for_model(model_id)
         states, legend = evaluate_smart_view(view, elements)
@@ -545,9 +507,7 @@ class SmartViewService:
             )
 
         # Scope verification reuses the same guard create_view uses.
-        await self._verify_scope(
-            scope_type=scope_type, scope_id=scope_id, user_id=user_id
-        )
+        await self._verify_scope(scope_type=scope_type, scope_id=scope_id, user_id=user_id)
 
         # Idempotency lookup — same author + same scope + same name.
         # We deliberately key on name (not preset_id) because a user
@@ -560,9 +520,7 @@ class SmartViewService:
             SmartView.scope_id == scope_id,
             SmartView.name == preset["name"],
         )
-        existing = (
-            await self.session.execute(existing_stmt)
-        ).scalar_one_or_none()
+        existing = (await self.session.execute(existing_stmt)).scalar_one_or_none()
         if existing is not None:
             return self._response_for(existing, viewer_id=user_id)
 
@@ -597,9 +555,7 @@ class SmartViewService:
         """
         view = await self.repo.get_by_id(view_id)
         if view is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found")
         if not self._can_write(view, user_id=user_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -629,9 +585,7 @@ class SmartViewService:
         """
         view = await self.repo.get_by_id(view_id)
         if view is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SmartView not found")
         if not self._can_write(view, user_id=user_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -641,9 +595,7 @@ class SmartViewService:
         await self.session.flush()
         await self._emit_visibility_changed(view, reason="unshared")
 
-    async def resolve_share_token(
-        self, token: str
-    ) -> SmartViewResponse:
+    async def resolve_share_token(self, token: str) -> SmartViewResponse:
         """Look up a SmartView by share token — UNAUTHENTICATED path.
 
         The token must:
@@ -664,23 +616,17 @@ class SmartViewService:
             # Guard against absurdly-long inputs before the signer
             # spends any CPU on them. 4 KB is well past a realistic
             # itsdangerous URL-safe token.
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Share link not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Share link not found")
 
         view_id = self._decode_share_token(token)
         if view_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Share link not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Share link not found")
 
         view = await self.repo.get_by_id(view_id)
         if view is None or view.share_token != token:
             # The token decoded but the column is NULL (revoked) or
             # carries a *different* token (rotated). Same 404 either way.
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Share link not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Share link not found")
 
         return self._response_for(view, viewer_id=None)
 

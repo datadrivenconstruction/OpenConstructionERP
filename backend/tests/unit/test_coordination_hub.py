@@ -40,7 +40,6 @@ import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 from sqlalchemy import select  # noqa: E402
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────────
 
 
@@ -113,16 +112,10 @@ async def test_dashboard_happy_path_returns_canonical_shape(app_factory, db_sess
     """GET /dashboard returns 200 with the canonical KPI payload."""
     app = app_factory
     user_id, project_id = await _seed_user_and_project(db_session)
-    _override_payload(
-        app, user_id, role="editor", perms=["coordination.read"]
-    )
+    _override_payload(app, user_id, role="editor", perms=["coordination.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/coordination/projects/{project_id}/dashboard"
-            )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/coordination/projects/{project_id}/dashboard")
         assert resp.status_code == 200, resp.text
         body = resp.json()
         # Canonical top-level shape — every aggregator section is present
@@ -152,16 +145,10 @@ async def test_dashboard_blocks_cross_user_idor(app_factory, db_session):
     app = app_factory
     _owner_id, project_id = await _seed_user_and_project(db_session)
     intruder_id = uuid.uuid4()  # not seeded, not the owner
-    _override_payload(
-        app, intruder_id, role="editor", perms=["coordination.read"]
-    )
+    _override_payload(app, intruder_id, role="editor", perms=["coordination.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/coordination/projects/{project_id}/dashboard"
-            )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/coordination/projects/{project_id}/dashboard")
         # verify_project_access raises 404 (not 403) by design — no UUID
         # existence leak.
         assert resp.status_code == 404
@@ -183,16 +170,10 @@ async def test_thresholds_get_does_not_seed_for_viewer(app_factory, db_session):
 
     app = app_factory
     user_id, project_id = await _seed_user_and_project(db_session)
-    _override_payload(
-        app, user_id, role="viewer", perms=["coordination.read"]
-    )
+    _override_payload(app, user_id, role="viewer", perms=["coordination.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/coordination/projects/{project_id}/thresholds"
-            )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/coordination/projects/{project_id}/thresholds")
         assert resp.status_code == 200, resp.text
         body = resp.json()
         # The response itself is honest — every default metric is
@@ -202,18 +183,13 @@ async def test_thresholds_get_does_not_seed_for_viewer(app_factory, db_session):
         rows = (
             (
                 await db_session.execute(
-                    select(CoordinationThreshold).where(
-                        CoordinationThreshold.project_id == project_id
-                    )
+                    select(CoordinationThreshold).where(CoordinationThreshold.project_id == project_id)
                 )
             )
             .scalars()
             .all()
         )
-        assert rows == [], (
-            "VIEWER GET should NOT seed the threshold table; "
-            f"found {len(rows)} row(s)."
-        )
+        assert rows == [], f"VIEWER GET should NOT seed the threshold table; found {len(rows)} row(s)."
     finally:
         app.dependency_overrides.clear()
 
@@ -234,12 +210,8 @@ async def test_thresholds_get_seeds_for_editor(app_factory, db_session):
         perms=["coordination.read", "coordination.write"],
     )
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/coordination/projects/{project_id}/thresholds"
-            )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/coordination/projects/{project_id}/thresholds")
         assert resp.status_code == 200, resp.text
         # Refresh: a new session sees the seed committed by the request.
         from app.database import async_session_factory
@@ -248,9 +220,7 @@ async def test_thresholds_get_seeds_for_editor(app_factory, db_session):
             rows = (
                 (
                     await fresh.execute(
-                        select(CoordinationThreshold).where(
-                            CoordinationThreshold.project_id == project_id
-                        )
+                        select(CoordinationThreshold).where(CoordinationThreshold.project_id == project_id)
                     )
                 )
                 .scalars()
@@ -264,9 +234,7 @@ async def test_thresholds_get_seeds_for_editor(app_factory, db_session):
 # ── Pure unit: warn ≤ error validation ───────────────────────────────────
 
 
-async def test_update_threshold_rejects_inverted_warn_error(
-    app_factory, db_session
-):
+async def test_update_threshold_rejects_inverted_warn_error(app_factory, db_session):
     """update_threshold raises on warn > error (regression guard)."""
     from decimal import Decimal
 

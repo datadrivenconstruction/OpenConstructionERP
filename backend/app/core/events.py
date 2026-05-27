@@ -69,6 +69,7 @@ def _log_failures(
     task.add_done_callback(_done)
     return task
 
+
 # Stable bus protocol revision tag — bumped only when the wire shape
 # of EventResult changes.  Persisted as a fixed string so subscribers
 # from older snapshots can detect a protocol skew at startup.
@@ -163,9 +164,7 @@ class EventBus:
         code should fire-and-forget. Errors inside the detached task are
         logged by :meth:`publish` itself.
         """
-        return asyncio.create_task(
-            self.publish(event_name, data, source_module=source_module)
-        )
+        return asyncio.create_task(self.publish(event_name, data, source_module=source_module))
 
     async def publish(
         self,

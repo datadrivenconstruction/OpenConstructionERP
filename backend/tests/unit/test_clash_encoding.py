@@ -30,9 +30,10 @@ _TMP_DB = _TMP_DIR / "clash_encoding.db"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}"
 os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 
+from collections.abc import AsyncIterator  # noqa: E402
+
 import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
-from collections.abc import AsyncIterator  # noqa: E402
 
 # ── Parameterised name pairs ───────────────────────────────────────────────
 
@@ -61,9 +62,9 @@ async def db_engine():
 
     get_settings.cache_clear()
     # Import all models so Base.metadata is fully populated before create_all.
-    import app.modules.users.models  # noqa: F401
-    import app.modules.projects.models  # noqa: F401
     import app.modules.clash.models  # noqa: F401
+    import app.modules.projects.models  # noqa: F401
+    import app.modules.users.models  # noqa: F401
     from app.database import Base, engine
 
     async with engine.begin() as conn:
@@ -157,18 +158,10 @@ async def test_umlaut_names_survive_db_roundtrip(session, a_name, b_name):
 
     from app.modules.clash.models import ClashResult
 
-    row = (
-        await session.execute(
-            select(ClashResult).where(ClashResult.id == result_id)
-        )
-    ).scalar_one()
+    row = (await session.execute(select(ClashResult).where(ClashResult.id == result_id))).scalar_one()
 
-    assert row.a_name == a_name, (
-        f"a_name mangled.\nExpected: {a_name!r}\nGot:      {row.a_name!r}"
-    )
-    assert row.b_name == b_name, (
-        f"b_name mangled.\nExpected: {b_name!r}\nGot:      {row.b_name!r}"
-    )
+    assert row.a_name == a_name, f"a_name mangled.\nExpected: {a_name!r}\nGot:      {row.a_name!r}"
+    assert row.b_name == b_name, f"b_name mangled.\nExpected: {b_name!r}\nGot:      {row.b_name!r}"
     # Explicit character checks — catch '?' substitution immediately.
     for ch in ("ä", "ö", "ü", "Ä", "Ö", "Ü", "ß"):
         if ch in a_name:
@@ -187,26 +180,16 @@ async def test_cyrillic_names_survive_db_roundtrip(session, a_name, b_name):
 
     from app.modules.clash.models import ClashResult
 
-    row = (
-        await session.execute(
-            select(ClashResult).where(ClashResult.id == result_id)
-        )
-    ).scalar_one()
+    row = (await session.execute(select(ClashResult).where(ClashResult.id == result_id))).scalar_one()
 
-    assert row.a_name == a_name, (
-        f"Cyrillic a_name mangled.\nExpected: {a_name!r}\nGot:      {row.a_name!r}"
-    )
-    assert row.b_name == b_name, (
-        f"Cyrillic b_name mangled.\nExpected: {b_name!r}\nGot:      {row.b_name!r}"
-    )
+    assert row.a_name == a_name, f"Cyrillic a_name mangled.\nExpected: {a_name!r}\nGot:      {row.a_name!r}"
+    assert row.b_name == b_name, f"Cyrillic b_name mangled.\nExpected: {b_name!r}\nGot:      {row.b_name!r}"
     assert "?" not in row.a_name, f"'?' substitution in a_name: {row.a_name!r}"
     assert "?" not in row.b_name, f"'?' substitution in b_name: {row.b_name!r}"
 
 
 @pytest.mark.parametrize("a_name,b_name", _MIXED_PAIRS)
-async def test_mixed_umlaut_cyrillic_names_survive_db_roundtrip(
-    session, a_name, b_name
-):
+async def test_mixed_umlaut_cyrillic_names_survive_db_roundtrip(session, a_name, b_name):
     """Mixed German + Cyrillic in element names survive DB round-trip."""
     _project_id, run_id = await _seed_run(session)
     result_id = await _seed_result(session, run_id, a_name, b_name)
@@ -215,18 +198,10 @@ async def test_mixed_umlaut_cyrillic_names_survive_db_roundtrip(
 
     from app.modules.clash.models import ClashResult
 
-    row = (
-        await session.execute(
-            select(ClashResult).where(ClashResult.id == result_id)
-        )
-    ).scalar_one()
+    row = (await session.execute(select(ClashResult).where(ClashResult.id == result_id))).scalar_one()
 
-    assert row.a_name == a_name, (
-        f"Mixed a_name mangled: {row.a_name!r}"
-    )
-    assert row.b_name == b_name, (
-        f"Mixed b_name mangled: {row.b_name!r}"
-    )
+    assert row.a_name == a_name, f"Mixed a_name mangled: {row.a_name!r}"
+    assert row.b_name == b_name, f"Mixed b_name mangled: {row.b_name!r}"
 
 
 # ── Tests: CSV export encoding ─────────────────────────────────────────────
@@ -305,8 +280,8 @@ def test_bcf_description_umlauts_survive_roundtrip():
     rt = result.topics[0]
     assert rt.description is not None
     assert "Träger" in rt.description, f"'Träger' missing: {rt.description!r}"
-    assert "Lüftungskanal" in rt.description, f"'Lüftungskanal' missing"
-    assert "Dachgeschoß" in rt.description, f"'Dachgeschoß' missing"
+    assert "Lüftungskanal" in rt.description, "'Lüftungskanal' missing"
+    assert "Dachgeschoß" in rt.description, "'Dachgeschoß' missing"
     assert "GUID-TRÄGER-001" in rt.description, f"Stable ID mangled: {rt.description!r}"
 
 

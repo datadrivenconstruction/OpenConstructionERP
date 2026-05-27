@@ -4,8 +4,9 @@
 
 from __future__ import annotations
 
-import pytest
 from decimal import Decimal
+
+import pytest
 
 from app.core.tax import VATNotApplicable, get_vat_rate, list_covered_countries
 

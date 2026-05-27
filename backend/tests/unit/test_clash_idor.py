@@ -30,10 +30,8 @@ _TMP_DB = _TMP_DIR / "clash_idor.db"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}"
 os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 
-import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
-
 
 # ── App fixture ───────────────────────────────────────────────────────────
 
@@ -122,9 +120,7 @@ async def _seed_clash_run(session, project_id: uuid.UUID) -> uuid.UUID:
     return run.id
 
 
-async def _seed_clash_result(
-    session, run_id: uuid.UUID
-) -> uuid.UUID:
+async def _seed_clash_result(session, run_id: uuid.UUID) -> uuid.UUID:
     """Persist a minimal ClashResult. Returns result_id."""
     from app.modules.clash.models import ClashResult
 
@@ -158,25 +154,17 @@ async def _seed_clash_result(
 # ── Tests ──────────────────────────────────────────────────────────────────
 
 
-async def test_list_runs_cross_project_returns_empty_not_others(
-    app_factory, db_session
-):
+async def test_list_runs_cross_project_returns_empty_not_others(app_factory, db_session):
     """Attacker lists runs on victim's project → 403 (IDOR guard denies)."""
     app = app_factory
     _victim_id, victim_project = await _seed_user_and_project(db_session)
     attacker_id, _attacker_project = await _seed_user_and_project(db_session)
     await _seed_clash_run(db_session, victim_project)
 
-    _override_payload(
-        app, attacker_id, role="editor", perms=["clash.read"]
-    )
+    _override_payload(app, attacker_id, role="editor", perms=["clash.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/clash/projects/{victim_project}/runs/"
-            )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/clash/projects/{victim_project}/runs/")
         # IDOR guard: non-owner gets 403
         assert resp.status_code in (403, 404), (
             f"Expected 403/404 for cross-project run list, got {resp.status_code}: {resp.text}"
@@ -193,19 +181,11 @@ async def test_get_run_wrong_project_returns_404(app_factory, db_session):
     run_id = await _seed_clash_run(db_session, victim_project)
 
     # Attacker requests victim's run under their own project
-    _override_payload(
-        app, attacker_id, role="editor", perms=["clash.read"]
-    )
+    _override_payload(app, attacker_id, role="editor", perms=["clash.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/clash/projects/{attacker_project}/runs/{run_id}"
-            )
-        assert resp.status_code == 404, (
-            f"Cross-project run GET should 404, got {resp.status_code}"
-        )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/clash/projects/{attacker_project}/runs/{run_id}")
+        assert resp.status_code == 404, f"Cross-project run GET should 404, got {resp.status_code}"
     finally:
         app.dependency_overrides.clear()
 
@@ -218,12 +198,8 @@ async def test_get_run_correct_owner_succeeds(app_factory, db_session):
 
     _override_payload(app, owner_id, role="editor", perms=["clash.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/clash/projects/{project_id}/runs/{run_id}"
-            )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/clash/projects/{project_id}/runs/{run_id}")
         assert resp.status_code == 200, resp.text
     finally:
         app.dependency_overrides.clear()
@@ -239,15 +215,9 @@ async def test_get_results_cross_project_denied(app_factory, db_session):
 
     _override_payload(app, attacker_id, role="editor", perms=["clash.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/clash/projects/{attacker_project}/runs/{run_id}/results"
-            )
-        assert resp.status_code in (403, 404), (
-            f"Cross-project results list should be denied, got {resp.status_code}"
-        )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/clash/projects/{attacker_project}/runs/{run_id}/results")
+        assert resp.status_code in (403, 404), f"Cross-project results list should be denied, got {resp.status_code}"
     finally:
         app.dependency_overrides.clear()
 
@@ -262,15 +232,9 @@ async def test_result_wrong_run_returns_404(app_factory, db_session):
 
     _override_payload(app, owner_id, role="editor", perms=["clash.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/clash/projects/{project_id}/runs/{wrong_run_id}/results"
-            )
-        assert resp.status_code == 404, (
-            f"Non-existent run results should 404, got {resp.status_code}"
-        )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/clash/projects/{project_id}/runs/{wrong_run_id}/results")
+        assert resp.status_code == 404, f"Non-existent run results should 404, got {resp.status_code}"
     finally:
         app.dependency_overrides.clear()
 
@@ -283,20 +247,14 @@ async def test_patch_result_cross_project_denied(app_factory, db_session):
     run_id = await _seed_clash_run(db_session, victim_project)
     result_id = await _seed_clash_result(db_session, run_id)
 
-    _override_payload(
-        app, attacker_id, role="editor", perms=["clash.update"]
-    )
+    _override_payload(app, attacker_id, role="editor", perms=["clash.update"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.patch(
                 f"/api/v1/clash/projects/{attacker_project}/runs/{run_id}/results/{result_id}",
                 json={"status": "active"},
             )
-        assert resp.status_code in (403, 404), (
-            f"Cross-project PATCH should be denied, got {resp.status_code}"
-        )
+        assert resp.status_code in (403, 404), f"Cross-project PATCH should be denied, got {resp.status_code}"
     finally:
         app.dependency_overrides.clear()
 
@@ -307,19 +265,11 @@ async def test_issues_list_cross_user_returns_404(app_factory, db_session):
     _victim_id, victim_project = await _seed_user_and_project(db_session)
     attacker_id, _attacker_project = await _seed_user_and_project(db_session)
 
-    _override_payload(
-        app, attacker_id, role="editor", perms=["clash.read"]
-    )
+    _override_payload(app, attacker_id, role="editor", perms=["clash.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/clash/issues?project_id={victim_project}"
-            )
-        assert resp.status_code in (403, 404), (
-            f"Cross-user issues list should be denied, got {resp.status_code}"
-        )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/clash/issues?project_id={victim_project}")
+        assert resp.status_code in (403, 404), f"Cross-user issues list should be denied, got {resp.status_code}"
     finally:
         app.dependency_overrides.clear()
 
@@ -331,19 +281,11 @@ async def test_delete_run_cross_project_denied(app_factory, db_session):
     attacker_id, attacker_project = await _seed_user_and_project(db_session)
     run_id = await _seed_clash_run(db_session, victim_project)
 
-    _override_payload(
-        app, attacker_id, role="editor", perms=["clash.delete"]
-    )
+    _override_payload(app, attacker_id, role="editor", perms=["clash.delete"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.delete(
-                f"/api/v1/clash/projects/{attacker_project}/runs/{run_id}"
-            )
-        assert resp.status_code in (403, 404), (
-            f"Cross-project DELETE should be denied, got {resp.status_code}"
-        )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.delete(f"/api/v1/clash/projects/{attacker_project}/runs/{run_id}")
+        assert resp.status_code in (403, 404), f"Cross-project DELETE should be denied, got {resp.status_code}"
     finally:
         app.dependency_overrides.clear()
 
@@ -374,14 +316,8 @@ async def test_admin_can_access_any_project_run(app_factory, db_session):
 
     _override_payload(app, admin_id, role="admin", perms=["clash.read"])
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
-            resp = await client.get(
-                f"/api/v1/clash/projects/{project_id}/runs/{run_id}"
-            )
-        assert resp.status_code == 200, (
-            f"Admin should access any project's run, got {resp.status_code}: {resp.text}"
-        )
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get(f"/api/v1/clash/projects/{project_id}/runs/{run_id}")
+        assert resp.status_code == 200, f"Admin should access any project's run, got {resp.status_code}: {resp.text}"
     finally:
         app.dependency_overrides.clear()

@@ -26,9 +26,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3119_propdev_house_type_parking_spots"
-down_revision: Union[str, Sequence[str], None] = (
-    "v3118_propdev_house_type_extra_fields"
-)
+down_revision: Union[str, Sequence[str], None] = "v3118_propdev_house_type_extra_fields"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

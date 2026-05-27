@@ -44,7 +44,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-
 # ── App / auth / project fixtures ─────────────────────────────────────────
 
 
@@ -76,9 +75,7 @@ async def client(app_instance):
         yield ac
 
 
-async def _register_admin(
-    client: AsyncClient, tag: str = "owner"
-) -> tuple[dict[str, str], str]:
+async def _register_admin(client: AsyncClient, tag: str = "owner") -> tuple[dict[str, str], str]:
     """Register an admin user; return (auth_header, email)."""
     from tests.integration._auth_helpers import promote_to_admin
 
@@ -125,7 +122,6 @@ async def project_id(client: AsyncClient, auth: dict[str, str]) -> str:
 @pytest_asyncio.fixture(scope="module")
 async def seeded_clashes(project_id: str) -> list[str]:
     """Seed 5 ClashResult rows on a fresh ClashRun. Returns signatures."""
-    from datetime import UTC, datetime
 
     from app.database import async_session_factory
     from app.modules.clash.models import ClashResult, ClashRun
@@ -316,9 +312,7 @@ async def test_export_zero_centroid_omits_viewpoint(
 
 
 @pytest.mark.asyncio
-async def test_export_clashes_requires_auth(
-    client: AsyncClient, project_id: str
-) -> None:
+async def test_export_clashes_requires_auth(client: AsyncClient, project_id: str) -> None:
     resp = await client.get(
         "/api/v1/bcf/export/clashes",
         params={"project_id": project_id},
@@ -327,9 +321,7 @@ async def test_export_clashes_requires_auth(
 
 
 @pytest.mark.asyncio
-async def test_export_clashes_idor_blocked(
-    client: AsyncClient, project_id: str
-) -> None:
+async def test_export_clashes_idor_blocked(client: AsyncClient, project_id: str) -> None:
     """A second admin user should not be able to export the first owner's clashes."""
     other_auth, _ = await _register_admin(client, "other")
     # other_auth is an admin → it should still pass (admins can read across
@@ -355,9 +347,7 @@ async def test_export_clashes_idor_blocked(
     )
     assert reg.status_code in (200, 201)
     async with async_session_factory() as session:
-        await session.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await session.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await session.commit()
     login = await client.post(
         "/api/v1/users/auth/login",
@@ -386,9 +376,7 @@ async def test_export_clashes_feature_unavailable_returns_503(
     from app.modules.bcf import service as bcf_service
 
     async def boom(*args, **kwargs):
-        raise bcf_service.BCFExportFeatureUnavailable(
-            "Clash storage table missing"
-        )
+        raise bcf_service.BCFExportFeatureUnavailable("Clash storage table missing")
 
     monkeypatch.setattr(
         bcf_service.BCFExportService,
@@ -405,9 +393,7 @@ async def test_export_clashes_feature_unavailable_returns_503(
 
 
 @pytest.mark.asyncio
-async def test_export_clashes_handles_project_not_found(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_export_clashes_handles_project_not_found(client: AsyncClient, auth: dict[str, str]) -> None:
     """A missing project id should 404 — not 500."""
     fake_id = str(uuid.uuid4())
     resp = await client.get(

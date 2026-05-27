@@ -101,8 +101,7 @@ def test_lock_boq_inspects_rowcount() -> None:
     """
     fn = _find_handler("lock_boq")
     assert _checks_rowcount(fn), (
-        "lock_boq runs a CAS UPDATE but never inspects rowcount — "
-        "race losers won't get a 409 Conflict"
+        "lock_boq runs a CAS UPDATE but never inspects rowcount — race losers won't get a 409 Conflict"
     )
 
 
@@ -114,8 +113,7 @@ def test_unlock_boq_uses_cas() -> None:
     """
     fn = _find_handler("unlock_boq")
     assert _has_where_is_locked_true(fn), (
-        "unlock_boq no longer constrains its UPDATE to is_locked=true — "
-        "double-unlock race is back"
+        "unlock_boq no longer constrains its UPDATE to is_locked=true — double-unlock race is back"
     )
 
 
@@ -123,6 +121,5 @@ def test_unlock_boq_inspects_rowcount() -> None:
     """Same pin for unlock — without rowcount check the CAS is decoration."""
     fn = _find_handler("unlock_boq")
     assert _checks_rowcount(fn), (
-        "unlock_boq runs a CAS UPDATE but never inspects rowcount — "
-        "the 'not locked' 400 will never fire"
+        "unlock_boq runs a CAS UPDATE but never inspects rowcount — the 'not locked' 400 will never fire"
     )

@@ -50,7 +50,7 @@ import csv
 import io
 import logging
 import uuid
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
@@ -71,10 +71,10 @@ from app.modules.property_dev.models import (
 )
 from app.modules.property_dev.schemas import (
     BULK_MAX_ITEMS,
-    BuyerBulkMerge,
     BulkFailed,
     BulkResult,
     BulkSkipped,
+    BuyerBulkMerge,
     DocumentsBulkRegenerate,
     PlotBulkStatusChange,
     ReservationBulkExtendExpiry,
@@ -127,9 +127,7 @@ async def _owner_ids_for_payload(payload: dict[str, Any]) -> tuple[bool, str | N
     return is_admin, str(user_id) if user_id is not None else None
 
 
-async def _project_owner_for_dev_id(
-    session: AsyncSession, dev_id: uuid.UUID
-) -> str | None:
+async def _project_owner_for_dev_id(session: AsyncSession, dev_id: uuid.UUID) -> str | None:
     """Resolve development → project.owner_id without raising on missing."""
     from app.modules.projects.repository import ProjectRepository
     from app.modules.property_dev.repository import DevelopmentRepository
@@ -228,25 +226,27 @@ async def bulk_plot_status_change(
     for pid in data.plot_ids:
         plot = await session.get(Plot, pid)
         if plot is None:
-            failed.append(BulkFailed(
-                entity_id=str(pid),
-                error_message="Plot not found.",
-                error_code=CODE_NOT_FOUND,
-            ))
+            failed.append(
+                BulkFailed(
+                    entity_id=str(pid),
+                    error_message="Plot not found.",
+                    error_code=CODE_NOT_FOUND,
+                )
+            )
             continue
 
         if not is_admin:
             dev_id = plot.development_id
             if dev_id not in owner_cache:
-                owner_cache[dev_id] = await _project_owner_for_dev_id(
-                    session, dev_id
-                )
+                owner_cache[dev_id] = await _project_owner_for_dev_id(session, dev_id)
             if owner_cache[dev_id] != user_id:
-                skipped.append(BulkSkipped(
-                    entity_id=str(pid),
-                    reason="Plot belongs to a different tenant.",
-                    code=CODE_IDOR_SKIP,
-                ))
+                skipped.append(
+                    BulkSkipped(
+                        entity_id=str(pid),
+                        reason="Plot belongs to a different tenant.",
+                        code=CODE_IDOR_SKIP,
+                    )
+                )
                 continue
 
         current = plot.status
@@ -257,15 +257,17 @@ async def bulk_plot_status_change(
             continue
 
         if target not in allowed_plot_transitions(current):
-            failed.append(BulkFailed(
-                entity_id=str(pid),
-                error_message=(
-                    f"Illegal FSM transition: {current} -> {target}. "
-                    f"Allowed from {current}: "
-                    f"{sorted(allowed_plot_transitions(current))}"
-                ),
-                error_code=CODE_FSM_REJECT,
-            ))
+            failed.append(
+                BulkFailed(
+                    entity_id=str(pid),
+                    error_message=(
+                        f"Illegal FSM transition: {current} -> {target}. "
+                        f"Allowed from {current}: "
+                        f"{sorted(allowed_plot_transitions(current))}"
+                    ),
+                    error_code=CODE_FSM_REJECT,
+                )
+            )
             continue
 
         to_write.append((plot, current, target))
@@ -350,7 +352,7 @@ async def bulk_extend_reservation_expiry(
             status_code=422,
             detail=f"new_expiry is not a valid ISO date: {exc}",
         ) from exc
-    today = datetime.now(timezone.utc).date()
+    today = datetime.now(UTC).date()
     if new_expiry_date <= today:
         raise HTTPException(
             status_code=422,
@@ -370,49 +372,52 @@ async def bulk_extend_reservation_expiry(
     for rid in data.reservation_ids:
         res = await session.get(Reservation, rid)
         if res is None:
-            failed.append(BulkFailed(
-                entity_id=str(rid),
-                error_message="Reservation not found.",
-                error_code=CODE_NOT_FOUND,
-            ))
+            failed.append(
+                BulkFailed(
+                    entity_id=str(rid),
+                    error_message="Reservation not found.",
+                    error_code=CODE_NOT_FOUND,
+                )
+            )
             continue
 
         # IDOR via plot → development → project owner
         if not is_admin:
             plot = await session.get(Plot, res.plot_id)
             if plot is None:
-                skipped.append(BulkSkipped(
-                    entity_id=str(rid),
-                    reason="Parent plot missing.",
-                    code=CODE_IDOR_SKIP,
-                ))
+                skipped.append(
+                    BulkSkipped(
+                        entity_id=str(rid),
+                        reason="Parent plot missing.",
+                        code=CODE_IDOR_SKIP,
+                    )
+                )
                 continue
             dev_id = plot.development_id
             if dev_id not in owner_cache:
-                owner_cache[dev_id] = await _project_owner_for_dev_id(
-                    session, dev_id
-                )
+                owner_cache[dev_id] = await _project_owner_for_dev_id(session, dev_id)
             if owner_cache[dev_id] != user_id:
-                skipped.append(BulkSkipped(
-                    entity_id=str(rid),
-                    reason="Reservation belongs to a different tenant.",
-                    code=CODE_IDOR_SKIP,
-                ))
+                skipped.append(
+                    BulkSkipped(
+                        entity_id=str(rid),
+                        reason="Reservation belongs to a different tenant.",
+                        code=CODE_IDOR_SKIP,
+                    )
+                )
                 continue
 
         if res.status != "active":
-            failed.append(BulkFailed(
-                entity_id=str(rid),
-                error_message=(
-                    f"Reservation is in terminal/non-active status "
-                    f"'{res.status}'. Only active reservations can be "
-                    f"extended."
-                ),
-                error_code=(
-                    CODE_ALREADY_CONVERTED if res.status == "converted"
-                    else CODE_NOT_ACTIVE
-                ),
-            ))
+            failed.append(
+                BulkFailed(
+                    entity_id=str(rid),
+                    error_message=(
+                        f"Reservation is in terminal/non-active status "
+                        f"'{res.status}'. Only active reservations can be "
+                        f"extended."
+                    ),
+                    error_code=(CODE_ALREADY_CONVERTED if res.status == "converted" else CODE_NOT_ACTIVE),
+                )
+            )
             continue
 
         to_write.append((res, res.expires_at))
@@ -511,44 +516,50 @@ async def bulk_regenerate_documents(
         if target_kind == "reservation":
             target = await session.get(Reservation, eid)
             if target is None:
-                failed.append(BulkFailed(
-                    entity_id=str(eid),
-                    error_message="Reservation not found.",
-                    error_code=CODE_NOT_FOUND,
-                ))
+                failed.append(
+                    BulkFailed(
+                        entity_id=str(eid),
+                        error_message="Reservation not found.",
+                        error_code=CODE_NOT_FOUND,
+                    )
+                )
                 continue
             plot_id = target.plot_id
         else:
             target = await session.get(SalesContract, eid)
             if target is None:
-                failed.append(BulkFailed(
-                    entity_id=str(eid),
-                    error_message="Sales contract not found.",
-                    error_code=CODE_NOT_FOUND,
-                ))
+                failed.append(
+                    BulkFailed(
+                        entity_id=str(eid),
+                        error_message="Sales contract not found.",
+                        error_code=CODE_NOT_FOUND,
+                    )
+                )
                 continue
             plot_id = target.plot_id
 
         if not is_admin:
             plot = await session.get(Plot, plot_id)
             if plot is None:
-                skipped.append(BulkSkipped(
-                    entity_id=str(eid),
-                    reason="Parent plot missing.",
-                    code=CODE_IDOR_SKIP,
-                ))
+                skipped.append(
+                    BulkSkipped(
+                        entity_id=str(eid),
+                        reason="Parent plot missing.",
+                        code=CODE_IDOR_SKIP,
+                    )
+                )
                 continue
             dev_id = plot.development_id
             if dev_id not in owner_cache:
-                owner_cache[dev_id] = await _project_owner_for_dev_id(
-                    session, dev_id
-                )
+                owner_cache[dev_id] = await _project_owner_for_dev_id(session, dev_id)
             if owner_cache[dev_id] != user_id:
-                skipped.append(BulkSkipped(
-                    entity_id=str(eid),
-                    reason="Document target belongs to a different tenant.",
-                    code=CODE_IDOR_SKIP,
-                ))
+                skipped.append(
+                    BulkSkipped(
+                        entity_id=str(eid),
+                        reason="Document target belongs to a different tenant.",
+                        code=CODE_IDOR_SKIP,
+                    )
+                )
                 continue
 
         to_render.append((eid, target, target_kind))
@@ -581,29 +592,27 @@ async def bulk_regenerate_documents(
                         locale=data.locale,
                     )
             except HTTPException as http_exc:
-                failed.append(BulkFailed(
-                    entity_id=str(eid),
-                    error_message=str(http_exc.detail)[:1000],
-                    error_code=(
-                        CODE_BAD_TARGET
-                        if http_exc.status_code in (400, 422)
-                        else CODE_DOC_RENDER_FAIL
-                    ),
-                ))
+                failed.append(
+                    BulkFailed(
+                        entity_id=str(eid),
+                        error_message=str(http_exc.detail)[:1000],
+                        error_code=(CODE_BAD_TARGET if http_exc.status_code in (400, 422) else CODE_DOC_RENDER_FAIL),
+                    )
+                )
                 continue
             except Exception as exc:  # noqa: BLE001
-                logger.exception(
-                    "bulk_regenerate_documents: render failed for %s", eid
+                logger.exception("bulk_regenerate_documents: render failed for %s", eid)
+                failed.append(
+                    BulkFailed(
+                        entity_id=str(eid),
+                        error_message=str(exc)[:1000],
+                        error_code=CODE_DOC_RENDER_FAIL,
+                    )
                 )
-                failed.append(BulkFailed(
-                    entity_id=str(eid),
-                    error_message=str(exc)[:1000],
-                    error_code=CODE_DOC_RENDER_FAIL,
-                ))
                 continue
 
             stamp = {
-                "rendered_at": datetime.now(timezone.utc).isoformat(),
+                "rendered_at": datetime.now(UTC).isoformat(),
                 "bytes_len": len(pdf_bytes),
                 "doc_type": data.document_type,
                 "locale": data.locale,
@@ -629,9 +638,7 @@ async def bulk_regenerate_documents(
                     },
                 )
             except Exception:  # noqa: BLE001
-                logger.exception(
-                    "bulk_regenerate_documents: audit-log failed for %s", eid
-                )
+                logger.exception("bulk_regenerate_documents: audit-log failed for %s", eid)
 
             succeeded += 1
 
@@ -665,22 +672,28 @@ async def bulk_regenerate_documents(
 
 
 _CSV_REQUIRED_HEADERS = (
-    "full_name", "email", "phone", "source",
-    "plot_type_interest", "budget_min", "budget_max", "notes",
+    "full_name",
+    "email",
+    "phone",
+    "source",
+    "plot_type_interest",
+    "budget_min",
+    "budget_max",
+    "notes",
 )
 
 # Anything that's CLEARLY a non-text payload disguised as CSV. CSV itself
 # has no magic-bytes signature so we use a denylist approach.
 _CSV_BANNED_PREFIXES: tuple[bytes, ...] = (
-    b"MZ",                # Windows PE
-    b"\x7fELF",           # Linux ELF
+    b"MZ",  # Windows PE
+    b"\x7fELF",  # Linux ELF
     b"\xca\xfe\xba\xbe",  # Mach-O / Java class
-    b"PK\x03\x04",        # ZIP / XLSX / DOCX
+    b"PK\x03\x04",  # ZIP / XLSX / DOCX
     b"PK\x05\x06",
     b"\xd0\xcf\x11\xe0",  # OLE compound (legacy XLS)
     b"%PDF-",
     b"\x89PNG",
-    b"\xff\xd8\xff",      # JPEG
+    b"\xff\xd8\xff",  # JPEG
     b"GIF8",
 )
 
@@ -814,11 +827,13 @@ async def bulk_import_leads_csv(
             row = {(k or "").strip().lower(): (v or "").strip() for k, v in raw_row.items()}
             email = (row.get("email") or "").strip().lower()
             if not email:
-                failed.append(BulkFailed(
-                    entity_id=f"row:{row_idx}",
-                    error_message="Row is missing the required 'email' field.",
-                    error_code=CODE_CSV_EMAIL_MISSING,
-                ))
+                failed.append(
+                    BulkFailed(
+                        entity_id=f"row:{row_idx}",
+                        error_message="Row is missing the required 'email' field.",
+                        error_code=CODE_CSV_EMAIL_MISSING,
+                    )
+                )
                 continue
 
             full_name = (row.get("full_name") or "").strip()
@@ -831,17 +846,17 @@ async def bulk_import_leads_csv(
                 budget_min = _parse_money(row.get("budget_min", ""))
                 budget_max = _parse_money(row.get("budget_max", ""))
             except ValueError as exc:
-                failed.append(BulkFailed(
-                    entity_id=f"row:{row_idx}",
-                    error_message=str(exc),
-                    error_code=CODE_CSV_INVALID,
-                ))
+                failed.append(
+                    BulkFailed(
+                        entity_id=f"row:{row_idx}",
+                        error_message=str(exc),
+                        error_code=CODE_CSV_INVALID,
+                    )
+                )
                 continue
 
             # ── Dedupe within the same development ─────────────────
-            existing = await _find_existing_lead_by_email(
-                session, email, development_id=development_id
-            )
+            existing = await _find_existing_lead_by_email(session, email, development_id=development_id)
             if existing is None and email in in_batch_emails:
                 # In-batch duplicate — fetch the freshly created Lead so
                 # we can append to its notes.
@@ -850,25 +865,24 @@ async def bulk_import_leads_csv(
             if existing is not None:
                 if not dry_run:
                     appendix = (
-                        f"\n[bulk_csv {datetime.now(timezone.utc).date().isoformat()} "
-                        f"row {row_idx}] {notes_in}"
+                        f"\n[bulk_csv {datetime.now(UTC).date().isoformat()} row {row_idx}] {notes_in}"
                         if notes_in
                         else (
-                            f"\n[bulk_csv {datetime.now(timezone.utc).date().isoformat()} "
-                            f"row {row_idx}] (duplicate, no notes)"
+                            f"\n[bulk_csv {datetime.now(UTC).date().isoformat()} row {row_idx}] (duplicate, no notes)"
                         )
                     )
                     new_notes = (existing.notes or "") + appendix
                     existing.notes = new_notes
                     session.add(existing)
-                skipped.append(BulkSkipped(
-                    entity_id=str(existing.id),
-                    reason=(
-                        f"Email '{email}' already exists in this development; "
-                        f"appended notes to existing Lead."
-                    ),
-                    code=CODE_CSV_EMAIL_DUP,
-                ))
+                skipped.append(
+                    BulkSkipped(
+                        entity_id=str(existing.id),
+                        reason=(
+                            f"Email '{email}' already exists in this development; appended notes to existing Lead."
+                        ),
+                        code=CODE_CSV_EMAIL_DUP,
+                    )
+                )
                 continue
 
             if dry_run:
@@ -877,9 +891,7 @@ async def bulk_import_leads_csv(
 
             note_blob = notes_in or ""
             if plot_interest:
-                note_blob = (
-                    f"plot_type_interest: {plot_interest}\n{note_blob}".strip()
-                )
+                note_blob = f"plot_type_interest: {plot_interest}\n{note_blob}".strip()
 
             new_lead = Lead(
                 development_id=development_id,
@@ -897,11 +909,13 @@ async def bulk_import_leads_csv(
                 await session.flush()
             except Exception as exc:  # noqa: BLE001
                 logger.exception("bulk_import_leads_csv: insert failed at row %s", row_idx)
-                failed.append(BulkFailed(
-                    entity_id=f"row:{row_idx}",
-                    error_message=str(exc)[:1000],
-                    error_code=CODE_CSV_INVALID,
-                ))
+                failed.append(
+                    BulkFailed(
+                        entity_id=f"row:{row_idx}",
+                        error_message=str(exc)[:1000],
+                        error_code=CODE_CSV_INVALID,
+                    )
+                )
                 continue
             in_batch_emails[email] = new_lead.id
             succeeded += 1
@@ -999,11 +1013,13 @@ async def bulk_merge_buyers(
             requested=len(data.duplicate_buyer_ids),
             succeeded=0,
             skipped=[],
-            failed=[BulkFailed(
-                entity_id=str(data.primary_buyer_id),
-                error_message="Primary buyer not found.",
-                error_code=CODE_PRIMARY_MISSING,
-            )],
+            failed=[
+                BulkFailed(
+                    entity_id=str(data.primary_buyer_id),
+                    error_message="Primary buyer not found.",
+                    error_code=CODE_PRIMARY_MISSING,
+                )
+            ],
             dry_run=dry_run,
         )
 
@@ -1011,9 +1027,7 @@ async def bulk_merge_buyers(
     # the merge is silently a no-op (returns 404-equivalent at the
     # request level via the same "not found" code).
     if not is_admin:
-        primary_owner = await _project_owner_for_dev_id(
-            session, primary.development_id
-        )
+        primary_owner = await _project_owner_for_dev_id(session, primary.development_id)
         if primary_owner != user_id:
             raise HTTPException(status_code=404, detail="Primary buyer not found")
 
@@ -1022,50 +1036,52 @@ async def bulk_merge_buyers(
     succeeded = 0
 
     async with session.begin_nested():
-        owner_cache: dict[uuid.UUID, str | None] = {primary.development_id: (
-            user_id if is_admin else (
-                await _project_owner_for_dev_id(session, primary.development_id)
+        owner_cache: dict[uuid.UUID, str | None] = {
+            primary.development_id: (
+                user_id if is_admin else (await _project_owner_for_dev_id(session, primary.development_id))
             )
-        )}
+        }
 
         for dup_id in data.duplicate_buyer_ids:
             dup = await session.get(Buyer, dup_id)
             if dup is None:
-                failed.append(BulkFailed(
-                    entity_id=str(dup_id),
-                    error_message="Duplicate buyer not found.",
-                    error_code=CODE_DUP_NOT_FOUND,
-                ))
+                failed.append(
+                    BulkFailed(
+                        entity_id=str(dup_id),
+                        error_message="Duplicate buyer not found.",
+                        error_code=CODE_DUP_NOT_FOUND,
+                    )
+                )
                 continue
 
             # IDOR check on duplicate
             if not is_admin:
                 if dup.development_id not in owner_cache:
-                    owner_cache[dup.development_id] = (
-                        await _project_owner_for_dev_id(
-                            session, dup.development_id
+                    owner_cache[dup.development_id] = await _project_owner_for_dev_id(session, dup.development_id)
+                if owner_cache[dup.development_id] != user_id:
+                    skipped.append(
+                        BulkSkipped(
+                            entity_id=str(dup_id),
+                            reason="Duplicate buyer belongs to a different tenant.",
+                            code=CODE_IDOR_SKIP,
                         )
                     )
-                if owner_cache[dup.development_id] != user_id:
-                    skipped.append(BulkSkipped(
-                        entity_id=str(dup_id),
-                        reason="Duplicate buyer belongs to a different tenant.",
-                        code=CODE_IDOR_SKIP,
-                    ))
                     continue
 
             # Cross-development merge is blocked: a buyer in Dev A
             # cannot logically replace one in Dev B (different escrow
             # accounts, different jurisdictions, different reservations).
             if dup.development_id != primary.development_id:
-                failed.append(BulkFailed(
-                    entity_id=str(dup_id),
-                    error_message=(
-                        f"Cannot merge buyer from development {dup.development_id} "
-                        f"into primary in {primary.development_id}."
-                    ),
-                    error_code=CODE_CROSS_DEV_MERGE,
-                ))
+                failed.append(
+                    BulkFailed(
+                        entity_id=str(dup_id),
+                        error_message=(
+                            f"Cannot merge buyer from development {dup.development_id} "
+                            f"into primary in {primary.development_id}."
+                        ),
+                        error_code=CODE_CROSS_DEV_MERGE,
+                    )
+                )
                 continue
 
             if dry_run:
@@ -1083,10 +1099,10 @@ async def bulk_merge_buyers(
                 # Soft-delete the duplicate
                 dup.status = "cancelled"
                 dup.cancelled_reason = f"merged_into:{data.primary_buyer_id}"
-                dup.cancelled_at = datetime.now(timezone.utc).date().isoformat()
+                dup.cancelled_at = datetime.now(UTC).date().isoformat()
                 md = dict(dup.metadata_ or {})
                 md["merged_into"] = str(data.primary_buyer_id)
-                md["merged_at"] = datetime.now(timezone.utc).isoformat()
+                md["merged_at"] = datetime.now(UTC).isoformat()
                 md["merged_by"] = user_id
                 if data.reason:
                     md["merge_reason"] = data.reason
@@ -1117,15 +1133,18 @@ async def bulk_merge_buyers(
             except Exception as exc:  # noqa: BLE001
                 logger.exception(
                     "bulk_merge_buyers: repoint failed for %s -> %s",
-                    dup_id, data.primary_buyer_id,
+                    dup_id,
+                    data.primary_buyer_id,
                 )
                 # Surface as a per-item failure, but the SAVEPOINT will
                 # capture and re-raise so the whole batch rolls back.
-                failed.append(BulkFailed(
-                    entity_id=str(dup_id),
-                    error_message=str(exc)[:1000],
-                    error_code="merge_repoint_failed",
-                ))
+                failed.append(
+                    BulkFailed(
+                        entity_id=str(dup_id),
+                        error_message=str(exc)[:1000],
+                        error_code="merge_repoint_failed",
+                    )
+                )
                 raise
 
         if dry_run:
@@ -1165,25 +1184,18 @@ async def _repoint_buyer_fks(
     """
     # Reservations
     await session.execute(
-        sa_update(Reservation)
-        .where(Reservation.buyer_id == from_buyer_id)
-        .values(buyer_id=to_buyer_id)
+        sa_update(Reservation).where(Reservation.buyer_id == from_buyer_id).values(buyer_id=to_buyer_id)
     )
 
     # Warranty claims
     await session.execute(
-        sa_update(WarrantyClaim)
-        .where(WarrantyClaim.buyer_id == from_buyer_id)
-        .values(buyer_id=to_buyer_id)
+        sa_update(WarrantyClaim).where(WarrantyClaim.buyer_id == from_buyer_id).values(buyer_id=to_buyer_id)
     )
 
     # Snag.buyer_id is nullable — repoint when set.
     from app.modules.property_dev.models import Snag as _Snag
-    await session.execute(
-        sa_update(_Snag)
-        .where(_Snag.buyer_id == from_buyer_id)
-        .values(buyer_id=to_buyer_id)
-    )
+
+    await session.execute(sa_update(_Snag).where(_Snag.buyer_id == from_buyer_id).values(buyer_id=to_buyer_id))
 
     # ContractParty — UNIQUE(sales_contract_id, buyer_id) means a naive
     # ``UPDATE … SET buyer_id = primary`` would unique-violate if the
@@ -1191,6 +1203,7 @@ async def _repoint_buyer_fks(
     # for each duplicate's party, either move it (when no conflict) or
     # delete it (when primary already on contract).
     from sqlalchemy import select
+
     party_stmt = select(ContractParty).where(ContractParty.buyer_id == from_buyer_id)
     parties = (await session.execute(party_stmt)).scalars().all()
     for party in parties:
@@ -1198,9 +1211,7 @@ async def _repoint_buyer_fks(
             ContractParty.sales_contract_id == party.sales_contract_id,
             ContractParty.buyer_id == to_buyer_id,
         )
-        existing_primary_party = (
-            await session.execute(existing_stmt)
-        ).scalars().first()
+        existing_primary_party = (await session.execute(existing_stmt)).scalars().first()
         if existing_primary_party is None:
             party.buyer_id = to_buyer_id
             session.add(party)

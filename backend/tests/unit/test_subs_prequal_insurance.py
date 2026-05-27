@@ -26,7 +26,6 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-
 # ── In-memory repository stub (mirrors test_subcontractors.py shape) ────
 
 
@@ -184,7 +183,9 @@ async def test_flag_expiring_insurance_window() -> None:
     )
     # Already expired (-5d)
     past = await _make_sub(
-        svc, legal_name="Past Due", insurance_expiry_date=today - timedelta(days=5),
+        svc,
+        legal_name="Past Due",
+        insurance_expiry_date=today - timedelta(days=5),
     )
     # Far future (100d ahead) — outside 30-day sweep
     far = await _make_sub(
@@ -210,10 +211,12 @@ async def test_flag_expiring_insurance_emits_event_per_sub() -> None:
     svc = _make_service()
     today = date(2026, 6, 1)
     await _make_sub(
-        svc, insurance_expiry_date=today + timedelta(days=5),
+        svc,
+        insurance_expiry_date=today + timedelta(days=5),
     )
     await _make_sub(
-        svc, insurance_expiry_date=today - timedelta(days=1),
+        svc,
+        insurance_expiry_date=today - timedelta(days=1),
     )
     with patch(
         "app.modules.subcontractors.service.event_bus.publish_detached",
@@ -222,8 +225,7 @@ async def test_flag_expiring_insurance_emits_event_per_sub() -> None:
     assert len(flagged) == 2
     # One event per flagged sub.
     expiring_calls = [
-        c for c in publish_mock.call_args_list
-        if c.args and c.args[0] == "subcontractors.insurance.expiring"
+        c for c in publish_mock.call_args_list if c.args and c.args[0] == "subcontractors.insurance.expiring"
     ]
     assert len(expiring_calls) == 2
 
@@ -240,7 +242,9 @@ async def test_block_then_unblock_toggles_flag_and_reason() -> None:
 
     with patch("app.modules.subcontractors.service.event_bus.publish_detached"):
         blocked = await svc.block_subcontractor(
-            sub.id, reason="Failed safety audit 2026-05-10", by_user_id="admin-1",
+            sub.id,
+            reason="Failed safety audit 2026-05-10",
+            by_user_id="admin-1",
         )
     assert blocked.is_blocked is True
     assert blocked.blocked_reason == "Failed safety audit 2026-05-10"

@@ -79,11 +79,7 @@ async def auth(client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     token = ""
@@ -122,9 +118,7 @@ async def _create_project(client: AsyncClient, auth: dict[str, str]) -> str:
     return resp.json()["id"]
 
 
-async def _create_boq(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> str:
+async def _create_boq(client: AsyncClient, auth: dict[str, str], project_id: str) -> str:
     resp = await client.post(
         "/api/v1/boq/boqs/",
         json={
@@ -191,9 +185,7 @@ def _sorted(positions: list[dict]) -> list[dict]:
 
 
 @pytest.mark.asyncio
-async def test_insert_partida_below_selected_mid_section_row(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_insert_partida_below_selected_mid_section_row(client: AsyncClient, auth: dict[str, str]) -> None:
     """The video repro: select 01.002 mid-section, add a partida.
 
     It must land at sort_order = selected.sort_order + 1 (directly after
@@ -206,48 +198,97 @@ async def test_insert_partida_below_selected_mid_section_row(
     sec1 = (await _add_section(client, auth, boq_id, ordinal="01")).json()
     sec2 = (await _add_section(client, auth, boq_id, ordinal="02")).json()
 
-    p1 = (await _add_position(
-        client, auth, boq_id, ordinal="01.001", description="A",
-        unit="m3", quantity=1, unit_rate=1, parent_id=sec1["id"],
-    )).json()
-    p2 = (await _add_position(
-        client, auth, boq_id, ordinal="01.002", description="B",
-        unit="m3", quantity=1, unit_rate=1, parent_id=sec1["id"],
-    )).json()
-    p3 = (await _add_position(
-        client, auth, boq_id, ordinal="01.003", description="C",
-        unit="m3", quantity=1, unit_rate=1, parent_id=sec1["id"],
-    )).json()
-    p4 = (await _add_position(
-        client, auth, boq_id, ordinal="01.004", description="D",
-        unit="m3", quantity=1, unit_rate=1, parent_id=sec1["id"],
-    )).json()
+    p1 = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.001",
+            description="A",
+            unit="m3",
+            quantity=1,
+            unit_rate=1,
+            parent_id=sec1["id"],
+        )
+    ).json()
+    p2 = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.002",
+            description="B",
+            unit="m3",
+            quantity=1,
+            unit_rate=1,
+            parent_id=sec1["id"],
+        )
+    ).json()
+    p3 = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.003",
+            description="C",
+            unit="m3",
+            quantity=1,
+            unit_rate=1,
+            parent_id=sec1["id"],
+        )
+    ).json()
+    p4 = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.004",
+            description="D",
+            unit="m3",
+            quantity=1,
+            unit_rate=1,
+            parent_id=sec1["id"],
+        )
+    ).json()
     # A leaf in the SECOND section — must never be disturbed.
-    q1 = (await _add_position(
-        client, auth, boq_id, ordinal="02.001", description="Z",
-        unit="m3", quantity=1, unit_rate=1, parent_id=sec2["id"],
-    )).json()
+    q1 = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="02.001",
+            description="Z",
+            unit="m3",
+            quantity=1,
+            unit_rate=1,
+            parent_id=sec2["id"],
+        )
+    ).json()
 
     p2_so = p2["sort_order"]
 
     # Simulate the editor: user selected p2 (a leaf) → parent = its parent,
     # after_position_id = p2.id.  Ordinal label is whatever the FE computed;
     # placement correctness is driven by after_position_id / sort_order.
-    inserted = (await _add_position(
-        client, auth, boq_id,
-        ordinal="01.0025",
-        description="INSERTED",
-        unit="m3", quantity=2, unit_rate=3,
-        parent_id=sec1["id"],
-        after_position_id=p2["id"],
-    )).json()
+    inserted = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.0025",
+            description="INSERTED",
+            unit="m3",
+            quantity=2,
+            unit_rate=3,
+            parent_id=sec1["id"],
+            after_position_id=p2["id"],
+        )
+    ).json()
 
     # Same section.
     assert inserted["parent_id"] == sec1["id"], inserted
     # Directly after the selected row.
-    assert inserted["sort_order"] == p2_so + 1, (
-        f"expected sort_order {p2_so + 1}, got {inserted['sort_order']}"
-    )
+    assert inserted["sort_order"] == p2_so + 1, f"expected sort_order {p2_so + 1}, got {inserted['sort_order']}"
 
     after = {p["id"]: p for p in await _positions(client, auth, boq_id)}
     # p1, p2 unchanged; p3, p4, q1 shifted down by one.
@@ -258,60 +299,81 @@ async def test_insert_partida_below_selected_mid_section_row(
     assert after[q1["id"]]["sort_order"] == q1["sort_order"] + 1
 
     # Render order: the inserted row sits immediately between p2 and p3.
-    order = [
-        p["id"]
-        for p in _sorted(await _positions(client, auth, boq_id))
-        if not p["unit"] in ("", "section")
-    ]
+    order = [p["id"] for p in _sorted(await _positions(client, auth, boq_id)) if p["unit"] not in ("", "section")]
     i_p2 = order.index(p2["id"])
     assert order[i_p2 + 1] == inserted["id"], order
     assert order[i_p2 + 2] == p3["id"], order
 
 
 @pytest.mark.asyncio
-async def test_insert_partida_at_section_end_when_selected_is_last(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_insert_partida_at_section_end_when_selected_is_last(client: AsyncClient, auth: dict[str, str]) -> None:
     """Selecting the LAST child of a section still inserts right after it
     (not before, not in the next section)."""
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
     sec1 = (await _add_section(client, auth, boq_id, ordinal="01")).json()
     sec2 = (await _add_section(client, auth, boq_id, ordinal="02")).json()
-    a = (await _add_position(
-        client, auth, boq_id, ordinal="01.001", unit="m3",
-        quantity=1, unit_rate=1, parent_id=sec1["id"],
-    )).json()
-    b = (await _add_position(
-        client, auth, boq_id, ordinal="01.002", unit="m3",
-        quantity=1, unit_rate=1, parent_id=sec1["id"],
-    )).json()
-    z = (await _add_position(
-        client, auth, boq_id, ordinal="02.001", unit="m3",
-        quantity=1, unit_rate=1, parent_id=sec2["id"],
-    )).json()
+    a = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.001",
+            unit="m3",
+            quantity=1,
+            unit_rate=1,
+            parent_id=sec1["id"],
+        )
+    ).json()
+    b = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.002",
+            unit="m3",
+            quantity=1,
+            unit_rate=1,
+            parent_id=sec1["id"],
+        )
+    ).json()
+    z = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="02.001",
+            unit="m3",
+            quantity=1,
+            unit_rate=1,
+            parent_id=sec2["id"],
+        )
+    ).json()
 
-    ins = (await _add_position(
-        client, auth, boq_id, ordinal="01.003", unit="m3",
-        quantity=1, unit_rate=1, parent_id=sec1["id"],
-        after_position_id=b["id"],
-    )).json()
+    ins = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.003",
+            unit="m3",
+            quantity=1,
+            unit_rate=1,
+            parent_id=sec1["id"],
+            after_position_id=b["id"],
+        )
+    ).json()
 
     assert ins["parent_id"] == sec1["id"]
     assert ins["sort_order"] == b["sort_order"] + 1
-    order = [
-        p["id"]
-        for p in _sorted(await _positions(client, auth, boq_id))
-    ]
+    order = [p["id"] for p in _sorted(await _positions(client, auth, boq_id))]
     # a, b, ins must be contiguous and ins must precede section 2's child z.
     assert order.index(a["id"]) < order.index(b["id"]) < order.index(ins["id"])
     assert order.index(ins["id"]) < order.index(z["id"])
 
 
 @pytest.mark.asyncio
-async def test_issue_149_add_position_lands_inside_clicked_section(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_issue_149_add_position_lands_inside_clicked_section(client: AsyncClient, auth: dict[str, str]) -> None:
     """Issue #149 — clicking a section's "Add position" button must put the
     new partida INSIDE that section.
 
@@ -331,27 +393,39 @@ async def test_issue_149_add_position_lands_inside_clicked_section(
     boq_id = await _create_boq(client, auth, project_id)
 
     secA = (await _add_section(client, auth, boq_id, ordinal="01")).json()
-    subA1 = (await _add_section(
-        client, auth, boq_id, ordinal="01.01", parent_id=secA["id"]
-    )).json()
-    subA2 = (await _add_section(
-        client, auth, boq_id, ordinal="01.02", parent_id=secA["id"]
-    )).json()
+    subA1 = (await _add_section(client, auth, boq_id, ordinal="01.01", parent_id=secA["id"])).json()
+    subA2 = (await _add_section(client, auth, boq_id, ordinal="01.02", parent_id=secA["id"])).json()
     # A.2 gets a priced leaf so it is unmistakably "the last child section
     # with content" — the place the bug used to dump the new partida.
-    deep_leaf = (await _add_position(
-        client, auth, boq_id, ordinal="01.02.0010",
-        description="DEEP", unit="m3", quantity=2, unit_rate=5,
-        parent_id=subA2["id"],
-    )).json()
+    deep_leaf = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.02.0010",
+            description="DEEP",
+            unit="m3",
+            quantity=2,
+            unit_rate=5,
+            parent_id=subA2["id"],
+        )
+    ).json()
 
     # Click "Add position" on section A. The FE sends parent_id=A and the
     # gap-of-10 ordinal it computes from A's children (no after_position_id).
-    first = (await _add_position(
-        client, auth, boq_id, ordinal="01.03",
-        description="ADDED-TO-A", unit="m2", quantity=0, unit_rate=0,
-        parent_id=secA["id"],
-    )).json()
+    first = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.03",
+            description="ADDED-TO-A",
+            unit="m2",
+            quantity=0,
+            unit_rate=0,
+            parent_id=secA["id"],
+        )
+    ).json()
     assert first["parent_id"] == secA["id"], first
 
     order = [p["id"] for p in _sorted(await _positions(client, auth, boq_id))]
@@ -363,18 +437,22 @@ async def test_issue_149_add_position_lands_inside_clicked_section(
 
     # A second click appends after the first, both still above the
     # sub-sections (section's own line items stay grouped & ordered).
-    second = (await _add_position(
-        client, auth, boq_id, ordinal="01.04",
-        description="ADDED-TO-A-2", unit="m2", quantity=0, unit_rate=0,
-        parent_id=secA["id"],
-    )).json()
+    second = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.04",
+            description="ADDED-TO-A-2",
+            unit="m2",
+            quantity=0,
+            unit_rate=0,
+            parent_id=secA["id"],
+        )
+    ).json()
     assert second["parent_id"] == secA["id"], second
     order2 = [p["id"] for p in _sorted(await _positions(client, auth, boq_id))]
-    assert (
-        order2.index(first["id"])
-        < order2.index(second["id"])
-        < order2.index(subA1["id"])
-    ), order2
+    assert order2.index(first["id"]) < order2.index(second["id"]) < order2.index(subA1["id"]), order2
     assert order2.index(second["id"]) < order2.index(deep_leaf["id"]), order2
 
     # The deep leaf's price is undisturbed and still rolls up.
@@ -383,24 +461,38 @@ async def test_issue_149_add_position_lands_inside_clicked_section(
 
 
 @pytest.mark.asyncio
-async def test_insert_falls_back_to_append_for_stale_anchor(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_insert_falls_back_to_append_for_stale_anchor(client: AsyncClient, auth: dict[str, str]) -> None:
     """A stale / cross-BOQ after_position_id must NOT scramble order —
     it falls back to append-at-end."""
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
     sec1 = (await _add_section(client, auth, boq_id, ordinal="01")).json()
-    a = (await _add_position(
-        client, auth, boq_id, ordinal="01.001", unit="m3",
-        quantity=1, unit_rate=1, parent_id=sec1["id"],
-    )).json()
+    a = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.001",
+            unit="m3",
+            quantity=1,
+            unit_rate=1,
+            parent_id=sec1["id"],
+        )
+    ).json()
 
-    ins = (await _add_position(
-        client, auth, boq_id, ordinal="01.002", unit="m3",
-        quantity=1, unit_rate=1, parent_id=sec1["id"],
-        after_position_id=str(uuid.uuid4()),  # does not exist
-    )).json()
+    ins = (
+        await _add_position(
+            client,
+            auth,
+            boq_id,
+            ordinal="01.002",
+            unit="m3",
+            quantity=1,
+            unit_rate=1,
+            parent_id=sec1["id"],
+            after_position_id=str(uuid.uuid4()),  # does not exist
+        )
+    ).json()
     # Appended at end (max sort_order + 1); nothing else moved.
     assert ins["sort_order"] > a["sort_order"]
 
@@ -411,18 +503,14 @@ async def test_insert_falls_back_to_append_for_stale_anchor(
 
 
 @pytest.mark.asyncio
-async def test_limits_endpoint_reports_max_nesting_depth(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_limits_endpoint_reports_max_nesting_depth(client: AsyncClient, auth: dict[str, str]) -> None:
     r = await client.get("/api/v1/boq/limits/", headers=auth)
     assert r.status_code == 200, r.text
     assert r.json()["max_nesting_depth"] == 8
 
 
 @pytest.mark.asyncio
-async def test_full_requested_tree_shape_builds_and_rolls_up(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_full_requested_tree_shape_builds_and_rolls_up(client: AsyncClient, auth: dict[str, str]) -> None:
     """SECTION → SECCIÓN-HIJA → SECCIÓN-HIJA → PARTIDA → PARTIDA-HIJA →
     PARTIDA-HIJA — six position tiers, exactly the verbatim requested
     shape. Build it through the API, then assert the parent chain, that it
@@ -433,33 +521,47 @@ async def test_full_requested_tree_shape_builds_and_rolls_up(
 
     # Tier 1-3: section → sub-section → sub-sub-section
     s1 = (await _add_section(client, auth, boq_id, ordinal="01")).json()
-    s2 = (await _add_section(
-        client, auth, boq_id, ordinal="01.01", parent_id=s1["id"]
-    )).json()
-    s3 = (await _add_section(
-        client, auth, boq_id, ordinal="01.01.01", parent_id=s2["id"]
-    )).json()
+    s2 = (await _add_section(client, auth, boq_id, ordinal="01.01", parent_id=s1["id"])).json()
+    s3 = (await _add_section(client, auth, boq_id, ordinal="01.01.01", parent_id=s2["id"])).json()
     assert s2["parent_id"] == s1["id"], "sub-section must nest under section"
     assert s3["parent_id"] == s2["id"], "sub-sub-section must nest"
 
     # Tier 4-6: partida → partida-hija → partida-hija
     pr = await _add_position(
-        client, auth, boq_id, ordinal="01.01.01.0010",
-        description="PARTIDA", unit="m3", quantity=1, unit_rate=0,
+        client,
+        auth,
+        boq_id,
+        ordinal="01.01.01.0010",
+        description="PARTIDA",
+        unit="m3",
+        quantity=1,
+        unit_rate=0,
         parent_id=s3["id"],
     )
     assert pr.status_code == 201, pr.text
     p1 = pr.json()
     p2r = await _add_position(
-        client, auth, boq_id, ordinal="01.01.01.0010.10",
-        description="PARTIDA-HIJA", unit="m3", quantity=1, unit_rate=0,
+        client,
+        auth,
+        boq_id,
+        ordinal="01.01.01.0010.10",
+        description="PARTIDA-HIJA",
+        unit="m3",
+        quantity=1,
+        unit_rate=0,
         parent_id=p1["id"],
     )
     assert p2r.status_code == 201, p2r.text
     p2 = p2r.json()
     p3r = await _add_position(
-        client, auth, boq_id, ordinal="01.01.01.0010.10.10",
-        description="PARTIDA-HIJA-2", unit="m3", quantity=4, unit_rate=25,
+        client,
+        auth,
+        boq_id,
+        ordinal="01.01.01.0010.10.10",
+        description="PARTIDA-HIJA-2",
+        unit="m3",
+        quantity=4,
+        unit_rate=25,
         parent_id=p2["id"],
     )
     assert p3r.status_code == 201, p3r.text
@@ -473,29 +575,21 @@ async def test_full_requested_tree_shape_builds_and_rolls_up(
     while cur is not None:
         chain.append(cur)
         cur = by_id[cur]["parent_id"]
-    assert chain == [
-        p3["id"], p2["id"], p1["id"], s3["id"], s2["id"], s1["id"]
-    ], chain
+    assert chain == [p3["id"], p2["id"], p1["id"], s3["id"], s2["id"], s1["id"]], chain
 
     # Subtotal rolls up the deepest priced leaf (4 * 25 = 100) all the way
     # to the root section.
     deep_total = float(by_id[p3["id"]]["total"])
     assert abs(deep_total - 100.0) < 0.01, by_id[p3["id"]]
 
-    bd = await client.get(
-        f"/api/v1/boq/boqs/{boq_id}/cost-breakdown/", headers=auth
-    )
+    bd = await client.get(f"/api/v1/boq/boqs/{boq_id}/cost-breakdown/", headers=auth)
     assert bd.status_code == 200, bd.text
     grand = await client.get(f"/api/v1/boq/boqs/{boq_id}", headers=auth)
-    assert abs(float(grand.json()["grand_total"]) - 100.0) < 0.01, (
-        grand.json()["grand_total"]
-    )
+    assert abs(float(grand.json()["grand_total"]) - 100.0) < 0.01, grand.json()["grand_total"]
 
 
 @pytest.mark.asyncio
-async def test_eight_tiers_allowed_ninth_rejected(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_eight_tiers_allowed_ninth_rejected(client: AsyncClient, auth: dict[str, str]) -> None:
     """A full 8-tier chain is creatable; the 9th tier is rejected with 422
     (the cap is real and enforced server-side)."""
     project_id = await _create_project(client, auth)
@@ -514,53 +608,43 @@ async def test_eight_tiers_allowed_ninth_rejected(
         if parent_id is not None:
             body["parent_id"] = parent_id
         r = await _add_position(client, auth, boq_id, **body)
-        assert r.status_code == 201, (
-            f"tier {tier} must be allowed (cap is 8): {r.text}"
-        )
+        assert r.status_code == 201, f"tier {tier} must be allowed (cap is 8): {r.text}"
         last_id = r.json()["id"]
         parent_id = last_id
 
     # Tier 9 — must be rejected.
     r9 = await _add_position(
-        client, auth, boq_id,
-        ordinal="T9", description="tier 9 (over cap)",
-        unit="m3", quantity=1, unit_rate=1,
+        client,
+        auth,
+        boq_id,
+        ordinal="T9",
+        description="tier 9 (over cap)",
+        unit="m3",
+        quantity=1,
+        unit_rate=1,
         parent_id=last_id,
     )
-    assert r9.status_code == 422, (
-        f"tier 9 must exceed MAX_NESTING_DEPTH: {r9.status_code} {r9.text}"
-    )
+    assert r9.status_code == 422, f"tier 9 must exceed MAX_NESTING_DEPTH: {r9.status_code} {r9.text}"
     assert "nesting depth" in r9.text.lower()
 
 
 @pytest.mark.asyncio
-async def test_nested_subsection_inserts_below_selected_via_after_id(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_nested_subsection_inserts_below_selected_via_after_id(client: AsyncClient, auth: dict[str, str]) -> None:
     """Issue #139 ∩ #136 — inserting a sub-section below a SELECTED
     sub-section (after_position_id) must slot it right there, not at the
     end of the parent section."""
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
     s1 = (await _add_section(client, auth, boq_id, ordinal="01")).json()
-    sa = (await _add_section(
-        client, auth, boq_id, ordinal="01.01", parent_id=s1["id"]
-    )).json()
-    sb = (await _add_section(
-        client, auth, boq_id, ordinal="01.02", parent_id=s1["id"]
-    )).json()
+    sa = (await _add_section(client, auth, boq_id, ordinal="01.01", parent_id=s1["id"])).json()
+    sb = (await _add_section(client, auth, boq_id, ordinal="01.02", parent_id=s1["id"])).json()
 
     # Insert a sub-section that should land directly AFTER sa (selected).
-    r = await _add_section(
-        client, auth, boq_id, ordinal="01.015", parent_id=s1["id"]
-    )
+    r = await _add_section(client, auth, boq_id, ordinal="01.015", parent_id=s1["id"])
     assert r.status_code == 201, r.text
     new_sec = r.json()
 
-    order = [
-        p["id"]
-        for p in _sorted(await _positions(client, auth, boq_id))
-    ]
+    order = [p["id"] for p in _sorted(await _positions(client, auth, boq_id))]
     assert new_sec["parent_id"] == s1["id"]
     # Document current behaviour: sections are appended (no after_position_id
     # on the section endpoint). new_sec lands after sb today.

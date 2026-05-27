@@ -51,7 +51,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "v3090_notification_preferences"
 down_revision: Union[str, Sequence[str], None] = "v3087_merge_wave2_heads"
@@ -76,7 +75,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -104,7 +105,9 @@ def upgrade() -> None:
             )
         else:
             user_col = sa.Column(
-                "user_id", sa.String(length=36), nullable=False,
+                "user_id",
+                sa.String(length=36),
+                nullable=False,
             )
 
         op.create_table(
@@ -138,15 +141,15 @@ def upgrade() -> None:
                 server_default=sa.func.now(),
             ),
             sa.UniqueConstraint(
-                "user_id", "event_type", "channel", name=_UQ_PREF,
+                "user_id",
+                "event_type",
+                "channel",
+                name=_UQ_PREF,
             ),
         )
 
     inspector = sa.inspect(bind)
-    if (
-        _has_table(inspector, _PREF_TABLE)
-        and not _has_index(inspector, _PREF_TABLE, _IX_PREF_USER)
-    ):
+    if _has_table(inspector, _PREF_TABLE) and not _has_index(inspector, _PREF_TABLE, _IX_PREF_USER):
         try:
             op.create_index(_IX_PREF_USER, _PREF_TABLE, ["user_id"])
         except Exception:  # noqa: BLE001 — idempotent guard
@@ -168,7 +171,9 @@ def upgrade() -> None:
             )
         else:
             user_col2 = sa.Column(
-                "user_id", sa.String(length=36), nullable=False,
+                "user_id",
+                sa.String(length=36),
+                nullable=False,
             )
 
         op.create_table(
@@ -178,7 +183,10 @@ def upgrade() -> None:
             sa.Column("event_type", sa.String(length=80), nullable=False),
             sa.Column("channel", sa.String(length=32), nullable=False),
             sa.Column(
-                "payload", sa.JSON(), nullable=False, server_default="{}",
+                "payload",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column(
                 "scheduled_for",
@@ -199,10 +207,7 @@ def upgrade() -> None:
         )
 
     inspector = sa.inspect(bind)
-    if (
-        _has_table(inspector, _QUEUE_TABLE)
-        and not _has_index(inspector, _QUEUE_TABLE, _IX_QUEUE_SCHED)
-    ):
+    if _has_table(inspector, _QUEUE_TABLE) and not _has_index(inspector, _QUEUE_TABLE, _IX_QUEUE_SCHED):
         try:
             op.create_index(
                 _IX_QUEUE_SCHED,
@@ -211,10 +216,7 @@ def upgrade() -> None:
             )
         except Exception:  # noqa: BLE001
             pass
-    if (
-        _has_table(inspector, _QUEUE_TABLE)
-        and not _has_index(inspector, _QUEUE_TABLE, _IX_QUEUE_USER)
-    ):
+    if _has_table(inspector, _QUEUE_TABLE) and not _has_index(inspector, _QUEUE_TABLE, _IX_QUEUE_USER):
         try:
             op.create_index(_IX_QUEUE_USER, _QUEUE_TABLE, ["user_id"])
         except Exception:  # noqa: BLE001

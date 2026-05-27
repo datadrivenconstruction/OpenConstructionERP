@@ -76,9 +76,7 @@ async def _auth_headers(client: AsyncClient) -> dict[str, str]:
     assert reg.status_code in (200, 201), reg.text
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User).where(User.email == email.lower()).values(is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(is_active=True))
         await s.commit()
 
     login = await client.post(
@@ -101,12 +99,12 @@ async def headers(http_client):
 @pytest.mark.parametrize(
     ("lat", "lon"),
     [
-        (91.0, 0.0),       # lat above 90
-        (-90.5, 0.0),      # lat below -90
-        (0.0, 181.0),      # lon above 180
-        (0.0, -181.0),     # lon below -180
-        (1e9, 0.0),        # absurdly large lat
-        (0.0, -1e9),       # absurdly negative lon
+        (91.0, 0.0),  # lat above 90
+        (-90.5, 0.0),  # lat below -90
+        (0.0, 181.0),  # lon above 180
+        (0.0, -181.0),  # lon below -180
+        (1e9, 0.0),  # absurdly large lat
+        (0.0, -1e9),  # absurdly negative lon
     ],
 )
 async def test_out_of_range_coordinates_rejected(http_client, headers, lat, lon):
@@ -115,8 +113,7 @@ async def test_out_of_range_coordinates_rejected(http_client, headers, lat, lon)
         headers=headers,
     )
     assert resp.status_code == 422, (
-        f"out-of-range coords accepted: lat={lat} lon={lon} "
-        f"-> {resp.status_code} {resp.text!r}"
+        f"out-of-range coords accepted: lat={lat} lon={lon} -> {resp.status_code} {resp.text!r}"
     )
 
 
@@ -136,8 +133,7 @@ async def test_non_finite_coordinates_rejected(http_client, headers, lat, lon):
         headers=headers,
     )
     assert resp.status_code == 422, (
-        f"non-finite coords accepted: lat={lat} lon={lon} "
-        f"-> {resp.status_code} {resp.text!r}"
+        f"non-finite coords accepted: lat={lat} lon={lon} -> {resp.status_code} {resp.text!r}"
     )
 
 

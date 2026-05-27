@@ -37,16 +37,12 @@ def _reject_unsafe_string(value: str, field: str) -> str:
     via FastAPI's 422 envelope; localisation happens client-side.
     """
     if _CONTROL_CHAR_RE.search(value):
-        raise ValueError(
-            f"[teams.validation.{field}.control_characters] "
-            f"{field} contains control characters"
-        )
+        raise ValueError(f"[teams.validation.{field}.control_characters] {field} contains control characters")
     cleaned = value.strip()
     if not cleaned:
-        raise ValueError(
-            f"[teams.validation.{field}.blank] {field} must not be blank"
-        )
+        raise ValueError(f"[teams.validation.{field}.blank] {field} must not be blank")
     return cleaned
+
 
 # ── Team ─────────────────────────────────────────────────────────────────
 

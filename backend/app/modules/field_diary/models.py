@@ -74,20 +74,28 @@ class DiaryEntry(Base):
     weather: Mapped[str | None] = mapped_column(String(64), nullable=True)
     temperature_c: Mapped[float | None] = mapped_column(Numeric(6, 2), nullable=True)
     headcount: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     notes_md: Mapped[str | None] = mapped_column(Text, nullable=True)
     # draft / submitted / approved. Free-form on the DB side so future
     # statuses can land without a migration; the FSM in the service layer
     # is authoritative.
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="draft", server_default="draft",
+        String(20),
+        nullable=False,
+        default="draft",
+        server_default="draft",
     )
     submitted_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     approved_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     approved_by: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
@@ -103,10 +111,7 @@ class DiaryEntry(Base):
     )
 
     def __repr__(self) -> str:  # pragma: no cover — debug only
-        return (
-            f"<DiaryEntry {self.entry_date} author={self.author_id} "
-            f"({self.status})>"
-        )
+        return f"<DiaryEntry {self.entry_date} author={self.author_id} ({self.status})>"
 
 
 class DiaryActivity(Base):
@@ -129,16 +134,20 @@ class DiaryActivity(Base):
     )
     # work / delay / inspection / visit / incident — service-layer enum.
     activity_type: Mapped[str] = mapped_column(
-        String(32), nullable=False, index=True,
+        String(32),
+        nullable=False,
+        index=True,
     )
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     hours: Mapped[float | None] = mapped_column(Numeric(6, 2), nullable=True)
     location: Mapped[str | None] = mapped_column(String(255), nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     ended_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -178,11 +187,16 @@ class DiaryAttachment(Base):
     # router never trusts this to build a path (path-traversal guard).
     filename: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     mime_type: Mapped[str] = mapped_column(
-        String(120), nullable=False, default="application/octet-stream",
+        String(120),
+        nullable=False,
+        default="application/octet-stream",
         server_default="application/octet-stream",
     )
     size_bytes: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     # Server-derived relative path (``field_diary/attachments/<entry>_<hex><ext>``).
     storage_key: Mapped[str] = mapped_column(String(512), nullable=False)
@@ -240,7 +254,9 @@ class FieldModuleGrant(Base):
     # Free-form so new field modules (timesheet / photos / deliveries)
     # can grant against the same table without a schema migration.
     module_key: Mapped[str] = mapped_column(
-        String(64), nullable=False, default="field_diary",
+        String(64),
+        nullable=False,
+        default="field_diary",
         server_default="field_diary",
     )
     granted_by: Mapped[uuid.UUID | None] = mapped_column(
@@ -249,15 +265,18 @@ class FieldModuleGrant(Base):
         nullable=True,
     )
     granted_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False,
+        DateTime(timezone=True),
+        nullable=False,
     )
     # Optional sunset — null = no expiry. Service layer compares against
     # UTC ``now()``.
     expires_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     revoked_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -300,33 +319,40 @@ class FieldMagicLink(Base):
         index=True,
     )
     module_key: Mapped[str] = mapped_column(
-        String(64), nullable=False, default="field_diary",
+        String(64),
+        nullable=False,
+        default="field_diary",
         server_default="field_diary",
     )
     phone: Mapped[str] = mapped_column(String(40), nullable=False, default="")
     # SHA-256 of the URL token. The plaintext is shown to the field
     # worker exactly once via SMS and never persisted.
     token_hash: Mapped[str] = mapped_column(
-        String(128), nullable=False, unique=True, index=True,
+        String(128),
+        nullable=False,
+        unique=True,
+        index=True,
     )
     # SHA-256 of the 6-digit PIN. The plaintext is shown to the field
     # worker via the same SMS as a separate line ("PIN: 482910").
     pin_hash: Mapped[str] = mapped_column(String(128), nullable=False)
     pin_attempts: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     expires_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False,
+        DateTime(timezone=True),
+        nullable=False,
     )
     consumed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     def __repr__(self) -> str:  # pragma: no cover
-        return (
-            f"<FieldMagicLink user={self.user_id} project={self.project_id} "
-            f"consumed={self.consumed_at is not None}>"
-        )
+        return f"<FieldMagicLink user={self.user_id} project={self.project_id} consumed={self.consumed_at is not None}>"
 
 
 class FieldSession(Base):
@@ -353,23 +379,31 @@ class FieldSession(Base):
         index=True,
     )
     module_key: Mapped[str] = mapped_column(
-        String(64), nullable=False, default="field_diary",
+        String(64),
+        nullable=False,
+        default="field_diary",
         server_default="field_diary",
     )
     session_token_hash: Mapped[str] = mapped_column(
-        String(128), nullable=False, unique=True, index=True,
+        String(128),
+        nullable=False,
+        unique=True,
+        index=True,
     )
     # Pin-hash carried over from the consumed magic-link so subsequent
     # requests can present the same PIN header against the same session.
     pin_hash: Mapped[str] = mapped_column(String(128), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False,
+        DateTime(timezone=True),
+        nullable=False,
     )
     revoked_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     last_seen_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     def __repr__(self) -> str:  # pragma: no cover

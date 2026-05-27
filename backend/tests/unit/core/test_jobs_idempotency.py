@@ -136,7 +136,11 @@ async def test_concurrent_submits_with_same_key_dedupe(session_factory) -> None:
             )
 
         results = await asyncio.gather(
-            submit(), submit(), submit(), submit(), submit(),
+            submit(),
+            submit(),
+            submit(),
+            submit(),
+            submit(),
         )
 
     ids = {r.id for r in results}
@@ -145,17 +149,15 @@ async def test_concurrent_submits_with_same_key_dedupe(session_factory) -> None:
     # And only one DB row exists for that key.
     async with session_factory() as s:
         from sqlalchemy import select
-        rows = (
-            await s.execute(
-                select(JobRun).where(JobRun.idempotency_key == "concurrent-key")
-            )
-        ).scalars().all()
+
+        rows = (await s.execute(select(JobRun).where(JobRun.idempotency_key == "concurrent-key"))).scalars().all()
         assert len(rows) == 1
 
 
 @pytest.mark.asyncio
 async def test_idempotency_key_uniqueness_across_threads(
-    session_factory, monkeypatch,
+    session_factory,
+    monkeypatch,
 ) -> None:
     """Same key used from multiple threads (sync wrapper) must not duplicate.
 

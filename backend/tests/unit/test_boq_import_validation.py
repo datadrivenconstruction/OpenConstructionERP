@@ -38,7 +38,6 @@ import pytest
 
 from app.modules.boq.router import _run_import_validation
 
-
 # ── Auto-register built-in rules ────────────────────────────────────────────
 # The validation engine ships with an empty registry; ``register_builtin_rules``
 # wires DIN276 + GAEB + boq_quality + NRM + MasterFormat + DPGF + ÖNORM +
@@ -203,9 +202,7 @@ def test_clean_import_yields_passed_validation_report(
     # Engine status must reflect the all-clear (it can still be 'warnings'
     # because boq_quality.* contains optional benchmark checks, but
     # 'errors' must not appear).
-    assert report["status"] in {"passed", "warnings"}, (
-        f"Unexpected status on a clean import: {report['status']!r}"
-    )
+    assert report["status"] in {"passed", "warnings"}, f"Unexpected status on a clean import: {report['status']!r}"
 
 
 # ── Test 2: missing-quantity row → at least one ERROR with element_ref ─────
@@ -245,8 +242,7 @@ def test_missing_quantity_import_surfaces_error_with_element_ref(
     bad_id = str(bad.id)
     refs = {r["element_ref"] for r in errors if r.get("element_ref")}
     assert bad_id in refs, (
-        f"Expected an ERROR result citing position id {bad_id} (ordinal {bad.ordinal}); "
-        f"got element_refs: {refs!r}"
+        f"Expected an ERROR result citing position id {bad_id} (ordinal {bad.ordinal}); got element_refs: {refs!r}"
     )
     # And the overall report status must be 'errors' so the UI flips to red.
     assert report["status"] == "errors", (
@@ -275,8 +271,7 @@ def test_feature_flag_off_returns_none(monkeypatch: pytest.MonkeyPatch) -> None:
             _run_import_validation(uuid.uuid4(), service, service.session)  # type: ignore[arg-type]
         )
         assert report is None, (
-            "Inline validation must short-circuit to None when the feature "
-            f"flag is off; got: {report!r}"
+            f"Inline validation must short-circuit to None when the feature flag is off; got: {report!r}"
         )
     finally:
         # Reset the cached settings so subsequent tests see the default.

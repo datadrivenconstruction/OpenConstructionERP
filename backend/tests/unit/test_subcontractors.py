@@ -21,7 +21,6 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-
 # ── Stub model factory helpers ─────────────────────────────────────────
 
 
@@ -361,10 +360,7 @@ class _Repo:
 
     async def get_for_period(self, sub_id: uuid.UUID, period: str) -> Any:
         for r in self.rows.values():
-            if (
-                getattr(r, "subcontractor_id", None) == sub_id
-                and getattr(r, "period", None) == period
-            ):
+            if getattr(r, "subcontractor_id", None) == sub_id and getattr(r, "period", None) == period:
                 return r
         return None
 
@@ -417,7 +413,9 @@ async def test_prequalification_workflow_happy_path() -> None:
         assert submitted.status == "submitted"
 
         approved = await svc.approve_prequalification(
-            prequal.id, reviewer_id="reviewer-1", notes="OK",
+            prequal.id,
+            reviewer_id="reviewer-1",
+            notes="OK",
         )
         assert approved.status == "approved"
         assert approved.reviewer_id == "reviewer-1"
@@ -489,7 +487,8 @@ async def test_payment_application_workflow_happy_path() -> None:
         # An agreement is born "draft"; it must be signed off (activated)
         # before any payment can be claimed against it.
         agreement = await svc.update_agreement(
-            agreement.id, AgreementUpdate(status="active"),
+            agreement.id,
+            AgreementUpdate(status="active"),
         )
         assert agreement.status == "active"
         pa = await svc.submit_payment_application(
@@ -599,7 +598,9 @@ async def test_retention_accrue_and_release() -> None:
 
         # Release 1500
         await svc.release_retention(
-            agreement_id=agreement.id, amount=Decimal("1500"), reason="50% practical_completion",
+            agreement_id=agreement.id,
+            amount=Decimal("1500"),
+            reason="50% practical_completion",
         )
         new_balance = await svc.retention_balance(agreement.id)
         assert new_balance == Decimal("500.00")
@@ -719,17 +720,21 @@ def test_permissions_role_hierarchy() -> None:
     register_subcontractors_permissions()
     # Editor cannot delete or approve finance / release retention
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "subcontractors.delete",
+        Role.EDITOR,
+        "subcontractors.delete",
     )
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "subcontractors.release_retention",
+        Role.EDITOR,
+        "subcontractors.release_retention",
     )
     # Manager can do everything except the admin-only system commands
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "subcontractors.approve_payment_finance",
+        Role.MANAGER,
+        "subcontractors.approve_payment_finance",
     )
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "subcontractors.release_retention",
+        Role.MANAGER,
+        "subcontractors.release_retention",
     )
 
 
@@ -830,7 +835,9 @@ class _SubStubRepo:
         if sub_id != self.sub_id:
             return None
         return SimpleNamespace(
-            id=self.sub_id, legal_name=self.legal_name, rating_score=self.rating_score,
+            id=self.sub_id,
+            legal_name=self.legal_name,
+            rating_score=self.rating_score,
         )
 
     async def update_fields(self, sub_id: uuid.UUID, **fields: Any) -> None:
@@ -970,14 +977,20 @@ async def test_sov_summary_rolls_up_claimed_certified_approved() -> None:
     svc.work_packages = _SovWPRepo(  # type: ignore[assignment]
         rows=[
             SimpleNamespace(
-                id=wp1_id, agreement_id=agreement_id,
-                name="Foundations", planned_value=Decimal("60000"),
-                completion_percent=Decimal("50"), status="in_progress",
+                id=wp1_id,
+                agreement_id=agreement_id,
+                name="Foundations",
+                planned_value=Decimal("60000"),
+                completion_percent=Decimal("50"),
+                status="in_progress",
             ),
             SimpleNamespace(
-                id=wp2_id, agreement_id=agreement_id,
-                name="Frame", planned_value=Decimal("40000"),
-                completion_percent=Decimal("0"), status="planned",
+                id=wp2_id,
+                agreement_id=agreement_id,
+                name="Frame",
+                planned_value=Decimal("40000"),
+                completion_percent=Decimal("0"),
+                status="planned",
             ),
         ]
     )
@@ -991,14 +1004,16 @@ async def test_sov_summary_rolls_up_claimed_certified_approved() -> None:
         rows=[
             # PA1: 20k claimed / 18k cert / 18k approved on WP1
             SimpleNamespace(
-                payment_application_id=pa1_id, work_package_id=wp1_id,
+                payment_application_id=pa1_id,
+                work_package_id=wp1_id,
                 claimed_amount=Decimal("20000"),
                 certified_amount=Decimal("18000"),
                 approved_amount=Decimal("18000"),
             ),
             # PA2: 10k claimed / 10k cert / 10k approved on WP1
             SimpleNamespace(
-                payment_application_id=pa2_id, work_package_id=wp1_id,
+                payment_application_id=pa2_id,
+                work_package_id=wp1_id,
                 claimed_amount=Decimal("10000"),
                 certified_amount=Decimal("10000"),
                 approved_amount=Decimal("10000"),

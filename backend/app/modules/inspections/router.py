@@ -152,9 +152,7 @@ async def export_inspections(
         ws.cell(row=row_idx, column=8, value=item.result or "")
         # Checklist pass/fail count
         checklist = item.checklist_data or []
-        passed = sum(
-            1 for ci in checklist if isinstance(ci, dict) and ci.get("passed")
-        )
+        passed = sum(1 for ci in checklist if isinstance(ci, dict) and ci.get("passed"))
         failed = len(checklist) - passed
         ws.cell(row=row_idx, column=9, value=f"{passed}/{failed}")
 
@@ -279,9 +277,9 @@ async def create_defect_from_inspection(
             description=description,
             priority="high" if inspection.result == "fail" else "medium",
             status="open",
-            category=inspection.inspection_type if inspection.inspection_type in (
-                "structural", "electrical", "plumbing", "fire_safety", "general"
-            ) else "general",
+            category=inspection.inspection_type
+            if inspection.inspection_type in ("structural", "electrical", "plumbing", "fire_safety", "general")
+            else "general",
             trade=inspection.inspection_type,
             created_by=str(user_id),
             metadata_={
@@ -363,10 +361,8 @@ async def create_ncr_from_inspection(
     from app.modules.ncr.service import NCRService
 
     existing = (
-        await session.execute(
-            select(NCR).where(NCR.linked_inspection_id == str(inspection_id))
-        )
-    ).scalars().first()
+        (await session.execute(select(NCR).where(NCR.linked_inspection_id == str(inspection_id)))).scalars().first()
+    )
     if existing is not None:
         return {
             "ncr_id": str(existing.id),
@@ -388,13 +384,8 @@ async def create_ncr_from_inspection(
         return resp in {"no", "fail", "false", "0", "failed"}
 
     checklist = inspection.checklist_data or []
-    failed_items = [
-        ci for ci in checklist
-        if isinstance(ci, dict) and _is_failed(ci)
-    ]
-    has_critical_failure = any(
-        bool(ci.get("critical")) for ci in failed_items
-    )
+    failed_items = [ci for ci in checklist if isinstance(ci, dict) and _is_failed(ci)]
+    has_critical_failure = any(bool(ci.get("critical")) for ci in failed_items)
 
     description_parts = [
         f"Auto-generated from inspection {inspection.inspection_number}: {inspection.title}",
@@ -447,7 +438,9 @@ async def create_ncr_from_inspection(
     ncr = await ncr_service.create_ncr(payload, user_id=str(user_id))
     logger.info(
         "Created NCR %s from inspection %s (severity=%s)",
-        ncr.ncr_number, inspection_id, severity,
+        ncr.ncr_number,
+        inspection_id,
+        severity,
     )
     return {
         "ncr_id": str(ncr.id),

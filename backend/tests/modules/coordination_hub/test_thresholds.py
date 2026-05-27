@@ -165,9 +165,7 @@ async def _seed_clash(
         return str(clash.id)
 
 
-async def _seed_bim_model(
-    project_id_: str, *, created_at: datetime | None = None
-) -> None:
+async def _seed_bim_model(project_id_: str, *, created_at: datetime | None = None) -> None:
     """Seed one BIMModel; created_at controls the staleness clock."""
     from app.database import async_session_factory
     from app.modules.bim_hub.models import BIMModel
@@ -200,9 +198,7 @@ def _invalidate_cache() -> None:
 
 
 @pytest.mark.asyncio
-async def test_thresholds_default_seeded_on_first_get(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_thresholds_default_seeded_on_first_get(client: AsyncClient, auth: dict[str, str], project_id: str):
     """First GET on a fresh project lazily seeds four default rows."""
     _invalidate_cache()
     resp = await client.get(
@@ -223,9 +219,7 @@ async def test_thresholds_default_seeded_on_first_get(
 
 
 @pytest.mark.asyncio
-async def test_evaluate_no_breach_when_zero_signal(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_evaluate_no_breach_when_zero_signal(client: AsyncClient, auth: dict[str, str], project_id: str):
     """Empty project: no model uploaded → model_age fires ERROR (99999d)."""
     _invalidate_cache()
     resp = await client.get(
@@ -244,9 +238,7 @@ async def test_evaluate_no_breach_when_zero_signal(
 
 
 @pytest.mark.asyncio
-async def test_evaluate_warn_only_breach(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_evaluate_warn_only_breach(client: AsyncClient, auth: dict[str, str], project_id: str):
     """Seed exactly 5 high-severity clashes — warn breach, not error."""
     # Defaults: warn=5 / error=20 for high_severity_clashes.
     for _ in range(5):
@@ -268,9 +260,7 @@ async def test_evaluate_warn_only_breach(
 
 
 @pytest.mark.asyncio
-async def test_evaluate_error_level_breach(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_evaluate_error_level_breach(client: AsyncClient, auth: dict[str, str], project_id: str):
     """Seed 20 high-severity clashes (= error threshold)."""
     for _ in range(20):
         await _seed_clash(project_id, severity="critical", status_="new")
@@ -290,9 +280,7 @@ async def test_evaluate_error_level_breach(
 
 
 @pytest.mark.asyncio
-async def test_disabled_threshold_does_not_alert(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_disabled_threshold_does_not_alert(client: AsyncClient, auth: dict[str, str], project_id: str):
     """Flipping ``enabled=False`` suppresses the alert even on breach."""
     # Trigger an error first.
     for _ in range(25):
@@ -322,9 +310,7 @@ async def test_disabled_threshold_does_not_alert(
 
 
 @pytest.mark.asyncio
-async def test_put_persists_new_thresholds(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_put_persists_new_thresholds(client: AsyncClient, auth: dict[str, str], project_id: str):
     """PUT a custom override — GET reflects the new warn / error values."""
     resp = await client.put(
         f"/api/v1/coordination/projects/{project_id}/thresholds/open_clashes_total",
@@ -348,9 +334,7 @@ async def test_put_persists_new_thresholds(
 
 
 @pytest.mark.asyncio
-async def test_put_rejects_unknown_metric(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_put_rejects_unknown_metric(client: AsyncClient, auth: dict[str, str], project_id: str):
     """A typo'd metric returns 422 — no ghost-write."""
     resp = await client.put(
         f"/api/v1/coordination/projects/{project_id}/thresholds/not_a_real_metric",
@@ -361,9 +345,7 @@ async def test_put_rejects_unknown_metric(
 
 
 @pytest.mark.asyncio
-async def test_put_rejects_empty_payload(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_put_rejects_empty_payload(client: AsyncClient, auth: dict[str, str], project_id: str):
     """An empty PUT is a no-op — rejected with 422."""
     resp = await client.put(
         f"/api/v1/coordination/projects/{project_id}/thresholds/open_clashes_total",
@@ -374,9 +356,7 @@ async def test_put_rejects_empty_payload(
 
 
 @pytest.mark.asyncio
-async def test_put_blocks_viewer_role(
-    client: AsyncClient, project_id: str
-):
+async def test_put_blocks_viewer_role(client: AsyncClient, project_id: str):
     """A plain VIEWER lacks coordination.write permission."""
     from sqlalchemy import update
 
@@ -397,9 +377,7 @@ async def test_put_blocks_viewer_role(
     )
     assert reg.status_code in (200, 201), reg.text
     async with async_session_factory() as session:
-        await session.execute(
-            update(User).where(User.email == email).values(is_active=True)
-        )
+        await session.execute(update(User).where(User.email == email).values(is_active=True))
         await session.commit()
     login = await client.post(
         "/api/v1/users/auth/login",
@@ -418,9 +396,7 @@ async def test_put_blocks_viewer_role(
 
 
 @pytest.mark.asyncio
-async def test_model_age_fires_error_on_empty_project(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_model_age_fires_error_on_empty_project(client: AsyncClient, auth: dict[str, str], project_id: str):
     """No BIM model upload → model_age_days_max = 99999d → ERROR."""
     _invalidate_cache()
     resp = await client.get(
@@ -435,13 +411,9 @@ async def test_model_age_fires_error_on_empty_project(
 
 
 @pytest.mark.asyncio
-async def test_unauthenticated_request_rejected(
-    client: AsyncClient, project_id: str
-):
+async def test_unauthenticated_request_rejected(client: AsyncClient, project_id: str):
     """No Authorization header → 401/403 from the auth layer."""
-    resp = await client.get(
-        f"/api/v1/coordination/projects/{project_id}/thresholds"
-    )
+    resp = await client.get(f"/api/v1/coordination/projects/{project_id}/thresholds")
     assert resp.status_code in (401, 403)
 
 
@@ -494,13 +466,9 @@ async def test_threshold_evaluation_warn_then_error_progression(
 
 
 @pytest.mark.asyncio
-async def test_recent_model_keeps_model_age_ok(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-):
+async def test_recent_model_keeps_model_age_ok(client: AsyncClient, auth: dict[str, str], project_id: str):
     """A model uploaded 5 days ago stays OK (default warn=14, error=30)."""
-    await _seed_bim_model(
-        project_id, created_at=datetime.now(UTC) - timedelta(days=5)
-    )
+    await _seed_bim_model(project_id, created_at=datetime.now(UTC) - timedelta(days=5))
     _invalidate_cache()
     resp = await client.get(
         f"/api/v1/coordination/projects/{project_id}/thresholds",

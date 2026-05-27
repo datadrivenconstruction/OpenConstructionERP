@@ -79,8 +79,7 @@ class MessageBundle:
         self._warned_missing.clear()
         if not self.messages_dir.exists():
             logger.warning(
-                "Validation messages directory missing: %s — all keys will "
-                "fall back to raw key names",
+                "Validation messages directory missing: %s — all keys will fall back to raw key names",
                 self.messages_dir,
             )
             self._loaded_from = self.messages_dir
@@ -181,8 +180,7 @@ class MessageBundle:
             return template.format(**params)
         except (KeyError, IndexError, ValueError) as exc:
             logger.warning(
-                "Validation message template '%s' could not be formatted "
-                "with params=%s: %s",
+                "Validation message template '%s' could not be formatted with params=%s: %s",
                 key,
                 sorted(params.keys()),
                 exc,

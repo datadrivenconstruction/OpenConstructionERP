@@ -39,6 +39,7 @@ byte-reproducible for a given input. Snapshot tests compare against a
 fixture blob; if sort order were non-deterministic the tests would be
 flaky.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -57,56 +58,146 @@ from openpyxl.worksheet.worksheet import Worksheet
 # missing data.
 
 CONTACT_COLUMNS = [
-    "Email*", "CreatedBy", "CreatedOn", "Category", "Company",
-    "Phone", "ExtSystem", "ExtObject", "ExtIdentifier",
-    "Department", "OrganizationCode", "GivenName", "FamilyName",
-    "Street", "PostalBox", "Town", "StateRegion", "PostalCode",
+    "Email*",
+    "CreatedBy",
+    "CreatedOn",
+    "Category",
+    "Company",
+    "Phone",
+    "ExtSystem",
+    "ExtObject",
+    "ExtIdentifier",
+    "Department",
+    "OrganizationCode",
+    "GivenName",
+    "FamilyName",
+    "Street",
+    "PostalBox",
+    "Town",
+    "StateRegion",
+    "PostalCode",
     "Country",
 ]
 
 FACILITY_COLUMNS = [
-    "Name*", "CreatedBy", "CreatedOn", "Category", "ProjectName",
-    "SiteName", "LinearUnits", "AreaUnits", "VolumeUnits", "CurrencyUnit",
-    "AreaMeasurement", "ExternalSystem", "ExternalProjectObject",
-    "ExternalProjectIdentifier", "ExternalSiteObject",
-    "ExternalSiteIdentifier", "ExternalFacilityObject",
-    "ExternalFacilityIdentifier", "Description", "ProjectDescription",
-    "SiteDescription", "Phase",
+    "Name*",
+    "CreatedBy",
+    "CreatedOn",
+    "Category",
+    "ProjectName",
+    "SiteName",
+    "LinearUnits",
+    "AreaUnits",
+    "VolumeUnits",
+    "CurrencyUnit",
+    "AreaMeasurement",
+    "ExternalSystem",
+    "ExternalProjectObject",
+    "ExternalProjectIdentifier",
+    "ExternalSiteObject",
+    "ExternalSiteIdentifier",
+    "ExternalFacilityObject",
+    "ExternalFacilityIdentifier",
+    "Description",
+    "ProjectDescription",
+    "SiteDescription",
+    "Phase",
 ]
 
 FLOOR_COLUMNS = [
-    "Name*", "CreatedBy", "CreatedOn", "Category", "ExtSystem",
-    "ExtObject", "ExtIdentifier", "Description", "Elevation", "Height",
+    "Name*",
+    "CreatedBy",
+    "CreatedOn",
+    "Category",
+    "ExtSystem",
+    "ExtObject",
+    "ExtIdentifier",
+    "Description",
+    "Elevation",
+    "Height",
 ]
 
 SPACE_COLUMNS = [
-    "Name*", "CreatedBy", "CreatedOn", "Category", "FloorName",
-    "Description", "ExtSystem", "ExtObject", "ExtIdentifier",
-    "RoomTag", "UsableHeight", "GrossArea", "NetArea",
+    "Name*",
+    "CreatedBy",
+    "CreatedOn",
+    "Category",
+    "FloorName",
+    "Description",
+    "ExtSystem",
+    "ExtObject",
+    "ExtIdentifier",
+    "RoomTag",
+    "UsableHeight",
+    "GrossArea",
+    "NetArea",
 ]
 
 TYPE_COLUMNS = [
-    "Name*", "CreatedBy", "CreatedOn", "Category", "Description",
-    "AssetType", "Manufacturer", "ModelNumber", "WarrantyGuarantorParts",
-    "WarrantyDurationParts", "WarrantyGuarantorLabor",
-    "WarrantyDurationLabor", "WarrantyDurationUnit", "ExtSystem",
-    "ExtObject", "ExtIdentifier", "ReplacementCost", "ExpectedLife",
-    "DurationUnit", "NominalLength", "NominalWidth", "NominalHeight",
-    "ModelReference", "Shape", "Size", "Color", "Finish", "Grade",
-    "Material", "Constituents", "Features", "AccessibilityPerformance",
-    "CodePerformance", "SustainabilityPerformance",
+    "Name*",
+    "CreatedBy",
+    "CreatedOn",
+    "Category",
+    "Description",
+    "AssetType",
+    "Manufacturer",
+    "ModelNumber",
+    "WarrantyGuarantorParts",
+    "WarrantyDurationParts",
+    "WarrantyGuarantorLabor",
+    "WarrantyDurationLabor",
+    "WarrantyDurationUnit",
+    "ExtSystem",
+    "ExtObject",
+    "ExtIdentifier",
+    "ReplacementCost",
+    "ExpectedLife",
+    "DurationUnit",
+    "NominalLength",
+    "NominalWidth",
+    "NominalHeight",
+    "ModelReference",
+    "Shape",
+    "Size",
+    "Color",
+    "Finish",
+    "Grade",
+    "Material",
+    "Constituents",
+    "Features",
+    "AccessibilityPerformance",
+    "CodePerformance",
+    "SustainabilityPerformance",
 ]
 
 COMPONENT_COLUMNS = [
-    "Name*", "CreatedBy", "CreatedOn", "TypeName", "Space",
-    "Description", "ExtSystem", "ExtObject", "ExtIdentifier",
-    "SerialNumber", "InstallationDate", "WarrantyStartDate", "TagNumber",
-    "BarCode", "AssetIdentifier",
+    "Name*",
+    "CreatedBy",
+    "CreatedOn",
+    "TypeName",
+    "Space",
+    "Description",
+    "ExtSystem",
+    "ExtObject",
+    "ExtIdentifier",
+    "SerialNumber",
+    "InstallationDate",
+    "WarrantyStartDate",
+    "TagNumber",
+    "BarCode",
+    "AssetIdentifier",
 ]
 
 SYSTEM_COLUMNS = [
-    "Name*", "CreatedBy", "CreatedOn", "Category", "ComponentNames",
-    "ExtSystem", "ExtObject", "ExtIdentifier", "Description",
+    "Name*",
+    "CreatedBy",
+    "CreatedOn",
+    "Category",
+    "ComponentNames",
+    "ExtSystem",
+    "ExtObject",
+    "ExtIdentifier",
+    "Description",
 ]
 
 
@@ -209,8 +300,7 @@ def build_cobie_workbook(
         wb.properties.lastModifiedBy = "OpenConstructionERP"
         wb.properties.title = f"COBie UK 2.4 — {getattr(model, 'name', 'Model')}"
         wb.properties.description = (
-            "Generated by OpenConstructionERP "
-            "(https://openconstructionerp.com) · DDC-CWICR-OE-2026"
+            "Generated by OpenConstructionERP (https://openconstructionerp.com) · DDC-CWICR-OE-2026"
         )
     except Exception:  # noqa: BLE001 — best-effort metadata stamp
         pass
@@ -229,9 +319,7 @@ def _write_header_row(ws: Worksheet, columns: list[str]) -> None:
         cell = ws.cell(row=1, column=col_idx, value=col_name)
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="left")
-        cell.fill = PatternFill(
-            start_color="FFE0E0E0", end_color="FFE0E0E0", fill_type="solid"
-        )
+        cell.fill = PatternFill(start_color="FFE0E0E0", end_color="FFE0E0E0", fill_type="solid")
 
 
 def _write_contact_sheet(ws: Worksheet, created_on: str, opts: CobieOptions) -> None:
@@ -248,9 +336,7 @@ def _write_contact_sheet(ws: Worksheet, created_on: str, opts: CobieOptions) -> 
     _append_row(ws, CONTACT_COLUMNS, row)
 
 
-def _write_facility_sheet(
-    ws: Worksheet, model: Any, created_on: str, opts: CobieOptions
-) -> None:
+def _write_facility_sheet(ws: Worksheet, model: Any, created_on: str, opts: CobieOptions) -> None:
     _write_header_row(ws, FACILITY_COLUMNS)
     row = {
         "Name*": getattr(model, "name", "Facility"),
@@ -279,13 +365,9 @@ def _write_facility_sheet(
     _append_row(ws, FACILITY_COLUMNS, row)
 
 
-def _write_floor_sheet(
-    ws: Worksheet, elements: list[Any], created_on: str, opts: CobieOptions
-) -> None:
+def _write_floor_sheet(ws: Worksheet, elements: list[Any], created_on: str, opts: CobieOptions) -> None:
     _write_header_row(ws, FLOOR_COLUMNS)
-    storeys = _distinct_sorted(
-        [getattr(e, "storey", None) for e in elements if getattr(e, "storey", None)]
-    )
+    storeys = _distinct_sorted([getattr(e, "storey", None) for e in elements if getattr(e, "storey", None)])
     if not storeys:
         # Some models have no storey data — emit at least one floor so
         # spaces/components can dangle reference "Floor1".
@@ -311,9 +393,7 @@ def _is_space_element(element: Any) -> bool:
     return any(token in et for token in SPACE_TYPE_TOKENS)
 
 
-def _write_space_sheet(
-    ws: Worksheet, elements: list[Any], created_on: str, opts: CobieOptions
-) -> None:
+def _write_space_sheet(ws: Worksheet, elements: list[Any], created_on: str, opts: CobieOptions) -> None:
     _write_header_row(ws, SPACE_COLUMNS)
     spaces = [e for e in elements if _is_space_element(e)]
     spaces.sort(key=lambda e: (getattr(e, "storey", "") or "", getattr(e, "stable_id", "")))
@@ -337,9 +417,7 @@ def _write_space_sheet(
         _append_row(ws, SPACE_COLUMNS, row)
 
 
-def _write_type_sheet(
-    ws: Worksheet, elements: list[Any], created_on: str, opts: CobieOptions
-) -> None:
+def _write_type_sheet(ws: Worksheet, elements: list[Any], created_on: str, opts: CobieOptions) -> None:
     """Aggregate tracked assets by (element_type, manufacturer, model)
     → one Type row. Components reference the Type by its Name."""
     _write_header_row(ws, TYPE_COLUMNS)
@@ -401,9 +479,7 @@ def _write_type_sheet(
         _append_row(ws, TYPE_COLUMNS, row)
 
 
-def _write_component_sheet(
-    ws: Worksheet, elements: list[Any], created_on: str, opts: CobieOptions
-) -> None:
+def _write_component_sheet(ws: Worksheet, elements: list[Any], created_on: str, opts: CobieOptions) -> None:
     """One row per tracked asset. Name = stable_id or asset_tag, TypeName
     back-references the Type sheet via (element_type + manufacturer + model)."""
     _write_header_row(ws, COMPONENT_COLUMNS)
@@ -416,9 +492,7 @@ def _write_component_sheet(
         mdl = ai.get("model") or "Unknown"
         type_name = _type_key(et, mfr, mdl)
         row = {
-            "Name*": ai.get("asset_tag")
-            or getattr(comp, "name", None)
-            or getattr(comp, "stable_id", ""),
+            "Name*": ai.get("asset_tag") or getattr(comp, "name", None) or getattr(comp, "stable_id", ""),
             "CreatedBy": opts.default_contact_email,
             "CreatedOn": created_on,
             "TypeName": type_name,
@@ -437,9 +511,7 @@ def _write_component_sheet(
         _append_row(ws, COMPONENT_COLUMNS, row)
 
 
-def _write_system_sheet(
-    ws: Worksheet, elements: list[Any], created_on: str, opts: CobieOptions
-) -> None:
+def _write_system_sheet(ws: Worksheet, elements: list[Any], created_on: str, opts: CobieOptions) -> None:
     """Aggregate components by ``asset_info.parent_system``. One row per
     system, ``ComponentNames`` joins the member stable_ids with ``,``."""
     _write_header_row(ws, SYSTEM_COLUMNS)
@@ -452,11 +524,7 @@ def _write_system_sheet(
         if not sys_name:
             continue
         members = system_map.setdefault(sys_name, [])
-        members.append(
-            ai.get("asset_tag")
-            or getattr(element, "name", None)
-            or getattr(element, "stable_id", "")
-        )
+        members.append(ai.get("asset_tag") or getattr(element, "name", None) or getattr(element, "stable_id", ""))
     for sys_name in sorted(system_map.keys()):
         members = sorted(system_map[sys_name])
         row = {

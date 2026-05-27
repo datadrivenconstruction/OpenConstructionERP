@@ -139,18 +139,21 @@ async def _on_po_issued(event: Event) -> None:
             budget = await _select_budget_row(session, project_id, wbs_hint)
             if budget is None:
                 logger.info(
-                    "finance: po.issued for project %s — no budget rows, "
-                    "commitment skipped (po_id=%s, amount=%s)",
-                    project_id, data.get("po_id"), amount,
+                    "finance: po.issued for project %s — no budget rows, commitment skipped (po_id=%s, amount=%s)",
+                    project_id,
+                    data.get("po_id"),
+                    amount,
                 )
                 return
             current = _to_decimal(budget.committed)
             budget.committed = current + amount
             await session.commit()
             logger.info(
-                "finance: po.issued committed += %s on budget %s "
-                "(project=%s, po=%s)",
-                amount, budget.id, project_id, data.get("po_id"),
+                "finance: po.issued committed += %s on budget %s (project=%s, po=%s)",
+                amount,
+                budget.id,
+                project_id,
+                data.get("po_id"),
             )
     except Exception:
         logger.debug("finance: _on_po_issued failed", exc_info=True)
@@ -169,9 +172,10 @@ async def _on_gr_confirmed(event: Event) -> None:
             budget = await _select_budget_row(session, project_id, wbs_hint)
             if budget is None:
                 logger.info(
-                    "finance: gr.confirmed for project %s — no budget rows, "
-                    "actuals skipped (gr_id=%s, amount=%s)",
-                    project_id, data.get("gr_id"), amount,
+                    "finance: gr.confirmed for project %s — no budget rows, actuals skipped (gr_id=%s, amount=%s)",
+                    project_id,
+                    data.get("gr_id"),
+                    amount,
                 )
                 return
             current_committed = _to_decimal(budget.committed)
@@ -187,9 +191,11 @@ async def _on_gr_confirmed(event: Event) -> None:
             budget.actual = current_actual + amount
             await session.commit()
             logger.info(
-                "finance: gr.confirmed flipped %s from committed→actual on "
-                "budget %s (project=%s, gr=%s)",
-                amount, budget.id, project_id, data.get("gr_id"),
+                "finance: gr.confirmed flipped %s from committed→actual on budget %s (project=%s, gr=%s)",
+                amount,
+                budget.id,
+                project_id,
+                data.get("gr_id"),
             )
     except Exception:
         logger.debug("finance: _on_gr_confirmed failed", exc_info=True)

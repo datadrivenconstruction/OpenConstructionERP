@@ -103,7 +103,8 @@ def _build_public_url(token: str) -> str:
 
 
 async def _load_document(
-    session: AsyncSession, document_id: uuid.UUID,
+    session: AsyncSession,
+    document_id: uuid.UUID,
 ) -> Document:
     """Fetch a :class:`Document` or raise 404."""
     stmt = select(Document).where(Document.id == document_id)
@@ -117,7 +118,8 @@ async def _load_document(
 
 
 async def _load_link_by_token(
-    session: AsyncSession, token: str,
+    session: AsyncSession,
+    token: str,
 ) -> DocumentShareLink | None:
     """Fetch an active share link by token, or ``None``.
 
@@ -159,9 +161,7 @@ async def create_share_link(
     # R7 audit: never mint a never-expires link. Apply the 30-day
     # default when the caller omits ``expires_in_days`` so a leaked URL
     # is naturally bounded.
-    effective_days = (
-        expires_in_days if expires_in_days is not None else _DEFAULT_EXPIRES_IN_DAYS
-    )
+    effective_days = expires_in_days if expires_in_days is not None else _DEFAULT_EXPIRES_IN_DAYS
     expires_at: datetime = _now() + timedelta(days=effective_days)
 
     row = DocumentShareLink(
@@ -177,13 +177,17 @@ async def create_share_link(
     await session.flush()
     logger.info(
         "Minted share link for document=%s by user=%s (password=%s, expires=%s)",
-        document_id, created_by, bool(pw_hash), expires_at,
+        document_id,
+        created_by,
+        bool(pw_hash),
+        expires_at,
     )
     return row
 
 
 async def get_share_link_public(
-    session: AsyncSession, token: str,
+    session: AsyncSession,
+    token: str,
 ) -> tuple[DocumentShareLink, Document]:
     """Return the link + its document, or raise 404.
 
@@ -247,7 +251,8 @@ async def access_share_link(
 
 
 async def list_share_links_for_document(
-    session: AsyncSession, document_id: uuid.UUID,
+    session: AsyncSession,
+    document_id: uuid.UUID,
 ) -> list[DocumentShareLink]:
     """Return all non-revoked links for a document, newest-first.
 

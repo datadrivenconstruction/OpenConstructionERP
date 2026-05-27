@@ -19,9 +19,7 @@ class Comment(Base):
     """‌⁠‍Threaded comment attached to any entity."""
 
     __tablename__ = "oe_collaboration_comment"
-    __table_args__ = (
-        Index("ix_collab_comment_entity", "entity_type", "entity_id"),
-    )
+    __table_args__ = (Index("ix_collab_comment_entity", "entity_type", "entity_id"),)
 
     entity_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     entity_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
@@ -32,21 +30,15 @@ class Comment(Base):
         index=True,
     )
     text: Mapped[str] = mapped_column(Text, nullable=False)
-    comment_type: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="comment", server_default="comment"
-    )
+    comment_type: Mapped[str] = mapped_column(String(50), nullable=False, default="comment", server_default="comment")
     parent_comment_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_collaboration_comment.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
     )
-    edited_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    is_deleted: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    edited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -97,9 +89,7 @@ class CommentMention(Base):
         nullable=False,
         index=True,
     )
-    mention_type: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="at_notify"
-    )
+    mention_type: Mapped[str] = mapped_column(String(20), nullable=False, default="at_notify")
 
     # Relationships
     comment: Mapped[Comment] = relationship(back_populates="mentions")
@@ -116,9 +106,7 @@ class Viewpoint(Base):
     """
 
     __tablename__ = "oe_collaboration_viewpoint"
-    __table_args__ = (
-        Index("ix_collab_viewpoint_entity", "entity_type", "entity_id"),
-    )
+    __table_args__ = (Index("ix_collab_viewpoint_entity", "entity_type", "entity_id"),)
 
     entity_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     entity_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
@@ -126,9 +114,7 @@ class Viewpoint(Base):
     data: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False
     )
-    created_by: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True
-    )
+    created_by: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
     comment_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_collaboration_comment.id", ondelete="SET NULL"),

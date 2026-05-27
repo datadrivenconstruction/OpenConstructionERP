@@ -79,7 +79,8 @@ class DiaryEntryResponse(BaseModel):
     # ``metadata`` for API consumers (matches the create / update wire
     # name).
     metadata: dict[str, Any] = Field(
-        default_factory=dict, alias="metadata_",
+        default_factory=dict,
+        alias="metadata_",
     )
 
 
@@ -108,7 +109,8 @@ class DiaryActivityResponse(BaseModel):
     started_at: datetime | None = None
     ended_at: datetime | None = None
     metadata: dict[str, Any] = Field(
-        default_factory=dict, alias="metadata_",
+        default_factory=dict,
+        alias="metadata_",
     )
     created_at: datetime
     updated_at: datetime

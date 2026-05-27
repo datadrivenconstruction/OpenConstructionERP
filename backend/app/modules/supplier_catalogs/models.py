@@ -92,7 +92,10 @@ class Vendor(Base):
     # Name of the TolerianceProfile this vendor should be matched against.
     # Resolved by name (not FK) so the link survives profile deletes/renames.
     tolerance_profile_name: Mapped[str] = mapped_column(
-        String(64), nullable=False, default="default", server_default="default",
+        String(64),
+        nullable=False,
+        default="default",
+        server_default="default",
     )
 
     price_lists: Mapped[list[PriceList]] = relationship(
@@ -162,10 +165,15 @@ class CatalogItem(Base):
     gtin: Mapped[str | None] = mapped_column(String(20), nullable=True, index=True)
     # UNSPSC/eClass commodity code reference (e.g. "30161501" for portland cement)
     commodity_code: Mapped[str | None] = mapped_column(
-        String(32), nullable=True, index=True,
+        String(32),
+        nullable=True,
+        index=True,
     )
     commodity_scheme: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="unspsc", server_default="unspsc",
+        String(16),
+        nullable=False,
+        default="unspsc",
+        server_default="unspsc",
     )
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
@@ -568,10 +576,15 @@ class VendorInvoice(Base):
         server_default="manual",
     )  # manual | peppol | edi | email_pdf
     peppol_message_id: Mapped[str | None] = mapped_column(
-        String(255), nullable=True, index=True,
+        String(255),
+        nullable=True,
+        index=True,
     )
     line_level_match_json: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
 
     lines: Mapped[list[VendorInvoiceLine]] = relationship(
@@ -605,16 +618,24 @@ class VendorInvoiceLine(Base):
     )
     description: Mapped[str] = mapped_column(String(500), nullable=False)
     quantity: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     unit_of_measure: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="pcs",
+        String(20),
+        nullable=False,
+        default="pcs",
     )
     unit_price: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     line_total: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0"),
+        Numeric(18, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     # Vendor-supplied identifier (PEPPOL: cac:Item/cac:SellersItemIdentification)
     vendor_sku: Mapped[str | None] = mapped_column(String(100), nullable=True)
@@ -816,11 +837,16 @@ class CommodityCode(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     parent_code: Mapped[str | None] = mapped_column(
-        String(32), nullable=True, index=True,
+        String(32),
+        nullable=True,
+        index=True,
     )
     level: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1",
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="1",
     )
 
     def __repr__(self) -> str:
@@ -841,30 +867,47 @@ class TolerianceProfile(Base):
     __tablename__ = "oe_supplier_catalogs_tolerance_profile"
 
     name: Mapped[str] = mapped_column(
-        String(64), nullable=False, unique=True, index=True,
+        String(64),
+        nullable=False,
+        unique=True,
+        index=True,
     )
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Price tolerance: absolute (currency) AND percentage — both checked
     price_tolerance_pct: Mapped[Decimal] = mapped_column(
-        Numeric(8, 4), nullable=False, default=Decimal("2.0"),
+        Numeric(8, 4),
+        nullable=False,
+        default=Decimal("2.0"),
     )
     price_tolerance_abs: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"),
+        Numeric(18, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     # Quantity tolerance: percentage
     qty_tolerance_pct: Mapped[Decimal] = mapped_column(
-        Numeric(8, 4), nullable=False, default=Decimal("0"),
+        Numeric(8, 4),
+        nullable=False,
+        default=Decimal("0"),
     )
     # Period tolerance: days early/late on delivery vs PO.expected_delivery
     period_tolerance_days: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=7,
+        Integer,
+        nullable=False,
+        default=7,
     )
     # If GR is required (most installs yes); set false for service POs
     require_gr: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1",
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="1",
     )
     is_default: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
 
     def __repr__(self) -> str:
@@ -910,7 +953,8 @@ class KYCDocument(Base):
         index=True,
     )  # active | expired | rejected | pending_review
     verified_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     verified_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -956,36 +1000,50 @@ class VendorScorecard(Base):
     period_end: Mapped[_date] = mapped_column(Date, nullable=False)
     # Sub-scores, each 0..100
     delivery_score: Mapped[Decimal] = mapped_column(
-        Numeric(6, 2), nullable=False, default=Decimal("0"),
+        Numeric(6, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     quality_score: Mapped[Decimal] = mapped_column(
-        Numeric(6, 2), nullable=False, default=Decimal("0"),
+        Numeric(6, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     price_score: Mapped[Decimal] = mapped_column(
-        Numeric(6, 2), nullable=False, default=Decimal("0"),
+        Numeric(6, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     esg_score: Mapped[Decimal] = mapped_column(
-        Numeric(6, 2), nullable=False, default=Decimal("0"),
+        Numeric(6, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     composite_score: Mapped[Decimal] = mapped_column(
-        Numeric(6, 2), nullable=False, default=Decimal("0"),
+        Numeric(6, 2),
+        nullable=False,
+        default=Decimal("0"),
     )
     # Audit trail of inputs that fed the formula
     inputs_json: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     weights_json: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
     )
     computed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False,
+        DateTime(timezone=True),
+        nullable=False,
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<VendorScorecard vendor={self.vendor_id} "
-            f"score={self.composite_score}>"
-        )
+        return f"<VendorScorecard vendor={self.vendor_id} score={self.composite_score}>"
 
 
 # ── Public aliases ───────────────────────────────────────────────────────────

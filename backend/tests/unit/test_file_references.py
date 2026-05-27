@@ -89,9 +89,7 @@ def test_iso19650_valid_seven_part_passes() -> None:
     Type=DR, Role=AR (2-char discipline), Number=0001.
     """
     result = validate_iso19650_name("PRJ1-ABC-01-02-DR-AR-0001.pdf")
-    assert result.is_valid is True, (
-        f"Expected pass, got codes={result.violation_codes}"
-    )
+    assert result.is_valid is True, f"Expected pass, got codes={result.violation_codes}"
     assert result.violation_codes == []
     assert result.parts.project == "PRJ1"
     assert result.parts.originator == "ABC"
@@ -104,12 +102,8 @@ def test_iso19650_valid_seven_part_passes() -> None:
 
 def test_iso19650_valid_with_optional_status_and_revision() -> None:
     """Nine-part name with status + revision is also valid."""
-    result = validate_iso19650_name(
-        "PRJ1-ABC-XX-00-DR-AR-0001-S2-P01.pdf"
-    )
-    assert result.is_valid is True, (
-        f"Expected pass, got codes={result.violation_codes}"
-    )
+    result = validate_iso19650_name("PRJ1-ABC-XX-00-DR-AR-0001-S2-P01.pdf")
+    assert result.is_valid is True, f"Expected pass, got codes={result.violation_codes}"
     assert result.parts.status == "S2"
     assert result.parts.revision == "P01"
 
@@ -201,11 +195,7 @@ async def test_scan_project_writes_rows_for_invalid_filenames(
 
     rows = list(
         (
-            await session.execute(
-                select(FileNamingViolation).where(
-                    FileNamingViolation.project_id == project.id
-                )
-            )
+            await session.execute(select(FileNamingViolation).where(FileNamingViolation.project_id == project.id))
         ).scalars()
     )
     assert len(rows) == 1
@@ -244,11 +234,7 @@ async def test_rescan_clears_row_when_file_becomes_valid(
 
     rows = list(
         (
-            await session.execute(
-                select(FileNamingViolation).where(
-                    FileNamingViolation.project_id == project.id
-                )
-            )
+            await session.execute(select(FileNamingViolation).where(FileNamingViolation.project_id == project.id))
         ).scalars()
     )
     assert rows == []
@@ -273,11 +259,7 @@ async def test_acknowledge_violation_stamps_row(
     await scan_project(session, project.id)
     rows = list(
         (
-            await session.execute(
-                select(FileNamingViolation).where(
-                    FileNamingViolation.project_id == project.id
-                )
-            )
+            await session.execute(select(FileNamingViolation).where(FileNamingViolation.project_id == project.id))
         ).scalars()
     )
     assert len(rows) == 1
@@ -293,9 +275,7 @@ async def test_acknowledge_violation_stamps_row(
     assert total == 0
     assert items == []
 
-    items_all, total_all = await list_violations(
-        session, project.id, include_acknowledged=True
-    )
+    items_all, total_all = await list_violations(session, project.id, include_acknowledged=True)
     assert total_all == 1
 
 
@@ -329,17 +309,13 @@ async def test_create_reference_and_list_by_target_and_file(
     assert created.relation == "references"
 
     # By file ─ Returns the RFI link.
-    by_file, total = await list_references_for_file(
-        session, file_kind="document", file_id=file_id
-    )
+    by_file, total = await list_references_for_file(session, file_kind="document", file_id=file_id)
     assert total == 1
     assert by_file[0].target_type == "rfi"
     assert by_file[0].target_id == rfi_id
 
     # By target — same row, viewed from the other end.
-    by_target, total_t = await list_files_for_target(
-        session, target_type="rfi", target_id=rfi_id
-    )
+    by_target, total_t = await list_files_for_target(session, target_type="rfi", target_id=rfi_id)
     assert total_t == 1
     assert by_target[0].file_kind == "document"
     assert by_target[0].file_id == file_id
@@ -388,9 +364,7 @@ async def test_delete_reference_removes_link(session: AsyncSession) -> None:
     ok = await delete_reference(session, created.id)
     assert ok is True
 
-    items, total = await list_files_for_target(
-        session, target_type="rfi", target_id=rfi_id
-    )
+    items, total = await list_files_for_target(session, target_type="rfi", target_id=rfi_id)
     assert total == 0
     assert items == []
 

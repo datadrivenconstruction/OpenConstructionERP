@@ -9,6 +9,7 @@ Revision ID: v191_meetings_document_ids
 Revises: a1b2c3d4e5f6
 Create Date: 2026-04-17
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

@@ -40,20 +40,14 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
     return name in inspector.get_table_names()
 
 
-def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str
-) -> bool:
+def _has_index(inspector: sa.engine.reflection.Inspector, table: str, index: str) -> bool:
     if not _has_table(inspector, table):
         return False
     return any(ix["name"] == index for ix in inspector.get_indexes(table))
 
 
 def _guid_type(is_sqlite: bool) -> sa.types.TypeEngine:
-    return (
-        sa.String(36)
-        if is_sqlite
-        else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    return sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
 
 def _base_columns(guid_type: sa.types.TypeEngine) -> list[sa.Column]:
@@ -169,9 +163,7 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column("trigger_type", sa.String(20), nullable=False),
-            sa.Column(
-                "trigger_threshold", _NUMERIC, nullable=False, server_default="0"
-            ),
+            sa.Column("trigger_threshold", _NUMERIC, nullable=False, server_default="0"),
             sa.Column("description", sa.String(500), nullable=False, server_default=""),
             sa.Column("last_completed_at", sa.String(20), nullable=True),
             sa.Column("last_completed_meter", _NUMERIC, nullable=True),
@@ -200,16 +192,12 @@ def upgrade() -> None:
             sa.Column(
                 "schedule_id",
                 guid,
-                sa.ForeignKey(
-                    "oe_equipment_maintenance_schedule.id", ondelete="SET NULL"
-                ),
+                sa.ForeignKey("oe_equipment_maintenance_schedule.id", ondelete="SET NULL"),
                 nullable=True,
             ),
             sa.Column("scheduled_for", sa.String(20), nullable=True),
             sa.Column("completed_at", sa.String(20), nullable=True),
-            sa.Column(
-                "status", sa.String(30), nullable=False, server_default="scheduled"
-            ),
+            sa.Column("status", sa.String(30), nullable=False, server_default="scheduled"),
             sa.Column("technician_id", sa.String(36), nullable=True),
             sa.Column("work_summary", sa.Text(), nullable=True),
             sa.Column("cost", _NUMERIC, nullable=False, server_default="0"),
@@ -259,12 +247,8 @@ def upgrade() -> None:
             ),
             sa.Column("start_date", sa.String(20), nullable=False),
             sa.Column("end_date", sa.String(20), nullable=True),
-            sa.Column(
-                "internal_rate_per_day", _NUMERIC, nullable=False, server_default="0"
-            ),
-            sa.Column(
-                "internal_rate_per_hour", _NUMERIC, nullable=False, server_default="0"
-            ),
+            sa.Column("internal_rate_per_day", _NUMERIC, nullable=False, server_default="0"),
+            sa.Column("internal_rate_per_hour", _NUMERIC, nullable=False, server_default="0"),
             sa.Column("currency", sa.String(3), nullable=False, server_default=""),
             sa.Column("status", sa.String(20), nullable=False, server_default="active"),
             sa.Column("metadata", sa.JSON(), nullable=False, server_default="{}"),

@@ -79,19 +79,13 @@ class Development(Base):
     total_area_m2: Mapped[Decimal] = mapped_column(
         Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0"
     )
-    total_floors: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
-    sales_phase: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="planning", index=True
-    )
+    total_floors: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    sales_phase: Mapped[str] = mapped_column(String(40), nullable=False, default="planning", index=True)
     start_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     launch_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     completion_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     marketing_brief: Mapped[str | None] = mapped_column(Text, nullable=True)
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="active", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="active", index=True)
     units: Mapped[str] = mapped_column(String(16), nullable=False, default="metric")
     # Total sales target in ``currency``. Used by the dashboard's progress bar
     # and by the EAC / cashflow forecasts.
@@ -101,9 +95,7 @@ class Development(Base):
     # ISO-4217 currency. Empty-string default == "fall back to the parent
     # project's currency at read time"; the service layer never auto-fills
     # this with a hard-coded "EUR" (see v3 DB-level EUR-default kill).
-    currency: Mapped[str] = mapped_column(
-        String(8), nullable=False, default="", server_default=""
-    )
+    currency: Mapped[str] = mapped_column(String(8), nullable=False, default="", server_default="")
     # People / orgs. Kept as free-form strings instead of FK to Companies
     # because (a) Companies module is optional and (b) the developer can
     # often be a JV that doesn't have a tidy row in any directory.
@@ -130,11 +122,7 @@ class HouseType(Base):
     """‌⁠‍A reusable house type / model within a development."""
 
     __tablename__ = "oe_property_dev_house_type"
-    __table_args__ = (
-        UniqueConstraint(
-            "development_id", "code", name="uq_oe_property_dev_house_type_dev_code"
-        ),
-    )
+    __table_args__ = (UniqueConstraint("development_id", "code", name="uq_oe_property_dev_house_type_dev_code"),)
 
     development_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -146,16 +134,10 @@ class HouseType(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     bedrooms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     bathrooms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    total_area_m2: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
-    footprint_m2: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
+    total_area_m2: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
+    footprint_m2: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     levels: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    base_price: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
+    base_price: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(8), nullable=False, default="")
     # Canonical BIM model id — NO FK (intentional, see module docstring).
     bim_model_ref: Mapped[str | None] = mapped_column(String(120), nullable=True)
@@ -173,11 +155,7 @@ class HouseTypeVariant(Base):
     """A price-modifying variant of a house type (mirror, extra bedroom, ...)."""
 
     __tablename__ = "oe_property_dev_house_type_variant"
-    __table_args__ = (
-        UniqueConstraint(
-            "house_type_id", "code", name="uq_oe_property_dev_variant_house_code"
-        ),
-    )
+    __table_args__ = (UniqueConstraint("house_type_id", "code", name="uq_oe_property_dev_variant_house_code"),)
 
     house_type_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -188,9 +166,7 @@ class HouseTypeVariant(Base):
     code: Mapped[str] = mapped_column(String(50), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     # Modifier as percentage points off base_price (e.g. 5.50 = +5.5%).
-    modifier_pct: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2), nullable=False, default=Decimal("0")
-    )
+    modifier_pct: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
@@ -207,11 +183,7 @@ class Plot(Base):
     """A sale-able plot within a development."""
 
     __tablename__ = "oe_property_dev_plot"
-    __table_args__ = (
-        UniqueConstraint(
-            "development_id", "plot_number", name="uq_oe_property_dev_plot_dev_number"
-        ),
-    )
+    __table_args__ = (UniqueConstraint("development_id", "plot_number", name="uq_oe_property_dev_plot_dev_number"),)
 
     development_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -241,9 +213,7 @@ class Plot(Base):
         index=True,
     )
     level_in_block: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    position_on_floor: Mapped[str | None] = mapped_column(
-        String(40), nullable=True
-    )
+    position_on_floor: Mapped[str | None] = mapped_column(String(40), nullable=True)
     orientation: Mapped[str | None] = mapped_column(String(16), nullable=True)
     # Free-text label kept until a future task replaces this with a
     # user-creatable HouseType catalogue (tracked separately).
@@ -252,53 +222,29 @@ class Plot(Base):
     # street, park, other. Kept as String (not enum) so a developer can
     # add bespoke values per project without a migration.
     view_type: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    area_m2: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
-    garden_area_m2: Mapped[Decimal | None] = mapped_column(
-        Numeric(18, 2), nullable=True
-    )
-    balcony_area_m2: Mapped[Decimal | None] = mapped_column(
-        Numeric(18, 2), nullable=True
-    )
-    storage_area_m2: Mapped[Decimal | None] = mapped_column(
-        Numeric(18, 2), nullable=True
-    )
+    area_m2: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
+    garden_area_m2: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
+    balcony_area_m2: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
+    storage_area_m2: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
     # Per-plot bedroom / bathroom override. Defaults to 0 so the form
     # column is always present. The HouseType row carries the "default"
     # for a model — these per-plot fields capture deviations
     # (e.g. converted study -> bedroom).
-    bedrooms: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
-    bathrooms: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
-    parking_spaces: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
+    bedrooms: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    bathrooms: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    parking_spaces: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     # Best-effort average daily sun exposure. Optional — most listings
     # don't have this measured, but high-end / passive-house brochures do.
-    sun_exposure_hours: Mapped[Decimal | None] = mapped_column(
-        Numeric(4, 2), nullable=True
-    )
+    sun_exposure_hours: Mapped[Decimal | None] = mapped_column(Numeric(4, 2), nullable=True)
     # ``price_base`` = explicit override (priority 1).
     # ``computed_price`` = cached value from PriceMatrix.compute(plot) (prio 2).
     # Effective price helper lives in service.compute_plot_price().
-    price_base: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
-    computed_price: Mapped[Decimal | None] = mapped_column(
-        Numeric(18, 2), nullable=True
-    )
+    price_base: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
+    computed_price: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
     currency: Mapped[str] = mapped_column(String(8), nullable=False, default="")
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="planned", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="planned", index=True)
     reservation_deadline: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    construction_status_percent: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2), nullable=False, default=Decimal("0")
-    )
+    construction_status_percent: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -334,9 +280,7 @@ class BuyerOptionGroup(Base):
     display_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     allow_multiple: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     max_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    freeze_offset_days_before_handover: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=60
-    )
+    freeze_offset_days_before_handover: Mapped[int] = mapped_column(Integer, nullable=False, default=60)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -359,16 +303,12 @@ class BuyerOption(Base):
     code: Mapped[str] = mapped_column(String(80), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     sku: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
-    price_delta: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
+    price_delta: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(8), nullable=False, default="")
     lead_time_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     supplier_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     thumbnail_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, index=True
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
     # JSON compatibility rules. Schema:
     #   {"must_have": ["opt_code", ...], "must_not_have": ["opt_code", ...]}
     compatibility_rules: Mapped[dict] = mapped_column(  # type: ignore[assignment]
@@ -425,12 +365,8 @@ class Buyer(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False, default="", index=True)
     phone: Mapped[str | None] = mapped_column(String(40), nullable=True)
     language: Mapped[str] = mapped_column(String(10), nullable=False, default="en")
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="lead", index=True
-    )
-    contract_value: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="lead", index=True)
+    contract_value: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(8), nullable=False, default="")
     contract_signed_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
     deposit_paid_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
@@ -446,13 +382,9 @@ class Buyer(Base):
         Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0"
     )
     # ISO 3166-1 alpha-2 country code — selects forfeiture rules.
-    jurisdiction: Mapped[str] = mapped_column(
-        String(8), nullable=False, default="", server_default=""
-    )
+    jurisdiction: Mapped[str] = mapped_column(String(8), nullable=False, default="", server_default="")
     cancelled_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    cancelled_reason: Mapped[str] = mapped_column(
-        String(500), nullable=False, default="", server_default=""
-    )
+    cancelled_reason: Mapped[str] = mapped_column(String(500), nullable=False, default="", server_default="")
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -475,14 +407,10 @@ class BuyerSelection(Base):
         nullable=False,
         index=True,
     )
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="draft", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="draft", index=True)
     submitted_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
     locked_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    total_options_value: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
+    total_options_value: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
@@ -510,15 +438,9 @@ class BuyerSelectionItem(Base):
         index=True,
     )
     quantity: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    unit_price_snapshot: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
-    total_price: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0")
-    )
-    included_in_production: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
+    unit_price_snapshot: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
+    total_price: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
+    included_in_production: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -534,9 +456,7 @@ class Handover(Base):
     """A handover ceremony / state record per plot (one per plot)."""
 
     __tablename__ = "oe_property_dev_handover"
-    __table_args__ = (
-        UniqueConstraint("plot_id", name="uq_oe_property_dev_handover_plot"),
-    )
+    __table_args__ = (UniqueConstraint("plot_id", name="uq_oe_property_dev_handover_plot"),)
 
     plot_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -545,12 +465,8 @@ class Handover(Base):
     )
     scheduled_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
     completed_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    snag_count_at_handover: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0
-    )
-    final_check_passed: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
+    snag_count_at_handover: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    final_check_passed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     keys_handed_over_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
     customer_signature_ref: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -628,34 +544,37 @@ class Snag(Base):
         index=True,
     )
     category: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="general", server_default="general",
+        String(40),
+        nullable=False,
+        default="general",
+        server_default="general",
         index=True,
     )
     location_in_plot: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    severity: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="minor", index=True
-    )
+    severity: Mapped[str] = mapped_column(String(20), nullable=False, default="minor", index=True)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="open", index=True
-    )
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="open", index=True)
     reported_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
     fixed_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
     fix_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Estimated repair cost. Decimal so rollups stay exact.
     cost_impact: Mapped[Decimal] = mapped_column(
-        Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0",
+        Numeric(18, 2),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
     )
     # Relative paths under uploads/snag/photos/. Magic-byte gated upload.
     photos: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     # Best-effort link to the auto-created punchlist item. NOT a FK
     # (cross-module); plain UUID string. NULL when bridge skipped or
     # punchlist module disabled.
-    linked_punch_item_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True
-    )
+    linked_punch_item_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -717,13 +636,9 @@ class WarrantyClaim(Base):
     # Optional assignee — contractor / PM responsible for resolution.
     # No FK on oe_users_user (cross-module ref kept loose; matches the
     # rest of property_dev's external-ref convention).
-    assigned_to_user_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    assigned_to_user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     raised_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    category: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="defect", index=True
-    )
+    category: Mapped[str] = mapped_column(String(40), nullable=False, default="defect", index=True)
     # NOTE: severity mirrors Snag.severity (minor/major/critical) — used
     # for SLA escalation in the UI.
     severity: Mapped[str] = mapped_column(
@@ -740,28 +655,19 @@ class WarrantyClaim(Base):
     photos: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=list, server_default="[]"
     )
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="raised", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="raised", index=True)
     sla_deadline: Mapped[str | None] = mapped_column(String(20), nullable=True)
     accepted_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
     closed_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
     resolution_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Cross-module ref to oe_service_ticket.id — plain UUID, NO FK.
-    linked_service_ticket_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True
-    )
+    linked_service_ticket_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<WarrantyClaim plot={self.plot_id} "
-            f"({self.category}/{self.status})>"
-        )
-
-
+        return f"<WarrantyClaim plot={self.plot_id} ({self.category}/{self.status})>"
 
 
 # ── R6: Lead / Reservation / SalesContract / PaymentSchedule ────────────
@@ -784,12 +690,8 @@ class Lead(Base):
         index=True,
     )
     # Multi-tenant column — nullable for single-tenant deployments.
-    tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
-    source: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="other", index=True
-    )
+    tenant_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    source: Mapped[str] = mapped_column(String(40), nullable=False, default="other", index=True)
     # ── Contacts bridge ────────────────────────────────────────────
     # Optional FK back to the canonical contact row. The Contact owns
     # name/email/phone; the Lead keeps lead-specific fields (score,
@@ -800,20 +702,12 @@ class Lead(Base):
         nullable=True,
         index=True,
     )
-    lead_score: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2), nullable=False, default=Decimal("0")
-    )
-    assigned_agent_user_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="new", index=True
-    )
+    lead_score: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
+    assigned_agent_user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="new", index=True)
     nurture_stage: Mapped[str | None] = mapped_column(Text, nullable=True)
     full_name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
-    email: Mapped[str] = mapped_column(
-        String(255), nullable=False, default="", index=True
-    )
+    email: Mapped[str] = mapped_column(String(255), nullable=False, default="", index=True)
     phone: Mapped[str | None] = mapped_column(String(40), nullable=True)
     language: Mapped[str] = mapped_column(String(10), nullable=False, default="en")
     budget_min: Mapped[Decimal | None] = mapped_column(Numeric(15, 2), nullable=True)
@@ -834,9 +728,7 @@ class Lead(Base):
     # Optional acquisition cost for this lead (campaign spend / pay-per-
     # click invoice). Drives the CPA column in the lead-source attribution
     # widget. Decimal so rollups stay exact.
-    source_cost: Mapped[Decimal | None] = mapped_column(
-        Numeric(15, 2), nullable=True
-    )
+    source_cost: Mapped[Decimal | None] = mapped_column(Numeric(15, 2), nullable=True)
     # Optional assigned broker / agency that owns the lead end-to-end.
     # NULL means in-house / portal-driven. Used by the broker-performance
     # leaderboard widget and by the lead-source attribution rollup when
@@ -889,25 +781,17 @@ class Reservation(Base):
         ForeignKey("oe_property_dev_buyer.id", ondelete="SET NULL"),
         nullable=True,
     )
-    tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    tenant_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     reservation_number: Mapped[str] = mapped_column(String(80), nullable=False)
-    deposit_amount: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
+    deposit_amount: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="")
-    deposit_paid_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    deposit_paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     cooling_off_days: Mapped[int] = mapped_column(Integer, nullable=False, default=7)
     cooling_off_until: Mapped[str | None] = mapped_column(  # ISO date
         String(20), nullable=True
     )
     expires_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="active", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="active", index=True)
     # Pricing-engine snapshot captured at the moment this reservation was
     # created — the canonical audit record of "why did this deal close at
     # X?". Shape mirrors :class:`PriceQuote` from
@@ -955,9 +839,7 @@ class SalesContract(Base):
         ForeignKey("oe_property_dev_reservation.id", ondelete="SET NULL"),
         nullable=True,
     )
-    tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    tenant_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     signing_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     # ISO 3166-2 region code (e.g. "DE-BE", "GB-ENG"). Optional —
     # falls back to the development's jurisdiction at write time.
@@ -967,14 +849,10 @@ class SalesContract(Base):
     total_price_breakdown: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
     )
-    total_value: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
+    total_value: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="")
     e_sign_envelope_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="draft", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="draft", index=True)
     parent_contract_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_property_dev_sales_contract.id", ondelete="SET NULL"),
@@ -1021,10 +899,7 @@ class SalesContractRevision(Base):
     created_by_user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
     def __repr__(self) -> str:
-        return (
-            f"<SalesContractRevision contract={self.contract_id} "
-            f"rev={self.revision_number}>"
-        )
+        return f"<SalesContractRevision contract={self.contract_id} rev={self.revision_number}>"
 
 
 class PaymentSchedule(Base):
@@ -1049,20 +924,12 @@ class PaymentSchedule(Base):
         nullable=False,
         index=True,
     )
-    tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    tenant_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="")
-    total_amount: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
-    late_fee_pct: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2), nullable=False, default=Decimal("0")
-    )
+    total_amount: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
+    late_fee_pct: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
     grace_period_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="active", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="active", index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -1095,41 +962,24 @@ class Instalment(Base):
         index=True,
     )
     sequence: Mapped[int] = mapped_column(Integer, nullable=False)
-    milestone_label: Mapped[str] = mapped_column(
-        String(255), nullable=False, default=""
-    )
+    milestone_label: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     # When this event publishes through the event bus the line moves to
     # ``due`` (e.g. ``reservation`` | ``spa_signed`` | ``foundation_complete``
     # | ``structure_complete`` | ``handover``).
-    milestone_event: Mapped[str] = mapped_column(
-        String(80), nullable=False, default="", index=True
-    )
+    milestone_event: Mapped[str] = mapped_column(String(80), nullable=False, default="", index=True)
     due_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    amount: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
-    amount_paid: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
-    paid_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="pending", index=True
-    )
-    late_fee_accrued: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
+    amount: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
+    amount_paid: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="pending", index=True)
+    late_fee_accrued: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
     invoice_ref: Mapped[str | None] = mapped_column(String(255), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<Instalment schedule={self.schedule_id} #{self.sequence} "
-            f"({self.status})>"
-        )
+        return f"<Instalment schedule={self.schedule_id} #{self.sequence} ({self.status})>"
 
 
 class ContractParty(Base):
@@ -1161,16 +1011,10 @@ class ContractParty(Base):
         nullable=False,
         index=True,
     )
-    ownership_pct: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2), nullable=False, default=Decimal("0")
-    )
-    party_role: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="primary"
-    )
+    ownership_pct: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
+    party_role: Mapped[str] = mapped_column(String(40), nullable=False, default="primary")
     signing_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    signed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    signed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     signature_ref: Mapped[str | None] = mapped_column(String(255), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
@@ -1181,8 +1025,6 @@ class ContractParty(Base):
             f"<ContractParty contract={self.sales_contract_id} "
             f"buyer={self.buyer_id} ({self.party_role}/{self.ownership_pct}%)>"
         )
-
-
 
 
 # ── Phase / Block hierarchy (task #138) ─────────────────────────────────
@@ -1197,11 +1039,7 @@ class Phase(Base):
     """
 
     __tablename__ = "oe_property_dev_phase"
-    __table_args__ = (
-        UniqueConstraint(
-            "development_id", "code", name="uq_oe_property_dev_phase_dev_code"
-        ),
-    )
+    __table_args__ = (UniqueConstraint("development_id", "code", name="uq_oe_property_dev_phase_dev_code"),)
 
     development_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -1214,9 +1052,7 @@ class Phase(Base):
     sequence: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     planned_start: Mapped[str | None] = mapped_column(String(20), nullable=True)
     planned_end: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="planned", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="planned", index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -1229,11 +1065,7 @@ class Block(Base):
     """A building / cluster within a Phase. Groups Plots by level/position."""
 
     __tablename__ = "oe_property_dev_block"
-    __table_args__ = (
-        UniqueConstraint(
-            "phase_id", "code", name="uq_oe_property_dev_block_phase_code"
-        ),
-    )
+    __table_args__ = (UniqueConstraint("phase_id", "code", name="uq_oe_property_dev_block_phase_code"),)
 
     phase_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -1244,16 +1076,12 @@ class Block(Base):
     code: Mapped[str] = mapped_column(String(50), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     levels_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    units_per_level: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=1
-    )
+    units_per_level: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     orientation: Mapped[str | None] = mapped_column(String(16), nullable=True)
     geo_coordinates: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=True
     )
-    status: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="planned", index=True
-    )
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="planned", index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -1275,40 +1103,25 @@ class Broker(Base):
     __tablename__ = "oe_property_dev_broker"
     __table_args__ = (
         UniqueConstraint(
-            "tenant_id", "license_number",
+            "tenant_id",
+            "license_number",
             name="uq_oe_property_dev_broker_tenant_license",
         ),
     )
 
     # Multi-tenant key. Held as a plain UUID (no FK) — mirrors the
     # cross-module convention used elsewhere in property_dev.
-    tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    tenant_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
-    license_number: Mapped[str] = mapped_column(
-        String(120), nullable=False, default="", index=True
-    )
+    license_number: Mapped[str] = mapped_column(String(120), nullable=False, default="", index=True)
     # ISO 3166-2 region (e.g. "AE-DU", "RU-MOW"); broader than ISO 3166-1.
-    jurisdiction: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="", index=True
-    )
-    contact_email: Mapped[str] = mapped_column(
-        String(255), nullable=False, default=""
-    )
+    jurisdiction: Mapped[str] = mapped_column(String(16), nullable=False, default="", index=True)
+    contact_email: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     contact_phone: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    default_commission_pct: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2), nullable=False, default=Decimal("0")
-    )
-    kyc_status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="pending", index=True
-    )
-    kyc_verified_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, index=True
-    )
+    default_commission_pct: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
+    kyc_status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending", index=True)
+    kyc_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
@@ -1349,36 +1162,23 @@ class CommissionAgreement(Base):
     specific_plot_ids: Mapped[list | None] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=True
     )
-    structure_type: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="percent"
-    )
+    structure_type: Mapped[str] = mapped_column(String(20), nullable=False, default="percent")
     structure: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
     )
-    accrual_trigger: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="spa_signed", index=True
-    )
-    payout_terms: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="net30"
-    )
-    withholding_tax_pct: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2), nullable=False, default=Decimal("0")
-    )
+    accrual_trigger: Mapped[str] = mapped_column(String(40), nullable=False, default="spa_signed", index=True)
+    payout_terms: Mapped[str] = mapped_column(String(20), nullable=False, default="net30")
+    withholding_tax_pct: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(8), nullable=False, default="")
     effective_from: Mapped[str] = mapped_column(String(20), nullable=False, default="")
     effective_to: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="draft", index=True
-    )
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft", index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<CommissionAgreement broker={self.broker_id} "
-            f"{self.structure_type} ({self.status})>"
-        )
+        return f"<CommissionAgreement broker={self.broker_id} {self.structure_type} ({self.status})>"
 
 
 class CommissionAccrual(Base):
@@ -1392,9 +1192,7 @@ class CommissionAccrual(Base):
 
     agreement_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
-        ForeignKey(
-            "oe_property_dev_commission_agreement.id", ondelete="CASCADE"
-        ),
+        ForeignKey("oe_property_dev_commission_agreement.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -1404,50 +1202,25 @@ class CommissionAccrual(Base):
         nullable=False,
         index=True,
     )
-    trigger_event: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="", index=True
-    )
-    trigger_entity_type: Mapped[str] = mapped_column(
-        String(40), nullable=False, default=""
-    )
-    trigger_entity_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
-    base_amount: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
-    commission_amount: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
+    trigger_event: Mapped[str] = mapped_column(String(40), nullable=False, default="", index=True)
+    trigger_entity_type: Mapped[str] = mapped_column(String(40), nullable=False, default="")
+    trigger_entity_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    base_amount: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
+    commission_amount: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(8), nullable=False, default="")
-    state: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="accrued", index=True
-    )
-    accrued_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    approved_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    paid_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    state: Mapped[str] = mapped_column(String(20), nullable=False, default="accrued", index=True)
+    accrued_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     payment_ref: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    withholding_amount: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
-    net_payable: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
+    withholding_amount: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
+    net_payable: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<CommissionAccrual broker={self.broker_id} "
-            f"{self.commission_amount}{self.currency} ({self.state})>"
-        )
+        return f"<CommissionAccrual broker={self.broker_id} {self.commission_amount}{self.currency} ({self.state})>"
 
 
 # ── Escrow (task #138) ──────────────────────────────────────────────────
@@ -1463,7 +1236,9 @@ class EscrowAccount(Base):
     __tablename__ = "oe_property_dev_escrow_account"
     __table_args__ = (
         UniqueConstraint(
-            "development_id", "currency", "regulator_ref",
+            "development_id",
+            "currency",
+            "regulator_ref",
             name="uq_oe_property_dev_escrow_dev_ccy_reg",
         ),
     )
@@ -1474,34 +1249,21 @@ class EscrowAccount(Base):
         nullable=False,
         index=True,
     )
-    regulator_ref: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="other", index=True
-    )
-    regulator_account_number: Mapped[str] = mapped_column(
-        String(120), nullable=False, default=""
-    )
-    bank_name: Mapped[str] = mapped_column(
-        String(255), nullable=False, default=""
-    )
+    regulator_ref: Mapped[str] = mapped_column(String(40), nullable=False, default="other", index=True)
+    regulator_account_number: Mapped[str] = mapped_column(String(120), nullable=False, default="")
+    bank_name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     iban: Mapped[str] = mapped_column(String(40), nullable=False, default="")
-    swift_bic: Mapped[str] = mapped_column(
-        String(16), nullable=False, default=""
-    )
+    swift_bic: Mapped[str] = mapped_column(String(16), nullable=False, default="")
     currency: Mapped[str] = mapped_column(String(8), nullable=False, default="")
     opened_at: Mapped[str] = mapped_column(String(20), nullable=False, default="")
     closed_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, index=True
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<EscrowAccount dev={self.development_id} "
-            f"{self.currency} ({self.regulator_ref})>"
-        )
+        return f"<EscrowAccount dev={self.development_id} {self.currency} ({self.regulator_ref})>"
 
 
 class EscrowTransaction(Base):
@@ -1511,53 +1273,28 @@ class EscrowTransaction(Base):
 
     escrow_account_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
-        ForeignKey(
-            "oe_property_dev_escrow_account.id", ondelete="CASCADE"
-        ),
+        ForeignKey("oe_property_dev_escrow_account.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
-    direction: Mapped[str] = mapped_column(
-        String(8), nullable=False, default="credit"
-    )
-    amount: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
+    direction: Mapped[str] = mapped_column(String(8), nullable=False, default="credit")
+    amount: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(8), nullable=False, default="")
-    source_type: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="instalment", index=True
-    )
+    source_type: Mapped[str] = mapped_column(String(40), nullable=False, default="instalment", index=True)
     # Plain UUID (no FK) — instalment lives in PaymentSchedule (task #137).
-    source_instalment_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
-    source_reference: Mapped[str] = mapped_column(
-        String(255), nullable=False, default=""
-    )
-    bank_reference: Mapped[str | None] = mapped_column(
-        String(255), nullable=True
-    )
-    transaction_date: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="", index=True
-    )
-    reconciliation_state: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="unreconciled", index=True
-    )
-    reconciled_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    reconciled_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True
-    )
+    source_instalment_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    source_reference: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    bank_reference: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    transaction_date: Mapped[str] = mapped_column(String(20), nullable=False, default="", index=True)
+    reconciliation_state: Mapped[str] = mapped_column(String(20), nullable=False, default="unreconciled", index=True)
+    reconciled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reconciled_by_user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<EscrowTx {self.direction} {self.amount}{self.currency} "
-            f"({self.reconciliation_state})>"
-        )
+        return f"<EscrowTx {self.direction} {self.amount}{self.currency} ({self.reconciliation_state})>"
 
 
 # ── PriceMatrix (task #138) ─────────────────────────────────────────────
@@ -1588,31 +1325,21 @@ class PriceMatrix(Base):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
-    base_price_per_m2: Mapped[Decimal] = mapped_column(
-        Numeric(15, 2), nullable=False, default=Decimal("0")
-    )
+    base_price_per_m2: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=Decimal("0"))
     currency: Mapped[str] = mapped_column(String(8), nullable=False, default="")
-    effective_from: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="", index=True
-    )
+    effective_from: Mapped[str] = mapped_column(String(20), nullable=False, default="", index=True)
     effective_to: Mapped[str | None] = mapped_column(String(20), nullable=True)
     rules: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=list, server_default="[]"
     )
-    status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="draft", index=True
-    )
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft", index=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<PriceMatrix {self.name!r} v{self.version} ({self.status})>"
-        )
-
-
+        return f"<PriceMatrix {self.name!r} v{self.version} ({self.status})>"
 
 
 # ── House Type Catalogue (user-extensible, country-scoped presets) ──────
@@ -1667,21 +1394,15 @@ class PropertyDevHouseType(Base):
     # Stored upper-case ("DE", "US"). When the operator picks "Other /
     # Custom region" in the UI we store NULL here and the free-text tag
     # lands in :attr:`region_label` below.
-    country_code: Mapped[str | None] = mapped_column(
-        String(2), nullable=True, index=True
-    )
+    country_code: Mapped[str | None] = mapped_column(String(2), nullable=True, index=True)
     # Free-text region label, used either when the operator picks
     # "Other / Custom region" (e.g. "EU-wide", "DACH", "Middle East") or
     # as an extra qualifier alongside ``country_code``. Optional.
-    region_label: Mapped[str | None] = mapped_column(
-        String(80), nullable=True
-    )
+    region_label: Mapped[str | None] = mapped_column(String(80), nullable=True)
     code: Mapped[str] = mapped_column(String(40), nullable=False)
     name: Mapped[str] = mapped_column(String(120), nullable=False, default="")
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    area_typical_m2: Mapped[Decimal | None] = mapped_column(
-        Numeric(10, 2), nullable=True
-    )
+    area_typical_m2: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     floors_typical: Mapped[int | None] = mapped_column(Integer, nullable=True)
     # Layout — purely typical/illustrative, the actual Plot row carries
     # the source-of-truth quantities. Kept nullable so partial info is OK.
@@ -1694,40 +1415,26 @@ class PropertyDevHouseType(Base):
     parking_spots: Mapped[int | None] = mapped_column(Integer, nullable=True)
     # Pricing — both bounds optional so the operator can store a single-
     # ended hint ("from 250k", "up to 1.2M"). ``currency`` is ISO 4217.
-    typical_price_min: Mapped[Decimal | None] = mapped_column(
-        Numeric(14, 2), nullable=True
-    )
-    typical_price_max: Mapped[Decimal | None] = mapped_column(
-        Numeric(14, 2), nullable=True
-    )
+    typical_price_min: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)
+    typical_price_max: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)
     currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
     # Free strings so tenants can extend without a schema change. The UI
     # constrains them to a curated dropdown but the storage stays open.
-    construction_type: Mapped[str | None] = mapped_column(
-        String(20), nullable=True
-    )
-    energy_class: Mapped[str | None] = mapped_column(
-        String(10), nullable=True
-    )
-    sales_channel: Mapped[str | None] = mapped_column(
-        String(20), nullable=True
-    )
+    construction_type: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    energy_class: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    sales_channel: Mapped[str | None] = mapped_column(String(20), nullable=True)
     image_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     # Free-form tag list. JSON (not JSONB) because SQLite-compat — this
     # is settings data, never queried by content.
     tags: Mapped[list] = mapped_column(  # type: ignore[type-arg]
         JSON, nullable=False, default=list, server_default="[]"
     )
-    is_preset: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0", index=True
-    )
+    is_preset: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0", index=True)
     # Owning user — NULL for migration-seeded presets. Plain UUID, NOT a
     # FK to oe_users_user (cross-module convention; SET NULL on user
     # delete would need a real FK with on-delete callback, which we
     # explicitly avoid here to match the rest of property_dev).
-    created_by: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
     def __repr__(self) -> str:
         return (
@@ -1768,36 +1475,26 @@ class PropertyDevCustomTemplate(Base):
     )
     # Optional development scope (no FK — same convention as the rest
     # of property_dev cross-table refs).
-    development_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    development_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     doc_type: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="custom", server_default="custom",
+        String(40),
+        nullable=False,
+        default="custom",
+        server_default="custom",
         index=True,
     )
-    entity: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="custom", server_default="custom"
-    )
-    trigger: Mapped[str] = mapped_column(
-        String(200), nullable=False, default="manual", server_default="manual"
-    )
+    entity: Mapped[str] = mapped_column(String(40), nullable=False, default="custom", server_default="custom")
+    trigger: Mapped[str] = mapped_column(String(200), nullable=False, default="manual", server_default="manual")
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
     storage_path: Mapped[str] = mapped_column(String(512), nullable=False)
     content_type: Mapped[str] = mapped_column(String(120), nullable=False)
-    size_bytes: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
-    created_by: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    size_bytes: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
     def __repr__(self) -> str:
-        return (
-            f"<PropertyDevCustomTemplate {self.name} "
-            f"({self.doc_type}, {self.filename})>"
-        )
+        return f"<PropertyDevCustomTemplate {self.name} ({self.doc_type}, {self.filename})>"
 
 
 # ── Pricing Engine (PriceList / PriceListEntry / PricingRule) ───────────
@@ -1840,22 +1537,19 @@ class SalesPriceList(Base):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
-    effective_from: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="", server_default=""
-    )
+    effective_from: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")
     effective_to: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    currency: Mapped[str] = mapped_column(
-        String(8), nullable=False, default="", server_default=""
-    )
+    currency: Mapped[str] = mapped_column(String(8), nullable=False, default="", server_default="")
     # ``draft`` / ``active`` / ``superseded``.
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="draft", server_default="draft",
+        String(20),
+        nullable=False,
+        default="draft",
+        server_default="draft",
         index=True,
     )
     # Plain UUID — refers to oe_users_user.id but kept FK-less (cross-module).
-    created_by: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True
-    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     def __repr__(self) -> str:
@@ -1872,7 +1566,8 @@ class SalesPriceListEntry(Base):
     __tablename__ = "oe_property_dev_price_list_entry"
     __table_args__ = (
         UniqueConstraint(
-            "price_list_id", "plot_id",
+            "price_list_id",
+            "plot_id",
             name="uq_oe_property_dev_price_list_entry_list_plot",
         ),
     )
@@ -1894,10 +1589,7 @@ class SalesPriceListEntry(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<SalesPriceListEntry list={self.price_list_id} "
-            f"plot={self.plot_id}>"
-        )
+        return f"<SalesPriceListEntry list={self.price_list_id} plot={self.plot_id}>"
 
 
 class SalesPricingRule(Base):
@@ -1932,8 +1624,11 @@ class SalesPricingRule(Base):
     # / ``size_premium`` / ``promo_code`` / ``friends_family`` / ``loyalty``
     # / ``bulk_buy``. Enforced at the schema layer (discriminated union).
     rule_type: Mapped[str] = mapped_column(
-        String(40), nullable=False, default="early_bird",
-        server_default="early_bird", index=True,
+        String(40),
+        nullable=False,
+        default="early_bird",
+        server_default="early_bird",
+        index=True,
     )
     condition_json: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
@@ -1943,30 +1638,17 @@ class SalesPricingRule(Base):
     adjustment_pct: Mapped[Decimal] = mapped_column(
         Numeric(6, 3), nullable=False, default=Decimal("0"), server_default="0"
     )
-    adjustment_fixed: Mapped[Decimal | None] = mapped_column(
-        Numeric(18, 2), nullable=True
-    )
+    adjustment_fixed: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
     # Lower priority value = applied first.
-    priority: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=100, server_default="100"
-    )
-    active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1", index=True
-    )
-    effective_from: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="", server_default=""
-    )
+    priority: Mapped[int] = mapped_column(Integer, nullable=False, default=100, server_default="100")
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1", index=True)
+    effective_from: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")
     effective_to: Mapped[str | None] = mapped_column(String(20), nullable=True)
     max_uses: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    times_used: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
+    times_used: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
     def __repr__(self) -> str:
-        return (
-            f"<SalesPricingRule {self.name!r} type={self.rule_type} "
-            f"prio={self.priority}>"
-        )
+        return f"<SalesPricingRule {self.name!r} type={self.rule_type} prio={self.priority}>"
 
 
 # ── Buyer Self-Service Portal magic-link tokens ─────────────────────────
@@ -2017,17 +1699,24 @@ class PortalToken(Base):
     # answers "is this token revoked?" without scanning. 64 chars covers
     # any uuid4-hex / urlsafe-token shape we might use.
     jwt_id: Mapped[str] = mapped_column(
-        String(64), nullable=False, default="", server_default="",
-        unique=True, index=True,
+        String(64),
+        nullable=False,
+        default="",
+        server_default="",
+        unique=True,
+        index=True,
     )
     issued_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False,
+        DateTime(timezone=True),
+        nullable=False,
     )
     expires_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False,
+        DateTime(timezone=True),
+        nullable=False,
     )
     revoked_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     # Single-use semantics (industry standard — Slack/Notion/Linear).
     # NULL = unused, NOT NULL = the moment the magic-link was redeemed.
@@ -2037,18 +1726,23 @@ class PortalToken(Base):
     # is via the longer-lived session JWT issued at first verify; if the
     # buyer needs a fresh device they must request a new magic-link.
     consumed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, server_default=None,
+        DateTime(timezone=True),
+        nullable=True,
+        server_default=None,
     )
     last_used_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     last_used_ip: Mapped[str | None] = mapped_column(
-        String(64), nullable=True,
+        String(64),
+        nullable=True,
     )
     # Plain UUID (no FK) — matches the cross-module convention used
     # elsewhere in property_dev to dodge a hard dep on oe_users_user.
     issued_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
 
     def __repr__(self) -> str:  # pragma: no cover — debug only

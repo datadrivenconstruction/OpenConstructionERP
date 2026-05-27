@@ -58,9 +58,7 @@ async def session() -> AsyncSession:
     _register_models()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with factory() as s:
         from app.modules.projects.models import Project
         from app.modules.users.models import User
@@ -170,11 +168,7 @@ async def test_trade_matrix_groups_by_symmetric_pair(
     await session.flush()
     session.add(_make_result(run, a_disc="Architectural", b_disc="Structural"))
     session.add(_make_result(run, a_disc="Structural", b_disc="Architectural"))
-    session.add(
-        _make_result(
-            run, a_disc="Mechanical", b_disc="Structural", status_="resolved"
-        )
-    )
+    session.add(_make_result(run, a_disc="Mechanical", b_disc="Structural", status_="resolved"))
     await session.commit()
 
     svc = CoordinationHubService(session)
@@ -204,7 +198,12 @@ async def test_trade_matrix_empty_when_no_clashes(
     matrix = await svc.trade_matrix(project_id)
     assert matrix.cells == []
     assert list(matrix.trades) == [
-        "arch", "struct", "mep", "landscape", "civil", "other",
+        "arch",
+        "struct",
+        "mep",
+        "landscape",
+        "civil",
+        "other",
     ]
 
 
@@ -351,9 +350,7 @@ async def test_use_cache_false_always_rebuilds(
     project_id = session.info["project_id"]
     svc = CoordinationHubService(session)
     first = await svc.dashboard(project_id, currency="EUR")
-    second = await svc.dashboard(
-        project_id, currency="EUR", use_cache=False
-    )
+    second = await svc.dashboard(project_id, currency="EUR", use_cache=False)
     assert first is not second
 
 
@@ -390,6 +387,7 @@ async def test_aggregator_tolerates_missing_submodule_table(
 
     async def boom_federation(self, project_id):
         from app.modules.coordination_hub.schemas import FederationStats
+
         # Mimic the warn-and-zero degraded path.
         return FederationStats()
 

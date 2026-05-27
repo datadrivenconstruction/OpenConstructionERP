@@ -27,16 +27,13 @@ from httpx import AsyncClient
 
 from .conftest import _register_user
 
-
 # ── Fixtures ────────────────────────────────────────────────────────────
 
 
 @pytest_asyncio.fixture(scope="module")
 async def analytics_tenant_a(client: AsyncClient):
     """Tenant A admin with a project + dev + plot + buyer + reservation + SPA + handover."""
-    _uid, _email, headers = await _register_user(
-        client, role="admin", tag="ana"
-    )
+    _uid, _email, headers = await _register_user(client, role="admin", tag="ana")
 
     proj = await client.post(
         "/api/v1/projects/",
@@ -143,9 +140,7 @@ async def analytics_tenant_a(client: AsyncClient):
 @pytest_asyncio.fixture(scope="module")
 async def analytics_tenant_b(client: AsyncClient):
     """Tenant B editor with their OWN project (used to probe IDOR)."""
-    _uid, _email, headers = await _register_user(
-        client, role="editor", tag="anb"
-    )
+    _uid, _email, headers = await _register_user(client, role="editor", tag="anb")
 
     proj = await client.post(
         "/api/v1/projects/",
@@ -182,9 +177,7 @@ async def analytics_tenant_b(client: AsyncClient):
 @pytest_asyncio.fixture(scope="module")
 async def analytics_tenant_c_empty(client: AsyncClient):
     """Tenant C editor with NO projects — exercises the empty-200 path."""
-    _uid, _email, headers = await _register_user(
-        client, role="editor", tag="anc"
-    )
+    _uid, _email, headers = await _register_user(client, role="editor", tag="anc")
     return {"headers": headers}
 
 
@@ -193,7 +186,8 @@ async def analytics_tenant_c_empty(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_cohort_retention_200_with_data(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/cohort-retention/",
@@ -210,7 +204,8 @@ async def test_cohort_retention_200_with_data(
 
 @pytest.mark.asyncio
 async def test_cohort_retention_empty_tenant_200(
-    client: AsyncClient, analytics_tenant_c_empty,
+    client: AsyncClient,
+    analytics_tenant_c_empty,
 ):
     """Tenant with no devs gets 200 + empty (no oracle)."""
     res = await client.get(
@@ -225,7 +220,8 @@ async def test_cohort_retention_empty_tenant_200(
 
 @pytest.mark.asyncio
 async def test_cohort_retention_bad_since_422(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     """Malformed ``since`` (not YYYY-MM-DD) → 422."""
     res = await client.get(
@@ -237,7 +233,8 @@ async def test_cohort_retention_bad_since_422(
 
 @pytest.mark.asyncio
 async def test_cohort_retention_money_pct_as_strings(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     """Retention percentages serialize as plain-decimal strings."""
     res = await client.get(
@@ -253,9 +250,7 @@ async def test_cohort_retention_money_pct_as_strings(
             "retention_pct_d90",
             "retention_pct_d180",
         ):
-            assert isinstance(row[fld], str), (
-                f"{fld} should be str, got {type(row[fld]).__name__}"
-            )
+            assert isinstance(row[fld], str), f"{fld} should be str, got {type(row[fld]).__name__}"
             Decimal(row[fld])
             assert "E" not in row[fld] and "e" not in row[fld]
 
@@ -284,7 +279,8 @@ async def test_time_to_close_200(client: AsyncClient, analytics_tenant_a):
 
 @pytest.mark.asyncio
 async def test_time_to_close_empty_tenant_200(
-    client: AsyncClient, analytics_tenant_c_empty,
+    client: AsyncClient,
+    analytics_tenant_c_empty,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/time-to-close/",
@@ -298,7 +294,8 @@ async def test_time_to_close_empty_tenant_200(
 
 @pytest.mark.asyncio
 async def test_time_to_close_bad_until_422(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/time-to-close/?until=garbage",
@@ -309,7 +306,8 @@ async def test_time_to_close_bad_until_422(
 
 @pytest.mark.asyncio
 async def test_time_to_close_decimal_days_as_strings(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     """``mean_days`` / ``p50_days`` / ``p90_days`` serialize as strings."""
     res = await client.get(
@@ -320,9 +318,7 @@ async def test_time_to_close_decimal_days_as_strings(
     body = res.json()
     for s in body["stages"]:
         for fld in ("mean_days", "p50_days", "p90_days"):
-            assert isinstance(s[fld], str), (
-                f"{fld} should be str, got {type(s[fld]).__name__}"
-            )
+            assert isinstance(s[fld], str), f"{fld} should be str, got {type(s[fld]).__name__}"
             Decimal(s[fld])
 
 
@@ -331,7 +327,8 @@ async def test_time_to_close_decimal_days_as_strings(
 
 @pytest.mark.asyncio
 async def test_lead_source_attribution_200(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/lead-source-attribution/",
@@ -345,7 +342,8 @@ async def test_lead_source_attribution_200(
 
 @pytest.mark.asyncio
 async def test_lead_source_attribution_empty_tenant_200(
-    client: AsyncClient, analytics_tenant_c_empty,
+    client: AsyncClient,
+    analytics_tenant_c_empty,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/lead-source-attribution/",
@@ -359,7 +357,8 @@ async def test_lead_source_attribution_empty_tenant_200(
 
 @pytest.mark.asyncio
 async def test_lead_source_attribution_bad_since_422(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/lead-source-attribution/?since=oops",
@@ -370,7 +369,8 @@ async def test_lead_source_attribution_bad_since_422(
 
 @pytest.mark.asyncio
 async def test_lead_source_attribution_money_as_strings(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/lead-source-attribution/",
@@ -384,9 +384,7 @@ async def test_lead_source_attribution_money_as_strings(
             "conversion_to_sale_pct",
             "total_source_cost",
         ):
-            assert isinstance(row[fld], str), (
-                f"{fld} should be str on attribution row"
-            )
+            assert isinstance(row[fld], str), f"{fld} should be str on attribution row"
             Decimal(row[fld])
         if row.get("cpa") is not None:
             assert isinstance(row["cpa"], str)
@@ -416,12 +414,13 @@ async def test_conversion_funnel_200(client: AsyncClient, analytics_tenant_a):
 
 @pytest.mark.asyncio
 async def test_conversion_funnel_cross_tenant_dev_id_404(
-    client: AsyncClient, analytics_tenant_a, analytics_tenant_b,
+    client: AsyncClient,
+    analytics_tenant_a,
+    analytics_tenant_b,
 ):
     """Tenant B passing tenant A's dev_id → 404 (R8 IDOR closure)."""
     res = await client.get(
-        "/api/v1/property-dev/dashboards/conversion-funnel/"
-        f"?dev_id={analytics_tenant_a['development_id']}",
+        f"/api/v1/property-dev/dashboards/conversion-funnel/?dev_id={analytics_tenant_a['development_id']}",
         headers=analytics_tenant_b["headers"],
     )
     assert res.status_code == 404, res.text
@@ -429,12 +428,12 @@ async def test_conversion_funnel_cross_tenant_dev_id_404(
 
 @pytest.mark.asyncio
 async def test_conversion_funnel_random_dev_id_404(
-    client: AsyncClient, analytics_tenant_b,
+    client: AsyncClient,
+    analytics_tenant_b,
 ):
     """Random UUID → 404 (no existence oracle)."""
     res = await client.get(
-        "/api/v1/property-dev/dashboards/conversion-funnel/"
-        f"?dev_id={uuid.uuid4()}",
+        f"/api/v1/property-dev/dashboards/conversion-funnel/?dev_id={uuid.uuid4()}",
         headers=analytics_tenant_b["headers"],
     )
     assert res.status_code == 404, res.text
@@ -442,7 +441,8 @@ async def test_conversion_funnel_random_dev_id_404(
 
 @pytest.mark.asyncio
 async def test_conversion_funnel_empty_tenant_200(
-    client: AsyncClient, analytics_tenant_c_empty,
+    client: AsyncClient,
+    analytics_tenant_c_empty,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/conversion-funnel/",
@@ -456,7 +456,8 @@ async def test_conversion_funnel_empty_tenant_200(
 
 @pytest.mark.asyncio
 async def test_conversion_funnel_bad_until_422(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/conversion-funnel/?until=not-a-date",
@@ -470,7 +471,8 @@ async def test_conversion_funnel_bad_until_422(
 
 @pytest.mark.asyncio
 async def test_broker_performance_200(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/broker-performance/",
@@ -484,7 +486,8 @@ async def test_broker_performance_200(
 
 @pytest.mark.asyncio
 async def test_broker_performance_empty_tenant_200(
-    client: AsyncClient, analytics_tenant_c_empty,
+    client: AsyncClient,
+    analytics_tenant_c_empty,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/broker-performance/",
@@ -498,7 +501,8 @@ async def test_broker_performance_empty_tenant_200(
 
 @pytest.mark.asyncio
 async def test_broker_performance_bad_since_422(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/broker-performance/?since=2026/13/01",
@@ -509,7 +513,8 @@ async def test_broker_performance_bad_since_422(
 
 @pytest.mark.asyncio
 async def test_broker_performance_conversion_pct_as_string(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     """If any broker rows exist, conversion_rate_pct should be a string."""
     res = await client.get(
@@ -534,7 +539,8 @@ async def test_broker_performance_conversion_pct_as_string(
 
 @pytest.mark.asyncio
 async def test_cohort_retention_etag_304_short_circuit(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     """Repeat request with If-None-Match → 304."""
     first = await client.get(
@@ -550,14 +556,13 @@ async def test_cohort_retention_etag_304_short_circuit(
         "/api/v1/property-dev/dashboards/cohort-retention/",
         headers={**analytics_tenant_a["headers"], "If-None-Match": etag},
     )
-    assert second.status_code == 304, (
-        f"expected 304, got {second.status_code}: {second.text!r}"
-    )
+    assert second.status_code == 304, f"expected 304, got {second.status_code}: {second.text!r}"
 
 
 @pytest.mark.asyncio
 async def test_broker_performance_cache_control_header(
-    client: AsyncClient, analytics_tenant_a,
+    client: AsyncClient,
+    analytics_tenant_a,
 ):
     res = await client.get(
         "/api/v1/property-dev/dashboards/broker-performance/",

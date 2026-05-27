@@ -62,9 +62,7 @@ class BCFRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_topic_by_guid(
-        self, project_id: uuid.UUID, guid: str
-    ) -> BCFTopic | None:
+    async def get_topic_by_guid(self, project_id: uuid.UUID, guid: str) -> BCFTopic | None:
         """Load a topic by its BCF ``guid`` within a project."""
         stmt = select(BCFTopic).where(
             BCFTopic.project_id == project_id,
@@ -87,9 +85,7 @@ class BCFRepository:
         """Load a comment by surrogate id."""
         return await self.session.get(BCFComment, comment_id)
 
-    async def get_comment_by_guid(
-        self, topic_id: uuid.UUID, guid: str
-    ) -> BCFComment | None:
+    async def get_comment_by_guid(self, topic_id: uuid.UUID, guid: str) -> BCFComment | None:
         """Load a comment by its BCF ``guid`` within a topic."""
         stmt = select(BCFComment).where(
             BCFComment.topic_id == topic_id,
@@ -108,9 +104,7 @@ class BCFRepository:
 
     # ── Viewpoints ─────────────────────────────────────────────────────
 
-    async def get_viewpoint_by_guid(
-        self, topic_id: uuid.UUID, guid: str
-    ) -> BCFViewpoint | None:
+    async def get_viewpoint_by_guid(self, topic_id: uuid.UUID, guid: str) -> BCFViewpoint | None:
         """Load a viewpoint by its BCF ``guid`` within a topic."""
         stmt = select(BCFViewpoint).where(
             BCFViewpoint.topic_id == topic_id,
@@ -125,16 +119,12 @@ class BCFRepository:
 
     async def next_viewpoint_index(self, topic_id: uuid.UUID) -> int:
         """Return the next free ``vp_index`` for a topic (0-based)."""
-        stmt = select(BCFViewpoint.vp_index).where(
-            BCFViewpoint.topic_id == topic_id
-        )
+        stmt = select(BCFViewpoint.vp_index).where(BCFViewpoint.topic_id == topic_id)
         result = await self.session.execute(stmt)
         existing = [row for row in result.scalars().all() if row is not None]
         return (max(existing) + 1) if existing else 0
 
     async def delete_topics_for_project(self, project_id: uuid.UUID) -> int:
         """Bulk-delete every topic of a project. Returns the row count."""
-        result = await self.session.execute(
-            delete(BCFTopic).where(BCFTopic.project_id == project_id)
-        )
+        result = await self.session.execute(delete(BCFTopic).where(BCFTopic.project_id == project_id))
         return int(result.rowcount or 0)

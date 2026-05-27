@@ -79,9 +79,7 @@ async def _promote(email: str, role: str = "admin") -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            update(User).where(User.email == email.lower()).values(role=role)
-        )
+        await session.execute(update(User).where(User.email == email.lower()).values(role=role))
         await session.commit()
 
 
@@ -95,9 +93,7 @@ async def test_get_users_me_returns_current_user(client):
 
     resp = await client.get("/api/v1/users/me", headers=headers)
 
-    assert resp.status_code == 200, (
-        f"Expected 200 from /users/me but got {resp.status_code}: {resp.text!r}"
-    )
+    assert resp.status_code == 200, f"Expected 200 from /users/me but got {resp.status_code}: {resp.text!r}"
     body = resp.json()
     assert body.get("email") == email
     assert "permissions" in body  # UserMeResponse extends UserResponse
@@ -130,12 +126,8 @@ async def test_get_users_invalid_uuid_returns_sanitised_error(client):
     # Either 400 (sanitised) or 401/403 (auth-first) is acceptable — what
     # matters is that the body does NOT mention the param name or type.
     body_text = resp.text.lower()
-    assert "user_id" not in body_text, (
-        f"Response leaks path-param name 'user_id': {resp.text!r}"
-    )
-    assert "uuid" not in body_text, (
-        f"Response leaks expected type 'UUID': {resp.text!r}"
-    )
+    assert "user_id" not in body_text, f"Response leaks path-param name 'user_id': {resp.text!r}"
+    assert "uuid" not in body_text, f"Response leaks expected type 'UUID': {resp.text!r}"
     assert "uuid_parsing" not in body_text
 
 
@@ -288,7 +280,6 @@ async def test_permission_denial_logged_at_debug_not_warn(client, caplog):
         and rec.levelno >= logging.WARNING
         and "permission" in rec.getMessage().lower()
     ]
-    assert not offending, (
-        "Permission denials must not log at WARN+; got: "
-        + "\n".join(f"{r.levelname} {r.getMessage()}" for r in offending)
+    assert not offending, "Permission denials must not log at WARN+; got: " + "\n".join(
+        f"{r.levelname} {r.getMessage()}" for r in offending
     )

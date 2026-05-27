@@ -104,8 +104,7 @@ def test_real_v18_binary_converts_rvt_via_processor(tmp_path: Path) -> None:
     result = ifc_processor._try_cad2data(work_rvt, out_dir, conversion_depth="standard")
 
     assert result is not None, (
-        "Real-binary conversion returned None — last failure: "
-        f"{ifc_processor.last_ddc_failure()}"
+        f"Real-binary conversion returned None — last failure: {ifc_processor.last_ddc_failure()}"
     )
 
     # XLSX outputs land under out_dir with the input stem.
@@ -130,8 +129,7 @@ def test_real_v18_binary_converts_rvt_via_processor(tmp_path: Path) -> None:
     dae_path = out_dir / "geometry.dae"
     if dae_path.exists():
         assert dae_path.stat().st_size > 100, (
-            f"DAE {dae_path} exists but is suspiciously small "
-            f"({dae_path.stat().st_size} bytes)"
+            f"DAE {dae_path} exists but is suspiciously small ({dae_path.stat().st_size} bytes)"
         )
     else:
         logger.warning("No geometry.dae produced for v18 conversion (xlsx ok)")

@@ -79,9 +79,7 @@ class TestClassificationCountryMismatchRule:
     async def test_de_din_only_no_nudge(self) -> None:
         """DE project with DIN 276 only: preferred standard already present — no nudge."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(din276="330")], country_code="DE")
-        )
+        results = await rule.validate(_ctx([_pos(din276="330")], country_code="DE"))
         assert len(results) == 1
         assert results[0].passed, "Should pass: DIN 276 is the preferred DACH standard"
         assert results[0].severity == Severity.INFO
@@ -90,9 +88,7 @@ class TestClassificationCountryMismatchRule:
     async def test_de_masterformat_only_nudge(self) -> None:
         """DE project with MasterFormat only: INFO nudge with non-empty suggested DIN 276."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(masterformat="03 30 00")], country_code="DE")
-        )
+        results = await rule.validate(_ctx([_pos(masterformat="03 30 00")], country_code="DE"))
         assert len(results) == 1
         r = results[0]
         assert not r.passed, "Should fire nudge"
@@ -106,9 +102,7 @@ class TestClassificationCountryMismatchRule:
     async def test_de_both_din_and_mf_no_nudge(self) -> None:
         """DE project with both DIN 276 and MasterFormat: user has done both — no nudge."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(din276="330", masterformat="03 30 00")], country_code="DE")
-        )
+        results = await rule.validate(_ctx([_pos(din276="330", masterformat="03 30 00")], country_code="DE"))
         assert len(results) == 1
         assert results[0].passed
 
@@ -116,9 +110,7 @@ class TestClassificationCountryMismatchRule:
     async def test_us_din_only_nudge(self) -> None:
         """US project with DIN 276 only: INFO nudge suggesting MasterFormat."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(din276="330")], country_code="US")
-        )
+        results = await rule.validate(_ctx([_pos(din276="330")], country_code="US"))
         assert len(results) == 1
         r = results[0]
         assert not r.passed
@@ -131,9 +123,7 @@ class TestClassificationCountryMismatchRule:
     async def test_uk_din_only_nudge(self) -> None:
         """UK project with DIN 276 only: INFO nudge suggesting NRM."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(din276="330")], country_code="GB")
-        )
+        results = await rule.validate(_ctx([_pos(din276="330")], country_code="GB"))
         assert len(results) == 1
         r = results[0]
         assert not r.passed
@@ -146,9 +136,7 @@ class TestClassificationCountryMismatchRule:
     async def test_no_country_code_no_nudge(self) -> None:
         """No country code in context: rule passes silently — avoids false positives."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(masterformat="03 30 00")], country_code=None, region=None)
-        )
+        results = await rule.validate(_ctx([_pos(masterformat="03 30 00")], country_code=None, region=None))
         assert len(results) == 1
         assert results[0].passed, "Must not fire nudge when country is unknown"
 
@@ -157,24 +145,18 @@ class TestClassificationCountryMismatchRule:
         """Unknown MasterFormat division: nudge fires but suggested_din276 is None."""
         rule = ClassificationCountryMismatchRule()
         # Division "99" is not in the mapping table
-        results = await rule.validate(
-            _ctx([_pos(masterformat="99 00 00")], country_code="DE")
-        )
+        results = await rule.validate(_ctx([_pos(masterformat="99 00 00")], country_code="DE"))
         assert len(results) == 1
         r = results[0]
         assert not r.passed
         assert r.severity == Severity.INFO
-        assert r.details["suggested_din276"] is None, (
-            "Unknown division must still fire nudge but with null suggestion"
-        )
+        assert r.details["suggested_din276"] is None, "Unknown division must still fire nudge but with null suggestion"
 
     @pytest.mark.asyncio
     async def test_at_triggers_dach_nudge(self) -> None:
         """AT (Austria) is DACH — should also trigger the DIN 276 nudge."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(masterformat="22 10 00")], country_code="AT")
-        )
+        results = await rule.validate(_ctx([_pos(masterformat="22 10 00")], country_code="AT"))
         r = results[0]
         assert not r.passed
         assert r.details["country"] == "AT"
@@ -184,9 +166,7 @@ class TestClassificationCountryMismatchRule:
     async def test_ch_triggers_dach_nudge(self) -> None:
         """CH (Switzerland) is DACH — should also trigger the DIN 276 nudge."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(masterformat="26 00 00")], country_code="CH")
-        )
+        results = await rule.validate(_ctx([_pos(masterformat="26 00 00")], country_code="CH"))
         r = results[0]
         assert not r.passed
         assert r.details["country"] == "CH"
@@ -196,9 +176,7 @@ class TestClassificationCountryMismatchRule:
     async def test_de_nrm_only_nudge(self) -> None:
         """DE project with NRM only: INFO nudge suggesting DIN 276."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(nrm="2.6.1")], country_code="DE")
-        )
+        results = await rule.validate(_ctx([_pos(nrm="2.6.1")], country_code="DE"))
         r = results[0]
         assert not r.passed
         assert r.severity == Severity.INFO
@@ -209,9 +187,7 @@ class TestClassificationCountryMismatchRule:
     async def test_us_nrm_only_nudge(self) -> None:
         """US project with NRM only: INFO nudge suggesting MasterFormat."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(nrm="5.4")], country_code="US")
-        )
+        results = await rule.validate(_ctx([_pos(nrm="5.4")], country_code="US"))
         r = results[0]
         assert not r.passed
         assert r.severity == Severity.INFO
@@ -244,27 +220,21 @@ class TestClassificationCountryMismatchRule:
     async def test_region_fallback_dach(self) -> None:
         """Region='DACH' with no country_code: fallback derives DE, nudge fires."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(masterformat="03 30 00")], region="DACH")
-        )
+        results = await rule.validate(_ctx([_pos(masterformat="03 30 00")], region="DACH"))
         assert not results[0].passed
 
     @pytest.mark.asyncio
     async def test_region_fallback_uk(self) -> None:
         """Region='UK' with no country_code: fallback derives GB, nudge fires."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(din276="330")], region="UK")
-        )
+        results = await rule.validate(_ctx([_pos(din276="330")], region="UK"))
         assert not results[0].passed
 
     @pytest.mark.asyncio
     async def test_region_fallback_us(self) -> None:
         """Region='US' with no country_code: nudge fires for DIN-only position."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(din276="330")], region="US")
-        )
+        results = await rule.validate(_ctx([_pos(din276="330")], region="US"))
         assert not results[0].passed
 
     @pytest.mark.asyncio
@@ -296,9 +266,7 @@ class TestClassificationCountryMismatchRule:
     async def test_uk_masterformat_only_nudge(self) -> None:
         """UK project with MasterFormat only: INFO nudge suggesting NRM."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(masterformat="03 30 00")], country_code="GB")
-        )
+        results = await rule.validate(_ctx([_pos(masterformat="03 30 00")], country_code="GB"))
         r = results[0]
         assert not r.passed
         assert r.details["suggested_nrm"] is not None
@@ -308,9 +276,7 @@ class TestClassificationCountryMismatchRule:
     async def test_de_message_locale(self) -> None:
         """German locale: message contains German text."""
         rule = ClassificationCountryMismatchRule()
-        results = await rule.validate(
-            _ctx([_pos(masterformat="03 30 00")], country_code="DE", locale="de")
-        )
+        results = await rule.validate(_ctx([_pos(masterformat="03 30 00")], country_code="DE", locale="de"))
         r = results[0]
         assert not r.passed
         # German message should contain 'MasterFormat' (proper noun stays)

@@ -44,7 +44,8 @@ class MatchElementRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     source: Literal["bim", "pdf", "dwg", "photo"] = Field(
-        ..., description="One of bim/pdf/dwg/photo. Validated to a closed allowlist.",
+        ...,
+        description="One of bim/pdf/dwg/photo. Validated to a closed allowlist.",
     )
     project_id: UUID
     raw_element_data: dict[str, Any] = Field(default_factory=dict)

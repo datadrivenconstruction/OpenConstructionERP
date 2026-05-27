@@ -61,8 +61,7 @@ class AliasConflictError(Exception):
 
     def __init__(self, scope: str, scope_id: uuid.UUID | None, name: str) -> None:
         super().__init__(
-            f"An alias named {name!r} already exists in scope "
-            f"{scope!r} (scope_id={scope_id}).",
+            f"An alias named {name!r} already exists in scope {scope!r} (scope_id={scope_id}).",
         )
         self.scope = scope
         self.scope_id = scope_id
@@ -140,9 +139,7 @@ async def create_alias(
         # the pre-check and this flush. Roll back the half-added row so the
         # session is reusable, then surface the same typed conflict.
         await session.rollback()
-        raise AliasConflictError(
-            payload.scope, payload.scope_id, payload.name
-        ) from exc
+        raise AliasConflictError(payload.scope, payload.scope_id, payload.name) from exc
 
     for syn_payload in payload.synonyms:
         syn = _build_synonym(syn_payload, alias_id=alias.id)
@@ -264,11 +261,7 @@ async def list_aliases(
     if q:
         like = f"%{q}%"
         stmt = stmt.where(EacParameterAlias.name.ilike(like))
-    stmt = (
-        stmt.order_by(EacParameterAlias.name)
-        .limit(limit)
-        .offset(offset)
-    )
+    stmt = stmt.order_by(EacParameterAlias.name).limit(limit).offset(offset)
     result = await session.execute(stmt)
     aliases = list(result.scalars().unique().all())
 
@@ -281,9 +274,7 @@ async def list_aliases(
             if like_lower in alias.name.lower():
                 keep.append(alias)
                 continue
-            if any(
-                like_lower in (s.pattern or "").lower() for s in (alias.synonyms or [])
-            ):
+            if any(like_lower in (s.pattern or "").lower() for s in (alias.synonyms or [])):
                 keep.append(alias)
         # If the SQL filter already trimmed down by name, also include any
         # aliases whose name didn't match but whose synonyms did. We cannot

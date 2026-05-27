@@ -79,9 +79,7 @@ class SnapshotMeta:
             "label": self.label,
             "created_at": self.created_at.isoformat(),
             "created_by_user_id": str(self.created_by_user_id),
-            "parent_snapshot_id": (
-                str(self.parent_snapshot_id) if self.parent_snapshot_id else None
-            ),
+            "parent_snapshot_id": (str(self.parent_snapshot_id) if self.parent_snapshot_id else None),
             "total_entities": self.total_entities,
             "total_categories": self.total_categories,
             "source_file_count": self.source_file_count,
@@ -264,10 +262,7 @@ def list_snapshots_for_project(
     completeness_scores = completeness_scores or {}
 
     # Filter on the cursor first to keep the working set small.
-    filtered: list[Any] = [
-        r for r in rows
-        if before is None or r.created_at < before
-    ]
+    filtered: list[Any] = [r for r in rows if before is None or r.created_at < before]
     # Newest-first.
     filtered.sort(key=lambda r: r.created_at, reverse=True)
     filtered = filtered[:limit]
@@ -327,18 +322,14 @@ def diff_two_snapshots(
         a_dtype = a_cols[name]
         b_dtype = b_cols[name]
         if a_dtype != b_dtype:
-            columns_changed.append(
-                ColumnChange(name=name, a_dtype=a_dtype, b_dtype=b_dtype)
-            )
+            columns_changed.append(ColumnChange(name=name, a_dtype=a_dtype, b_dtype=b_dtype))
 
     delta = schema_b.row_count - schema_a.row_count
     rows_added = max(0, delta)
     rows_removed = max(0, -delta)
 
     schema_hash_match = bool(
-        schema_a.schema_hash
-        and schema_b.schema_hash
-        and schema_a.schema_hash == schema_b.schema_hash
+        schema_a.schema_hash and schema_b.schema_hash and schema_a.schema_hash == schema_b.schema_hash
     )
 
     return SnapshotDiff(

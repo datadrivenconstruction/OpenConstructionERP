@@ -55,6 +55,7 @@ logger = logging.getLogger(__name__)
 # any decode error returns ``None`` so the router can map it to a 400
 # without leaking parser internals to the caller.
 
+
 def encode_cursor(code: str, item_id: str) -> str:
     """‌⁠‍Pack ``(code, id)`` into a URL-safe base64 cursor token."""
     payload = _json.dumps({"code": code, "id": item_id}, separators=(",", ":"))
@@ -271,9 +272,7 @@ class CostItemService:
         background callers (e.g. event handlers) don't share a stale
         snapshot with HTTP clients.
         """
-        return await self.repo.category_tree(
-            region=region, depth=depth, parent_path=parent_path
-        )
+        return await self.repo.category_tree(region=region, depth=depth, parent_path=parent_path)
 
     # ── Update ────────────────────────────────────────────────────────────
 
@@ -611,9 +610,7 @@ class CostItemService:
                 reasons.append(f"{key}={val} exact match")
                 break
             # Prefix match (e.g. DIN 276 "330" vs "331") - weaker.
-            if isinstance(other, str) and other and (
-                other.startswith(val) or val.startswith(other)
-            ):
+            if isinstance(other, str) and other and (other.startswith(val) or val.startswith(other)):
                 score += 0.2
                 reasons.append(f"{key}={val} prefix match")
                 break

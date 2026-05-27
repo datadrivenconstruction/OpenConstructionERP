@@ -205,7 +205,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -233,9 +235,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── Incident investigation ──────────────────────────────────────────
     if not _has_table(inspector, "oe_hse_advanced_incident_investigation"):
@@ -253,14 +253,23 @@ def upgrade() -> None:
             sa.Column("started_at", sa.DateTime(timezone=True), nullable=False),
             sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column(
-                "method", sa.String(50), nullable=False, server_default="5_whys",
+                "method",
+                sa.String(50),
+                nullable=False,
+                server_default="5_whys",
             ),
             sa.Column("findings", sa.Text(), nullable=False, server_default=""),
             sa.Column(
-                "recommendations", sa.Text(), nullable=False, server_default="",
+                "recommendations",
+                sa.Text(),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
-                "status", sa.String(50), nullable=False, server_default="in_progress",
+                "status",
+                sa.String(50),
+                nullable=False,
+                server_default="in_progress",
             ),
             sa.Column("report_url", sa.String(1000), nullable=True),
             sa.Column("created_by", sa.String(36), nullable=True),
@@ -276,16 +285,28 @@ def upgrade() -> None:
             sa.Column("title", sa.String(500), nullable=False),
             sa.Column("content", sa.Text(), nullable=False, server_default=""),
             sa.Column(
-                "category", sa.String(50), nullable=False, server_default="general",
+                "category",
+                sa.String(50),
+                nullable=False,
+                server_default="general",
             ),
             sa.Column(
-                "language", sa.String(10), nullable=False, server_default="en",
+                "language",
+                sa.String(10),
+                nullable=False,
+                server_default="en",
             ),
             sa.Column(
-                "duration_minutes", sa.Integer(), nullable=False, server_default="5",
+                "duration_minutes",
+                sa.Integer(),
+                nullable=False,
+                server_default="5",
             ),
             sa.Column(
-                "version", sa.String(20), nullable=False, server_default="1.0",
+                "version",
+                sa.String(20),
+                nullable=False,
+                server_default="1.0",
             ),
             sa.Column(
                 "is_active",
@@ -324,16 +345,28 @@ def upgrade() -> None:
             ),
             sa.Column("approved_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column(
-                "status", sa.String(50), nullable=False, server_default="draft",
+                "status",
+                sa.String(50),
+                nullable=False,
+                server_default="draft",
             ),
             sa.Column(
-                "hazards", sa.JSON(), nullable=False, server_default="[]",
+                "hazards",
+                sa.JSON(),
+                nullable=False,
+                server_default="[]",
             ),
             sa.Column(
-                "required_ppe", sa.JSON(), nullable=False, server_default="[]",
+                "required_ppe",
+                sa.JSON(),
+                nullable=False,
+                server_default="[]",
             ),
             sa.Column(
-                "risk_score", sa.Integer(), nullable=False, server_default="0",
+                "risk_score",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column("created_by", sa.String(36), nullable=True),
         )
@@ -353,7 +386,10 @@ def upgrade() -> None:
             sa.Column("permit_number", sa.String(50), nullable=False),
             sa.Column("permit_type", sa.String(50), nullable=False),
             sa.Column(
-                "description", sa.Text(), nullable=False, server_default="",
+                "description",
+                sa.Text(),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("location", sa.String(500), nullable=True),
             sa.Column("work_start", sa.DateTime(timezone=True), nullable=False),
@@ -377,7 +413,10 @@ def upgrade() -> None:
                 nullable=True,
             ),
             sa.Column(
-                "status", sa.String(50), nullable=False, server_default="requested",
+                "status",
+                sa.String(50),
+                nullable=False,
+                server_default="requested",
             ),
             sa.Column("approved_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column(
@@ -387,7 +426,10 @@ def upgrade() -> None:
                 nullable=True,
             ),
             sa.Column(
-                "conditions", sa.Text(), nullable=False, server_default="",
+                "conditions",
+                sa.Text(),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
                 "closure_checklist_passed",
@@ -396,7 +438,10 @@ def upgrade() -> None:
                 server_default=sa.text("0") if is_sqlite else sa.text("false"),
             ),
             sa.Column(
-                "closure_notes", sa.Text(), nullable=False, server_default="",
+                "closure_notes",
+                sa.Text(),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("created_by", sa.String(36), nullable=True),
         )
@@ -423,7 +468,10 @@ def upgrade() -> None:
                 nullable=True,
             ),
             sa.Column(
-                "language", sa.String(10), nullable=False, server_default="en",
+                "language",
+                sa.String(10),
+                nullable=False,
+                server_default="en",
             ),
             sa.Column(
                 "attendance_count",
@@ -446,7 +494,8 @@ def upgrade() -> None:
                 "toolbox_talk_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_hse_advanced_toolbox_talk.id", ondelete="CASCADE",
+                    "oe_hse_advanced_toolbox_talk.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -496,7 +545,10 @@ def upgrade() -> None:
             sa.Column("valid_until", sa.Date(), nullable=True),
             sa.Column("returned_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column(
-                "status", sa.String(50), nullable=False, server_default="issued",
+                "status",
+                sa.String(50),
+                nullable=False,
+                server_default="issued",
             ),
         )
 
@@ -554,7 +606,10 @@ def upgrade() -> None:
             sa.Column("source_ref", guid, nullable=True),
             sa.Column("title", sa.String(500), nullable=False),
             sa.Column(
-                "description", sa.Text(), nullable=False, server_default="",
+                "description",
+                sa.Text(),
+                nullable=False,
+                server_default="",
             ),
             sa.Column(
                 "owner_user_id",
@@ -564,7 +619,10 @@ def upgrade() -> None:
             ),
             sa.Column("target_date", sa.Date(), nullable=False),
             sa.Column(
-                "status", sa.String(50), nullable=False, server_default="open",
+                "status",
+                sa.String(50),
+                nullable=False,
+                server_default="open",
             ),
             sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
             sa.Column(
@@ -591,10 +649,16 @@ def upgrade() -> None:
             ),
             sa.Column("item_description", sa.Text(), nullable=False),
             sa.Column(
-                "category", sa.String(50), nullable=False, server_default="other",
+                "category",
+                sa.String(50),
+                nullable=False,
+                server_default="other",
             ),
             sa.Column(
-                "severity", sa.String(20), nullable=False, server_default="low",
+                "severity",
+                sa.String(20),
+                nullable=False,
+                server_default="low",
             ),
             sa.Column(
                 "is_passed",
@@ -631,7 +695,10 @@ def upgrade() -> None:
             sa.Column("valid_until", sa.Date(), nullable=False),
             sa.Column("document_url", sa.String(1000), nullable=True),
             sa.Column(
-                "status", sa.String(50), nullable=False, server_default="valid",
+                "status",
+                sa.String(50),
+                nullable=False,
+                server_default="valid",
             ),
         )
 

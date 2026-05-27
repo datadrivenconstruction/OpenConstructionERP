@@ -41,7 +41,6 @@ from app.modules.correspondence.service import CorrespondenceService
 from app.modules.projects.models import Project, ProjectMilestone, ProjectWBS
 from app.modules.users.models import APIKey, User
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────────
 
 
@@ -173,7 +172,8 @@ def _build_app(db_session, *, caller_id: str) -> FastAPI:
     async def _project_access_override(project_id, user_id, session) -> None:
         # Mirror production semantics: a missing project (or one the
         # caller doesn't own) surfaces as 404 so we don't leak ids.
-        from fastapi import HTTPException, status as st
+        from fastapi import HTTPException
+        from fastapi import status as st
 
         from app.modules.projects.models import Project as _P
 

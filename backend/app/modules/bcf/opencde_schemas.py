@@ -56,9 +56,7 @@ class CommentAuthorization(BaseModel):
 class ProjectAuthorization(BaseModel):
     """``authorization`` sub-object on a project."""
 
-    project_actions: list[Literal["update", "createTopic"]] = Field(
-        default_factory=list
-    )
+    project_actions: list[Literal["update", "createTopic"]] = Field(default_factory=list)
 
 
 # ── Project / extensions / current-user ─────────────────────────────────
@@ -69,9 +67,7 @@ class BCFProject(BaseModel):
 
     project_id: str
     name: str
-    authorization: ProjectAuthorization = Field(
-        default_factory=ProjectAuthorization
-    )
+    authorization: ProjectAuthorization = Field(default_factory=ProjectAuthorization)
 
 
 class BCFExtensions(BaseModel):

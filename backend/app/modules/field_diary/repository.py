@@ -66,9 +66,13 @@ class DiaryEntryRepository(_BaseRepo):
             stmt = stmt.where(DiaryEntry.entry_date >= date_from)
         if date_to is not None:
             stmt = stmt.where(DiaryEntry.entry_date <= date_to)
-        stmt = stmt.order_by(
-            DiaryEntry.entry_date.desc(),
-        ).offset(offset).limit(limit)
+        stmt = (
+            stmt.order_by(
+                DiaryEntry.entry_date.desc(),
+            )
+            .offset(offset)
+            .limit(limit)
+        )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -94,13 +98,10 @@ class DiaryActivityRepository(_BaseRepo):
         return activity
 
     async def list_for_entry(
-        self, entry_id: uuid.UUID,
+        self,
+        entry_id: uuid.UUID,
     ) -> list[DiaryActivity]:
-        stmt = (
-            select(DiaryActivity)
-            .where(DiaryActivity.entry_id == entry_id)
-            .order_by(DiaryActivity.created_at)
-        )
+        stmt = select(DiaryActivity).where(DiaryActivity.entry_id == entry_id).order_by(DiaryActivity.created_at)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -116,13 +117,10 @@ class DiaryAttachmentRepository(_BaseRepo):
         return attachment
 
     async def list_for_entry(
-        self, entry_id: uuid.UUID,
+        self,
+        entry_id: uuid.UUID,
     ) -> list[DiaryAttachment]:
-        stmt = (
-            select(DiaryAttachment)
-            .where(DiaryAttachment.entry_id == entry_id)
-            .order_by(DiaryAttachment.created_at)
-        )
+        stmt = select(DiaryAttachment).where(DiaryAttachment.entry_id == entry_id).order_by(DiaryAttachment.created_at)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -138,7 +136,8 @@ class FieldModuleGrantRepository(_BaseRepo):
         return grant
 
     async def get_by_id(
-        self, grant_id: uuid.UUID,
+        self,
+        grant_id: uuid.UUID,
     ) -> FieldModuleGrant | None:
         return await self.session.get(FieldModuleGrant, grant_id)
 
@@ -179,7 +178,10 @@ class FieldModuleGrantRepository(_BaseRepo):
         return list(result.scalars().all())
 
     async def revoke(
-        self, grant_id: uuid.UUID, *, revoked_at: datetime,
+        self,
+        grant_id: uuid.UUID,
+        *,
+        revoked_at: datetime,
     ) -> bool:
         grant = await self.session.get(FieldModuleGrant, grant_id)
         if grant is None or grant.revoked_at is not None:
@@ -200,7 +202,8 @@ class FieldMagicLinkRepository(_BaseRepo):
         return link
 
     async def get_by_token_hash(
-        self, token_hash: str,
+        self,
+        token_hash: str,
     ) -> FieldMagicLink | None:
         stmt = select(FieldMagicLink).where(
             FieldMagicLink.token_hash == token_hash,
@@ -209,7 +212,9 @@ class FieldMagicLinkRepository(_BaseRepo):
         return result.scalar_one_or_none()
 
     async def update_fields(
-        self, link_id: uuid.UUID, **fields: Any,
+        self,
+        link_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
         link = await self.session.get(FieldMagicLink, link_id)
         if link is None:
@@ -230,7 +235,8 @@ class FieldSessionRepository(_BaseRepo):
         return sess
 
     async def get_by_token_hash(
-        self, token_hash: str,
+        self,
+        token_hash: str,
     ) -> FieldSession | None:
         stmt = select(FieldSession).where(
             FieldSession.session_token_hash == token_hash,
@@ -239,7 +245,9 @@ class FieldSessionRepository(_BaseRepo):
         return result.scalar_one_or_none()
 
     async def update_fields(
-        self, session_id: uuid.UUID, **fields: Any,
+        self,
+        session_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
         sess = await self.session.get(FieldSession, session_id)
         if sess is None:

@@ -91,35 +91,168 @@ def _seed_rows() -> list[CostItem]:
         )
 
     # DE_BERLIN — covers all four depths fully.
-    rows.append(_mk("A001", collection="Buildings", department="Concrete", section="Walls", subsection="Reinforced", region="DE_BERLIN"))
-    rows.append(_mk("A002", collection="Buildings", department="Concrete", section="Walls", subsection="Plain", region="DE_BERLIN"))
-    rows.append(_mk("A003", collection="Buildings", department="Concrete", section="Floors", subsection="Slab", region="DE_BERLIN"))
-    rows.append(_mk("A004", collection="Buildings", department="Masonry", section="Walls", subsection="Brick", region="DE_BERLIN"))
-    rows.append(_mk("A005", collection="Buildings", department="Masonry", section="Walls", subsection="Block", region="DE_BERLIN"))
-    rows.append(_mk("A006", collection="Roads", department="Asphalt", section="Surface", subsection="Hot", region="DE_BERLIN"))
-    rows.append(_mk("A007", collection="Roads", department="Asphalt", section="Surface", subsection="Cold", region="DE_BERLIN"))
-    rows.append(_mk("A008", collection="Roads", department="Asphalt", section="Subbase", subsection="Crushed", region="DE_BERLIN"))
-    rows.append(_mk("A009", collection="Roads", department="Concrete", section="Surface", subsection="CRCP", region="DE_BERLIN"))
+    rows.append(
+        _mk(
+            "A001",
+            collection="Buildings",
+            department="Concrete",
+            section="Walls",
+            subsection="Reinforced",
+            region="DE_BERLIN",
+        )
+    )
+    rows.append(
+        _mk(
+            "A002",
+            collection="Buildings",
+            department="Concrete",
+            section="Walls",
+            subsection="Plain",
+            region="DE_BERLIN",
+        )
+    )
+    rows.append(
+        _mk(
+            "A003",
+            collection="Buildings",
+            department="Concrete",
+            section="Floors",
+            subsection="Slab",
+            region="DE_BERLIN",
+        )
+    )
+    rows.append(
+        _mk(
+            "A004",
+            collection="Buildings",
+            department="Masonry",
+            section="Walls",
+            subsection="Brick",
+            region="DE_BERLIN",
+        )
+    )
+    rows.append(
+        _mk(
+            "A005",
+            collection="Buildings",
+            department="Masonry",
+            section="Walls",
+            subsection="Block",
+            region="DE_BERLIN",
+        )
+    )
+    rows.append(
+        _mk("A006", collection="Roads", department="Asphalt", section="Surface", subsection="Hot", region="DE_BERLIN")
+    )
+    rows.append(
+        _mk("A007", collection="Roads", department="Asphalt", section="Surface", subsection="Cold", region="DE_BERLIN")
+    )
+    rows.append(
+        _mk(
+            "A008",
+            collection="Roads",
+            department="Asphalt",
+            section="Subbase",
+            subsection="Crushed",
+            region="DE_BERLIN",
+        )
+    )
+    rows.append(
+        _mk("A009", collection="Roads", department="Concrete", section="Surface", subsection="CRCP", region="DE_BERLIN")
+    )
 
     # GB_LONDON — fewer rows, lets us pin region filter.
-    rows.append(_mk("B001", collection="Buildings", department="Concrete", section="Walls", subsection="Reinforced", region="GB_LONDON"))
-    rows.append(_mk("B002", collection="Buildings", department="Concrete", section="Floors", subsection="Slab", region="GB_LONDON"))
-    rows.append(_mk("B003", collection="Roads", department="Asphalt", section="Surface", subsection="Hot", region="GB_LONDON"))
+    rows.append(
+        _mk(
+            "B001",
+            collection="Buildings",
+            department="Concrete",
+            section="Walls",
+            subsection="Reinforced",
+            region="GB_LONDON",
+        )
+    )
+    rows.append(
+        _mk(
+            "B002",
+            collection="Buildings",
+            department="Concrete",
+            section="Floors",
+            subsection="Slab",
+            region="GB_LONDON",
+        )
+    )
+    rows.append(
+        _mk("B003", collection="Roads", department="Asphalt", section="Surface", subsection="Hot", region="GB_LONDON")
+    )
 
     # Rows with NULL intermediate levels — must coalesce into the sentinel
     # at category_tree, and must still match a wildcard middle segment in
     # classification_path.
-    rows.append(_mk("Z001", collection="Buildings", department=None, section="Walls", subsection="Reinforced", region="DE_BERLIN"))
-    rows.append(_mk("Z002", collection="Buildings", department="Concrete", section=None, subsection="Plain", region="DE_BERLIN"))
-    rows.append(_mk("Z003", collection=None, department="Concrete", section="Walls", subsection="Reinforced", region="DE_BERLIN"))
-    rows.append(_mk("Z004", collection="Buildings", department="Concrete", section="Walls", subsection=None, region="DE_BERLIN"))
+    rows.append(
+        _mk(
+            "Z001",
+            collection="Buildings",
+            department=None,
+            section="Walls",
+            subsection="Reinforced",
+            region="DE_BERLIN",
+        )
+    )
+    rows.append(
+        _mk("Z002", collection="Buildings", department="Concrete", section=None, subsection="Plain", region="DE_BERLIN")
+    )
+    rows.append(
+        _mk(
+            "Z003", collection=None, department="Concrete", section="Walls", subsection="Reinforced", region="DE_BERLIN"
+        )
+    )
+    rows.append(
+        _mk("Z004", collection="Buildings", department="Concrete", section="Walls", subsection=None, region="DE_BERLIN")
+    )
 
     # Plus four extra Buildings rows so the total Buildings count is
     # large enough to verify pagination boundaries (limit=5 paged twice).
-    rows.append(_mk("A010", collection="Buildings", department="Concrete", section="Walls", subsection="Reinforced", region="DE_BERLIN"))
-    rows.append(_mk("A011", collection="Buildings", department="Concrete", section="Walls", subsection="Reinforced", region="DE_BERLIN"))
-    rows.append(_mk("A012", collection="Buildings", department="Concrete", section="Walls", subsection="Reinforced", region="DE_BERLIN"))
-    rows.append(_mk("A013", collection="Buildings", department="Concrete", section="Walls", subsection="Reinforced", region="DE_BERLIN"))
+    rows.append(
+        _mk(
+            "A010",
+            collection="Buildings",
+            department="Concrete",
+            section="Walls",
+            subsection="Reinforced",
+            region="DE_BERLIN",
+        )
+    )
+    rows.append(
+        _mk(
+            "A011",
+            collection="Buildings",
+            department="Concrete",
+            section="Walls",
+            subsection="Reinforced",
+            region="DE_BERLIN",
+        )
+    )
+    rows.append(
+        _mk(
+            "A012",
+            collection="Buildings",
+            department="Concrete",
+            section="Walls",
+            subsection="Reinforced",
+            region="DE_BERLIN",
+        )
+    )
+    rows.append(
+        _mk(
+            "A013",
+            collection="Buildings",
+            department="Concrete",
+            section="Walls",
+            subsection="Reinforced",
+            region="DE_BERLIN",
+        )
+    )
 
     return rows
 
@@ -128,13 +261,9 @@ def _seed_rows() -> list[CostItem]:
 async def session() -> AsyncSession:
     """Fresh per-test SQLite DB seeded with 20 cost items."""
     db_path = _TMP_DIR / f"test-{uuid.uuid4().hex[:8]}.db"
-    engine = create_async_engine(
-        f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False
-    )
+    engine = create_async_engine(f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False)
     async with engine.begin() as conn:
-        await conn.run_sync(
-            Base.metadata.create_all, tables=[CostItem.__table__]
-        )
+        await conn.run_sync(Base.metadata.create_all, tables=[CostItem.__table__])
 
     Session = async_sessionmaker(engine, expire_on_commit=False)
     async with Session() as s:
@@ -225,9 +354,7 @@ async def test_skip_count_returns_none(session: AsyncSession) -> None:
 async def test_classification_path_depth_1(session: AsyncSession) -> None:
     """Filter at depth 1 (collection only) returns the whole branch (DE only)."""
     repo = CostItemRepository(session)
-    items, total, _ = await repo.search(
-        classification_path="Buildings", region="DE_BERLIN", limit=100
-    )
+    items, total, _ = await repo.search(classification_path="Buildings", region="DE_BERLIN", limit=100)
     # DE_BERLIN Buildings: A001-A005 (5) + A010-A013 (4) + Z001 + Z002 + Z004 = 12.
     # Z003 has collection=None so excluded.
     assert total == 12
@@ -240,9 +367,7 @@ async def test_classification_path_depth_1(session: AsyncSession) -> None:
 async def test_classification_path_depth_2(session: AsyncSession) -> None:
     """Filter at depth 2 (collection/department)."""
     repo = CostItemRepository(session)
-    items, total, _ = await repo.search(
-        classification_path="Buildings/Concrete", region="DE_BERLIN", limit=100
-    )
+    items, total, _ = await repo.search(classification_path="Buildings/Concrete", region="DE_BERLIN", limit=100)
     # DE_BERLIN Buildings + Concrete: A001, A002, A003, A010-A013, Z002, Z004 = 9.
     # Z001 has department=None → excluded. Z003 has collection=None → excluded.
     assert total == 9
@@ -256,9 +381,7 @@ async def test_classification_path_depth_2(session: AsyncSession) -> None:
 async def test_classification_path_depth_3(session: AsyncSession) -> None:
     """Filter at depth 3 (collection/department/section)."""
     repo = CostItemRepository(session)
-    items, total, _ = await repo.search(
-        classification_path="Buildings/Concrete/Walls", region="DE_BERLIN", limit=100
-    )
+    items, total, _ = await repo.search(classification_path="Buildings/Concrete/Walls", region="DE_BERLIN", limit=100)
     # DE_BERLIN Buildings/Concrete/Walls: A001, A002, A010-A013 + Z004
     # (subsection=None still matches because depth-4 isn't constrained) = 7.
     # Z002 (section=None) excluded.
@@ -286,9 +409,7 @@ async def test_classification_path_wildcard_middle_segment(session: AsyncSession
     """Empty middle segment matches anything at that depth."""
     repo = CostItemRepository(session)
     # Buildings // Walls = any department, but section must be Walls
-    items, total, _ = await repo.search(
-        classification_path="Buildings//Walls", region="DE_BERLIN", limit=100
-    )
+    items, total, _ = await repo.search(classification_path="Buildings//Walls", region="DE_BERLIN", limit=100)
     # DE_BERLIN Buildings, any department, section==Walls:
     # A001, A002, A004, A005, A010-A013, Z001 (dept=None passes wildcard),
     # Z004 (subsection=None still matches — only 3 depths constrained) = 10.
@@ -300,12 +421,8 @@ async def test_classification_path_wildcard_middle_segment(session: AsyncSession
 async def test_classification_path_strips_slashes(session: AsyncSession) -> None:
     """Leading/trailing slashes must be tolerated."""
     repo = CostItemRepository(session)
-    a, total_a, _ = await repo.search(
-        classification_path="/Buildings/", region="DE_BERLIN", limit=100
-    )
-    b, total_b, _ = await repo.search(
-        classification_path="Buildings", region="DE_BERLIN", limit=100
-    )
+    a, total_a, _ = await repo.search(classification_path="/Buildings/", region="DE_BERLIN", limit=100)
+    b, total_b, _ = await repo.search(classification_path="Buildings", region="DE_BERLIN", limit=100)
     assert total_a == total_b
     assert {x.code for x in a} == {x.code for x in b}
 
@@ -314,9 +431,7 @@ async def test_classification_path_strips_slashes(session: AsyncSession) -> None
 async def test_classification_path_combined_with_region(session: AsyncSession) -> None:
     """classification_path must AND-combine with the region filter."""
     repo = CostItemRepository(session)
-    items, total, _ = await repo.search(
-        classification_path="Buildings", region="GB_LONDON", limit=100
-    )
+    items, total, _ = await repo.search(classification_path="Buildings", region="GB_LONDON", limit=100)
     # GB_LONDON Buildings rows: B001, B002 = 2.
     assert total == 2
     assert {x.code for x in items} == {"B001", "B002"}

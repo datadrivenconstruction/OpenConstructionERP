@@ -31,7 +31,6 @@ from datetime import UTC, datetime
 import pytest
 import pytest_asyncio
 from fastapi import UploadFile
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -52,7 +51,6 @@ from app.modules.markups.schemas import MarkupCreate
 from app.modules.markups.service import MarkupsService
 from app.modules.projects.models import Project  # noqa: F401
 from app.modules.users.models import User
-
 
 # ── Fixtures ───────────────────────────────────────────────────────────
 
@@ -166,9 +164,7 @@ async def test_upload_document_revision_rolls_chain_forward(
     doc = await svc.upload_document(project_id, first, "drawing", user_id)
 
     rev_upload = _upload_file("plans-v2.pdf", b"%PDF-1.4\nsecond", "application/pdf")
-    await svc.upload_document_revision(
-        doc.id, rev_upload, user_id, notes="rev B"
-    )
+    await svc.upload_document_revision(doc.id, rev_upload, user_id, notes="rev B")
 
     repo = FileVersionRepository(session)
     chain = await repo.list_chain(
@@ -216,9 +212,7 @@ async def test_upload_photo_registers_chain_v1(session: AsyncSession) -> None:
 
 
 @pytest.mark.asyncio
-async def test_split_pdf_to_sheets_writes_chain(
-    monkeypatch: pytest.MonkeyPatch, session: AsyncSession
-) -> None:
+async def test_split_pdf_to_sheets_writes_chain(monkeypatch: pytest.MonkeyPatch, session: AsyncSession) -> None:
     project_id, user_id = await _seed_project(session)
 
     # Stub the heavy pdfplumber path: produce a fake 2-page "pdf" so the
@@ -240,7 +234,7 @@ async def test_split_pdf_to_sheets_writes_chain(
     class _FakePDF:
         pages = [_FakePage(1), _FakePage(2)]
 
-        def __enter__(self) -> "_FakePDF":
+        def __enter__(self) -> _FakePDF:
             return self
 
         def __exit__(self, *_exc: object) -> None:

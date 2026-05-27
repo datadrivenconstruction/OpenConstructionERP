@@ -50,6 +50,7 @@ def _decimal_to_str(v: object) -> object:
         return format(Decimal(str(v)), "f")
     return v
 
+
 # ── Change Order schemas ─────────────────────────────────────────────────────
 
 
@@ -116,8 +117,7 @@ class ChangeOrderUpdate(BaseModel):
     def _reject_status_in_patch(cls, v: str | None) -> str | None:
         if v is not None:
             raise ValueError(
-                "Status cannot be changed via PATCH. "
-                "Use POST /changeorders/{id}/submit, /approve, or /reject."
+                "Status cannot be changed via PATCH. Use POST /changeorders/{id}/submit, /approve, or /reject."
             )
         return v
 
@@ -143,7 +143,11 @@ class ChangeOrderItemResponse(BaseModel):
     updated_at: datetime
 
     _coerce_decimal = field_validator(
-        "original_quantity", "new_quantity", "original_rate", "new_rate", "cost_delta",
+        "original_quantity",
+        "new_quantity",
+        "original_rate",
+        "new_rate",
+        "cost_delta",
         mode="before",
     )(lambda cls, v: _decimal_to_str(v))
 
@@ -172,9 +176,7 @@ class ChangeOrderResponse(BaseModel):
     updated_at: datetime
     item_count: int = 0
 
-    _coerce_decimal = field_validator("cost_impact", mode="before")(
-        lambda cls, v: _decimal_to_str(v)
-    )
+    _coerce_decimal = field_validator("cost_impact", mode="before")(lambda cls, v: _decimal_to_str(v))
     # T3: Procore-style commitment / RFI links + approval-chain cursor.
     # Normalised to ``[]`` on read so legacy COs that pre-date v3082
     # (where the columns are physically NULL) still serialize cleanly.
@@ -211,7 +213,10 @@ class ChangeOrderItemCreate(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     _coerce_in = field_validator(
-        "original_quantity", "new_quantity", "original_rate", "new_rate",
+        "original_quantity",
+        "new_quantity",
+        "original_rate",
+        "new_rate",
         mode="before",
     )(lambda cls, v: _decimal_to_str(v))
 
@@ -240,7 +245,10 @@ class ChangeOrderItemUpdate(BaseModel):
     metadata: dict[str, Any] | None = None
 
     _coerce_in = field_validator(
-        "original_quantity", "new_quantity", "original_rate", "new_rate",
+        "original_quantity",
+        "new_quantity",
+        "original_rate",
+        "new_rate",
         mode="before",
     )(lambda cls, v: _decimal_to_str(v))
 
@@ -315,6 +323,6 @@ class ChangeOrderSummary(BaseModel):
     # when neither carries a currency — never a literal "EUR" (task #217).
     currency: str = ""
 
-    _coerce_decimal = field_validator(
-        "total_approved_amount", "total_cost_impact", mode="before"
-    )(lambda cls, v: _decimal_to_str(v))
+    _coerce_decimal = field_validator("total_approved_amount", "total_cost_impact", mode="before")(
+        lambda cls, v: _decimal_to_str(v)
+    )

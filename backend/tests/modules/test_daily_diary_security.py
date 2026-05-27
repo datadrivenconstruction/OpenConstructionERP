@@ -90,7 +90,7 @@ from app.modules.users.models import User  # noqa: F401
 
 _DD_TABLES = [
     Project.__table__,  # FK target for project_id
-    User.__table__,     # FK target for site_supervisor_id / signed_by / etc.
+    User.__table__,  # FK target for site_supervisor_id / signed_by / etc.
     DailyDiary.__table__,
     WeatherRecord.__table__,
     DiaryEntry.__table__,
@@ -114,6 +114,7 @@ async def session() -> AsyncIterator[AsyncSession]:
     migration tests against PostgreSQL, not here.
     """
     from sqlalchemy import text
+
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", future=True)
     async with engine.begin() as conn:
         # Explicit pragma OFF — some sqlite builds default to ON.
@@ -148,13 +149,16 @@ def test_daily_diary_unlock_is_manager() -> None:
     """‌⁠‍The new unlock permission must be MANAGER+; EDITOR rejected."""
     register_daily_diary_permissions()
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "daily_diary.unlock",
+        Role.MANAGER,
+        "daily_diary.unlock",
     )
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "daily_diary.unlock",
+        Role.EDITOR,
+        "daily_diary.unlock",
     )
     assert not permission_registry.role_has_permission(
-        Role.VIEWER, "daily_diary.unlock",
+        Role.VIEWER,
+        "daily_diary.unlock",
     )
 
 
@@ -162,10 +166,12 @@ def test_daily_diary_sign_is_manager() -> None:
     """‌⁠‍Sign-off remains MANAGER+ (per foreman-class roles)."""
     register_daily_diary_permissions()
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "daily_diary.sign",
+        Role.MANAGER,
+        "daily_diary.sign",
     )
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "daily_diary.sign",
+        Role.EDITOR,
+        "daily_diary.sign",
     )
 
 
@@ -424,7 +430,9 @@ async def test_unlock_signed_diary_reopens_to_open(
 
     user_id = str(uuid.uuid4())
     unlocked = await svc.unlock_diary(
-        diary.id, user_id=user_id, reason="late equipment-count amendment",
+        diary.id,
+        user_id=user_id,
+        reason="late equipment-count amendment",
     )
     assert unlocked.status == "open"
 

@@ -97,7 +97,9 @@ async def _safe_audit(
     except Exception:
         logger.warning(
             "ActivityLog write skipped for change_order %s (%s → %s)",
-            order_id, from_status, to_status,
+            order_id,
+            from_status,
+            to_status,
             exc_info=True,
         )
 
@@ -148,9 +150,7 @@ class ChangeOrderService:
         from decimal import Decimal, InvalidOperation
 
         try:
-            initial_cost_impact = (
-                Decimal(str(data.cost_impact)) if data.cost_impact else Decimal("0")
-            )
+            initial_cost_impact = Decimal(str(data.cost_impact)) if data.cost_impact else Decimal("0")
         except (InvalidOperation, ValueError, TypeError):
             initial_cost_impact = Decimal("0")
 
@@ -222,11 +222,7 @@ class ChangeOrderService:
         from app.modules.projects.models import Project
 
         try:
-            project = (
-                await self.session.execute(
-                    select(Project).where(Project.id == project_id)
-                )
-            ).scalar_one_or_none()
+            project = (await self.session.execute(select(Project).where(Project.id == project_id))).scalar_one_or_none()
         except Exception:
             # No real session (unit-test stub) or transient lookup error —
             # fall back to empty rather than guessing a currency.
@@ -352,10 +348,7 @@ class ChangeOrderService:
         if order.submitted_by and str(order.submitted_by) == str(user_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    f"You cannot {action} a change order you submitted yourself "
-                    "(four-eyes principle)."
-                ),
+                detail=(f"You cannot {action} a change order you submitted yourself (four-eyes principle)."),
             )
 
     async def submit_order(self, order_id: uuid.UUID, user_id: str) -> ChangeOrder:
@@ -495,9 +488,7 @@ class ChangeOrderService:
             # would trigger a sync-context attribute refresh and raise
             # ``MissingGreenlet`` under async aiosqlite.
             project = (
-                await self.session.execute(
-                    select(Project).where(Project.id == project_id_uuid)
-                )
+                await self.session.execute(select(Project).where(Project.id == project_id_uuid))
             ).scalar_one_or_none()
             if project is not None:
                 try:
@@ -550,7 +541,10 @@ class ChangeOrderService:
         fresh = await self.repo.get_by_id(order_id)
         logger.info(
             "Change order approved: %s by %s (delta=%s, boq=%s)",
-            code_s, user_id, delta, boq_result,
+            code_s,
+            user_id,
+            delta,
+            boq_result,
         )
         return fresh or order
 
@@ -589,9 +583,7 @@ class ChangeOrderService:
                 from app.modules.projects.models import Project
 
                 project = (
-                    await self.session.execute(
-                        select(Project).where(Project.id == project_id_uuid)
-                    )
+                    await self.session.execute(select(Project).where(Project.id == project_id_uuid))
                 ).scalar_one_or_none()
                 if project is not None:
                     currency_code = project.currency
@@ -602,12 +594,10 @@ class ChangeOrderService:
 
             # Idempotent lookup keyed by metadata.change_order_id.
             existing = (
-                await self.session.execute(
-                    select(ProjectBudget).where(
-                        ProjectBudget.project_id == project_id_uuid
-                    )
-                )
-            ).scalars().all()
+                (await self.session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id_uuid)))
+                .scalars()
+                .all()
+            )
             match: ProjectBudget | None = None
             for row in existing:
                 md = row.metadata_ if isinstance(row.metadata_, dict) else {}
@@ -650,8 +640,7 @@ class ChangeOrderService:
             return {"action": "created", "budget_id": str(budget.id)}
         except Exception:
             logger.warning(
-                "Budget delta-row write failed for change order %s — "
-                "approval still committed.",
+                "Budget delta-row write failed for change order %s — approval still committed.",
                 code,
                 exc_info=True,
             )
@@ -695,7 +684,9 @@ class ChangeOrderService:
                         .where(ChangeOrderItem.change_order_id == order.id)
                         .order_by(ChangeOrderItem.sort_order)
                     )
-                ).scalars().all()
+                )
+                .scalars()
+                .all()
             )
         except Exception:
             # Test stubs (SimpleNamespace) don't have a real session.
@@ -705,11 +696,7 @@ class ChangeOrderService:
             return {"applied": False, "reason": "no_items"}
 
         if boq_id is not None:
-            boq = (
-                await self.session.execute(
-                    select(BOQ).where(BOQ.id == boq_id)
-                )
-            ).scalar_one_or_none()
+            boq = (await self.session.execute(select(BOQ).where(BOQ.id == boq_id))).scalar_one_or_none()
             if boq is None:
                 return {"applied": False, "reason": "boq_not_found"}
             if boq.project_id != order.project_id:
@@ -728,25 +715,27 @@ class ChangeOrderService:
             ).scalar_one_or_none()
             if boq is None:
                 logger.info(
-                    "Change order %s approved but no unlocked BOQ in project %s "
-                    "— BOQ writeback skipped",
-                    order.code, order.project_id,
+                    "Change order %s approved but no unlocked BOQ in project %s — BOQ writeback skipped",
+                    order.code,
+                    order.project_id,
                 )
                 return {"applied": False, "reason": "no_active_boq"}
             logger.warning(
-                "Change order %s applied to BOQ %s by created_at fallback "
-                "(no explicit boq_id supplied)",
-                order.code, boq.id,
+                "Change order %s applied to BOQ %s by created_at fallback (no explicit boq_id supplied)",
+                order.code,
+                boq.id,
             )
 
         # Idempotent guard: section keyed by change_order_id in metadata.
         existing_sections = (
-            await self.session.execute(
-                select(Position)
-                .where(Position.boq_id == boq.id)
-                .where(Position.unit == "section")
+            (
+                await self.session.execute(
+                    select(Position).where(Position.boq_id == boq.id).where(Position.unit == "section")
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         for sec in existing_sections:
             md = sec.metadata_ if isinstance(sec.metadata_, dict) else {}
             if md.get("change_order_id") == str(order.id):
@@ -841,7 +830,11 @@ class ChangeOrderService:
 
         logger.info(
             "Change order %s applied to BOQ %s: section=%s, %d positions, total=%s",
-            order.code, boq.id, section.id, positions_added, item_total,
+            order.code,
+            boq.id,
+            section.id,
+            positions_added,
+            item_total,
         )
         return {
             "applied": True,
@@ -956,9 +949,7 @@ class ChangeOrderService:
         # doesn't enter the calculation as 0.1000000000000000055…; round
         # only at the persisted boundary (presentation rounds again in the
         # response builder / UI).
-        cost_delta = (
-            _dec(data.new_quantity) * _dec(data.new_rate)
-        ) - (
+        cost_delta = (_dec(data.new_quantity) * _dec(data.new_rate)) - (
             _dec(data.original_quantity) * _dec(data.original_rate)
         )
 
@@ -1091,9 +1082,7 @@ class ChangeOrderService:
 
         try:
             stmt = select(func.count()).select_from(
-                select(ChangeOrderApproval)
-                .where(ChangeOrderApproval.change_order_id == order_id)
-                .subquery()
+                select(ChangeOrderApproval).where(ChangeOrderApproval.change_order_id == order_id).subquery()
             )
             count = (await self.session.execute(stmt)).scalar_one()
             return bool(count and int(count) > 0)
@@ -1105,7 +1094,8 @@ class ChangeOrderService:
             return False
 
     async def list_approvals(
-        self, order_id: uuid.UUID,
+        self,
+        order_id: uuid.UUID,
     ) -> list[ChangeOrderApproval]:
         """Return the approval rows for ``order_id`` ordered by ``step_order``."""
         from sqlalchemy import select
@@ -1163,8 +1153,7 @@ class ChangeOrderService:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=(
-                    "An approval chain already exists for this change "
-                    "order. Use /advance-approval to drive it forward."
+                    "An approval chain already exists for this change order. Use /advance-approval to drive it forward."
                 ),
             )
 
@@ -1232,7 +1221,8 @@ class ChangeOrderService:
         )
         logger.info(
             "Approval chain started for CO %s: %d steps",
-            order_id, len(rows),
+            order_id,
+            len(rows),
         )
         return rows
 
@@ -1270,19 +1260,13 @@ class ChangeOrderService:
         if order.status not in ("submitted",):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    "Cannot advance approval — change order is not in "
-                    f"'submitted' state (got '{order.status}')."
-                ),
+                detail=(f"Cannot advance approval — change order is not in 'submitted' state (got '{order.status}')."),
             )
         cursor = order.current_approval_step
         if cursor is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    "No approval chain is active — call "
-                    "/approval-chain first."
-                ),
+                detail=("No approval chain is active — call /approval-chain first."),
             )
 
         # Resolve the active step's row.
@@ -1297,33 +1281,21 @@ class ChangeOrderService:
         if active_row is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=(
-                    f"No approval step at cursor {cursor} for this "
-                    "change order."
-                ),
+                detail=(f"No approval step at cursor {cursor} for this change order."),
             )
 
         # Caller must be the assigned approver. Compare as strings so
         # GUID-typed and str-typed JWT subjects compare cleanly.
-        if (
-            active_row.approver_user_id is None
-            or str(active_row.approver_user_id) != str(user_id)
-        ):
+        if active_row.approver_user_id is None or str(active_row.approver_user_id) != str(user_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    "You are not the assigned approver for the current "
-                    "step of this change order."
-                ),
+                detail=("You are not the assigned approver for the current step of this change order."),
             )
 
         if active_row.decision != "pending":
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    "This step has already been decided — chain may be "
-                    "out of sync."
-                ),
+                detail=("This step has already been decided — chain may be out of sync."),
             )
 
         # Race-safety: the python-side "set active_row.decision" pattern
@@ -1362,10 +1334,7 @@ class ChangeOrderService:
         if affected == 0:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    "This approval step was concurrently decided by another "
-                    "approver — refresh and retry."
-                ),
+                detail=("This approval step was concurrently decided by another approver — refresh and retry."),
             )
         # Keep the in-memory row in sync for the rest of this method so
         # downstream code (event payload, return value) sees the new
@@ -1378,12 +1347,14 @@ class ChangeOrderService:
 
         # Total step count to know whether we just signed off the last one.
         total_steps = (
-            await self.session.execute(
-                select(ChangeOrderApproval).where(
-                    ChangeOrderApproval.change_order_id == order_id
+            (
+                await self.session.execute(
+                    select(ChangeOrderApproval).where(ChangeOrderApproval.change_order_id == order_id)
                 )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         n_steps = len(total_steps)
 
         if decision == "rejected":
@@ -1423,7 +1394,9 @@ class ChangeOrderService:
             )
             logger.info(
                 "Approval chain rejected at step %d for CO %s by %s",
-                cursor, order_id, user_id,
+                cursor,
+                order_id,
+                user_id,
             )
             return active_row
 
@@ -1433,9 +1406,7 @@ class ChangeOrderService:
             # BOQ side-effects to the legacy approve_order path by
             # clearing the cursor (so the chain-gate doesn't fire) and
             # calling it. Snapshot now in case the cursor check is racy.
-            await self.repo.update_fields(
-                order_id, current_approval_step=None
-            )
+            await self.repo.update_fields(order_id, current_approval_step=None)
             await _safe_publish(
                 "changeorders.approval.advanced",
                 {
@@ -1456,14 +1427,14 @@ class ChangeOrderService:
             await self.approve_order(order_id, user_id, _from_chain=True)
             logger.info(
                 "Approval chain completed for CO %s on step %d by %s",
-                order_id, cursor, user_id,
+                order_id,
+                cursor,
+                user_id,
             )
             return active_row
 
         # Mid-chain approval: bump the cursor and keep going.
-        await self.repo.update_fields(
-            order_id, current_approval_step=cursor + 1
-        )
+        await self.repo.update_fields(order_id, current_approval_step=cursor + 1)
         await _safe_publish(
             "changeorders.approval.advanced",
             {
@@ -1477,6 +1448,9 @@ class ChangeOrderService:
         )
         logger.info(
             "Approval step %d → approved for CO %s by %s (next: %d)",
-            cursor, order_id, user_id, cursor + 1,
+            cursor,
+            order_id,
+            user_id,
+            cursor + 1,
         )
         return active_row

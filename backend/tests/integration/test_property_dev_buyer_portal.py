@@ -32,6 +32,8 @@ _TMP_DB = _TMP_DIR / "buyer_portal_snag.db"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}"
 os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 
+from datetime import UTC
+
 import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
@@ -49,8 +51,8 @@ async def app_instance():
 
     async with app.router.lifespan_context(app):
         from app.database import Base, engine
-        from app.modules.property_dev import models as _propdev_models  # noqa: F401
         from app.modules.portal import models as _portal_models  # noqa: F401
+        from app.modules.property_dev import models as _propdev_models  # noqa: F401
 
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -73,7 +75,7 @@ async def _create_portal_session(portal_user_id: uuid.UUID) -> str:
     consume endpoint does internally. We activate the user first so
     ``verify_session`` accepts them.
     """
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
     from sqlalchemy import update
 
@@ -84,14 +86,10 @@ async def _create_portal_session(portal_user_id: uuid.UUID) -> str:
     async with async_session_factory() as s:
         # Activate the user — magic-link consume normally flips
         # status=invited -> active on first use.
-        await s.execute(
-            update(PortalUser)
-            .where(PortalUser.id == portal_user_id)
-            .values(status="active")
-        )
+        await s.execute(update(PortalUser).where(PortalUser.id == portal_user_id).values(status="active"))
 
         plain = generate_token()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         sess = PortalSession(
             portal_user_id=portal_user_id,
             session_token_hash=hash_token(plain),
@@ -116,7 +114,6 @@ async def two_buyers(http_client):
     handover so the portal-invisibility test has something to check.
     """
     from decimal import Decimal
-    from sqlalchemy import select
 
     from app.database import async_session_factory
     from app.modules.portal.models import PortalUser
@@ -354,7 +351,5 @@ async def test_portal_warranty_status_filter(http_client, two_buyers):
 
 @pytest.mark.asyncio
 async def test_portal_warranty_requires_session(http_client, two_buyers):
-    res = await http_client.get(
-        "/api/v1/property-dev/portal/me/warranty-claims"
-    )
+    res = await http_client.get("/api/v1/property-dev/portal/me/warranty-claims")
     assert res.status_code == 401, res.text

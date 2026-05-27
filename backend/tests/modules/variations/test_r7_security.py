@@ -95,6 +95,7 @@ class _StubSession:
         class _R:
             def scalar_one_or_none(self) -> Any:
                 return None
+
         return _R()
 
     def add(self, _obj: Any) -> None:
@@ -112,9 +113,7 @@ class _StubCORepo:
         return self.orders.get(order_id)
 
     async def count_for_project(self, project_id: uuid.UUID) -> int:
-        return sum(
-            1 for o in self.orders.values() if o.project_id == project_id
-        )
+        return sum(1 for o in self.orders.values() if o.project_id == project_id)
 
     async def create(self, order: SimpleNamespace) -> SimpleNamespace:
         if self.fail_create:
@@ -122,6 +121,7 @@ class _StubCORepo:
         if getattr(order, "id", None) is None:
             order.id = uuid.uuid4()
         from datetime import UTC, datetime
+
         now = datetime.now(UTC)
         order.created_at = now
         order.updated_at = now
@@ -129,7 +129,9 @@ class _StubCORepo:
         return order
 
     async def update_fields(
-        self, order_id: uuid.UUID, **fields: Any,
+        self,
+        order_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
         obj = self.orders.get(order_id)
         if obj is None:
@@ -157,7 +159,9 @@ class _StubVRRepo:
         return vr
 
     async def update_fields(
-        self, vr_id: uuid.UUID, **fields: Any,
+        self,
+        vr_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
         obj = self.rows.get(vr_id)
         if obj is None:
@@ -185,7 +189,9 @@ class _StubVORepo:
         return vo
 
     async def update_fields(
-        self, vo_id: uuid.UUID, **fields: Any,
+        self,
+        vo_id: uuid.UUID,
+        **fields: Any,
     ) -> None:
         obj = self.rows.get(vo_id)
         if obj is None:
@@ -257,6 +263,7 @@ def test_change_order_response_money_serializes_to_string() -> None:
     flips it back to a JSON number gets caught.
     """
     from datetime import UTC, datetime
+
     now = datetime.now(UTC)
     resp = ChangeOrderResponse(
         id=uuid.uuid4(),
@@ -283,6 +290,7 @@ def test_variation_order_response_money_serializes_to_string() -> None:
     past 15 sig-digits. Pinned via ``field_serializer(when_used='json')``.
     """
     from datetime import UTC, datetime
+
     now = datetime.now(UTC)
     resp = VariationOrderResponse(
         id=uuid.uuid4(),
@@ -306,6 +314,7 @@ def test_variation_order_response_money_serializes_to_string() -> None:
 def test_variation_request_response_money_serializes_to_string() -> None:
     """Same guarantee on the VariationRequest response."""
     from datetime import UTC, datetime
+
     now = datetime.now(UTC)
     resp = VariationRequestResponse(
         id=uuid.uuid4(),
@@ -335,13 +344,16 @@ def test_variations_high_value_approval_requires_admin() -> None:
     register_variations_permissions()
     # Editor/Manager must NOT have the high-value gate.
     assert not permission_registry.role_has_permission(
-        Role.MANAGER, "variations.approve_high_value",
+        Role.MANAGER,
+        "variations.approve_high_value",
     )
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "variations.approve_high_value",
+        Role.EDITOR,
+        "variations.approve_high_value",
     )
     assert permission_registry.role_has_permission(
-        Role.ADMIN, "variations.approve_high_value",
+        Role.ADMIN,
+        "variations.approve_high_value",
     )
 
 
@@ -349,10 +361,12 @@ def test_variations_update_blocked_for_viewer() -> None:
     """A plain VIEWER must not be able to PATCH a variation row."""
     register_variations_permissions()
     assert not permission_registry.role_has_permission(
-        Role.VIEWER, "variations.update",
+        Role.VIEWER,
+        "variations.update",
     )
     assert permission_registry.role_has_permission(
-        Role.EDITOR, "variations.update",
+        Role.EDITOR,
+        "variations.update",
     )
 
 
@@ -361,12 +375,15 @@ def test_changeorder_approve_requires_manager() -> None:
     from app.modules.changeorders.permissions import (
         register_changeorder_permissions,
     )
+
     register_changeorder_permissions()
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "changeorders.approve",
+        Role.EDITOR,
+        "changeorders.approve",
     )
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "changeorders.approve",
+        Role.MANAGER,
+        "changeorders.approve",
     )
 
 
@@ -496,7 +513,9 @@ async def test_convert_vr_to_vo_rolls_back_on_co_failure(
     )
     with pytest.raises(HTTPException) as exc_info:
         await svc.convert_vr_to_vo(
-            vr.id, payload, user_id=str(uuid.uuid4()),
+            vr.id,
+            payload,
+            user_id=str(uuid.uuid4()),
         )
     assert exc_info.value.status_code == 500
     # Rollback fired exactly once on the failure path.

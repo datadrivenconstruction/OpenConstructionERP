@@ -126,13 +126,16 @@ def test_qms_calibration_tenant_write_is_manager() -> None:
     """‌⁠‍The R7 tenant-write split must register at MANAGER+, not EDITOR."""
     register_qms_permissions()
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "qms.calibration.tenant_write",
+        Role.MANAGER,
+        "qms.calibration.tenant_write",
     )
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "qms.calibration.tenant_write",
+        Role.EDITOR,
+        "qms.calibration.tenant_write",
     )
     assert not permission_registry.role_has_permission(
-        Role.VIEWER, "qms.calibration.tenant_write",
+        Role.VIEWER,
+        "qms.calibration.tenant_write",
     )
 
 
@@ -140,10 +143,12 @@ def test_qms_ncr_escalate_is_manager() -> None:
     """‌⁠‍NCR escalation to variation must be MANAGER+ (cost-impact gate)."""
     register_qms_permissions()
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "qms.ncr.escalate",
+        Role.MANAGER,
+        "qms.ncr.escalate",
     )
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "qms.ncr.escalate",
+        Role.EDITOR,
+        "qms.ncr.escalate",
     )
 
 
@@ -224,7 +229,9 @@ async def test_inspection_fsm_rejects_passed_to_in_progress(
     item = await svc.add_itp_item(
         plan.id,
         ITPItemCreate(
-            sequence=1, control_point_name="cp1", signatories_required=1,
+            sequence=1,
+            control_point_name="cp1",
+            signatories_required=1,
         ),
     )
     inspection = await svc.schedule_inspection(
@@ -237,7 +244,8 @@ async def test_inspection_fsm_rejects_passed_to_in_progress(
     await svc.add_signature(
         inspection.id,
         __import__(
-            "app.modules.qms.schemas", fromlist=["InspectionSignatureCreate"],
+            "app.modules.qms.schemas",
+            fromlist=["InspectionSignatureCreate"],
         ).InspectionSignatureCreate(
             signer_user_id=uuid.uuid4(),
             signer_role="GC",
@@ -247,9 +255,11 @@ async def test_inspection_fsm_rejects_passed_to_in_progress(
 
     # FSM rejects passed -> in_progress AND passed -> any-other-status.
     from app.modules.qms.schemas import InspectionUpdate
+
     with pytest.raises(ValueError, match="Cannot edit"):
         await svc.update_inspection(
-            inspection.id, InspectionUpdate(status="in_progress"),
+            inspection.id,
+            InspectionUpdate(status="in_progress"),
         )
 
 
@@ -338,10 +348,12 @@ async def test_inspection_cross_project_isolation(
         ITPPlanCreate(project_id=proj_b, name="B", work_type="steel"),
     )
     item_a = await svc.add_itp_item(
-        plan_a.id, ITPItemCreate(sequence=1, control_point_name="ap"),
+        plan_a.id,
+        ITPItemCreate(sequence=1, control_point_name="ap"),
     )
     item_b = await svc.add_itp_item(
-        plan_b.id, ITPItemCreate(sequence=1, control_point_name="bp"),
+        plan_b.id,
+        ITPItemCreate(sequence=1, control_point_name="bp"),
     )
     await svc.schedule_inspection(
         InspectionCreate(
@@ -449,6 +461,7 @@ async def test_audit_fsm_rejects_closed_to_in_progress(
     await svc.start_audit(audit.id)
     await svc.complete_audit(audit.id, overall_rating=4)
     from app.modules.qms.schemas import AuditUpdate
+
     # complete -> closed allowed; in_progress -> closed not in transitions
     await svc.update_audit(audit.id, AuditUpdate(status="closed"))
     with pytest.raises(ValueError, match="Illegal audit transition"):
@@ -462,6 +475,7 @@ async def test_audit_fsm_rejects_closed_to_in_progress(
 async def test_itp_template_clone_404_on_missing(svc: QMSService) -> None:
     """‌⁠‍Cloning a non-existent template raises ValueError → 404."""
     from app.modules.qms.schemas import ITPTemplateCloneRequest
+
     project_id = uuid.uuid4()
     with pytest.raises(ValueError, match="not found"):
         await svc.clone_itp_template_to_project(
@@ -479,12 +493,15 @@ def test_calibration_create_permission_for_tenant_wide_needs_manager() -> None:
     register_qms_permissions()
     # Per-project create: editor is sufficient.
     assert permission_registry.role_has_permission(
-        Role.EDITOR, "qms.calibration.write",
+        Role.EDITOR,
+        "qms.calibration.write",
     )
     # Tenant-wide (project_id=None) create needs MANAGER+.
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "qms.calibration.tenant_write",
+        Role.EDITOR,
+        "qms.calibration.tenant_write",
     )
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "qms.calibration.tenant_write",
+        Role.MANAGER,
+        "qms.calibration.tenant_write",
     )

@@ -232,7 +232,9 @@ async def unlock_diary(
     existing = await service.get_diary(diary_id)
     await verify_project_access(existing.project_id, user_id, session)
     diary = await service.unlock_diary(
-        diary_id, user_id=user_id, reason=reason,
+        diary_id,
+        user_id=user_id,
+        reason=reason,
     )
     return DailyDiaryResponse.model_validate(diary)
 
@@ -482,9 +484,7 @@ async def update_entry(
     existing = await service.get_entry(entry_id)
     diary = await service.get_diary(existing.diary_id)
     await verify_project_access(diary.project_id, user_id, session)
-    entry = await service.update_entry(
-        entry_id, data.model_dump(exclude_unset=True)
-    )
+    entry = await service.update_entry(entry_id, data.model_dump(exclude_unset=True))
     return DiaryEntryResponse.model_validate(entry)
 
 
@@ -568,7 +568,8 @@ async def photos_before_after(
 ) -> BeforeAfterResponse:
     await verify_project_access(project_id, user_id, session)
     items, _ = await service.photo_repo.photos_for_project_in_range(
-        project_id, limit=10_000,
+        project_id,
+        limit=10_000,
     )
     pairs = compute_before_after(items, date_a, date_b, location_radius_m)
     return BeforeAfterResponse(
@@ -608,6 +609,7 @@ async def get_photo(
     photo = await service.photo_repo.get_by_id(photo_id)
     if photo is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail=translate("errors.diary_photo_not_found", locale=get_locale()))
     await verify_project_access(photo.project_id, user_id, session)
     return DiaryPhotoResponse.model_validate(photo)
@@ -628,6 +630,7 @@ async def update_photo(
     existing = await service.photo_repo.get_by_id(photo_id)
     if existing is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail=translate("errors.diary_photo_not_found", locale=get_locale()))
     await verify_project_access(existing.project_id, user_id, session)
     photo = await service.update_photo(photo_id, data)
@@ -645,6 +648,7 @@ async def delete_photo(
     existing = await service.photo_repo.get_by_id(photo_id)
     if existing is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail=translate("errors.diary_photo_not_found", locale=get_locale()))
     await verify_project_access(existing.project_id, user_id, session)
     await service.delete_photo(photo_id)
@@ -665,7 +669,9 @@ async def list_videos(
 ) -> list[DiaryVideoResponse]:
     await verify_project_access(project_id, user_id, session)
     items, _ = await service.video_repo.list_for_project(
-        project_id, offset=offset, limit=limit,
+        project_id,
+        offset=offset,
+        limit=limit,
     )
     return [DiaryVideoResponse.model_validate(i) for i in items]
 
@@ -701,6 +707,7 @@ async def get_video(
     video = await service.video_repo.get_by_id(video_id)
     if video is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail=translate("errors.diary_video_not_found", locale=get_locale()))
     await verify_project_access(video.project_id, user_id, session)
     return DiaryVideoResponse.model_validate(video)
@@ -721,6 +728,7 @@ async def update_video(
     existing = await service.video_repo.get_by_id(video_id)
     if existing is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail=translate("errors.diary_video_not_found", locale=get_locale()))
     await verify_project_access(existing.project_id, user_id, session)
     video = await service.update_video(video_id, data)
@@ -738,6 +746,7 @@ async def delete_video(
     existing = await service.video_repo.get_by_id(video_id)
     if existing is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail=translate("errors.diary_video_not_found", locale=get_locale()))
     await verify_project_access(existing.project_id, user_id, session)
     await service.delete_video(video_id)
@@ -758,7 +767,9 @@ async def list_drone_surveys(
 ) -> list[DroneSurveyResponse]:
     await verify_project_access(project_id, user_id, session)
     items, _ = await service.drone_repo.list_for_project(
-        project_id, offset=offset, limit=limit,
+        project_id,
+        offset=offset,
+        limit=limit,
     )
     return [DroneSurveyResponse.model_validate(i) for i in items]
 
@@ -794,6 +805,7 @@ async def get_drone_survey(
     survey = await service.drone_repo.get_by_id(survey_id)
     if survey is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail=translate("errors.survey_not_found", locale=get_locale()))
     await verify_project_access(survey.project_id, user_id, session)
     return DroneSurveyResponse.model_validate(survey)
@@ -814,6 +826,7 @@ async def update_drone_survey(
     existing = await service.drone_repo.get_by_id(survey_id)
     if existing is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail=translate("errors.survey_not_found", locale=get_locale()))
     await verify_project_access(existing.project_id, user_id, session)
     survey = await service.update_drone_survey(survey_id, data)
@@ -831,6 +844,7 @@ async def delete_drone_survey(
     existing = await service.drone_repo.get_by_id(survey_id)
     if existing is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail=translate("errors.survey_not_found", locale=get_locale()))
     await verify_project_access(existing.project_id, user_id, session)
     await service.delete_drone_survey(survey_id)
@@ -854,7 +868,9 @@ async def list_reality_captures(
 ) -> list[RealityCaptureResponse]:
     await verify_project_access(project_id, user_id, session)
     items, _ = await service.reality_repo.list_for_project(
-        project_id, offset=offset, limit=limit,
+        project_id,
+        offset=offset,
+        limit=limit,
     )
     return [RealityCaptureResponse.model_validate(i) for i in items]
 
@@ -890,6 +906,7 @@ async def get_reality_capture(
     ds = await service.reality_repo.get_by_id(ds_id)
     if ds is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="Reality capture not found")
     await verify_project_access(ds.project_id, user_id, session)
     return RealityCaptureResponse.model_validate(ds)
@@ -910,6 +927,7 @@ async def update_reality_capture(
     existing = await service.reality_repo.get_by_id(ds_id)
     if existing is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="Reality capture not found")
     await verify_project_access(existing.project_id, user_id, session)
     ds = await service.update_reality_capture(ds_id, data)
@@ -927,6 +945,7 @@ async def delete_reality_capture(
     existing = await service.reality_repo.get_by_id(ds_id)
     if existing is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="Reality capture not found")
     await verify_project_access(existing.project_id, user_id, session)
     await service.delete_reality_capture(ds_id)
@@ -966,6 +985,7 @@ async def get_archive_signature(
     sig = await service.signature_repo.get_by_id(signature_id)
     if sig is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="Archive signature not found")
     diary = await service.get_diary(sig.diary_id)
     await verify_project_access(diary.project_id, user_id, session)
@@ -1057,6 +1077,7 @@ async def extract_photo_gps(
         raw = base64.b64decode(payload.image_base64, validate=True)
     except (ValueError, TypeError) as exc:
         from fastapi import HTTPException
+
         raise HTTPException(422, f"Invalid base64 image: {exc}") from exc
     # Magic-byte gate FIRST — Pillow is happy to attempt to decode all sorts
     # of formats and an attacker-shaped payload could exercise its parsers
@@ -1068,6 +1089,7 @@ async def extract_photo_gps(
         )
     except FileSignatureMismatch as exc:
         from fastapi import HTTPException
+
         raise HTTPException(415, str(exc)) from exc
     gps = extract_exif_gps(raw)
     if gps is None:
@@ -1085,7 +1107,8 @@ async def extract_photo_gps(
 
 
 @router.get(
-    "/diaries/{diary_id}/workforce-summary", response_model=WorkforceSummary,
+    "/diaries/{diary_id}/workforce-summary",
+    response_model=WorkforceSummary,
 )
 async def diary_workforce_summary(
     diary_id: uuid.UUID,
@@ -1132,7 +1155,8 @@ async def diary_dashboard(
 ) -> DiaryDashboardResponse:
     await verify_project_access(project_id, user_id, session)
     diaries, total = await service.diary_repo.list_by_project_in_range(
-        project_id, limit=10_000,
+        project_id,
+        limit=10_000,
     )
     counts = {"open": 0, "closed": 0, "signed": 0, "archived": 0}
     by_date: dict[str, int] = {}
@@ -1140,13 +1164,16 @@ async def diary_dashboard(
         counts[d.status] = counts.get(d.status, 0) + 1
         by_date[d.diary_date] = by_date.get(d.diary_date, 0) + 1
     photos, photos_total = await service.photo_repo.photos_for_project_in_range(
-        project_id, limit=1,
+        project_id,
+        limit=1,
     )
     drone, drone_total = await service.drone_repo.list_for_project(
-        project_id, limit=1,
+        project_id,
+        limit=1,
     )
     reality, reality_total = await service.reality_repo.list_for_project(
-        project_id, limit=1,
+        project_id,
+        limit=1,
     )
     return DiaryDashboardResponse(
         total_diaries=total,

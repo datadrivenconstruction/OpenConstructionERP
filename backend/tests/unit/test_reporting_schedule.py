@@ -8,10 +8,11 @@ invalid crons without having to spin up the full app lifespan.
 Router-level tests live under ``tests/integration/`` because they need
 the auth + project fixtures.
 """
+
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 import pytest_asyncio
@@ -85,10 +86,8 @@ class TestScheduleTemplate:
         # in the future.
         assert updated.next_run_at is not None
         assert updated.next_run_at.endswith("Z")
-        next_dt = datetime.strptime(
-            updated.next_run_at, "%Y-%m-%dT%H:%M:%SZ"
-        ).replace(tzinfo=timezone.utc)
-        assert next_dt > datetime.now(timezone.utc) - timedelta(seconds=5)
+        next_dt = datetime.strptime(updated.next_run_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
+        assert next_dt > datetime.now(UTC) - timedelta(seconds=5)
         # And it lands on a Monday at 09:00.
         assert next_dt.weekday() == 0
         assert next_dt.hour == 9
@@ -189,7 +188,7 @@ class TestListDueTemplates:
 
         service = ReportingService(session)
         due = await service.list_due_templates(
-            as_of=datetime(2026, 5, 1, 0, 0, tzinfo=timezone.utc),
+            as_of=datetime(2026, 5, 1, 0, 0, tzinfo=UTC),
         )
         names = {t.name for t in due}
         assert names == {"Due-Scheduled"}
@@ -199,7 +198,7 @@ class TestListDueTemplates:
         await _make_template(session)
         service = ReportingService(session)
         due = await service.list_due_templates(
-            as_of=datetime(2026, 5, 1, 0, 0, tzinfo=timezone.utc),
+            as_of=datetime(2026, 5, 1, 0, 0, tzinfo=UTC),
         )
         assert due == []
 
@@ -214,7 +213,7 @@ class TestMarkTemplateRan:
             next_run_at="2026-04-20T09:00:00Z",
         )
         service = ReportingService(session)
-        ran_at = datetime(2026, 4, 20, 9, 0, 30, tzinfo=timezone.utc)
+        ran_at = datetime(2026, 4, 20, 9, 0, 30, tzinfo=UTC)
         updated = await service.mark_template_ran(template, ran_at=ran_at)
 
         assert updated.last_run_at == "2026-04-20T09:00:30Z"
@@ -231,7 +230,8 @@ class TestMarkTemplateRan:
         )
         service = ReportingService(session)
         updated = await service.mark_template_ran(
-            template, ran_at=datetime(2026, 4, 20, 9, 0, tzinfo=timezone.utc),
+            template,
+            ran_at=datetime(2026, 4, 20, 9, 0, tzinfo=UTC),
         )
         assert updated.next_run_at is None
         assert updated.last_run_at == "2026-04-20T09:00:00Z"
@@ -250,7 +250,8 @@ class TestMarkTemplateRan:
         )
         service = ReportingService(session)
         updated = await service.mark_template_ran(
-            template, ran_at=datetime(2026, 4, 20, 9, 0, tzinfo=timezone.utc),
+            template,
+            ran_at=datetime(2026, 4, 20, 9, 0, tzinfo=UTC),
         )
         assert updated.next_run_at is None
         assert updated.is_scheduled is False

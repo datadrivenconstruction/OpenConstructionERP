@@ -56,17 +56,12 @@ class HSEIncidentInvestigation(Base):
     method: Mapped[str] = mapped_column(String(50), nullable=False, default="5_whys")
     findings: Mapped[str] = mapped_column(Text, nullable=False, default="")
     recommendations: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="in_progress", index=True
-    )
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="in_progress", index=True)
     report_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
     def __repr__(self) -> str:
-        return (
-            f"<HSEIncidentInvestigation incident={self.incident_ref} "
-            f"status={self.status}>"
-        )
+        return f"<HSEIncidentInvestigation incident={self.incident_ref} status={self.status}>"
 
 
 class JobSafetyAnalysis(Base):
@@ -93,12 +88,8 @@ class JobSafetyAnalysis(Base):
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
         nullable=True,
     )
-    approved_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="draft", index=True
-    )
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     # hazards: [{step, hazard, severity, likelihood, controls}]
     hazards: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON,
@@ -151,44 +142,26 @@ class PermitToWork(Base):
         ForeignKey("oe_hse_advanced_jsa.id", ondelete="SET NULL"),
         nullable=True,
     )
-    status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="requested", index=True
-    )
-    approved_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="requested", index=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     approved_by: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
         nullable=True,
     )
     conditions: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    closure_checklist_passed: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
+    closure_checklist_passed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     closure_notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
     # Prerequisites — checked before transition to 'active'
-    prereq_jsa_approved: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
-    prereq_supervisor_present: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
-    prereq_fire_watch_assigned: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
-    prereq_extinguisher_present: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
-    prereq_atmospheric_test_passed: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
+    prereq_jsa_approved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    prereq_supervisor_present: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    prereq_fire_watch_assigned: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    prereq_extinguisher_present: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    prereq_atmospheric_test_passed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
     def __repr__(self) -> str:
-        return (
-            f"<PTW {self.permit_number} type={self.permit_type} status={self.status}>"
-        )
+        return f"<PTW {self.permit_number} type={self.permit_type} status={self.status}>"
 
 
 class JSATemplate(Base):
@@ -205,10 +178,16 @@ class JSATemplate(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     task_description: Mapped[str] = mapped_column(Text, nullable=False)
     hazards_json: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     required_ppe_json: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=list, server_default="[]",
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
     )
     region: Mapped[str | None] = mapped_column(String(32), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
@@ -232,9 +211,7 @@ class ToolboxTalk(Base):
     )
     topic_code: Mapped[str] = mapped_column(String(50), nullable=False)
     topic_title: Mapped[str] = mapped_column(String(500), nullable=False)
-    conducted_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, index=True
-    )
+    conducted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
     conducted_by: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
@@ -266,12 +243,8 @@ class ToolboxAttendance(Base):
     attendee_company: Mapped[str | None] = mapped_column(String(255), nullable=True)
     attendee_role: Mapped[str] = mapped_column(String(50), nullable=False, default="worker")
     signature_ref: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    signed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    attendance_status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="present"
-    )
+    signed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    attendance_status: Mapped[str] = mapped_column(String(50), nullable=False, default="present")
 
     def __repr__(self) -> str:
         return f"<ToolboxAttendance talk={self.toolbox_talk_id} name={self.attendee_name}>"
@@ -285,9 +258,7 @@ class ToolboxTopic(Base):
     code: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    category: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="general", index=True
-    )
+    category: Mapped[str] = mapped_column(String(50), nullable=False, default="general", index=True)
     language: Mapped[str] = mapped_column(String(10), nullable=False, default="en")
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
     version: Mapped[str] = mapped_column(String(20), nullable=False, default="1.0")
@@ -320,12 +291,8 @@ class PPEIssue(Base):
     brand: Mapped[str | None] = mapped_column(String(100), nullable=True)
     serial: Mapped[str | None] = mapped_column(String(100), nullable=True)
     valid_until: Mapped[date | None] = mapped_column(Date(), nullable=True)
-    returned_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="issued", index=True
-    )
+    returned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="issued", index=True)
 
     def __repr__(self) -> str:
         return f"<PPEIssue type={self.ppe_type} status={self.status}>"
@@ -343,21 +310,15 @@ class SafetyAudit(Base):
         index=True,
     )
     audit_type: Mapped[str] = mapped_column(String(50), nullable=False, default="internal")
-    conducted_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, index=True
-    )
+    conducted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
     conducted_by: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
         nullable=True,
     )
-    score_total: Mapped[Decimal | None] = mapped_column(
-        Numeric(5, 2), nullable=True
-    )
+    score_total: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
     max_score: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
-    status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="scheduled", index=True
-    )
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="scheduled", index=True)
     summary: Mapped[str] = mapped_column(Text, nullable=False, default="")
     # plain UUID — references external audit template registry
     checklist_template_ref: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
@@ -379,9 +340,7 @@ class SafetyAuditFinding(Base):
         index=True,
     )
     item_description: Mapped[str] = mapped_column(Text, nullable=False)
-    category: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="other", index=True
-    )
+    category: Mapped[str] = mapped_column(String(50), nullable=False, default="other", index=True)
     severity: Mapped[str] = mapped_column(String(20), nullable=False, default="low")
     is_passed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     evidence_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
@@ -392,10 +351,7 @@ class SafetyAuditFinding(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<AuditFinding audit={self.audit_id} category={self.category} "
-            f"passed={self.is_passed}>"
-        )
+        return f"<AuditFinding audit={self.audit_id} category={self.category} passed={self.is_passed}>"
 
 
 class CorrectiveAction(Base):
@@ -420,26 +376,25 @@ class CorrectiveAction(Base):
         nullable=True,
     )
     target_date: Mapped[date] = mapped_column(Date(), nullable=False)
-    status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="open", index=True
-    )
-    completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="open", index=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     verification_notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
     root_cause_category: Mapped[str | None] = mapped_column(String(50), nullable=True)
     # Structured 5-Whys chain (list of {"why": str, "answer": str}) — nullable
     # so existing rows continue to validate.
     five_whys: Mapped[list | None] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=True,
+        JSON,
+        nullable=True,
     )
     # Effectiveness verification (ISO 9001 §10.2.1) — a CAPA may close but
     # the corrective action's effectiveness is reviewed later.
     effectiveness_verified_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     effectiveness_verified_by: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True,
+        GUID(),
+        nullable=True,
     )
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
@@ -464,9 +419,7 @@ class SafetyCertification(Base):
     issue_date: Mapped[date] = mapped_column(Date(), nullable=False)
     valid_until: Mapped[date] = mapped_column(Date(), nullable=False, index=True)
     document_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
-    status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="valid", index=True
-    )
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="valid", index=True)
 
     def __repr__(self) -> str:
         return f"<Certification {self.cert_type} status={self.status}>"

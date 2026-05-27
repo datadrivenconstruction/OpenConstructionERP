@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -128,12 +127,8 @@ async def test_list_submittals_filters_by_project() -> None:
     service = _make_service()
     pid1 = uuid.uuid4()
     pid2 = uuid.uuid4()
-    await service.create_submittal(
-        SubmittalCreate(project_id=pid1, title="A", submittal_type="sample")
-    )
-    await service.create_submittal(
-        SubmittalCreate(project_id=pid2, title="B", submittal_type="sample")
-    )
+    await service.create_submittal(SubmittalCreate(project_id=pid1, title="A", submittal_type="sample"))
+    await service.create_submittal(SubmittalCreate(project_id=pid2, title="B", submittal_type="sample"))
 
     rows, total = await service.list_submittals(pid1)
     assert total == 1
@@ -237,9 +232,7 @@ async def test_review_submittal_revise_returns_ball_to_creator() -> None:
     )
     submittal.status = "submitted"
 
-    result = await service.review_submittal(
-        submittal.id, "revise_and_resubmit", "reviewer-1"
-    )
+    result = await service.review_submittal(submittal.id, "revise_and_resubmit", "reviewer-1")
     assert result.status == "revise_and_resubmit"
     assert result.ball_in_court == "creator-1"
 
@@ -262,9 +255,7 @@ async def test_update_closed_submittal_raises_400() -> None:
     submittal.status = "closed"
 
     with pytest.raises(HTTPException) as exc_info:
-        await service.update_submittal(
-            submittal.id, SubmittalUpdate(title="New Title")
-        )
+        await service.update_submittal(submittal.id, SubmittalUpdate(title="New Title"))
     assert exc_info.value.status_code == 400
 
 
@@ -282,9 +273,7 @@ async def test_update_invalid_status_transition_raises_400() -> None:
     )
     # draft -> approved is NOT allowed (must go through submitted first)
     with pytest.raises(HTTPException) as exc_info:
-        await service.update_submittal(
-            submittal.id, SubmittalUpdate(status="approved")
-        )
+        await service.update_submittal(submittal.id, SubmittalUpdate(status="approved"))
     assert exc_info.value.status_code == 400
 
 

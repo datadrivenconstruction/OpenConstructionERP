@@ -251,7 +251,8 @@ class NotificationService:
         return pref
 
     async def get_preferences(
-        self, user_id: uuid.UUID | str,
+        self,
+        user_id: uuid.UUID | str,
     ) -> list[NotificationPreference]:
         """Fetch all notification preferences for a user."""
         uid = uuid.UUID(str(user_id)) if not isinstance(user_id, uuid.UUID) else user_id
@@ -262,7 +263,10 @@ class NotificationService:
         return list(result.scalars().all())
 
     async def get_preference(
-        self, user_id: uuid.UUID, event_type: str, channel: str,
+        self,
+        user_id: uuid.UUID,
+        event_type: str,
+        channel: str,
     ) -> NotificationPreference | None:
         """Internal helper — look up a single pref row."""
         stmt = select(NotificationPreference).where(
@@ -361,7 +365,9 @@ class NotificationService:
         )
 
     async def flush_digest_queue(
-        self, channel: str, before: datetime | None = None,
+        self,
+        channel: str,
+        before: datetime | None = None,
     ) -> int:
         """Flush pending digest rows for ``channel`` whose ``scheduled_for``
         is ``<= before``.
@@ -426,16 +432,14 @@ class NotificationService:
         # Mark all flushed rows as sent.
         now = datetime.now(UTC)
         ids = [r.id for r in rows]
-        upd = (
-            update(NotificationDigestQueue)
-            .where(NotificationDigestQueue.id.in_(ids))
-            .values(sent_at=now)
-        )
+        upd = update(NotificationDigestQueue).where(NotificationDigestQueue.id.in_(ids)).values(sent_at=now)
         await self.session.execute(upd)
         await self.session.flush()
         logger.info(
             "Notification digest flush: channel=%s users=%d rows=%d",
-            channel, len(by_user), sent_total,
+            channel,
+            len(by_user),
+            sent_total,
         )
         return sent_total
 
@@ -468,7 +472,11 @@ KNOWN_EVENT_TYPES: list[dict[str, str]] = [
     {"event_type": "boq.position.created", "module": "boq", "description": "BOQ position created"},
     {"event_type": "boq.position.updated", "module": "boq", "description": "BOQ position updated"},
     # Change orders
-    {"event_type": "changeorders.approval.advanced", "module": "changeorders", "description": "Change-order approval advanced"},
+    {
+        "event_type": "changeorders.approval.advanced",
+        "module": "changeorders",
+        "description": "Change-order approval advanced",
+    },
     {"event_type": "changeorders.approval.approved", "module": "changeorders", "description": "Change-order approved"},
     {"event_type": "changeorders.approval.rejected", "module": "changeorders", "description": "Change-order rejected"},
     # Risk
@@ -502,5 +510,9 @@ KNOWN_EVENT_TYPES: list[dict[str, str]] = [
     {"event_type": "tendering.bid.received", "module": "tendering", "description": "Tender bid received"},
     {"event_type": "tendering.addendum.published", "module": "tendering", "description": "Tender addendum published"},
     # File comments (Epic B / B1)
-    {"event_type": "file_comments.mention.created", "module": "file_comments", "description": "You were @mentioned in a file comment"},
+    {
+        "event_type": "file_comments.mention.created",
+        "module": "file_comments",
+        "description": "You were @mentioned in a file comment",
+    },
 ]

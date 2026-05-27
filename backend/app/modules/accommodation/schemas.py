@@ -199,11 +199,7 @@ class BookingUpdate(BaseModel):
 
     @model_validator(mode="after")
     def _validate_dates(self) -> BookingUpdate:
-        if (
-            self.check_in is not None
-            and self.check_out is not None
-            and self.check_out <= self.check_in
-        ):
+        if self.check_in is not None and self.check_out is not None and self.check_out <= self.check_in:
             raise ValueError("check_out must be strictly after check_in")
         return self
 
@@ -267,11 +263,7 @@ class ChargeCreate(BaseModel):
 
     @model_validator(mode="after")
     def _validate_period(self) -> ChargeCreate:
-        if (
-            self.period_start is not None
-            and self.period_end is not None
-            and self.period_end < self.period_start
-        ):
+        if self.period_start is not None and self.period_end is not None and self.period_end < self.period_start:
             raise ValueError("period_end must not precede period_start")
         return self
 

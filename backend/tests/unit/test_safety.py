@@ -222,7 +222,8 @@ async def test_create_incident_with_corrective_actions() -> None:
     ]
     with patch("app.modules.safety.service.event_bus.publish", new_callable=AsyncMock):
         incident = await svc.create_incident(
-            _incident_data(corrective_actions=actions), user_id="u1",
+            _incident_data(corrective_actions=actions),
+            user_id="u1",
         )
     assert len(incident.corrective_actions) == 2
     assert incident.corrective_actions[0]["description"] == "Install guardrails"
@@ -286,7 +287,8 @@ async def test_create_observation_risk_score() -> None:
     svc = _make_service()
     with patch("app.modules.safety.service.event_bus.publish", new_callable=AsyncMock):
         obs = await svc.create_observation(
-            _observation_data(severity=4, likelihood=3), user_id="u1",
+            _observation_data(severity=4, likelihood=3),
+            user_id="u1",
         )
     assert obs.risk_score == 12  # 4 * 3
 
@@ -313,13 +315,15 @@ async def test_update_observation_recomputes_risk() -> None:
     svc = _make_service()
     with patch("app.modules.safety.service.event_bus.publish", new_callable=AsyncMock):
         obs = await svc.create_observation(
-            _observation_data(severity=2, likelihood=2), user_id="u1",
+            _observation_data(severity=2, likelihood=2),
+            user_id="u1",
         )
     assert obs.risk_score == 4
 
     with patch("app.modules.safety.service.event_bus.publish", new_callable=AsyncMock):
         updated = await svc.update_observation(
-            obs.id, ObservationUpdate(severity=5),
+            obs.id,
+            ObservationUpdate(severity=5),
         )
     # New risk = 5 * 2 (original likelihood) = 10
     assert updated.risk_score == 10
@@ -330,10 +334,12 @@ async def test_list_observations_with_type_filter() -> None:
     svc = _make_service()
     with patch("app.modules.safety.service.event_bus.publish", new_callable=AsyncMock):
         await svc.create_observation(
-            _observation_data(observation_type="unsafe_condition"), user_id="u1",
+            _observation_data(observation_type="unsafe_condition"),
+            user_id="u1",
         )
         await svc.create_observation(
-            _observation_data(observation_type="positive"), user_id="u1",
+            _observation_data(observation_type="positive"),
+            user_id="u1",
         )
 
     rows, total = await svc.list_observations(PROJECT_ID, observation_type="positive")
@@ -493,9 +499,7 @@ async def test_get_stats_malformed_does_not_mask_valid_recent() -> None:
     svc = _make_service()
     today = datetime.now(UTC).date()
     iso = f"{today.year:04d}-{today.month:02d}-{today.day:02d}"
-    svc.session = _StatsSession(
-        [_incident_row("zzzz-bad"), _incident_row(iso)], []
-    )
+    svc.session = _StatsSession([_incident_row("zzzz-bad"), _incident_row(iso)], [])
 
     stats = await svc.get_stats(PROJECT_ID)
 

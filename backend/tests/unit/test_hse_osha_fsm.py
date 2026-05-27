@@ -35,7 +35,6 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from fastapi import HTTPException  # noqa: E402
 
-
 PROJECT_ID = uuid.uuid4()
 
 
@@ -185,8 +184,8 @@ async def test_osha_300_csv_filters_recordable_and_year(db_session) -> None:
     assert data[5] == "Worker cut hand on rebar"
     assert data[6] == "3"
     assert data[7] == "0"
-    assert data[8] == "N"          # not a fatality
-    assert data[9] == "N"          # days_away > 0 → not "other recordable"
+    assert data[8] == "N"  # not a fatality
+    assert data[9] == "N"  # days_away > 0 → not "other recordable"
 
 
 # ── Slim CorrectiveAction FSM ─────────────────────────────────────────────
@@ -210,7 +209,9 @@ async def test_corrective_action_fsm_happy_path(db_session) -> None:
     assert ca.verified_by_user_id is None
 
     ca = await svc.transition_corrective_action(
-        ca.id, "in_progress", user_id=None,
+        ca.id,
+        "in_progress",
+        user_id=None,
     )
     assert ca.status == "in_progress"
     assert ca.verified_at is None
@@ -229,7 +230,9 @@ async def test_corrective_action_fsm_happy_path(db_session) -> None:
     assert "Inspected on 2026-05-19" in ca.verification_notes
 
     ca = await svc.transition_corrective_action(
-        ca.id, "closed", user_id=verifier_id,
+        ca.id,
+        "closed",
+        user_id=verifier_id,
     )
     assert ca.status == "closed"
     # verified_at must survive subsequent transitions for the audit trail.
@@ -250,7 +253,9 @@ async def test_corrective_action_fsm_rejects_skip_transition(db_session) -> None
 
     with pytest.raises(HTTPException) as exc_info:
         await svc.transition_corrective_action(
-            ca.id, "verified", user_id=None,
+            ca.id,
+            "verified",
+            user_id=None,
         )
     assert exc_info.value.status_code == 409
     detail = str(exc_info.value.detail)
@@ -273,13 +278,17 @@ async def test_corrective_action_fsm_rejects_backwards(db_session) -> None:
     verifier_id = await _make_user(db_session)
     await svc.transition_corrective_action(ca.id, "in_progress", user_id=None)
     await svc.transition_corrective_action(
-        ca.id, "verified", user_id=verifier_id,
+        ca.id,
+        "verified",
+        user_id=verifier_id,
     )
     await svc.transition_corrective_action(ca.id, "closed", user_id=None)
 
     with pytest.raises(HTTPException) as exc_info:
         await svc.transition_corrective_action(
-            ca.id, "in_progress", user_id=None,
+            ca.id,
+            "in_progress",
+            user_id=None,
         )
     assert exc_info.value.status_code == 409
 

@@ -291,6 +291,7 @@ def test_rerank_promotes_band_with_hard_filter_count(
 ) -> None:
     """A 0.78 reranked score with 3 hard filters → HIGH band per §6.4."""
     import math
+
     target_score = 0.78
     logit = math.log(target_score / (1 - target_score))
     fake = _stub_reranker([logit])

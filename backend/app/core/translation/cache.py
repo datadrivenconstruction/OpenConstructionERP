@@ -190,9 +190,7 @@ class TranslationCache:
 
     # ── public API ──────────────────────────────────────────────────
 
-    async def get(
-        self, text: str, source_lang: str, target_lang: str, domain: str
-    ) -> dict[str, Any] | None:
+    async def get(self, text: str, source_lang: str, target_lang: str, domain: str) -> dict[str, Any] | None:
         """Return cached row as a dict, or ``None`` if no hit.
 
         Backed by an in-process LRU keyed on ``(text_hash, src, tgt,
@@ -299,9 +297,7 @@ class TranslationCache:
             con = sqlite3.connect(self._path)
             try:
                 con.execute(
-                    "UPDATE oe_translation_cache "
-                    "SET usage_count = usage_count + 1, last_used_at = ? "
-                    "WHERE id = ?",
+                    "UPDATE oe_translation_cache SET usage_count = usage_count + 1, last_used_at = ? WHERE id = ?",
                     (now, row_id),
                 )
                 con.commit()
@@ -322,9 +318,7 @@ class TranslationCache:
             try:
                 con.row_factory = sqlite3.Row
                 cur = con.execute(
-                    "SELECT COUNT(*) AS rows, "
-                    "COALESCE(SUM(usage_count), 0) AS hits "
-                    "FROM oe_translation_cache"
+                    "SELECT COUNT(*) AS rows, COALESCE(SUM(usage_count), 0) AS hits FROM oe_translation_cache"
                 )
                 row = cur.fetchone()
                 return {"rows": int(row["rows"]), "hits": int(row["hits"])}

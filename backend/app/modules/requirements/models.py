@@ -146,9 +146,7 @@ class GateResult(Base):
     gate_number: Mapped[int] = mapped_column(Integer, nullable=False)
     gate_name: Mapped[str] = mapped_column(String(100), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="skipped")
-    score: Mapped[float] = mapped_column(
-        Float, nullable=False, default=0.0, server_default="0"
-    )
+    score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0")
     findings: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON,
         nullable=False,
@@ -194,15 +192,9 @@ class RequirementDeliverable(Base):
     lod: Mapped[str | None] = mapped_column(String(8), nullable=True)
     # ISO 19650 LOI: 1 | 2 | 3 | 4 | 5
     loi: Mapped[str | None] = mapped_column(String(8), nullable=True)
-    due_milestone_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True
-    )
-    submitted_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    accepted_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    due_milestone_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
 
     # Relationships
@@ -220,7 +212,4 @@ class RequirementDeliverable(Base):
         return "missing"
 
     def __repr__(self) -> str:
-        return (
-            f"<RequirementDeliverable {self.deliverable_type} "
-            f"LOD={self.lod} LOI={self.loi} ({self.status})>"
-        )
+        return f"<RequirementDeliverable {self.deliverable_type} LOD={self.lod} LOI={self.loi} ({self.status})>"

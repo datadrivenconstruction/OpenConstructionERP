@@ -46,7 +46,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -54,7 +56,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -72,9 +76,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     def _id_cols() -> list[sa.Column]:
         return [
@@ -104,14 +106,22 @@ def upgrade() -> None:
             sa.Column("description", sa.Text(), nullable=True),
             sa.Column("standard_ref", sa.String(64), nullable=True),
             sa.Column(
-                "items_json", sa.JSON(), nullable=False, server_default="[]",
+                "items_json",
+                sa.JSON(),
+                nullable=False,
+                server_default="[]",
             ),
             sa.Column(
-                "is_active", sa.Boolean(), nullable=False,
+                "is_active",
+                sa.Boolean(),
+                nullable=False,
                 server_default=sa.text("1" if is_sqlite else "true"),
             ),
             sa.Column(
-                "version", sa.Integer(), nullable=False, server_default="1",
+                "version",
+                sa.Integer(),
+                nullable=False,
+                server_default="1",
             ),
             sa.Column("created_by", sa.String(36), nullable=True),
         )
@@ -135,7 +145,10 @@ def upgrade() -> None:
             sa.Column("measurement_uncertainty", sa.String(255), nullable=True),
             sa.Column("owner_user_id", guid_type, nullable=True),
             sa.Column(
-                "status", sa.String(32), nullable=False, server_default="valid",
+                "status",
+                sa.String(32),
+                nullable=False,
+                server_default="valid",
             ),
             sa.Column("notes", sa.Text(), nullable=True),
         )
@@ -149,18 +162,29 @@ def upgrade() -> None:
             sa.Column("name", sa.String(255), nullable=False),
             sa.Column("task_description", sa.Text(), nullable=False),
             sa.Column(
-                "hazards_json", sa.JSON(), nullable=False, server_default="[]",
+                "hazards_json",
+                sa.JSON(),
+                nullable=False,
+                server_default="[]",
             ),
             sa.Column(
-                "required_ppe_json", sa.JSON(), nullable=False, server_default="[]",
+                "required_ppe_json",
+                sa.JSON(),
+                nullable=False,
+                server_default="[]",
             ),
             sa.Column("region", sa.String(32), nullable=True),
             sa.Column(
-                "is_active", sa.Boolean(), nullable=False,
+                "is_active",
+                sa.Boolean(),
+                nullable=False,
                 server_default=sa.text("1" if is_sqlite else "true"),
             ),
             sa.Column(
-                "version", sa.Integer(), nullable=False, server_default="1",
+                "version",
+                sa.Integer(),
+                nullable=False,
+                server_default="1",
             ),
             sa.Column("created_by", sa.String(36), nullable=True),
         )

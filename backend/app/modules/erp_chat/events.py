@@ -42,11 +42,7 @@ async def _index_message(event: Event) -> None:
             # project id without a second query.
             from sqlalchemy import select
 
-            stmt = (
-                select(ChatMessage)
-                .options(selectinload(ChatMessage.session))
-                .where(ChatMessage.id == message_id)
-            )
+            stmt = select(ChatMessage).options(selectinload(ChatMessage.session)).where(ChatMessage.id == message_id)
             row = (await session.execute(stmt)).scalar_one_or_none()
             if row is None:
                 await vector_delete_one(chat_message_adapter, str(message_id))

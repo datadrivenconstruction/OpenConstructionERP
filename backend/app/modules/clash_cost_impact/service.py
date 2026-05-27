@@ -201,7 +201,8 @@ def _project_cost_config(project: Project) -> tuple[Decimal, Decimal]:
             except (InvalidOperation, ValueError, TypeError):
                 logger.debug(
                     "Bad rework_factor %r on project %s — using default",
-                    raw_factor, project.id,
+                    raw_factor,
+                    project.id,
                 )
         raw_rate = cfg.get("blended_rate")
         if raw_rate is not None:
@@ -212,7 +213,8 @@ def _project_cost_config(project: Project) -> tuple[Decimal, Decimal]:
             except (InvalidOperation, ValueError, TypeError):
                 logger.debug(
                     "Bad blended_rate %r on project %s — using default",
-                    raw_rate, project.id,
+                    raw_rate,
+                    project.id,
                 )
     return factor, rate
 
@@ -239,9 +241,7 @@ class ClashCostImpactService:
     async def _load_run(self, run_id: uuid.UUID) -> ClashRun | None:
         return await self.session.get(ClashRun, run_id)
 
-    async def project_id_for_clash(
-        self, clash_id: uuid.UUID
-    ) -> uuid.UUID | None:
+    async def project_id_for_clash(self, clash_id: uuid.UUID) -> uuid.UUID | None:
         """Resolve owning project id for a clash without computing impact.
 
         Used by the router to run the IDOR access check *before* doing
@@ -259,9 +259,7 @@ class ClashCostImpactService:
     async def _load_project(self, project_id: uuid.UUID) -> Project | None:
         return await self.session.get(Project, project_id)
 
-    async def _positions_for_project(
-        self, project_id: uuid.UUID
-    ) -> list[Position]:
+    async def _positions_for_project(self, project_id: uuid.UUID) -> list[Position]:
         """All BOQ positions whose owning BOQ belongs to ``project_id``.
 
         We deliberately fetch every position once and filter in Python on
@@ -270,11 +268,7 @@ class ClashCostImpactService:
         test SQLite + prod Postgres pair we ship), and a single project's
         BOQ count is in the 10² range, well within memory.
         """
-        stmt = (
-            select(Position)
-            .join(BOQ, BOQ.id == Position.boq_id)
-            .where(BOQ.project_id == project_id)
-        )
+        stmt = select(Position).join(BOQ, BOQ.id == Position.boq_id).where(BOQ.project_id == project_id)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -359,19 +353,12 @@ class ClashCostImpactService:
         """
         rework_factor, blended_rate = _project_cost_config(project)
 
-        rework_total = sum(
-            (_to_decimal(p.total) for p in affected), Decimal("0")
-        )
+        rework_total = sum((_to_decimal(p.total) for p in affected), Decimal("0"))
         rework_subtotal = rework_total * rework_factor
 
-        has_guids = bool(
-            (clash.a_stable_id or "").strip()
-            or (clash.b_stable_id or "").strip()
-        )
+        has_guids = bool((clash.a_stable_id or "").strip() or (clash.b_stable_id or "").strip())
         if has_guids:
-            labour_hours_int = trade_pair_hours(
-                clash.a_discipline, clash.b_discipline
-            )
+            labour_hours_int = trade_pair_hours(clash.a_discipline, clash.b_discipline)
         else:
             labour_hours_int = 0
         labour_hours = Decimal(labour_hours_int)
@@ -398,9 +385,7 @@ class ClashCostImpactService:
             "currency": project.currency or "",
             "components": {
                 "rework_positions_total": _money_round(rework_total),
-                "rework_factor_pct": float(
-                    _money_quantise(rework_factor * Decimal("100"))
-                ),
+                "rework_factor_pct": float(_money_quantise(rework_factor * Decimal("100"))),
                 "rework_subtotal": _money_round(rework_subtotal),
                 "labour_hours": float(labour_hours),
                 "blended_rate": float(_money_quantise(blended_rate)),
@@ -420,9 +405,7 @@ class ClashCostImpactService:
         }
         return payload, total
 
-    async def impact_for_clash(
-        self, clash_id: uuid.UUID
-    ) -> tuple[dict[str, Any] | None, uuid.UUID | None]:
+    async def impact_for_clash(self, clash_id: uuid.UUID) -> tuple[dict[str, Any] | None, uuid.UUID | None]:
         """Resolve a single clash → cost-impact payload + owning project id.
 
         Returns ``(None, None)`` when the clash row is missing — the
@@ -464,9 +447,7 @@ class ClashCostImpactService:
         if project is None:
             return None
 
-        clashes = await self._open_clashes_for_project(
-            project_id, status_filter=status_filter
-        )
+        clashes = await self._open_clashes_for_project(project_id, status_filter=status_filter)
         if not clashes:
             return {
                 "project_id": project.id,
@@ -481,9 +462,7 @@ class ClashCostImpactService:
         positions = await self._positions_for_project(project_id)
 
         total = Decimal("0")
-        by_pair_total: dict[tuple[str, str], Decimal] = defaultdict(
-            lambda: Decimal("0")
-        )
+        by_pair_total: dict[tuple[str, str], Decimal] = defaultdict(lambda: Decimal("0"))
         by_pair_count: dict[tuple[str, str], int] = defaultdict(int)
 
         for clash in clashes:

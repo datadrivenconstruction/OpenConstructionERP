@@ -36,11 +36,9 @@ from app.modules.schedule.service_4d import (
     STATUS_DELAYED,
     STATUS_IN_PROGRESS,
     STATUS_NOT_STARTED,
-    EacPredicateResolver,
     ScheduleSnapshotService,
     _derive_task_status,
 )
-
 
 PROJECT_ID = uuid.uuid4()
 
@@ -52,9 +50,9 @@ def _register_minimal_models() -> None:
     with irrelevant tables. We import only the FK-target chain rooted at
     ``oe_schedule_schedule.project_id``.
     """
-    import app.modules.users.models  # noqa: F401  — projects.owner_id FK
     import app.modules.projects.models  # noqa: F401  — schedule.project_id FK
     import app.modules.schedule.models  # noqa: F401  — registers 4D tables
+    import app.modules.users.models  # noqa: F401  — projects.owner_id FK
 
 
 async def _seed_project(session: AsyncSession, project_id: uuid.UUID) -> None:
@@ -258,9 +256,7 @@ async def test_snapshot_aggregates_multiple_tasks_with_priority(session: AsyncSe
     )
 
     service = ScheduleSnapshotService(session, resolver=resolver)
-    statuses = await service.snapshot(
-        schedule.id, date(2026, 4, 5), model_version_id=None
-    )
+    statuses = await service.snapshot(schedule.id, date(2026, 4, 5), model_version_id=None)
 
     # Task1 hit 100% but the snapshot is taken before its planned end_date
     # (as_of=2026-04-05 < end=2026-04-10) → ahead_of_schedule per FR-6.5.
@@ -289,19 +285,13 @@ async def test_snapshot_skips_excluded_links(session: AsyncSession):
     await session.flush()
 
     pred = {"selector": "anything"}
-    excluded = EacScheduleLink(
-        task_id=activity.id, predicate_json=pred, mode="excluded"
-    )
+    excluded = EacScheduleLink(task_id=activity.id, predicate_json=pred, mode="excluded")
     session.add(excluded)
     await session.flush()
 
-    resolver = _FixedResolver(
-        {(None, repr(sorted(pred.items()))): ["E_should_not_appear"]}
-    )
+    resolver = _FixedResolver({(None, repr(sorted(pred.items()))): ["E_should_not_appear"]})
     service = ScheduleSnapshotService(session, resolver=resolver)
-    statuses = await service.snapshot(
-        schedule.id, date(2026, 4, 1), model_version_id=None
-    )
+    statuses = await service.snapshot(schedule.id, date(2026, 4, 1), model_version_id=None)
 
     assert statuses == {}
 
@@ -309,7 +299,5 @@ async def test_snapshot_skips_excluded_links(session: AsyncSession):
 @pytest.mark.asyncio
 async def test_snapshot_empty_for_unknown_schedule(session: AsyncSession):
     service = ScheduleSnapshotService(session, resolver=_FixedResolver({}))
-    statuses = await service.snapshot(
-        uuid.uuid4(), date(2026, 4, 1), model_version_id=None
-    )
+    statuses = await service.snapshot(uuid.uuid4(), date(2026, 4, 1), model_version_id=None)
     assert statuses == {}

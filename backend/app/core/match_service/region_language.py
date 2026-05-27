@@ -74,7 +74,7 @@ REGION_LANGUAGE: dict[str, str] = {
     "IT_ROME": "it",
     "PT_LISBON": "pt",
     "BR_SAOPAULO": "pt",
-    "PT_SAOPAULO": "pt",        # legacy id, retained for back-compat
+    "PT_SAOPAULO": "pt",  # legacy id, retained for back-compat
     # English / Anglophone
     "GB_LONDON": "en",
     "IE_DUBLIN": "en",
@@ -152,11 +152,11 @@ REGION_LANGUAGE: dict[str, str] = {
 # until a one-time migration renames them to the canonical id at the DB
 # level. Each alias must point to a key in ``REGION_LANGUAGE`` above.
 _ALIASES: dict[str, str] = {
-    "UK_GBP": "GB_LONDON",       # used by an early UK rate import
-    "ENG_TORONTO": "CA_TORONTO", # mis-prefixed in a 2025 batch
-    "SP_BARCELONA": "ES_MADRID", # ES is the ISO code; SP was a typo
-    "CS_PRAGUE": "CZ_PRAGUE",    # CS is the language code, not country
-    "ZH_SHANGHAI": "CN_SHANGHAI",# language-prefixed catalogue id
+    "UK_GBP": "GB_LONDON",  # used by an early UK rate import
+    "ENG_TORONTO": "CA_TORONTO",  # mis-prefixed in a 2025 batch
+    "SP_BARCELONA": "ES_MADRID",  # ES is the ISO code; SP was a typo
+    "CS_PRAGUE": "CZ_PRAGUE",  # CS is the language code, not country
+    "ZH_SHANGHAI": "CN_SHANGHAI",  # language-prefixed catalogue id
     "JA_TOKYO": "JP_TOKYO",
     "KO_SEOUL": "KR_SEOUL",
     "VI_HANOI": "VN_HANOI",
@@ -247,24 +247,24 @@ def _load_region_language_yaml_overlay() -> None:
 # carries the right language, but pinning them explicitly makes the
 # intent unambiguous to the next maintainer who reads ``language_for``.
 _BARE_COUNTRY_OVERRIDES: dict[str, str] = {
-    "AR": "es",      # Argentina (Buenos Aires) — not Arabic
-    "BG": "bg",      # Bulgaria
-    "BR": "pt",      # Brazil
-    "CN": "zh",      # China
-    "CZ": "cs",      # Czech Republic — language is cs, not cz
-    "GB": "en",      # United Kingdom — historical British alias
-    "HR": "hr",      # Croatia
-    "ID": "id",      # Indonesia
-    "JP": "ja",      # Japan
-    "KR": "ko",      # Korea
-    "MN": "mn",      # Mongolia
-    "RO": "ro",      # Romania
-    "TH": "th",      # Thailand
-    "TR": "tr",      # Turkey
-    "VN": "vi",      # Vietnam
-    "AE": "ar",      # United Arab Emirates speaks Arabic
-    "SA": "ar",      # Saudi Arabia speaks Arabic
-    "USA": "en",     # 3-letter US alias still in use by some catalogues
+    "AR": "es",  # Argentina (Buenos Aires) — not Arabic
+    "BG": "bg",  # Bulgaria
+    "BR": "pt",  # Brazil
+    "CN": "zh",  # China
+    "CZ": "cs",  # Czech Republic — language is cs, not cz
+    "GB": "en",  # United Kingdom — historical British alias
+    "HR": "hr",  # Croatia
+    "ID": "id",  # Indonesia
+    "JP": "ja",  # Japan
+    "KR": "ko",  # Korea
+    "MN": "mn",  # Mongolia
+    "RO": "ro",  # Romania
+    "TH": "th",  # Thailand
+    "TR": "tr",  # Turkey
+    "VN": "vi",  # Vietnam
+    "AE": "ar",  # United Arab Emirates speaks Arabic
+    "SA": "ar",  # Saudi Arabia speaks Arabic
+    "USA": "en",  # 3-letter US alias still in use by some catalogues
 }
 
 

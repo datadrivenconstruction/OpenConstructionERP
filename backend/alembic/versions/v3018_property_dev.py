@@ -220,7 +220,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -248,9 +250,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── development ──────────────────────────────────────────────────────
     if not _has_table(inspector, "oe_property_dev_development"):
@@ -268,7 +268,10 @@ def upgrade() -> None:
             sa.Column("name", sa.String(255), nullable=False, server_default=""),
             sa.Column("location_address", sa.Text(), nullable=True),
             sa.Column(
-                "total_plots", sa.Integer(), nullable=False, server_default="0",
+                "total_plots",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
                 "sales_phase",
@@ -280,13 +283,22 @@ def upgrade() -> None:
             sa.Column("completion_date", sa.String(20), nullable=True),
             sa.Column("marketing_brief", sa.Text(), nullable=True),
             sa.Column(
-                "status", sa.String(40), nullable=False, server_default="active",
+                "status",
+                sa.String(40),
+                nullable=False,
+                server_default="active",
             ),
             sa.Column(
-                "units", sa.String(16), nullable=False, server_default="metric",
+                "units",
+                sa.String(16),
+                nullable=False,
+                server_default="metric",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
 
@@ -300,7 +312,8 @@ def upgrade() -> None:
                 "development_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_development.id", ondelete="CASCADE",
+                    "oe_property_dev_development.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -332,7 +345,10 @@ def upgrade() -> None:
             sa.Column("thumbnail_url", sa.String(1024), nullable=True),
             sa.Column("description", sa.Text(), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
                 "development_id",
@@ -351,7 +367,8 @@ def upgrade() -> None:
                 "house_type_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_house_type.id", ondelete="CASCADE",
+                    "oe_property_dev_house_type.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -365,7 +382,10 @@ def upgrade() -> None:
             ),
             sa.Column("description", sa.Text(), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
                 "house_type_id",
@@ -384,7 +404,8 @@ def upgrade() -> None:
                 "development_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_development.id", ondelete="CASCADE",
+                    "oe_property_dev_development.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -393,7 +414,8 @@ def upgrade() -> None:
                 "house_type_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_house_type.id", ondelete="SET NULL",
+                    "oe_property_dev_house_type.id",
+                    ondelete="SET NULL",
                 ),
                 nullable=True,
             ),
@@ -422,7 +444,10 @@ def upgrade() -> None:
             ),
             sa.Column("currency", sa.String(8), nullable=False, server_default=""),
             sa.Column(
-                "status", sa.String(40), nullable=False, server_default="planned",
+                "status",
+                sa.String(40),
+                nullable=False,
+                server_default="planned",
             ),
             sa.Column("reservation_deadline", sa.String(20), nullable=True),
             sa.Column(
@@ -432,7 +457,10 @@ def upgrade() -> None:
                 server_default="0",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
                 "development_id",
@@ -451,7 +479,8 @@ def upgrade() -> None:
                 "development_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_development.id", ondelete="CASCADE",
+                    "oe_property_dev_development.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -464,10 +493,16 @@ def upgrade() -> None:
                 server_default="extras",
             ),
             sa.Column(
-                "display_order", sa.Integer(), nullable=False, server_default="0",
+                "display_order",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column(
-                "allow_multiple", sa.Boolean(), nullable=False, server_default=sa.text("0"),
+                "allow_multiple",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.text("0"),
             ),
             sa.Column("max_count", sa.Integer(), nullable=True),
             sa.Column(
@@ -477,7 +512,10 @@ def upgrade() -> None:
                 server_default="60",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint(
                 "development_id",
@@ -512,12 +550,18 @@ def upgrade() -> None:
             ),
             sa.Column("currency", sa.String(8), nullable=False, server_default=""),
             sa.Column(
-                "lead_time_days", sa.Integer(), nullable=False, server_default="0",
+                "lead_time_days",
+                sa.Integer(),
+                nullable=False,
+                server_default="0",
             ),
             sa.Column("supplier_name", sa.String(255), nullable=True),
             sa.Column("thumbnail_url", sa.String(1024), nullable=True),
             sa.Column(
-                "is_active", sa.Boolean(), nullable=False, server_default=sa.text("1"),
+                "is_active",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.text("1"),
             ),
             sa.Column(
                 "compatibility_rules",
@@ -526,7 +570,10 @@ def upgrade() -> None:
                 server_default="{}",
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
 
@@ -540,7 +587,8 @@ def upgrade() -> None:
                 "development_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_development.id", ondelete="CASCADE",
+                    "oe_property_dev_development.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -557,7 +605,10 @@ def upgrade() -> None:
             sa.Column("phone", sa.String(40), nullable=True),
             sa.Column("language", sa.String(10), nullable=False, server_default="en"),
             sa.Column(
-                "status", sa.String(40), nullable=False, server_default="lead",
+                "status",
+                sa.String(40),
+                nullable=False,
+                server_default="lead",
             ),
             sa.Column(
                 "contract_value",
@@ -570,7 +621,10 @@ def upgrade() -> None:
             sa.Column("deposit_paid_at", sa.String(20), nullable=True),
             sa.Column("freeze_deadline", sa.String(20), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint("plot_id", name="uq_oe_property_dev_buyer_plot"),
         )
@@ -588,7 +642,10 @@ def upgrade() -> None:
                 nullable=False,
             ),
             sa.Column(
-                "status", sa.String(40), nullable=False, server_default="draft",
+                "status",
+                sa.String(40),
+                nullable=False,
+                server_default="draft",
             ),
             sa.Column("submitted_at", sa.String(20), nullable=True),
             sa.Column("locked_at", sa.String(20), nullable=True),
@@ -600,7 +657,10 @@ def upgrade() -> None:
             ),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
 
@@ -614,7 +674,8 @@ def upgrade() -> None:
                 "selection_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_buyer_selection.id", ondelete="CASCADE",
+                    "oe_property_dev_buyer_selection.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
@@ -622,12 +683,16 @@ def upgrade() -> None:
                 "option_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_buyer_option.id", ondelete="RESTRICT",
+                    "oe_property_dev_buyer_option.id",
+                    ondelete="RESTRICT",
                 ),
                 nullable=False,
             ),
             sa.Column(
-                "quantity", sa.Integer(), nullable=False, server_default="1",
+                "quantity",
+                sa.Integer(),
+                nullable=False,
+                server_default="1",
             ),
             sa.Column(
                 "unit_price_snapshot",
@@ -648,7 +713,10 @@ def upgrade() -> None:
                 server_default=sa.text("0"),
             ),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
 
@@ -682,7 +750,10 @@ def upgrade() -> None:
             sa.Column("customer_signature_ref", sa.String(255), nullable=True),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.UniqueConstraint("plot_id", name="uq_oe_property_dev_handover_plot"),
         )
@@ -697,23 +768,33 @@ def upgrade() -> None:
                 "handover_id",
                 guid,
                 sa.ForeignKey(
-                    "oe_property_dev_handover.id", ondelete="CASCADE",
+                    "oe_property_dev_handover.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column("location_in_plot", sa.String(255), nullable=True),
             sa.Column(
-                "severity", sa.String(20), nullable=False, server_default="minor",
+                "severity",
+                sa.String(20),
+                nullable=False,
+                server_default="minor",
             ),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
             sa.Column(
-                "status", sa.String(20), nullable=False, server_default="open",
+                "status",
+                sa.String(20),
+                nullable=False,
+                server_default="open",
             ),
             sa.Column("reported_at", sa.String(20), nullable=True),
             sa.Column("fixed_at", sa.String(20), nullable=True),
             sa.Column("fix_notes", sa.Text(), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
 
@@ -737,18 +818,27 @@ def upgrade() -> None:
             ),
             sa.Column("raised_at", sa.String(20), nullable=True),
             sa.Column(
-                "category", sa.String(40), nullable=False, server_default="defect",
+                "category",
+                sa.String(40),
+                nullable=False,
+                server_default="defect",
             ),
             sa.Column("description", sa.Text(), nullable=False, server_default=""),
             sa.Column(
-                "status", sa.String(40), nullable=False, server_default="raised",
+                "status",
+                sa.String(40),
+                nullable=False,
+                server_default="raised",
             ),
             sa.Column("accepted_at", sa.String(20), nullable=True),
             sa.Column("closed_at", sa.String(20), nullable=True),
             # linked_service_ticket_id intentionally NO FK (cross-module).
             sa.Column("linked_service_ticket_id", guid, nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
         )
 

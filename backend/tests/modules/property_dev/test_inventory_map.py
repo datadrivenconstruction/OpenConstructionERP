@@ -41,7 +41,6 @@ from httpx import AsyncClient
 
 from .conftest import _register_user
 
-
 # ────────────────────────────────────────────────────────────────────────
 # Fixtures — independent tenants so failures here can't poison R7/R8.
 # ────────────────────────────────────────────────────────────────────────
@@ -161,9 +160,7 @@ async def inv_tenant_b(client: AsyncClient):
 @pytest_asyncio.fixture(scope="module")
 async def inv_editor_in_tenant_a_proj(client: AsyncClient, inv_tenant_a):
     """An EDITOR-role user owning their own dev — RBAC harness."""
-    _uid, _email, headers = await _register_user(
-        client, role="editor", tag="invED"
-    )
+    _uid, _email, headers = await _register_user(client, role="editor", tag="invED")
     proj = await client.post(
         "/api/v1/projects/",
         json={
@@ -211,12 +208,12 @@ async def inv_editor_in_tenant_a_proj(client: AsyncClient, inv_tenant_a):
 
 @pytest.mark.asyncio
 async def test_inventory_map_returns_blocks_floors_plots(
-    client: AsyncClient, inv_tenant_a,
+    client: AsyncClient,
+    inv_tenant_a,
 ):
     """The map response contains the 12 plots distributed across blocks/floors."""
     res = await client.get(
-        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}"
-        "/inventory-map/",
+        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}/inventory-map/",
         headers=inv_tenant_a["headers"],
     )
     assert res.status_code == 200, res.text
@@ -226,20 +223,18 @@ async def test_inventory_map_returns_blocks_floors_plots(
     # All plots have block_code=None at the model level (we set
     # plot_number with a prefix but no block_id) → they fall under
     # the synthetic "—" unassigned block. We assert the total count.
-    total_plots = sum(
-        len(f["plots"]) for b in body["blocks"] for f in b["floors"]
-    )
+    total_plots = sum(len(f["plots"]) for b in body["blocks"] for f in b["floors"])
     assert total_plots == 12
 
 
 @pytest.mark.asyncio
 async def test_inventory_map_summary_counts_match(
-    client: AsyncClient, inv_tenant_a,
+    client: AsyncClient,
+    inv_tenant_a,
 ):
     """KPI ribbon counters are correct (12 plots, all available/planned)."""
     res = await client.get(
-        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}"
-        "/inventory-map/",
+        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}/inventory-map/",
         headers=inv_tenant_a["headers"],
     )
     assert res.status_code == 200
@@ -255,31 +250,30 @@ async def test_inventory_map_summary_counts_match(
 
 @pytest.mark.asyncio
 async def test_inventory_map_floors_descend_within_block(
-    client: AsyncClient, inv_tenant_a,
+    client: AsyncClient,
+    inv_tenant_a,
 ):
     """Floors are returned high-to-low inside each block card."""
     res = await client.get(
-        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}"
-        "/inventory-map/",
+        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}/inventory-map/",
         headers=inv_tenant_a["headers"],
     )
     body = res.json()
     for block in body["blocks"]:
         floors = [f["floor"] for f in block["floors"]]
         assert floors == sorted(floors, reverse=True), (
-            f"Floors not sorted descending in block {block['block_code']!r}: "
-            f"{floors!r}"
+            f"Floors not sorted descending in block {block['block_code']!r}: {floors!r}"
         )
 
 
 @pytest.mark.asyncio
 async def test_inventory_map_money_fields_are_strings(
-    client: AsyncClient, inv_tenant_a,
+    client: AsyncClient,
+    inv_tenant_a,
 ):
     """Plot ``base_price`` + ``area_m2`` arrive as plain-decimal strings."""
     res = await client.get(
-        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}"
-        "/inventory-map/",
+        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}/inventory-map/",
         headers=inv_tenant_a["headers"],
     )
     body = res.json()
@@ -293,12 +287,13 @@ async def test_inventory_map_money_fields_are_strings(
 
 @pytest.mark.asyncio
 async def test_inventory_map_idor_cross_tenant_404(
-    client: AsyncClient, inv_tenant_a, inv_tenant_b,
+    client: AsyncClient,
+    inv_tenant_a,
+    inv_tenant_b,
 ):
     """Tenant B reading tenant A's inventory map → 404 (never 403)."""
     res = await client.get(
-        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}"
-        "/inventory-map/",
+        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}/inventory-map/",
         headers=inv_tenant_b["headers"],
     )
     assert res.status_code == 404, res.text
@@ -306,7 +301,8 @@ async def test_inventory_map_idor_cross_tenant_404(
 
 @pytest.mark.asyncio
 async def test_inventory_map_random_uuid_also_404(
-    client: AsyncClient, inv_tenant_b,
+    client: AsyncClient,
+    inv_tenant_b,
 ):
     """A random UUID returns the same 404 as a cross-tenant one (no oracle)."""
     res = await client.get(
@@ -323,13 +319,13 @@ async def test_inventory_map_random_uuid_also_404(
 
 @pytest.mark.asyncio
 async def test_bulk_hold_flips_available_plots(
-    client: AsyncClient, inv_tenant_a,
+    client: AsyncClient,
+    inv_tenant_a,
 ):
     """Holding 2 available plots flips both to ``held``."""
     pid1, pid2 = inv_tenant_a["plot_ids"][0], inv_tenant_a["plot_ids"][1]
     res = await client.post(
-        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}"
-        "/inventory-map/bulk-hold/",
+        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}/inventory-map/bulk-hold/",
         headers=inv_tenant_a["headers"],
         json={
             "plot_ids": [pid1, pid2],
@@ -352,8 +348,7 @@ async def test_bulk_hold_flips_available_plots(
 
     # Release them again so the dev is clean for downstream tests.
     rel = await client.post(
-        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}"
-        "/inventory-map/bulk-release/",
+        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}/inventory-map/bulk-release/",
         headers=inv_tenant_a["headers"],
         json={"plot_ids": [pid1, pid2]},
     )
@@ -362,7 +357,8 @@ async def test_bulk_hold_flips_available_plots(
 
 @pytest.mark.asyncio
 async def test_bulk_hold_rejects_reserved_plot_with_409_and_rolls_back(
-    client: AsyncClient, inv_tenant_a,
+    client: AsyncClient,
+    inv_tenant_a,
 ):
     """If ANY plot in the batch is reserved, the WHOLE batch is rejected.
 
@@ -401,18 +397,19 @@ async def test_bulk_hold_rejects_reserved_plot_with_409_and_rolls_back(
     # Critical: the available plot must NOT have been left in 'held' —
     # the SAVEPOINT must have rolled back BOTH flips.
     avail_after = await client.get(
-        f"/api/v1/property-dev/plots/{pid_avail}", headers=headers,
+        f"/api/v1/property-dev/plots/{pid_avail}",
+        headers=headers,
     )
     assert avail_after.status_code == 200
     assert avail_after.json()["status"] == "planned", (
-        "SAVEPOINT did not roll back the available-plot flip — "
-        "atomicity broken"
+        "SAVEPOINT did not roll back the available-plot flip — atomicity broken"
     )
 
 
 @pytest.mark.asyncio
 async def test_bulk_hold_already_held_is_silent_skip(
-    client: AsyncClient, inv_tenant_a,
+    client: AsyncClient,
+    inv_tenant_a,
 ):
     """Re-holding an already-held plot is a soft skip, not a 409."""
     headers = inv_tenant_a["headers"]
@@ -443,12 +440,13 @@ async def test_bulk_hold_already_held_is_silent_skip(
 
 @pytest.mark.asyncio
 async def test_bulk_hold_idor_cross_tenant_404(
-    client: AsyncClient, inv_tenant_a, inv_tenant_b,
+    client: AsyncClient,
+    inv_tenant_a,
+    inv_tenant_b,
 ):
     """Tenant B trying to hold tenant A's plots → 404 (not 403/200)."""
     res = await client.post(
-        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}"
-        "/inventory-map/bulk-hold/",
+        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}/inventory-map/bulk-hold/",
         headers=inv_tenant_b["headers"],
         json={
             "plot_ids": [inv_tenant_a["plot_ids"][5]],
@@ -460,13 +458,12 @@ async def test_bulk_hold_idor_cross_tenant_404(
 
 @pytest.mark.asyncio
 async def test_bulk_hold_editor_role_gets_403(
-    client: AsyncClient, inv_editor_in_tenant_a_proj,
+    client: AsyncClient,
+    inv_editor_in_tenant_a_proj,
 ):
     """EDITOR role on their OWN dev still hits 403 — bulk-hold is MANAGER+."""
     res = await client.post(
-        f"/api/v1/property-dev/developments/"
-        f"{inv_editor_in_tenant_a_proj['development_id']}"
-        "/inventory-map/bulk-hold/",
+        f"/api/v1/property-dev/developments/{inv_editor_in_tenant_a_proj['development_id']}/inventory-map/bulk-hold/",
         headers=inv_editor_in_tenant_a_proj["headers"],
         json={
             "plot_ids": [inv_editor_in_tenant_a_proj["plot_id"]],
@@ -478,12 +475,12 @@ async def test_bulk_hold_editor_role_gets_403(
 
 @pytest.mark.asyncio
 async def test_bulk_hold_rejects_empty_plot_ids(
-    client: AsyncClient, inv_tenant_a,
+    client: AsyncClient,
+    inv_tenant_a,
 ):
     """Empty plot_ids → 422 (avoids audit-log noise from no-op calls)."""
     res = await client.post(
-        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}"
-        "/inventory-map/bulk-hold/",
+        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}/inventory-map/bulk-hold/",
         headers=inv_tenant_a["headers"],
         json={"plot_ids": [], "hold_reason": "noop"},
     )
@@ -497,7 +494,8 @@ async def test_bulk_hold_rejects_empty_plot_ids(
 
 @pytest.mark.asyncio
 async def test_bulk_release_held_plots_flips_to_planned(
-    client: AsyncClient, inv_tenant_a,
+    client: AsyncClient,
+    inv_tenant_a,
 ):
     """Held plots are released back to ``planned``."""
     headers = inv_tenant_a["headers"]
@@ -525,14 +523,16 @@ async def test_bulk_release_held_plots_flips_to_planned(
 
     # Confirm the plot is back to planned.
     plot = await client.get(
-        f"/api/v1/property-dev/plots/{pid}", headers=headers,
+        f"/api/v1/property-dev/plots/{pid}",
+        headers=headers,
     )
     assert plot.json()["status"] == "planned"
 
 
 @pytest.mark.asyncio
 async def test_bulk_release_on_non_held_is_idempotent(
-    client: AsyncClient, inv_tenant_a,
+    client: AsyncClient,
+    inv_tenant_a,
 ):
     """Releasing a planned plot is a silent skip (200, updated=0)."""
     headers = inv_tenant_a["headers"]
@@ -553,12 +553,13 @@ async def test_bulk_release_on_non_held_is_idempotent(
 
 @pytest.mark.asyncio
 async def test_bulk_release_idor_cross_tenant_404(
-    client: AsyncClient, inv_tenant_a, inv_tenant_b,
+    client: AsyncClient,
+    inv_tenant_a,
+    inv_tenant_b,
 ):
     """Tenant B trying to release tenant A's plots → 404."""
     res = await client.post(
-        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}"
-        "/inventory-map/bulk-release/",
+        f"/api/v1/property-dev/developments/{inv_tenant_a['development_id']}/inventory-map/bulk-release/",
         headers=inv_tenant_b["headers"],
         json={"plot_ids": [inv_tenant_a["plot_ids"][8]]},
     )
@@ -567,7 +568,8 @@ async def test_bulk_release_idor_cross_tenant_404(
 
 @pytest.mark.asyncio
 async def test_bulk_release_editor_role_gets_403(
-    client: AsyncClient, inv_editor_in_tenant_a_proj,
+    client: AsyncClient,
+    inv_editor_in_tenant_a_proj,
 ):
     """EDITOR role can't bulk-release — MANAGER+ gate."""
     res = await client.post(
@@ -582,7 +584,8 @@ async def test_bulk_release_editor_role_gets_403(
 
 @pytest.mark.asyncio
 async def test_summary_reflects_held_after_hold(
-    client: AsyncClient, inv_tenant_a,
+    client: AsyncClient,
+    inv_tenant_a,
 ):
     """KPI ribbon updates to show held count after a hold call."""
     headers = inv_tenant_a["headers"]

@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, date, datetime
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -33,13 +33,11 @@ import pytest_asyncio
 from httpx import AsyncClient
 
 from app.modules.property_dev.pricing_engine import (
-    PriceQuote,
     RULE_TYPES,
     compute_quote_pure,
 )
 
 from .conftest import _register_user
-
 
 # ── Pure-engine fixtures (no DB) ────────────────────────────────────────
 
@@ -102,7 +100,10 @@ def test_early_bird_matches_before_cutoff():
         adjustment_pct=Decimal("-5"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=pl, base_price=plot.price_base, rules=[rule],
+        plot=plot,
+        price_list=pl,
+        base_price=plot.price_base,
+        rules=[rule],
         quote_date=date(2026, 7, 1),
     )
     assert q.total == Decimal("332500.00")
@@ -119,7 +120,10 @@ def test_early_bird_does_not_match_after_cutoff():
         adjustment_pct=Decimal("-5"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=pl, base_price=plot.price_base, rules=[rule],
+        plot=plot,
+        price_list=pl,
+        base_price=plot.price_base,
+        rules=[rule],
         quote_date=date(2026, 8, 2),
     )
     assert q.total == plot.price_base
@@ -134,8 +138,10 @@ def test_view_premium_matches_listed_value():
         adjustment_pct=Decimal("8"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule],
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
     )
     assert q.total == Decimal("378000.00")
 
@@ -148,8 +154,10 @@ def test_view_premium_skips_unlisted_view():
         adjustment_pct=Decimal("8"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule],
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
     )
     assert q.total == plot.price_base
 
@@ -162,8 +170,10 @@ def test_floor_premium_min_floor():
         adjustment_fixed=Decimal("12000"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule],
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
     )
     assert q.total == Decimal("362000.00")
 
@@ -176,8 +186,10 @@ def test_floor_premium_skips_below_min():
         adjustment_fixed=Decimal("12000"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule],
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
     )
     assert q.total == plot.price_base
 
@@ -190,8 +202,10 @@ def test_corner_premium_metadata_flag():
         adjustment_pct=Decimal("3"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule],
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
     )
     assert q.total == Decimal("360500.00")
 
@@ -204,8 +218,10 @@ def test_size_premium_requires_bound():
         adjustment_pct=Decimal("2"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule],
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
     )
     assert q.total == Decimal("357000.00")
 
@@ -220,8 +236,11 @@ def test_promo_code_case_insensitive():
     # Lowercase, mixed-case, original — all match.
     for code in ("launch25", "Launch25", "LAUNCH25"):
         q = compute_quote_pure(
-            plot=plot, price_list=_FakePriceList(),
-            base_price=plot.price_base, rules=[rule], promo_code=code,
+            plot=plot,
+            price_list=_FakePriceList(),
+            base_price=plot.price_base,
+            rules=[rule],
+            promo_code=code,
         )
         assert q.total == Decimal("315000.00"), code
 
@@ -234,8 +253,11 @@ def test_promo_code_wrong_code_no_match():
         adjustment_pct=Decimal("-10"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], promo_code="WRONG",
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        promo_code="WRONG",
     )
     assert q.total == plot.price_base
 
@@ -249,8 +271,11 @@ def test_friends_family_via_buyer_tag():
         adjustment_fixed=Decimal("-5000"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], buyer=buyer,
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        buyer=buyer,
     )
     assert q.total == Decimal("345000.00")
 
@@ -263,8 +288,11 @@ def test_friends_family_no_buyer_no_match():
         adjustment_fixed=Decimal("-5000"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], buyer=None,
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        buyer=None,
     )
     assert q.total == plot.price_base
 
@@ -277,13 +305,19 @@ def test_loyalty_threshold():
         adjustment_pct=Decimal("-3"),
     )
     q1 = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], prior_purchases=1,
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        prior_purchases=1,
     )
     assert q1.total == plot.price_base
     q2 = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], prior_purchases=2,
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        prior_purchases=2,
     )
     assert q2.total == Decimal("339500.00")
 
@@ -296,13 +330,19 @@ def test_bulk_buy_only_when_threshold_met():
         adjustment_pct=Decimal("-7"),
     )
     q1 = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], basket_size=2,
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        basket_size=2,
     )
     assert q1.total == plot.price_base
     q2 = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], basket_size=3,
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        basket_size=3,
     )
     assert q2.total == Decimal("325500.00")
 
@@ -328,8 +368,10 @@ def test_priority_ordering_lower_first():
     )
     buyer = _FakeBuyer(metadata_={"tags": ["ff"]})
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[ff, eb],  # input unordered
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[ff, eb],  # input unordered
         buyer=buyer,
     )
     # Expect: base 350000 → -5% (early bird, prio 10) = 332500 → -5000 = 327500
@@ -351,8 +393,11 @@ def test_max_uses_cap_deactivates():
         times_used=5,  # exhausted
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], promo_code="LAUNCH",
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        promo_code="LAUNCH",
     )
     assert q.total == plot.price_base
 
@@ -367,8 +412,11 @@ def test_max_uses_not_yet_exhausted_still_matches():
         times_used=4,
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], promo_code="LAUNCH",
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        promo_code="LAUNCH",
     )
     assert q.total == Decimal("315000.00")
 
@@ -385,8 +433,11 @@ def test_effective_window_quote_before_start_no_match():
         effective_from="2026-08-01",
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], promo_code="AUG",
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        promo_code="AUG",
         quote_date=date(2026, 7, 15),
     )
     assert q.total == plot.price_base
@@ -402,8 +453,11 @@ def test_effective_window_quote_after_end_no_match():
         effective_to="2026-08-31",
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], promo_code="AUG",
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        promo_code="AUG",
         quote_date=date(2026, 9, 1),
     )
     assert q.total == plot.price_base
@@ -419,8 +473,11 @@ def test_effective_window_in_range_matches():
         effective_to="2026-08-31",
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], promo_code="AUG",
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        promo_code="AUG",
         quote_date=date(2026, 8, 15),
     )
     assert q.total == Decimal("332500.00")
@@ -448,9 +505,12 @@ def test_decimal_correctness_100_minus_5pct_minus_2_50():
     )
     buyer = _FakeBuyer(metadata_={"tags": ["ff"]})
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[r1, r2],
-        promo_code="X", buyer=buyer,
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[r1, r2],
+        promo_code="X",
+        buyer=buyer,
     )
     assert q.total == Decimal("92.50")
 
@@ -481,8 +541,10 @@ def test_decimal_waterfall_350k_floor_eb_ff():
     )
     buyer = _FakeBuyer(metadata_={"tags": ["ff"]})
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[ff, floor, eb],
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[ff, floor, eb],
         buyer=buyer,
     )
     # 350000 + 12000 = 362000
@@ -579,10 +641,7 @@ async def price_list_pe(client: AsyncClient, tenant_pe):
         "name": "Launch Q3 list",
         "effective_from": "2026-01-01",
         "currency": "EUR",
-        "entries": [
-            {"plot_id": pid, "base_price": "350000"}
-            for pid in tenant_pe["plot_ids"]
-        ],
+        "entries": [{"plot_id": pid, "base_price": "350000"} for pid in tenant_pe["plot_ids"]],
         "rules": [
             {
                 "name": "Floor 10+",
@@ -634,7 +693,9 @@ async def price_list_pe(client: AsyncClient, tenant_pe):
 
 @pytest.mark.asyncio
 async def test_e2e_quote_endpoint_returns_waterfall(
-    client: AsyncClient, tenant_pe, price_list_pe,
+    client: AsyncClient,
+    tenant_pe,
+    price_list_pe,
 ):
     """Single-plot quote with floor + early-bird applied."""
     headers = tenant_pe["headers"]
@@ -655,7 +716,9 @@ async def test_e2e_quote_endpoint_returns_waterfall(
 
 @pytest.mark.asyncio
 async def test_e2e_quote_basket_with_bulk_rule(
-    client: AsyncClient, tenant_pe, price_list_pe,
+    client: AsyncClient,
+    tenant_pe,
+    price_list_pe,
 ):
     """3-plot basket: just confirms each plot returns a quote and sums."""
     headers = tenant_pe["headers"]
@@ -673,7 +736,9 @@ async def test_e2e_quote_basket_with_bulk_rule(
 
 @pytest.mark.asyncio
 async def test_e2e_effective_rules_endpoint(
-    client: AsyncClient, tenant_pe, price_list_pe,
+    client: AsyncClient,
+    tenant_pe,
+    price_list_pe,
 ):
     """The /rules/effective/ endpoint returns active rules with counts."""
     headers = tenant_pe["headers"]
@@ -691,11 +756,15 @@ async def test_e2e_effective_rules_endpoint(
 
 @pytest.mark.asyncio
 async def test_e2e_idor_cross_tenant_plot_returns_404(
-    client: AsyncClient, tenant_pe, price_list_pe,
+    client: AsyncClient,
+    tenant_pe,
+    price_list_pe,
 ):
     """A second tenant trying to quote against another tenant's price list → 404."""
     _uid, _email, other_headers = await _register_user(
-        client, role="admin", tag="pe-other",
+        client,
+        role="admin",
+        tag="pe-other",
     )
     res = await client.get(
         f"/api/v1/property-dev/price-lists/{price_list_pe['id']}/quote/",
@@ -707,7 +776,8 @@ async def test_e2e_idor_cross_tenant_plot_returns_404(
 
 @pytest.mark.asyncio
 async def test_e2e_rbac_editor_cannot_create_price_list(
-    client: AsyncClient, tenant_pe,
+    client: AsyncClient,
+    tenant_pe,
 ):
     """An EDITOR-role caller must NOT be able to create a PriceList (MANAGER+ gated).
 
@@ -717,7 +787,9 @@ async def test_e2e_rbac_editor_cannot_create_price_list(
     Either way the row must not be created.
     """
     _uid, _email, editor_headers = await _register_user(
-        client, role="editor", tag="pe-ed",
+        client,
+        role="editor",
+        tag="pe-ed",
     )
     res = await client.post(
         f"/api/v1/property-dev/developments/{tenant_pe['dev_id']}/price-lists/",
@@ -733,7 +805,9 @@ async def test_e2e_rbac_editor_cannot_create_price_list(
 
 @pytest.mark.asyncio
 async def test_e2e_snapshot_matches_active_quote_on_reservation(
-    client: AsyncClient, tenant_pe, price_list_pe,
+    client: AsyncClient,
+    tenant_pe,
+    price_list_pe,
 ):
     """The reservation's ``price_breakdown_snapshot`` must match the live quote."""
     headers = tenant_pe["headers"]
@@ -767,7 +841,8 @@ async def test_e2e_snapshot_matches_active_quote_on_reservation(
 
 @pytest.mark.asyncio
 async def test_e2e_activate_supersedes_previous_active(
-    client: AsyncClient, tenant_pe,
+    client: AsyncClient,
+    tenant_pe,
 ):
     """Activating a new price list flips the old active row to 'superseded'."""
     headers = tenant_pe["headers"]
@@ -822,8 +897,7 @@ def test_module_exports_match_spec():
     """Public API of the pricing engine matches the spec."""
     from app.modules.property_dev import pricing_engine
 
-    expected = {"PriceQuote", "PriceQuoteLine", "RULE_TYPES",
-                "compute_final_price", "compute_quote_pure"}
+    expected = {"PriceQuote", "PriceQuoteLine", "RULE_TYPES", "compute_final_price", "compute_quote_pure"}
     assert expected.issubset(set(pricing_engine.__all__))
 
 
@@ -832,7 +906,10 @@ def test_price_quote_serializes_money_as_strings():
     plot = _base_plot()
     pl = _FakePriceList()
     q = compute_quote_pure(
-        plot=plot, price_list=pl, base_price=plot.price_base, rules=[],
+        plot=plot,
+        price_list=pl,
+        base_price=plot.price_base,
+        rules=[],
     )
     j = q.model_dump(mode="json")
     assert isinstance(j["total"], str)
@@ -864,7 +941,9 @@ def test_price_quote_serializes_money_as_strings():
 
 @pytest.mark.asyncio
 async def test_e2e_snapshot_immutable_after_rule_mutation(
-    client: AsyncClient, tenant_pe, price_list_pe,
+    client: AsyncClient,
+    tenant_pe,
+    price_list_pe,
 ):
     """Snapshot frozen on reservation create — later rule edits don't bleed in.
 
@@ -922,7 +1001,9 @@ async def test_e2e_snapshot_immutable_after_rule_mutation(
 
 @pytest.mark.asyncio
 async def test_e2e_viewer_can_read_price_lists(
-    client: AsyncClient, tenant_pe, price_list_pe,
+    client: AsyncClient,
+    tenant_pe,
+    price_list_pe,
 ):
     """Viewer with property_dev.read permission can list price lists.
 
@@ -933,7 +1014,9 @@ async def test_e2e_viewer_can_read_price_lists(
     to 403 would be over-strict.
     """
     _uid, _email, viewer_headers = await _register_user(
-        client, role="viewer", tag=f"pe-vw-{uuid.uuid4().hex[:6]}",
+        client,
+        role="viewer",
+        tag=f"pe-vw-{uuid.uuid4().hex[:6]}",
     )
     # Cross-tenant viewer: must collapse to 404 (IDOR shield).
     res = await client.get(
@@ -947,7 +1030,8 @@ async def test_e2e_viewer_can_read_price_lists(
 
 @pytest.mark.asyncio
 async def test_e2e_admin_can_delete_pricing_rule(
-    client: AsyncClient, tenant_pe,
+    client: AsyncClient,
+    tenant_pe,
 ):
     """Admin can DELETE a pricing rule via the rule sub-route.
 
@@ -1000,7 +1084,8 @@ async def test_e2e_admin_can_delete_pricing_rule(
 
 @pytest.mark.asyncio
 async def test_e2e_invalid_currency_rejected_on_create(
-    client: AsyncClient, tenant_pe,
+    client: AsyncClient,
+    tenant_pe,
 ):
     """A 2-letter or non-alpha currency on the price-list create → 422.
 
@@ -1035,8 +1120,10 @@ def test_unknown_rule_type_silently_ignored():
         adjustment_pct=Decimal("-50"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule],
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
     )
     assert q.total == plot.price_base
     assert len(q.lines) == 1  # base only
@@ -1052,8 +1139,11 @@ def test_inactive_rule_skipped_even_when_matching():
         active=False,  # deactivated
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], promo_code="X",
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        promo_code="X",
     )
     assert q.total == plot.price_base
     assert len(q.lines) == 1
@@ -1061,7 +1151,9 @@ def test_inactive_rule_skipped_even_when_matching():
 
 @pytest.mark.asyncio
 async def test_e2e_quote_for_nonexistent_plot_404(
-    client: AsyncClient, tenant_pe, price_list_pe,
+    client: AsyncClient,
+    tenant_pe,
+    price_list_pe,
 ):
     """A random plot UUID on /quote/ collapses to 404 — no engine call.
 
@@ -1089,11 +1181,14 @@ def test_effective_from_in_window_returns_two_lines():
         condition_json={"code": "X"},
         adjustment_pct=Decimal("-2"),
         effective_from="2026-05-01",  # past
-        effective_to="2099-12-31",     # far future
+        effective_to="2099-12-31",  # far future
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule], promo_code="X",
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
+        promo_code="X",
         quote_date=date(2026, 5, 24),
     )
     assert len(q.lines) == 2
@@ -1111,7 +1206,9 @@ def test_corner_premium_negative_metadata_no_match():
         adjustment_pct=Decimal("3"),
     )
     q = compute_quote_pure(
-        plot=plot, price_list=_FakePriceList(),
-        base_price=plot.price_base, rules=[rule],
+        plot=plot,
+        price_list=_FakePriceList(),
+        base_price=plot.price_base,
+        rules=[rule],
     )
     assert q.total == plot.price_base

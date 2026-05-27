@@ -144,7 +144,7 @@ _MATERIAL_TEMPLATES: list[tuple[str, list[tuple[str, str, Decimal]]]] = [
 
 _FUELS = ("diesel", "petrol", "lpg", "natural_gas")
 _FUEL_FACTORS = {
-    "diesel": Decimal("2.68"),       # kgCO2e per litre
+    "diesel": Decimal("2.68"),  # kgCO2e per litre
     "petrol": Decimal("2.31"),
     "lpg": Decimal("1.51"),
     "natural_gas": Decimal("2.02"),  # per m3
@@ -160,56 +160,66 @@ def _build_epd_records(rng: random.Random) -> list[EPDRecord]:
             counter += 1
             epd_id = f"EPD-{material_class.upper()}-{counter:03d}"
             manufacturer = rng.choice(
-                ["HeidelbergMaterials", "Holcim", "ArcelorMittal", "Rockwool",
-                 "Kingspan", "Saint-Gobain", "Lafarge", "BASF", "Owens Corning",
-                 "Sika"],
+                [
+                    "HeidelbergMaterials",
+                    "Holcim",
+                    "ArcelorMittal",
+                    "Rockwool",
+                    "Kingspan",
+                    "Saint-Gobain",
+                    "Lafarge",
+                    "BASF",
+                    "Owens Corning",
+                    "Sika",
+                ],
             )
             region = rng.choice(["EU", "DE", "FR", "UK", "US", "CA", "AU", ""])
             validity = date(2026, 12, 31) + timedelta(days=rng.randint(-180, 730))
-            records.append(EPDRecord(
-                id=uuid.uuid4(),
-                epd_id=epd_id,
-                source=rng.choice(["oekobaudat", "ice", "ec3", "custom"]),
-                material_class=material_class,
-                product_name=product_name,
-                manufacturer=manufacturer,
-                region=region,
-                declared_unit=declared_unit,
-                gwp_a1a3=gwp_a1a3,
-                gwp_a4=Decimal(rng.choice(["0.02", "0.05", "0.08", "0.12"])),
-                gwp_a5=Decimal(rng.choice(["0.01", "0.03", "0.04", "0.06"])),
-                gwp_b_total=Decimal(rng.choice(["0.0", "0.10", "0.20"])),
-                gwp_c_total=Decimal(rng.choice(["0.02", "0.05", "0.08"])),
-                gwp_d_credits=Decimal(rng.choice(["-0.02", "-0.05", "0.00"])),
-                validity_until=validity,
-                document_url=f"https://example.test/epd/{epd_id}.pdf",
-            ))
+            records.append(
+                EPDRecord(
+                    id=uuid.uuid4(),
+                    epd_id=epd_id,
+                    source=rng.choice(["oekobaudat", "ice", "ec3", "custom"]),
+                    material_class=material_class,
+                    product_name=product_name,
+                    manufacturer=manufacturer,
+                    region=region,
+                    declared_unit=declared_unit,
+                    gwp_a1a3=gwp_a1a3,
+                    gwp_a4=Decimal(rng.choice(["0.02", "0.05", "0.08", "0.12"])),
+                    gwp_a5=Decimal(rng.choice(["0.01", "0.03", "0.04", "0.06"])),
+                    gwp_b_total=Decimal(rng.choice(["0.0", "0.10", "0.20"])),
+                    gwp_c_total=Decimal(rng.choice(["0.02", "0.05", "0.08"])),
+                    gwp_d_credits=Decimal(rng.choice(["-0.02", "-0.05", "0.00"])),
+                    validity_until=validity,
+                    document_url=f"https://example.test/epd/{epd_id}.pdf",
+                )
+            )
     return records
 
 
 def _build_factors(
-    rng: random.Random, epds: list[EPDRecord],
+    rng: random.Random,
+    epds: list[EPDRecord],
 ) -> list[MaterialCarbonFactor]:
     """‌⁠‍100 material factors, half linked to an EPD, half with override only."""
     factors: list[MaterialCarbonFactor] = []
     for i in range(100):
         epd = epds[i % len(epds)] if i % 2 == 0 else None
-        manual = (
-            None
-            if epd is not None
-            else Decimal(rng.choice(["0.05", "0.12", "0.22", "0.50", "1.10"]))
+        manual = None if epd is not None else Decimal(rng.choice(["0.05", "0.12", "0.22", "0.50", "1.10"]))
+        factors.append(
+            MaterialCarbonFactor(
+                id=uuid.uuid4(),
+                cost_item_id=uuid.uuid4(),
+                epd_id=epd.id if epd is not None else None,
+                manual_override_factor=manual,
+                unit_for_factor="kg",
+                region=rng.choice(["EU", "DE", "FR", "UK", ""]),
+                last_reviewed_at=date(2026, 1, 15) + timedelta(days=rng.randint(0, 90)),
+                confidence=rng.choice(["high", "medium", "low"]),
+                notes=f"factor #{i + 1}",
+            )
         )
-        factors.append(MaterialCarbonFactor(
-            id=uuid.uuid4(),
-            cost_item_id=uuid.uuid4(),
-            epd_id=epd.id if epd is not None else None,
-            manual_override_factor=manual,
-            unit_for_factor="kg",
-            region=rng.choice(["EU", "DE", "FR", "UK", ""]),
-            last_reviewed_at=date(2026, 1, 15) + timedelta(days=rng.randint(0, 90)),
-            confidence=rng.choice(["high", "medium", "low"]),
-            notes=f"factor #{i + 1}",
-        ))
     return factors
 
 
@@ -217,15 +227,18 @@ def _build_inventory_for_project(
     rng: random.Random,
     project_id: uuid.UUID,
     factors: list[MaterialCarbonFactor],
-) -> tuple[CarbonInventory, list[EmbodiedCarbonEntry], list[Scope1Entry],
-           list[Scope2Entry], list[Scope3Entry]]:
+) -> tuple[CarbonInventory, list[EmbodiedCarbonEntry], list[Scope1Entry], list[Scope2Entry], list[Scope3Entry]]:
     """Build one inventory with 80 embodied + 50 ops entries."""
     inv = CarbonInventory(
         id=uuid.uuid4(),
         project_id=project_id,
-        name=rng.choice([
-            "Baseline 2026", "Design-stage estimate", "As-built tally",
-        ]),
+        name=rng.choice(
+            [
+                "Baseline 2026",
+                "Design-stage estimate",
+                "As-built tally",
+            ]
+        ),
         scope=rng.choice(["cradle_to_gate", "cradle_to_grave", "operational"]),
         as_of_date=date(2026, 1, 1) + timedelta(days=rng.randint(0, 200)),
         status=rng.choice(["draft", "baseline", "current"]),
@@ -233,112 +246,132 @@ def _build_inventory_for_project(
     embodied: list[EmbodiedCarbonEntry] = []
     for i in range(80):
         factor = rng.choice(factors)
-        factor_value = (
-            factor.manual_override_factor
-            if factor.manual_override_factor is not None
-            else Decimal("0.130")
-        )
+        factor_value = factor.manual_override_factor if factor.manual_override_factor is not None else Decimal("0.130")
         qty = Decimal(rng.choice(["50", "120", "500", "1000", "2500"]))
-        embodied.append(EmbodiedCarbonEntry(
-            id=uuid.uuid4(),
-            inventory_id=inv.id,
-            element_ref=f"elem-{i:03d}",
-            description=f"Material line {i + 1}",
-            quantity=qty,
-            unit="kg",
-            factor_id=factor.id,
-            factor_value_used=factor_value,
-            carbon_kg=qty * Decimal(str(factor_value)),
-            stage=rng.choice(["a1a3", "a4", "a5", "c"]),
-        ))
+        embodied.append(
+            EmbodiedCarbonEntry(
+                id=uuid.uuid4(),
+                inventory_id=inv.id,
+                element_ref=f"elem-{i:03d}",
+                description=f"Material line {i + 1}",
+                quantity=qty,
+                unit="kg",
+                factor_id=factor.id,
+                factor_value_used=factor_value,
+                carbon_kg=qty * Decimal(str(factor_value)),
+                stage=rng.choice(["a1a3", "a4", "a5", "c"]),
+            )
+        )
     s1: list[Scope1Entry] = []
     s2: list[Scope2Entry] = []
     s3: list[Scope3Entry] = []
     for i in range(50):
         fuel = rng.choice(_FUELS)
         litres = Decimal(rng.choice(["100", "250", "500", "1000"]))
-        s1.append(Scope1Entry(
-            id=uuid.uuid4(),
-            inventory_id=inv.id,
-            period_start=date(2026, 1, 1),
-            period_end=date(2026, 1, 31),
-            fuel_type=fuel,
-            litres_or_m3=litres,
-            emission_factor_kg_co2e_per_unit=_FUEL_FACTORS[fuel],
-            total_co2e_kg=litres * _FUEL_FACTORS[fuel],
-            source=rng.choice(["fuel_log", "manual", "equipment_telematics"]),
-        ))
+        s1.append(
+            Scope1Entry(
+                id=uuid.uuid4(),
+                inventory_id=inv.id,
+                period_start=date(2026, 1, 1),
+                period_end=date(2026, 1, 31),
+                fuel_type=fuel,
+                litres_or_m3=litres,
+                emission_factor_kg_co2e_per_unit=_FUEL_FACTORS[fuel],
+                total_co2e_kg=litres * _FUEL_FACTORS[fuel],
+                source=rng.choice(["fuel_log", "manual", "equipment_telematics"]),
+            )
+        )
         kwh = Decimal(rng.choice(["1000", "2500", "5000", "10000"]))
         ef2 = Decimal(rng.choice(["0.18", "0.25", "0.40"]))
-        s2.append(Scope2Entry(
-            id=uuid.uuid4(),
-            inventory_id=inv.id,
-            period_start=date(2026, 1, 1),
-            period_end=date(2026, 1, 31),
-            energy_type=rng.choice(["grid_electricity", "district_heating"]),
-            kwh=kwh,
-            emission_factor_kg_co2e_per_kwh=ef2,
-            market_or_location=rng.choice(["market", "location"]),
-            total_co2e_kg=kwh * ef2,
-        ))
+        s2.append(
+            Scope2Entry(
+                id=uuid.uuid4(),
+                inventory_id=inv.id,
+                period_start=date(2026, 1, 1),
+                period_end=date(2026, 1, 31),
+                energy_type=rng.choice(["grid_electricity", "district_heating"]),
+                kwh=kwh,
+                emission_factor_kg_co2e_per_kwh=ef2,
+                market_or_location=rng.choice(["market", "location"]),
+                total_co2e_kg=kwh * ef2,
+            )
+        )
         act = Decimal(rng.choice(["100", "500", "1000", "2000"]))
         ef3 = Decimal(rng.choice(["0.10", "0.20", "0.50"]))
-        s3.append(Scope3Entry(
-            id=uuid.uuid4(),
-            inventory_id=inv.id,
-            period_start=date(2026, 1, 1),
-            period_end=date(2026, 1, 31),
-            category=rng.choice([
-                "transport_upstream", "transport_downstream", "waste",
-                "business_travel", "other",
-            ]),
-            description=f"Activity {i + 1}",
-            activity_data=act,
-            activity_unit="tkm",
-            emission_factor=ef3,
-            total_co2e_kg=act * ef3,
-        ))
+        s3.append(
+            Scope3Entry(
+                id=uuid.uuid4(),
+                inventory_id=inv.id,
+                period_start=date(2026, 1, 1),
+                period_end=date(2026, 1, 31),
+                category=rng.choice(
+                    [
+                        "transport_upstream",
+                        "transport_downstream",
+                        "waste",
+                        "business_travel",
+                        "other",
+                    ]
+                ),
+                description=f"Activity {i + 1}",
+                activity_data=act,
+                activity_unit="tkm",
+                emission_factor=ef3,
+                total_co2e_kg=act * ef3,
+            )
+        )
     return inv, embodied, s1, s2, s3
 
 
 def _build_targets(
-    rng: random.Random, project_id: uuid.UUID,
+    rng: random.Random,
+    project_id: uuid.UUID,
 ) -> list[CarbonTarget]:
     out: list[CarbonTarget] = []
     for i in range(6):
-        out.append(CarbonTarget(
-            id=uuid.uuid4(),
-            project_id=project_id,
-            name=f"Reduction target {i + 1}",
-            target_type=rng.choice([
-                "absolute", "intensity_per_m2", "intensity_per_unit",
-            ]),
-            baseline_value=Decimal(rng.choice(["1000", "5000", "10000"])),
-            target_value=Decimal(rng.choice(["500", "2500", "5000"])),
-            baseline_year=2020,
-            target_year=2030,
-            scope_set=["1", "2", "embodied"],
-            status=rng.choice(["active", "met", "missed"]),
-        ))
+        out.append(
+            CarbonTarget(
+                id=uuid.uuid4(),
+                project_id=project_id,
+                name=f"Reduction target {i + 1}",
+                target_type=rng.choice(
+                    [
+                        "absolute",
+                        "intensity_per_m2",
+                        "intensity_per_unit",
+                    ]
+                ),
+                baseline_value=Decimal(rng.choice(["1000", "5000", "10000"])),
+                target_value=Decimal(rng.choice(["500", "2500", "5000"])),
+                baseline_year=2020,
+                target_year=2030,
+                scope_set=["1", "2", "embodied"],
+                status=rng.choice(["active", "met", "missed"]),
+            )
+        )
     return out
 
 
 def _build_reports(
-    rng: random.Random, project_id: uuid.UUID, inventory_id: uuid.UUID,
+    rng: random.Random,
+    project_id: uuid.UUID,
+    inventory_id: uuid.UUID,
 ) -> list[SustainabilityReport]:
     out: list[SustainabilityReport] = []
     for i in range(4):
-        out.append(SustainabilityReport(
-            id=uuid.uuid4(),
-            project_id=project_id,
-            inventory_id=inventory_id,
-            period_start=date(2026, 1, 1),
-            period_end=date(2026, 12, 31),
-            framework=rng.choice(["ghg_protocol", "gri", "issb", "custom"]),
-            totals={"scope1": "1000", "scope2": "2000", "scope3": "500"},
-            narrative=f"Sustainability report {i + 1}",
-            generated_at=date(2026, 6, 30),
-        ))
+        out.append(
+            SustainabilityReport(
+                id=uuid.uuid4(),
+                project_id=project_id,
+                inventory_id=inventory_id,
+                period_start=date(2026, 1, 1),
+                period_end=date(2026, 12, 31),
+                framework=rng.choice(["ghg_protocol", "gri", "issb", "custom"]),
+                totals={"scope1": "1000", "scope2": "2000", "scope3": "500"},
+                narrative=f"Sustainability report {i + 1}",
+                generated_at=date(2026, 6, 30),
+            )
+        )
     return out
 
 
@@ -370,7 +403,9 @@ async def seed_carbon_demo(
         first_inventory_id: uuid.UUID | None = None
         for _ in range(3):
             inv, embodied, s1, s2, s3 = _build_inventory_for_project(
-                rng, project_id, factors,
+                rng,
+                project_id,
+                factors,
             )
             session.add(inv)
             await session.flush()

@@ -115,9 +115,7 @@ def check_gates(*, hostname: str | None, confirm_token: str | None, tenant: str)
 
 
 async def _resolve_demo_user_ids(session: AsyncSession) -> list:
-    rows = (
-        await session.execute(select(User).where(User.email.in_(DEMO_EMAILS)))
-    ).scalars().all()
+    rows = (await session.execute(select(User).where(User.email.in_(DEMO_EMAILS)))).scalars().all()
     return [u.id for u in rows]
 
 
@@ -125,16 +123,11 @@ async def _sanity_user_count(session: AsyncSession) -> None:
     """Abort if total users > ceiling — production safeguard."""
     from sqlalchemy import func
 
-    total = (
-        await session.execute(select(func.count()).select_from(User))
-    ).scalar() or 0
+    total = (await session.execute(select(func.count()).select_from(User))).scalar() or 0
     if total > MAX_USERS_FOR_RESET:
         raise GateError(
             code="qa_reset_user_count_exceeded",
-            message=(
-                f"User table has {total} rows (> {MAX_USERS_FOR_RESET}); "
-                "looks like production. Refusing."
-            ),
+            message=(f"User table has {total} rows (> {MAX_USERS_FOR_RESET}); looks like production. Refusing."),
         )
 
 
@@ -158,9 +151,7 @@ async def reset_demo_data(session: AsyncSession) -> dict:
     # every per-module table because the cascades are already set up.
     deleted_projects = 0
     if demo_user_ids:
-        result = await session.execute(
-            delete(Project).where(Project.owner_id.in_(demo_user_ids))
-        )
+        result = await session.execute(delete(Project).where(Project.owner_id.in_(demo_user_ids)))
         deleted_projects = result.rowcount or 0
         await session.flush()
 
@@ -178,9 +169,7 @@ async def reset_demo_data(session: AsyncSession) -> dict:
             "warehouse-dubai",
         ):
             try:
-                result = await install_demo_project(
-                    session, demo_id, force_reinstall=True
-                )
+                result = await install_demo_project(session, demo_id, force_reinstall=True)
                 seeded += 1
                 seeded_demo_ids.append(demo_id)
                 logger.info(

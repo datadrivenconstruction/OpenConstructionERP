@@ -120,12 +120,8 @@ def upgrade() -> None:
             sa.Column("created_by", sa.String(length=36), nullable=True),
             sa.UniqueConstraint("slug", name="uq_oe_webhook_leads_source_slug"),
         )
-        op.create_index(
-            "ix_oe_webhook_leads_source_slug", _SOURCE, ["slug"], unique=True
-        )
-        op.create_index(
-            "ix_oe_webhook_leads_source_is_active", _SOURCE, ["is_active"]
-        )
+        op.create_index("ix_oe_webhook_leads_source_slug", _SOURCE, ["slug"], unique=True)
+        op.create_index("ix_oe_webhook_leads_source_is_active", _SOURCE, ["is_active"])
 
     if not _has_table(inspector, _MAPPING):
         op.create_table(
@@ -148,9 +144,7 @@ def upgrade() -> None:
                 server_default="0",
             ),
         )
-        op.create_index(
-            "ix_oe_webhook_leads_mapping_source_id", _MAPPING, ["source_id"]
-        )
+        op.create_index("ix_oe_webhook_leads_mapping_source_id", _MAPPING, ["source_id"])
 
     if not _has_table(inspector, _LOG):
         op.create_table(
@@ -188,28 +182,18 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="0",
             ),
-            sa.Column(
-                "payload", sa.JSON(), nullable=False, server_default="{}"
-            ),
+            sa.Column("payload", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column(
                 "error_message",
                 sa.Text(),
                 nullable=False,
                 server_default="",
             ),
-            sa.Column(
-                "created_lead_id", sa.String(length=36), nullable=True
-            ),
+            sa.Column("created_lead_id", sa.String(length=36), nullable=True),
         )
-        op.create_index(
-            "ix_oe_webhook_leads_log_source_id", _LOG, ["source_id"]
-        )
-        op.create_index(
-            "ix_oe_webhook_leads_log_source_slug", _LOG, ["source_slug"]
-        )
-        op.create_index(
-            "ix_oe_webhook_leads_log_status", _LOG, ["status"]
-        )
+        op.create_index("ix_oe_webhook_leads_log_source_id", _LOG, ["source_id"])
+        op.create_index("ix_oe_webhook_leads_log_source_slug", _LOG, ["source_slug"])
+        op.create_index("ix_oe_webhook_leads_log_status", _LOG, ["status"])
 
 
 def downgrade() -> None:

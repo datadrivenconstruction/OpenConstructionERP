@@ -97,24 +97,24 @@ class TestProjectCreatedSubscriber:
 
     @pytest.mark.asyncio
     async def test_idempotent_on_replay(self, app_instance, project_id):
+        from sqlalchemy import select
+
         from app.core.events import event_bus
         from app.database import async_session_factory
         from app.modules.geo_hub.models import GeoAnchor
-        from sqlalchemy import select
 
         # Publish twice.
         await event_bus.publish("projects.created", {"project_id": str(project_id)})
         await event_bus.publish("projects.created", {"project_id": str(project_id)})
         async with async_session_factory() as s:
-            res = await s.execute(
-                select(GeoAnchor).where(GeoAnchor.project_id == project_id)
-            )
+            res = await s.execute(select(GeoAnchor).where(GeoAnchor.project_id == project_id))
             anchors = list(res.scalars().all())
             assert len(anchors) == 1
 
     @pytest.mark.asyncio
     async def test_missing_project_id_ignored(self, app_instance):
         from app.core.events import event_bus
+
         res = await event_bus.publish("projects.created", {})
         # No exception, subscriber returned "ignored".
         assert res.success
@@ -150,7 +150,9 @@ class TestBimUploadSubscriber:
 class TestDevelopmentCreatedSubscriber:
     @pytest.mark.asyncio
     async def test_places_anchor_and_emits_geo_placed(
-        self, app_instance, project_id,
+        self,
+        app_instance,
+        project_id,
     ):
         from app.core.events import event_bus
         from app.database import async_session_factory
@@ -163,7 +165,8 @@ class TestDevelopmentCreatedSubscriber:
             return {"status": "captured"}
 
         event_bus.subscribe(
-            "property_dev.development.geo_placed", _capture,
+            "property_dev.development.geo_placed",
+            _capture,
         )
 
         try:
@@ -181,17 +184,17 @@ class TestDevelopmentCreatedSubscriber:
                 anchor = await repo.get_by_project(project_id)
                 assert anchor is not None
                 assert anchor.lat == Decimal("52.5200000")
-            assert any(
-                f.get("anchor_id") for f in fanout_received
-            )
+            assert any(f.get("anchor_id") for f in fanout_received)
         finally:
             event_bus.unsubscribe(
-                "property_dev.development.geo_placed", _capture,
+                "property_dev.development.geo_placed",
+                _capture,
             )
 
     @pytest.mark.asyncio
     async def test_missing_lat_lon_skipped(self, app_instance, project_id):
         from app.core.events import event_bus
+
         # Without lat/lon the subscriber returns "ignored".
         res = await event_bus.publish(
             "property_dev.development.created",
@@ -206,7 +209,9 @@ class TestDevelopmentCreatedSubscriber:
 class TestCarbonSubscriber:
     @pytest.mark.asyncio
     async def test_stamps_tint_on_existing_tileset(
-        self, app_instance, project_id,
+        self,
+        app_instance,
+        project_id,
     ):
         from app.core.events import event_bus
         from app.database import async_session_factory
@@ -246,7 +251,9 @@ class TestCarbonSubscriber:
 class TestScheduleSubscriber:
     @pytest.mark.asyncio
     async def test_stamps_temporal_metadata(
-        self, app_instance, project_id,
+        self,
+        app_instance,
+        project_id,
     ):
         from app.core.events import event_bus
         from app.database import async_session_factory
@@ -350,10 +357,11 @@ class TestClashSubscriber:
 
     @pytest.mark.asyncio
     async def test_clash_replay_idempotent(self, app_instance, project_id):
+        from sqlalchemy import func, select
+
         from app.core.events import event_bus
         from app.database import async_session_factory
         from app.modules.geo_hub.models import GeoOverlay
-        from sqlalchemy import func, select
 
         clash_id = f"clash-replay-{uuid.uuid4().hex[:6]}"
         for _ in range(3):
@@ -447,11 +455,15 @@ class TestRiskZoneSubscriber:
         zone_id = f"rz-{uuid.uuid4().hex[:6]}"
         polygon = {
             "type": "Polygon",
-            "coordinates": [[
-                [13.40, 52.51], [13.42, 52.51],
-                [13.42, 52.52], [13.40, 52.52],
-                [13.40, 52.51],
-            ]],
+            "coordinates": [
+                [
+                    [13.40, 52.51],
+                    [13.42, 52.51],
+                    [13.42, 52.52],
+                    [13.40, 52.52],
+                    [13.40, 52.51],
+                ]
+            ],
         }
         await event_bus.publish(
             "risk.zone.flagged",
@@ -472,18 +484,23 @@ class TestRiskZoneSubscriber:
 
     @pytest.mark.asyncio
     async def test_risk_zone_idempotent(self, app_instance, project_id):
+        from sqlalchemy import func, select
+
         from app.core.events import event_bus
         from app.database import async_session_factory
         from app.modules.geo_hub.models import GeoOverlay
-        from sqlalchemy import func, select
 
         zone_id = f"rz-replay-{uuid.uuid4().hex[:6]}"
         polygon = {
             "type": "Polygon",
-            "coordinates": [[
-                [13.40, 52.51], [13.42, 52.51],
-                [13.42, 52.52], [13.40, 52.51],
-            ]],
+            "coordinates": [
+                [
+                    [13.40, 52.51],
+                    [13.42, 52.51],
+                    [13.42, 52.52],
+                    [13.40, 52.51],
+                ]
+            ],
         }
         for _ in range(3):
             await event_bus.publish(

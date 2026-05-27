@@ -23,9 +23,7 @@ class ContactCreate(BaseModel):
     is_platform_user: bool = False
     user_id: UUID | None = None
 
-    first_name: str | None = Field(
-        default=None, max_length=255, description="Contact's first name", examples=["Max"]
-    )
+    first_name: str | None = Field(default=None, max_length=255, description="Contact's first name", examples=["Max"])
     last_name: str | None = Field(
         default=None, max_length=255, description="Contact's last name", examples=["Mustermann"]
     )
@@ -35,9 +33,7 @@ class ContactCreate(BaseModel):
         description="Company or organization name",
         examples=["Acme Construction GmbH"],
     )
-    legal_name: str | None = Field(
-        default=None, max_length=255, description="Registered legal entity name"
-    )
+    legal_name: str | None = Field(default=None, max_length=255, description="Registered legal entity name")
     vat_number: str | None = Field(
         default=None, max_length=50, description="VAT registration number", examples=["DE123456789"]
     )

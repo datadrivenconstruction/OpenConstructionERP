@@ -45,11 +45,7 @@ class InspectionRepository:
 
     async def next_inspection_number(self, project_id: uuid.UUID) -> str:
         """Generate the next inspection number (INS-001, INS-002, ...)."""
-        stmt = (
-            select(func.count())
-            .select_from(QualityInspection)
-            .where(QualityInspection.project_id == project_id)
-        )
+        stmt = select(func.count()).select_from(QualityInspection).where(QualityInspection.project_id == project_id)
         count = (await self.session.execute(stmt)).scalar_one()
         return f"INS-{count + 1:03d}"
 
@@ -61,11 +57,7 @@ class InspectionRepository:
 
     async def update_fields(self, inspection_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on an inspection."""
-        stmt = (
-            update(QualityInspection)
-            .where(QualityInspection.id == inspection_id)
-            .values(**fields)
-        )
+        stmt = update(QualityInspection).where(QualityInspection.id == inspection_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()

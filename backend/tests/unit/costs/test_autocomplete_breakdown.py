@@ -40,7 +40,6 @@ from app.modules.costs.router import (  # noqa: E402
 )
 from app.modules.costs.service import CostItemService  # noqa: E402
 
-
 # ── Pure-helper coverage ───────────────────────────────────────────────────
 
 
@@ -98,9 +97,7 @@ def test_slim_metadata_empty_returns_none() -> None:
 @pytest_asyncio.fixture
 async def session() -> AsyncSession:
     db_path = _TMP_DIR / f"test-{uuid.uuid4().hex[:8]}.db"
-    engine = create_async_engine(
-        f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False
-    )
+    engine = create_async_engine(f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all, tables=[CostItem.__table__])
     Session = async_sessionmaker(engine, expire_on_commit=False)
@@ -249,6 +246,4 @@ async def test_autocomplete_payload_size_bounded(session: AsyncSession) -> None:
     # Even with three breakdown numbers + variant_stats + count, the
     # added fields must stay well under 400 B per item — the spec calls
     # for < 200 B but 400 B leaves headroom for translated stats keys.
-    assert len(new_blob.encode("utf-8")) < 400, (
-        f"Autocomplete payload delta grew to {len(new_blob.encode('utf-8'))} B"
-    )
+    assert len(new_blob.encode("utf-8")) < 400, f"Autocomplete payload delta grew to {len(new_blob.encode('utf-8'))} B"

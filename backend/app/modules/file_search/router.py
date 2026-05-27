@@ -17,7 +17,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.dependencies import (
     CurrentUserId,
@@ -94,9 +94,7 @@ async def search_files(
     await verify_project_access(project_id, user_id, session)
 
     if not q.strip():
-        return SearchResponse(
-            project_id=project_id, q=q, mode=mode, total=0, hits=[]
-        )
+        return SearchResponse(project_id=project_id, q=q, mode=mode, total=0, hits=[])
 
     hits = await search_content(
         session,
@@ -164,6 +162,8 @@ async def remove_index(
         # Still 204 — the desired post-condition (no rows) holds.
         logger.debug(
             "remove_index: no rows for project=%s file=%s kind=%s",
-            project_id, file_id, kind,
+            project_id,
+            file_id,
+            kind,
         )
-    return None
+    return

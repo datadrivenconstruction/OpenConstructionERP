@@ -39,7 +39,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import sqlite3
 import sys
 from pathlib import Path
@@ -174,8 +173,7 @@ def backfill(
     while True:
         if last_id is None:
             cur.execute(
-                f"SELECT id, classification, components, metadata FROM oe_costs_item "
-                f"WHERE {where} ORDER BY id LIMIT ?",
+                f"SELECT id, classification, components, metadata FROM oe_costs_item WHERE {where} ORDER BY id LIMIT ?",
                 [*params, chunk],
             )
         else:
@@ -211,9 +209,7 @@ def backfill(
 
         if write_batch and not dry_run:
             cur.executemany(
-                "UPDATE oe_costs_item "
-                "SET classification = ?, components = ?, metadata = ? "
-                "WHERE id = ?",
+                "UPDATE oe_costs_item SET classification = ?, components = ?, metadata = ? WHERE id = ?",
                 write_batch,
             )
             conn.commit()
@@ -277,9 +273,7 @@ def main() -> int:
 
     db_path = args.db or _find_default_db()
     if db_path is None or not db_path.is_file():
-        sys.stderr.write(
-            "Could not find openestimate.db. Pass --db /path/to/openestimate.db\n"
-        )
+        sys.stderr.write("Could not find openestimate.db. Pass --db /path/to/openestimate.db\n")
         return 2
 
     if not args.locale and not args.all_locales:

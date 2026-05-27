@@ -143,7 +143,7 @@ def _resolve_order_by(order_by: str | None) -> tuple[str, str] | None:
             "order_by column cannot be empty.",
             details={"order_by": order_by},
         )
-    direction = (parts[1].strip().lower() if len(parts) == 2 else "asc")
+    direction = parts[1].strip().lower() if len(parts) == 2 else "asc"
     if direction not in ("asc", "desc"):
         raise InvalidQueryError(
             "order_by direction must be 'asc' or 'desc'.",
@@ -215,7 +215,10 @@ async def read_rows(
     # known list back to the caller and (b) verify selected columns
     # exist before issuing the data query.
     schema_rows = await pool.execute(
-        snapshot_id, project_id, "DESCRIBE entities", parameters=[],
+        snapshot_id,
+        project_id,
+        "DESCRIBE entities",
+        parameters=[],
     )
     all_columns = [str(r[0]) for r in schema_rows]
     if not all_columns:
@@ -274,16 +277,19 @@ async def read_rows(
     # Total (matches the WHERE clause but ignores limit/offset).
     total_sql = f"SELECT COUNT(*) FROM entities{where_sql}"
     total_rows = await pool.execute(
-        snapshot_id, project_id, total_sql, parameters=where_params,
+        snapshot_id,
+        project_id,
+        total_sql,
+        parameters=where_params,
     )
     total = int(total_rows[0][0]) if total_rows else 0
 
-    page_sql = (
-        f"SELECT {select_cols_sql} FROM entities"
-        f"{where_sql}{order_sql} LIMIT {int(limit)} OFFSET {int(offset)}"
-    )
+    page_sql = f"SELECT {select_cols_sql} FROM entities{where_sql}{order_sql} LIMIT {int(limit)} OFFSET {int(offset)}"
     page = await pool.execute(
-        snapshot_id, project_id, page_sql, parameters=where_params,
+        snapshot_id,
+        project_id,
+        page_sql,
+        parameters=where_params,
     )
 
     rows = [_row_to_dict(projected, r) for r in page]
@@ -354,9 +360,7 @@ def _export_csv(columns: list[str], rows: list[dict[str, Any]]) -> bytes:
     writer = csv.DictWriter(buf, fieldnames=columns, extrasaction="ignore")
     writer.writeheader()
     for row in rows:
-        writer.writerow(
-            {col: _stringify_for_csv(row.get(col)) for col in columns}
-        )
+        writer.writerow({col: _stringify_for_csv(row.get(col)) for col in columns})
     return buf.getvalue().encode("utf-8")
 
 
@@ -537,8 +541,7 @@ def _parse_csv(payload: bytes) -> tuple[list[str], list[dict[str, Any]]]:
     columns = [c.strip() for c in header]
     rows: list[dict[str, Any]] = []
     for raw_row in reader:
-        rows.append({col: raw_row[i] if i < len(raw_row) else None
-                     for i, col in enumerate(columns)})
+        rows.append({col: raw_row[i] if i < len(raw_row) else None for i, col in enumerate(columns)})
     return columns, rows
 
 
@@ -558,10 +561,7 @@ def _parse_xlsx(payload: bytes) -> tuple[list[str], list[dict[str, Any]]]:
     columns = [str(c).strip() if c is not None else "" for c in header]
     rows: list[dict[str, Any]] = []
     for raw in rows_iter:
-        rows.append(
-            {col: raw[i] if i < len(raw) else None
-             for i, col in enumerate(columns)}
-        )
+        rows.append({col: raw[i] if i < len(raw) else None for i, col in enumerate(columns)})
     return columns, rows
 
 

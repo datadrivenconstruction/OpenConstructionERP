@@ -73,9 +73,7 @@ async def client(app_instance):
         yield ac
 
 
-async def _register_admin(
-    client: AsyncClient, tag: str
-) -> tuple[dict[str, str], str]:
+async def _register_admin(client: AsyncClient, tag: str) -> tuple[dict[str, str], str]:
     from tests.integration._auth_helpers import promote_to_admin
 
     suffix = uuid.uuid4().hex[:8]
@@ -118,9 +116,7 @@ async def project_id(client: AsyncClient, auth: dict[str, str]) -> str:
     return resp.json()["id"]
 
 
-async def _create_topic(
-    client: AsyncClient, auth: dict[str, str], project_id: str, **kw
-) -> dict:
+async def _create_topic(client: AsyncClient, auth: dict[str, str], project_id: str, **kw) -> dict:
     payload = {
         "topic_type": "Issue",
         "topic_status": "Open",
@@ -160,9 +156,7 @@ _REQUIRED_TOPIC_KEYS = {
 
 
 @pytest.mark.asyncio
-async def test_topic_response_has_opencde_keys(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_topic_response_has_opencde_keys(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id, title="key-test")
     missing = _REQUIRED_TOPIC_KEYS - set(topic.keys())
     assert not missing, f"Topic JSON missing OpenCDE-required keys: {missing}"
@@ -172,9 +166,7 @@ async def test_topic_response_has_opencde_keys(
 
 
 @pytest.mark.asyncio
-async def test_uuid_response_is_lowercase(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_uuid_response_is_lowercase(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id, title="uuid-case")
     assert topic["guid"] == topic["guid"].lower()
     # Must be the canonical 36-char dashed form.
@@ -186,9 +178,7 @@ async def test_uuid_response_is_lowercase(
 
 
 @pytest.mark.asyncio
-async def test_empty_topic_list_returns_empty_items(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_empty_topic_list_returns_empty_items(client: AsyncClient, auth: dict[str, str]) -> None:
     # Fresh project with NO topics.
     proj = await client.post(
         "/api/v1/projects/",
@@ -196,9 +186,7 @@ async def test_empty_topic_list_returns_empty_items(
         headers=auth,
     )
     pid = proj.json()["id"]
-    resp = await client.get(
-        f"{_API}/projects/{pid}/topics", headers=auth
-    )
+    resp = await client.get(f"{_API}/projects/{pid}/topics", headers=auth)
     assert resp.status_code == 200
     body = resp.json()
     assert "items" in body
@@ -210,9 +198,7 @@ async def test_empty_topic_list_returns_empty_items(
 
 
 @pytest.mark.asyncio
-async def test_snapshot_round_trip(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_snapshot_round_trip(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id, title="snap-test")
     vp_resp = await client.post(
         f"{_API}/projects/{project_id}/topics/{topic['guid']}/viewpoints",
@@ -328,9 +314,7 @@ def test_odata_parser_rejects_unknown_field() -> None:
 def test_odata_parser_handles_compound_and() -> None:
     from app.modules.bcf.opencde_service import parse_odata_filter
 
-    clauses = parse_odata_filter(
-        "topic_status eq 'Open' and priority eq 'high'"
-    )
+    clauses = parse_odata_filter("topic_status eq 'Open' and priority eq 'high'")
     assert len(clauses) == 2
 
 
@@ -338,9 +322,7 @@ def test_odata_parser_handles_compound_and() -> None:
 
 
 @pytest.mark.asyncio
-async def test_orderby_top_skip_combine(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_orderby_top_skip_combine(client: AsyncClient, auth: dict[str, str]) -> None:
     proj = await client.post(
         "/api/v1/projects/",
         json={"name": "order probe", "description": "x"},
@@ -370,9 +352,7 @@ async def test_orderby_top_skip_combine(
 
 
 @pytest.mark.asyncio
-async def test_x_total_count_header(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_x_total_count_header(client: AsyncClient, auth: dict[str, str]) -> None:
     proj = await client.post(
         "/api/v1/projects/",
         json={"name": "total count probe", "description": "x"},
@@ -396,9 +376,7 @@ async def test_x_total_count_header(
 
 
 @pytest.mark.asyncio
-async def test_topic_authorization_for_admin(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_topic_authorization_for_admin(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id, title="auth-admin")
     actions = topic["authorization"]["topic_actions"]
     # Admin gets every action.
@@ -410,12 +388,8 @@ async def test_topic_authorization_for_admin(
 
 
 @pytest.mark.asyncio
-async def test_extensions_lists_expected_priorities(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
-    resp = await client.get(
-        f"{_API}/projects/{project_id}/extensions", headers=auth
-    )
+async def test_extensions_lists_expected_priorities(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
+    resp = await client.get(f"{_API}/projects/{project_id}/extensions", headers=auth)
     assert resp.status_code == 200
     body = resp.json()
     # 4-level priority ladder matches the BCFExportService _PRIORITY_MAP.
@@ -429,17 +403,11 @@ async def test_extensions_lists_expected_priorities(
 
 
 @pytest.mark.asyncio
-async def test_etag_is_sha1_of_modified_date(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_etag_is_sha1_of_modified_date(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id, title="etag-det")
-    r1 = await client.get(
-        f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth
-    )
+    r1 = await client.get(f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth)
     etag1 = r1.headers["etag"]
-    r2 = await client.get(
-        f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth
-    )
+    r2 = await client.get(f"{_API}/projects/{project_id}/topics/{topic['guid']}", headers=auth)
     etag2 = r2.headers["etag"]
     assert etag1 == etag2
     # 'sha1' hex is 40 chars; with surrounding quotes that is 42.
@@ -451,9 +419,7 @@ async def test_etag_is_sha1_of_modified_date(
 
 
 @pytest.mark.asyncio
-async def test_comment_uuid_lowercase(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_comment_uuid_lowercase(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     topic = await _create_topic(client, auth, project_id, title="comment-uuid")
     resp = await client.post(
         f"{_API}/projects/{project_id}/topics/{topic['guid']}/comments",
@@ -469,9 +435,7 @@ async def test_comment_uuid_lowercase(
 
 
 @pytest.mark.asyncio
-async def test_current_user_contract(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_current_user_contract(client: AsyncClient, auth: dict[str, str]) -> None:
     resp = await client.get(f"{_API}/current-user", headers=auth)
     assert resp.status_code == 200
     body = resp.json()

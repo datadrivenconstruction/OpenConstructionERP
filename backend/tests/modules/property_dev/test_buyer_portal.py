@@ -50,7 +50,6 @@ from httpx import AsyncClient
 
 from .conftest import _register_user
 
-
 # ── Per-test buyer chain (shared shape with test_portal.py) ────────────
 
 
@@ -62,7 +61,9 @@ async def _mk_buyer_with_contract_chain(client: AsyncClient) -> dict[str, str]:
     payload exercises every money field.
     """
     _uid, _email, headers = await _register_user(
-        client, role="admin", tag=f"buyport-{uuid.uuid4().hex[:6]}",
+        client,
+        role="admin",
+        tag=f"buyport-{uuid.uuid4().hex[:6]}",
     )
 
     proj = await client.post(
@@ -139,7 +140,8 @@ async def chain(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_verify_succeeds_on_first_call_only(
-    client: AsyncClient, chain,
+    client: AsyncClient,
+    chain,
 ):
     """The first ``/verify/`` of a token returns 200 + JWT context;
     every subsequent call returns 401 with the distinct
@@ -165,7 +167,8 @@ async def test_verify_succeeds_on_first_call_only(
 
     # First call: 200 + JWT context.
     first = await client.post(
-        "/api/v1/property-dev/portal/verify/", json={"token": token},
+        "/api/v1/property-dev/portal/verify/",
+        json={"token": token},
     )
     assert first.status_code == 200, first.text
     assert first.json()["buyer_id"] == chain["buyer_id"]
@@ -173,14 +176,16 @@ async def test_verify_succeeds_on_first_call_only(
     # Second call: 401 with the specific ``portal_token_already_used``
     # code (NOT the generic ``portal_token_invalid_or_expired``).
     second = await client.post(
-        "/api/v1/property-dev/portal/verify/", json={"token": token},
+        "/api/v1/property-dev/portal/verify/",
+        json={"token": token},
     )
     assert second.status_code == 401, second.text
     assert second.json()["detail"]["code"] == "portal_token_already_used"
 
     # Third call: same 401 + same code (idempotent error response).
     third = await client.post(
-        "/api/v1/property-dev/portal/verify/", json={"token": token},
+        "/api/v1/property-dev/portal/verify/",
+        json={"token": token},
     )
     assert third.status_code == 401, third.text
     assert third.json()["detail"]["code"] == "portal_token_already_used"
@@ -227,7 +232,8 @@ async def test_concurrent_verify_atomic(client: AsyncClient, chain):
 
     async def _verify() -> int:
         r = await client.post(
-            "/api/v1/property-dev/portal/verify/", json={"token": token},
+            "/api/v1/property-dev/portal/verify/",
+            json={"token": token},
         )
         return r.status_code
 
@@ -237,9 +243,7 @@ async def test_concurrent_verify_atomic(client: AsyncClient, chain):
     # the consume isn't atomic) and never two 401s (would mean the
     # consume is too aggressive and rejects the winner too).
     statuses = sorted([a, b])
-    assert statuses == [200, 401], (
-        f"expected exactly one 200 + one 401, got {statuses!r}"
-    )
+    assert statuses == [200, 401], f"expected exactly one 200 + one 401, got {statuses!r}"
 
 
 # ── 1c. After-consume error code is the specific one (not generic) ─────
@@ -247,7 +251,8 @@ async def test_concurrent_verify_atomic(client: AsyncClient, chain):
 
 @pytest.mark.asyncio
 async def test_verify_after_consume_returns_specific_error_code(
-    client: AsyncClient, chain,
+    client: AsyncClient,
+    chain,
 ):
     """Replay of a consumed token returns ``portal_token_already_used``
     — NOT the generic ``portal_token_invalid_or_expired``.
@@ -266,20 +271,20 @@ async def test_verify_after_consume_returns_specific_error_code(
 
     # Burn the single-use redemption.
     first = await client.post(
-        "/api/v1/property-dev/portal/verify/", json={"token": token},
+        "/api/v1/property-dev/portal/verify/",
+        json={"token": token},
     )
     assert first.status_code == 200, first.text
 
     # Replay → 401 with the specific code.
     replay = await client.post(
-        "/api/v1/property-dev/portal/verify/", json={"token": token},
+        "/api/v1/property-dev/portal/verify/",
+        json={"token": token},
     )
     assert replay.status_code == 401, replay.text
 
     body = replay.json()
-    assert isinstance(body.get("detail"), dict), (
-        f"detail must be a code-carrying dict, got {body!r}"
-    )
+    assert isinstance(body.get("detail"), dict), f"detail must be a code-carrying dict, got {body!r}"
     assert body["detail"]["code"] == "portal_token_already_used"
     # And explicitly NOT the catch-all bucket.
     assert body["detail"]["code"] != "portal_token_invalid_or_expired"
@@ -290,7 +295,8 @@ async def test_verify_after_consume_returns_specific_error_code(
 
 @pytest.mark.asyncio
 async def test_verify_consumes_token_atomically_via_sql_where_clause(
-    client: AsyncClient, chain,
+    client: AsyncClient,
+    chain,
 ):
     """The consume path uses a single UPDATE ``WHERE consumed_at IS NULL``,
     not a Python ``select → mutate → flush`` that loses to a concurrent
@@ -321,15 +327,8 @@ async def test_verify_consumes_token_atomically_via_sql_where_clause(
 
         # Reproduce the exact statement the implementation must build,
         # then compile to SQL to assert the WHERE shape.
-        stmt = (
-            update(_PT)
-            .where(_PT.jwt_id == jti)
-            .where(_PT.consumed_at.is_(None))
-            .values(consumed_at=now)
-        )
-        compiled = str(
-            stmt.compile(compile_kwargs={"literal_binds": False})
-        ).lower()
+        stmt = update(_PT).where(_PT.jwt_id == jti).where(_PT.consumed_at.is_(None)).values(consumed_at=now)
+        compiled = str(stmt.compile(compile_kwargs={"literal_binds": False})).lower()
         captured.append(
             {
                 "is_update": compiled.startswith("update "),
@@ -342,21 +341,18 @@ async def test_verify_consumes_token_atomically_via_sql_where_clause(
     ps.PortalLinkService.consume_token_atomic = _spy  # type: ignore[assignment]
     try:
         first = await client.post(
-            "/api/v1/property-dev/portal/verify/", json={"token": token},
+            "/api/v1/property-dev/portal/verify/",
+            json={"token": token},
         )
         assert first.status_code == 200, first.text
     finally:
         ps.PortalLinkService.consume_token_atomic = original  # type: ignore[assignment]
 
-    assert len(captured) == 1, (
-        f"consume_token_atomic must run exactly once per verify, got {captured!r}"
-    )
+    assert len(captured) == 1, f"consume_token_atomic must run exactly once per verify, got {captured!r}"
     shape = captured[0]
     assert shape["is_update"], "consume must be a SQL UPDATE, not SELECT"
     assert shape["has_jti_where"], "UPDATE must filter on jwt_id"
-    assert shape["has_consumed_at_null_where"], (
-        "UPDATE must guard on `consumed_at IS NULL` for race safety"
-    )
+    assert shape["has_consumed_at_null_where"], "UPDATE must guard on `consumed_at IS NULL` for race safety"
 
 
 # ── 2. Cross-scope JWT isolation (portal token ≠ access token) ─────────
@@ -364,7 +360,8 @@ async def test_verify_consumes_token_atomically_via_sql_where_clause(
 
 @pytest.mark.asyncio
 async def test_portal_token_cannot_call_internal_projects_api(
-    client: AsyncClient, chain,
+    client: AsyncClient,
+    chain,
 ):
     """A scope='portal' JWT used as a Bearer on /api/v1/projects/ → 401.
 
@@ -393,7 +390,8 @@ async def test_portal_token_cannot_call_internal_projects_api(
 
 @pytest.mark.asyncio
 async def test_overview_money_fields_round_trip_through_decimal(
-    client: AsyncClient, chain,
+    client: AsyncClient,
+    chain,
 ):
     """Every money string on /overview/ parses back into Decimal cleanly.
 
@@ -408,9 +406,7 @@ async def test_overview_money_fields_round_trip_through_decimal(
     )
     token = issued.json()["token"]
 
-    overview = await client.get(
-        f"/api/v1/property-dev/portal/buyer/{token}/overview/"
-    )
+    overview = await client.get(f"/api/v1/property-dev/portal/buyer/{token}/overview/")
     assert overview.status_code == 200, overview.text
     body = overview.json()
 
@@ -440,7 +436,8 @@ async def test_overview_money_fields_round_trip_through_decimal(
 
 @pytest.mark.asyncio
 async def test_audit_event_published_for_contact_agent(
-    client: AsyncClient, chain,
+    client: AsyncClient,
+    chain,
 ):
     """Contact-agent fires an event row carrying buyer + source + activity.
 
@@ -495,7 +492,8 @@ async def test_audit_event_published_for_contact_agent(
 
 @pytest.mark.asyncio
 async def test_repeat_issue_returns_distinct_tokens(
-    client: AsyncClient, chain,
+    client: AsyncClient,
+    chain,
 ):
     """Calling /issue/ twice yields two distinct, both-valid tokens.
 
@@ -523,7 +521,8 @@ async def test_repeat_issue_returns_distinct_tokens(
     # Both verify.
     for t in (token_a, token_b):
         v = await client.post(
-            "/api/v1/property-dev/portal/verify/", json={"token": t},
+            "/api/v1/property-dev/portal/verify/",
+            json={"token": t},
         )
         assert v.status_code == 200, v.text
 
@@ -533,7 +532,8 @@ async def test_repeat_issue_returns_distinct_tokens(
 
 @pytest.mark.asyncio
 async def test_revoked_and_garbage_have_same_error_code(
-    client: AsyncClient, chain,
+    client: AsyncClient,
+    chain,
 ):
     """Anti-enumeration: revoked, expired, garbage tokens → same code.
 
@@ -557,19 +557,17 @@ async def test_revoked_and_garbage_have_same_error_code(
     assert rev.status_code == 204, rev.text
 
     rev_res = await client.post(
-        "/api/v1/property-dev/portal/verify/", json={"token": token},
+        "/api/v1/property-dev/portal/verify/",
+        json={"token": token},
     )
     bad_res = await client.post(
-        "/api/v1/property-dev/portal/verify/", json={"token": "garbage" * 10},
+        "/api/v1/property-dev/portal/verify/",
+        json={"token": "garbage" * 10},
     )
 
     assert rev_res.status_code == 401, rev_res.text
     assert bad_res.status_code == 401, bad_res.text
-    assert (
-        rev_res.json()["detail"]["code"]
-        == bad_res.json()["detail"]["code"]
-        == "portal_token_invalid_or_expired"
-    )
+    assert rev_res.json()["detail"]["code"] == bad_res.json()["detail"]["code"] == "portal_token_invalid_or_expired"
 
 
 # ── 7. KYC type=passport accepted, type=anything-else rejected ─────────
@@ -577,7 +575,8 @@ async def test_revoked_and_garbage_have_same_error_code(
 
 @pytest.mark.asyncio
 async def test_kyc_only_allowlisted_doc_types_accepted(
-    client: AsyncClient, chain,
+    client: AsyncClient,
+    chain,
 ):
     """Only documented KYC slot codes are accepted; novel ones → 400."""
     issued = await client.post(
@@ -598,13 +597,10 @@ async def test_kyc_only_allowlisted_doc_types_accepted(
     # Random + path-tricks both rejected.
     for bad_type in ("../../etc/passwd", "ssn", "x"):
         bad = await client.post(
-            f"/api/v1/property-dev/portal/buyer/{token}/upload-kyc/"
-            f"?document_type={bad_type}",
+            f"/api/v1/property-dev/portal/buyer/{token}/upload-kyc/?document_type={bad_type}",
             files={"file": ("p.pdf", pdf, "application/pdf")},
         )
-        assert bad.status_code in (400, 422), (
-            f"{bad_type!r} should not have been accepted, got {bad.status_code}"
-        )
+        assert bad.status_code in (400, 422), f"{bad_type!r} should not have been accepted, got {bad.status_code}"
 
 
 # ── 8. KYC empty file rejected ─────────────────────────────────────────
@@ -612,7 +608,8 @@ async def test_kyc_only_allowlisted_doc_types_accepted(
 
 @pytest.mark.asyncio
 async def test_kyc_zero_byte_file_rejected(
-    client: AsyncClient, chain,
+    client: AsyncClient,
+    chain,
 ):
     """Zero-byte upload → 415 (magic-byte check needs N bytes minimum)."""
     issued = await client.post(
@@ -636,9 +633,7 @@ async def test_overview_with_random_unsigned_string_is_401(
     client: AsyncClient,
 ):
     """A non-JWT string in the URL path is rejected by the JWT decoder."""
-    res = await client.get(
-        "/api/v1/property-dev/portal/buyer/totally.not.a.jwt/overview/"
-    )
+    res = await client.get("/api/v1/property-dev/portal/buyer/totally.not.a.jwt/overview/")
     assert res.status_code == 401, res.text
 
 
@@ -647,7 +642,8 @@ async def test_overview_with_random_unsigned_string_is_401(
 
 @pytest.mark.asyncio
 async def test_issue_response_carries_correct_buyer_id(
-    client: AsyncClient, chain,
+    client: AsyncClient,
+    chain,
 ):
     """``response.row.buyer_id`` must equal the request body buyer_id."""
     res = await client.post(

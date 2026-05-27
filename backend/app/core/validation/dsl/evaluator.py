@@ -74,7 +74,8 @@ _MISSING: Any = object()
 
 
 def _resolve_path(
-    bindings: dict[str, Any], path: tuple[str, ...],
+    bindings: dict[str, Any],
+    path: tuple[str, ...],
 ) -> Any:
     """‌⁠‍Walk a dotted path through ``bindings`` (dicts only — no attrs)."""
     if not path:
@@ -366,9 +367,7 @@ def _run(
                 raise
             if not outcome:
                 any_failure = True
-                element_ref = (
-                    item.get("id") if isinstance(item, dict) else None
-                )
+                element_ref = item.get("id") if isinstance(item, dict) else None
                 results.append(
                     RuleResult(
                         rule_id=rule.rule_id,
@@ -423,17 +422,15 @@ def _run(
             severity=rule.severity,
             category=rule.category,
             passed=outcome,
-            message=(
-                "Assertion passed."
-                if outcome
-                else f"Assertion failed for rule '{rule.rule_id}'."
-            ),
+            message=("Assertion passed." if outcome else f"Assertion failed for rule '{rule.rule_id}'."),
         )
     ]
 
 
 def _failure_message(
-    definition: RuleDefinition, item: Any, index: int,
+    definition: RuleDefinition,
+    item: Any,
+    index: int,
 ) -> str:
     """Compose a per-item failure message.
 
@@ -445,10 +442,7 @@ def _failure_message(
         for key in ("ordinal", "id", "code", "name"):
             value = item.get(key)
             if value:
-                return (
-                    f"Rule '{definition.rule_id}' failed for "
-                    f"{key}={value}"
-                )
+                return f"Rule '{definition.rule_id}' failed for {key}={value}"
     return f"Rule '{definition.rule_id}' failed at index {index}"
 
 

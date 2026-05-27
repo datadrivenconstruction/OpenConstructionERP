@@ -156,7 +156,7 @@ def test_scoring_axis_lifts_relevant_modules() -> None:
     """A cost-estimation activity must push BoQ/takeoff into >= optional."""
     assigns = build_project_modules(
         all_modules=_universe(),
-        preset="custom",                 # no preset must-set in the way
+        preset="custom",  # no preset must-set in the way
         activities=["cost_estimation"],
         phases=["tender"],
         role="cost_engineer",
@@ -215,6 +215,4 @@ def test_assign_ordinals_numbers_only_enabled_non_crosscutting() -> None:
     numbered = sorted(v for v in ordinals.values() if v is not None)
     # Sequential 1..n with no gaps or dupes.
     assert numbered == list(range(1, len(numbered) + 1))
-    assert len(numbered) >= len(ALWAYS_ON) - len(
-        set(ALWAYS_ON) & CROSS_CUTTING
-    )
+    assert len(numbered) >= len(ALWAYS_ON) - len(set(ALWAYS_ON) & CROSS_CUTTING)

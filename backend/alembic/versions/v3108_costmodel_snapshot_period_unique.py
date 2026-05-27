@@ -31,7 +31,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 revision: str = "v3108_costmodel_snapshot_unique"
 down_revision: Union[str, Sequence[str], None] = "v3107_costmodel_idempotency"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -46,7 +45,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False

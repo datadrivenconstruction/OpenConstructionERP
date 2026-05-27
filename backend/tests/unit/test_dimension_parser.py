@@ -22,7 +22,6 @@ import pytest
 
 from app.modules.takeoff.service import _parse_indian_number as parse
 
-
 # ---------------------------------------------------------------------------
 # Metric: mm
 # ---------------------------------------------------------------------------
@@ -98,10 +97,10 @@ class TestImperialFeetInches:
             ("3'-0\"", 3.0),
             ("0'-6\"", 0.5),  # 6 inches only
             # Various separator styles
-            ("5'6\"", 5.5),   # no dash
+            ("5'6\"", 5.5),  # no dash
             ("5' 6\"", 5.5),  # space separator
-            ("5'-6", 5.5),    # no closing quote
-            ("5'6", 5.5),     # minimal form
+            ("5'-6", 5.5),  # no closing quote
+            ("5'6", 5.5),  # minimal form
             # Whole feet only
             ("8 ft", 8.0),
             ("8ft", 8.0),
@@ -128,8 +127,8 @@ class TestUnicodeDimensionStrings:
             ("3500 × 2400", 3500.0),
             ("3.5 × 2.4 m", 3.5),
             # Superscript units (common in non-ASCII PDFs)
-            ("12 m²", 12.0),   # m² (area)
-            ("5 m³", 5.0),     # m³ (volume)
+            ("12 m²", 12.0),  # m² (area)
+            ("5 m³", 5.0),  # m³ (volume)
             # Degree symbol in angles (should parse the number before °)
             ("45°", 45.0),
             # Plus/minus ± prefix
@@ -189,9 +188,9 @@ class TestIndianLocale:
     @pytest.mark.parametrize(
         ("raw", "expected"),
         [
-            ("1,00,000 mm", 100000.0),   # 1 lakh
+            ("1,00,000 mm", 100000.0),  # 1 lakh
             ("10,00,000 mm", 1000000.0),  # 10 lakh
-            ("12,5", 12.5),              # decimal-comma (no unit)
+            ("12,5", 12.5),  # decimal-comma (no unit)
         ],
     )
     def test_indian_grouping(self, raw: str, expected: float) -> None:
@@ -211,10 +210,10 @@ class TestPlainNumbers:
             ("1500.5", 1500.5),
             ("0", 0.0),
             ("-25", -25.0),
-            (42, 42.0),      # integer passthrough
-            (3.14, 3.14),    # float passthrough
-            (True, 0.0),     # bool treated as non-numeric
-            (False, 0.0),    # bool treated as non-numeric
+            (42, 42.0),  # integer passthrough
+            (3.14, 3.14),  # float passthrough
+            (True, 0.0),  # bool treated as non-numeric
+            (False, 0.0),  # bool treated as non-numeric
         ],
     )
     def test_plain(self, raw: object, expected: float) -> None:

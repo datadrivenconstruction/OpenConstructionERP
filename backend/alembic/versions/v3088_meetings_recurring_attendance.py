@@ -61,7 +61,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "v3088_meetings_recurring_attendance"
 down_revision: Union[str, Sequence[str], None] = "v3087_merge_wave2_heads"
@@ -85,7 +84,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -93,7 +94,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -101,14 +104,14 @@ def _has_index(
 
 
 def _has_unique(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
     try:
-        return any(
-            uc.get("name") == name for uc in inspector.get_unique_constraints(table)
-        )
+        return any(uc.get("name") == name for uc in inspector.get_unique_constraints(table))
     except NotImplementedError:  # pragma: no cover — backend without UC reflection
         return False
 
@@ -122,18 +125,20 @@ def upgrade() -> None:
         needs = {
             "series_id": not _has_column(inspector, _MEETING_TABLE, "series_id"),
             "recurrence_rule": not _has_column(
-                inspector, _MEETING_TABLE, "recurrence_rule",
+                inspector,
+                _MEETING_TABLE,
+                "recurrence_rule",
             ),
             "is_series_master": not _has_column(
-                inspector, _MEETING_TABLE, "is_series_master",
+                inspector,
+                _MEETING_TABLE,
+                "is_series_master",
             ),
         }
         if any(needs.values()):
             with op.batch_alter_table(_MEETING_TABLE) as batch:
                 if needs["series_id"]:
-                    batch.add_column(
-                        sa.Column("series_id", sa.String(length=36), nullable=True)
-                    )
+                    batch.add_column(sa.Column("series_id", sa.String(length=36), nullable=True))
                 if needs["recurrence_rule"]:
                     batch.add_column(
                         sa.Column(
@@ -154,13 +159,14 @@ def upgrade() -> None:
 
         # Re-inspect because batch_alter_table on SQLite re-creates the table.
         inspector = sa.inspect(bind)
-        if (
-            _has_column(inspector, _MEETING_TABLE, "series_id")
-            and not _has_index(inspector, _MEETING_TABLE, _IX_MEETING_SERIES)
+        if _has_column(inspector, _MEETING_TABLE, "series_id") and not _has_index(
+            inspector, _MEETING_TABLE, _IX_MEETING_SERIES
         ):
             try:
                 op.create_index(
-                    _IX_MEETING_SERIES, _MEETING_TABLE, ["series_id"],
+                    _IX_MEETING_SERIES,
+                    _MEETING_TABLE,
+                    ["series_id"],
                 )
             except Exception:  # noqa: BLE001 — idempotent guard
                 pass
@@ -184,7 +190,9 @@ def upgrade() -> None:
             )
         else:
             meeting_col = sa.Column(
-                "meeting_id", sa.String(length=36), nullable=False,
+                "meeting_id",
+                sa.String(length=36),
+                nullable=False,
             )
 
         if users_present:
@@ -200,7 +208,9 @@ def upgrade() -> None:
             )
         else:
             user_col = sa.Column(
-                "user_id", sa.String(length=36), nullable=True,
+                "user_id",
+                sa.String(length=36),
+                nullable=True,
             )
 
         op.create_table(
@@ -210,10 +220,14 @@ def upgrade() -> None:
             user_col,
             sa.Column("external_name", sa.String(length=200), nullable=True),
             sa.Column(
-                "checked_in_at", sa.DateTime(timezone=True), nullable=True,
+                "checked_in_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
-                "signature_image_path", sa.String(length=500), nullable=True,
+                "signature_image_path",
+                sa.String(length=500),
+                nullable=True,
             ),
             sa.Column(
                 "created_at",
@@ -232,18 +246,21 @@ def upgrade() -> None:
             # attendees (NULL user_id) can have multiple rows — exactly what
             # we want for walk-ins where two "John Doe" entries are legit.
             sa.UniqueConstraint(
-                "meeting_id", "user_id", name=_UQ_ATTENDANCE_MEETING_USER,
+                "meeting_id",
+                "user_id",
+                name=_UQ_ATTENDANCE_MEETING_USER,
             ),
         )
 
     inspector = sa.inspect(bind)
-    if (
-        _has_table(inspector, _ATTENDANCE_TABLE)
-        and not _has_index(inspector, _ATTENDANCE_TABLE, _IX_ATTENDANCE_MEETING)
+    if _has_table(inspector, _ATTENDANCE_TABLE) and not _has_index(
+        inspector, _ATTENDANCE_TABLE, _IX_ATTENDANCE_MEETING
     ):
         try:
             op.create_index(
-                _IX_ATTENDANCE_MEETING, _ATTENDANCE_TABLE, ["meeting_id"],
+                _IX_ATTENDANCE_MEETING,
+                _ATTENDANCE_TABLE,
+                ["meeting_id"],
             )
         except Exception:  # noqa: BLE001
             pass

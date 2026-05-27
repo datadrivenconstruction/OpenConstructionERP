@@ -75,7 +75,8 @@ class TestRBACSeparation:
         from app.core.permissions import Role, permission_registry
 
         assert not permission_registry.role_has_permission(
-            Role.EDITOR, "reporting.delete",
+            Role.EDITOR,
+            "reporting.delete",
         ), (
             "EDITOR must NOT carry reporting.delete — generated PDFs "
             "may contain audit-trail evidence and require manager-level "
@@ -87,7 +88,8 @@ class TestRBACSeparation:
         from app.core.permissions import Role, permission_registry
 
         assert permission_registry.role_has_permission(
-            Role.MANAGER, "reporting.delete",
+            Role.MANAGER,
+            "reporting.delete",
         )
 
     def test_editor_cannot_distribute_report(self) -> None:
@@ -95,7 +97,8 @@ class TestRBACSeparation:
         from app.core.permissions import Role, permission_registry
 
         assert not permission_registry.role_has_permission(
-            Role.EDITOR, "reporting.distribute",
+            Role.EDITOR,
+            "reporting.distribute",
         ), (
             "EDITOR must NOT carry reporting.distribute — fan-out to "
             "arbitrary recipient lists on a cron is a cross-tenant "
@@ -107,7 +110,8 @@ class TestRBACSeparation:
         from app.core.permissions import Role, permission_registry
 
         assert permission_registry.role_has_permission(
-            Role.MANAGER, "reporting.distribute",
+            Role.MANAGER,
+            "reporting.distribute",
         )
 
     def test_viewer_can_read_report(self) -> None:
@@ -115,7 +119,8 @@ class TestRBACSeparation:
         from app.core.permissions import Role, permission_registry
 
         assert permission_registry.role_has_permission(
-            Role.VIEWER, "reporting.read",
+            Role.VIEWER,
+            "reporting.read",
         )
 
     def test_editor_can_create_report(self) -> None:
@@ -127,7 +132,8 @@ class TestRBACSeparation:
         from app.core.permissions import Role, permission_registry
 
         assert permission_registry.role_has_permission(
-            Role.EDITOR, "reporting.create",
+            Role.EDITOR,
+            "reporting.create",
         )
 
 
@@ -236,8 +242,7 @@ class TestScheduleEndpointElevation:
         # The schedule handler is the only route in this module that
         # uses ``reporting.distribute`` — assert at least one occurrence.
         assert 'RequirePermission("reporting.distribute")' in source, (
-            "schedule template handler must use reporting.distribute "
-            "(MANAGER+), not reporting.create (EDITOR)"
+            "schedule template handler must use reporting.distribute (MANAGER+), not reporting.create (EDITOR)"
         )
 
     def test_delete_route_uses_delete_permission(self) -> None:
@@ -247,8 +252,7 @@ class TestScheduleEndpointElevation:
 
         source = Path(router_mod.__file__).read_text(encoding="utf-8")
         assert 'RequirePermission("reporting.delete")' in source, (
-            "delete_report handler must use reporting.delete (MANAGER+), "
-            "not reporting.create (EDITOR)"
+            "delete_report handler must use reporting.delete (MANAGER+), not reporting.create (EDITOR)"
         )
 
 
@@ -276,13 +280,15 @@ class TestKPIMoneyStringConvention:
         )
         # Pydantic ``str`` annotation guarantees the wire format.
         for field in (
-            "cpi", "spi", "budget_consumed_pct",
-            "schedule_progress_pct", "risk_score_avg",
+            "cpi",
+            "spi",
+            "budget_consumed_pct",
+            "schedule_progress_pct",
+            "risk_score_avg",
         ):
             value = getattr(resp, field)
             assert isinstance(value, str), (
-                f"{field!r} must be ``str`` to preserve Decimal precision; "
-                f"got {type(value).__name__}: {value!r}"
+                f"{field!r} must be ``str`` to preserve Decimal precision; got {type(value).__name__}: {value!r}"
             )
 
     def test_no_float_columns_on_kpi_model(self) -> None:

@@ -27,19 +27,16 @@ from __future__ import annotations
 
 import uuid
 from contextlib import asynccontextmanager
-from decimal import Decimal
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import select
+from sqlalchemy import event as sa_event
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy import event as sa_event
-
 
 # ── DB fixture (pure in-memory SQLite) ──────────────────────────────────────
 
@@ -47,9 +44,9 @@ from sqlalchemy import event as sa_event
 @pytest_asyncio.fixture
 async def mem_session():
     """Isolated in-memory SQLite session with EAC + audit tables."""
-    import app.modules.eac.models  # noqa: F401 — register ORM models
-    import app.core.audit_log  # noqa: F401
     import app.core.audit  # noqa: F401
+    import app.core.audit_log  # noqa: F401
+    import app.modules.eac.models  # noqa: F401 — register ORM models
     from app.database import Base
 
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", future=True)
@@ -255,8 +252,7 @@ async def test_completed_run_row_is_frozen_after_rerun(client: AsyncClient) -> N
     assert orig_resp.status_code == 200
     orig = orig_resp.json()
     assert orig["elements_evaluated"] == run1_evaluated, (
-        f"Source run elements_evaluated mutated: was {run1_evaluated}, "
-        f"now {orig['elements_evaluated']}"
+        f"Source run elements_evaluated mutated: was {run1_evaluated}, now {orig['elements_evaluated']}"
     )
     assert orig["status"] in {"success", "failed", "partial"}, (
         "Source run status must remain in a terminal state after rerun"
@@ -318,17 +314,14 @@ async def test_historical_run_counts_preserved(mem_session: AsyncSession) -> Non
         run_ids.append(run.id)
 
     # Now verify each snapshot is unchanged.
-    for run_id, w in zip(run_ids, weekly):
+    for run_id, w in zip(run_ids, weekly, strict=False):
         row = await mem_session.get(EacRun, run_id)
         assert row is not None
         assert row.elements_matched == w["matched"], (
-            f"Week {w['week']} snapshot mutated: expected matched={w['matched']}, "
-            f"got {row.elements_matched}"
+            f"Week {w['week']} snapshot mutated: expected matched={w['matched']}, got {row.elements_matched}"
         )
         assert row.elements_evaluated == w["evaluated"]
-        assert row.summary_json["week"] == w["week"], (
-            "Summary JSON must be frozen to the snapshot-time value"
-        )
+        assert row.summary_json["week"] == w["week"], "Summary JSON must be frozen to the snapshot-time value"
 
 
 # ── Test 4: CPI trend computed from historical run snapshots ─────────────────
@@ -358,10 +351,10 @@ def test_cpi_trend_from_successive_snapshots() -> None:
     """
     # Simulated weekly snapshot data (elements_matched / elements_evaluated).
     weekly_data = [
-        {"evaluated": 10, "matched": 9},   # Week 1: 90% → CPI=1.125
-        {"evaluated": 10, "matched": 7},   # Week 2: 70% → CPI=0.875
-        {"evaluated": 10, "matched": 5},   # Week 3: 50% → CPI=0.625
-        {"evaluated": 10, "matched": 3},   # Week 4: 30% → CPI=0.375
+        {"evaluated": 10, "matched": 9},  # Week 1: 90% → CPI=1.125
+        {"evaluated": 10, "matched": 7},  # Week 2: 70% → CPI=0.875
+        {"evaluated": 10, "matched": 5},  # Week 3: 50% → CPI=0.625
+        {"evaluated": 10, "matched": 3},  # Week 4: 30% → CPI=0.375
     ]
 
     cpis: list[float] = []
@@ -372,10 +365,7 @@ def test_cpi_trend_from_successive_snapshots() -> None:
 
     # Trend must be strictly decreasing (worsening performance each week).
     for i in range(1, len(cpis)):
-        assert cpis[i] < cpis[i - 1], (
-            f"CPI trend not decreasing at week {i + 1}: "
-            f"cpis={cpis}"
-        )
+        assert cpis[i] < cpis[i - 1], f"CPI trend not decreasing at week {i + 1}: cpis={cpis}"
 
     # The final CPI must be below 1.0 (over budget).
     assert cpis[-1] < 1.0, f"Final CPI should indicate over-budget, got {cpis[-1]}"
@@ -432,6 +422,4 @@ async def test_snapshot_aliases_json_is_independent_copy(
     stored_unit = reloaded.aliases_json.get("_Volume", {}).get("default_unit", "")
     # After commit+refresh, SQLAlchemy re-reads from DB; the stored JSON
     # was serialised at flush time so must be the original 'm3'.
-    assert stored_unit == "m3", (
-        f"Snapshot aliases_json must reflect insertion-time values, got unit={stored_unit!r}"
-    )
+    assert stored_unit == "m3", f"Snapshot aliases_json must reflect insertion-time values, got unit={stored_unit!r}"

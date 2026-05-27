@@ -44,9 +44,7 @@ class _StubForecastRepo:
         self.rows.append(forecast)
         return forecast
 
-    async def list(
-        self, *, project_id: uuid.UUID | None = None
-    ) -> tuple[list[Any], int]:
+    async def list(self, *, project_id: uuid.UUID | None = None) -> tuple[list[Any], int]:
         return self.rows, len(self.rows)
 
 
@@ -90,9 +88,7 @@ async def test_calculate_forecast_returns_etc_eac_vac_tcpi() -> None:
         value = getattr(forecast, field)
         assert value, f"{field} empty"
         # Each should be either a decimal string or the "inf" sentinel.
-        assert value == "inf" or _is_decimal_str(value), (
-            f"{field}={value!r} not decimal"
-        )
+        assert value == "inf" or _is_decimal_str(value), f"{field}={value!r} not decimal"
 
     # Sanity: EAC = AC + ETC (derived identity).
     from decimal import Decimal
@@ -105,9 +101,7 @@ async def test_calculate_forecast_cpi_zero_uses_raw_remaining() -> None:
     """When CPI == 0 the service falls back to ETC = remaining budget
     (no divide-by-zero). Tests the defensive branch in
     ``calculate_forecast``."""
-    service = _make_service(
-        _make_snapshot(bac="100000", ev="0", ac="0", cpi="0", spi="0")
-    )
+    service = _make_service(_make_snapshot(bac="100000", ev="0", ac="0", cpi="0", spi="0"))
     forecast = await service.calculate_forecast(uuid.uuid4())
 
     from decimal import Decimal

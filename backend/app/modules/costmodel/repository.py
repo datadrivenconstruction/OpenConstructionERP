@@ -18,7 +18,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.costmodel.models import BudgetLine, CashFlow, CostSnapshot
 
-
 # ── Currency conversion helper (R5 audit, May 2026) ─────────────────────
 
 
@@ -74,6 +73,7 @@ def _amount_in_base(
         return amount
 
     return amount * rate
+
 
 # ── CostSnapshot repository ─────────────────────────────────────────────────
 
@@ -147,9 +147,7 @@ class SnapshotRepository:
         result = await self.session.execute(stmt)
         return result.scalars().first()
 
-    async def get_for_project_period(
-        self, project_id: uuid.UUID, period: str
-    ) -> CostSnapshot | None:
+    async def get_for_project_period(self, project_id: uuid.UUID, period: str) -> CostSnapshot | None:
         """Return the snapshot for ``(project_id, period)`` if one exists.
 
         Used by ``create_snapshot`` to reject duplicate periods at the
@@ -242,9 +240,7 @@ class BudgetLineRepository:
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def _project_fx_context(
-        self, project_id: uuid.UUID
-    ) -> tuple[str, dict[str, str]]:
+    async def _project_fx_context(self, project_id: uuid.UUID) -> tuple[str, dict[str, str]]:
         """Resolve the project's base currency and ``fx_rates`` map.
 
         Returns ``("", {})`` when no project / no fx rates are configured
@@ -373,9 +369,7 @@ class BudgetLineRepository:
         await self.session.flush()
         return lines
 
-    async def existing_position_ids(
-        self, project_id: uuid.UUID
-    ) -> set[uuid.UUID]:
+    async def existing_position_ids(self, project_id: uuid.UUID) -> set[uuid.UUID]:
         """Return the set of BOQ position IDs already wired to a budget line.
 
         Used by ``generate_budget_from_boq`` to make the auto-generation

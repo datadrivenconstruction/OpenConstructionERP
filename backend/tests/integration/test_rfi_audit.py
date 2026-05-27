@@ -39,7 +39,6 @@ from fastapi import HTTPException
 from app.modules.rfi.schemas import RFICreate, RFIUpdate
 from app.modules.rfi.service import RFIService
 
-
 # ── Stubs (mirrors tests/unit/test_rfi.py) ─────────────────────────────────
 
 
@@ -189,8 +188,7 @@ async def test_respond_to_rfi_rejects_draft_status() -> None:
     with pytest.raises(HTTPException) as exc_info:
         await service.respond_to_rfi(rfi.id, "premature", "responder-1")
     assert exc_info.value.status_code == 400, (
-        "draft → answered must be rejected; the FSM only allows "
-        "draft → open and open → answered."
+        "draft → answered must be rejected; the FSM only allows draft → open and open → answered."
     )
 
 
@@ -224,8 +222,7 @@ async def test_update_rfi_answered_to_open_requires_manager_role() -> None:
             actor_role="editor",
         )
     assert exc_info.value.status_code == 403, (
-        "EDITOR must NOT be able to reopen an answered RFI; require "
-        "MANAGER/ADMIN/OWNER."
+        "EDITOR must NOT be able to reopen an answered RFI; require MANAGER/ADMIN/OWNER."
     )
 
 
@@ -305,8 +302,7 @@ async def test_bulk_delete_rfis_admin_bypass() -> None:
             # Pre-fix signature has no ``payload`` arg → admin path is
             # impossible by construction; the failure mode IS the bug.
             pytest.fail(
-                "batch_delete_rfis has no `payload` parameter — admin "
-                "callers cannot reach an `is_admin=True` branch."
+                "batch_delete_rfis has no `payload` parameter — admin callers cannot reach an `is_admin=True` branch."
             )
         except _StopProbe:
             pass  # expected — captured the flag, short-circuit fine
@@ -336,9 +332,6 @@ async def test_get_stats_applies_hard_cap_on_scan() -> None:
 
     cap = getattr(svc_mod, "_RFI_STATS_SCAN_CAP", None)
     assert cap is not None, (
-        "RFIService.get_stats has no scan cap; large tenants pay full "
-        "table read on every stats request."
+        "RFIService.get_stats has no scan cap; large tenants pay full table read on every stats request."
     )
-    assert isinstance(cap, int) and cap > 0, (
-        f"_RFI_STATS_SCAN_CAP must be a positive int, got {cap!r}"
-    )
+    assert isinstance(cap, int) and cap > 0, f"_RFI_STATS_SCAN_CAP must be a positive int, got {cap!r}"

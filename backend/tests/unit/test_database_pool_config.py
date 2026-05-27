@@ -17,10 +17,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-DATABASE_PY = (
-    Path(__file__).resolve().parent.parent.parent
-    / "app" / "database.py"
-)
+DATABASE_PY = Path(__file__).resolve().parent.parent.parent / "app" / "database.py"
 
 
 def _parse_create_engine() -> ast.FunctionDef:
@@ -74,9 +71,7 @@ def test_pool_size_assigned_outside_sqlite_branch() -> None:
         "Otherwise SQLite gets the SQLAlchemy default pool of size=5+10 "
         "which exhausts under parallel load."
     )
-    assert max_overflow_assigned_at_top_level, (
-        "kwargs['max_overflow'] must be assigned at the top level too."
-    )
+    assert max_overflow_assigned_at_top_level, "kwargs['max_overflow'] must be assigned at the top level too."
 
 
 def test_no_else_branch_with_pool_kwargs() -> None:
@@ -90,11 +85,7 @@ def test_no_else_branch_with_pool_kwargs() -> None:
             continue
         # Look for the _is_sqlite(url) test
         test = stmt.test
-        if not (
-            isinstance(test, ast.Call)
-            and isinstance(test.func, ast.Name)
-            and test.func.id == "_is_sqlite"
-        ):
+        if not (isinstance(test, ast.Call) and isinstance(test.func, ast.Name) and test.func.id == "_is_sqlite"):
             continue
 
         # The else branch must NOT assign pool_size/max_overflow.
@@ -127,9 +118,6 @@ def test_database_settings_have_pool_fields() -> None:
     assert hasattr(Settings, "model_fields"), "Settings must be a Pydantic v2 model"
     fields = Settings.model_fields
     assert "database_pool_size" in fields, (
-        "Settings.database_pool_size missing — required by "
-        "create_engine_from_settings."
+        "Settings.database_pool_size missing — required by create_engine_from_settings."
     )
-    assert "database_max_overflow" in fields, (
-        "Settings.database_max_overflow missing."
-    )
+    assert "database_max_overflow" in fields, "Settings.database_max_overflow missing."

@@ -62,9 +62,7 @@ def decode_text_bytes(
     if last_exc is not None:
         raise last_exc
     # Defensive: empty encodings tuple.
-    raise UnicodeDecodeError(
-        "decode_text_bytes", content, 0, 0, "no encodings supplied"
-    )
+    raise UnicodeDecodeError("decode_text_bytes", content, 0, 0, "no encodings supplied")
 
 
 def safe_float(value: Any, default: float = 0.0) -> float:

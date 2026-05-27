@@ -104,7 +104,8 @@ async def _seed_user_and_project(SessionFactory) -> tuple[uuid.UUID, uuid.UUID]:
         s.add(owner)
         await s.flush()
         proj = Project(
-            name=f"P-{uuid.uuid4().hex[:6]}", owner_id=owner.id,
+            name=f"P-{uuid.uuid4().hex[:6]}",
+            owner_id=owner.id,
         )
         s.add(proj)
         await s.flush()
@@ -220,7 +221,9 @@ async def test_pin_required_on_field_endpoints(app_and_client) -> None:
     _app, client, SessionFactory = app_and_client
     _owner, project_id = await _seed_user_and_project(SessionFactory)
     token, pin, _user_id = await _request_link_and_grant(
-        client, SessionFactory, project_id=project_id,
+        client,
+        SessionFactory,
+        project_id=project_id,
     )
     session_token = await _open_session(client, token, pin)
 
@@ -250,7 +253,9 @@ async def test_pin_wrong_returns_401(app_and_client) -> None:
     _app, client, SessionFactory = app_and_client
     _owner, project_id = await _seed_user_and_project(SessionFactory)
     token, pin, _user_id = await _request_link_and_grant(
-        client, SessionFactory, project_id=project_id,
+        client,
+        SessionFactory,
+        project_id=project_id,
     )
     session_token = await _open_session(client, token, pin)
 
@@ -271,7 +276,9 @@ async def test_diary_entry_lifecycle(app_and_client) -> None:
     _app, client, SessionFactory = app_and_client
     _owner, project_id = await _seed_user_and_project(SessionFactory)
     token, pin, _user_id = await _request_link_and_grant(
-        client, SessionFactory, project_id=project_id,
+        client,
+        SessionFactory,
+        project_id=project_id,
     )
     session_token = await _open_session(client, token, pin)
     headers = {
@@ -307,14 +314,16 @@ async def test_diary_entry_lifecycle(app_and_client) -> None:
 
     # Submit.
     r = await client.post(
-        f"/v1/field-diary/entries/{entry_id}/submit/", headers=headers,
+        f"/v1/field-diary/entries/{entry_id}/submit/",
+        headers=headers,
     )
     assert r.status_code == 200
     assert r.json()["status"] == "submitted"
 
     # Submit again — idempotent (still 200, still submitted).
     r = await client.post(
-        f"/v1/field-diary/entries/{entry_id}/submit/", headers=headers,
+        f"/v1/field-diary/entries/{entry_id}/submit/",
+        headers=headers,
     )
     assert r.status_code == 200
     assert r.json()["status"] == "submitted"
@@ -334,7 +343,9 @@ async def test_diary_attachment_upload_size_limit(app_and_client) -> None:
     _app, client, SessionFactory = app_and_client
     _owner, project_id = await _seed_user_and_project(SessionFactory)
     token, pin, _user_id = await _request_link_and_grant(
-        client, SessionFactory, project_id=project_id,
+        client,
+        SessionFactory,
+        project_id=project_id,
     )
     session_token = await _open_session(client, token, pin)
     headers = {
@@ -413,7 +424,9 @@ async def test_diary_entry_unique_per_author_date(app_and_client) -> None:
     _app, client, SessionFactory = app_and_client
     _owner, project_id = await _seed_user_and_project(SessionFactory)
     token, pin, _user_id = await _request_link_and_grant(
-        client, SessionFactory, project_id=project_id,
+        client,
+        SessionFactory,
+        project_id=project_id,
     )
     session_token = await _open_session(client, token, pin)
     headers = {
@@ -427,12 +440,16 @@ async def test_diary_entry_unique_per_author_date(app_and_client) -> None:
         "notes_md": "first",
     }
     r = await client.post(
-        "/v1/field-diary/entries/", headers=headers, json=payload,
+        "/v1/field-diary/entries/",
+        headers=headers,
+        json=payload,
     )
     assert r.status_code == 201
 
     # Same author + date → 409.
     r = await client.post(
-        "/v1/field-diary/entries/", headers=headers, json=payload,
+        "/v1/field-diary/entries/",
+        headers=headers,
+        json=payload,
     )
     assert r.status_code == 409

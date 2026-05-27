@@ -112,8 +112,8 @@ class NegativePromptSnippet(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    snippet: str          # First 120 chars of the user-prompt
-    thumbs_down: int      # How many distinct downvotes the linked turn drew
+    snippet: str  # First 120 chars of the user-prompt
+    thumbs_down: int  # How many distinct downvotes the linked turn drew
     message_id: UUID | None = None
 
 
@@ -126,9 +126,9 @@ class AdminStatsResponse(BaseModel):
     total_messages: int
     total_thumbs_up: int
     total_thumbs_down: int
-    feedback_rate_pct: float        # % of assistant messages with any rating
+    feedback_rate_pct: float  # % of assistant messages with any rating
     total_tokens_input: int
     total_tokens_output: int
-    cache_hit_rate_pct: float       # % of turns where provider reported cache_hit=True
+    cache_hit_rate_pct: float  # % of turns where provider reported cache_hit=True
     top_negative_prompts: list[NegativePromptSnippet]
     daily_breakdown: list[DailyChatStat]

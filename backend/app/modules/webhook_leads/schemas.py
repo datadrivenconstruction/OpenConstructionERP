@@ -24,9 +24,7 @@ ALLOWED_TARGET_FIELDS: frozenset[str] = frozenset(
 )
 
 # Pure string transforms a mapping rule may name.
-ALLOWED_TRANSFORMS: frozenset[str] = frozenset(
-    {"lower", "upper", "strip", "str", "title"}
-)
+ALLOWED_TRANSFORMS: frozenset[str] = frozenset({"lower", "upper", "strip", "str", "title"})
 
 
 # ── WebhookSource ─────────────────────────────────────────────────────────
@@ -36,17 +34,13 @@ class WebhookSourceCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str = Field(..., min_length=1, max_length=255)
-    slug: str = Field(
-        ..., min_length=1, max_length=64, pattern=r"^[a-z0-9][a-z0-9-_]*$"
-    )
+    slug: str = Field(..., min_length=1, max_length=64, pattern=r"^[a-z0-9][a-z0-9-_]*$")
     auth_method: str = Field(default="api_key", pattern=_AUTH_PATTERN)
     project_id: str | None = Field(default=None, max_length=36)
     ip_allowlist: list[str] = Field(default_factory=list)
     is_active: bool = True
     rate_limit_per_min: int = Field(default=60, ge=1, le=10000)
-    default_lead_source: str = Field(
-        default="web", pattern=r"^(web|referral|event|cold_outreach|inbound)$"
-    )
+    default_lead_source: str = Field(default="web", pattern=r"^(web|referral|event|cold_outreach|inbound)$")
 
 
 class WebhookSourceUpdate(BaseModel):
@@ -58,9 +52,7 @@ class WebhookSourceUpdate(BaseModel):
     ip_allowlist: list[str] | None = None
     is_active: bool | None = None
     rate_limit_per_min: int | None = Field(default=None, ge=1, le=10000)
-    default_lead_source: str | None = Field(
-        default=None, pattern=r"^(web|referral|event|cold_outreach|inbound)$"
-    )
+    default_lead_source: str | None = Field(default=None, pattern=r"^(web|referral|event|cold_outreach|inbound)$")
 
 
 class WebhookSourceResponse(BaseModel):

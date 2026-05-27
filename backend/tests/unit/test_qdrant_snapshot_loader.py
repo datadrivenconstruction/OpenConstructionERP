@@ -114,8 +114,7 @@ def test_target_returns_none_for_non_v3_snapshots(filename: str) -> None:
 def test_target_accepts_path_objects_with_directory_prefix() -> None:
     # Mirrors what os.walk yields — the function strips the dir part.
     p = Path(
-        "DDC-CWICR/RU___DDC_CWICR/"
-        "RU_STPETERSBURG_workitems_costs_resources_EMBEDDINGS_BGEM3_V3_DDC_CWICR.snapshot"
+        "DDC-CWICR/RU___DDC_CWICR/RU_STPETERSBURG_workitems_costs_resources_EMBEDDINGS_BGEM3_V3_DDC_CWICR.snapshot"
     )
     assert cwicr_snapshot_target_for(p) == "cwicr_ru_v3"
 
@@ -193,9 +192,7 @@ def test_restore_from_url_raises_with_qdrant_error_verbatim(monkeypatch) -> None
             collection_name="cwicr_en_v3",
             snapshot_url="https://hf.co/x.snapshot",
         )
-    assert captured["url"] == (
-        "http://localhost:6333/collections/cwicr_en_v3/snapshots/recover"
-    )
+    assert captured["url"] == ("http://localhost:6333/collections/cwicr_en_v3/snapshots/recover")
     assert captured["json"] == {
         "location": "https://hf.co/x.snapshot",
         "priority": "snapshot",
@@ -216,11 +213,14 @@ def test_restore_from_url_returns_true_on_result_true(monkeypatch) -> None:
 
     monkeypatch.setattr(httpx, "put", lambda *a, **kw: _StubResp())
 
-    assert restore_snapshot_from_url(
-        qdrant_url="http://localhost:6333",
-        collection_name="cwicr_en_v3",
-        snapshot_url="https://hf.co/x.snapshot",
-    ) is True
+    assert (
+        restore_snapshot_from_url(
+            qdrant_url="http://localhost:6333",
+            collection_name="cwicr_en_v3",
+            snapshot_url="https://hf.co/x.snapshot",
+        )
+        is True
+    )
 
 
 # ── Dry-run directory walk ───────────────────────────────────────────────
@@ -294,8 +294,7 @@ def test_dry_run_warns_on_collision(tmp_path: Path, caplog) -> None:
 
     assert len(summary.loaded) == 2
     assert any(
-        "Two snapshots map to" in record.message and "cwicr_en_v3" in record.message
-        for record in caplog.records
+        "Two snapshots map to" in record.message and "cwicr_en_v3" in record.message for record in caplog.records
     ), "expected a collision WARN log when two snapshots target the same collection"
 
 

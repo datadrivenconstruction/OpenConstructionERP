@@ -98,9 +98,7 @@ class Component(Base):
     # "operator" / "subcontractor" / "overhead"). Promoted from metadata
     # in v2940 — see migration for back-fill rules. Nullable because
     # legacy rows may still be untyped until a user revisits them.
-    resource_type: Mapped[str | None] = mapped_column(
-        String(20), nullable=True, index=True
-    )
+    resource_type: Mapped[str | None] = mapped_column(String(20), nullable=True, index=True)
     factor: Mapped[str] = mapped_column(String(50), nullable=False, default="1.0")
     quantity: Mapped[str] = mapped_column(String(50), nullable=False, default="1.0")
     unit: Mapped[str] = mapped_column(String(20), nullable=False)
@@ -162,15 +160,11 @@ class AssemblyTemplate(Base):
 
     __tablename__ = "oe_assemblies_template"
 
-    name: Mapped[str] = mapped_column(
-        String(255), unique=True, index=True, nullable=False
-    )
+    name: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     name_translations: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict, server_default="{}"
     )
-    category: Mapped[str] = mapped_column(
-        String(100), nullable=False, default="", index=True
-    )
+    category: Mapped[str] = mapped_column(String(100), nullable=False, default="", index=True)
     unit: Mapped[str] = mapped_column(String(20), nullable=False, default="")
     components: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=list, server_default="[]"
@@ -181,9 +175,7 @@ class AssemblyTemplate(Base):
     tags: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=list, server_default="[]"
     )
-    is_builtin: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="1"
-    )
+    is_builtin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
 
     def __repr__(self) -> str:
         return f"<AssemblyTemplate {self.name[:60]} ({self.category}/{self.unit})>"

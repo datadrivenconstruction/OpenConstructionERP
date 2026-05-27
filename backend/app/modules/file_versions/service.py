@@ -176,8 +176,7 @@ class FileVersionService:
                 # A subscription / notification failure must never
                 # roll back a successful version write.
                 logger.debug(
-                    "on_file_new_revision hook failed; "
-                    "version row was still committed",
+                    "on_file_new_revision hook failed; version row was still committed",
                     exc_info=True,
                 )
 

@@ -23,9 +23,7 @@ _COMMITMENT_STATUS = r"^(planned|committed|in_progress|completed|at_risk|missed)
 _WEEKLY_STATUS = r"^(draft|committed|in_progress|closed)$"
 _BASELINE_STATUS = r"^(active|superseded|archived)$"
 _MASTER_STATUS = r"^(active|archived)$"
-_RNC_CATEGORY = (
-    r"^(manpower|material|equipment|info|weather|predecessor|changes|quality|other)$"
-)
+_RNC_CATEGORY = r"^(manpower|material|equipment|info|weather|predecessor|changes|quality|other)$"
 
 
 # ── MasterSchedule ─────────────────────────────────────────────────────────

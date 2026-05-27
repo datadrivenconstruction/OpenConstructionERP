@@ -65,9 +65,7 @@ def _coerce_decimal(v: Any) -> Decimal:
 def _compare(lhs: Any, op: str, rhs: Any) -> bool:
     """‌⁠‍Comparison primitive — works on numeric + string types."""
     # If both look numeric, coerce to Decimal for fair comparison
-    if isinstance(lhs, (int, float, Decimal)) or (
-        isinstance(rhs, (int, float, Decimal))
-    ):
+    if isinstance(lhs, (int, float, Decimal)) or (isinstance(rhs, (int, float, Decimal))):
         try:
             lhs_n = _coerce_decimal(lhs)
             rhs_n = _coerce_decimal(rhs)
@@ -141,16 +139,10 @@ async def evaluate_alert_expression(
             )
         op = node.get("op")
         if op == "and":
-            results = [
-                await _eval(child, f"{path}.and[{i}]")
-                for i, child in enumerate(node.get("operands") or [])
-            ]
+            results = [await _eval(child, f"{path}.and[{i}]") for i, child in enumerate(node.get("operands") or [])]
             return all(results) if results else True
         if op == "or":
-            results = [
-                await _eval(child, f"{path}.or[{i}]")
-                for i, child in enumerate(node.get("operands") or [])
-            ]
+            results = [await _eval(child, f"{path}.or[{i}]") for i, child in enumerate(node.get("operands") or [])]
             return any(results) if results else False
         if op == "not":
             operands = node.get("operands") or []
@@ -166,7 +158,9 @@ async def evaluate_alert_expression(
                     f"Invalid compare '{compare}' at {path}",
                 )
             result = await _kpis.compute(
-                code, session, project_id=project_id,
+                code,
+                session,
+                project_id=project_id,
             )
             lhs = result.value
             outcome = _compare(lhs, compare, _coerce_decimal(rhs))

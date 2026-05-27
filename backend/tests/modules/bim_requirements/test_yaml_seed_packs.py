@@ -359,11 +359,7 @@ def test_lod300_pack_distinguishes_compliant_vs_missing_material() -> None:
     Material is flagged."""
     pack = load_rule_pack(SEED_DIR / "lod300_design_development.yaml")
     result = evaluate_rule_pack(pack, SYNTHETIC_ELEMENTS)
-    material_outcomes = {
-        r.element_id: r.passed
-        for r in result.results
-        if r.rule_id == "lod300_wall_material_present"
-    }
+    material_outcomes = {r.element_id: r.passed for r in result.results if r.rule_id == "lod300_wall_material_present"}
     assert material_outcomes.get("wall-lod300-ok") is True
     assert material_outcomes.get("wall-lod300-bad") is False
 
@@ -372,11 +368,7 @@ def test_lod300_pack_validates_door_operation_type_vocabulary() -> None:
     """LOD300 door rule must accept the Pset_DoorCommon enumeration."""
     pack = load_rule_pack(SEED_DIR / "lod300_design_development.yaml")
     result = evaluate_rule_pack(pack, SYNTHETIC_ELEMENTS)
-    op_outcomes = {
-        r.element_id: r.passed
-        for r in result.results
-        if r.rule_id == "lod300_door_pset_common"
-    }
+    op_outcomes = {r.element_id: r.passed for r in result.results if r.rule_id == "lod300_door_pset_common"}
     assert op_outcomes.get("door-lod400-ok") is True
 
 
@@ -384,11 +376,7 @@ def test_lod400_pack_flags_terminal_without_source() -> None:
     """LOD 400 connectivity rule must fail terminals where HasSource=false."""
     pack = load_rule_pack(SEED_DIR / "lod400_construction.yaml")
     result = evaluate_rule_pack(pack, SYNTHETIC_ELEMENTS)
-    source_outcomes = {
-        r.element_id: r.passed
-        for r in result.results
-        if r.rule_id == "lod400_mep_traces_to_source"
-    }
+    source_outcomes = {r.element_id: r.passed for r in result.results if r.rule_id == "lod400_mep_traces_to_source"}
     assert source_outcomes.get("mep-terminal-ok") is True
     assert source_outcomes.get("mep-terminal-bad") is False
 
@@ -398,11 +386,7 @@ def test_lod400_pack_requires_manufacturer_on_type_bearing_element() -> None:
     ManufacturerName."""
     pack = load_rule_pack(SEED_DIR / "lod400_construction.yaml")
     result = evaluate_rule_pack(pack, SYNTHETIC_ELEMENTS)
-    mfg_outcomes = {
-        r.element_id: r.passed
-        for r in result.results
-        if r.rule_id == "lod400_manufacturer_name"
-    }
+    mfg_outcomes = {r.element_id: r.passed for r in result.results if r.rule_id == "lod400_manufacturer_name"}
     assert mfg_outcomes.get("type-elem-ok") is True
     assert mfg_outcomes.get("type-elem-bad") is False
 
@@ -411,11 +395,7 @@ def test_lod400_pack_enforces_door_hosting_invariant() -> None:
     """Doors must be hosted by IfcWall — slab-hosted doors must fail."""
     pack = load_rule_pack(SEED_DIR / "lod400_construction.yaml")
     result = evaluate_rule_pack(pack, SYNTHETIC_ELEMENTS)
-    host_outcomes = {
-        r.element_id: r.passed
-        for r in result.results
-        if r.rule_id == "lod400_door_hosted_by_wall"
-    }
+    host_outcomes = {r.element_id: r.passed for r in result.results if r.rule_id == "lod400_door_hosted_by_wall"}
     assert host_outcomes.get("door-lod400-ok") is True
     assert host_outcomes.get("door-bad-host") is False
 
@@ -424,11 +404,7 @@ def test_cobie_pack_enforces_four_level_spatial_structure() -> None:
     """COBie pack must fail spaces whose SpatialDepth != 4."""
     pack = load_rule_pack(SEED_DIR / "cobie_handover.yaml")
     result = evaluate_rule_pack(pack, SYNTHETIC_ELEMENTS)
-    depth_outcomes = {
-        r.element_id: r.passed
-        for r in result.results
-        if r.rule_id == "cobie_spatial_depth_is_four"
-    }
+    depth_outcomes = {r.element_id: r.passed for r in result.results if r.rule_id == "cobie_spatial_depth_is_four"}
     assert depth_outcomes.get("cobie-space-ok") is True
     assert depth_outcomes.get("cobie-space-flat") is False
 
@@ -437,11 +413,7 @@ def test_cobie_pack_requires_manufacturer_on_types() -> None:
     """COBie types must declare Manufacturer; missing → fail."""
     pack = load_rule_pack(SEED_DIR / "cobie_handover.yaml")
     result = evaluate_rule_pack(pack, SYNTHETIC_ELEMENTS)
-    mfg_outcomes = {
-        r.element_id: r.passed
-        for r in result.results
-        if r.rule_id == "cobie_type_manufacturer"
-    }
+    mfg_outcomes = {r.element_id: r.passed for r in result.results if r.rule_id == "cobie_type_manufacturer"}
     assert mfg_outcomes.get("cobie-type-ok") is True
     assert mfg_outcomes.get("cobie-type-bad") is False
 
@@ -450,10 +422,6 @@ def test_cobie_pack_flags_unserialised_components() -> None:
     """COBie SerialNumber rule fails when IsSerialised but no SerialNumber."""
     pack = load_rule_pack(SEED_DIR / "cobie_handover.yaml")
     result = evaluate_rule_pack(pack, SYNTHETIC_ELEMENTS)
-    sn_outcomes = {
-        r.element_id: r.passed
-        for r in result.results
-        if r.rule_id == "cobie_component_serial_number"
-    }
+    sn_outcomes = {r.element_id: r.passed for r in result.results if r.rule_id == "cobie_component_serial_number"}
     assert sn_outcomes.get("cobie-comp-ok") is True
     assert sn_outcomes.get("cobie-comp-bad") is False

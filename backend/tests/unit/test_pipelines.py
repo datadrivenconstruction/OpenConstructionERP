@@ -56,7 +56,6 @@ from app.modules.pipelines.service import PipelineService
 from app.modules.projects.models import Project
 from app.modules.users.models import User
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────────
 
 
@@ -89,9 +88,7 @@ async def session_factory(tmp_path):
                 PipelineNodeState.__table__,
             ],
         )
-    maker = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     yield maker
     await engine.dispose()
 
@@ -189,9 +186,7 @@ async def test_submit_run_enqueues_a_jobrun_and_drives_the_graph(
                 return_value=session_factory,
             ),
         ):
-            run, job = await svc.submit_run(
-                pipeline, trigger={"type": "manual"}, actor_id=None
-            )
+            run, job = await svc.submit_run(pipeline, trigger={"type": "manual"}, actor_id=None)
 
     # The contract: a run IS a JobRun of kind="pipeline.run".
     assert job is not None
@@ -203,9 +198,7 @@ async def test_submit_run_enqueues_a_jobrun_and_drives_the_graph(
     # graph (no Celery worker needed for a unit test).
     from app.core.pipeline.executor import _run_pipeline_job
 
-    summary = await _run_pipeline_job(
-        job, {"run_id": str(run.id)}, session_factory=session_factory
-    )
+    summary = await _run_pipeline_job(job, {"run_id": str(run.id)}, session_factory=session_factory)
     assert summary["node_count"] == 2
     assert summary["done"] == 2
     assert summary["error"] == 0
@@ -239,9 +232,7 @@ async def test_run_read_model_returns_per_node_states(session_factory):
                 return_value=session_factory,
             ),
         ):
-            run, _ = await svc.submit_run(
-                pipeline, trigger={"type": "manual"}, actor_id=None
-            )
+            run, _ = await svc.submit_run(pipeline, trigger={"type": "manual"}, actor_id=None)
         await execute_run(db, run.id)
 
         run_row = await svc.get_run(run.id)
@@ -263,9 +254,7 @@ async def test_run_read_model_returns_per_node_states(session_factory):
 # ── 4. hardening: max-nodes-per-run guard ────────────────────────────────
 
 
-async def test_execute_run_rejects_graphs_exceeding_max_nodes(
-    session_factory, monkeypatch
-):
+async def test_execute_run_rejects_graphs_exceeding_max_nodes(session_factory, monkeypatch):
     """A graph past ``DEFAULT_MAX_NODES_PER_RUN`` is refused before any node runs.
 
     Without this cap a malicious / buggy graph could ask the worker to

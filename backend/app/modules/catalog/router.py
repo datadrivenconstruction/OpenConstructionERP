@@ -82,9 +82,7 @@ def _fmt_price(value: float) -> str:
     return "0" if out in ("-0", "-0.0") else out
 
 
-def _normalise_band(
-    base: float, lo: float, hi: float
-) -> tuple[float, float, float]:
+def _normalise_band(base: float, lo: float, hi: float) -> tuple[float, float, float]:
     """Enforce the price-band invariant ``min <= base <= max`` (CAT-001).
 
     ``CatalogResourceCreate._check_price_band`` rejects an inverted /
@@ -162,6 +160,7 @@ async def import_catalog_from_github(
     # final URL still has the trusted host. This makes the trust boundary
     # explicit and silences CodeQL's `py/partial-ssrf` finding.
     from urllib.parse import quote, urlparse
+
     url = f"{_GITHUB_BASE}/{quote(folder, safe='')}/DDC_CWICR_{quote(region, safe='')}_Catalog.csv"
     if urlparse(url).netloc != "raw.githubusercontent.com":
         raise HTTPException(
@@ -173,12 +172,7 @@ async def import_catalog_from_github(
     try:
         req = urllib.request.Request(
             url,
-            headers={
-                "User-Agent": (
-                    "OpenConstructionERP "
-                    "(+https://datadrivenconstruction.io; DDC-CWICR-OE-2026)"
-                )
-            },
+            headers={"User-Agent": ("OpenConstructionERP (+https://datadrivenconstruction.io; DDC-CWICR-OE-2026)")},
         )
 
         # Offload blocking urllib to a worker thread so the event loop
@@ -393,9 +387,7 @@ async def adjust_prices(
                 # predated the band validator) would survive every bulk
                 # run untouched. Normalise here so the invariant is
                 # restored on the next adjust-prices pass.
-                new_base, new_lo, new_hi = _normalise_band(
-                    new_base, new_lo, new_hi
-                )
+                new_base, new_lo, new_hi = _normalise_band(new_base, new_lo, new_hi)
                 res.base_price = _fmt_price(new_base)
                 res.min_price = _fmt_price(new_lo)
                 res.max_price = _fmt_price(new_hi)
@@ -506,8 +498,7 @@ async def search_catalog(
 async def catalog_stats(
     region: str | None = Query(
         default=None,
-        description="Scope counts to a single region so they match the "
-        "region-filtered resource list",
+        description="Scope counts to a single region so they match the region-filtered resource list",
     ),
     # Public endpoint — same optional-auth fix as ``search_catalog`` above
     # (a forced 401 here left the page's type/category badges empty).
@@ -569,9 +560,9 @@ async def list_cost_positions_using_resource(
     from app.modules.catalog.models import CatalogResource
     from app.modules.costs.models import CostItem
 
-    resource = (await session.execute(
-        select(CatalogResource).where(CatalogResource.id == resource_id)
-    )).scalar_one_or_none()
+    resource = (
+        await session.execute(select(CatalogResource).where(CatalogResource.id == resource_id))
+    ).scalar_one_or_none()
     if resource is None:
         raise HTTPException(
             status_code=404,
@@ -589,17 +580,17 @@ async def list_cost_positions_using_resource(
         func.cast(CostItem.components, String).like(f"%{needle_alt}%"),
     )
 
-    total = (await session.execute(
-        select(func.count()).select_from(CostItem).where(base_filter)
-    )).scalar_one()
+    total = (await session.execute(select(func.count()).select_from(CostItem).where(base_filter))).scalar_one()
 
-    rows = (await session.execute(
-        select(CostItem)
-        .where(base_filter)
-        .order_by(CostItem.code, CostItem.id)
-        .limit(limit)
-        .offset(offset)
-    )).scalars().all()
+    rows = (
+        (
+            await session.execute(
+                select(CostItem).where(base_filter).order_by(CostItem.code, CostItem.id).limit(limit).offset(offset)
+            )
+        )
+        .scalars()
+        .all()
+    )
 
     items: list[dict[str, Any]] = []
     for row in rows:
@@ -608,16 +599,18 @@ async def list_cost_positions_using_resource(
             if isinstance(c, dict) and c.get("code") == code:
                 matched_component = c
                 break
-        items.append({
-            "id": str(row.id),
-            "code": row.code,
-            "description": row.description,
-            "unit": row.unit,
-            "rate": row.rate,
-            "currency": row.currency,
-            "region": row.region,
-            "component": matched_component,
-        })
+        items.append(
+            {
+                "id": str(row.id),
+                "code": row.code,
+                "description": row.description,
+                "unit": row.unit,
+                "rate": row.rate,
+                "currency": row.currency,
+                "region": row.region,
+                "component": matched_component,
+            }
+        )
 
     return {
         "resource_code": code,

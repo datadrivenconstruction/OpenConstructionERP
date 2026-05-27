@@ -18,9 +18,6 @@ from __future__ import annotations
 import uuid
 from collections.abc import AsyncIterator
 from decimal import Decimal
-from types import SimpleNamespace
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pytest_asyncio
@@ -38,7 +35,7 @@ from app.dependencies import get_current_user_id, get_session
 from app.modules.changeorders.models import ChangeOrder, ChangeOrderApproval, ChangeOrderItem
 from app.modules.changeorders.router import router as co_router
 from app.modules.changeorders.schemas import ChangeOrderCreate
-from app.modules.changeorders.service import ChangeOrderService, VALID_TRANSITIONS
+from app.modules.changeorders.service import VALID_TRANSITIONS, ChangeOrderService
 from app.modules.projects.models import Project, ProjectMilestone, ProjectWBS
 from app.modules.users.models import APIKey, User
 
@@ -131,9 +128,7 @@ class TestCOFSM:
         assert "draft" in VALID_TRANSITIONS.get("rejected", [])
 
     @pytest.mark.asyncio
-    async def test_draft_to_approved_raises(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_draft_to_approved_raises(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -146,9 +141,7 @@ class TestCOFSM:
         assert exc_info.value.status_code == 400  # invalid transition
 
     @pytest.mark.asyncio
-    async def test_executed_to_anything_raises(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_executed_to_anything_raises(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -174,9 +167,7 @@ class TestCOFSM:
             await svc.execute_order(co.id, str(user))
 
     @pytest.mark.asyncio
-    async def test_approve_already_approved_is_idempotent(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_approve_already_approved_is_idempotent(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -204,9 +195,7 @@ class TestExecuteOrder:
     """Tests for the new execute_order terminal-state method."""
 
     @pytest.mark.asyncio
-    async def test_execute_approved_co_succeeds(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_execute_approved_co_succeeds(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -227,9 +216,7 @@ class TestExecuteOrder:
         assert co.status == "executed"
 
     @pytest.mark.asyncio
-    async def test_execute_submitted_co_raises(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_execute_submitted_co_raises(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -253,9 +240,7 @@ class TestCOAuditTrail:
     """submit / approve / reject / execute transitions write ActivityLog rows."""
 
     @pytest.mark.asyncio
-    async def test_submit_writes_audit_log(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_submit_writes_audit_log(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         from sqlalchemy import select
 
         user = await _make_user(session)
@@ -269,19 +254,21 @@ class TestCOAuditTrail:
         await session.commit()
 
         rows = (
-            await session.execute(
-                select(ActivityLog)
-                .where(ActivityLog.entity_type == "change_order")
-                .where(ActivityLog.entity_id == str(co.id))
-                .where(ActivityLog.to_status == "submitted")
+            (
+                await session.execute(
+                    select(ActivityLog)
+                    .where(ActivityLog.entity_type == "change_order")
+                    .where(ActivityLog.entity_id == str(co.id))
+                    .where(ActivityLog.to_status == "submitted")
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         assert len(rows) >= 1
 
     @pytest.mark.asyncio
-    async def test_approve_writes_audit_log(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_approve_writes_audit_log(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         from sqlalchemy import select
 
         approver = await _make_user(session)
@@ -298,19 +285,21 @@ class TestCOAuditTrail:
         await session.commit()
 
         rows = (
-            await session.execute(
-                select(ActivityLog)
-                .where(ActivityLog.entity_type == "change_order")
-                .where(ActivityLog.entity_id == str(co.id))
-                .where(ActivityLog.to_status == "approved")
+            (
+                await session.execute(
+                    select(ActivityLog)
+                    .where(ActivityLog.entity_type == "change_order")
+                    .where(ActivityLog.entity_id == str(co.id))
+                    .where(ActivityLog.to_status == "approved")
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         assert len(rows) >= 1
 
     @pytest.mark.asyncio
-    async def test_execute_writes_audit_log(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_execute_writes_audit_log(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         from sqlalchemy import select
 
         approver = await _make_user(session)
@@ -329,13 +318,17 @@ class TestCOAuditTrail:
         await session.commit()
 
         rows = (
-            await session.execute(
-                select(ActivityLog)
-                .where(ActivityLog.entity_type == "change_order")
-                .where(ActivityLog.entity_id == str(co.id))
-                .where(ActivityLog.to_status == "executed")
+            (
+                await session.execute(
+                    select(ActivityLog)
+                    .where(ActivityLog.entity_type == "change_order")
+                    .where(ActivityLog.entity_id == str(co.id))
+                    .where(ActivityLog.to_status == "executed")
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         assert len(rows) >= 1
 
 
@@ -367,9 +360,7 @@ class TestCOIDOR:
     """Wrong-tenant caller gets 404, not a 200 or 403."""
 
     @pytest.mark.asyncio
-    async def test_get_co_wrong_project_returns_404(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_get_co_wrong_project_returns_404(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         owner = await _make_user(session)
         attacker = await _make_user(session)
         project = await _make_project(session, owner)
@@ -384,9 +375,7 @@ class TestCOIDOR:
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_patch_co_wrong_project_returns_404(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_patch_co_wrong_project_returns_404(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         owner = await _make_user(session)
         attacker = await _make_user(session)
         project = await _make_project(session, owner)
@@ -401,9 +390,7 @@ class TestCOIDOR:
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_delete_co_wrong_project_returns_404(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_delete_co_wrong_project_returns_404(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         owner = await _make_user(session)
         attacker = await _make_user(session)
         project = await _make_project(session, owner)
@@ -425,9 +412,7 @@ class TestCOMoneyDecimal:
     """cost_impact persists as exact Decimal, not float."""
 
     @pytest.mark.asyncio
-    async def test_cost_impact_round_trips_exactly(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_cost_impact_round_trips_exactly(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         user = await _make_user(session)
         project = await _make_project(session, user)
         await session.commit()
@@ -441,9 +426,7 @@ class TestCOMoneyDecimal:
         assert result == exact, f"Expected {exact!r}, got {result!r}"
 
     @pytest.mark.asyncio
-    async def test_contractor_amount_is_decimal(
-        self, session: AsyncSession, svc: ChangeOrderService
-    ) -> None:
+    async def test_contractor_amount_is_decimal(self, session: AsyncSession, svc: ChangeOrderService) -> None:
         """contractor_amount column uses MoneyType — no float drift."""
         user = await _make_user(session)
         project = await _make_project(session, user)

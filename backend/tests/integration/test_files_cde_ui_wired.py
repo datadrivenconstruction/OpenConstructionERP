@@ -50,11 +50,11 @@ from app.modules.documents.models import Document  # noqa: E402
 from app.modules.file_distribution.models import (  # noqa: E402
     FileDistributionSubscription,
 )
+from app.modules.file_distribution.schemas import SubscriptionCreate  # noqa: E402
 from app.modules.file_distribution.service import (  # noqa: E402
     SubscriptionService,
     on_file_new_revision,
 )
-from app.modules.file_distribution.schemas import SubscriptionCreate  # noqa: E402
 from app.modules.file_saved_views.models import FileSavedView  # noqa: E402
 from app.modules.file_saved_views.schemas import (  # noqa: E402
     FilterSnapshot,
@@ -80,7 +80,6 @@ from app.modules.notifications.models import Notification  # noqa: E402
 from app.modules.projects.models import Project  # noqa: E402
 from app.modules.users.models import User  # noqa: E402
 
-
 # ── DB fixture ─────────────────────────────────────────────────────────────
 
 
@@ -95,7 +94,8 @@ async def db_session() -> AsyncSession:
     """
     db_path = _TMP_DIR / f"cde-{uuid.uuid4().hex[:8]}.db"
     engine = create_async_engine(
-        f"sqlite+aiosqlite:///{db_path.as_posix()}", echo=False,
+        f"sqlite+aiosqlite:///{db_path.as_posix()}",
+        echo=False,
     )
     async with engine.begin() as conn:
         await conn.run_sync(
@@ -120,7 +120,9 @@ async def db_session() -> AsyncSession:
 
 
 async def _seed_user_and_project(
-    session: AsyncSession, *, project_name: str = "CDE Suite",
+    session: AsyncSession,
+    *,
+    project_name: str = "CDE Suite",
 ) -> tuple[uuid.UUID, uuid.UUID]:
     """Insert one User + one Project and return their ids."""
     user = User(
@@ -316,9 +318,7 @@ async def test_purge_expired_trash_only_deletes_expired_rows(
     await db_session.commit()
     assert purged == 1
 
-    survivors = (
-        await db_session.execute(select(FileTrash).where(FileTrash.project_id == project_id))
-    ).scalars().all()
+    survivors = (await db_session.execute(select(FileTrash).where(FileTrash.project_id == project_id))).scalars().all()
     assert {r.id for r in survivors} == {young.id}
 
 
@@ -374,10 +374,14 @@ async def test_on_file_new_revision_notifies_active_subscribers(
     )
     await db_session.commit()
     first_pass = (
-        await db_session.execute(
-            select(Notification).where(Notification.user_id == subscriber.id),
+        (
+            await db_session.execute(
+                select(Notification).where(Notification.user_id == subscriber.id),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     assert first_pass == []
 
     # v2 supersedes v1 → exactly one notification for the subscriber.
@@ -395,10 +399,14 @@ async def test_on_file_new_revision_notifies_active_subscribers(
     await db_session.commit()
 
     notes = (
-        await db_session.execute(
-            select(Notification).where(Notification.user_id == subscriber.id),
+        (
+            await db_session.execute(
+                select(Notification).where(Notification.user_id == subscriber.id),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     assert len(notes) == 1
     assert notes[0].notification_type == "file_revision"
     assert notes[0].entity_type == "file_document"
@@ -449,8 +457,12 @@ async def test_on_file_new_revision_respects_notify_on_filter(
     assert created == 0
 
     notes = (
-        await db_session.execute(
-            select(Notification).where(Notification.user_id == subscriber.id),
+        (
+            await db_session.execute(
+                select(Notification).where(Notification.user_id == subscriber.id),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     assert notes == []

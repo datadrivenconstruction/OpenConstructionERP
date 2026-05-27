@@ -106,7 +106,8 @@ def compute_next_run_at(
         dow = day_of_week if day_of_week is not None else 0
         delta_days = (dow - now.weekday()) % 7
         candidate = datetime.combine(
-            now.date() + timedelta(days=delta_days), target_time,
+            now.date() + timedelta(days=delta_days),
+            target_time,
         )
         if candidate <= now:
             candidate = candidate + timedelta(days=7)
@@ -118,7 +119,8 @@ def compute_next_run_at(
         last_day = calendar.monthrange(year, month)[1]
         target_day = min(dom, last_day)
         candidate = datetime.combine(
-            _date(year, month, target_day), target_time,
+            _date(year, month, target_day),
+            target_time,
         )
         if candidate <= now:
             # Roll over to next month
@@ -129,7 +131,8 @@ def compute_next_run_at(
             last_day = calendar.monthrange(year, month)[1]
             target_day = min(dom, last_day)
             candidate = datetime.combine(
-                _date(year, month, target_day), target_time,
+                _date(year, month, target_day),
+                target_time,
             )
         return candidate
 
@@ -144,7 +147,8 @@ def compute_next_run_at(
             next_q = 1
         target_day = min(day_of_month or 1, calendar.monthrange(year, next_q)[1])
         return datetime.combine(
-            _date(year, next_q, target_day), target_time,
+            _date(year, next_q, target_day),
+            target_time,
         )
 
     # Unknown frequency — fall back to 1 day out
@@ -176,7 +180,9 @@ class BIDashboardsService:
         return len(meta_list)
 
     async def list_kpi_definitions(
-        self, *, category: str | None = None,
+        self,
+        *,
+        category: str | None = None,
     ) -> list[Any]:
         return await self.repo.list_kpi_definitions(category=category)
 
@@ -232,7 +238,9 @@ class BIDashboardsService:
         trend: list[dict[str, Any]] = []
         if include_trend:
             history = await self.repo.list_kpi_values(
-                code, project_id=project_id, limit=12,
+                code,
+                project_id=project_id,
+                limit=12,
             )
             trend = [
                 {
@@ -247,7 +255,9 @@ class BIDashboardsService:
         if include_benchmark and project_id is not None:
             try:
                 benchmark_data = await _kpis.benchmark(
-                    code, self.session, project_id=project_id,
+                    code,
+                    self.session,
+                    project_id=project_id,
                 )
             except Exception:
                 logger.debug("compute_kpi: benchmark failed", exc_info=True)
@@ -272,7 +282,9 @@ class BIDashboardsService:
         limit: int = 12,
     ) -> list[KPIHistoryPoint]:
         rows = await self.repo.list_kpi_values(
-            code, project_id=project_id, limit=limit,
+            code,
+            project_id=project_id,
+            limit=limit,
         )
         return [
             KPIHistoryPoint(
@@ -308,29 +320,36 @@ class BIDashboardsService:
         return await self.repo.create_dashboard(dashboard)
 
     async def update_dashboard(
-        self, dashboard_id: uuid.UUID, payload: DashboardUpdate,
+        self,
+        dashboard_id: uuid.UUID,
+        payload: DashboardUpdate,
     ) -> Dashboard | None:
         return await self.repo.update_dashboard(
-            dashboard_id, **payload.model_dump(exclude_unset=True),
+            dashboard_id,
+            **payload.model_dump(exclude_unset=True),
         )
 
     async def delete_dashboard(self, dashboard_id: uuid.UUID) -> bool:
         return await self.repo.delete_dashboard(dashboard_id)
 
     async def list_dashboards(
-        self, *, owner_user_id: uuid.UUID | None,
+        self,
+        *,
+        owner_user_id: uuid.UUID | None,
     ) -> list[Dashboard]:
         return await self.repo.list_dashboards_visible_to(owner_user_id)
 
     async def get_dashboard(
-        self, dashboard_id: uuid.UUID,
+        self,
+        dashboard_id: uuid.UUID,
     ) -> Dashboard | None:
         return await self.repo.get_dashboard(dashboard_id)
 
     # ── Widgets ───────────────────────────────────────────────────
 
     async def create_widget(
-        self, payload: WidgetCreate,
+        self,
+        payload: WidgetCreate,
     ) -> DashboardWidget | None:
         # Guard: dashboard must exist
         dashboard = await self.repo.get_dashboard(payload.dashboard_id)
@@ -351,17 +370,21 @@ class BIDashboardsService:
         return await self.repo.create_widget(widget)
 
     async def update_widget(
-        self, widget_id: uuid.UUID, payload: WidgetUpdate,
+        self,
+        widget_id: uuid.UUID,
+        payload: WidgetUpdate,
     ) -> DashboardWidget | None:
         return await self.repo.update_widget(
-            widget_id, **payload.model_dump(exclude_unset=True),
+            widget_id,
+            **payload.model_dump(exclude_unset=True),
         )
 
     async def delete_widget(self, widget_id: uuid.UUID) -> bool:
         return await self.repo.delete_widget(widget_id)
 
     async def update_widget_snapshot(
-        self, widget_id: uuid.UUID,
+        self,
+        widget_id: uuid.UUID,
     ) -> dict[str, Any] | None:
         """Recompute the widget's KPI and write a fresh snapshot."""
         widget = await self.repo.get_widget(widget_id)
@@ -372,8 +395,7 @@ class BIDashboardsService:
         result = await _kpis.compute(
             widget.kpi_code,
             self.session,
-            project_id=widget.config_json.get("project_id")
-            if isinstance(widget.config_json, dict) else None,
+            project_id=widget.config_json.get("project_id") if isinstance(widget.config_json, dict) else None,
         )
         now = _now()
         dashboard = await self.repo.get_dashboard(widget.dashboard_id)
@@ -400,7 +422,8 @@ class BIDashboardsService:
         }
 
     async def render_dashboard(
-        self, dashboard_id: uuid.UUID,
+        self,
+        dashboard_id: uuid.UUID,
     ) -> DashboardRenderResponse | None:
         dashboard = await self.repo.get_dashboard(dashboard_id)
         if dashboard is None:
@@ -421,9 +444,7 @@ class BIDashboardsService:
             snap = await self.repo.get_latest_snapshot(widget.id)
             snap_valid_until = (
                 snap.valid_until.replace(tzinfo=UTC)
-                if snap is not None
-                and snap.valid_until is not None
-                and snap.valid_until.tzinfo is None
+                if snap is not None and snap.valid_until is not None and snap.valid_until.tzinfo is None
                 else (snap.valid_until if snap is not None else None)
             )
             if (
@@ -443,7 +464,8 @@ class BIDashboardsService:
             elif widget.kpi_code is not None:
                 # Compute live + write snapshot
                 result = await _kpis.compute(
-                    widget.kpi_code, self.session,
+                    widget.kpi_code,
+                    self.session,
                 )
                 value = result.value
                 unit = result.unit
@@ -517,9 +539,7 @@ class BIDashboardsService:
         # Snapshot the inputs honestly: the response only echoes filters
         # we actually applied so the UI doesn't show a chip the backend
         # silently ignored.
-        applied: dict[str, Any] = (
-            dict(filters or {}) if cross_filter and filters else {}
-        )
+        applied: dict[str, Any] = dict(filters or {}) if cross_filter and filters else {}
 
         # Pull project_id / period bounds out as first-class kwargs to
         # ``_kpis.compute`` so they hit the KPI's typed signature rather
@@ -532,28 +552,19 @@ class BIDashboardsService:
             for key, value in applied.items():
                 if key == "project_id" and value:
                     try:
-                        project_id_val = (
-                            value if isinstance(value, uuid.UUID)
-                            else uuid.UUID(str(value))
-                        )
+                        project_id_val = value if isinstance(value, uuid.UUID) else uuid.UUID(str(value))
                     except Exception:
                         # Unparseable project_id is treated like any other
                         # unknown key — silently dropped, not 500'd.
                         pass
                 elif key == "period_start" and value:
                     try:
-                        period_start_val = (
-                            value if isinstance(value, _date)
-                            else _date.fromisoformat(str(value))
-                        )
+                        period_start_val = value if isinstance(value, _date) else _date.fromisoformat(str(value))
                     except Exception:
                         pass
                 elif key == "period_end" and value:
                     try:
-                        period_end_val = (
-                            value if isinstance(value, _date)
-                            else _date.fromisoformat(str(value))
-                        )
+                        period_end_val = value if isinstance(value, _date) else _date.fromisoformat(str(value))
                     except Exception:
                         pass
                 else:
@@ -577,14 +588,14 @@ class BIDashboardsService:
                     # default project binding used by render_dashboard.
                     effective_project = project_id_val
                     if effective_project is None and isinstance(
-                        widget.config_json, dict,
+                        widget.config_json,
+                        dict,
                     ):
                         cfg_pid = widget.config_json.get("project_id")
                         if cfg_pid:
                             try:
                                 effective_project = (
-                                    cfg_pid if isinstance(cfg_pid, uuid.UUID)
-                                    else uuid.UUID(str(cfg_pid))
+                                    cfg_pid if isinstance(cfg_pid, uuid.UUID) else uuid.UUID(str(cfg_pid))
                                 )
                             except Exception:
                                 effective_project = None
@@ -598,7 +609,8 @@ class BIDashboardsService:
                     )
                 else:
                     computation = await _kpis.compute(
-                        widget.kpi_code, self.session,
+                        widget.kpi_code,
+                        self.session,
                     )
                 value = computation.value
                 unit = computation.unit
@@ -608,10 +620,7 @@ class BIDashboardsService:
             # KPI history (cheapest source of a time-axis). For non-
             # chart widgets we omit it to keep the payload light.
             series: list[dict[str, Any]] = []
-            if (
-                widget.kpi_code is not None
-                and widget.widget_type in ("line_chart", "bar_chart")
-            ):
+            if widget.kpi_code is not None and widget.widget_type in ("line_chart", "bar_chart"):
                 history = await self.repo.list_kpi_values(
                     widget.kpi_code,
                     project_id=project_id_val,
@@ -675,10 +684,7 @@ class BIDashboardsService:
 
             raise HTTPException(
                 status_code=409,
-                detail=(
-                    f"A report definition with code '{payload.code}' "
-                    f"already exists (id={existing.id})."
-                ),
+                detail=(f"A report definition with code '{payload.code}' already exists (id={existing.id})."),
             )
         report = ReportDefinition(
             code=payload.code,
@@ -694,17 +700,22 @@ class BIDashboardsService:
         return await self.repo.create_report(report)
 
     async def update_report(
-        self, report_id: uuid.UUID, payload: ReportDefinitionUpdate,
+        self,
+        report_id: uuid.UUID,
+        payload: ReportDefinitionUpdate,
     ) -> ReportDefinition | None:
         return await self.repo.update_report(
-            report_id, **payload.model_dump(exclude_unset=True),
+            report_id,
+            **payload.model_dump(exclude_unset=True),
         )
 
     async def delete_report(self, report_id: uuid.UUID) -> bool:
         return await self.repo.delete_report(report_id)
 
     async def list_reports(
-        self, *, owner_user_id: uuid.UUID | None,
+        self,
+        *,
+        owner_user_id: uuid.UUID | None,
     ) -> list[ReportDefinition]:
         return await self.repo.list_reports(owner_user_id=owner_user_id)
 
@@ -749,7 +760,9 @@ class BIDashboardsService:
         try:
             for code in kpis_to_run:
                 result = await _kpis.compute(
-                    code, self.session, project_id=project_id,
+                    code,
+                    self.session,
+                    project_id=project_id,
                 )
                 rows.append(
                     {
@@ -757,10 +770,7 @@ class BIDashboardsService:
                         "value": str(result.value),
                         "unit": result.unit,
                         "source_record_count": result.source_record_count,
-                        **{
-                            f"breakdown__{k}": v
-                            for k, v in result.breakdown.items()
-                        },
+                        **{f"breakdown__{k}": v for k, v in result.breakdown.items()},
                     },
                 )
 
@@ -795,10 +805,7 @@ class BIDashboardsService:
             run.file_size_bytes = file_size
             await self.session.flush()
 
-            file_url = (
-                f"/api/v1/bi-dashboards/report-runs/{run.id}/file"
-                if file_path else None
-            )
+            file_url = f"/api/v1/bi-dashboards/report-runs/{run.id}/file" if file_path else None
 
             response = ReportRunResponse(
                 report_id=report.id,
@@ -822,7 +829,8 @@ class BIDashboardsService:
             return response
         except Exception as exc:
             logger.exception(
-                "run_report: failed for %s", report_id,
+                "run_report: failed for %s",
+                report_id,
             )
             run.status = "failed"
             run.finished_at = _now()
@@ -831,14 +839,16 @@ class BIDashboardsService:
             raise
 
     async def get_report_run(
-        self, run_id: uuid.UUID,
+        self,
+        run_id: uuid.UUID,
     ) -> ReportRun | None:
         return await self.session.get(ReportRun, run_id)
 
     # ── Schedules ─────────────────────────────────────────────────
 
     async def create_schedule(
-        self, payload: ReportScheduleCreate,
+        self,
+        payload: ReportScheduleCreate,
     ) -> ReportSchedule | None:
         report = await self.repo.get_report(payload.report_definition_id)
         if report is None:
@@ -864,16 +874,16 @@ class BIDashboardsService:
         return await self.repo.create_schedule(schedule)
 
     async def update_schedule(
-        self, schedule_id: uuid.UUID, payload: ReportScheduleUpdate,
+        self,
+        schedule_id: uuid.UUID,
+        payload: ReportScheduleUpdate,
     ) -> ReportSchedule | None:
         existing = await self.repo.get_schedule(schedule_id)
         if existing is None:
             return None
         updates = payload.model_dump(exclude_unset=True)
         # Re-compute next_run_at if scheduling fields changed
-        if any(
-            k in updates for k in ("frequency", "time_of_day", "day_of_week", "day_of_month")
-        ):
+        if any(k in updates for k in ("frequency", "time_of_day", "day_of_week", "day_of_month")):
             updates["next_run_at"] = compute_next_run_at(
                 frequency=updates.get("frequency", existing.frequency),
                 time_of_day=updates.get("time_of_day", existing.time_of_day),
@@ -883,7 +893,8 @@ class BIDashboardsService:
         return await self.repo.update_schedule(schedule_id, **updates)
 
     async def run_scheduled_report(
-        self, schedule_id: uuid.UUID,
+        self,
+        schedule_id: uuid.UUID,
     ) -> ReportRunResponse | None:
         schedule = await self.repo.get_schedule(schedule_id)
         if schedule is None:
@@ -898,7 +909,9 @@ class BIDashboardsService:
             base=now,
         )
         await self.repo.update_schedule(
-            schedule_id, last_run_at=now, next_run_at=next_run,
+            schedule_id,
+            last_run_at=now,
+            next_run_at=next_run,
         )
         if response is not None:
             _safe_publish(
@@ -951,12 +964,16 @@ class BIDashboardsService:
         return await self.repo.create_alert(alert)
 
     async def toggle_alert(
-        self, alert_id: uuid.UUID, *, enabled: bool,
+        self,
+        alert_id: uuid.UUID,
+        *,
+        enabled: bool,
     ) -> AlertRule | None:
         return await self.repo.update_alert(alert_id, enabled=enabled)
 
     async def evaluate_alert(
-        self, alert: AlertRule,
+        self,
+        alert: AlertRule,
     ) -> bool:
         """Evaluate one alert rule. Return True if it fired this cycle.
 
@@ -992,7 +1009,8 @@ class BIDashboardsService:
                 )
             except Exception:
                 logger.exception(
-                    "evaluate_alert: DSL evaluation failed for %s", alert.id,
+                    "evaluate_alert: DSL evaluation failed for %s",
+                    alert.id,
                 )
                 return False
             # Also compute the headline KPI so the event payload carries a value
@@ -1047,10 +1065,7 @@ class BIDashboardsService:
                 "threshold": str(alert.threshold_value),
                 "condition": cond if not expression else "composite",
                 "severity": alert.severity,
-                "scope_project_id": (
-                    str(alert.scope_project_id)
-                    if alert.scope_project_id else None
-                ),
+                "scope_project_id": (str(alert.scope_project_id) if alert.scope_project_id else None),
                 "recipients": alert.recipients_json or [],
                 "channels": alert.channels_json or ["in_app"],
                 "trace": trace,
@@ -1068,7 +1083,8 @@ class BIDashboardsService:
                     fired += 1
             except Exception:
                 logger.exception(
-                    "evaluate_alerts: rule %s raised", alert.id,
+                    "evaluate_alerts: rule %s raised",
+                    alert.id,
                 )
         return fired
 
@@ -1108,14 +1124,19 @@ class BIDashboardsService:
         )
         # Real records from the registered provider
         records: list[dict[str, Any]] = await _kpis.drilldown(
-            code, self.session, project_id=project_id, limit=limit,
+            code,
+            self.session,
+            project_id=project_id,
+            limit=limit,
         )
         if not records:
             # Fallback: synthesise rows from the breakdown + history
             for k, v in (result.breakdown or {}).items():
                 records.append({"kind": "breakdown", "key": k, "value": v})
             history = await self.repo.list_kpi_values(
-                code, project_id=project_id, limit=depth * 12,
+                code,
+                project_id=project_id,
+                limit=depth * 12,
             )
             for h in history:
                 records.append(
@@ -1149,9 +1170,7 @@ class BIDashboardsService:
             module=payload.module,
             filter_json=payload.filter_json,
             is_default=payload.is_default,
-            shared_with_user_ids_json=[
-                str(u) for u in (payload.shared_with_user_ids or [])
-            ],
+            shared_with_user_ids_json=[str(u) for u in (payload.shared_with_user_ids or [])],
         )
         return await self.repo.create_filter(sf)
 
@@ -1162,14 +1181,16 @@ class BIDashboardsService:
         module: str | None = None,
     ) -> list[SavedFilter]:
         rows = await self.repo.list_filters(
-            owner_user_id=owner_user_id, module=module,
+            owner_user_id=owner_user_id,
+            module=module,
         )
         if owner_user_id is None:
             return rows
         # Also include filters shared with this user (sqlalchemy can't JSON-
         # contains check portably across sqlite + postgres). Do it in Python.
         shared_rows = await self.repo.list_filters_shared_with(
-            owner_user_id, module=module,
+            owner_user_id,
+            module=module,
         )
         seen_ids = {r.id for r in rows}
         for sr in shared_rows:
@@ -1195,11 +1216,7 @@ class BIDashboardsService:
             from fastapi import HTTPException
 
             raise HTTPException(status_code=404, detail="Filter not found")
-        if (
-            sf.owner_user_id is not None
-            and owner_user_id is not None
-            and sf.owner_user_id != owner_user_id
-        ):
+        if sf.owner_user_id is not None and owner_user_id is not None and sf.owner_user_id != owner_user_id:
             from fastapi import HTTPException
 
             raise HTTPException(status_code=404, detail="Filter not found")
@@ -1237,10 +1254,7 @@ class BIDashboardsService:
             result = await _kpis.compute(
                 kpi_code,
                 self.session,
-                project_id=(
-                    widget.config_json.get("project_id")
-                    if isinstance(widget.config_json, dict) else None
-                ),
+                project_id=(widget.config_json.get("project_id") if isinstance(widget.config_json, dict) else None),
             )
             history_rows = await self.repo.list_kpi_values(kpi_code, limit=24)
             history = [

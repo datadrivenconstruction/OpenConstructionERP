@@ -37,8 +37,8 @@ from app.modules.clash.models import (
 )
 from app.modules.clash.service import (
     _ARCHIVE_AFTER_MISSING,
-    _compute_signature_hash,
     ClashService,
+    _compute_signature_hash,
 )
 
 
@@ -198,7 +198,10 @@ async def test_ten_clashes_same_signature_become_one_issue(
     project_id = session.info["project_id"]
     specs = [{"a_stable": "A", "b_stable": "B"} for _ in range(10)]
     _run, rows = await _persist_run_with_clashes(
-        session, project_id, name="r1", clashes_spec=specs,
+        session,
+        project_id,
+        name="r1",
+        clashes_spec=specs,
     )
     svc = ClashService(session)
     issues, total = await svc.list_issues(project_id)
@@ -218,7 +221,10 @@ async def test_two_signatures_two_issues(session: AsyncSession) -> None:
         {"a_stable": "C", "b_stable": "D"},
     ]
     _run, _rows = await _persist_run_with_clashes(
-        session, project_id, name="r1", clashes_spec=specs,
+        session,
+        project_id,
+        name="r1",
+        clashes_spec=specs,
     )
     svc = ClashService(session)
     _issues, total = await svc.list_issues(project_id)
@@ -234,7 +240,9 @@ async def test_new_clash_creates_issue_with_server_id(
 ) -> None:
     project_id = session.info["project_id"]
     _run, _rows = await _persist_run_with_clashes(
-        session, project_id, name="r1",
+        session,
+        project_id,
+        name="r1",
         clashes_spec=[{"a_stable": "X", "b_stable": "Y"}],
     )
     svc = ClashService(session)
@@ -252,11 +260,15 @@ async def test_new_clash_creates_issue_with_server_id(
 async def test_server_ids_monotonic_per_project(session: AsyncSession) -> None:
     project_id = session.info["project_id"]
     await _persist_run_with_clashes(
-        session, project_id, name="r1",
+        session,
+        project_id,
+        name="r1",
         clashes_spec=[{"a_stable": "A", "b_stable": "B"}],
     )
     await _persist_run_with_clashes(
-        session, project_id, name="r2",
+        session,
+        project_id,
+        name="r2",
         clashes_spec=[
             {"a_stable": "A", "b_stable": "B"},  # same as r1
             {"a_stable": "C", "b_stable": "D"},  # new
@@ -296,19 +308,21 @@ async def test_missing_for_one_run_flips_to_resolved(
     project_id = session.info["project_id"]
     spec_ab = [{"a_stable": "A", "b_stable": "B"}]
     run1, _ = await _persist_run_with_clashes(
-        session, project_id, name="r1", clashes_spec=spec_ab,
+        session,
+        project_id,
+        name="r1",
+        clashes_spec=spec_ab,
     )
     # r2 has no AB clash — the issue is gone.
     run2, _ = await _persist_run_with_clashes(
-        session, project_id, name="r2",
+        session,
+        project_id,
+        name="r2",
         clashes_spec=[{"a_stable": "C", "b_stable": "D"}],
     )
     svc = ClashService(session)
     (issues, _total) = await svc.list_issues(project_id)
-    ab_issue = next(
-        i for i, _c in issues
-        if i.first_seen_run_id == run1.id
-    )
+    ab_issue = next(i for i, _c in issues if i.first_seen_run_id == run1.id)
     assert ab_issue.status == "resolved"
     assert ab_issue.resolved_run_id == run2.id
     assert ab_issue.missing_run_count == 1
@@ -324,12 +338,17 @@ async def test_missing_for_three_runs_flips_to_archived(
     spec_ab = [{"a_stable": "A", "b_stable": "B"}]
     spec_other = [{"a_stable": "X", "b_stable": "Y"}]
     await _persist_run_with_clashes(
-        session, project_id, name="r1", clashes_spec=spec_ab,
+        session,
+        project_id,
+        name="r1",
+        clashes_spec=spec_ab,
     )
     # 3 runs without AB → missing_run_count climbs 1, 2, 3 → archived.
     for i in range(_ARCHIVE_AFTER_MISSING):
         await _persist_run_with_clashes(
-            session, project_id, name=f"r{i + 2}",
+            session,
+            project_id,
+            name=f"r{i + 2}",
             clashes_spec=spec_other,
         )
     svc = ClashService(session)
@@ -352,8 +371,11 @@ async def test_missing_count_resets_when_signature_returns(
     await _persist_run_with_clashes(session, project_id, name="r3", clashes_spec=spec_ab)
     svc = ClashService(session)
     ab_sig, _q = _compute_signature_hash(
-        a_guid="A", b_guid="B",
-        centroid=(1.0, 2.0, 3.0), clash_type="hard", grid_mm=500,
+        a_guid="A",
+        b_guid="B",
+        centroid=(1.0, 2.0, 3.0),
+        clash_type="hard",
+        grid_mm=500,
     )
     ab_issue = await svc.repo.get_issue_by_signature(project_id, ab_sig)
     assert ab_issue is not None
@@ -380,8 +402,11 @@ async def test_resolved_issue_resurfaces_as_persisted(
     svc = ClashService(session)
     (issues, _total) = await svc.list_issues(project_id)
     ab_sig, _q = _compute_signature_hash(
-        a_guid="A", b_guid="B",
-        centroid=(1.0, 2.0, 3.0), clash_type="hard", grid_mm=500,
+        a_guid="A",
+        b_guid="B",
+        centroid=(1.0, 2.0, 3.0),
+        clash_type="hard",
+        grid_mm=500,
     )
     ab_issue = next(i for i, _c in issues if i.signature_hash == ab_sig)
     assert ab_issue.status == "persisted"
@@ -400,20 +425,29 @@ async def test_archived_issue_can_be_reopened(
     await _persist_run_with_clashes(session, project_id, name="r1", clashes_spec=spec_ab)
     for i in range(_ARCHIVE_AFTER_MISSING):
         await _persist_run_with_clashes(
-            session, project_id, name=f"r{i + 2}", clashes_spec=spec_other,
+            session,
+            project_id,
+            name=f"r{i + 2}",
+            clashes_spec=spec_other,
         )
     # Confirm archived.
     svc = ClashService(session)
     ab_sig, _q = _compute_signature_hash(
-        a_guid="A", b_guid="B",
-        centroid=(1.0, 2.0, 3.0), clash_type="hard", grid_mm=500,
+        a_guid="A",
+        b_guid="B",
+        centroid=(1.0, 2.0, 3.0),
+        clash_type="hard",
+        grid_mm=500,
     )
     issue = await svc.repo.get_issue_by_signature(project_id, ab_sig)
     assert issue is not None
     assert issue.status == "archived"
     # Now resurface.
     await _persist_run_with_clashes(
-        session, project_id, name="r_resurface", clashes_spec=spec_ab,
+        session,
+        project_id,
+        name="r_resurface",
+        clashes_spec=spec_ab,
     )
     issue = await svc.repo.get_issue_by_signature(project_id, ab_sig)
     assert issue is not None
@@ -510,8 +544,12 @@ async def test_upsert_requires_signature_hash(session: AsyncSession) -> None:
         clash_type="hard",
         penetration_m=0.05,
         distance_m=0.0,
-        cx=0.0, cy=0.0, cz=0.0,
-        status="new", severity="medium", signature="",
+        cx=0.0,
+        cy=0.0,
+        cz=0.0,
+        status="new",
+        severity="medium",
+        signature="",
         signature_hash="",  # ← intentionally blank
         signature_quality="strong",
     )
@@ -526,7 +564,9 @@ async def test_upsert_requires_signature_hash(session: AsyncSession) -> None:
 async def test_upsert_links_clash_to_issue(session: AsyncSession) -> None:
     project_id = session.info["project_id"]
     run, rows = await _persist_run_with_clashes(
-        session, project_id, name="r1",
+        session,
+        project_id,
+        name="r1",
         clashes_spec=[{"a_stable": "A", "b_stable": "B"}],
     )
     # The persisted row should have a non-null issue_id.
@@ -548,12 +588,16 @@ async def test_run_diff_reports_new_persisted_resolved(
     project_id = session.info["project_id"]
     # r1: seed AB
     await _persist_run_with_clashes(
-        session, project_id, name="r1",
+        session,
+        project_id,
+        name="r1",
         clashes_spec=[{"a_stable": "A", "b_stable": "B"}],
     )
     # r2: keep AB (persisted), add CD (new), drop nothing else.
     r2, _ = await _persist_run_with_clashes(
-        session, project_id, name="r2",
+        session,
+        project_id,
+        name="r2",
         clashes_spec=[
             {"a_stable": "A", "b_stable": "B"},
             {"a_stable": "C", "b_stable": "D"},
@@ -561,7 +605,7 @@ async def test_run_diff_reports_new_persisted_resolved(
     )
     svc = ClashService(session)
     diff = await svc.run_diff(project_id, r2.id)
-    assert diff["new"] == 1     # CD
+    assert diff["new"] == 1  # CD
     assert diff["persisted"] == 1  # AB
     assert diff["resolved"] == 0
     assert diff["reopened"] == 0
@@ -572,11 +616,15 @@ async def test_run_diff_reports_new_persisted_resolved(
 async def test_run_diff_counts_resolved(session: AsyncSession) -> None:
     project_id = session.info["project_id"]
     await _persist_run_with_clashes(
-        session, project_id, name="r1",
+        session,
+        project_id,
+        name="r1",
         clashes_spec=[{"a_stable": "A", "b_stable": "B"}],
     )
     r2, _ = await _persist_run_with_clashes(
-        session, project_id, name="r2",
+        session,
+        project_id,
+        name="r2",
         clashes_spec=[{"a_stable": "C", "b_stable": "D"}],
     )
     svc = ClashService(session)
@@ -593,7 +641,9 @@ async def test_run_diff_counts_resolved(session: AsyncSession) -> None:
 async def test_finalize_run_is_idempotent(session: AsyncSession) -> None:
     project_id = session.info["project_id"]
     run, _ = await _persist_run_with_clashes(
-        session, project_id, name="r1",
+        session,
+        project_id,
+        name="r1",
         clashes_spec=[{"a_stable": "A", "b_stable": "B"}],
     )
     svc = ClashService(session)

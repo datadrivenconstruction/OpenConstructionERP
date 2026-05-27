@@ -211,11 +211,7 @@ async def chat_message_similar(
     from app.core.vector_index import find_similar
     from app.modules.erp_chat.vector_adapter import chat_message_adapter
 
-    stmt = (
-        select(ChatMessage)
-        .options(selectinload(ChatMessage.session))
-        .where(ChatMessage.id == message_id)
-    )
+    stmt = select(ChatMessage).options(selectinload(ChatMessage.session)).where(ChatMessage.id == message_id)
     row = (await session.execute(stmt)).scalar_one_or_none()
     if row is None:
         raise HTTPException(status_code=404, detail="Chat message not found")
@@ -225,9 +221,7 @@ async def chat_message_similar(
     if row.session is None or str(row.session.user_id) != str(user_id):
         raise HTTPException(status_code=404, detail="Chat message not found")
     project_id = (
-        str(row.session.project_id)
-        if row.session is not None and getattr(row.session, "project_id", None)
-        else None
+        str(row.session.project_id) if row.session is not None and getattr(row.session, "project_id", None) else None
     )
     hits = await find_similar(
         chat_message_adapter,
@@ -274,11 +268,13 @@ async def submit_message_feedback(
         )
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc),
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
         ) from exc
     except LookupError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc),
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
         ) from exc
 
     return FeedbackResponse(
@@ -326,9 +322,9 @@ from app.modules.erp_chat.vector_adapter import (  # noqa: E402
 async def _chat_loader(session: Any, project_id: uuid.UUID | None) -> list[Any]:
     stmt = _select(ChatMessage).options(_selectinload(ChatMessage.session))
     if project_id is not None:
-        stmt = stmt.join(
-            ChatSession, ChatMessage.session_id == ChatSession.id
-        ).where(ChatSession.project_id == project_id)
+        stmt = stmt.join(ChatSession, ChatMessage.session_id == ChatSession.id).where(
+            ChatSession.project_id == project_id
+        )
     return list((await session.execute(stmt)).scalars().all())
 
 
@@ -341,4 +337,3 @@ router.include_router(
         write_permission=None,
     )
 )
-

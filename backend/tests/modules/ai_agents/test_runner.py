@@ -258,9 +258,7 @@ async def test_boq_drafter_happy_path() -> None:
     assert "Reinforced concrete wall" in result.final_output
 
     # Observation from create_position must be a proposal payload (not a DB write).
-    create_obs = [
-        s for s in result.steps if s.role == "observation" and isinstance(s.content, dict)
-    ]
+    create_obs = [s for s in result.steps if s.role == "observation" and isinstance(s.content, dict)]
     proposals = [c.content for c in create_obs if c.content.get("kind") == "boq_position_proposal"]
     assert proposals
     assert proposals[0]["confirmed"] is False  # human-confirmed principle

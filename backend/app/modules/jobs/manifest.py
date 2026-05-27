@@ -12,10 +12,7 @@ manifest = ModuleManifest(
     name="oe_jobs",
     version="1.0.0",
     display_name="Background Jobs",
-    description=(
-        "Status, listing and cancellation surface for the platform-wide "
-        "Celery job runner (RFC 34 §4 W0.1)."
-    ),
+    description=("Status, listing and cancellation surface for the platform-wide Celery job runner (RFC 34 §4 W0.1)."),
     author="OpenEstimate Core Team",
     category="core",
     depends=[],

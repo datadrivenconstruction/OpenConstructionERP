@@ -93,11 +93,12 @@ class AuditContext:
 # Module-level singleton. Default ``None`` so out-of-request callers
 # see no context (NULLs land in the row, which is the contract).
 _audit_context_var: ContextVar[AuditContext | None] = ContextVar(
-    "audit_context", default=None,
+    "audit_context",
+    default=None,
 )
 
 
-def set_audit_context(ctx: AuditContext | None) -> "object":
+def set_audit_context(ctx: AuditContext | None) -> object:
     """Set the request-scoped audit context. Returns a reset token."""
     return _audit_context_var.set(ctx)
 
@@ -161,10 +162,14 @@ class ActivityLog(Base):
     )
 
     tenant_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
     actor_id: Mapped[uuid.UUID | None] = mapped_column(
-        GUID(), nullable=True, index=True,
+        GUID(),
+        nullable=True,
+        index=True,
     )
     entity_type: Mapped[str] = mapped_column(String(64), nullable=False)
     entity_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
@@ -186,22 +191,25 @@ class ActivityLog(Base):
     request_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     module: Mapped[str | None] = mapped_column(String(64), nullable=True)
     parent_entity_type: Mapped[str | None] = mapped_column(
-        String(64), nullable=True,
+        String(64),
+        nullable=True,
     )
     parent_entity_id: Mapped[str | None] = mapped_column(
-        String(64), nullable=True,
+        String(64),
+        nullable=True,
     )
     before_state: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=True,
+        JSON,
+        nullable=True,
     )
     after_state: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=True,
+        JSON,
+        nullable=True,
     )
 
     def __repr__(self) -> str:  # pragma: no cover — debug only
         return (
-            f"<ActivityLog {self.entity_type}:{self.entity_id} "
-            f"{self.from_status}->{self.to_status} by {self.actor_id}>"
+            f"<ActivityLog {self.entity_type}:{self.entity_id} {self.from_status}->{self.to_status} by {self.actor_id}>"
         )
 
 
@@ -336,9 +344,7 @@ async def log_activity(
         request_id=request_id,
         module=module,
         parent_entity_type=parent_entity_type,
-        parent_entity_id=(
-            str(parent_entity_id) if parent_entity_id is not None else None
-        ),
+        parent_entity_id=(str(parent_entity_id) if parent_entity_id is not None else None),
         before_state=_bounded_state(before_state),
         after_state=_bounded_state(after_state),
     )
@@ -357,18 +363,27 @@ async def log_activity(
         # Stub sessions in tests — ``_StubSession`` has no ``add``.
         logger.debug(
             "activity_log: skipped (session does not support add) %s:%s %s",
-            entity_type, entity_id, action,
+            entity_type,
+            entity_id,
+            action,
         )
         return entry
     except Exception:
         logger.exception(
             "activity_log: flush failed for %s:%s %s",
-            entity_type, entity_id, action,
+            entity_type,
+            entity_id,
+            action,
         )
         return entry
     logger.debug(
         "activity_log: %s %s %s %s->%s actor=%s",
-        action, entity_type, entity_id, from_status, to_status, actor_id,
+        action,
+        entity_type,
+        entity_id,
+        from_status,
+        to_status,
+        actor_id,
     )
     return entry
 

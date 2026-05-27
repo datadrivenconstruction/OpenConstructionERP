@@ -80,11 +80,11 @@ def test_empty_and_none_inputs_are_safe():
 def test_unicode_preserved_across_scripts():
     """CJK / Arabic / Cyrillic / Greek text must survive the strip."""
     samples = [
-        "钢筋混凝土 C30/37",                # Chinese
-        "خرسانة مسلحة",                       # Arabic
-        "Железобетон C30/37",               # Cyrillic
-        "Σκυρόδεμα C30/37",                  # Greek
-        "コンクリート C30/37",                # Japanese (mixed scripts)
+        "钢筋混凝土 C30/37",  # Chinese
+        "خرسانة مسلحة",  # Arabic
+        "Железобетон C30/37",  # Cyrillic
+        "Σκυρόδεμα C30/37",  # Greek
+        "コンクリート C30/37",  # Japanese (mixed scripts)
     ]
     for s in samples:
         assert strip_all_html_tags(f"<b>{s}</b>") == s

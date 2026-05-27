@@ -367,9 +367,7 @@ async def test_batch_concurrency_cap(session: AsyncSession) -> None:
         return _VALID_VERDICT_JSON, 100
 
     with patch("app.modules.clash_ai_triage.service.call_ai", new=_mock):
-        rows = await svc.triage_batch(
-            extra_ids, user_id=user_id, max_concurrent=4
-        )
+        rows = await svc.triage_batch(extra_ids, user_id=user_id, max_concurrent=4)
 
     assert len(rows) == 10
     assert peak <= 4, f"observed peak in-flight LLM calls = {peak}, want ≤ 4"
@@ -399,9 +397,7 @@ async def test_cost_usd_computed_from_tokens(session: AsyncSession) -> None:
 
 def test_cost_helper_unit() -> None:
     """Direct unit check on the _estimate_cost_usd helper."""
-    assert _estimate_cost_usd("claude-haiku-4-5", 1000) == MODEL_COSTS[
-        "claude-haiku-4-5"
-    ]
+    assert _estimate_cost_usd("claude-haiku-4-5", 1000) == MODEL_COSTS["claude-haiku-4-5"]
     assert _estimate_cost_usd("claude-haiku-4-5", 0) == 0
     # Unknown model uses the conservative fallback.
     assert _estimate_cost_usd("totally-unknown", 1000) == DEFAULT_COST_PER_1K
@@ -506,11 +502,7 @@ async def test_subject_type_promotes_to_clash_issue(session: AsyncSession) -> No
     session.add(issue)
     from sqlalchemy import update
 
-    await session.execute(
-        update(ClashResult)
-        .where(ClashResult.id == clash_id)
-        .values(issue_id=issue.id)
-    )
+    await session.execute(update(ClashResult).where(ClashResult.id == clash_id).values(issue_id=issue.id))
     await session.commit()
 
     svc = ClashTriageService(session)

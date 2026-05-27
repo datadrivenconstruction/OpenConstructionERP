@@ -122,14 +122,13 @@ def downgrade() -> None:
 
     if "oe_crm_account" in inspector.get_table_names():
         existing_cols = {c["name"] for c in inspector.get_columns("oe_crm_account")}
-        existing_indexes = {
-            i["name"] for i in inspector.get_indexes("oe_crm_account")
-        }
+        existing_indexes = {i["name"] for i in inspector.get_indexes("oe_crm_account")}
         if "ix_oe_crm_account_role" in existing_indexes:
             op.drop_index("ix_oe_crm_account_role", table_name="oe_crm_account")
         if "ix_oe_crm_account_parent_account_id" in existing_indexes:
             op.drop_index(
-                "ix_oe_crm_account_parent_account_id", table_name="oe_crm_account",
+                "ix_oe_crm_account_parent_account_id",
+                table_name="oe_crm_account",
             )
         if "role" in existing_cols:
             op.drop_column("oe_crm_account", "role")

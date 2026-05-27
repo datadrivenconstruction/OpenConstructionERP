@@ -31,7 +31,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, column: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    column: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -39,7 +41,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, index: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    index: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -62,9 +66,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     is_sqlite = bind.dialect.name == "sqlite"
-    guid_type = (
-        sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
-    )
+    guid_type = sa.String(36) if is_sqlite else sa.dialects.postgresql.UUID(as_uuid=True)
 
     # ── Variations: request — clause + NEC4 timers ─────────────────────
     additions_request: list[tuple[str, sa.Column]] = [
@@ -135,13 +137,19 @@ def upgrade() -> None:
         (
             "subtotal_amount",
             sa.Column(
-                "subtotal_amount", _money(4), nullable=False, server_default="0",
+                "subtotal_amount",
+                _money(4),
+                nullable=False,
+                server_default="0",
             ),
         ),
         (
             "markup_percent",
             sa.Column(
-                "markup_percent", _money(2), nullable=False, server_default="0",
+                "markup_percent",
+                _money(2),
+                nullable=False,
+                server_default="0",
             ),
         ),
     ]
@@ -163,7 +171,10 @@ def upgrade() -> None:
         (
             "unit_of_measure",
             sa.Column(
-                "unit_of_measure", sa.String(30), nullable=False, server_default="",
+                "unit_of_measure",
+                sa.String(30),
+                nullable=False,
+                server_default="",
             ),
         ),
         (
@@ -224,7 +235,9 @@ def upgrade() -> None:
     ]
     for col_name, col_def in additions_sub_line:
         if not _has_column(
-            inspector, "oe_bid_management_submission_line", col_name,
+            inspector,
+            "oe_bid_management_submission_line",
+            col_name,
         ):
             with op.batch_alter_table("oe_bid_management_submission_line") as batch:
                 batch.add_column(col_def)
@@ -234,25 +247,37 @@ def upgrade() -> None:
         (
             "deposit_amount",
             sa.Column(
-                "deposit_amount", _money(2), nullable=False, server_default="0",
+                "deposit_amount",
+                _money(2),
+                nullable=False,
+                server_default="0",
             ),
         ),
         (
             "deposit_forfeited",
             sa.Column(
-                "deposit_forfeited", _money(2), nullable=False, server_default="0",
+                "deposit_forfeited",
+                _money(2),
+                nullable=False,
+                server_default="0",
             ),
         ),
         (
             "deposit_refunded",
             sa.Column(
-                "deposit_refunded", _money(2), nullable=False, server_default="0",
+                "deposit_refunded",
+                _money(2),
+                nullable=False,
+                server_default="0",
             ),
         ),
         (
             "jurisdiction",
             sa.Column(
-                "jurisdiction", sa.String(8), nullable=False, server_default="",
+                "jurisdiction",
+                sa.String(8),
+                nullable=False,
+                server_default="",
             ),
         ),
         (
@@ -283,34 +308,47 @@ def upgrade() -> None:
                 "handover_id",
                 guid_type,
                 sa.ForeignKey(
-                    "oe_property_dev_handover.id", ondelete="CASCADE",
+                    "oe_property_dev_handover.id",
+                    ondelete="CASCADE",
                 ),
                 nullable=False,
             ),
             sa.Column("doc_type", sa.String(40), nullable=False),
             sa.Column(
-                "title", sa.String(255), nullable=False, server_default="",
+                "title",
+                sa.String(255),
+                nullable=False,
+                server_default="",
             ),
             sa.Column("file_url", sa.String(1024), nullable=True),
             sa.Column(
-                "is_required", sa.Boolean(), nullable=False,
+                "is_required",
+                sa.Boolean(),
+                nullable=False,
                 server_default=sa.text("0" if is_sqlite else "false"),
             ),
             sa.Column(
-                "is_delivered", sa.Boolean(), nullable=False,
+                "is_delivered",
+                sa.Boolean(),
+                nullable=False,
                 server_default=sa.text("0" if is_sqlite else "false"),
             ),
             sa.Column("delivered_at", sa.String(40), nullable=True),
             sa.Column(
-                "metadata", sa.JSON(), nullable=False, server_default="{}",
+                "metadata",
+                sa.JSON(),
+                nullable=False,
+                server_default="{}",
             ),
             sa.Column(
-                "created_at", sa.DateTime(timezone=True),
+                "created_at",
+                sa.DateTime(timezone=True),
                 nullable=False,
                 server_default=sa.func.current_timestamp(),
             ),
             sa.Column(
-                "updated_at", sa.DateTime(timezone=True),
+                "updated_at",
+                sa.DateTime(timezone=True),
                 nullable=False,
                 server_default=sa.func.current_timestamp(),
             ),

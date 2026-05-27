@@ -120,9 +120,7 @@ def upgrade() -> None:
     # versions, so do it after the batch closes).
     inspector = sa.inspect(bind)
     lead_indexes = (
-        {idx["name"] for idx in inspector.get_indexes(_LEAD_TABLE)}
-        if inspector.has_table(_LEAD_TABLE)
-        else set()
+        {idx["name"] for idx in inspector.get_indexes(_LEAD_TABLE)} if inspector.has_table(_LEAD_TABLE) else set()
     )
     if (
         inspector.has_table(_LEAD_TABLE)
@@ -159,9 +157,7 @@ def upgrade() -> None:
 
     inspector = sa.inspect(bind)
     buyer_indexes = (
-        {idx["name"] for idx in inspector.get_indexes(_BUYER_TABLE)}
-        if inspector.has_table(_BUYER_TABLE)
-        else set()
+        {idx["name"] for idx in inspector.get_indexes(_BUYER_TABLE)} if inspector.has_table(_BUYER_TABLE) else set()
     )
     if (
         inspector.has_table(_BUYER_TABLE)
@@ -179,9 +175,7 @@ def downgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
 
-    if inspector.has_table(_BUYER_TABLE) and "contact_id" in _columns(
-        inspector, _BUYER_TABLE
-    ):
+    if inspector.has_table(_BUYER_TABLE) and "contact_id" in _columns(inspector, _BUYER_TABLE):
         buyer_indexes = {idx["name"] for idx in inspector.get_indexes(_BUYER_TABLE)}
         if "ix_oe_property_dev_buyer_contact_id" in buyer_indexes:
             op.drop_index("ix_oe_property_dev_buyer_contact_id", _BUYER_TABLE)
@@ -196,9 +190,7 @@ def downgrade() -> None:
             batch_op.drop_column("contact_id")
 
     inspector = sa.inspect(bind)
-    if inspector.has_table(_LEAD_TABLE) and "contact_id" in _columns(
-        inspector, _LEAD_TABLE
-    ):
+    if inspector.has_table(_LEAD_TABLE) and "contact_id" in _columns(inspector, _LEAD_TABLE):
         lead_indexes = {idx["name"] for idx in inspector.get_indexes(_LEAD_TABLE)}
         if "ix_oe_property_dev_lead_contact_id" in lead_indexes:
             op.drop_index("ix_oe_property_dev_lead_contact_id", _LEAD_TABLE)

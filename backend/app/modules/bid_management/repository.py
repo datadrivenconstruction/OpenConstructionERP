@@ -79,9 +79,7 @@ class BidPackageRepository(_BaseRepo):
         return list(result.scalars().all()), total
 
     async def get_by_code(self, code: str) -> BidPackage | None:
-        result = await self.session.execute(
-            select(BidPackage).where(BidPackage.code == code)
-        )
+        result = await self.session.execute(select(BidPackage).where(BidPackage.code == code))
         return result.scalar_one_or_none()
 
 
@@ -147,9 +145,7 @@ class BidSubmissionRepository(_BaseRepo):
 
     model = BidSubmission
 
-    async def submissions_for_package(
-        self, package_id: uuid.UUID
-    ) -> list[BidSubmission]:
+    async def submissions_for_package(self, package_id: uuid.UUID) -> list[BidSubmission]:
         # Submissions live under invitations which live under packages.
         stmt = (
             select(BidSubmission)
@@ -159,9 +155,7 @@ class BidSubmissionRepository(_BaseRepo):
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def get_by_invitation(
-        self, invitation_id: uuid.UUID
-    ) -> BidSubmission | None:
+    async def get_by_invitation(self, invitation_id: uuid.UUID) -> BidSubmission | None:
         stmt = select(BidSubmission).where(BidSubmission.invitation_id == invitation_id)
         return (await self.session.execute(stmt)).scalar_one_or_none()
 
@@ -171,18 +165,12 @@ class BidSubmissionLineRepository(_BaseRepo):
 
     model = BidSubmissionLine
 
-    async def list_for_submission(
-        self, submission_id: uuid.UUID
-    ) -> list[BidSubmissionLine]:
-        stmt = select(BidSubmissionLine).where(
-            BidSubmissionLine.submission_id == submission_id
-        )
+    async def list_for_submission(self, submission_id: uuid.UUID) -> list[BidSubmissionLine]:
+        stmt = select(BidSubmissionLine).where(BidSubmissionLine.submission_id == submission_id)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def bulk_create(
-        self, items: list[BidSubmissionLine]
-    ) -> list[BidSubmissionLine]:
+    async def bulk_create(self, items: list[BidSubmissionLine]) -> list[BidSubmissionLine]:
         self.session.add_all(items)
         await self.session.flush()
         return items
@@ -194,11 +182,7 @@ class BidQARepository(_BaseRepo):
     model = BidQA
 
     async def q_and_a_for_package(self, package_id: uuid.UUID) -> list[BidQA]:
-        stmt = (
-            select(BidQA)
-            .where(BidQA.package_id == package_id)
-            .order_by(BidQA.created_at.asc())
-        )
+        stmt = select(BidQA).where(BidQA.package_id == package_id).order_by(BidQA.created_at.asc())
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
@@ -218,9 +202,7 @@ class BidLevelingRepository(_BaseRepo):
 
     model = BidLeveling
 
-    async def levelings_for_comparison(
-        self, comparison_id: uuid.UUID
-    ) -> list[BidLeveling]:
+    async def levelings_for_comparison(self, comparison_id: uuid.UUID) -> list[BidLeveling]:
         stmt = (
             select(BidLeveling)
             .where(BidLeveling.comparison_id == comparison_id)

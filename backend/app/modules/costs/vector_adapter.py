@@ -137,6 +137,7 @@ def _looks_like_fixture(payload: dict[str, Any]) -> bool:
     global _FIXTURE_CODE_RE
     if _FIXTURE_CODE_RE is None:
         import re
+
         _FIXTURE_CODE_RE = re.compile(r"^TEST-[a-f0-9]{6,}$")
     code = str(payload.get("code", "") or "")
     if code and _FIXTURE_CODE_RE.match(code):
@@ -201,9 +202,7 @@ async def _sql_lexical_search(
             stmt = select(CostItem).where(CostItem.is_active.is_(True))
             if region:
                 stmt = stmt.where(CostItem.region == region)
-            stmt = stmt.where(
-                or_(*[CostItem.description.ilike(f"%{t}%") for t in tokens])
-            )
+            stmt = stmt.where(or_(*[CostItem.description.ilike(f"%{t}%") for t in tokens]))
             # Over-fetch so the in-Python token-coverage score has a real
             # chance to surface descriptions that match *several* tokens,
             # not just whatever PK-ordered first row matches one. The
@@ -215,7 +214,9 @@ async def _sql_lexical_search(
         return []
 
     def _row_to_hit_with_count(
-        row: CostItem, hits_count: int, total_tokens: int,
+        row: CostItem,
+        hits_count: int,
+        total_tokens: int,
     ) -> dict[str, Any]:
         # Score band 0.3 - 0.6 — always below typical vector hits (≥0.7),
         # so the lexical fallback never fights a real vector candidate.
@@ -250,8 +251,11 @@ async def _sql_lexical_search(
     out.sort(key=lambda h: -h["score"])
     logger.info(
         "cost-vector lexical: query=%r tokens=%d region=%s returning=%d/%d",
-        text[:80], len(tokens), region or "any",
-        min(len(out), limit), len(out),
+        text[:80],
+        len(tokens),
+        region or "any",
+        min(len(out), limit),
+        len(out),
     )
     return out[:limit]
 
@@ -326,9 +330,7 @@ class CostItemVectorAdapter:
             "language": _language_for(row),
             "classification_din276": str(classification.get("din276") or ""),
             "classification_nrm": str(classification.get("nrm") or ""),
-            "classification_masterformat": str(
-                classification.get("masterformat") or ""
-            ),
+            "classification_masterformat": str(classification.get("masterformat") or ""),
         }
 
     def project_id_of(self, row: CostItem) -> str | None:
@@ -368,9 +370,7 @@ class CostItemVectorAdapter:
         classification = row.classification or {}
         if not isinstance(classification, dict):
             return ""
-        ordered = sorted(
-            (k, v) for k, v in classification.items() if v not in (None, "")
-        )
+        ordered = sorted((k, v) for k, v in classification.items() if v not in (None, ""))
         return ", ".join(f"{k}:{v}" for k, v in ordered)
 
 
@@ -551,7 +551,10 @@ async def search(
     if not _vector_available():
         _warn_missing_backend("search")
         return await _sql_lexical_search(
-            query, limit=limit, region=region, language=language,
+            query,
+            limit=limit,
+            region=region,
+            language=language,
         )
 
     try:
@@ -568,11 +571,17 @@ async def search(
         # empty pane while ops fixes the encoder backend.
         logger.info("cost-vector search: encode failed (%s); using SQL fallback", exc)
         return await _sql_lexical_search(
-            query, limit=limit, region=region, language=language,
+            query,
+            limit=limit,
+            region=region,
+            language=language,
         )
     if not vectors:
         return await _sql_lexical_search(
-            query, limit=limit, region=region, language=language,
+            query,
+            limit=limit,
+            region=region,
+            language=language,
         )
 
     # Pull a wider window when payload-side filters are active so we
@@ -617,10 +626,7 @@ async def search(
     # filter.
     active_din_prefix = din276_kg_prefix
     if active_din_prefix and decoded:
-        classified = sum(
-            1 for (_r, pl) in decoded
-            if str(pl.get("classification_din276") or "").strip()
-        )
+        classified = sum(1 for (_r, pl) in decoded if str(pl.get("classification_din276") or "").strip())
         if classified < max(3, int(len(decoded) * 0.20)):
             active_din_prefix = None
 
@@ -672,7 +678,10 @@ async def search(
                 fixture_count,
             )
         sql_hits = await _sql_lexical_search(
-            query, limit=limit, region=region, language=language,
+            query,
+            limit=limit,
+            region=region,
+            language=language,
         )
         return sql_hits
 

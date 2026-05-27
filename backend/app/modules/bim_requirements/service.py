@@ -143,17 +143,11 @@ class BIMRequirementService:
             # A rejected XXE / DTD / entity-expansion payload is a *malicious
             # input* (400), not an unprocessable-but-honest file (422). The
             # IDS parser tags these with field="xml_security" (E-SEC-016).
-            security_errors = [
-                e
-                for e in parse_result.errors
-                if e.get("field") == "xml_security"
-            ]
+            security_errors = [e for e in parse_result.errors if e.get("field") == "xml_security"]
             if security_errors:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=security_errors[0].get(
-                        "msg", "XML rejected for security reasons."
-                    ),
+                    detail=security_errors[0].get("msg", "XML rejected for security reasons."),
                 )
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -283,9 +277,7 @@ class BIMRequirementService:
         reqs = await self._load_requirements_as_universal(set_id)
         return export_ids_xml(reqs, title=req_set.name)
 
-    async def _load_requirements_as_universal(
-        self, set_id: uuid.UUID
-    ) -> list[UniversalRequirement]:
+    async def _load_requirements_as_universal(self, set_id: uuid.UUID) -> list[UniversalRequirement]:
         """Load DB requirements and convert to UniversalRequirement objects."""
         stmt = (
             select(BIMRequirement)
@@ -355,18 +347,20 @@ class BIMRequirementService:
             constraint = req.constraint_def or {}
 
             if not matched:
-                results.append({
-                    "requirement_id": str(req.id),
-                    "property_group": prop_group,
-                    "property_name": prop_name,
-                    "element_filter": ef,
-                    "constraint_def": constraint,
-                    "status": "not_applicable",
-                    "matched_elements": 0,
-                    "compliant_elements": 0,
-                    "non_compliant_elements": 0,
-                    "details": "No elements match the element_filter",
-                })
+                results.append(
+                    {
+                        "requirement_id": str(req.id),
+                        "property_group": prop_group,
+                        "property_name": prop_name,
+                        "element_filter": ef,
+                        "constraint_def": constraint,
+                        "status": "not_applicable",
+                        "matched_elements": 0,
+                        "compliant_elements": 0,
+                        "non_compliant_elements": 0,
+                        "details": "No elements match the element_filter",
+                    }
+                )
                 not_applicable += 1
                 continue
 
@@ -385,22 +379,24 @@ class BIMRequirementService:
             else:
                 failed += 1
 
-            results.append({
-                "requirement_id": str(req.id),
-                "property_group": prop_group,
-                "property_name": prop_name,
-                "element_filter": ef,
-                "constraint_def": constraint,
-                "status": req_status,
-                "matched_elements": len(matched),
-                "compliant_elements": compliant,
-                "non_compliant_elements": non_compliant,
-                "details": (
-                    f"{compliant}/{len(matched)} elements compliant"
-                    if req_status == "pass"
-                    else f"{non_compliant}/{len(matched)} elements non-compliant"
-                ),
-            })
+            results.append(
+                {
+                    "requirement_id": str(req.id),
+                    "property_group": prop_group,
+                    "property_name": prop_name,
+                    "element_filter": ef,
+                    "constraint_def": constraint,
+                    "status": req_status,
+                    "matched_elements": len(matched),
+                    "compliant_elements": compliant,
+                    "non_compliant_elements": non_compliant,
+                    "details": (
+                        f"{compliant}/{len(matched)} elements compliant"
+                        if req_status == "pass"
+                        else f"{non_compliant}/{len(matched)} elements non-compliant"
+                    ),
+                }
+            )
 
         total = passed + failed + not_applicable
         return {
@@ -646,9 +642,7 @@ class BIMRequirementService:
             if rule.selector.classification:
                 element_filter["classification"] = dict(rule.selector.classification)
             if rule.selector.properties:
-                element_filter["properties"] = [
-                    p.model_dump(exclude_none=True) for p in rule.selector.properties
-                ]
+                element_filter["properties"] = [p.model_dump(exclude_none=True) for p in rule.selector.properties]
 
             db_req = BIMRequirement(
                 requirement_set_id=req_set.id,

@@ -48,7 +48,6 @@ from app.modules.bcf.reader import (
     ParsedTopic,
 )
 
-
 # ── tiny fixture helpers (no I/O, just byte composition) ──────────────────
 
 
@@ -62,10 +61,7 @@ def _minimal_png() -> bytes:
     # IHDR
     ihdr_data = struct.pack(">IIBBBBB", 1, 1, 8, 6, 0, 0, 0)
     ihdr_chunk = (
-        struct.pack(">I", len(ihdr_data))
-        + b"IHDR"
-        + ihdr_data
-        + struct.pack(">I", 0xA8A1AE0A)  # precomputed CRC
+        struct.pack(">I", len(ihdr_data)) + b"IHDR" + ihdr_data + struct.pack(">I", 0xA8A1AE0A)  # precomputed CRC
     )
     # IDAT (deflate of one zero-byte scanline filter + 4 RGBA bytes)
     import zlib
@@ -116,7 +112,7 @@ def _markup_xml(
     if server_assigned_id is not None:
         attrs += f' ServerAssignedId="{server_assigned_id}"'
 
-    parts = [f'<Topic {attrs}>']
+    parts = [f"<Topic {attrs}>"]
     parts.append(f"<Title>{title}</Title>")
     if priority:
         parts.append(f"<Priority>{priority}</Priority>")
@@ -147,11 +143,7 @@ def _markup_xml(
             parts.append("</ViewPoint>")
         parts.append("</Viewpoints>")
     parts.append("</Topic>")
-    return (
-        '<?xml version="1.0" encoding="utf-8"?><Markup>'
-        + "".join(parts)
-        + "</Markup>"
-    ).encode("utf-8")
+    return ('<?xml version="1.0" encoding="utf-8"?><Markup>' + "".join(parts) + "</Markup>").encode("utf-8")
 
 
 def _visinfo_xml(
@@ -206,12 +198,8 @@ def _visinfo_xml(
         parts.append("<ClippingPlanes>")
         for loc, dirn in clipping_planes:
             parts.append("<ClippingPlane>")
-            parts.append(
-                f"<Location><X>{loc[0]}</X><Y>{loc[1]}</Y><Z>{loc[2]}</Z></Location>"
-            )
-            parts.append(
-                f"<Direction><X>{dirn[0]}</X><Y>{dirn[1]}</Y><Z>{dirn[2]}</Z></Direction>"
-            )
+            parts.append(f"<Location><X>{loc[0]}</X><Y>{loc[1]}</Y><Z>{loc[2]}</Z></Location>")
+            parts.append(f"<Direction><X>{dirn[0]}</X><Y>{dirn[1]}</Y><Z>{dirn[2]}</Z></Direction>")
             parts.append("</ClippingPlane>")
         parts.append("</ClippingPlanes>")
 
@@ -256,17 +244,12 @@ def test_reader_parses_5_topics_with_comments_and_viewpoints() -> None:
         tguid = _make_uuid()
         seen_guids.append(tguid)
         vguid = _make_uuid()
-        comments = [
-            {"guid": _make_uuid(), "comment": f"comment {i} on {tguid}"}
-            for i in range(10)
-        ]
+        comments = [{"guid": _make_uuid(), "comment": f"comment {i} on {tguid}"} for i in range(10)]
         viewpoints = [{"guid": vguid}]
         entries.append(
             (
                 f"{tguid}/markup.bcf",
-                _markup_xml(
-                    guid=tguid, comments=comments, viewpoints=viewpoints
-                ),
+                _markup_xml(guid=tguid, comments=comments, viewpoints=viewpoints),
             )
         )
         entries.append((f"{tguid}/{vguid}.bcfv", _visinfo_xml(vguid)))
@@ -394,9 +377,11 @@ def test_one_malformed_markup_does_not_kill_the_archive() -> None:
     assert True in by_err  # at least one good topic
     assert False in by_err  # at least one bad
     bad_topic = by_err[False]
-    assert "not well-formed" in (bad_topic.parse_error or "").lower() \
-        or "syntax" in (bad_topic.parse_error or "").lower() \
+    assert (
+        "not well-formed" in (bad_topic.parse_error or "").lower()
+        or "syntax" in (bad_topic.parse_error or "").lower()
         or "xml" in (bad_topic.parse_error or "").lower()
+    )
 
 
 # ── 9. path-traversal raises BCFSecurityError ─────────────────────────────
@@ -550,7 +535,7 @@ def test_missing_required_title_surfaces_as_parse_error() -> None:
         "<CreationDate>2026-05-21T10:00:00Z</CreationDate>"
         "<CreationAuthor>alice@example.com</CreationAuthor>"
         "</Topic></Markup>"
-    ).encode("utf-8")
+    ).encode()
     data = _make_zip(
         [
             ("bcf.version", _version_xml()),

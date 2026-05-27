@@ -70,9 +70,7 @@ class Resource(Base):
     default_cost_rate: Mapped[Decimal] = mapped_column(
         Numeric(18, 4), nullable=False, default=Decimal("0"), server_default="0"
     )
-    currency: Mapped[str] = mapped_column(
-        String(3), nullable=False, default="", server_default=""
-    )
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, default="", server_default="")
     status: Mapped[str] = mapped_column(
         String(32), nullable=False, default="active", server_default="active", index=True
     )
@@ -124,9 +122,7 @@ class ResourceSkill(Base):
     """Link table: Resource has Skill at a given Level."""
 
     __tablename__ = "oe_resources_resource_skill"
-    __table_args__ = (
-        Index("ix_oe_resources_resource_skill_resource_skill", "resource_id", "skill_id"),
-    )
+    __table_args__ = (Index("ix_oe_resources_resource_skill_resource_skill", "resource_id", "skill_id"),)
 
     resource_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -138,9 +134,7 @@ class ResourceSkill(Base):
         ForeignKey("oe_resources_skill.id", ondelete="CASCADE"),
         nullable=False,
     )
-    level: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="competent", server_default="competent"
-    )
+    level: Mapped[str] = mapped_column(String(16), nullable=False, default="competent", server_default="competent")
     acquired_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
     expires_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
@@ -173,9 +167,7 @@ class Certification(Base):
     issue_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     valid_until: Mapped[str | None] = mapped_column(String(20), nullable=True, index=True)
     document_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
-    status: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="valid", server_default="valid", index=True
-    )
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="valid", server_default="valid", index=True)
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -229,10 +221,7 @@ class AvailabilityWindow(Base):
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug repr
-        return (
-            f"<AvailabilityWindow r={self.resource_id} {self.window_type} "
-            f"{self.start_at}→{self.end_at}>"
-        )
+        return f"<AvailabilityWindow r={self.resource_id} {self.window_type} {self.start_at}→{self.end_at}>"
 
 
 class Assignment(Base):
@@ -281,12 +270,8 @@ class Assignment(Base):
         server_default="proposed",
         index=True,
     )
-    cost_rate: Mapped[Decimal] = mapped_column(
-        Numeric(18, 4), nullable=False, default=Decimal("0"), server_default="0"
-    )
-    currency: Mapped[str] = mapped_column(
-        String(3), nullable=False, default="", server_default=""
-    )
+    cost_rate: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False, default=Decimal("0"), server_default="0")
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, default="", server_default="")
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
@@ -298,10 +283,7 @@ class Assignment(Base):
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug repr
-        return (
-            f"<Assignment r={self.resource_id} p={self.project_id} "
-            f"{self.start_at}→{self.end_at} {self.status}>"
-        )
+        return f"<Assignment r={self.resource_id} p={self.project_id} {self.start_at}→{self.end_at} {self.status}>"
 
 
 class ResourceRequest(Base):

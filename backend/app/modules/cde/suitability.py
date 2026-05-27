@@ -67,10 +67,7 @@ def validate_suitability_for_state(code: str | None, state: str) -> tuple[bool, 
         return False, f"Unknown CDE state {state!r}"
     if code not in allowed:
         allowed_sorted = sorted(allowed)
-        return False, (
-            f"Suitability code {code!r} is not allowed in state {state!r}. "
-            f"Allowed codes: {allowed_sorted}"
-        )
+        return False, (f"Suitability code {code!r} is not allowed in state {state!r}. Allowed codes: {allowed_sorted}")
     return True, "ok"
 
 

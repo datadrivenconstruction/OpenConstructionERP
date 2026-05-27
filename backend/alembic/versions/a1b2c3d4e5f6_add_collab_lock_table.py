@@ -15,6 +15,7 @@ Revises: b2f4e1a3c907
 Create Date: 2026-04-11
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -82,9 +83,7 @@ def upgrade() -> None:
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
         _meta(),
         *_timestamps(),
-        sa.UniqueConstraint(
-            "entity_type", "entity_id", name="uq_collab_lock_entity"
-        ),
+        sa.UniqueConstraint("entity_type", "entity_id", name="uq_collab_lock_entity"),
     )
 
     # Indexes.  Guarded because the table may already exist from
@@ -94,13 +93,9 @@ def upgrade() -> None:
     existing = {ix["name"] for ix in insp.get_indexes("oe_collab_lock")}
 
     if "ix_collab_lock_expires" not in existing:
-        op.create_index(
-            "ix_collab_lock_expires", "oe_collab_lock", ["expires_at"]
-        )
+        op.create_index("ix_collab_lock_expires", "oe_collab_lock", ["expires_at"])
     if "ix_collab_lock_user" not in existing:
-        op.create_index(
-            "ix_collab_lock_user", "oe_collab_lock", ["user_id"]
-        )
+        op.create_index("ix_collab_lock_user", "oe_collab_lock", ["user_id"])
     if "ix_collab_lock_entity_lookup" not in existing:
         op.create_index(
             "ix_collab_lock_entity_lookup",

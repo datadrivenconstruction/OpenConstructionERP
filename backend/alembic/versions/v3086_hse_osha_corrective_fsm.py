@@ -49,7 +49,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "v3086_hse_osha_corrective_fsm"
 down_revision: Union[str, Sequence[str], None] = "v3083_merge_v311_heads"
@@ -73,7 +72,9 @@ def _has_table(inspector: sa.engine.reflection.Inspector, name: str) -> bool:
 
 
 def _has_column(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -81,7 +82,9 @@ def _has_column(
 
 
 def _has_index(
-    inspector: sa.engine.reflection.Inspector, table: str, name: str,
+    inspector: sa.engine.reflection.Inspector,
+    table: str,
+    name: str,
 ) -> bool:
     if not _has_table(inspector, table):
         return False
@@ -96,22 +99,34 @@ def upgrade() -> None:
     if _has_table(inspector, _INCIDENT_TABLE):
         needs = {
             "osha_recordable": not _has_column(
-                inspector, _INCIDENT_TABLE, "osha_recordable",
+                inspector,
+                _INCIDENT_TABLE,
+                "osha_recordable",
             ),
             "osha_case_number": not _has_column(
-                inspector, _INCIDENT_TABLE, "osha_case_number",
+                inspector,
+                _INCIDENT_TABLE,
+                "osha_case_number",
             ),
             "days_away": not _has_column(
-                inspector, _INCIDENT_TABLE, "days_away",
+                inspector,
+                _INCIDENT_TABLE,
+                "days_away",
             ),
             "days_restricted": not _has_column(
-                inspector, _INCIDENT_TABLE, "days_restricted",
+                inspector,
+                _INCIDENT_TABLE,
+                "days_restricted",
             ),
             "root_cause_method": not _has_column(
-                inspector, _INCIDENT_TABLE, "root_cause_method",
+                inspector,
+                _INCIDENT_TABLE,
+                "root_cause_method",
             ),
             "root_cause_tags": not _has_column(
-                inspector, _INCIDENT_TABLE, "root_cause_tags",
+                inspector,
+                _INCIDENT_TABLE,
+                "root_cause_tags",
             ),
         }
         if any(needs.values()):
@@ -134,13 +149,13 @@ def upgrade() -> None:
                         )
                     )
                 if needs["days_away"]:
-                    batch.add_column(
-                        sa.Column("days_away", sa.Integer(), nullable=True)
-                    )
+                    batch.add_column(sa.Column("days_away", sa.Integer(), nullable=True))
                 if needs["days_restricted"]:
                     batch.add_column(
                         sa.Column(
-                            "days_restricted", sa.Integer(), nullable=True,
+                            "days_restricted",
+                            sa.Integer(),
+                            nullable=True,
                         )
                     )
                 if needs["root_cause_method"]:
@@ -163,11 +178,10 @@ def upgrade() -> None:
 
         # Re-inspect because batch_alter_table on SQLite re-creates the table.
         inspector = sa.inspect(bind)
-        if (
-            _has_column(inspector, _INCIDENT_TABLE, "osha_recordable")
-            and not _has_index(
-                inspector, _INCIDENT_TABLE, _IX_INCIDENT_RECORDABLE,
-            )
+        if _has_column(inspector, _INCIDENT_TABLE, "osha_recordable") and not _has_index(
+            inspector,
+            _INCIDENT_TABLE,
+            _IX_INCIDENT_RECORDABLE,
         ):
             try:
                 op.create_index(
@@ -206,10 +220,14 @@ def upgrade() -> None:
             )
         else:
             assigned_col = sa.Column(
-                "assigned_to_user_id", sa.String(length=36), nullable=True,
+                "assigned_to_user_id",
+                sa.String(length=36),
+                nullable=True,
             )
             verified_col = sa.Column(
-                "verified_by_user_id", sa.String(length=36), nullable=True,
+                "verified_by_user_id",
+                sa.String(length=36),
+                nullable=True,
             )
 
         op.create_table(
@@ -233,10 +251,14 @@ def upgrade() -> None:
             ),
             verified_col,
             sa.Column(
-                "verified_at", sa.DateTime(timezone=True), nullable=True,
+                "verified_at",
+                sa.DateTime(timezone=True),
+                nullable=True,
             ),
             sa.Column(
-                "verification_notes", sa.Text(), nullable=True,
+                "verification_notes",
+                sa.Text(),
+                nullable=True,
             ),
             sa.Column(
                 "created_at",
@@ -253,18 +275,12 @@ def upgrade() -> None:
         )
 
     inspector = sa.inspect(bind)
-    if (
-        _has_table(inspector, _CA_TABLE)
-        and not _has_index(inspector, _CA_TABLE, _IX_CA_INCIDENT)
-    ):
+    if _has_table(inspector, _CA_TABLE) and not _has_index(inspector, _CA_TABLE, _IX_CA_INCIDENT):
         try:
             op.create_index(_IX_CA_INCIDENT, _CA_TABLE, ["incident_id"])
         except Exception:  # noqa: BLE001
             pass
-    if (
-        _has_table(inspector, _CA_TABLE)
-        and not _has_index(inspector, _CA_TABLE, _IX_CA_STATUS)
-    ):
+    if _has_table(inspector, _CA_TABLE) and not _has_index(inspector, _CA_TABLE, _IX_CA_STATUS):
         try:
             op.create_index(_IX_CA_STATUS, _CA_TABLE, ["status"])
         except Exception:  # noqa: BLE001
@@ -287,7 +303,8 @@ def downgrade() -> None:
     inspector = sa.inspect(bind)
     if _has_index(inspector, _INCIDENT_TABLE, _IX_INCIDENT_RECORDABLE):
         op.drop_index(
-            _IX_INCIDENT_RECORDABLE, table_name=_INCIDENT_TABLE,
+            _IX_INCIDENT_RECORDABLE,
+            table_name=_INCIDENT_TABLE,
         )
 
     if _has_table(inspector, _INCIDENT_TABLE):

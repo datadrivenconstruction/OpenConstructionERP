@@ -153,7 +153,8 @@ async def test_ambiguous_text_low_confidence_no_match() -> None:
 async def test_lang_de_alias_match() -> None:
     """German text should be normalised to English before regex matching."""
     res = await parse_nl_to_dsl(
-        "alle wände müssen brandschutzklasse haben", lang="de",
+        "alle wände müssen brandschutzklasse haben",
+        lang="de",
     )
     assert res.used_method == "pattern"
     assert res.matched_pattern == "must_have"
@@ -166,7 +167,8 @@ async def test_lang_de_alias_match() -> None:
 @pytest.mark.asyncio
 async def test_lang_ru_alias_match() -> None:
     res = await parse_nl_to_dsl(
-        "все walls должны иметь fire_rating", lang="ru",
+        "все walls должны иметь fire_rating",
+        lang="ru",
     )
     assert res.used_method == "pattern"
     assert res.matched_pattern == "must_have"
@@ -175,7 +177,8 @@ async def test_lang_ru_alias_match() -> None:
 @pytest.mark.asyncio
 async def test_unknown_lang_falls_back_to_english() -> None:
     res = await parse_nl_to_dsl(
-        "all walls must have fire_rating", lang="zz",
+        "all walls must have fire_rating",
+        lang="zz",
     )
     assert res.used_method == "pattern"
 

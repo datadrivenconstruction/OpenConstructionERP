@@ -326,7 +326,8 @@ class TestUploadDocumentGates:
 
         monkeypatch.setattr(svc_mod, "_count_pdf_pages", lambda *a, **k: 1)
         monkeypatch.setattr(
-            svc_mod, "_extract_pdf_pages",
+            svc_mod,
+            "_extract_pdf_pages",
             lambda *a, **k: [{"page": 1, "text": "hello"}],
         )
 
@@ -346,18 +347,13 @@ class TestUploadDocumentGates:
             )
         except HTTPException as exc:
             assert exc.status_code != 413, (
-                "Unlimited config must not produce a 413 — got: "
-                f"{exc.status_code} {exc.detail}"
+                f"Unlimited config must not produce a 413 — got: {exc.status_code} {exc.detail}"
             )
 
     @pytest.mark.asyncio
     async def test_encrypted_pdf_rejected_with_actionable_message(self):
         svc = _make_service()
-        encrypted = (
-            b"%PDF-1.6\n"
-            + b"some content\n" * 10
-            + b"trailer\n<< /Size 5 /Root 1 0 R /Encrypt 4 0 R >>\n%%EOF"
-        )
+        encrypted = b"%PDF-1.6\n" + b"some content\n" * 10 + b"trailer\n<< /Size 5 /Root 1 0 R /Encrypt 4 0 R >>\n%%EOF"
         with pytest.raises(HTTPException) as exc:
             await svc.upload_document(
                 filename="locked.pdf",
@@ -459,7 +455,13 @@ class TestScannedPdfNeedsOcr:
         assert doc.status == "needs_ocr", "Scanned-PDF must be persisted with needs_ocr status"
         assert doc.pages == 3
         # A clear log line tells operators to install [cv].
-        install_hints = [r for r in caplog.records if "install [cv] extra" in r.getMessage().lower() or "install" in r.getMessage().lower() and "cv" in r.getMessage().lower()]
+        install_hints = [
+            r
+            for r in caplog.records
+            if "install [cv] extra" in r.getMessage().lower()
+            or "install" in r.getMessage().lower()
+            and "cv" in r.getMessage().lower()
+        ]
         assert install_hints, "Operator-facing OCR install hint not logged"
 
 

@@ -22,9 +22,7 @@ class ValidationReport(Base):
     """
 
     __tablename__ = "oe_validation_report"
-    __table_args__ = (
-        Index("ix_validation_target", "target_type", "target_id"),
-    )
+    __table_args__ = (Index("ix_validation_target", "target_type", "target_id"),)
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),

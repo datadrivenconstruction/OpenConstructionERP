@@ -118,9 +118,7 @@ async def test_create_draft_with_items_recipients_then_send(db_session):
         ],
         recipients=[
             TransmittalRecipientCreate(email="alice@test.io", display_name="Alice"),
-            TransmittalRecipientCreate(
-                email="bob@test.io", display_name="Bob", role="Architect"
-            ),
+            TransmittalRecipientCreate(email="bob@test.io", display_name="Bob", role="Architect"),
             TransmittalRecipientCreate(email="charlie@test.io"),
         ],
     )
@@ -141,10 +139,7 @@ async def test_create_draft_with_items_recipients_then_send(db_session):
     assert sent.cover_sheet_path
     assert sent.cover_sheet_path.endswith((".pdf", ".txt"))
     # Tokens minted on every recipient.
-    assert all(
-        r.acknowledge_token and len(r.acknowledge_token) >= 32
-        for r in sent.recipients
-    )
+    assert all(r.acknowledge_token and len(r.acknowledge_token) >= 32 for r in sent.recipients)
     # Cover sheet bytes are non-empty and contain the subject.
     cover_bytes, media_type = await service.read_cover(sent.id)
     assert len(cover_bytes) > 100, "Cover sheet should be non-trivial"
@@ -203,9 +198,7 @@ async def test_recipient_ack_flips_acknowledged_at_and_status(db_session):
     assert transmittal.status == "sent"
 
     # Idempotent: re-call returns the same recipient with same timestamp.
-    transmittal, recipient_a_again = await service.acknowledge_by_token(
-        tokens[0]
-    )
+    transmittal, recipient_a_again = await service.acknowledge_by_token(tokens[0])
     assert recipient_a_again.acknowledged_at == recipient_a.acknowledged_at
 
     # Second recipient acks → workflow promotes to ``acknowledged``.

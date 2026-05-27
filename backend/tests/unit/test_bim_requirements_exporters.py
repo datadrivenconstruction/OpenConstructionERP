@@ -124,7 +124,7 @@ class TestIDSExporter:
         reqs = _sample_requirements()
         xml_str = export_ids_xml(reqs, title="Test Export")
         assert isinstance(xml_str, str)
-        assert '<?xml version' in xml_str
+        assert "<?xml version" in xml_str
 
         # Must be parseable
         root = ET.fromstring(xml_str)

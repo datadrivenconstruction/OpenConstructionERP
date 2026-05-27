@@ -22,9 +22,7 @@ ALLOWED_FILE_KINDS: tuple[str, ...] = (
     "report",
     "markup",
 )
-_FILE_KIND_PATTERN = (
-    r"^(document|photo|sheet|bim_model|dwg_drawing|takeoff|report|markup)$"
-)
+_FILE_KIND_PATTERN = r"^(document|photo|sheet|bim_model|dwg_drawing|takeoff|report|markup)$"
 
 # Target type union — open by design, validated by the schema but not
 # foreign-keyed. The string list is exported so the frontend can render
@@ -164,9 +162,7 @@ class FileReferenceCreate(BaseModel):
     file_id: str = Field(..., min_length=1, max_length=255)
     target_type: str = Field(..., pattern=_TARGET_TYPE_PATTERN)
     target_id: str = Field(..., min_length=1, max_length=255)
-    relation: str = Field(
-        default="references", min_length=1, max_length=32
-    )
+    relation: str = Field(default="references", min_length=1, max_length=32)
     target_label: str | None = Field(default=None, max_length=255)
 
 

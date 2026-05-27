@@ -245,7 +245,9 @@ _ACHIEVEMENT_RULES: list[dict[str, Any]] = [
     },
     {
         "domain": "risk",
-        "condition": lambda s: s.risk.register_exists and s.risk.high_severity_unmitigated == 0 and s.risk.total_risks > 0,
+        "condition": lambda s: s.risk.register_exists
+        and s.risk.high_severity_unmitigated == 0
+        and s.risk.total_risks > 0,
         "title": "All high-severity risks have mitigation",
         "description": "Risk management is in good shape.",
     },
@@ -337,9 +339,7 @@ def compute_score(state: ProjectState) -> ProjectScore:
         "reports": state.reports.completion_pct,
     }
 
-    result.domain_scores = {
-        domain: round(pct * 100, 1) for domain, pct in domain_pcts.items()
-    }
+    result.domain_scores = {domain: round(pct * 100, 1) for domain, pct in domain_pcts.items()}
 
     # ── Overall weighted score ─────────────────────────────────────────
     # Essential domains always count even if zero — they're required for any
@@ -379,9 +379,7 @@ def compute_score(state: ProjectState) -> ProjectScore:
                     impact=rule["impact"],
                     action_id=rule.get("action_id"),
                     affected_count=(
-                        _resolve_value(rule["affected_count"], state)
-                        if "affected_count" in rule
-                        else None
+                        _resolve_value(rule["affected_count"], state) if "affected_count" in rule else None
                     ),
                 )
                 result.critical_gaps.append(gap)

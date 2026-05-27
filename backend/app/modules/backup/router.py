@@ -202,9 +202,7 @@ async def restore_backup(
                 except Exception as exc:
                     warnings.append(f"Flush error after {backup_key}: {str(exc)[:200]}")
                     await session.rollback()
-                    warnings.append(
-                        f"Rolled back {backup_key} due to error; subsequent tables may also be affected"
-                    )
+                    warnings.append(f"Rolled back {backup_key} due to error; subsequent tables may also be affected")
 
             await session.commit()
         except Exception as exc:
@@ -265,9 +263,7 @@ async def validate_backup(
 
     backup_version = manifest.get("format_version", "unknown")
     if backup_version != BACKUP_FORMAT_VERSION:
-        warnings.append(
-            f"Format version mismatch: backup={backup_version}, current={BACKUP_FORMAT_VERSION}"
-        )
+        warnings.append(f"Format version mismatch: backup={backup_version}, current={BACKUP_FORMAT_VERSION}")
 
     known_keys = {key for key, _, _ in get_backup_tables()}
     for key in data:

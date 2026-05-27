@@ -55,6 +55,7 @@ def _utcnow_iso() -> str:
     """Return current UTC time as ISO-8601 string."""
     return datetime.now(UTC).isoformat()
 
+
 # ── Allowed status transitions ──────────────────────────────────────────────
 #
 # Kept in addition to :mod:`app.core.fsm.registry` for backwards compatibility:
@@ -123,17 +124,14 @@ class FinanceService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
-                    f"Invalid invoice status: '{data.status}'. "
-                    f"Allowed: {', '.join(sorted(_VALID_INVOICE_STATUSES))}"
+                    f"Invalid invoice status: '{data.status}'. Allowed: {', '.join(sorted(_VALID_INVOICE_STATUSES))}"
                 ),
             )
 
         # Auto-generate invoice number if not provided
         invoice_number = data.invoice_number
         if not invoice_number:
-            invoice_number = await self.invoices.next_invoice_number(
-                data.project_id, data.invoice_direction
-            )
+            invoice_number = await self.invoices.next_invoice_number(data.project_id, data.invoice_direction)
 
         # Server-side total computation: always override amount_total
         computed_total = _compute_invoice_total(data.amount_subtotal, data.tax_amount)
@@ -235,8 +233,7 @@ class FinanceService:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=(
-                        f"Invalid invoice status: '{new_status}'. "
-                        f"Allowed: {', '.join(sorted(_VALID_INVOICE_STATUSES))}"
+                        f"Invalid invoice status: '{new_status}'. Allowed: {', '.join(sorted(_VALID_INVOICE_STATUSES))}"
                     ),
                 )
             allowed = _INVOICE_STATUS_TRANSITIONS.get(invoice.status, set())
@@ -326,9 +323,9 @@ class FinanceService:
                 )
             except Exception as exc:
                 logger.warning(
-                    "Audit log FAILED for invoice line-items replace "
-                    "(invoice_id=%s): %s",
-                    invoice_id, exc,
+                    "Audit log FAILED for invoice line-items replace (invoice_id=%s): %s",
+                    invoice_id,
+                    exc,
                     exc_info=True,
                 )
 
@@ -384,9 +381,10 @@ class FinanceService:
             )
         except Exception as exc:
             logger.warning(
-                "FSM audit log FAILED for invoice approve "
-                "(user_id=%s, invoice_id=%s): %s",
-                actor_id, invoice_id, exc,
+                "FSM audit log FAILED for invoice approve (user_id=%s, invoice_id=%s): %s",
+                actor_id,
+                invoice_id,
+                exc,
                 exc_info=True,
             )
         updated = await self.invoices.get(invoice_id)
@@ -418,10 +416,7 @@ class FinanceService:
         if prior not in ("approved", "sent"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Cannot mark as paid invoice in status '{prior}'. "
-                    "Invoice must be sent first."
-                ),
+                detail=(f"Cannot mark as paid invoice in status '{prior}'. Invoice must be sent first."),
             )
         await self.invoices.update(invoice_id, status="paid")
         # Best-effort: an audit failure must NOT roll back the status
@@ -444,9 +439,10 @@ class FinanceService:
             )
         except Exception as exc:
             logger.warning(
-                "FSM audit log FAILED for invoice pay "
-                "(user_id=%s, invoice_id=%s): %s",
-                actor_id, invoice_id, exc,
+                "FSM audit log FAILED for invoice pay (user_id=%s, invoice_id=%s): %s",
+                actor_id,
+                invoice_id,
+                exc,
                 exc_info=True,
             )
         updated = await self.invoices.get(invoice_id)
@@ -491,9 +487,7 @@ class FinanceService:
             paid_invoices = paid_result.scalars().all()
 
             # key = (wbs_id, cost_category); both None means "uncategorized"
-            bucketed: dict[tuple[str | None, str | None], Decimal] = defaultdict(
-                lambda: Decimal("0")
-            )
+            bucketed: dict[tuple[str | None, str | None], Decimal] = defaultdict(lambda: Decimal("0"))
             total_actual = Decimal("0")
 
             for inv in paid_invoices:
@@ -517,9 +511,7 @@ class FinanceService:
                     total_actual += amt
 
             budget_result = await self.session.execute(
-                select(ProjectBudget).where(
-                    ProjectBudget.project_id == invoice.project_id
-                )
+                select(ProjectBudget).where(ProjectBudget.project_id == invoice.project_id)
             )
             budgets = list(budget_result.scalars().all())
 
@@ -530,8 +522,7 @@ class FinanceService:
                 budget.actual = str(bucketed.get(key, Decimal("0")))
 
             logger.info(
-                "Updated budget actuals for project %s: total_actual=%s "
-                "across %d budget row(s), %d bucket(s)",
+                "Updated budget actuals for project %s: total_actual=%s across %d budget row(s), %d bucket(s)",
                 invoice.project_id,
                 total_actual,
                 len(budgets),
@@ -585,9 +576,7 @@ class FinanceService:
         """
         # ── 1. Idempotency check ──────────────────────────────────────────────
         if data.idempotency_key:
-            existing = await self.payments_repo.get_by_idempotency_key(
-                data.idempotency_key
-            )
+            existing = await self.payments_repo.get_by_idempotency_key(data.idempotency_key)
             if existing is not None:
                 return existing
 
@@ -611,16 +600,8 @@ class FinanceService:
         # ── 3. Refund guard ───────────────────────────────────────────────────
         if data.is_refund:
             all_payments, _ = await self.payments_repo.list(invoice_id=data.invoice_id)
-            total_forward = sum(
-                _safe_decimal(p.amount)
-                for p in all_payments
-                if not getattr(p, "is_refund", False)
-            )
-            total_refunds = sum(
-                _safe_decimal(p.amount)
-                for p in all_payments
-                if getattr(p, "is_refund", False)
-            )
+            total_forward = sum(_safe_decimal(p.amount) for p in all_payments if not getattr(p, "is_refund", False))
+            total_refunds = sum(_safe_decimal(p.amount) for p in all_payments if getattr(p, "is_refund", False))
             refund_amount = _safe_decimal(data.amount)
             if total_forward - total_refunds - refund_amount < Decimal("0"):
                 raise HTTPException(
@@ -667,9 +648,10 @@ class FinanceService:
             )
         except Exception as exc:
             logger.warning(
-                "Audit log FAILED for payment create "
-                "(actor_id=%s, invoice_id=%s): %s",
-                actor_id, data.invoice_id, exc,
+                "Audit log FAILED for payment create (actor_id=%s, invoice_id=%s): %s",
+                actor_id,
+                data.invoice_id,
+                exc,
                 exc_info=True,
             )
 
@@ -684,9 +666,7 @@ class FinanceService:
         offset: int = 0,
     ) -> tuple[list[Payment], int]:
         """List payments with optional invoice filter."""
-        return await self.payments_repo.list(
-            invoice_id=invoice_id, limit=limit, offset=offset
-        )
+        return await self.payments_repo.list(invoice_id=invoice_id, limit=limit, offset=offset)
 
     # ── Budgets ──────────────────────────────────────────────────────────────
 
@@ -722,9 +702,7 @@ class FinanceService:
             # EUR — task #217).
             try:
                 proj = (
-                    await self.session.execute(
-                        select(Project.currency).where(Project.id == data.project_id)
-                    )
+                    await self.session.execute(select(Project.currency).where(Project.id == data.project_id))
                 ).scalar_one_or_none()
             except Exception:  # noqa: BLE001 — lookup is non-critical
                 proj = None
@@ -837,9 +815,7 @@ class FinanceService:
             budget_agg = await self.budgets.aggregate_for_dashboard(
                 project_id=data.project_id,
             )
-            derived_bac = Decimal(
-                str(budget_agg["total_budget_revised"] or budget_agg["total_budget_original"])
-            )
+            derived_bac = Decimal(str(budget_agg["total_budget_revised"] or budget_agg["total_budget_original"]))
             derived_ac = Decimal(str(budget_agg["total_actual"]))
             derived_committed = Decimal(str(budget_agg["total_committed"]))
             # PV approximation: planned spend up to snapshot date is the
@@ -915,7 +891,12 @@ class FinanceService:
         snapshot = await self.evm.create(snapshot)
         logger.info(
             "EVM snapshot created: project=%s date=%s EAC=%s VAC=%s SPI=%s CPI=%s",
-            data.project_id, data.snapshot_date, eac, vac, spi, cpi,
+            data.project_id,
+            data.snapshot_date,
+            eac,
+            vac,
+            spi,
+            cpi,
         )
         return snapshot
 
@@ -962,11 +943,7 @@ class FinanceService:
         total_actual = budget_agg["total_actual"]
 
         total_variance = total_budget_revised - total_actual
-        budget_consumed_pct = (
-            total_actual / total_budget_revised * 100
-            if total_budget_revised > 0
-            else 0.0
-        )
+        budget_consumed_pct = total_actual / total_budget_revised * 100 if total_budget_revised > 0 else 0.0
 
         # Budget warning level
         if budget_consumed_pct >= 95:
@@ -1027,10 +1004,7 @@ class FinanceService:
         if debit_val <= Decimal("0"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    "Zero or negative debit amount. "
-                    "Double-entry invariant requires debit_amount > 0."
-                ),
+                detail=("Zero or negative debit amount. Double-entry invariant requires debit_amount > 0."),
             )
         if debit_val != credit_val:
             raise HTTPException(
@@ -1080,7 +1054,9 @@ class FinanceService:
 
         logger.info(
             "Ledger transaction created: ref=%s dr=%s cr=%s",
-            data.transaction_ref, debit_val, credit_val,
+            data.transaction_ref,
+            debit_val,
+            credit_val,
         )
         return debit_row, credit_row
 
@@ -1128,9 +1104,9 @@ class FinanceService:
             rev_debit = LedgerEntry(
                 project_id=project_id or orig_debit.project_id,
                 transaction_ref=reversal_ref,
-                account_code=orig_credit.account_code,   # ← swapped
+                account_code=orig_credit.account_code,  # ← swapped
                 description=rev_description,
-                debit_amount=orig_debit.debit_amount,    # same magnitude
+                debit_amount=orig_debit.debit_amount,  # same magnitude
                 credit_amount=Decimal("0"),
                 currency_code=orig_debit.currency_code,
                 posted_at=posted_at,
@@ -1144,7 +1120,7 @@ class FinanceService:
             rev_credit = LedgerEntry(
                 project_id=project_id or orig_credit.project_id,
                 transaction_ref=reversal_ref,
-                account_code=orig_debit.account_code,    # ← swapped
+                account_code=orig_debit.account_code,  # ← swapped
                 description=rev_description,
                 debit_amount=Decimal("0"),
                 credit_amount=orig_credit.credit_amount,  # same magnitude

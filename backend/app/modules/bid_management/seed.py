@@ -78,9 +78,7 @@ def _iso(dt: datetime) -> str:
     return dt.isoformat()
 
 
-async def _seed_one_project(
-    session: AsyncSession, project_id: uuid.UUID, project_index: int
-) -> dict[str, int]:
+async def _seed_one_project(session: AsyncSession, project_id: uuid.UUID, project_index: int) -> dict[str, int]:
     """‌⁠‍Seed a single project's bid_management data.
 
     Returns counts for logging.
@@ -100,9 +98,7 @@ async def _seed_one_project(
 
     for pkg_idx, (suffix, status, title, currency, budget) in enumerate(_PACKAGE_SEED):
         code = f"BP-P{project_index:02d}-{suffix}"
-        existing = await session.execute(
-            select(BidPackage).where(BidPackage.code == code)
-        )
+        existing = await session.execute(select(BidPackage).where(BidPackage.code == code))
         if existing.scalar_one_or_none() is not None:
             continue
 
@@ -175,9 +171,7 @@ async def _seed_one_project(
                 invitee_email=bidder.contact_email,
                 invitee_company_name=bidder.company_name,
                 sent_at=_iso(now - timedelta(days=20)) if status != "draft" else None,
-                status="submitted" if status == "closed" and bi < 4 else (
-                    "sent" if status != "draft" else "pending"
-                ),
+                status="submitted" if status == "closed" and bi < 4 else ("sent" if status != "draft" else "pending"),
             )
             session.add(invitation)
             invitations.append(invitation)
@@ -234,9 +228,7 @@ async def _seed_one_project(
             award = BidAward(
                 package_id=package.id,
                 awarded_bidder_id=award_bidder.id,
-                awarded_amount=str(
-                    (Decimal(budget) * Decimal("0.95")).quantize(Decimal("0.01"))
-                ),
+                awarded_amount=str((Decimal(budget) * Decimal("0.95")).quantize(Decimal("0.01"))),
                 currency=currency,
                 decision_summary=f"Awarded to {award_bidder.company_name} (lowest valid bid)",
                 decision_signed_by=None,
@@ -281,9 +273,7 @@ async def _seed_one_project(
     return counts
 
 
-async def seed_bid_management_demo(
-    session: AsyncSession, project_ids: Iterable[uuid.UUID]
-) -> dict[str, int]:
+async def seed_bid_management_demo(session: AsyncSession, project_ids: Iterable[uuid.UUID]) -> dict[str, int]:
     """‌⁠‍Seed deterministic demo data for the bid_management module.
 
     Args:

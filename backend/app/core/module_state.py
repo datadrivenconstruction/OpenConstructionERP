@@ -128,9 +128,7 @@ def set_module_enabled(
         ValueError: If ``module_name`` is a core module (cannot be disabled).
     """
     if core_modules and module_name in core_modules:
-        raise ValueError(
-            f"Module '{module_name}' is a core module and cannot be disabled."
-        )
+        raise ValueError(f"Module '{module_name}' is a core module and cannot be disabled.")
 
     states = load_module_states(data_dir)
     now = datetime.now(UTC).isoformat()

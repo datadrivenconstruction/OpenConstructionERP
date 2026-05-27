@@ -60,9 +60,7 @@ def _validate_multiplier(raw: str | None) -> str | None:
     try:
         value = Decimal(text)
     except (InvalidOperation, ValueError) as exc:
-        raise ValueError(
-            f"multiplier must be a finite positive number, got {raw!r}"
-        ) from exc
+        raise ValueError(f"multiplier must be a finite positive number, got {raw!r}") from exc
     if not value.is_finite():
         raise ValueError(f"multiplier must be finite, got {raw!r}")
     if value <= 0:
@@ -75,9 +73,7 @@ def _validate_multiplier(raw: str | None) -> str | None:
     # keeping well under float-overflow territory means the apply-time
     # float() can never yield inf even after the waste multiplier.
     if value > Decimal("1e15"):
-        raise ValueError(
-            f"multiplier {raw!r} is implausibly large (max 1e15)"
-        )
+        raise ValueError(f"multiplier {raw!r} is implausibly large (max 1e15)")
     return text
 
 
@@ -100,16 +96,13 @@ def _validate_waste_pct(raw: str | None) -> str | None:
     try:
         value = Decimal(text)
     except (InvalidOperation, ValueError) as exc:
-        raise ValueError(
-            f"waste_factor_pct must be a number 0-100, got {raw!r}"
-        ) from exc
+        raise ValueError(f"waste_factor_pct must be a number 0-100, got {raw!r}") from exc
     if not value.is_finite():
         raise ValueError(f"waste_factor_pct must be finite, got {raw!r}")
     if value < 0 or value > 100:
-        raise ValueError(
-            f"waste_factor_pct must be between 0 and 100, got {raw!r}"
-        )
+        raise ValueError(f"waste_factor_pct must be between 0 and 100, got {raw!r}")
     return text
+
 
 # ── BIMModel schemas ─────────────────────────────────────────────────────────
 
@@ -305,9 +298,7 @@ class BOQElementLinkBrief(BaseModel):
     link_type: str
     confidence: str | None = None
 
-    @field_serializer(
-        "boq_position_unit_rate", "boq_position_total", when_used="json"
-    )
+    @field_serializer("boq_position_unit_rate", "boq_position_total", when_used="json")
     def _ser_money(self, v: Decimal | None) -> str | None:
         return _serialise_money(v)
 
@@ -600,9 +591,7 @@ class BIMModelBOQLinkAggregate(BaseModel):
     confidence: str | None = None
     element_ids: list[UUID] = Field(default_factory=list)
 
-    @field_serializer(
-        "boq_position_unit_rate", "boq_position_total", when_used="json"
-    )
+    @field_serializer("boq_position_unit_rate", "boq_position_total", when_used="json")
     def _ser_money(self, v: Decimal | None) -> str | None:
         return _serialise_money(v)
 
@@ -940,9 +929,7 @@ class FederationCreate(BaseModel):
     project_id: UUID
     name: str = Field(..., min_length=1, max_length=255)
     description: str | None = None
-    origin_offset: FederationOriginOffset = Field(
-        default_factory=FederationOriginOffset
-    )
+    origin_offset: FederationOriginOffset = Field(default_factory=FederationOriginOffset)
     shared_units: str = Field(default="m", min_length=1, max_length=20)
 
 

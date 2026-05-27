@@ -41,7 +41,6 @@ import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 from pypdf import PdfReader  # noqa: E402
 
-
 # ── App fixtures ───────────────────────────────────────────────────────────
 
 
@@ -76,11 +75,7 @@ async def _set_role(email: str, role: str) -> None:
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(
-            update(User)
-            .where(User.email == email.lower())
-            .values(role=role, is_active=True)
-        )
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
 
 
@@ -309,8 +304,7 @@ async def test_render_reservation_receipt_happy_path():
         cooling_off_days=14,
         status="active",
     )
-    plot = _stub(plot_number="A-01", area_m2=Decimal("120.5"), currency="EUR",
-                 metadata_={})
+    plot = _stub(plot_number="A-01", area_m2=Decimal("120.5"), currency="EUR", metadata_={})
     dev = _stub(name="Marina Heights", code="MAR01", metadata_={})
     buyers = [_stub(full_name="John Doe", email="john@example.com")]
     pdf = render_reservation_receipt_pdf(res, plot, dev, buyers, locale="en")
@@ -336,23 +330,33 @@ async def test_render_sales_contract_happy_path():
     )
     sched = _stub(currency="EUR")
     insts = [
-        _stub(sequence=1, milestone_label="Reservation",
-              milestone_event="reservation", due_date="2026-06-01",
-              amount=Decimal("10000")),
-        _stub(sequence=2, milestone_label="Foundation",
-              milestone_event="foundation_complete", due_date="2026-09-01",
-              amount=Decimal("440000")),
+        _stub(
+            sequence=1,
+            milestone_label="Reservation",
+            milestone_event="reservation",
+            due_date="2026-06-01",
+            amount=Decimal("10000"),
+        ),
+        _stub(
+            sequence=2,
+            milestone_label="Foundation",
+            milestone_event="foundation_complete",
+            due_date="2026-09-01",
+            amount=Decimal("440000"),
+        ),
     ]
-    parties = [_stub(buyer_id=uuid.uuid4(), party_role="primary",
-                     ownership_pct=Decimal("100"), full_name="Buyer One",
-                     email="one@example.com")]
-    plot = _stub(plot_number="A-01", area_m2=Decimal("120"), currency="EUR",
-                 metadata_={})
-    dev = _stub(name="Marina Heights", code="MAR01",
-                metadata_={"regulator": "NONE"})
-    pdf = render_sales_contract_pdf(
-        contract, sched, insts, parties, plot, dev, locale="en"
-    )
+    parties = [
+        _stub(
+            buyer_id=uuid.uuid4(),
+            party_role="primary",
+            ownership_pct=Decimal("100"),
+            full_name="Buyer One",
+            email="one@example.com",
+        )
+    ]
+    plot = _stub(plot_number="A-01", area_m2=Decimal("120"), currency="EUR", metadata_={})
+    dev = _stub(name="Marina Heights", code="MAR01", metadata_={"regulator": "NONE"})
+    pdf = render_sales_contract_pdf(contract, sched, insts, parties, plot, dev, locale="en")
     _assert_pdf_magic(pdf)
     txt = _pdf_text(pdf)
     assert "SPA-2026-001" in txt
@@ -365,15 +369,16 @@ async def test_render_payment_receipt_happy_path():
     from app.modules.property_dev.document_templates import render_payment_receipt_pdf
 
     inst = _stub(
-        id=uuid.uuid4(), sequence=2,
-        milestone_label="Foundation", milestone_event="foundation_complete",
-        amount=Decimal("100000"), amount_paid=Decimal("100000"),
+        id=uuid.uuid4(),
+        sequence=2,
+        milestone_label="Foundation",
+        milestone_event="foundation_complete",
+        amount=Decimal("100000"),
+        amount_paid=Decimal("100000"),
         paid_at="2026-09-05",
     )
     contract = _stub(contract_number="SPA-2026-001", currency="EUR")
-    pdf = render_payment_receipt_pdf(
-        inst, contract, "bank_transfer", "WIRE-9988", locale="en"
-    )
+    pdf = render_payment_receipt_pdf(inst, contract, "bank_transfer", "WIRE-9988", locale="en")
     _assert_pdf_magic(pdf)
     txt = _pdf_text(pdf)
     assert "SPA-2026-001" in txt
@@ -387,15 +392,15 @@ async def test_render_handover_certificate_happy_path():
     )
 
     handover = _stub(
-        id=uuid.uuid4(), completed_at="2027-06-15",
-        keys_handed_over_at="2027-06-15", snag_count_at_handover=2,
+        id=uuid.uuid4(),
+        completed_at="2027-06-15",
+        keys_handed_over_at="2027-06-15",
+        snag_count_at_handover=2,
     )
     contract = _stub(contract_number="SPA-2026-001", status="signed")
     plot = _stub(plot_number="A-01", area_m2=Decimal("120"), metadata_={})
     dev = _stub(name="Marina Heights", code="MAR01", metadata_={})
-    pdf = render_handover_certificate_pdf(
-        handover, contract, snag_count=2, plot=plot, development=dev, locale="en"
-    )
+    pdf = render_handover_certificate_pdf(handover, contract, snag_count=2, plot=plot, development=dev, locale="en")
     _assert_pdf_magic(pdf)
     txt = _pdf_text(pdf)
     assert "Handover" in txt or "Certificate" in txt
@@ -410,8 +415,11 @@ async def test_render_warranty_certificate_happy_path():
     handover = _stub(id=uuid.uuid4(), completed_at="2027-06-15")
     contract = _stub(contract_number="SPA-2026-001", status="signed")
     pdf = render_warranty_certificate_pdf(
-        contract, handover, structural_warranty_years=10,
-        finishing_warranty_years=1, locale="en",
+        contract,
+        handover,
+        structural_warranty_years=10,
+        finishing_warranty_years=1,
+        locale="en",
     )
     _assert_pdf_magic(pdf)
     txt = _pdf_text(pdf)
@@ -426,12 +434,15 @@ async def test_render_noc_happy_path():
         render_no_objection_certificate_pdf,
     )
 
-    contract = _stub(id=uuid.uuid4(), contract_number="SPA-2026-001",
-                     status="signed")
+    contract = _stub(id=uuid.uuid4(), contract_number="SPA-2026-001", status="signed")
     plot = _stub(plot_number="A-01", area_m2=Decimal("120"), metadata_={})
     dev = _stub(name="Marina Heights", code="MAR01", metadata_={})
     pdf = render_no_objection_certificate_pdf(
-        contract, plot, dev, requested_by="John Doe", locale="en",
+        contract,
+        plot,
+        dev,
+        requested_by="John Doe",
+        locale="en",
     )
     _assert_pdf_magic(pdf)
     txt = _pdf_text(pdf)
@@ -444,14 +455,17 @@ async def test_render_noc_happy_path():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("locale,marker", [
-    ("en", "Reservation Receipt"),
-    ("de", "Reservierungsbestätigung"),
-    ("ru", "Расписка о бронировании"),
-    ("fr", "Reçu de Réservation"),
-    ("es", "Recibo de Reserva"),
-    ("ar", "إيصال حجز"),
-])
+@pytest.mark.parametrize(
+    "locale,marker",
+    [
+        ("en", "Reservation Receipt"),
+        ("de", "Reservierungsbestätigung"),
+        ("ru", "Расписка о бронировании"),
+        ("fr", "Reçu de Réservation"),
+        ("es", "Recibo de Reserva"),
+        ("ar", "إيصال حجز"),
+    ],
+)
 async def test_locale_titles_present(locale, marker):
     """Every shipped locale produces the expected localized title."""
     from app.modules.property_dev.document_templates import (
@@ -459,15 +473,22 @@ async def test_locale_titles_present(locale, marker):
     )
 
     res = _stub(
-        id=uuid.uuid4(), reservation_number="RES-2026-LOC",
-        deposit_amount=Decimal("1000"), currency="EUR",
-        expires_at="2026-06-15", cooling_off_until="2026-06-15",
-        cooling_off_days=7, status="active",
+        id=uuid.uuid4(),
+        reservation_number="RES-2026-LOC",
+        deposit_amount=Decimal("1000"),
+        currency="EUR",
+        expires_at="2026-06-15",
+        cooling_off_until="2026-06-15",
+        cooling_off_days=7,
+        status="active",
     )
     plot = _stub(plot_number="A-01", area_m2=Decimal("100"), metadata_={})
     dev = _stub(name="Localized Dev", code="LOC01", metadata_={})
     pdf = render_reservation_receipt_pdf(
-        res, plot, dev, [_stub(full_name="Buyer", email="b@example.com")],
+        res,
+        plot,
+        dev,
+        [_stub(full_name="Buyer", email="b@example.com")],
         locale=locale,
     )
     _assert_pdf_magic(pdf)
@@ -496,14 +517,25 @@ def _build_spa_inputs(regulator: str, extra_meta: dict[str, str] | None = None):
     if extra_meta:
         meta.update(extra_meta)
     contract = _stub(
-        id=uuid.uuid4(), contract_number="SPA-J-1", signing_date="2026-06-01",
-        currency="EUR", total_value=Decimal("100"), status="draft",
-        total_price_breakdown={}, metadata_={},
+        id=uuid.uuid4(),
+        contract_number="SPA-J-1",
+        signing_date="2026-06-01",
+        currency="EUR",
+        total_value=Decimal("100"),
+        status="draft",
+        total_price_breakdown={},
+        metadata_={},
     )
     sched = _stub(currency="EUR")
-    parties = [_stub(buyer_id=uuid.uuid4(), party_role="primary",
-                     ownership_pct=Decimal("100"), full_name="J",
-                     email="j@example.com")]
+    parties = [
+        _stub(
+            buyer_id=uuid.uuid4(),
+            party_role="primary",
+            ownership_pct=Decimal("100"),
+            full_name="J",
+            email="j@example.com",
+        )
+    ]
     plot = _stub(plot_number="A-01", area_m2=Decimal("100"), metadata_={})
     dev = _stub(name=f"Dev-{regulator}", code="JUR01", metadata_=meta)
     return contract, sched, parties, plot, dev
@@ -513,11 +545,8 @@ def _build_spa_inputs(regulator: str, extra_meta: dict[str, str] | None = None):
 async def test_jurisdiction_clauses_rera():
     from app.modules.property_dev.document_templates import render_sales_contract_pdf
 
-    contract, sched, parties, plot, dev = _build_spa_inputs(
-        "RERA", {"rera_registration_no": "RERA-DXB-99"}
-    )
-    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev,
-                                    locale="en")
+    contract, sched, parties, plot, dev = _build_spa_inputs("RERA", {"rera_registration_no": "RERA-DXB-99"})
+    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev, locale="en")
     txt = _pdf_text(pdf)
     assert "RERA" in txt
     # Placeholder substitution worked.
@@ -533,8 +562,7 @@ async def test_jurisdiction_clauses_maharera():
     contract, sched, parties, plot, dev = _build_spa_inputs(
         "MAHARERA", {"maharera_registration_no": "P52100099", "carpet_area_m2": "95.5"}
     )
-    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev,
-                                    locale="en")
+    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev, locale="en")
     txt = _pdf_text(pdf)
     assert "MAHARERA" in txt
     assert "P52100099" in txt
@@ -546,11 +574,8 @@ async def test_jurisdiction_clauses_maharera():
 async def test_jurisdiction_clauses_214fz():
     from app.modules.property_dev.document_templates import render_sales_contract_pdf
 
-    contract, sched, parties, plot, dev = _build_spa_inputs(
-        "214_FZ", {"ddu_registration_no": "77-77-001/000/2026"}
-    )
-    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev,
-                                    locale="en")
+    contract, sched, parties, plot, dev = _build_spa_inputs("214_FZ", {"ddu_registration_no": "77-77-001/000/2026"})
+    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev, locale="en")
     txt = _pdf_text(pdf)
     # 214-FZ marker — text contains either "214" or the DDU registration
     # number, depending on which clause heading the extractor catches.
@@ -562,11 +587,8 @@ async def test_jurisdiction_clauses_214fz():
 async def test_jurisdiction_clauses_cma():
     from app.modules.property_dev.document_templates import render_sales_contract_pdf
 
-    contract, sched, parties, plot, dev = _build_spa_inputs(
-        "CMA", {"mof_approval_no": "MOF-9988"}
-    )
-    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev,
-                                    locale="en")
+    contract, sched, parties, plot, dev = _build_spa_inputs("CMA", {"mof_approval_no": "MOF-9988"})
+    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev, locale="en")
     txt = _pdf_text(pdf)
     assert "MOF-9988" in txt or "CMA" in txt or "scrow" in txt.lower()
 
@@ -581,21 +603,23 @@ async def test_multi_buyer_spa_ownership_sums_to_100():
     from app.modules.property_dev.document_templates import render_sales_contract_pdf
 
     contract = _stub(
-        id=uuid.uuid4(), contract_number="SPA-MB-1", signing_date="2026-06-01",
-        currency="EUR", total_value=Decimal("600000"), status="draft",
-        total_price_breakdown={}, metadata_={},
+        id=uuid.uuid4(),
+        contract_number="SPA-MB-1",
+        signing_date="2026-06-01",
+        currency="EUR",
+        total_value=Decimal("600000"),
+        status="draft",
+        total_price_breakdown={},
+        metadata_={},
     )
     sched = _stub(currency="EUR")
     b1 = uuid.uuid4()
     b2 = uuid.uuid4()
     b3 = uuid.uuid4()
     parties = [
-        _stub(buyer_id=b1, party_role="primary",
-              ownership_pct=Decimal("50.00")),
-        _stub(buyer_id=b2, party_role="co_owner",
-              ownership_pct=Decimal("30.00")),
-        _stub(buyer_id=b3, party_role="co_owner",
-              ownership_pct=Decimal("20.00")),
+        _stub(buyer_id=b1, party_role="primary", ownership_pct=Decimal("50.00")),
+        _stub(buyer_id=b2, party_role="co_owner", ownership_pct=Decimal("30.00")),
+        _stub(buyer_id=b3, party_role="co_owner", ownership_pct=Decimal("20.00")),
     ]
     lookup = {
         b1: _stub(full_name="Alice Anderson", email="alice@example.com"),
@@ -603,11 +627,16 @@ async def test_multi_buyer_spa_ownership_sums_to_100():
         b3: _stub(full_name="Carol Carter", email="carol@example.com"),
     }
     plot = _stub(plot_number="A-01", area_m2=Decimal("120"), metadata_={})
-    dev = _stub(name="Multi-Buyer Dev", code="MUL01",
-                metadata_={"regulator": "NONE"})
+    dev = _stub(name="Multi-Buyer Dev", code="MUL01", metadata_={"regulator": "NONE"})
     pdf = render_sales_contract_pdf(
-        contract, sched, [], parties, plot, dev,
-        locale="en", buyer_lookup=lookup,
+        contract,
+        sched,
+        [],
+        parties,
+        plot,
+        dev,
+        locale="en",
+        buyer_lookup=lookup,
     )
     _assert_pdf_magic(pdf)
     txt = _pdf_text(pdf)
@@ -632,8 +661,7 @@ async def test_watermark_present_when_draft():
 
     contract, sched, parties, plot, dev = _build_spa_inputs("NONE")
     contract.status = "draft"
-    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev,
-                                    locale="en")
+    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev, locale="en")
     txt = _pdf_text(pdf)
     assert "DRAFT" in txt, "DRAFT watermark missing on draft contract"
 
@@ -644,8 +672,7 @@ async def test_watermark_absent_when_signed():
 
     contract, sched, parties, plot, dev = _build_spa_inputs("NONE")
     contract.status = "signed"
-    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev,
-                                    locale="en")
+    pdf = render_sales_contract_pdf(contract, sched, [], parties, plot, dev, locale="en")
     txt = _pdf_text(pdf)
     assert "DRAFT" not in txt, "DRAFT watermark must not appear on signed contract"
 
@@ -659,8 +686,7 @@ async def test_watermark_absent_when_signed():
 async def test_endpoint_stream_returns_pdf_with_filename(http_client, tenant_a):
     graph = await _make_contract_graph(http_client, tenant_a)
     res = await http_client.get(
-        f"/api/v1/property-dev/documents/sales_contract"
-        f"?contract_id={graph['contract_id']}&locale=en",
+        f"/api/v1/property-dev/documents/sales_contract?contract_id={graph['contract_id']}&locale=en",
         headers=tenant_a["headers"],
     )
     assert res.status_code == 200, res.text
@@ -673,7 +699,9 @@ async def test_endpoint_stream_returns_pdf_with_filename(http_client, tenant_a):
 @pytest.mark.asyncio
 async def test_endpoint_preview_returns_base64(http_client, tenant_a):
     graph = await _make_contract_graph(
-        http_client, tenant_a, plot_index=1,
+        http_client,
+        tenant_a,
+        plot_index=1,
     )
     res = await http_client.post(
         "/api/v1/property-dev/documents/preview",
@@ -695,14 +723,11 @@ async def test_endpoint_preview_returns_base64(http_client, tenant_a):
 
 
 @pytest.mark.asyncio
-async def test_endpoint_idor_cross_tenant_returns_404(
-    http_client, tenant_a, tenant_b
-):
+async def test_endpoint_idor_cross_tenant_returns_404(http_client, tenant_a, tenant_b):
     # Tenant A builds the SPA; Tenant B tries to fetch the document.
     graph = await _make_contract_graph(http_client, tenant_a)
     res = await http_client.get(
-        f"/api/v1/property-dev/documents/sales_contract"
-        f"?contract_id={graph['contract_id']}",
+        f"/api/v1/property-dev/documents/sales_contract?contract_id={graph['contract_id']}",
         headers=tenant_b["headers"],
     )
     assert res.status_code == 404, res.text
@@ -711,21 +736,17 @@ async def test_endpoint_idor_cross_tenant_returns_404(
 @pytest.mark.asyncio
 async def test_endpoint_unknown_doc_type_returns_400(http_client, tenant_a):
     res = await http_client.get(
-        "/api/v1/property-dev/documents/totally_made_up?contract_id="
-        + str(uuid.uuid4()),
+        "/api/v1/property-dev/documents/totally_made_up?contract_id=" + str(uuid.uuid4()),
         headers=tenant_a["headers"],
     )
     assert res.status_code in (400, 404), res.text
 
 
 @pytest.mark.asyncio
-async def test_endpoint_locale_fallback_to_en_for_unknown(
-    http_client, tenant_a
-):
+async def test_endpoint_locale_fallback_to_en_for_unknown(http_client, tenant_a):
     graph = await _make_contract_graph(http_client, tenant_a)
     res = await http_client.get(
-        f"/api/v1/property-dev/documents/sales_contract"
-        f"?contract_id={graph['contract_id']}&locale=xx",
+        f"/api/v1/property-dev/documents/sales_contract?contract_id={graph['contract_id']}&locale=xx",
         headers=tenant_a["headers"],
     )
     assert res.status_code == 200, res.text

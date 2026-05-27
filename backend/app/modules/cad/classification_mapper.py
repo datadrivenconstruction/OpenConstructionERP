@@ -232,68 +232,89 @@ def _canonical_category(category: str) -> str:
 # "reinforced concrete" doesn't get short-circuited by "concrete" alone.
 # Each row: (canonical_key, [substrings to match in the lowered material])
 _MATERIAL_SYNONYMS: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("concrete", (
-        "reinforced concrete",
-        "stahlbeton",
+    (
         "concrete",
-        "beton",
-        "stahl-beton",
-        "rc ",
-        "c20/25",
-        "c25/30",
-        "c30/37",
-        "c35/45",
-    )),
-    ("masonry", (
-        "kalksandstein",
-        "ks 12",
-        "ks 14",
-        "ks 17",
-        "mauerwerk",
-        "ziegel",
-        "clay brick",
-        "brick",
+        (
+            "reinforced concrete",
+            "stahlbeton",
+            "concrete",
+            "beton",
+            "stahl-beton",
+            "rc ",
+            "c20/25",
+            "c25/30",
+            "c30/37",
+            "c35/45",
+        ),
+    ),
+    (
         "masonry",
-    )),
-    ("timber", (
+        (
+            "kalksandstein",
+            "ks 12",
+            "ks 14",
+            "ks 17",
+            "mauerwerk",
+            "ziegel",
+            "clay brick",
+            "brick",
+            "masonry",
+        ),
+    ),
+    (
         "timber",
-        "wood",
-        "holz",
-        "solid wood",
-        "spruce",
-        "fichte",
-        "hardwood",
-        "softwood",
-    )),
-    ("steel", (
-        "structural steel",
-        "stahl",
+        (
+            "timber",
+            "wood",
+            "holz",
+            "solid wood",
+            "spruce",
+            "fichte",
+            "hardwood",
+            "softwood",
+        ),
+    ),
+    (
         "steel",
-        "ipe",
-        "hea",
-        "heb",
-        "s235",
-        "s355",
-    )),
-    ("drywall", (
+        (
+            "structural steel",
+            "stahl",
+            "steel",
+            "ipe",
+            "hea",
+            "heb",
+            "s235",
+            "s355",
+        ),
+    ),
+    (
         "drywall",
-        "trockenbau",
-        "gipskarton",
-        "gypsum",
-        "metal stud",
-        "plasterboard",
-    )),
-    ("aluminium", (
+        (
+            "drywall",
+            "trockenbau",
+            "gipskarton",
+            "gypsum",
+            "metal stud",
+            "plasterboard",
+        ),
+    ),
+    (
         "aluminium",
-        "aluminum",
-        "alu",
-    )),
-    ("glass", (
-        "glazing",
-        "glazed",
+        (
+            "aluminium",
+            "aluminum",
+            "alu",
+        ),
+    ),
+    (
         "glass",
-        "glas",
-    )),
+        (
+            "glazing",
+            "glazed",
+            "glass",
+            "glas",
+        ),
+    ),
 )
 
 
@@ -326,12 +347,12 @@ def _normalise_material(material: str | None) -> str | None:
 # ---------------------------------------------------------------------------
 MATERIAL_AWARE_DIN276: dict[tuple[str, str], str] = {
     # Walls (KG 330 = Außenwände, KG 331 = subdivision in fixture data)
-    ("Walls", "concrete"): "330.10",          # Stahlbeton-Außenwand
-    ("Walls", "masonry"): "331.10",           # Brick / Kalksandstein
-    ("Walls", "timber"): "331.40",            # Timber wall (Holzwand)
-    ("Walls", "drywall"): "331.30",           # Trockenbau / drywall partition
-    ("Curtain Walls", "aluminium"): "334.20", # Aluminium curtain wall
-    ("Curtain Walls", "glass"): "334.20",     # Structural-glazing curtain wall
+    ("Walls", "concrete"): "330.10",  # Stahlbeton-Außenwand
+    ("Walls", "masonry"): "331.10",  # Brick / Kalksandstein
+    ("Walls", "timber"): "331.40",  # Timber wall (Holzwand)
+    ("Walls", "drywall"): "331.30",  # Trockenbau / drywall partition
+    ("Curtain Walls", "aluminium"): "334.20",  # Aluminium curtain wall
+    ("Curtain Walls", "glass"): "334.20",  # Structural-glazing curtain wall
     # Slabs / floors (KG 350 = Decken)
     ("Floors", "concrete"): "350.10",
     # Roofs (KG 360 = Dächer)
@@ -366,7 +387,7 @@ MATERIAL_AWARE_NRM: dict[tuple[str, str], str] = {
     ("Walls", "concrete"): "2.5.1",
     ("Walls", "masonry"): "2.5.2",
     ("Walls", "timber"): "2.5.3",
-    ("Walls", "drywall"): "2.7.1",   # 2.7 = Internal walls and partitions
+    ("Walls", "drywall"): "2.7.1",  # 2.7 = Internal walls and partitions
     # 2.3 = Floors / Upper floors
     ("Floors", "concrete"): "2.3.1",
     # 2.7 = Roofs (NRM 1 element 2.7); 2.7.1 = roof structure
@@ -393,17 +414,17 @@ MATERIAL_AWARE_NRM: dict[tuple[str, str], str] = {
 # ---------------------------------------------------------------------------
 MATERIAL_AWARE_MASTERFORMAT: dict[tuple[str, str], str] = {
     # 03 = Concrete; 04 = Masonry; 05 = Metals; 06 = Wood/Plastics
-    ("Walls", "concrete"): "03 30 00",          # Cast-in-Place Concrete
-    ("Walls", "masonry"): "04 22 00",           # Concrete Unit Masonry / brick masonry
-    ("Walls", "timber"): "06 11 00",            # Wood Framing
-    ("Walls", "drywall"): "09 21 00",           # Plaster and Gypsum Board Assemblies
-    ("Curtain Walls", "aluminium"): "08 44 00", # Curtain Wall and Glazed Assemblies
+    ("Walls", "concrete"): "03 30 00",  # Cast-in-Place Concrete
+    ("Walls", "masonry"): "04 22 00",  # Concrete Unit Masonry / brick masonry
+    ("Walls", "timber"): "06 11 00",  # Wood Framing
+    ("Walls", "drywall"): "09 21 00",  # Plaster and Gypsum Board Assemblies
+    ("Curtain Walls", "aluminium"): "08 44 00",  # Curtain Wall and Glazed Assemblies
     ("Curtain Walls", "glass"): "08 44 00",
     # 03 30 = Cast-in-Place Concrete; 03 40 = Precast
     ("Floors", "concrete"): "03 30 00",
     # 07 = Thermal and Moisture Protection
     ("Roofs", "concrete"): "03 30 00",
-    ("Roofs", "timber"): "06 15 00",            # Wood Decking
+    ("Roofs", "timber"): "06 15 00",  # Wood Decking
     # 03 30 / 31 = Cast-in-Place foundation
     ("Structural Foundations", "concrete"): "03 30 00",
     # 03 30 = concrete columns; 05 12 = structural-steel framing

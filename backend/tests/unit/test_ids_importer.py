@@ -137,10 +137,7 @@ def test_wrong_root_element_raises() -> None:
 
 def test_missing_specifications_raises() -> None:
     """An IDS doc with no <specifications> element raises IDSImportError."""
-    bad = (
-        b"<?xml version='1.0'?>"
-        b'<ids xmlns="http://standards.buildingsmart.org/IDS"></ids>'
-    )
+    bad = b"<?xml version='1.0'?><ids xmlns=\"http://standards.buildingsmart.org/IDS\"></ids>"
     with pytest.raises(IDSImportError) as excinfo:
         parse_ids(bad)
     assert "specifications" in str(excinfo.value).lower()

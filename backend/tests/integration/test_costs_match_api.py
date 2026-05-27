@@ -72,11 +72,7 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
     from app.modules.users.models import User
 
     async with async_session_factory() as session:
-        await session.execute(
-            sa_update(User)
-            .where(User.email == email.lower())
-            .values(role="admin", is_active=True)
-        )
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
         await session.commit()
 
     token = ""
@@ -190,9 +186,7 @@ async def _create_cost_item(
 
 
 @pytest.mark.asyncio
-async def test_match_endpoint_returns_ranked_results(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_match_endpoint_returns_ranked_results(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """Top-K results come back ranked by score with the right shape."""
     client, auth = shared_client, shared_auth
     region = f"T12-{uuid.uuid4().hex[:6]}"
@@ -200,19 +194,28 @@ async def test_match_endpoint_returns_ranked_results(
     # Seed three CWICR-style items in a unique region so we don't pick up
     # rows from other tests.
     await _create_cost_item(
-        client, auth,
+        client,
+        auth,
         description="Reinforced concrete wall C30/37",
-        unit="m3", rate=185.0, region=region,
+        unit="m3",
+        rate=185.0,
+        region=region,
     )
     await _create_cost_item(
-        client, auth,
+        client,
+        auth,
         description="Brick wall, 24cm clay brick",
-        unit="m2", rate=78.0, region=region,
+        unit="m2",
+        rate=78.0,
+        region=region,
     )
     await _create_cost_item(
-        client, auth,
+        client,
+        auth,
         description="Wood formwork for slabs",
-        unit="m2", rate=42.5, region=region,
+        unit="m2",
+        rate=42.5,
+        region=region,
     )
 
     resp = await client.post(
@@ -271,15 +274,20 @@ async def test_match_from_position_resolves_description(
     region = f"T12-{uuid.uuid4().hex[:6]}"
 
     await _create_cost_item(
-        client, auth,
+        client,
+        auth,
         description="Reinforced concrete wall C30/37",
-        unit="m3", rate=185.0, region=region,
+        unit="m3",
+        rate=185.0,
+        region=region,
     )
 
     project_id = await _create_project(client, auth)
     boq_id = await _create_boq(client, auth, project_id)
     position_id = await _create_position(
-        client, auth, boq_id,
+        client,
+        auth,
+        boq_id,
         description="Reinforced concrete wall, 24cm",
         unit="m3",
     )
@@ -318,18 +326,19 @@ async def test_match_from_position_unknown_id_returns_404(
 
 
 @pytest.mark.asyncio
-async def test_match_respects_region_isolation(
-    shared_client: AsyncClient, shared_auth: dict[str, str]
-) -> None:
+async def test_match_respects_region_isolation(shared_client: AsyncClient, shared_auth: dict[str, str]) -> None:
     """Items in region A must not surface for queries scoped to region B."""
     client, auth = shared_client, shared_auth
     region_a = f"T12A-{uuid.uuid4().hex[:6]}"
     region_b = f"T12B-{uuid.uuid4().hex[:6]}"
 
     await _create_cost_item(
-        client, auth,
+        client,
+        auth,
         description="ISOLATION-MARKER concrete wall",
-        unit="m3", rate=185.0, region=region_a,
+        unit="m3",
+        rate=185.0,
+        region=region_a,
     )
 
     # Query in region B — we must NOT see the region A row.

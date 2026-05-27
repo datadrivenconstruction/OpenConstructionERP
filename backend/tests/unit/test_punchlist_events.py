@@ -65,6 +65,7 @@ class _StubRepo:
 def _make_service() -> PunchListService:
     svc = PunchListService.__new__(PunchListService)
     fake_session = SimpleNamespace()
+
     # ``service.session.refresh`` is awaited — provide an async no-op
     async def _refresh(_obj: Any) -> None:
         return None
@@ -116,9 +117,7 @@ async def test_create_emits_item_created(captured_events: list[Event]) -> None:
 @pytest.mark.asyncio
 async def test_update_emits_item_updated(captured_events: list[Event]) -> None:
     svc = _make_service()
-    item = await svc.create_item(
-        PunchItemCreate(project_id=PROJECT_ID, title="x"), user_id="u"
-    )
+    item = await svc.create_item(PunchItemCreate(project_id=PROJECT_ID, title="x"), user_id="u")
     captured_events.clear()
 
     await svc.update_item(item.id, PunchItemUpdate(priority="critical"))
@@ -134,9 +133,7 @@ async def test_update_emits_item_updated(captured_events: list[Event]) -> None:
 @pytest.mark.asyncio
 async def test_delete_emits_item_deleted(captured_events: list[Event]) -> None:
     svc = _make_service()
-    item = await svc.create_item(
-        PunchItemCreate(project_id=PROJECT_ID, title="x"), user_id="u"
-    )
+    item = await svc.create_item(PunchItemCreate(project_id=PROJECT_ID, title="x"), user_id="u")
     captured_events.clear()
 
     await svc.delete_item(item.id)
@@ -150,9 +147,7 @@ async def test_delete_emits_item_deleted(captured_events: list[Event]) -> None:
 @pytest.mark.asyncio
 async def test_status_transition_emits_status_changed(captured_events: list[Event]) -> None:
     svc = _make_service()
-    item = await svc.create_item(
-        PunchItemCreate(project_id=PROJECT_ID, title="x"), user_id="u"
-    )
+    item = await svc.create_item(PunchItemCreate(project_id=PROJECT_ID, title="x"), user_id="u")
     captured_events.clear()
 
     await svc.transition_status(

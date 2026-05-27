@@ -41,6 +41,7 @@ async def _safe_publish(name: str, data: dict, source_module: str = "oe_reportin
     except Exception:
         _logger_ev.debug("Event publish skipped: %s", name)
 
+
 # ── System report templates (seeded on first startup) ──────────────────────
 
 SYSTEM_TEMPLATES: list[dict] = [
@@ -323,9 +324,7 @@ class ReportingService:
                 "schedule_cron": template.schedule_cron,
                 "is_scheduled": template.is_scheduled,
                 "next_run_at": template.next_run_at,
-                "project_id_scope": (
-                    str(template.project_id_scope) if template.project_id_scope else None
-                ),
+                "project_id_scope": (str(template.project_id_scope) if template.project_id_scope else None),
             },
         )
 
@@ -504,8 +503,7 @@ class ReportingService:
                 )
         except Exception:
             logger.warning(
-                "Report rendering failed for report_id=%s; the metadata row "
-                "is preserved but storage_key remains null.",
+                "Report rendering failed for report_id=%s; the metadata row is preserved but storage_key remains null.",
                 report.id,
                 exc_info=True,
             )

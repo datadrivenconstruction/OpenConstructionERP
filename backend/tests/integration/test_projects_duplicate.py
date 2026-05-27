@@ -58,7 +58,9 @@ async def temp_engine_and_factory():
         await conn.run_sync(Base.metadata.create_all)
 
     factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False,
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
     yield engine, factory, tmp_db
@@ -231,7 +233,8 @@ async def _seed_source_project(
 
 @pytest.mark.asyncio
 async def test_duplicate_clones_full_project_graph(
-    client: AsyncClient, temp_engine_and_factory,
+    client: AsyncClient,
+    temp_engine_and_factory,
 ) -> None:
     """End-to-end clone — every column, every child, fresh IDs."""
     from app.modules.projects.models import (
@@ -354,15 +357,12 @@ async def test_duplicate_clones_full_project_graph(
 
         # MatchProjectSettings — cloned with new project_id but same values.
         new_match = (
-            (
-                await session.execute(
-                    select(MatchProjectSettings).where(
-                        MatchProjectSettings.project_id == new_id,
-                    ),
-                )
+            await session.execute(
+                select(MatchProjectSettings).where(
+                    MatchProjectSettings.project_id == new_id,
+                ),
             )
-            .scalar_one_or_none()
-        )
+        ).scalar_one_or_none()
         assert new_match is not None
         assert new_match.target_language == "de"
         assert new_match.classifier == "din276"
@@ -380,7 +380,8 @@ async def test_duplicate_clones_full_project_graph(
 
 @pytest.mark.asyncio
 async def test_duplicate_rejects_non_owner(
-    client: AsyncClient, temp_engine_and_factory,
+    client: AsyncClient,
+    temp_engine_and_factory,
 ) -> None:
     """A non-owner viewer cannot clone someone else's project."""
     from app.modules.users.models import User

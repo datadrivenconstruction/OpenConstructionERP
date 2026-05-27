@@ -78,26 +78,99 @@ _HARDCODED_REGION_GROUPS: dict[str, tuple[str, ...]] = {
     "latam": ("MX_", "BR_", "AR_", "CL_", "CO_", "PE_"),
     # ── Language-family ─────────────────────────────────────────────
     "anglophone": (
-        "USA_", "US_", "GB_", "IE_", "AU_", "NZ_", "CA_", "ZA_", "IN_", "NG_",
+        "USA_",
+        "US_",
+        "GB_",
+        "IE_",
+        "AU_",
+        "NZ_",
+        "CA_",
+        "ZA_",
+        "IN_",
+        "NG_",
     ),
     "hispanic": (
-        "ES_", "MX_", "AR_", "CL_", "CO_", "PE_", "EC_", "UY_", "PY_",
-        "BO_", "DO_", "CR_", "VE_", "GT_", "PA_", "HN_", "SV_", "NI_",
+        "ES_",
+        "MX_",
+        "AR_",
+        "CL_",
+        "CO_",
+        "PE_",
+        "EC_",
+        "UY_",
+        "PY_",
+        "BO_",
+        "DO_",
+        "CR_",
+        "VE_",
+        "GT_",
+        "PA_",
+        "HN_",
+        "SV_",
+        "NI_",
     ),
     "lusophone": ("PT_", "BR_", "AO_", "MZ_", "CV_", "TL_"),
     "francophone": (
-        "FR_", "BE_", "CH_", "CA_", "MA_", "TN_", "DZ_", "SN_", "CI_",
-        "CM_", "MG_", "CD_", "BF_", "ML_", "GN_", "TG_", "BJ_", "NE_",
-        "RW_", "BI_", "DJ_", "GA_", "LU_", "MC_",
+        "FR_",
+        "BE_",
+        "CH_",
+        "CA_",
+        "MA_",
+        "TN_",
+        "DZ_",
+        "SN_",
+        "CI_",
+        "CM_",
+        "MG_",
+        "CD_",
+        "BF_",
+        "ML_",
+        "GN_",
+        "TG_",
+        "BJ_",
+        "NE_",
+        "RW_",
+        "BI_",
+        "DJ_",
+        "GA_",
+        "LU_",
+        "MC_",
     ),
     "germanic": ("DE_", "AT_", "CH_", "LI_"),
     "slavic": (
-        "RU_", "UA_", "BY_", "PL_", "CZ_", "SK_", "BG_", "RS_", "HR_",
-        "SI_", "MK_", "BA_", "ME_",
+        "RU_",
+        "UA_",
+        "BY_",
+        "PL_",
+        "CZ_",
+        "SK_",
+        "BG_",
+        "RS_",
+        "HR_",
+        "SI_",
+        "MK_",
+        "BA_",
+        "ME_",
     ),
     "arabic": (
-        "AE_", "SA_", "QA_", "KW_", "BH_", "OM_", "EG_", "MA_", "TN_",
-        "DZ_", "JO_", "LB_", "SY_", "IQ_", "YE_", "PS_", "LY_", "SD_",
+        "AE_",
+        "SA_",
+        "QA_",
+        "KW_",
+        "BH_",
+        "OM_",
+        "EG_",
+        "MA_",
+        "TN_",
+        "DZ_",
+        "JO_",
+        "LB_",
+        "SY_",
+        "IQ_",
+        "YE_",
+        "PS_",
+        "LY_",
+        "SD_",
     ),
     "nordic": ("SE_", "SV_", "NO_", "DK_", "FI_", "IS_"),
     "turkic": ("TR_", "AZ_", "KZ_", "UZ_", "TM_", "KG_", "TJ_"),
@@ -154,10 +227,7 @@ def _load_region_groups_from_yaml() -> dict[str, tuple[str, ...]]:
     try:
         import yaml  # type: ignore[import-not-found]
     except ImportError:
-        _log.warning(
-            "pyyaml unavailable — region_groups.yaml extension disabled, "
-            "matcher uses hardcoded baseline only"
-        )
+        _log.warning("pyyaml unavailable — region_groups.yaml extension disabled, matcher uses hardcoded baseline only")
         return {}
 
     # backend/app/core/match_service/boosts/region.py → repo root via 5x ``parents``.
@@ -175,8 +245,7 @@ def _load_region_groups_from_yaml() -> dict[str, tuple[str, ...]]:
             raw = yaml.safe_load(fh)
     except (OSError, yaml.YAMLError) as exc:  # type: ignore[attr-defined]
         _log.warning(
-            "region_groups.yaml at %s could not be parsed (%s) — "
-            "using hardcoded baseline",
+            "region_groups.yaml at %s could not be parsed (%s) — using hardcoded baseline",
             yaml_path,
             exc,
         )
@@ -184,8 +253,7 @@ def _load_region_groups_from_yaml() -> dict[str, tuple[str, ...]]:
 
     if not isinstance(raw, dict):
         _log.warning(
-            "region_groups.yaml at %s top-level is not a mapping — "
-            "using hardcoded baseline",
+            "region_groups.yaml at %s top-level is not a mapping — using hardcoded baseline",
             yaml_path,
         )
         return {}
@@ -193,8 +261,7 @@ def _load_region_groups_from_yaml() -> dict[str, tuple[str, ...]]:
     groups = raw.get("groups")
     if not isinstance(groups, dict):
         _log.warning(
-            "region_groups.yaml at %s has no ``groups`` mapping — "
-            "using hardcoded baseline",
+            "region_groups.yaml at %s has no ``groups`` mapping — using hardcoded baseline",
             yaml_path,
         )
         return {}

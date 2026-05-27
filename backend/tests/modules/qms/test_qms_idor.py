@@ -26,7 +26,6 @@ _TMP_DB = _TMP_DIR / "qms_idor.db"
 os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}"
 os.environ["DATABASE_SYNC_URL"] = f"sqlite:///{_TMP_DB.as_posix()}"
 
-import datetime  # noqa: E402
 
 import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
@@ -61,7 +60,6 @@ from app.modules.qms.models import (  # noqa: E402
 )
 from app.modules.qms.router import router as qms_router  # noqa: E402
 from app.modules.qms.schemas import (  # noqa: E402
-    CalibrationCreate,
     InspectionCreate,
     NCRCreate,
 )

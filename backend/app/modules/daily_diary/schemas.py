@@ -29,10 +29,10 @@ def _validate_storage_url(value: str | None) -> str | None:
         return stripped  # relative MinIO / static path is fine
     if not (lowered.startswith("http://") or lowered.startswith("https://")):
         raise ValueError(
-            "Asset URL must use http(s) or a relative /path "
-            "(javascript:/data:/file: rejected)",
+            "Asset URL must use http(s) or a relative /path (javascript:/data:/file: rejected)",
         )
     return stripped
+
 
 # ── Status enums (encoded as patterns) ───────────────────────────────────
 
@@ -50,20 +50,16 @@ _SIGNER_ROLE_RE = r"^(owner|supervisor|inspector|client)$"
 # documents.ALLOWED_IMAGE_TYPES (+ avif, which site cameras now emit).
 # SVG is explicitly NOT in this set — it can carry arbitrary script payload
 # and the UI would render it inline.
-_PHOTO_MIME_RE = (
-    r"^image/(jpeg|png|gif|webp|heic|heif|avif|tiff)$"
-)
+_PHOTO_MIME_RE = r"^image/(jpeg|png|gif|webp|heic|heif|avif|tiff)$"
 # Video MIME — site recorders emit mp4/quicktime/webm/AVI; absolutely no
 # ``text/*`` / ``application/*`` / ``image/svg+xml`` allowed (a maliciously
 # stored MIME would be served back verbatim and trusted by the UI).
-_VIDEO_MIME_RE = (
-    r"^video/(mp4|quicktime|webm|x-msvideo|x-matroska|3gpp|3gpp2|mpeg)$"
-)
+_VIDEO_MIME_RE = r"^video/(mp4|quicktime|webm|x-msvideo|x-matroska|3gpp|3gpp2|mpeg)$"
 # Caps for file_size_bytes — preventing nonsense values that would distort
 # storage-quota dashboards and break downstream aggregation. 5 GB matches
 # what a long drone-flight clip realistically produces; nothing in a site
 # diary should ever be larger than that.
-_MAX_PHOTO_BYTES = 200 * 1024 * 1024       # 200 MB
+_MAX_PHOTO_BYTES = 200 * 1024 * 1024  # 200 MB
 _MAX_VIDEO_BYTES = 5 * 1024 * 1024 * 1024  # 5 GB
 
 # Realistic upper bound for headcount / equipment count on a single site
@@ -103,7 +99,9 @@ class DailyDiaryUpdate(BaseModel):
     weather_summary: dict[str, Any] | None = None
     labour_count: int | None = Field(default=None, ge=0, le=_MAX_LABOUR_COUNT)
     equipment_count: int | None = Field(
-        default=None, ge=0, le=_MAX_EQUIPMENT_COUNT,
+        default=None,
+        ge=0,
+        le=_MAX_EQUIPMENT_COUNT,
     )
     notes: str | None = Field(default=None, max_length=20000)
     metadata: dict[str, Any] | None = None
@@ -290,9 +288,7 @@ class DiaryPhotoCreate(BaseModel):
     location_label: str | None = Field(default=None, max_length=255)
     file_url: str = Field(..., min_length=1, max_length=2000)
     thumbnail_url: str | None = Field(default=None, max_length=2000)
-    mime_type: str = Field(
-        default="image/jpeg", max_length=80, pattern=_PHOTO_MIME_RE
-    )
+    mime_type: str = Field(default="image/jpeg", max_length=80, pattern=_PHOTO_MIME_RE)
     file_size_bytes: int = Field(default=0, ge=0, le=_MAX_PHOTO_BYTES)
     description: str | None = Field(default=None, max_length=20000)
     tags: list[str] = Field(default_factory=list)
@@ -369,7 +365,9 @@ class DiaryVideoCreate(BaseModel):
     duration_seconds: int = Field(default=0, ge=0, le=86_400)
     file_size_bytes: int = Field(default=0, ge=0, le=_MAX_VIDEO_BYTES)
     mime_type: str | None = Field(
-        default=None, max_length=80, pattern=_VIDEO_MIME_RE,
+        default=None,
+        max_length=80,
+        pattern=_VIDEO_MIME_RE,
     )
     description: str | None = Field(default=None, max_length=20000)
     tags: list[str] = Field(default_factory=list)
@@ -387,7 +385,9 @@ class DiaryVideoUpdate(BaseModel):
     thumbnail_url: str | None = Field(default=None, max_length=2000)
     duration_seconds: int | None = Field(default=None, ge=0, le=86_400)
     mime_type: str | None = Field(
-        default=None, max_length=80, pattern=_VIDEO_MIME_RE,
+        default=None,
+        max_length=80,
+        pattern=_VIDEO_MIME_RE,
     )
     description: str | None = Field(default=None, max_length=20000)
     tags: list[str] | None = None
@@ -436,10 +436,14 @@ class DroneSurveyCreate(BaseModel):
     # Elevations are bounded by realistic surveyed terrain — Mariana
     # Trench (-11 km) to Everest (8.85 km) plus a comfortable margin.
     elevation_min_m: Decimal | None = Field(
-        default=None, ge=Decimal("-12000"), le=Decimal("10000"),
+        default=None,
+        ge=Decimal("-12000"),
+        le=Decimal("10000"),
     )
     elevation_max_m: Decimal | None = Field(
-        default=None, ge=Decimal("-12000"), le=Decimal("10000"),
+        default=None,
+        ge=Decimal("-12000"),
+        le=Decimal("10000"),
     )
     notes: str | None = Field(default=None, max_length=20000)
 
@@ -467,16 +471,22 @@ class DroneSurveyUpdate(BaseModel):
     pilot_name: str | None = Field(default=None, max_length=255)
     drone_model: str | None = Field(default=None, max_length=255)
     area_m2: Decimal | None = Field(
-        default=None, ge=0, le=Decimal("100000000"),
+        default=None,
+        ge=0,
+        le=Decimal("100000000"),
     )
     ortho_file_url: str | None = Field(default=None, max_length=2000)
     dsm_file_url: str | None = Field(default=None, max_length=2000)
     point_cloud_url: str | None = Field(default=None, max_length=2000)
     elevation_min_m: Decimal | None = Field(
-        default=None, ge=Decimal("-12000"), le=Decimal("10000"),
+        default=None,
+        ge=Decimal("-12000"),
+        le=Decimal("10000"),
     )
     elevation_max_m: Decimal | None = Field(
-        default=None, ge=Decimal("-12000"), le=Decimal("10000"),
+        default=None,
+        ge=Decimal("-12000"),
+        le=Decimal("10000"),
     )
     notes: str | None = Field(default=None, max_length=20000)
 

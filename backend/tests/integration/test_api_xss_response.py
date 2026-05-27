@@ -73,6 +73,7 @@ async def auth(client: AsyncClient) -> dict[str, str]:
     # Tests need admin to create projects/BOQs/positions, so we promote
     # via direct DB write — same pattern used by test_critical_flows.
     from ._auth_helpers import promote_to_admin
+
     await promote_to_admin(email)
 
     token = ""
@@ -119,18 +120,14 @@ def _assert_no_html_tags(value: str, *, label: str) -> None:
     )
     lowered = value.lower()
     for marker in bad_markers:
-        assert marker not in lowered, (
-            f"{label} still contains '{marker}' in response: {value!r}"
-        )
+        assert marker not in lowered, f"{label} still contains '{marker}' in response: {value!r}"
 
 
 # ── Live-input path: input validator + output strip in series ────────────
 
 
 @pytest.mark.asyncio
-async def test_response_strips_html_from_live_input(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_response_strips_html_from_live_input(client: AsyncClient, auth: dict[str, str]) -> None:
     """End-to-end: POST with embedded HTML, GET shows tag-free output.
 
     Verifies the *dangerous* tag (``<img onerror=>``) is fully gone AND
@@ -208,9 +205,7 @@ async def test_response_strips_html_from_live_input(
 
 
 @pytest.mark.asyncio
-async def test_response_strips_html_from_pre_existing_storage(
-    client: AsyncClient, auth: dict[str, str]
-) -> None:
+async def test_response_strips_html_from_pre_existing_storage(client: AsyncClient, auth: dict[str, str]) -> None:
     """Pre-existing rows containing raw HTML must not leak through GET.
 
     Writes directly to the BOQ Position model via SQLAlchemy, bypassing
@@ -291,9 +286,7 @@ async def test_response_strips_html_from_pre_existing_storage(
             Position.boq_id == uuid.UUID(boq_id),
         )
         row = (await session.execute(stmt)).scalar_one()
-        assert row.description == payload, (
-            "Storage layer mutated the value — test assumption broken"
-        )
+        assert row.description == payload, "Storage layer mutated the value — test assumption broken"
 
     # GET the BOQ via API — response model must strip the tag.
     # ``GET /boqs/{id}`` returns ``BOQWithPositions`` with a flat

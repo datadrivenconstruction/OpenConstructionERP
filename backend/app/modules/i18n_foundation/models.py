@@ -21,23 +21,13 @@ class ExchangeRate(Base):
     """
 
     __tablename__ = "oe_i18n_exchange_rate"
-    __table_args__ = (
-        UniqueConstraint(
-            "from_currency", "to_currency", "rate_date", name="uq_exchange_rate_pair_date"
-        ),
-    )
+    __table_args__ = (UniqueConstraint("from_currency", "to_currency", "rate_date", name="uq_exchange_rate_pair_date"),)
 
     from_currency: Mapped[str] = mapped_column(String(10), index=True, nullable=False)
     to_currency: Mapped[str] = mapped_column(String(10), index=True, nullable=False)
-    rate: Mapped[str] = mapped_column(
-        String(50), nullable=False
-    )  # Decimal as string for SQLite compat
-    rate_date: Mapped[str] = mapped_column(
-        String(20), nullable=False
-    )  # ISO date string, e.g. "2026-04-07"
-    source: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="manual"
-    )  # manual / ecb / custom
+    rate: Mapped[str] = mapped_column(String(50), nullable=False)  # Decimal as string for SQLite compat
+    rate_date: Mapped[str] = mapped_column(String(20), nullable=False)  # ISO date string, e.g. "2026-04-07"
+    source: Mapped[str] = mapped_column(String(50), nullable=False, default="manual")  # manual / ecb / custom
     is_manual: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -48,10 +38,7 @@ class ExchangeRate(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<ExchangeRate {self.from_currency}/{self.to_currency}"
-            f" {self.rate} @ {self.rate_date}>"
-        )
+        return f"<ExchangeRate {self.from_currency}/{self.to_currency} {self.rate} @ {self.rate_date}>"
 
 
 class Country(Base):
@@ -64,27 +51,19 @@ class Country(Base):
 
     __tablename__ = "oe_i18n_country"
 
-    iso_code: Mapped[str] = mapped_column(
-        String(2), unique=True, index=True, nullable=False
-    )
+    iso_code: Mapped[str] = mapped_column(String(2), unique=True, index=True, nullable=False)
     iso_code_3: Mapped[str | None] = mapped_column(String(3), nullable=True)
-    name_en: Mapped[str] = mapped_column(
-        String(255), nullable=False
-    )  # Denormalized for fast queries
+    name_en: Mapped[str] = mapped_column(String(255), nullable=False)  # Denormalized for fast queries
     name_translations: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False
     )  # {"en": "Germany", "de": "Deutschland", ...}
     currency_default: Mapped[str | None] = mapped_column(String(10), nullable=True)
-    measurement_default: Mapped[str | None] = mapped_column(
-        String(20), nullable=True
-    )  # metric / imperial
+    measurement_default: Mapped[str | None] = mapped_column(String(20), nullable=True)  # metric / imperial
     phone_code: Mapped[str | None] = mapped_column(String(10), nullable=True)
     address_format_template: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=True
     )
-    region_group: Mapped[str | None] = mapped_column(
-        String(50), nullable=True
-    )  # EU, DACH, MENA, NA, APAC, etc.
+    region_group: Mapped[str | None] = mapped_column(String(50), nullable=True)  # EU, DACH, MENA, NA, APAC, etc.
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -106,9 +85,7 @@ class WorkCalendar(Base):
     """
 
     __tablename__ = "oe_i18n_work_calendar"
-    __table_args__ = (
-        UniqueConstraint("country_code", "year", name="uq_work_calendar_country_year"),
-    )
+    __table_args__ = (UniqueConstraint("country_code", "year", name="uq_work_calendar_country_year"),)
 
     country_code: Mapped[str] = mapped_column(String(2), index=True, nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -116,9 +93,7 @@ class WorkCalendar(Base):
         JSON, nullable=True
     )
     year: Mapped[str] = mapped_column(String(4), nullable=False)  # e.g. "2026"
-    work_hours_per_day: Mapped[str] = mapped_column(
-        String(10), nullable=False, default="8"
-    )  # Decimal as string
+    work_hours_per_day: Mapped[str] = mapped_column(String(10), nullable=False, default="8")  # Decimal as string
     work_days: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False
     )  # ISO weekday numbers, e.g. [1,2,3,4,5] for Mon-Fri
@@ -145,30 +120,18 @@ class TaxConfiguration(Base):
     """
 
     __tablename__ = "oe_i18n_tax_config"
-    __table_args__ = (
-        Index("ix_tax_config_country_type", "country_code", "tax_type"),
-    )
+    __table_args__ = (Index("ix_tax_config_country_type", "country_code", "tax_type"),)
 
     country_code: Mapped[str] = mapped_column(String(2), index=True, nullable=False)
     tax_name: Mapped[str] = mapped_column(String(255), nullable=False)
     tax_name_translations: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=True
     )
-    tax_code: Mapped[str | None] = mapped_column(
-        String(50), nullable=True
-    )  # VAT, GST, HST, etc.
-    rate_pct: Mapped[str] = mapped_column(
-        String(20), nullable=False
-    )  # e.g. "19.0" — string for SQLite compat
-    tax_type: Mapped[str] = mapped_column(
-        String(50), nullable=False
-    )  # vat / sales_tax / gst / service_tax / customs
-    effective_from: Mapped[str | None] = mapped_column(
-        String(20), nullable=True
-    )  # ISO date string
-    effective_to: Mapped[str | None] = mapped_column(
-        String(20), nullable=True
-    )  # NULL = currently active
+    tax_code: Mapped[str | None] = mapped_column(String(50), nullable=True)  # VAT, GST, HST, etc.
+    rate_pct: Mapped[str] = mapped_column(String(20), nullable=False)  # e.g. "19.0" — string for SQLite compat
+    tax_type: Mapped[str] = mapped_column(String(50), nullable=False)  # vat / sales_tax / gst / service_tax / customs
+    effective_from: Mapped[str | None] = mapped_column(String(20), nullable=True)  # ISO date string
+    effective_to: Mapped[str | None] = mapped_column(String(20), nullable=True)  # NULL = currently active
     is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

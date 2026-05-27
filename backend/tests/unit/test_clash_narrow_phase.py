@@ -53,12 +53,18 @@ _CUBE_V = np.array(
 )
 _CUBE_F = np.array(
     [
-        [0, 1, 2], [0, 2, 3],  # bottom
-        [4, 6, 5], [4, 7, 6],  # top
-        [0, 4, 5], [0, 5, 1],  # front
-        [1, 5, 6], [1, 6, 2],  # right
-        [2, 6, 7], [2, 7, 3],  # back
-        [3, 7, 4], [3, 4, 0],  # left
+        [0, 1, 2],
+        [0, 2, 3],  # bottom
+        [4, 6, 5],
+        [4, 7, 6],  # top
+        [0, 4, 5],
+        [0, 5, 1],  # front
+        [1, 5, 6],
+        [1, 6, 2],  # right
+        [2, 6, 7],
+        [2, 7, 3],  # back
+        [3, 7, 4],
+        [3, 4, 0],  # left
     ],
     dtype=np.int64,
 )
@@ -103,8 +109,12 @@ class _FakeElement:
         self.discipline = geom.discipline
         self.element_type = "Generic"
         self.bounding_box = {
-            "min_x": geom.aabb[0], "min_y": geom.aabb[1], "min_z": geom.aabb[2],
-            "max_x": geom.aabb[3], "max_y": geom.aabb[4], "max_z": geom.aabb[5],
+            "min_x": geom.aabb[0],
+            "min_y": geom.aabb[1],
+            "min_z": geom.aabb[2],
+            "max_x": geom.aabb[3],
+            "max_y": geom.aabb[4],
+            "max_z": geom.aabb[5],
         }
 
 
@@ -123,7 +133,7 @@ def _run_detect(run, geoms: list[ElementGeom]):
     """Drive ClashService._detect with fake elements + a geom map."""
     svc = ClashService.__new__(ClashService)  # no DB session needed
     elements = [_FakeElement(g) for g in geoms]
-    gmap = {str(e.id): g for e, g in zip(elements, geoms)}
+    gmap = {str(e.id): g for e, g in zip(elements, geoms, strict=False)}
     return svc._detect(run, elements, gmap)
 
 
@@ -188,10 +198,16 @@ def test_thin_diagonal_triangle_beats_bbox_false_positive():
     tri_f = np.array([[0, 1, 2]], dtype=np.int64)
     mn, mx = tri_v.min(axis=0), tri_v.max(axis=0)
     tri = ElementGeom(
-        element_id="T", stable_id="T", name="Diag", discipline="Structural",
+        element_id="T",
+        stable_id="T",
+        name="Diag",
+        discipline="Structural",
         aabb=(mn[0], mn[1], mn[2], mx[0], mx[1], mx[2]),
-        vertices=tri_v, faces=tri_f,
-        obb_center=(mn + mx) / 2.0, obb_axes=np.eye(3), obb_half=(mx - mn) / 2.0,
+        vertices=tri_v,
+        faces=tri_f,
+        obb_center=(mn + mx) / 2.0,
+        obb_axes=np.eye(3),
+        obb_half=(mx - mn) / 2.0,
         storey=0,
     )
     # Small box parked at (0,3,3): inside the triangle's AABB but nowhere
@@ -206,19 +222,30 @@ def test_degenerate_and_empty_mesh_no_crash():
     """Empty / degenerate meshes never crash and never clash."""
     good = _box_geom("G", (0, 0, 0), (1, 1, 1), "Structural")
     empty = ElementGeom(
-        element_id="E", stable_id="E", name="Empty", discipline="Mechanical",
+        element_id="E",
+        stable_id="E",
+        name="Empty",
+        discipline="Mechanical",
         aabb=(0.0, 0.0, 0.0, 1.0, 1.0, 1.0),
-        vertices=np.zeros((0, 3)), faces=np.zeros((0, 3), dtype=np.int64),
-        obb_center=np.zeros(3), obb_axes=np.eye(3), obb_half=np.ones(3),
+        vertices=np.zeros((0, 3)),
+        faces=np.zeros((0, 3), dtype=np.int64),
+        obb_center=np.zeros(3),
+        obb_axes=np.eye(3),
+        obb_half=np.ones(3),
         storey=0,
     )
     collinear = ElementGeom(
-        element_id="C", stable_id="C", name="Line", discipline="Electrical",
+        element_id="C",
+        stable_id="C",
+        name="Line",
+        discipline="Electrical",
         aabb=(0.0, 0.0, 0.0, 2.0, 0.0, 0.0),
         vertices=np.array([[0, 0, 0], [1, 0, 0], [2, 0, 0]], dtype=np.float64),
         faces=np.array([[0, 1, 2]], dtype=np.int64),
-        obb_center=np.array([1.0, 0.0, 0.0]), obb_axes=np.eye(3),
-        obb_half=np.array([1.0, 0.0, 0.0]), storey=0,
+        obb_center=np.array([1.0, 0.0, 0.0]),
+        obb_axes=np.eye(3),
+        obb_half=np.array([1.0, 0.0, 0.0]),
+        storey=0,
     )
     run = _FakeRun(tolerance_m=0.01, clearance_m=1.0, mode="all")
     res = _run_detect(run, [good, empty, collinear])
@@ -241,50 +268,64 @@ def test_moller_unit_cases_precision_recall_1():
     cases: list[tuple[np.ndarray, np.ndarray, bool]] = []
 
     # 1. Coplanar, overlapping (both in z=0 plane).
-    cases.append((
-        _tri([0, 0, 0], [2, 0, 0], [0, 2, 0]),
-        _tri([1, 1, 0], [3, 1, 0], [1, 3, 0]),
-        True,
-    ))
+    cases.append(
+        (
+            _tri([0, 0, 0], [2, 0, 0], [0, 2, 0]),
+            _tri([1, 1, 0], [3, 1, 0], [1, 3, 0]),
+            True,
+        )
+    )
     # 2. Coplanar, disjoint.
-    cases.append((
-        _tri([0, 0, 0], [1, 0, 0], [0, 1, 0]),
-        _tri([5, 5, 0], [6, 5, 0], [5, 6, 0]),
-        False,
-    ))
+    cases.append(
+        (
+            _tri([0, 0, 0], [1, 0, 0], [0, 1, 0]),
+            _tri([5, 5, 0], [6, 5, 0], [5, 6, 0]),
+            False,
+        )
+    )
     # 3. Edge pierces face: vertical tri stabbing through a horizontal one.
-    cases.append((
-        _tri([-1, 0.5, -1], [3, 0.5, -1], [1, 0.5, 3]),
-        _tri([0, 0, 0], [2, 0, 0], [0, 2, 0]),
-        True,
-    ))
+    cases.append(
+        (
+            _tri([-1, 0.5, -1], [3, 0.5, -1], [1, 0.5, 3]),
+            _tri([0, 0, 0], [2, 0, 0], [0, 2, 0]),
+            True,
+        )
+    )
     # 4. Disjoint in space (parallel planes far apart).
-    cases.append((
-        _tri([0, 0, 0], [1, 0, 0], [0, 1, 0]),
-        _tri([0, 0, 5], [1, 0, 5], [0, 1, 5]),
-        False,
-    ))
+    cases.append(
+        (
+            _tri([0, 0, 0], [1, 0, 0], [0, 1, 0]),
+            _tri([0, 0, 5], [1, 0, 5], [0, 1, 5]),
+            False,
+        )
+    )
     # 5. Shared edge only (touch, not penetrate): two coplanar tris meeting
     #    along the segment (0,0,0)-(1,0,0). Closed-interval test → touch
     #    counts as an intersection at the Möller stage (the penetration
     #    gate is what rejects mere touches downstream).
-    cases.append((
-        _tri([0, 0, 0], [1, 0, 0], [0, 1, 0]),
-        _tri([0, 0, 0], [1, 0, 0], [0, -1, 0]),
-        True,
-    ))
+    cases.append(
+        (
+            _tri([0, 0, 0], [1, 0, 0], [0, 1, 0]),
+            _tri([0, 0, 0], [1, 0, 0], [0, -1, 0]),
+            True,
+        )
+    )
     # 6. One tri fully above the other's plane (trivial plane reject).
-    cases.append((
-        _tri([0, 0, 1], [1, 0, 1], [0, 1, 1]),
-        _tri([0, 0, 0], [1, 0, 0], [0, 1, 0]),
-        False,
-    ))
+    cases.append(
+        (
+            _tri([0, 0, 1], [1, 0, 1], [0, 1, 1]),
+            _tri([0, 0, 0], [1, 0, 0], [0, 1, 0]),
+            False,
+        )
+    )
     # 7. Crossing tris that genuinely interpenetrate.
-    cases.append((
-        _tri([-1, 0, 0], [1, 0, 0], [0, 0, 2]),
-        _tri([0, -1, 1], [0, 1, 1], [0, 0, -1]),
-        True,
-    ))
+    cases.append(
+        (
+            _tri([-1, 0, 0], [1, 0, 0], [0, 0, 2]),
+            _tri([0, -1, 1], [0, 1, 1], [0, 0, -1]),
+            True,
+        )
+    )
 
     tp = fp = fn = tn = 0
     for ta, tb, truth in cases:
@@ -379,14 +420,10 @@ def test_storey_level_matrix_intra_model_single_discipline():
 
     summary = _build_summary(res)
     assert summary["storeys"] == [0, 1]
-    assert summary["level_matrix"] == [
-        {"a": 0, "b": 1, "count": 1, "open_count": 1}
-    ]
+    assert summary["level_matrix"] == [{"a": 0, "b": 1, "count": 1, "open_count": 1}]
     # The discipline matrix is the useless 1×1 here (proves why the
     # level matrix is needed) but is still correctly shaped + untouched.
-    assert summary["matrix"] == [
-        {"a": "Structural", "b": "Structural", "count": 1, "open_count": 1}
-    ]
+    assert summary["matrix"] == [{"a": "Structural", "b": "Structural", "count": 1, "open_count": 1}]
     assert summary["by_type"] == {"hard": 1}
 
 
@@ -399,9 +436,7 @@ def test_level_matrix_same_storey_and_unknown_storey():
     res = _run_detect(_FakeRun(tolerance_m=0.01, mode="all"), [a, b])
     summary = _build_summary(res)
     assert summary["storeys"] == [2]
-    assert summary["level_matrix"] == [
-        {"a": 2, "b": 2, "count": 1, "open_count": 1}
-    ]
+    assert summary["level_matrix"] == [{"a": 2, "b": 2, "count": 1, "open_count": 1}]
 
     # Now simulate a no-GLB element: storey resolves to None on the row.
     r = res[0]

@@ -84,10 +84,7 @@ def test_translate_en_matches_audit_text() -> None:
     assert translate("errors.project_not_found", locale="en") == "Project not found"
     assert translate("errors.vendor_not_found", locale="en") == "Vendor not found"
     assert translate("errors.purchase_order_not_found", locale="en") == "PO not found"
-    assert (
-        translate("errors.commission_accrual_not_found", locale="en")
-        == "CommissionAccrual not found"
-    )
+    assert translate("errors.commission_accrual_not_found", locale="en") == "CommissionAccrual not found"
 
 
 def test_translate_de_is_german_not_english() -> None:
@@ -96,12 +93,8 @@ def test_translate_de_is_german_not_english() -> None:
     missing key, which the coverage tests above already guard against,
     but check distinctness here for the 3 most-common keys)."""
     assert translate("errors.project_not_found", locale="de") == "Projekt nicht gefunden"
-    assert (
-        translate("errors.position_not_found", locale="de") == "Position nicht gefunden"
-    )
-    assert (
-        translate("errors.document_not_found", locale="de") == "Dokument nicht gefunden"
-    )
+    assert translate("errors.position_not_found", locale="de") == "Position nicht gefunden"
+    assert translate("errors.document_not_found", locale="de") == "Dokument nicht gefunden"
 
 
 def test_translate_ru_is_russian_not_english() -> None:

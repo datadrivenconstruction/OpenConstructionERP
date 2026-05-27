@@ -18,6 +18,7 @@ def _validate_non_negative_decimal(v: str) -> str:
         raise ValueError(f"Value must be non-negative, got {v!r}")
     return v
 
+
 # ── Purchase Order ───────────────────────────────────────────────────────────
 
 

@@ -68,9 +68,7 @@ class SafetyIncident(Base):
         server_default="[]",
     )
 
-    reported_to_regulator: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
+    reported_to_regulator: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="reported", index=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
@@ -92,7 +90,11 @@ class SafetyIncident(Base):
     # ``osha_recordable`` value) trips a NOT NULL violation on first boot,
     # leaving the seed transaction open and SQLite write-locked. See #154.
     osha_recordable: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="0", index=True,
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
+        index=True,
     )
     osha_case_number: Mapped[str | None] = mapped_column(String(32), nullable=True)
     days_away: Mapped[int | None] = mapped_column(Integer, nullable=True)
@@ -101,7 +103,10 @@ class SafetyIncident(Base):
     # the service layer) so we can extend the taxonomy without a migration.
     root_cause_method: Mapped[str | None] = mapped_column(String(32), nullable=True)
     root_cause_tags: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=True, default=list, server_default="[]",
+        JSON,
+        nullable=True,
+        default=list,
+        server_default="[]",
     )
 
     def __repr__(self) -> str:
@@ -123,7 +128,9 @@ class HSECorrectiveAction(Base):
     # Plain UUID — references oe_safety_incident.id, no FK to avoid
     # cross-module coupling (mirrors HSEIncidentInvestigation.incident_ref).
     incident_id: Mapped[uuid.UUID] = mapped_column(
-        GUID(), nullable=False, index=True,
+        GUID(),
+        nullable=False,
+        index=True,
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
     assigned_to_user_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -133,7 +140,10 @@ class HSECorrectiveAction(Base):
     )
     due_date: Mapped[date | None] = mapped_column(Date(), nullable=True)
     status: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="pending", index=True,
+        String(16),
+        nullable=False,
+        default="pending",
+        index=True,
     )
     verified_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
@@ -141,15 +151,13 @@ class HSECorrectiveAction(Base):
         nullable=True,
     )
     verified_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
     verification_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     def __repr__(self) -> str:
-        return (
-            f"<HSECorrectiveAction incident={self.incident_id} "
-            f"status={self.status}>"
-        )
+        return f"<HSECorrectiveAction incident={self.incident_id} status={self.status}>"
 
 
 class SafetyObservation(Base):
@@ -183,7 +191,4 @@ class SafetyObservation(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<SafetyObservation {self.observation_number} "
-            f"({self.observation_type}/{self.status})>"
-        )
+        return f"<SafetyObservation {self.observation_number} ({self.observation_type}/{self.status})>"

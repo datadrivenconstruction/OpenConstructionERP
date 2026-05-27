@@ -94,7 +94,8 @@ def parquet_fixture(
 class TestReadRows:
     @pytest.mark.asyncio
     async def test_pagination_returns_correct_total_and_page(
-        self, parquet_fixture,
+        self,
+        parquet_fixture,
     ) -> None:
         project_id, snapshot_id = parquet_fixture
         pool = DuckDBPool()
@@ -151,7 +152,8 @@ class TestReadRows:
 
     @pytest.mark.asyncio
     async def test_unknown_column_in_filters_raises(
-        self, parquet_fixture,
+        self,
+        parquet_fixture,
     ) -> None:
         project_id, snapshot_id = parquet_fixture
         pool = DuckDBPool()
@@ -230,7 +232,8 @@ class TestReadRows:
 class TestExportRoundTrips:
     @pytest.mark.asyncio
     async def test_csv_round_trip_matches_filtered_query(
-        self, parquet_fixture,
+        self,
+        parquet_fixture,
     ) -> None:
         project_id, snapshot_id = parquet_fixture
         pool = DuckDBPool()
@@ -246,7 +249,9 @@ class TestExportRoundTrips:
             await pool.close_all()
 
         payload, content_type, ext = export_to_format(
-            columns=result.columns, rows=result.rows, format="csv",
+            columns=result.columns,
+            rows=result.rows,
+            format="csv",
         )
         assert content_type == "text/csv"
         assert ext == "csv"
@@ -261,7 +266,8 @@ class TestExportRoundTrips:
 
     @pytest.mark.asyncio
     async def test_xlsx_round_trip_preserves_rows(
-        self, parquet_fixture,
+        self,
+        parquet_fixture,
     ) -> None:
         project_id, snapshot_id = parquet_fixture
         pool = DuckDBPool()
@@ -276,7 +282,9 @@ class TestExportRoundTrips:
             await pool.close_all()
 
         payload, content_type, ext = export_to_format(
-            columns=result.columns, rows=result.rows, format="xlsx",
+            columns=result.columns,
+            rows=result.rows,
+            format="xlsx",
         )
         assert ext == "xlsx"
         assert content_type.endswith("spreadsheetml.sheet")
@@ -292,7 +300,8 @@ class TestExportRoundTrips:
 
     @pytest.mark.asyncio
     async def test_parquet_round_trip_preserves_rows(
-        self, parquet_fixture,
+        self,
+        parquet_fixture,
     ) -> None:
         project_id, snapshot_id = parquet_fixture
         pool = DuckDBPool()
@@ -307,7 +316,9 @@ class TestExportRoundTrips:
             await pool.close_all()
 
         payload, content_type, ext = export_to_format(
-            columns=result.columns, rows=result.rows, format="parquet",
+            columns=result.columns,
+            rows=result.rows,
+            format="parquet",
         )
         assert ext == "parquet"
 
@@ -329,12 +340,7 @@ class TestExportRoundTrips:
 class TestImportStaging:
     def test_csv_round_trip_stage_then_commit(self) -> None:
         snapshot_id = uuid.uuid4()
-        upload = (
-            b"category,material,thickness_mm\n"
-            b"wall,concrete,200\n"
-            b"door,wood,45\n"
-            b"wall,concrete,180\n"
-        )
+        upload = b"category,material,thickness_mm\nwall,concrete,200\ndoor,wood,45\nwall,concrete,180\n"
         preview = stage_import(
             snapshot_id=snapshot_id,
             snapshot_columns=["category", "material", "thickness_mm"],
@@ -343,21 +349,25 @@ class TestImportStaging:
         )
         assert preview["total_rows"] == 3
         assert preview["matched_columns"] == [
-            "category", "material", "thickness_mm",
+            "category",
+            "material",
+            "thickness_mm",
         ]
         assert preview["missing_columns"] == []
         assert preview["extra_columns"] == []
         assert len(preview["preview_rows"]) == 3
 
         commit = commit_import(
-            snapshot_id=snapshot_id, staging_id=preview["staging_id"],
+            snapshot_id=snapshot_id,
+            staging_id=preview["staging_id"],
         )
         assert commit["rows_committed"] == 3
 
         # Replay must fail — staging is one-shot.
         with pytest.raises(StagingNotFoundError):
             commit_import(
-                snapshot_id=snapshot_id, staging_id=preview["staging_id"],
+                snapshot_id=snapshot_id,
+                staging_id=preview["staging_id"],
             )
 
     def test_extra_and_missing_columns_reported(self) -> None:
@@ -406,5 +416,6 @@ class TestImportStaging:
         )
         with pytest.raises(StagingNotFoundError):
             commit_import(
-                snapshot_id=wrong, staging_id=preview["staging_id"],
+                snapshot_id=wrong,
+                staging_id=preview["staging_id"],
             )

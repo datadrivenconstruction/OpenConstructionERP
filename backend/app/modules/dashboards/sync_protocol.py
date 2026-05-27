@@ -151,12 +151,7 @@ class SyncReport:
 
     @property
     def all_issues(self) -> list[SyncIssue]:
-        return (
-            self.column_renames
-            + self.dropped_columns
-            + self.dropped_filter_values
-            + self.dtype_changes
-        )
+        return self.column_renames + self.dropped_columns + self.dropped_filter_values + self.dtype_changes
 
     @property
     def is_in_sync(self) -> bool:
@@ -182,9 +177,7 @@ class SyncReport:
             "is_in_sync": self.is_in_sync,
             "column_renames": [i.to_dict() for i in self.column_renames],
             "dropped_columns": [i.to_dict() for i in self.dropped_columns],
-            "dropped_filter_values": [
-                i.to_dict() for i in self.dropped_filter_values
-            ],
+            "dropped_filter_values": [i.to_dict() for i in self.dropped_filter_values],
             "dtype_changes": [i.to_dict() for i in self.dtype_changes],
         }
 
@@ -348,10 +341,7 @@ class PresetSyncProbe:
                         column=col,
                         new_column=renamed_to,
                         message_key="preset.sync.column_rename",
-                        message=(
-                            f"Column '{col}' looks renamed to "
-                            f"'{renamed_to}' in the refreshed snapshot."
-                        ),
+                        message=(f"Column '{col}' looks renamed to '{renamed_to}' in the refreshed snapshot."),
                     )
                 )
             else:
@@ -362,10 +352,7 @@ class PresetSyncProbe:
                         suggested_fix="manual",
                         column=col,
                         message_key="preset.sync.dropped_column",
-                        message=(
-                            f"Column '{col}' is no longer present in the "
-                            f"snapshot. Pick a replacement manually."
-                        ),
+                        message=(f"Column '{col}' is no longer present in the snapshot. Pick a replacement manually."),
                     )
                 )
 
@@ -383,9 +370,7 @@ class PresetSyncProbe:
                     old_dtype=old_dt,
                     new_dtype=new_dt,
                     message_key="preset.sync.dtype_change",
-                    message=(
-                        f"Column '{col}' dtype changed: {old_dt} → {new_dt}."
-                    ),
+                    message=(f"Column '{col}' dtype changed: {old_dt} → {new_dt}."),
                 )
             )
 
@@ -398,9 +383,7 @@ class PresetSyncProbe:
             current_values = current_meta.values_for(col)
             if current_values is None:
                 continue
-            missing = tuple(
-                v for v in allowed if v not in current_values
-            )
+            missing = tuple(v for v in allowed if v not in current_values)
             if not missing:
                 continue
             report.dropped_filter_values.append(
@@ -414,8 +397,7 @@ class PresetSyncProbe:
                     message=(
                         f"Filter '{col}' references {len(missing)} "
                         f"value(s) no longer present: "
-                        f"{', '.join(missing[:3])}"
-                        + ("…" if len(missing) > 3 else "")
+                        f"{', '.join(missing[:3])}" + ("…" if len(missing) > 3 else "")
                     ),
                 )
             )
@@ -435,14 +417,9 @@ class PresetSyncProbe:
         if not isinstance(raw, dict):
             return SnapshotMeta()
         columns = tuple(str(c) for c in raw.get("columns", ()))
-        dtypes = {
-            str(k): str(v) for k, v in (raw.get("dtypes") or {}).items()
-        }
+        dtypes = {str(k): str(v) for k, v in (raw.get("dtypes") or {}).items()}
         value_sets_raw = raw.get("value_sets") or {}
-        value_sets = {
-            str(k): frozenset(str(x) for x in (v or []))
-            for k, v in value_sets_raw.items()
-        }
+        value_sets = {str(k): frozenset(str(x) for x in (v or [])) for k, v in value_sets_raw.items()}
         return SnapshotMeta(
             columns=columns,
             dtypes=dtypes,
@@ -466,7 +443,7 @@ class PresetSyncProbe:
                 if isinstance(v, str) and v.strip():
                     cols.add(v.strip())
         # Filter keys.
-        for k in (config.get("filters") or {}):
+        for k in config.get("filters") or {}:
             if isinstance(k, str) and k.strip():
                 cols.add(k.strip())
         return cols
@@ -518,9 +495,7 @@ class PresetSyncProbe:
         old_dt = old_meta.dtypes.get(old_column)
 
         # Step 2 (cheaper) first: case-insensitive name equivalence.
-        normalised_match = [
-            c for c in added_columns if self._normalise(c) == old_norm
-        ]
+        normalised_match = [c for c in added_columns if self._normalise(c) == old_norm]
         if len(normalised_match) == 1:
             return normalised_match[0]
 
@@ -543,7 +518,8 @@ class PresetSyncProbe:
 
     @staticmethod
     def _classify_dtype_change(
-        old_dt: str, new_dt: str,
+        old_dt: str,
+        new_dt: str,
     ) -> tuple[Severity, SuggestedFix]:
         """Decide how serious a dtype shift is.
 
@@ -599,19 +575,14 @@ def auto_heal(
 
     # Build rename map (old → new).
     renames = {
-        i.column: i.new_column
-        for i in sync_report.column_renames
-        if i.suggested_fix == "auto_rename" and i.new_column
+        i.column: i.new_column for i in sync_report.column_renames if i.suggested_fix == "auto_rename" and i.new_column
     }
 
     # 1. Apply renames.
     if renames:
         # Top-level columns list.
         if isinstance(patched.get("columns"), list):
-            patched["columns"] = [
-                renames.get(c, c) if isinstance(c, str) else c
-                for c in patched["columns"]
-            ]
+            patched["columns"] = [renames.get(c, c) if isinstance(c, str) else c for c in patched["columns"]]
         # Charts.
         if isinstance(patched.get("charts"), list):
             new_charts = []
@@ -637,17 +608,13 @@ def auto_heal(
 
     # 2. Drop missing filter values.
     drops = {
-        i.column: set(i.dropped_values)
-        for i in sync_report.dropped_filter_values
-        if i.suggested_fix == "drop_filter"
+        i.column: set(i.dropped_values) for i in sync_report.dropped_filter_values if i.suggested_fix == "drop_filter"
     }
     if drops and isinstance(patched.get("filters"), dict):
         cleaned: dict[str, Any] = {}
         for k, v in patched["filters"].items():
             if k in drops and isinstance(v, list):
-                cleaned[k] = [
-                    item for item in v if str(item) not in drops[k]
-                ]
+                cleaned[k] = [item for item in v if str(item) not in drops[k]]
             else:
                 cleaned[k] = v
         patched["filters"] = cleaned
@@ -681,8 +648,7 @@ async def load_current_meta(
         rows = await pool.execute(
             snapshot_id,
             project_id,
-            "SELECT column_name, data_type FROM information_schema.columns "
-            "WHERE table_name = 'entities'",
+            "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'entities'",
         )
     except Exception as exc:  # pragma: no cover — defensive
         logger.warning(
@@ -709,7 +675,7 @@ async def load_current_meta(
                     project_id,
                     f'SELECT DISTINCT CAST("{col}" AS VARCHAR) '
                     f'FROM entities WHERE "{col}" IS NOT NULL '
-                    f'LIMIT {int(max_values_per_column)}',
+                    f"LIMIT {int(max_values_per_column)}",
                 )
             except Exception:
                 continue

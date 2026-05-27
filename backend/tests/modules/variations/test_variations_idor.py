@@ -64,10 +64,7 @@ class _Repo:
         limit: int = 50,
         status: str | None = None,
     ) -> tuple[list[Any], int]:
-        rows = [
-            r for r in self.rows.values()
-            if getattr(r, "project_id", None) == project_id
-        ]
+        rows = [r for r in self.rows.values() if getattr(r, "project_id", None) == project_id]
         if status is not None:
             rows = [r for r in rows if getattr(r, "status", None) == status]
         return rows[offset : offset + limit], len(rows)
@@ -82,16 +79,16 @@ class _Repo:
 
     async def list_valued_for_project(self, project_id: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
-            if getattr(r, "project_id", None) == project_id
-            and getattr(r, "status", None) != "voided"
+            r
+            for r in self.rows.values()
+            if getattr(r, "project_id", None) == project_id and getattr(r, "status", None) != "voided"
         ]
 
     async def list_signed(self, project_id: uuid.UUID) -> list[Any]:
         return [
-            r for r in self.rows.values()
-            if getattr(r, "project_id", None) == project_id
-            and getattr(r, "status", None) in {"signed", "billed"}
+            r
+            for r in self.rows.values()
+            if getattr(r, "project_id", None) == project_id and getattr(r, "status", None) in {"signed", "billed"}
         ]
 
     async def for_project(self, project_id: uuid.UUID) -> Any:

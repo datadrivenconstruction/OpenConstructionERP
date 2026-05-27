@@ -265,8 +265,7 @@ async def seed_hse_advanced_demo(
             id=uuid.uuid4(),
             code=f"TBX-{idx + 1:03d}",
             title=title,
-            content=f"Detailed talk content for {title}. "
-            f"Covers hazards, controls, and PPE requirements.",
+            content=f"Detailed talk content for {title}. Covers hazards, controls, and PPE requirements.",
             category=_TOPIC_CATEGORIES[idx % len(_TOPIC_CATEGORIES)],
             language=_LANGUAGES[idx % len(_LANGUAGES)],
             duration_minutes=rng.choice([5, 10, 15, 20]),
@@ -340,10 +339,7 @@ async def seed_hse_advanced_demo(
             project_id=project_id,
             permit_number=f"PTW-{2026}-{idx + 1:04d}",
             permit_type=permit_type,
-            description=(
-                f"{permit_type.replace('_', ' ').title()} permit "
-                f"for routine site activity #{idx + 1}"
-            ),
+            description=(f"{permit_type.replace('_', ' ').title()} permit for routine site activity #{idx + 1}"),
             location=f"Zone {chr(65 + (idx % 5))}",
             work_start=work_start,
             work_end=work_end,
@@ -354,9 +350,7 @@ async def seed_hse_advanced_demo(
             conditions="Comply with site SOP and applicable PPE matrix.",
             closure_checklist_passed=(status_choice == "closed"),
             closure_notes=(
-                "Area cleared, debris removed, post-work inspection signed."
-                if status_choice == "closed"
-                else ""
+                "Area cleared, debris removed, post-work inspection signed." if status_choice == "closed" else ""
             ),
             created_by=None,
         )
@@ -402,9 +396,7 @@ async def seed_hse_advanced_demo(
                 attendee_role=rng.choice(["worker", "foreman", "visitor"]),
                 signature_ref=None,
                 signed_at=talk.conducted_at + timedelta(minutes=j),
-                attendance_status=rng.choice(
-                    ["present"] * 8 + ["late", "absent"]
-                ),
+                attendance_status=rng.choice(["present"] * 8 + ["late", "absent"]),
             )
             session.add(attendance)
             attendances.append(attendance)
@@ -513,18 +505,12 @@ async def seed_hse_advanced_demo(
             source_type=_CAPA_SOURCE_TYPES[idx % len(_CAPA_SOURCE_TYPES)],
             source_ref=audits[idx % len(audits)].id if audits else None,
             title=f"CAPA #{idx + 1}: address finding from audit",
-            description=(
-                "Verify control measures, retrain crew, and report back to safety officer."
-            ),
+            description=("Verify control measures, retrain crew, and report back to safety officer."),
             owner_user_id=None,
             target_date=target_date,
             status=status_choice,
-            completed_at=(now - timedelta(days=rng.randint(1, 60)))
-            if status_choice == "completed"
-            else None,
-            verification_notes="Verified on site walk-down."
-            if status_choice == "completed"
-            else "",
+            completed_at=(now - timedelta(days=rng.randint(1, 60))) if status_choice == "completed" else None,
+            verification_notes="Verified on site walk-down." if status_choice == "completed" else "",
             root_cause_category=rng.choice(_ROOT_CAUSES + (None,)),
             created_by=None,
         )
@@ -550,9 +536,7 @@ async def seed_hse_advanced_demo(
             owner_name=_NAMES[idx % len(_NAMES)],
             owner_company=_COMPANIES[idx % len(_COMPANIES)],
             cert_type=_CERT_TYPES[idx % len(_CERT_TYPES)],
-            issued_by=rng.choice(
-                ["OSHA", "IOSH", "NEBOSH", "TÜV", "BG BAU", "City & Guilds"]
-            ),
+            issued_by=rng.choice(["OSHA", "IOSH", "NEBOSH", "TÜV", "BG BAU", "City & Guilds"]),
             issue_date=valid_until - timedelta(days=730),
             valid_until=valid_until,
             document_url=None,

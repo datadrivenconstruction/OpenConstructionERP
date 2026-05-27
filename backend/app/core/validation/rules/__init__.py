@@ -61,14 +61,11 @@ def _get_leaf_positions(context: ValidationContext) -> list[dict[str, Any]]:
     metadata field.
     """
     positions = _get_positions(context)
-    parent_ids: set[str] = {
-        str(p["parent_id"]) for p in positions
-        if p.get("parent_id")
-    }
+    parent_ids: set[str] = {str(p["parent_id"]) for p in positions if p.get("parent_id")}
     return [
-        pos for pos in positions
-        if (pos.get("type") or "position") != "section"
-        and str(pos.get("id") or "") not in parent_ids
+        pos
+        for pos in positions
+        if (pos.get("type") or "position") != "section" and str(pos.get("id") or "") not in parent_ids
     ]
 
 
@@ -253,9 +250,7 @@ class PositionHasQuantity(ValidationRule):
             qty = pos.get("quantity", 0)
             qty_num = _to_number(qty)
             passed = (
-                qty_num is not None
-                and qty_num is not _NOT_A_NUMBER
-                and qty_num > 0  # type: ignore[operator]
+                qty_num is not None and qty_num is not _NOT_A_NUMBER and qty_num > 0  # type: ignore[operator]
             )
             if passed:
                 message = _ok(locale)
@@ -300,9 +295,7 @@ class PositionHasUnitRate(ValidationRule):
             rate = pos.get("unit_rate", 0)
             rate_num = _to_number(rate)
             passed = (
-                rate_num is not None
-                and rate_num is not _NOT_A_NUMBER
-                and rate_num > 0  # type: ignore[operator]
+                rate_num is not None and rate_num is not _NOT_A_NUMBER and rate_num > 0  # type: ignore[operator]
             )
             if passed:
                 message = _ok(locale)
@@ -646,9 +639,7 @@ class GAEBLVStructure(ValidationRule):
         if not positions:
             return []
 
-        parent_ids: set[str] = {
-            str(p.get("parent_id")) for p in positions if p.get("parent_id") is not None
-        }
+        parent_ids: set[str] = {str(p.get("parent_id")) for p in positions if p.get("parent_id") is not None}
 
         results: list[RuleResult] = []
         for pos in positions:
@@ -845,9 +836,7 @@ class GAEBQuantityDecimals(ValidationRule):
     standard = "gaeb"
     severity = Severity.WARNING
     category = RuleCategory.COMPLIANCE
-    description = (
-        "Quantities should be rounded to at most 3 decimal places for GAEB X83 exports."
-    )
+    description = "Quantities should be rounded to at most 3 decimal places for GAEB X83 exports."
 
     MAX_DECIMALS = 3
 
@@ -1007,13 +996,9 @@ class UnrealisticRate(ValidationRule):
             else:
                 parts: list[str] = []
                 if not rate_ok:
-                    parts.append(
-                        f"unit_rate {_fmt_decimal(rate)} > {self.RATE_THRESHOLD:,}"
-                    )
+                    parts.append(f"unit_rate {_fmt_decimal(rate)} > {self.RATE_THRESHOLD:,}")
                 if not total_ok:
-                    parts.append(
-                        f"total {_fmt_decimal(total)} > {self.TOTAL_THRESHOLD:,}"
-                    )
+                    parts.append(f"total {_fmt_decimal(total)} > {self.TOTAL_THRESHOLD:,}")
                 message = translate(
                     "boq_quality.unrealistic_rate.fail",
                     locale=locale,
@@ -1174,21 +1159,43 @@ class EmptyUnit(ValidationRule):
 # Units that are definitively metric (SI) — m, m2, m3, kg, etc.
 _METRIC_BOQ_UNITS: frozenset[str] = frozenset(
     {
-        "m", "m2", "m3", "m²", "m³",
-        "mm", "cm", "km",
+        "m",
+        "m2",
+        "m3",
+        "m²",
+        "m³",
+        "mm",
+        "cm",
+        "km",
         "lm",  # "laufende meter" (linear metres, common GAEB)
-        "kg", "t", "tonne",
-        "l", "litre", "liter",
+        "kg",
+        "t",
+        "tonne",
+        "l",
+        "litre",
+        "liter",
         "ha",  # hectare
     },
 )
 # Units that are definitively imperial (US/UK) — ft, lb, etc.
 _IMPERIAL_BOQ_UNITS: frozenset[str] = frozenset(
     {
-        "ft", "ft2", "ft3", "sqft", "cuft",
-        "in", "inch", "yd", "sqyd", "cy",  # cubic yards
-        "lb", "lbs", "oz", "ton",  # short ton
-        "gal", "gallon",
+        "ft",
+        "ft2",
+        "ft3",
+        "sqft",
+        "cuft",
+        "in",
+        "inch",
+        "yd",
+        "sqyd",
+        "cy",  # cubic yards
+        "lb",
+        "lbs",
+        "oz",
+        "ton",  # short ton
+        "gal",
+        "gallon",
     },
 )
 
@@ -1213,8 +1220,7 @@ class BOQUnitSystemConsistencyRule(ValidationRule):
     severity = Severity.WARNING
     category = RuleCategory.CONSISTENCY
     description = (
-        "Warn when BOQ positions use units from a different measurement "
-        "system than the project (metric vs imperial)."
+        "Warn when BOQ positions use units from a different measurement system than the project (metric vs imperial)."
     )
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
@@ -1246,10 +1252,7 @@ class BOQUnitSystemConsistencyRule(ValidationRule):
                 )
             ]
         # The "wrong" set is the OTHER system.
-        wrong_set = (
-            _IMPERIAL_BOQ_UNITS if project_system == "metric"
-            else _METRIC_BOQ_UNITS
-        )
+        wrong_set = _IMPERIAL_BOQ_UNITS if project_system == "metric" else _METRIC_BOQ_UNITS
         wrong_label = "imperial" if project_system == "metric" else "metric"
 
         mismatches: list[dict[str, str]] = []
@@ -1420,7 +1423,8 @@ _NRM_ELEM_TO_MF_DIV: dict[str, str] = {
 
 
 def _normalize_country_code(
-    metadata: dict[str, Any], region: str | None,
+    metadata: dict[str, Any],
+    region: str | None,
 ) -> str | None:
     """Resolve the active country code from metadata or fall back to region."""
     cc = metadata.get("country_code") if isinstance(metadata, dict) else None
@@ -1529,8 +1533,7 @@ class ClassificationCountryMismatchRule(ValidationRule):
             if cls.get("din276"):
                 # KG 3xx → NRM 2, 4xx → 5, 5xx → 8 (rough)
                 kg = str(cls["din276"]).strip()[:1]
-                kg_to_nrm = {"1": "0", "2": "1", "3": "2", "4": "5",
-                             "5": "8", "6": "4", "7": "0"}
+                kg_to_nrm = {"1": "0", "2": "1", "3": "2", "4": "5", "5": "8", "6": "4", "7": "0"}
                 details["suggested_nrm"] = kg_to_nrm.get(kg)
             elif cls.get("masterformat"):
                 mf = str(cls["masterformat"]).strip().split()[0][:2]
@@ -2629,11 +2632,7 @@ class DPGFPricingComplete(ValidationRule):
         positions = _get_positions(context)
         if not positions:
             return []
-        priced = sum(
-            1
-            for p in positions
-            if p.get("unit_rate") and (_num(p["unit_rate"], default=0.0) or 0.0) > 0
-        )
+        priced = sum(1 for p in positions if p.get("unit_rate") and (_num(p["unit_rate"], default=0.0) or 0.0) > 0)
         total = len(positions)
         ratio = priced / total if total > 0 else 0
         passed = ratio >= 0.80
@@ -3243,9 +3242,7 @@ class BC3ValidCode(ValidationRule):
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             classification = pos.get("classification") or {}
-            code = str(
-                classification.get("bc3_code") or classification.get("code") or ""
-            ).strip()
+            code = str(classification.get("bc3_code") or classification.get("code") or "").strip()
             if not code:
                 continue
             # Reject whitespace, leading dot, and shapes the spec forbids.
@@ -3435,9 +3432,7 @@ class PipelineSideEffectGated(ValidationRule):
 
         from app.core.pipeline.registry import node_registry
 
-        node_type: dict[str, str] = {
-            str(n.get("id")): str(n.get("type") or "") for n in nodes
-        }
+        node_type: dict[str, str] = {str(n.get("id")): str(n.get("type") or "") for n in nodes}
         in_edges: dict[str, list[str]] = {nid: [] for nid in node_type}
         for e in edges:
             src = str(e.get("source") or "")
@@ -3558,11 +3553,7 @@ def _propdev_context(context: ValidationContext) -> tuple[Any, Any] | None:
     try:
         import uuid as _uuid
 
-        dev_id = (
-            dev_id_raw
-            if isinstance(dev_id_raw, _uuid.UUID)
-            else _uuid.UUID(str(dev_id_raw))
-        )
+        dev_id = dev_id_raw if isinstance(dev_id_raw, _uuid.UUID) else _uuid.UUID(str(dev_id_raw))
     except (ValueError, AttributeError, TypeError):
         return None
     return session, dev_id
@@ -3586,7 +3577,7 @@ _IBAN_LENGTHS: dict[str, int] = {
     "ES": 24,
     "FR": 27,
     "GB": 22,
-    "IN": 0,    # India does not use IBAN (length=0 → skip length check)
+    "IN": 0,  # India does not use IBAN (length=0 → skip length check)
     "IT": 27,
     "NL": 18,
     "PL": 28,
@@ -3595,7 +3586,7 @@ _IBAN_LENGTHS: dict[str, int] = {
     "SA": 24,  # Saudi Arabia (CMA)
     "TR": 26,
     "UA": 29,
-    "US": 0,    # US does not use IBAN
+    "US": 0,  # US does not use IBAN
 }
 
 
@@ -3964,8 +3955,7 @@ class PropDevSalesContractPartyOwnershipSumsTo100(ValidationRule):
     severity = Severity.ERROR
     category = RuleCategory.CONSISTENCY
     description = (
-        "Every SalesContract's parties must collectively own 100.00% — "
-        "neither over-subscribed nor under-allocated."
+        "Every SalesContract's parties must collectively own 100.00% — neither over-subscribed nor under-allocated."
     )
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
@@ -3985,13 +3975,9 @@ class PropDevSalesContractPartyOwnershipSumsTo100(ValidationRule):
 
         # SalesContracts indirectly belong to a Development through Plot.
         contract_stmt = (
-            _sql_select(SalesContract)
-            .join(Plot, Plot.id == SalesContract.plot_id)
-            .where(Plot.development_id == dev_id)
+            _sql_select(SalesContract).join(Plot, Plot.id == SalesContract.plot_id).where(Plot.development_id == dev_id)
         )
-        contracts = list(
-            (await session.execute(contract_stmt)).scalars().all()
-        )
+        contracts = list((await session.execute(contract_stmt)).scalars().all())
         if not contracts:
             return [
                 RuleResult(
@@ -4006,9 +3992,7 @@ class PropDevSalesContractPartyOwnershipSumsTo100(ValidationRule):
         results: list[RuleResult] = []
         any_bad = False
         for c in contracts:
-            party_stmt = _sql_select(ContractParty).where(
-                ContractParty.sales_contract_id == c.id
-            )
+            party_stmt = _sql_select(ContractParty).where(ContractParty.sales_contract_id == c.id)
             parties = list((await session.execute(party_stmt)).scalars().all())
             if not parties:
                 # Draft contracts with zero parties → out of scope; skip.
@@ -4090,13 +4074,9 @@ class PropDevPaymentScheduleInstalmentsSumToContractValue(ValidationRule):
         )
 
         contract_stmt = (
-            _sql_select(SalesContract)
-            .join(Plot, Plot.id == SalesContract.plot_id)
-            .where(Plot.development_id == dev_id)
+            _sql_select(SalesContract).join(Plot, Plot.id == SalesContract.plot_id).where(Plot.development_id == dev_id)
         )
-        contracts = list(
-            (await session.execute(contract_stmt)).scalars().all()
-        )
+        contracts = list((await session.execute(contract_stmt)).scalars().all())
         if not contracts:
             return [
                 RuleResult(
@@ -4111,21 +4091,13 @@ class PropDevPaymentScheduleInstalmentsSumToContractValue(ValidationRule):
         results: list[RuleResult] = []
         any_bad = False
         for c in contracts:
-            sched_stmt = _sql_select(PaymentSchedule).where(
-                PaymentSchedule.sales_contract_id == c.id
-            )
-            sched = (
-                await session.execute(sched_stmt)
-            ).scalar_one_or_none()
+            sched_stmt = _sql_select(PaymentSchedule).where(PaymentSchedule.sales_contract_id == c.id)
+            sched = (await session.execute(sched_stmt)).scalar_one_or_none()
             if sched is None:
                 # No schedule yet — not the consistency rule's concern.
                 continue
-            inst_stmt = _sql_select(Instalment).where(
-                Instalment.schedule_id == sched.id
-            )
-            instalments = list(
-                (await session.execute(inst_stmt)).scalars().all()
-            )
+            inst_stmt = _sql_select(Instalment).where(Instalment.schedule_id == sched.id)
+            instalments = list((await session.execute(inst_stmt)).scalars().all())
             instalment_total = sum(
                 (Decimal(str(i.amount or 0)) for i in instalments),
                 Decimal("0"),
@@ -4211,9 +4183,7 @@ class PropDevReservationExpiryInFuture(ValidationRule):
             .where(Plot.development_id == dev_id)
             .where(Reservation.status == "active")
         )
-        reservations = list(
-            (await session.execute(stmt)).scalars().all()
-        )
+        reservations = list((await session.execute(stmt)).scalars().all())
         if not reservations:
             return [
                 RuleResult(
@@ -4339,9 +4309,7 @@ class PropDevBrokerCommissionRateWithinBounds(ValidationRule):
                 CommissionAgreement.development_id.is_(None),
             )
         )
-        agreements = list(
-            (await session.execute(stmt)).scalars().all()
-        )
+        agreements = list((await session.execute(stmt)).scalars().all())
         if not agreements:
             return [
                 RuleResult(
@@ -4371,9 +4339,7 @@ class PropDevBrokerCommissionRateWithinBounds(ValidationRule):
                     # Heuristic: rate may be expressed as 0.025 (=2.5%) or 2.5.
                     rate = pct / Decimal("100") if pct > Decimal("1") else pct
                     if rate < Decimal("0.001") or rate > Decimal("0.15"):
-                        issue = (
-                            f"percent rate {pct} outside permitted range 0.1%-15%"
-                        )
+                        issue = f"percent rate {pct} outside permitted range 0.1%-15%"
             elif stype == "flat":
                 amt_raw = structure.get("amount") if isinstance(structure, dict) else None
                 try:
@@ -4459,9 +4425,7 @@ class PropDevPriceMatrixNoNegativeModifier(ValidationRule):
 
         from app.modules.property_dev.models import PriceMatrix
 
-        stmt = _sql_select(PriceMatrix).where(
-            PriceMatrix.development_id == dev_id
-        )
+        stmt = _sql_select(PriceMatrix).where(PriceMatrix.development_id == dev_id)
         matrices = list((await session.execute(stmt)).scalars().all())
         if not matrices:
             return [

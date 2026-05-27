@@ -68,7 +68,4 @@ class FileSearchIndex(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<FileSearchIndex project={self.project_id} "
-            f"kind={self.file_kind} file_id={self.file_id}>"
-        )
+        return f"<FileSearchIndex project={self.project_id} kind={self.file_kind} file_id={self.file_id}>"

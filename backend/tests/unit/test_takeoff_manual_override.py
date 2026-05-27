@@ -19,9 +19,8 @@ All tests are pure-Python — no DB, no HTTP, no filesystem.
 
 from __future__ import annotations
 
-import decimal
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -30,7 +29,6 @@ from app.modules.takeoff.service import (
     TakeoffService,
     recompute_measurement_value,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -97,8 +95,7 @@ class TestMeasurementModelHasNoConfidence:
 
         columns = {col.key for col in TakeoffMeasurement.__table__.columns}
         assert "confidence" not in columns, (
-            "TakeoffMeasurement must not have a confidence column. "
-            "Manual measurements have no AI score."
+            "TakeoffMeasurement must not have a confidence column. Manual measurements have no AI score."
         )
 
     def test_takeoff_measurement_no_ai_confidence_column(self) -> None:
@@ -107,9 +104,7 @@ class TestMeasurementModelHasNoConfidence:
 
         columns = {col.key for col in TakeoffMeasurement.__table__.columns}
         for name in ("ai_confidence", "score", "certainty"):
-            assert name not in columns, (
-                f"TakeoffMeasurement must not have '{name}' column."
-            )
+            assert name not in columns, f"TakeoffMeasurement must not have '{name}' column."
 
 
 # ---------------------------------------------------------------------------
@@ -158,9 +153,7 @@ class TestManualOverrideUpdatesValue:
         recomputed = captured.get("measurement_value")
         assert recomputed is not None
         # 500 px / 100 px/m = 5.0 m — client's 9999.0 must be ignored
-        assert abs(recomputed - 5.0) < 0.01, (
-            f"Expected recomputed value ~5.0 m, got {recomputed}"
-        )
+        assert abs(recomputed - 5.0) < 0.01, f"Expected recomputed value ~5.0 m, got {recomputed}"
 
     @pytest.mark.asyncio
     async def test_patch_without_geometry_preserves_existing_value(self) -> None:
@@ -188,9 +181,7 @@ class TestManualOverrideUpdatesValue:
 
         # measurement_value should NOT be in the captured fields since
         # no geometry trigger was touched.
-        assert "measurement_value" not in captured, (
-            "Non-geometry PATCH must not recompute measurement_value"
-        )
+        assert "measurement_value" not in captured, "Non-geometry PATCH must not recompute measurement_value"
 
 
 # ---------------------------------------------------------------------------

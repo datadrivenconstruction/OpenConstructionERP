@@ -79,21 +79,18 @@ class ResourcesMatcher:
         # The catalogue is small (typically <50K rows) so a full scan is
         # acceptable; for larger tenants we'll add an FTS index in
         # Phase A.10+.
-        stmt = (
-            select(
-                CatalogResource.id,
-                CatalogResource.resource_code,
-                CatalogResource.name,
-                CatalogResource.resource_type,
-                CatalogResource.category,
-                CatalogResource.unit,
-                CatalogResource.base_price,
-                CatalogResource.currency,
-                CatalogResource.region,
-                CatalogResource.source,
-            )
-            .where(CatalogResource.is_active.is_(True))
-        )
+        stmt = select(
+            CatalogResource.id,
+            CatalogResource.resource_code,
+            CatalogResource.name,
+            CatalogResource.resource_type,
+            CatalogResource.category,
+            CatalogResource.unit,
+            CatalogResource.base_price,
+            CatalogResource.currency,
+            CatalogResource.region,
+            CatalogResource.source,
+        ).where(CatalogResource.is_active.is_(True))
         # Currency-aware filter — same universality story as LexicalMatcher.
         # A USD project shouldn't see EUR resources pretending to be USD
         # rates; restrict to project currency or unstamped legacy rows.
@@ -117,21 +114,19 @@ class ResourcesMatcher:
         # Match against name + category to broaden recall — "concrete"
         # in the query should hit resources whose name is "Beton C30/37"
         # via the category "Concrete & Cement".
-        choices: dict[int, str] = {
-            idx: f"{row.name} — {row.category}" for idx, row in enumerate(rows)
-        }
+        choices: dict[int, str] = {idx: f"{row.name} — {row.category}" for idx, row in enumerate(rows)}
         scored = process.extract(
-            query, choices, scorer=fuzz.token_set_ratio, limit=top_k,
+            query,
+            choices,
+            scorer=fuzz.token_set_ratio,
+            limit=top_k,
         )
 
         # Language hint for the lex-threshold profile — ``ElementEnvelope``
         # exposes the upstream extractor's detection as ``source_lang``;
         # ``project_region`` is the fallback when the source itself is
         # untagged (no extractor language available).
-        lang_hint = (
-            (envelope.source_lang or "")
-            or (envelope.project_region or "").split("_", 1)[0].lower()
-        )
+        lang_hint = (envelope.source_lang or "") or (envelope.project_region or "").split("_", 1)[0].lower()
 
         out: list[MatchCandidate] = []
         for _matched, score, idx in scored:

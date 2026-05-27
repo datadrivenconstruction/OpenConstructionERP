@@ -39,9 +39,7 @@ def _validate_currency_code(value: str | None) -> str | None:
     if not cleaned:
         raise ValueError("currency_code must not be blank")
     if not _CURRENCY_CODE_RE.match(cleaned):
-        raise ValueError(
-            f"currency_code must be a 3-letter ISO-4217 code, got {value!r}"
-        )
+        raise ValueError(f"currency_code must be a 3-letter ISO-4217 code, got {value!r}")
     return cleaned
 
 
@@ -62,9 +60,7 @@ def _validate_money_amount(value: str | None, field: str) -> str | None:
     try:
         d = Decimal(cleaned)
     except (InvalidOperation, ValueError) as exc:
-        raise ValueError(
-            f"{field} must be a valid decimal number, got {value!r}"
-        ) from exc
+        raise ValueError(f"{field} must be a valid decimal number, got {value!r}") from exc
     if not d.is_finite():
         raise ValueError(f"{field} must be finite, got {value!r}")
     if d < 0:
@@ -73,10 +69,9 @@ def _validate_money_amount(value: str | None, field: str) -> str | None:
     # but rejects pathological inputs like "1.0000000000000000000001".
     sign, _digits, exponent = d.as_tuple()
     if isinstance(exponent, int) and exponent < -6:
-        raise ValueError(
-            f"{field} has too many decimal places (max 6), got {value!r}"
-        )
+        raise ValueError(f"{field} has too many decimal places (max 6), got {value!r}")
     return format(d, "f")
+
 
 # ── RFQ ─────────────────────────────────────────────────────────────────────
 

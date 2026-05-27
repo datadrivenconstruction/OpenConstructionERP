@@ -45,12 +45,12 @@ import pytest_asyncio  # noqa: E402
 from fastapi import HTTPException, UploadFile  # noqa: E402
 from starlette.datastructures import Headers  # noqa: E402
 
-# Ensure ORM registration before create_all().
-import app.modules.projects.models  # noqa: E402, F401
-import app.modules.users.models  # noqa: E402, F401
 import app.modules.documents.models  # noqa: E402, F401
 import app.modules.dwg_takeoff.models  # noqa: E402, F401
 
+# Ensure ORM registration before create_all().
+import app.modules.projects.models  # noqa: E402, F401
+import app.modules.users.models  # noqa: E402, F401
 from app.modules.dwg_takeoff import router as dwg_router  # noqa: E402
 from app.modules.dwg_takeoff.models import DwgAnnotation, DwgDrawing  # noqa: E402
 from app.modules.dwg_takeoff.service import (  # noqa: E402
@@ -59,14 +59,10 @@ from app.modules.dwg_takeoff.service import (  # noqa: E402
     _validate_cad_magic_bytes,
 )
 
-
 # ── Helpers ───────────────────────────────────────────────────────────────
 
 
-_MINIMAL_DXF = (
-    b"  0\r\nSECTION\r\n  2\r\nHEADER\r\n  0\r\n"
-    b"ENDSEC\r\n  0\r\nEOF\r\n"
-)
+_MINIMAL_DXF = b"  0\r\nSECTION\r\n  2\r\nHEADER\r\n  0\r\nENDSEC\r\n  0\r\nEOF\r\n"
 
 
 def _make_upload(payload: bytes, filename: str) -> UploadFile:
@@ -206,9 +202,7 @@ def test_every_router_endpoint_has_auth_or_permission() -> None:
         deps = collect_dep_names(route.dependant)
         if not any(token in dep for dep in deps for token in auth_dep_names):
             missing.append(f"{route.methods} {route.path} deps={deps}")
-    assert not missing, (
-        "Endpoints missing auth: " + "; ".join(missing)
-    )
+    assert not missing, "Endpoints missing auth: " + "; ".join(missing)
 
 
 # ── 3. Decimal round-trip happy-path ──────────────────────────────────────
@@ -307,8 +301,12 @@ async def test_upload_drawing_rejects_renamed_pdf(db_session) -> None:
     from sqlalchemy import select
 
     rows = (
-        await db_session.execute(
-            select(DwgDrawing).where(DwgDrawing.project_id == project_id),
+        (
+            await db_session.execute(
+                select(DwgDrawing).where(DwgDrawing.project_id == project_id),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     assert rows == []

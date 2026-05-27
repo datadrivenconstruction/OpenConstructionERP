@@ -7,8 +7,7 @@ manifest = ModuleManifest(
     version="0.1.0",
     display_name="Equipment & Fleet Management",
     description=(
-        "Owned/rented equipment fleet with telemetry, maintenance scheduling, "
-        "inspections, internal rental billing"
+        "Owned/rented equipment fleet with telemetry, maintenance scheduling, inspections, internal rental billing"
     ),
     author="OpenConstructionERP Core Team",
     category="business",

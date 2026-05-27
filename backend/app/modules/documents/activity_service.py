@@ -84,9 +84,11 @@ async def record_activity(
             age = now_utc - latest_ts
             if timedelta(0) <= age <= _DEDUPE_WINDOW:
                 logger.debug(
-                    "Skipping duplicate activity %s for doc %s (user=%s, "
-                    "within %s)",
-                    action, document_id, user_id, _DEDUPE_WINDOW,
+                    "Skipping duplicate activity %s for doc %s (user=%s, within %s)",
+                    action,
+                    document_id,
+                    user_id,
+                    _DEDUPE_WINDOW,
                 )
                 return None
 
@@ -102,7 +104,8 @@ async def record_activity(
     except Exception:
         logger.exception(
             "Failed to record document activity (doc=%s action=%s)",
-            document_id, action,
+            document_id,
+            action,
         )
         return None
 

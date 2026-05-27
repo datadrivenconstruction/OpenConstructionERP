@@ -178,19 +178,22 @@ def _safe_count(seq: Sequence[Any] | None) -> int:
 
 
 async def _collect_documents(
-    session: AsyncSession, project_id: str,
+    session: AsyncSession,
+    project_id: str,
 ) -> list[FileRow]:
     try:
         from app.modules.documents.models import Document
     except ImportError:
         return []
     rows = (
-        await session.execute(
-            select(Document)
-            .where(Document.project_id == project_id)
-            .limit(_PER_COLLECTOR_LIMIT),
+        (
+            await session.execute(
+                select(Document).where(Document.project_id == project_id).limit(_PER_COLLECTOR_LIMIT),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     out: list[FileRow] = []
     for r in rows:
         path = r.file_path or ""
@@ -222,19 +225,22 @@ async def _collect_documents(
 
 
 async def _collect_photos(
-    session: AsyncSession, project_id: str,
+    session: AsyncSession,
+    project_id: str,
 ) -> list[FileRow]:
     try:
         from app.modules.documents.models import ProjectPhoto
     except ImportError:
         return []
     rows = (
-        await session.execute(
-            select(ProjectPhoto)
-            .where(ProjectPhoto.project_id == project_id)
-            .limit(_PER_COLLECTOR_LIMIT),
+        (
+            await session.execute(
+                select(ProjectPhoto).where(ProjectPhoto.project_id == project_id).limit(_PER_COLLECTOR_LIMIT),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     out: list[FileRow] = []
     for r in rows:
         path = r.file_path
@@ -251,16 +257,8 @@ async def _collect_photos(
                 physical_path=path,
                 relative_path=_relative_path(path, project_id),
                 download_url=f"/api/v1/documents/photos/{r.id}/file/",
-                preview_url=(
-                    f"/api/v1/documents/photos/{r.id}/thumb/"
-                    if r.thumbnail_path
-                    else None
-                ),
-                thumbnail_url=(
-                    f"/api/v1/documents/photos/{r.id}/thumb/"
-                    if r.thumbnail_path
-                    else None
-                ),
+                preview_url=(f"/api/v1/documents/photos/{r.id}/thumb/" if r.thumbnail_path else None),
+                thumbnail_url=(f"/api/v1/documents/photos/{r.id}/thumb/" if r.thumbnail_path else None),
                 category=r.category,
                 extra={
                     "gps_lat": r.gps_lat,
@@ -273,19 +271,22 @@ async def _collect_photos(
 
 
 async def _collect_sheets(
-    session: AsyncSession, project_id: str,
+    session: AsyncSession,
+    project_id: str,
 ) -> list[FileRow]:
     try:
         from app.modules.documents.models import Document, Sheet
     except ImportError:
         return []
     rows = (
-        await session.execute(
-            select(Sheet)
-            .where(Sheet.project_id == project_id)
-            .limit(_PER_COLLECTOR_LIMIT),
+        (
+            await session.execute(
+                select(Sheet).where(Sheet.project_id == project_id).limit(_PER_COLLECTOR_LIMIT),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     # A sheet's only physical artifact is its thumbnail PNG, which is
     # frequently absent (snapshot-seeded data, lazy thumbnailing). Rather
     # than report a misleading 0, fall back to an even per-page share of
@@ -312,10 +313,7 @@ async def _collect_sheets(
         # Sheets are extracted pages of a parent PDF document. The "physical
         # file" here is the thumbnail PNG; the source PDF is reachable via
         # r.document_id and shows up under the documents collector.
-        name = (
-            r.sheet_title
-            or (f"Sheet {r.sheet_number}" if r.sheet_number else f"Page {r.page_number}")
-        )
+        name = r.sheet_title or (f"Sheet {r.sheet_number}" if r.sheet_number else f"Page {r.page_number}")
         out.append(
             FileRow(
                 id=str(r.id),
@@ -325,8 +323,7 @@ async def _collect_sheets(
                 size_bytes=(
                     _file_size(path)
                     or (
-                        doc_size.get(str(r.document_id), 0)
-                        // max(sheets_per_doc.get(r.document_id, 1), 1)
+                        doc_size.get(str(r.document_id), 0) // max(sheets_per_doc.get(r.document_id, 1), 1)
                         if r.document_id
                         else 0
                     )
@@ -353,7 +350,8 @@ async def _collect_sheets(
 
 
 async def _collect_bim_models(
-    session: AsyncSession, project_id: str,
+    session: AsyncSession,
+    project_id: str,
 ) -> list[FileRow]:
     try:
         from app.modules.bim_hub import file_storage as bim_file_storage
@@ -361,12 +359,14 @@ async def _collect_bim_models(
     except ImportError:
         return []
     rows = (
-        await session.execute(
-            select(BIMModel)
-            .where(BIMModel.project_id == project_id)
-            .limit(_PER_COLLECTOR_LIMIT),
+        (
+            await session.execute(
+                select(BIMModel).where(BIMModel.project_id == project_id).limit(_PER_COLLECTOR_LIMIT),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     out: list[FileRow] = []
     for r in rows:
         path = r.canonical_file_path or ""
@@ -378,7 +378,8 @@ async def _collect_bim_models(
         if not size:
             try:
                 size = await bim_file_storage.compute_artifact_size_bytes(
-                    project_id, r.id,
+                    project_id,
+                    r.id,
                 )
             except Exception:  # noqa: BLE001 - best-effort sizing
                 size = 0
@@ -394,11 +395,7 @@ async def _collect_bim_models(
                 modified_at=getattr(r, "updated_at", None) or getattr(r, "created_at", None),
                 physical_path=path,
                 relative_path=_relative_path(path, project_id),
-                download_url=(
-                    f"/api/v1/bim_hub/models/{r.id}/download/"
-                    if path
-                    else None
-                ),
+                download_url=(f"/api/v1/bim_hub/models/{r.id}/download/" if path else None),
                 preview_url=None,
                 discipline=r.discipline,
                 extra={
@@ -414,19 +411,22 @@ async def _collect_bim_models(
 
 
 async def _collect_dwg_drawings(
-    session: AsyncSession, project_id: str,
+    session: AsyncSession,
+    project_id: str,
 ) -> list[FileRow]:
     try:
         from app.modules.dwg_takeoff.models import DwgDrawing
     except ImportError:
         return []
     rows = (
-        await session.execute(
-            select(DwgDrawing)
-            .where(DwgDrawing.project_id == project_id)
-            .limit(_PER_COLLECTOR_LIMIT),
+        (
+            await session.execute(
+                select(DwgDrawing).where(DwgDrawing.project_id == project_id).limit(_PER_COLLECTOR_LIMIT),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     out: list[FileRow] = []
     for r in rows:
         path = r.file_path
@@ -446,16 +446,8 @@ async def _collect_dwg_drawings(
                 # informative.
                 relative_path=Path(path).name if path else "",
                 download_url=f"/api/v1/dwg-takeoff/drawings/{r.id}/download/",
-                preview_url=(
-                    f"/api/v1/dwg-takeoff/drawings/{r.id}/thumbnail/"
-                    if r.thumbnail_key
-                    else None
-                ),
-                thumbnail_url=(
-                    f"/api/v1/dwg-takeoff/drawings/{r.id}/thumbnail/"
-                    if r.thumbnail_key
-                    else None
-                ),
+                preview_url=(f"/api/v1/dwg-takeoff/drawings/{r.id}/thumbnail/" if r.thumbnail_key else None),
+                thumbnail_url=(f"/api/v1/dwg-takeoff/drawings/{r.id}/thumbnail/" if r.thumbnail_key else None),
                 discipline=r.discipline,
                 extra={
                     "file_format": r.file_format,
@@ -502,7 +494,9 @@ async def list_project_files(
             rows.extend(await fn(session, project_id))
         except Exception:  # noqa: BLE001 — see docstring
             logger.exception(
-                "file-manager: %s collector failed for project %s — skipped", kind, project_id,
+                "file-manager: %s collector failed for project %s — skipped",
+                kind,
+                project_id,
             )
 
     # Filters
@@ -583,9 +577,7 @@ async def file_tree(
             continue
         # Pick the deepest common parent — anchors the path-bar header.
         first_path = kind_rows[0].physical_path
-        physical_parent = (
-            str(Path(first_path).parent) if first_path else None
-        )
+        physical_parent = str(Path(first_path).parent) if first_path else None
         tree.append(
             FileTreeNode(
                 # id IS the FileKind so the UI can reuse it as a filter
@@ -605,7 +597,10 @@ async def file_tree(
 
 
 def resolve_storage_locations(
-    project_id: str, project_name: str, *, settings: Any | None = None,
+    project_id: str,
+    project_name: str,
+    *,
+    settings: Any | None = None,
 ) -> StorageLocations:
     """Where does this project's data actually live on disk?
 
@@ -650,6 +645,7 @@ def resolve_storage_locations(
     bim_root: str | None = None
     try:
         from app.core.storage import _default_local_base_dir
+
         bim_root = str(_default_local_base_dir() / "bim" / project_id)
     except ImportError:
         pass
@@ -673,9 +669,7 @@ def resolve_storage_locations(
 
     backend_name = "local"
     if settings is not None:
-        backend_name = (
-            getattr(settings, "storage_backend", "local") or "local"
-        ).lower()
+        backend_name = (getattr(settings, "storage_backend", "local") or "local").lower()
 
     return StorageLocations(
         project_id=str(project_id),

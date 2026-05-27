@@ -76,8 +76,7 @@ PACK_CONFIG: dict[str, Any] = {
             "code": "MES",
             "name": "MES — Military Engineer Services",
             "description": (
-                "Schedule of rates for defence construction works; "
-                "often referenced for government projects"
+                "Schedule of rates for defence construction works; often referenced for government projects"
             ),
         },
         {
@@ -175,8 +174,7 @@ PACK_CONFIG: dict[str, Any] = {
             "code": "RA_BILL",
             "name": "Running Account (RA) Bill",
             "description": (
-                "Interim payment bill based on measured work; "
-                "standard payment mechanism for government contracts"
+                "Interim payment bill based on measured work; standard payment mechanism for government contracts"
             ),
             "fields": [
                 "bill_number",

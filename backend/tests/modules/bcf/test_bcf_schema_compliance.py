@@ -137,9 +137,7 @@ def test_visinfo_exactly_one_camera() -> None:
     t = _full_topic()
     raw = build_visinfo_xml(t.viewpoints[0])
     root = ET.fromstring(raw)
-    cam_count = sum(
-        1 for c in root if c.tag in ("PerspectiveCamera", "OrthogonalCamera")
-    )
+    cam_count = sum(1 for c in root if c.tag in ("PerspectiveCamera", "OrthogonalCamera"))
     assert cam_count == 1
 
 
@@ -181,17 +179,16 @@ def test_lxml_strict_well_formedness_if_available() -> None:
     lxml_etree = pytest.importorskip("lxml.etree")
     t = _full_topic()
     # Whole-archive blob.
-    blob = (
-        BCFWriter()
-        .set_project("p1", "P1")
-        .add_topic(t)
-        .build_bytes()
-    )
+    blob = BCFWriter().set_project("p1", "P1").add_topic(t).build_bytes()
     with zipfile.ZipFile(io.BytesIO(blob)) as zf:
         xml_members = [
-            n for n in zf.namelist()
-            if n.endswith(".xml") or n.endswith(".bcf") or n.endswith(".bcfv")
-            or n == "bcf.version" or n == "project.bcfp"
+            n
+            for n in zf.namelist()
+            if n.endswith(".xml")
+            or n.endswith(".bcf")
+            or n.endswith(".bcfv")
+            or n == "bcf.version"
+            or n == "project.bcfp"
         ]
         assert xml_members
         for name in xml_members:

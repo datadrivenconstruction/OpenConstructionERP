@@ -44,7 +44,7 @@ import logging
 import sqlite3
 import sys
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -223,19 +223,12 @@ def _read_workbook(xlsx: Path) -> dict[str, list[dict[str, Any]]]:
         headers = next(rows_iter, None)
         if not headers:
             continue
-        header_map = {
-            (h.strip().lower() if isinstance(h, str) else None): i
-            for i, h in enumerate(headers)
-        }
+        header_map = {(h.strip().lower() if isinstance(h, str) else None): i for i, h in enumerate(headers)}
         rows: list[dict[str, Any]] = []
         for raw in rows_iter:
             if raw is None:
                 continue
-            row = {
-                key: raw[idx]
-                for key, idx in header_map.items()
-                if key is not None and idx < len(raw)
-            }
+            row = {key: raw[idx] for key, idx in header_map.items() if key is not None and idx < len(raw)}
             rows.append(row)
         result[sheet_name] = rows
     wb.close()
@@ -254,10 +247,7 @@ def _resolve_owner_id(conn: sqlite3.Connection, email: str | None) -> str:
         if row:
             return row[0]
         logger.warning("Owner email not found: %s — falling back to first admin", email)
-    cur.execute(
-        "SELECT id FROM oe_users_user WHERE role = 'admin' "
-        "ORDER BY created_at ASC LIMIT 1"
-    )
+    cur.execute("SELECT id FROM oe_users_user WHERE role = 'admin' ORDER BY created_at ASC LIMIT 1")
     row = cur.fetchone()
     if not row:
         logger.error("No admin user found in DB. Cannot assign tenant_id.")
@@ -349,7 +339,7 @@ def _process_workbook(
     existing = _fetch_existing(conn, emails)
 
     cur = conn.cursor()
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
     for sheet_name, row in pending:
         contact_type, tier_tag = SHEET_TO_TYPE[sheet_name]
@@ -357,16 +347,12 @@ def _process_workbook(
         first_name, last_name = _split_name(row.get("name"))
         company = (str(row.get("company")).strip() if row.get("company") else None) or None
         country_iso = _normalise_country(row.get("country"))
-        last_subject = (
-            str(row.get("last_subject")).strip() if row.get("last_subject") else None
-        )
+        last_subject = str(row.get("last_subject")).strip() if row.get("last_subject") else None
         notes = last_subject or None
 
         topics = _split_csv(row.get("topics"))
         inboxes = _split_csv(row.get("inboxes"))
-        language = (
-            str(row.get("language")).strip().lower() if row.get("language") else None
-        )
+        language = str(row.get("language")).strip().lower() if row.get("language") else None
 
         tags = _build_tags(
             group=sheet_name.split("_", 1)[1],  # paid_customers / hot_leads / ...

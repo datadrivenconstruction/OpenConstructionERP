@@ -191,9 +191,7 @@ class _Requirement:
             ok = self.restriction.matches(actual)
             return (
                 ok,
-                "OK"
-                if ok
-                else f"{self._target()} value '{actual}' violates restriction",
+                "OK" if ok else f"{self._target()} value '{actual}' violates restriction",
             )
 
         # cardinality == required (default)
@@ -204,9 +202,7 @@ class _Requirement:
         ok = self.restriction.matches(actual)
         return (
             ok,
-            "OK"
-            if ok
-            else f"{self._target()} value '{actual}' violates restriction",
+            "OK" if ok else f"{self._target()} value '{actual}' violates restriction",
         )
 
     def _target(self) -> str:
@@ -305,9 +301,7 @@ def _parse_restriction(value_el: ET.Element | None) -> _ValueRestriction:
 
     # xs:restriction lookups — try ids namespace, then xs namespace, then bare.
     restriction = (
-        _find(value_el, "xs:restriction")
-        or value_el.find(f"{{{_XS_NS}}}restriction")
-        or value_el.find("restriction")
+        _find(value_el, "xs:restriction") or value_el.find(f"{{{_XS_NS}}}restriction") or value_el.find("restriction")
     )
     enums: list[str] = []
     pattern: str | None = None
@@ -491,12 +485,7 @@ class IDSValidationRule(ValidationRule):
                     passed=passed,
                     message="OK" if passed else "; ".join(failures),
                     element_ref=element_id or None,
-                    details=(
-                        {"failures": failures, "ifc_version": self.ifc_version}
-                        if not passed
-                        else None
-                    )
-                    or {},
+                    details=({"failures": failures, "ifc_version": self.ifc_version} if not passed else None) or {},
                 )
             )
 

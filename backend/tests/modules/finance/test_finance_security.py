@@ -50,7 +50,6 @@ from app.core.permissions import Role, permission_registry
 from app.modules.finance import permissions as finance_perms
 from app.modules.finance import router as finance_router
 from app.modules.finance.schemas import (
-    BudgetCreate,
     BudgetResponse,
     EVMSnapshotCreate,
     InvoiceCreate,
@@ -104,9 +103,7 @@ class _StubInvoiceRepo:
             rows = [r for r in rows if r.project_id == project_id]
         return rows, len(rows)
 
-    async def next_invoice_number(
-        self, project_id: uuid.UUID, direction: str
-    ) -> str:
+    async def next_invoice_number(self, project_id: uuid.UUID, direction: str) -> str:
         self._counter += 1
         return f"INV-{self._counter:04d}"
 
@@ -259,16 +256,20 @@ async def test_require_project_access_returns_404_on_cross_tenant(
             return SimpleNamespace(id=user_id, role="user")
 
     monkeypatch.setattr(
-        "app.modules.projects.repository.ProjectRepository", _StubProjectRepo,
+        "app.modules.projects.repository.ProjectRepository",
+        _StubProjectRepo,
     )
     monkeypatch.setattr(
-        "app.modules.users.repository.UserRepository", _StubUserRepo,
+        "app.modules.users.repository.UserRepository",
+        _StubUserRepo,
     )
 
     # USER_B (no access) → 404, not 403.
     with pytest.raises(HTTPException) as exc_info:
         await finance_router._require_project_access(
-            session=None, project_id=PROJECT_A, user_id=USER_B,  # type: ignore[arg-type]
+            session=None,
+            project_id=PROJECT_A,
+            user_id=USER_B,  # type: ignore[arg-type]
         )
     assert exc_info.value.status_code == 404, (
         f"finance _require_project_access leaks existence on cross-tenant: "
@@ -277,7 +278,9 @@ async def test_require_project_access_returns_404_on_cross_tenant(
 
     # USER_A (owner) → no raise.
     await finance_router._require_project_access(
-        session=None, project_id=PROJECT_A, user_id=USER_A,  # type: ignore[arg-type]
+        session=None,
+        project_id=PROJECT_A,
+        user_id=USER_A,  # type: ignore[arg-type]
     )
 
 
@@ -304,15 +307,19 @@ async def test_require_project_access_missing_project_is_404(
             return SimpleNamespace(id=user_id, role="user")
 
     monkeypatch.setattr(
-        "app.modules.projects.repository.ProjectRepository", _StubProjectRepo,
+        "app.modules.projects.repository.ProjectRepository",
+        _StubProjectRepo,
     )
     monkeypatch.setattr(
-        "app.modules.users.repository.UserRepository", _StubUserRepo,
+        "app.modules.users.repository.UserRepository",
+        _StubUserRepo,
     )
 
     with pytest.raises(HTTPException) as exc_info:
         await finance_router._require_project_access(
-            session=None, project_id=uuid.uuid4(), user_id=USER_A,  # type: ignore[arg-type]
+            session=None,
+            project_id=uuid.uuid4(),
+            user_id=USER_A,  # type: ignore[arg-type]
         )
     assert exc_info.value.status_code == 404
 
@@ -322,7 +329,9 @@ async def test_require_project_access_no_project_id_is_noop() -> None:
     """``project_id=None`` (cross-project dashboard) must not raise — the
     aggregation endpoints handle scoping at the service layer."""
     await finance_router._require_project_access(
-        session=None, project_id=None, user_id=USER_A,  # type: ignore[arg-type]
+        session=None,
+        project_id=None,
+        user_id=USER_A,  # type: ignore[arg-type]
     )
 
 
@@ -332,7 +341,9 @@ async def test_require_project_access_no_user_is_401() -> None:
     a silent 200 or 500."""
     with pytest.raises(HTTPException) as exc_info:
         await finance_router._require_project_access(
-            session=None, project_id=PROJECT_A, user_id=None,  # type: ignore[arg-type]
+            session=None,
+            project_id=PROJECT_A,
+            user_id=None,  # type: ignore[arg-type]
         )
     assert exc_info.value.status_code == 401
 
@@ -366,8 +377,7 @@ def test_router_get_invoice_chains_through_access_guard() -> None:
         handler = getattr(finance_router, handler_name)
         src = inspect.getsource(handler)
         assert "_require_invoice_access" in src, (
-            f"IDOR REGRESSION: finance.{handler_name} no longer chains "
-            f"through _require_invoice_access"
+            f"IDOR REGRESSION: finance.{handler_name} no longer chains through _require_invoice_access"
         )
 
 
@@ -396,12 +406,13 @@ def test_invoice_response_money_fields_are_strings() -> None:
     regression to float would lose precision on the wire."""
     fields = InvoiceResponse.model_fields
     for fname in (
-        "amount_subtotal", "tax_amount", "retention_amount", "amount_total",
+        "amount_subtotal",
+        "tax_amount",
+        "retention_amount",
+        "amount_total",
     ):
         ann = fields[fname].annotation
-        assert ann is str, (
-            f"InvoiceResponse.{fname} must be `str`, got {ann!r}"
-        )
+        assert ann is str, f"InvoiceResponse.{fname} must be `str`, got {ann!r}"
 
 
 def test_payment_response_money_fields_are_strings() -> None:
@@ -412,22 +423,22 @@ def test_payment_response_money_fields_are_strings() -> None:
     fields = PaymentResponse.model_fields
     for fname in ("amount", "exchange_rate_snapshot"):
         ann = fields[fname].annotation
-        assert ann is str, (
-            f"PaymentResponse.{fname} must be `str`, got {ann!r}"
-        )
+        assert ann is str, f"PaymentResponse.{fname} must be `str`, got {ann!r}"
 
 
 def test_budget_response_money_fields_are_strings() -> None:
     """All budget money slots return Decimal-as-string."""
     fields = BudgetResponse.model_fields
     for fname in (
-        "original_budget", "revised_budget", "committed", "actual",
-        "forecast_final", "variance",
+        "original_budget",
+        "revised_budget",
+        "committed",
+        "actual",
+        "forecast_final",
+        "variance",
     ):
         ann = fields[fname].annotation
-        assert ann is str, (
-            f"BudgetResponse.{fname} must be `str`, got {ann!r}"
-        )
+        assert ann is str, f"BudgetResponse.{fname} must be `str`, got {ann!r}"
 
 
 def test_payment_create_rejects_zero_amount() -> None:
@@ -494,8 +505,7 @@ def test_budget_import_router_imports_file_signature() -> None:
     """
     src = Path(finance_router.__file__).read_text(encoding="utf-8")
     assert "file_signature" in src, (
-        "finance/router.py no longer imports file_signature — the "
-        "magic-byte gate on /budgets/import/file/ is gone."
+        "finance/router.py no longer imports file_signature — the magic-byte gate on /budgets/import/file/ is gone."
     )
 
 
@@ -514,6 +524,8 @@ def test_magic_byte_gate_rejects_pe_executable_renamed_as_xlsx() -> None:
     renamed to ``payload.xlsx``."""
     from app.core.file_signature import (
         FileSignatureMismatch,
+    )
+    from app.core.file_signature import (
         require as require_signature,
     )
 
@@ -521,7 +533,9 @@ def test_magic_byte_gate_rejects_pe_executable_renamed_as_xlsx() -> None:
     pe_head = b"MZ\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00\xff\xff\x00\x00"
     with pytest.raises(FileSignatureMismatch):
         require_signature(
-            pe_head, frozenset({"zip", "ole"}), filename="payload.xlsx",
+            pe_head,
+            frozenset({"zip", "ole"}),
+            filename="payload.xlsx",
         )
 
 
@@ -531,7 +545,9 @@ def test_magic_byte_gate_accepts_real_xlsx_signature() -> None:
 
     zip_head = b"PK\x03\x04\x14\x00\x06\x00\x08\x00\x00\x00!\x00\xab\xcd"
     detected = require_signature(
-        zip_head, frozenset({"zip", "ole"}), filename="budget.xlsx",
+        zip_head,
+        frozenset({"zip", "ole"}),
+        filename="budget.xlsx",
     )
     assert detected == "zip"
 
@@ -542,7 +558,9 @@ def test_magic_byte_gate_accepts_legacy_xls_signature() -> None:
 
     ole_head = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x00\x00\x00\x00\x00\x00\x00\x00"
     detected = require_signature(
-        ole_head, frozenset({"zip", "ole"}), filename="budget.xls",
+        ole_head,
+        frozenset({"zip", "ole"}),
+        filename="budget.xls",
     )
     assert detected == "ole"
 
@@ -556,12 +574,16 @@ def test_invoice_status_transitions_table_covers_all_states() -> None:
     and brick the workflow without an explicit allowlist decision.
     """
     expected = {
-        "draft", "pending", "approved", "sent", "paid",
-        "cancelled", "credit_note_issued",
+        "draft",
+        "pending",
+        "approved",
+        "sent",
+        "paid",
+        "cancelled",
+        "credit_note_issued",
     }
     assert expected == _VALID_INVOICE_STATUSES, (
-        f"invoice FSM state set drifted: expected {expected}, "
-        f"got {_VALID_INVOICE_STATUSES}"
+        f"invoice FSM state set drifted: expected {expected}, got {_VALID_INVOICE_STATUSES}"
     )
 
 
@@ -660,14 +682,14 @@ def test_finance_approve_permission_is_manager() -> None:
     EDITOR must NOT satisfy it.
     """
     finance_perms.register_finance_permissions()
-    assert (
-        permission_registry.get_min_role("finance.approve") is Role.MANAGER
-    )
+    assert permission_registry.get_min_role("finance.approve") is Role.MANAGER
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "finance.approve",
+        Role.EDITOR,
+        "finance.approve",
     ), "EDITOR can now approve invoices — RBAC regression"
     assert permission_registry.role_has_permission(
-        Role.MANAGER, "finance.approve",
+        Role.MANAGER,
+        "finance.approve",
     )
 
 
@@ -677,7 +699,8 @@ def test_finance_pay_permission_is_manager() -> None:
     finance_perms.register_finance_permissions()
     assert permission_registry.get_min_role("finance.pay") is Role.MANAGER
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "finance.pay",
+        Role.EDITOR,
+        "finance.pay",
     )
 
 
@@ -685,12 +708,10 @@ def test_finance_record_payment_permission_is_manager() -> None:
     """Recording a payment row is MANAGER+. An EDITOR-level role can no
     longer fabricate ledger entries against an invoice."""
     finance_perms.register_finance_permissions()
-    assert (
-        permission_registry.get_min_role("finance.record_payment")
-        is Role.MANAGER
-    )
+    assert permission_registry.get_min_role("finance.record_payment") is Role.MANAGER
     assert not permission_registry.role_has_permission(
-        Role.EDITOR, "finance.record_payment",
+        Role.EDITOR,
+        "finance.record_payment",
     )
 
 
@@ -717,9 +738,7 @@ def test_router_create_payment_uses_record_payment_permission() -> None:
 def test_service_approve_invoice_writes_audit_log() -> None:
     """Static guard: approve_invoice persists an ActivityLog row."""
     src = inspect.getsource(FinanceService.approve_invoice)
-    assert "log_activity" in src, (
-        "approve_invoice no longer writes an audit row — compliance hole"
-    )
+    assert "log_activity" in src, "approve_invoice no longer writes an audit row — compliance hole"
 
 
 def test_service_pay_invoice_writes_audit_log() -> None:
@@ -732,8 +751,7 @@ def test_service_create_payment_writes_audit_log() -> None:
     the audit trail with the actor id."""
     src = inspect.getsource(FinanceService.create_payment)
     assert "log_activity" in src, (
-        "create_payment no longer writes an audit row — money-moving "
-        "events must always be auditable."
+        "create_payment no longer writes an audit row — money-moving events must always be auditable."
     )
 
 

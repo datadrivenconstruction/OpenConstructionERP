@@ -75,9 +75,7 @@ async def test_get_dashboard_layout_empty_for_new_user(client):
 
     resp = await client.get("/api/v1/users/me/dashboard-layout/", headers=headers)
 
-    assert resp.status_code == 200, (
-        f"Expected 200 but got {resp.status_code}: {resp.text!r}"
-    )
+    assert resp.status_code == 200, f"Expected 200 but got {resp.status_code}: {resp.text!r}"
     body = resp.json()
     assert body == {"order": [], "hidden": []}
 
@@ -102,9 +100,7 @@ async def test_put_then_get_dashboard_layout_round_trip(client):
     assert put_resp.status_code == 200, put_resp.text
     assert put_resp.json() == payload
 
-    get_resp = await client.get(
-        "/api/v1/users/me/dashboard-layout/", headers=headers
-    )
+    get_resp = await client.get("/api/v1/users/me/dashboard-layout/", headers=headers)
     assert get_resp.status_code == 200
     assert get_resp.json() == payload
 
@@ -125,9 +121,7 @@ async def test_put_overwrites_previous_value(client):
         json={"order": ["z"], "hidden": []},
     )
 
-    resp = await client.get(
-        "/api/v1/users/me/dashboard-layout/", headers=headers
-    )
+    resp = await client.get("/api/v1/users/me/dashboard-layout/", headers=headers)
     assert resp.json() == {"order": ["z"], "hidden": []}
 
 
@@ -146,15 +140,11 @@ async def test_user_a_write_does_not_affect_user_b(client):
         json={"order": ["kpi", "projects"], "hidden": ["analytics"]},
     )
 
-    resp_b = await client.get(
-        "/api/v1/users/me/dashboard-layout/", headers=headers_b
-    )
+    resp_b = await client.get("/api/v1/users/me/dashboard-layout/", headers=headers_b)
     assert resp_b.status_code == 200
     assert resp_b.json() == {"order": [], "hidden": []}
 
-    resp_a = await client.get(
-        "/api/v1/users/me/dashboard-layout/", headers=headers_a
-    )
+    resp_a = await client.get("/api/v1/users/me/dashboard-layout/", headers=headers_a)
     assert resp_a.json() == {"order": ["kpi", "projects"], "hidden": ["analytics"]}
 
 
@@ -171,9 +161,7 @@ async def test_put_rejects_non_list_order(client):
         headers=headers,
         json={"order": "not-a-list", "hidden": []},
     )
-    assert resp.status_code in (400, 422), (
-        f"Expected 4xx for non-list order but got {resp.status_code}: {resp.text!r}"
-    )
+    assert resp.status_code in (400, 422), f"Expected 4xx for non-list order but got {resp.status_code}: {resp.text!r}"
 
 
 @pytest.mark.asyncio
@@ -186,9 +174,7 @@ async def test_put_rejects_non_list_hidden(client):
         headers=headers,
         json={"order": [], "hidden": {"foo": True}},
     )
-    assert resp.status_code in (400, 422), (
-        f"Expected 4xx for non-list hidden but got {resp.status_code}: {resp.text!r}"
-    )
+    assert resp.status_code in (400, 422), f"Expected 4xx for non-list hidden but got {resp.status_code}: {resp.text!r}"
 
 
 @pytest.mark.asyncio

@@ -33,6 +33,7 @@ def _serialise_money(v: Decimal | None) -> str | None:
         return "0"
     return format(v, "f")
 
+
 SourceName = Literal["bim", "dwg", "boq", "text", "pdf", "photo", "image"]
 
 # Per MAPPING_PROCESS.md v3 §4.2 the 12 OmniClass-aligned construction
@@ -83,9 +84,7 @@ class SessionCreate(BaseModel):
     # NULL = use the default subtractive set (IfcOpeningElement, etc.).
     # Pass [] explicitly to opt into showing voids/annotations.
     excluded_categories: list[str] | None = None
-    auto_confirm_threshold: float = Field(
-        default=DEFAULT_AUTO_CONFIRM_THRESHOLD, ge=0.0, le=1.0
-    )
+    auto_confirm_threshold: float = Field(default=DEFAULT_AUTO_CONFIRM_THRESHOLD, ge=0.0, le=1.0)
     use_net_quantities: bool = True
     # Accepts either a CWICR v3 region id ("DE_BERLIN", "US_BOSTON", ...
     # from ``CWICR_V3_CATALOGUES``) or a legacy ``CostDatabase`` UUID.
@@ -401,6 +400,7 @@ class TemplateLookupResponse(BaseModel):
 
 class AttributeKey(BaseModel):
     """One drag-source chip in the group-by sidepanel."""
+
     key: str
     sample_values: list[str] = Field(default_factory=list)
 
@@ -502,7 +502,13 @@ class AnalyticsResponse(BaseModel):
 # ── Visible pipeline (v3034 — 7-stage match wizard) ──────────────────────
 
 StageName = Literal[
-    "convert", "load", "schema", "filter", "group", "match", "rollup",
+    "convert",
+    "load",
+    "schema",
+    "filter",
+    "group",
+    "match",
+    "rollup",
 ]
 StageStatus = Literal["pending", "running", "done", "error", "stale", "skipped"]
 
@@ -597,5 +603,3 @@ class PromptTemplateUpdate(BaseModel):
     system_prompt: str | None = None
     user_template: str | None = None
     allowed_providers: str | None = None
-
-

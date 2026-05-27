@@ -96,9 +96,7 @@ QDRANT_CONFIG_DIR: Path = QDRANT_HOME / "config"
 # on Windows before changing.
 _QDRANT_REPO = "qdrant/qdrant"
 _QDRANT_PINNED_TAG = "v1.16.3"
-_PINNED_RELEASE_URL = (
-    f"https://api.github.com/repos/{_QDRANT_REPO}/releases/tags/{_QDRANT_PINNED_TAG}"
-)
+_PINNED_RELEASE_URL = f"https://api.github.com/repos/{_QDRANT_REPO}/releases/tags/{_QDRANT_PINNED_TAG}"
 
 # Map (system, machine) → release asset filename pattern. Qdrant
 # publishes static binaries for the three desktop triples we care
@@ -331,19 +329,14 @@ def _resolve_release_asset() -> tuple[str, str]:
         # doesn't rename the asset (we'd notice in CI on the first
         # download).
         if exc.code in (403, 404, 429):
-            fallback = (
-                f"https://github.com/{_QDRANT_REPO}/releases/download/"
-                f"{_QDRANT_PINNED_TAG}/{asset_key}"
-            )
+            fallback = f"https://github.com/{_QDRANT_REPO}/releases/download/{_QDRANT_PINNED_TAG}/{asset_key}"
             logger.warning(
                 "GitHub API rate-limited (%s) — falling back to direct URL %s",
                 exc.code,
                 fallback,
             )
             return asset_key, fallback
-        raise RuntimeError(
-            f"GitHub Releases API returned {exc.code}: {exc.reason}"
-        ) from exc
+        raise RuntimeError(f"GitHub Releases API returned {exc.code}: {exc.reason}") from exc
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
         raise RuntimeError(f"Could not reach GitHub Releases API: {exc}") from exc
 
@@ -357,8 +350,7 @@ def _resolve_release_asset() -> tuple[str, str]:
 
     available = ", ".join(a.get("name", "?") for a in assets)
     raise RuntimeError(
-        f"Qdrant {_QDRANT_PINNED_TAG} release does not include asset "
-        f"{asset_key!r}. Available assets: {available}"
+        f"Qdrant {_QDRANT_PINNED_TAG} release does not include asset {asset_key!r}. Available assets: {available}"
     )
 
 
@@ -389,9 +381,7 @@ def install_qdrant_native(*, force: bool = False) -> Path:
         urllib.request.urlretrieve(download_url, str(archive_path))
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
         archive_path.unlink(missing_ok=True)
-        raise RuntimeError(
-            f"Download from {download_url} failed: {exc}"
-        ) from exc
+        raise RuntimeError(f"Download from {download_url} failed: {exc}") from exc
 
     target = _expected_binary_path()
     target_dir = target.parent
@@ -408,8 +398,7 @@ def install_qdrant_native(*, force: bool = False) -> Path:
                         break
                 else:
                     raise RuntimeError(
-                        f"Archive {asset_name} did not contain qdrant.exe — "
-                        "release layout may have changed."
+                        f"Archive {asset_name} did not contain qdrant.exe — release layout may have changed."
                     )
         elif asset_name.endswith((".tar.gz", ".tgz")):
             with tarfile.open(archive_path, "r:gz") as tf:
@@ -424,23 +413,16 @@ def install_qdrant_native(*, force: bool = False) -> Path:
                         target.chmod(0o755)
                         break
                 else:
-                    raise RuntimeError(
-                        f"Archive {asset_name} did not contain a qdrant binary."
-                    )
+                    raise RuntimeError(f"Archive {asset_name} did not contain a qdrant binary.")
         else:
             raise RuntimeError(f"Unsupported archive type: {asset_name}")
     except (zipfile.BadZipFile, tarfile.TarError) as exc:
-        raise RuntimeError(
-            f"Could not extract {asset_name}: {exc}"
-        ) from exc
+        raise RuntimeError(f"Could not extract {asset_name}: {exc}") from exc
     finally:
         archive_path.unlink(missing_ok=True)
 
     if not target.is_file() or target.stat().st_size < 1_000_000:
-        raise RuntimeError(
-            f"Extraction left no valid binary at {target} — "
-            "treat this as install failure."
-        )
+        raise RuntimeError(f"Extraction left no valid binary at {target} — treat this as install failure.")
 
     _ = target_dir  # explicit
     logger.info("Installed Qdrant at %s (asset=%s)", target, asset_name)
@@ -510,7 +492,7 @@ def ensure_qdrant_running(url: str | None, *, spawn_if_installed: bool = True) -
             asset_name, asset_url = _resolve_release_asset()
             download_url: str | None = asset_url
             install_hint = (
-                "Vector database is not installed. Click \"Install Qdrant\" to "
+                'Vector database is not installed. Click "Install Qdrant" to '
                 f"download {asset_name} from the official GitHub Releases "
                 "(no Docker required). The install completes in about 30 seconds."
             )
@@ -549,10 +531,7 @@ def ensure_qdrant_running(url: str | None, *, spawn_if_installed: bool = True) -
             f"{url}. Another process may be holding the port, or the binary "
             "is still booting — wait 10 seconds and click Refresh."
         ),
-        install_hint=(
-            f"Binary found at {binary}. Check ~/.openestimator/qdrant/qdrant.log "
-            "for startup errors."
-        ),
+        install_hint=(f"Binary found at {binary}. Check ~/.openestimator/qdrant/qdrant.log for startup errors."),
         download_url=None,
     )
 

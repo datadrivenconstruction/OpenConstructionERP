@@ -58,10 +58,7 @@ async def test_side_effecting_without_gate_fails():
         target_type="pipeline",
     )
     assert report.has_errors
-    assert any(
-        r.rule_id == "pipeline.side_effecting_requires_gate"
-        for r in report.errors
-    )
+    assert any(r.rule_id == "pipeline.side_effecting_requires_gate" for r in report.errors)
 
 
 async def test_side_effecting_with_validation_gate_passes():

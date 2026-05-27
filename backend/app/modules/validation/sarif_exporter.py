@@ -108,12 +108,8 @@ def _normalize_report(report: Any) -> dict[str, Any]:
                 {
                     "rule_id": r.rule_id,
                     "rule_name": r.rule_name,
-                    "severity": (
-                        r.severity.value if isinstance(r.severity, Severity) else str(r.severity)
-                    ),
-                    "category": (
-                        r.category.value if hasattr(r.category, "value") else str(r.category)
-                    ),
+                    "severity": (r.severity.value if isinstance(r.severity, Severity) else str(r.severity)),
+                    "category": (r.category.value if hasattr(r.category, "value") else str(r.category)),
                     "passed": r.passed,
                     "message": r.message,
                     "element_ref": r.element_ref,
@@ -134,12 +130,8 @@ def _normalize_report(report: Any) -> dict[str, Any]:
                 {
                     "rule_id": r.rule_id,
                     "rule_name": r.rule_name,
-                    "severity": (
-                        r.severity.value if isinstance(r.severity, Severity) else str(r.severity)
-                    ),
-                    "category": (
-                        r.category.value if hasattr(r.category, "value") else str(r.category)
-                    ),
+                    "severity": (r.severity.value if isinstance(r.severity, Severity) else str(r.severity)),
+                    "category": (r.category.value if hasattr(r.category, "value") else str(r.category)),
                     "passed": r.passed,
                     "message": r.message,
                     "element_ref": r.element_ref,
@@ -291,9 +283,7 @@ def report_to_sarif(report: Any) -> dict[str, Any]:
         # are still captured via properties.run.invocations.passingChecks.
         if item.get("passed", False):
             continue
-        sarif_results.append(
-            _build_result(item, norm["target_type"], norm["target_id"])
-        )
+        sarif_results.append(_build_result(item, norm["target_type"], norm["target_id"]))
 
     timestamp = norm["timestamp"]
     if isinstance(timestamp, datetime):
@@ -330,9 +320,7 @@ def report_to_sarif(report: Any) -> dict[str, Any]:
         "originalUriBaseIds": {
             "%SRCROOT%": {
                 "uri": f"openestimate://{norm['target_type']}/{norm['target_id']}/",
-                "description": {
-                    "text": f"OpenConstructionERP {norm['target_type']} {norm['target_id']}"
-                },
+                "description": {"text": f"OpenConstructionERP {norm['target_type']} {norm['target_id']}"},
             }
         },
         "properties": {

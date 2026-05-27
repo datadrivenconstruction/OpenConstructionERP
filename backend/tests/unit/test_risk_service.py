@@ -77,9 +77,7 @@ async def session():
         )
         await s.flush()
         s.add(Project(id=PROJECT_ID, name="Risk Test", owner_id=OWNER_ID, currency="EUR"))
-        s.add(
-            Project(id=OTHER_PROJECT_ID, name="Other", owner_id=OWNER_ID, currency="USD")
-        )
+        s.add(Project(id=OTHER_PROJECT_ID, name="Other", owner_id=OWNER_ID, currency="USD"))
         await s.commit()
         yield s
     await engine.dispose()
@@ -213,9 +211,7 @@ async def test_update_recomputes_score_and_tier(session):
     r = await svc.create_risk(_create(probability=0.2, impact_severity="low"))
     assert r.risk_tier == "low"
 
-    updated = await svc.update_risk(
-        r.id, RiskUpdate(probability=0.9, impact_severity="critical")
-    )
+    updated = await svc.update_risk(r.id, RiskUpdate(probability=0.9, impact_severity="critical"))
     assert float(updated.risk_score) == pytest.approx(4.5)
     assert updated.probability_score == 5
     assert updated.impact_score_cost == 5
@@ -345,14 +341,8 @@ async def test_matrix_excludes_closed_risks(session):
 @pytest.mark.asyncio
 async def test_list_filters_and_sorts(session):
     svc = RiskService(session)
-    await svc.create_risk(
-        _create(title="Tech", category="technical", probability=0.2, impact_severity="low")
-    )
-    await svc.create_risk(
-        _create(
-            title="Fin", category="financial", probability=0.9, impact_severity="critical"
-        )
-    )
+    await svc.create_risk(_create(title="Tech", category="technical", probability=0.2, impact_severity="low"))
+    await svc.create_risk(_create(title="Fin", category="financial", probability=0.9, impact_severity="critical"))
 
     items, total = await svc.list_risks(PROJECT_ID, category_filter="financial")
     assert total == 1

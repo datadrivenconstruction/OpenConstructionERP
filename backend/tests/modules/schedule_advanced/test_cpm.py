@@ -95,9 +95,9 @@ def test_forward_pass_es_ef() -> None:
     expected = {
         "A": (0, 3),
         "B": (0, 4),
-        "C": (3, 8),    # waits for A.EF=3
-        "D": (4, 6),    # waits for B.EF=4
-        "E": (4, 7),    # waits for B.EF=4
+        "C": (3, 8),  # waits for A.EF=3
+        "D": (4, 6),  # waits for B.EF=4
+        "E": (4, 7),  # waits for B.EF=4
         # F waits for max(C.EF=8, D.EF=6) = 8
         "F": (8, 11),
     }
@@ -137,17 +137,15 @@ def test_total_float_correct() -> None:
     results = compute_cpm(network)
 
     expected_float = {
-        "A": 0,   # critical
-        "C": 0,   # critical
-        "F": 0,   # critical
-        "B": 2,   # LS=2 − ES=0
-        "D": 2,   # LS=6 − ES=4
-        "E": 4,   # LS=8 − ES=4
+        "A": 0,  # critical
+        "C": 0,  # critical
+        "F": 0,  # critical
+        "B": 2,  # LS=2 − ES=0
+        "D": 2,  # LS=6 − ES=4
+        "E": 4,  # LS=8 − ES=4
     }
     for aid, tf in expected_float.items():
-        assert (
-            results[aid].total_float == tf
-        ), f"{aid}.total_float expected {tf}, got {results[aid].total_float}"
+        assert results[aid].total_float == tf, f"{aid}.total_float expected {tf}, got {results[aid].total_float}"
 
 
 def test_cycle_detection_raises() -> None:

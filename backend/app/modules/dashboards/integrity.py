@@ -360,7 +360,8 @@ def _infer_type(series: pd.Series, non_null: pd.Series) -> InferredType:
 
 
 def _ratio_passes(
-    series: pd.Series, predicate: Callable[[Any], bool],
+    series: pd.Series,
+    predicate: Callable[[Any], bool],
 ) -> float:
     """Return the fraction of values satisfying ``predicate``."""
     if len(series) == 0:

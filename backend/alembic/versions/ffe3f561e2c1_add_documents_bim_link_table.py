@@ -14,6 +14,7 @@ Revises: f22fa2934807
 Create Date: 2026-04-11
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

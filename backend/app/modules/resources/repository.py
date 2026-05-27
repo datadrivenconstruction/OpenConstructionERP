@@ -263,9 +263,7 @@ class AvailabilityWindowRepository:
         start_at: datetime | None = None,
         end_at: datetime | None = None,
     ) -> list[AvailabilityWindow]:
-        stmt = select(AvailabilityWindow).where(
-            AvailabilityWindow.resource_id == resource_id
-        )
+        stmt = select(AvailabilityWindow).where(AvailabilityWindow.resource_id == resource_id)
         if start_at is not None:
             stmt = stmt.where(AvailabilityWindow.end_at >= start_at)
         if end_at is not None:
@@ -280,11 +278,7 @@ class AvailabilityWindowRepository:
         return window
 
     async def update_fields(self, window_id: uuid.UUID, **fields: Any) -> None:
-        stmt = (
-            update(AvailabilityWindow)
-            .where(AvailabilityWindow.id == window_id)
-            .values(**fields)
-        )
+        stmt = update(AvailabilityWindow).where(AvailabilityWindow.id == window_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
         self.session.expire_all()

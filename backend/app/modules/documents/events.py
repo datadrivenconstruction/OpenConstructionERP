@@ -54,9 +54,7 @@ async def _index_document(event: Event) -> None:
                 # Race: row was deleted between publish and handler.
                 await vector_delete_one(document_vector_adapter, str(document_id))
                 return
-            project_id = (
-                str(row.project_id) if row.project_id is not None else None
-            )
+            project_id = str(row.project_id) if row.project_id is not None else None
             await vector_index_one(
                 document_vector_adapter,
                 row,

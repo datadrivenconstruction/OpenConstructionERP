@@ -120,9 +120,7 @@ async def create_file_comment(
     try:
         comment, mentions = await create_comment(session, payload, author_uuid)
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
     return FileCommentResponse(
         id=comment.id,
@@ -184,9 +182,7 @@ async def patch_file_comment(
         repo = UserRepository(session)
         user = await repo.get_by_id(_coerce_user_uuid(user_id))
         role = getattr(user, "role", "") if user is not None else ""
-        if role != "admin" and not permission_registry.role_has_permission(
-            role, "file_comments.resolve"
-        ):
+        if role != "admin" and not permission_registry.role_has_permission(role, "file_comments.resolve"):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Missing permission: file_comments.resolve",
@@ -196,18 +192,12 @@ async def patch_file_comment(
     try:
         result = await update_comment(session, comment_id, payload, actor_uuid)
     except PermissionError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
     comment, mentions = result
 
     # Author boundary + project access guard — even though the body /
@@ -260,14 +250,10 @@ async def delete_file_comment(
     try:
         ok = await soft_delete_comment(session, comment_id, actor_uuid)
     except PermissionError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
     if not ok:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found"
-        )
-    return None
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
+    return
 
 
 # ── Mentions inbox ─────────────────────────────────────────────────────
@@ -307,4 +293,4 @@ async def acknowledge_my_mention(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Mention not found",
         )
-    return None
+    return

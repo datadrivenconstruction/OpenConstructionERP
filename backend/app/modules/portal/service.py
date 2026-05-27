@@ -187,7 +187,9 @@ class PortalService:
         )
         logger.info(
             "Portal user invited: %s (%s) created=%s",
-            user.email, user.portal_role, created,
+            user.email,
+            user.portal_role,
+            created,
         )
         return user, plain, link.expires_at
 
@@ -216,7 +218,9 @@ class PortalService:
         )
 
     async def patch_portal_user(
-        self, user_id: uuid.UUID, **fields: Any,
+        self,
+        user_id: uuid.UUID,
+        **fields: Any,
     ) -> PortalUser:
         user = await self.get_portal_user(user_id)
         cleaned: dict[str, Any] = {k: v for k, v in fields.items() if v is not None}
@@ -332,7 +336,9 @@ class PortalService:
         # Activate first-login users.
         if user_status == "invited":
             await self.user_repo.update_fields(
-                user_id, status="active", last_login_at=now,
+                user_id,
+                status="active",
+                last_login_at=now,
             )
         else:
             await self.user_repo.update_fields(user_id, last_login_at=now)
@@ -423,7 +429,8 @@ class PortalService:
     async def revoke_all_for_user(self, portal_user_id: uuid.UUID) -> int:
         """Revoke every active session for a portal user."""
         return await self.session_repo.revoke_all_for_user(
-            portal_user_id, revoked_at=now_utc(),
+            portal_user_id,
+            revoked_at=now_utc(),
         )
 
     # ── Access rules / RLS ────────────────────────────────────────────────
@@ -440,7 +447,9 @@ class PortalService:
     ) -> PortalAccessRule:
         """Idempotent upsert of an access rule."""
         existing = await self.rule_repo.get_one(
-            portal_user_id, resource_type, resource_id,
+            portal_user_id,
+            resource_type,
+            resource_id,
         )
         now = now_utc()
         if existing is not None:
@@ -472,7 +481,9 @@ class PortalService:
         resource_id: uuid.UUID,
     ) -> None:
         await self.rule_repo.delete_match(
-            portal_user_id, resource_type, resource_id,
+            portal_user_id,
+            resource_type,
+            resource_id,
         )
 
     async def revoke_access_rule(self, rule_id: uuid.UUID) -> None:
@@ -506,7 +517,8 @@ class PortalService:
     ) -> list[uuid.UUID]:
         """Return resource IDs of ``resource_type`` the user can currently see."""
         rules = await self.rule_repo.list_for_user(
-            portal_user_id, resource_type=resource_type,
+            portal_user_id,
+            resource_type=resource_type,
         )
         now = now_utc()
         out: list[uuid.UUID] = []
@@ -530,7 +542,9 @@ class PortalService:
         granting at least ``required`` permission on the target resource.
         """
         rule = await self.rule_repo.get_one(
-            portal_user_id, resource_type, resource_id,
+            portal_user_id,
+            resource_type,
+            resource_id,
         )
         if rule is None:
             return False
@@ -658,7 +672,10 @@ async def enforce_rls(
     """
     svc = PortalService(session)
     return await svc.enforce_rls(
-        portal_user_id, resource_type, resource_id, required,
+        portal_user_id,
+        resource_type,
+        resource_id,
+        required,
     )
 
 

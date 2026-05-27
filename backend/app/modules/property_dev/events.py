@@ -140,6 +140,7 @@ async def _on_schedule_milestone_reached(event: Event) -> dict[str, Any]:
             touched = 0
             if spa_id:
                 import uuid as _uuid
+
                 try:
                     spa_uuid = _uuid.UUID(str(spa_id))
                 except (TypeError, ValueError):
@@ -149,18 +150,14 @@ async def _on_schedule_milestone_reached(event: Event) -> dict[str, Any]:
                 # Fan out across every SPA — match by milestone alone.
                 # Only used in tests/diagnostics; production callers
                 # always supply spa_id.
-                instalments = await svc.instalments.list_due_for_milestone(
-                    milestone_event
-                )
+                instalments = await svc.instalments.list_due_for_milestone(milestone_event)
                 for ins in instalments:
                     await svc.instalments.update_fields(ins.id, status="due")
                     touched += 1
             await session.commit()
             return {"status": "ok", "touched": touched}
     except Exception as exc:  # noqa: BLE001 — never crash event loop
-        logger.warning(
-            "property_dev._on_schedule_milestone_reached failed: %s", exc
-        )
+        logger.warning("property_dev._on_schedule_milestone_reached failed: %s", exc)
         return {"status": "error", "error": str(exc)}
 
 
@@ -189,6 +186,7 @@ async def _on_correspondence_outbound_delivered(
 
     try:
         import uuid as _uuid
+
         try:
             ins_uuid = _uuid.UUID(str(instalment_id))
         except (TypeError, ValueError):
@@ -206,9 +204,7 @@ async def _on_correspondence_outbound_delivered(
             await session.commit()
             return {"status": "ok"}
     except Exception as exc:  # noqa: BLE001
-        logger.warning(
-            "property_dev._on_correspondence_outbound_delivered: %s", exc
-        )
+        logger.warning("property_dev._on_correspondence_outbound_delivered: %s", exc)
         return {"status": "error", "error": str(exc)}
 
 
@@ -234,6 +230,7 @@ async def _on_documents_uploaded(event: Event) -> dict[str, Any]:
 
     try:
         import uuid as _uuid
+
         try:
             spa_uuid = _uuid.UUID(str(spa_id))
         except (TypeError, ValueError):
@@ -366,9 +363,7 @@ async def _on_instalment_paid(event: Event) -> dict[str, Any] | None:
     instalment_id = _coerce_uuid(event.data.get("instalment_id"))
     amount = event.data.get("amount")
     currency = event.data.get("currency") or ""
-    transaction_date = (
-        event.data.get("paid_at") or event.data.get("transaction_date") or ""
-    )
+    transaction_date = event.data.get("paid_at") or event.data.get("transaction_date") or ""
     if escrow_id is None or amount is None or not transaction_date:
         return None
 
@@ -408,9 +403,7 @@ def register_property_dev_event_subscribers() -> None:
     appends to the underlying handler list (the framework keeps it
     de-duplicated at startup via module loader call-once semantics).
     """
-    event_bus.subscribe(
-        "schedule.milestone.reached", _on_schedule_milestone_reached
-    )
+    event_bus.subscribe("schedule.milestone.reached", _on_schedule_milestone_reached)
     event_bus.subscribe(
         "correspondence.outbound.delivered",
         _on_correspondence_outbound_delivered,
@@ -425,10 +418,12 @@ def register_subscribers() -> None:
         return
     event_bus.subscribe("property_dev.spa.signed", _on_spa_signed)
     event_bus.subscribe(
-        "property_dev.reservation.created", _on_reservation_created,
+        "property_dev.reservation.created",
+        _on_reservation_created,
     )
     event_bus.subscribe(
-        "property_dev.handover.completed", _on_handover_completed,
+        "property_dev.handover.completed",
+        _on_handover_completed,
     )
     event_bus.subscribe("property_dev.instalment.paid", _on_instalment_paid)
     setattr(event_bus, _SUBSCRIBED_FLAG, True)
@@ -483,14 +478,11 @@ async def _on_crm_lead_qualified(event: Event) -> dict[str, Any] | None:
     try:
         async with async_session_factory() as session:
             dev = (
-                await session.execute(
-                    _sql_select(Development).where(Development.code == dev_code)
-                )
+                await session.execute(_sql_select(Development).where(Development.code == dev_code))
             ).scalar_one_or_none()
             if dev is None:
                 logger.debug(
-                    "property_dev.on_crm_lead_qualified: no Development "
-                    "with code=%r (lead=%s)",
+                    "property_dev.on_crm_lead_qualified: no Development with code=%r (lead=%s)",
                     dev_code,
                     data.get("lead_id"),
                 )
@@ -506,9 +498,7 @@ async def _on_crm_lead_qualified(event: Event) -> dict[str, Any] | None:
                 buyer_meta = dict(existing.metadata_ or {})
                 buyer_meta.setdefault("crm_lead_id", data.get("lead_id"))
                 await session.execute(
-                    Buyer.__table__.update()
-                    .where(Buyer.id == existing.id)
-                    .values(metadata=buyer_meta)
+                    Buyer.__table__.update().where(Buyer.id == existing.id).values(metadata=buyer_meta)
                 )
                 await session.commit()
                 logger.info(
@@ -583,17 +573,14 @@ async def _on_portal_buyer_signup(event: Event) -> dict[str, Any] | None:
             rows = list((await session.execute(stmt)).scalars().all())
             if len(rows) != 1:
                 logger.debug(
-                    "property_dev.on_portal_buyer_signup: ambiguous match "
-                    "(found=%d) for email=%s",
+                    "property_dev.on_portal_buyer_signup: ambiguous match (found=%d) for email=%s",
                     len(rows),
                     email,
                 )
                 return None
             buyer = rows[0]
             await session.execute(
-                Buyer.__table__.update()
-                .where(Buyer.id == buyer.id)
-                .values(portal_user_id=portal_user_id)
+                Buyer.__table__.update().where(Buyer.id == buyer.id).values(portal_user_id=portal_user_id)
             )
             await session.commit()
             logger.info(
@@ -656,11 +643,7 @@ async def _on_finance_invoice_created(event: Event) -> dict[str, Any] | None:
             invoices.append(entry)
             buyer_meta["invoice_refs"] = invoices
             buyer_meta["invoice_ref"] = entry["invoice_number"]  # latest
-            await session.execute(
-                Buyer.__table__.update()
-                .where(Buyer.id == buyer.id)
-                .values(metadata=buyer_meta)
-            )
+            await session.execute(Buyer.__table__.update().where(Buyer.id == buyer.id).values(metadata=buyer_meta))
             await session.commit()
             logger.info(
                 "property_dev: recorded invoice %s on buyer %s",
@@ -745,11 +728,7 @@ async def _on_snag_created_warranty_bridge(event: Event) -> dict[str, Any] | Non
             if buyer_id is None:
                 # Best-effort: any buyer on the plot.
                 row = (
-                    await session.execute(
-                        _select(_Buyer)
-                        .where(_Buyer.plot_id == handover.plot_id)
-                        .limit(1)
-                    )
+                    await session.execute(_select(_Buyer).where(_Buyer.plot_id == handover.plot_id).limit(1))
                 ).scalar_one_or_none()
                 if row is None:
                     return {"status": "ignored", "reason": "no buyer link"}
@@ -763,11 +742,7 @@ async def _on_snag_created_warranty_bridge(event: Event) -> dict[str, Any] | Non
             )
 
             sev_in = payload.get("severity") or "minor"
-            sev = (
-                sev_in
-                if sev_in in ("minor", "major", "critical")
-                else "minor"
-            )
+            sev = sev_in if sev_in in ("minor", "major", "critical") else "minor"
             create = _WCreate(
                 plot_id=handover.plot_id,
                 buyer_id=buyer_id,
@@ -775,12 +750,13 @@ async def _on_snag_created_warranty_bridge(event: Event) -> dict[str, Any] | Non
                 source_snag_id=snag_id,
                 category="defect",
                 severity=sev,
-                description=(payload.get("description") or "")[:2000]
-                or "(promoted from snag)",
+                description=(payload.get("description") or "")[:2000] or "(promoted from snag)",
             )
             svc = _Svc(session)
             claim = await svc.raise_warranty_claim(
-                handover.plot_id, buyer_id, create,
+                handover.plot_id,
+                buyer_id,
+                create,
             )
             await session.commit()
             logger.info(
@@ -804,9 +780,7 @@ def register_warranty_bridge_subscribers() -> None:
     """Wire the snag→warranty auto-bridge subscriber. Idempotent."""
     if getattr(event_bus, _WARRANTY_BRIDGE_FLAG, False):
         return
-    event_bus.subscribe(
-        "property_dev.snag.created", _on_snag_created_warranty_bridge
-    )
+    event_bus.subscribe("property_dev.snag.created", _on_snag_created_warranty_bridge)
     setattr(event_bus, _WARRANTY_BRIDGE_FLAG, True)
     logger.info("property_dev snag→warranty bridge subscriber registered")
 

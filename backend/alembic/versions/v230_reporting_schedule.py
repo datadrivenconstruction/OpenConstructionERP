@@ -18,11 +18,11 @@ Revision ID: v230_reporting_schedule
 Revises: v230_bim_element_asset_info
 Create Date: 2026-04-22
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-
 
 revision: str = "v230_reporting_schedule"
 down_revision: Union[str, None] = "v230_bim_element_asset_info"

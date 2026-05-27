@@ -19,11 +19,11 @@ Revision ID: v192_dwg_annotation_thickness_layer
 Revises: v191_cde_audit
 Create Date: 2026-04-18
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-
 
 # revision identifiers, used by Alembic.
 revision: str = "v192_dwg_annotation_thickness_layer"

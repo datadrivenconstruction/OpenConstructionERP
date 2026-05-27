@@ -212,10 +212,14 @@ async def test_legacy_audit_shim_mirrors_into_activity_log(
         details={"company_name": "Siemens"},
     )
     rows = (
-        await session.execute(
-            select(ActivityLog).where(ActivityLog.entity_id == target),
+        (
+            await session.execute(
+                select(ActivityLog).where(ActivityLog.entity_id == target),
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     assert len(rows) == 1
     mirrored = rows[0]
     assert mirrored.action == "create"
@@ -261,12 +265,8 @@ async def test_prune_audit_pii_scrubs_old_rows(session: AsyncSession) -> None:
     # ORM instances still hold the pre-update value; expire and re-fetch
     # via the session so we read what actually landed in the DB.
     session.expunge_all()
-    fresh_reloaded = (
-        await session.execute(select(ActivityLog).where(ActivityLog.id == fresh_id))
-    ).scalar_one()
-    ancient_reloaded = (
-        await session.execute(select(ActivityLog).where(ActivityLog.id == ancient_id))
-    ).scalar_one()
+    fresh_reloaded = (await session.execute(select(ActivityLog).where(ActivityLog.id == fresh_id))).scalar_one()
+    ancient_reloaded = (await session.execute(select(ActivityLog).where(ActivityLog.id == ancient_id))).scalar_one()
     assert fresh_reloaded.ip_address == "10.0.0.1"  # untouched
     assert ancient_reloaded.ip_address is None
     assert ancient_reloaded.user_agent is None

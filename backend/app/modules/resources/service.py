@@ -268,9 +268,7 @@ def validate_skill_requirements(
                     continue
                 if cert.cert_type != required_cert:
                     continue
-                status_derived = derive_certification_status(
-                    cert.valid_until, cert.status == "revoked", on_date
-                )
+                status_derived = derive_certification_status(cert.valid_until, cert.status == "revoked", on_date)
                 if status_derived == "valid":
                     has_valid = True
                     break
@@ -343,9 +341,7 @@ class ResourcesService:
 
     # ── Resource CRUD ──────────────────────────────────────────────────
 
-    async def create_resource(
-        self, data: ResourceCreate, user_id: str | None = None
-    ) -> Resource:
+    async def create_resource(self, data: ResourceCreate, user_id: str | None = None) -> Resource:
         existing = await self.resource_repo.get_by_code(data.code)
         if existing is not None:
             raise HTTPException(
@@ -393,9 +389,7 @@ class ResourcesService:
             status=resource_status,
         )
 
-    async def update_resource(
-        self, resource_id: uuid.UUID, data: ResourceUpdate
-    ) -> Resource:
+    async def update_resource(self, resource_id: uuid.UUID, data: ResourceUpdate) -> Resource:
         resource = await self.get_resource(resource_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
@@ -432,17 +426,13 @@ class ResourcesService:
     async def get_skill(self, skill_id: uuid.UUID) -> Skill:
         skill = await self.skill_repo.get_by_id(skill_id)
         if skill is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Skill not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Skill not found")
         return skill
 
     async def list_skills(
         self, *, offset: int = 0, limit: int = 200, category: str | None = None
     ) -> tuple[list[Skill], int]:
-        return await self.skill_repo.list_all(
-            offset=offset, limit=limit, category=category
-        )
+        return await self.skill_repo.list_all(offset=offset, limit=limit, category=category)
 
     async def update_skill(self, skill_id: uuid.UUID, data: SkillUpdate) -> Skill:
         skill = await self.get_skill(skill_id)
@@ -461,9 +451,7 @@ class ResourcesService:
 
     # ── ResourceSkill management ──────────────────────────────────────
 
-    async def attach_skill(
-        self, resource_id: uuid.UUID, data: ResourceSkillCreate
-    ) -> ResourceSkill:
+    async def attach_skill(self, resource_id: uuid.UUID, data: ResourceSkillCreate) -> ResourceSkill:
         await self.get_resource(resource_id)
         await self.get_skill(data.skill_id)
         existing = await self.resource_skill_repo.find_pair(resource_id, data.skill_id)
@@ -485,14 +473,10 @@ class ResourcesService:
         )
         return await self.resource_skill_repo.create(link)
 
-    async def detach_skill(
-        self, resource_id: uuid.UUID, skill_id: uuid.UUID
-    ) -> None:
+    async def detach_skill(self, resource_id: uuid.UUID, skill_id: uuid.UUID) -> None:
         await self.resource_skill_repo.delete_pair(resource_id, skill_id)
 
-    async def list_resource_skills(
-        self, resource_id: uuid.UUID
-    ) -> list[ResourceSkill]:
+    async def list_resource_skills(self, resource_id: uuid.UUID) -> list[ResourceSkill]:
         return await self.resource_skill_repo.list_for_resource(resource_id)
 
     # ── Certification CRUD ────────────────────────────────────────────
@@ -501,9 +485,7 @@ class ResourcesService:
         await self.get_resource(data.resource_id)
         # Auto-derive status if not provided as revoked
         revoked = data.status == "revoked"
-        derived = derive_certification_status(
-            data.valid_until, revoked, datetime.now(UTC).date()
-        )
+        derived = derive_certification_status(data.valid_until, revoked, datetime.now(UTC).date())
         cert = Certification(
             resource_id=data.resource_id,
             cert_type=data.cert_type,
@@ -527,21 +509,15 @@ class ResourcesService:
             )
         return cert
 
-    async def list_certifications_for_resource(
-        self, resource_id: uuid.UUID
-    ) -> list[Certification]:
+    async def list_certifications_for_resource(self, resource_id: uuid.UUID) -> list[Certification]:
         return await self.cert_repo.list_for_resource(resource_id)
 
     async def list_expiring_certifications(self, days: int = 60) -> list[Certification]:
         today = datetime.now(UTC).date()
         cutoff = today + timedelta(days=max(1, days))
-        return await self.cert_repo.list_expiring(
-            today_iso=today.isoformat(), cutoff_iso=cutoff.isoformat()
-        )
+        return await self.cert_repo.list_expiring(today_iso=today.isoformat(), cutoff_iso=cutoff.isoformat())
 
-    async def update_certification(
-        self, cert_id: uuid.UUID, data: CertificationUpdate
-    ) -> Certification:
+    async def update_certification(self, cert_id: uuid.UUID, data: CertificationUpdate) -> Certification:
         cert = await self.get_certification(cert_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
@@ -550,9 +526,7 @@ class ResourcesService:
         new_valid_until = fields.get("valid_until", cert.valid_until)
         new_status_in = fields.get("status", cert.status)
         revoked = new_status_in == "revoked"
-        fields["status"] = derive_certification_status(
-            new_valid_until, revoked, datetime.now(UTC).date()
-        )
+        fields["status"] = derive_certification_status(new_valid_until, revoked, datetime.now(UTC).date())
         if not fields:
             return cert
         await self.cert_repo.update_fields(cert_id, **fields)
@@ -565,9 +539,7 @@ class ResourcesService:
 
     # ── AvailabilityWindow CRUD ───────────────────────────────────────
 
-    async def create_window(
-        self, data: AvailabilityWindowCreate
-    ) -> AvailabilityWindow:
+    async def create_window(self, data: AvailabilityWindowCreate) -> AvailabilityWindow:
         await self.get_resource(data.resource_id)
         if data.end_at <= data.start_at:
             raise HTTPException(
@@ -601,13 +573,9 @@ class ResourcesService:
         start_at: datetime | None = None,
         end_at: datetime | None = None,
     ) -> list[AvailabilityWindow]:
-        return await self.window_repo.list_for_resource(
-            resource_id, start_at=start_at, end_at=end_at
-        )
+        return await self.window_repo.list_for_resource(resource_id, start_at=start_at, end_at=end_at)
 
-    async def update_window(
-        self, window_id: uuid.UUID, data: AvailabilityWindowUpdate
-    ) -> AvailabilityWindow:
+    async def update_window(self, window_id: uuid.UUID, data: AvailabilityWindowUpdate) -> AvailabilityWindow:
         window = await self.get_window(window_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
@@ -624,9 +592,7 @@ class ResourcesService:
 
     # ── Assignment CRUD + workflow ────────────────────────────────────
 
-    async def create_assignment(
-        self, data: AssignmentCreate, user_id: str | None = None
-    ) -> Assignment:
+    async def create_assignment(self, data: AssignmentCreate, user_id: str | None = None) -> Assignment:
         await self.get_resource(data.resource_id)
         if data.end_at <= data.start_at:
             raise HTTPException(
@@ -654,9 +620,7 @@ class ResourcesService:
     async def get_assignment(self, assignment_id: uuid.UUID) -> Assignment:
         assignment = await self.assignment_repo.get_by_id(assignment_id)
         if assignment is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
         return assignment
 
     async def list_assignments_for_resource(
@@ -674,9 +638,7 @@ class ResourcesService:
             status=assignment_status,
         )
 
-    async def update_assignment(
-        self, assignment_id: uuid.UUID, data: AssignmentUpdate
-    ) -> Assignment:
+    async def update_assignment(self, assignment_id: uuid.UUID, data: AssignmentUpdate) -> Assignment:
         assignment = await self.get_assignment(assignment_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
@@ -726,9 +688,7 @@ class ResourcesService:
                 exclude_id=assignment_id,
             )
             if conflicts:
-                raise ResourceConflictError(
-                    "Assignment update would overallocate", conflicts
-                )
+                raise ResourceConflictError("Assignment update would overallocate", conflicts)
 
         await self.assignment_repo.update_fields(assignment_id, **fields)
         await self.session.refresh(assignment)
@@ -774,9 +734,7 @@ class ResourcesService:
 
         # Skill check
         if data.required_skills:
-            res_skills = await self.resource_skill_repo.list_for_resource(
-                data.resource_id
-            )
+            res_skills = await self.resource_skill_repo.list_for_resource(data.resource_id)
             certs = await self.cert_repo.list_for_resource(data.resource_id)
             passes, missing = validate_skill_requirements(
                 data.resource_id,
@@ -786,9 +744,7 @@ class ResourcesService:
                 on_date=data.start_at.date(),
             )
             if not passes:
-                raise SkillMismatchError(
-                    f"Resource {resource.code} missing required skills", missing
-                )
+                raise SkillMismatchError(f"Resource {resource.code} missing required skills", missing)
 
         # Cost-rate snapshot policy: the assignment freezes whatever the
         # caller supplied AT THIS MOMENT. A *missing* cost_rate (None — only
@@ -879,8 +835,7 @@ class ResourcesService:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=(
-                    f"Cannot complete assignment in status '{assignment.status}'; "
-                    f"must be 'confirmed' or 'in_progress'"
+                    f"Cannot complete assignment in status '{assignment.status}'; must be 'confirmed' or 'in_progress'"
                 ),
             )
         fields: dict[str, Any] = {"status": "completed"}
@@ -917,9 +872,7 @@ class ResourcesService:
         notes = assignment.notes or ""
         if reason:
             notes = (notes + f"\nCANCELLED: {reason}").strip()
-        await self.assignment_repo.update_fields(
-            assignment_id, status="cancelled", notes=notes
-        )
+        await self.assignment_repo.update_fields(assignment_id, status="cancelled", notes=notes)
         await self.session.refresh(assignment)
         return assignment
 
@@ -980,13 +933,9 @@ class ResourcesService:
         limit: int = 100,
         request_status: str | None = None,
     ) -> tuple[list[ResourceRequest], int]:
-        return await self.request_repo.list_for_project(
-            project_id, offset=offset, limit=limit, status=request_status
-        )
+        return await self.request_repo.list_for_project(project_id, offset=offset, limit=limit, status=request_status)
 
-    async def update_request(
-        self, request_id: uuid.UUID, data: ResourceRequestUpdate
-    ) -> ResourceRequest:
+    async def update_request(self, request_id: uuid.UUID, data: ResourceRequestUpdate) -> ResourceRequest:
         req = await self.get_request(request_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
@@ -1079,14 +1028,10 @@ class ResourcesService:
             )
         return link
 
-    async def list_links_for_resource(
-        self, resource_id: uuid.UUID
-    ) -> list[ResourceLink]:
+    async def list_links_for_resource(self, resource_id: uuid.UUID) -> list[ResourceLink]:
         return await self.link_repo.list_for_resource(resource_id)
 
-    async def update_link(
-        self, link_id: uuid.UUID, data: ResourceLinkUpdate
-    ) -> ResourceLink:
+    async def update_link(self, link_id: uuid.UUID, data: ResourceLinkUpdate) -> ResourceLink:
         link = await self.get_link(link_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
@@ -1103,18 +1048,14 @@ class ResourcesService:
 
     # ── Dashboard / Utilization ───────────────────────────────────────
 
-    async def resource_dashboard(
-        self, resource_id: uuid.UUID
-    ) -> dict[str, Any]:
+    async def resource_dashboard(self, resource_id: uuid.UUID) -> dict[str, Any]:
         """Aggregate data for a resource dashboard view."""
         resource = await self.get_resource(resource_id)
         now = datetime.now(UTC)
         in_30d = now + timedelta(days=30)
         past_window = now - timedelta(days=30)
 
-        all_assignments, _ = await self.assignment_repo.list_for_resource(
-            resource_id, offset=0, limit=500
-        )
+        all_assignments, _ = await self.assignment_repo.list_for_resource(resource_id, offset=0, limit=500)
         # "Active" = anything that is happening right now and still needs
         # attention. A *proposed* assignment whose window has already
         # started is the most important thing to show — it is awaiting a
@@ -1125,28 +1066,19 @@ class ResourcesService:
         active = [
             a
             for a in all_assignments
-            if a.status in ("proposed", "confirmed", "in_progress")
-            and a.start_at <= now <= a.end_at
+            if a.status in ("proposed", "confirmed", "in_progress") and a.start_at <= now <= a.end_at
         ]
-        upcoming = [
-            a
-            for a in all_assignments
-            if a.status in ("proposed", "confirmed") and a.start_at > now
-        ]
+        upcoming = [a for a in all_assignments if a.status in ("proposed", "confirmed") and a.start_at > now]
         certs = await self.cert_repo.list_for_resource(resource_id)
         today = now.date()
         cutoff = today + timedelta(days=60)
         expiring = [
             c
             for c in certs
-            if c.valid_until
-            and c.status == "valid"
-            and today.isoformat() <= c.valid_until <= cutoff.isoformat()
+            if c.valid_until and c.status == "valid" and today.isoformat() <= c.valid_until <= cutoff.isoformat()
         ]
         skills = await self.resource_skill_repo.list_for_resource(resource_id)
-        util = compute_resource_utilization(
-            resource_id, past_window, now, all_assignments
-        )
+        util = compute_resource_utilization(resource_id, past_window, now, all_assignments)
         return {
             "resource": resource,
             "active_assignments": active,
@@ -1175,22 +1107,16 @@ class ResourcesService:
     ) -> list[dict[str, Any]]:
         """Flat dispatcher-board: resources + their assignments in [start, end)."""
         resources, _ = await self.resource_repo.list_all(limit=500, project_id=project_id)
-        assignments = await self.assignment_repo.list_in_window(
-            start, end, project_id=project_id
-        )
+        assignments = await self.assignment_repo.list_in_window(start, end, project_id=project_id)
         by_resource: dict[uuid.UUID, list[Assignment]] = {}
         for a in assignments:
             by_resource.setdefault(a.resource_id, []).append(a)
         entries: list[dict[str, Any]] = []
         for r in resources:
-            entries.append(
-                {"resource": r, "assignments": by_resource.get(r.id, [])}
-            )
+            entries.append({"resource": r, "assignments": by_resource.get(r.id, [])})
         return entries
 
-    async def board_conflicts(
-        self, start: datetime, end: datetime
-    ) -> list[dict[str, Any]]:
+    async def board_conflicts(self, start: datetime, end: datetime) -> list[dict[str, Any]]:
         """List unresolved conflicts in [start, end)."""
         assignments = await self.assignment_repo.list_in_window(start, end)
         by_resource: dict[uuid.UUID, list[Assignment]] = {}
@@ -1295,15 +1221,11 @@ class ResourcesService:
             matched = required_set & owned_skill_ids
             if not matched and required_set:
                 continue  # zero overlap — not a candidate
-            skill_score = (
-                len(matched) / len(required_set) if required_set else 1.0
-            )
+            skill_score = len(matched) / len(required_set) if required_set else 1.0
 
             # Availability: sum allocation_percent of overlapping non-cancelled
             # assignments in [start, end). Convert to a 0..1 free-fraction.
-            existing = await self.assignment_repo.assignments_for_resource_in_window(
-                res.id, start, end
-            )
+            existing = await self.assignment_repo.assignments_for_resource_in_window(res.id, start, end)
             total_alloc = 0
             for a in existing:
                 if a.status in ("cancelled", "completed"):
@@ -1319,9 +1241,7 @@ class ResourcesService:
             # available" — that would rank an out-of-office resource top of
             # the list and let a dispatcher book someone who is on leave.
             blocking = False
-            windows = await self.window_repo.list_for_resource(
-                res.id, start_at=start, end_at=end
-            )
+            windows = await self.window_repo.list_for_resource(res.id, start_at=start, end_at=end)
             for w in windows:
                 if w.window_type in ("unavailable", "holiday", "sick"):
                     if _intervals_overlap(start, end, w.start_at, w.end_at):
@@ -1337,27 +1257,23 @@ class ResourcesService:
             elif home_project_id is None:
                 proximity = 1.0  # don't penalise when caller doesn't care
 
-            score = (
-                weight_skill * skill_score
-                + weight_availability * free_fraction
-                + weight_proximity * proximity
-            )
+            score = weight_skill * skill_score + weight_availability * free_fraction + weight_proximity * proximity
 
-            out.append({
-                "resource_id": res.id,
-                "code": res.code,
-                "name": res.name,
-                "resource_type": res.resource_type,
-                "home_project_id": res.home_project_id,
-                "matched_skills": [str(s) for s in matched],
-                "missing_skills": [
-                    str(s) for s in required_set if s not in owned_skill_ids
-                ],
-                "skill_score": round(skill_score, 4),
-                "availability_score": round(free_fraction, 4),
-                "proximity_score": round(proximity, 4),
-                "score": round(score, 4),
-            })
+            out.append(
+                {
+                    "resource_id": res.id,
+                    "code": res.code,
+                    "name": res.name,
+                    "resource_type": res.resource_type,
+                    "home_project_id": res.home_project_id,
+                    "matched_skills": [str(s) for s in matched],
+                    "missing_skills": [str(s) for s in required_set if s not in owned_skill_ids],
+                    "skill_score": round(skill_score, 4),
+                    "availability_score": round(free_fraction, 4),
+                    "proximity_score": round(proximity, 4),
+                    "score": round(score, 4),
+                }
+            )
 
         out.sort(key=lambda r: r["score"], reverse=True)
         return out[:limit]
@@ -1384,9 +1300,7 @@ class ResourcesService:
         # Pull the largest window once, then bucket in Python.
         max_window = sorted_windows[-1]
         cutoff = today + timedelta(days=max_window)
-        all_expiring = await self.cert_repo.list_expiring(
-            today_iso=today.isoformat(), cutoff_iso=cutoff.isoformat()
-        )
+        all_expiring = await self.cert_repo.list_expiring(today_iso=today.isoformat(), cutoff_iso=cutoff.isoformat())
         for cert in all_expiring:
             if not cert.valid_until:
                 continue
@@ -1529,9 +1443,7 @@ class ResourcesService:
             "error_count": len(errors),
         }
 
-    async def _resolve_resource_from_row(
-        self, row: dict[str, Any]
-    ) -> Resource:
+    async def _resolve_resource_from_row(self, row: dict[str, Any]) -> Resource:
         """Resolve a Resource by row's resource_code or resource_id."""
         rid = row.get("resource_id")
         code = row.get("resource_code")
