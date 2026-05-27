@@ -16,6 +16,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep, SettingsDep
 from app.modules.projects import profile_service
@@ -125,7 +126,7 @@ async def _verify_project_access(
     service: ProjectService,
     project_id: uuid.UUID,
     user_id: str,
-    session: object,
+    session: AsyncSession,
     payload: dict | None = None,
 ) -> object:
     """‌⁠‍Load a project and verify the current user has read access.
@@ -133,8 +134,11 @@ async def _verify_project_access(
     Grants access to: admins, the project owner, and any team member
     added via add_project_member (i.e. a TeamMembership row exists).
     Used for read operations (get, dashboard, list members, etc.).
+
+    Raises 404 (not 403) on denial to keep "missing" and "denied"
+    indistinguishable — same IDOR policy as verify_project_access.
     """
-    from app.modules.teams.models import Team, TeamMembership
+    from app.modules.teams.access import is_project_member
 
     project = await service.get_project(project_id)
 
@@ -146,25 +150,20 @@ async def _verify_project_access(
     if str(project.owner_id) == user_id:
         return project
 
-    # Team-member check — any membership row for this project grants read access
-    member_row = (
-        await session.execute(
-            select(TeamMembership.id)
-            .join(Team, Team.id == TeamMembership.team_id)
-            .where(
-                Team.project_id == project_id,
-                TeamMembership.user_id == uuid.UUID(user_id),
-            )
-            .limit(1)
-        )
-    ).scalar_one_or_none()
+    # Team-member check — any membership row for this project grants read access.
+    # Wrap UUID conversion so a malformed user_id yields 404, not 500.
+    try:
+        uid = uuid.UUID(str(user_id))
+    except (ValueError, TypeError):
+        uid = None
 
-    if member_row is None:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have access to this project",
-        )
-    return project
+    if uid is not None and await is_project_member(session, project_id, uid):
+        return project
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Project not found",
+    )
 
 
 # ── Create ────────────────────────────────────────────────────────────────
@@ -1455,18 +1454,16 @@ async def dashboard_cards(
             select(Project).where(Project.status != "archived").order_by(Project.updated_at.desc())
         )
     else:
-        from app.modules.teams.models import Team, TeamMembership
+        from app.modules.teams.access import member_project_ids_subquery
 
-        member_project_ids = (
-            select(Team.project_id)
-            .join(TeamMembership, TeamMembership.team_id == Team.id)
-            .where(TeamMembership.user_id == uuid.UUID(user_id))
-            .scalar_subquery()
-        )
+        try:
+            uid = uuid.UUID(user_id)
+        except (ValueError, TypeError):
+            return []
         proj_result = await session.execute(
             select(Project)
             .where(
-                (Project.owner_id == uuid.UUID(user_id)) | (Project.id.in_(member_project_ids)),
+                (Project.owner_id == uid) | (Project.id.in_(member_project_ids_subquery(uid))),
                 Project.status != "archived",
             )
             .order_by(Project.updated_at.desc())
@@ -1688,16 +1685,14 @@ async def analytics_overview(
     # Per-project summary — owner + team-member projects for non-admins
     proj_stmt = select(Project).order_by(Project.name)
     if not is_admin:
-        from app.modules.teams.models import Team, TeamMembership
+        from app.modules.teams.access import member_project_ids_subquery
 
-        member_project_ids = (
-            select(Team.project_id)
-            .join(TeamMembership, TeamMembership.team_id == Team.id)
-            .where(TeamMembership.user_id == uuid.UUID(_user_id))
-            .scalar_subquery()
-        )
+        try:
+            _uid = uuid.UUID(_user_id)
+        except (ValueError, TypeError):
+            return {}
         proj_stmt = proj_stmt.where(
-            (Project.owner_id == _user_id) | (Project.id.in_(member_project_ids))
+            (Project.owner_id == _uid) | (Project.id.in_(member_project_ids_subquery(_uid)))
         )
     proj_result = await session.execute(proj_stmt)
     all_projects = list(proj_result.scalars().all())

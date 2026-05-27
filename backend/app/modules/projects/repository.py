@@ -41,19 +41,13 @@ class ProjectRepository:
         Archived (soft-deleted) projects are excluded by default; pass an
         explicit `status` to override.
         """
-        from app.modules.teams.models import Team, TeamMembership
+        from app.modules.teams.access import member_project_ids_subquery
 
         base = select(Project)
         if not is_admin:
-            # Subquery: project_ids where user is a team member
-            member_project_ids = (
-                select(Team.project_id)
-                .join(TeamMembership, TeamMembership.team_id == Team.id)
-                .where(TeamMembership.user_id == owner_id)
-                .scalar_subquery()
-            )
             base = base.where(
-                (Project.owner_id == owner_id) | (Project.id.in_(member_project_ids))
+                (Project.owner_id == owner_id)
+                | (Project.id.in_(member_project_ids_subquery(owner_id)))
             )
         if status is not None:
             base = base.where(Project.status == status)

@@ -185,26 +185,6 @@ def _get_service(session: SessionDep) -> BOQService:
     return BOQService(session)
 
 
-async def _is_project_member(session: SessionDep, project_id: uuid.UUID, user_id: str) -> bool:
-    """Return True if user_id has a TeamMembership row for the given project."""
-    from sqlalchemy import select
-
-    from app.modules.teams.models import Team, TeamMembership
-
-    row = (
-        await session.execute(
-            select(TeamMembership.id)
-            .join(Team, Team.id == TeamMembership.team_id)
-            .where(
-                Team.project_id == project_id,
-                TeamMembership.user_id == uuid.UUID(user_id),
-            )
-            .limit(1)
-        )
-    ).scalar_one_or_none()
-    return row is not None
-
-
 async def _verify_boq_owner(
     session: SessionDep,
     boq_id: uuid.UUID,
@@ -232,7 +212,13 @@ async def _verify_boq_owner(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale()))
     if str(project.owner_id) == user_id:
         return
-    if await _is_project_member(session, boq.project_id, user_id):
+    from app.modules.teams.access import is_project_member
+
+    try:
+        uid = uuid.UUID(str(user_id))
+    except (ValueError, TypeError):
+        uid = None
+    if uid is not None and await is_project_member(session, boq.project_id, uid):
         return
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
@@ -265,7 +251,13 @@ async def _verify_project_owner_for_boq(
         return
     if str(project.owner_id) == user_id:
         return
-    if await _is_project_member(session, project_id, user_id):
+    from app.modules.teams.access import is_project_member
+
+    try:
+        uid = uuid.UUID(str(user_id))
+    except (ValueError, TypeError):
+        uid = None
+    if uid is not None and await is_project_member(session, project_id, uid):
         return
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
