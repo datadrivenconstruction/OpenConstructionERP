@@ -5281,7 +5281,7 @@ async def import_boq_gaeb(
 
 async def _persist_imported_boq(
     boq_id: uuid.UUID,
-    imported: "ImportedBOQ",
+    imported: "ImportedBOQ",  # noqa: F821 — imported inside function body at call site
     *,
     file_name: str,
     service: BOQService,
