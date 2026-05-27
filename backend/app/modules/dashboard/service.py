@@ -316,10 +316,12 @@ async def compute_validation_score(
             "by_project": [],
         }
 
-    # Pull all reports for these projects — small payload (no `results`
-    # column needed) and SQLite can't always do correlated subqueries
-    # for "latest per group" cheaply. We pick the latest per project in
-    # Python.
+    # Pull the most-recent N reports per project set — small payload (no
+    # ``results`` column) ordered DESC so the Python "first-seen = latest"
+    # shortcut works.  Cap at 10 × project count (at most ~500 for a
+    # large install) so a project with thousands of historical reports
+    # doesn't drag in megabytes of rows just to find its latest score.
+    _report_cap = max(len(project_ids) * 10, 100)
     stmt = (
         select(
             ValidationReport.id,
@@ -330,6 +332,7 @@ async def compute_validation_score(
         )
         .where(ValidationReport.project_id.in_(project_ids))
         .order_by(ValidationReport.created_at.desc())
+        .limit(_report_cap)
     )
     rows = (await session.execute(stmt)).all()
 
@@ -489,6 +492,11 @@ async def compute_schedule_critical(
     )
     total_schedules = int((await session.execute(sched_count_stmt)).scalar() or 0)
 
+    # Cap at 1000 rows — the dashboard only ever shows the top-5 critical
+    # activities. Without a limit, large schedules (5K+ activities per
+    # project × 50 projects) pull megabytes of data into Python just to
+    # sort and slice [:5]. Ordering by is_critical DESC puts flagged rows
+    # first so the early cutoff still surfaces the most relevant ones.
     stmt = (
         select(
             Activity.id,
@@ -502,6 +510,8 @@ async def compute_schedule_critical(
         )
         .join(Schedule, Schedule.id == Activity.schedule_id)
         .where(Schedule.project_id.in_(project_ids))
+        .order_by(Activity.is_critical.desc())
+        .limit(1000)
     )
     rows = (await session.execute(stmt)).all()
 

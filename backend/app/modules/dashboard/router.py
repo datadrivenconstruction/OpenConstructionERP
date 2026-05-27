@@ -3,7 +3,12 @@
 Mounted by the module loader at ``/api/v1/dashboard/``.
 
 Endpoints:
-    GET /rollup/ — return all (or filtered) widget payloads in one shot.
+    GET  /rollup/ — fast path: return all (or filtered) widget payloads in
+                    one shot via query-string params.
+    POST /rollup/ — config-aware path: accepts ``RollupRequest`` body so
+                    callers can supply per-widget ``WidgetConfigItem`` overrides
+                    (e.g. the dashboard customisation panel).  The same IDOR
+                    posture and 422-validation flow as the GET path.
 
 IDOR posture: project IDs the caller doesn't own are silently dropped
 from the rollup — never 403. Empty / unaccessible scope returns 200 with
@@ -20,7 +25,10 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Header, Query, Response
 
 from app.dependencies import CurrentUserId, SessionDep
-from app.modules.dashboard.schemas import RollupResponse  # noqa: F401 — re-exported in OpenAPI
+from app.modules.dashboard.schemas import (
+    RollupRequest,
+    RollupResponse,  # noqa: F401 — re-exported in OpenAPI
+)
 from app.modules.dashboard.service import (
     KNOWN_WIDGETS,
     accessible_projects,
@@ -126,4 +134,67 @@ async def get_rollup(
         content=serialized,
         media_type="application/json",
         headers=cache_headers,
+    )
+
+
+@router.post(
+    "/rollup/",
+    response_model=RollupResponse,
+    response_model_exclude_none=True,
+    summary="Dashboard rollup — config-aware POST path",
+    description=(
+        "Config-aware variant of the rollup endpoint. Accepts a "
+        "``RollupRequest`` body so callers can supply per-widget "
+        "``WidgetConfigItem`` overrides (e.g. ``max_by_project`` for "
+        "``boq_summary``). Unknown widget ids or config keys return 422 "
+        "before any DB work. The same IDOR posture applies: inaccessible "
+        "project ids are silently dropped. No ETag caching on the POST "
+        "path (the body varies arbitrarily)."
+    ),
+)
+async def post_rollup(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    body: RollupRequest,
+) -> Response:
+    # Derive widget list from the body's widget_configs.  If no configs are
+    # supplied fall back to all known widgets (mirrors GET default).
+    if body.widget_configs:
+        requested_widgets = [wc.widget_id for wc in body.widget_configs]
+        # Keep only those that are also in KNOWN_WIDGETS (the config schema
+        # only covers the 10 configurable wave-2 widgets; the project-detail
+        # widgets are accessible via GET only).
+        requested_widgets = [w for w in requested_widgets if w in KNOWN_WIDGETS]
+    else:
+        requested_widgets = sorted(KNOWN_WIDGETS)
+
+    # Parse project_ids from body (list of UUID strings).
+    project_id_filter: list[uuid.UUID] | None = None
+    if body.project_ids is not None:
+        parsed: list[uuid.UUID] = []
+        for raw in body.project_ids:
+            try:
+                parsed.append(uuid.UUID(raw))
+            except (ValueError, TypeError):
+                continue  # silently drop malformed UUIDs
+        project_id_filter = parsed
+
+    projects = await accessible_projects(
+        session,
+        user_id,
+        requested_ids=project_id_filter,
+    )
+
+    payload = await compute_rollup(session, projects, requested_widgets)
+
+    body_out = {
+        **payload,
+        "generated_at": datetime.now(UTC).isoformat(),
+        "widgets_requested": requested_widgets,
+        "project_count": len(projects),
+    }
+    serialized = json.dumps(body_out, sort_keys=True, default=str)
+    return Response(
+        content=serialized,
+        media_type="application/json",
     )
