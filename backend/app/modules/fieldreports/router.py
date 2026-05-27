@@ -861,10 +861,20 @@ async def submit_report(
 async def approve_report(
     report_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("fieldreports.approve")),
     service: FieldReportService = Depends(_get_service),
 ) -> FieldReportResponse:
-    """Approve a submitted report."""
+    """Approve a submitted report.
+
+    IDOR guard: load the report first and verify the caller owns the parent
+    project before mutating the status.  Previously ``session`` was not
+    injected so ``verify_project_access`` could never be called — any
+    authenticated user with the ``fieldreports.approve`` permission could
+    approve reports belonging to other tenants.
+    """
+    existing = await service.get_report(report_id)
+    await verify_project_access(existing.project_id, user_id, session)
     report = await service.approve_report(report_id, user_id)
     return _report_to_response(report)
 
