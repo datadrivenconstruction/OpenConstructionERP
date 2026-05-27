@@ -184,6 +184,69 @@ def unit_dim_for(unit_hint: str | None) -> str | None:
     return dim or None
 
 
+# ── IFC class normalisation ──────────────────────────────────────────────
+#
+# Source IFC files emit per-IFC-version refinements that the CWICR
+# catalogue's ``ifc_class`` payload doesn't always carry. The most
+# common case: IFC2X3 emits ``IfcWallStandardCase`` while the v3
+# snapshot indexes only ``IfcWall``. Pinning ``IfcWallStandardCase``
+# as a hard filter under that snapshot causes every relax tier to
+# return zero hits — because ``ifc_class`` is bedrock and never gets
+# dropped — so the matcher falls through to the metadata-only path
+# and returns deterministic-but-wrong "Electrical equipment" rows.
+#
+# Collapsing the refinement onto the canonical parent class is
+# always semantically correct (StandardCase IS a Wall, ElementedCase
+# IS a Wall, etc.) so we fold here before the filter is pinned. The
+# upstream extractor's ``ifc_class`` (e.g. ``IfcWallStandardCase``)
+# is preserved on the envelope for other consumers; only the filter
+# value collapses.
+
+_IFC_CLASS_PARENT: dict[str, str] = {
+    # IFC2X3 ↔ IFC4 refinement folds (StandardCase / ElementedCase)
+    "IfcWallStandardCase": "IfcWall",
+    "IfcWallElementedCase": "IfcWall",
+    "IfcSlabStandardCase": "IfcSlab",
+    "IfcSlabElementedCase": "IfcSlab",
+    "IfcDoorStandardCase": "IfcDoor",
+    "IfcDoorStyle": "IfcDoor",
+    "IfcWindowStandardCase": "IfcWindow",
+    "IfcWindowStyle": "IfcWindow",
+    "IfcColumnStandardCase": "IfcColumn",
+    "IfcBeamStandardCase": "IfcBeam",
+    "IfcMemberStandardCase": "IfcMember",
+    "IfcPlateStandardCase": "IfcPlate",
+    "IfcStandardWallStandardCase": "IfcWall",  # noqa: E501 — synthetic from buggy exporters
+    # Generic MEP base classes → CWICR's concrete subclass.
+    # The catalogue indexes ``IfcPipeSegment`` / ``IfcDuctSegment`` /
+    # ``IfcCableSegment``; the source IFC often emits the generic
+    # ``IfcFlowSegment`` parent. Without this fold, pinning
+    # ``ifc_class=IfcFlowSegment`` matches zero catalogue rows because
+    # the catalogue never re-indexed under the abstract parent.
+    "IfcFlowSegment": "IfcPipeSegment",
+    "IfcFlowFitting": "IfcPipeFitting",
+    "IfcFlowController": "IfcValve",
+    "IfcFlowTerminal": "IfcSanitaryTerminal",
+    "IfcDistributionElement": "IfcPipeSegment",
+    "IfcDistributionControlElement": "IfcController",
+    "IfcDistributionFlowElement": "IfcPipeSegment",
+}
+
+
+def canonical_ifc_class(ifc_class: str | None) -> str | None:
+    """Collapse IFC entity-type refinements onto their parent class.
+
+    ``IfcWallStandardCase`` → ``IfcWall`` because the CWICR v3
+    snapshot indexes the parent class only. The fold is a no-op
+    for any class not in :data:`_IFC_CLASS_PARENT` (returns the
+    input verbatim) — that keeps the matcher honest when a
+    catalogue actually does carry the refinement separately.
+    """
+    if not ifc_class:
+        return None
+    return _IFC_CLASS_PARENT.get(ifc_class, ifc_class)
+
+
 # ── DIN 276 → department_code filter value ───────────────────────────────
 #
 # The CWICR payload's ``department_code`` is the 2-digit DIN 276 KG
@@ -482,7 +545,12 @@ def build_search_plan(
         and str(envelope.ifc_class).startswith("Ifc")
         and _collection_carries(catalog_id, "ifc_class")
     ):
-        hard["ifc_class"] = envelope.ifc_class
+        # Collapse IFC-version refinements onto their parent class so
+        # ``IfcWallStandardCase`` matches the catalogue's ``IfcWall``
+        # rows. Without this fold the relax ladder never drops
+        # ``ifc_class`` (bedrock) and the search returns zero hits,
+        # collapsing onto the metadata-only fallback.
+        hard["ifc_class"] = canonical_ifc_class(envelope.ifc_class)
     if envelope.ifc_predefined_type and _collection_carries(catalog_id, "ifc_predefined_type"):
         hard["ifc_predefined_type"] = envelope.ifc_predefined_type
     if envelope.construction_stage_hint and _collection_carries(catalog_id, "construction_stage"):
@@ -581,6 +649,7 @@ __all__ = [
     "SearchPlan",
     "build_query",
     "build_search_plan",
+    "canonical_ifc_class",
     "department_code_for",
     "extract_resource_hints",
     "unit_dim_for",

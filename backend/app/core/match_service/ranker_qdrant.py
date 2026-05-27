@@ -86,6 +86,103 @@ _BOOSTS = (
 )
 
 
+# IFC entity-types that do not correspond to a billable cost rate in
+# any CWICR catalogue. The matcher short-circuits to "no candidates"
+# for these when the rest of the envelope carries no specific signal
+# (material / nominal_size / properties / meaningful description) so
+# the metadata-only fallback can't surface arbitrary "Electrical
+# equipment" rows just because they're the most frequent class in
+# the catalogue.
+#
+# IfcOpeningElement is intentionally NOT here even though it's a
+# "void" rather than a physical billed element: the catalogue does
+# index 392 rate rows tagged with IfcOpeningElement (host-wall
+# patching, lintel installation), and source IFCs often attach a
+# meaningful name to the opening (``"merk B2-R"`` for a door/window
+# label). Excluding it would over-suppress.
+_NON_BILLABLE_IFC: frozenset[str] = frozenset({
+    "IfcSpace",
+    "IfcZone",
+    "IfcSite",
+    "IfcBuilding",
+    "IfcBuildingStorey",
+    "IfcVirtualElement",
+    "IfcGrid",
+    "IfcAnnotation",
+    "IfcGeographicElement",
+    "IfcDistributionPort",
+    "IfcLocalPlacement",
+})
+
+
+# Sentinels for "the source extractor synthesised the only English
+# anchor available" — when the post-synthesis description equals just
+# these generic phrases the source supplied no specific signal.
+_GENERIC_DESCRIPTIONS: frozenset[str] = frozenset({
+    "building element part",
+    "generic element",
+    "virtual element",
+    "space room zone",
+    "transport element",
+    "opening void",
+    "site",
+    "building",
+    "zone",
+    "annotation",
+})
+
+
+def _envelope_has_specific_signal(envelope: ElementEnvelope) -> bool:
+    """True when this envelope carries content beyond the generic IFC anchor.
+
+    Returns ``True`` when ANY of:
+
+    * ``material_class`` is set (the extractor matched a synonym),
+    * ``nominal_size_mm`` is set (the geometry carried a thickness),
+    * ``properties`` carries a non-empty string,
+    * the description, after stripping the generic IFC English anchor,
+      still has alphabetic content (i.e. a meaningful name).
+    """
+    if envelope.material_class:
+        return True
+    if envelope.nominal_size_mm:
+        return True
+    if envelope.properties and any(
+        v for v in envelope.properties.values() if isinstance(v, str) and v.strip()
+    ):
+        return True
+    desc = (envelope.description or "").strip().lower()
+    if not desc:
+        return False
+    if desc in _GENERIC_DESCRIPTIONS:
+        return False
+    # Strip the leading IFC English anchor (e.g. "space room zone, 8.01"
+    # → "8.01") and check whether anything alphabetic is left.
+    for anchor in _GENERIC_DESCRIPTIONS:
+        if desc.startswith(anchor):
+            tail = desc[len(anchor):].strip().strip(",").strip()
+            return bool(tail) and any(c.isalpha() for c in tail)
+    return True
+
+
+def _is_non_billable_envelope(envelope: ElementEnvelope) -> bool:
+    """True when this envelope corresponds to an unbillable IFC entity.
+
+    Returns ``True`` only when BOTH:
+
+    * the ifc_class is in the non-billable set, AND
+    * the envelope carries no specific signal (see
+      :func:`_envelope_has_specific_signal`).
+
+    A wall element with ifc_class IfcWall always returns ``False`` —
+    non-billable is a last-resort gate, not a category exclusion.
+    """
+    ifc = (envelope.ifc_class or envelope.category or "").strip()
+    if not ifc or ifc not in _NON_BILLABLE_IFC:
+        return False
+    return not _envelope_has_specific_signal(envelope)
+
+
 def _active_encoder_id() -> str | None:
     """‌⁠‍Resolve the active encoder model id for confidence-band calibration.
 
@@ -900,8 +997,32 @@ async def _metadata_only_candidates(
     # / 0.675 / 0.9 with the default weights) so equal-score ties are
     # the norm, not the exception. Pin them by lex order.
     scored.sort(key=lambda t: (-t[0], t[2].rate_code))
+
+    # Minimum-score threshold for the metadata-only path. When ALL of
+    # lexical / unit / material scored 0 (no English token overlap, no
+    # unit family match, no material match), the only signal is region
+    # — every catalogue hit gets the same 0.15 region bonus and ties
+    # break by rate_code lex order. That produces deterministic-but-
+    # arbitrary "Electrical equipment" candidates for any envelope with
+    # a junk description. Drop hits where the *non-region* signal sums
+    # to zero, so the caller sees "no candidates" rather than a
+    # confidently-wrong answer. We can't gate on the final score alone
+    # because a high-quality lexical match (lexical=0.2) without a
+    # region match (region=0) also scores 0.09 < 0.16 and would be
+    # incorrectly dropped.
+
+    def _has_real_signal(breakdown: dict[str, float]) -> bool:
+        """Non-region signal sum — the only legitimate ranking driver."""
+        return (
+            float(breakdown.get("lexical") or 0.0)
+            + float(breakdown.get("unit") or 0.0)
+            + float(breakdown.get("material") or 0.0)
+        ) > 0.0
+
     out: list[QdrantHit] = []
     for score, breakdown, h in scored[:top_k]:
+        if not _has_real_signal(breakdown):
+            continue
         # Annotate payload so downstream UI/log can show why this ranked.
         new_payload = dict(h.payload or {})
         new_payload["_match_breakdown"] = breakdown
@@ -1060,6 +1181,31 @@ async def rank(
     # the result set at every relax tier.
     plan = build_search_plan(translated_envelope, catalog_id=catalog_id)
     if not plan.dense_query:
+        return MatchResponse(
+            request=req,
+            candidates=[],
+            translation_used=translation_used,
+            auto_linked=None,
+            took_ms=int((time.perf_counter() - started) * 1000),
+            cost_usd=cost_usd,
+            status="ok",
+            catalog_id=catalog_id,
+            catalog_count=catalog_count,
+            catalog_vectorized_count=catalog_vec,
+        )
+
+    # Non-billable IFC entity-types — IfcSpace (rooms/zones),
+    # IfcVirtualElement (placeholders) and bare IfcOpeningElement
+    # (voids — usually billed via the host wall, not standalone) — do
+    # not have a corresponding cost rate in any CWICR catalogue. When
+    # the source description is also junk (single 0xFF byte, bare
+    # numeric "8.01", etc.) the metadata-only fallback bubbles
+    # arbitrary "Electrical equipment" rows to the top because they
+    # happen to be the most frequent class in the catalogue. Better
+    # UX: return an empty candidate list and let the UI render
+    # "no estimable rate for this element type" than serve confidently-
+    # wrong matches.
+    if _is_non_billable_envelope(translated_envelope):
         return MatchResponse(
             request=req,
             candidates=[],
