@@ -305,6 +305,41 @@ async def test_accuracy_m_upper_bound_rejects_huge_values(
 
 
 @pytest.mark.asyncio
+async def test_admin_sweep_endpoint_returns_swept_count(
+    http_client,
+    tenant_a,
+    monkeypatch,
+):
+    """``POST /admin/sweep-deleted-raster-overlays`` is reachable by admins
+    and returns a ``{"swept": N, "blob_errors": N}`` payload.
+
+    The service logic is covered by ``test_sweep_deleted_raster_overlays_*``;
+    here we just pin the HTTP contract so a future refactor doesn't
+    accidentally expose a different shape or mis-route the endpoint.
+    """
+    from app.core import storage as storage_mod
+
+    class _NoopBackend:
+        async def delete(self, key: str) -> None:
+            pass
+
+    monkeypatch.setattr(storage_mod, "get_storage_backend", lambda: _NoopBackend())
+
+    res = await http_client.post(
+        "/api/v1/geo-hub/admin/sweep-deleted-raster-overlays?older_than_days=30",
+        headers=tenant_a["headers"],
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert "swept" in body
+    assert "blob_errors" in body
+    # With a fresh db there should be nothing to sweep (all rows are live or
+    # the previous test already committed them), so the count is 0 or small.
+    assert isinstance(body["swept"], int)
+    assert isinstance(body["blob_errors"], int)
+
+
+@pytest.mark.asyncio
 async def test_lat_lon_clamp_rejected_at_schema_layer(
     http_client,
     tenant_a,

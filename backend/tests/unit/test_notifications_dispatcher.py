@@ -323,3 +323,107 @@ def test_file_comment_mention_icon_category() -> None:
     # Unknown still falls back to info — never raises.
     assert icon_category_for("some_random_third_party_type") == "info"
     assert icon_category_for(None) == "info"
+
+
+# ── Circuit-breaker: open threshold skips delivery ─────────────────────────
+
+
+def test_circuit_open_threshold_constants_are_sane() -> None:
+    """The two thresholds must be positive and ordered correctly."""
+    from app.modules.notifications.dispatcher import (
+        _CIRCUIT_DEACTIVATE_THRESHOLD,
+        _CIRCUIT_OPEN_THRESHOLD,
+    )
+
+    assert _CIRCUIT_OPEN_THRESHOLD > 0
+    assert _CIRCUIT_DEACTIVATE_THRESHOLD > _CIRCUIT_OPEN_THRESHOLD
+
+
+@pytest.mark.asyncio
+async def test_circuit_open_skips_delivery_for_high_failure_count(session) -> None:
+    """A target whose ``failure_count`` >= ``_CIRCUIT_OPEN_THRESHOLD`` must not
+    receive the POST even though ``active=True``.
+
+    We drive the internal helper directly rather than a full HTTP POST so we
+    can assert skipping without needing an external server.
+    """
+    from app.modules.notifications.dispatcher import (
+        _CIRCUIT_OPEN_THRESHOLD,
+        _on_dispatch_webhook,
+    )
+    from app.core.events import Event
+
+    target = WebhookTarget(
+        name="circuit-open-target",
+        url="https://dead.endpoint.example.com/hook",
+        event_filter="*",
+        active=True,
+        failure_count=_CIRCUIT_OPEN_THRESHOLD,  # exactly at threshold
+    )
+    session.add(target)
+    await session.commit()
+
+    posted_to: list[str] = []
+
+    import app.modules.notifications.dispatcher as disp_mod
+
+    original_factory = disp_mod.async_session_factory
+
+    class _PatchedFactory:
+        """Return the test session instead of opening a new one."""
+
+        def __aenter__(self):
+            return self
+
+        async def __aenter__(self):
+            return session
+
+        async def __aexit__(self, *_: object) -> None:
+            # We do NOT commit from the test session — keep isolation.
+            pass
+
+    # Monkey-patch the factory used inside _on_dispatch_webhook so it uses
+    # our test session instead of the production pool.
+    original = disp_mod.async_session_factory
+
+    class _CM:
+        async def __aenter__(self):
+            return session
+
+        async def __aexit__(self, *_: object) -> None:
+            pass
+
+    import httpx
+    import unittest.mock
+
+    with unittest.mock.patch.object(disp_mod, "async_session_factory", return_value=_CM()):
+        with unittest.mock.patch.object(
+            disp_mod,
+            "_get_http_client",
+        ) as mock_client:
+
+            class _FakeClient:
+                async def post(self, url: str, **kwargs: object) -> object:
+                    posted_to.append(url)
+
+                    class _FakeResp:
+                        status_code = 200
+
+                    return _FakeResp()
+
+            mock_client.return_value = _FakeClient()
+
+            event = Event(
+                name="notifications.dispatch.webhook",
+                data={
+                    "event_type": "boq.position.created",
+                    "user_id": str(uuid.uuid4()),
+                    "payload": {},
+                },
+            )
+            await _on_dispatch_webhook(event)
+
+    # Circuit is open: no HTTP call should have been made to the dead endpoint.
+    assert posted_to == [], (
+        f"Expected no delivery for circuit-open target but got posts to: {posted_to}"
+    )

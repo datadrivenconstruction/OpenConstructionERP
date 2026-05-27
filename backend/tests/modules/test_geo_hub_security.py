@@ -546,6 +546,72 @@ async def test_editor_cannot_delete_overlay_requires_manager(
     assert cleanup.status_code == 204, cleanup.text
 
 
+# ── 7. Raster overlay delete requires geo_hub.delete (not geo_hub.write) ─
+
+
+@pytest.mark.asyncio
+async def test_editor_cannot_delete_raster_overlay_requires_delete_perm(
+    http_client,
+    tenant_a,
+    editor_member,
+):
+    """EDITOR role must be 403'd on DELETE /raster-overlays/{id}.
+
+    Pre-fix the endpoint used geo_hub.write — allowing any editor to soft-
+    delete raster overlays on any project they could reach. Post-fix it
+    requires geo_hub.delete (MANAGER+), consistent with the vector overlay
+    and tileset delete endpoints.
+    """
+    # Create a tiny PNG as a raster overlay under tenant A.
+    import base64
+    import struct
+    import zlib
+
+    def _tiny_png() -> bytes:
+        """Minimal 1x1 white PNG — same helper as conftest uses."""
+        raw = b"\x00\xff\xff\xff"  # filter byte + 1 pixel RGB
+        compressed = zlib.compress(raw)
+        chunks = [
+            struct.pack(">I", 13) + b"IHDR" + struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0),
+            struct.pack(">I", len(compressed)) + b"IDAT" + compressed,
+            struct.pack(">I", 0) + b"IEND",
+        ]
+
+        def _crc(data: bytes) -> bytes:
+            return struct.pack(">I", zlib.crc32(data) & 0xFFFFFFFF)
+
+        body = b"\x89PNG\r\n\x1a\n"
+        for chunk in chunks:
+            body += chunk + _crc(chunk[4:])
+        return body
+
+    tiny = _tiny_png()
+    upload = await http_client.post(
+        "/api/v1/geo-hub/raster-overlays/upload-image",
+        data={"project_id": tenant_a["project_id"]},
+        files={"file": ("plan.png", tiny, "image/png")},
+        headers=tenant_a["headers"],
+    )
+    assert upload.status_code == 201, upload.text
+    overlay_id = upload.json()["id"]
+
+    # Editor attempts DELETE -> 403 from RequirePermission("geo_hub.delete").
+    res = await http_client.delete(
+        f"/api/v1/geo-hub/raster-overlays/{overlay_id}",
+        headers=editor_member["headers"],
+    )
+    assert res.status_code == 403, (
+        f"Expected 403 for editor on raster overlay delete, got {res.status_code}: {res.text}"
+    )
+
+    # Admin (tenant A) can still delete — sanity-check happy path.
+    cleanup = await http_client.delete(
+        f"/api/v1/geo-hub/raster-overlays/{overlay_id}",
+        headers=tenant_a["headers"],
+    )
+    assert cleanup.status_code == 204, cleanup.text
+
+
 # ── Pure-unit checks of the magic-byte / DoS helpers ────────────────────
 
 

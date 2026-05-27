@@ -781,7 +781,7 @@ async def delete_raster_overlay(
     overlay_id: uuid.UUID,
     service: GeoHubService = Depends(_svc),
     payload: CurrentUserPayload = None,  # type: ignore[assignment]
-    _perm: None = Depends(RequirePermission("geo_hub.write")),
+    _perm: None = Depends(RequirePermission("geo_hub.delete")),
 ) -> Response:
     await service.delete_raster_overlay(overlay_id, payload=payload)
     return Response(status_code=204)
@@ -991,6 +991,32 @@ async def list_diary_photo_pins(
         limit=limit,
     )
     return [DiaryPhotoPinResponse.model_validate(r) for r in rows]
+
+
+# ── Admin maintenance endpoints ──────────────────────────────────────────
+
+
+@router.post(
+    "/admin/sweep-deleted-raster-overlays",
+    response_model=dict,
+    status_code=200,
+)
+async def sweep_deleted_raster_overlays(
+    older_than_days: int = Query(default=30, ge=0, le=3650),
+    service: GeoHubService = Depends(_svc),
+    _perm: None = Depends(RequirePermission("geo_hub.admin")),
+) -> dict:
+    """Hard-delete soft-deleted raster overlays older than the grace window.
+
+    Frees storage blobs (source + rasterised PNG) before removing the DB row
+    so orphaned bytes are actually reclaimed. Defaults to 30 days matching
+    the geocode-cache TTL. Pass ``older_than_days=0`` to flush everything
+    older than the current second (full purge — use with caution).
+
+    Admin-only (``geo_hub.admin``). Safe to call repeatedly; each pass
+    processes only rows whose ``deleted_at`` is before the cutoff.
+    """
+    return await service.sweep_deleted_raster_overlays(older_than_days=older_than_days)
 
 
 __all__ = ["router"]

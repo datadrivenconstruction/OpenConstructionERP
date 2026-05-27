@@ -62,6 +62,18 @@ _HTTP_CLIENT: httpx.AsyncClient | None = None
 # a stuck endpoint to back up the notification loop for everyone.
 _WEBHOOK_TIMEOUT_SEC = 5.0
 
+# Circuit-breaker thresholds.  A target with consecutive failures at or
+# above ``_CIRCUIT_OPEN_THRESHOLD`` is skipped entirely so a dead
+# external endpoint cannot slow down the fan-out batch for every
+# notification.  Once the operator fixes the endpoint and manually
+# resets ``failure_count`` (or re-saves the target), deliveries resume.
+# ``_CIRCUIT_DEACTIVATE_THRESHOLD`` is a higher watermark: if a target
+# has been silently failing this long it is auto-deactivated with a
+# warning so it appears in the Admin UI as "needs attention" rather than
+# piling up a growing failure counter that nobody sees.
+_CIRCUIT_OPEN_THRESHOLD = 10
+_CIRCUIT_DEACTIVATE_THRESHOLD = 50
+
 
 def _get_http_client() -> httpx.AsyncClient:
     global _HTTP_CLIENT
@@ -263,6 +275,31 @@ async def _on_dispatch_webhook(event: Event) -> None:
             for target in targets:
                 if not _event_filter_matches(target.event_filter, event_type):
                     continue
+
+                # Circuit-breaker: skip targets that have been failing
+                # consecutively for too long so a dead endpoint doesn't
+                # slow down every notification batch.
+                current_failures = target.failure_count or 0
+                if current_failures >= _CIRCUIT_DEACTIVATE_THRESHOLD:
+                    # Auto-deactivate so the Admin UI surfaces it.
+                    target.active = False
+                    logger.warning(
+                        "dispatcher: webhook target %s (%s) auto-deactivated "
+                        "after %d consecutive failures — re-activate once fixed",
+                        target.id,
+                        target.url[:60],
+                        current_failures,
+                    )
+                    continue
+                if current_failures >= _CIRCUIT_OPEN_THRESHOLD:
+                    logger.debug(
+                        "dispatcher: circuit open for webhook target %s "
+                        "(%d failures) — skipping delivery",
+                        target.id,
+                        current_failures,
+                    )
+                    continue
+
                 headers = {
                     "Content-Type": "application/json",
                     "X-OE-Event-Type": event_type,
