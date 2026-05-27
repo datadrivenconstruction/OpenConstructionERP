@@ -260,8 +260,9 @@ function buildResourcesCsv(rows: Resource[]): string {
 
 function downloadCsv(filename: string, csv: string) {
   // BOM ensures Excel opens UTF-8 correctly (German / Russian / Greek
-  // umlauts in code/name would otherwise mojibake).
-  const blob = new Blob(['﻿', csv], { type: 'text/csv;charset=utf-8;' });
+  // umlauts in code/name would otherwise mojibake). Use the U+FEFF escape
+  // rather than a literal BOM char so the zero-width-guard CI scan passes.
+  const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
