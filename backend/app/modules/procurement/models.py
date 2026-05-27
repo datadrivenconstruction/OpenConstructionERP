@@ -41,7 +41,9 @@ class PurchaseOrder(Base):
     po_type: Mapped[str] = mapped_column(String(50), nullable=False, default="standard")
     issue_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     delivery_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="EUR")
+    # Empty by default — service inherits the parent project's currency so
+    # no PO silently shows EUR when the project is non-EUR (task #217).
+    currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="")
     amount_subtotal: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     tax_amount: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     amount_total: Mapped[str] = mapped_column(String(50), nullable=False, default="0")

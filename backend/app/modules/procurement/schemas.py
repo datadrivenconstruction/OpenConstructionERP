@@ -133,7 +133,7 @@ class POResponse(BaseModel):
     po_type: str = "standard"
     issue_date: str | None = None
     delivery_date: str | None = None
-    currency_code: str = "EUR"
+    currency_code: str = ""  # empty until set — never assume EUR (task #217)
     amount_subtotal: str = "0"
     tax_amount: str = "0"
     amount_total: str = "0"
