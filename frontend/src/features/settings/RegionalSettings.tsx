@@ -239,7 +239,7 @@ function SearchableSelect<T extends string>({
                     className={clsx(
                       'flex w-full items-center gap-2 px-3 py-1.5 text-sm transition-colors',
                       opt.value === value
-                        ? 'bg-oe-blue-subtle text-oe-blue-dark font-medium'
+                        ? 'bg-oe-blue-subtle text-oe-blue-text font-medium'
                         : 'text-content-primary hover:bg-surface-secondary',
                     )}
                   >
@@ -280,7 +280,7 @@ function ToggleGroup<T extends string>({
             className={clsx(
               'flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-fast',
               active
-                ? 'bg-oe-blue-subtle border-2 border-oe-blue text-oe-blue-dark'
+                ? 'bg-oe-blue-subtle border-2 border-oe-blue text-oe-blue-text'
                 : 'border-2 border-border-light text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
             )}
           >

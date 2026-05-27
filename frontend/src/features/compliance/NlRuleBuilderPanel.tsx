@@ -300,7 +300,7 @@ export function NlRuleBuilderPanel() {
               </ul>
             )}
             {result && result.suggestions.length > 0 && !result.dsl_yaml && (
-              <div className="rounded-lg bg-oe-blue-subtle px-3 py-2 text-xs text-oe-blue-dark">
+              <div className="rounded-lg bg-oe-blue-subtle px-3 py-2 text-xs text-oe-blue-text">
                 <div className="mb-1 flex items-center gap-1.5 font-medium">
                   <Wand2 size={12} />
                   {t('compliance.nl.no_match', {

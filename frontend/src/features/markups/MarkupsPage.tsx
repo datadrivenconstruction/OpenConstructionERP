@@ -324,7 +324,7 @@ function AddMarkupModal({
                     className={clsx(
                       'flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all border',
                       isSelected
-                        ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark ring-1 ring-oe-blue/30'
+                        ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text ring-1 ring-oe-blue/30'
                         : 'border-border-light bg-surface-primary text-content-secondary hover:bg-surface-secondary',
                     )}
                   >

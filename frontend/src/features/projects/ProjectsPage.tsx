@@ -46,11 +46,11 @@ const REGION_AVATAR_PALETTE = [
 ];
 
 function getRegionAvatarClass(region?: string): string {
-  if (!region) return 'bg-oe-blue-subtle text-oe-blue-dark';
+  if (!region) return 'bg-oe-blue-subtle text-oe-blue-text';
   // Stable hash → palette index so the same region always renders the same colour.
   let h = 0;
   for (let i = 0; i < region.length; i++) h = (h * 31 + region.charCodeAt(i)) >>> 0;
-  return REGION_AVATAR_PALETTE[h % REGION_AVATAR_PALETTE.length] ?? 'bg-oe-blue-subtle text-oe-blue-dark';
+  return REGION_AVATAR_PALETTE[h % REGION_AVATAR_PALETTE.length] ?? 'bg-oe-blue-subtle text-oe-blue-text';
 }
 
 const currencyFmt = new Intl.NumberFormat(getIntlLocale(), {
@@ -504,7 +504,7 @@ export function ProjectsPage() {
                   onClick={() => setSortOption(opt.value)}
                   className={`flex items-center gap-1 rounded-md px-2 py-1.5 text-2xs font-medium transition-colors ${
                     sortOption === opt.value
-                      ? 'bg-oe-blue-subtle text-oe-blue-dark'
+                      ? 'bg-oe-blue-subtle text-oe-blue-text'
                       : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary'
                   }`}
                 >
@@ -1028,7 +1028,7 @@ function ProjectCard({
           </p>
         )}
         <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
-          <span className="inline-flex items-center gap-1 rounded-full border border-oe-blue/20 bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue-dark">
+          <span className="inline-flex items-center gap-1 rounded-full border border-oe-blue/20 bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue-text">
             <Building2 size={11} strokeWidth={2.25} />
             {standardLabels[project.classification_standard] ?? project.classification_standard}
           </span>
@@ -1053,7 +1053,7 @@ function ProjectCard({
             <Link
               to={`/projects/${project.id}/geo`}
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 rounded-full border border-oe-blue/30 bg-oe-blue-subtle px-2 py-0.5 text-2xs font-semibold text-oe-blue-dark transition-all hover:bg-oe-blue hover:text-white hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60"
+              className="inline-flex items-center gap-1 rounded-full border border-oe-blue/30 bg-oe-blue-subtle px-2 py-0.5 text-2xs font-semibold text-oe-blue-text transition-all hover:bg-oe-blue hover:text-white hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60"
               title={t('projects.card.fly_to_on_map', {
                 defaultValue: 'Fly camera to {{name}} on the globe',
                 name: project.name,
@@ -1162,7 +1162,7 @@ function WidgetToggles() {
   const btn = (active: boolean) =>
     `flex items-center gap-1 rounded-md px-2 py-1.5 text-2xs font-medium transition-colors ${
       active
-        ? 'bg-oe-blue-subtle text-oe-blue-dark'
+        ? 'bg-oe-blue-subtle text-oe-blue-text'
         : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary'
     }`;
 

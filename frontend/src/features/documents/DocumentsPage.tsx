@@ -209,7 +209,7 @@ function DocBIMIcon({ docId }: { docId: string }) {
       elementIds={elementIds}
       iconSize={10}
       label=""
-      className="inline-flex items-center gap-0.5 text-2xs text-oe-blue hover:text-oe-blue-dark transition-colors"
+      className="inline-flex items-center gap-0.5 text-2xs text-oe-blue hover:text-oe-blue-text transition-colors"
     />
   );
 }
@@ -407,7 +407,7 @@ function SortDropdown({
               onClick={() => { onChange(field); setOpen(false); }}
               className={`w-full text-left px-3 py-2 text-xs transition-colors ${
                 value === field
-                  ? 'bg-oe-blue-subtle/30 text-oe-blue-dark font-medium'
+                  ? 'bg-oe-blue-subtle/30 text-oe-blue-text font-medium'
                   : 'text-content-secondary hover:bg-surface-secondary'
               }`}
             >

@@ -393,7 +393,7 @@ function RegionTabBar({
         {/* Add database button */}
         <button
           onClick={() => navigate('/costs/import')}
-          className="flex items-center gap-1.5 shrink-0 rounded-t-lg px-3 py-2.5 border-b-2 border-transparent text-content-tertiary hover:text-oe-blue-dark hover:bg-oe-blue-subtle/10 transition-all duration-fast ease-oe"
+          className="flex items-center gap-1.5 shrink-0 rounded-t-lg px-3 py-2.5 border-b-2 border-transparent text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle/10 transition-all duration-fast ease-oe"
           title={t('costs.import_database', { defaultValue: 'Import database' })}
         >
           <Plus size={14} />
@@ -838,7 +838,7 @@ export function CostsPage() {
             size="sm"
             icon={<Layers size={14} />}
             onClick={() => setShowRegionalAdjust((p) => !p)}
-            className={showRegionalAdjust ? 'border-oe-blue/40 text-oe-blue-dark bg-oe-blue-subtle/20' : ''}
+            className={showRegionalAdjust ? 'border-oe-blue/40 text-oe-blue-text bg-oe-blue-subtle/20' : ''}
           >
             {t('costs.regional_adjust.toggle', { defaultValue: 'Regional Adjust' })}
           </Button>
@@ -1538,7 +1538,7 @@ function AddToBOQModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-dark">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
               <Table2 size={18} />
             </div>
             <div>
@@ -2129,7 +2129,7 @@ function CostVariantDetail({
         <Layers size={13} className="text-oe-blue shrink-0" />
         <span className="text-xs font-semibold text-content-primary">
           {t('costs.variant_count', { defaultValue: 'Variants' })}
-          <span className="ml-1.5 rounded bg-oe-blue-subtle/40 px-1.5 py-0.5 text-2xs font-normal text-oe-blue-dark">
+          <span className="ml-1.5 rounded bg-oe-blue-subtle/40 px-1.5 py-0.5 text-2xs font-normal text-oe-blue-text">
             {stats.count}
           </span>
         </span>
@@ -2231,7 +2231,7 @@ function CostVariantDetail({
           <button
             type="button"
             onClick={() => setExpanded((e) => !e)}
-            className="rounded px-2 py-0.5 text-2xs font-medium text-oe-blue-dark hover:bg-oe-blue-subtle/30 transition-colors"
+            className="rounded px-2 py-0.5 text-2xs font-medium text-oe-blue-text hover:bg-oe-blue-subtle/30 transition-colors"
           >
             {expanded
               ? t('costs.variant_show_less', { defaultValue: 'Show less' })
@@ -2416,7 +2416,7 @@ function CostItemRow({
               className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all ${
                 isSelected
                   ? 'bg-oe-blue text-white'
-                  : 'text-content-tertiary hover:bg-oe-blue-subtle hover:text-oe-blue-dark'
+                  : 'text-content-tertiary hover:bg-oe-blue-subtle hover:text-oe-blue-text'
               }`}
             >
               <Plus size={14} />

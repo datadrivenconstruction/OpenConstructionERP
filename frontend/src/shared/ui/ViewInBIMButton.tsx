@@ -59,7 +59,7 @@ export function ViewInBIMButton({
       onClick={handleClick}
       className={
         className ??
-        'inline-flex items-center gap-1 text-xs text-oe-blue hover:text-oe-blue-dark transition-colors'
+        'inline-flex items-center gap-1 text-xs text-oe-blue hover:text-oe-blue-text transition-colors'
       }
       title={t('common.view_in_bim', {
         defaultValue: 'View in BIM 3D',

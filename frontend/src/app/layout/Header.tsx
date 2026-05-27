@@ -774,7 +774,7 @@ function LanguageSwitcher({
               className={clsx(
                 'flex w-full items-center gap-2.5 px-3 py-1.5 text-sm transition-colors',
                 lang.code === currentLang.code
-                  ? 'bg-oe-blue-subtle text-oe-blue-dark font-medium'
+                  ? 'bg-oe-blue-subtle text-oe-blue-text font-medium'
                   : 'text-content-primary hover:bg-surface-secondary',
               )}
             >
@@ -1105,10 +1105,10 @@ function ProjectSwitcher() {
             }
           }}
           className={clsx(
-            // WCAG AA fix 2026-05-27: text-oe-blue-dark (#0071e3) on bg-oe-blue-subtle
-            // failed 4.35:1; text-oe-blue-dark passes at 8.05:1.
+            // WCAG AA fix 2026-05-27: text-oe-blue-text (#0071e3) on bg-oe-blue-subtle
+            // failed 4.35:1; text-oe-blue-text passes at 8.05:1.
             'flex items-center gap-2 pl-1.5 pr-2 h-9 text-[13px] min-w-0',
-            activeProjectId ? 'text-oe-blue-dark' : 'text-oe-blue-dark/85 hover:text-oe-blue-dark',
+            activeProjectId ? 'text-oe-blue-text' : 'text-oe-blue-text/85 hover:text-oe-blue-text',
           )}
           title={activeProjectId
             ? t('projects.open_current', { defaultValue: 'Open this project' })
@@ -1139,13 +1139,13 @@ function ProjectSwitcher() {
           type="button"
           onClick={() => setOpen(!open)}
           className={clsx(
-            // WCAG AA: text-oe-blue-dark at /70 alpha on bg-oe-blue-subtle drops
+            // WCAG AA: text-oe-blue-text at /70 alpha on bg-oe-blue-subtle drops
             // below 4.5:1. Use oe-blue-dark for the icon color so axe scans
             // pass even though ChevronDown is presentational.
             'flex items-center px-2 border-l transition-colors',
             activeProjectId
-              ? 'border-oe-blue/20 text-oe-blue-dark/70 hover:bg-oe-blue/10 hover:text-oe-blue-dark'
-              : 'border-oe-blue/25 border-dashed text-oe-blue-dark/60 hover:bg-oe-blue/10 hover:text-oe-blue-dark',
+              ? 'border-oe-blue/20 text-oe-blue-text/70 hover:bg-oe-blue/10 hover:text-oe-blue-text'
+              : 'border-oe-blue/25 border-dashed text-oe-blue-text/60 hover:bg-oe-blue/10 hover:text-oe-blue-text',
           )}
           title={t('schedule.switch_project', { defaultValue: 'Switch Project' })}
           aria-label={t('schedule.switch_project', { defaultValue: 'Switch Project' })}
@@ -1216,7 +1216,7 @@ function ProjectSwitcher() {
                 className={clsx(
                   'flex w-full items-center gap-2.5 px-4 py-2 text-sm transition-colors',
                   p.id === activeProjectId
-                    ? 'bg-oe-blue-subtle text-oe-blue-dark font-medium'
+                    ? 'bg-oe-blue-subtle text-oe-blue-text font-medium'
                     : 'text-content-primary hover:bg-surface-secondary',
                 )}
               >
@@ -1310,7 +1310,7 @@ function UploadQueueIndicator() {
         aria-expanded={open}
         className={clsx(
           'relative flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
-          totalActive > 0 ? 'text-oe-blue-dark bg-oe-blue-subtle' : 'text-content-tertiary hover:bg-surface-secondary',
+          totalActive > 0 ? 'text-oe-blue-text bg-oe-blue-subtle' : 'text-content-tertiary hover:bg-surface-secondary',
         )}
         title={t('queue.title', { defaultValue: 'Upload Queue' })}
       >

@@ -287,7 +287,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
               onClick={handleAddMarkup}
               disabled={addMutation.isPending}
               aria-label={t('boq.add_markup', { defaultValue: 'Add Markup' })}
-              className="flex items-center gap-1.5 text-xs font-medium text-oe-blue-dark hover:text-oe-blue-dark transition-colors rounded-md px-2 py-1.5 hover:bg-oe-blue-subtle whitespace-nowrap"
+              className="flex items-center gap-1.5 text-xs font-medium text-oe-blue-text hover:text-oe-blue-text transition-colors rounded-md px-2 py-1.5 hover:bg-oe-blue-subtle whitespace-nowrap"
             >
               <Plus size={14} className="shrink-0" />
               <span>{t('boq.add_markup', { defaultValue: 'Add Markup' })}</span>

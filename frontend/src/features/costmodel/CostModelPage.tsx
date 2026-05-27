@@ -1191,7 +1191,7 @@ function BudgetLinesEditor({
                 <td className="py-3.5 pl-4 text-center">
                   <button
                     onClick={() => startEditing(line)}
-                    className="invisible group-hover:visible flex h-7 w-7 mx-auto items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-dark hover:bg-oe-blue-subtle/40 transition-colors"
+                    className="invisible group-hover:visible flex h-7 w-7 mx-auto items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 transition-colors"
                     title={t('common.edit', { defaultValue: 'Edit' })}
                   >
                     <Pencil size={13} />
@@ -2382,7 +2382,7 @@ const ProjectCard = memo(function ProjectCard({
       onClick={handleClick}
     >
       <div className="flex items-center gap-3 px-5 py-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark font-bold">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text font-bold">
           {project.name.charAt(0).toUpperCase()}
         </div>
         <div className="min-w-0 flex-1">
@@ -2512,7 +2512,7 @@ export function CostModelPage() {
         </div>
 
         <div className="mb-6 flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-dark">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text">
             <BarChart3 size={22} />
           </div>
           <div>

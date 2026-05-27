@@ -512,7 +512,7 @@ export function BackupRestore() {
                                     aria-pressed={restoreMode === 'merge'}
                                     className={`flex-1 rounded-lg px-3 py-2.5 text-xs font-medium border-2 transition-all ${
                                       restoreMode === 'merge'
-                                        ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark'
+                                        ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text'
                                         : 'border-border-light hover:bg-surface-secondary text-content-secondary'
                                     }`}
                                   >

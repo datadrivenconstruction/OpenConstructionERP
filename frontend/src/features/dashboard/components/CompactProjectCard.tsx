@@ -46,7 +46,7 @@ const standardLabels: Record<string, string> = {
 
 function getRegionAvatarClass(region?: string): string {
   if (region && regionColorMap[region]) return regionColorMap[region];
-  return 'bg-oe-blue-subtle text-oe-blue-dark';
+  return 'bg-oe-blue-subtle text-oe-blue-text';
 }
 
 const currencyFmt = new Intl.NumberFormat(getIntlLocale(), {
@@ -129,7 +129,7 @@ export function CompactProjectCard({
 
         <div className="mt-2 flex flex-wrap items-center gap-1">
           {classificationStandard && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-oe-blue/20 bg-oe-blue-subtle px-1.5 py-0.5 text-2xs font-medium text-oe-blue-dark">
+            <span className="inline-flex items-center gap-1 rounded-full border border-oe-blue/20 bg-oe-blue-subtle px-1.5 py-0.5 text-2xs font-medium text-oe-blue-text">
               <Building2 size={10} strokeWidth={2.25} />
               {standardLabels[classificationStandard] ?? classificationStandard}
             </span>

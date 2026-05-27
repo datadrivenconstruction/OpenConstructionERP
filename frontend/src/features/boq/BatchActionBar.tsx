@@ -163,7 +163,7 @@ export function BatchActionBar({
               aria-label={t('boq.batch_change_unit', { defaultValue: 'Change unit' })}
               aria-expanded={unitDropdownOpen}
               aria-haspopup="listbox"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue-subtle px-3 py-1.5 text-xs font-medium text-oe-blue-dark hover:bg-oe-blue-subtle/80 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue-subtle px-3 py-1.5 text-xs font-medium text-oe-blue-text hover:bg-oe-blue-subtle/80 transition-colors"
             >
               <Ruler size={14} />
               {t('boq.batch_change_unit', { defaultValue: 'Change unit' })}

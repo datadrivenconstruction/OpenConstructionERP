@@ -1435,7 +1435,7 @@ export function TasksPage() {
           className={clsx(
             'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap',
             typeFilter === ''
-              ? 'bg-oe-blue-subtle text-oe-blue-dark'
+              ? 'bg-oe-blue-subtle text-oe-blue-text'
               : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary',
           )}
         >

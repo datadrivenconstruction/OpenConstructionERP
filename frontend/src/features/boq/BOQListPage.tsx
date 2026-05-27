@@ -181,7 +181,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
               <GitCompareArrows size={18} />
             </div>
             <h2 className="text-lg font-bold text-content-primary">{t('boq.compare_title', { defaultValue: 'BOQ Comparison' })}</h2>
@@ -751,7 +751,7 @@ export function BOQListPage() {
                   onClick={() => handleSort(field)}
                   className={`flex items-center gap-1 rounded-md px-2 py-1.5 text-2xs font-medium transition-colors ${
                     sortField === field
-                      ? 'bg-oe-blue-subtle text-oe-blue-dark'
+                      ? 'bg-oe-blue-subtle text-oe-blue-text'
                       : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary'
                   }`}
                 >
@@ -817,7 +817,7 @@ export function BOQListPage() {
               }}
             >
               <div className="flex items-center gap-4 px-5 py-3.5">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
                   <Table2 size={18} strokeWidth={1.75} />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -849,8 +849,8 @@ export function BOQListPage() {
                     onClick={(e) => { e.stopPropagation(); handleCompareClick(boq.id, boq.currency); }}
                     className={`flex h-7 w-7 items-center justify-center rounded-md transition-all ${
                       selectedForCompare?.id === boq.id
-                        ? 'text-oe-blue-dark bg-oe-blue-subtle'
-                        : 'text-content-tertiary hover:text-oe-blue-dark hover:bg-oe-blue-subtle'
+                        ? 'text-oe-blue-text bg-oe-blue-subtle'
+                        : 'text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle'
                     }`}
                     title={
                       compareMode && selectedForCompare?.id === boq.id
@@ -864,7 +864,7 @@ export function BOQListPage() {
                   <button
                     onClick={(e) => { e.stopPropagation(); duplicateMutation.mutate(boq.id); }}
                     disabled={duplicateMutation.isPending}
-                    className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-dark hover:bg-oe-blue-subtle transition-all disabled:opacity-40"
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all disabled:opacity-40"
                     title={t('boq.duplicate', { defaultValue: 'Duplicate' })}
                   >
                     <Copy size={13} />

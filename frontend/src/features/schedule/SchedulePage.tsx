@@ -689,7 +689,7 @@ function GanttChart({
             const sc = isCritical
               ? { bg: 'bg-semantic-error/20', fill: 'bg-semantic-error', text: 'text-semantic-error', variant: 'error' as const }
               : cpActive
-                ? { bg: 'bg-oe-blue-subtle', fill: 'bg-oe-blue/30', text: 'text-oe-blue-dark', variant: 'neutral' as const }
+                ? { bg: 'bg-oe-blue-subtle', fill: 'bg-oe-blue/30', text: 'text-oe-blue-text', variant: 'neutral' as const }
                 : statusColor(activity.status);
             const isMilestone = activity.activity_type === 'milestone';
             const isSummary = activity.activity_type === 'summary';
@@ -775,7 +775,7 @@ function GanttChart({
                 const sc = isCritical
                   ? { bg: 'bg-semantic-error/20', fill: 'bg-semantic-error', text: 'text-semantic-error', variant: 'error' as const }
                   : cpActive
-                    ? { bg: 'bg-oe-blue-subtle', fill: 'bg-oe-blue/30', text: 'text-oe-blue-dark', variant: 'neutral' as const }
+                    ? { bg: 'bg-oe-blue-subtle', fill: 'bg-oe-blue/30', text: 'text-oe-blue-text', variant: 'neutral' as const }
                     : statusColor(activity.status);
                 const barStyle = getBarStyle(activity);
                 const isMilestone = activity.activity_type === 'milestone';
@@ -1564,7 +1564,7 @@ function ScheduleDetail({
                     onClick={() => setShowGenerateBOQ(true)}
                     className="group flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border-light bg-surface-secondary/30 p-6 transition-all hover:border-oe-blue/50 hover:bg-oe-blue-subtle/30"
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark transition-transform group-hover:scale-110">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text transition-transform group-hover:scale-110">
                       <FileBarChart size={24} />
                     </div>
                     <div>
@@ -1673,7 +1673,7 @@ function ScheduleDetail({
                   onClick={() => setActivityForm((f) => ({ ...f, activity_type: type }))}
                   className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium capitalize transition-all ${
                     activityForm.activity_type === type
-                      ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark'
+                      ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text'
                       : 'border-border bg-surface-primary text-content-secondary hover:bg-surface-secondary'
                   }`}
                 >
@@ -1966,7 +1966,7 @@ function ProjectSchedules({
               onClick={() => setSelectedSchedule(schedule)}
             >
               <div className="flex items-center gap-3 px-5 py-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
                   <CalendarDays size={18} strokeWidth={1.75} />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -2169,7 +2169,7 @@ export function SchedulePage() {
               onClick={() => setActiveProject(project.id, project.name)}
             >
               <div className="flex items-center gap-3 px-5 py-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark font-bold">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text font-bold">
                   {project.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">

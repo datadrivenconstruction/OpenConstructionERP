@@ -638,7 +638,7 @@ function WorkflowStepper({ status, t }: { status: string; t: (key: string, opts?
                   : isCompleted
                     ? 'border-semantic-success bg-semantic-success-bg text-semantic-success'
                     : isActive
-                      ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark'
+                      ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text'
                       : 'border-border-light bg-surface-secondary text-content-tertiary'
               }`}>
                 {showRejected ? '\u2715' : isCompleted ? '\u2713' : i + 1}

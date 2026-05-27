@@ -1713,7 +1713,7 @@ function SidebarItem({
               'shrink-0 flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums transition-colors',
               isActive
                 ? 'bg-oe-blue text-white'
-                : 'bg-oe-blue-subtle text-oe-blue-dark',
+                : 'bg-oe-blue-subtle text-oe-blue-text',
             )}
             aria-hidden
           >

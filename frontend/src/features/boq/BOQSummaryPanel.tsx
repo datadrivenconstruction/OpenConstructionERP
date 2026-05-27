@@ -333,7 +333,7 @@ export function QuickAddFAB({
                 }}
                 className="flex w-full items-start gap-3 px-4 py-3 hover:bg-surface-secondary transition-colors text-left"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-dark">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
                   {action.icon}
                 </div>
                 <div className="min-w-0">
@@ -470,7 +470,7 @@ export function EmptyBOQOnboarding({
                   step.complete
                     ? 'bg-semantic-success/10 text-semantic-success'
                     : i === completedCount
-                      ? 'bg-oe-blue-subtle text-oe-blue-dark'
+                      ? 'bg-oe-blue-subtle text-oe-blue-text'
                       : 'bg-surface-secondary text-content-tertiary'
                 }`}
               >

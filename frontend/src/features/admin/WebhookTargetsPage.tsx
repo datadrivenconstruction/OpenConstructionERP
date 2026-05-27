@@ -235,7 +235,7 @@ function StatusBadge({ target }: { target: WebhookTarget }) {
   }
   if (target.last_status == null) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-2 py-0.5 text-2xs text-oe-blue-dark">
+      <span className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-2 py-0.5 text-2xs text-oe-blue-text">
         Active · never fired
       </span>
     );

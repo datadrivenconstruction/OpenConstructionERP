@@ -826,7 +826,7 @@ function InterfaceModeCard() {
             aria-label={t('nav.mode_simple', { defaultValue: 'Simple' })}
             className={`flex-1 flex flex-col items-center gap-2 rounded-xl px-4 py-4 border-2 transition-all ${
               !isAdvanced
-                ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark'
+                ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text'
                 : 'border-transparent hover:bg-surface-secondary text-content-secondary hover:text-content-primary'
             }`}
           >
@@ -842,7 +842,7 @@ function InterfaceModeCard() {
             aria-label={t('nav.mode_advanced', { defaultValue: 'Advanced' })}
             className={`flex-1 flex flex-col items-center gap-2 rounded-xl px-4 py-4 border-2 transition-all ${
               isAdvanced
-                ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark'
+                ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text'
                 : 'border-transparent hover:bg-surface-secondary text-content-secondary hover:text-content-primary'
             }`}
           >
@@ -899,7 +899,7 @@ function AppearanceCard() {
                 aria-label={t(option.labelKey, { defaultValue: option.defaultLabel })}
                 className={`flex flex-col items-center gap-2.5 rounded-xl px-4 py-4 text-center transition-all duration-normal ease-oe ${
                   isActive
-                    ? 'bg-oe-blue-subtle border-2 border-oe-blue text-oe-blue-dark'
+                    ? 'bg-oe-blue-subtle border-2 border-oe-blue text-oe-blue-text'
                     : 'border-2 border-transparent hover:bg-surface-secondary text-content-secondary hover:text-content-primary'
                 }`}
               >
@@ -1281,7 +1281,7 @@ export function SettingsPage() {
                   onClick={() => handleTabChange(tab.id)}
                   className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-fast ${
                     isActive
-                      ? 'bg-oe-blue-subtle text-oe-blue-dark'
+                      ? 'bg-oe-blue-subtle text-oe-blue-text'
                       : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary'
                   }`}
                 >
@@ -1514,7 +1514,7 @@ export function SettingsPage() {
                           aria-label={`${lang.name} (${lang.code})`}
                           className={`flex flex-col items-center gap-1 rounded-xl px-3 py-3 text-center transition-all duration-normal ease-oe ${
                             isActive
-                              ? 'bg-oe-blue-subtle border-2 border-oe-blue text-oe-blue-dark'
+                              ? 'bg-oe-blue-subtle border-2 border-oe-blue text-oe-blue-text'
                               : 'border-2 border-transparent hover:bg-surface-secondary text-content-secondary hover:text-content-primary'
                           }`}
                         >

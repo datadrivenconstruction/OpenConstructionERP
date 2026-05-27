@@ -227,7 +227,7 @@ function RegionImportGrid({
     <Card padding="none" className="mb-6">
       <div className="p-5 border-b border-border-light">
         <div className="flex items-center gap-3 mb-1">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-dark">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
             <Database size={18} />
           </div>
           <div>
@@ -465,7 +465,7 @@ function RegionTabBar({
         {/* Import button */}
         <button
           onClick={onImportClick}
-          className="flex items-center gap-1.5 shrink-0 rounded-t-lg px-3 py-2.5 border-b-2 border-transparent text-content-tertiary hover:text-oe-blue-dark hover:bg-oe-blue-subtle/10 transition-all duration-fast ease-oe"
+          className="flex items-center gap-1.5 shrink-0 rounded-t-lg px-3 py-2.5 border-b-2 border-transparent text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle/10 transition-all duration-fast ease-oe"
           title={t('catalog.import_region', { defaultValue: 'Import region' })}
         >
           <Plus size={14} />
@@ -1032,7 +1032,7 @@ function BuildAssemblyModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light shrink-0">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-dark">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
               <Layers size={18} />
             </div>
             <div>

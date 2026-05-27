@@ -30,7 +30,7 @@ export function AboutPage() {
             href="https://openconstructionerp.com?utm_source=app&utm_medium=about"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-oe-blue hover:text-oe-blue-dark transition-colors mb-4"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-oe-blue hover:text-oe-blue-text transition-colors mb-4"
           >
             <Globe size={13} />
             openconstructionerp.com

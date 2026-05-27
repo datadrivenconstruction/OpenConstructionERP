@@ -322,7 +322,7 @@ function FilterChips<T extends string>({
           onClick={() => onChange(opt.value)}
           className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
             value === opt.value
-              ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark'
+              ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text'
               : 'border-border bg-surface-primary text-content-secondary hover:bg-surface-secondary'
           }`}
         >
@@ -602,7 +602,7 @@ function KpiCard({
     success: 'border-semantic-success/30 bg-semantic-success/5 text-semantic-success',
     warning: 'border-amber-500/30 bg-amber-50 text-amber-700',
     error: 'border-semantic-error/30 bg-semantic-error/5 text-semantic-error',
-    blue: 'border-oe-blue/30 bg-oe-blue-subtle text-oe-blue-dark',
+    blue: 'border-oe-blue/30 bg-oe-blue-subtle text-oe-blue-text',
     neutral: 'border-border bg-surface-secondary text-content-tertiary',
   };
   return (
@@ -2659,7 +2659,7 @@ function CAPATab({ projectId }: { projectId: string }) {
           onClick={() => setSubTab('capa')}
           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
             subTab === 'capa'
-              ? 'bg-oe-blue-subtle text-oe-blue-dark'
+              ? 'bg-oe-blue-subtle text-oe-blue-text'
               : 'text-content-tertiary hover:bg-surface-secondary'
           }`}
         >
@@ -2671,7 +2671,7 @@ function CAPATab({ projectId }: { projectId: string }) {
           onClick={() => setSubTab('corrective_actions')}
           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
             subTab === 'corrective_actions'
-              ? 'bg-oe-blue-subtle text-oe-blue-dark'
+              ? 'bg-oe-blue-subtle text-oe-blue-text'
               : 'text-content-tertiary hover:bg-surface-secondary'
           }`}
         >

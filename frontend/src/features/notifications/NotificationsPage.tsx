@@ -77,7 +77,7 @@ const ICON_MAP: Record<IconCategory, { icon: typeof CheckCircle2; color: string;
   },
   error: { icon: XCircle, color: 'text-semantic-error', bg: 'bg-rose-50 dark:bg-rose-900/30' },
   warning: { icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/30' },
-  info: { icon: Info, color: 'text-oe-blue-dark', bg: 'bg-oe-blue-subtle' },
+  info: { icon: Info, color: 'text-oe-blue-text', bg: 'bg-oe-blue-subtle' },
   import: { icon: Upload, color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/30' },
   validation: { icon: Shield, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/30' },
   system: { icon: Settings, color: 'text-content-tertiary', bg: 'bg-surface-secondary' },
@@ -248,7 +248,7 @@ export function NotificationsPage() {
             </span>
           )}
           {unreadCount > 0 && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-semibold bg-oe-blue-subtle text-oe-blue-dark tabular-nums">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-semibold bg-oe-blue-subtle text-oe-blue-text tabular-nums">
               {unreadCount} {t('notifications.unread', { defaultValue: 'unread' })}
             </span>
           )}

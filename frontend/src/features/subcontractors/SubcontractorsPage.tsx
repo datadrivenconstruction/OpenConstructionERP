@@ -652,7 +652,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               type="button"
               onClick={() => setPrequalOpen(true)}
               disabled={!sub}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-oe-blue-dark hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-oe-blue-text hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label={t('subcontractors.prequalify', {
                 defaultValue: 'Prequalify',
               })}
@@ -688,7 +688,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               type="button"
               onClick={() => setEditOpen(true)}
               disabled={!sub}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-oe-blue-dark hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-oe-blue-text hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label={t('common.edit', { defaultValue: 'Edit' })}
             >
               <Pencil size={12} />

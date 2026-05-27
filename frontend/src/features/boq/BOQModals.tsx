@@ -1587,7 +1587,7 @@ export function CostDatabaseSearchModal({
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-6 py-4 border-b border-border-light shrink-0">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-dark">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
             <Database size={18} />
           </div>
           <div className="flex-1">
@@ -1758,7 +1758,7 @@ export function CostDatabaseSearchModal({
               {selectedPath && (
                 <span
                   data-testid="filter-chip-category"
-                  className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle/60 text-oe-blue-dark px-2 py-0.5 text-2xs font-medium"
+                  className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle/60 text-oe-blue-text px-2 py-0.5 text-2xs font-medium"
                 >
                   <span title={selectedPath} className="max-w-[200px] truncate">
                     {selectedPath

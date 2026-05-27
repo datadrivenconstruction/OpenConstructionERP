@@ -101,7 +101,7 @@ export function PlanningCrossLinks({ active }: { active: PlanningRouteKey }) {
             className={
               isActive
                 ? 'inline-flex items-center gap-1.5 rounded-full bg-oe-blue px-3 py-1 text-xs font-semibold text-white shadow-sm'
-                : 'inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-primary px-3 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-oe-blue/40 hover:bg-oe-blue-subtle/40 hover:text-oe-blue-dark'
+                : 'inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-primary px-3 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-oe-blue/40 hover:bg-oe-blue-subtle/40 hover:text-oe-blue-text'
             }
           >
             <Icon size={13} />

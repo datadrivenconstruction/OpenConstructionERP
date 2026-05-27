@@ -17,6 +17,18 @@
   --oe-blue-hover: #0077ed;
   --oe-blue-active: #006edb;
   --oe-blue-dark: #005bb5;
+  /* Theme-aware blue intended for use as TEXT on tinted/lifted surfaces.
+     Pairs with --oe-blue-subtle and the semantic-info pills.
+     WCAG-AA contrast fix 2026-05-27 (sequel to v5.3.0): the v5.3.0 wave
+     replaced `text-oe-blue` → `text-oe-blue-dark` in 51 files. In light
+     mode that lands at #005bb5 (≈8:1 on the pill bg, perfect). But in
+     dark mode `--oe-blue-dark` is #1d4ed8 — only ~2:1 on lifted dark
+     surfaces, FAILS hard. This new token resolves separately per theme
+     so the same `text-oe-blue-text` class passes AA in both modes.
+       Light  #005bb5 → 7.4:1 on #fff, 7.0:1 on #f0f7ff
+       Dark   #93c5fd → 7.9:1 on #1e2130, 8.4:1 on #1a1d2b, 7.8:1 on
+                        flattened bg-oe-blue-subtle (rgba 0.15 over bg) */
+  --oe-blue-text: #005bb5;
   /* WCAG-AA contrast fix 2026-05-27: was #e8f2fe (4.15:1 against
      text-oe-blue #0071e3 — fails AA for normal text). Lightened to
      #f0f7ff so the Apple-Blue brand colour passes AA on the pill
@@ -149,6 +161,10 @@
   --oe-blue-active: #2563eb;
   --oe-blue-dark: #bfdbfe;
   --oe-blue-subtle: rgba(59, 130, 246, 0.15);
+  /* See light-mode comment. Dark-mode swaps to Tailwind blue-300 so
+     `text-oe-blue-text` reads cleanly on lifted dark surfaces without
+     touching `bg-oe-blue-dark` (used as hover/active button bg). */
+  --oe-blue-text: #93c5fd;
 
   /* Surfaces — deep blue-gray palette */
   --oe-bg: #0f1117;

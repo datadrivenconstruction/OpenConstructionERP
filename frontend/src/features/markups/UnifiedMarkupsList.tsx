@@ -236,7 +236,7 @@ export function UnifiedMarkupsList({ projectId }: UnifiedMarkupsListProps) {
                 className={clsx(
                   'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium transition-all',
                   active
-                    ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark'
+                    ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text'
                     : 'border-border-light bg-surface-primary text-content-secondary hover:bg-surface-secondary',
                 )}
               >
@@ -283,7 +283,7 @@ export function UnifiedMarkupsList({ projectId }: UnifiedMarkupsListProps) {
                 className={clsx(
                   'inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-2xs font-medium transition-all capitalize',
                   active
-                    ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark'
+                    ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text'
                     : 'border-border-light bg-surface-primary text-content-tertiary hover:bg-surface-secondary',
                 )}
               >

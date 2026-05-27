@@ -11,6 +11,11 @@ export default {
           'blue-active': 'var(--oe-blue-active)',
           'blue-dark': 'var(--oe-blue-dark)',
           'blue-subtle': 'var(--oe-blue-subtle)',
+          // Theme-aware blue intended for use as TEXT on tinted/lifted
+          // surfaces. Resolves to a deeper hue in light mode and to a
+          // brighter hue in dark mode so the same class clears WCAG-AA
+          // 4.5:1 in both themes. See index.css `--oe-blue-text`.
+          'blue-text': 'var(--oe-blue-text)',
         },
         surface: {
           primary: 'var(--oe-bg)',

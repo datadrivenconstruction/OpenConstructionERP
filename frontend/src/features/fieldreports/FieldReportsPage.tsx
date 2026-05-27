@@ -433,7 +433,7 @@ export function FieldReportsPage() {
               className={clsx(
                 'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
                 view === 'calendar'
-                  ? 'bg-oe-blue-subtle text-oe-blue-dark'
+                  ? 'bg-oe-blue-subtle text-oe-blue-text'
                   : 'text-content-tertiary hover:text-content-primary',
               )}
             >
@@ -447,7 +447,7 @@ export function FieldReportsPage() {
               className={clsx(
                 'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
                 view === 'list'
-                  ? 'bg-oe-blue-subtle text-oe-blue-dark'
+                  ? 'bg-oe-blue-subtle text-oe-blue-text'
                   : 'text-content-tertiary hover:text-content-primary',
               )}
             >

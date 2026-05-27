@@ -396,7 +396,7 @@ export default function SustainabilityModule() {
 
           <button
             onClick={addPosition}
-            className="text-sm text-oe-blue hover:text-oe-blue-dark font-medium"
+            className="text-sm text-oe-blue hover:text-oe-blue-text font-medium"
           >
             + {t('sustainability.add_position', { defaultValue: 'Add position' })}
           </button>

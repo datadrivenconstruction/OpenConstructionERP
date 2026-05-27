@@ -145,7 +145,7 @@ function WorkflowIntro() {
   return (
     <Card padding="md" className="border-oe-blue/20 bg-oe-blue-subtle/10">
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-dark">
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
           <Truck size={16} />
         </div>
         <div className="min-w-0 flex-1">
@@ -640,7 +640,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               type="button"
               onClick={() => setEditOpen(true)}
               disabled={!eq}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-oe-blue-dark hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-oe-blue-text hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label={t('common.edit', { defaultValue: 'Edit' })}
               title={t('equipment.edit_hint', {
                 defaultValue: 'Edit equipment details',
@@ -911,7 +911,7 @@ function SectionHeader({
       <button
         type="button"
         onClick={onAdd}
-        className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary hover:text-oe-blue-dark hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors"
+        className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary hover:text-oe-blue-text hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors"
       >
         <Plus size={12} />
         {addLabel}

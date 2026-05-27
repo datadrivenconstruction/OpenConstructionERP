@@ -1443,7 +1443,7 @@ function ModuleToggleCard({
       <div
         className={clsx(
           'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors',
-          enabled ? 'bg-oe-blue-subtle text-oe-blue-dark' : 'bg-surface-tertiary text-content-quaternary',
+          enabled ? 'bg-oe-blue-subtle text-oe-blue-text' : 'bg-surface-tertiary text-content-quaternary',
         )}
       >
         <Icon size={15} />
@@ -1529,7 +1529,7 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoIn
             mod.category === 'resource_catalog'
               ? 'bg-semantic-warning-bg text-semantic-warning'
               : mod.category === 'cost_database'
-                ? 'bg-oe-blue-subtle text-oe-blue-dark'
+                ? 'bg-oe-blue-subtle text-oe-blue-text'
                 : mod.category === 'vector_index'
                   ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400'
                   : mod.category === 'language'

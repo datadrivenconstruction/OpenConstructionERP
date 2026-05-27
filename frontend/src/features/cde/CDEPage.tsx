@@ -1360,7 +1360,7 @@ export function CDEPage() {
             className={clsx(
               'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap',
               stateFilter === tab.key
-                ? 'bg-oe-blue-subtle text-oe-blue-dark'
+                ? 'bg-oe-blue-subtle text-oe-blue-text'
                 : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
             )}
           >

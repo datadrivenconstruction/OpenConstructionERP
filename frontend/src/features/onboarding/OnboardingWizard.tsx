@@ -629,7 +629,7 @@ function StepStartChoice({
           <Badge variant="blue" size="sm" className="mb-4">
             {t('onboarding.recommended', { defaultValue: 'Recommended' })}
           </Badge>
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-dark mb-6 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-6 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
             <Sparkles size={30} />
           </div>
           <h3 className="text-2xl font-bold text-content-primary">
@@ -1314,7 +1314,7 @@ function StepDataSetup({
         {/* Card 1: Cost Database — full width */}
         <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
               <Database size={20} />
             </div>
             <div>
@@ -1412,7 +1412,7 @@ function StepDataSetup({
         <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
                 <FolderOpen size={20} />
               </div>
               <div>
@@ -1454,7 +1454,7 @@ function StepDataSetup({
             className="w-full flex items-center justify-between p-6"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
                 <Sparkles size={20} />
               </div>
               <div className="text-left">

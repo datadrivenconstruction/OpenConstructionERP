@@ -154,7 +154,7 @@ function AddendumRow({
   return (
     <Card padding="none" className="overflow-hidden">
       <div className="flex items-start gap-3 px-4 py-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-dark">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
           <Megaphone size={16} />
         </div>
         <div className="min-w-0 flex-1">

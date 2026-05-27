@@ -378,7 +378,7 @@ function DocumentCard({
           hasError
             ? 'bg-semantic-error-bg text-semantic-error'
             : isUploading
-              ? 'bg-oe-blue-subtle text-oe-blue-dark'
+              ? 'bg-oe-blue-subtle text-oe-blue-text'
               : doc.analysis
                 ? 'bg-semantic-success-bg text-semantic-success'
                 : 'bg-surface-secondary text-content-tertiary',
@@ -591,7 +591,7 @@ function DocumentCard({
                 <div className="flex flex-wrap gap-2">
                   <a
                     href="/bim"
-                    className="flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs text-content-secondary transition-colors hover:bg-oe-blue-subtle hover:text-oe-blue-dark hover:border-oe-blue/30"
+                    className="flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs text-content-secondary transition-colors hover:bg-oe-blue-subtle hover:text-oe-blue-text hover:border-oe-blue/30"
                   >
                     <Box size={13} />
                     {t('takeoff.open_in_bim', 'Open in BIM Viewer')}
@@ -599,7 +599,7 @@ function DocumentCard({
                   </a>
                   <a
                     href="/boq"
-                    className="flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs text-content-secondary transition-colors hover:bg-oe-blue-subtle hover:text-oe-blue-dark hover:border-oe-blue/30"
+                    className="flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs text-content-secondary transition-colors hover:bg-oe-blue-subtle hover:text-oe-blue-text hover:border-oe-blue/30"
                   >
                     <Link2 size={13} />
                     {t('takeoff.link_to_boq', 'Link to BOQ')}
@@ -955,7 +955,7 @@ function TakeoffDocFilmstrip({
                       'absolute top-1 right-6 p-1 rounded transition-all',
                       isPinned
                         ? 'text-oe-blue opacity-100'
-                        : 'text-content-quaternary hover:text-oe-blue-dark hover:bg-oe-blue-subtle opacity-0 group-hover:opacity-100',
+                        : 'text-content-quaternary hover:text-oe-blue-text hover:bg-oe-blue-subtle opacity-0 group-hover:opacity-100',
                     )}
                     title={
                       isPinned
@@ -2055,7 +2055,7 @@ export function TakeoffPage() {
                 </p>
                 <a
                   href="/markups"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-oe-blue-dark hover:bg-oe-blue-subtle transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-oe-blue-text hover:bg-oe-blue-subtle transition-colors"
                 >
                   <ArrowRight size={12} className="rotate-180" />
                   {t('takeoff.back_to_markups', { defaultValue: 'Back to Markups' })}

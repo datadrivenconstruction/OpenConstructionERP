@@ -262,7 +262,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
 
       {ordinal && (
         <span className="shrink-0 inline-flex items-center h-4 px-1.5 rounded
-                         bg-oe-blue-subtle text-oe-blue-dark text-[10px] font-mono font-semibold
+                         bg-oe-blue-subtle text-oe-blue-text text-[10px] font-mono font-semibold
                          tabular-nums">
           {ordinal}
         </span>
@@ -346,7 +346,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
           }}
           className="shrink-0 h-5 flex items-center gap-1 px-2 rounded ring-1 ring-oe-blue
                      text-[10px] font-semibold
-                     bg-oe-blue-subtle text-oe-blue-dark
+                     bg-oe-blue-subtle text-oe-blue-text
                      hover:bg-oe-blue hover:text-white
                      transition-colors"
           title={t('boq.add_sub_section', { defaultValue: 'Add sub-section nested under this section' })}
@@ -627,8 +627,8 @@ export function ExpandCellRenderer(params: ICellRendererParams) {
         style={{ width: 22, height: 22 }}
         className={`shrink-0 flex items-center justify-center rounded-md ring-1 transition-colors cursor-pointer hover:bg-oe-blue hover:text-white hover:ring-oe-blue ${
           isExpanded
-            ? 'bg-oe-blue-subtle text-oe-blue-dark ring-oe-blue'
-            : 'bg-oe-blue-subtle text-oe-blue-dark ring-oe-blue-subtle'
+            ? 'bg-oe-blue-subtle text-oe-blue-text ring-oe-blue'
+            : 'bg-oe-blue-subtle text-oe-blue-text ring-oe-blue-subtle'
         }`}
         title={expandTitle}
         aria-label={expandTitle}
@@ -3085,7 +3085,7 @@ function ResourceCurrencyCombobox({
                 <div className="text-[9px] uppercase tracking-wider text-content-tertiary mb-1">
                   {t('boq.fx_rate_label', { defaultValue: 'FX rate' })}
                   {fxSource === 'project' && (
-                    <span className="ml-1 px-1 rounded bg-oe-blue-subtle text-oe-blue-dark text-[8px] font-bold">
+                    <span className="ml-1 px-1 rounded bg-oe-blue-subtle text-oe-blue-text text-[8px] font-bold">
                       {t('boq.fx_rate_project_badge', { defaultValue: 'PROJECT' })}
                     </span>
                   )}
@@ -3907,7 +3907,7 @@ export function EditableResourceRow({ data, ctx, slots, leftPad }: { data: Recor
           ctx.onSaveResourceToCatalog?.(posId, resIdx);
         }}
         className="shrink-0 h-4 w-4 flex items-center justify-center rounded
-                   text-content-tertiary hover:text-oe-blue-dark hover:bg-oe-blue-subtle
+                   text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle
                    opacity-0 group-hover/res:opacity-100 transition-all"
         title={ctx.t('boq.save_to_catalog', { defaultValue: 'Save to My Catalog' })}
       >
@@ -4319,7 +4319,7 @@ function VariantHeaderResourceRow({
           }}
           onMouseDown={(e) => e.stopPropagation()}
           className="shrink-0 h-4 w-4 flex items-center justify-center rounded
-                     text-content-tertiary hover:text-oe-blue-dark hover:bg-oe-blue-subtle
+                     text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle
                      transition-all"
           title={ctx.t('boq.rs_save_variant_to_catalog', {
             defaultValue: 'Save as a regular article in your catalog',
@@ -4478,7 +4478,7 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
             ctx.onAddManualResource?.(data._parentPositionId);
           }}
           className="flex items-center gap-1.5 h-5 px-2 rounded text-[10px] font-medium
-                     text-content-tertiary hover:text-oe-blue-dark hover:bg-oe-blue-subtle transition-all"
+                     text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all"
         >
           <Plus size={10} />
           {ctx.t('boq.add_resource_manual', { defaultValue: 'Add Resource' })}

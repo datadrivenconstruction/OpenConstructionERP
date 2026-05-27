@@ -512,7 +512,7 @@ export function TranslationManager() {
         {hasMore && (
           <button
             onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-            className="mt-2 w-full rounded-lg border border-border-light py-2 text-xs font-medium text-oe-blue-dark hover:bg-oe-blue-subtle transition-colors"
+            className="mt-2 w-full rounded-lg border border-border-light py-2 text-xs font-medium text-oe-blue-text hover:bg-oe-blue-subtle transition-colors"
           >
             {t('settings.tm_show_more', { defaultValue: 'Show more ({{remaining}} remaining)', remaining: filteredRows.length - visibleCount })}
           </button>

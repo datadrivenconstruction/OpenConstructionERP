@@ -177,7 +177,7 @@ export function EntityNameFilter({
             <button
               type="button"
               onClick={() => setShowAll((v) => !v)}
-              className="text-[11px] text-oe-blue hover:text-oe-blue-dark font-medium text-center py-1 transition-colors"
+              className="text-[11px] text-oe-blue hover:text-oe-blue-text font-medium text-center py-1 transition-colors"
             >
               {showAll
                 ? t('dwg_takeoff.show_less', 'Show less')

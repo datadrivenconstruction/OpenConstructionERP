@@ -58,7 +58,7 @@ export function StampPicker({
             'h-24 rounded-lg border text-xs flex flex-col items-center justify-center gap-1',
             'transition-colors',
             value === null
-              ? 'border-oe-blue bg-oe-blue-subtle/50 text-oe-blue-dark'
+              ? 'border-oe-blue bg-oe-blue-subtle/50 text-oe-blue-text'
               : 'border-border-light hover:bg-surface-secondary',
           )}
         >

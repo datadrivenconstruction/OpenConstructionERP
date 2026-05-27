@@ -518,7 +518,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
                         <div className="relative flex justify-center py-2 border-t border-border-light/50">
                           <button
                             onClick={() => setExpanded((prev) => !prev)}
-                            className="flex items-center gap-1.5 px-3 py-1 text-2xs font-medium text-oe-blue-dark hover:text-oe-blue-dark hover:bg-oe-blue-subtle/40 rounded-md transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1 text-2xs font-medium text-oe-blue-text hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 rounded-md transition-colors"
                           >
                             {expanded ? (
                               <>
@@ -607,7 +607,7 @@ function ResourceRow({
 
   const pillClass =
     pillTone === 'blue'
-      ? 'bg-oe-blue-subtle/50 text-oe-blue-dark ring-1 ring-oe-blue/30 hover:bg-oe-blue-subtle'
+      ? 'bg-oe-blue-subtle/50 text-oe-blue-text ring-1 ring-oe-blue/30 hover:bg-oe-blue-subtle'
       : pillTone === 'amber'
       ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500/30 hover:bg-amber-500/25'
       : 'bg-surface-tertiary text-content-secondary ring-1 ring-border-light hover:bg-surface-tertiary/80';
@@ -765,7 +765,7 @@ function ResourceRow({
           <button
             onClick={() => onSaveToCatalog(resource)}
             title={t('boq.rs_save_to_catalog', { defaultValue: 'Save to My Catalog' })}
-            className="inline-flex items-center justify-center h-6 w-6 rounded-md text-content-tertiary opacity-0 group-hover:opacity-100 hover:text-oe-blue-dark hover:bg-oe-blue-subtle/40 transition-all"
+            className="inline-flex items-center justify-center h-6 w-6 rounded-md text-content-tertiary opacity-0 group-hover:opacity-100 hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 transition-all"
           >
             <BookmarkPlus size={13} />
           </button>

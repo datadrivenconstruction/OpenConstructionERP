@@ -683,7 +683,7 @@ function SummaryCard({
   const bgMap = {
     default: 'bg-surface-secondary text-content-tertiary',
     success: 'bg-semantic-success-bg text-semantic-success',
-    blue: 'bg-oe-blue-subtle text-oe-blue-dark',
+    blue: 'bg-oe-blue-subtle text-oe-blue-text',
   };
 
   return (
@@ -850,7 +850,7 @@ function ImportDialog({
               <h2 className="text-lg font-semibold text-content-primary">
                 {t('import.import_document', { defaultValue: 'Import Document' })}
               </h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue-dark">
+              <span className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue-text">
                 <Sparkles size={10} />
                 {t('import.ai_powered', { defaultValue: 'AI-powered' })}
               </span>
@@ -953,7 +953,7 @@ function ImportDialog({
                   </p>
                 </div>
                 {(result.method === 'ai' || result.method === 'cad_ai') && (
-                  <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue-dark">
+                  <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue-text">
                     <Sparkles size={10} />
                     {result.method === 'cad_ai'
                       ? `CAD + ${result.model_used ?? 'AI'}`
@@ -969,7 +969,7 @@ function ImportDialog({
 
               {/* CAD info banner */}
               {result.method === 'cad_ai' && result.cad_elements != null && (
-                <div className="flex items-center gap-2 rounded-lg bg-oe-blue-subtle/50 px-4 py-2.5 text-xs text-oe-blue-dark">
+                <div className="flex items-center gap-2 rounded-lg bg-oe-blue-subtle/50 px-4 py-2.5 text-xs text-oe-blue-text">
                   <span className="font-medium">
                     {t('import.cad_elements_count', { defaultValue: '{{count}} CAD elements', count: result.cad_elements })}
                   </span>
@@ -1811,7 +1811,7 @@ export function ProjectDetailPage() {
                         ? 'bg-semantic-error-bg text-semantic-error'
                         : dashboardData.budget.warning_level === 'warning'
                         ? 'bg-amber-100 text-amber-600'
-                        : 'bg-oe-blue-subtle text-oe-blue-dark'
+                        : 'bg-oe-blue-subtle text-oe-blue-text'
                     }`}>
                       <DollarSign size={20} strokeWidth={1.75} />
                     </div>
@@ -2215,7 +2215,7 @@ export function ProjectDetailPage() {
                           field_report: t('projects.dash_field_report', { defaultValue: 'Field Report' }),
                         };
                         const typeColors: Record<string, string> = {
-                          rfi_created: 'bg-oe-blue-subtle text-oe-blue-dark',
+                          rfi_created: 'bg-oe-blue-subtle text-oe-blue-text',
                           task_created: 'bg-[#0891b2]/10 text-[#0891b2]',
                           change_order: 'bg-amber-100 text-amber-600',
                           document_uploaded: 'bg-[#7c3aed]/10 text-[#7c3aed]',
@@ -2468,7 +2468,7 @@ export function ProjectDetailPage() {
                       {/* Icon */}
                       <button
                         onClick={() => navigate(`/boq/${boq.id}`)}
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark transition-transform group-hover:scale-105"
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text transition-transform group-hover:scale-105"
                       >
                         <Table2 size={18} strokeWidth={1.75} />
                       </button>

@@ -443,7 +443,7 @@ function AddContactModal({
                 className={clsx(
                   'flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-all text-center',
                   form.payment_terms === days
-                    ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark ring-1 ring-oe-blue/30'
+                    ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text ring-1 ring-oe-blue/30'
                     : 'border-border text-content-tertiary hover:border-border-light hover:text-content-secondary',
                 )}
               >
@@ -700,7 +700,7 @@ const ContactCard = React.memo(function ContactCard({
           tabIndex={0}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onEdit(contact); }}
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-dark font-bold text-sm shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text font-bold text-sm shrink-0">
             {displayName.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">

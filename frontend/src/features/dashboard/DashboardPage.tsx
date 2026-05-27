@@ -548,7 +548,7 @@ function OnboardingSteps({
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                       step.done
                         ? 'bg-semantic-success-bg text-semantic-success'
-                        : 'bg-oe-blue-subtle text-oe-blue-dark'
+                        : 'bg-oe-blue-subtle text-oe-blue-text'
                     }`}
                   >
                     {step.id}
@@ -1637,7 +1637,7 @@ function QuickUploadCard() {
               }
             }}
           />
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
             {uploading ? (
               <Loader2 size={22} className="animate-spin" />
             ) : (
@@ -1663,7 +1663,7 @@ function QuickUploadCard() {
             <div className="mt-2 flex items-center gap-3 text-2xs text-content-tertiary">
               <button
                 type="button"
-                className="inline-flex items-center gap-1 text-oe-blue hover:text-oe-blue-dark transition-colors"
+                className="inline-flex items-center gap-1 text-oe-blue hover:text-oe-blue-text transition-colors"
                 onClick={() => navigate('/documents')}
                 disabled={!hasProject}
               >
@@ -2280,7 +2280,7 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
           className="flex w-full items-center gap-4 px-6 py-3.5 text-left transition-all duration-normal ease-oe hover:bg-surface-secondary animate-stagger-in"
           style={{ animationDelay: `${300 + index * 60}ms` }}
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-dark text-xs font-bold">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text text-xs font-bold">
             {p.name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">

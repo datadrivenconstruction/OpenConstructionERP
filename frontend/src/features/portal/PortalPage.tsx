@@ -102,7 +102,7 @@ function WorkflowIntro() {
   return (
     <Card padding="md" className="border-oe-blue/20 bg-oe-blue-subtle/10">
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-dark">
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
           <ShieldCheck size={16} />
         </div>
         <div className="min-w-0 flex-1">

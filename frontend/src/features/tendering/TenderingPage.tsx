@@ -523,7 +523,7 @@ function PackageCard({
       onClick={onClick}
     >
       <div className="flex items-center gap-3 px-5 py-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-dark">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
           <Package size={18} />
         </div>
         <div className="min-w-0 flex-1">

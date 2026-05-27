@@ -884,7 +884,7 @@ function CategoryFilter({
               onClick={() => { onChange(cat); setOpen(false); }}
               className={`w-full text-left px-3 py-2 text-xs transition-colors ${
                 value === cat
-                  ? 'bg-oe-blue-subtle/30 text-oe-blue-dark font-medium'
+                  ? 'bg-oe-blue-subtle/30 text-oe-blue-text font-medium'
                   : 'text-content-secondary hover:bg-surface-secondary'
               }`}
             >
@@ -1281,7 +1281,7 @@ export function PhotoGalleryPage() {
               onClick={() => setViewMode('grid')}
               className={`flex items-center gap-1.5 h-10 px-3 text-xs font-medium transition-colors ${
                 viewMode === 'grid'
-                  ? 'bg-oe-blue-subtle text-oe-blue-dark'
+                  ? 'bg-oe-blue-subtle text-oe-blue-text'
                   : 'text-content-secondary hover:bg-surface-secondary'
               }`}
               aria-label={t('photos.grid_view', { defaultValue: 'Grid view' })}
@@ -1293,7 +1293,7 @@ export function PhotoGalleryPage() {
               onClick={() => setViewMode('timeline')}
               className={`flex items-center gap-1.5 h-10 px-3 text-xs font-medium transition-colors ${
                 viewMode === 'timeline'
-                  ? 'bg-oe-blue-subtle text-oe-blue-dark'
+                  ? 'bg-oe-blue-subtle text-oe-blue-text'
                   : 'text-content-secondary hover:bg-surface-secondary'
               }`}
               aria-label={t('photos.timeline_view', { defaultValue: 'Timeline view' })}

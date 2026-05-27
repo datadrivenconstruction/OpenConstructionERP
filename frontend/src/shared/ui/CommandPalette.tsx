@@ -602,7 +602,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                       'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left',
                       'text-sm transition-colors',
                       isActive
-                        ? 'bg-oe-blue-subtle text-oe-blue-dark'
+                        ? 'bg-oe-blue-subtle text-oe-blue-text'
                         : 'text-content-primary hover:bg-surface-secondary',
                     )}
                   >

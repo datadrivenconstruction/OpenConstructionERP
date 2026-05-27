@@ -400,7 +400,7 @@ function ApproveModal({
                   className={clsx(
                     'rounded-lg border px-3 py-2 text-xs font-medium transition-colors text-left',
                     decision === s
-                      ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark'
+                      ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text'
                       : 'border-border bg-surface-primary text-content-secondary hover:bg-surface-secondary',
                   )}
                 >

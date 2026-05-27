@@ -1277,7 +1277,7 @@ function FilterChip({
       className={clsx(
         'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 transition-colors',
         active
-          ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-dark'
+          ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text'
           : 'border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary',
       )}
     >
