@@ -83,7 +83,19 @@ def _status_index(value: str) -> int:
 
 
 def _ensure_can_transition(current: str, target: str) -> None:
-    """‌⁠‍Raise HTTPException(409) if the transition would regress."""
+    """Raise HTTPException(409) if the transition would regress or is same-status.
+
+    The status flow ``open → closed → signed → archived`` is strictly
+    one-way.  Same-status calls (e.g. ``closed → closed``) are also
+    rejected: callers are expected to load the latest diary state before
+    calling a transition helper, so a same-status attempt signals that the
+    caller already operated on stale state, and the 409 surfaces that
+    contract violation rather than silently succeeding.
+
+    ``sign_diary`` sidesteps this by calling ``close_diary`` only when the
+    diary is still ``open``; the idempotent guard in ``unlock_diary`` is
+    separate and returns early before reaching this helper.
+    """
     if _status_index(target) <= _status_index(current):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
