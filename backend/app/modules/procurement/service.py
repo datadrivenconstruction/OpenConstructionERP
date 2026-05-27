@@ -552,7 +552,23 @@ class ProcurementService:
         # Replace items if provided
         if data.items is not None:
             await self.po_item_repo.delete_by_po(po_id)
+            item_amounts: list[Decimal] = []
             for idx, item_data in enumerate(data.items):
+                # R8: recompute each line's amount from qty × rate so the
+                # header totals stay consistent even when the caller omits
+                # amount_subtotal / tax_amount from the PATCH body.
+                try:
+                    qty = Decimal(str(item_data.quantity or "0"))
+                    rate = Decimal(str(item_data.unit_rate or "0"))
+                except (InvalidOperation, ValueError, TypeError):
+                    qty = Decimal("0")
+                    rate = Decimal("0")
+                line_total = qty * rate
+                # If caller supplied amount == "0" (schema default), derive
+                # it from the computed total; otherwise respect their value.
+                if _to_decimal(item_data.amount) == Decimal("0"):
+                    item_data.amount = str(line_total)
+                item_amounts.append(line_total)
                 item = PurchaseOrderItem(
                     po_id=po_id,
                     description=item_data.description,
@@ -565,6 +581,20 @@ class ProcurementService:
                     sort_order=item_data.sort_order if item_data.sort_order else idx,
                 )
                 await self.po_item_repo.create(item)
+
+            # Recompute PO header totals from new line items when the PATCH
+            # body did not include explicit subtotal / tax overrides.
+            # Without this, editing line quantities/rates via items=[...] left
+            # amount_subtotal and amount_total stale (R8 bug).
+            if "amount_subtotal" not in fields and "tax_amount" not in fields:
+                new_subtotal_from_items = str(sum(item_amounts, Decimal("0")))
+                current_tax = po.tax_amount or "0"
+                recomputed_total = _compute_po_total(new_subtotal_from_items, current_tax)
+                await self.po_repo.update(
+                    po_id,
+                    amount_subtotal=new_subtotal_from_items,
+                    amount_total=recomputed_total,
+                )
 
         updated = await self.po_repo.get(po_id)
         if updated is None:

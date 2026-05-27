@@ -553,7 +553,39 @@ class SubmittalService:
         submittal_number_s = getattr(submittal, "submittal_number", None)
 
         prior_status = submittal.status
-        await self.repo.update_fields(submittal_id, **fields)
+
+        # R8: compare-and-swap to prevent concurrent double-approval races.
+        # Two simultaneous requests both read status != "approved", both pass
+        # the pre-check above, and then both try to write "approved". The
+        # WHERE clause on prior_status means the second writer updates 0 rows;
+        # we detect that and return 409 so the caller knows to re-read state.
+        from sqlalchemy import update as _sa_update
+
+        from app.modules.submittals.models import Submittal as _Submittal
+
+        result = await self.session.execute(
+            _sa_update(_Submittal)
+            .where(_Submittal.id == submittal_id)
+            .where(_Submittal.status == prior_status)
+            .values(**fields)
+        )
+        if result.rowcount == 0:  # type: ignore[union-attr]
+            # Concurrent writer already transitioned this row — re-read and
+            # return idempotently if it's now "approved", else 409.
+            fresh_check = await self.repo.get_by_id(submittal_id)
+            if fresh_check and fresh_check.status == "approved":
+                logger.info(
+                    "Submittal %s concurrently approved — returning existing state (idempotent)",
+                    submittal_id,
+                )
+                return fresh_check
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Submittal status changed concurrently; please reload and retry."
+                ),
+            )
+
         fresh = await self.repo.get_by_id(submittal_id)
 
         # Epic H — universal audit trail (drop the try/except: pass wrapper).

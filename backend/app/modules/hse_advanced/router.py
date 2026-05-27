@@ -279,9 +279,16 @@ async def delete_jsa(
 @router.post("/jsa/{item_id}/submit", response_model=JSAResponse)
 async def submit_jsa(
     item_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.update")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> JSAResponse:
+    # R8: IDOR guard — FSM transitions were missing the project-access check
+    # that PATCH/DELETE already have. Any user holding hse_advanced.update
+    # could drive the state machine of a JSA on a project they cannot see.
+    existing = await service.get_jsa(item_id)
+    await _guard_project(existing.project_id, user_id, session)
     obj = await service.submit_jsa(item_id)
     return JSAResponse.model_validate(obj)
 
@@ -290,9 +297,12 @@ async def submit_jsa(
 async def approve_jsa(
     item_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.approve_jsa")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> JSAResponse:
+    existing = await service.get_jsa(item_id)
+    await _guard_project(existing.project_id, user_id, session)
     approver_uuid: uuid.UUID | None = None
     try:
         approver_uuid = uuid.UUID(str(user_id)) if user_id else None
@@ -305,9 +315,13 @@ async def approve_jsa(
 @router.post("/jsa/{item_id}/activate", response_model=JSAResponse)
 async def activate_jsa(
     item_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.update")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> JSAResponse:
+    existing = await service.get_jsa(item_id)
+    await _guard_project(existing.project_id, user_id, session)
     obj = await service.activate_jsa(item_id)
     return JSAResponse.model_validate(obj)
 
@@ -315,9 +329,13 @@ async def activate_jsa(
 @router.post("/jsa/{item_id}/archive", response_model=JSAResponse)
 async def archive_jsa(
     item_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.update")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> JSAResponse:
+    existing = await service.get_jsa(item_id)
+    await _guard_project(existing.project_id, user_id, session)
     obj = await service.archive_jsa(item_id)
     return JSAResponse.model_validate(obj)
 
