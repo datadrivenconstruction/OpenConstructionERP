@@ -337,11 +337,7 @@ def extract(raw: dict[str, Any]) -> ElementEnvelope:
     # within ±10% so a 220mm-wall envelope still picks up the 200mm
     # boost.
     geometry = raw.get("geometry") if isinstance(raw.get("geometry"), dict) else {}
-    thickness_m = (
-        geometry.get("thickness_m")
-        or properties.get("thickness_m")
-        or raw.get("thickness_m")
-    )
+    thickness_m = geometry.get("thickness_m") or properties.get("thickness_m") or raw.get("thickness_m")
     if thickness_m:
         try:
             envelope.nominal_size_mm = int(round(float(thickness_m) * 1000))

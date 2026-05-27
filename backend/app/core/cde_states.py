@@ -18,13 +18,13 @@ Usage:
 from __future__ import annotations
 
 import logging
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class CDEState(str, Enum):
+class CDEState(StrEnum):
     """‌⁠‍ISO 19650 CDE document states."""
 
     WIP = "wip"

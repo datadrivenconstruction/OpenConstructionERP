@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 # Module-level imports so the cascade orchestrator is patchable from tests
@@ -35,7 +35,7 @@ from app.core.translation.lookup import lookup_phrase
 logger = logging.getLogger(__name__)
 
 
-class TierUsed(str, Enum):
+class TierUsed(StrEnum):
     """‌⁠‍Identifies which tier produced the translation."""
 
     LOOKUP_MUSE = "lookup_muse"

@@ -1195,7 +1195,7 @@ class RequirementsService:
                     }
                     continue
                 # Status priority: accepted > submitted > missing.
-                bucket.sort(key=lambda d: (0 if d.accepted_at is not None else 1 if d.submitted_at is not None else 2))
+                bucket.sort(key=lambda d: 0 if d.accepted_at is not None else 1 if d.submitted_at is not None else 2)
                 cell = bucket[0]
                 cells[col] = {
                     "deliverable_id": cell.id,

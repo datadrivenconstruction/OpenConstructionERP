@@ -3828,7 +3828,7 @@ class PropertyDevService:
             phase_to_blocks.setdefault(b.phase_id, []).append(b)
         # Sort blocks inside each phase by code.
         for blist in phase_to_blocks.values():
-            blist.sort(key=lambda b: (b.code or ""))
+            blist.sort(key=lambda b: b.code or "")
 
         # Bucket plots: (phase_id, block_id) -> [plot]
         plot_buckets: dict[tuple[Any, Any], list[Plot]] = {}

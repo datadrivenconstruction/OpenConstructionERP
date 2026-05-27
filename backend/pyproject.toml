@@ -269,7 +269,6 @@ ignore = [
     "RET505",           # unnecessary else after return — readability call
     "UP007",            # X | Y union syntax — keep Optional[X] readable for FastAPI
     "UP035",            # deprecated typing imports — touches too many files
-    "UP038",            # non-pep604 isinstance — `isinstance(x, (int, str))` reads fine
     "E402",             # module-level imports not at top — some files set env vars first
     "E501",             # line-too-long — formatter handles wrapping where it matters
     "E701",             # multiple statements on one line — common in stub clauses

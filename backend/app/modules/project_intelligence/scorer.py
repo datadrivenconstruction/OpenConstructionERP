@@ -245,9 +245,9 @@ _ACHIEVEMENT_RULES: list[dict[str, Any]] = [
     },
     {
         "domain": "risk",
-        "condition": lambda s: s.risk.register_exists
-        and s.risk.high_severity_unmitigated == 0
-        and s.risk.total_risks > 0,
+        "condition": lambda s: (
+            s.risk.register_exists and s.risk.high_severity_unmitigated == 0 and s.risk.total_risks > 0
+        ),
         "title": "All high-severity risks have mitigation",
         "description": "Risk management is in good shape.",
     },

@@ -98,7 +98,7 @@ async def test_old_version_still_retrievable_after_reupload() -> None:
     # Stub the repo to return v1 when queried by v1.id.
     svc.repo = AsyncMock()
     svc.repo.get_by_id = AsyncMock(
-        side_effect=lambda doc_id: (v1 if doc_id == v1.id else (v2 if doc_id == v2.id else None))
+        side_effect=lambda doc_id: v1 if doc_id == v1.id else (v2 if doc_id == v2.id else None)
     )
 
     # Both versions must be retrievable.
