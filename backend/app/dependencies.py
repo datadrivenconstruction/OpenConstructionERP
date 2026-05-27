@@ -413,12 +413,16 @@ async def verify_project_access(
     user_id: str,
     session: AsyncSession,
 ) -> None:
-    """Verify user owns or has admin access to the project.
+    """Verify user has access to the project: owner, admin, or team member.
 
-    Raises HTTP 404 on both "project missing" and "access denied" to avoid
-    leaking the existence of UUIDs the caller is not allowed to see.
+    Raises HTTP 404 on "project missing" and HTTP 403 on "access denied".
+    Team membership (added via add_project_member) grants the same read/write
+    access as ownership within the caller's RBAC role.
     """
+    from sqlalchemy import select as _select
+
     from app.modules.projects.repository import ProjectRepository
+    from app.modules.teams.models import Team, TeamMembership
     from app.modules.users.repository import UserRepository
 
     proj_repo = ProjectRepository(session)
@@ -438,11 +442,32 @@ async def verify_project_access(
     except Exception:
         logger.exception("Admin-role lookup failed during project access check")
 
-    if str(getattr(project, "owner_id", "")) != str(user_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found",
-        )
+    # Owner has full access.
+    if str(getattr(project, "owner_id", "")) == str(user_id):
+        return
+
+    # Team-member check — any TeamMembership row for this project grants access.
+    try:
+        member_row = (
+            await session.execute(
+                _select(TeamMembership.id)
+                .join(Team, Team.id == TeamMembership.team_id)
+                .where(
+                    Team.project_id == project_id,
+                    TeamMembership.user_id == _uuid.UUID(str(user_id)),
+                )
+                .limit(1)
+            )
+        ).scalar_one_or_none()
+        if member_row is not None:
+            return
+    except Exception:
+        logger.exception("Team-membership lookup failed during project access check")
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="You do not have access to this project",
+    )
 
 
 # ── Locale resolution (per-request, for HTTPException i18n) ────────────────

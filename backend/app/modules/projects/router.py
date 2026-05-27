@@ -107,12 +107,59 @@ async def _verify_project_owner(
 
     Admins (role=admin in JWT payload) bypass the ownership check.
     Returns the project object on success, raises 403 if not owner.
+    Used for write operations (update, delete, add/remove member, etc.).
     """
     project = await service.get_project(project_id)
     # Admin bypass
     if payload and payload.get("role") == "admin":
         return project
     if str(project.owner_id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this project",
+        )
+    return project
+
+
+async def _verify_project_access(
+    service: ProjectService,
+    project_id: uuid.UUID,
+    user_id: str,
+    session: object,
+    payload: dict | None = None,
+) -> object:
+    """‌⁠‍Load a project and verify the current user has read access.
+
+    Grants access to: admins, the project owner, and any team member
+    added via add_project_member (i.e. a TeamMembership row exists).
+    Used for read operations (get, dashboard, list members, etc.).
+    """
+    from app.modules.teams.models import Team, TeamMembership
+
+    project = await service.get_project(project_id)
+
+    # Admin bypass
+    if payload and payload.get("role") == "admin":
+        return project
+
+    # Owner has full access
+    if str(project.owner_id) == user_id:
+        return project
+
+    # Team-member check — any membership row for this project grants read access
+    member_row = (
+        await session.execute(
+            select(TeamMembership.id)
+            .join(Team, Team.id == TeamMembership.team_id)
+            .where(
+                Team.project_id == project_id,
+                TeamMembership.user_id == uuid.UUID(user_id),
+            )
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+
+    if member_row is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have access to this project",
@@ -196,10 +243,11 @@ async def get_project(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
     payload: CurrentUserPayload,
+    session: SessionDep,
     service: ProjectService = Depends(_get_service),
 ) -> ProjectResponse:
-    """Get project by ID. Verifies ownership."""
-    project = await _verify_project_owner(service, project_id, user_id, payload)
+    """Get project by ID. Accessible by owner, admin, or project team member."""
+    project = await _verify_project_access(service, project_id, user_id, session, payload)
     return ProjectResponse.model_validate(project)
 
 
@@ -372,8 +420,8 @@ async def list_project_members_endpoint(
     session: SessionDep,
     service: ProjectService = Depends(_get_service),
 ) -> list[ProjectMemberResponse]:
-    """List members of a project. Owner / admin only — 403 otherwise."""
-    await _verify_project_owner(service, project_id, user_id, payload)
+    """List members of a project. Accessible by owner, admin, or any team member."""
+    await _verify_project_access(service, project_id, user_id, session, payload)
     from app.modules.projects.member_service import list_project_members
 
     return await list_project_members(session, project_id)
@@ -617,8 +665,8 @@ async def project_dashboard(
     from sqlalchemy import Float, func, literal_column, select, union_all
     from sqlalchemy.sql.expression import cast
 
-    # Verify ownership / admin access
-    project = await _verify_project_owner(service, project_id, user_id, payload)
+    # Verify read access — owner, admin, or team member
+    project = await _verify_project_access(service, project_id, user_id, session, payload)
 
     # ── Helper: safe query wrapper ──────────────────────────────
     async def _safe(coro, default=None):  # noqa: ANN001, ANN202
@@ -1400,16 +1448,27 @@ async def dashboard_cards(
 
     from app.modules.projects.models import Project
 
-    # Fetch all projects (admin sees all, regular user sees own)
+    # Fetch all projects (admin sees all, regular user sees owned + member projects)
     is_admin = payload.get("role") == "admin"
     if is_admin:
         proj_result = await session.execute(
             select(Project).where(Project.status != "archived").order_by(Project.updated_at.desc())
         )
     else:
+        from app.modules.teams.models import Team, TeamMembership
+
+        member_project_ids = (
+            select(Team.project_id)
+            .join(TeamMembership, TeamMembership.team_id == Team.id)
+            .where(TeamMembership.user_id == uuid.UUID(user_id))
+            .scalar_subquery()
+        )
         proj_result = await session.execute(
             select(Project)
-            .where(Project.owner_id == uuid.UUID(user_id), Project.status != "archived")
+            .where(
+                (Project.owner_id == uuid.UUID(user_id)) | (Project.id.in_(member_project_ids)),
+                Project.status != "archived",
+            )
             .order_by(Project.updated_at.desc())
         )
     all_projects = proj_result.scalars().all()
@@ -1626,10 +1685,20 @@ async def analytics_overview(
 
     is_admin = bool(payload and payload.get("role") == "admin")
 
-    # Per-project summary — owner-scoped for non-admins
+    # Per-project summary — owner + team-member projects for non-admins
     proj_stmt = select(Project).order_by(Project.name)
     if not is_admin:
-        proj_stmt = proj_stmt.where(Project.owner_id == _user_id)
+        from app.modules.teams.models import Team, TeamMembership
+
+        member_project_ids = (
+            select(Team.project_id)
+            .join(TeamMembership, TeamMembership.team_id == Team.id)
+            .where(TeamMembership.user_id == uuid.UUID(_user_id))
+            .scalar_subquery()
+        )
+        proj_stmt = proj_stmt.where(
+            (Project.owner_id == _user_id) | (Project.id.in_(member_project_ids))
+        )
     proj_result = await session.execute(proj_stmt)
     all_projects = list(proj_result.scalars().all())
 
