@@ -48,7 +48,7 @@ for (const f of fs.readdirSync(TX_DIR)) {
 
 const LOCALES = ['ar','bg','cs','da','de','es','fi','fr','hi','hr','id','it','ja','ko','mn','nl','no','pl','pt','ro','ru','sv','th','tr','vi','zh'];
 
-function formatValue(val) {
+function _formatValue(val) {
   // val is the raw English buffer like: "Add Child Partida",  or  'No steps match "{{query}}"',
   // We want to preserve the same quoting style. Strip trailing comma.
   let v = val.replace(/,\s*$/, '');

@@ -37,7 +37,7 @@ async function shoot(page, name) {
   const file = path.join(SHOTS, `${name}.png`);
   try {
     await page.screenshot({ path: file, fullPage: true });
-  } catch (e) {
+  } catch {
     await page.screenshot({ path: file }).catch(() => {});
   }
   return file;

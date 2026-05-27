@@ -115,7 +115,7 @@ function humanizeKey(key: string): string {
 
 const PAGE_SIZE = 50;
 
-type Filter = 'all' | 'unread' | 'read';
+type NotificationFilter = 'all' | 'unread' | 'read';
 
 export function NotificationsPage() {
   const { t } = useTranslation();
@@ -123,7 +123,7 @@ export function NotificationsPage() {
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<Tab>('inbox');
-  const [filter, setFilter] = useState<Filter>('all');
+  const [filter, setFilter] = useState<NotificationFilter>('all');
   const [page, setPage] = useState(0);
 
   /* The backend's `is_read` query param is tri-state: `undefined` =
@@ -262,7 +262,7 @@ export function NotificationsPage() {
             <select
               value={filter}
               onChange={(e) => {
-                setFilter(e.target.value as Filter);
+                setFilter(e.target.value as NotificationFilter);
                 setPage(0);
               }}
               className="h-9 ps-8 pe-3 text-xs rounded-lg border border-border bg-surface-primary text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"

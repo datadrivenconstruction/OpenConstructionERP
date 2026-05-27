@@ -692,7 +692,6 @@ async function clickSidebarButton(page, matcher, label) {
   });
   // The delete button is opacity-0 group-hover:opacity-100 — reveal first
   const deleteClicked = await page.evaluate((name) => {
-    const buttons = Array.from(document.querySelectorAll('button'));
     // Find the row by its name span, then look for the delete button that's
     // a sibling of the row's main click target.
     const span = Array.from(document.querySelectorAll('span')).find(

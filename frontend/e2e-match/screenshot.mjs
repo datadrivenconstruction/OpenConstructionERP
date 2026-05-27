@@ -14,7 +14,7 @@ const FRONTEND = 'http://localhost:5180';
 const BACKEND = 'http://localhost:8000';
 const USER = { email: 'v19-e2e@openestimate.com', password: 'OpenEstimate2024!' };
 
-async function login(request) {
+async function login(_request) {
   let res = await fetch(`${BACKEND}/api/v1/users/auth/login/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

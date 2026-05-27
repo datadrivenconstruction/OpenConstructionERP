@@ -1,4 +1,4 @@
-/**​‌‍ ⁠
+/** 
  * screenshot-bim-color-isolate.mjs — v3.13.0 W6.6.
  *
  * Sanity-check pass for the ColorByPropertyPanel + context-menu Isolate/

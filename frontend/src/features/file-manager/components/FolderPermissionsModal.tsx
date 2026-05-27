@@ -216,7 +216,7 @@ export function FolderPermissionsModal({
     try {
       await revokeFolderPermission(projectId, row.id);
       invalidate();
-    } catch (e) {
+    } catch {
       addToast({
         type: 'error',
         title: t('files.permissions.error_revoke', {

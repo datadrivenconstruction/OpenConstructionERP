@@ -676,7 +676,6 @@ function UploadZone({
 
     setUploading(true);
     let successCount = 0;
-    let failCount = 0;
 
     for (let i = 0; i < validFiles.length; i++) {
       const file = validFiles[i]!;
@@ -694,8 +693,7 @@ function UploadZone({
           gps_lon: exif.gps_lon,
         });
         successCount++;
-      } catch (err) {
-        failCount++;
+      } catch {
         addToast({
           type: 'error',
           title: t('photos.upload_failed', { defaultValue: 'Upload failed' }),
