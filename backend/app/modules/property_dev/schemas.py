@@ -1127,6 +1127,12 @@ class SalesKanbanBuyerCard(BaseModel):
     contract_signed_at: str | None = None
     freeze_deadline: str | None = None
 
+    # R8: money fields as plain-decimal strings (matches BuyerResponse).
+    @field_serializer("contract_value", when_used="json")
+    @classmethod
+    def _ser_money(cls, v: Decimal) -> str:
+        return _serialize_money_string(v) or "0"
+
 
 class SalesKanbanColumn(BaseModel):
     """One column on the kanban (one status)."""
@@ -1135,6 +1141,12 @@ class SalesKanbanColumn(BaseModel):
     buyers: list[SalesKanbanBuyerCard] = Field(default_factory=list)
     count: int = 0
     total_value: Decimal = Decimal("0")
+
+    # R8: money fields as plain-decimal strings.
+    @field_serializer("total_value", when_used="json")
+    @classmethod
+    def _ser_money(cls, v: Decimal) -> str:
+        return _serialize_money_string(v) or "0"
 
 
 class SalesKanbanResponse(BaseModel):

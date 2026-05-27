@@ -2682,7 +2682,12 @@ class PropertyDevService:
         plot = await self.plots.get_by_id(data.plot_id)
         if plot is None:
             raise HTTPException(status_code=422, detail="plot not found")
-        if plot.status in {"sold", "handed_over"}:
+        # "reserved" is intentionally included: a plot that is already
+        # reserved must not accept a second reservation (double-booking race).
+        # Callers that legitimately need to re-reserve a plot must first
+        # cancel the existing reservation so the plot status returns to
+        # "planned" before creating a new one.
+        if plot.status in {"reserved", "sold", "handed_over"}:
             raise HTTPException(
                 status_code=409,
                 detail=f"Plot {plot.plot_number} not available for reservation",
