@@ -1021,26 +1021,25 @@ async def export_budgets(
     for row_idx, b in enumerate(items, 2):
         ws.cell(row=row_idx, column=1, value=b.wbs_id or "")
         ws.cell(row=row_idx, column=2, value=b.category or "")
-        try:
-            original = float(b.original_budget)
-        except (ValueError, TypeError):
-            original = 0.0
-        try:
-            revised = float(b.revised_budget)
-        except (ValueError, TypeError):
-            revised = 0.0
-        try:
-            committed = float(b.committed)
-        except (ValueError, TypeError):
-            committed = 0.0
-        try:
-            actual = float(b.actual)
-        except (ValueError, TypeError):
-            actual = 0.0
-        try:
-            forecast = float(b.forecast_final)
-        except (ValueError, TypeError):
-            forecast = 0.0
+        # BUG-069: use Decimal (not float) so large construction-budget values
+        # (e.g. 123456789.99) don't suffer IEEE-754 rounding when Excel reads
+        # them back — openpyxl stores Decimal natively as a NUMERIC cell.
+        from decimal import Decimal as _Dec, InvalidOperation as _IOp
+
+        def _bd(raw: Any) -> _Dec:
+            if raw is None or raw == "":
+                return _Dec("0")
+            try:
+                d = _Dec(str(raw).strip())
+            except (_IOp, ValueError, TypeError):
+                return _Dec("0")
+            return d if d.is_finite() else _Dec("0")
+
+        original = _bd(b.original_budget)
+        revised = _bd(b.revised_budget)
+        committed = _bd(b.committed)
+        actual = _bd(b.actual)
+        forecast = _bd(b.forecast_final)
         variance = revised - actual
 
         ws.cell(row=row_idx, column=3, value=original)
