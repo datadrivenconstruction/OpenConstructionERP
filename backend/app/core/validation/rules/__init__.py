@@ -1228,16 +1228,9 @@ class BOQUnitSystemConsistencyRule(ValidationRule):
         data = context.data if isinstance(context.data, dict) else {}
         project_system_raw = data.get("project_unit_system")
         if project_system_raw is None:
-            return [
-                RuleResult(
-                    rule_id=self.rule_id,
-                    rule_name=self.name,
-                    severity=self.severity,
-                    category=self.category,
-                    passed=True,
-                    message=_ok(locale),
-                )
-            ]
+            # No project-level unit-system configured → nothing to check.
+            # Return [] so an otherwise-empty BOQ stays SKIPPED (E-VAL-008).
+            return []
         project_system = str(project_system_raw).strip().lower()
         if project_system not in {"metric", "imperial"}:
             # Unknown unit-system value → skip (don't false-positive).
@@ -1464,18 +1457,10 @@ class ClassificationCountryMismatchRule(ValidationRule):
         metadata = getattr(context, "metadata", {}) or {}
         region = getattr(context, "region", None)
         country = _normalize_country_code(metadata, region)
-        # No country context → cannot judge → pass silently.
+        # No country context → cannot judge → nothing to emit.
+        # Return [] so an otherwise-empty / unregioned BOQ stays SKIPPED (E-VAL-008).
         if not country or country not in _PREFERRED_STANDARD_BY_COUNTRY:
-            return [
-                RuleResult(
-                    rule_id=self.rule_id,
-                    rule_name=self.name,
-                    severity=self.severity,
-                    category=self.category,
-                    passed=True,
-                    message=_ok(locale),
-                )
-            ]
+            return []
         preferred = _PREFERRED_STANDARD_BY_COUNTRY[country]
         country_display = _COUNTRY_TO_DISPLAY_NAME.get(country, country)
         positions = _get_positions(context)
@@ -4521,6 +4506,8 @@ def register_builtin_rules() -> None:
         (CostConcentration(), None),
         (CurrencyConsistency(), None),
         (MeasurementConsistency(), None),
+        (BOQUnitSystemConsistencyRule(), None),
+        (ClassificationCountryMismatchRule(), None),
         # DIN 276 (DACH)
         (DIN276CostGroupRequired(), None),
         (DIN276ValidCostGroup(), None),

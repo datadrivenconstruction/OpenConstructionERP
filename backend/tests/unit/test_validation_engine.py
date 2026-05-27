@@ -346,5 +346,7 @@ class TestEmptyDataHandling:
 
         report = await validation_engine.validate(data={"positions": []}, rule_sets=["boq_quality"])
         assert report.status == ValidationStatus.SKIPPED
-        assert report.score == 1.0
+        # SKIPPED reports have no honest quality signal — score is None, not 1.0
+        # (NEW-VAL-004: an empty BOQ must not look "100% green").
+        assert report.score is None
         assert len(report.results) == 0
