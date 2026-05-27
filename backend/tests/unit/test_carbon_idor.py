@@ -458,6 +458,67 @@ def test_rollup_d_credits_negative_decimal_exact() -> None:
     assert Decimal(totals["total"]) == Decimal("100")
 
 
+# ── Auto-fill carbon_kg correctness (Fix 1) ──────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_create_embodied_entry_autofill_direct_multiply(
+    db_session: AsyncSession,
+) -> None:
+    """Auto-fill carbon_kg = quantity × factor_value_used (direct multiply).
+
+    Regression: the old code called compute_embodied_entry_carbon(qty, unit,
+    factor, unit) — passing entry.unit for BOTH qty_unit and factor_unit.
+    When the factor is declared per-kg but the entry unit is m3, the identity
+    branch fires and returns qty (m3) × factor instead of the correct result.
+    The fix: auto-fill multiplies directly without any unit conversion so
+    callers own the normalisation step (as they do in assign_boq_position_carbon).
+    """
+    ctx = await _setup_two_projects(db_session)
+    inv = await ctx["service"].create_inventory(
+        CarbonInventoryCreate(project_id=ctx["project_a"].id, name="autofill-test"),
+        user_id=None,
+    )
+    # Pass carbon_kg=0 so the auto-fill path triggers.
+    entry = await ctx["service"].create_embodied_entry(
+        EmbodiedCarbonEntryCreate(
+            inventory_id=inv.id,
+            description="auto",
+            quantity=Decimal("10"),
+            unit="m3",
+            factor_value_used=Decimal("0.13"),
+            carbon_kg=Decimal("0"),
+            stage="a1a3",
+        ),
+    )
+    # 10 × 0.13 = 1.3 exactly (no float drift).
+    assert Decimal(str(entry.carbon_kg)) == Decimal("1.3"), (
+        f"auto-fill produced wrong carbon_kg: {entry.carbon_kg}"
+    )
+
+
+# ── EPD source allowlist includes epd_international (Fix 2) ──────────────
+
+
+def test_epd_record_create_accepts_epd_international_source() -> None:
+    """EPDRecordCreate must accept source='epd_international' after the fix.
+
+    Before the fix the pattern was ^(oekobaudat|ice|ec3|custom)$ which would
+    reject the epd_international source returned by parse_epd_identifier for
+    environdec/EPD-Norge URLs — silently unusable API surface.
+    """
+    from app.modules.carbon.schemas import EPDRecordCreate
+
+    rec = EPDRecordCreate(
+        epd_id="epd_international:EPD-TEST-001",
+        source="epd_international",
+        material_class="concrete",
+        product_name="Test product",
+        gwp_a1a3=Decimal("0.15"),
+    )
+    assert rec.source == "epd_international"
+
+
 # ── Permission registry orphan check ──────────────────────────────────────
 
 

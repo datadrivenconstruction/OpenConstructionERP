@@ -1218,16 +1218,13 @@ class CarbonService:
                     detail=str(exc),
                 ) from exc
         # If carbon_kg is zero but quantity & factor are set, auto-fill.
+        # ``factor_value_used`` is already normalised to the same unit as
+        # ``quantity`` by the caller (or by assign_boq_position_carbon), so
+        # we multiply directly rather than re-running the unit-conversion
+        # machinery (which would mis-interpret m3×(kg/m3) as m3×(m3/…) if
+        # both sides were naively set to entry.unit).
         if (entry.carbon_kg in (0, "0", Decimal("0"))) and entry.quantity and entry.factor_value_used:
-            try:
-                entry.carbon_kg = compute_embodied_entry_carbon(
-                    entry.quantity,
-                    entry.unit,
-                    entry.factor_value_used,
-                    entry.unit,
-                )
-            except UnitMismatchError:
-                pass
+            entry.carbon_kg = Decimal(str(entry.quantity)) * Decimal(str(entry.factor_value_used))
         return await self.embodied_repo.create(entry)
 
     async def list_embodied_entries(
@@ -1731,7 +1728,15 @@ class CarbonService:
                 validity_until=validity_until,
                 document_url=document_url,
             )
-            return await self.epd_repo.get_by_id(existing_id)
+            refreshed = await self.epd_repo.get_by_id(existing_id)
+            if refreshed is None:
+                # Row deleted between update and re-fetch (extremely unlikely;
+                # treat the same as a concurrent hard-delete).
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="EPD record removed concurrently during ingest",
+                )
+            return refreshed
         record = EPDRecord(
             epd_id=canonical_id,
             source=parsed["source"],

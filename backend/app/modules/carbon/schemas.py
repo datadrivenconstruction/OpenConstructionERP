@@ -20,7 +20,7 @@ class EPDRecordCreate(BaseModel):
     epd_id: str = Field(..., min_length=1, max_length=120)
     source: str = Field(
         default="custom",
-        pattern=r"^(oekobaudat|ice|ec3|custom)$",
+        pattern=r"^(oekobaudat|ice|ec3|epd_international|custom)$",
     )
     material_class: str = Field(..., min_length=1, max_length=80)
     product_name: str = Field(..., min_length=1, max_length=500)
@@ -45,7 +45,7 @@ class EPDRecordUpdate(BaseModel):
 
     source: str | None = Field(
         default=None,
-        pattern=r"^(oekobaudat|ice|ec3|custom)$",
+        pattern=r"^(oekobaudat|ice|ec3|epd_international|custom)$",
     )
     material_class: str | None = Field(default=None, max_length=80)
     product_name: str | None = Field(default=None, max_length=500)
