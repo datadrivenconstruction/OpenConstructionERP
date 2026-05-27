@@ -551,6 +551,13 @@ function GlobalShortcuts() {
 useAuthStore.getState().loadFromStorage();
 useThemeStore.getState().init();
 
+// Refresh the authoritative role from the server so a user whose role was
+// changed by an admin sees the correct UI immediately on the next page load,
+// without waiting for their token to expire (RBAC stale-role fix).
+// Fire-and-forget — a network failure here is non-fatal; the JWT-decoded role
+// remains available as a fallback.
+useAuthStore.getState().syncRoleFromServer();
+
 // Initialize the anonymized error logger (global handlers for unhandled errors)
 initErrorLogger();
 

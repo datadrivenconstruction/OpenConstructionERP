@@ -449,6 +449,22 @@ class UserService:
         access_token = create_access_token(user, self.settings)
         refresh_token = create_refresh_token(user, self.settings)
 
+        # Audit trail — security-critical event: successful login.
+        try:
+            from app.core.audit_log import log_activity as _log_activity
+
+            await _log_activity(
+                self.session,
+                actor_id=str(user_id),
+                entity_type="user",
+                entity_id=str(user_id),
+                action="login",
+                module="users",
+                after_state={"email": user_email, "role": user_role},
+            )
+        except Exception:  # noqa: BLE001
+            logger.debug("audit log skipped for login (non-fatal)")
+
         await _safe_publish(
             "users.user.logged_in",
             {"user_id": str(user.id)},
@@ -617,6 +633,14 @@ class UserService:
         """Reset user password using a valid reset token.
 
         Raises HTTPException 400 on invalid/expired token.
+
+        Single-use enforcement: after the first successful reset the
+        ``password_changed_at`` column is bumped to ``now()``.  On any
+        subsequent attempt with the same token, ``iat`` (issued-at) will
+        be ≤ ``password_changed_at`` — we reject it as already-used,
+        preventing token reuse within the 15-minute expiry window.  No DB
+        blocklist is needed; the existing ``password_changed_at`` column
+        already serves as the invalidation timestamp.
         """
         from jose import JWTError
 
@@ -652,8 +676,23 @@ class UserService:
                 detail="User not found or inactive",
             )
 
+        # Single-use guard: reject the token if password was already changed
+        # after this token was issued (iat).  Mirrors the same logic used in
+        # get_current_user_payload for access tokens.
+        iat = payload.get("iat")
+        if iat is not None and user.password_changed_at is not None:
+            pwd_changed = user.password_changed_at
+            if pwd_changed.tzinfo is None:
+                pwd_changed = pwd_changed.replace(tzinfo=UTC)
+            if int(float(iat)) <= int(pwd_changed.timestamp()):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Reset token has already been used. Please request a new one.",
+                )
+
         # Eagerly read email before update_fields (which calls expire_all)
         user_email = user.email
+        user_uuid = user.id
 
         await self.user_repo.update_fields(
             user.id,
@@ -661,9 +700,25 @@ class UserService:
             password_changed_at=datetime.now(UTC),
         )
 
+        # Audit trail — security-critical event: password change via reset token.
+        try:
+            from app.core.audit_log import log_activity as _log_activity
+
+            await _log_activity(
+                self.session,
+                actor_id=str(user_uuid),
+                entity_type="user",
+                entity_id=str(user_uuid),
+                action="password_reset_completed",
+                module="users",
+                after_state={"email": user_email},
+            )
+        except Exception:  # noqa: BLE001
+            logger.debug("audit log skipped for password_reset_completed (non-fatal)")
+
         await _safe_publish(
             "users.password_reset.completed",
-            {"user_id": str(user.id), "email": user_email},
+            {"user_id": str(user_uuid), "email": user_email},
             source_module="oe_users",
         )
 
@@ -680,11 +735,44 @@ class UserService:
         return user
 
     async def update_profile(self, user_id: uuid.UUID, **fields: object) -> User:
-        """Update user profile fields."""
+        """Update user profile fields.
+
+        If ``role`` is being changed, a dedicated audit log entry is written so
+        privilege escalation / demotion is always traceable (RBAC audit gap fix).
+        """
+        # Capture old role before overwriting so the audit row has before/after.
+        old_role: str | None = None
+        new_role: str | None = None
+        if "role" in fields:
+            prior = await self.user_repo.get_by_id(user_id)
+            if prior is not None:
+                old_role = prior.role
+            new_role = str(fields["role"])
+
         await self.user_repo.update_fields(user_id, **fields)
         user = await self.user_repo.get_by_id(user_id)
         if user is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+        if old_role is not None and new_role is not None and old_role != new_role:
+            try:
+                from app.core.audit_log import log_activity as _log_activity
+
+                await _log_activity(
+                    self.session,
+                    actor_id=None,  # context dep fills this from ContextVar
+                    entity_type="user",
+                    entity_id=str(user_id),
+                    action="role_changed",
+                    from_status=old_role,
+                    to_status=new_role,
+                    module="users",
+                    before_state={"role": old_role},
+                    after_state={"role": new_role, "email": user.email},
+                )
+            except Exception:  # noqa: BLE001
+                logger.debug("audit log skipped for role_changed (non-fatal)")
+
         return user
 
     async def update_preferences(
