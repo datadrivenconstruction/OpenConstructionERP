@@ -264,14 +264,23 @@ class PositionRepository:
         stmt = delete(Position).where(Position.id == position_id)
         await self.session.execute(stmt)
 
-    async def reorder(self, position_ids: list[uuid.UUID]) -> None:
+    async def reorder(self, position_ids: list[uuid.UUID], boq_id: uuid.UUID) -> None:
         """Reorder positions by assigning sort_order based on list index.
+
+        Only touches positions that belong to ``boq_id`` — foreign IDs are
+        silently skipped (UPDATE rows=0) rather than mutating positions in
+        another user's BOQ (cross-tenant sort_order pollution).
 
         Args:
             position_ids: Ordered list of position UUIDs. Index becomes sort_order.
+            boq_id: Owning BOQ — positions not in this BOQ are not affected.
         """
         for index, pid in enumerate(position_ids):
-            stmt = update(Position).where(Position.id == pid).values(sort_order=index)
+            stmt = (
+                update(Position)
+                .where(Position.id == pid, Position.boq_id == boq_id)
+                .values(sort_order=index)
+            )
             await self.session.execute(stmt)
 
     async def get_max_sort_order(self, boq_id: uuid.UUID) -> int:

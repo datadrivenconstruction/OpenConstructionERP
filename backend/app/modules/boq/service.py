@@ -3959,11 +3959,18 @@ class BOQService:
                 elif payload.rate_factor is not None:
                     current = _to_decimal(row.unit_rate, default=Decimal("0"))
                     new_rate = current * Decimal(str(payload.rate_factor))
-                    update_data = PositionUpdate(unit_rate=float(_quantize_money(new_rate)))
+                    # Pass Decimal directly — PositionUpdate.unit_rate is
+                    # typed Decimal, so converting through float() would
+                    # re-introduce binary-floating-point rounding on large
+                    # rates (BUG-B-bulk-float).
+                    update_data = PositionUpdate(unit_rate=_quantize_money(new_rate))
                 else:
                     # quantity_factor branch (validator guarantees one is set)
                     current_q = _to_decimal(row.quantity, default=Decimal("0"))
                     new_q = current_q * Decimal(str(payload.quantity_factor))
+                    # quantity field is typed float; use the string-encoded
+                    # Decimal so the schema coercion path (_quantize_money_str)
+                    # fires cleanly rather than going float → string → Decimal.
                     update_data = PositionUpdate(quantity=float(_quantize_money(new_q)))
                 await self.update_position(pid, update_data, actor_id=actor_id)
                 updated += 1
@@ -4555,7 +4562,7 @@ class BOQService:
             HTTPException 409: If the BOQ is locked.
         """
         await self._ensure_not_locked(boq_id)
-        await self.position_repo.reorder(position_ids)
+        await self.position_repo.reorder(position_ids, boq_id)
         logger.info("Reordered %d positions in BOQ %s", len(position_ids), boq_id)
 
     # ── Markup operations ─────────────────────────────────────────────────

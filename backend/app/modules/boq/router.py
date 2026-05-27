@@ -1230,6 +1230,9 @@ async def delete_boq(
 )
 async def duplicate_boq(
     boq_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> BOQResponse:
     """Duplicate an entire BOQ with all its positions and markups.
@@ -1237,6 +1240,8 @@ async def duplicate_boq(
     Creates a new BOQ named "<original> (Copy)" in the same project.
     All positions (with hierarchy) and markups are deep-copied with new IDs.
     """
+    # IDOR guard: verify the caller owns the source BOQ before cloning it
+    await _verify_boq_owner(session, boq_id, user_id, payload)
     new_boq = await service.duplicate_boq(boq_id)
     return BOQResponse.model_validate(new_boq)
 
@@ -1250,12 +1255,23 @@ async def duplicate_boq(
 )
 async def duplicate_position(
     position_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> PositionResponse:
     """Duplicate a single position within the same BOQ.
 
     Creates a copy with ordinal "<original>.1" placed after the original.
     """
+    # IDOR guard: load position → derive boq_id → verify ownership chain
+    existing = await service.position_repo.get_by_id(position_id)
+    if existing is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=translate("errors.position_not_found", locale=get_locale()),
+        )
+    await _verify_boq_owner(session, existing.boq_id, user_id, payload)
     new_position = await service.duplicate_position(position_id)
     return _position_to_response(new_position)
 
