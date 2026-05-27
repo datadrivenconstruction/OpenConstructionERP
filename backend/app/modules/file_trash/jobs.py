@@ -35,10 +35,13 @@ from app.modules.file_trash.service import purge_expired_trash
 
 logger = logging.getLogger(__name__)
 
-# Once-per-process guard so a hot-reload (or a duplicate ``register_jobs``
-# call from a test harness) doesn't end up running two parallel purge
-# loops against the same database.
-_REGISTERED: bool = False
+# Active task reference — ``None`` when no scheduler is running.
+# Using the task object (rather than a bare bool) means the guard
+# is automatically invalidated when the task is cancelled or done
+# (e.g. a test's event-loop teardown or a uvicorn --reload cycle),
+# so a subsequent ``register_jobs()`` call correctly starts a new task
+# instead of silently no-op-ing because the old bool was still ``True``.
+_ACTIVE_TASK: asyncio.Task[None] | None = None
 
 # Scheduler cadence — 24h is plenty given retention windows are
 # measured in days and the cron is purely a clean-up safety net.
@@ -101,15 +104,19 @@ def register_jobs(
 ) -> asyncio.Task[None] | None:
     """Schedule the periodic retention-purge job.
 
-    Idempotent: the second call returns ``None`` and leaves the
-    already-running task alone.
+    Idempotent: if a live (non-done, non-cancelled) task is already
+    registered the function returns ``None`` and leaves it alone.
+    A completed or cancelled task is treated as *not running*, so a
+    new one is created — this correctly handles uvicorn --reload cycles
+    and test teardowns that cancel the previous task.
 
-    Returns the created asyncio task on first call so callers /
-    tests can ``cancel()`` it during teardown. Returns ``None`` on
-    subsequent calls.
+    Returns the created asyncio task so callers / tests can
+    ``cancel()`` it during teardown. Returns ``None`` when an existing
+    live task is found.
     """
-    global _REGISTERED
-    if _REGISTERED:
+    global _ACTIVE_TASK
+    # Re-use the existing task only if it's still running.
+    if _ACTIVE_TASK is not None and not _ACTIVE_TASK.done():
         return None
     try:
         loop = asyncio.get_running_loop()
@@ -123,7 +130,7 @@ def register_jobs(
     task = loop.create_task(
         _scheduler_loop(interval_seconds, first_tick_delay_seconds),
     )
-    _REGISTERED = True
+    _ACTIVE_TASK = task
     logger.info(
         "file_trash scheduler registered (every %d s; first tick in %d s)",
         interval_seconds,

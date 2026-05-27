@@ -360,7 +360,12 @@ async def create_scale(
 
 @router.get("/scales/", response_model=list[ScaleConfigResponse])
 async def list_scales(
+    session: SessionDep,
     document_id: str = Query(...),
+    project_id: uuid.UUID = Query(
+        ...,
+        description="Project that owns the document. Used for IDOR guard.",
+    ),
     document_page: int | None = Query(
         default=None,
         ge=1,
@@ -379,11 +384,13 @@ async def list_scales(
 ) -> list[ScaleConfigResponse]:
     """List scale configs for a document.
 
-    Authn is required (CurrentUserId). Scales are document-scoped — until
-    documents grow a project FK we keep authz at the calibrator level (see
-    delete_scale). ``page`` is the deprecated alias for ``document_page``;
+    ``project_id`` is required and verified via :func:`verify_project_access`
+    so a caller cannot enumerate another tenant's calibration data by
+    supplying an arbitrary ``document_id`` (A-MRK-01 IDOR fix).
+    ``page`` is the deprecated alias for ``document_page``;
     pagination uses platform-standard ``offset``+``limit``.
     """
+    await verify_project_access(project_id, str(user_id), session)
     page_filter = document_page if document_page is not None else page
     items = await service.list_scales(document_id, page=page_filter)
     # Apply offset/limit at the API edge so the route matches platform shape

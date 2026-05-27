@@ -297,7 +297,12 @@ export function InlinePdfAnnotator({
       // bitmap data.
       activeTask?.cancel?.();
     };
-  }, [pdfDoc, currentPage, zoom]); // eslint-disable-line react-hooks/exhaustive-deps
+    // drawAnnotations is included so page-flip and zoom changes always
+    // redraw annotations with the freshest closure (annotations state,
+    // current page filter, viewport). Without it the call at lines 285/289
+    // captured the stale callback from the previous render, causing
+    // annotations from page N to bleed onto (or vanish from) page N+1.
+  }, [pdfDoc, currentPage, zoom, drawAnnotations]);
 
   /* ── Draw annotations on overlay ──────────────────────────────────── */
 
