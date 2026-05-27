@@ -892,7 +892,25 @@ class BidManagementService:
     # ── Submissions ───────────────────────────────────────────────────
 
     async def record_submission(self, data: BidSubmissionCreate) -> BidSubmission:
-        # Submission unique per invitation.
+        """Record a bid submission, guarding against concurrent duplicates.
+
+        The application-level check (``get_by_invitation``) provides a
+        fast early-out for the common single-request path.  However, two
+        concurrent POSTs for the same ``invitation_id`` can both pass the
+        check before either commits, resulting in two submission rows for
+        the same invitation — corrupting the leveling matrix and
+        potentially exposing competing prices to both bidders.
+
+        Defence-in-depth: the ``oe_bid_management_submission.invitation_id``
+        column carries a UNIQUE constraint (see models.py).  We wrap the
+        insert + flush in a try/except so the DB-level uniqueness violation
+        is surfaced as a clean HTTP 409, not a 500 Internal Server Error.
+        The application-level check is kept as a pre-flight to avoid
+        hitting the DB error path on the most common replay attempt.
+        """
+        from sqlalchemy.exc import IntegrityError
+
+        # Application-level pre-flight (fast path for serialised requests).
         existing = await self.submission_repo.get_by_invitation(data.invitation_id)
         if existing is not None:
             raise HTTPException(status_code=409, detail="Submission already exists for this invitation")
@@ -922,16 +940,25 @@ class BidManagementService:
             qualifications=list(data.qualifications),
             envelope_payload=data.envelope_payload,
         )
-        created = await self.submission_repo.create(sub)
+        try:
+            created = await self.submission_repo.create(sub)
 
-        # Stamp invitation
-        inv = await self.invitation_repo.get_by_id(data.invitation_id)
-        if inv is not None:
-            inv.submission_received_at = sub.submitted_at
-            if inv.status in ("pending", "sent", "opened"):
-                inv.status = "submitted"
+            # Stamp invitation
+            inv = await self.invitation_repo.get_by_id(data.invitation_id)
+            if inv is not None:
+                inv.submission_received_at = sub.submitted_at
+                if inv.status in ("pending", "sent", "opened"):
+                    inv.status = "submitted"
 
-        await self.session.flush()
+            await self.session.flush()
+        except IntegrityError:
+            # Concurrent duplicate — the UNIQUE constraint on invitation_id
+            # fired. Roll back the partial work and surface a clean 409.
+            await self.session.rollback()
+            raise HTTPException(
+                status_code=409,
+                detail="Submission already exists for this invitation (concurrent request)",
+            )
 
         event_bus.publish_detached(
             "bid_management.submission.received",
@@ -1265,7 +1292,34 @@ class BidManagementService:
         return award
 
     async def delete_award(self, award_id: uuid.UUID) -> None:
+        """Delete an award record and revert the package to 'closed'.
+
+        Deleting the BidAward row without reverting the BidPackage FSM
+        state would leave the package permanently stuck in 'awarded'
+        (which has no outgoing transitions), making re-award impossible
+        and breaking the audit trail. We therefore atomically step the
+        package back to 'closed' — the last valid pre-award state — so the
+        full award → compare → re-award cycle can be restarted.
+        """
+        award = await self.award_repo.get_by_id(award_id)
+        if award is None:
+            return
+        package = await self.package_repo.get_by_id(award.package_id)
         await self.award_repo.delete(award_id)
+        # Revert FSM: awarded → closed so the package can be re-awarded.
+        if package is not None and package.status == "awarded":
+            package.status = "closed"
+            package.awarded_at = None
+            await self.session.flush()
+            event_bus.publish_detached(
+                "bid_management.award.deleted",
+                {
+                    "package_id": str(award.package_id),
+                    "award_id": str(award_id),
+                    "reverted_to": "closed",
+                },
+                source_module="bid_management",
+            )
 
     async def create_rejection(self, data: BidRejectionCreate) -> BidRejection:
         await self.get_package(data.package_id)

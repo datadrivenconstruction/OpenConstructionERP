@@ -187,7 +187,9 @@ class BidInvitationResponse(BaseModel):
     declined_at: str | None = None
     decline_reason: str | None = None
     status: str = "pending"
-    token_hash: str | None = None
+    # token_hash is intentionally excluded — it is a server-side secret
+    # used to authenticate magic-link bidder access and must never be
+    # returned to API callers (including owner roles).
     created_at: datetime
     updated_at: datetime
 
