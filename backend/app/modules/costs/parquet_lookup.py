@@ -186,7 +186,36 @@ def parquet_path_for_country(country: str) -> Path | None:
     return _parquet_for_country(country)
 
 
+def clear_parquet_caches() -> None:
+    """Invalidate all memoised parquet state.
+
+    Call this after dropping a new CWICR parquet file into the data
+    directory so the next :func:`lookup_rows` call rescans the directory
+    and opens the new file instead of using a stale ``lru_cache`` entry.
+
+    Two caches are cleared:
+
+    * :func:`_parquet_for_country` — directory scan results keyed on the
+      upper-cased country head (``DE``, ``US``, etc.). Must be cleared
+      whenever the set of parquet files changes so the path resolver
+      discovers newly-added files.
+    * :func:`_scan` — Polars ``LazyFrame`` handles keyed on the absolute
+      parquet path string. A ``LazyFrame`` holds an mmap/file descriptor
+      open on all platforms. Clearing this cache closes those handles,
+      which is important on Windows where an open mmap blocks file
+      replacement (the ``os error 5`` / Access Denied symptom). Without
+      this clear, replacing a parquet file while the backend is running
+      leaves the old frame in the cache and all subsequent lookups read
+      stale data silently.
+    """
+
+    _parquet_for_country.cache_clear()
+    _scan.cache_clear()
+    logger.info("parquet_lookup: caches cleared (directory + LazyFrame handles)")
+
+
 __all__ = [
+    "clear_parquet_caches",
     "lookup_rows",
     "parquet_path_for_country",
     "parquet_root",

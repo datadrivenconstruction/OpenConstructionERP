@@ -3190,6 +3190,16 @@ async def load_cwicr_database(
         duration,
     )
     _invalidate_cost_cache()
+    # A new CWICR parquet may have been written alongside the SQL import
+    # (or the import itself writes a parquet artefact). Clear the polars
+    # LazyFrame + path-resolution lru_caches so the next /qdrant-search
+    # call opens the new file rather than reading the old mmap snapshot.
+    try:
+        from app.modules.costs.parquet_lookup import clear_parquet_caches
+
+        clear_parquet_caches()
+    except Exception:
+        logger.debug("parquet cache clear failed (non-fatal)", exc_info=True)
 
     # Schema-level failures (e.g. parquet missing the required ``rate_code``
     # column) must surface as 422 Unprocessable Entity — the file was

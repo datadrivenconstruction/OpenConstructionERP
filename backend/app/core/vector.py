@@ -368,6 +368,41 @@ def _lancedb_status() -> dict[str, Any]:
 # ── Multi-collection LanceDB helpers ─────────────────────────────────────
 
 
+import re as _re
+
+# Allowlist for string fields interpolated into LanceDB WHERE expressions.
+# Only printable ASCII minus single-quote and backslash are allowed so a
+# caller-supplied region / project_id / tenant_id can never break out of
+# the surrounding ``field = '<value>'`` literal.  The cap (128 chars) is
+# generous — real values are ≤ 64 chars.
+_LANCEDB_SAFE_STRING_RE = _re.compile(r"^[^\x00-\x1f\x7f'\\]{1,128}$")
+
+
+def _safe_quote_scalar(value: str, field: str = "field") -> str | None:
+    """Validate and single-quote a scalar string for a LanceDB WHERE literal.
+
+    Returns the quoted string (``'value'``) when the input passes the
+    allowlist, or ``None`` when it must be rejected.  Callers MUST treat
+    a ``None`` return as "drop this filter" — never fall through to
+    interpolating the raw value.
+
+    The allowlist is intentionally restrictive (printable ASCII excluding
+    ``'`` and ``\\``) so the function stays correct even when LanceDB
+    changes its SQL parser internals.  Legitimate CWICR region codes and
+    UUID strings all pass; only crafted injection payloads fail.
+    """
+    if not isinstance(value, str) or not value:
+        return None
+    if not _LANCEDB_SAFE_STRING_RE.match(value):
+        logger.warning(
+            "LanceDB filter: unsafe %s value rejected (injection guard): %r",
+            field,
+            value[:80],
+        )
+        return None
+    return f"'{value}'"
+
+
 def _safe_quote_ids(raw_ids: list[Any]) -> list[str]:
     """Validate and quote a list of row ids for inclusion in a LanceDB SQL filter.
 
@@ -474,9 +509,13 @@ def _lancedb_search_generic(
     q = tbl.search(query_vector).limit(limit)
     where_parts: list[str] = []
     if project_id:
-        where_parts.append(f"project_id = '{project_id}'")
+        safe_pid = _safe_quote_scalar(project_id, "project_id")
+        if safe_pid:
+            where_parts.append(f"project_id = {safe_pid}")
     if tenant_id:
-        where_parts.append(f"tenant_id = '{tenant_id}'")
+        safe_tid = _safe_quote_scalar(tenant_id, "tenant_id")
+        if safe_tid:
+            where_parts.append(f"tenant_id = {safe_tid}")
     if extra_where:
         where_parts.append(extra_where)
     if where_parts:
@@ -581,7 +620,9 @@ def _lancedb_search(
 
     q = tbl.search(query_vector).limit(limit)
     if region:
-        q = q.where(f"region = '{region}'")
+        safe_region = _safe_quote_scalar(region, "region")
+        if safe_region:
+            q = q.where(f"region = {safe_region}")
 
     results = q.to_list()
     return [
