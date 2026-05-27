@@ -619,7 +619,18 @@ export default function TakeoffViewerModule({
     ctx.lineWidth = 2 * dpr;
     ctx.font = `${12 * dpr}px sans-serif`;
 
-    /** Draw an annotation label with a semi-transparent background at (lx, ly). */
+    /** Draw an annotation label with a semi-transparent background at (lx, ly).
+     *
+     * Dark-mode fix (D-TKC-DK01): the label pill background was hardcoded
+     * to '#ffffff', which made it invisible against a light canvas in light
+     * mode when globalAlpha was low, and looked jarring in dark mode where
+     * the app chrome is dark but the PDF canvas itself is always white.
+     * We now read the actual dark-mode state from the html element so the
+     * pill adapts correctly: white background in light mode, dark-grey in
+     * dark mode. The text color is always the measurement group color so
+     * the label remains legible regardless of theme.
+     */
+    const isDark = document.documentElement.classList.contains('dark');
     const drawAnnotationLabel = (text: string, lx: number, ly: number, color: string) => {
       const fontSize = 11 * dpr;
       ctx.font = `bold ${fontSize}px sans-serif`;
@@ -630,9 +641,9 @@ export default function TakeoffViewerModule({
       const boxH = fontSize + padY * 2;
       const bx = lx - padX;
       const by = ly - fontSize - padY;
-      // Semi-transparent background
-      ctx.globalAlpha = 0.75;
-      ctx.fillStyle = '#ffffff';
+      // Semi-transparent background — white in light mode, dark-grey in dark mode
+      ctx.globalAlpha = 0.82;
+      ctx.fillStyle = isDark ? '#1e293b' : '#ffffff';
       ctx.fillRect(bx, by, boxW, boxH);
       ctx.globalAlpha = 1;
       // Border

@@ -78,6 +78,23 @@ class TestIsEncryptedPdf:
         body = prefix + (b"safe" * 5000) + (b"x" * 10000) + b"\ntrailer<<>>\n%%EOF"
         assert _is_encrypted_pdf(body) is False
 
+    def test_returns_true_for_inline_encrypt_dict(self):
+        """Some generators (e.g. LibreOffice) emit /Encrypt << ... >> inline
+        instead of an indirect reference /Encrypt N 0 R.  D-TKC-ENC01 fix.
+        """
+        body = (
+            b"%PDF-1.7\n"
+            + b"1 0 obj\n<< /Type /Catalog >>\nendobj\n"
+            + b"xref\n0 2\n"
+            + b"trailer\n<< /Size 2 /Encrypt << /Filter /Standard /R 6 >> >>\n%%EOF"
+        )
+        assert _is_encrypted_pdf(body) is True
+
+    def test_returns_false_for_partial_encrypt_word_in_content(self):
+        """String '/Encrypting' in a content stream should NOT match."""
+        body = b"%PDF-1.4\n" + b"pad" * 1000 + b"\n(Encrypting data...)\ntrailer<<>>\n%%EOF"
+        assert _is_encrypted_pdf(body) is False
+
 
 # ---------------------------------------------------------------------------
 # Upload size cap & env overrides

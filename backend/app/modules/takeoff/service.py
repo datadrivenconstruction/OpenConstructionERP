@@ -29,17 +29,28 @@ logger = logging.getLogger(__name__)
 def _is_encrypted_pdf(content: bytes) -> bool:
     """Detect password-protected PDFs by sniffing the trailer block.
 
-    PDF encryption flags live in the trailer dictionary as
-    ``/Encrypt N N R``. We scan only the LAST 8 KB of the file (where
-    trailers live) to keep false positives from "/Encrypt" appearing
-    as a literal string inside content streams much earlier in the
-    file. Empty or sub-8KB files are treated as not encrypted (the
-    upstream gate already rejects them as zero-byte uploads).
+    PDF encryption flags live in the trailer dictionary as:
+    * ``/Encrypt N N R``  — indirect reference form (most generators)
+    * ``/Encrypt <<``     — inline dict form (rare but valid)
+
+    We scan only the LAST 8 KB of the file (where trailers live) to
+    avoid false positives from "/Encrypt" appearing inside content
+    streams earlier in the file.  Empty or sub-8KB files are treated
+    as not encrypted (the upstream gate already rejects zero-byte
+    uploads).
+
+    Improved (D-TKC-ENC01): the previous pattern only matched the
+    indirect-reference form ``/Encrypt <digit>``.  Some generators emit
+    an inline encryption dictionary ``/Encrypt <<`` instead. We now
+    match both forms so password-protected PDFs from Acrobat/LibreOffice
+    using either syntax are correctly rejected before the expensive
+    pdfplumber parse attempt.
     """
     if not content:
         return False
     tail = content[-8192:] if len(content) > 8192 else content
-    return bool(re.search(rb"/Encrypt\s+\d", tail))
+    # Match both: /Encrypt N N R  AND  /Encrypt <<
+    return bool(re.search(rb"/Encrypt\s+(?:\d|<<)", tail))
 
 
 def _max_upload_bytes() -> int:

@@ -1294,7 +1294,22 @@ export function TakeoffPage() {
       });
 
       if (!response.ok) {
-        throw new Error(`Upload failed: ${response.statusText}`);
+        // Surface the server's structured error message (FastAPI returns
+        // {"detail": "..."}) instead of the generic HTTP status text so the
+        // user sees the real reason (e.g. "File does not appear to be a valid
+        // PDF", "This PDF is password-protected", "Too many uploads"). Falls
+        // back to statusText when the response body is not JSON or has no
+        // detail field (D-TKC-UP01).
+        let detail = response.statusText;
+        try {
+          const body = await response.json() as { detail?: string };
+          if (typeof body?.detail === 'string' && body.detail) {
+            detail = body.detail;
+          }
+        } catch {
+          // non-JSON body — keep statusText
+        }
+        throw new Error(detail);
       }
 
       return (await response.json()) as {
