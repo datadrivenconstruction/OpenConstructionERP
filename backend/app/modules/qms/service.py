@@ -516,6 +516,7 @@ class QMSService:
             )
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         new_status = fields.get("status")
+        prior_status = ncr.status
         if new_status is not None and new_status != ncr.status:
             # Closing must go through ``close_ncr`` so the
             # "every corrective action verified" invariant and the
@@ -533,6 +534,18 @@ class QMSService:
         if fields:
             await self.repo.update_ncr_fields(ncr_id, **fields)
             await self.session.refresh(ncr)
+        # R8 audit: status transitions via PATCH were not audit-logged, leaving
+        # a gap in the FSM audit trail between ``raise_ncr`` (open) and
+        # ``close_ncr`` (closed). The transition is often the most important
+        # event for compliance reviewers ("who moved the NCR to verifying?").
+        if new_status is not None and new_status != prior_status:
+            await self.repo.append_audit(
+                entity_type="ncr",
+                entity_id=ncr_id,
+                action="status_change",
+                old_status=prior_status,
+                new_status=new_status,
+            )
         return ncr
 
     async def assign_ncr_action(
@@ -618,8 +631,16 @@ class QMSService:
             new="closed",
             entity="NCR",
         )
+        # R8 TOCTOU guard: two concurrent /close calls both pass the status
+        # check above, then race to write "closed". Flush the pending update
+        # and re-read inside the same transaction so the second caller sees the
+        # committed "closed" status and raises instead of double-writing.
         await self.repo.update_ncr_fields(ncr_id, status="closed")
+        await self.session.flush()
         await self.session.refresh(ncr)
+        if ncr.status != "closed":
+            # Another concurrent transaction won the race; surface a clear error.
+            raise ValueError("NCR close failed due to concurrent modification; please retry")
         await self.repo.append_audit(
             entity_type="ncr",
             entity_id=ncr_id,
