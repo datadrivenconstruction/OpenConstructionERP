@@ -154,6 +154,56 @@ _CATEGORY_ALIASES: dict[str, str] = {
     "topography": "Topography",
     "site": "Site",
     "parking": "Parking",
+    # IFC entity-type aliases — when a BIM extractor surfaces the raw
+    # IFC class verbatim (``"IfcWall"``, ``"IfcSlab"``, …) the coarse
+    # maps would otherwise miss because they're keyed on Revit Pascal-
+    # case plurals. Folding IFC → Revit here lets ``enrich_classification``
+    # produce a DIN 276 / NRM / MasterFormat code even when the canonical
+    # extractor never ran through a Revit-style category aliaser.
+    # Without this the BIM extractor produces ``classifier_hint=None``
+    # for every IFC-sourced element, which kills the
+    # ``department_code`` hard filter AND the classifier boost.
+    "ifcwall": "Walls",
+    "ifcwallstandardcase": "Walls",
+    "ifccurtainwall": "Curtain Walls",
+    "ifcslab": "Floors",
+    "ifcfloor": "Floors",
+    "ifcroof": "Roofs",
+    "ifcdoor": "Doors",
+    "ifcwindow": "Windows",
+    "ifcstair": "Stairs",
+    "ifcstairflight": "Stairs",
+    "ifcramp": "Ramps",
+    "ifcrampflight": "Ramps",
+    "ifccolumn": "Columns",
+    "ifcbeam": "Structural Framing",
+    "ifcmember": "Structural Framing",
+    "ifcplate": "Structural Framing",
+    "ifcfooting": "Structural Foundations",
+    "ifcpile": "Structural Foundations",
+    "ifcrailing": "Railings",
+    "ifcpipesegment": "Pipe Segments",
+    "ifcductsegment": "Duct Segments",
+    "ifccablecarriersegment": "Cable Trays",
+    "ifcflowsegment": "Pipe Segments",
+    "ifcflowfitting": "Pipe Segments",
+    "ifcflowterminal": "Plumbing Fixtures",
+    "ifcdistributionelement": "Mechanical Equipment",
+    "ifcdistributionchamberelement": "Mechanical Equipment",
+    "ifcdistributioncontrolelement": "Electrical Equipment",
+    "ifclamp": "Electrical Fixtures",
+    "ifclightfixture": "Electrical Fixtures",
+    "ifcoutlet": "Electrical Fixtures",
+    "ifcswitchingdevice": "Electrical Equipment",
+    "ifcairterminal": "Mechanical Equipment",
+    "ifcairterminalbox": "Mechanical Equipment",
+    "ifcfurniture": "Generic Models",
+    "ifcfurnishingelement": "Generic Models",
+    "ifccovering": "Generic Models",  # finishings — KG 350 / 360 inherit
+    "ifcbuildingelementproxy": "Generic Models",
+    "ifcbuildingelementpart": "Generic Models",
+    "ifcvirtualelement": "Generic Models",
+    "ifctransportelement": "Generic Models",
     # Insulation has no Revit-Pascal coarse code; tracked via material map.
 }
 
