@@ -593,18 +593,36 @@ class DwgTakeoffService:
             return
 
         try:
-            from app.modules.boq.cad_import import find_converter
+            from app.modules.boq.cad_import import (
+                build_ddc_args,
+                detect_converter_capabilities,
+                find_converter,
+            )
 
             converter = find_converter("dwg")
         except ImportError:
             converter = None
+            build_ddc_args = None  # type: ignore[assignment]
+            detect_converter_capabilities = None  # type: ignore[assignment]
 
         if converter is None:
+            # Actionable install path — the previous message ("Please upload
+            # DXF format") hid the fact that DWG conversion is supported and
+            # just needs a one-time install. Surfacing the Quantities-page
+            # link + the GitHub manual fallback closes the support loop the
+            # multi-user reports landed in (the Offline Ready pill on the
+            # /dwg-takeoff page also offers a one-click install via the
+            # same /v1/takeoff/converters/dwg/install/ endpoint).
             await self.drawing_repo.update_fields(
                 drawing_id,
                 status="error",
                 error_message=(
-                    "DWG conversion requires DDC DwgExporter. Please upload DXF format or install the converter."
+                    "DWG conversion requires the DDC DwgExporter binary, "
+                    "which was not found on this server. Click the "
+                    "\"Install converter\" pill at the top right of /dwg-takeoff, "
+                    "or download manually from "
+                    "https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN. "
+                    "DXF files work without the converter."
                 ),
             )
             return
@@ -614,12 +632,33 @@ class DwgTakeoffService:
         import subprocess
         from pathlib import Path as _Path
 
-        # DDC DwgExporter → Excel (dispatched by output file extension)
+        # DDC DwgExporter → Excel. Compose the CLI through the same
+        # capability-aware builder the takeoff router uses so we don't
+        # hand v18 flag-driven binaries the legacy positional shape
+        # (``<input> <output> -no-collada``) — that returns exit 15 with
+        # ``arguments were not expected: ... -no-collada``, the same root
+        # cause that previously surfaced as "CAD conversion failed for
+        # .rvt" in the CAD/BIM Data Explorer. Once DDC ships a v18
+        # DwgExporter this code keeps working without any further patch.
         xlsx_path = file_path.rsplit(".", 1)[0] + "_dwg.xlsx"
         try:
+            caps = detect_converter_capabilities("dwg")
+            args = build_ddc_args(
+                converter,
+                _Path(file_path).resolve(),
+                caps=caps,
+                xlsx_out=_Path(xlsx_path).resolve(),
+                # DWG converters historically do not support a mode preset
+                # (the takeoff router only emits ``standard`` for RVT/IFC).
+                # build_ddc_args' v18 path emits ``-m standard`` only when
+                # ``caps.accepts_flag_mode`` is True, which currently fires
+                # for RVT — harmless on DWG should DDC adopt it later.
+                mode="standard",
+                include_no_dae=True,
+            )
             proc = await asyncio.to_thread(
                 lambda: subprocess.run(
-                    [str(converter), str(_Path(file_path).resolve()), str(_Path(xlsx_path).resolve()), "-no-collada"],
+                    args,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     cwd=str(converter.parent),

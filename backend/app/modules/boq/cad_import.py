@@ -61,7 +61,29 @@ CONVERTER_SEARCH_PATHS: list[Path] = [
 
 
 def _find_ddc_toolkit_bin() -> Path | None:
-    """‌⁠‍Auto-detect DDC toolkit converters/bin from editable install or known paths."""
+    """‌⁠‍Auto-detect DDC toolkit converters/bin from editable install or known paths.
+
+    Search order, in priority:
+
+      1. ``DDC_TOOLKIT_DIR`` env override (operator-explicit wins everything).
+      2. ``importlib.metadata`` lookup for the ``ddc-toolkit`` distribution
+         (works for ``pip install -e`` of the toolkit package).
+      3. Sibling directories of the **source** repository
+         (``Path(__file__).resolve().parents[4].parent``). This works when
+         the user runs the backend from a checked-out source tree.
+      4. Sibling directories of the **working directory** the process was
+         launched from. Critical for the wheel-install case: when the user
+         starts the service with ``pip install openconstructionerp`` and
+         then runs ``uvicorn`` from inside their project root, the
+         ``__file__`` path resolves to ``site-packages`` (parents[4].parent
+         is ``anaconda3``) and the sibling-scan above completely misses a
+         ``ddc_toolkit`` checkout living next to the project root. Adding
+         ``Path.cwd().parent`` as an additional anchor closes that gap
+         without requiring the operator to set ``DDC_TOOLKIT_DIR``.
+      5. ``~/.openestimator/converters/`` directly — the BIM auto-installer
+         drops shared binaries (no per-format subfolder) here for users who
+         do a one-click install via the Quantities page.
+    """
     # 1. Check env var
     env_dir = os.environ.get("DDC_TOOLKIT_DIR")
     if env_dir:
@@ -88,12 +110,28 @@ def _find_ddc_toolkit_bin() -> Path | None:
     except Exception:
         logger.debug("DDC converter discovery via importlib failed", exc_info=True)
 
-    # 3. Scan common sibling directories (projects next to this repo)
+    # 3. Scan sibling directories of this project (source-tree install).
+    # 4. ALSO scan sibling directories of the launch CWD (wheel install +
+    #    user runs from their project root). Both anchors are tried with
+    #    the same set of common toolkit directory names.
     this_project = Path(__file__).resolve().parents[4]  # backend/app/modules/boq -> repo root
-    for sibling_name in ("ddc_toolkit", "ddc-toolkit", "DDC_Toolkit"):
-        candidate = this_project.parent / sibling_name / "converters" / "bin"
-        if candidate.is_dir():
-            return candidate
+    cwd = Path.cwd().resolve()
+    sibling_names = ("ddc_toolkit", "ddc-toolkit", "DDC_Toolkit")
+    anchors: tuple[Path, ...] = (this_project.parent, cwd.parent, cwd)
+    seen: set[Path] = set()
+    for anchor in anchors:
+        if anchor in seen:
+            continue
+        seen.add(anchor)
+        for sibling_name in sibling_names:
+            candidate = anchor / sibling_name / "converters" / "bin"
+            if candidate.is_dir():
+                return candidate
+
+    # 5. Final fallback: the BIM auto-installer's shared drop-dir.
+    shared = Path.home() / ".openestimator" / "converters"
+    if shared.is_dir():
+        return shared
 
     return None
 
