@@ -299,35 +299,38 @@
     '.oce-mini-card:hover .oce-mini-card__title{color:var(--accent,#0284c7);}',
     /* ----- Right-rail behaviour on very wide screens ----- */
     /* Article body uses max-width:720px centred inside a 1180px wrap. */
-    /* From 1400px+ there is ~310px of margin on each side; turn the   */
-    /* widget into a 2-up sticky rail anchored to the right margin.    */
-    '@media (min-width:1400px){',
-    '  .oce-more-rail{',
+    /* The widest article shell (concept paper) uses ~840px content    */
+    /* centred at ~1100px. We need the rail to clear that AND leave    */
+    /* breathing room, so we kick in at 1500px+ where the gap from a   */
+    /* 1180px wrap to the viewport edge is ~160px each side.           */
+    '@media (min-width:1500px){',
+    '  .oce-more-rail--rail{',
     '    max-width:none;',
     '    padding:0;',
     '    margin:0;',
     '    position:absolute;',
     '    top:var(--oce-rail-top,640px);',
-    '    right:max(24px,calc(50% - 600px));',
-    '    width:300px;',
+    '    height:var(--oce-rail-height,2400px);',
+    '    right:max(24px,calc(50% - 720px));',
+    '    width:280px;',
     '    pointer-events:none;',
     '  }',
-    '  .oce-more-rail__inner{',
+    '  .oce-more-rail--rail .oce-more-rail__inner{',
     '    pointer-events:auto;',
     '    position:sticky;top:96px;',
     '  }',
-    '  .oce-more-rail__head{',
+    '  .oce-more-rail--rail .oce-more-rail__head{',
     '    padding-bottom:14px;margin-bottom:16px;',
     '  }',
-    '  .oce-more-rail__title{font-size:16px;}',
-    '  .oce-more-rail__all{font-size:13px;}',
-    '  .oce-more-rail__grid{grid-template-columns:1fr;gap:14px;}',
-    '  .oce-mini-card__media{aspect-ratio:16/9;}',
-    '  .oce-mini-card__title{font-size:13.5px;-webkit-line-clamp:3;}',
-    '  /* Below-the-fold band on these screens stays as fallback only */',
-    '  .oce-more-rail--inline{display:none;}',
+    '  .oce-more-rail--rail .oce-more-rail__title{font-size:16px;}',
+    '  .oce-more-rail--rail .oce-more-rail__all{font-size:13px;}',
+    '  .oce-more-rail--rail .oce-more-rail__grid{grid-template-columns:1fr;gap:14px;}',
+    '  .oce-more-rail--rail .oce-mini-card__media{aspect-ratio:16/9;}',
+    '  .oce-more-rail--rail .oce-mini-card__title{font-size:13.5px;-webkit-line-clamp:3;}',
+    '  /* The below-article inline band remains as a closing wrap-up  */',
+    '  /* even on rail screens — feels like a magazine end-strip.     */',
     '}',
-    '@media (max-width:1399px){',
+    '@media (max-width:1499px){',
     '  .oce-more-rail--rail{display:none;}',
     '}'
   ].join('\n');
@@ -430,17 +433,42 @@
     railNode = railNode.firstChild;
     document.body.appendChild(railNode);
 
-    // Compute a sensible top offset so the rail begins around where the
-    // article body starts (after hero/cover).
-    try {
-      var anchor = document.querySelector('article.article, .body, .content') ||
-                   document.querySelector('.article-hero');
-      if (anchor) {
-        var rect = anchor.getBoundingClientRect();
-        var top = Math.max(540, rect.top + window.scrollY);
-        railNode.style.setProperty('--oce-rail-top', top + 'px');
-      }
-    } catch (e) { /* non-fatal */ }
+    // Compute (a) where the rail starts (just after the hero/cover) and
+    // (b) where it ends — so the sticky inner can stay in view for the
+    // whole reading scroll, not just the first viewport-height.
+    function recomputeRail() {
+      try {
+        var anchor =
+          document.querySelector('article.article, .body, .content') ||
+          document.querySelector('.article-hero');
+        var endAnchor =
+          document.querySelector('.oce-more-rail--inline') ||
+          document.querySelector('footer.pagefoot, .footer-band') ||
+          document.body;
+        if (anchor) {
+          var rect = anchor.getBoundingClientRect();
+          var top = Math.max(540, rect.top + window.scrollY);
+          railNode.style.setProperty('--oce-rail-top', top + 'px');
+        }
+        if (endAnchor) {
+          var endRect = endAnchor.getBoundingClientRect();
+          var endY = endRect.top + window.scrollY - 40;
+          var topNum = parseFloat(
+            railNode.style.getPropertyValue('--oce-rail-top') || '540'
+          );
+          var height = Math.max(800, endY - topNum);
+          railNode.style.setProperty('--oce-rail-height', height + 'px');
+        }
+      } catch (e) { /* non-fatal */ }
+    }
+    recomputeRail();
+    // Recompute once after images/fonts settle in case heights change.
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(recomputeRail, { timeout: 1200 });
+    } else {
+      setTimeout(recomputeRail, 700);
+    }
+    window.addEventListener('resize', recomputeRail);
   }
 
   if (document.readyState === 'loading') {
