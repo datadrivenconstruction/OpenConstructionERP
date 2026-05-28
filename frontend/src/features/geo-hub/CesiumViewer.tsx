@@ -1128,6 +1128,28 @@ export function CesiumViewer({
           click them. Constraints kept narrow so we never collide with
           unrelated app chrome. */}
       <style>{`
+        /* Cesium's widgets.css is intentionally NOT bundled (see note above)
+           — but without it, .cesium-viewer / .cesium-widget / canvas all
+           fall back to browser defaults (300x150 canvas), so the globe
+           renders into a tiny postage-stamp in the top-left corner.
+           These five rules are the minimum from widgets.css needed for
+           the canvas to fill its parent. */
+        .cesium-viewer,
+        .cesium-viewer-cesiumWidgetContainer,
+        .cesium-widget {
+          display: block;
+          position: relative;
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+        }
+        .cesium-widget canvas {
+          width: 100%;
+          height: 100%;
+          touch-action: none;
+        }
         .cesium-viewer .cesium-widget-credits {
           color: rgb(226 232 240 / 0.85);
           font-size: 10px;

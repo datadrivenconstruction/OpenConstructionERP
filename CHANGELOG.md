@@ -5,6 +5,70 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.4.1] - 2026-05-28
+
+**Hotfix wave.** Bundles the 20-wave deep audit landings (W1–W20 across
+every business module) plus a critical /geo render fix.
+
+### Fixed — /geo (P0 user-reported)
+- **Cesium canvas collapsed to 300×150** on the global Geo Hub view — the
+  CesiumViewer.tsx wrapper intentionally skips Cesium's `widgets.css`
+  (to suppress unstyled toolbar pills) but the same stylesheet is also
+  the only place `.cesium-viewer`, `.cesium-widget`, and the canvas get
+  `width:100%; height:100%`. Without it the canvas fell back to browser
+  default and the globe rendered into a postage-stamp in the corner of
+  the main area. Fixed by inlining the four minimum rules into the
+  scoped `<style>` block.
+
+### Fixed — 20-wave deep audit (security + correctness across every module)
+
+**Security (HIGH-severity):**
+- **W3 Costs/Vector**: LanceDB filter SQL injection guard
+- **W7 PropDev**: double-reservation race (conditional UPDATE)
+- **W8 CRM**: GDPR `forget_lead` PII scrub extended to source + activity
+- **W9 HSE**: JSA FSM IDOR (foreign-project state transitions)
+- **W11 Auth**: audit-log gap on login/reset/role-change (invisible to
+  forensics); reset-token single-use guard
+- **W12 Reporting**: HTTP header injection via `invoice_number` /
+  Content-Disposition (RFC 6266 quoting)
+- **W16 fieldreports**: approve endpoint had no `verify_project_access`
+- **W17 Geo Hub**: raster-overlay DELETE used `write` perm instead of
+  `delete` (editor could nuke manager-owned overlays)
+- **W19 Punchlist**: photo delete IDOR; verify/close perm was dead code
+
+**Correctness (silent miscalc):**
+- **W10 Schedule**: CPM critical-path used `<0` instead of `<=0` for
+  total-float (missed zero-float activities)
+- **W18 Carbon**: embodied-CO₂ auto-fill double-normalised the unit
+  (silently wrong figures for cross-unit factors)
+- **W20 Procurement**: EUR hardcoded in `PurchaseOrder.currency_code`
+  ORM default (task #217 violation)
+- **W20 Finance**: `budget.actual` was `str` assigned to `MoneyType()`
+  column (PostgreSQL coercion bug)
+- **W20 Finance**: budget Excel export used `float()` → IEEE-754
+  rounding on large values
+- **W6 Validation**: 2 rule classes existed but were never registered
+  (E-VAL-008 + BOQUnitSystem + ClassificationNudge)
+
+**Race conditions / FSM hardening:**
+- **W2 Tendering**: token_hash leak, award-delete FSM revert, concurrent
+  submit race
+- **W9 Submittals**: CAS race on parallel approvals
+- **W15 Variations**: VR→VO conversion race (one VR creating two VOs)
+- **W17 Notifications**: webhook circuit-breaker (skip after 10 fails,
+  auto-deactivate after 50)
+
+**IDOR / RBAC:**
+- **W1 BOQ**: three IDOR/precision gaps
+- **W14 Files/Markups**: scale-list IDOR, scheduler re-registration
+- **W15 ChangeOrders**: missing `RequirePermission` on GET-detail
+
+**UX / perf:**
+- **W4 Takeoff**: inline-dict PDF encryption detection, dark-mode canvas
+- **W5 BIM**: canvas ARIA labels, dark-mode, overriddenMeshes leak
+- **W13 Dashboards**: missing POST /rollup/ handler (5 endpoint tests
+  silently 405-broken); unbounded activity + validation report fetches
+
 ## [5.4.0] - 2026-05-27
 
 **Quality wave on the v5.3.0 base.** Six focused commits — no schema
