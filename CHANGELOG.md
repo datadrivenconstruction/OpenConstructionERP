@@ -5,6 +5,28 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.4.3] - 2026-05-28
+
+**/geo navigation + autocomplete UX.** Browser audit found two bugs the
+postage-stamp fix in v5.4.1 didn't catch: clicking the `Project` or
+`Development` mode tab when no context was active navigated to
+`/projects` or `/property-dev` — dumping the user out of /geo into a
+slow-loading list page. Address autocomplete also felt broken because
+the dropdown stayed closed while Nominatim's 1 req/s upstream took
+5–10 s on a cold cache.
+
+### Fixed
+- **GeoModePicker soft-disabled tabs** — clicking a tab without context
+  now opens an in-page picker dialog (project/development list with
+  search) instead of navigating away. Picking a row navigates to the
+  appropriate scoped /geo route. ESC + backdrop click close the dialog.
+  Keyboard nav, ARIA roles, and the dim "?" affordance preserved.
+- **AddressAutocomplete perceived empty** — the dropdown now opens
+  immediately when a fetch begins and renders a `Searching…` row with
+  spinner while suggestions are empty + `isLoading` is true. Users see
+  progress instead of an apparently-broken input during the 5–10 s
+  Nominatim round-trip on cold cache.
+
 ## [5.4.2] - 2026-05-28
 
 **Converter UX simplification.** Fresh-install pain reported by Artem on

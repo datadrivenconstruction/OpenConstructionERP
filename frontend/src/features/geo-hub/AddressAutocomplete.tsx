@@ -138,6 +138,10 @@ export function AddressAutocomplete({
       lastQueryRef.current = trimmed;
       setIsLoading(true);
       setErrorKind('none');
+      // Open the dropdown immediately so the user sees a "Searching…"
+      // row while Nominatim's 1 req/s upstream cooks (cold cache can
+      // take 5–10 s). Otherwise the input looks broken.
+      setIsOpen(true);
       try {
         const res = await geocodeSuggest(trimmed, {
           limit: maxResults,
@@ -288,7 +292,7 @@ export function AddressAutocomplete({
     isOpen &&
     (suggestions.length > 0 ||
       errorKind !== 'none' ||
-      (value.trim().length >= 3 && !isLoading));
+      value.trim().length >= 3);
 
   const renderErrorRow = () => {
     if (errorKind === 'disabled') {
@@ -415,6 +419,22 @@ export function AddressAutocomplete({
           data-testid="geo-address-autocomplete-list"
         >
           {renderErrorRow()}
+          {suggestions.length === 0 &&
+            errorKind === 'none' &&
+            value.trim().length >= 3 &&
+            isLoading && (
+              <li
+                className="flex items-center gap-2 px-3 py-2 text-xs text-content-tertiary"
+                data-testid="geo-address-autocomplete-loading"
+              >
+                <Loader2 size={13} className="animate-spin" aria-hidden />
+                <span>
+                  {t('geo_hub.autocomplete.searching', {
+                    defaultValue: 'Searching…',
+                  })}
+                </span>
+              </li>
+            )}
           {suggestions.length === 0 &&
             errorKind === 'none' &&
             value.trim().length >= 3 &&
