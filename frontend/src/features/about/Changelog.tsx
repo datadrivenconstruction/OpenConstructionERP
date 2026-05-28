@@ -30,6 +30,7 @@ interface ChangelogEntry {
 // out-of-order entries here still display correctly.
 const CHANGELOG: ChangelogEntry[] = [
   // ── v5.x — second stable major ───────────────────────────────────────────
+  { version: '5.5.0', date: '2026-05-28', tag: 'NEW',       summary: 'Stability wave (last stable 5.x) — 8 user-reported bug fixes (/takeoff PDF worker + 403, /dwg-takeoff load, BIM walk + Section Box, /bim/federations 3D, CAD/BIM Data Explorer RVT, /projects maps), session-reset fix (JWT persistence), JA locale to 98.5% (1,627 keys), i18n high-impact pass on 26 locales, news related-articles widget on 15 article pages, PR #164 team-member access merged, 9/9 PASS browser verification' },
   { version: '5.4.3', date: '2026-05-28', tag: 'FIX',       summary: '/geo mode-picker no longer dumps user out to /projects — soft-disabled tabs open in-page picker dialog. Address autocomplete shows "Searching…" row while Nominatim resolves (was perceived empty during 5–10s cold cache)' },
   { version: '5.4.2', date: '2026-05-28', tag: 'FIX',       summary: 'Converter UX simplification — inline 1-click DWG install on /dwg-takeoff conversion failure, BIM out-of-date overlay shows clean human message (raw stderr hidden behind "Show technical details" disclosure)' },
   { version: '5.4.1', date: '2026-05-28', tag: 'SECURITY',  summary: '20-wave deep audit landings: 13 security fixes (3+ HIGH), 5 silent-miscalc bugs, 8 race/FSM hardenings, GDPR PII scrub extension, Cesium /geo canvas-collapse fix (postage-stamp regression)' },

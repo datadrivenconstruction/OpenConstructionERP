@@ -5,6 +5,140 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.5.0] - 2026-05-28
+
+**Stability wave — last stable 5.x cut.** Eight user-reported runtime
+bugs found in a single morning of fresh-install testing, plus the
+underlying "session reset on backend restart" issue, plus a deep i18n
+pass that brought Japanese to 98.5% coverage. Includes six merged
+contributor PRs (#140, #141, #151, #158, #163, #164 — team-member
+project access, Mourdi59), the related-articles widget across all
+news article pages, and the 2026-05-28 9/9-PASS browser verification
+sweep with 22 screenshots committed under `docs/qa/`.
+
+### Fixed
+- **`/takeoff` "Failed to load PDF — Setting up fake worker failed"**
+  on cold loads — added `.mjs` to the PWA precache glob so the PDF.js
+  worker is cached with its real Content-Type, and made
+  `request.destination === 'worker'` bypass the CacheFirst runtime
+  rule so future Workers (PDF.js, Cesium, ML pipelines) never get
+  intermediated by the service worker.
+- **`/takeoff` "Failed to fetch PDF (403)"** when downloading an
+  uploaded document — the path-traversal guard whitelisted only the
+  brand-namespace `~/.openestimator` while the CLI defaults to
+  `~/.openestimate`; now both spellings and `OE_DATA_DIR` /
+  `DATA_DIR` env vars are honored.
+- **Session reset on backend restart ("kicked back to desktop")** —
+  dev-mode `JWT_SECRET` was rotated every boot when the bundled
+  default was in use, invalidating every active token. The secret is
+  now persisted to `~/.openestimate/.jwt-secret` (chmod 600 on POSIX)
+  and re-loaded on subsequent boots. Sessions survive `Ctrl+C`+relaunch.
+  Setting `JWT_SECRET` env var still takes precedence.
+- **CAD/BIM Data Explorer "CAD conversion failed for .rvt"** — the
+  `convert_cad_to_excel` path built CLI args as `<exe> <input>
+  <output> standard -no-collada` unconditionally. DDC v18+ rejects
+  those positional tokens with `exit 15`. Routed through the
+  `build_ddc_args` + `detect_converter_capabilities` builder that
+  `ifc_processor` already uses, so v17 keeps its positional shape and
+  v18 gets `-x out.xlsx --no-dae -m standard` automatically.
+- **`/dwg-takeoff` drawings don't load + misleading "upload DXF"
+  error** — wheel-install converter discovery now scans the launch
+  CWD's parent in addition to the source-repo parent (closes the
+  wheel-install gap), and the missing-converter error message points
+  at the one-click install pill + GitHub fallback instead of just
+  "use DXF". DWG conversion now goes through the same v18-aware
+  `build_ddc_args` so future DwgExporter v18 works without further
+  patching.
+- **`/bim/:id` 3D walk mode froze the viewport** — `WalkMode` /
+  `PointerLockControls` mutated the camera every frame but never
+  signalled the on-demand `SceneManager._needsRender` (which was
+  previously only set by the now-disabled `OrbitControls`). Added an
+  optional `onChange` callback fired from `tick()` on any frame the
+  camera moved or pointer-lock was active; wired
+  `BIMViewer.tsx` → `scene.requestRender()`.
+- **BIM Section Box buttons ("По выделению / По всей модели /
+  Сбросить") did nothing** — `applyToScene()` set
+  `material.clippingPlanes` + `localClippingEnabled=true` but no
+  dirty signal reached the on-demand renderer. Same `onChange`
+  pattern as walk-mode now fires from `enable()`, `disable()`, and
+  `setBoundsToBox()`.
+- **`/bim/federations` 3D tab showed "Geometry fetch failed [object
+  Object]"** — the embedded `FederatedViewer` 404'd on every member
+  model that hadn't been re-converted. Replaced the broken viewport
+  with a list of member-model link cards that navigate to
+  `/bim/:modelId` (where the per-model viewer works) and HEAD-probe
+  each model's geometry so 404 rows are greyed out as "Geometry not
+  available" instead of leading the user into a broken page.
+- **`/projects` lost the per-card map** — `ProjectsPage` gated the
+  map render on `mapEnabled && project.address`; demo projects
+  created before the v3.2.0 seed update had `address IS NULL`, so
+  the card silently dropped its map. Removed the gate (ProjectMap
+  itself handles the missing-coords case with a friendly
+  placeholder) and added alembic `v3145_demo_project_addresses` to
+  backfill the five canonical demo addresses on existing installs.
+
+### Added
+- **i18n deep coverage pass across 26 locales** — 26 high-impact
+  commits filling nav phase labels, common verbs, sidebar admin,
+  login brand, tour + WhatsNew chrome. Locale-by-locale gap analysis
+  saved to `docs/i18n/COVERAGE_2026_05_28.md`.
+- **Japanese (JA) locale to 98.5% coverage** — 1,627 keys translated
+  across boq, propdev, costs, match_elements, accommodation, bim,
+  finance, schedule, users and 20+ other namespaces using
+  construction-industry terminology (積算, 単価, 明細, 工事, 物件).
+  111 keys intentionally kept in Latin (brand codes, EVM acronyms,
+  industry-exchange identifiers, file paths).
+- **`/geo` — Photon (Komoot, Apache 2.0) as primary geocoder** with
+  Nominatim (ODbL) as fallback. Photon is faster, has no per-IP
+  rate limit, and matches our open-data + self-hostable
+  philosophy.
+- **`/geo` viewer — collapsible "Open Data" license pill** that lists
+  every upstream source (Cesium Apache 2.0, OpenStreetMap ODbL,
+  Nominatim ODbL, Photon Apache 2.0) with direct links so reviewers
+  can verify the stack is fully open without reading the source.
+- **`/geo` + `/projects` — one-click 2D/3D toggle** wired into both
+  the Geo Hub viewer and every project card's map preview.
+- **News pages: "More from the OpenConstructionERP blog" widget** —
+  inline closing strip on every article + sticky right-rail at
+  `min-width:1500px`, vanilla JS, no dependencies, no tracking. 15
+  article pages covered.
+- **Browser verification harness** — `docs/qa/verification-2026-05-28/`
+  ships the Playwright spec, before/after screenshots for nine
+  fixes, and a Markdown REPORT showing 9 PASS / 0 FAIL against a
+  source-built backend on port 8001.
+
+### Changed
+- **Team-member project access (PR #164, Mourdi59)** — non-owner
+  team members now reach project + BOQ endpoints through
+  `TeamMembership` rows alongside owner checks. New
+  `backend/app/modules/teams/access.py` provides the canonical
+  `is_project_member()` + `member_project_ids_subquery()` helpers,
+  replacing six inline copies. Access denials return 404 (not 403)
+  to avoid leaking UUID existence; malformed UUIDs are wrapped in
+  try/except returning 404 instead of 500. Five integration tests
+  cover the access matrix.
+- **PWA service worker** — `globPatterns: '**/*.{js,mjs,css,html,svg,
+  woff2,ico}'` (`.mjs` added) so future ESM workers are precached
+  with correct headers without needing per-asset Workbox rules.
+
+### Dependencies
+- `chore(deps)`: tmp 0.2.5 → 0.2.6 (#163, dependabot)
+- `chore(deps)`: 8 minor/patch frontend bumps (react-query,
+  date-fns, three, postcss, …) (#158, dependabot)
+- `chore(deps)`: openssl 0.10.79 → 0.10.80 in desktop/src-tauri
+  (#151, dependabot)
+- `chore(deps)`: pandas upper bound `<3` → `<4` (#141, dependabot)
+- `ci`: actions/dependency-review-action 4 → 5 (#140, dependabot)
+
+### Skipped (separate migration wave)
+- react-router-dom 6 → 7 (#145), react-i18next 15 → 17 (#146),
+  eslint 9 → 10 (#144), @vitejs/plugin-react 4 → 6 (#143) — each is
+  a meaningful API change that deserves its own audit + test cycle.
+- PR #161 (rjohny55) — baseline is v4.12; unresolvable conflicts in
+  `ai/router.py` + `catalog/router.py` against our v5.4 state.
+  Useful pieces (Kimi provider, retry session, password strength)
+  worth extracting into a fresh PR after rebase.
+
 ## [5.4.3] - 2026-05-28
 
 **/geo navigation + autocomplete UX.** Browser audit found two bugs the
