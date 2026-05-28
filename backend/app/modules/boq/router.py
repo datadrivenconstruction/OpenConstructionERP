@@ -191,9 +191,11 @@ async def _verify_boq_owner(
     user_id: str,
     payload: dict | None = None,
 ) -> None:
-    """‌⁠‍Load a BOQ, then its project, and verify ownership.
+    """‌⁠‍Load a BOQ, then its project, and verify the user has access.
 
-    Admins bypass the check. Raises 403 if the user is not the project owner.
+    Admins bypass the check. Grants access to the project owner and to
+    any user who is a team member of the project (added via add_project_member).
+    Raises 403 if none of those conditions are met.
     """
     if payload and payload.get("role") == "admin":
         return
@@ -207,14 +209,21 @@ async def _verify_boq_owner(
     project_repo = ProjectRepository(session)
     project = await project_repo.get_by_id(boq.project_id)
     if project is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale())
-        )
-    if str(project.owner_id) != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have access to this BOQ",
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale()))
+    if str(project.owner_id) == user_id:
+        return
+    from app.modules.teams.access import is_project_member
+
+    try:
+        uid = uuid.UUID(str(user_id))
+    except (ValueError, TypeError):
+        uid = None
+    if uid is not None and await is_project_member(session, boq.project_id, uid):
+        return
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="You do not have access to this BOQ",
+    )
 
 
 async def _verify_project_owner_for_boq(
@@ -223,8 +232,9 @@ async def _verify_project_owner_for_boq(
     user_id: str,
     payload: dict | None = None,
 ) -> None:
-    """‌⁠‍Verify the current user owns the given project. Admins bypass.
+    """‌⁠‍Verify the current user has access to the given project.
 
+    Grants access to: admins, the project owner, and team members.
     Treats archived (soft-deleted) projects as 404 — no operations on
     archived projects are permitted via this gateway.
     """
@@ -239,11 +249,20 @@ async def _verify_project_owner_for_boq(
         )
     if is_admin:
         return
-    if str(project.owner_id) != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have access to this project",
-        )
+    if str(project.owner_id) == user_id:
+        return
+    from app.modules.teams.access import is_project_member
+
+    try:
+        uid = uuid.UUID(str(user_id))
+    except (ValueError, TypeError):
+        uid = None
+    if uid is not None and await is_project_member(session, project_id, uid):
+        return
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="You do not have access to this project",
+    )
 
 
 async def _log_activity(
@@ -5254,7 +5273,7 @@ async def import_boq_gaeb(
 
 async def _persist_imported_boq(
     boq_id: uuid.UUID,
-    imported: "ImportedBOQ",
+    imported: "ImportedBOQ",  # noqa: F821 — imported inside function body at call site
     *,
     file_name: str,
     service: BOQService,

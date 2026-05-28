@@ -413,12 +413,16 @@ async def verify_project_access(
     user_id: str,
     session: AsyncSession,
 ) -> None:
-    """Verify user owns or has admin access to the project.
+    """Verify user owns or has admin / team-member access to the project.
 
     Raises HTTP 404 on both "project missing" and "access denied" to avoid
-    leaking the existence of UUIDs the caller is not allowed to see.
+    leaking the existence of UUIDs the caller is not allowed to see (IDOR
+    defence — same policy as all downstream modules that call this helper).
+    Team membership (added via add_project_member) grants the same read/write
+    access as ownership within the caller's RBAC role.
     """
     from app.modules.projects.repository import ProjectRepository
+    from app.modules.teams.access import is_project_member
     from app.modules.users.repository import UserRepository
 
     proj_repo = ProjectRepository(session)
@@ -438,11 +442,25 @@ async def verify_project_access(
     except Exception:
         logger.exception("Admin-role lookup failed during project access check")
 
-    if str(getattr(project, "owner_id", "")) != str(user_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found",
-        )
+    # Owner has full access.
+    if str(getattr(project, "owner_id", "")) == str(user_id):
+        return
+
+    # Team-member check — any TeamMembership row for this project grants access.
+    try:
+        if await is_project_member(session, project_id, _uuid.UUID(str(user_id))):
+            return
+    except (ValueError, TypeError):
+        pass  # malformed user_id — fall through to 404
+    except Exception:
+        logger.exception("Team-membership lookup failed during project access check")
+
+    # 404 (not 403) — keeps "resource missing" and "access denied"
+    # indistinguishable, preventing UUID-existence oracle attacks.
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Project not found",
+    )
 
 
 # ── Locale resolution (per-request, for HTTPException i18n) ────────────────

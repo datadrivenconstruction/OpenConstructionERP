@@ -16,6 +16,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep, SettingsDep
 from app.modules.projects import profile_service
@@ -107,6 +108,7 @@ async def _verify_project_owner(
 
     Admins (role=admin in JWT payload) bypass the ownership check.
     Returns the project object on success, raises 403 if not owner.
+    Used for write operations (update, delete, add/remove member, etc.).
     """
     project = await service.get_project(project_id)
     # Admin bypass
@@ -118,6 +120,50 @@ async def _verify_project_owner(
             detail="You do not have access to this project",
         )
     return project
+
+
+async def _verify_project_access(
+    service: ProjectService,
+    project_id: uuid.UUID,
+    user_id: str,
+    session: AsyncSession,
+    payload: dict | None = None,
+) -> object:
+    """‌⁠‍Load a project and verify the current user has read access.
+
+    Grants access to: admins, the project owner, and any team member
+    added via add_project_member (i.e. a TeamMembership row exists).
+    Used for read operations (get, dashboard, list members, etc.).
+
+    Raises 404 (not 403) on denial to keep "missing" and "denied"
+    indistinguishable — same IDOR policy as verify_project_access.
+    """
+    from app.modules.teams.access import is_project_member
+
+    project = await service.get_project(project_id)
+
+    # Admin bypass
+    if payload and payload.get("role") == "admin":
+        return project
+
+    # Owner has full access
+    if str(project.owner_id) == user_id:
+        return project
+
+    # Team-member check — any membership row for this project grants read access.
+    # Wrap UUID conversion so a malformed user_id yields 404, not 500.
+    try:
+        uid = uuid.UUID(str(user_id))
+    except (ValueError, TypeError):
+        uid = None
+
+    if uid is not None and await is_project_member(session, project_id, uid):
+        return project
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Project not found",
+    )
 
 
 # ── Create ────────────────────────────────────────────────────────────────
@@ -196,10 +242,11 @@ async def get_project(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
     payload: CurrentUserPayload,
+    session: SessionDep,
     service: ProjectService = Depends(_get_service),
 ) -> ProjectResponse:
-    """Get project by ID. Verifies ownership."""
-    project = await _verify_project_owner(service, project_id, user_id, payload)
+    """Get project by ID. Accessible by owner, admin, or project team member."""
+    project = await _verify_project_access(service, project_id, user_id, session, payload)
     return ProjectResponse.model_validate(project)
 
 
@@ -372,8 +419,8 @@ async def list_project_members_endpoint(
     session: SessionDep,
     service: ProjectService = Depends(_get_service),
 ) -> list[ProjectMemberResponse]:
-    """List members of a project. Owner / admin only — 403 otherwise."""
-    await _verify_project_owner(service, project_id, user_id, payload)
+    """List members of a project. Accessible by owner, admin, or any team member."""
+    await _verify_project_access(service, project_id, user_id, session, payload)
     from app.modules.projects.member_service import list_project_members
 
     return await list_project_members(session, project_id)
@@ -617,8 +664,8 @@ async def project_dashboard(
     from sqlalchemy import Float, func, literal_column, select, union_all
     from sqlalchemy.sql.expression import cast
 
-    # Verify ownership / admin access
-    project = await _verify_project_owner(service, project_id, user_id, payload)
+    # Verify read access — owner, admin, or team member
+    project = await _verify_project_access(service, project_id, user_id, session, payload)
 
     # ── Helper: safe query wrapper ──────────────────────────────
     async def _safe(coro, default=None):  # noqa: ANN001, ANN202
@@ -1400,16 +1447,25 @@ async def dashboard_cards(
 
     from app.modules.projects.models import Project
 
-    # Fetch all projects (admin sees all, regular user sees own)
+    # Fetch all projects (admin sees all, regular user sees owned + member projects)
     is_admin = payload.get("role") == "admin"
     if is_admin:
         proj_result = await session.execute(
             select(Project).where(Project.status != "archived").order_by(Project.updated_at.desc())
         )
     else:
+        from app.modules.teams.access import member_project_ids_subquery
+
+        try:
+            uid = uuid.UUID(user_id)
+        except (ValueError, TypeError):
+            return []
         proj_result = await session.execute(
             select(Project)
-            .where(Project.owner_id == uuid.UUID(user_id), Project.status != "archived")
+            .where(
+                (Project.owner_id == uid) | (Project.id.in_(member_project_ids_subquery(uid))),
+                Project.status != "archived",
+            )
             .order_by(Project.updated_at.desc())
         )
     all_projects = proj_result.scalars().all()
@@ -1626,10 +1682,18 @@ async def analytics_overview(
 
     is_admin = bool(payload and payload.get("role") == "admin")
 
-    # Per-project summary — owner-scoped for non-admins
+    # Per-project summary — owner + team-member projects for non-admins
     proj_stmt = select(Project).order_by(Project.name)
     if not is_admin:
-        proj_stmt = proj_stmt.where(Project.owner_id == _user_id)
+        from app.modules.teams.access import member_project_ids_subquery
+
+        try:
+            _uid = uuid.UUID(_user_id)
+        except (ValueError, TypeError):
+            return {}
+        proj_stmt = proj_stmt.where(
+            (Project.owner_id == _uid) | (Project.id.in_(member_project_ids_subquery(_uid)))
+        )
     proj_result = await session.execute(proj_stmt)
     all_projects = list(proj_result.scalars().all())
 
