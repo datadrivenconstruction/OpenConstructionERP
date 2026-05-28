@@ -954,7 +954,13 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
   // Render the backend-supplied actionable message when present so users
   // see *why* their model didn't convert (DDC missing, RVT version
   // mismatch, etc.) instead of a generic "Error" placeholder.
-  const description = !isProcessing && backendMessage ? backendMessage : c.desc;
+  //
+  // For ``converter_outdated``, the backend message helpfully includes a
+  // stderr excerpt ("The following argument was not expected: …") so the
+  // user can paste it into a support ticket — but it's noise for the 95%
+  // case where the user just wants to click Reinstall. Below we replace
+  // it with a clean human sentence and surface the raw message via
+  // disclosure; see `cleanDescription` after `isOutdatedConverter`.
 
   const handleRetry = async () => {
     if (isRetrying) return;
@@ -976,6 +982,23 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
   // *why* they should reinstall instead of the generic guidance.
   const isOutdatedConverter =
     !isProcessing && errorCode === 'converter_outdated' && !!converterId;
+
+  // Clean human-friendly description replaces the raw backend stderr for
+  // the "out of date" case (see comment above near `description`).
+  const cleanDescription =
+    isOutdatedConverter
+      ? t('bim.overlay_converter_outdated_clean', {
+          defaultValue:
+            "The installed {{format}} converter is older than this build expects. Click 'Reinstall converter' below — we'll pull the latest version and retry your upload automatically.",
+          format: fmt || 'BIM',
+        })
+      : null;
+  const description =
+    cleanDescription
+    ?? (!isProcessing && backendMessage ? backendMessage : c.desc);
+  const technicalDetails =
+    cleanDescription && backendMessage ? backendMessage : null;
+
   const showInstallButton =
     !isProcessing
     && (errorCode === 'ddc_not_found' || isOutdatedConverter)
@@ -1012,13 +1035,15 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
         <div className={`mx-auto w-20 h-20 rounded-2xl ${c.bg} border flex items-center justify-center mb-5`}>{c.icon}</div>
         <h2 className="text-lg font-bold text-content-primary mb-2">{headlineTitle}</h2>
         <p className="text-sm text-content-secondary mb-2 whitespace-pre-line">{description}</p>
-        {isOutdatedConverter && (
-          <p className="text-[11px] text-amber-700 dark:text-amber-300 mb-3 px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 inline-block">
-            {t('bim.overlay_converter_outdated_hint', {
-              defaultValue:
-                'Reinstall fetches the latest converter from GitHub and retries your upload automatically.',
-            })}
-          </p>
+        {technicalDetails && (
+          <details className="text-left mb-3 mx-auto max-w-sm">
+            <summary className="text-[11px] text-content-tertiary cursor-pointer hover:text-content-secondary">
+              {t('bim.overlay_technical_details', { defaultValue: 'Show technical details' })}
+            </summary>
+            <pre className="mt-2 p-2 text-[10px] bg-surface-secondary border border-border-light rounded-md text-content-tertiary whitespace-pre-wrap font-mono">
+              {technicalDetails}
+            </pre>
+          </details>
         )}
         <p className="text-[11px] text-content-quaternary mb-6">{model.name}{model.file_size ? ` · ${formatFileSize(model.file_size)}` : ''}</p>
 

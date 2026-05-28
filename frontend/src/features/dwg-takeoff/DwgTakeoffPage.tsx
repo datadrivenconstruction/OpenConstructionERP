@@ -5288,6 +5288,122 @@ function ConversionProgressCard({
   );
 }
 
+/** Sub-component: one-click DWG converter installer.
+ *
+ * Mounted by ConversionErrorCard when the backend signals "converter
+ * missing" via the stable substring `DDC DwgExporter`. Calls the same
+ * `POST /v1/takeoff/converters/dwg/install/` that /settings → Converters
+ * uses, with a live progress bar (downloads ~150 MB of Qt6 DLLs on
+ * Windows; Linux is unsupported and the response carries the apt-get
+ * commands the user has to run themselves).
+ *
+ * On successful install, the file the user already uploaded is
+ * pre-processed via `onInstalled` (delete-and-reupload, matching the
+ * existing Retry semantics — backend has no re-convert endpoint).
+ */
+function InstallDwgConverterCTA({
+  onInstalled,
+}: {
+  onInstalled?: () => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const [unsupportedMessage, setUnsupportedMessage] = useState<string | null>(null);
+
+  const installMutation = useMutation({
+    mutationFn: () => installBIMConverter('dwg'),
+    onSuccess: (result) => {
+      if (result.installed) {
+        addToast({
+          type: 'success',
+          title: t('dwg_takeoff.conv_install_ok_title', {
+            defaultValue: 'DWG converter installed',
+          }),
+          message: t('dwg_takeoff.conv_install_ok_message', {
+            defaultValue: 'Re-uploading your drawing now.',
+          }),
+        });
+        onInstalled?.();
+      } else if (result.platform_unsupported) {
+        setUnsupportedMessage(
+          result.message ||
+            t('dwg_takeoff.conv_install_unsupported', {
+              defaultValue:
+                'Automated install is only available on Windows. On Linux, install the DDC DwgExporter manually.',
+            }),
+        );
+      } else {
+        addToast({
+          type: 'error',
+          title: t('dwg_takeoff.conv_install_failed', {
+            defaultValue: 'Install failed',
+          }),
+          message: result.message,
+        });
+      }
+    },
+    onError: (err: unknown) => {
+      addToast({
+        type: 'error',
+        title: t('dwg_takeoff.conv_install_failed', {
+          defaultValue: 'Install failed',
+        }),
+        message: err instanceof Error ? err.message : String(err),
+      });
+    },
+  });
+
+  if (unsupportedMessage) {
+    return (
+      <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-[11px] text-amber-700 dark:text-amber-200">
+        <p>{unsupportedMessage}</p>
+        <a
+          href="/settings?tab=converters"
+          className="mt-2 inline-flex items-center gap-1 text-amber-700 dark:text-amber-200 underline hover:no-underline"
+        >
+          {t('dwg_takeoff.conv_open_settings', {
+            defaultValue: 'Open Converters settings →',
+          })}
+        </a>
+      </div>
+    );
+  }
+
+  if (installMutation.isPending) {
+    return (
+      <div className="mt-4">
+        <ConverterInstallProgressBar
+          converterId="dwg"
+          installing={true}
+          sizeMb={150}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4">
+      <button
+        type="button"
+        onClick={() => installMutation.mutate()}
+        data-testid="dwg-install-converter-cta"
+        className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 text-white text-[11px] font-semibold px-3 py-1.5 hover:bg-emerald-700 transition-colors"
+      >
+        <Download size={12} />
+        {t('dwg_takeoff.conv_install_cta', {
+          defaultValue: 'Install DWG converter (1 click)',
+        })}
+      </button>
+      <p className="mt-1.5 text-[10px] text-content-tertiary">
+        {t('dwg_takeoff.conv_install_hint', {
+          defaultValue:
+            'Downloads ~150 MB to ~/.openestimator/converters/ — Windows only. Takes 30-90 seconds.',
+        })}
+      </p>
+    </div>
+  );
+}
+
 function ConversionErrorCard({
   drawingName,
   message,
@@ -5300,6 +5416,11 @@ function ConversionErrorCard({
   onDelete?: () => void;
 }) {
   const { t } = useTranslation();
+  // Stable marker emitted by `_handle_dwg` when `find_converter('dwg')`
+  // returns None. Keeps the install CTA scoped — generic conversion
+  // failures (wrong version, corrupt file) should still show the
+  // "Retry / Delete" UX without an Install button that wouldn't help.
+  const isMissingConverter = !!message && message.includes('DDC DwgExporter');
   return (
     <div className="flex flex-1 items-center justify-center p-6">
       <div
@@ -5314,18 +5435,28 @@ function ConversionErrorCard({
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-semibold text-content-primary leading-tight">
-              {t('dwg_takeoff.conv_error_title', { defaultValue: 'Conversion failed' })}
+              {isMissingConverter
+                ? t('dwg_takeoff.conv_missing_title', {
+                    defaultValue: 'DWG converter not installed',
+                  })
+                : t('dwg_takeoff.conv_error_title', { defaultValue: 'Conversion failed' })}
             </h2>
             <p className="text-xs text-content-tertiary mt-1 truncate" title={drawingName}>
               {drawingName}
             </p>
             <p className="text-xs text-content-secondary mt-3 leading-relaxed">
-              {message ||
-                t('dwg_takeoff.conv_error_default', {
-                  defaultValue:
-                    'The server could not parse this file. Try re-saving as a newer DWG/DXF version or upload a different file.',
-                })}
+              {isMissingConverter
+                ? t('dwg_takeoff.conv_missing_message', {
+                    defaultValue:
+                      'OpenConstructionERP needs the DDC DwgExporter to read DWG files. Install it once — works for every DWG you upload after.',
+                  })
+                : message ||
+                  t('dwg_takeoff.conv_error_default', {
+                    defaultValue:
+                      'The server could not parse this file. Try re-saving as a newer DWG/DXF version or upload a different file.',
+                  })}
             </p>
+            {isMissingConverter && <InstallDwgConverterCTA onInstalled={onRetry} />}
             {(onRetry || onDelete) && (
               <div className="mt-4 flex items-center gap-2">
                 {onRetry && (
@@ -5336,9 +5467,13 @@ function ConversionErrorCard({
                     className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue text-white text-[11px] font-semibold px-3 py-1.5 hover:bg-oe-blue-dark transition-colors"
                   >
                     <RotateCcw size={12} />
-                    {t('dwg_takeoff.conv_retry', {
-                      defaultValue: 'Retry — upload again',
-                    })}
+                    {isMissingConverter
+                      ? t('dwg_takeoff.conv_retry_after_install', {
+                          defaultValue: 'Re-upload after install',
+                        })
+                      : t('dwg_takeoff.conv_retry', {
+                          defaultValue: 'Retry — upload again',
+                        })}
                   </button>
                 )}
                 {onDelete && (
