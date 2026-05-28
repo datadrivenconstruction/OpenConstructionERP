@@ -1199,19 +1199,101 @@ export function CesiumViewer({
         data-testid="geo-hub-cesium-container"
         className="h-full w-full bg-slate-900"
       />
-      {/* OSM attribution overlay — required by the OpenStreetMap tile
-          usage policy. We hide Cesium's own credit container (to suppress
-          the Ion default-token nag) so this owner-rendered badge keeps us
-          compliant. Bottom-left, small, accessible. */}
-      <a
-        href="https://www.openstreetmap.org/copyright"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute bottom-1 left-1 z-10 rounded bg-black/40 px-1.5 py-0.5 text-[10px] leading-tight text-white/80 backdrop-blur-sm hover:text-white"
-        data-testid="geo-hub-osm-attribution"
+      {/* Open-data attribution overlay — required by the OpenStreetMap
+          tile usage policy AND a visible legal-clarity signal for
+          self-hosting users. Cesium's own credit container is hidden
+          (to suppress the Ion default-token nag) so this owner-rendered
+          disclosure keeps us compliant. Collapsed it's a tiny pill;
+          clicked it lists every third-party component + its license so
+          there's zero ambiguity about what the user can use commercially. */}
+      <details
+        className="group absolute bottom-1 left-1 z-10"
+        data-testid="geo-hub-licenses"
       >
-        © OpenStreetMap contributors
-      </a>
+        <summary
+          className={[
+            'inline-flex cursor-pointer list-none items-center gap-1 rounded',
+            'bg-black/40 px-1.5 py-0.5 text-[10px] leading-tight text-white/80',
+            'backdrop-blur-sm hover:text-white',
+            'marker:hidden [&::-webkit-details-marker]:hidden',
+          ].join(' ')}
+          title={t('geo_hub.licenses_title', {
+            defaultValue: 'Open-data stack: click to view licenses',
+          })}
+        >
+          <span aria-hidden>ⓘ</span>
+          <span>
+            {t('geo_hub.licenses_pill', {
+              defaultValue: 'Open Data',
+            })}
+          </span>
+        </summary>
+        <div
+          className={[
+            'absolute bottom-full left-0 mb-1 w-72 rounded-md border border-white/15',
+            'bg-slate-900/95 px-3 py-2 text-[11px] leading-relaxed text-slate-100',
+            'shadow-lg backdrop-blur-md',
+          ].join(' ')}
+        >
+          <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300/90">
+            {t('geo_hub.licenses_heading', {
+              defaultValue: 'Open Data & Open Source',
+            })}
+          </div>
+          <ul className="space-y-1">
+            <li>
+              <a
+                href="https://github.com/CesiumGS/cesium/blob/main/LICENSE.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-300 hover:text-sky-200"
+              >
+                Cesium
+              </a>{' '}
+              <span className="text-slate-400">— Apache 2.0 · 3D globe runtime</span>
+            </li>
+            <li>
+              <a
+                href="https://www.openstreetmap.org/copyright"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-300 hover:text-sky-200"
+              >
+                OpenStreetMap
+              </a>{' '}
+              <span className="text-slate-400">— ODbL · base imagery + map data</span>
+            </li>
+            <li>
+              <a
+                href="https://nominatim.org/release-docs/latest/api/Search/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-300 hover:text-sky-200"
+              >
+                Nominatim
+              </a>{' '}
+              <span className="text-slate-400">— ODbL · structured geocoding</span>
+            </li>
+            <li>
+              <a
+                href="https://photon.komoot.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-300 hover:text-sky-200"
+              >
+                Photon
+              </a>{' '}
+              <span className="text-slate-400">— Apache 2.0 · autocomplete geocoder</span>
+            </li>
+          </ul>
+          <div className="mt-2 text-[10px] text-slate-400">
+            {t('geo_hub.licenses_footer', {
+              defaultValue:
+                'No vendor lock-in. Self-host the entire stack. Cesium Ion + commercial imagery providers are intentionally not used.',
+            })}
+          </div>
+        </div>
+      </details>
       {cesiumStatus === 'pending' && (
         <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-slate-950/40 text-sm text-slate-200 backdrop-blur-sm">
           <div className="relative">
