@@ -1012,15 +1012,26 @@ async def convert_cad_to_excel(
 
     logger.info("Converting %s using %s", input_path.name, converter.name)
 
-    # DDC converters CLI: <input> [<output.xlsx>] [<mode>] [-no-collada]
-    # Use 'standard' mode by default — balanced data extraction without
-    # the heavy per-view/per-schedule parameter dump of 'complete' mode.
+    # Compose the CLI through the capability-aware builder so v18 binaries
+    # get ``-x <xlsx> --no-dae -m standard`` (and v17 binaries keep the
+    # legacy ``<xlsx> standard -no-collada`` positional shape). Calling
+    # the v17 positional form against a v18 binary causes ``exit 15`` with
+    # "arguments were not expected: ... standard -no-collada" — the bug
+    # the CAD/BIM Data Explorer surfaced as "CAD conversion failed for
+    # .rvt file" on every fresh-install with a current DDC binary.
     output_xlsx = output_dir / (input_path.stem + ".xlsx")
-    args = [str(converter), str(input_path), str(output_xlsx)]
-    # RVT and IFC converters support export modes; DWG/DGN do not
-    if extension in ("rvt", "ifc"):
-        args.append("standard")
-    args.append("-no-collada")
+    caps = detect_converter_capabilities(extension)
+    args = build_ddc_args(
+        converter,
+        input_path,
+        caps=caps,
+        xlsx_out=output_xlsx,
+        mode="standard",
+        # XLSX-only conversion: ask the binary to skip the COLLADA pass.
+        # v18 emits ``--no-dae``; v17 emits ``-no-collada``. The legacy
+        # profile (no flag) just runs both, which is harmless here.
+        include_no_dae=True,
+    )
 
     try:
         import subprocess
