@@ -35,6 +35,12 @@ export interface SectionBoxArgs {
   scene: THREE.Scene;
   camera: THREE.Camera;
   renderer: THREE.WebGLRenderer;
+  /** Optional callback fired whenever the section state mutates in a way
+   *  that affects rendered pixels (enable / disable / bounds-change). The
+   *  host wires this to `SceneManager.requestRender()` so the on-demand
+   *  render loop redraws — without it the clip would only become visible
+   *  on the user's next camera move. */
+  onChange?: () => void;
 }
 
 /** Internal state held per scene-mesh while clipping is active, so we
@@ -49,6 +55,7 @@ export class SectionBox {
   private scene: THREE.Scene;
   private camera: THREE.Camera;
   private renderer: THREE.WebGLRenderer;
+  private onChange?: () => void;
 
   /** Current AABB in world space. */
   private box = new THREE.Box3();
@@ -85,6 +92,7 @@ export class SectionBox {
     this.scene = args.scene;
     this.camera = args.camera;
     this.renderer = args.renderer;
+    this.onChange = args.onChange;
   }
 
   /** Whether the section is currently clipping geometry. */
@@ -117,6 +125,10 @@ export class SectionBox {
       this.applyToScene();
       this.refreshWireframe();
     }
+    // Materials + renderer flag mutated → ask the host to re-render so the
+    // clip becomes visible immediately (the parent SceneManager renders
+    // on-demand and would otherwise skip the next frame).
+    this.onChange?.();
   }
 
   /** Deactivate the section: restore previous clipping planes on every
@@ -146,6 +158,10 @@ export class SectionBox {
     if (this.transformHelper) {
       this.transformHelper.visible = false;
     }
+    // Restoring planes / overlay visibility doesn't trigger any internal
+    // event — the host's render loop is on-demand, so request a redraw
+    // explicitly to make the un-clipped view appear immediately.
+    this.onChange?.();
   }
 
   /** Fit the section to an arbitrary world-space AABB. */
@@ -162,6 +178,7 @@ export class SectionBox {
       this.recomputePlanes();
       this.applyToScene();
       this.refreshWireframe();
+      this.onChange?.();
     }
   }
 

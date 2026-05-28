@@ -968,6 +968,12 @@ export function BIMViewer({
       scene: scene.scene,
       camera: scene.camera,
       renderer: scene.renderer,
+      // SceneManager renders on-demand. SectionBox mutates material
+      // clippingPlanes + the renderer.localClippingEnabled flag, but no
+      // existing event invalidates the frame — without this hook the
+      // clip would only become visible the next time the user happened
+      // to move the camera.
+      onChange: () => scene.requestRender(),
     });
     const walkModeHelper = new WalkMode({
       camera: scene.camera,
