@@ -25,7 +25,7 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@tanstack/react-query": "^5.100.14",
-    "@types/three": "^0.183.1",
+    "@types/three": "^0.184.1",
     "@xyflow/react": "^12.10.2",
     "ag-grid-community": "^32.3.0",
     "ag-grid-react": "^32.3.9",
@@ -51,7 +51,7 @@
     "y-webrtc": "^10.3.0",
     "y-websocket": "^3.0.0",
     "yjs": "^13.6.30",
-    "zustand": "^5.0.13"
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
@@ -63,7 +63,7 @@
     "@types/jest-axe": "^3.5.9",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
-    "@typescript-eslint/eslint-plugin": "^8.59.4",
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
     "@typescript-eslint/parser": "^8.59.4",
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.5.0",
