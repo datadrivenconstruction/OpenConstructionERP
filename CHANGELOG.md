@@ -5,6 +5,13 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.5.1] - 2026-05-28
+
+**README CLI-name patch — re-ships the v5.5.0 wheel with the long-description that PyPI renders on the project page.** The v5.5.0 wheel was tagged from a commit that still showed the legacy `openestimate` CLI binary name in the quickstart and the `doctor` invocation hint. Both binaries continue to work (pyproject.toml exposes `openestimate` and `openconstructionerp` as parallel entry points), but the canonical command on the rendered README should match the package name. No code changes. No migration. Same `5.5.0` runtime.
+
+### Fixed
+- **README quickstart and doctor invocation** — `openestimate` → `openconstructionerp` on `README.md:700` and `README.md:713` so the PyPI long-description matches the package name. Filed because users browsing https://pypi.org/project/openconstructionerp/ kept seeing the old name in the highlighted install snippet.
+
 ## [5.5.0] - 2026-05-28
 
 **Stability wave — last stable 5.x cut.** Eight user-reported runtime
