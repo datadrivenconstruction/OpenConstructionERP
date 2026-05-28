@@ -980,6 +980,11 @@ export function BIMViewer({
       renderer: scene.renderer,
       domElement: canvas,
       orbitControls: scene.controls,
+      // OrbitControls is disabled while walk mode is active, so its
+      // `change` listener (the only thing that normally invalidates the
+      // on-demand render loop) never fires. WalkMode pings us every
+      // frame the camera moved or the cursor is pointer-locked.
+      onChange: () => scene.requestRender(),
     });
     const measureToolHelper = new MeasureTool({
       scene: scene.scene,

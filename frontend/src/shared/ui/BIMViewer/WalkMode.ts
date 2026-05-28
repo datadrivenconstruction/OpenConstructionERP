@@ -33,6 +33,12 @@ export interface WalkModeArgs {
   /** Optional OrbitControls reference. If supplied, `enable()` checks that
    *  it has been disabled by the caller and throws if not. */
   orbitControls?: { enabled: boolean };
+  /** Optional callback fired whenever the camera moved during a tick.
+   *  The host wires this to `SceneManager.requestRender()` so the
+   *  on-demand render loop redraws — without it the camera moves but the
+   *  user sees no motion because OrbitControls (the only other source of
+   *  render invalidation) is disabled in walk mode. */
+  onChange?: () => void;
 }
 
 const DEFAULT_SPEED = 2; // m/s
@@ -46,6 +52,7 @@ export class WalkMode {
   private _renderer: THREE.WebGLRenderer;
   private domElement: HTMLElement;
   private orbitControls?: { enabled: boolean };
+  private onChange?: () => void;
 
   private controls: PointerLockControls | null = null;
   private _enabled = false;
@@ -98,6 +105,7 @@ export class WalkMode {
     this._renderer = args.renderer;
     this.domElement = args.domElement;
     this.orbitControls = args.orbitControls;
+    this.onChange = args.onChange;
     void this._renderer;
   }
 
@@ -215,6 +223,14 @@ export class WalkMode {
     const speed = this.keys.sprint ? this.flightSpeed * SPRINT_MULTIPLIER : this.flightSpeed;
     const distance = speed * dt;
 
+    const moved =
+      this.keys.forward ||
+      this.keys.backward ||
+      this.keys.left ||
+      this.keys.right ||
+      this.keys.up ||
+      this.keys.down;
+
     // Forward/back/left/right are camera-relative; up/down are world-Y.
     if (this.keys.forward) this.controls.moveForward(distance);
     if (this.keys.backward) this.controls.moveForward(-distance);
@@ -222,6 +238,16 @@ export class WalkMode {
     if (this.keys.left) this.controls.moveRight(-distance);
     if (this.keys.up) this.camera.position.y += distance;
     if (this.keys.down) this.camera.position.y -= distance;
+
+    // While pointer-lock is active the user is also free-looking via mouse
+    // (PointerLockControls mutates the camera quaternion directly without
+    // notifying us), so we have to redraw every frame the cursor is
+    // captured — not just frames where a key moved the position. The host
+    // SceneManager is on-demand and would otherwise sit frozen while the
+    // mouse moves.
+    if (moved || this._locked) {
+      this.onChange?.();
+    }
   }
 
   private startLoop(): void {
