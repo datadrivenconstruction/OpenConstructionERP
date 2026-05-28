@@ -4,9 +4,9 @@
 
 ### The #1 open-source workspace for construction project management
 
-**Like WordPress for construction companies** — pick modules from the marketplace, drop in your own, or replace ours with custom-built ones. Same plug-and-play model, but for BOQ, scheduling, cost control, BIM, and tendering.
+Professional BOQ, 4D scheduling, 5D cost model, and tendering - all in one open-source platform.
 
-Professional BOQ, 4D scheduling, 5D cost model, and tendering — all in one open-source platform.
+**Like WordPress for construction companies** - pick modules from the marketplace, drop in your own, or replace ours with custom-built ones. Same plug-and-play model, but for BOQ, scheduling, cost control, BIM, and tendering.
 
 [▶ Watch the 12-min walkthrough](https://www.youtube.com/watch?v=X06cIaroAeI) · [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
@@ -193,43 +193,6 @@ See the [latest release](https://github.com/datadrivenconstruction/OpenConstruct
 ## <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/log-dark.svg"><img src="docs/readme-icons/log-light.svg" width="14" align="center" alt=""></picture> What's New in v5.2.5 — International BOQ + Universal audit trail + Install-crash fix
 
 The **v5.2.x** line graduates the platform to **116 modules** with three foundation epics from the Deep-Coordination initiative, plus **Epic I — International BOQ** for worldwide tender formats. **v5.2.5** specifically unblocks fresh `pip install` — the previous 4.5.0 wheel on PyPI crashed at startup because of a FastAPI 0.115.x regression on `@router.delete(status_code=204)` routes, and v5.2.5 pins `fastapi>=0.116`. Everyone stuck on 4.5.0 can now simply `pip install --upgrade openconstructionerp`.
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/bell-dark.svg"><img src="docs/readme-icons/bell-light.svg" width="14" align="center" alt=""></picture> Epic B — Unified notifications dispatcher**
-Single subscriber model that fans every cross-module event (RFI replies, snag assignments, approval requests, schedule shifts, …) out to in-app inbox + email recipients. Replaces 8 ad-hoc senders. SMTP path validated end-to-end (port 465 SSL, port 587 STARTTLS).
-
-**<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/file-dark.svg"><img src="docs/readme-icons/file-light.svg" width="14" align="center" alt=""></picture> Epic C — File versioning unification**
-`oe_file_version` is now the canonical table for every uploaded artefact: BIM models, BOQ imports, doc-template attachments, BCF 3.0 issue containers, RFI replies, drawing markups. **751 v1 rows backfilled** on the live demo VPS. Each upload carries a monotonic version + immutable parent ref — full audit history per file.
-
-**<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/log-dark.svg"><img src="docs/readme-icons/log-light.svg" width="14" align="center" alt=""></picture> Epic H — Universal audit trail**
-`oe_activity_log` records every state-changing action across all 116 modules (who · what · when · before/after). Visible in `/settings?tab=audit` and queryable per-record from every detail page. Compliance-ready (GDPR Art. 30, ISO 19650).
-
-</td>
-<td width="50%" valign="top">
-
-**<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/globe-dark.svg"><img src="docs/readme-icons/globe-light.svg" width="14" align="center" alt=""></picture> Epic I — International BOQ formats**
-Native I/O for the four formats covering **~70% of the Tier-1 construction market**:
-- **GAEB X81 / X83 / X84** (DACH) — hierarchical positions, GTU codes, FX-correct totals.
-- **BC3 (FIEBDC-3)** (Spain) — capítulo/partida tree, mediciones, precios descompuestos.
-- **NRM Excel** (UK) — work sections, NRM1 element codes, BCIS-compatible measurement rules.
-- **MasterFormat Excel** (US) — division/section structure, Procore-compatible export.
-
-New `/regional-exchange` page ties them together with one drag-and-drop import surface.
-
-**<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/bug-dark.svg"><img src="docs/readme-icons/bug-light.svg" width="14" align="center" alt=""></picture> v5.2.5 install-crash fix (#157)**
-- `fastapi>=0.116.0,<1` pinned in `backend/pyproject.toml` so the buggy `Status code 204 must not have a response body` assertion never resolves again on a fresh install.
-- Authenticated `/` now redirects to `/dashboard` (was `/projects` per #215 fix — restored canonical landing).
-- W22: `deleteDiary` API helper added in the Daily Diary client.
-- W25: `FinancePage.Payment.amount` widened to `string | number` + new `currency_code` field.
-
-**<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/broadcast-dark.svg"><img src="docs/readme-icons/broadcast-light.svg" width="14" align="center" alt=""></picture> Latest alembic head**: `v3144` (Wave 1 Deep-Coordination: notifications + file versioning + audit trail) · single-head invariant maintained across every wave.
-
-</td>
-</tr>
-</table>
 
 See the [latest release](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest) and the [CHANGELOG](CHANGELOG.md) for the per-release breakdown.
 
