@@ -5,6 +5,33 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.4.2] - 2026-05-28
+
+**Converter UX simplification.** Fresh-install pain reported by Artem on
+a new Windows machine: DWG upload failed with "DWG conversion requires
+DDC DwgExporter" and no path to actually install; BIM "out of date"
+overlay surfaced the raw stderr ("The following argument was not
+expected: …") as the primary message.
+
+### Fixed
+- **/dwg-takeoff conversion error** — when the backend message names
+  "DDC DwgExporter", the error card now renders an inline `Install DWG
+  converter (1 click)` button (with live progress bar — ~150 MB
+  download) before the existing Retry/Delete row. Hits the same
+  `POST /api/v1/takeoff/converters/dwg/install/` endpoint as /settings →
+  Converters. On success, auto-triggers the upload-retry flow. On Linux,
+  surfaces the apt-get commands the backend returns and links to
+  /settings?tab=converters as a fallback.
+- **/bim "Converter is out of date" overlay** — replaced the raw
+  stderr-bearing backend message with a clean human sentence
+  ("The installed RVT converter is older than this build expects. Click
+  'Reinstall converter' below — we'll pull the latest version and retry
+  your upload automatically"). The original message + stderr excerpt
+  are preserved as a collapsible `<details>` "Show technical details"
+  block (useful for support tickets). Dropped the redundant
+  "Reinstall fetches the latest converter from GitHub…" hint that
+  appeared next to the Reinstall button.
+
 ## [5.4.1] - 2026-05-28
 
 **Hotfix wave.** Bundles the 20-wave deep audit landings (W1–W20 across

@@ -30,6 +30,7 @@ interface ChangelogEntry {
 // out-of-order entries here still display correctly.
 const CHANGELOG: ChangelogEntry[] = [
   // ── v5.x — second stable major ───────────────────────────────────────────
+  { version: '5.4.2', date: '2026-05-28', tag: 'FIX',       summary: 'Converter UX simplification — inline 1-click DWG install on /dwg-takeoff conversion failure, BIM out-of-date overlay shows clean human message (raw stderr hidden behind "Show technical details" disclosure)' },
   { version: '5.4.1', date: '2026-05-28', tag: 'SECURITY',  summary: '20-wave deep audit landings: 13 security fixes (3+ HIGH), 5 silent-miscalc bugs, 8 race/FSM hardenings, GDPR PII scrub extension, Cesium /geo canvas-collapse fix (postage-stamp regression)' },
   { version: '5.4.0', date: '2026-05-27', tag: 'NEW',       summary: 'Quality wave — match-quality (IFC classifier + BGE rerank blend + non-billable gate), WCAG-AA round 2 (theme-aware blue-text token + secondary contrast bump), useLLMRun hook + formatters lift, dark-mode button-bg revert' },
   { version: '5.3.0', date: '2026-05-27', tag: 'NEW',       summary: 'Geo Hub round 2 (storage sweep + 10km accuracy cap + 100dvh), Brazil Tier-1 (BRL + NBR 12721 + RPS PDF), /login dark-mode, /reporting renderer, Daily Diary delete, WCAG-AA contrast pass on 51 files, dashboard rollup' },
