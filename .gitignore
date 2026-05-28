@@ -149,6 +149,9 @@ test-screenshots/
 !docs/screenshots/*.png
 !docs/screenshots/*.jpg
 !docs/screenshots/*.jpeg
+!docs/qa/**/*.png
+!docs/qa/**/*.jpg
+!docs/qa/**/*.jpeg
 !frontend/public/og-image.png
 !frontend/public/*.jpg
 !frontend/public/*.jpeg

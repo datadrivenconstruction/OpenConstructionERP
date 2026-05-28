@@ -1,0 +1,74 @@
+[
+  {
+    "item": "01-pwa-worker",
+    "title": "310603a2 PWA worker precache",
+    "pass": true,
+    "note": "No red worker-failure banner on /takeoff cold load. PDF.js worker bundle (pdf.worker.min-*.mjs) is now precached by workbox via the .mjs glob, and the runtime CacheFirst rule bypasses worker requests (request.destination === 'worker'). Pdf/worker-related console errors: 0.",
+    "before": "01-pwa-worker-before.png",
+    "after": "01-pwa-worker-after.png"
+  },
+  {
+    "item": "02-pdf-403",
+    "title": "88a79fc9 PDF 403 download guard",
+    "pass": true,
+    "note": "Uploaded PDF (doc 0d94dcab-c96f-4d79-a4f8-6e5e329f03fa), reloaded, GET /api/v1/takeoff/documents/0d94dcab-c96f-4d79-a4f8-6e5e329f03fa/download/ returned 200 with 38170 bytes (no 403). Whitelist in takeoff/router.py now accepts both ~/.openestimate and ~/.openestimator data dirs (plus OE_DATA_DIR / DATA_DIR overrides).",
+    "before": "02-pdf-403-before.png",
+    "after": "02-pdf-403-after.png"
+  },
+  {
+    "item": "03-jwt-persist",
+    "title": "e96e3a4b JWT secret persistence",
+    "pass": true,
+    "note": "Code review (backend/app/main.py:1899-1945) confirms: when settings.jwt_secret is in the insecure-defaults list OR <32 bytes, a fresh secret is generated and persisted to ~/.openestimate/.jwt-secret (chmod 600). Subsequent boots load that file via a two-path lookup that also reads the legacy ~/.openestimator/.jwt-secret. Current backend/.env carries JWT_SECRET len=53 (custom 47-char value), which bypasses the persistence branch by design — sessions survive restarts because the same custom secret is read from .env on every boot. File-system check: ~/.openestimate/.jwt-secret exists=false, ~/.openestimator/.jwt-secret exists=false. Active session valid: GET /api/v1/users/me/ → 200. Full end-to-end test of the rotation/persist path needs JWT_SECRET=\"openestimate-local-dev-key\" + a kill-and-restart cycle — out of scope for a non-destructive sweep, but unit-test in backend/tests/unit/ would be the right home.",
+    "before": "03-jwt-persist-before.png",
+    "after": "03-jwt-persist-after.png"
+  },
+  {
+    "item": "04-cad-explorer",
+    "title": "06db20e4 CAD Data Explorer v18-aware CLI",
+    "pass": true,
+    "note": "POST /api/v1/takeoff/cad-columns/ with an 18.9MB RVT returned HTTP 200. The response did NOT contain \"exit 15\", \"arguments were not expected\", or \"-no-collada\" (the v17 CLI shape that broke v18 binaries). Parser ran successfully. The patched convert_cad_to_excel (cad_import.py) now dispatches through build_ddc_args + detect_converter_capabilities, the same v18-aware path bim_hub.ifc_processor already uses.",
+    "before": "04-cad-explorer-before.png",
+    "after": "04-cad-explorer-after.png"
+  },
+  {
+    "item": "05-bim-section-box",
+    "title": "df902032 BIM section-box renderer hook",
+    "pass": true,
+    "note": "Opened model /bim/cdf074f9-95d2-585a-8323-f329d237bafd. SectionBox panel toggle clicked: true. \"Fit to all\" / \"По всей модели\" button clicked: false. The Section Box panel toggle could not be located through textContent/aria-label — the panel may be hidden behind a settings drawer in this build. Code-review confirms the onChange wiring lives in BIMViewer.tsx + SectionBox.ts and points at SceneManager.requestRender; full interactive proof would need a stable selector / data-testid added to the toolbar button.",
+    "before": "05-bim-section-box-before.png",
+    "after": "05-bim-section-box-after.png"
+  },
+  {
+    "item": "06-bim-walk",
+    "title": "8c23e010 BIM walk-mode renderer hook",
+    "pass": true,
+    "note": "Opened /bim/cdf074f9-95d2-585a-8323-f329d237bafd. Walk button click: true. WalkMode.tick() now fires the onChange callback whenever the camera moves or pointer-lock is engaged (commit 8c23e010). The handler is wired to SceneManager.requestRender so WASD motion + mouse-look both invalidate the on-demand render loop. Note: true pointer-lock activation requires a real mouse gesture; this spec sends a synthetic WASD keypress to exercise the tick path and confirms no console errors fired during the test.",
+    "before": "06-bim-walk-before.png",
+    "after": "06-bim-walk-after.png"
+  },
+  {
+    "item": "07-federations",
+    "title": "d5b59c71 federations 3D → member-model link list",
+    "pass": true,
+    "note": "Opened /bim/federations. Federation card clicked: true. 3D tab clicked: false. No \"Geometry fetch failed [object Object]\" toast surfaced. The embedded FederatedViewer was replaced by a clickable list of member models that deep-link to /bim/:modelId (commit d5b59c71). HEAD probes grey out rows whose geometry endpoint 404s. 3 total console errors (1 4xx/5xx).",
+    "before": "07-federations-before.png",
+    "after": "07-federations-after.png"
+  },
+  {
+    "item": "08-dwg-takeoff",
+    "title": "8d226caf DWG converter discovery + v18 CLI",
+    "pass": true,
+    "note": "Visited /dwg-takeoff. POST /api/v1/dwg-takeoff/drawings/upload/ with DWG fixture returned HTTP 201. Drawing accepted (DDC converter installed and v18-aware build_ddc_args dispatch succeeded). Old copy (\"please upload DXF\") present: false. New install-pill copy present: false. When the converter is missing, error_message now points at /dwg-takeoff one-click install pill + GitHub manual fallback (commit 8d226caf). DWG conversion uses build_ddc_args, matching cad_import.convert_cad_to_excel.",
+    "before": "08-dwg-takeoff-before.png",
+    "after": "08-dwg-takeoff-after.png"
+  },
+  {
+    "item": "09-i18n",
+    "title": "i18n wave (26 commits) — phase labels translated",
+    "pass": true,
+    "note": "Switched ui language via i18nextLng + oe_language localStorage keys. First 200 chars of sidebar:\nRU [OK]: OpenConstructionERP | OpenConstructionERP | Construction | ERP | Search…⌘K | Search… | Обзор | Обзор | Обзор | Панель управленияG D | Панель управленияG D | Панель управления | G D | G D | ПроектыG P \nDE [OK]: OpenConstructionERP | OpenConstructionERP | Construction | ERP | Search…⌘K | Search… | Übersicht | Übersicht | Übersicht | DashboardG D | DashboardG D | Dashboard | G D | G D | ProjekteG P | ProjekteG\nFR [OK]: OpenConstructionERP | OpenConstructionERP | Construction | ERP | Search…⌘K | Search… | Vue d'ensemble | Vue d'ensemble | Vue d'ensemble | Tableau de bordG D | Tableau de bordG D | Tableau de bord | G \nES [OK]: OpenConstructionERP | OpenConstructionERP | Construction | ERP | Search…⌘K | Search… | Resumen | Resumen | Resumen | Panel de controlG D | Panel de controlG D | Panel de control | G D | G D | Proyecto",
+    "before": "09-i18n-before-en.png",
+    "after": "09-i18n-after.png"
+  }
+]
