@@ -147,6 +147,8 @@ test-screenshots/
 !frontend/public/favicon.png
 !frontend/public/logo.png
 !docs/screenshots/*.png
+!docs/screenshots/*.jpg
+!docs/screenshots/*.jpeg
 !frontend/public/og-image.png
 !frontend/public/*.jpg
 !frontend/public/*.jpeg
