@@ -1886,27 +1886,71 @@ def create_app() -> FastAPI:
         elif _jwt_is_default or _jwt_too_short:
             # BUG-320: even in development, the hardcoded default secret is
             # published in the AGPL repo — any attacker with network access
-            # to a dev box could forge tokens. Rotate to an ephemeral random
-            # secret for this process so forged "open-source-secret" tokens
-            # stop working. Persisted tokens from the old secret get
-            # invalidated, which is exactly what we want.
+            # to a dev box could forge tokens. Rotate to a strong random
+            # secret so forged "open-source-secret" tokens stop working.
+            #
+            # The secret is **persisted** to ``~/.openestimator/.jwt-secret``
+            # (chmod 600) and re-used across boots so the user's browser
+            # session survives a ``Ctrl+C`` + relaunch of the CLI. Previously
+            # this rotated on every boot, which silently invalidated every
+            # active token and dumped PWA users back to the OS desktop on
+            # the next request (auth → 401 → window.location to /login,
+            # which for a standalone-installed PWA looks like a "crash").
             import secrets as _secrets
+            from pathlib import Path as _Path
 
-            ephemeral = _secrets.token_urlsafe(48)
+            secret_path = _Path.home() / ".openestimator" / ".jwt-secret"
+            persisted: str | None = None
+            try:
+                if secret_path.is_file():
+                    candidate = secret_path.read_text(encoding="utf-8").strip()
+                    if len(candidate.encode("utf-8")) >= 32:
+                        persisted = candidate
+            except OSError:
+                persisted = None
+
+            if persisted is None:
+                persisted = _secrets.token_urlsafe(48)
+                try:
+                    secret_path.parent.mkdir(parents=True, exist_ok=True)
+                    secret_path.write_text(persisted, encoding="utf-8")
+                    # Best-effort chmod 600 (POSIX). On Windows the file
+                    # inherits user-only ACLs from the home directory.
+                    try:
+                        secret_path.chmod(0o600)
+                    except OSError:
+                        pass
+                    logger.info(
+                        "JWT_SECRET was default/short — generated a fresh dev secret "
+                        "and persisted it to %s. Sessions now survive restarts. "
+                        "Set JWT_SECRET env var for a stable team-wide secret.",
+                        secret_path,
+                    )
+                except OSError as _persist_err:
+                    logger.warning(
+                        "JWT_SECRET persistence to %s failed (%s) — falling back "
+                        "to a per-process random secret. Sessions WILL be invalidated "
+                        "on every restart. Set JWT_SECRET env var (>=32 bytes) "
+                        "to keep sessions alive.",
+                        secret_path,
+                        _persist_err,
+                    )
+            else:
+                logger.info(
+                    "JWT_SECRET was default/short — loaded persisted dev secret from %s. "
+                    "Existing sessions remain valid. Set JWT_SECRET env var for a "
+                    "stable team-wide secret.",
+                    secret_path,
+                )
+
             try:
                 # pydantic-settings blocks direct assignment when frozen,
                 # but the default Settings class is mutable. If the field
                 # is frozen in a future refactor, falling back to
                 # ``object.__setattr__`` keeps us safe.
-                settings.jwt_secret = ephemeral
+                settings.jwt_secret = persisted
             except Exception:
-                object.__setattr__(settings, "jwt_secret", ephemeral)
-            logger.warning(
-                "JWT_SECRET was default/short — rotated to a random per-process "
-                "secret for this dev session. Existing tokens from prior runs "
-                "are now invalid. Set JWT_SECRET env var (>=32 bytes) to keep "
-                "sessions alive across restarts."
-            )
+                object.__setattr__(settings, "jwt_secret", persisted)
 
         if settings.is_production:
             if "minioadmin" in (settings.s3_access_key + settings.s3_secret_key):
