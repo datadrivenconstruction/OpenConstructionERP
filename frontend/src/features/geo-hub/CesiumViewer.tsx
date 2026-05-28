@@ -426,9 +426,17 @@ export function CesiumViewer({
           shouldAnimate: false,
           fullscreenButton: false,
           geocoder: false,
-          homeButton: false,
-          navigationHelpButton: false,
-          sceneModePicker: false,
+          // Cesium's built-in widgets are useful but used to be invisible
+          // because we didn't ship ``widgets.css``. We now inline the
+          // minimum CSS for them (see ``<style>`` block below), so the
+          // three toolbar buttons that give the user "go home", "2D / 2.5D
+          // / 3D scene mode", and "navigation help" can be turned back on.
+          // The 2D/3D toggle in particular was the explicit user ask —
+          // a single tap to switch between flat-map and globe view.
+          homeButton: true,
+          navigationHelpButton: true,
+          navigationInstructionsInitiallyVisible: false,
+          sceneModePicker: true,
           creditContainer: hiddenCreditContainer,
         });
         viewer = v;

@@ -854,7 +854,7 @@ function ProjectCard({
       style={style}
       onClick={() => navigate(`/projects/${project.id}`)}
     >
-      {mapEnabled && project.address && (
+      {mapEnabled && (
         <div className="relative" onClick={(e) => e.stopPropagation()}>
           <ProjectMap
             variant="card"
