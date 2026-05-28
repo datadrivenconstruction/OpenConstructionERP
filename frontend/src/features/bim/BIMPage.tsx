@@ -287,7 +287,14 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
   const statusLabel = model.status === 'ready'
     ? t('bim.status_ready', { defaultValue: 'Ready' })
     : model.status === 'degraded'
-      ? t('bim.status_degraded', { defaultValue: 'Imported (no quantities)' })
+      ? (
+          // error_code="converter_absent" means the DDC converter is missing but
+          // IfcElementQuantity / Qto_* data WAS extracted — geometry is placeholder
+          // boxes only. Show "no 3D" instead of the misleading "no quantities".
+          model.error_code === 'converter_absent'
+            ? t('bim.status_degraded_no3d', { defaultValue: 'Imported (no 3D)' })
+            : t('bim.status_degraded', { defaultValue: 'Imported (no quantities)' })
+        )
       : model.status === 'needs_converter'
         ? t('bim.status_needs_converter', { defaultValue: 'Needs Converter' })
         : model.status === 'processing'
@@ -1605,7 +1612,18 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     <div className="flex items-center gap-2 text-[10px] text-content-quaternary">
                       <span className="flex items-center gap-1">
                         <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`} />
-                        {isReady ? t('bim.status_ready', { defaultValue: 'Ready' }) : isDegraded ? t('bim.status_degraded', { defaultValue: 'Imported (no quantities)' }) : isProcessing ? t('bim.status_processing', { defaultValue: 'Processing' }) : m.status}
+                        {isReady
+                          ? t('bim.status_ready', { defaultValue: 'Ready' })
+                          : isDegraded
+                            ? (
+                                m.error_code === 'converter_absent'
+                                  ? t('bim.status_degraded_no3d', { defaultValue: 'Imported (no 3D)' })
+                                  : t('bim.status_degraded', { defaultValue: 'Imported (no quantities)' })
+                              )
+                            : isProcessing
+                              ? t('bim.status_processing', { defaultValue: 'Processing' })
+                              : m.status
+                        }
                       </span>
                       {(m.element_count ?? 0) > 0 && (
                         <>

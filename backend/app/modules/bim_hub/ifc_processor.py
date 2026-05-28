@@ -1156,6 +1156,33 @@ def _excel_elements_to_bim_result(
         if mesh_ref_int is not None:
             bbox = dae_bboxes.get(mesh_ref_int)
 
+        # Bbox-derived quantity fallback — DDC IfcExporter XLSX omits
+        # explicit quantity columns when the IFC source lacks
+        # IfcElementQuantity blocks (the common case for Revit/ArchiCAD
+        # exports without a dedicated quantity-takeoff export preset).
+        # When the real DAE bounding box is available, derive approximate
+        # dimensions from it so the BOQ ModelLinkPanel always has field
+        # options to choose from.  These are geometry-backed values, not
+        # type-defaults, so they are materially more useful than zeros.
+        # In DDC COLLADA: Z is the vertical axis (height); X/Y are
+        # horizontal.  length = max(dx, dy), width = min(dx, dy).
+        if not quantities and bbox is not None:
+            _bx = bbox or {}
+            _dx = round(abs((_bx.get("max_x") or 0.0) - (_bx.get("min_x") or 0.0)), 4)
+            _dy = round(abs((_bx.get("max_y") or 0.0) - (_bx.get("min_y") or 0.0)), 4)
+            _dz = round(abs((_bx.get("max_z") or 0.0) - (_bx.get("min_z") or 0.0)), 4)
+            if _dx > 0 or _dy > 0 or _dz > 0:
+                _h_ext = max(_dx, _dy)           # horizontal length
+                _thin  = min(_dx, _dy) or _h_ext  # horizontal width/thickness
+                _vert  = _dz or _h_ext            # vertical height
+                quantities = {
+                    "Length": _h_ext,
+                    "Width":  _thin,
+                    "Height": _vert,
+                    "Area":   round(_h_ext * _vert, 4),
+                    "Volume": round(_dx * _dy * _dz, 4),
+                }
+
         # Properties: preserve EVERY DDC column from the dataframe so the
         # viewer never loses information.  Only skip keys that are
         # genuinely duplicated as top-level fields (id → stable_id,
@@ -1287,6 +1314,25 @@ def _excel_elements_to_bim_result(
                     break
                 extras[k] = v
             properties = {**priority, **extras}
+
+        # Last-resort type-default fallback for elements that have neither
+        # XLSX quantities nor a DAE bbox (e.g. elements excluded from the
+        # DAE export, or converter runs without a .dae side-car).
+        # Uses the same per-IFC-type extents table as the text-parser path.
+        if not quantities:
+            _ifc_key = etype.upper().replace(" ", "")
+            if not _ifc_key.startswith("IFC"):
+                _ifc_key = f"IFC{_ifc_key}"
+            _ln, _w, _h = _placeholder_default_extents(_ifc_key)
+            quantities = {
+                "Length": _ln,
+                "Width": _w,
+                "Height": _h,
+                "Area": round(_ln * _h, 4),
+                "Volume": round(_ln * _w * _h, 4),
+            }
+            properties = dict(properties)
+            properties["quantities_source"] = "type_defaults"
 
         elements.append(
             {
@@ -1954,6 +2000,32 @@ def process_ifc_file(
     # so every element here has a placeholder bounding box.
     for elem in elements:
         elem["is_placeholder"] = True
+
+    # Last-resort quantity back-fill: if an element still has no quantities
+    # after the IFC parsing passes (the file carries neither IfcElementQuantity
+    # blocks nor Qto_* property sets), populate approximate values from the
+    # per-IFC-type default extents used to build the placeholder boxes.
+    # This guarantees BOQ links always resolve to *something* rather than
+    # silently returning zero.  The "degraded" model status already communicates
+    # to the user that accurate quantities require the DDC converter; these
+    # defaults are preferable to an empty dict.
+    for elem in elements:
+        if elem.get("quantities"):
+            continue
+        ifc_type_upper = (elem.get("properties") or {}).get("ifc_type", "").upper()
+        ln, w, h = _placeholder_default_extents(ifc_type_upper)
+        area = round(ln * h, 4)   # most relevant face (length × height) for walls/columns
+        volume = round(ln * w * h, 4)
+        elem["quantities"] = {
+            "Length": ln,
+            "Width": w,
+            "Height": h,
+            "Area": area,
+            "Volume": volume,
+        }
+        props = dict(elem.get("properties") or {})
+        props["quantities_source"] = "type_defaults"
+        elem["properties"] = props
 
     # Audit C2 — surface the resolved unit system + scale table in
     # canonical.metadata.units so the BOQ aggregator, validation
@@ -2757,52 +2829,103 @@ def _extract_quantities_for_element(
             continue
         pdef_id = int(all_refs[-1])
         pdef = entities.get(pdef_id)
-        if not pdef or pdef["type"] != "IFCELEMENTQUANTITY":
+        if not pdef:
             continue
-        # IFCELEMENTQUANTITY args: (GlobalId, OwnerHistory, Name,
-        # Description, MethodOfMeasurement, Quantities=(#q1, #q2, …))
-        q_refs = re.findall(r"#(\d+)", pdef["args_raw"])
-        for qr in q_refs:
-            q_ent = entities.get(int(qr))
-            if not q_ent:
-                continue
-            if q_ent["type"] not in (
-                "IFCQUANTITYLENGTH",
-                "IFCQUANTITYAREA",
-                "IFCQUANTITYVOLUME",
-                "IFCQUANTITYWEIGHT",
-                "IFCQUANTITYCOUNT",
-                "IFCQUANTITYTIME",
-                "IFCQUANTITYNUMBER",
+        if pdef["type"] == "IFCELEMENTQUANTITY":
+            # IFCELEMENTQUANTITY args: (GlobalId, OwnerHistory, Name,
+            # Description, MethodOfMeasurement, Quantities=(#q1, #q2, …))
+            q_refs = re.findall(r"#(\d+)", pdef["args_raw"])
+            for qr in q_refs:
+                q_ent = entities.get(int(qr))
+                if not q_ent:
+                    continue
+                if q_ent["type"] not in (
+                    "IFCQUANTITYLENGTH", "IFCQUANTITYAREA",
+                    "IFCQUANTITYVOLUME", "IFCQUANTITYWEIGHT", "IFCQUANTITYCOUNT",
+                    "IFCQUANTITYTIME", "IFCQUANTITYNUMBER",
+                ):
+                    continue
+                q_strings = q_ent["strings"]
+                q_name = q_strings[0] if q_strings else "unknown"
+                # Bugfix (C7): the old regex r"[\d.]+(?:E[+-]?\d+)?" also
+                # matched the digit portion of #N references — so
+                # IFCQUANTITYAREA('NetArea',$,$,#5,42.5) parsed as nums[0]="5"
+                # and we recorded NetArea=5 m² instead of 42.5. Strip all
+                # #N tokens first, then look for the trailing numeric literal.
+                args_no_refs = re.sub(r"#\d+", "", q_ent["args_raw"])
+                nums = re.findall(r"-?\d+\.?\d*(?:[Ee][+-]?\d+)?", args_no_refs)
+                # The measurement value is the LAST positional argument of an
+                # IFCQUANTITY* entity, so prefer the last numeric we found.
+                for n in reversed(nums):
+                    try:
+                        val = float(n)
+                    except ValueError:
+                        continue
+                    if val > 0:
+                        # Audit C2 — apply unit scale so the recorded value is
+                        # always in canonical SI (m, m², m³, kg, s) regardless
+                        # of whether the source IFC used millimetres, feet, or
+                        # any other declared unit. unit_ctx is None for the
+                        # legacy regression tests that pass entities by hand;
+                        # we skip the scale in that case to preserve their
+                        # expectations.
+                        scale = unit_ctx.scale(q_ent["type"]) if unit_ctx else 1.0
+                        quantities[q_name] = val * scale
+                        break
+        elif pdef["type"] == "IFCPROPERTYSET":
+            # Revit/ArchiCAD IFC exports commonly place base quantities in
+            # IFCPROPERTYSET named Qto_*BaseQuantities using
+            # IFCPROPERTYSINGLEVALUE with typed measure wrappers
+            # (IFCLENGTHMEASURE, IFCAREAMEASURE, IFCVOLUMEMEASURE …)
+            # instead of IFCELEMENTQUANTITY. Recover those values so BOQ
+            # linking has usable quantities even when the DDC converter is
+            # unavailable or the file was exported without explicit quantity
+            # sets.
+            pset_name = (
+                pdef["strings"][1] if len(pdef["strings"]) > 1
+                else (pdef["strings"][0] if pdef["strings"] else "")
+            )
+            if not (
+                "Qto_" in pset_name
+                or "BaseQuantit" in pset_name
+                or pset_name.endswith("Quantities")
             ):
                 continue
-            q_strings = q_ent["strings"]
-            q_name = q_strings[0] if q_strings else "unknown"
-            # Bugfix (C7): the old regex r"[\d.]+(?:E[+-]?\d+)?" also
-            # matched the digit portion of #N references — so
-            # IFCQUANTITYAREA('NetArea',$,$,#5,42.5) parsed as nums[0]="5"
-            # and we recorded NetArea=5 m² instead of 42.5. Strip all
-            # #N tokens first, then look for the trailing numeric literal.
-            args_no_refs = re.sub(r"#\d+", "", q_ent["args_raw"])
-            nums = re.findall(r"-?\d+\.?\d*(?:[Ee][+-]?\d+)?", args_no_refs)
-            # The measurement value is the LAST positional argument of an
-            # IFCQUANTITY* entity, so prefer the last numeric we found.
-            for n in reversed(nums):
+            for pr in re.findall(r"#(\d+)", pdef["args_raw"]):
+                prop_ent = entities.get(int(pr))
+                if not prop_ent or prop_ent["type"] != "IFCPROPERTYSINGLEVALUE":
+                    continue
+                prop_name = prop_ent["strings"][0] if prop_ent["strings"] else "unknown"
+                # Value encoded as typed measure, e.g. IFCLENGTHMEASURE(3.5)
+                m = re.search(
+                    r"IFC(\w+MEASURE)\((-?[\d.]+(?:[Ee][+-]?\d+)?)\)",
+                    prop_ent["args_raw"],
+                    re.IGNORECASE,
+                )
+                if not m:
+                    continue
                 try:
-                    val = float(n)
+                    val = float(m.group(2))
                 except ValueError:
                     continue
-                if val > 0:
-                    # Audit C2 — apply unit scale so the recorded value is
-                    # always in canonical SI (m, m², m³, kg, s) regardless
-                    # of whether the source IFC used millimetres, feet, or
-                    # any other declared unit. unit_ctx is None for the
-                    # legacy regression tests that pass entities by hand;
-                    # we skip the scale in that case to preserve their
-                    # expectations.
-                    scale = unit_ctx.scale(q_ent["type"]) if unit_ctx else 1.0
-                    quantities[q_name] = val * scale
-                    break
+                if val <= 0:
+                    continue
+                measure_kind = m.group(1).upper()
+                if "LENGTH" in measure_kind:
+                    unit_type = "LENGTHUNIT"
+                elif "AREA" in measure_kind:
+                    unit_type = "AREAUNIT"
+                elif "VOLUME" in measure_kind:
+                    unit_type = "VOLUMEUNIT"
+                elif "MASS" in measure_kind:
+                    unit_type = "MASSUNIT"
+                else:
+                    unit_type = ""
+                scale = (
+                    unit_ctx.scale_for.get(unit_type, 1.0)
+                    if (unit_ctx and unit_type) else 1.0
+                )
+                quantities[prop_name] = val * scale
 
     return quantities
 
