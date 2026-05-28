@@ -1493,6 +1493,18 @@ async def _process_cad_in_background(
                 return
 
             if element_count > 0:
+                # Wipe any elements from a previous import / failed retry
+                # before inserting the new batch.  Without this, each Retry
+                # accumulates duplicate rows (same stable_id, different
+                # created_at) and the ModelLinkPanel picker returns the OLD
+                # empty-quantities rows first (ordered by created_at ASC).
+                from sqlalchemy import delete as _sa_delete
+
+                await session.execute(
+                    _sa_delete(BIMElement).where(BIMElement.model_id == model_uuid)
+                )
+                await session.flush()
+
                 # Top-level geometry_quality drives the placeholder banner.
                 # Stamp it onto each element's properties so the frontend
                 # viewer can self-detect placeholders without an extra API
@@ -1654,15 +1666,21 @@ async def _process_cad_in_background(
                         model_id,
                     )
 
-                # Storage policy - drop the raw upload after a *successful*
-                # conversion when ``keep_original_cad`` is False (production
-                # default).  Failed conversions fall through to the else
-                # branch below and keep the original so retry works without
-                # re-upload.  Conversion artifacts (GLB/DAE/parquet) stay
-                # forever regardless.
+                # Storage policy — drop the raw upload ONLY after a *fully
+                # successful* (ready) conversion when ``keep_original_cad``
+                # is False (production default).
+                # Degraded models (converter absent / no quantities) keep
+                # the original so the user can Retry once the DDC converter
+                # is installed or the pipeline is fixed.  Failed conversions
+                # (element_count == 0) fall through to the else branch
+                # below.  Conversion artifacts (GLB/DAE/parquet) stay
+                # forever regardless of this setting.
                 from app.config import get_settings as _get_settings
 
-                if not _get_settings().keep_original_cad:
+                if (
+                    model.status == "ready"
+                    and not _get_settings().keep_original_cad
+                ):
                     await bim_file_storage.delete_original_cad(
                         project_id=project_id,
                         model_id=model_id,
