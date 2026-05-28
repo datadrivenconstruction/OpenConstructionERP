@@ -697,7 +697,7 @@ Get productive in under 10 minutes:
 
 ```bash
 pip install --upgrade openconstructionerp
-openestimate
+openconstructionerp
 ```
 
 That's it. Installs backend + pre-built React frontend in one wheel (~7.4 MB), opens your browser at **http://localhost:8080**, creates a SQLite database, and seeds the three demo accounts on first boot. No Docker, no Node.js, no extra services. [PyPI package](https://pypi.org/project/openconstructionerp/).
@@ -710,7 +710,7 @@ That's it. Installs backend + pre-built React frontend in one wheel (~7.4 MB), o
 > ```
 > Full Linux guide with system deps and troubleshooting: [docs/INSTALL_LINUX.md](docs/INSTALL_LINUX.md).
 
-If something looks off, run `openestimate doctor` for a per-check OK/WARN/ERROR report.
+If something looks off, run `openconstructionerp doctor` for a per-check OK/WARN/ERROR report.
 
 ### Alternative 1: One-line installer (auto-detects Docker / uv / pip)
 
