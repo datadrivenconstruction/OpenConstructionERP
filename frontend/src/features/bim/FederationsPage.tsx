@@ -22,9 +22,10 @@
  *   DELETE /federations/{id}/models/{model_id}    — remove member
  */
 
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query';
 
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 import {
@@ -43,9 +44,9 @@ import {
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 import { FederationTypeTree } from './FederationTypeTree';
-import { FederatedViewer, type FederatedViewerHandle } from './FederatedViewer';
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
@@ -310,12 +311,35 @@ interface FederationDetailDrawerProps {
   onChanged: () => void;
 }
 
+/**
+ * Probe whether a BIM model's geometry endpoint is reachable, using HEAD
+ * so we don't download the full GLB just to grey-out an unavailable row.
+ * Returns ``true`` when the endpoint responds 2xx, ``false`` on 4xx/5xx,
+ * and ``undefined`` while the request is in flight (so the UI can show a
+ * neutral row until we know).
+ */
+async function probeGeometryAvailable(modelId: string): Promise<boolean> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = { 'X-DDC-Client': 'OE/1.0' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  try {
+    const resp = await fetch(
+      `/api/v1/bim-hub/models/${encodeURIComponent(modelId)}/geometry/`,
+      { method: 'HEAD', headers },
+    );
+    return resp.ok;
+  } catch {
+    return false;
+  }
+}
+
 function FederationDetailDrawer({
   federationId,
   onClose,
   onChanged,
 }: FederationDetailDrawerProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const open = federationId !== null;
 
@@ -336,9 +360,12 @@ function FederationDetailDrawer({
     useState<FederationDiscipline>('arch');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Slice 3: which sub-tab is visible inside the drawer. The "3D" tab
-  // mounts the FederatedViewer; the type tree's onSelectClass callback
-  // auto-switches to it so users see isolation take effect.
+  // Which sub-tab is visible inside the drawer.
+  // The "3D" tab no longer mounts a federated viewer (the embedded scene
+  // had unreliable geometry resolution for some members and surfaced raw
+  // 404s in a yellow toast). Instead it renders a clickable list of member
+  // models that deep-link to the per-model viewer at /bim/:modelId, which
+  // is the supported & working 3D surface.
   const [activeTab, setActiveTab] = useState<'members' | 'types' | '3d'>(
     'members',
   );
@@ -348,16 +375,14 @@ function FederationDetailDrawer({
     onChange: setActiveTab,
     orientation: 'horizontal',
   });
-  const viewerRef = useRef<FederatedViewerHandle | null>(null);
+  // FederationTypeTree calls this when a class is picked. We no longer
+  // own a 3D scene here, so the best we can do is switch to the 3D tab
+  // (the per-model viewers there are independent of the federation
+  // selection — class-level isolation is only available inside an open
+  // /bim/:modelId page).
   const handleSelectClass = useCallback(
-    (ifcClass: string /* , _modelIds: string[] */) => {
+    (_ifcClass: string) => {
       setActiveTab('3d');
-      // useImperativeHandle is set up on FederatedViewer; ref may be null
-      // until the canvas mounts after the tab switch (effect runs on the
-      // next tick). Defer the isolation push so the scene is alive.
-      queueMicrotask(() => {
-        viewerRef.current?.isolateClass(ifcClass);
-      });
     },
     [],
   );
@@ -372,6 +397,42 @@ function FederationDetailDrawer({
       (modelsPayload?.items ?? []).filter((m) => !memberModelIds.has(m.id)),
     [modelsPayload, memberModelIds],
   );
+
+  // Per-member geometry availability probe (HEAD). Used by the "3D" tab
+  // to grey out rows whose geometry endpoint 404s so the user doesn't
+  // navigate to a broken viewer page. We only fire the probes when the
+  // 3D tab is active to keep the cost off the members/types tabs.
+  const memberIds = useMemo(
+    () => (data?.members ?? []).map((m) => m.bim_model_id),
+    [data?.members],
+  );
+  const geometryProbes = useQueries({
+    queries: memberIds.map((modelId) => ({
+      queryKey: ['federation-member-geometry-probe', modelId],
+      queryFn: () => probeGeometryAvailable(modelId),
+      enabled: activeTab === '3d' && !!modelId,
+      retry: false,
+      staleTime: 60 * 1000,
+    })),
+  });
+  const geometryAvailability = useMemo(() => {
+    const map: Record<string, boolean | undefined> = {};
+    memberIds.forEach((id, i) => {
+      const q = geometryProbes[i];
+      map[id] = q?.data;
+    });
+    return map;
+  }, [memberIds, geometryProbes]);
+
+  // Resolve a friendly model name from the project's BIM models list so
+  // the 3D tab can show "Arch — Block A.ifc" instead of an 8-char UUID
+  // slice. Falls back to the slice when the model is not in the list yet
+  // (e.g. the catalogue hasn't loaded).
+  const modelNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const m of modelsPayload?.items ?? []) map.set(m.id, m.name);
+    return map;
+  }, [modelsPayload]);
 
   const handleAdd = useCallback(async () => {
     if (!data || !addingModelId) return;
@@ -483,10 +544,10 @@ function FederationDetailDrawer({
               </div>
             </div>
 
-            {/* Slice 3: 3-tab layout — Members / Element types / 3D. The
-                3D tab mounts the FederatedViewer; selecting a class from
-                the type tree auto-switches to it and isolates that class
-                in the viewer via the imperative ref handle. */}
+            {/* 3-tab layout — Members / Element types / 3D. The 3D tab
+                used to mount a federated viewer; it now renders a list of
+                clickable member-model rows that deep-link to the per-model
+                /bim/:modelId viewer (see the 3D panel below for details). */}
             <div
               role="tablist"
               aria-label={t('bim.federation.tabs_label', {
@@ -655,8 +716,137 @@ function FederationDetailDrawer({
             ) : null}
 
             {activeTab === '3d' ? (
-              <div data-testid="federation-tab-panel-3d" role="tabpanel" id="federation-tab-panel-3d" aria-labelledby="federation-tab-3d">
-                <FederatedViewer ref={viewerRef} federationId={data.id} />
+              <div
+                data-testid="federation-tab-panel-3d"
+                role="tabpanel"
+                id="federation-tab-panel-3d"
+                aria-labelledby="federation-tab-3d"
+              >
+                {/* The embedded federated 3D scene was unreliable: when a
+                    member's geometry endpoint 404'd the panel showed a
+                    yellow toast with raw "Geometry fetch failed (404)"
+                    text and the canvas stayed empty. Instead we render a
+                    list of member models, each row deep-linking to the
+                    per-model viewer at /bim/:modelId (which is the
+                    supported & working surface). Rows whose geometry HEAD
+                    probe fails are greyed out so the user doesn't navigate
+                    into a broken viewer. */}
+                <h3 className="mb-2 text-sm font-semibold text-slate-700">
+                  {t('bim.federation.open_in_3d_viewer', {
+                    defaultValue: 'Open a member in the 3D viewer',
+                  })}
+                </h3>
+                <p className="mb-3 text-xs text-slate-500">
+                  {t('bim.federation.tab_3d_subtitle', {
+                    defaultValue:
+                      'Pick a model below to open the full 3D viewer for that file. The federated scene returns in a later release.',
+                  })}
+                </p>
+                {data.members.length === 0 ? (
+                  <p className="text-sm text-slate-500">
+                    {t('bim.federation.no_members')}
+                  </p>
+                ) : (
+                  <ul
+                    className="divide-y divide-slate-100 rounded border border-slate-200"
+                    data-testid="federation-tab-panel-3d-list"
+                  >
+                    {data.members.map((m) => {
+                      const available = geometryAvailability[m.bim_model_id];
+                      const isUnavailable = available === false;
+                      const isProbing = available === undefined;
+                      const friendlyName =
+                        modelNameById.get(m.bim_model_id) ??
+                        m.bim_model_id.slice(0, 8);
+                      const baseRow =
+                        'flex w-full items-center justify-between gap-3 px-3 py-2 text-left transition-colors';
+                      const enabledRow =
+                        baseRow +
+                        ' hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-oe-blue/40';
+                      const disabledRow =
+                        baseRow + ' cursor-not-allowed opacity-60';
+                      const swatchColor =
+                        m.color_hint ||
+                        DISCIPLINE_PALETTE[
+                          m.discipline as FederationDiscipline
+                        ] ||
+                        '#94a3b8';
+                      return (
+                        <li key={m.id}>
+                          {isUnavailable ? (
+                            <div
+                              className={disabledRow}
+                              data-testid={`federation-3d-row-${m.bim_model_id}`}
+                              aria-disabled="true"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span
+                                  className="inline-block h-4 w-4 rounded"
+                                  style={{ backgroundColor: swatchColor }}
+                                  aria-hidden
+                                />
+                                <Badge>
+                                  {t(`bim.federation.disc_${m.discipline}`, {
+                                    defaultValue: m.discipline,
+                                  })}
+                                </Badge>
+                                <span className="text-sm text-slate-700">
+                                  {friendlyName}
+                                </span>
+                              </div>
+                              <span className="text-xs text-slate-400">
+                                {t('bim.federation.geometry_unavailable', {
+                                  defaultValue: 'Geometry not available',
+                                })}
+                              </span>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              className={enabledRow}
+                              data-testid={`federation-3d-row-${m.bim_model_id}`}
+                              onClick={() =>
+                                navigate(`/bim/${m.bim_model_id}`)
+                              }
+                              aria-label={t(
+                                'bim.federation.open_member_in_3d_aria',
+                                {
+                                  defaultValue: 'Open {{name}} in 3D viewer',
+                                  name: friendlyName,
+                                },
+                              )}
+                            >
+                              <div className="flex items-center gap-3">
+                                <span
+                                  className="inline-block h-4 w-4 rounded"
+                                  style={{ backgroundColor: swatchColor }}
+                                  aria-hidden
+                                />
+                                <Badge>
+                                  {t(`bim.federation.disc_${m.discipline}`, {
+                                    defaultValue: m.discipline,
+                                  })}
+                                </Badge>
+                                <span className="text-sm text-slate-700">
+                                  {friendlyName}
+                                </span>
+                              </div>
+                              <span className="text-xs text-oe-blue">
+                                {isProbing
+                                  ? t('bim.federation.checking', {
+                                      defaultValue: 'Checking…',
+                                    })
+                                  : t('bim.federation.openIn3D', {
+                                      defaultValue: 'Open in 3D viewer →',
+                                    })}
+                              </span>
+                            </button>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
             ) : null}
           </>
