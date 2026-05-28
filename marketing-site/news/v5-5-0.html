@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <title>v5.5.0 — Stability wave, full Japanese locale, 9-of-9 verified — OpenConstructionERP</title>
+  <meta name="description" content="OpenConstructionERP v5.5.0 — last stable cut of the 5.x line. Eight user-reported bugs fixed end-to-end (PDF worker, PDF 403, JWT session reset, CAD/BIM Data Explorer with RVT, Section Box, Walk mode, /bim/federations 3D, DWG load). Full Japanese locale (1,627 keys, 98.5%). Six dependabot upgrades merged. News right-rail related-articles widget. 9-of-9 PASS browser verification." />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://openconstructionerp.com/news/v5-5-0.html" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="OpenConstructionERP" />
+  <meta property="og:url" content="https://openconstructionerp.com/news/v5-5-0.html" />
+  <meta property="og:title" content="v5.5.0 — Stability wave + full Japanese + 9-of-9 verified" />
+  <meta property="og:description" content="Eight user-reported bugs fixed end-to-end, Japanese locale completed to 98.5%, six dependabot upgrades merged, and a sequential 9-of-9 PASS browser verification." />
+  <meta property="article:published_time" content="2026-05-28T10:30:00Z" />
+  <meta property="article:author" content="Artem Boiko" />
+  <meta property="article:tag" content="Release" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="v5.5.0 — Stability wave + Japanese + 9-of-9 verified" />
+  <meta name="twitter:description" content="Last stable 5.x cut. Eight user-reported fixes, Japanese to 98.5%, six dependabot upgrades, 9-of-9 PASS verification." />
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#0284c7" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <script>
+    (function () { try { var t = localStorage.getItem('oce-theme') || 'light'; document.documentElement.dataset.theme = t; } catch (e) { document.documentElement.dataset.theme = 'light'; } })();
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "v5.5.0 — Stability wave, full Japanese locale, 9-of-9 verified",
+    "datePublished": "2026-05-28",
+    "author": { "@type": "Person", "name": "Artem Boiko" },
+    "publisher": { "@type": "Organization", "name": "DataDrivenConstruction", "logo": { "@type": "ImageObject", "url": "https://openconstructionerp.com/favicon.svg" } },
+    "mainEntityOfPage": "https://openconstructionerp.com/news/v5-5-0.html"
+  }
+  </script>
+
+  <style>
+    :root { --bg-0: #f7fbff; --bg-1: #edf5ff; --bg-2: #e7f2fd; --ink-0: #0b1220; --ink-1: #1e293b; --ink-2: #475569; --ink-3: #94a3b8; --line-0: rgba(15, 23, 42, 0.05); --line-1: rgba(15, 23, 42, 0.09); --line-2: rgba(15, 23, 42, 0.14); --card: #ffffff; --code-bg: #0f172a; --code-fg: #e2e8f0; --accent: #0284c7; --accent-2: #0ea5e9; --accent-3: #2563eb; --accent-4: #6366f1; --accent-5: #06b6d4; }
+    [data-theme="dark"] { --bg-0: #0b1220; --bg-1: #111a2c; --bg-2: #152238; --ink-0: #eff6ff; --ink-1: #cfe0f5; --ink-2: #94a3b8; --ink-3: #64748b; --line-0: rgba(255,255,255,0.06); --line-1: rgba(255,255,255,0.10); --line-2: rgba(255,255,255,0.16); --card: #111a2c; --code-bg: #0a0f1c; --code-fg: #e2e8f0; --accent: #38bdf8; --accent-2: #7dd3fc; --accent-3: #60a5fa; }
+    *, *::before, *::after { box-sizing: border-box; } html { scroll-behavior: smooth; }
+    body { margin: 0; background: radial-gradient(60% 50% at 50% 0%, color-mix(in oklab, var(--accent) 7%, transparent) 0%, transparent 70%), var(--bg-0); color: var(--ink-0); font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; } a:hover { color: var(--accent); }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+    .narrow { max-width: 720px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+    .nav { position: sticky; top: 0; z-index: 50; background: color-mix(in oklab, var(--bg-0) 88%, transparent); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); border-bottom: 1px solid var(--line-1); }
+    .nav-inner { max-width: 1300px; margin: 0 auto; padding: 12px clamp(20px, 4vw, 48px); display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .nav-left, .nav-right { display: flex; align-items: center; gap: 10px; }
+    .brand { display: inline-flex; align-items: baseline; font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.015em; }
+    .brand-seg-1 { color: var(--ink-0); } .brand-seg-2 { color: var(--ink-2); } .brand-seg-3 { color: var(--accent); font-weight: 800; }
+    .nav-icon-btn { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9px; border: 1px solid var(--line-2); background: transparent; color: var(--ink-2); cursor: pointer; transition: border-color 0.15s ease, color 0.15s ease; }
+    .nav-icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-icon-btn .icon-moon { display: none; }
+    [data-theme="dark"] .nav-icon-btn .icon-sun { display: none; }
+    [data-theme="dark"] .nav-icon-btn .icon-moon { display: block; }
+    .nav-links { display: flex; gap: clamp(10px, 1.6vw, 22px); align-items: center; font-size: 14px; }
+    .nav-links a { color: var(--ink-2); font-weight: 500; padding: 6px 4px; transition: color 0.15s ease; }
+    .nav-links a:hover, .nav-links a.is-active { color: var(--accent); }
+    .nav-links a.is-active { font-weight: 600; }
+    .nav-pill { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease; }
+    .nav-pill.github { border: 1px solid var(--line-2); color: var(--ink-1); background: transparent; }
+    .nav-pill.github:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-pill.cta { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%); color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 8px 18px -8px color-mix(in oklab, var(--accent) 60%, transparent); }
+    .nav-pill.cta:hover { transform: translateY(-1px); color: #fff; }
+    .nav-pill .arrow { transition: transform 0.15s ease; } .nav-pill:hover .arrow { transform: translateX(2px); }
+    @media (max-width: 980px) { .nav-links a:not(.news-link), .nav-pill.github { display: none; } }
+    .article-hero { position: relative; padding: clamp(48px, 7vw, 96px) 0 clamp(32px, 5vw, 48px); overflow: hidden; }
+    .article-hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(to right, color-mix(in oklab, var(--accent) 7%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in oklab, var(--accent) 7%, transparent) 1px, transparent 1px); background-size: 56px 56px; -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 35%, black 30%, transparent 78%); mask-image: radial-gradient(ellipse 75% 60% at 50% 35%, black 30%, transparent 78%); pointer-events: none; opacity: 0.5; }
+    .article-hero > * { position: relative; }
+    .crumbs { font-family: 'Inter Tight', sans-serif; font-size: 13px; color: var(--ink-3); margin-bottom: 18px; }
+    .crumbs a:hover { color: var(--accent); } .crumbs .sep { margin: 0 8px; opacity: 0.5; }
+    .pill-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+    .chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-family: 'Inter Tight', sans-serif; font-size: 11.5px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; }
+    .chip.release { background: color-mix(in oklab, var(--accent) 10%, transparent); color: var(--accent); border: 1px solid color-mix(in oklab, var(--accent) 24%, transparent); }
+    .chip.stable { background: color-mix(in oklab, #16a34a 12%, transparent); color: #16a34a; border: 1px solid color-mix(in oklab, #16a34a 28%, transparent); }
+    [data-theme="dark"] .chip.stable { color: #4ade80; border-color: color-mix(in oklab, #4ade80 32%, transparent); }
+    .pill-meta { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-2); letter-spacing: 0.01em; }
+    .pill-meta + .pill-meta::before { content: "·"; margin: 0 8px; opacity: 0.5; }
+    .article-hero h1 { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: clamp(34px, 5.6vw, 60px); line-height: 1.05; letter-spacing: -0.025em; margin: 0 0 22px; }
+    .article-hero h1 .accent { color: var(--accent); }
+    .article-hero p.lede { font-size: clamp(17px, 1.6vw, 21px); line-height: 1.55; color: var(--ink-2); max-width: 680px; margin: 0 0 28px; }
+    .cover { max-width: 1180px; margin: 0 auto clamp(40px, 6vw, 64px); padding: 0 clamp(20px, 4vw, 48px); }
+    .cover-inner { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line-2); background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); box-shadow: 0 24px 60px -24px rgba(2, 90, 160, 0.22), 0 2px 8px -2px rgba(15, 23, 42, 0.08); aspect-ratio: 21 / 9; display: grid; place-items: center; }
+    .cover-inner .cover-art { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: clamp(56px, 9vw, 128px); color: color-mix(in oklab, var(--accent) 22%, transparent); letter-spacing: -0.04em; }
+    .article { padding: 0 0 clamp(48px, 6vw, 80px); }
+    .article p, .article ul, .article ol { font-size: 17px; line-height: 1.7; color: var(--ink-1); margin: 0 0 18px; }
+    .article ul, .article ol { padding-left: 22px; } .article ul li, .article ol li { margin-bottom: 6px; }
+    .article h2 { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: clamp(24px, 2.6vw, 32px); line-height: 1.15; letter-spacing: -0.02em; margin: 56px 0 18px; color: var(--ink-0); }
+    .article h2:first-child { margin-top: 0; }
+    .article h3 { font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 19px; letter-spacing: -0.01em; margin: 28px 0 10px; color: var(--ink-0); }
+    .article a { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in oklab, var(--accent) 32%, transparent); transition: border-color 0.15s ease; }
+    .article a:hover { border-bottom-color: var(--accent); }
+    .article .btn, .article .btn:hover { border-bottom: none; }
+    .article .btn-primary, .article .btn-primary:hover { color: #fff; }
+    .article .btn-ghost { color: var(--ink-0); }
+    .article .btn-ghost:hover { color: var(--accent); }
+    .article strong { color: var(--ink-0); font-weight: 600; }
+    .article code { font-family: 'JetBrains Mono', monospace; font-size: 0.92em; padding: 1px 6px; border-radius: 5px; background: color-mix(in oklab, var(--accent) 8%, var(--bg-1)); border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--line-1)); color: var(--ink-0); }
+    .highlights { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 14px 0 28px; }
+    @media (max-width: 720px) { .highlights { grid-template-columns: 1fr; } }
+    .hi-card { background: var(--card); border: 1px solid var(--line-1); border-radius: 14px; padding: 20px 20px 22px; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+    .hi-card:hover { transform: translateY(-2px); border-color: color-mix(in oklab, var(--accent) 35%, var(--line-1)); box-shadow: 0 14px 28px -16px rgba(2, 90, 160, 0.18); }
+    .hi-card .hi-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: color-mix(in oklab, var(--accent) 12%, transparent); color: var(--accent); margin-bottom: 14px; }
+    .hi-card .hi-icon svg { width: 18px; height: 18px; }
+    .hi-card h4 { font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 15.5px; letter-spacing: -0.005em; margin: 0 0 6px; color: var(--ink-0); }
+    .hi-card p { font-size: 14px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+    .codewrap { position: relative; background: var(--code-bg); color: var(--code-fg); border-radius: 14px; padding: 22px 24px; margin: 14px 0 30px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.7; overflow-x: auto; border: 1px solid rgba(56, 189, 248, 0.18); box-shadow: 0 18px 40px -20px rgba(2, 90, 160, 0.25); }
+    .codewrap .cmd::before { content: "$ "; color: #64748b; user-select: none; }
+    .codewrap .tok-cmd { color: #7dd3fc; } .codewrap .tok-arg { color: #e2e8f0; } .codewrap .tok-flag { color: #fbbf24; } .codewrap .tok-amp { color: #64748b; padding: 0 4px; }
+    .copy-btn { position: absolute; top: 14px; right: 14px; padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); color: #e2e8f0; font-family: 'Inter Tight', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; }
+    .copy-btn:hover { background: rgba(56, 189, 248, 0.18); border-color: rgba(56, 189, 248, 0.4); }
+    .copy-btn.is-copied { background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.4); color: #86efac; }
+    .cta-block { margin: 56px auto 0; padding: clamp(28px, 4vw, 44px); background: radial-gradient(80% 100% at 0% 0%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 60%), radial-gradient(80% 100% at 100% 100%, color-mix(in oklab, var(--accent-3) 14%, transparent), transparent 60%), var(--card); border: 1px solid color-mix(in oklab, var(--accent) 25%, var(--line-1)); border-radius: 20px; text-align: center; }
+    .cta-block h3 { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: clamp(22px, 2.4vw, 28px); letter-spacing: -0.015em; margin: 0 0 8px; color: var(--ink-0); }
+    .cta-block p { color: var(--ink-2); font-size: 15px; margin: 0 0 22px; }
+    .cta-row { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 12px; font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 14.5px; letter-spacing: -0.005em; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+    .btn .arrow { transition: transform 0.15s ease; } .btn:hover .arrow { transform: translateX(3px); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%); color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 10px 22px -10px color-mix(in oklab, var(--accent) 60%, transparent); }
+    .btn-primary:hover { transform: translateY(-1px); color: #fff; }
+    .btn-ghost { background: transparent; border: 1px solid var(--line-2); color: var(--ink-0); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .pagefoot { border-top: 1px solid var(--line-1); padding: 28px 0; margin-top: 24px; color: var(--ink-2); font-size: 13px; }
+    .pagefoot-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .pagefoot a { color: var(--ink-2); } .pagefoot a:hover { color: var(--accent); }
+    @media (max-width: 540px) { .article p, .article ul, .article ol { font-size: 16px; } }
+  </style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <a class="brand" href="/"><span class="brand-name"><span class="brand-seg-1">Open</span><span class="brand-seg-2">Construction</span><span class="brand-seg-3">ERP</span></span></a>
+      <button type="button" class="nav-icon-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/></svg>
+      </button>
+    </div>
+    <div class="nav-links">
+      <a href="/services.html">Practices</a>
+      <a href="/industries.html">Industries</a>
+      <a href="/standards.html">Standards</a>
+      <a href="/maturity.html">Maturity</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/partners.html">Partners</a>
+      <a href="/news.html" class="news-link is-active">News</a>
+      <a href="/docs.html">Docs</a>
+    </div>
+    <div class="nav-right">
+      <a class="nav-pill github" href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+        <span>GitHub</span>
+      </a>
+      <a class="nav-pill cta" href="/demo"><span>Try demo</span><svg class="arrow" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+    </div>
+  </div>
+</nav>
+
+<section class="article-hero">
+  <div class="narrow">
+    <div class="crumbs">
+      <a href="/">Home</a><span class="sep">/</span>
+      <a href="/news.html">News</a><span class="sep">/</span>
+      <span>v5.5.0 — Stability wave + Japanese + 9-of-9 verified</span>
+    </div>
+    <div class="pill-row">
+      <span class="chip release">Release</span>
+      <span class="chip stable">Last stable 5.x</span>
+      <span class="pill-meta">2026-05-28</span>
+      <span class="pill-meta">~6 min read</span>
+    </div>
+    <h1>v5.5.0 — <span class="accent">Eight user-reported fixes</span>,<br />verified one by one in a real browser.</h1>
+    <p class="lede">
+      v5.3.0 closed six audit bundles. v5.5.0 closes eight individual bug reports
+      that came back from real sessions &mdash; PDF takeoff worker, PDF document
+      <code>403</code>, JWT session reset, the CAD/BIM Data Explorer choking on
+      RVT, the BIM Section Box, Walk mode, the <code>/bim/federations</code> 3D
+      tab, and DWG load. Every fix sat in front of a Playwright probe before it
+      shipped: 9 PASS, 0 FAIL. The Japanese locale finally crosses
+      98.5&nbsp;% coverage (1,627 keys). Six dependabot upgrades cleared. And
+      the news index gets a related-articles right-rail so reading
+      one release leads to the next.
+    </p>
+  </div>
+</section>
+
+<div class="cover"><div class="cover-inner"><div class="cover-art">v5.5.0</div></div></div>
+
+<article class="article">
+  <div class="narrow">
+
+    <p>
+      The shape of this wave is different from v5.3.0. That release was six deep
+      bundles &mdash; each one its own audit pass on a feature area. v5.5.0 is
+      eight individual user-reported bugs, each fixed end-to-end and verified
+      against a real browser before commit. It&rsquo;s the version where the
+      regressions that real users tripped on while exploring the platform
+      between v5.3.0 and now have all closed. There&rsquo;s also a deep
+      Japanese-locale pass and a half-dozen dependabot merges riding along.
+    </p>
+
+    <h2>The eight fixes</h2>
+
+    <div class="highlights">
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+        </div>
+        <h4>PDF takeoff worker &mdash; the &ldquo;Setting up fake worker failed&rdquo; banner</h4>
+        <p>
+          The PWA service-worker glob pattern only captured <code>.js</code>, not
+          <code>.mjs</code>, so the <code>pdf.worker.min.mjs</code> bundle never
+          precached. Then the runtime <code>CacheFirst</code> rule blocked the
+          fetch on first load. Two changes in <code>vite.config.ts</code>:
+          <code>globPatterns</code> picks up <code>.mjs</code>, and runtime
+          caching bypasses <code>request.destination === 'worker'</code>. PDF
+          takeoff loads cleanly on cold cache now. Zero pdf/worker console
+          errors in verification.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h4>PDF document <code>403</code> &mdash; path-whitelist regression</h4>
+        <p>
+          The takeoff download endpoint guarded against path traversal by
+          whitelisting <code>~/.openestimator</code> &mdash; but the live
+          installer persists data under <code>~/.openestimate</code>, so
+          downloads ate a <code>403</code> on the legitimate path. The
+          whitelist now accepts both spellings plus the
+          <code>OE_DATA_DIR</code> / <code>DATA_DIR</code> environment
+          overrides. Verified: upload a 38&nbsp;KB PDF, reload, fetch &rarr;
+          byte-perfect 200.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+        </div>
+        <h4>JWT session reset &mdash; &ldquo;sessions were dropping&rdquo;</h4>
+        <p>
+          On dev installs the JWT secret was a process-random value &mdash; so
+          every backend restart invalidated every issued token, kicking users
+          back to <code>/login</code> with no signal that anything had changed.
+          The secret now persists to
+          <code>~/.openestimate/.jwt-secret</code> (with legacy
+          <code>~/.openestimator/.jwt-secret</code> fallback). Restart the
+          backend, your session survives. Explicit production secrets via the
+          <code>JWT_SECRET</code> env var still take priority.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        </div>
+        <h4>CAD/BIM Data Explorer RVT &mdash; the v17/v18 CLI break</h4>
+        <p>
+          The CAD-to-Excel pipeline still passed v17-style positional args
+          (<code>out.xlsx standard -no-collada</code>) to a DDC cad2data v18
+          binary that takes named flags
+          (<code>-x out.xlsx --no-dae -m standard</code>). RVT uploads
+          died with <code>exit 15</code>. Routed through a new
+          <code>build_ddc_args()</code> helper with capability detection, so
+          both v17 and v18 binaries are spoken to in their own dialect. Real
+          18.9&nbsp;MB RVT &rarr; <code>HTTP 200</code> on verification.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+        </div>
+        <h4>BIM Section Box + Walk mode &mdash; on-demand rendering</h4>
+        <p>
+          Both worked logically but didn&rsquo;t paint. The Three.js scene
+          uses on-demand rendering with a dirty flag; <code>SectionBox</code>
+          and <code>WalkMode</code> mutated the scene without telling it to
+          re-render. Added <code>onChange</code> callbacks fired from
+          <code>enable()</code> / <code>disable()</code> /
+          <code>setBoundsToBox()</code> on the section box and
+          <code>tick()</code> on the walk loop, wired both to
+          <code>scene.requestRender()</code>. Now the clipping plane and the
+          first-person camera both visibly respond to user input.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
+        </div>
+        <h4><code>/bim/federations</code> 3D &mdash; replaced the broken viewer</h4>
+        <p>
+          The embedded <code>FederatedViewer</code> tab was throwing
+          &ldquo;Geometry fetch failed&rdquo; toasts because federations were
+          assembling viewers for member models whose geometry hadn&rsquo;t
+          processed yet. v5.5.0 drops the in-page viewer and replaces it with
+          a list of member-model rows, each with a HEAD geometry probe.
+          Available members deep-link to <code>/bim/:modelId</code> &mdash; the
+          single-model viewer that already works. Missing-geometry rows are
+          greyed and not clickable. No more dead 3D tab.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+        </div>
+        <h4>DWG load &mdash; same v17/v18 CLI break, takeoff path</h4>
+        <p>
+          The DWG takeoff endpoint hit the same v17/v18 fork as the CAD
+          Explorer and degraded silently with a misleading &ldquo;please upload
+          DXF&rdquo; copy. Routed through <code>build_ddc_args()</code>, added
+          the user&rsquo;s converter install directory to discovery, and
+          replaced the error copy with a pointer to the
+          <code>/dwg-takeoff</code> install pill plus the GitHub fallback.
+          Sample DWG upload now returns <code>HTTP 201</code> end-to-end.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2a14 14 0 0 1 0 20M12 2a14 14 0 0 0 0 20"/></svg>
+        </div>
+        <h4>Japanese locale &mdash; 1,627 keys, 98.5&nbsp;% coverage</h4>
+        <p>
+          The JA backlog from issue&nbsp;#245 was the largest single
+          locale-translation push the project has run: 1,627 keys translated
+          with construction-industry terminology
+          (積算, 単価, 明細, 工事, 物件). Coverage moves from a partial state to
+          98.5&nbsp;%. RU / DE / FR / ES verified sidebar by sidebar during the
+          same audit. Per-locale screenshots checked into
+          <code>docs/qa/verification-2026-05-28/</code>.
+        </p>
+      </div>
+
+    </div>
+
+    <h2>Verified one by one</h2>
+    <p>
+      Every fix went through a sequential Playwright/Chromium probe against
+      <code>127.0.0.1:8001</code> with a freshly built
+      <code>frontend/dist</code> &mdash; one item, one before-and-after pair of
+      screenshots, one decision. Sequential, not parallel: the local SQLite
+      backend can&rsquo;t survive concurrent audits. Tally:
+      <strong>9 PASS / 0 FAIL</strong>. 22 before/after screenshots,
+      <code>spec.mjs</code> and <code>results.json</code> live alongside the
+      report under <code>docs/qa/verification-2026-05-28/</code>. Two
+      non-blocking follow-ups noted: a <code>data-testid</code> on the BIM
+      Section Box &ldquo;Fit to all&rdquo; button and the federations 3D rows
+      would make future assertive probes easier, and the JWT
+      default-secret-on-first-boot &rarr; persist &rarr; second-boot-reads-file
+      cycle deserves a unit test in <code>backend/tests/unit/</code>.
+    </p>
+
+    <h2>The other half &mdash; PRs, dependencies, news widget</h2>
+    <p>
+      Six contributor pull requests landed via cherry-pick + squash review
+      after a malicious-code audit:
+      Dependabot upgrades for FastAPI, uvicorn, pydantic, the dnd-kit family,
+      and a docs typo fix from
+      <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/pulls" target="_blank" rel="noopener">community contributors</a>.
+      PR&nbsp;#161 was deliberately skipped &mdash; it touched the
+      money-decimal layer in a way that conflicted with the multi-currency
+      audit in the v5.4.x line and would have been a net regression. PR&nbsp;#164
+      from <code>@Mourdi59</code> remained intact from v5.3.0.
+    </p>
+    <p>
+      Every news article (this one included) gets a right-rail
+      &ldquo;Related articles&rdquo; widget rendered by
+      <code>marketing-site/news/assets/related-articles.js</code>. Vanilla JS,
+      ~470 lines, pulls neighbouring news cards from
+      <code>news.html</code> at runtime and pins them in a sticky sidebar so
+      readers can hop from one release announcement to the next without
+      bouncing back to the index. Layout is a desktop-only right rail; below
+      the viewport breakpoint it inlines at the bottom of the article.
+    </p>
+
+    <h2>Why this is the last stable 5.x</h2>
+    <p>
+      The 5.x line wraps up here. The release-every-two-days cadence of the
+      v5.2 / v5.3 series carried it through the deep-coordination initiative,
+      the Geo Hub redesign, Brazil Tier-1, and the WCAG-AA pass. v5.5.0 is the
+      bookend: nothing speculative landed, every change was a closed user
+      report or a verified contributor PR, and CI ships the wheel under
+      Trusted Publishing without manual <code>twine</code>. The 6.x line will
+      open the multi-tenant RLS, Yjs collaboration on BOQ, and marketplace
+      v1 work that&rsquo;s been deferred while the stability surface was
+      audited.
+    </p>
+
+    <h2>Upgrade</h2>
+
+    <div class="codewrap">
+      <button type="button" class="copy-btn" id="copy-upgrade" aria-label="Copy upgrade command">Copy</button>
+<pre><span class="cmd"><span class="tok-cmd">pip</span> <span class="tok-arg">install</span> <span class="tok-flag">--upgrade</span> <span class="tok-arg">openconstructionerp</span></span></pre>
+    </div>
+
+    <p>
+      No Alembic migration in this release &mdash; head stays at <code>v3144</code>
+      (the v3145 demo-address backfill drafted during the wave was deferred to
+      the 6.x line). 116 modules. Frontend ships the PWA glob-pattern fix, the
+      Section Box / Walk on-demand wiring, the new federations list, the JA
+      locale completion, and the news right-rail widget. Backend ships the
+      JWT-secret persistence, the path-whitelist regression fix, and the
+      <code>build_ddc_args()</code> helper that closes the v17/v18 CAD-CLI
+      fork. The wheel is built from tag <code>v5.5.0</code>
+      (commit&nbsp;<code>7068f316</code>) by GitHub Trusted Publishing.
+    </p>
+
+    <div class="cta-block">
+      <h3>Try v5.5.0 today.</h3>
+      <p>Live demo in your browser, or self-host in five minutes. AGPL-3.0, no signup required.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="/demo"><span>Try the demo</span><svg class="arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a class="btn btn-ghost" href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+          <span>View on GitHub</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer class="pagefoot">
+  <div class="wrap">
+    <div class="pagefoot-inner">
+      <div>&copy; 2026 Artem Boiko / DataDrivenConstruction &middot; Open source under AGPL-3.0.</div>
+      <div>
+        <a href="/">Home</a> &middot;
+        <a href="/partners.html">Partners</a> &middot;
+        <a href="/news.html">News</a> &middot;
+        <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">GitHub</a> &middot;
+        <a href="https://datadrivenconstruction.io" target="_blank" rel="noopener">DataDrivenConstruction.io</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var btn = document.getElementById('theme-toggle'); if (!btn) return;
+    btn.addEventListener('click', function () {
+      var cur = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+      var next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem('oce-theme', next); } catch (e) {}
+    });
+  })();
+  (function () {
+    var btn = document.getElementById('copy-upgrade'); if (!btn) return;
+    var cmd = 'pip install --upgrade openconstructionerp';
+    btn.addEventListener('click', function () {
+      var done = function () { var prev = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('is-copied'); setTimeout(function () { btn.textContent = prev; btn.classList.remove('is-copied'); }, 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cmd).then(done).catch(function () { var ta = document.createElement('textarea'); ta.value = cmd; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta); done(); });
+      } else { var ta = document.createElement('textarea'); ta.value = cmd; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta); done(); }
+    });
+  })();
+</script>
+
+<script src="/news/assets/related-articles.js" defer></script>
+
+</body>
+</html>
