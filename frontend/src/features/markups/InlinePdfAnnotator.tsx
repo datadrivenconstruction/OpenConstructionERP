@@ -244,6 +244,12 @@ export function InlinePdfAnnotator({
 
   /* ── Render page ──────────────────────────────────────────────────── */
 
+  // Forward declaration via ref: `drawAnnotations` is declared after this
+  // effect (its body needs callback definitions that live below). Calling
+  // through a ref keeps both callers reading the freshest closure without
+  // a TDZ reference cycle.
+  const drawAnnotationsRef = useRef<() => void>(() => {});
+
   useEffect(() => {
     if (!pdfDoc || !canvasRef.current) return;
     let cancelled = false;
@@ -282,11 +288,11 @@ export function InlinePdfAnnotator({
         }
         // Even on cancellation, repaint the overlay so stale strokes from
         // the previous page can't linger if the redraw effect races us.
-        if (!cancelled) drawAnnotations();
+        if (!cancelled) drawAnnotationsRef.current();
         return;
       }
       if (!cancelled) {
-        drawAnnotations();
+        drawAnnotationsRef.current();
       }
     };
     renderPage();
@@ -297,12 +303,7 @@ export function InlinePdfAnnotator({
       // bitmap data.
       activeTask?.cancel?.();
     };
-    // drawAnnotations is included so page-flip and zoom changes always
-    // redraw annotations with the freshest closure (annotations state,
-    // current page filter, viewport). Without it the call at lines 285/289
-    // captured the stale callback from the previous render, causing
-    // annotations from page N to bleed onto (or vanish from) page N+1.
-  }, [pdfDoc, currentPage, zoom, drawAnnotations]);
+  }, [pdfDoc, currentPage, zoom]);
 
   /* ── Draw annotations on overlay ──────────────────────────────────── */
 
@@ -481,6 +482,13 @@ export function InlinePdfAnnotator({
       ctx.restore();
     }
   }, [annotations, currentPage, isDrawing, drawStart, drawEnd, activeTool, activeColor]);
+
+  // Keep the forward-ref pointing at the latest drawAnnotations closure
+  // so the render-effect (which can't depend on drawAnnotations directly
+  // — see the TDZ comment above) always invokes the freshest version.
+  useEffect(() => {
+    drawAnnotationsRef.current = drawAnnotations;
+  }, [drawAnnotations]);
 
   // Redraw overlay whenever annotations or drawing state changes
   useEffect(() => {
