@@ -1899,15 +1899,23 @@ def create_app() -> FastAPI:
             import secrets as _secrets
             from pathlib import Path as _Path
 
-            secret_path = _Path.home() / ".openestimator" / ".jwt-secret"
+            # The CLI's default data dir is ``~/.openestimate`` (no "r")
+            # per cli.py:51. The historical brand namespace ``.openestimator``
+            # is honoured only as a read fallback for legacy installs.
+            primary_dir = _Path.home() / ".openestimate"
+            legacy_dir = _Path.home() / ".openestimator"
+            secret_path = primary_dir / ".jwt-secret"
+            legacy_secret_path = legacy_dir / ".jwt-secret"
             persisted: str | None = None
-            try:
-                if secret_path.is_file():
-                    candidate = secret_path.read_text(encoding="utf-8").strip()
-                    if len(candidate.encode("utf-8")) >= 32:
-                        persisted = candidate
-            except OSError:
-                persisted = None
+            for path in (secret_path, legacy_secret_path):
+                try:
+                    if path.is_file():
+                        candidate = path.read_text(encoding="utf-8").strip()
+                        if len(candidate.encode("utf-8")) >= 32:
+                            persisted = candidate
+                            break
+                except OSError:
+                    continue
 
             if persisted is None:
                 persisted = _secrets.token_urlsafe(48)

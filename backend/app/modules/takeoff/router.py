@@ -33,6 +33,7 @@ Routes:
 """
 
 import logging
+import os
 import random as _random
 import threading
 import time as _time
@@ -3762,9 +3763,26 @@ async def download_document(
 
     file_path = Path(doc.file_path).resolve()
 
-    # Security: ensure resolved path is within the takeoff upload directory
-    allowed_base = (Path.home() / ".openestimator").resolve()
-    if not str(file_path).startswith(str(allowed_base)):
+    # Security: ensure resolved path is within the takeoff upload directory.
+    # The CLI's default data dir is ``~/.openestimate`` (see cli.py:51,
+    # ``DEFAULT_DATA_DIR = Path.home() / ".openestimate"``). The guard used
+    # to whitelist the brand-namespace ``~/.openestimator`` (with an "r")
+    # which mismatched every actual file path on disk — every PDF download
+    # returned 403 "Access denied". Whitelist both spellings to also cover
+    # any historical installs that landed under the brand namespace, plus
+    # any operator-supplied custom data dir via OE_DATA_DIR.
+    home = Path.home().resolve()
+    allowed_bases = [
+        (home / ".openestimate").resolve(),
+        (home / ".openestimator").resolve(),
+    ]
+    custom_dir = os.environ.get("OE_DATA_DIR") or os.environ.get("DATA_DIR")
+    if custom_dir:
+        try:
+            allowed_bases.append(Path(custom_dir).resolve())
+        except OSError:
+            pass
+    if not any(str(file_path).startswith(str(b)) for b in allowed_bases):
         raise HTTPException(status_code=403, detail="Access denied")
 
     if not file_path.exists() or file_path.is_symlink():
