@@ -8,14 +8,20 @@ RUN groupadd -r oe && useradd -r -g oe -d /app -s /sbin/nologin oe
 
 WORKDIR /app
 
-COPY backend/pyproject.toml backend/
-RUN pip install --no-cache-dir ./backend && \
-    pip install --no-cache-dir "ezdxf>=0.18.0" || true
-
+# Copy the FULL backend source BEFORE installing. hatchling (packages=["app"])
+# needs app/ present to build the package, and the runtime needs the alembic/
+# data/ locales/ siblings. The previous layout copied only pyproject.toml then
+# ran `pip install ./backend ... || true` — the install failed (no source yet)
+# but `|| true` masked it, so the image shipped with NO dependencies and no
+# uvicorn (container crashed: "exec: uvicorn: not found"). The [server] extra
+# pulls asyncpg/psycopg2 required by the PostgreSQL DATABASE_URL.
 COPY backend/ backend/
+RUN pip install --no-cache-dir -e "./backend[server]"
 
 RUN chown -R oe:oe /app
 USER oe
+
+WORKDIR /app/backend
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
