@@ -663,6 +663,23 @@ class QuantityLinkRepository:
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
+    async def get_projection_for_position(self, position_id: uuid.UUID) -> QuantityLink | None:
+        """Return the single governing projection (rule) for a position.
+
+        Option C (binding/projection split): a position has at most one
+        projection describing *how* to compute its quantity. During the
+        transition more than one row may still exist for a position; the
+        most recently created one wins so a freshly-saved rule takes effect.
+        """
+        stmt = (
+            select(QuantityLink)
+            .where(QuantityLink.position_id == position_id)
+            .order_by(QuantityLink.created_at.desc())
+            .limit(1)
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+
     async def list_for_boq(self, boq_id: uuid.UUID) -> list[QuantityLink]:
         """List every quantity link for a BOQ, ordered by position then age."""
         stmt = (

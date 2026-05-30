@@ -301,6 +301,25 @@ def evaluate_formula(
     return result
 
 
+def validate_formula(formula: str) -> set[str]:
+    """Parse + safety-scan a formula without executing it; return its vars.
+
+    A convenience wrapper used by callers that want a single up-front
+    "is this formula acceptable?" gate (e.g. the BOQ quantity-projection
+    preview + refresh paths). Unlike :func:`parse_formula` alone — which
+    only catches *syntax* errors — this also runs :func:`_scan_for_unsafe`,
+    so a formula that parses but references a dunder / lambda / ``eval`` is
+    rejected here with :class:`FormulaUnsafeError` instead of silently
+    failing later at evaluation time.
+
+    Returns the set of free variable names (see :func:`collect_variable_names`).
+    Raises :class:`FormulaSyntaxError` or :class:`FormulaUnsafeError`.
+    """
+    parsed = parse_formula(formula)
+    _scan_for_unsafe(parsed)
+    return collect_variable_names(parsed)
+
+
 def collect_variable_names(parsed: ast.Expression | ast.Module) -> set[str]:
     """Return the set of free variable names referenced by ``parsed``.
 
@@ -372,6 +391,7 @@ __all__ = [
     "collect_variable_names",
     "evaluate_formula",
     "parse_formula",
+    "validate_formula",
 ]
 
 

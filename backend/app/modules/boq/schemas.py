@@ -2151,14 +2151,23 @@ class QuantityLinkCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     model_id: UUID
-    element_stable_ids: list[str] = Field(..., min_length=1)
-    quantity_field: str = Field(..., min_length=1, max_length=64)
+    # Option C (binding/projection split): the binding (which elements) now
+    # lives in ``oe_bim_boq_link``; this row is the *projection* (how to
+    # compute). ``element_stable_ids`` is therefore optional and DEPRECATED —
+    # kept only so pre-migration callers keep working.
+    element_stable_ids: list[str] = Field(default_factory=list)
+    # Simple mode: which canonical element quantity key to aggregate. Optional
+    # because formula mode and ``count`` aggregation don't read a single key.
+    quantity_field: str = Field(default="", max_length=64)
     target_field: Literal["quantity"] = "quantity"
     aggregation: QuantityAggregation = "sum"
+    # Projection mode + the per-element expression (formula mode only).
+    projection_kind: Literal["simple", "formula"] = "simple"
+    formula: str | None = Field(default=None, max_length=2000)
 
     @field_validator("element_stable_ids")
     @classmethod
-    def _dedupe_non_empty(cls, v: list[str]) -> list[str]:
+    def _dedupe(cls, v: list[str]) -> list[str]:
         """Strip blanks and duplicates while preserving first-seen order."""
         seen: set[str] = set()
         out: list[str] = []
@@ -2167,9 +2176,25 @@ class QuantityLinkCreate(BaseModel):
             if s and s not in seen:
                 seen.add(s)
                 out.append(s)
-        if not out:
-            raise ValueError("element_stable_ids must contain at least one id")
         return out
+
+    @model_validator(mode="after")
+    def _check_projection(self) -> "QuantityLinkCreate":
+        """Enforce the projection contract.
+
+        * formula mode → a non-empty formula; ``count`` is reserved to simple
+          mode, so a formula aggregation falls back to ``sum``.
+        * simple mode → a quantity field UNLESS the aggregation is ``count``
+          (which counts elements, not a field).
+        """
+        if self.projection_kind == "formula":
+            if not (self.formula or "").strip():
+                raise ValueError("formula is required when projection_kind='formula'")
+            if self.aggregation == "count":
+                object.__setattr__(self, "aggregation", "sum")
+        elif self.aggregation != "count" and not self.quantity_field.strip():
+            raise ValueError("quantity_field is required for a non-count simple projection")
+        return self
 
 
 class QuantityLinkResponse(BaseModel):
@@ -2185,6 +2210,8 @@ class QuantityLinkResponse(BaseModel):
     quantity_field: str
     target_field: str
     aggregation: str
+    projection_kind: str = "simple"
+    formula: str | None = None
     status: str
     source_model_version: str | None = None
     last_applied_quantity: str | None = None

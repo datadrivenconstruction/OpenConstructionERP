@@ -2,11 +2,22 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useQuery } from '@tanstack/react-query';
-import { X, Loader2, Cuboid, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { X, Loader2, Cuboid, ArrowRight, SlidersHorizontal } from 'lucide-react';
 import { fetchBIMElementsByIds } from '@/features/bim/api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer/ElementManager';
 import type { DisplayQuantityApi } from '@/shared/hooks/useDisplayQuantity';
+import { useToastStore } from '@/stores/useToastStore';
+import { boqApi } from '../api';
+import { ProjectionEditor, type ProjectionValue } from '../ProjectionEditor';
+
+const DEFAULT_PROJECTION: ProjectionValue = {
+  projection_kind: 'simple',
+  quantity_field: '',
+  aggregation: 'sum',
+  formula: '',
+};
 
 /* ── Unit inference from property/quantity key ─────────────────────── */
 
@@ -158,6 +169,7 @@ function fmtNum(v: number): string {
 /* ── Component ─────────────────────────────────────────────────────── */
 
 export function BIMQuantityPicker({
+  positionId,
   cadElementIds,
   bimModelId,
   currentQuantity,
@@ -166,7 +178,17 @@ export function BIMQuantityPicker({
   onClose,
   displayQuantity,
 }: BIMQuantityPickerProps) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  // Projection rule (option C): persists the *durable* extraction rule so
+  // "Refresh from model" honours the chosen parameter / formula instead of
+  // re-guessing from the unit. Distinct from the quick "Use" buttons below,
+  // which set a one-shot manual value.
+  const [showRule, setShowRule] = useState(false);
+  const [projection, setProjection] = useState<ProjectionValue>(DEFAULT_PROJECTION);
 
   // Close on outside click
   useEffect(() => {
@@ -241,6 +263,49 @@ export function BIMQuantityPicker({
     }
     return { position: 'fixed' as const, left, top };
   }, [anchorRect]);
+
+  // Canonical params available across the bound elements (chips + field).
+  const availableParams = useMemo(() => {
+    const keys = new Set<string>();
+    for (const g of groups) for (const e of g.entries) keys.add(e.key);
+    return Array.from(keys).sort();
+  }, [groups]);
+
+  const saveProjection = useMutation({
+    mutationFn: () =>
+      boqApi.createQuantityLink(positionId, {
+        model_id: bimModelId,
+        projection_kind: projection.projection_kind,
+        quantity_field:
+          projection.projection_kind === 'simple' && projection.aggregation !== 'count'
+            ? projection.quantity_field
+            : '',
+        aggregation: projection.aggregation,
+        formula: projection.projection_kind === 'formula' ? projection.formula : null,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['quantity-links', positionId] });
+      addToast({
+        type: 'success',
+        title: t('boq.projection_saved', { defaultValue: 'Projection saved' }),
+        message: t('boq.projection_saved_hint', {
+          defaultValue:
+            'The quantity is not changed yet — use “Refresh from model” then Apply to pull it in.',
+        }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('boq.projection_save_failed', { defaultValue: 'Could not save projection' }),
+        message: e.message,
+      }),
+  });
+
+  const projectionValid =
+    projection.projection_kind === 'formula'
+      ? projection.formula.trim().length > 0
+      : projection.aggregation === 'count' || !!projection.quantity_field;
 
   const popover = (
     <div
@@ -375,6 +440,43 @@ export function BIMQuantityPicker({
           </>
         )}
       </div>
+
+      {/* Durable rule (projection): chosen parameter or formula. */}
+      {!isLoading && groups.length > 0 && (
+        <div className="border-t border-border-light dark:border-border-dark">
+          <button
+            onClick={() => setShowRule((v) => !v)}
+            className="w-full flex items-center gap-1.5 px-3 py-2 text-left hover:bg-surface-secondary/40 transition-colors"
+          >
+            <SlidersHorizontal size={13} className="text-content-tertiary shrink-0" />
+            <span className="text-[11px] font-medium text-content-secondary flex-1">
+              {t('boq.projection_rule_toggle', { defaultValue: 'Quantity rule (parameter / formula)' })}
+            </span>
+            <span className="text-[10px] text-content-quaternary">
+              {showRule ? '▼' : '▶'}
+            </span>
+          </button>
+          {showRule && (
+            <div className="px-3 pb-3 space-y-3">
+              <ProjectionEditor
+                positionId={positionId}
+                availableParams={availableParams}
+                value={projection}
+                onChange={setProjection}
+                livePreview
+              />
+              <button
+                onClick={() => saveProjection.mutate()}
+                disabled={!projectionValid || saveProjection.isPending}
+                className="w-full flex items-center justify-center gap-1.5 h-7 rounded-lg bg-oe-blue text-white text-xs font-medium hover:bg-oe-blue/90 disabled:opacity-50 transition-colors"
+              >
+                {saveProjection.isPending && <Loader2 size={12} className="animate-spin" />}
+                {t('boq.projection_save', { defaultValue: 'Save projection' })}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 

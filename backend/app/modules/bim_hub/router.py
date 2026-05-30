@@ -104,6 +104,8 @@ from app.modules.bim_hub.schemas import (
     BOQElementLinkListResponse,
     BOQElementLinkResponse,
     BoqExportRequest,
+    BulkBOQElementLinkCreate,
+    BulkBOQElementLinkResponse,
     CreateModelFromDocumentRequest,
     FederationCreate,
     FederationDiffResponse,
@@ -116,6 +118,8 @@ from app.modules.bim_hub.schemas import (
     FederationSnapshot,
     FederationTypeTreeResponse,
     FederationUpdate,
+    QuantityFormulaPreviewRequest,
+    QuantityFormulaPreviewResponse,
     QuantityMapApplyRequest,
     QuantityMapApplyResult,
     SmartViewPreviewRequest,
@@ -4484,6 +4488,64 @@ async def delete_link(
         )
     await _verify_model_access(service, element.model_id, user_id)
     await service.delete_link(link_id)
+
+
+@router.post(
+    "/links/bulk",
+    response_model=BulkBOQElementLinkResponse,
+    status_code=201,
+)
+async def bulk_create_links(
+    data: BulkBOQElementLinkCreate,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
+    service: BIMHubService = Depends(_get_service),
+) -> BulkBOQElementLinkResponse:
+    """Idempotently bind many BIM elements to one BOQ position.
+
+    Backs the "select all (filtered)" action in the rewritten
+    ``ModelLinkPanel``: elements already linked are skipped, so the call is
+    safe to repeat. Quantity is *not* auto-synced — the projection rule now
+    owns the value (option C).
+    """
+    await _verify_boq_position_access(service, data.boq_position_id, user_id)
+    created, skipped = await service.bulk_create_links(
+        data.boq_position_id,
+        data.bim_element_ids,
+        link_type=data.link_type,
+        user_id=user_id,
+    )
+    return BulkBOQElementLinkResponse(
+        created=[BOQElementLinkResponse.model_validate(lnk) for lnk in created],
+        created_count=len(created),
+        skipped_count=len(skipped),
+        skipped_element_ids=skipped,
+    )
+
+
+@router.post(
+    "/links/quantity-formula/preview",
+    response_model=QuantityFormulaPreviewResponse,
+)
+async def preview_quantity_formula(
+    data: QuantityFormulaPreviewRequest,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.read")),
+    service: BIMHubService = Depends(_get_service),
+) -> QuantityFormulaPreviewResponse:
+    """Dry-run a per-element quantity formula for the picker's live preview.
+
+    Read-only: reuses the exact evaluator and element binding that "refresh
+    from model" uses, so the preview can never drift from the value that will
+    actually be applied (single source of truth).
+    """
+    await _verify_boq_position_access(service, data.boq_position_id, user_id)
+    result = await service.preview_quantity_formula(
+        data.boq_position_id,
+        formula=data.formula,
+        aggregation=data.aggregation,
+    )
+    return QuantityFormulaPreviewResponse.model_validate(result)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -395,7 +395,14 @@ class QuantityLink(Base):
             currently always ``quantity`` (only field a model can drive)
         aggregation - how multiple elements combine: ``sum`` (default),
             ``max``, ``min``, ``count``, ``first``
-        status - ``active`` (in sync) | ``stale`` (a refresh detected the
+        projection_kind — ``simple`` (aggregate ``quantity_field``) or
+            ``formula`` (evaluate ``formula`` per element, then aggregate)
+        formula — per-element expression evaluated via the shared safe
+            evaluator when ``projection_kind == "formula"``; ``None`` otherwise
+        element_stable_ids — DEPRECATED (option C): the bound element set is
+            now derived from the canonical ``oe_bim_boq_link`` binding table;
+            kept nullable for migration and no longer written
+        status — ``active`` (in sync) | ``stale`` (a refresh detected the
             source elements changed and a human has not yet applied) |
             ``broken`` (model/elements no longer resolvable)
         source_model_version - the model ``version`` string captured at
@@ -444,6 +451,14 @@ class QuantityLink(Base):
     quantity_field: Mapped[str] = mapped_column(String(64), nullable=False)
     target_field: Mapped[str] = mapped_column(String(32), nullable=False, default="quantity", server_default="quantity")
     aggregation: Mapped[str] = mapped_column(String(16), nullable=False, default="sum", server_default="sum")
+    # Projection mode (option C — binding/projection split):
+    #   "simple"  → aggregate ``quantity_field`` across the bound elements
+    #   "formula" → evaluate ``formula`` per element, then aggregate
+    # ``formula`` is the per-element expression (safe_eval); NULL in simple mode.
+    projection_kind: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="simple", server_default="simple"
+    )
+    formula: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="active", server_default="active")
     source_model_version: Mapped[str | None] = mapped_column(String(20), nullable=True)
     last_applied_quantity: Mapped[str | None] = mapped_column(String(50), nullable=True)

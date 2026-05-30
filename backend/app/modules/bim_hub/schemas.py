@@ -595,6 +595,71 @@ class BOQElementLinkListResponse(BaseModel):
     total: int = 0
 
 
+class BulkBOQElementLinkCreate(BaseModel):
+    """Idempotently bind many BIM elements to one BOQ position.
+
+    Powers the "select all (filtered)" action in ``ModelLinkPanel``: the
+    element selector resolves a set of element UUIDs and posts them in one
+    request. Already-linked elements are skipped server-side.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    boq_position_id: UUID
+    bim_element_ids: list[UUID] = Field(default_factory=list)
+    link_type: str = Field(default="manual", max_length=50)
+
+
+class BulkBOQElementLinkResponse(BaseModel):
+    """Outcome of a bulk-link upsert."""
+
+    created: list[BOQElementLinkResponse] = Field(default_factory=list)
+    created_count: int = 0
+    skipped_count: int = 0
+    skipped_element_ids: list[UUID] = Field(default_factory=list)
+
+
+class QuantityFormulaPreviewRequest(BaseModel):
+    """Dry-run a per-element quantity formula for the live picker preview."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    boq_position_id: UUID
+    formula: str = Field(default="", max_length=2000)
+    aggregation: str = Field(default="sum", max_length=16)
+
+
+class QuantityFormulaPreviewElement(BaseModel):
+    """One element's contribution in a formula preview."""
+
+    stable_id: str
+    name: str | None = None
+    value: Decimal | None = None
+    error: str | None = None
+
+    @field_serializer("value", when_used="json")
+    def _ser_value(self, v: Decimal | None) -> str | None:
+        return None if v is None else str(v)
+
+
+class QuantityFormulaPreviewResponse(BaseModel):
+    """Result of evaluating a formula over a position's bound elements."""
+
+    valid: bool = False
+    error: str | None = None
+    referenced_params: list[str] = Field(default_factory=list)
+    aggregation: str = "sum"
+    total: Decimal | None = None
+    contributing_count: int = 0
+    missing_count: int = 0
+    link_count: int = 0
+    per_element: list[QuantityFormulaPreviewElement] = Field(default_factory=list)
+
+    @field_serializer("total", when_used="json")
+    def _ser_total(self, v: Decimal | None) -> str | None:
+        return None if v is None else str(v)
+
+
 class BIMModelBOQLinkAggregate(BaseModel):
     """Aggregated BOQ position + linked BIM element IDs for one model.
 

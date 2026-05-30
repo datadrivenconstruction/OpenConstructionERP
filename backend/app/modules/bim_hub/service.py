@@ -14,8 +14,10 @@ import asyncio
 import fnmatch
 import json
 import logging
+import math
 import shutil
 import uuid
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -459,6 +461,103 @@ _COUNT_UNITS: frozenset[str] = frozenset(
         "kpl",
     }
 )
+
+
+# Dimension-locked mapping from a canonical (ASCII) ``Position.unit`` token
+# to the ordered list of element ``quantities`` keys that legitimately
+# satisfy it. A unit absent from this map (and not in ``_COUNT_UNITS``) has
+# NO dimensionally-correct BIM quantity — see D-TKC-028: we never guess a
+# dimension, we leave the estimator's manual value untouched.
+_UNIT_TO_QKEY: dict[str, list[str]] = {
+    "m3": ["volume_m3", "Volume", "volume"],
+    "m2": ["area_m2", "Area", "area"],
+    "m": ["length_m", "Length", "length"],
+    "lfm": ["length_m", "Length", "length"],
+    "lm": ["length_m", "Length", "length"],
+    "kg": ["weight_kg", "Weight", "weight"],
+    "t": ["weight_kg", "Weight", "weight"],
+    "to": ["weight_kg", "Weight", "weight"],
+}
+
+
+def _aggregate_decimals(values: list[Decimal], aggregation: str) -> Decimal:
+    """Combine per-element values according to the projection aggregation.
+
+    ``count`` is NOT handled here — it counts elements, not values, and is
+    resolved by the caller. An empty list yields ``Decimal(0)``.
+    """
+    if not values:
+        return Decimal(0)
+    if aggregation == "max":
+        return max(values)
+    if aggregation == "min":
+        return min(values)
+    if aggregation == "first":
+        return values[0]
+    return sum(values, Decimal(0))  # "sum" (default)
+
+
+@dataclass(slots=True)
+class ProjectionSpec:
+    """How to project a quantity from a position's bound BIM elements.
+
+    Option C (binding/projection split): the *binding* (which elements)
+    lives in ``oe_bim_boq_link``; this spec is the *projection* (how to
+    compute), owned by the BOQ module (``QuantityLink``) and injected into
+    :meth:`BIMHubService.compute_quantity_from_links` so ``bim_hub`` never
+    has to import the BOQ link table.
+
+    When no spec is injected the compute falls back to inferring a simple
+    rule from the position's unit (legacy behaviour), which is what keeps
+    pre-projection bindings working unchanged.
+
+    Attributes:
+        kind: ``"simple"`` (aggregate ``quantity_field``) or ``"formula"``
+            (evaluate ``formula`` per element, then aggregate).
+        quantity_field: canonical element quantity key to read (simple mode).
+        aggregation: ``sum`` | ``max`` | ``min`` | ``first`` | ``count``.
+        formula: per-element expression evaluated in formula mode.
+    """
+
+    kind: str = "simple"
+    quantity_field: str = ""
+    aggregation: str = "sum"
+    formula: str | None = None
+
+
+@dataclass(slots=True)
+class LinkQuantityComputation:
+    """Read-only result of pricing a position against its BOQElementLinks.
+
+    Produced by :meth:`BIMHubService.compute_quantity_from_links` and shared
+    by both the auto-sync writer (``_sync_boq_quantity_from_links``) and the
+    BOQ "refresh from model" probe so the two paths can never diverge on the
+    dimensional rules (count units, tonne ÷1000, no arbitrary fallback).
+
+    Attributes:
+        quantity: The dimensionally-correct aggregate, or ``None`` when the
+            unit has no mapping (D-TKC-028 — caller leaves the value
+            untouched). A geometric unit with links but no contributing
+            element quantities yields ``Decimal(0)`` (distinct from
+            ``None``).
+        unit: The canonical (ASCII-folded) unit token the result keys off.
+        quantity_field: The element quantity key actually projected
+            (``"count"`` for count units), for display/provenance.
+        aggregation: ``"count"`` for count units, otherwise ``"sum"``.
+        contributing_elements: ``stable_id``s that contributed a value.
+        missing_element_ids: ``stable_id``s (or raw element ids) that
+            resolved to no usable quantity / no longer exist.
+        link_count: Number of BOQElementLinks on the position.
+    """
+
+    quantity: Decimal | None
+    unit: str
+    quantity_field: str
+    aggregation: str
+    contributing_elements: list[str] = field(default_factory=list)
+    missing_element_ids: list[str] = field(default_factory=list)
+    link_count: int = 0
+    projection_kind: str = "simple"
 
 
 # Sentinel key used by ``list_elements_with_links`` to signal that a
@@ -2130,8 +2229,10 @@ class BIMHubService:
         # Keep Position.cad_element_ids in sync (legacy JSON mirror).
         await self._append_cad_element_id(data.boq_position_id, data.bim_element_id)
 
-        # Auto-populate BOQ position quantity from linked element quantities.
-        await self._sync_boq_quantity_from_links(data.boq_position_id)
+        # Option C: binding NEVER mutates the quantity. The value is owned by
+        # the projection rule and only changes through the explicit "Refresh
+        # from model" + Apply flow (propose → human confirms). Auto-sync on
+        # create/delete was removed so toggling a binding is side-effect free.
 
         logger.info(
             "BOQ-BIM link created: pos=%s elem=%s type=%s",
@@ -2156,8 +2257,8 @@ class BIMHubService:
         # Remove the mirrored id from Position.cad_element_ids.
         await self._remove_cad_element_id(position_id, element_id)
 
-        # Re-sync BOQ position quantity after link removal.
-        await self._sync_boq_quantity_from_links(position_id)
+        # Option C: binding NEVER mutates the quantity (see create_link). No
+        # re-sync on delete — the value only changes through Refresh + Apply.
 
         logger.info("BOQ-BIM link deleted: %s", link_id)
 
@@ -2185,105 +2286,119 @@ class BIMHubService:
             # Re-assign to force SQLAlchemy to notice the mutation on JSON.
             await self.session.flush()
 
-    async def _sync_boq_quantity_from_links(
+    async def compute_quantity_from_links(
         self,
         position_id: uuid.UUID,
-    ) -> None:
-        """Recompute ``Position.quantity`` from all linked BIM element quantities.
+        *,
+        projection: ProjectionSpec | None = None,
+    ) -> LinkQuantityComputation:
+        """Read-only twin of :meth:`_sync_boq_quantity_from_links`.
 
-        Strategy: sum the *dimensionally-correct* quantity field from
-        linked elements based on the position's unit:
+        Evaluates what a position's quantity *would* become from its
+        linked BIM elements without writing anything. The auto-sync
+        writer delegates to this so the dimensional rules live in exactly
+        one place; the BOQ "refresh from model" probe reuses it to surface
+        BOQElementLink-driven positions in its review payload.
 
-        - m3 / m³           → Σ volume_m3
-        - m2 / m²           → Σ area_m2
-        - m / lfm / lm      → Σ length_m
-        - kg                → Σ weight_kg
-        - t (metric tonne)  → Σ weight_kg ÷ 1000   (D-TKC-005)
-        - pcs / St / ea / … → element *count*       (E-XMOD-003)
+        Projection (option C — binding/projection split):
 
-        Correctness invariants (these were the v1.9.0 defects):
+        * When ``projection`` is given, it is the *user's* rule: it decides
+          the quantity key + aggregation (simple mode) or carries a
+          per-element formula (formula mode). This is what fixes the
+          "refresh always re-guesses the default parameter" bug — the
+          chosen ``width_m`` is honoured instead of the unit default.
+        * When ``projection`` is ``None`` the rule is inferred from the
+          position's unit (legacy behaviour), so pre-projection bindings
+          keep working unchanged:
 
-        * **E-XMOD-003** - a count position (``pcs``/``St``/``ea``/
-          ``lsum``/…) must NEVER take volume/area/weight. It gets the
-          number of linked elements (1 per element) so "7.5 pcs of
-          walls" can no longer happen.
-        * **D-TKC-005** - a tonne position divides ``weight_kg`` by
-          1000 so 4000 kg → 4 t, not 4000 t.
-        * **D-TKC-028** - if NO dimensionally-correct quantity exists
-          for the unit, the position is left untouched. We never fall
-          back to "first non-zero numeric value" (which silently summed
-          an area into a length position, etc.). The estimator's manual
-          value is preserved instead of being corrupted.
+          - m3 / m³           → Σ volume_m3
+          - m2 / m²           → Σ area_m2
+          - m / lfm / lm      → Σ length_m
+          - kg                → Σ weight_kg
+          - t (metric tonne)  → Σ weight_kg ÷ 1000   (D-TKC-005)
+          - pcs / St / ea / … → element *count*       (E-XMOD-003)
+
+        Correctness invariants (preserved in both modes):
+
+        * **E-XMOD-003** — a count position never takes geometry; it gets
+          the number of resolvable linked elements.
+        * **D-TKC-005** — a tonne position divides ``weight_kg`` by 1000.
+        * **D-TKC-028** — a unit with no dimensionally-correct mapping
+          yields ``quantity=None``; the caller leaves the manual value
+          untouched (no arbitrary fallback).
         """
         pos = await self.session.get(Position, position_id)
-        if pos is None:
-            return
-
         links = await self.link_repo.list_by_boq_position(position_id)
-        if not links:
-            return
+        unit = normalize_unit_token(pos.unit) if pos is not None else ""
 
-        # Canonical ASCII unit token (m³→m3, M2→m2, …) so the mapping
-        # below is locale/encoding independent.
-        unit = normalize_unit_token(pos.unit)
+        if not links or pos is None:
+            return LinkQuantityComputation(
+                quantity=None,
+                unit=unit,
+                quantity_field="",
+                aggregation="sum",
+                link_count=len(links),
+                projection_kind=projection.kind if projection else "simple",
+            )
 
-        # ── Count units: quantity = number of linked elements ─────────
-        # No geometric substitution - this is the E-XMOD-003 fix.
-        if unit in _COUNT_UNITS:
-            count_total = 0
+        # ── Formula mode — evaluated per element then aggregated (Phase 2).
+        if projection is not None and projection.kind == "formula":
+            return await self._compute_formula_quantity(pos, links, unit, projection)
+
+        # ── Resolve the effective simple rule ─────────────────────────
+        if projection is not None and (projection.quantity_field or projection.aggregation == "count"):
+            aggregation = projection.aggregation or "sum"
+            is_count = aggregation == "count"
+            preferred_keys = [projection.quantity_field] if projection.quantity_field else []
+        else:
+            aggregation = "sum"
+            is_count = unit in _COUNT_UNITS
+            preferred_keys = _UNIT_TO_QKEY.get(unit, [])
+
+        # ── Count: quantity = number of resolvable elements (E-XMOD-003) ─
+        if is_count:
+            contributing: list[str] = []
+            missing: list[str] = []
             for lnk in links:
                 elem = await self.element_repo.get(lnk.bim_element_id)
                 if elem is not None:
-                    count_total += 1
-            if count_total > 0:
-                pos.quantity = str(count_total)
-                try:
-                    rate = Decimal(pos.unit_rate or "0")
-                    pos.total = str((Decimal(count_total) * rate).quantize(Decimal("0.01")))
-                except (InvalidOperation, TypeError, ValueError):
-                    pass
-                await self.session.flush()
-                logger.info(
-                    "BOQ position %s (count unit %r) quantity auto-set to %d linked BIM element(s)",
-                    position_id,
-                    pos.unit,
-                    count_total,
-                )
-            return
-
-        # ── Geometric units: dimension-locked quantity key ────────────
-        _UNIT_TO_QKEY: dict[str, list[str]] = {
-            "m3": ["volume_m3", "Volume", "volume"],
-            "m2": ["area_m2", "Area", "area"],
-            "m": ["length_m", "Length", "length"],
-            "lfm": ["length_m", "Length", "length"],
-            "lm": ["length_m", "Length", "length"],
-            "kg": ["weight_kg", "Weight", "weight"],
-            "t": ["weight_kg", "Weight", "weight"],
-            "to": ["weight_kg", "Weight", "weight"],
-        }
-        preferred_keys = _UNIT_TO_QKEY.get(unit, [])
-        if not preferred_keys:
-            # D-TKC-028 - unknown / non-geometric unit and not a known
-            # count unit: do NOT guess a dimension. Leaving the manual
-            # quantity intact is strictly safer than summing an
-            # arbitrary geometric value of the wrong dimension.
-            logger.info(
-                "BOQ position %s unit %r has no dimensionally-correct "
-                "BIM quantity mapping - manual quantity left untouched "
-                "(no arbitrary fallback)",
-                position_id,
-                pos.unit,
+                    contributing.append(elem.stable_id or str(elem.id))
+                else:
+                    missing.append(str(lnk.bim_element_id))
+            return LinkQuantityComputation(
+                quantity=Decimal(len(contributing)),
+                unit=unit,
+                quantity_field="count",
+                aggregation="count",
+                contributing_elements=contributing,
+                missing_element_ids=missing,
+                link_count=len(links),
+                projection_kind="simple",
             )
-            return
 
-        # kg → 1, t → 1/1000 (D-TKC-005: tonne conversion).
+        # ── Geometric: dimension-locked / chosen quantity key ─────────
+        if not preferred_keys:
+            # D-TKC-028 — unknown / non-geometric unit with no chosen key.
+            return LinkQuantityComputation(
+                quantity=None,
+                unit=unit,
+                quantity_field="",
+                aggregation=aggregation,
+                link_count=len(links),
+                projection_kind="simple",
+            )
+
+        # kg → 1, t → 1/1000 (D-TKC-005: tonne conversion, unit-driven).
         scale = Decimal("0.001") if unit in ("t", "to") else Decimal("1")
 
-        total = Decimal(0)
+        contributing = []
+        missing = []
+        used_key = preferred_keys[0]
+        values: list[Decimal] = []
         for lnk in links:
             elem = await self.element_repo.get(lnk.bim_element_id)
             if elem is None:
+                missing.append(str(lnk.bim_element_id))
                 continue
             qtys = elem.quantities or {}
 
@@ -2293,31 +2408,408 @@ class BIMHubService:
                 if raw is not None:
                     try:
                         value = Decimal(str(raw))
+                        used_key = key
                         break
                     except (InvalidOperation, TypeError, ValueError):
                         continue
 
-            # D-TKC-028 - NO arbitrary fallback. An element that lacks
-            # the dimensionally-correct quantity simply contributes 0.
+            # D-TKC-028 — NO arbitrary fallback. An element that lacks
+            # the dimensionally-correct quantity contributes nothing.
             if value is not None and value > 0:
-                total += value * scale
+                values.append(value * scale)
+                contributing.append(elem.stable_id or str(elem.id))
+            else:
+                missing.append(elem.stable_id or str(elem.id))
 
-        if total > 0:
-            # Round to 4 decimal places to avoid floating-point noise
-            pos.quantity = str(total.quantize(Decimal("0.0001")))
-            # Also recompute total = quantity * unit_rate
-            try:
-                rate = Decimal(pos.unit_rate or "0")
-                pos.total = str((total * rate).quantize(Decimal("0.01")))
-            except (InvalidOperation, TypeError, ValueError):
-                pass
-            await self.session.flush()
-            logger.info(
-                "BOQ position %s quantity auto-updated to %s from %d linked BIM elements",
-                position_id,
-                pos.quantity,
-                len(links),
+        return LinkQuantityComputation(
+            quantity=_aggregate_decimals(values, aggregation),
+            unit=unit,
+            quantity_field=used_key,
+            aggregation=aggregation,
+            contributing_elements=contributing,
+            missing_element_ids=missing,
+            link_count=len(links),
+            projection_kind="simple",
+        )
+
+    @staticmethod
+    def _element_formula_names(elem) -> dict[str, float]:
+        """Build the ``names`` binding for a formula from an element's row.
+
+        Exposes every numeric value found in the element's canonical
+        ``quantities`` (primary) and ``properties`` (secondary, never
+        overriding a quantity of the same name), plus ``count = 1`` so a
+        formula can reference the element count for parity with simple
+        ``count`` aggregation. Non-numeric / non-finite values are skipped.
+        """
+        names: dict[str, float] = {}
+        for source in (elem.quantities or {}, elem.properties or {}):
+            for key, raw in source.items():
+                if key in names:
+                    continue
+                try:
+                    val = float(raw)
+                except (TypeError, ValueError):
+                    continue
+                if not math.isfinite(val):
+                    continue
+                names[key] = val
+        names.setdefault("count", 1.0)
+        return names
+
+    async def _compute_formula_quantity(
+        self,
+        pos: Position,
+        links: list,
+        unit: str,
+        projection: ProjectionSpec,
+    ) -> LinkQuantityComputation:
+        """Evaluate a per-element formula then aggregate (option C).
+
+        For every bound element a ``names`` binding is built from its
+        canonical row and the formula is evaluated through the shared safe
+        evaluator (``eac.engine.safe_eval``). The model is "transform per
+        element, then aggregate": ``Σ formula(element_i)`` (or max/min/
+        first). An element that lacks a parameter the formula references is
+        **ignored and flagged** (mixed-binding tolerance), never an error.
+
+        Returns ``quantity=None`` only when the formula is empty or fails
+        to parse / is unsafe — the caller then leaves the manual value
+        untouched (same contract as D-TKC-028). When the formula is valid
+        but no element contributes, the aggregate is ``Decimal(0)`` (parity
+        with the geometric path).
+        """
+        from app.modules.eac.engine.safe_eval import (
+            FormulaSyntaxError,
+            FormulaTimeoutError,
+            FormulaUnsafeError,
+            evaluate_formula,
+            validate_formula,
+        )
+
+        formula = (projection.formula or "").strip()
+        # count is reserved to simple mode (E-XMOD-003 discussion); a
+        # formula aggregates with sum/max/min/first only.
+        aggregation = projection.aggregation if projection.aggregation in ("sum", "max", "min", "first") else "sum"
+
+        if not formula:
+            return LinkQuantityComputation(
+                quantity=None,
+                unit=unit,
+                quantity_field="formula",
+                aggregation=aggregation,
+                link_count=len(links),
+                projection_kind="formula",
             )
+
+        # Parse + safety-scan + discover referenced params once. Invalid /
+        # unsafe formula → no quantity (the manual value is left untouched);
+        # the safety scan runs up-front so a dunder/lambda/eval expression is
+        # rejected outright rather than silently flagged per element.
+        try:
+            referenced = validate_formula(formula)
+        except (FormulaSyntaxError, FormulaUnsafeError):
+            return LinkQuantityComputation(
+                quantity=None,
+                unit=unit,
+                quantity_field=formula,
+                aggregation=aggregation,
+                link_count=len(links),
+                projection_kind="formula",
+            )
+
+        values: list[Decimal] = []
+        contributing: list[str] = []
+        missing: list[str] = []
+        for lnk in links:
+            elem = await self.element_repo.get(lnk.bim_element_id)
+            if elem is None:
+                missing.append(str(lnk.bim_element_id))
+                continue
+            names = self._element_formula_names(elem)
+            sid = elem.stable_id or str(elem.id)
+            # Mixed-binding tolerance: a referenced parameter absent on this
+            # element → ignore it (flagged), don't fail the whole pull.
+            if referenced - names.keys():
+                missing.append(sid)
+                continue
+            try:
+                result = evaluate_formula(formula, names)
+                val = Decimal(str(result))
+            except (FormulaSyntaxError, FormulaUnsafeError, FormulaTimeoutError):
+                missing.append(sid)
+                continue
+            except (InvalidOperation, TypeError, ValueError):
+                missing.append(sid)
+                continue
+            if not val.is_finite():
+                missing.append(sid)
+                continue
+            values.append(val)
+            contributing.append(sid)
+
+        return LinkQuantityComputation(
+            quantity=_aggregate_decimals(values, aggregation),
+            unit=unit,
+            quantity_field=formula,
+            aggregation=aggregation,
+            contributing_elements=contributing,
+            missing_element_ids=missing,
+            link_count=len(links),
+            projection_kind="formula",
+        )
+
+    async def preview_quantity_formula(
+        self,
+        position_id: uuid.UUID,
+        *,
+        formula: str,
+        aggregation: str = "sum",
+    ) -> dict[str, Any]:
+        """Dry-run a per-element formula over a position's bound elements.
+
+        Read-only twin of :meth:`_compute_formula_quantity`: it reuses the
+        exact same evaluator and element binding so the live preview shown in
+        the BIM picker can never drift from what "refresh from model" will
+        actually compute (single source of truth).
+
+        Returns a JSON-ready dict::
+
+            {
+              "valid":            bool,    # formula parsed & is safe
+              "error":            str|None,# formula-level parse/unsafe reason
+              "referenced_params": [str],  # variables the formula reads
+              "aggregation":      str,
+              "total":            Decimal|None,
+              "contributing_count": int,
+              "missing_count":    int,
+              "link_count":       int,
+              "per_element": [
+                  {"stable_id", "name", "value": Decimal|None, "error": str|None},
+              ],
+            }
+
+        ``valid=False`` ⇒ ``total=None`` and every per-element row carries the
+        same formula-level error. A valid formula whose elements all lack a
+        referenced parameter yields ``total=Decimal(0)`` (parity with refresh).
+        """
+        from app.modules.eac.engine.safe_eval import (
+            FormulaSyntaxError,
+            FormulaTimeoutError,
+            FormulaUnsafeError,
+            evaluate_formula,
+            validate_formula,
+        )
+
+        formula = (formula or "").strip()
+        aggregation = aggregation if aggregation in ("sum", "max", "min", "first") else "sum"
+        links = await self.link_repo.list_by_boq_position(position_id)
+
+        base: dict[str, Any] = {
+            "valid": False,
+            "error": None,
+            "referenced_params": [],
+            "aggregation": aggregation,
+            "total": None,
+            "contributing_count": 0,
+            "missing_count": 0,
+            "link_count": len(links),
+            "per_element": [],
+        }
+
+        if not formula:
+            base["error"] = "empty"
+            return base
+
+        try:
+            referenced = validate_formula(formula)
+        except FormulaSyntaxError as exc:
+            base["error"] = f"syntax: {exc}"
+            return base
+        except FormulaUnsafeError as exc:
+            base["error"] = f"unsafe: {exc}"
+            return base
+
+        base["valid"] = True
+        base["referenced_params"] = sorted(referenced)
+
+        per_element: list[dict[str, Any]] = []
+        values: list[Decimal] = []
+        contributing = 0
+        missing = 0
+        for lnk in links:
+            elem = await self.element_repo.get(lnk.bim_element_id)
+            if elem is None:
+                missing += 1
+                per_element.append({
+                    "stable_id": str(lnk.bim_element_id),
+                    "name": None,
+                    "value": None,
+                    "error": "element not found",
+                })
+                continue
+            sid = elem.stable_id or str(elem.id)
+            names = self._element_formula_names(elem)
+            absent = referenced - names.keys()
+            if absent:
+                missing += 1
+                per_element.append({
+                    "stable_id": sid,
+                    "name": elem.name,
+                    "value": None,
+                    "error": "missing params: " + ", ".join(sorted(absent)),
+                })
+                continue
+            try:
+                result = evaluate_formula(formula, names)
+                val = Decimal(str(result))
+                if not val.is_finite():
+                    raise InvalidOperation("non-finite result")
+            except (FormulaSyntaxError, FormulaUnsafeError, FormulaTimeoutError) as exc:
+                missing += 1
+                per_element.append({
+                    "stable_id": sid,
+                    "name": elem.name,
+                    "value": None,
+                    "error": f"eval: {exc}",
+                })
+                continue
+            except (InvalidOperation, TypeError, ValueError):
+                missing += 1
+                per_element.append({
+                    "stable_id": sid,
+                    "name": elem.name,
+                    "value": None,
+                    "error": "eval: non-numeric result",
+                })
+                continue
+            values.append(val)
+            contributing += 1
+            per_element.append({
+                "stable_id": sid,
+                "name": elem.name,
+                "value": val,
+                "error": None,
+            })
+
+        base["total"] = _aggregate_decimals(values, aggregation)
+        base["contributing_count"] = contributing
+        base["missing_count"] = missing
+        base["per_element"] = per_element
+        return base
+
+    async def bulk_create_links(
+        self,
+        boq_position_id: uuid.UUID,
+        bim_element_ids: list[uuid.UUID],
+        *,
+        link_type: str = "manual",
+        user_id: str | None = None,
+        sync_quantity: bool = False,
+    ) -> tuple[list[BOQElementLink], list[uuid.UUID]]:
+        """Idempotently bind many BIM elements to one BOQ position.
+
+        Used by the rewritten ``ModelLinkPanel`` "select all (filtered)"
+        action so the binding (``oe_bim_boq_link``) can be created in one
+        round-trip. Elements already linked to the position are skipped
+        (idempotent upsert), so re-running with an overlapping set is safe.
+
+        Returns ``(created_links, skipped_existing_element_ids)``. The legacy
+        ``Position.cad_element_ids`` mirror is kept in sync. Quantity
+        auto-sync is *off* by default (option C: the projection now decides
+        the value); pass ``sync_quantity=True`` to recompute once at the end.
+        """
+        existing = await self.link_repo.list_by_boq_position(boq_position_id)
+        existing_ids = {lnk.bim_element_id for lnk in existing}
+
+        created: list[BOQElementLink] = []
+        skipped: list[uuid.UUID] = []
+        for elem_id in bim_element_ids:
+            if elem_id in existing_ids:
+                skipped.append(elem_id)
+                continue
+            element = await self.element_repo.get(elem_id)
+            if element is None:
+                # Unknown element id — treat as skipped rather than 404 the
+                # whole batch (mixed/stale selections tolerated).
+                skipped.append(elem_id)
+                continue
+            link = await self.link_repo.create(BOQElementLink(
+                boq_position_id=boq_position_id,
+                bim_element_id=elem_id,
+                link_type=link_type,
+                created_by=user_id,
+            ))
+            await self._append_cad_element_id(boq_position_id, elem_id)
+            created.append(link)
+            existing_ids.add(elem_id)
+
+        if sync_quantity and created:
+            await self._sync_boq_quantity_from_links(boq_position_id)
+
+        logger.info(
+            "Bulk BOQ-BIM links: pos=%s created=%d skipped=%d",
+            boq_position_id,
+            len(created),
+            len(skipped),
+        )
+        return created, skipped
+
+    async def _sync_boq_quantity_from_links(
+        self,
+        position_id: uuid.UUID,
+    ) -> None:
+        """Recompute and persist ``Position.quantity`` from linked elements.
+
+        Thin write wrapper over :meth:`compute_quantity_from_links`: the
+        dimensional rules (count units, tonne ÷1000, no arbitrary
+        fallback) all live in the read-only compute. This method only
+        decides whether to persist and recomputes ``total`` exactly via
+        ``quantity * unit_rate``.
+        """
+        pos = await self.session.get(Position, position_id)
+        if pos is None:
+            return
+
+        result = await self.compute_quantity_from_links(position_id)
+        if result.link_count == 0:
+            return
+        if result.quantity is None:
+            # D-TKC-028 — unit has no dimensionally-correct mapping; leave
+            # the estimator's manual quantity intact (no arbitrary guess).
+            logger.info(
+                "BOQ position %s unit %r has no dimensionally-correct "
+                "BIM quantity mapping — manual quantity left untouched "
+                "(no arbitrary fallback)",
+                position_id,
+                pos.unit,
+            )
+            return
+
+        qty = result.quantity
+        if qty <= 0:
+            # Count unit with no resolvable element, or geometric unit
+            # with no contributing quantity — nothing safe to write.
+            return
+
+        if result.aggregation == "count":
+            pos.quantity = str(int(qty))
+        else:
+            # Round to 4 decimal places to avoid floating-point noise.
+            pos.quantity = str(qty.quantize(Decimal("0.0001")))
+        try:
+            rate = Decimal(pos.unit_rate or "0")
+            pos.total = str((qty * rate).quantize(Decimal("0.01")))
+        except (InvalidOperation, TypeError, ValueError):
+            pass
+        await self.session.flush()
+        logger.info(
+            "BOQ position %s (unit %r) quantity auto-updated to %s from %d linked BIM element(s)",
+            position_id,
+            pos.unit,
+            pos.quantity,
+            result.link_count,
+        )
 
     async def _remove_cad_element_id(
         self,

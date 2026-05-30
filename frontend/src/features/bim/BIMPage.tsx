@@ -110,6 +110,7 @@ import {
   fetchBIMModel,
   fetchBIMElements,
   fetchBIMElementProgress,
+  fetchBIMModelBOQLinks,
   fetchBIMConverters,
   deleteBIMModel,
   deleteLink,
@@ -121,6 +122,7 @@ import {
   isNon3DBimFormat,
   type BIMElementGroup,
 } from './api';
+import type { BIMBOQLinkBrief } from '@/shared/ui/BIMViewer/ElementManager';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -2404,7 +2406,6 @@ export function BIMPage() {
       !!activeModelId &&
       (activeModel?.status === 'ready' || activeModel?.status === 'degraded'),
   });
-  const elements: BIMElementData[] = elementsQuery.data?.items ?? [];
   const elementsTotal: number = elementsQuery.data?.total ?? 0;
 
   // BOQ progress per element - fetched ONLY while the "By progress" colour
@@ -2444,6 +2445,48 @@ export function BIMPage() {
     }
     return out;
   }, [progressQuery.data]);
+
+  // Elements load in skeleton mode (no boq_links join, ~10× faster). Pull the
+  // model-wide link aggregate and stitch a per-element brief back onto the list.
+  const modelLinksQuery = useQuery({
+    queryKey: ['bim-model-boq-links', activeModelId],
+    queryFn: () => fetchBIMModelBOQLinks(activeModelId!),
+    enabled: !!activeModelId && (activeModel?.status === 'ready' || activeModel?.status === 'degraded'),
+    staleTime: 30_000,
+  });
+
+  const linksByElementId = useMemo(() => {
+    const map = new Map<string, BIMBOQLinkBrief[]>();
+    for (const agg of modelLinksQuery.data?.items ?? []) {
+      const brief: BIMBOQLinkBrief = {
+        id: agg.boq_position_id,
+        boq_position_id: agg.boq_position_id,
+        boq_position_ordinal: agg.boq_position_ordinal,
+        boq_position_description: agg.boq_position_description,
+        boq_position_quantity: agg.boq_position_quantity,
+        boq_position_unit: agg.boq_position_unit,
+        boq_position_unit_rate: agg.boq_position_unit_rate,
+        boq_position_total: agg.boq_position_total,
+        link_type: (agg.link_type as BIMBOQLinkBrief['link_type']) ?? 'manual',
+        confidence: agg.confidence,
+      };
+      for (const elementId of agg.element_ids) {
+        const existing = map.get(elementId);
+        if (existing) existing.push(brief);
+        else map.set(elementId, [brief]);
+      }
+    }
+    return map;
+  }, [modelLinksQuery.data]);
+
+  const elements: BIMElementData[] = useMemo(() => {
+    const raw = elementsQuery.data?.items ?? [];
+    if (linksByElementId.size === 0) return raw;
+    return raw.map((el) => {
+      const links = linksByElementId.get(el.id);
+      return links ? { ...el, boq_links: links } : el;
+    });
+  }, [elementsQuery.data, linksByElementId]);
 
   // Apply the deep-link element selection as soon as the elements list
   // resolves.  Strips the query param afterwards so a refresh doesn't

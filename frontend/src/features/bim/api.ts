@@ -1055,6 +1055,72 @@ export async function deleteLink(linkId: string): Promise<void> {
   await apiDelete(`/v1/bim_hub/links/${encodeURIComponent(linkId)}`);
 }
 
+/* ── Bulk binding (option C — "select all (filtered)") ─────────────────── */
+
+export interface BulkCreateLinksRequest {
+  boq_position_id: string;
+  bim_element_ids: string[];
+  link_type?: 'manual' | 'auto' | 'rule_based';
+}
+
+export interface BulkCreateLinksResponse {
+  created: BOQElementLink[];
+  created_count: number;
+  skipped_count: number;
+  skipped_element_ids: string[];
+}
+
+/** Idempotently bind many BIM elements to one BOQ position in one call.
+ *  Already-linked elements are skipped server-side, so the call is safe
+ *  to repeat (powers the panel's "select all (filtered)" action). */
+export async function bulkCreateLinks(
+  payload: BulkCreateLinksRequest,
+): Promise<BulkCreateLinksResponse> {
+  return apiPost<BulkCreateLinksResponse, BulkCreateLinksRequest>(
+    '/v1/bim_hub/links/bulk',
+    payload,
+  );
+}
+
+/* ── Quantity-formula live preview (option C — projection editor) ──────── */
+
+export interface QuantityFormulaPreviewRequest {
+  boq_position_id: string;
+  formula: string;
+  aggregation?: string;
+}
+
+export interface QuantityFormulaPreviewElement {
+  stable_id: string;
+  name: string | null;
+  value: string | null;
+  error: string | null;
+}
+
+export interface QuantityFormulaPreviewResponse {
+  valid: boolean;
+  error: string | null;
+  referenced_params: string[];
+  aggregation: string;
+  total: string | null;
+  contributing_count: number;
+  missing_count: number;
+  link_count: number;
+  per_element: QuantityFormulaPreviewElement[];
+}
+
+/** Dry-run a per-element quantity formula over a position's bound elements.
+ *  Read-only: reuses the exact evaluator "refresh from model" uses, so the
+ *  preview can never drift from the value that will actually be applied. */
+export async function previewQuantityFormula(
+  payload: QuantityFormulaPreviewRequest,
+): Promise<QuantityFormulaPreviewResponse> {
+  return apiPost<QuantityFormulaPreviewResponse, QuantityFormulaPreviewRequest>(
+    '/v1/bim_hub/links/quantity-formula/preview',
+    payload,
+  );
+}
+
 /* ── Quantity Maps (rule-based bulk linking) ───────────────────────────── */
 
 /** Optional target for a quantity-map rule. */

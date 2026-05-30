@@ -110,10 +110,9 @@ dependencies = [
     "lazrs>=0.6.0",
     "duckdb>=1.2.0,<2",
     "rapidfuzz>=3.0.0",
-    # Imported at module load by the smart_views (signed share links) and eac
-    # (safe expression evaluation) modules, so they must be base dependencies;
-    # a clean install otherwise cannot import those modules.
+    # Imported at module load by smart_views and eac — must be base dependencies.
     "itsdangerous>=2.1.0",
+    # Powers EAC rule engine and BOQ per-element quantity formulas.
     "simpleeval>=0.9.13",
 ]
 [project.scripts]

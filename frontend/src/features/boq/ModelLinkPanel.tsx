@@ -1,26 +1,41 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * ModelLinkPanel — Feature 1 ("live model→BOQ quantity binding").
+ * ModelLinkPanel — "live model→BOQ quantity binding" (option C rewrite).
  *
- * Lets the user bind a BOQ position's quantity to a set of BIM model
- * elements (an extraction rule, e.g. "sum of area_m2 across these
- * elements → quantity"), see existing links, and delete them. Creating
- * a link NEVER mutates the quantity — that requires the explicit
- * BOQ-wide refresh + per-row Apply in {@link ModelLinkReviewPanel}
- * (the architecture guide §7 — propose, human confirms).
+ * Two coordinated concerns, cleanly separated:
  *
- * Every string goes through i18n `t()`; no hardcoded UI text.
+ *   1. BINDING (which BIM elements) — the element selector creates/deletes
+ *      rows in `oe_bim_boq_link` directly (via the bim_hub links API). Each
+ *      checkbox toggle persists immediately; a tri-state "select all
+ *      (filtered)" binds/unbinds the whole filtered set in one call.
+ *
+ *   2. PROJECTION (how to compute the quantity) — the shared
+ *      {@link ProjectionEditor} (value vs. formula, aggregation, live
+ *      preview). Saving persists the projection on the position's
+ *      QuantityLink (upserted server-side, one per position).
+ *
+ * Neither action mutates the position quantity: that still requires the
+ * explicit BOQ-wide "Refresh from model" + per-row Apply (propose → human
+ * confirms). Every string goes through i18n `t()`.
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Cuboid, Trash2, Link2 } from 'lucide-react';
-import { WideModal, Button, Badge } from '@/shared/ui';
+import { Loader2, Cuboid, Search, Link2, Check } from 'lucide-react';
+import { WideModal, Button } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
-import { fetchBIMModels, fetchBIMElements } from '@/features/bim/api';
-import { boqApi, type CreateQuantityLinkData, type QuantityAggregation } from './api';
+import {
+  fetchBIMModels,
+  fetchBIMElements,
+  listLinks,
+  createLink,
+  deleteLink,
+  bulkCreateLinks,
+} from '@/features/bim/api';
+import { boqApi, type QuantityAggregation } from './api';
+import { ProjectionEditor, type ProjectionValue } from './ProjectionEditor';
 
 export interface ModelLinkPanelProps {
   /** The position being bound. */
@@ -32,7 +47,12 @@ export interface ModelLinkPanelProps {
   onClose: () => void;
 }
 
-const AGGREGATIONS: QuantityAggregation[] = ['sum', 'max', 'min', 'count', 'first'];
+const DEFAULT_PROJECTION: ProjectionValue = {
+  projection_kind: 'simple',
+  quantity_field: '',
+  aggregation: 'sum',
+  formula: '',
+};
 
 export function ModelLinkPanel({
   positionId,
@@ -45,21 +65,51 @@ export function ModelLinkPanel({
   const addToast = useToastStore((s) => s.addToast);
 
   const [selectedModelId, setSelectedModelId] = useState<string>('');
-  const [selectedElementIds, setSelectedElementIds] = useState<Set<string>>(new Set());
-  const [quantityField, setQuantityField] = useState<string>('');
-  const [aggregation, setAggregation] = useState<QuantityAggregation>('sum');
+  const [filter, setFilter] = useState('');
+  const [projection, setProjection] = useState<ProjectionValue>(DEFAULT_PROJECTION);
 
-  const { data: links, isLoading: linksLoading } = useQuery({
+  /* ── Existing binding (oe_bim_boq_link) for this position ────────── */
+  const { data: linksResp, isLoading: linksLoading } = useQuery({
+    queryKey: ['bim-element-links', positionId],
+    queryFn: () => listLinks(positionId),
+  });
+  const elementLinks = useMemo(() => linksResp?.items ?? [], [linksResp]);
+
+  /** bim_element_id → link id, for delete + checked lookups. */
+  const linkByElement = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const lnk of elementLinks) m.set(lnk.bim_element_id, lnk.id);
+    return m;
+  }, [elementLinks]);
+
+  /* ── Existing projection (QuantityLink) — initialise the editor ──── */
+  const { data: quantityLinks } = useQuery({
     queryKey: ['quantity-links', positionId],
     queryFn: () => boqApi.getQuantityLinks(positionId),
   });
+  const existingProjection = quantityLinks?.[0];
 
+  // Seed the editor + model from the saved projection exactly once.
+  const [seeded, setSeeded] = useState(false);
+  useEffect(() => {
+    if (seeded || !existingProjection) return;
+    setProjection({
+      projection_kind:
+        existingProjection.projection_kind === 'formula' ? 'formula' : 'simple',
+      quantity_field: existingProjection.quantity_field ?? '',
+      aggregation: (existingProjection.aggregation as QuantityAggregation) ?? 'sum',
+      formula: existingProjection.formula ?? '',
+    });
+    if (existingProjection.model_id) setSelectedModelId(existingProjection.model_id);
+    setSeeded(true);
+  }, [seeded, existingProjection]);
+
+  /* ── Models + elements ───────────────────────────────────────────── */
   const { data: modelsResp, isLoading: modelsLoading } = useQuery({
     queryKey: ['bim-models', projectId],
     queryFn: () => fetchBIMModels(projectId),
     enabled: !!projectId,
   });
-
   const models = modelsResp?.items ?? [];
 
   const { data: elementsResp, isLoading: elementsLoading } = useQuery({
@@ -67,109 +117,160 @@ export function ModelLinkPanel({
     queryFn: () => fetchBIMElements(selectedModelId, { limit: 500 }),
     enabled: !!selectedModelId,
   });
-
   const elements = elementsResp?.items ?? [];
 
-  // Canonical quantity keys available across the currently-selected
-  // elements — drives the "which quantity" picker without hardcoding a
-  // fixed list (a model can expose any canonical key).
-  const availableFields = useMemo(() => {
+  const filteredElements = useMemo(() => {
+    const q = filter.trim().toLowerCase();
+    if (!q) return elements;
+    return elements.filter((e) =>
+      `${e.name ?? ''} ${e.element_type ?? ''} ${e.stable_id ?? ''}`
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [elements, filter]);
+
+  /** Canonical params available across the BOUND elements (chips + field).
+   *  Mirrors the backend's `_element_formula_names`: quantities + numeric
+   *  properties, so the formula editor only offers params that resolve. */
+  const availableParams = useMemo(() => {
     const keys = new Set<string>();
     for (const e of elements) {
-      if (!selectedElementIds.has(e.stable_id ?? e.id)) continue;
+      if (!linkByElement.has(e.id)) continue;
       for (const k of Object.keys(e.quantities ?? {})) keys.add(k);
+      for (const [k, v] of Object.entries(e.properties ?? {})) {
+        if (typeof v === 'number' && Number.isFinite(v)) keys.add(k);
+      }
     }
     return Array.from(keys).sort();
-  }, [elements, selectedElementIds]);
+  }, [elements, linkByElement]);
 
-  const toggleElement = useCallback((stableId: string) => {
-    setSelectedElementIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(stableId)) next.delete(stableId);
-      else next.add(stableId);
-      return next;
-    });
-  }, []);
+  const boundCount = elementLinks.length;
 
-  const createMutation = useMutation({
-    mutationFn: (data: CreateQuantityLinkData) =>
-      boqApi.createQuantityLink(positionId, data),
+  /* ── Binding mutations (live, per-toggle) ────────────────────────── */
+  const invalidateBinding = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['bim-element-links', positionId] });
+    if (selectedModelId)
+      queryClient.invalidateQueries({ queryKey: ['model-boq-links', selectedModelId] });
+  }, [queryClient, positionId, selectedModelId]);
+
+  const onBindError = useCallback(
+    (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('boq.model_link_bind_failed', { defaultValue: 'Could not update binding' }),
+        message: e.message,
+      }),
+    [addToast, t],
+  );
+
+  const bindMutation = useMutation({
+    mutationFn: (elementId: string) =>
+      createLink({ boq_position_id: positionId, bim_element_id: elementId }),
+    onSuccess: invalidateBinding,
+    onError: onBindError,
+  });
+
+  const unbindMutation = useMutation({
+    mutationFn: (linkId: string) => deleteLink(linkId),
+    onSuccess: invalidateBinding,
+    onError: onBindError,
+  });
+
+  const toggleElement = useCallback(
+    (elementId: string) => {
+      const linkId = linkByElement.get(elementId);
+      if (linkId) unbindMutation.mutate(linkId);
+      else bindMutation.mutate(elementId);
+    },
+    [linkByElement, bindMutation, unbindMutation],
+  );
+
+  /* ── Tri-state "select all (filtered)" ───────────────────────────── */
+  const filteredBoundCount = useMemo(
+    () => filteredElements.filter((e) => linkByElement.has(e.id)).length,
+    [filteredElements, linkByElement],
+  );
+  const allFilteredBound =
+    filteredElements.length > 0 && filteredBoundCount === filteredElements.length;
+  const someFilteredBound = filteredBoundCount > 0 && !allFilteredBound;
+
+  const bulkBindMutation = useMutation({
+    mutationFn: (elementIds: string[]) =>
+      bulkCreateLinks({ boq_position_id: positionId, bim_element_ids: elementIds }),
+    onSuccess: invalidateBinding,
+    onError: onBindError,
+  });
+
+  const bulkUnbindMutation = useMutation({
+    mutationFn: async (linkIds: string[]) => {
+      for (const id of linkIds) await deleteLink(id);
+    },
+    onSuccess: invalidateBinding,
+    onError: onBindError,
+  });
+
+  const bulkBusy = bulkBindMutation.isPending || bulkUnbindMutation.isPending;
+
+  const toggleSelectAllFiltered = useCallback(() => {
+    if (allFilteredBound) {
+      const linkIds = filteredElements
+        .map((e) => linkByElement.get(e.id))
+        .filter((x): x is string => !!x);
+      bulkUnbindMutation.mutate(linkIds);
+    } else {
+      const toBind = filteredElements
+        .filter((e) => !linkByElement.has(e.id))
+        .map((e) => e.id);
+      if (toBind.length > 0) bulkBindMutation.mutate(toBind);
+    }
+  }, [allFilteredBound, filteredElements, linkByElement, bulkBindMutation, bulkUnbindMutation]);
+
+  /* ── Save projection ─────────────────────────────────────────────── */
+  const saveProjection = useMutation({
+    mutationFn: () =>
+      boqApi.createQuantityLink(positionId, {
+        model_id: selectedModelId,
+        projection_kind: projection.projection_kind,
+        quantity_field:
+          projection.projection_kind === 'simple' && projection.aggregation !== 'count'
+            ? projection.quantity_field
+            : '',
+        aggregation: projection.aggregation,
+        formula: projection.projection_kind === 'formula' ? projection.formula : null,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quantity-links', positionId] });
-      setSelectedElementIds(new Set());
-      setQuantityField('');
       addToast({
         type: 'success',
-        title: t('boq.model_link_created', { defaultValue: 'Model link created' }),
-        message: t('boq.model_link_created_hint', {
+        title: t('boq.projection_saved', { defaultValue: 'Projection saved' }),
+        message: t('boq.projection_saved_hint', {
           defaultValue:
             'The quantity is not changed yet - use “Refresh from model” then Apply to pull it in.',
         }),
       });
     },
-    onError: (e: Error) => {
+    onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('boq.model_link_failed', { defaultValue: 'Could not create model link' }),
+        title: t('boq.projection_save_failed', { defaultValue: 'Could not save projection' }),
         message: e.message,
-      });
-    },
+      }),
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (linkId: string) => boqApi.deleteQuantityLink(positionId, linkId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['quantity-links', positionId] });
-      addToast({
-        type: 'success',
-        title: t('boq.model_link_deleted', { defaultValue: 'Model link removed' }),
-      });
-    },
-    onError: (e: Error) => {
-      addToast({
-        type: 'error',
-        title: t('boq.model_link_delete_failed', {
-          defaultValue: 'Could not remove model link',
-        }),
-        message: e.message,
-      });
-    },
-  });
-
-  const canSubmit =
+  const projectionValid =
     !!selectedModelId &&
-    selectedElementIds.size > 0 &&
-    (aggregation === 'count' || !!quantityField) &&
-    !createMutation.isPending;
+    (projection.projection_kind === 'formula'
+      ? projection.formula.trim().length > 0
+      : projection.aggregation === 'count' || !!projection.quantity_field);
 
-  const handleSubmit = useCallback(() => {
-    createMutation.mutate({
-      model_id: selectedModelId,
-      element_stable_ids: Array.from(selectedElementIds),
-      quantity_field: aggregation === 'count' ? 'count' : quantityField,
-      aggregation,
-    });
-  }, [createMutation, selectedModelId, selectedElementIds, quantityField, aggregation]);
-
-  const statusVariant = (status: string): 'neutral' | 'blue' | 'success' | 'warning' | 'error' => {
-    if (status === 'active') return 'success';
-    if (status === 'stale') return 'warning';
-    if (status === 'broken') return 'error';
-    return 'neutral';
-  };
-
-  // i18next's typed `t()` rejects an inline options object that carries
-  // a custom interpolation variable alongside `defaultValue` (only
-  // `count` is special-cased). The codebase convention (see
-  // LinkedPositionsModal) is to widen the options to
-  // `Record<string, unknown>` so the strict overload is not selected.
+  /* ── i18n strings with interpolation (widened per codebase convention) */
   const subtitleText = t('boq.model_link_subtitle', {
     defaultValue: 'Position {{ordinal}} - bind its quantity to BIM model elements',
     ordinal: positionOrdinal,
   } as Record<string, unknown>);
-  const elementsLabel = t('boq.model_link_elements', {
-    defaultValue: 'Elements ({{selected}} selected)',
-    selected: selectedElementIds.size,
+  const boundLabel = t('boq.model_link_bound_count', {
+    defaultValue: '{{count}} element(s) bound',
+    count: boundCount,
   } as Record<string, unknown>);
 
   return (
@@ -187,89 +288,20 @@ export function ModelLinkPanel({
           <Button
             variant="primary"
             size="sm"
-            disabled={!canSubmit}
-            onClick={handleSubmit}
+            disabled={!projectionValid || saveProjection.isPending}
+            onClick={() => saveProjection.mutate()}
           >
-            {createMutation.isPending ? (
+            {saveProjection.isPending ? (
               <Loader2 size={14} className="mr-1 animate-spin" />
             ) : (
               <Link2 size={14} className="mr-1" />
             )}
-            {t('boq.model_link_create', { defaultValue: 'Create link' })}
+            {t('boq.projection_save', { defaultValue: 'Save projection' })}
           </Button>
         </div>
       }
     >
-      {/* Existing links */}
-      <div className="mb-5">
-        <h4 className="text-xs font-semibold text-content-secondary mb-2">
-          {t('boq.model_link_existing', { defaultValue: 'Existing links' })}
-        </h4>
-        {linksLoading ? (
-          <div className="flex items-center gap-2 text-xs text-content-tertiary py-3">
-            <Loader2 size={14} className="animate-spin" />
-            {t('common.loading', { defaultValue: 'Loading…' })}
-          </div>
-        ) : !links || links.length === 0 ? (
-          <p className="text-xs text-content-tertiary py-2">
-            {t('boq.model_link_none', {
-              defaultValue: 'No model links yet for this position.',
-            })}
-          </p>
-        ) : (
-          <ul className="divide-y divide-border-light rounded-lg border border-border-light">
-            {links.map((lnk) => (
-              <li
-                key={lnk.id}
-                className="flex items-center justify-between gap-3 px-3 py-2"
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-content-primary truncate">
-                      {lnk.aggregation}({lnk.quantity_field}) → {lnk.target_field}
-                    </span>
-                    <Badge variant={statusVariant(lnk.status)} size="sm">
-                      {t(`boq.model_link_status_${lnk.status}`, {
-                        defaultValue: lnk.status,
-                      })}
-                    </Badge>
-                  </div>
-                  <p className="text-2xs text-content-tertiary mt-0.5">
-                    {t('boq.model_link_elem_count', {
-                      defaultValue: '{{count}} element(s)',
-                      count: lnk.element_stable_ids.length,
-                    })}
-                    {lnk.source_model_version
-                      ? ` · ${t('boq.model_link_version', {
-                          defaultValue: 'model v{{v}}',
-                          v: lnk.source_model_version,
-                        } as Record<string, unknown>)}`
-                      : ''}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => deleteMutation.mutate(lnk.id)}
-                  disabled={deleteMutation.isPending}
-                  aria-label={t('boq.model_link_delete', {
-                    defaultValue: 'Delete link',
-                  })}
-                  className="shrink-0 flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error/10 transition-colors disabled:opacity-50"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* New link builder */}
-      <div className="space-y-4">
-        <h4 className="text-xs font-semibold text-content-secondary">
-          {t('boq.model_link_new', { defaultValue: 'New link' })}
-        </h4>
-
+      <div className="space-y-5">
         {/* Model picker */}
         <label className="block">
           <span className="block text-2xs font-medium text-content-secondary mb-1">
@@ -291,8 +323,7 @@ export function ModelLinkPanel({
               value={selectedModelId}
               onChange={(e) => {
                 setSelectedModelId(e.target.value);
-                setSelectedElementIds(new Set());
-                setQuantityField('');
+                setFilter('');
               }}
               className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
             >
@@ -308,28 +339,80 @@ export function ModelLinkPanel({
           )}
         </label>
 
-        {/* Element selector */}
+        {/* Element binding */}
         {selectedModelId && (
           <div>
-            <span className="block text-2xs font-medium text-content-secondary mb-1">
-              {elementsLabel}
-            </span>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-2xs font-medium text-content-secondary">
+                {t('boq.model_link_binding', { defaultValue: 'Bound elements' })}
+                {linksLoading ? null : (
+                  <span className="ml-1.5 text-content-tertiary">· {boundLabel}</span>
+                )}
+              </span>
+            </div>
+
+            {/* Filter + select-all-filtered */}
+            <div className="flex items-center gap-2 mb-2">
+              <div className="relative flex-1">
+                <Search
+                  size={13}
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-content-quaternary"
+                />
+                <input
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  placeholder={t('boq.model_link_filter', { defaultValue: 'Filter elements…' })}
+                  className="w-full rounded-lg border border-border-light bg-surface-primary pl-8 pr-3 py-1.5 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                />
+              </div>
+              {filteredElements.length > 0 && (
+                <button
+                  type="button"
+                  onClick={toggleSelectAllFiltered}
+                  disabled={bulkBusy}
+                  className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border-light text-xs text-content-secondary hover:bg-surface-secondary/60 disabled:opacity-50 transition-colors"
+                >
+                  {bulkBusy ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <span
+                      className={`inline-flex h-3.5 w-3.5 items-center justify-center rounded border ${
+                        allFilteredBound
+                          ? 'bg-oe-blue border-oe-blue text-white'
+                          : someFilteredBound
+                            ? 'bg-oe-blue/30 border-oe-blue'
+                            : 'border-border-light'
+                      }`}
+                    >
+                      {allFilteredBound ? (
+                        <Check size={10} />
+                      ) : someFilteredBound ? (
+                        <span className="h-0.5 w-2 bg-oe-blue rounded" />
+                      ) : null}
+                    </span>
+                  )}
+                  {allFilteredBound
+                    ? t('boq.model_link_deselect_all', { defaultValue: 'Unbind all' })
+                    : t('boq.model_link_select_all', { defaultValue: 'Bind all (filtered)' })}
+                </button>
+              )}
+            </div>
+
             {elementsLoading ? (
               <div className="flex items-center gap-2 text-xs text-content-tertiary py-3">
                 <Loader2 size={14} className="animate-spin" />
                 {t('common.loading', { defaultValue: 'Loading…' })}
               </div>
-            ) : elements.length === 0 ? (
+            ) : filteredElements.length === 0 ? (
               <p className="text-xs text-content-tertiary py-2">
-                {t('boq.model_link_no_elements', {
-                  defaultValue: 'This model has no elements.',
-                })}
+                {elements.length === 0
+                  ? t('boq.model_link_no_elements', { defaultValue: 'This model has no elements.' })
+                  : t('boq.model_link_no_matches', { defaultValue: 'No elements match the filter.' })}
               </p>
             ) : (
               <div className="max-h-56 overflow-y-auto rounded-lg border border-border-light divide-y divide-border-light">
-                {elements.map((el) => {
-                  const sid = el.stable_id ?? el.id;
-                  const checked = selectedElementIds.has(sid);
+                {filteredElements.map((el) => {
+                  const checked = linkByElement.has(el.id);
                   return (
                     <label
                       key={el.id}
@@ -338,12 +421,12 @@ export function ModelLinkPanel({
                       <input
                         type="checkbox"
                         checked={checked}
-                        onChange={() => toggleElement(sid)}
+                        onChange={() => toggleElement(el.id)}
                         className="accent-oe-blue"
                       />
                       <Cuboid size={13} className="text-content-tertiary shrink-0" />
                       <span className="text-xs text-content-primary truncate">
-                        {el.name || el.element_type || sid}
+                        {el.name || el.element_type || el.stable_id}
                       </span>
                       <span className="text-2xs text-content-tertiary ml-auto shrink-0">
                         {el.element_type}
@@ -356,52 +439,19 @@ export function ModelLinkPanel({
           </div>
         )}
 
-        {/* Aggregation + quantity field */}
-        {selectedElementIds.size > 0 && (
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block">
-              <span className="block text-2xs font-medium text-content-secondary mb-1">
-                {t('boq.model_link_aggregation', { defaultValue: 'Aggregation' })}
-              </span>
-              <select
-                value={aggregation}
-                onChange={(e) =>
-                  setAggregation(e.target.value as QuantityAggregation)
-                }
-                className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
-              >
-                {AGGREGATIONS.map((a) => (
-                  <option key={a} value={a}>
-                    {t(`boq.model_link_agg_${a}`, { defaultValue: a })}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {aggregation !== 'count' && (
-              <label className="block">
-                <span className="block text-2xs font-medium text-content-secondary mb-1">
-                  {t('boq.model_link_quantity_field', {
-                    defaultValue: 'Quantity field',
-                  })}
-                </span>
-                <select
-                  value={quantityField}
-                  onChange={(e) => setQuantityField(e.target.value)}
-                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
-                >
-                  <option value="">
-                    {t('boq.model_link_pick_field', {
-                      defaultValue: '- Select a quantity -',
-                    })}
-                  </option>
-                  {availableFields.map((f) => (
-                    <option key={f} value={f}>
-                      {f}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
+        {/* Projection editor */}
+        {selectedModelId && boundCount > 0 && (
+          <div>
+            <h4 className="text-xs font-semibold text-content-secondary mb-2">
+              {t('boq.model_link_rule', { defaultValue: 'Quantity rule' })}
+            </h4>
+            <ProjectionEditor
+              positionId={positionId}
+              availableParams={availableParams}
+              value={projection}
+              onChange={setProjection}
+              livePreview
+            />
           </div>
         )}
       </div>

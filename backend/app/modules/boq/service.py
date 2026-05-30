@@ -7539,20 +7539,41 @@ class BOQService:
                 detail="Model belongs to a different project than the BOQ",
             )
 
-        link = QuantityLink(
-            position_id=position_id,
-            boq_id=position.boq_id,
-            model_id=data.model_id,
-            element_stable_ids=list(data.element_stable_ids),
-            quantity_field=data.quantity_field,
-            target_field=data.target_field,
-            aggregation=data.aggregation,
-            status="active",
-            source_model_version=str(model.version) if model.version else None,
-            created_by=created_by,
-            metadata_={},
-        )
-        link = await self.quantity_link_repo.create(link)
+        # Option C: one *projection* per position. Upsert the latest rule
+        # instead of stacking rows so the panel/picker edit a single record
+        # and refresh always reads the user's current choice.
+        source_version = str(model.version) if model.version else None
+        existing = await self.quantity_link_repo.get_projection_for_position(position_id)
+        if existing is not None:
+            existing.model_id = data.model_id
+            existing.element_stable_ids = list(data.element_stable_ids)
+            existing.quantity_field = data.quantity_field
+            existing.target_field = data.target_field
+            existing.aggregation = data.aggregation
+            existing.projection_kind = data.projection_kind
+            existing.formula = (data.formula or None)
+            existing.status = "active"
+            existing.source_model_version = source_version
+            await self.session.flush()
+            await self.session.refresh(existing)
+            link = existing
+        else:
+            link = QuantityLink(
+                position_id=position_id,
+                boq_id=position.boq_id,
+                model_id=data.model_id,
+                element_stable_ids=list(data.element_stable_ids),
+                quantity_field=data.quantity_field,
+                target_field=data.target_field,
+                aggregation=data.aggregation,
+                projection_kind=data.projection_kind,
+                formula=(data.formula or None),
+                status="active",
+                source_model_version=source_version,
+                created_by=created_by,
+                metadata_={},
+            )
+            link = await self.quantity_link_repo.create(link)
         await _safe_publish(
             "boq.quantity_link.created",
             {
@@ -7685,12 +7706,134 @@ class BOQService:
                 )
             )
 
+        # ── BOQElementLink-driven positions (Feature: unify on the
+        # canonical bim_hub link) ─────────────────────────────────────
+        # Positions bound through the BIM viewer's ``oe_bim_boq_link``
+        # table are a SEPARATE binding mechanism from ``QuantityLink``.
+        # Without this pass "Refresh from model" reported "no model
+        # linked" for a position that *was* linked via the viewer. We
+        # surface each such position as a pseudo-link whose ``link_id``
+        # is the ``position_id`` itself (both UUID4 — no collision with
+        # real QuantityLink ids). The dimensional compute is delegated to
+        # the bim_hub service so the count/tonne/no-fallback rules stay
+        # in one place.
+        bim_rows, bim_stale = await self._refresh_bim_element_links(boq_id)
+        rows.extend(bim_rows)
+        stale_count += bim_stale
+
         return QuantityLinkRefreshResponse(
             boq_id=boq_id,
             checked=len(rows),
             stale=stale_count,
             rows=rows,
         )
+
+    async def _projection_spec_for_position(self, position_id: uuid.UUID):
+        """Build the bim_hub ``ProjectionSpec`` for a position's rule.
+
+        Option C: the *projection* (how to compute the quantity — chosen
+        parameter or formula) lives on the position's ``QuantityLink``,
+        while the *binding* (which elements) lives in ``oe_bim_boq_link``.
+        Returns ``None`` when the position has no projection, in which case
+        the compute falls back to unit-based inference (legacy behaviour).
+        """
+        from app.modules.bim_hub.service import ProjectionSpec
+
+        link = await self.quantity_link_repo.get_projection_for_position(position_id)
+        if link is None:
+            return None
+        return ProjectionSpec(
+            kind=getattr(link, "projection_kind", "simple") or "simple",
+            quantity_field=link.quantity_field or "",
+            aggregation=link.aggregation or "sum",
+            formula=getattr(link, "formula", None),
+        )
+
+    async def _refresh_bim_element_links(
+        self,
+        boq_id: uuid.UUID,
+    ) -> tuple[list[QuantityLinkRefreshRow], int]:
+        """Build review rows for positions bound via ``oe_bim_boq_link``.
+
+        Read-only probe (mirrors :meth:`refresh_quantity_links` but for
+        the BIM viewer's canonical link table). Each returned row carries
+        ``link_id == position_id`` so the apply path can recognise a
+        pseudo-link and recompute it through the bim_hub service.
+
+        Returns:
+            ``(rows, stale_count)``.
+        """
+        from app.modules.bim_hub.service import BIMHubService
+
+        positions = await self.position_repo.list_all_for_boq(boq_id)
+        if not positions:
+            return [], 0
+
+        bim_service = BIMHubService(self.session)
+        linked_ids = await bim_service.link_repo.list_position_ids_with_links(
+            [p.id for p in positions]
+        )
+        if not linked_ids:
+            return [], 0
+
+        rows: list[QuantityLinkRefreshRow] = []
+        stale_count = 0
+        for pos in positions:
+            if pos.id not in linked_ids:
+                continue
+            # Honour the user's chosen projection (parameter/formula) over
+            # the unit default — fixes "refresh re-guesses the default".
+            projection = await self._projection_spec_for_position(pos.id)
+            comp = await bim_service.compute_quantity_from_links(pos.id, projection=projection)
+            old_qty = _to_decimal(pos.quantity)
+
+            if comp.quantity is None:
+                # Unit has no dimensionally-correct mapping — surface the
+                # link (so "no model linked" never fires) but it is not
+                # applicable and never stale.
+                new_qty_q = old_qty
+                changed = False
+                new_status = "active"
+                message = "Unit has no dimensionally-correct BIM quantity mapping"
+            else:
+                new_qty_q = _to_decimal(_quantize_money_str(comp.quantity))
+                delta = new_qty_q - old_qty
+                changed = delta != 0
+                if not comp.contributing_elements and comp.missing_element_ids:
+                    new_status = "broken"
+                    message = "No linked elements resolve in the latest model version"
+                elif changed:
+                    new_status = "stale"
+                    message = "Linked element quantities changed"
+                else:
+                    new_status = "active"
+                    message = ""
+
+            if new_status == "stale":
+                stale_count += 1
+
+            rows.append(
+                QuantityLinkRefreshRow(
+                    link_id=pos.id,
+                    position_id=pos.id,
+                    ordinal=pos.ordinal,
+                    description=pos.description,
+                    quantity_field=comp.quantity_field or "—",
+                    target_field="quantity",
+                    aggregation=comp.aggregation,
+                    unit=pos.unit,
+                    old_quantity=_quantize_money_str(old_qty),
+                    new_quantity=_quantize_money_str(new_qty_q),
+                    delta=_quantize_money_str(new_qty_q - old_qty),
+                    changed=changed,
+                    status=new_status,
+                    contributing_elements=comp.contributing_elements,
+                    missing_element_ids=comp.missing_element_ids,
+                    message=message,
+                )
+            )
+
+        return rows, stale_count
 
     async def apply_quantity_links(
         self,
@@ -7776,18 +7919,35 @@ class BOQService:
         for link_id in link_ids:
             snap = snap_by_id.get(link_id)
             if snap is None:
-                skipped += 1
-                results.append(
-                    QuantityLinkApplyResultRow(
-                        link_id=link_id,
-                        position_id=link_id,  # placeholder; unknown link
-                        ordinal="",
-                        applied=False,
-                        old_quantity="0",
-                        new_quantity="0",
-                        message="Link not found in this BOQ",
-                    )
+                # Not a QuantityLink — try the BOQElementLink pseudo-link
+                # path (link_id == position_id) before declaring it
+                # unknown.
+                pseudo = await self._apply_bim_element_link(
+                    link_id,
+                    applied_by=applied_by,
+                    now_iso=now_iso,
                 )
+                if pseudo is None:
+                    skipped += 1
+                    results.append(
+                        QuantityLinkApplyResultRow(
+                            link_id=link_id,
+                            position_id=link_id,  # placeholder; unknown link
+                            ordinal="",
+                            applied=False,
+                            old_quantity="0",
+                            new_quantity="0",
+                            message="Link not found in this BOQ",
+                        )
+                    )
+                    continue
+                row, did_apply = pseudo
+                results.append(row)
+                if did_apply:
+                    applied += 1
+                    mutated_position_ids.add(link_id)
+                else:
+                    skipped += 1
                 continue
 
             position_id = snap["position_id"]
@@ -7907,6 +8067,130 @@ class BOQService:
             applied=applied,
             skipped=skipped,
             results=results,
+        )
+
+    async def _apply_bim_element_link(
+        self,
+        position_id: uuid.UUID,
+        *,
+        applied_by: uuid.UUID | None,
+        now_iso: str,
+    ) -> tuple[QuantityLinkApplyResultRow, bool] | None:
+        """Apply a BOQElementLink-driven (pseudo-link) quantity to a position.
+
+        Counterpart of the QuantityLink apply branch for positions bound
+        through the BIM viewer's ``oe_bim_boq_link`` table. The dimensional
+        recompute is delegated to the bim_hub service so the count/tonne/
+        no-fallback rules live in one place.
+
+        Returns:
+            ``None`` if ``position_id`` is not a BOQElementLink-bound
+            position (caller then reports "Link not found"); otherwise
+            ``(result_row, did_apply)``.
+        """
+        from app.modules.bim_hub.service import BIMHubService
+
+        bim_service = BIMHubService(self.session)
+        projection = await self._projection_spec_for_position(position_id)
+        comp = await bim_service.compute_quantity_from_links(position_id, projection=projection)
+        if comp.link_count == 0:
+            return None
+
+        position = await self.position_repo.get_by_id(position_id)
+        if position is None:
+            return (
+                QuantityLinkApplyResultRow(
+                    link_id=position_id,
+                    position_id=position_id,
+                    ordinal="",
+                    applied=False,
+                    old_quantity="0",
+                    new_quantity="0",
+                    message="Bound position no longer exists",
+                ),
+                False,
+            )
+
+        # Snapshot every scalar the result rows read BEFORE any
+        # ``update_fields`` (→ ``session.expire_all()``): touching an
+        # expired ORM attribute afterwards would trigger a lazy reload and
+        # raise MissingGreenlet.
+        pos_ordinal = position.ordinal
+        pos_unit_rate = position.unit_rate
+        pos_metadata = dict(position.metadata_ or {})
+        old_qty_str = _quantize_money_str(position.quantity)
+        if comp.quantity is None:
+            no_value_msg = (
+                "Formula is empty or invalid — not applied"
+                if comp.projection_kind == "formula"
+                else "Unit has no dimensionally-correct BIM quantity mapping — not applied"
+            )
+            return (
+                QuantityLinkApplyResultRow(
+                    link_id=position_id,
+                    position_id=position_id,
+                    ordinal=pos_ordinal,
+                    applied=False,
+                    old_quantity=old_qty_str,
+                    new_quantity=old_qty_str,
+                    message=no_value_msg,
+                ),
+                False,
+            )
+        if not comp.contributing_elements and comp.missing_element_ids:
+            return (
+                QuantityLinkApplyResultRow(
+                    link_id=position_id,
+                    position_id=position_id,
+                    ordinal=pos_ordinal,
+                    applied=False,
+                    old_quantity=old_qty_str,
+                    new_quantity=_quantize_money_str(comp.quantity),
+                    message="No linked elements resolve — not applied",
+                ),
+                False,
+            )
+
+        new_qty_str = _quantize_money_str(comp.quantity)
+        new_total = _compute_total(new_qty_str, pos_unit_rate)
+
+        # Append (never replace) a provenance record so the BIM-driven
+        # pull is auditable alongside QuantityLink pulls.
+        meta = dict(pos_metadata)
+        history = list(meta.get("model_quantity_pull_history") or [])
+        provenance = {
+            "source": "bim_element_link",
+            "projection_kind": comp.projection_kind,
+            "quantity_field": comp.quantity_field,
+            "aggregation": comp.aggregation,
+            "contributing_elements": comp.contributing_elements,
+            "missing_element_ids": comp.missing_element_ids,
+            "old_quantity": old_qty_str,
+            "new_quantity": new_qty_str,
+            "applied_at": now_iso,
+            "applied_by": str(applied_by) if applied_by else None,
+        }
+        history.append(provenance)
+        meta["model_quantity_pull"] = provenance
+        meta["model_quantity_pull_history"] = history
+
+        await self.position_repo.update_fields(
+            position_id,
+            quantity=new_qty_str,
+            total=new_total,
+            metadata_=meta,
+        )
+        return (
+            QuantityLinkApplyResultRow(
+                link_id=position_id,
+                position_id=position_id,
+                ordinal=pos_ordinal,
+                applied=True,
+                old_quantity=old_qty_str,
+                new_quantity=new_qty_str,
+                message="Applied",
+            ),
+            True,
         )
 
     # ── Feature 2: estimate baseline / line-level comparison ──────────────

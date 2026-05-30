@@ -347,6 +347,25 @@ class BOQElementLinkRepository:
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
+    async def list_position_ids_with_links(
+        self,
+        position_ids: list[uuid.UUID],
+    ) -> set[uuid.UUID]:
+        """Return which of ``position_ids`` have at least one link.
+
+        One ``SELECT DISTINCT`` instead of an N+1 ``list_by_boq_position``
+        loop, so the BOQ "refresh from model" probe can cheaply discover
+        every BOQElementLink-bound position in a BOQ. Short-circuits the
+        empty input so SQLAlchemy never emits a degenerate ``IN ()``.
+        """
+        if not position_ids:
+            return set()
+        stmt = select(BOQElementLink.boq_position_id).where(
+            BOQElementLink.boq_position_id.in_(position_ids)
+        )
+        result = await self.session.execute(stmt)
+        return set(result.scalars().all())
+
     async def list_by_bim_element(
         self,
         bim_element_id: uuid.UUID,

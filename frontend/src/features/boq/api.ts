@@ -970,6 +970,10 @@ export interface QuantityLink {
   quantity_field: string;
   target_field: string;
   aggregation: string;
+  /** "simple" (aggregate a quantity field) or "formula" (per-element expr). */
+  projection_kind: string;
+  /** Per-element expression evaluated then aggregated (formula mode only). */
+  formula: string | null;
   status: string;
   source_model_version: string | null;
   last_applied_quantity: string | null;
@@ -981,10 +985,16 @@ export interface QuantityLink {
 
 export interface CreateQuantityLinkData {
   model_id: string;
-  element_stable_ids: string[];
-  quantity_field: string;
+  /** DEPRECATED (option C): the binding now lives in oe_bim_boq_link. Optional. */
+  element_stable_ids?: string[];
+  /** Required in simple mode unless aggregation is "count". */
+  quantity_field?: string;
   target_field?: 'quantity';
   aggregation?: QuantityAggregation;
+  /** "simple" (aggregate a quantity field) or "formula" (per-element expr). */
+  projection_kind?: 'simple' | 'formula';
+  /** Per-element expression (required when projection_kind === 'formula'). */
+  formula?: string | null;
 }
 
 /** One per-position review row produced by the refresh probe. */
