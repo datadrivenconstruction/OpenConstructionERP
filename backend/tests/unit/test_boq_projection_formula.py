@@ -250,6 +250,46 @@ async def test_unsafe_formula_yields_none(evil: str) -> None:
     assert result.quantity is None
 
 
+# ── Parameter-name normalisation (spaces / brackets) ─────────────────────
+
+
+def test_safe_param_name_normalises_spaces_and_brackets() -> None:
+    f = BIMHubService._safe_param_name
+    assert f("[qto_slabbasequantities] grossarea") == "qto_slabbasequantities_grossarea"
+    assert f("area_m2") == "area_m2"
+    assert f("Base Offset") == "Base_Offset"
+    assert f("  Net Volume (m3) ") == "Net_Volume_m3"
+    assert f("123abc") == "_123abc"  # identifiers may not start with a digit
+
+
+def test_formula_names_alias_spaced_keys() -> None:
+    """A property whose name has spaces/brackets is exposed as a safe id."""
+    elem = _FakeElement(
+        stable_id="S1",
+        quantities={"area_m2": 6.0},
+        properties={"[qto_slabbasequantities] grossarea": "12.5"},
+    )
+    names = BIMHubService._element_formula_names(elem)
+    assert names["qto_slabbasequantities_grossarea"] == 12.5
+    assert names["area_m2"] == 6.0
+
+
+@pytest.mark.asyncio
+async def test_formula_over_spaced_param_evaluates_not_broken() -> None:
+    """Regression: a formula over a spaced/bracketed param computes (was
+    flagged "broken" — every element missing — because the name didn't bind)."""
+    elements = [
+        _FakeElement(stable_id="S1", properties={"[qto_slabbasequantities] grossarea": "10"}),
+        _FakeElement(stable_id="S2", properties={"[qto_slabbasequantities] grossarea": "5"}),
+    ]
+    result = await _compute(
+        elements, formula="qto_slabbasequantities_grossarea * 2", aggregation="sum"
+    )
+    assert result.quantity == Decimal("30")  # (10+5)*2
+    assert sorted(result.contributing_elements) == ["S1", "S2"]
+    assert result.missing_element_ids == []
+
+
 @pytest.mark.asyncio
 async def test_formula_can_reference_synthetic_count() -> None:
     """A formula may reference ``count`` (=1 per element) for parity."""

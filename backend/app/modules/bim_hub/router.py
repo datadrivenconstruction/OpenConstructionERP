@@ -4051,6 +4051,26 @@ async def get_elements_by_ids(
     )
 
 
+@router.post("/models/{model_id}/elements/enrich-from-parquet/")
+async def enrich_elements_from_parquet(
+    model_id: uuid.UUID,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.update")),
+    service: BIMHubService = Depends(_get_service),
+) -> dict:
+    """Backfill every element's ``properties`` with the full numeric param
+    set from the model's Parquet dataframe (in place — bindings preserved).
+
+    Exposes the same parameters the 3D viewer's property panel shows to the
+    BOQ quantity-formula editor + "Refresh from model", which read
+    ``BIMElement.properties``. Idempotent; safe to re-run after each import.
+    """
+    await _verify_model_access(service, model_id, user_id)
+    result = await service.enrich_elements_from_parquet(model_id)
+    await service.session.commit()
+    return result
+
+
 @router.post(
     "/models/{model_id}/ensure-element/",
     response_model=BIMElementResponse,

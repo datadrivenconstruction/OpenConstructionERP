@@ -1974,6 +1974,160 @@ class BIMHubService:
         )
         return await self._reload_element_with_links(element.id)
 
+    @staticmethod
+    def _numeric_non_id_value(key: str, raw: Any) -> float | None:
+        """Coerce a Parquet cell to a *keepable* numeric param, or ``None``.
+
+        Honours the user's rule: expose every number shown in the property
+        panel (integers OR decimals) **except identifiers**. An identifier is
+        either a column whose NAME looks like an id (``Id``, ``ElementId``,
+        ``IfcGUID``…) or a bare *long* integer with no decimal separator
+        (Revit ElementIds are 6–9 digit integers — "une suite de chiffres
+        sans virgule"). Decimals and short integers (counts) are kept.
+        """
+        if raw is None or raw == "":
+            return None
+        s = str(raw).strip()
+        try:
+            val = float(s)
+        except (TypeError, ValueError):
+            return None
+        if not math.isfinite(val):
+            return None
+        low = str(key).strip().lower()
+        if low == "id" or low.endswith("id") or low.endswith(" id") or "guid" in low or "uuid" in low:
+            return None
+        # Bare long integer (no decimal point) → an identifier, not a measure.
+        digits = s.lstrip("+-")
+        if digits.isdigit() and val == int(val) and len(digits) >= 6:
+            return None
+        return val
+
+    async def enrich_elements_from_parquet(
+        self,
+        model_id: uuid.UUID,
+    ) -> dict[str, int]:
+        """Backfill each element's ``properties`` with the FULL numeric param
+        set from the model's Parquet dataframe — **in place**.
+
+        The bulk-import path stores only the converter's curated subset, but
+        the DDC Parquet holds every Revit/IFC parameter (the set the 3D
+        viewer's property panel shows). This walks the Parquet once, matches
+        each row to an existing element by ``mesh_ref`` / ``stable_id`` (the
+        Revit id), and merges its numeric, non-identifier columns into the
+        element's ``properties`` (canonical Area/Volume/… also fold into
+        ``quantities``).
+
+        It UPDATES existing rows, so element ids — and therefore every
+        ``oe_bim_boq_link`` binding and ``Position.cad_element_ids`` mirror —
+        are preserved. (A re-import would recreate elements with new ids and
+        orphan the bindings, which is why this is a backfill, not a reload.)
+
+        Returns counts: ``elements_scanned`` / ``elements_enriched`` /
+        ``properties_added`` / ``parquet_rows``.
+        """
+        import asyncio
+
+        from app.modules.bim_hub.dataframe_store import query_parquet, read_schema
+
+        model = await self.get_model(model_id)
+
+        # Probe the id column (converter-agnostic — same logic as ensure_element).
+        try:
+            schema = await asyncio.to_thread(read_schema, str(model.project_id), str(model_id))
+        except (OSError, ValueError):
+            schema = []
+        schema_cols = {c["name"] for c in schema}
+        id_col: str | None = next(
+            (c for c in ("id", "Id", "ID", "ElementId", "Element ID", "element_id") if c in schema_cols),
+            None,
+        )
+        empty = {"elements_scanned": 0, "elements_enriched": 0, "properties_added": 0, "parquet_rows": 0}
+        if id_col is None:
+            return empty
+
+        rows = await asyncio.to_thread(
+            query_parquet,
+            str(model.project_id),
+            str(model_id),
+            columns=None,
+            filters=None,
+            limit=50_000,
+        )
+        row_by_id = {str(r.get(id_col)): r for r in rows if r.get(id_col) is not None}
+        if not row_by_id:
+            return {**empty, "parquet_rows": len(rows)}
+
+        qty_key_map = {
+            "area": "area_m2",
+            "volume": "volume_m3",
+            "length": "length_m",
+            "width": "width_m",
+            "height": "height_m",
+            "perimeter": "perimeter_m",
+            "weight": "weight_kg",
+        }
+
+        elements = (
+            (await self.session.execute(select(BIMElement).where(BIMElement.model_id == model_id)))
+            .scalars()
+            .all()
+        )
+
+        enriched = 0
+        props_added = 0
+        for elem in elements:
+            row = row_by_id.get(str(elem.mesh_ref or "")) or row_by_id.get(str(elem.stable_id or ""))
+            if row is None:
+                continue
+            props = dict(elem.properties or {})
+            qtys = dict(elem.quantities or {})
+            added_here = 0
+            for raw_key, raw_val in row.items():
+                if str(raw_key) == id_col:
+                    continue
+                num = self._numeric_non_id_value(raw_key, raw_val)
+                if num is None:
+                    continue
+                lower = str(raw_key).strip().lower()
+                canonical = None
+                for needle, canon in qty_key_map.items():
+                    if needle == lower or lower.endswith(f" {needle}") or lower.endswith(f"_{needle}"):
+                        canonical = canon
+                        break
+                if canonical is not None:
+                    if canonical not in qtys:
+                        qtys[canonical] = num
+                        added_here += 1
+                else:
+                    # Store under a formula-safe identifier so a param with
+                    # spaces / brackets is directly referenceable in a formula.
+                    safe_key = self._safe_param_name(raw_key)
+                    if props.get(safe_key) != num:
+                        props[safe_key] = num
+                        added_here += 1
+            if added_here:
+                elem.properties = props
+                elem.quantities = qtys
+                enriched += 1
+                props_added += added_here
+
+        await self.session.flush()
+        logger.info(
+            "enrich_from_parquet model=%s: %d/%d elements enriched (+%d params, %d parquet rows)",
+            model_id,
+            enriched,
+            len(elements),
+            props_added,
+            len(rows),
+        )
+        return {
+            "elements_scanned": len(elements),
+            "elements_enriched": enriched,
+            "properties_added": props_added,
+            "parquet_rows": len(rows),
+        }
+
     async def bulk_import_elements(
         self,
         model_id: uuid.UUID,
@@ -2433,6 +2587,32 @@ class BIMHubService:
         )
 
     @staticmethod
+    def _safe_param_name(raw: object) -> str:
+        """Normalise a BIM parameter name into a safe formula identifier.
+
+        A formula is parsed as a Python expression, so a parameter whose
+        name carries spaces / brackets (e.g. ``[qto_slabbasequantities]
+        grossarea``) cannot be referenced verbatim — the parser chokes and
+        every element is flagged "missing" (the "broken" refresh status).
+        We fold each run of non ``[A-Za-z0-9_]`` characters to a single
+        ``_`` and trim, yielding ``qto_slabbasequantities_grossarea``. The
+        IDENTICAL rule runs in the formula editor (frontend ``safeParamName``)
+        so the chip the user clicks matches the name the evaluator binds.
+        """
+        s = str(raw).strip()
+        name = "".join(
+            ch if (ch.isascii() and (ch.isalnum() or ch == "_")) else "_" for ch in s
+        )
+        while "__" in name:
+            name = name.replace("__", "_")
+        name = name.strip("_")
+        if not name:
+            return "param"
+        if name[0].isdigit():
+            name = "_" + name
+        return name
+
+    @staticmethod
     def _element_formula_names(elem) -> dict[str, float]:
         """Build the ``names`` binding for a formula from an element's row.
 
@@ -2441,11 +2621,17 @@ class BIMHubService:
         overriding a quantity of the same name), plus ``count = 1`` so a
         formula can reference the element count for parity with simple
         ``count`` aggregation. Non-numeric / non-finite values are skipped.
+
+        Keys are normalised through :meth:`_safe_param_name` so parameters
+        with spaces / brackets become valid formula identifiers (matching
+        the editor's chips). First writer wins on an alias collision, so a
+        canonical quantity is never shadowed by a like-named property.
         """
         names: dict[str, float] = {}
         for source in (elem.quantities or {}, elem.properties or {}):
             for key, raw in source.items():
-                if key in names:
+                safe = BIMHubService._safe_param_name(key)
+                if safe in names:
                     continue
                 try:
                     val = float(raw)
@@ -2453,7 +2639,7 @@ class BIMHubService:
                     continue
                 if not math.isfinite(val):
                     continue
-                names[key] = val
+                names[safe] = val
         names.setdefault("count", 1.0)
         return names
 
