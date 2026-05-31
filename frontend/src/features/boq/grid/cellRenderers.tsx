@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useMemo, useEffect, useLayoutEffect, for
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { ICellRendererParams, Column, GridApi } from 'ag-grid-community';
-import type { Position } from '../api';
+import { boqApi, type Position, type QuantityAggregation } from '../api';
 import {
   ChevronDown,
   ChevronRight,
@@ -31,9 +31,10 @@ import {
   Check,
   AlertTriangle,
   Link2,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { useQuery, useQueries } from '@tanstack/react-query';
+import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   COMMON_CURRENCIES,
   CURRENCY_SYMBOL,
@@ -46,8 +47,10 @@ import {
 import { RESOURCE_TYPES, getResourceTypeLabel } from '../boqResourceTypes';
 import { countComments } from '../CommentDrawer';
 import { BIMQuantityPicker } from './BIMQuantityPicker';
+import { ProjectionEditor, safeParamName, type ProjectionValue } from '../ProjectionEditor';
+import { useToastStore } from '@/stores/useToastStore';
 import { MiniGeometryPreview } from '@/shared/ui/MiniGeometryPreview';
-import { fetchBIMElementsByIds, fetchBIMElementProperties } from '@/features/bim/api';
+import { fetchBIMElementsByIds, fetchBIMElementProperties, enrichElementsFromParquet } from '@/features/bim/api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer/ElementManager';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import type { DisplayQuantityApi } from '@/shared/hooks/useDisplayQuantity';
@@ -1445,12 +1448,23 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
   if (!hasBimLink && !hasPdfLink && !hasDwgLink) return null;
 
   const popoverStyle = anchorRect
-    ? {
-        position: 'fixed' as const,
-        left: Math.min(anchorRect.right + 8, window.innerWidth - 660),
-        top: Math.max(8, Math.min(anchorRect.top - 40, window.innerHeight - 520)),
-        zIndex: 9999,
-      }
+    ? (() => {
+        const margin = 8;
+        const vh = window.innerHeight;
+        const vw = window.innerWidth;
+        // Always anchor the panel to the TOP of the viewport (not the clicked
+        // row's height) so it opens in a stable, predictable spot regardless of
+        // where the position sits in the grid; it fills down and scrolls
+        // internally. Horizontal stays near the cell, clamped on-screen.
+        const top = margin;
+        return {
+          position: 'fixed' as const,
+          left: Math.max(margin, Math.min(anchorRect.right + 8, vw - 660)),
+          top,
+          maxHeight: vh - 2 * margin,
+          zIndex: 9999,
+        };
+      })()
     : undefined;
 
   return (
@@ -1629,6 +1643,7 @@ const BimLinkPopover = forwardRef<
   }, [onClose]);
 
   const [glbOk, setGlbOk] = useState(true);
+  const [geomError, setGeomError] = useState<string | null>(null);
   const [showAllProps, setShowAllProps] = useState(false);
   const [showAllSums, setShowAllSums] = useState(false);
   const { data, isLoading } = useQuery({
@@ -1868,12 +1883,128 @@ const BimLinkPopover = forwardRef<
     });
   }, [elements, parquetByElementId, showAllSums]);
 
+  /* ── Durable quantity rule (projection, option C) ─────────────────────
+   *  Distinct from the one-shot "Set as qty" buttons above: this persists
+   *  the *rule* (chosen parameter or per-element formula) on the position's
+   *  QuantityLink so "Refresh from model" honours it instead of re-guessing
+   *  from the unit. Reuses the SAME shared {@link ProjectionEditor} as the
+   *  ModelLinkPanel — one source of truth for the projection UX. */
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const projPositionId = (positionData?.id as string | undefined) ?? '';
+  const [showRule, setShowRule] = useState(false);
+  const [projection, setProjection] = useState<ProjectionValue>({
+    projection_kind: 'simple',
+    quantity_field: '',
+    aggregation: 'sum',
+    formula: '',
+  });
+
+  // Params the per-element formula may reference. Mirrors the backend's
+  // `_element_formula_names` EXACTLY — only DB-stored `quantities` +
+  // `properties` (numeric-coercible, incl. numeric strings like
+  // `qto_wallbasequantities_volume: "12.5"`). Parquet-only columns are
+  // deliberately excluded: the backend evaluator can't see them, so a
+  // formula referencing one would be flagged "missing" at refresh time.
+  const availableParams = useMemo(() => {
+    const keys = new Set<string>();
+    const numeric = (v: unknown) =>
+      typeof v === 'number' ? Number.isFinite(v) : Number.isFinite(parseFloat(String(v)));
+    for (const el of elements) {
+      for (const [k, v] of Object.entries(el.quantities ?? {})) if (numeric(v)) keys.add(safeParamName(k));
+      for (const [k, v] of Object.entries(el.properties ?? {})) if (numeric(v)) keys.add(safeParamName(k));
+    }
+    return Array.from(keys).sort();
+  }, [elements]);
+
+  // Seed the editor from a previously-saved projection exactly once.
+  const { data: quantityLinks } = useQuery({
+    queryKey: ['quantity-links', projPositionId],
+    queryFn: () => boqApi.getQuantityLinks(projPositionId),
+    enabled: !!projPositionId,
+  });
+  const existingProjection = quantityLinks?.[0];
+  const [seeded, setSeeded] = useState(false);
+  useEffect(() => {
+    if (seeded || !existingProjection) return;
+    setProjection({
+      projection_kind: existingProjection.projection_kind === 'formula' ? 'formula' : 'simple',
+      quantity_field: existingProjection.quantity_field ?? '',
+      aggregation: (existingProjection.aggregation as QuantityAggregation) ?? 'sum',
+      formula: existingProjection.formula ?? '',
+    });
+    setSeeded(true);
+  }, [seeded, existingProjection]);
+
+  const saveProjection = useMutation({
+    mutationFn: () =>
+      boqApi.createQuantityLink(projPositionId, {
+        model_id: modelId,
+        projection_kind: projection.projection_kind,
+        quantity_field:
+          projection.projection_kind === 'simple' && projection.aggregation !== 'count'
+            ? projection.quantity_field
+            : '',
+        aggregation: projection.aggregation,
+        formula: projection.projection_kind === 'formula' ? projection.formula : null,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['quantity-links', projPositionId] });
+      addToast({
+        type: 'success',
+        title: t('boq.projection_saved', { defaultValue: 'Projection saved' }),
+        message: t('boq.projection_saved_hint', {
+          defaultValue:
+            'The quantity is not changed yet — use “Refresh from model” then Apply to pull it in.',
+        }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('boq.projection_save_failed', { defaultValue: 'Could not save projection' }),
+        message: e.message,
+      }),
+  });
+
+  const projectionValid =
+    projection.projection_kind === 'formula'
+      ? projection.formula.trim().length > 0
+      : projection.aggregation === 'count' || !!projection.quantity_field;
+
+  // Backfill the model's elements with the FULL numeric param set from the
+  // Parquet (the params the 3D viewer shows). Refetches the linked elements
+  // so the formula chips pick up every newly-exposed parameter.
+  const enrichParams = useMutation({
+    mutationFn: () => enrichElementsFromParquet(modelId),
+    onSuccess: (r) => {
+      queryClient.invalidateQueries({ queryKey: ['bim-link-preview', modelId] });
+      queryClient.invalidateQueries({ queryKey: ['bim-elements-by-ids'] });
+      queryClient.invalidateQueries({ queryKey: ['bim-elements'] });
+      addToast({
+        type: 'success',
+        title: t('boq.enrich_params_done', { defaultValue: 'BIM parameters loaded' }),
+        message: t('boq.enrich_params_done_hint', {
+          defaultValue: '{{enriched}} element(s) enriched with {{added}} parameter(s).',
+          enriched: r.elements_enriched,
+          added: r.properties_added,
+        } as Record<string, unknown>),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('boq.enrich_params_failed', { defaultValue: 'Could not load BIM parameters' }),
+        message: e.message,
+      }),
+  });
+
   return (
     <div
       ref={combinedRef}
       className="rounded-xl shadow-2xl border border-border-light dark:border-border-dark
                  bg-white dark:bg-surface-elevated overflow-hidden flex flex-col"
-      style={{ ...style, width: canApply ? 900 : 380, maxHeight: 'calc(100vh - 48px)' }}
+      style={{ maxHeight: 'calc(100vh - 48px)', ...style, width: canApply ? 900 : 380 }}
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -2041,14 +2172,9 @@ const BimLinkPopover = forwardRef<
 
         {/* MIDDLE column: 3D preview + element cards */}
         <div className={canApply ? 'w-[380px] shrink-0 border-r border-border-light dark:border-border-dark flex flex-col' : 'w-full'}>
-          {/* 3D Preview — render the viewer while the model still serves
-              geometry. When the GLB request fails (e.g. the linked element
-              belongs to a data-only DWG model that is `needs_converter`, so
-              the geometry endpoint 404s), `onError` flips `glbOk` to false.
-              Previously the preview was simply dropped, leaving a blank
-              panel with no explanation. Show a clear, actionable message
-              in the same footprint instead, keeping the "Open in BIM"
-              affordance reachable from the header above. */}
+          {/* 3D Preview — GLB or DAE (auto-detected). Falls back to an
+              explicit notice when the model has no servable geometry, so the
+              middle column is never a confusing blank. */}
           {glbOk ? (
             <MiniGeometryPreview
               modelId={modelId}
@@ -2056,7 +2182,10 @@ const BimLinkPopover = forwardRef<
               width={380}
               height={220}
               className="bg-gray-50 dark:bg-gray-900 border-b border-border-light dark:border-border-dark"
-              onError={() => setGlbOk(false)}
+              onError={(reason) => {
+                setGlbOk(false);
+                setGeomError(reason ?? null);
+              }}
             />
           ) : (
             <div
@@ -2292,6 +2421,60 @@ const BimLinkPopover = forwardRef<
           </div>
         )}
       </div>
+
+      {/* Durable quantity rule (projection): chosen parameter or per-element
+          formula. Same shared editor as the ModelLinkPanel. */}
+      {canApply && (
+        <div className="border-t border-border-light dark:border-border-dark shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowRule((v) => !v)}
+            className="w-full flex items-center gap-1.5 px-4 py-2 text-left hover:bg-surface-secondary/40 transition-colors"
+          >
+            <SlidersHorizontal size={13} className="text-content-tertiary shrink-0" />
+            <span className="text-[11px] font-medium text-content-secondary flex-1">
+              {t('boq.projection_rule_toggle', { defaultValue: 'Quantity rule (parameter / formula)' })}
+            </span>
+            <ChevronDown
+              size={12}
+              className={`text-content-quaternary transition-transform ${showRule ? 'rotate-180' : ''}`}
+            />
+          </button>
+          {showRule && (
+            <div className="px-4 pb-3 space-y-3 max-h-[40vh] overflow-y-auto">
+              <ProjectionEditor
+                positionId={projPositionId}
+                availableParams={availableParams}
+                value={projection}
+                onChange={setProjection}
+                livePreview
+              />
+              <button
+                type="button"
+                onClick={() => enrichParams.mutate()}
+                disabled={enrichParams.isPending}
+                title={t('boq.enrich_params_hint', {
+                  defaultValue:
+                    'Load every numeric parameter from the BIM model (the ones shown in the 3D viewer) so the formula can use them.',
+                })}
+                className="w-full flex items-center justify-center gap-1.5 h-7 rounded-lg border border-border-light text-content-secondary text-xs font-medium hover:bg-surface-secondary/60 disabled:opacity-50 transition-colors"
+              >
+                {enrichParams.isPending ? <Loader2 size={12} className="animate-spin" /> : <Boxes size={12} />}
+                {t('boq.enrich_params', { defaultValue: 'Load all BIM parameters' })}
+              </button>
+              <button
+                type="button"
+                onClick={() => saveProjection.mutate()}
+                disabled={!projectionValid || saveProjection.isPending}
+                className="w-full flex items-center justify-center gap-1.5 h-7 rounded-lg bg-oe-blue text-white text-xs font-medium hover:bg-oe-blue/90 disabled:opacity-50 transition-colors"
+              >
+                {saveProjection.isPending && <Loader2 size={12} className="animate-spin" />}
+                {t('boq.projection_save', { defaultValue: 'Save projection' })}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Footer — navigate to BIM viewer */}
       <div className="px-4 py-2 border-t border-border-light dark:border-border-dark bg-surface-secondary/20">

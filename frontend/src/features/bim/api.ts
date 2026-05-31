@@ -661,6 +661,26 @@ export async function fetchBIMElementsByIds(
   );
 }
 
+export interface EnrichFromParquetResponse {
+  elements_scanned: number;
+  elements_enriched: number;
+  properties_added: number;
+  parquet_rows: number;
+}
+
+/** Backfill every element's `properties` with the FULL numeric param set
+ *  from the model's Parquet dataframe (the params the 3D viewer shows),
+ *  in place — bindings preserved. Run after import to expose every numeric
+ *  BIM parameter to the BOQ quantity-formula editor + "Refresh from model". */
+export async function enrichElementsFromParquet(
+  modelId: string,
+): Promise<EnrichFromParquetResponse> {
+  return apiPost<EnrichFromParquetResponse, Record<string, never>>(
+    `/v1/bim_hub/models/${encodeURIComponent(modelId)}/elements/enrich-from-parquet/`,
+    {},
+  );
+}
+
 export interface BIMModelBOQLinkAggregate {
   boq_position_id: string;
   boq_id: string;

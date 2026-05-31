@@ -35,6 +35,26 @@ export interface ProjectionValue {
   formula: string;
 }
 
+/**
+ * Normalise a BIM parameter name into a safe formula identifier.
+ *
+ * A formula is parsed as an expression, so a parameter whose name has
+ * spaces / brackets (e.g. `[qto_slabbasequantities] grossarea`) can't be
+ * referenced verbatim. We fold each run of non `[A-Za-z0-9_]` characters to
+ * a single `_` and trim → `qto_slabbasequantities_grossarea`. MUST stay in
+ * lockstep with the backend `BIMHubService._safe_param_name`, so the chip a
+ * user clicks matches the name the evaluator binds.
+ */
+export function safeParamName(raw: string): string {
+  let name = String(raw)
+    .replace(/[^A-Za-z0-9_]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  if (!name) return 'param';
+  if (/^[0-9]/.test(name)) name = '_' + name;
+  return name;
+}
+
 const SIMPLE_AGGREGATIONS: QuantityAggregation[] = ['sum', 'max', 'min', 'count', 'first'];
 const FORMULA_AGGREGATIONS: QuantityAggregation[] = ['sum', 'max', 'min', 'first'];
 

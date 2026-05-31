@@ -33,9 +33,10 @@ import {
   createLink,
   deleteLink,
   bulkCreateLinks,
+  enrichElementsFromParquet,
 } from '@/features/bim/api';
 import { boqApi, type QuantityAggregation } from './api';
-import { ProjectionEditor, type ProjectionValue } from './ProjectionEditor';
+import { ProjectionEditor, safeParamName, type ProjectionValue } from './ProjectionEditor';
 
 export interface ModelLinkPanelProps {
   /** The position being bound. */
@@ -130,15 +131,23 @@ export function ModelLinkPanel({
   }, [elements, filter]);
 
   /** Canonical params available across the BOUND elements (chips + field).
-   *  Mirrors the backend's `_element_formula_names`: quantities + numeric
-   *  properties, so the formula editor only offers params that resolve. */
+   *  Mirrors the backend's `_element_formula_names` exactly: every key in
+   *  `quantities` or `properties` whose value coerces to a finite number —
+   *  including numeric *strings* like `qto_wallbasequantities_volume: "12.5"`
+   *  (raw IFC QTO sets serialise as strings). Using a strict `typeof
+   *  'number'` test here is what previously hid all the string-valued IFC
+   *  parameters and left only the ~5 canonical float quantities. */
   const availableParams = useMemo(() => {
     const keys = new Set<string>();
+    const isNumericLike = (v: unknown) =>
+      typeof v === 'number' ? Number.isFinite(v) : Number.isFinite(parseFloat(String(v)));
     for (const e of elements) {
       if (!linkByElement.has(e.id)) continue;
-      for (const k of Object.keys(e.quantities ?? {})) keys.add(k);
+      for (const [k, v] of Object.entries(e.quantities ?? {})) {
+        if (isNumericLike(v)) keys.add(safeParamName(k));
+      }
       for (const [k, v] of Object.entries(e.properties ?? {})) {
-        if (typeof v === 'number' && Number.isFinite(v)) keys.add(k);
+        if (isNumericLike(v)) keys.add(safeParamName(k));
       }
     }
     return Array.from(keys).sort();
@@ -253,6 +262,31 @@ export function ModelLinkPanel({
       addToast({
         type: 'error',
         title: t('boq.projection_save_failed', { defaultValue: 'Could not save projection' }),
+        message: e.message,
+      }),
+  });
+
+  // Backfill the model's elements with the full numeric param set from the
+  // Parquet (the params the 3D viewer shows), so the formula chips expose
+  // every parameter — not just the curated import subset.
+  const enrichParams = useMutation({
+    mutationFn: () => enrichElementsFromParquet(selectedModelId),
+    onSuccess: (r) => {
+      queryClient.invalidateQueries({ queryKey: ['bim-elements', selectedModelId] });
+      addToast({
+        type: 'success',
+        title: t('boq.enrich_params_done', { defaultValue: 'BIM parameters loaded' }),
+        message: t('boq.enrich_params_done_hint', {
+          defaultValue: '{{enriched}} element(s) enriched with {{added}} parameter(s).',
+          enriched: r.elements_enriched,
+          added: r.properties_added,
+        } as Record<string, unknown>),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('boq.enrich_params_failed', { defaultValue: 'Could not load BIM parameters' }),
         message: e.message,
       }),
   });
@@ -442,9 +476,28 @@ export function ModelLinkPanel({
         {/* Projection editor */}
         {selectedModelId && boundCount > 0 && (
           <div>
-            <h4 className="text-xs font-semibold text-content-secondary mb-2">
-              {t('boq.model_link_rule', { defaultValue: 'Quantity rule' })}
-            </h4>
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-xs font-semibold text-content-secondary">
+                {t('boq.model_link_rule', { defaultValue: 'Quantity rule' })}
+              </h4>
+              <button
+                type="button"
+                onClick={() => enrichParams.mutate()}
+                disabled={enrichParams.isPending}
+                title={t('boq.enrich_params_hint', {
+                  defaultValue:
+                    'Load every numeric parameter from the BIM model (the ones shown in the 3D viewer) so the formula can use them.',
+                })}
+                className="shrink-0 inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border border-border-light text-2xs text-content-secondary hover:bg-surface-secondary/60 disabled:opacity-50 transition-colors"
+              >
+                {enrichParams.isPending ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  <Cuboid size={12} />
+                )}
+                {t('boq.enrich_params', { defaultValue: 'Load all BIM parameters' })}
+              </button>
+            </div>
             <ProjectionEditor
               positionId={positionId}
               availableParams={availableParams}

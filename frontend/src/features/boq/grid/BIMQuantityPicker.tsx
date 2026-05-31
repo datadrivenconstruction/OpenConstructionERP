@@ -10,7 +10,7 @@ import type { BIMElementData } from '@/shared/ui/BIMViewer/ElementManager';
 import type { DisplayQuantityApi } from '@/shared/hooks/useDisplayQuantity';
 import { useToastStore } from '@/stores/useToastStore';
 import { boqApi } from '../api';
-import { ProjectionEditor, type ProjectionValue } from '../ProjectionEditor';
+import { ProjectionEditor, safeParamName, type ProjectionValue } from '../ProjectionEditor';
 
 const DEFAULT_PROJECTION: ProjectionValue = {
   projection_kind: 'simple',
@@ -252,22 +252,31 @@ export function BIMQuantityPicker({
     });
   }, []);
 
-  // Compute portal position from anchor rect
+  // Compute portal position from the anchor rect. Anchors below the cell
+  // when there's room; flips ABOVE when the cell sits near the bottom of the
+  // viewport; and ALWAYS bounds the height to the available space so the
+  // popover can never spill off-screen (the body + rule footer then scroll
+  // internally). Fixes the "lower rows cut the picker off the bottom" bug.
   const style = useMemo(() => {
     if (!anchorRect) return { position: 'absolute' as const, right: 0, top: '100%', marginTop: 4 };
-    const top = anchorRect.bottom + 4;
-    const left = Math.min(anchorRect.left, window.innerWidth - 330);
-    // Flip up if near bottom of viewport
-    if (top + 320 > window.innerHeight) {
-      return { position: 'fixed' as const, left, top: anchorRect.top - 320 - 4 };
-    }
-    return { position: 'fixed' as const, left, top };
+    const margin = 8;
+    const width = 320; // w-80
+    const spaceBelow = window.innerHeight - anchorRect.bottom - margin;
+    const spaceAbove = anchorRect.top - margin;
+    // Prefer opening downward; only flip up when below is cramped and above
+    // genuinely has more room.
+    const openUp = spaceBelow < 360 && spaceAbove > spaceBelow;
+    const left = Math.max(margin, Math.min(anchorRect.left, window.innerWidth - width - margin));
+    const maxHeight = Math.max(180, openUp ? spaceAbove : spaceBelow);
+    return openUp
+      ? { position: 'fixed' as const, left, bottom: window.innerHeight - anchorRect.top + 4, maxHeight }
+      : { position: 'fixed' as const, left, top: anchorRect.bottom + 4, maxHeight };
   }, [anchorRect]);
 
   // Canonical params available across the bound elements (chips + field).
   const availableParams = useMemo(() => {
     const keys = new Set<string>();
-    for (const g of groups) for (const e of g.entries) keys.add(e.key);
+    for (const g of groups) for (const e of g.entries) keys.add(safeParamName(e.key));
     return Array.from(keys).sort();
   }, [groups]);
 
@@ -312,13 +321,13 @@ export function BIMQuantityPicker({
       ref={popoverRef}
       className="w-80 bg-white dark:bg-surface-elevated
                  rounded-xl shadow-xl border border-border-light dark:border-border-dark
-                 overflow-hidden"
+                 overflow-hidden flex flex-col"
       style={{ ...style, zIndex: 9999 }}
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border-light dark:border-border-dark bg-surface-secondary/30">
+      <div className="shrink-0 flex items-center justify-between px-3 py-2 border-b border-border-light dark:border-border-dark bg-surface-secondary/30">
         <div className="flex items-center gap-1.5">
           <Cuboid size={14} className="text-emerald-600" />
           <span className="text-xs font-semibold text-content-primary">BIM Quantities</span>
@@ -337,7 +346,7 @@ export function BIMQuantityPicker({
       </div>
 
       {/* Body */}
-      <div className="max-h-72 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {isLoading && (
           <div className="flex items-center justify-center gap-2 py-8">
             <Loader2 size={16} className="animate-spin text-content-tertiary" />
@@ -443,7 +452,7 @@ export function BIMQuantityPicker({
 
       {/* Durable rule (projection): chosen parameter or formula. */}
       {!isLoading && groups.length > 0 && (
-        <div className="border-t border-border-light dark:border-border-dark">
+        <div className="shrink-0 border-t border-border-light dark:border-border-dark">
           <button
             onClick={() => setShowRule((v) => !v)}
             className="w-full flex items-center gap-1.5 px-3 py-2 text-left hover:bg-surface-secondary/40 transition-colors"
@@ -457,7 +466,7 @@ export function BIMQuantityPicker({
             </span>
           </button>
           {showRule && (
-            <div className="px-3 pb-3 space-y-3">
+            <div className="px-3 pb-3 space-y-3 max-h-[45vh] overflow-y-auto">
               <ProjectionEditor
                 positionId={positionId}
                 availableParams={availableParams}
