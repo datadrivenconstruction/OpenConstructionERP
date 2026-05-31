@@ -279,13 +279,10 @@ export function MiniGeometryPreview({
         // In COLLADA/DAE the Revit ElementId (== mesh_ref) sits on an ANCESTOR
         // <node>, not the mesh itself, so we walk every ancestor's name +
         // userData ids (like the full ElementManager does).
-        let meshCount = 0;
         let matchedCount = 0;
-        const sampleChains: string[] = [];
 
         group.traverse((child) => {
           if (!(child instanceof THREE.Mesh)) return;
-          meshCount++;
 
           const names: string[] = [];
           let cursor: THREE.Object3D | null = child;
@@ -299,7 +296,6 @@ export function MiniGeometryPreview({
             if (ud?.stableId) names.push(String(ud.stableId));
             cursor = cursor.parent;
           }
-          if (sampleChains.length < 10) sampleChains.push(names.join('  <  ') || '(unnamed mesh)');
 
           let isTarget = names.some(inSet);
           if (!isTarget) {
@@ -323,15 +319,9 @@ export function MiniGeometryPreview({
         scene.updateMatrixWorld(true);
 
         if (matchedCount === 0) {
-          // No matching meshes — log a sample so the node-naming scheme can be
-          // compared against the ids we matched on.
-          // eslint-disable-next-line no-console
-          console.warn(
-            `[MiniGeometryPreview] no mesh matched for model ${modelId}.\n` +
-              `meshes traversed: ${meshCount}\n` +
-              `match ids (sample): ${Array.from(matchSet).slice(0, 12).join(', ')}\n` +
-              `mesh ancestor-chains (sample):\n  ${sampleChains.join('\n  ')}`,
-          );
+          // No matching meshes (e.g. the linked elements live in another
+          // model). Render the empty scene; the popover surfaces its own
+          // "no geometry" state when the load itself fails.
           loadingRef.current = false;
           renderer.render(scene, camera);
           return;

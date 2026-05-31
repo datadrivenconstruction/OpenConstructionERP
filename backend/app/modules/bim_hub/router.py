@@ -5376,7 +5376,17 @@ async def query_dataframe(
             limit=min(body.get("limit", 10_000), 50_000),
         )
     except ValueError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
+        # Bad column / operator in the request → client error.
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001 - optional enrichment must never 500
+        # The Parquet dataframe is an OPTIONAL enrichment (e.g. the BOQ
+        # picker's per-element property fallback, fired in parallel for many
+        # elements). A DuckDB/file hiccup should degrade to "no rows", not a
+        # 500 that floods the console. Logged so real issues stay visible.
+        logger.warning(
+            "dataframe query failed (model=%s): %s", model_id, exc, exc_info=True
+        )
+        return []
     return rows
 
 
