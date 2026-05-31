@@ -1654,6 +1654,13 @@ const BimLinkPopover = forwardRef<
   });
   const elements = data?.items ?? [];
 
+  // Multi-model projects: the position may be linked to a DIFFERENT model
+  // than the BOQ grid's active `modelId` (e.g. a freshly-imported model became
+  // the project default). by-ids resolves elements project-wide, so trust the
+  // resolved element's own model for geometry / Parquet / enrich — otherwise
+  // the 3D + properties would target the wrong model and show nothing.
+  const resolvedModelId = elements.find((e) => e.model_id)?.model_id ?? modelId;
+
   // Parquet fallback: some BIM elements have empty `quantities` in the DB
   // because DDC's "standard" Excel extract skips Area/Volume for certain
   // Revit categories (e.g. tapered roofs, planting). The full DDC
@@ -1664,9 +1671,10 @@ const BimLinkPopover = forwardRef<
   // has something actionable to apply.
   const parquetFetches = useQueries({
     queries: elements.map((el) => ({
-      queryKey: ['bim-parquet-row', modelId, el.mesh_ref || el.id],
-      queryFn: () => fetchBIMElementProperties(modelId, el.mesh_ref || el.stable_id || el.id),
-      enabled: !!modelId && !!el.mesh_ref,
+      queryKey: ['bim-parquet-row', el.model_id ?? resolvedModelId, el.mesh_ref || el.id],
+      queryFn: () =>
+        fetchBIMElementProperties(el.model_id ?? resolvedModelId, el.mesh_ref || el.stable_id || el.id),
+      enabled: !!(el.model_id ?? resolvedModelId) && !!el.mesh_ref,
       staleTime: 5 * 60_000,
     })),
   });
@@ -1976,7 +1984,7 @@ const BimLinkPopover = forwardRef<
   // Parquet (the params the 3D viewer shows). Refetches the linked elements
   // so the formula chips pick up every newly-exposed parameter.
   const enrichParams = useMutation({
-    mutationFn: () => enrichElementsFromParquet(modelId),
+    mutationFn: () => enrichElementsFromParquet(resolvedModelId),
     onSuccess: (r) => {
       queryClient.invalidateQueries({ queryKey: ['bim-link-preview', modelId] });
       queryClient.invalidateQueries({ queryKey: ['bim-elements-by-ids'] });
@@ -2177,7 +2185,7 @@ const BimLinkPopover = forwardRef<
               middle column is never a confusing blank. */}
           {glbOk ? (
             <MiniGeometryPreview
-              modelId={modelId}
+              modelId={resolvedModelId}
               elementIds={elementIds}
               width={380}
               height={220}

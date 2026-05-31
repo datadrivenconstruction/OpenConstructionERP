@@ -188,7 +188,10 @@ export interface PropertyValueCount {
 
 export interface BIMElementData {
   id: string;
-  /** RVT UniqueId / IFC GlobalId — stable across re-uploads. */
+  /** Owning BIM model. Present in API responses; lets a multi-model project
+   *  resolve which model an element (and its geometry) actually belongs to. */
+  model_id?: string;
+  /** Revit UniqueId / IFC GlobalId — stable across re-uploads. */
   stable_id?: string;
   name: string;
   element_type: string;

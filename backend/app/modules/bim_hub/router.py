@@ -4030,16 +4030,30 @@ async def get_elements_by_ids(
     _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMElementListResponse:
-    """Fetch specific elements by their IDs (DB UUID or stable_id)."""
+    """Fetch specific elements by their IDs (DB UUID or stable_id).
+
+    DB UUIDs are globally unique, so they resolve across EVERY model in the
+    caller's project — not just ``model_id``. This matters for multi-model
+    projects: a BOQ position linked to model A's elements must still resolve
+    when the BOQ grid opens the picker with the project's *active* model B
+    (e.g. a freshly-imported model). ``stable_id`` is NOT globally unique, so
+    it stays scoped to ``model_id``. Access is bounded to the project already
+    authorised by ``_verify_model_access``.
+    """
     await _verify_model_access(service, model_id, user_id or "")
 
     element_ids: list[str] = body.get("element_ids", [])
     if not element_ids or len(element_ids) > 100:
         return BIMElementListResponse(items=[], total=0, offset=0, limit=0)
 
-    from sqlalchemy import or_
+    from sqlalchemy import and_, or_
 
-    from app.modules.bim_hub.models import BIMElement
+    from app.modules.bim_hub.models import BIMElement, BIMModel
+
+    model = await service.get_model(model_id)
+    project_id = model.project_id if model is not None else None
+
+    uuid_ids = [uuid.UUID(eid) for eid in element_ids if len(eid) == 36]
 
     parsed_uuids: list[uuid.UUID] = []
     for eid in element_ids:
@@ -4050,11 +4064,15 @@ async def get_elements_by_ids(
 
     query = (
         select(BIMElement)
-        .where(BIMElement.model_id == model_id)
+        .join(BIMModel, BIMElement.model_id == BIMModel.id)
+        .where(BIMModel.project_id == project_id)
         .where(
             or_(
-                BIMElement.id.in_(parsed_uuids),
-                BIMElement.stable_id.in_(element_ids),
+                BIMElement.id.in_(uuid_ids),
+                and_(
+                    BIMElement.model_id == model_id,
+                    BIMElement.stable_id.in_(element_ids),
+                ),
             )
         )
     )
