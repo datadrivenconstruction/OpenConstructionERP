@@ -340,6 +340,7 @@ function DocumentCard({
   doc,
   onAnalyze,
   onExtractTables,
+  onView,
   onRemove,
   onToggleElement,
   onSelectAll,
@@ -350,6 +351,7 @@ function DocumentCard({
   doc: UploadedDocument;
   onAnalyze: (id: string) => void;
   onExtractTables: (id: string) => void;
+  onView: (doc: UploadedDocument) => void;
   onRemove: (id: string) => void;
   onToggleElement: (docId: string, elementId: string) => void;
   onSelectAll: (docId: string) => void;
@@ -470,14 +472,7 @@ function DocumentCard({
             defaultValue: 'View {{name}}',
             name: doc.filename,
           })}
-          onClick={() => {
-            // Open in a new tab; fall back to same-tab nav if the browser
-            // blocks `window.open` (popup blocker) so the user still sees
-            // their document instead of a no-op click.
-            const url = `/api/v1/takeoff/documents/${doc.id}/download`;
-            const w = window.open(url, '_blank', 'noopener,noreferrer');
-            if (!w) window.location.href = url;
-          }}
+          onClick={() => onView(doc)}
         >
           {t('takeoff.view', 'View')}
         </Button>
@@ -1551,6 +1546,25 @@ export function TakeoffPage() {
     [extractTablesMutation],
   );
 
+  /* ── View a document ──────────────────────────────────────────────────
+   * Open the document in the in-app pdf.js viewer (Measurements tab) rather
+   * than navigating the whole tab to the raw `/download` API URL. That URL
+   * (a) is auth-gated — a top-level browser navigation can't send the Bearer
+   * token, so it 401s — and (b) 404s without the trailing slash. The viewer
+   * fetches the PDF with the auth header (see TakeoffViewerModule), so this
+   * reuses the proven, working path. */
+  const handleViewDocument = useCallback(
+    (doc: UploadedDocument) => {
+      setActiveDocId(doc.id);
+      setViewerDoc({
+        url: `/api/v1/takeoff/documents/${doc.id}/download/`,
+        name: doc.filename,
+      });
+      setActiveTab('measurements');
+    },
+    [],
+  );
+
   const handleToggleElement = useCallback((docId: string, elementId: string) => {
     setDocuments((prev) =>
       prev.map((d) => {
@@ -1974,6 +1988,7 @@ export function TakeoffPage() {
                     doc={doc}
                     onAnalyze={handleAnalyze}
                     onExtractTables={handleExtractTables}
+                    onView={handleViewDocument}
                     onRemove={handleRemoveDocument}
                     onToggleElement={handleToggleElement}
                     onSelectAll={handleSelectAll}
