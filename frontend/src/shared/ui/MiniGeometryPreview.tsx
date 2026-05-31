@@ -16,6 +16,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { ColladaLoader } from 'three/addons/loaders/ColladaLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { useAuthStore } from '@/stores/useAuthStore';
 
@@ -32,92 +33,102 @@ export interface MiniGeometryPreviewProps {
   height?: number;
   /** Extra CSS class names on the wrapper div. */
   className?: string;
-  /** Called when GLB loading fails (e.g. 404). */
-  onError?: () => void;
+  /** Called when geometry loading fails. ``reason`` carries the underlying
+   *  error message (e.g. "geometry HTTP 404") for diagnostics. */
+  onError?: (reason?: string) => void;
 }
 
-/* ── Module-level GLB scene cache ───────────────────────────────────────── */
+/* ── Module-level geometry-BYTES cache ──────────────────────────────────── */
+//
+// We cache the raw geometry BYTES (not a parsed THREE scene) and re-parse a
+// FRESH scene per preview instance. Caching a parsed scene and handing out
+// ``clone(true)`` copies SHARES materials across every instance + renderer;
+// once any instance's renderer is disposed (unmount / React StrictMode
+// double-invoke) the shared material's compiled WebGLProgram goes stale and
+// the next render floods the console with "uniform3f: location is not from
+// the associated program" and shows nothing. A fresh parse gives each
+// renderer its own materials + geometry, which is what fixes the blank canvas.
 
-interface CachedScene {
-  group: THREE.Group;
-  /** Timestamp of last access — for potential LRU eviction. */
-  accessedAt: number;
-}
+const bufferCache = new Map<string, ArrayBuffer>();
+const loadingBuffers = new Map<string, Promise<ArrayBuffer>>();
 
-const sceneCache = new Map<string, CachedScene>();
-const loadingPromises = new Map<string, Promise<THREE.Group>>();
-
-/** Max cached models — evict oldest when exceeded. */
+/** Max cached models — evict oldest (insertion order) when exceeded. */
 const MAX_CACHE_SIZE = 4;
 
 function evictOldest(): void {
-  if (sceneCache.size <= MAX_CACHE_SIZE) return;
-  let oldestKey: string | null = null;
-  let oldestTime = Infinity;
-  for (const [key, entry] of sceneCache) {
-    if (entry.accessedAt < oldestTime) {
-      oldestTime = entry.accessedAt;
-      oldestKey = key;
-    }
-  }
-  if (oldestKey) {
-    sceneCache.delete(oldestKey);
-  }
+  if (bufferCache.size <= MAX_CACHE_SIZE) return;
+  const oldestKey = bufferCache.keys().next().value as string | undefined;
+  if (oldestKey) bufferCache.delete(oldestKey);
 }
 
 /**
- * Load a GLB scene for a given model, returning a deep clone so each
- * preview instance can independently show/hide meshes.
+ * Parse a geometry ArrayBuffer into a scene, auto-detecting the format the
+ * way the full {@link ElementManager} does: GLB (binary glTF, magic ``glTF``)
+ * → GLTFLoader; otherwise COLLADA/DAE (XML) → ColladaLoader.
+ *
+ * The mini-preview previously used GLTFLoader ONLY, so any model whose
+ * ``/geometry/`` endpoint serves a DAE (the GLB-preferred / DAE-fallback
+ * default) rendered nothing — even though the main 3D viewer showed it.
  */
-function loadModelScene(modelId: string): Promise<THREE.Group> {
-  // Return cached clone
-  const cached = sceneCache.get(modelId);
-  if (cached) {
-    cached.accessedAt = Date.now();
-    return Promise.resolve(cached.group.clone(true));
+function parseGeometryScene(buffer: ArrayBuffer): Promise<THREE.Object3D> {
+  const head = new Uint8Array(buffer.slice(0, 4));
+  const magic = String.fromCharCode(head[0] ?? 0, head[1] ?? 0, head[2] ?? 0, head[3] ?? 0);
+
+  if (magic === 'glTF') {
+    return new Promise((resolve, reject) => {
+      const loader = new GLTFLoader();
+      loader.parse(
+        buffer,
+        '',
+        (gltf) => (gltf?.scene ? resolve(gltf.scene) : reject(new Error('Empty GLB'))),
+        (err) => reject(err instanceof Error ? err : new Error('GLB parse failed')),
+      );
+    });
   }
 
-  // Deduplicate concurrent loads
-  const existing = loadingPromises.get(modelId);
-  if (existing) {
-    return existing.then((group) => group.clone(true));
+  // Assume COLLADA/DAE (XML). ColladaLoader.parse is synchronous.
+  const text = new TextDecoder('utf-8').decode(new Uint8Array(buffer));
+  const collada = new ColladaLoader().parse(text, '');
+  if (collada?.scene) return Promise.resolve(collada.scene as unknown as THREE.Object3D);
+  return Promise.reject(new Error('Empty DAE'));
+}
+
+/** Fetch (and cache) the raw geometry bytes for a model, deduped. */
+function fetchGeometryBuffer(modelId: string): Promise<ArrayBuffer> {
+  const cached = bufferCache.get(modelId);
+  if (cached) return Promise.resolve(cached);
+
+  let loadPromise = loadingBuffers.get(modelId);
+  if (!loadPromise) {
+    loadPromise = (async () => {
+      const token = useAuthStore.getState().accessToken;
+      const url =
+        `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/geometry/?_t=${Date.now()}`;
+      const resp = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!resp.ok) throw new Error(`geometry HTTP ${resp.status}`);
+      const buffer = await resp.arrayBuffer();
+      bufferCache.set(modelId, buffer);
+      evictOldest();
+      return buffer;
+    })();
+    loadingBuffers.set(modelId, loadPromise);
+    // Drop the in-flight entry once settled (so a failed load can be retried).
+    loadPromise.catch(() => {}).finally(() => loadingBuffers.delete(modelId));
   }
 
-  const token = useAuthStore.getState().accessToken;
-  const base = `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/geometry/`;
-  const params = new URLSearchParams();
-  if (token) params.set('token', token);
-  params.set('_t', String(Date.now()));
-  const url = `${base}?${params.toString()}`;
+  return loadPromise;
+}
 
-  const promise = new Promise<THREE.Group>((resolve, reject) => {
-    const loader = new GLTFLoader();
-    loader.load(
-      url,
-      (gltf) => {
-        if (!gltf?.scene) {
-          reject(new Error('GLTFLoader returned empty result'));
-          return;
-        }
-        // Store the original scene in cache
-        sceneCache.set(modelId, {
-          group: gltf.scene,
-          accessedAt: Date.now(),
-        });
-        evictOldest();
-        loadingPromises.delete(modelId);
-        resolve(gltf.scene.clone(true));
-      },
-      undefined,
-      (error) => {
-        loadingPromises.delete(modelId);
-        reject(error);
-      },
-    );
-  });
-
-  loadingPromises.set(modelId, promise);
-  return promise;
+/**
+ * Load a model's geometry as a FRESH, independent scene (GLB or DAE). Each
+ * call parses its own copy so materials + geometry are never shared across the
+ * separate WebGL renderers the previews spin up.
+ */
+async function loadModelScene(modelId: string): Promise<THREE.Group> {
+  const buffer = await fetchGeometryBuffer(modelId);
+  return (await parseGeometryScene(buffer)) as THREE.Group;
 }
 
 /* ── Component ──────────────────────────────────────────────────────────── */
@@ -130,13 +141,12 @@ export function MiniGeometryPreview({
   className,
   onError,
 }: MiniGeometryPreviewProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const rafRef = useRef<number>(0);
-  const mountedRef = useRef(true);
   const loadingRef = useRef(true);
   const errorRef = useRef(false);
 
@@ -164,12 +174,30 @@ export function MiniGeometryPreview({
   }, []);
 
   useEffect(() => {
-    mountedRef.current = true;
+    // Per-effect-run cancellation flag. A module-shared ref (mountedRef) was
+    // wrong: StrictMode flips it back to true on remount, so the FIRST run's
+    // async ``.then`` would resume and render with its already-disposed
+    // renderer. A local ``let`` is captured per run.
+    let cancelled = false;
     loadingRef.current = true;
     errorRef.current = false;
 
-    const canvas = canvasRef.current;
-    if (!canvas || !modelId || elementIds.length === 0) return;
+    const container = containerRef.current;
+    if (!container || !modelId || elementIds.length === 0) return;
+
+    // Create a FRESH <canvas> per effect run (StrictMode mounts twice). A
+    // React-managed canvas ref is reused across mounts, so two renderers end
+    // up on one canvas/context → "location is not from the associated
+    // program" flood (and forceContextLoss on a reused canvas then nukes the
+    // context entirely → "reading 'precision'" crash). An owned canvas per
+    // run gives each renderer its own context, cleanly removed on teardown.
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.display = 'block';
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    container.appendChild(canvas);
 
     // --- Init Three.js ---
     const renderer = new THREE.WebGLRenderer({
@@ -220,7 +248,16 @@ export function MiniGeometryPreview({
           const data = await resp.json();
           for (const el of data.items ?? []) {
             if (el.mesh_ref) matchSet.add(String(el.mesh_ref));
-            if (el.stable_id) matchSet.add(el.stable_id);
+            if (el.stable_id) {
+              matchSet.add(el.stable_id);
+              // DAE nodes are named by the bare Revit ElementId, which is
+              // often embedded in a compound stable_id (e.g. the "459717" in
+              // "Sol:DP15:459717"). Add the numeric segments so a node named
+              // "459717" still matches even when mesh_ref is absent.
+              for (const seg of String(el.stable_id).split(/[^0-9]+/)) {
+                if (seg.length >= 3) matchSet.add(seg);
+              }
+            }
             if (el.id) matchSet.add(el.id);
           }
         }
@@ -230,61 +267,91 @@ export function MiniGeometryPreview({
 
     Promise.all([loadModelScene(modelId), resolveMatchSet()])
       .then(([group, matchSet]) => {
-        if (!mountedRef.current) return;
-
-        // Traverse: show meshes matching any known ID (db uuid, stable_id, mesh_ref)
-        const visibleBox = new THREE.Box3();
-        let hasVisibleMesh = false;
+        if (cancelled) return;
 
         // Build a lowercase version of matchSet for case-insensitive matching
         const matchSetLower = new Set<string>();
         for (const id of matchSet) matchSetLower.add(id.toLowerCase());
+        const inSet = (n: string) =>
+          !!n && (matchSet.has(n) || matchSetLower.has(n.toLowerCase()));
+
+        // ── Pass 1: flag which meshes belong to the linked elements ──
+        // In COLLADA/DAE the Revit ElementId (== mesh_ref) sits on an ANCESTOR
+        // <node>, not the mesh itself, so we walk every ancestor's name +
+        // userData ids (like the full ElementManager does).
+        let meshCount = 0;
+        let matchedCount = 0;
+        const sampleChains: string[] = [];
 
         group.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            // Try matching by name, id, or userData
-            const candidateNames = [
-              child.name,
-              String(child.id),
-              child.userData?.name,
-              child.userData?.elementId,
-              child.userData?.stableId,
-            ].filter(Boolean).map(String);
+          if (!(child instanceof THREE.Mesh)) return;
+          meshCount++;
 
-            // Exact match first
-            let isTarget = candidateNames.some(
-              (n) => matchSet.has(n) || matchSetLower.has(n.toLowerCase()),
-            );
+          const names: string[] = [];
+          let cursor: THREE.Object3D | null = child;
+          while (cursor && cursor !== group) {
+            if (cursor.name) names.push(cursor.name);
+            const ud = cursor.userData as
+              | { name?: unknown; elementId?: unknown; stableId?: unknown }
+              | undefined;
+            if (ud?.name) names.push(String(ud.name));
+            if (ud?.elementId) names.push(String(ud.elementId));
+            if (ud?.stableId) names.push(String(ud.stableId));
+            cursor = cursor.parent;
+          }
+          if (sampleChains.length < 10) sampleChains.push(names.join('  <  ') || '(unnamed mesh)');
 
-            // Substring match: GLB nodes often use compound names like
-            // "Chair-5-180572-mesh" where the ElementId is a segment.
-            // Split node name by common delimiters and check each part.
-            if (!isTarget && child.name) {
-              const nameParts = child.name.split(/[-_]/);
-              isTarget = nameParts.some(
-                (part) => part.length >= 3 && (matchSet.has(part) || matchSetLower.has(part.toLowerCase())),
-              );
-            }
-
-            child.visible = isTarget;
-            if (isTarget) {
-              child.geometry.computeBoundingBox();
-              visibleBox.expandByObject(child);
-              hasVisibleMesh = true;
+          let isTarget = names.some(inSet);
+          if (!isTarget) {
+            for (const n of names) {
+              const parts = n.split(/[-_:.\s]+/);
+              if (parts.some((p) => p.length >= 3 && inSet(p))) {
+                isTarget = true;
+                break;
+              }
             }
           }
+          child.visible = isTarget;
+          if (isTarget) matchedCount++;
         });
 
         scene.add(group);
+        // World matrices MUST be refreshed before measuring: the loader leaves
+        // them stale, and the DAE Z-UP→Y-UP correction is a rotation on the
+        // root. Measuring earlier framed the wrong place → slabs off-screen
+        // (visible canvas, nothing in view) even though meshes matched.
+        scene.updateMatrixWorld(true);
 
-        if (!hasVisibleMesh) {
-          // GLB loaded but none of its meshes matched the requested element
-          // IDs (wrong model selected, stale stable_ids, or a mesh-less
-          // data-only export). Previously this rendered a blank gray canvas
-          // with no signal, so callers could not tell it apart from a
-          // still-loading state. Surface it through `onError` so the host
-          // (e.g. the BOQ linked-geometry popover) can show a clear message
-          // instead of an empty panel.
+        if (matchedCount === 0) {
+          // No matching meshes — log a sample so the node-naming scheme can be
+          // compared against the ids we matched on.
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[MiniGeometryPreview] no mesh matched for model ${modelId}.\n` +
+              `meshes traversed: ${meshCount}\n` +
+              `match ids (sample): ${Array.from(matchSet).slice(0, 12).join(', ')}\n` +
+              `mesh ancestor-chains (sample):\n  ${sampleChains.join('\n  ')}`,
+          );
+          loadingRef.current = false;
+          renderer.render(scene, camera);
+          return;
+        }
+
+        // ── Pass 2: bounding box of the visible (matched) meshes, now that
+        // world matrices are current ──
+        const visibleBox = new THREE.Box3();
+        group.traverse((child) => {
+          if (child instanceof THREE.Mesh && child.visible) {
+            visibleBox.expandByObject(child);
+          }
+        });
+
+        if (visibleBox.isEmpty()) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[MiniGeometryPreview] matched ${matchedCount} mesh(es) but their ` +
+              `bounding box is empty for model ${modelId} (degenerate geometry?).`,
+          );
           loadingRef.current = false;
           errorRef.current = true;
           renderer.render(scene, camera);
@@ -297,8 +364,8 @@ export function MiniGeometryPreview({
         visibleBox.getCenter(center);
         const size = new THREE.Vector3();
         visibleBox.getSize(size);
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
 
-        const maxDim = Math.max(size.x, size.y, size.z);
         const fov = camera.fov * (Math.PI / 180);
         let cameraZ = maxDim / (2 * Math.tan(fov / 2));
         cameraZ *= 1.8; // padding
@@ -326,37 +393,37 @@ export function MiniGeometryPreview({
 
         // Animation loop — OrbitControls drives camera
         const animate = () => {
-          if (!mountedRef.current) return;
+          if (cancelled) return;
           controls.update();
           renderer.render(scene, camera);
           rafRef.current = requestAnimationFrame(animate);
         };
         animate();
       })
-      .catch(() => {
-        if (!mountedRef.current) return;
+      .catch((err) => {
+        if (cancelled) return;
         errorRef.current = true;
         loadingRef.current = false;
-        onError?.();
+        const reason = err instanceof Error ? err.message : String(err);
+        // eslint-disable-next-line no-console
+        console.warn('[MiniGeometryPreview] geometry load failed:', err);
+        onError?.(reason);
       });
 
     return () => {
-      mountedRef.current = false;
+      cancelled = true;
       dispose();
+      canvas.remove();
     };
   }, [modelId, elementIds.join(','), width, height, dispose]);
 
+  // The <canvas> is created imperatively inside the effect (one per mount) and
+  // appended here, so StrictMode's double mount never shares a canvas/context.
   return (
     <div
+      ref={containerRef}
       className={className}
       style={{ width, height, borderRadius: 6, overflow: 'hidden', position: 'relative' }}
-    >
-      <canvas
-        ref={canvasRef}
-        width={width}
-        height={height}
-        style={{ display: 'block', width, height }}
-      />
-    </div>
+    />
   );
 }
