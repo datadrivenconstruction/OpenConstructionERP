@@ -3098,11 +3098,15 @@ export function BIMPage() {
   // elements that match the active filter predicate and open AddToBOQ with
   // the full subset so the user can generate one BOQ position from e.g.
   // "all walls on level 1".
-  const handleQuickTakeoff = useCallback(() => {
-    if (!elementsQuery.data || elementsQuery.data.items.length === 0) return;
-    const subset = filterPredicate
-      ? elementsQuery.data.items.filter(filterPredicate)
-      : elementsQuery.data.items;
+  const handleQuickTakeoff = useCallback((scopedSubset?: BIMElementData[]) => {
+    const items = elementsQuery.data?.items ?? [];
+    // Prefer the EXACT subset the filter panel computed (isolation ∩ storey ∩
+    // type ∩ search) so "Link N to BOQ" exports precisely what its count
+    // promises. Recomputing from `filterPredicate` alone let no-storey
+    // elements leak past the level filter (and ignored viewer isolation) — the
+    // "level filter not applied on export" bug. Fall back to the predicate
+    // recompute only when invoked without an explicit subset.
+    const subset = scopedSubset ?? (filterPredicate ? items.filter(filterPredicate) : items);
     if (subset.length === 0) {
       addToast({
         type: 'info',

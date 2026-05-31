@@ -52,7 +52,7 @@ export interface BIMFilterGroupsPanelProps {
   ) => void;
   onClose?: () => void;
   onElementClick?: (elementId: string) => void;
-  onQuickTakeoff?: () => void;
+  onQuickTakeoff?: (subset: BIMElementData[]) => void;
   visibleElementCount?: number | null;
   onSaveAsGroup?: (
     filter: BIMFilterState,
