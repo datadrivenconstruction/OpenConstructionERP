@@ -479,9 +479,26 @@ function CompanyProfilesTab() {
       // POST on the SAME metadata.module_preferences JSON (last writer won,
       // sometimes with the stale store snapshot). One awaited write, then a
       // read-back, keeps the two in lockstep.
+      // Full Enterprise = "turn everything on". The backend preset's
+      // `enabled_modules` is already the complete functional set (every key
+      // the sidebar gates on — bim_hub, finance, crm, …), so it is the
+      // authoritative base. We additionally union in the frontend plugin
+      // registry ids (gaeb-exchange, ddc-*, pipelines, …) which live outside
+      // the backend catalogue, so plugin surfaces are enabled too. Sending
+      // ONLY the plugin registry — as this did before — was the bug: the
+      // backend `modules_for` writes an explicit False for every known key
+      // NOT in the list, so the ~16 plugin ids ended up DISABLING bim_hub,
+      // finance, crm and the rest instead of enabling the whole platform.
       const isFullEnterprise = switchingTo.key === 'full_enterprise';
       const enabledModules = isFullEnterprise
-        ? Object.values(getModulesByCategory()).flatMap((mods) => mods.map((m) => m.id))
+        ? Array.from(
+            new Set([
+              ...switchingTo.enabled_modules,
+              ...Object.values(getModulesByCategory()).flatMap((mods) =>
+                mods.map((m) => m.id),
+              ),
+            ]),
+          )
         : switchingTo.enabled_modules;
 
       await apiPost('/v1/users/me/onboarding/', {
