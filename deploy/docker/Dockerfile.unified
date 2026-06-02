@@ -16,7 +16,7 @@
 # Pinned to node:22-alpine — rollup-plugin-visualizer 7.x already
 # emits an EBADENGINE warning on node:20, and 8.x (already published)
 # requires node>=22 outright (BUG-B04).
-FROM node:22-alpine AS frontend-build
+FROM node:26-alpine AS frontend-build
 
 WORKDIR /build
 COPY frontend/package.json frontend/package-lock.json ./
