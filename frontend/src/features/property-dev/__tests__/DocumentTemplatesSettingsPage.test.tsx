@@ -32,6 +32,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 vi.mock('../api', () => ({
   listDocumentTemplates: vi.fn(),
+  listDevelopments: vi.fn().mockResolvedValue([]),
   uploadCustomDocumentTemplate: vi.fn(),
   deleteCustomDocumentTemplate: vi.fn(),
   customDocumentTemplateDownloadUrl: vi.fn(() => '/dl/x'),

@@ -47,6 +47,7 @@ import {
   Users,
   CircleCheck,
   Layers,
+  ExternalLink,
 } from 'lucide-react';
 
 import {
@@ -438,6 +439,55 @@ function HeaderKpi({ icon, label, value, accent }: HeaderKpiProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ── Occupant reference ──────────────────────────────────────────────── */
+
+/**
+ * Render a booking's occupant. When the booking is tied to a real
+ * directory contact (``occupant_contact_id`` present), the name becomes
+ * a deep link into the Contacts directory so an operator can open the
+ * housed worker's record. Falls back to plain text for free-text
+ * occupants (no contact behind the name).
+ *
+ * The link carries the contact id as a ``?contactId=`` hint - the
+ * Contacts page resolves it to open the matching record. The label is
+ * always the human name, so the user sees who it is regardless.
+ */
+function OccupantRef({
+  contactId,
+  name,
+  className,
+}: {
+  contactId: string | null;
+  name: string | null;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  const label =
+    name ||
+    t('accommodation.bookings.unnamed_occupant', { defaultValue: '(unnamed)' });
+
+  if (!contactId) {
+    return <span className={className}>{label}</span>;
+  }
+
+  return (
+    <Link
+      to={`/contacts?contactId=${encodeURIComponent(contactId)}`}
+      className={clsx(
+        'inline-flex items-center gap-1 text-oe-blue hover:underline',
+        className,
+      )}
+      title={t('accommodation.bookings.open_contact', {
+        defaultValue: 'Open contact record',
+      })}
+      data-testid="occupant-contact-link"
+    >
+      <span className="truncate">{label}</span>
+      <ExternalLink size={11} aria-hidden="true" className="shrink-0" />
+    </Link>
   );
 }
 
@@ -1115,10 +1165,10 @@ function BookingsList({
                   {b.room_label ?? '—'}
                 </td>
                 <td className="px-3 py-2">
-                  {b.occupant_name ||
-                    t('accommodation.bookings.unnamed_occupant', {
-                      defaultValue: '(unnamed)',
-                    })}
+                  <OccupantRef
+                    contactId={b.occupant_contact_id}
+                    name={b.occupant_name}
+                  />
                 </td>
                 <td className="px-3 py-2 tabular-nums">{b.check_in}</td>
                 <td className="px-3 py-2 tabular-nums">
@@ -1174,10 +1224,10 @@ function BookingsList({
                     </span>
                   </div>
                   <div className="mt-1 text-sm">
-                    {b.occupant_name ||
-                      t('accommodation.bookings.unnamed_occupant', {
-                        defaultValue: '(unnamed)',
-                      })}
+                    <OccupantRef
+                      contactId={b.occupant_contact_id}
+                      name={b.occupant_name}
+                    />
                   </div>
                   <div className="mt-0.5 text-xs text-content-tertiary tabular-nums">
                     {b.check_in} {'→'} {b.check_out ?? '∞'}
@@ -1489,6 +1539,8 @@ function ChargesTab({ data }: { data: AccommodationDetail }) {
                   <div className="text-2xs text-content-tertiary tabular-nums">
                     {b.check_in} {'→'} {b.check_out ?? '∞'}
                   </div>
+                  {/* occupant deep link lives in the panel header to keep
+                      the rail button a single click target */}
                 </button>
               </li>
             );
@@ -1557,10 +1609,10 @@ function BookingChargesPanel({
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-light p-3">
         <div className="min-w-0">
           <div className="text-sm font-semibold text-content-primary truncate">
-            {data.occupant_name ||
-              t('accommodation.bookings.unnamed_occupant', {
-                defaultValue: '(unnamed)',
-              })}
+            <OccupantRef
+              contactId={data.occupant_contact_id}
+              name={data.occupant_name}
+            />
           </div>
           <div className="text-2xs text-content-tertiary tabular-nums">
             {data.check_in} {'→'} {data.check_out ?? '∞'}
