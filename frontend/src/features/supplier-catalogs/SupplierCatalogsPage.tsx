@@ -54,7 +54,11 @@ import {
   type VendorStatus,
 } from './api';
 
-type Tab = 'vendors' | 'catalog' | 'prs' | 'pos' | 'match' | 'warehouses';
+// CONN-46: the old prs / pos / match tabs were three dead tabs that each
+// only rendered a hand-off banner (this module has no list endpoints for
+// those records and they never surface in /procurement). They are demoted to
+// a single 'procurement' tab carrying one consolidated banner.
+type Tab = 'vendors' | 'catalog' | 'procurement' | 'warehouses';
 
 const VENDOR_VARIANT: Record<VendorStatus, 'neutral' | 'blue' | 'success' | 'warning' | 'error'> = {
   active: 'success',
@@ -303,12 +307,8 @@ export function SupplierCatalogsPage() {
           <VendorTable rows={filteredVendors} onAction={() => setCreateOpen(true)} />
         ) : tab === 'catalog' ? (
           <CatalogTable rows={filteredItems} onSelectPrice={(it) => setPriceItem(it)} onAction={() => setCreateOpen(true)} />
-        ) : tab === 'prs' ? (
-          <ProcurementHandoffPanel kind="prs" />
-        ) : tab === 'pos' ? (
-          <ProcurementHandoffPanel kind="pos" />
-        ) : tab === 'match' ? (
-          <ProcurementHandoffPanel kind="match" />
+        ) : tab === 'procurement' ? (
+          <ProcurementHandoffPanel />
         ) : (
           <WarehousePanel
             warehouses={warehousesArr}
@@ -338,9 +338,10 @@ function tabsDef(t: (k: string, opts?: Record<string, unknown>) => string) {
   return [
     { id: 'vendors' as const, label: t('supplier_catalogs.tab_vendors', { defaultValue: 'Vendors' }), icon: Truck },
     { id: 'catalog' as const, label: t('supplier_catalogs.tab_catalog', { defaultValue: 'Catalog' }), icon: Boxes },
-    { id: 'prs' as const, label: t('supplier_catalogs.tab_prs', { defaultValue: 'PRs' }), icon: ClipboardList },
-    { id: 'pos' as const, label: t('supplier_catalogs.tab_pos', { defaultValue: 'POs' }), icon: ShoppingCart },
-    { id: 'match' as const, label: t('supplier_catalogs.tab_match', { defaultValue: '3-Way Match' }), icon: FileCheck },
+    // CONN-46: one Procurement tab replaces the three dead PR / PO / Match
+    // tabs. It is a hand-off banner into the /procurement module, which owns
+    // the live requisition, purchase order and three-way-match workflows.
+    { id: 'procurement' as const, label: t('supplier_catalogs.tab_procurement', { defaultValue: 'Procurement' }), icon: ShoppingCart },
     { id: 'warehouses' as const, label: t('supplier_catalogs.tab_warehouses', { defaultValue: 'Warehouses' }), icon: WarehouseIcon },
   ];
 }
@@ -351,14 +352,12 @@ function createLabel(tab: Tab, t: (k: string, opts?: Record<string, unknown>) =>
       return t('supplier_catalogs.new_vendor', { defaultValue: 'New Vendor' });
     case 'catalog':
       return t('supplier_catalogs.new_item', { defaultValue: 'New Item' });
-    case 'prs':
-      return t('supplier_catalogs.new_pr', { defaultValue: 'New Requisition' });
-    case 'pos':
-      return t('supplier_catalogs.new_po', { defaultValue: 'New PO' });
-    case 'match':
-      return t('supplier_catalogs.match_invoice', { defaultValue: 'Match Invoice' });
     case 'warehouses':
       return t('supplier_catalogs.new_warehouse', { defaultValue: 'New Warehouse' });
+    // CONN-46: the procurement tab is a hand-off banner with no create flow
+    // here (records belong to /procurement), so it never reaches a button.
+    case 'procurement':
+      return '';
   }
 }
 
@@ -501,56 +500,87 @@ function CatalogTable({
 }
 
 /**
- * Read-only hand-off panel for the PR / PO / 3-way-match tabs.
+ * CONN-46: one consolidated hand-off banner for the whole live purchasing
+ * workflow (requisitions, purchase orders and three-way matching).
  *
  * The supplier_catalogs backend has no list endpoints for these records and
  * they never surface in /procurement, so creating them here would be a
- * create-into-the-void. Instead each tab explains what the stage is for and
- * deep-links to /procurement, which owns the live purchasing workflow.
+ * create-into-the-void. Rather than three dead tabs that each said the same
+ * thing, this single banner names the three stages and deep-links to
+ * /procurement, which owns them.
  */
-function ProcurementHandoffPanel({ kind }: { kind: 'prs' | 'pos' | 'match' }) {
+function ProcurementHandoffPanel() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const copy = {
-    prs: {
-      icon: <ClipboardList size={22} />,
-      title: t('supplier_catalogs.prs_handoff', {
-        defaultValue: 'Requisitions live in Procurement',
+  const stages = [
+    {
+      icon: <ClipboardList size={16} className="text-content-tertiary" />,
+      title: t('supplier_catalogs.stage_prs', {
+        defaultValue: 'Requisitions',
       }),
-      desc: t('supplier_catalogs.prs_handoff_desc', {
+      desc: t('supplier_catalogs.stage_prs_desc', {
         defaultValue:
-          'Raise and track purchase requisitions - request, approval and conversion to a purchase order - in the Procurement module. This page stays focused on the vendor and item reference library that requisitions draw from.',
+          'Raise, approve and convert purchase requisitions into purchase orders.',
       }),
     },
-    pos: {
-      icon: <ShoppingCart size={22} />,
-      title: t('supplier_catalogs.pos_handoff', {
-        defaultValue: 'Purchase orders live in Procurement',
+    {
+      icon: <ShoppingCart size={16} className="text-content-tertiary" />,
+      title: t('supplier_catalogs.stage_pos', {
+        defaultValue: 'Purchase orders',
       }),
-      desc: t('supplier_catalogs.pos_handoff_desc', {
+      desc: t('supplier_catalogs.stage_pos_desc', {
         defaultValue:
-          'Issue purchase orders to vendors and follow the draft, sent, acknowledged, received and closed flow in the Procurement module.',
+          'Issue orders to vendors and follow the draft, sent, acknowledged, received and closed flow.',
       }),
     },
-    match: {
-      icon: <FileCheck size={22} />,
-      title: t('supplier_catalogs.match_handoff', {
-        defaultValue: 'Three-way matching lives in Procurement',
+    {
+      icon: <FileCheck size={16} className="text-content-tertiary" />,
+      title: t('supplier_catalogs.stage_match', {
+        defaultValue: 'Three-way match',
       }),
-      desc: t('supplier_catalogs.match_handoff_desc', {
+      desc: t('supplier_catalogs.stage_match_desc', {
         defaultValue:
-          'Vendor invoices are matched against their purchase order and goods receipt in the Procurement module, where tolerance exceptions are reviewed and resolved.',
+          'Match vendor invoices against their purchase order and goods receipt, resolving tolerance exceptions.',
       }),
     },
-  }[kind];
+  ];
 
   return (
-    <EmptyState
-      icon={copy.icon}
-      title={copy.title}
-      description={copy.desc}
-      action={
+    <div className="p-6">
+      <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-secondary text-content-tertiary">
+          <ShoppingCart size={22} />
+        </div>
+        <h3 className="text-base font-semibold text-content-primary">
+          {t('supplier_catalogs.procurement_handoff_title', {
+            defaultValue: 'Live purchasing lives in Procurement',
+          })}
+        </h3>
+        <p className="mt-1.5 text-sm text-content-secondary">
+          {t('supplier_catalogs.procurement_handoff_desc', {
+            defaultValue:
+              'This page is the vendor and item reference library that purchasing draws from. Requisitions, purchase orders and three-way invoice matching all run in the Procurement module.',
+          })}
+        </p>
+      </div>
+
+      <div className="mx-auto mt-5 grid max-w-3xl gap-3 sm:grid-cols-3">
+        {stages.map((s) => (
+          <div
+            key={s.title}
+            className="rounded-xl border border-border-light bg-surface-secondary/40 p-4 text-left"
+          >
+            <div className="mb-2 flex items-center gap-2">
+              {s.icon}
+              <p className="text-sm font-medium text-content-primary">{s.title}</p>
+            </div>
+            <p className="text-xs text-content-secondary">{s.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 flex justify-center">
         <Button
           variant="primary"
           icon={<ArrowUpRight size={14} />}
@@ -560,8 +590,8 @@ function ProcurementHandoffPanel({ kind }: { kind: 'prs' | 'pos' | 'match' }) {
             defaultValue: 'Go to Procurement',
           })}
         </Button>
-      }
-    />
+      </div>
+    </div>
   );
 }
 
@@ -685,6 +715,28 @@ function PriceComparisonModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  // CONN-47: turn a compared vendor price into a draft purchase order in the
+  // Procurement module, which owns the live purchasing workflow. We emit a
+  // prefill query contract (a single line item: description / unit / rate /
+  // currency, plus a vendor display hint) and navigate there. The consumer on
+  // /procurement (ProcurementPage) parses these params to open its New PO
+  // modal prefilled - that side lands in a separate batch, so until then the
+  // user reaches Procurement with the New-PO intent and fills it manually.
+  const createPoFromRow = (row: PriceComparisonRow) => {
+    const params = new URLSearchParams({
+      new_po: '1',
+      vendor: row.vendor_name || row.vendor_code || '',
+      line_desc: `${item.sku} - ${item.name}`.trim(),
+      line_unit: item.unit_of_measure || '',
+      line_rate: String(row.unit_price ?? ''),
+      currency: row.currency || '',
+    });
+    onClose();
+    navigate(`/procurement?${params.toString()}`);
+  };
+
   const q = useQuery({
     queryKey: ['sc', 'price-compare', item.id],
     queryFn: () => comparePrices(item.id),
@@ -807,6 +859,19 @@ function PriceComparisonModal({
                         {t('supplier_catalogs.rating', { defaultValue: 'Rating' })}
                       </p>
                       <StarRating rating={r.rating ?? vendor?.rating ?? null} />
+                    </div>
+                    {/* CONN-47: buy from this vendor - hand off to Procurement
+                        with the line prefilled from this catalog item + price. */}
+                    <div className="pt-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full"
+                        icon={<ShoppingCart size={14} />}
+                        onClick={() => createPoFromRow(r)}
+                      >
+                        {t('supplier_catalogs.create_po', { defaultValue: 'Create PO' })}
+                      </Button>
                     </div>
                   </div>
                 </div>

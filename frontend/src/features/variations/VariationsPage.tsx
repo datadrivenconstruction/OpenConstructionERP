@@ -532,6 +532,13 @@ export function VariationsPage() {
             label: t('nav.finance', { defaultValue: 'Finance' }),
             onClick: () => navigate('/finance'),
           },
+          {
+            // CONN-48: keep the three change pipelines connected. A variation
+            // is the contractual sibling of a Management-of-Change item; one
+            // click reaches the MoC register that may have triggered it.
+            label: t('moc.title', { defaultValue: 'Management of Change' }),
+            onClick: () => navigate('/moc'),
+          },
         ]}
       >
         {t('variations.intro_body', {
