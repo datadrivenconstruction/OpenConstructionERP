@@ -558,7 +558,22 @@ export default function PayrollPage() {
                 <tbody>
                   {(batchDetailQuery.data?.entries ?? []).map((e) => (
                     <tr key={e.id} className="border-b border-border-subtle/60">
-                      <td className="px-4 py-2 text-content-primary">{e.worker}</td>
+                      <td className="px-4 py-2 text-content-primary">
+                        {e.resource_id ? (
+                          <Link
+                            to={`/resources?resourceId=${encodeURIComponent(e.resource_id)}`}
+                            className="inline-flex items-center gap-1 text-oe-blue hover:underline"
+                            title={t('payroll.open_resource', {
+                              defaultValue: 'Open in Resources & Crew',
+                            })}
+                          >
+                            {e.worker}
+                            <ExternalLink size={11} className="opacity-70" />
+                          </Link>
+                        ) : (
+                          e.worker
+                        )}
+                      </td>
                       <td className="px-4 py-2 text-content-secondary">
                         {e.work_date ? <DateDisplay value={e.work_date} format="date" /> : '-'}
                       </td>

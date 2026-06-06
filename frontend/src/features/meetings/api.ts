@@ -29,6 +29,8 @@ export type AttendeeStatus = 'present' | 'absent' | 'excused';
 
 export interface Attendee {
   id: string;
+  /** Contact id when this attendee was picked from the directory (links to it). */
+  user_id?: string | null;
   name: string;
   role: string;
   status: AttendeeStatus;
@@ -59,6 +61,8 @@ export interface Meeting {
   date: string;
   location: string;
   chairperson: string;
+  /** Raw chairperson reference - a contact id when picked, else free text. */
+  chairperson_id: string;
   status: MeetingStatus;
   attendees: Attendee[];
   agenda_items: AgendaItem[];
@@ -84,9 +88,10 @@ export interface CreateMeetingPayload {
   meeting_date: string;
   location?: string;
   chairperson_id?: string;
-  attendees?: { name: string; company?: string; status?: string }[];
+  attendees?: { name: string; user_id?: string; company?: string; status?: string }[];
   minutes?: string;
   document_ids?: string[];
+  metadata?: Record<string, unknown>;
 }
 
 export interface UpdateMeetingPayload {
@@ -95,10 +100,11 @@ export interface UpdateMeetingPayload {
   meeting_date?: string;
   location?: string;
   chairperson_id?: string;
-  attendees?: { name: string; company?: string; status?: string }[];
+  attendees?: { name: string; user_id?: string; company?: string; status?: string }[];
   minutes?: string;
   document_ids?: string[];
   status?: MeetingStatus;
+  metadata?: Record<string, unknown>;
 }
 
 /* -- Wire <-> UI normaliser ----------------------------------------------- */
@@ -120,13 +126,20 @@ type MeetingWire = Omit<Meeting, 'date' | 'chairperson' | 'attendees' | 'meeting
   attendees?: AttendeeWire[];
   meeting_number?: string | number;
   notes?: string;
+  metadata?: Record<string, unknown> | null;
 };
 
 function normaliseMeeting(m: MeetingWire): Meeting {
   const date = m.date ?? m.meeting_date ?? '';
-  const chairperson = m.chairperson ?? m.chairperson_id ?? '';
+  const chairperson_id = m.chairperson_id ?? '';
+  // The backend stores only chairperson_id; when a contact was picked we also
+  // persist its display name in metadata so the UI shows a name, not a UUID.
+  const metaName =
+    (m.metadata as { chairperson_name?: string } | undefined)?.chairperson_name ?? '';
+  const chairperson = m.chairperson ?? metaName ?? chairperson_id;
   const attendees: Attendee[] = (m.attendees ?? []).map((a, i) => ({
     id: a.id ?? a.user_id ?? `att-${i}`,
+    user_id: a.user_id ?? null,
     name: a.name ?? '',
     role: a.role ?? a.company ?? '',
     status: (a.status ?? 'present') as AttendeeStatus,
@@ -139,6 +152,7 @@ function normaliseMeeting(m: MeetingWire): Meeting {
     ...m,
     date,
     chairperson,
+    chairperson_id,
     attendees,
     meeting_number,
     notes: m.notes ?? '',
@@ -369,7 +383,7 @@ export interface CreateSeriesPayload {
   meeting_date: string; // YYYY-MM-DD
   location?: string;
   chairperson_id?: string;
-  attendees?: { name: string; company?: string; status?: string }[];
+  attendees?: { name: string; user_id?: string; company?: string; status?: string }[];
   minutes?: string;
   document_ids?: string[];
   status?: MeetingStatus;

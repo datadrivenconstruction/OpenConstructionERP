@@ -2860,6 +2860,7 @@ function AssignmentsTab({
   onSelectResource: (id: string) => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const userRole = useAuthStore((s) => s.userRole);
@@ -3106,7 +3107,7 @@ function AssignmentsTab({
 
             {isLoading ? (
               <div className="p-4">
-                <SkeletonTable rows={6} columns={6} />
+                <SkeletonTable rows={6} columns={7} />
               </div>
             ) : filtered.length === 0 ? (
               <EmptyState
@@ -3146,6 +3147,11 @@ function AssignmentsTab({
                       )}
                       <th className="px-3 py-2 text-left">
                         {t('resources.col_resource', { defaultValue: 'Resource' })}
+                      </th>
+                      <th className="px-3 py-2 text-left">
+                        {t('resources.col_project_task', {
+                          defaultValue: 'Project / Task',
+                        })}
                       </th>
                       <th className="px-3 py-2 text-left">
                         {t('resources.start', { defaultValue: 'Start' })}
@@ -3208,6 +3214,57 @@ function AssignmentsTab({
                             >
                               {a.resource_name}
                             </button>
+                          </td>
+                          <td className="px-3 py-1.5 text-xs">
+                            <div className="flex flex-col gap-0.5">
+                              {a.project_id ? (
+                                <button
+                                  type="button"
+                                  className="inline-flex w-fit items-center gap-1 text-left text-content-primary hover:text-oe-blue hover:underline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/projects/${a.project_id}`);
+                                  }}
+                                  title={t('resources.open_project', {
+                                    defaultValue: 'Open project',
+                                  })}
+                                >
+                                  {a.project_name ||
+                                    t('resources.untitled_project', {
+                                      defaultValue: 'Project',
+                                    })}
+                                </button>
+                              ) : (
+                                <span className="text-content-tertiary">
+                                  {t('resources.no_project', {
+                                    defaultValue: 'Unassigned',
+                                  })}
+                                </span>
+                              )}
+                              {a.task_id && (
+                                <button
+                                  type="button"
+                                  className="inline-flex w-fit items-center gap-1 text-left text-2xs text-content-tertiary hover:text-oe-blue hover:underline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    // Emits ?taskId for the Tasks page; the deep-link
+                                    // consumer is owned by the tasks batch and lands
+                                    // separately - until then this opens the Tasks list.
+                                    navigate(
+                                      `/tasks?taskId=${encodeURIComponent(a.task_id as string)}`,
+                                    );
+                                  }}
+                                  title={t('resources.open_task', {
+                                    defaultValue: 'Open task',
+                                  })}
+                                >
+                                  {a.task_name ||
+                                    t('resources.linked_task', {
+                                      defaultValue: 'Linked task',
+                                    })}
+                                </button>
+                              )}
+                            </div>
                           </td>
                           <td className="px-3 py-1.5 text-xs tabular-nums">
                             <DateDisplay value={a.start_at} />

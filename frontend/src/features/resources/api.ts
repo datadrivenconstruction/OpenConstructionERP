@@ -94,7 +94,11 @@ export interface Assignment {
   id: string;
   resource_id: string;
   project_id?: string | null;
+  /** Human-readable project label - populated by the board endpoint only. */
+  project_name?: string;
   task_id?: string | null;
+  /** Human-readable task label - populated by the board endpoint only. */
+  task_name?: string;
   work_order_id?: string | null;
   start_at: string;
   end_at: string;
