@@ -224,6 +224,8 @@ function KPICard({
   value,
   color = 'gray',
   icon: Icon,
+  onClick,
+  drillLabel,
 }: {
   label: string;
   // ReactNode so money tiles can pass <MoneyDisplay> directly (no
@@ -231,9 +233,13 @@ function KPICard({
   value: React.ReactNode;
   color?: TrafficLight;
   icon?: React.ElementType;
+  // When set the tile becomes a button that drills into the source list,
+  // the instinctive action people already try on a big number (CONN-74).
+  onClick?: () => void;
+  drillLabel?: string;
 }) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+  const inner = (
+    <>
       {Icon && (
         <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${trafficClasses[color]}`}>
           <Icon size={18} />
@@ -243,6 +249,24 @@ function KPICard({
         <p className="truncate text-xs font-medium text-content-secondary">{label}</p>
         <p className="truncate text-lg font-semibold text-content-primary">{value}</p>
       </div>
+    </>
+  );
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={drillLabel ?? label}
+        className="group flex w-full items-center gap-3 rounded-xl border border-border-light bg-surface-elevated/90 p-4 text-left shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+      >
+        {inner}
+        <ChevronRight size={16} className="ml-auto shrink-0 text-content-quaternary transition-colors group-hover:text-oe-blue-text" />
+      </button>
+    );
+  }
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+      {inner}
     </div>
   );
 }
@@ -256,12 +280,16 @@ function MoneyKPICard({
   currency,
   color = 'gray',
   icon,
+  onClick,
+  drillLabel,
 }: {
   label: string;
   amount: number | string | null | undefined;
   currency: string;
   color?: TrafficLight;
   icon?: React.ElementType;
+  onClick?: () => void;
+  drillLabel?: string;
 }) {
   return (
     <KPICard
@@ -269,6 +297,8 @@ function MoneyKPICard({
       value={<MoneyDisplay amount={amount} currency={currency} showCode />}
       color={color}
       icon={icon}
+      onClick={onClick}
+      drillLabel={drillLabel}
     />
   );
 }
@@ -1517,8 +1547,27 @@ function FinanceDashboardView({
           ? 'gray'
           : 'green';
 
+  // Per-card drill helpers: payable/receivable/overdue/cash-flow open the
+  // Finance Invoices tab; budget/committed/actual/consumed open the Budgets
+  // tab. The ?tab= deep link is consumed by FinancePage on mount (CONN-74).
+  const openFinance = (financeTab?: 'invoices' | 'budgets') =>
+    navigate(`/projects/${project.id}/finance${financeTab ? `?tab=${financeTab}` : ''}`);
+
   return (
     <div className="space-y-5">
+      {/* Open the full Finance module for this project — the dashboard is a
+          read-only summary; every figure has its detail one click away. */}
+      <div className="flex items-center justify-end">
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={<Wallet size={14} />}
+          onClick={() => openFinance()}
+        >
+          {t('reporting.open_in_finance', { defaultValue: 'Open in Finance' })}
+        </Button>
+      </div>
+
       {/* Finance KPIs */}
       {financeDash ? (
         <>
@@ -1528,12 +1577,16 @@ function FinanceDashboardView({
               amount={financeDash.total_payable}
               currency={currency}
               icon={Wallet}
+              onClick={() => openFinance('invoices')}
+              drillLabel={t('reporting.drill_payable', { defaultValue: 'Open payable invoices in Finance' })}
             />
             <MoneyKPICard
               label={t('reporting.receivable', { defaultValue: 'Total Receivable' })}
               amount={financeDash.total_receivable}
               currency={currency}
               icon={TrendingUp}
+              onClick={() => openFinance('invoices')}
+              drillLabel={t('reporting.drill_receivable', { defaultValue: 'Open receivable invoices in Finance' })}
             />
             <MoneyKPICard
               label={t('reporting.overdue_total', { defaultValue: 'Total Overdue' })}
@@ -1541,6 +1594,8 @@ function FinanceDashboardView({
               currency={currency}
               color={totalOverdue !== null && totalOverdue > 0 ? 'red' : 'green'}
               icon={AlertTriangle}
+              onClick={() => openFinance('invoices')}
+              drillLabel={t('reporting.drill_overdue', { defaultValue: 'Open overdue invoices in Finance' })}
             />
             <MoneyKPICard
               label={t('reporting.cash_flow_net', { defaultValue: 'Net Cash Flow' })}
@@ -1548,6 +1603,8 @@ function FinanceDashboardView({
               currency={currency}
               color={cashFlowNet === null ? 'gray' : cashFlowNet >= 0 ? 'green' : 'red'}
               icon={cashFlowNet !== null && cashFlowNet < 0 ? TrendingDown : TrendingUp}
+              onClick={() => openFinance('invoices')}
+              drillLabel={t('reporting.drill_cash_flow', { defaultValue: 'Open invoices and payments in Finance' })}
             />
           </div>
 
@@ -1559,24 +1616,32 @@ function FinanceDashboardView({
               amount={financeDash.total_budget_revised}
               currency={currency}
               icon={Wallet}
+              onClick={() => openFinance('budgets')}
+              drillLabel={t('reporting.drill_budget', { defaultValue: 'Open budget lines in Finance' })}
             />
             <MoneyKPICard
               label={t('reporting.committed', { defaultValue: 'Committed' })}
               amount={financeDash.total_committed}
               currency={currency}
               icon={ClipboardList}
+              onClick={() => openFinance('budgets')}
+              drillLabel={t('reporting.drill_committed', { defaultValue: 'Open budget lines in Finance' })}
             />
             <MoneyKPICard
               label={t('reporting.actual_spend', { defaultValue: 'Actual Spend' })}
               amount={financeDash.total_actual}
               currency={currency}
               icon={Wallet}
+              onClick={() => openFinance('budgets')}
+              drillLabel={t('reporting.drill_actual', { defaultValue: 'Open budget lines in Finance' })}
             />
             <KPICard
               label={t('reporting.budget_consumed', { defaultValue: 'Budget Consumed' })}
               value={budgetConsumedPct !== null ? `${budgetConsumedPct.toFixed(1)}%` : EMPTY}
               color={budgetColor}
               icon={BarChart3}
+              onClick={() => openFinance('budgets')}
+              drillLabel={t('reporting.drill_consumed', { defaultValue: 'Open budget lines in Finance' })}
             />
           </div>
         </>

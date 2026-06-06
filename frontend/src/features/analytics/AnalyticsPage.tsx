@@ -18,6 +18,7 @@ import {
   Database,
   AlertCircle,
   RefreshCw,
+  Wallet,
 } from 'lucide-react';
 import { Breadcrumb, Button, Card, Badge, Skeleton, EmptyState } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -327,6 +328,10 @@ export function AnalyticsPage() {
             label: t('nav.reporting', { defaultValue: 'Reporting' }),
             onClick: () => navigate('/reporting'),
           },
+          {
+            label: t('nav.finance', { defaultValue: 'Finance' }),
+            onClick: () => navigate('/finance'),
+          },
         ]}
       >
         {t('analytics.intro_body', {
@@ -564,6 +569,9 @@ export function AnalyticsPage() {
                   <th className="px-4 py-3 text-center text-xs font-medium text-content-tertiary uppercase tracking-wider">
                     {t('analytics.col_status', { defaultValue: 'Status' })}
                   </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-content-tertiary uppercase tracking-wider">
+                    {t('analytics.col_finance', { defaultValue: 'Finance' })}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-light">
@@ -621,6 +629,26 @@ export function AnalyticsPage() {
                           ? t('analytics.on_budget', { defaultValue: 'On Budget' })
                           : t('analytics.over_budget', { defaultValue: 'Over Budget' })}
                       </Badge>
+                    </td>
+                    {/* Per-row Finance deep link: the row itself opens the
+                        project, this opens that project's Finance module so the
+                        budget-vs-actual figure traces to its source (CONN-76). */}
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/projects/${p.id}/finance`);
+                        }}
+                        title={t('analytics.open_finance', { defaultValue: 'Open Finance' })}
+                        aria-label={t('analytics.open_finance_for', {
+                          defaultValue: 'Open Finance for {{name}}',
+                          name: p.name,
+                        })}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-oe-blue transition-colors"
+                      >
+                        <Wallet size={14} />
+                      </button>
                     </td>
                   </tr>
                 ))}
