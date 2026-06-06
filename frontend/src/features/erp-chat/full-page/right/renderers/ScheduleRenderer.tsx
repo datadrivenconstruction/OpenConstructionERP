@@ -1,4 +1,6 @@
 import { unwrapList } from './normalize';
+import { schedulePath } from './deepLink';
+import DeepLinkBar, { useOpenLabels } from './DeepLinkBar';
 
 interface Activity {
   name?: string;
@@ -19,6 +21,7 @@ function parseDayOffset(val: string | number | undefined, minDate: number): numb
 }
 
 export default function ScheduleRenderer({ data }: { data: unknown }) {
+  const labels = useOpenLabels();
   // Backend `get_schedule` returns `{ activities: [...], summary }`. The
   // activity rows carry `start_date`/`end_date`; older callers used
   // `start`/`end`. Normalize to `start`/`end` so the bar math is uniform.
@@ -171,6 +174,7 @@ export default function ScheduleRenderer({ data }: { data: unknown }) {
           </span>
         )}
       </div>
+      <DeepLinkBar to={schedulePath()} label={labels.schedule} />
     </div>
   );
 }
