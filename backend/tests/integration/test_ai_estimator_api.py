@@ -979,6 +979,7 @@ async def test_meta_endpoint_returns_the_agreed_contract(http_client, admin):
     """GET /meta returns the exact agreed shape, sourced from the module's
     single definitions (thresholds ~0.78/0.62, the 12-stage enum, cap 25)."""
     from app.modules.ai_estimator import schemas
+    from app.modules.ai_estimator.benchmarks import DEFAULT_BAND_FACTOR
     from app.modules.ai_estimator.service import (
         CONFIDENCE_HIGH_THRESHOLD,
         CONFIDENCE_MEDIUM_THRESHOLD,
@@ -987,13 +988,19 @@ async def test_meta_endpoint_returns_the_agreed_contract(http_client, admin):
     resp = await http_client.get("/api/v1/ai-estimator/meta", headers=admin["headers"])
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    assert set(body.keys()) == {"score_thresholds", "construction_stages", "match_group_cap"}
+    assert set(body.keys()) == {
+        "score_thresholds",
+        "construction_stages",
+        "match_group_cap",
+        "rate_sanity_band_factor",
+    }
     assert body["score_thresholds"] == {
         "high": CONFIDENCE_HIGH_THRESHOLD,
         "low": CONFIDENCE_MEDIUM_THRESHOLD,
     }
     assert body["construction_stages"] == list(schemas.CONSTRUCTION_STAGES)
     assert body["match_group_cap"] == schemas.DEFAULT_MATCH_GROUP_CAP
+    assert body["rate_sanity_band_factor"] == DEFAULT_BAND_FACTOR
 
 
 @pytest.mark.asyncio
