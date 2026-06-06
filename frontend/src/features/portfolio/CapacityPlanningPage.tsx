@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { User, Users, Truck, Building2, AlertTriangle, CalendarRange } from 'lucide-react';
+import { User, Users, Truck, Building2, AlertTriangle, CalendarRange, Scale } from 'lucide-react';
 
 import {
+  Button,
   Card,
   CardContent,
   Badge,
@@ -56,6 +58,7 @@ function cellClasses(cell: PortfolioCell | undefined): string {
 
 export function CapacityPlanningPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [bucket, setBucket] = useState<'week' | 'month'>('week');
   const range = useMemo(() => rangeFor(bucket), [bucket]);
 
@@ -92,24 +95,34 @@ export function CapacityPlanningPage() {
             'See how your people, crews and equipment are booked across every project, and spot where two projects are competing for the same resource.',
         })}
         actions={
-          <div className="inline-flex shrink-0 rounded-xl border border-border bg-surface-secondary/50 p-1">
-            {(['week', 'month'] as const).map((b) => (
-              <button
-                key={b}
-                type="button"
-                onClick={() => setBucket(b)}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                  bucket === b
-                    ? 'bg-surface-primary text-content-primary shadow-sm'
-                    : 'text-content-tertiary hover:text-content-secondary'
-                }`}
-              >
-                {b === 'week'
-                  ? t('capacity.by_week', { defaultValue: 'Weeks' })
-                  : t('capacity.by_month', { defaultValue: 'Months' })}
-              </button>
-            ))}
-          </div>
+          <>
+            <div className="inline-flex shrink-0 rounded-xl border border-border bg-surface-secondary/50 p-1">
+              {(['week', 'month'] as const).map((b) => (
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => setBucket(b)}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                    bucket === b
+                      ? 'bg-surface-primary text-content-primary shadow-sm'
+                      : 'text-content-tertiary hover:text-content-secondary'
+                  }`}
+                >
+                  {b === 'week'
+                    ? t('capacity.by_week', { defaultValue: 'Weeks' })
+                    : t('capacity.by_month', { defaultValue: 'Months' })}
+                </button>
+              ))}
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Scale size={14} />}
+              onClick={() => navigate('/portfolio/leveling')}
+            >
+              {t('capacity.open_leveling', { defaultValue: 'Open Resource Leveling' })}
+            </Button>
+          </>
         }
       />
 
@@ -123,6 +136,20 @@ export function CapacityPlanningPage() {
             ? <IntroRichText text={t('capacity.intro_more')} />
             : undefined
         }
+        links={[
+          {
+            label: t('capacity.intro_link_leveling', { defaultValue: 'Resource Leveling' }),
+            onClick: () => navigate('/portfolio/leveling'),
+          },
+          {
+            label: t('capacity.intro_link_resources', { defaultValue: 'Resources & Crew' }),
+            onClick: () => navigate('/resources'),
+          },
+          {
+            label: t('capacity.intro_link_schedule', { defaultValue: '4D Schedule' }),
+            onClick: () => navigate('/schedule'),
+          },
+        ]}
       >
         {t('capacity.intro_body', {
           defaultValue:
@@ -212,14 +239,27 @@ export function CapacityPlanningPage() {
                         className="grid items-center gap-1"
                         style={{ gridTemplateColumns: gridCols }}
                       >
-                        {/* Resource label */}
+                        {/* Resource label — links to the resource detail in
+                            Resources & Crew so a red over-allocated row can be
+                            opened where its bookings are managed. */}
                         <div className="flex min-w-0 items-center gap-2 pr-2">
                           <Icon size={15} className="shrink-0 text-content-tertiary" />
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <span className="truncate text-sm font-medium text-content-primary">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  navigate(
+                                    `/resources?resourceId=${encodeURIComponent(row.resource_id)}`,
+                                  )
+                                }
+                                className="truncate rounded text-left text-sm font-medium text-content-primary hover:text-oe-blue hover:underline focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                                title={t('capacity.open_resource', {
+                                  defaultValue: 'Open in Resources & Crew',
+                                })}
+                              >
                                 {row.name}
-                              </span>
+                              </button>
                               {row.is_floating && (
                                 <Badge variant="blue" size="sm" className="shrink-0">
                                   {t('capacity.floating', { defaultValue: 'Shared' })}
@@ -237,7 +277,9 @@ export function CapacityPlanningPage() {
                           </div>
                         </div>
 
-                        {/* Bucket cells */}
+                        {/* Bucket cells — an over-allocated cell becomes a
+                            button that jumps to Resource Leveling, the tool
+                            that resolves the clash, instead of dead-ending. */}
                         {buckets.map((b) => {
                           const cell = cells.get(b.index);
                           const tip = cell
@@ -246,15 +288,34 @@ export function CapacityPlanningPage() {
                                 .map((p) => `• ${p.project_name}: ${p.allocation_percent}%`)
                                 .join('\n')
                             : t('capacity.no_booking', { defaultValue: 'No booking' });
+                          const value =
+                            cell && cell.allocation_percent > 0
+                              ? `${cell.allocation_percent}%`
+                              : '';
+                          const cellCls = `relative flex h-9 items-center justify-center rounded-md text-[11px] tabular-nums ${cellClasses(
+                            cell,
+                          )} ${cell?.cross_project ? 'ring-2 ring-inset ring-rose-700' : ''}`;
+                          if (cell?.over_allocated) {
+                            return (
+                              <button
+                                key={b.index}
+                                type="button"
+                                title={`${tip}\n${t('capacity.resolve_in_leveling', {
+                                  defaultValue: 'Resolve in Resource Leveling',
+                                })}`}
+                                onClick={() => navigate('/portfolio/leveling')}
+                                className={`${cellCls} cursor-pointer hover:ring-2 hover:ring-inset hover:ring-rose-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-800`}
+                                aria-label={t('capacity.resolve_in_leveling', {
+                                  defaultValue: 'Resolve in Resource Leveling',
+                                })}
+                              >
+                                {value}
+                              </button>
+                            );
+                          }
                           return (
-                            <div
-                              key={b.index}
-                              title={tip}
-                              className={`relative flex h-9 items-center justify-center rounded-md text-[11px] tabular-nums ${cellClasses(
-                                cell,
-                              )} ${cell?.cross_project ? 'ring-2 ring-inset ring-rose-700' : ''}`}
-                            >
-                              {cell && cell.allocation_percent > 0 ? `${cell.allocation_percent}%` : ''}
+                            <div key={b.index} title={tip} className={cellCls}>
+                              {value}
                             </div>
                           );
                         })}
