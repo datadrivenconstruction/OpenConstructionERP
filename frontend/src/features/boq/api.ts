@@ -1202,6 +1202,10 @@ export const boqApi = {
   ) => apiPost<Position>(`/v1/boq/boqs/${boqId}/sections/`, { boq_id: boqId, ...data }),
 
   /* Position CRUD */
+  // Resolve which BOQ owns a position id. Reuses the existing GET-by-id
+  // endpoint (returns the full PositionResponse incl. boq_id) so a deep
+  // link like /boq?positionId=<id> can redirect to the right editor.
+  getPosition: (posId: string) => apiGet<Position>(`/v1/boq/positions/${posId}`),
   addPosition: (data: CreatePositionData) =>
     apiPost<Position>(`/v1/boq/boqs/${data.boq_id}/positions/`, data),
   updatePosition: (posId: string, data: UpdatePositionData) =>
