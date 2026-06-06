@@ -18,6 +18,8 @@ import {
   ChevronRight,
   Pencil,
   Trash2,
+  FileSpreadsheet,
+  Search,
 } from 'lucide-react';
 import {
   Button,
@@ -38,6 +40,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { apiGet, getErrorMessage } from '@/shared/lib/api';
 import {
   listInventories,
+  getInventory,
   getInventoryTotals,
   listEmbodiedEntries,
   listScope1,
@@ -71,6 +74,8 @@ import {
   createEPD,
   updateEPD,
   deleteEPD,
+  listMaterialFactors,
+  assignBoqPosition,
   type CarbonInventory,
   type InventoryStatus,
   type EPDRecord,
@@ -83,6 +88,7 @@ import {
   type Scope1Entry,
   type Scope2Entry,
   type Scope3Entry,
+  type MaterialCarbonFactor,
 } from './api';
 
 type Tab = 'inventory' | 'epds' | 'targets' | 'reports';
@@ -1112,6 +1118,8 @@ function InventoryDrawer({
   const [embodiedModal, setEmbodiedModal] = useState<
     { mode: 'create' } | { mode: 'edit'; entry: EmbodiedEntry } | null
   >(null);
+  // CONN-60: assign a BOQ position to this inventory via a material factor.
+  const [assignBoqOpen, setAssignBoqOpen] = useState(false);
   const [scopeModal, setScopeModal] = useState<
     | { kind: ScopeKind; mode: 'create' }
     | {
@@ -1184,6 +1192,13 @@ function InventoryDrawer({
       setLoading(false);
     }
   }
+
+  const inventoryQ = useQuery({
+    queryKey: ['carbon', 'inventory', inventoryId],
+    queryFn: () => getInventory(inventoryId),
+    staleTime: 60_000,
+  });
+  const inventoryProjectId = inventoryQ.data?.project_id ?? '';
 
   const totalsQ = useQuery({
     queryKey: ['carbon', 'totals', inventoryId],
@@ -1359,14 +1374,24 @@ function InventoryDrawer({
                         defaultValue: 'Embodied entries',
                       })}
                     </h3>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      icon={<Plus size={13} />}
-                      onClick={() => setEmbodiedModal({ mode: 'create' })}
-                    >
-                      {t('carbon.add_entry', { defaultValue: 'Add entry' })}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={<FileSpreadsheet size={13} />}
+                        onClick={() => setAssignBoqOpen(true)}
+                      >
+                        {t('carbon.add_from_boq', { defaultValue: 'Add from BOQ' })}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={<Plus size={13} />}
+                        onClick={() => setEmbodiedModal({ mode: 'create' })}
+                      >
+                        {t('carbon.add_entry', { defaultValue: 'Add entry' })}
+                      </Button>
+                    </div>
                   </div>
                   {(embodiedQ.data ?? []).length === 0 ? (
                     <p className="rounded-md bg-surface-secondary/60 p-3 text-xs text-content-tertiary">
@@ -1471,6 +1496,14 @@ function InventoryDrawer({
           kind={scopeModal.kind}
           entry={scopeModal.mode === 'edit' ? scopeModal.entry : undefined}
           onClose={() => setScopeModal(null)}
+          onSaved={invalidateAll}
+        />
+      )}
+      {assignBoqOpen && (
+        <AssignBoqModal
+          inventoryId={inventoryId}
+          projectId={inventoryProjectId}
+          onClose={() => setAssignBoqOpen(false)}
           onSaved={invalidateAll}
         />
       )}
@@ -2431,6 +2464,397 @@ function EmbodiedEntryModal({
           {isEdit
             ? t('common.save', { defaultValue: 'Save' })
             : t('common.create', { defaultValue: 'Create' })}
+        </Button>
+      </div>
+    </ModalShell>
+  );
+}
+
+/* ─── Assign BOQ position → embodied carbon (CONN-60) ─── */
+
+interface BoqListItem {
+  id: string;
+  name: string;
+}
+interface BoqPositionRow {
+  id: string;
+  boq_id: string;
+  ordinal: string;
+  description: string;
+  unit: string;
+  quantity: number | string;
+}
+interface BoqWithPositions {
+  positions: BoqPositionRow[];
+}
+
+/** Human label for a material factor in the picker: EPD product name when
+ *  the factor is EPD-backed, the manual override otherwise, plus unit /
+ *  region / confidence so the estimator can tell two factors apart. */
+function factorLabel(
+  f: MaterialCarbonFactor,
+  epdById: Map<string, EPDRecord>,
+): string {
+  const epd = f.epd_id ? epdById.get(f.epd_id) : undefined;
+  const head = epd
+    ? epd.product_name
+    : f.manual_override_factor != null
+      ? `Manual ${toNum(f.manual_override_factor)} kgCO2e/${f.unit_for_factor}`
+      : (f.notes || 'Factor');
+  const region = f.region ? ` · ${f.region}` : '';
+  return `${head} · /${f.unit_for_factor}${region} · ${f.confidence}`;
+}
+
+function AssignBoqModal({
+  inventoryId,
+  projectId,
+  onClose,
+  onSaved,
+}: {
+  inventoryId: string;
+  projectId: string;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const [boqId, setBoqId] = useState('');
+  const [search, setSearch] = useState('');
+  const [position, setPosition] = useState<BoqPositionRow | null>(null);
+  const [factorId, setFactorId] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [quantityUnit, setQuantityUnit] = useState('');
+  const [stage, setStage] = useState<Stage>('a1a3');
+  const [density, setDensity] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const boqsQ = useQuery({
+    queryKey: ['carbon', 'boqs', projectId],
+    queryFn: () =>
+      apiGet<BoqListItem[]>(`/v1/boq/boqs/?project_id=${projectId}`).catch(
+        () => [] as BoqListItem[],
+      ),
+    enabled: !!projectId,
+  });
+  const boqs = boqsQ.data ?? [];
+
+  const boqDetailQ = useQuery({
+    queryKey: ['carbon', 'boq-positions', boqId],
+    queryFn: () => apiGet<BoqWithPositions>(`/v1/boq/boqs/${boqId}`),
+    enabled: !!boqId,
+  });
+
+  const positions = useMemo(() => {
+    const rows = boqDetailQ.data?.positions ?? [];
+    const q = search.trim().toLowerCase();
+    const filtered = q
+      ? rows.filter(
+          (p) =>
+            (p.description || '').toLowerCase().includes(q) ||
+            (p.ordinal || '').toLowerCase().includes(q),
+        )
+      : rows;
+    return filtered.slice(0, 300);
+  }, [boqDetailQ.data, search]);
+
+  // Material factors + EPDs to label them. Both degrade to empty so the
+  // modal still renders (the assign button just stays disabled).
+  const factorsQ = useQuery({
+    queryKey: ['carbon', 'material-factors'],
+    queryFn: () => listMaterialFactors({ limit: 300 }).catch(() => []),
+  });
+  const epdsQ = useQuery({
+    queryKey: ['carbon', 'epds', '', ''],
+    queryFn: () => listEPDs({ limit: 300 }).catch(() => []),
+    staleTime: 60_000,
+  });
+  const factors = factorsQ.data ?? [];
+  const epdById = useMemo(() => {
+    const m = new Map<string, EPDRecord>();
+    for (const e of epdsQ.data ?? []) m.set(e.id, e);
+    return m;
+  }, [epdsQ.data]);
+
+  function pickPosition(p: BoqPositionRow) {
+    setPosition(p);
+    setQuantity(String(toNum(p.quantity)));
+    setQuantityUnit(p.unit || 'kg');
+  }
+
+  const canSubmit =
+    !!position && !!factorId && quantity.trim() !== '' && quantityUnit.trim() !== '';
+
+  async function submit() {
+    if (!position || !canSubmit) return;
+    setBusy(true);
+    try {
+      await assignBoqPosition(inventoryId, {
+        boq_position_id: position.id,
+        material_factor_id: factorId,
+        quantity: Number(quantity) || 0,
+        quantity_unit: quantityUnit,
+        stage,
+        density_kg_per_m3: density.trim() !== '' ? Number(density) : null,
+      });
+      addToast({
+        type: 'success',
+        title: t('carbon.boq_assigned', {
+          defaultValue: 'BOQ position added to inventory',
+        }),
+      });
+      onSaved();
+      onClose();
+    } catch (err) {
+      addToast({ type: 'error', title: getErrorMessage(err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const needsDensity = quantityUnit === 'm3' || quantityUnit === 'm2';
+
+  return (
+    <ModalShell
+      title={t('carbon.add_from_boq', { defaultValue: 'Add from BOQ' })}
+      onClose={onClose}
+    >
+      {!projectId ? (
+        <p className="rounded-md bg-surface-secondary/60 p-3 text-sm text-content-tertiary">
+          {t('carbon.boq_no_project', {
+            defaultValue: 'This inventory has no project, so no BOQ is available.',
+          })}
+        </p>
+      ) : (
+        <div className="space-y-3">
+          <p className="text-xs text-content-tertiary">
+            {t('carbon.add_from_boq_hint', {
+              defaultValue:
+                'Pick a priced BOQ position and a material carbon factor. The factor (from an EPD or a manual override) is multiplied by the quantity to compute embodied kgCO2e.',
+            })}
+          </p>
+
+          {/* BOQ selector */}
+          <div>
+            <label className={labelCls}>
+              {t('carbon.boq', { defaultValue: 'BOQ' })}
+            </label>
+            <select
+              value={boqId}
+              onChange={(e) => {
+                setBoqId(e.target.value);
+                setPosition(null);
+              }}
+              disabled={boqsQ.isLoading}
+              className={inputCls}
+            >
+              <option value="">
+                {boqsQ.isLoading
+                  ? t('common.loading', { defaultValue: 'Loading...' })
+                  : boqs.length > 0
+                    ? t('common.select_boq', { defaultValue: 'Select BOQ...' })
+                    : t('boq.no_boqs', { defaultValue: 'No BOQs found' })}
+              </option>
+              {boqs.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Position picker */}
+          {boqId && !position && (
+            <div>
+              <label className={labelCls}>
+                {t('carbon.boq_position', { defaultValue: 'Position' })}
+              </label>
+              <div className="relative mb-2">
+                <Search
+                  size={13}
+                  className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-content-tertiary"
+                />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t('carbon.boq_search_placeholder', {
+                    defaultValue: 'Filter by description or ordinal…',
+                  })}
+                  className={clsx(inputCls, 'pl-8')}
+                  autoComplete="off"
+                />
+              </div>
+              {boqDetailQ.isLoading ? (
+                <SkeletonTable rows={5} columns={2} />
+              ) : positions.length === 0 ? (
+                <p className="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-content-tertiary">
+                  {t('carbon.boq_picker_empty', {
+                    defaultValue: 'No positions match. Pick another BOQ or clear the filter.',
+                  })}
+                </p>
+              ) : (
+                <div className="max-h-64 overflow-y-auto rounded-lg border border-border-light">
+                  <table className="w-full text-sm">
+                    <tbody>
+                      {positions.map((p) => (
+                        <tr
+                          key={p.id}
+                          onClick={() => pickPosition(p)}
+                          className="cursor-pointer border-t border-border-light first:border-t-0 hover:bg-surface-secondary"
+                        >
+                          <td className="px-3 py-2 font-mono text-xs text-content-secondary whitespace-nowrap align-top">
+                            {p.ordinal}
+                          </td>
+                          <td className="px-3 py-2 text-content-primary">
+                            {p.description}
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums text-content-secondary whitespace-nowrap align-top">
+                            {toNum(p.quantity)} {p.unit}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Chosen position + factor + quantity */}
+          {position && (
+            <>
+              <div className="flex items-start justify-between gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2">
+                <span className="min-w-0">
+                  <span className="block truncate text-sm text-content-primary">
+                    <span className="font-mono text-xs text-content-secondary">
+                      {position.ordinal}
+                    </span>{' '}
+                    {position.description}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPosition(null)}
+                  className="shrink-0 text-xs text-oe-blue hover:underline"
+                >
+                  {t('common.change', { defaultValue: 'Change' })}
+                </button>
+              </div>
+
+              <div>
+                <label className={labelCls}>
+                  {t('carbon.material_factor', { defaultValue: 'Material carbon factor' })}
+                </label>
+                <select
+                  value={factorId}
+                  onChange={(e) => setFactorId(e.target.value)}
+                  disabled={factorsQ.isLoading}
+                  className={inputCls}
+                >
+                  <option value="">
+                    {factorsQ.isLoading
+                      ? t('common.loading', { defaultValue: 'Loading...' })
+                      : factors.length > 0
+                        ? t('carbon.select_factor', { defaultValue: 'Select factor...' })
+                        : t('carbon.no_factors', { defaultValue: 'No factors found' })}
+                  </option>
+                  {factors.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {factorLabel(f, epdById)}
+                    </option>
+                  ))}
+                </select>
+                {!factorsQ.isLoading && factors.length === 0 && (
+                  <p className="mt-1 text-xs text-content-tertiary">
+                    {t('carbon.no_factors_hint', {
+                      defaultValue:
+                        'Create a material factor (link it to an EPD or set a manual override) to assign BOQ positions.',
+                    })}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className={labelCls}>
+                    {t('carbon.quantity', { defaultValue: 'Quantity' })}
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>
+                    {t('carbon.col_unit', { defaultValue: 'Unit' })}
+                  </label>
+                  <select
+                    value={quantityUnit}
+                    onChange={(e) => setQuantityUnit(e.target.value)}
+                    className={inputCls}
+                  >
+                    {['kg', 't', 'm3', 'm2', 'm', 'pcs'].map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>
+                    {t('carbon.stage', { defaultValue: 'Stage' })}
+                  </label>
+                  <select
+                    value={stage}
+                    onChange={(e) => setStage(e.target.value as Stage)}
+                    className={inputCls}
+                  >
+                    {(['a1a3', 'a4', 'a5', 'b', 'c', 'd'] as Stage[]).map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {needsDensity && (
+                <div>
+                  <label className={labelCls}>
+                    {t('carbon.density', {
+                      defaultValue: 'Density (kg/m³) - for m³/m² ↔ kg conversion',
+                    })}
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={density}
+                    onChange={(e) => setDensity(e.target.value)}
+                    className={inputCls}
+                    placeholder="e.g. 2400"
+                  />
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="flex justify-end gap-2 mt-5">
+        <Button variant="ghost" onClick={onClose}>
+          {t('common.cancel', { defaultValue: 'Cancel' })}
+        </Button>
+        <Button
+          variant="primary"
+          onClick={submit}
+          loading={busy}
+          disabled={!canSubmit}
+          icon={busy ? <Loader2 size={14} /> : <Plus size={14} />}
+        >
+          {t('carbon.assign_to_inventory', { defaultValue: 'Add to inventory' })}
         </Button>
       </div>
     </ModalShell>

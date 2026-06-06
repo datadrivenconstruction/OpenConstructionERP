@@ -551,3 +551,53 @@ export function getCarbonDashboard(projectId: string): Promise<CarbonDashboard> 
   qs.set('project_id', projectId);
   return apiGet<CarbonDashboard>(`/v1/carbon/dashboard?${qs.toString()}`);
 }
+
+/* ── Material factors ──────────────────────────────────────────────────── */
+
+export function listMaterialFactors(params?: {
+  cost_item_id?: string;
+  region?: string;
+  limit?: number;
+}): Promise<MaterialCarbonFactor[]> {
+  const qs = new URLSearchParams();
+  if (params?.cost_item_id) qs.set('cost_item_id', params.cost_item_id);
+  if (params?.region) qs.set('region', params.region);
+  if (params?.limit !== undefined) qs.set('limit', String(params.limit));
+  const q = qs.toString();
+  return apiGet<MaterialCarbonFactor[]>(
+    `/v1/carbon/material-factors${q ? `?${q}` : ''}`,
+  );
+}
+
+/* ── BOQ position → embodied carbon assignment ─────────────────────────── */
+
+/** Result of assigning a BOQ position to an inventory (subset the UI needs). */
+export interface AssignBoqPositionResult {
+  id: string;
+  inventory_id: string;
+  element_ref: string | null;
+  stage: string;
+  carbon_kg: string;
+}
+
+/**
+ * Create an embodied-carbon entry tied to a BOQ position, using a material
+ * factor to compute kgCO2e. Wires the existing
+ * POST /carbon/inventories/{id}/assign-boq-position endpoint (CONN-60).
+ */
+export function assignBoqPosition(
+  inventoryId: string,
+  payload: {
+    boq_position_id: string;
+    material_factor_id: string;
+    quantity: number | string;
+    quantity_unit: string;
+    stage?: Stage;
+    density_kg_per_m3?: number | string | null;
+  },
+): Promise<AssignBoqPositionResult> {
+  return apiPost<AssignBoqPositionResult>(
+    `/v1/carbon/inventories/${inventoryId}/assign-boq-position`,
+    payload,
+  );
+}

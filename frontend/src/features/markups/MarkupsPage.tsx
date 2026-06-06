@@ -635,6 +635,7 @@ function MarkupDetail({
   onNavigate,
   onOpenInDocument,
   onOpenBoqPosition,
+  onUseAsQuantity,
 }: {
   markup: Markup;
   documentName?: string;
@@ -659,6 +660,13 @@ function MarkupDetail({
    * BOQ position" text becomes a live navigation control.
    */
   onOpenBoqPosition?: (positionId: string) => void;
+  /**
+   * Sends a measurement markup's value into PDF Takeoff so a clouded
+   * distance / area / count can become a takeoff quantity instead of being
+   * re-keyed by hand (CONN-67). Only rendered for measurement-type markups
+   * that carry a value.
+   */
+  onUseAsQuantity?: (markup: Markup) => void;
 }) {
   const { t } = useTranslation();
   const idx = siblings ? siblings.findIndex((m) => m.id === markup.id) : -1;
@@ -667,27 +675,52 @@ function MarkupDetail({
   const nextId = idx >= 0 && idx < total - 1 ? siblings![idx + 1]!.id : null;
   const showNav = !!siblings && total > 1 && idx >= 0;
 
+  // A measurement markup (distance / area / count) carrying a numeric value
+  // can be pushed straight into PDF Takeoff as a quantity (CONN-67).
+  const canUseAsQuantity =
+    MEASUREMENT_TYPES.includes(markup.type) &&
+    markup.measurement_value != null &&
+    !!onUseAsQuantity;
+
   return (
     <div className="px-6 py-3 bg-surface-secondary/40 border-t border-border-light">
-      {/* Deep-link CTA — primary action for the detail row. Sits above the
-          metadata grid so reviewers see it first when expanding a row.
+      {/* Deep-link CTAs — primary actions for the detail row. Sit above the
+          metadata grid so reviewers see them first when expanding a row.
           Hidden for project-level (no-document) markups since there's
           nothing to navigate to. */}
-      {markup.document_id && onOpenInDocument && (
-        <div className="mb-3">
-          <button
-            type="button"
-            onClick={() => onOpenInDocument(markup)}
-            title={t('markups.openInDocumentHint', {
-              defaultValue: 'Jump to this markup on the source document',
-            })}
-            data-testid="markup-open-in-document"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-hover transition-colors shadow-sm"
-          >
-            <FileText size={13} />
-            {t('markups.openInDocument', { defaultValue: 'Open in document' })}
-            <ExternalLink size={11} className="opacity-80" />
-          </button>
+      {((markup.document_id && onOpenInDocument) || canUseAsQuantity) && (
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          {markup.document_id && onOpenInDocument && (
+            <button
+              type="button"
+              onClick={() => onOpenInDocument(markup)}
+              title={t('markups.openInDocumentHint', {
+                defaultValue: 'Jump to this markup on the source document',
+              })}
+              data-testid="markup-open-in-document"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-oe-blue text-white hover:bg-oe-blue-hover transition-colors shadow-sm"
+            >
+              <FileText size={13} />
+              {t('markups.openInDocument', { defaultValue: 'Open in document' })}
+              <ExternalLink size={11} className="opacity-80" />
+            </button>
+          )}
+          {canUseAsQuantity && (
+            <button
+              type="button"
+              onClick={() => onUseAsQuantity!(markup)}
+              title={t('markups.useAsQuantityHint', {
+                defaultValue:
+                  'Send this measurement into PDF Takeoff as a quantity instead of re-keying it',
+              })}
+              data-testid="markup-use-as-quantity"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-oe-blue bg-oe-blue-subtle border border-oe-blue/30 hover:bg-oe-blue/10 transition-colors"
+            >
+              <Ruler size={13} />
+              {t('markups.useAsQuantity', { defaultValue: 'Use as takeoff quantity' })}
+              <ExternalLink size={11} className="opacity-80" />
+            </button>
+          )}
         </div>
       )}
       {showNav && (
@@ -963,6 +996,7 @@ function MarkupTableRow({
   userMap,
   onOpenInDocument,
   onOpenBoqPosition,
+  onUseAsQuantity,
 }: {
   markup: Markup;
   isExpanded: boolean;
@@ -976,6 +1010,7 @@ function MarkupTableRow({
   userMap: Map<string, AssigneeUser>;
   onOpenInDocument?: (markup: Markup) => void;
   onOpenBoqPosition?: (positionId: string) => void;
+  onUseAsQuantity?: (markup: Markup) => void;
 }) {
   const { t } = useTranslation();
   const TypeIcon = TYPE_ICONS[markup.type] ?? PenTool;
@@ -1114,6 +1149,7 @@ function MarkupTableRow({
               onNavigate={onNavigate}
               onOpenInDocument={onOpenInDocument}
               onOpenBoqPosition={onOpenBoqPosition}
+              onUseAsQuantity={onUseAsQuantity}
             />
           </td>
         </tr>
@@ -1395,6 +1431,33 @@ export function MarkupsPage() {
       navigate(`/boq?positionId=${encodeURIComponent(positionId)}`);
     },
     [navigate],
+  );
+
+  // Push a measurement markup into PDF Takeoff as a quantity (CONN-67).
+  // Takeoff matches its document by filename, which is exactly the document
+  // name we already resolve for the row, so we hand it ``docId=<name>`` and
+  // open straight on the Measurements tab. The measured value and unit ride
+  // along as ``mv`` / ``mu`` so the takeoff "Add measurement" form can
+  // pre-fill them (that consumer lands with the takeoff batch); the
+  // navigation itself is already useful without it.
+  const handleUseAsQuantity = useCallback(
+    (markup: Markup) => {
+      const params = new URLSearchParams();
+      params.set('tab', 'measurements');
+      const docName = markup.document_id
+        ? docNameById.get(markup.document_id)
+        : undefined;
+      if (docName) params.set('docId', docName);
+      if (markup.measurement_value != null) {
+        params.set('mv', String(markup.measurement_value));
+      }
+      if (markup.measurement_unit) params.set('mu', markup.measurement_unit);
+      if (markup.label || markup.text) {
+        params.set('mdesc', (markup.label || markup.text) as string);
+      }
+      navigate(`/takeoff?${params.toString()}`);
+    },
+    [navigate, docNameById],
   );
 
   // Invalidation. Includes the unified feed so hub-scope mutations appear
@@ -1935,6 +1998,7 @@ export function MarkupsPage() {
                           userMap={userMap}
                           onOpenInDocument={handleOpenInDocument}
                           onOpenBoqPosition={handleOpenBoqPosition}
+                          onUseAsQuantity={handleUseAsQuantity}
                         />
                       ))}
                     </tbody>
