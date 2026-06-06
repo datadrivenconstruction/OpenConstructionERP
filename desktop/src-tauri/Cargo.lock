@@ -2327,7 +2327,7 @@ dependencies = [
 
 [[package]]
 name = "openestimate-desktop"
-version = "7.0.1"
+version = "7.1.0"
 dependencies = [
  "portpicker",
  "reqwest 0.12.28",
