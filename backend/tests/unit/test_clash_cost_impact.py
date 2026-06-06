@@ -52,6 +52,7 @@ def _fake_position(total: str, *, cad_ids: list[str] | None = None) -> SimpleNam
     """
     return SimpleNamespace(
         id=uuid.uuid4(),
+        boq_id=uuid.uuid4(),  # owning BOQ - surfaced for the editor deep-link
         ordinal="01.01",
         description="Concrete wall, 240mm",
         total=total,  # canonical: STRING money on the ORM
@@ -124,6 +125,12 @@ def test_compute_impact_is_decimal_accurate_on_thirds():
     assert payload["total_estimate"] == _money_round(expected_total)
     assert payload["confidence"] == "high"
     assert payload["currency"] == "EUR"
+    # CONN-27: every affected position carries its owning BOQ id so the UI
+    # can deep-link to ``/boq/{boq_id}?highlight={position_id}``.
+    assert len(payload["affected_positions"]) == 3
+    for ap, src in zip(payload["affected_positions"], affected, strict=True):
+        assert ap["boq_id"] == src.boq_id
+        assert ap["position_id"] == src.id
 
 
 def test_compute_impact_no_boq_overlap_yields_labour_only_medium():

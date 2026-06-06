@@ -396,6 +396,10 @@ class ClashCostImpactService:
             "affected_positions": [
                 {
                     "position_id": p.id,
+                    # ``boq_id`` lets the UI deep-link straight to the owning
+                    # BOQ editor (``/boq/{boq_id}?highlight={position_id}``);
+                    # the position id alone is not routable without it.
+                    "boq_id": p.boq_id,
                     "ordinal": p.ordinal or "",
                     "description": p.description or "",
                     "total": _money_round(_to_decimal(p.total)),
