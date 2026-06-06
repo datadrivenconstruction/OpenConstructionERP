@@ -155,11 +155,17 @@ export function AssetsPage() {
           }
           links={[
             { label: t('assets.intro_link_bim', { defaultValue: 'BIM viewer' }), onClick: () => navigate('/bim') },
+            {
+              label: t('assets.intro_link_equipment', {
+                defaultValue: 'Equipment & Fleet',
+              }),
+              onClick: () => navigate('/equipment'),
+            },
           ]}
         >
           {t('assets.intro_body', {
             defaultValue:
-              'Lists every BIM element flagged as a tracked asset in the active project, with search across manufacturer, model and serial and a status filter. Edit a row to record operational data on the element, open it in the 3D viewer, or export the register as COBie for facilities handover.',
+              'Lists every BIM element flagged as a tracked asset in the active project, with search across manufacturer, model and serial and a status filter. Edit a row to record operational data on the element, open it in the 3D viewer, or export the register as COBie for facilities handover. This register is for installed building assets and fixtures from the model; for plant, vehicles and movable machinery use Equipment & Fleet.',
           })}
         </DismissibleInfo>
       </div>
