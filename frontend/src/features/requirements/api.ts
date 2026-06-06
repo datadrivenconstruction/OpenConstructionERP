@@ -456,6 +456,8 @@ export interface MatrixRow {
   entity: string;
   attribute: string;
   priority: string;
+  /** BOQ position this requirement is linked to, if any (deep-links to /boq). */
+  linked_position_id: string | null;
   cells: Record<string, MatrixCell>;
   coverage_pct: number;
 }
