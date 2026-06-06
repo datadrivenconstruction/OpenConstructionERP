@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import {
@@ -92,6 +92,10 @@ interface InvoiceLineItem {
   amount: string;
   wbs_id: string | null;
   cost_category: string | null;
+  // Gap B link to a costmodel.CostLine (already serialized on
+  // InvoiceLineItemResponse). When present the line can deep-link to the
+  // 5D cost spine row it posts actuals onto.
+  cost_line_id: string | null;
 }
 
 interface Invoice {
@@ -106,6 +110,10 @@ interface Invoice {
   currency: string;
   status: string;
   description: string;
+  // Gap E: the certified progress claim this receivable was raised from
+  // (serialized on InvoiceResponse). When set the invoice deep-links back
+  // to that claim. NULL on every non-claim invoice.
+  source_claim_id?: string | null;
   line_items?: InvoiceLineItem[];
   // Raw wire fields from InvoiceResponse — the API uses these names
   // (invoice_date / currency_code / amount_total / amount_subtotal /
@@ -543,8 +551,26 @@ export function FinancePage() {
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const projectId = routeProjectId || activeProjectId || '';
   const projectName = useProjectContextStore((s) => s.activeProjectName);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [activeTab, setActiveTab] = useState<FinanceTab>('budgets');
+
+  // Honour a ?tab= deep link once on mount so the Reporting Finance dashboard
+  // (and any other caller) can drill straight into a specific Finance section.
+  // The param is consumed and cleared with replace so a refresh / share keeps
+  // the user wherever they navigated to next (CONN-74 consumer).
+  const VALID_TABS: readonly FinanceTab[] = ['budgets', 'invoices', 'payments', 'evm', 'connectors'];
+  useEffect(() => {
+    const requested = searchParams.get('tab');
+    if (requested && VALID_TABS.includes(requested as FinanceTab)) {
+      setActiveTab(requested as FinanceTab);
+      const next = new URLSearchParams(searchParams);
+      next.delete('tab');
+      setSearchParams(next, { replace: true });
+    }
+    // Run once on mount; the param is cleared immediately after it is read.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const tabs: { key: FinanceTab; label: string; icon: React.ReactNode }[] = [
     {
@@ -1953,6 +1979,20 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                       </td>
                       <td className="px-4 py-3 text-content-secondary">
                         <div>{inv.counterparty_name}</div>
+                        {/* Gap E: a receivable raised from a certified progress
+                            claim deep-links straight back to that claim, instead
+                            of leaving the link as a dead figure (CONN-75). */}
+                        {inv.source_claim_id && (
+                          <Link
+                            to={`/projects/${projectId}/contracts/claims/${inv.source_claim_id}`}
+                            className="inline-flex items-center gap-0.5 text-2xs text-oe-blue hover:underline mt-0.5"
+                            title={t('finance.view_source_claim', { defaultValue: 'View source progress claim' })}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ExternalLink size={10} />
+                            <span>{t('finance.from_claim', { defaultValue: 'From claim' })}</span>
+                          </Link>
+                        )}
                         {inv.line_items && inv.line_items.length > 0 && inv.line_items.some((li) => li.cost_category || li.wbs_id) && (
                           <div className="flex items-center gap-1 text-2xs text-content-tertiary mt-0.5">
                             <span>
@@ -1974,6 +2014,25 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                             </Link>
                           </div>
                         )}
+                        {/* Gap B: when a line item is linked to a 5D cost-spine
+                            line, link to that cost model so the posted actual is
+                            traceable to its budget row. The /5d consumer of
+                            ?lineId lands separately (CONN-38). */}
+                        {(() => {
+                          const costLineId = inv.line_items?.find((li) => li.cost_line_id)?.cost_line_id;
+                          if (!costLineId) return null;
+                          return (
+                            <Link
+                              to={`/5d?lineId=${costLineId}`}
+                              className="inline-flex items-center gap-0.5 text-2xs text-oe-blue hover:underline mt-0.5"
+                              title={t('finance.view_cost_line', { defaultValue: 'View linked cost line in 5D' })}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink size={10} />
+                              <span>{t('finance.cost_line', { defaultValue: 'Cost line' })}</span>
+                            </Link>
+                          );
+                        })()}
                         {inv.description && (!inv.line_items || !inv.line_items.some((li) => li.cost_category || li.wbs_id)) && (
                           <div className="text-2xs text-content-quaternary mt-0.5 truncate max-w-[200px]">
                             {inv.description}
