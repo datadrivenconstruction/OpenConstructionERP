@@ -16,12 +16,14 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import {
   ArrowRight,
   ArrowRightCircle,
+  BedDouble,
   Boxes,
   Briefcase,
   Calculator,
@@ -636,6 +638,7 @@ export function BlocksTab({
   onJumpToPlots: () => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [phaseId, setPhaseId] = useState<string>('');
@@ -843,6 +846,21 @@ export function BlocksTab({
                           })}
                           title={t('propdev.assign_plots', {
                             defaultValue: 'Assign plots',
+                          })}
+                        />
+                        {/* CONN-16 (producer half): jump to the worker
+                            housing units of this block - the consumer on
+                            /accommodation filters by ?block=. */}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          icon={<BedDouble size={12} />}
+                          onClick={() => navigate(`/accommodation?block=${b.id}`)}
+                          aria-label={t('propdev.worker_housing', {
+                            defaultValue: 'Worker housing',
+                          })}
+                          title={t('propdev.worker_housing', {
+                            defaultValue: 'Worker housing',
                           })}
                         />
                         <Button
