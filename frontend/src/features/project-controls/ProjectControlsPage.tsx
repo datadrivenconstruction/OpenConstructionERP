@@ -114,6 +114,10 @@ export function ProjectControlsPage() {
             : undefined
         }
         links={[
+          {
+            label: t('nav.bi_dashboards', { defaultValue: 'BI Dashboards' }),
+            onClick: () => navigate('/bi-dashboards'),
+          },
           { label: t('nav.finance', { defaultValue: 'Finance' }), onClick: () => navigate('/finance') },
           { label: t('nav.risks', { defaultValue: 'Risks' }), onClick: () => navigate('/risks') },
           {

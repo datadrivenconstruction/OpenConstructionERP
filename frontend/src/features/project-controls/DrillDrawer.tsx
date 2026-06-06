@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Loader2 } from 'lucide-react';
+import { ExternalLink, Loader2, LineChart } from 'lucide-react';
 
 import { SideDrawer, EmptyState } from '@/shared/ui';
 
@@ -69,6 +69,21 @@ export function DrillDrawer({
               n: drillQ.data?.record_count ?? 0,
             })
           : undefined
+      }
+      headerActions={
+        kpi ? (
+          <Link
+            to="/bi-dashboards"
+            onClick={onClose}
+            className="flex items-center gap-1.5 rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+            title={t('controls.drill_trend_alerts_tip', {
+              defaultValue: 'See this KPI trend over time and configure threshold alerts in BI Dashboards',
+            })}
+          >
+            <LineChart className="h-3.5 w-3.5" />
+            {t('controls.drill_trend_alerts', { defaultValue: 'Trend & alerts' })}
+          </Link>
+        ) : undefined
       }
     >
       {drillQ.isLoading ? (

@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -154,11 +154,22 @@ export function SustainabilityPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
-  const [selectedProjectId, setSelectedProjectId] = useState('');
-  const [selectedBoqId, setSelectedBoqId] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Deep-link preselect (e.g. from the BOQ toolbar "Carbon footprint" action:
+  // /sustainability?project_id=&boq_id=). Read once on mount so the user lands
+  // on their BOQ instead of an empty selector.
+  const [selectedProjectId, setSelectedProjectId] = useState(
+    () => searchParams.get('project_id') ?? '',
+  );
+  const [selectedBoqId, setSelectedBoqId] = useState(
+    () => searchParams.get('boq_id') ?? '',
+  );
   const [areaM2, setAreaM2] = useState(2000);
   const [calculated, setCalculated] = useState(false);
   const [showAllPositions, setShowAllPositions] = useState(false);
+  // Guards the one-shot auto-calculate so a user who later changes the
+  // selectors isn't force-recalculated against the original deep-link.
+  const autoCalcDone = useRef(false);
 
   // Projects & BOQs
   const { data: projects, isLoading: projectsLoading } = useQuery({
@@ -178,6 +189,40 @@ export function SustainabilityPage() {
     queryFn: () => fetchSustainability(selectedBoqId, areaM2),
     enabled: false,
   });
+
+  // When the page is opened deep-linked with project_id + boq_id, run the
+  // analysis automatically once the BOQ list confirms the BOQ exists. After
+  // it fires we strip the params and never auto-run again, so manual changes
+  // to the selectors behave normally.
+  useEffect(() => {
+    if (autoCalcDone.current) return;
+    if (!selectedProjectId || !selectedBoqId) return;
+    // Wait until the project's BOQs have loaded; only auto-calculate when the
+    // linked BOQ is genuinely present (avoids a request for a stale id).
+    if (boqsLoading) return;
+    const exists = (boqs ?? []).some((b) => b.id === selectedBoqId);
+    if (!exists) {
+      autoCalcDone.current = true;
+      if (searchParams.has('project_id') || searchParams.has('boq_id')) {
+        setSearchParams({}, { replace: true });
+      }
+      return;
+    }
+    autoCalcDone.current = true;
+    setCalculated(true);
+    refetch();
+    if (searchParams.has('project_id') || searchParams.has('boq_id')) {
+      setSearchParams({}, { replace: true });
+    }
+  }, [
+    selectedProjectId,
+    selectedBoqId,
+    boqs,
+    boqsLoading,
+    refetch,
+    searchParams,
+    setSearchParams,
+  ]);
 
   // EPD materials for dropdown
   const { data: epdData } = useQuery({

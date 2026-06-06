@@ -317,6 +317,10 @@ export function BIDashboardsPage() {
         })}
         links={[
           {
+            label: t('nav.project_controls', { defaultValue: 'Project Controls' }),
+            onClick: () => navigate('/project-controls'),
+          },
+          {
             label: t('nav.reporting', { defaultValue: 'Reporting' }),
             onClick: () => navigate('/reporting'),
           },

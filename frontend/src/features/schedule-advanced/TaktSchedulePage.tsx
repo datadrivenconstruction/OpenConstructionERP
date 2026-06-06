@@ -257,6 +257,12 @@ export function TaktSchedulePage() {
               defaultValue:
                 'A takt schedule hangs off a master schedule. Create one on the Advanced Schedule page first.',
             })}
+            action={{
+              label: t('takt.no_master_action', {
+                defaultValue: 'Go to Advanced Schedule',
+              }),
+              onClick: () => navigate('/schedule-advanced'),
+            }}
           />
         </Card>
       ) : (
