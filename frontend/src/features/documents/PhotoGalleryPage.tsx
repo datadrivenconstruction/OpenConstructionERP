@@ -28,6 +28,10 @@ import {
   CheckSquare,
   Sparkles,
   Check,
+  ClipboardList,
+  AlertTriangle,
+  ShieldAlert,
+  BookOpen,
 } from 'lucide-react';
 import { Card, Button, Badge, ConfirmDialog, EmptyState, Breadcrumb, AuthImage, SkeletonGrid } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -180,6 +184,8 @@ function Lightbox({
   onNavigate,
   onEdit,
   onDelete,
+  onRaise,
+  onOpenDayDiary,
 }: {
   photos: PhotoItem[];
   currentIndex: number;
@@ -187,6 +193,10 @@ function Lightbox({
   onNavigate: (index: number) => void;
   onEdit: (photo: PhotoItem) => void;
   onDelete: (photo: PhotoItem) => void;
+  /** Raise a punch item / NCR / safety incident from this photo (CONN-66). */
+  onRaise: (photo: PhotoItem, target: 'punch' | 'ncr' | 'safety') => void;
+  /** Open the daily diary on the photo's capture day (CONN-68). */
+  onOpenDayDiary: (photo: PhotoItem) => void;
 }) {
   const { t } = useTranslation();
   const photo = photos[currentIndex];
@@ -327,6 +337,62 @@ function Lightbox({
                 <Trash2 size={16} />
               </button>
             </div>
+          </div>
+
+          {/* Turn a photo into the record it documents — a defect into a
+              punch item or NCR, a safety shot into an incident, or jump to
+              the diary for the day it was taken (CONN-66 / CONN-68). The
+              photo id rides along so the target can attach the evidence. */}
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/15 pt-3">
+            <span className="text-2xs uppercase tracking-wide text-white/50">
+              {t('photos.raise_from', { defaultValue: 'Create from this photo' })}
+            </span>
+            <button
+              type="button"
+              onClick={() => onRaise(photo, 'punch')}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/25 transition-colors"
+              title={t('photos.raise_punch_hint', {
+                defaultValue: 'Open a punch item prefilled from this photo',
+              })}
+            >
+              <ClipboardList size={13} />
+              {t('photos.raise_punch', { defaultValue: 'Punch item' })}
+            </button>
+            <button
+              type="button"
+              onClick={() => onRaise(photo, 'ncr')}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/25 transition-colors"
+              title={t('photos.raise_ncr_hint', {
+                defaultValue: 'Open an NCR prefilled from this photo',
+              })}
+            >
+              <AlertTriangle size={13} />
+              {t('photos.raise_ncr', { defaultValue: 'NCR' })}
+            </button>
+            <button
+              type="button"
+              onClick={() => onRaise(photo, 'safety')}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/25 transition-colors"
+              title={t('photos.raise_safety_hint', {
+                defaultValue: 'Open a safety incident prefilled from this photo',
+              })}
+            >
+              <ShieldAlert size={13} />
+              {t('photos.raise_safety', { defaultValue: 'Safety incident' })}
+            </button>
+            {(photo.taken_at || photo.created_at) && (
+              <button
+                type="button"
+                onClick={() => onOpenDayDiary(photo)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/25 transition-colors"
+                title={t('photos.open_day_diary_hint', {
+                  defaultValue: "Open the daily diary for this photo's capture day",
+                })}
+              >
+                <BookOpen size={13} />
+                {t('photos.open_day_diary', { defaultValue: 'Day diary' })}
+              </button>
+            )}
           </div>
         </div>
 
@@ -1170,6 +1236,43 @@ export function PhotoGalleryPage() {
     updateMutation.mutate({ id, data });
   }, [updateMutation]);
 
+  // Field-evidence to record (CONN-66): a defect / safety photo becomes the
+  // starting point for a punch item, NCR or safety incident. We open the
+  // target module's create flow with ``?create=true`` (the established
+  // convention used by Submittals / Transmittals) and carry the photo id +
+  // a seeded caption so the new record can attach the evidence. The create
+  // consumers on /punchlist, /ncr and /safety land with their own batches;
+  // until then these links open the page with the params on the URL.
+  const handleRaiseFromPhoto = useCallback(
+    (photo: PhotoItem, target: 'punch' | 'ncr' | 'safety') => {
+      const params = new URLSearchParams();
+      params.set('create', 'true');
+      params.set('photo_id', photo.id);
+      const seed = photo.caption || photo.filename;
+      if (seed) params.set('title', seed);
+      const route =
+        target === 'punch' ? '/punchlist' : target === 'ncr' ? '/ncr' : '/safety';
+      navigate(`${route}?${params.toString()}`);
+    },
+    [navigate],
+  );
+
+  // Photo timeline to diary (CONN-68): jump to the daily diary for the day
+  // the photo was captured. Daily Diary reads ``?date=YYYY-MM-DD`` (consumer
+  // lands with the diary batch); the link is already useful as it opens the
+  // diary scoped to the active project.
+  const handleOpenDayDiary = useCallback(
+    (photo: PhotoItem) => {
+      const stamp = photo.taken_at || photo.created_at;
+      const day = stamp ? stamp.slice(0, 10) : '';
+      const params = new URLSearchParams();
+      if (day) params.set('date', day);
+      const qs = params.toString();
+      navigate(`/daily-diary${qs ? `?${qs}` : ''}`);
+    },
+    [navigate],
+  );
+
   // Accept an AI / heuristic category suggestion. This is the explicit
   // human-confirm step — it PATCHes the category to the suggested value and
   // merges any auto-tags the model saw into the photo's existing tags. The
@@ -1334,6 +1437,14 @@ export function PhotoGalleryPage() {
           {
             label: t('nav.project_files', { defaultValue: 'Files' }),
             onClick: () => navigate('/files'),
+          },
+          {
+            label: t('photos.intro_link_punch', { defaultValue: 'Punch list' }),
+            onClick: () => navigate('/punchlist'),
+          },
+          {
+            label: t('photos.intro_link_diary', { defaultValue: 'Daily diary' }),
+            onClick: () => navigate('/daily-diary'),
           },
         ]}
       >
@@ -1560,6 +1671,8 @@ export function PhotoGalleryPage() {
           onNavigate={setLightboxIndex}
           onEdit={(photo) => { setLightboxIndex(null); setEditPhoto(photo); }}
           onDelete={(photo) => { setLightboxIndex(null); setDeleteTarget(photo); }}
+          onRaise={(photo, target) => { setLightboxIndex(null); handleRaiseFromPhoto(photo, target); }}
+          onOpenDayDiary={(photo) => { setLightboxIndex(null); handleOpenDayDiary(photo); }}
         />
       )}
 
