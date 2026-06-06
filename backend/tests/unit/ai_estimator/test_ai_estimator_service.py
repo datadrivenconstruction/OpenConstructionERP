@@ -432,7 +432,7 @@ def test_meta_payload_sources_every_value_from_one_definition():
     """The /meta payload mirrors the API contract and reuses the single existing
     definition for each value (thresholds, stage enum, group cap) - no
     duplicated magic numbers."""
-    from app.modules.ai_estimator import schemas
+    from app.modules.ai_estimator import benchmarks, schemas
 
     meta = schemas.MetaResponse(
         score_thresholds=schemas.ScoreThresholds(
@@ -441,6 +441,7 @@ def test_meta_payload_sources_every_value_from_one_definition():
         ),
         construction_stages=list(schemas.CONSTRUCTION_STAGES),
         match_group_cap=schemas.DEFAULT_MATCH_GROUP_CAP,
+        rate_sanity_band_factor=benchmarks.DEFAULT_BAND_FACTOR,
     )
     # Thresholds come straight off the service constants (the contract: ~0.78 / ~0.62).
     assert meta.score_thresholds.high == pytest.approx(0.78)
@@ -496,3 +497,141 @@ def test_run_create_rejects_unknown_construction_stage():
     # Unknown value rejected.
     with pytest.raises(pydantic.ValidationError):
         schemas.RunCreate(project_id=uuid.uuid4(), construction_stage="nonsense")
+
+
+# ── Multi-pass mapping pipeline (semantic -> unit/scale -> rate sanity) ───────
+#
+# These pin the two NEW deterministic passes (pass 1 needs the live ranker, so
+# it is exercised end-to-end in the integration suite). A fake candidate mirrors
+# the load-bearing surface of ``MatchCandidate``: a reassignable ``score`` and
+# ``confidence_band`` (both declared fields on the real model) plus ``unit`` /
+# ``unit_rate`` for the per-base-unit rate. The passes only ever read/reassign
+# those declared fields - never an arbitrary attribute - so this fake is faithful.
+
+
+class _FakeCandidate:
+    """Stand-in for MatchCandidate with the fields the passes touch."""
+
+    def __init__(self, code, unit, unit_rate, score, confidence_band="high"):
+        self.id = code
+        self.code = code
+        self.description = code
+        self.unit = unit
+        self.unit_rate = unit_rate
+        self.currency = "EUR"
+        self.score = score
+        self.confidence_band = confidence_band
+        self.classification = {}
+
+
+def _grp(trade="finishes", chosen_unit="m2"):
+    """A minimal group-like object carrying only what the passes read."""
+
+    class _G:
+        pass
+
+    g = _G()
+    g.trade = trade
+    g.chosen_unit = chosen_unit
+    g.group_key = f"{trade}|{chosen_unit}"
+    return g
+
+
+def test_reconcile_units_demotes_dimension_mismatch_to_below_correct():
+    """A volume (m3) rate for an area (m2) group is DEMOTED, not dropped: the
+    dimensionally-correct candidate rises to top-1 while the m3 row survives."""
+    service = AiEstimatorService.__new__(AiEstimatorService)
+    # The m3 candidate has the HIGHER raw score; after demotion the m2 one wins.
+    m3 = _FakeCandidate("VOL", "m3", "120.00", score=0.90)
+    m2 = _FakeCandidate("AREA", "m2", "45.00", score=0.70)
+    candidates = [m3, m2]
+    passes: list[dict] = []
+
+    service._reconcile_units(_grp(trade="finishes", chosen_unit="m2"), candidates, passes)
+
+    # The dimensionally-correct m2 candidate is now top-1; the m3 one survives
+    # (never dropped) but sank below it.
+    assert candidates[0].code == "AREA"
+    assert candidates[1].code == "VOL"
+    assert len(candidates) == 2  # nothing dropped
+    pass_entry = passes[0]
+    assert pass_entry["pass"] == "unit_scale"
+    assert pass_entry["dropped"] == 1
+    assert pass_entry["kept"] == 2
+
+
+def test_reconcile_units_keeps_compatible_and_unknown_dimensions():
+    """Same-dimension candidates and unmapped/lump-sum units are never demoted
+    (we never guess a dimension we cannot read)."""
+    service = AiEstimatorService.__new__(AiEstimatorService)
+    a = _FakeCandidate("A", "m2", "40.00", score=0.80)
+    b = _FakeCandidate("B", "100 m2", "4000.00", score=0.75)  # multiplier, still area
+    c = _FakeCandidate("C", "lsum", "9000.00", score=0.60)  # unknown dim -> never demoted
+    candidates = [a, b, c]
+    passes: list[dict] = []
+
+    service._reconcile_units(_grp(trade="finishes", chosen_unit="m2"), candidates, passes)
+
+    assert passes[0]["dropped"] == 0
+    # Order preserved (all scores unchanged, stable sort).
+    assert [x.code for x in candidates] == ["A", "B", "C"]
+
+
+def test_rate_sanity_flags_outlier_caps_band_and_keeps_real_rate():
+    """An injected ~100x outlier is flagged, capped at LOW band, and kept - the
+    real DB rate is never dropped and never invented."""
+    service = AiEstimatorService.__new__(AiEstimatorService)
+    # Cluster around 50; one gross 100x outlier at 6000 (median ~ 50, 8x band).
+    normal1 = _FakeCandidate("N1", "m2", "48.00", score=0.85)
+    normal2 = _FakeCandidate("N2", "m2", "52.00", score=0.80)
+    outlier = _FakeCandidate("OUT", "m2", "6000.00", score=0.90, confidence_band="high")
+    candidates = [normal1, normal2, outlier]
+    passes: list[dict] = []
+
+    flagged = service._rate_sanity(_grp(trade="finishes", chosen_unit="m2"), candidates, passes)
+
+    # Index 2 (the 6000 outlier) is flagged; the two normal rows are not.
+    assert flagged == {2}
+    # The outlier is capped at LOW band but still present (never dropped).
+    assert outlier.confidence_band == "low"
+    assert len(candidates) == 3
+    pe = passes[0]
+    assert pe["pass"] == "rate_sanity"
+    assert pe["benchmark"]["outliers"] == 1
+    assert pe["benchmark"]["trade"] == "finishes"
+    assert pe["benchmark"]["unit"] == "m2"
+    # The band bounds are real (median-relative), not None, when there is a median.
+    assert pe["benchmark"]["band_low"] is not None
+    assert pe["benchmark"]["band_high"] is not None
+
+
+def test_rate_sanity_single_candidate_is_never_an_outlier():
+    """A lone candidate is its own median, so it can never be flagged."""
+    service = AiEstimatorService.__new__(AiEstimatorService)
+    only = _FakeCandidate("ONLY", "m2", "999999.00", score=0.80)
+    passes: list[dict] = []
+    flagged = service._rate_sanity(_grp(chosen_unit="m2"), [only], passes)
+    assert flagged == set()
+    assert passes[0]["benchmark"]["outliers"] == 0
+
+
+def test_first_non_outlier_skips_flagged_then_falls_back_to_zero():
+    service = AiEstimatorService
+    cands = [object(), object(), object()]
+    # Index 0 flagged -> pick the first clean one (1).
+    assert service._first_non_outlier(cands, {0}) == 1
+    # Nothing flagged -> top-1.
+    assert service._first_non_outlier(cands, set()) == 0
+    # Every candidate flagged -> fall back to 0 (a real, if suspect, rate).
+    assert service._first_non_outlier(cands, {0, 1, 2}) == 0
+    # Empty list -> 0.
+    assert service._first_non_outlier([], set()) == 0
+
+
+def test_candidate_out_carries_rate_outlier_flag():
+    """The serialised candidate exposes the pass-3 rate_outlier marker."""
+    cand = _FakeCandidate("X", "m2", "45.00", score=0.83)
+    clean = AiEstimatorService._candidate_out(cand)
+    assert clean["rate_outlier"] is False
+    flagged = AiEstimatorService._candidate_out(cand, rate_outlier=True)
+    assert flagged["rate_outlier"] is True

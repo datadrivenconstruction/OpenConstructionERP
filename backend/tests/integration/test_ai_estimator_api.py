@@ -233,6 +233,38 @@ def _stub_rank(monkeypatch, cost_id: uuid.UUID, *, unit_rate: float, currency: s
     monkeypatch.setattr("app.core.match_service.ranker_qdrant.rank", _rank)
 
 
+def _stub_rank_candidates(monkeypatch, candidates: list[dict]) -> None:
+    """Stub the grounded ranker to a fixed list of candidate dicts.
+
+    Each dict carries id / code / description / unit / unit_rate / currency /
+    score; the multi-pass mapping then reconciles + sanity-checks them. The list
+    is returned for every group (the integration cases match a single group).
+    """
+    from app.core.match_service.envelope import MatchCandidate, MatchRequest, MatchResponse
+
+    async def _rank(req, *, db, ai_settings=None):
+        return MatchResponse(
+            request=req
+            if isinstance(req, MatchRequest)
+            else MatchRequest(envelope=req.envelope, project_id=req.project_id),
+            candidates=[
+                MatchCandidate(
+                    id=str(c["id"]),
+                    code=c.get("code", "C"),
+                    description=c.get("description", ""),
+                    unit=c.get("unit", "m2"),
+                    unit_rate=c["unit_rate"],
+                    currency=c.get("currency", "EUR"),
+                    score=c["score"],
+                    confidence_band="high" if c["score"] >= 0.78 else "medium",
+                )
+                for c in candidates
+            ],
+        )
+
+    monkeypatch.setattr("app.core.match_service.ranker_qdrant.rank", _rank)
+
+
 # ═════════════════════════════════════════════════════════════════════════
 #  1. Create run -> analyze (deterministic, no AI key)
 # ═════════════════════════════════════════════════════════════════════════
@@ -490,6 +522,184 @@ async def test_match_no_candidate_marks_needs_human(http_client, admin, monkeypa
     assert g["unit_rate"] is None
     assert g["confidence"] is None
     assert g["confidence_band"] == "none"
+
+
+# ═════════════════════════════════════════════════════════════════════════
+#  2b. Multi-pass mapping pipeline (semantic -> unit/scale -> rate sanity)
+# ═════════════════════════════════════════════════════════════════════════
+
+
+@pytest.mark.asyncio
+async def test_match_records_three_named_passes_in_trace(http_client, admin, monkeypatch):
+    """A matched group carries a mapping_trace with exactly the three named
+    passes (semantic / unit_scale / rate_sanity) and a final_method, and the
+    run timeline records a per-pass semantic observation. Deterministic, no key."""
+    project_id = await _seed_project(owner_id=admin["user_id"], currency="EUR")
+    # Two plausible same-dimension m2 candidates so all passes have real work.
+    c1 = await _seed_cost_item(description="Floor tiling porcelain", unit="m2", rate="45.00", currency="EUR")
+    c2 = await _seed_cost_item(description="Floor tiling ceramic", unit="m2", rate="52.00", currency="EUR")
+    _stub_rank_candidates(
+        monkeypatch,
+        [
+            {
+                "id": c1,
+                "code": "TILE-1",
+                "description": "Floor tiling porcelain",
+                "unit": "m2",
+                "unit_rate": 45.0,
+                "score": 0.84,
+            },
+            {
+                "id": c2,
+                "code": "TILE-2",
+                "description": "Floor tiling ceramic",
+                "unit": "m2",
+                "unit_rate": 52.0,
+                "score": 0.80,
+            },
+        ],
+    )
+    h = admin["headers"]
+
+    create = await http_client.post(
+        "/api/v1/ai-estimator/runs",
+        json={
+            "project_id": str(project_id),
+            "source": "excel",
+            "rows": [{"description": "Floor tiling", "qty": 20.0, "unit": "m2", "category": "finishes"}],
+            "currency": "EUR",
+        },
+        headers=h,
+    )
+    run_id = create.json()["id"]
+    await http_client.post(f"/api/v1/ai-estimator/runs/{run_id}/confirm", json={"stage": "source"}, headers=h)
+    match = await http_client.post(f"/api/v1/ai-estimator/runs/{run_id}/match", json={"use_agent": False}, headers=h)
+    assert match.status_code == 200, match.text
+    group_id = match.json()["groups"][0]["id"]
+
+    # The group detail exposes the three-pass mapping trace (WP4 serialisation).
+    detail = await http_client.get(f"/api/v1/ai-estimator/runs/{run_id}/groups/{group_id}", headers=h)
+    assert detail.status_code == 200, detail.text
+    trace = detail.json()["mapping_trace"]
+    assert trace is not None, "mapping_trace must be present on a matched group"
+    names = [p["pass"] for p in trace["passes"]]
+    assert names == ["semantic", "unit_scale", "rate_sanity"]
+    # Each pass entry carries the structured kept/dropped/notes shape.
+    for p in trace["passes"]:
+        assert {"pass", "kept", "dropped", "notes", "benchmark"} <= set(p)
+    # The rate-sanity pass carries a benchmark band block.
+    rs = trace["passes"][2]
+    assert rs["benchmark"]["trade"] == "finishes"
+    assert rs["benchmark"]["unit"] == "m2"
+    # No key + no agent -> deterministic vector method.
+    assert trace["final_method"] == "vector"
+
+    # The run timeline rendered the multi-pass for free (semantic observation).
+    steps = await http_client.get(f"/api/v1/ai-estimator/runs/{run_id}/steps", headers=h)
+    assert steps.status_code == 200, steps.text
+    contents = [s.get("content") or {} for s in steps.json()]
+    assert any(isinstance(c, dict) and c.get("pass") == "semantic" for c in contents), (
+        "the run timeline must record a semantic-pass observation"
+    )
+
+
+@pytest.mark.asyncio
+async def test_rate_sanity_flags_outlier_without_dropping_real_top(http_client, admin, monkeypatch):
+    """An injected ~130x outlier candidate is flagged (rate_outlier) and capped at
+    LOW band, while the dimensionally- and price-plausible candidate is the chosen
+    top-1. The real outlier rate is kept for human override, never dropped."""
+    project_id = await _seed_project(owner_id=admin["user_id"], currency="EUR")
+    good1 = await _seed_cost_item(description="Wall plaster A", unit="m2", rate="20.00", currency="EUR")
+    good2 = await _seed_cost_item(description="Wall plaster B", unit="m2", rate="24.00", currency="EUR")
+    outlier = await _seed_cost_item(description="Wall plaster mispriced", unit="m2", rate="3000.00", currency="EUR")
+    _stub_rank_candidates(
+        monkeypatch,
+        [
+            # The outlier has the HIGHEST raw score; rate sanity must still demote it
+            # out of top-1 (it is the only outlier), choosing a plausible candidate.
+            {"id": outlier, "code": "PLASTER-OUT", "unit": "m2", "unit_rate": 3000.0, "score": 0.90},
+            {"id": good1, "code": "PLASTER-1", "unit": "m2", "unit_rate": 20.0, "score": 0.85},
+            {"id": good2, "code": "PLASTER-2", "unit": "m2", "unit_rate": 24.0, "score": 0.80},
+        ],
+    )
+    h = admin["headers"]
+
+    create = await http_client.post(
+        "/api/v1/ai-estimator/runs",
+        json={
+            "project_id": str(project_id),
+            "source": "excel",
+            "rows": [{"description": "Wall plaster", "qty": 30.0, "unit": "m2", "category": "finishes"}],
+            "currency": "EUR",
+        },
+        headers=h,
+    )
+    run_id = create.json()["id"]
+    await http_client.post(f"/api/v1/ai-estimator/runs/{run_id}/confirm", json={"stage": "source"}, headers=h)
+    match = await http_client.post(f"/api/v1/ai-estimator/runs/{run_id}/match", json={"use_agent": False}, headers=h)
+    assert match.status_code == 200, match.text
+    mg = match.json()["groups"][0]
+    group_id = mg["id"]
+
+    # The chosen top-1 is a plausible candidate, NOT the 3000 outlier.
+    assert mg["chosen_code"] in ("PLASTER-1", "PLASTER-2")
+    assert float(mg["unit_rate"]) in (20.0, 24.0)
+
+    detail = await http_client.get(f"/api/v1/ai-estimator/runs/{run_id}/groups/{group_id}", headers=h)
+    cands = {c["code"]: c for c in detail.json()["candidates"]}
+    # The outlier survived (never dropped) but is flagged + capped at LOW band.
+    assert "PLASTER-OUT" in cands, "the real outlier rate must be kept for human override"
+    assert cands["PLASTER-OUT"]["rate_outlier"] is True
+    assert cands["PLASTER-OUT"]["confidence_band"] == "low"
+    # The plausible candidates are not flagged.
+    assert cands["PLASTER-1"]["rate_outlier"] is False
+    # The rate-sanity pass reported exactly one outlier in the trace.
+    rs = detail.json()["mapping_trace"]["passes"][2]
+    assert rs["benchmark"]["outliers"] == 1
+
+
+@pytest.mark.asyncio
+async def test_unit_scale_demotes_dimension_mismatch_in_match(http_client, admin, monkeypatch):
+    """A volume (m3) candidate for an area (m2) group is demoted out of top-1 by
+    the unit/scale pass; the dimensionally-correct m2 candidate is chosen, and
+    the m3 candidate is kept in the override list (never dropped)."""
+    project_id = await _seed_project(owner_id=admin["user_id"], currency="EUR")
+    m3 = await _seed_cost_item(description="Concrete by volume", unit="m3", rate="120.00", currency="EUR")
+    m2 = await _seed_cost_item(description="Screed by area", unit="m2", rate="35.00", currency="EUR")
+    _stub_rank_candidates(
+        monkeypatch,
+        [
+            # The m3 candidate has the higher raw score but the wrong dimension.
+            {"id": m3, "code": "VOL", "unit": "m3", "unit_rate": 120.0, "score": 0.90},
+            {"id": m2, "code": "AREA", "unit": "m2", "unit_rate": 35.0, "score": 0.70},
+        ],
+    )
+    h = admin["headers"]
+
+    create = await http_client.post(
+        "/api/v1/ai-estimator/runs",
+        json={
+            "project_id": str(project_id),
+            "source": "excel",
+            "rows": [{"description": "Floor screed", "qty": 40.0, "unit": "m2", "category": "finishes"}],
+            "currency": "EUR",
+        },
+        headers=h,
+    )
+    run_id = create.json()["id"]
+    await http_client.post(f"/api/v1/ai-estimator/runs/{run_id}/confirm", json={"stage": "source"}, headers=h)
+    match = await http_client.post(f"/api/v1/ai-estimator/runs/{run_id}/match", json={"use_agent": False}, headers=h)
+    mg = match.json()["groups"][0]
+    # The m2 (dimensionally-correct) candidate is top-1 despite the lower raw score.
+    assert mg["chosen_code"] == "AREA"
+    assert float(mg["unit_rate"]) == 35.0
+
+    detail = await http_client.get(f"/api/v1/ai-estimator/runs/{run_id}/groups/{mg['id']}", headers=h)
+    codes = {c["code"] for c in detail.json()["candidates"]}
+    assert codes == {"VOL", "AREA"}  # the m3 candidate survived, just demoted
+    unit_scale = detail.json()["mapping_trace"]["passes"][1]
+    assert unit_scale["pass"] == "unit_scale"
+    assert unit_scale["dropped"] == 1
 
 
 @pytest.mark.asyncio
