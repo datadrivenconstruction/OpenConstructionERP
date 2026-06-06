@@ -231,6 +231,12 @@ export function CarbonPage() {
         }
         links={[
           {
+            label: t('carbon.intro_link_sustainability', {
+              defaultValue: 'Per-BOQ carbon (Sustainability)',
+            }),
+            onClick: () => navigate('/sustainability'),
+          },
+          {
             label: t('carbon.intro_link_boq', { defaultValue: 'Open BOQ editor' }),
             onClick: () => navigate('/boq'),
           },

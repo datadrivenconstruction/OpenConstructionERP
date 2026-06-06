@@ -4033,6 +4033,11 @@ export function BOQEditorPage() {
           onImportInputChange={handleImportInputChange}
           onPasteFromExcel={() => setExcelPasteOpen(true)}
           onExport={handleExport}
+          onCarbonFootprint={() =>
+            navigate(
+              `/sustainability?project_id=${boq.project_id}&boq_id=${boq.id}`,
+            )
+          }
           onValidate={handleValidate}
           isValidating={isValidating}
           lastValidationScore={lastValidationScore}
