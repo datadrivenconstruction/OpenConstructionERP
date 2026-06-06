@@ -237,11 +237,11 @@ export function PortalPage() {
   return (
     <div className="space-y-5">
       <Breadcrumb
-        items={[{ label: t('nav.portal', { defaultValue: 'Customer / Buyer Portal' }) }]}
+        items={[{ label: t('nav.portal', { defaultValue: 'Client & Partner Portal' }) }]}
       />
 
       <PageHeader
-        srTitle={t('portal.title', { defaultValue: 'Customer / Buyer Portal' })}
+        srTitle={t('portal.title', { defaultValue: 'Client & Partner Portal' })}
         subtitle={t('portal.subtitle', {
           defaultValue:
             'Invite external customers and buyers, manage scoped access to documents, and audit who saw what.',

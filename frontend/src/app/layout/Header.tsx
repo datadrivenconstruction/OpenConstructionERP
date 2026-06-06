@@ -110,7 +110,7 @@ const TITLE_I18N_MAP: Record<string, string> = {
   'Equipment & Fleet': 'nav.equipment',
   'Resources & Crew': 'nav.resources',
   'Service & Maintenance': 'nav.service',
-  'Subcontractor Portal': 'nav.portal',
+  'Client & Partner Portal': 'nav.portal',
   'Asset Register': 'nav.assets',
   // Quality & safety
   'Validation': 'nav.validation',
@@ -1059,7 +1059,7 @@ const ROUTE_COMPONENT_MAP: ReadonlyArray<readonly [string, string]> = [
   ['/service', 'Service & Maintenance'],
   ['/equipment', 'Equipment & Fleet'],
   ['/daily-diary', 'Daily Diary'],
-  ['/portal', 'Subcontractor Portal'],
+  ['/portal', 'Client & Partner Portal'],
   ['/resources', 'Resources & Crew'],
   ['/contracts', 'Contracts'],
   ['/ai-estimate', 'AI Quick Estimate'],
