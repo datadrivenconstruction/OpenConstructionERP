@@ -57,7 +57,7 @@ from app.modules.ai_estimator.project_types import (
     package_by_key,
     params_for_round,
 )
-from app.modules.ai_estimator.quantities import compute_quantity
+from app.modules.ai_estimator.quantities import compute_quantity, describe_derivation
 from app.modules.ai_estimator.repository import (
     AiEstimatorGroupRepository,
     AiEstimatorIntakeRepository,
@@ -650,7 +650,9 @@ class IntakeService:
             grounded += coverage == "grounded"
             weak += coverage == "weak"
             gap += coverage == "gap"
-            group = await self._persist_group(run, pkg, stage, res["desc"], res["score"], qty, sort_base + offset)
+            group = await self._persist_group(
+                run, pkg, stage, res["desc"], res["score"], qty, sort_base + offset, params=params
+            )
             board = per_package.setdefault(
                 pkg.key,
                 {
@@ -797,10 +799,20 @@ class IntakeService:
         score: float | None,
         qty: Any,
         sort_order: int,
+        params: dict[str, Any] | None = None,
     ) -> AiEstimatorGroup:
-        """Write one composed :class:`AiEstimatorGroup` ready for run_matching."""
+        """Write one composed :class:`AiEstimatorGroup` ready for run_matching.
+
+        The WorkGroup provenance fields the design standardises (section 3.1)
+        are written uniformly into ``metadata_`` here, the single dialogue-path
+        creation site: ``derivation`` (the formula id plus a short human
+        sentence), ``assumptions`` (the proxies actually applied for these
+        params), and ``source="dialogue"``. They ride the existing free JSON
+        column, so there is no migration.
+        """
         desc = (description or pkg.key)[:500]
         quantities = self._quantities_dict(pkg.unit, qty.quantity)
+        derivation_text, assumptions = describe_derivation(pkg.qty_formula, params or {}, qty)
         envelope = {
             "source": "text",
             "description": desc,
@@ -829,6 +841,11 @@ class IntakeService:
                 "probe": {"chosen": desc, "score": score},
                 "estimated": bool(getattr(qty, "estimated", False)),
                 "coverage": self._coverage(score),
+                # WorkGroup provenance (design 3.1), written uniformly here.
+                "source": "dialogue",
+                "qty_formula": pkg.qty_formula,
+                "derivation": derivation_text,
+                "assumptions": assumptions,
             },
         )
         return await self.group_repo.add(group)

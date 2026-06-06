@@ -126,6 +126,35 @@ def _quantity_for_unit(quantities: dict[str, float], unit: str) -> float:
     }.get(unit, quantities.get("count", 0.0))
 
 
+# Envelope source kind -> standardised WorkGroup source (design 3.1 / 4.1).
+# CAD/BIM models are ``cad``; parsed files (BOQ rows, PDF/DWG takeoff, free
+# text) are ``file``; site photos are ``photo``. The dialogue path tags
+# ``dialogue`` directly in the intake composer.
+_ENVELOPE_SOURCE_TO_WORKGROUP: dict[str, str] = {
+    "bim": "cad",
+    "dwg": "cad",
+    "pdf": "file",
+    "boq": "file",
+    "text": "file",
+    "image": "photo",
+    "photo": "photo",
+}
+
+
+def _workgroup_source(envelope_source: Any) -> str:
+    """Map an envelope ``source`` to the standardised WorkGroup source.
+
+    Args:
+        envelope_source: The ``source`` field of the representative envelope
+            (``bim`` / ``dwg`` / ``pdf`` / ``boq`` / ``text`` / ``photo``).
+
+    Returns:
+        One of ``cad`` / ``file`` / ``photo``; an unknown / missing source
+        defaults to ``file`` (a measured group never carries ``dialogue``).
+    """
+    return _ENVELOPE_SOURCE_TO_WORKGROUP.get(str(envelope_source or ""), "file")
+
+
 def _pick_unit(quantities: dict[str, float]) -> str:
     """Auto-pick the most specific non-zero dimension (volume>area>length>...)."""
     for unit, key in (
@@ -729,6 +758,10 @@ class AiEstimatorService:
                     trade=trade,
                     status="unmatched",
                     sort_order=sort_order,
+                    # WorkGroup provenance (design 3.1 / 4.1): a measured group
+                    # carries its origin source (file | cad | photo) uniformly,
+                    # mapped from the envelope's own source kind.
+                    metadata_={"source": _workgroup_source(sample.get("source"))},
                 )
             )
         if groups:
@@ -2077,13 +2110,25 @@ class AiEstimatorService:
         )
 
     def group_to_detail(self, grp: AiEstimatorGroup) -> schemas.GroupDetail:
-        """Serialise a group to the full GroupDetail (candidates + resources)."""
+        """Serialise a group to the full GroupDetail (candidates + resources).
+
+        Surfaces the WorkGroup provenance (design 3.1) read-only from
+        ``metadata_``: ``source``, ``derivation``, ``assumptions`` and the
+        ``mapping_trace`` the matcher writes.
+        """
         summary = self.group_to_summary(grp)
+        meta = grp.metadata_ or {}
+        assumptions = meta.get("assumptions")
+        mapping_trace = meta.get("mapping_trace")
         return schemas.GroupDetail(
             **summary.model_dump(),
             run_id=grp.run_id,
             element_ids=[str(e) for e in (grp.element_ids or [])],
             envelope=grp.envelope or {},
+            source=(str(meta["source"]) if meta.get("source") else None),
+            derivation=(str(meta["derivation"]) if meta.get("derivation") else None),
+            assumptions=[str(a) for a in assumptions] if isinstance(assumptions, list) else [],
+            mapping_trace=mapping_trace if isinstance(mapping_trace, dict) else None,
             resources=[
                 schemas.ResourceOut(
                     name=str(r.get("name") or ""),

@@ -293,6 +293,30 @@ def test_quantities_from_row_maps_unit_to_canonical_key():
     assert f("m3", "abc") == {}
 
 
+# ── WorkGroup source standardisation (design 3.1 / 4.1) ──────────────────────
+
+
+@pytest.mark.parametrize(
+    ("envelope_source", "expected"),
+    [
+        ("bim", "cad"),
+        ("dwg", "cad"),
+        ("pdf", "file"),
+        ("boq", "file"),
+        ("text", "file"),
+        ("photo", "photo"),
+        ("image", "photo"),
+        # A measured group never carries dialogue; unknown / blank -> file.
+        ("dialogue", "file"),
+        ("", "file"),
+        (None, "file"),
+    ],
+)
+def test_workgroup_source_maps_envelope_to_standard_source(envelope_source, expected):
+    """Every measured envelope source maps to one of cad / file / photo."""
+    assert svc._workgroup_source(envelope_source) == expected
+
+
 def test_group_envelope_carries_project_currency_hard_filter():
     """The matcher envelope must carry the project currency so a USD project
     never gets EUR rates (the never-blend currency hard filter)."""

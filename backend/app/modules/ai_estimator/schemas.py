@@ -385,7 +385,14 @@ class GroupSummary(BaseModel):
 
 
 class GroupDetail(GroupSummary):
-    """Full detail for the per-group slide-over / match-review card."""
+    """Full detail for the per-group slide-over / match-review card.
+
+    The WorkGroup provenance fields (design section 3.1) are surfaced read-only
+    from the group ``metadata_``: ``source`` (how the group originated),
+    ``derivation`` (a short human formula sentence), ``assumptions`` (the
+    proxies applied) and ``mapping_trace`` (the multi-pass mapping log the
+    matcher writes). They are display-only; the UI never writes them back.
+    """
 
     run_id: uuid.UUID
     element_ids: list[str] = Field(default_factory=list)
@@ -395,6 +402,11 @@ class GroupDetail(GroupSummary):
     confirmed_by: uuid.UUID | None = None
     confirmed_at: datetime | None = None
     notes: str | None = None
+    # WorkGroup provenance (read-only, from metadata_).
+    source: str | None = None
+    derivation: str | None = None
+    assumptions: list[str] = Field(default_factory=list)
+    mapping_trace: dict[str, Any] | None = None
 
 
 class GroupListResponse(BaseModel):
