@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import {
   BarChart3,
   ClipboardList,
@@ -8,6 +9,10 @@ import {
   CircleDollarSign,
   Sparkles,
   Lightbulb,
+  Bot,
+  MessageSquare,
+  Calculator,
+  ArrowUpRight,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -25,6 +30,24 @@ interface DataPanelEmptyProps {
  */
 export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  // AI tools cross-link strip (CONN-82) - reach the sibling AI surfaces
+  // (Agents, Cost Advisor, Quick Estimate) from the chat empty state. The
+  // chat page itself is the current surface, so it is dropped from the list.
+  const AI_TOOLS: Array<{ to: string; icon: LucideIcon; label: string }> = [
+    { to: '/ai-agents', icon: Bot, label: t('nav.ai_agents', { defaultValue: 'AI Agents' }) },
+    {
+      to: '/advisor',
+      icon: MessageSquare,
+      label: t('nav.ai_advisor', { defaultValue: 'AI Cost Advisor' }),
+    },
+    {
+      to: '/ai-estimate',
+      icon: Calculator,
+      label: t('nav.ai_estimate', { defaultValue: 'AI Quick Estimate' }),
+    },
+  ];
 
   const TOOL_CATEGORIES: Array<{
     icon: LucideIcon;
@@ -377,6 +400,91 @@ export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
                 'Tip: Select a project at the top to scope the AI to that project. Without selection, the AI sees your whole portfolio.',
             })}
           </span>
+        </div>
+
+        {/* AI tools cross-link strip (CONN-82) */}
+        <h2
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--chat-text-secondary)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            margin: '24px 0 12px',
+          }}
+        >
+          {t('ai.cross_strip_title', { defaultValue: 'Other AI tools' })}
+        </h2>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 10,
+          }}
+        >
+          {AI_TOOLS.map((tool) => {
+            const ToolIcon = tool.icon;
+            return (
+              <button
+                key={tool.to}
+                type="button"
+                onClick={() => navigate(tool.to)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  textAlign: 'left',
+                  padding: '10px 12px',
+                  background: 'var(--chat-surface-1)',
+                  border: '1px solid var(--chat-border-subtle)',
+                  borderRadius: 'var(--chat-radius)',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--chat-accent)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--chat-border-subtle)';
+                }}
+              >
+                <span
+                  style={{
+                    width: 28,
+                    height: 28,
+                    flexShrink: 0,
+                    borderRadius: 6,
+                    background: 'var(--chat-surface-2)',
+                    color: 'var(--chat-accent)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ToolIcon size={15} strokeWidth={1.85} />
+                </span>
+                <span
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: 'var(--chat-text-primary)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {tool.label}
+                </span>
+                <ArrowUpRight
+                  size={14}
+                  strokeWidth={2}
+                  style={{ color: 'var(--chat-text-tertiary)', flexShrink: 0 }}
+                />
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

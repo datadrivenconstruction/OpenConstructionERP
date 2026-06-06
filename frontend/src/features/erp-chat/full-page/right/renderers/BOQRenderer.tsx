@@ -1,6 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { unwrapList } from './normalize';
+import { boqPath, readString } from './deepLink';
+import DeepLinkBar, { useOpenLabels } from './DeepLinkBar';
 
 interface BOQItem {
+  id?: string;
   ordinal?: string;
   description?: string;
   unit?: string;
@@ -10,8 +14,14 @@ interface BOQItem {
 }
 
 export default function BOQRenderer({ data }: { data: unknown }) {
+  const navigate = useNavigate();
+  const labels = useOpenLabels();
   // Backend `get_boq_items` returns `{ positions: [...], grand_total, ... }`.
   const items = unwrapList(data, ['positions', 'items']) as BOQItem[];
+  // The top-level `boq_id` is on the envelope (not the row list), so read it
+  // directly - this is the key that lets a position row deep-link into the BOQ
+  // editor. unwrapList intentionally drops everything but the array.
+  const boqId = readString(data, 'boq_id');
 
   if (items.length === 0) {
     return (
@@ -39,7 +49,7 @@ export default function BOQRenderer({ data }: { data: unknown }) {
   };
 
   return (
-    <div style={{ overflow: 'auto', height: '100%' }}>
+    <div style={{ overflow: 'auto', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--chat-text-primary)' }}>
         <thead>
           <tr style={{ background: 'var(--chat-surface-2)' }}>
@@ -55,12 +65,16 @@ export default function BOQRenderer({ data }: { data: unknown }) {
           {items.map((item, i) => {
             const total = item.total ?? (item.quantity ?? 0) * (item.unit_rate ?? 0);
             const isZeroPrice = (item.unit_rate ?? 0) === 0 && (item.quantity ?? 0) > 0;
+            const rowPath = boqPath(boqId, item.id);
             return (
               <tr
-                key={item.ordinal ?? i}
+                key={item.id ?? item.ordinal ?? i}
+                onClick={rowPath ? () => navigate(rowPath) : undefined}
+                title={rowPath ? labels.boq : undefined}
                 style={{
                   background: i % 2 === 0 ? 'transparent' : 'var(--chat-surface-1)',
                   borderLeft: isZeroPrice ? '3px solid var(--chat-tool-error)' : '3px solid transparent',
+                  cursor: rowPath ? 'pointer' : undefined,
                 }}
               >
                 <td style={{ ...cellBase, color: 'var(--chat-text-tertiary)' }}>{item.ordinal ?? i + 1}</td>
@@ -86,6 +100,11 @@ export default function BOQRenderer({ data }: { data: unknown }) {
           </tr>
         </tfoot>
       </table>
+      {boqPath(boqId) && (
+        <div style={{ padding: '0 10px 10px' }}>
+          <DeepLinkBar to={boqPath(boqId)!} label={labels.boq} />
+        </div>
+      )}
     </div>
   );
 }

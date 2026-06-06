@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { unwrapList, toNum } from './normalize';
+import { validationPath } from './deepLink';
+import DeepLinkBar, { useOpenLabels } from './DeepLinkBar';
 
 interface ValidationReport {
   id?: string;
@@ -195,6 +197,7 @@ function ValidationItemRow({ item }: { item: ValidationItem }) {
 }
 
 export default function ValidationRenderer({ data }: { data: unknown }) {
+  const labels = useOpenLabels();
   // Backend `get_validation_results` / `run_validation` return
   // `{ reports: [...] }` where each report is a per-run summary with
   // traffic-light counts. Render those as report cards. Fall back to the
@@ -206,6 +209,7 @@ export default function ValidationRenderer({ data }: { data: unknown }) {
         {reports.map((r, i) => (
           <ReportCard key={r.id ?? i} report={r} />
         ))}
+        <DeepLinkBar to={validationPath()} label={labels.validation} />
       </div>
     );
   }
@@ -251,6 +255,7 @@ export default function ValidationRenderer({ data }: { data: unknown }) {
           </div>
         );
       })}
+      <DeepLinkBar to={validationPath()} label={labels.validation} />
     </div>
   );
 }

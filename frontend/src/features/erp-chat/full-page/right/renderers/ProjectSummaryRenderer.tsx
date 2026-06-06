@@ -1,4 +1,6 @@
 import { toNum } from './normalize';
+import { projectPath } from './deepLink';
+import DeepLinkBar, { useOpenLabels } from './DeepLinkBar';
 
 /**
  * Renders the `project_summary` tool result (`get_project_summary`):
@@ -54,6 +56,7 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 export default function ProjectSummaryRenderer({ data }: { data: unknown }) {
+  const labels = useOpenLabels();
   const p = (data && typeof data === 'object' && !Array.isArray(data) ? data : {}) as ProjectSummary;
 
   if (!p.name && !p.id) {
@@ -122,6 +125,8 @@ export default function ProjectSummaryRenderer({ data }: { data: unknown }) {
           {p.description}
         </div>
       )}
+
+      {projectPath(p.id) && <DeepLinkBar to={projectPath(p.id)!} label={labels.project} />}
     </div>
   );
 }

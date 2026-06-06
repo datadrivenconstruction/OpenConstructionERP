@@ -12,6 +12,10 @@ import {
   History,
   Sparkles,
   MessageSquarePlus,
+  MessageSquare,
+  Calculator,
+  Bot,
+  ArrowRight,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -40,6 +44,83 @@ import {
   agentTagline,
   resolveAgentIcon,
 } from './components/agentMeta';
+
+// ── AI tools cross-link strip (CONN-82) ─────────────────────────────────────
+// The four AI surfaces - Agents, Cost Advisor, Chat, Quick Estimate - are
+// siblings that never pointed at each other, so a user on one had no way to
+// discover the others. This strip lives on each AI page (the `current` route is
+// dropped) so the set reads as one connected toolset. Plain navigation only.
+
+interface AiTool {
+  to: string;
+  icon: typeof Bot;
+  label: string;
+  desc: string;
+}
+
+export function AiToolsStrip({ current }: { current: string }): JSX.Element | null {
+  const { t } = useTranslation();
+  const tools: AiTool[] = [
+    {
+      to: '/ai-agents',
+      icon: Bot,
+      label: t('nav.ai_agents', { defaultValue: 'AI Agents' }),
+      desc: t('ai.cross_agents_desc', { defaultValue: 'Autonomous agents that call tools' }),
+    },
+    {
+      to: '/advisor',
+      icon: MessageSquare,
+      label: t('nav.ai_advisor', { defaultValue: 'AI Cost Advisor' }),
+      desc: t('ai.cross_advisor_desc', { defaultValue: 'Ask the price book a question' }),
+    },
+    {
+      to: '/chat',
+      icon: Sparkles,
+      label: t('nav.erp_chat', { defaultValue: 'AI Chat' }),
+      desc: t('ai.cross_chat_desc', { defaultValue: 'Query your ERP in plain language' }),
+    },
+    {
+      to: '/ai-estimate',
+      icon: Calculator,
+      label: t('nav.ai_estimate', { defaultValue: 'AI Quick Estimate' }),
+      desc: t('ai.cross_estimate_desc', { defaultValue: 'Generate a full BOQ with AI' }),
+    },
+  ];
+  const others = tools.filter((tool) => tool.to !== current);
+  if (others.length === 0) return null;
+
+  return (
+    <section aria-label={t('ai.cross_strip_label', { defaultValue: 'Other AI tools' })}>
+      <h2 className="mb-2 flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+        <Sparkles className="h-3.5 w-3.5" />
+        {t('ai.cross_strip_title', { defaultValue: 'Other AI tools' })}
+      </h2>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {others.map((tool) => {
+          const Icon = tool.icon;
+          return (
+            <Link
+              key={tool.to}
+              to={tool.to}
+              className="group flex items-center gap-3 rounded-xl border border-border-light bg-surface-elevated px-3 py-2.5 transition-colors hover:border-oe-blue/40 hover:bg-oe-blue-subtle"
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue-text">
+                <Icon className="h-4 w-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium text-content-primary">
+                  {tool.label}
+                </span>
+                <span className="block truncate text-xs text-content-tertiary">{tool.desc}</span>
+              </span>
+              <ArrowRight className="h-4 w-4 shrink-0 text-content-tertiary transition-transform group-hover:translate-x-0.5 group-hover:text-oe-blue-text" />
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 // ── Page ───────────────────────────────────────────────────────────────────
 
@@ -342,6 +423,8 @@ export function AgentsPage(): JSX.Element {
             'Run AI agents that reason over your project data, call tools and propose actions for you to review before anything is applied.',
         })}
       </DismissibleInfo>
+
+      <AiToolsStrip current="/ai-agents" />
 
       {/* LLM-provider banner — surfaces the most common failure cause
           (no_llm) upfront instead of letting the user write a prompt,
