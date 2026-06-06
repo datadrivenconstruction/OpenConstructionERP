@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Loader2, LineChart } from 'lucide-react';
+import { ExternalLink, Loader2, LineChart, Calculator } from 'lucide-react';
 
 import { SideDrawer, EmptyState } from '@/shared/ui';
 
@@ -57,6 +57,19 @@ export function DrillDrawer({
 
   const records = drillQ.data?.records ?? [];
 
+  // CONN-78: when a cost KPI's baseline at completion (BAC) was derived from
+  // the priced BOQ estimate (no project budget / contract value set), offer a
+  // jump to the BOQ so the executive can trace the baseline back to the
+  // take-off. Scoped to the active project when one is selected.
+  const baselineSource = String(
+    (kpi?.breakdown as Record<string, unknown> | undefined)?.['baseline_source'] ?? '',
+  );
+  const showBoqBaseline = baselineSource === 'boq';
+  // The BOQ list scopes itself from the global project context (already set
+  // to the same project this drawer is scoped to), so a plain /boq lands
+  // correctly without a redundant query param the page would ignore.
+  const boqHref = '/boq';
+
   return (
     <SideDrawer
       open={open}
@@ -72,17 +85,33 @@ export function DrillDrawer({
       }
       headerActions={
         kpi ? (
-          <Link
-            to="/bi-dashboards"
-            onClick={onClose}
-            className="flex items-center gap-1.5 rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-            title={t('controls.drill_trend_alerts_tip', {
-              defaultValue: 'See this KPI trend over time and configure threshold alerts in BI Dashboards',
-            })}
-          >
-            <LineChart className="h-3.5 w-3.5" />
-            {t('controls.drill_trend_alerts', { defaultValue: 'Trend & alerts' })}
-          </Link>
+          <div className="flex items-center gap-2">
+            {showBoqBaseline && (
+              <Link
+                to={boqHref}
+                onClick={onClose}
+                className="flex items-center gap-1.5 rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+                title={t('controls.drill_boq_baseline_tip', {
+                  defaultValue:
+                    'This cost baseline (BAC) comes from the priced BOQ estimate. Open the BOQ to trace it.',
+                })}
+              >
+                <Calculator className="h-3.5 w-3.5" />
+                {t('controls.drill_boq_baseline', { defaultValue: 'View BOQ baseline' })}
+              </Link>
+            )}
+            <Link
+              to="/bi-dashboards"
+              onClick={onClose}
+              className="flex items-center gap-1.5 rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+              title={t('controls.drill_trend_alerts_tip', {
+                defaultValue: 'See this KPI trend over time and configure threshold alerts in BI Dashboards',
+              })}
+            >
+              <LineChart className="h-3.5 w-3.5" />
+              {t('controls.drill_trend_alerts', { defaultValue: 'Trend & alerts' })}
+            </Link>
+          </div>
         ) : undefined
       }
     >

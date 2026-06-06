@@ -21,6 +21,7 @@ import {
   Download,
   RefreshCw,
   Trash2,
+  Layers,
 } from 'lucide-react';
 import {
   Button,
@@ -29,6 +30,7 @@ import {
   EmptyState,
   Breadcrumb,
   SkeletonTable,
+  SideDrawer,
   WideModal,
   WideModalSection,
   WideModalField,
@@ -42,6 +44,7 @@ import {
   listKpis,
   getKpiHistory,
   computeKpi,
+  drillDownKpi,
   listDashboards,
   renderDashboard,
   evaluateDashboard,
@@ -562,10 +565,17 @@ function KpiLibrary({ rows }: { rows: KpiDefinition[] }) {
   );
 }
 
+/** Humanise a snake_case module / field key for display, e.g. ``change_order`` -> ``Change order``. */
+function humanizeToken(key: string): string {
+  const spaced = key.replace(/_/g, ' ').trim();
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
+
 function KpiLibraryCard({ kpi }: { kpi: KpiDefinition }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const [drillOpen, setDrillOpen] = useState(false);
   const historyQ = useQuery({
     queryKey: ['bi', 'kpi-history', kpi.code],
     queryFn: () => getKpiHistory(kpi.code, { limit: 12 }),
@@ -573,6 +583,11 @@ function KpiLibraryCard({ kpi }: { kpi: KpiDefinition }) {
   });
   const history = historyQ.data?.history ?? [];
   const values = history.map((p) => toNumber(p.value));
+
+  // CONN-79: the source modules that feed this KPI, rendered as chips so the
+  // user sees where the number comes from before drilling. Defensive against
+  // a missing array on older payloads.
+  const sourceModules = Array.isArray(kpi.source_modules) ? kpi.source_modules : [];
 
   // Live value computed on demand. When a KPI has no persisted history
   // (KPIs registered but never computed) the history-derived headline
@@ -638,30 +653,150 @@ function KpiLibraryCard({ kpi }: { kpi: KpiDefinition }) {
       {kpi.description && (
         <p className="mt-3 text-xs text-content-secondary line-clamp-2">{kpi.description}</p>
       )}
+      {/* CONN-79: source-module chips — show which modules feed the number. */}
+      {sourceModules.length > 0 && (
+        <div className="mt-2.5 flex flex-wrap items-center gap-1">
+          <span className="text-[10px] uppercase tracking-wide text-content-tertiary">
+            {t('bi.kpi_sources', { defaultValue: 'Sources' })}
+          </span>
+          {sourceModules.map((m) => (
+            <span
+              key={m}
+              className="inline-flex items-center rounded-full bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-secondary"
+            >
+              {humanizeToken(m)}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="mt-2 flex items-center justify-between gap-2">
         <p className="text-[10px] uppercase tracking-wide text-content-tertiary">
           {t('bi.last_n_periods', { defaultValue: 'Last {{n}} periods', n: values.length })}
         </p>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={
-            computeMut.isPending ? (
-              <Loader2 size={12} className="animate-spin" />
-            ) : (
-              <RefreshCw size={12} />
-            )
-          }
-          onClick={() => computeMut.mutate()}
-          loading={computeMut.isPending}
-          title={t('bi.compute_now_hint', {
-            defaultValue: 'Compute this KPI now from live data and save a snapshot.',
-          })}
-        >
-          {t('bi.compute_now', { defaultValue: 'Compute' })}
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<Layers size={12} />}
+            onClick={() => setDrillOpen(true)}
+            title={t('bi.view_source_records_hint', {
+              defaultValue: 'Open the underlying source rows that feed this KPI.',
+            })}
+          >
+            {t('bi.view_source_records', { defaultValue: 'Source records' })}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={
+              computeMut.isPending ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : (
+                <RefreshCw size={12} />
+              )
+            }
+            onClick={() => computeMut.mutate()}
+            loading={computeMut.isPending}
+            title={t('bi.compute_now_hint', {
+              defaultValue: 'Compute this KPI now from live data and save a snapshot.',
+            })}
+          >
+            {t('bi.compute_now', { defaultValue: 'Compute' })}
+          </Button>
+        </div>
       </div>
+      {drillOpen && (
+        <KpiSourceRecordsDrawer
+          kpi={kpi}
+          open={drillOpen}
+          onClose={() => setDrillOpen(false)}
+        />
+      )}
     </Card>
+  );
+}
+
+/* ─── KPI source-records drawer (CONN-79) ─── */
+
+/**
+ * Opens the underlying source rows behind a KPI via the BI drill-down
+ * endpoint, so the KPI library is no longer a data island - the user can
+ * trace any headline number down to the records that produced it. Read-only:
+ * the BI drill endpoint returns plain field maps (no per-row deep links), so
+ * rows are rendered as a compact field list.
+ */
+function KpiSourceRecordsDrawer({
+  kpi,
+  open,
+  onClose,
+}: {
+  kpi: KpiDefinition;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const drillQ = useQuery({
+    queryKey: ['bi', 'kpi-drill', kpi.code],
+    queryFn: () => drillDownKpi(kpi.code, { limit: 100 }),
+    enabled: open,
+  });
+  const records = drillQ.data?.records ?? [];
+
+  return (
+    <SideDrawer
+      open={open}
+      onClose={onClose}
+      title={kpi.name}
+      subtitle={t('bi.source_records_subtitle', {
+        defaultValue: '{{n}} source records',
+        n: drillQ.data?.record_count ?? 0,
+      })}
+    >
+      {drillQ.isLoading ? (
+        <div className="flex items-center gap-2 p-4 text-sm text-content-tertiary">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {t('common.loading', { defaultValue: 'Loading…' })}
+        </div>
+      ) : records.length === 0 ? (
+        <div className="p-4">
+          <EmptyState
+            icon={<Layers size={22} />}
+            title={t('bi.source_records_empty', {
+              defaultValue: 'No underlying records',
+            })}
+            description={t('bi.source_records_empty_desc', {
+              defaultValue:
+                'This KPI has no source rows yet for the current scope. Once the feeding modules have data the rows show up here.',
+            })}
+          />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2 p-3">
+          {records.map((rec, idx) => (
+            <div
+              key={(rec['id'] as string) ?? idx}
+              className="rounded-md border border-border-subtle bg-surface-secondary p-2.5"
+            >
+              <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-0.5 text-2xs text-content-tertiary">
+                {Object.entries(rec)
+                  .filter(
+                    ([k, v]) =>
+                      k !== 'project_id' &&
+                      v != null &&
+                      String(v).trim() !== '',
+                  )
+                  .map(([k, v]) => (
+                    <div key={k} className="contents">
+                      <dt className="font-medium">{humanizeToken(k)}</dt>
+                      <dd className="truncate tabular-nums">{String(v)}</dd>
+                    </div>
+                  ))}
+              </dl>
+            </div>
+          ))}
+        </div>
+      )}
+    </SideDrawer>
   );
 }
 

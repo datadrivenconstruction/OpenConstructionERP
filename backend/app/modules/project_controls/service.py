@@ -114,6 +114,14 @@ _DEEP_LINK_TEMPLATES: dict[str, str] = {
     "payment": "/finance?id={id}",
     "purchase_order": "/procurement?id={id}",
     "project": "/projects/{id}",
+    # CONN-77: the 4 previously dead spine tiles now drill to real rows.
+    # ``inspection`` and ``change_order`` use the module page's ?id= focus
+    # param; ``rfi`` jumps straight to its detail route. The inspections
+    # page already reads ?id=; the RFI detail route exists; the change
+    # orders page consumer lands with a sibling batch.
+    "inspection": "/inspections?id={id}",
+    "rfi": "/rfi/{id}",
+    "change_order": "/changeorders?id={id}",
 }
 
 

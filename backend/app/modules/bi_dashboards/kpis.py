@@ -391,8 +391,24 @@ async def _evm_snapshot_for_project(
         pass
     except Exception:
         logger.debug("evm: project probe failed", exc_info=True)
+    # CONN-78: when neither budget nor contract value is set, the cost
+    # baseline (BAC) is the priced estimate - the sum of the project's BOQ
+    # position totals. This ties the executive cost spine back to the
+    # take-off / estimating work instead of collapsing to Σ planned_value.
+    # Each position is converted into the project base currency via the
+    # same fx_map (mirrors ``boq.service._position_total_in_base``), and the
+    # baseline source is recorded so the UI can offer a "View BOQ baseline"
+    # drill on the cost tile.
+    baseline_source = "budget" if snap.bac > 0 else ""
+    if snap.bac == 0:
+        boq_baseline = await _boq_baseline_for_project(session, project_id, fx_map, base_currency)
+        if boq_baseline > 0:
+            snap.bac = boq_baseline
+            baseline_source = "boq"
     if snap.bac == 0:
         snap.bac = snap.pv  # Fall back to Σ planned_value
+        if snap.bac > 0:
+            baseline_source = "planned_value"
 
     # finance.Payment → AC (settled actual cost)
     try:
@@ -444,11 +460,58 @@ async def _evm_snapshot_for_project(
         "ev": str(snap.ev),
         "ac": str(snap.ac),
         "currency": base_currency,
+        # Where BAC came from: "budget" (project budget/contract value),
+        # "boq" (priced estimate fallback - CONN-78) or "planned_value"
+        # (Σ task planned_value). "" when there is no baseline at all.
+        "baseline_source": baseline_source,
     }
     missing = _missing_fx_codes(seen_codes, fx_map, base_currency)
     if missing:
         snap.breakdown["missing_fx_codes"] = missing
     return snap
+
+
+async def _boq_baseline_for_project(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    fx_map: dict[str, str],
+    base_currency: str,
+) -> Decimal:
+    """Sum a project's priced BOQ position totals in the base currency.
+
+    The cost baseline of last resort (CONN-78): when a project carries no
+    budget / contract value, its estimate is the sum of every BOQ
+    position's ``total``. Each total is stored in the position's home
+    currency (carried on ``metadata_.currency`` / ``position_currency`` /
+    ``project_currency``, mirroring ``boq.service._position_currency``);
+    foreign rows are converted into the project base currency via the same
+    fx_map before summing so mixed-currency estimates never blend.
+
+    Degrades to ``Decimal("0")`` when the BOQ module is absent or any query
+    fails - this is purely a read-side fallback.
+    """
+    total = Decimal("0")
+    try:
+        from app.modules.boq.models import BOQ, Position  # type: ignore
+
+        stmt = select(Position).join(BOQ, Position.boq_id == BOQ.id).where(BOQ.project_id == project_id)
+        rows = (await session.execute(stmt)).scalars().all()
+        for row in rows:
+            meta = row.metadata_ if isinstance(getattr(row, "metadata_", None), dict) else {}
+            code = ""
+            for key in ("currency", "position_currency", "project_currency"):
+                val = meta.get(key)
+                if isinstance(val, str) and val.strip():
+                    code = val.strip().upper()
+                    break
+            amt = _to_decimal(getattr(row, "total", 0))
+            total += _amount_in_base(amt, code, fx_map, base_currency)
+    except ImportError:
+        return Decimal("0")
+    except Exception:
+        logger.debug("evm: boq baseline probe failed", exc_info=True)
+        return Decimal("0")
+    return total
 
 
 async def _evm_snapshot_portfolio(session: AsyncSession) -> EVMSnapshot:
@@ -1296,16 +1359,19 @@ async def first_pass_yield_kpi(
     total = 0
     passed = 0
     try:
-        from app.modules.inspections.models import Inspection  # type: ignore
+        from app.modules.inspections.models import QualityInspection  # type: ignore
 
-        stmt = select(Inspection)
+        stmt = select(QualityInspection)
         if project_id is not None:
-            stmt = stmt.where(Inspection.project_id == project_id)
+            stmt = stmt.where(QualityInspection.project_id == project_id)
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:
             total += 1
-            status_val = (getattr(row, "status", "") or "").lower()
-            if status_val in ("passed", "pass", "approved", "completed"):
+            # "Passed" reads from the dedicated ``result`` field first (the
+            # inspection outcome), falling back to ``status`` for rows that
+            # never recorded a separate result.
+            outcome = (getattr(row, "result", "") or getattr(row, "status", "") or "").lower()
+            if outcome in ("passed", "pass", "approved", "completed", "ok"):
                 passed += 1
     except ImportError:
         pass
@@ -2704,6 +2770,157 @@ async def _milestone_slippage_records(
         pass
     except Exception:
         logger.debug("milestone_slippage_days drilldown: probe failed", exc_info=True)
+    return records
+
+
+# ── Quality / change drill-downs (CONN-77: 4 previously dead tiles) ──────
+# first_pass_yield, copq, rfi_close_avg_days and change_order_ratio sit on
+# the Project Controls spine but had no registered record provider, so the
+# drill drawer opened empty (dead end). Each now returns the underlying rows
+# that feed its aggregate, deep-linked back to the owning module.
+
+
+@register_kpi_records("first_pass_yield")
+async def _first_pass_yield_records(
+    session: AsyncSession,
+    project_id: uuid.UUID | None,
+    limit: int,
+) -> list[dict[str, Any]]:
+    """Inspections behind ``first_pass_yield`` (passed / total)."""
+    records: list[dict[str, Any]] = []
+    try:
+        from app.modules.inspections.models import QualityInspection  # type: ignore
+
+        stmt = select(QualityInspection).limit(limit)
+        if project_id is not None:
+            stmt = stmt.where(QualityInspection.project_id == project_id)
+        rows = (await session.execute(stmt)).scalars().all()
+        for row in rows:
+            records.append(
+                {
+                    "kind": "inspection",
+                    "id": str(row.id),
+                    "inspection_number": getattr(row, "inspection_number", "") or "",
+                    "title": getattr(row, "title", "") or "",
+                    "inspection_type": getattr(row, "inspection_type", "") or "",
+                    "status": getattr(row, "status", "") or "",
+                    "result": getattr(row, "result", "") or "",
+                    "inspection_date": str(getattr(row, "inspection_date", "") or ""),
+                    "project_id": str(getattr(row, "project_id", "") or ""),
+                },
+            )
+    except ImportError:
+        pass
+    except Exception:
+        logger.debug("first_pass_yield drilldown: probe failed", exc_info=True)
+    return records
+
+
+@register_kpi_records("copq")
+async def _copq_records(
+    session: AsyncSession,
+    project_id: uuid.UUID | None,
+    limit: int,
+) -> list[dict[str, Any]]:
+    """NCRs behind ``copq`` (cost of poor quality = Σ NCR cost impact)."""
+    records: list[dict[str, Any]] = []
+    try:
+        from app.modules.ncr.models import NCR  # type: ignore
+
+        stmt = select(NCR).limit(limit)
+        if project_id is not None:
+            stmt = stmt.where(NCR.project_id == project_id)
+        rows = (await session.execute(stmt)).scalars().all()
+        for row in rows:
+            records.append(
+                {
+                    "kind": "ncr",
+                    "id": str(row.id),
+                    "ncr_number": getattr(row, "ncr_number", "") or "",
+                    "title": getattr(row, "title", "") or "",
+                    "severity": getattr(row, "severity", "") or "",
+                    "status": getattr(row, "status", "") or "",
+                    "cost_impact": str(getattr(row, "cost_impact", "") or ""),
+                    "project_id": str(getattr(row, "project_id", "") or ""),
+                },
+            )
+    except ImportError:
+        pass
+    except Exception:
+        logger.debug("copq drilldown: probe failed", exc_info=True)
+    return records
+
+
+@register_kpi_records("rfi_close_avg_days")
+async def _rfi_close_records(
+    session: AsyncSession,
+    project_id: uuid.UUID | None,
+    limit: int,
+) -> list[dict[str, Any]]:
+    """RFIs behind ``rfi_close_avg_days`` (open-to-close turnaround)."""
+    records: list[dict[str, Any]] = []
+    try:
+        from app.modules.rfi.models import RFI  # type: ignore
+
+        stmt = select(RFI).limit(limit)
+        if project_id is not None:
+            stmt = stmt.where(RFI.project_id == project_id)
+        rows = (await session.execute(stmt)).scalars().all()
+        for row in rows:
+            records.append(
+                {
+                    "kind": "rfi",
+                    "id": str(row.id),
+                    "rfi_number": getattr(row, "rfi_number", "") or "",
+                    "subject": getattr(row, "subject", "") or "",
+                    "status": getattr(row, "status", "") or "",
+                    "priority": getattr(row, "priority", "") or "",
+                    "responded_at": str(getattr(row, "responded_at", "") or ""),
+                    "project_id": str(getattr(row, "project_id", "") or ""),
+                },
+            )
+    except ImportError:
+        pass
+    except Exception:
+        logger.debug("rfi_close_avg_days drilldown: probe failed", exc_info=True)
+    return records
+
+
+@register_kpi_records("change_order_ratio")
+async def _change_order_records(
+    session: AsyncSession,
+    project_id: uuid.UUID | None,
+    limit: int,
+) -> list[dict[str, Any]]:
+    """Change orders behind ``change_order_ratio`` (Σ CO value / contract value)."""
+    records: list[dict[str, Any]] = []
+    try:
+        from app.modules.changeorders.models import ChangeOrder  # type: ignore
+
+        stmt = select(ChangeOrder).limit(limit)
+        if project_id is not None:
+            stmt = stmt.where(ChangeOrder.project_id == project_id)
+        rows = (await session.execute(stmt)).scalars().all()
+        for row in rows:
+            amount = getattr(row, "approved_amount", None)
+            if amount is None:
+                amount = getattr(row, "cost_impact", 0)
+            records.append(
+                {
+                    "kind": "change_order",
+                    "id": str(row.id),
+                    "code": getattr(row, "code", "") or "",
+                    "title": getattr(row, "title", "") or "",
+                    "status": getattr(row, "status", "") or "",
+                    "cost_impact": str(_to_decimal(amount)),
+                    "currency": getattr(row, "currency", "") or "",
+                    "project_id": str(getattr(row, "project_id", "") or ""),
+                },
+            )
+    except ImportError:
+        pass
+    except Exception:
+        logger.debug("change_order_ratio drilldown: probe failed", exc_info=True)
     return records
 
 
