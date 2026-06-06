@@ -115,6 +115,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     localStorage.removeItem(KEY_EMAIL);
     sessionStorage.removeItem(KEY_ACCESS);
     sessionStorage.removeItem(KEY_REFRESH);
+    // Desktop builds auto-bootstrap a local owner on /login. A deliberate
+    // logout must NOT immediately re-bootstrap the user back in, so mark this
+    // session as a manual login. Harmless on web (the flag is only read by the
+    // desktop first-run gate). Session-scoped so a fresh launch bootstraps again.
+    try {
+      sessionStorage.setItem('oe_manual_login', '1');
+    } catch {
+      // sessionStorage unavailable -- ignore.
+    }
     set({ accessToken: null, isAuthenticated: false, userEmail: null, userRole: null });
   },
 

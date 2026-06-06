@@ -12,6 +12,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.users.models import APIKey, User
 
+# E-mail of the bootstrap workspace owner created by the desktop first-run
+# flow (POST /auth/desktop-bootstrap). Excluded from "real user" checks so the
+# presence of the local owner never flips ``fresh_install`` to False: a desktop
+# install that has only auto-provisioned its own owner is still "fresh" from
+# the point of view of real, registered users.
+LOCAL_DESKTOP_OWNER_EMAIL = "owner@openestimate.local"
+
 
 class UserRepository:
     """‌⁠‍Data access for User model."""
@@ -105,6 +112,42 @@ class UserRepository:
             .limit(1)
         )
         return (await self.session.execute(stmt)).scalar_one_or_none() is not None
+
+    async def has_real_active_user(self) -> bool:
+        """Return True if a *real* active user exists (the inverse of fresh).
+
+        "Real" deliberately excludes two populations:
+
+        * the seeded demo accounts (``*@openconstructionerp.com``) shipped on a
+          fresh ``pip install`` / hosted demo, and
+        * the desktop bootstrap owner (``owner@openestimate.local``) that the
+          first-run flow auto-provisions.
+
+        So a brand-new install - whether empty or carrying only demo seeds and
+        an auto-created local owner - reports no real user, which is what the
+        ``first-run`` endpoint surfaces as ``fresh_install=True``. Once a human
+        registers (the bootstrap admin) this returns True and the desktop
+        auto-login guard refuses to silently mint a new owner.
+        """
+        stmt = (
+            select(User.id)
+            .where(User.is_active.is_(True))
+            .where(~User.email.ilike("%@openconstructionerp.com"))
+            .where(User.email != LOCAL_DESKTOP_OWNER_EMAIL)
+            .limit(1)
+        )
+        return (await self.session.execute(stmt)).scalar_one_or_none() is not None
+
+    async def get_local_desktop_owner(self) -> User | None:
+        """Return the desktop bootstrap owner row, or None if it doesn't exist.
+
+        Looks the row up by its fixed e-mail (``owner@openestimate.local``).
+        The caller is responsible for verifying the ``local_desktop`` metadata
+        flag before trusting it as a bootstrap owner - a row at this e-mail
+        without the flag is treated as a non-owner so a manually created
+        account at that address can never be auto-logged-in.
+        """
+        return await self.get_by_email(LOCAL_DESKTOP_OWNER_EMAIL)
 
 
 class APIKeyRepository:

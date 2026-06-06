@@ -1112,6 +1112,14 @@ def create_app() -> FastAPI:
 
     app.include_router(i18n_router, prefix="/api/v1")
 
+    # Desktop first-run / bootstrap auth endpoints. The users module router is
+    # auto-mounted by the loader at /api/v1/users, but the desktop shell needs
+    # a short app-level path it can call without knowing the module mount, so
+    # these two routes are mounted explicitly at /api/v1/auth/.
+    from app.modules.users.router import desktop_auth_router
+
+    app.include_router(desktop_auth_router, prefix="/api/v1/auth")
+
     # Module management API (list / enable / disable)
     from app.core.module_router import router as module_mgmt_router
 

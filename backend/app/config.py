@@ -607,3 +607,28 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Cached settings singleton."""
     return Settings()
+
+
+def desktop_mode() -> bool:
+    """Return True when the backend is running as the desktop (Tauri) sidecar.
+
+    The desktop shell spawns the Python backend as a bundled sidecar and sets
+    ``OE_DESKTOP=1`` on its environment (see ``desktop/src-tauri/src/main.rs``).
+    A PyInstaller/Nuitka frozen build also marks ``sys.frozen``. Either signal
+    means the backend is the single-user local workspace behind the native
+    shell rather than a shared, internet-exposed server.
+
+    This is intentionally a plain function (not a cached ``Settings`` field) so
+    tests can flip ``OE_DESKTOP`` via ``monkeypatch`` between calls without
+    busting the settings ``lru_cache``.
+
+    Returns:
+        ``True`` when ``sys.frozen`` is set, or when the ``OE_DESKTOP``
+        environment variable is ``"1"`` or ``"true"`` (case-insensitive).
+    """
+    import os
+    import sys
+
+    if getattr(sys, "frozen", False):
+        return True
+    return os.environ.get("OE_DESKTOP", "").strip().lower() in {"1", "true"}

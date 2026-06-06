@@ -8,7 +8,12 @@
  * at build time.
  */
 
-export const isTauri = typeof window !== 'undefined' && Boolean((window as { __TAURI__?: unknown }).__TAURI__);
+// Desktop runtime detection now lives in shared/lib so non-file-manager code
+// (auth bootstrap, onboarding) can reuse it without importing across feature
+// boundaries. Re-export here so this module's existing consumers keep working.
+import { isTauri } from '@/shared/lib/desktop';
+
+export { isTauri };
 
 export async function openInOSFinder(path: string): Promise<boolean> {
   if (!path) return false;

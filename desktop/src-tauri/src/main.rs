@@ -468,7 +468,13 @@ fn main() {
             let shell = handle.shell();
             let sidecar_cmd = match shell.sidecar("openestimate-server") {
                 Ok(cmd) => {
-                    cmd.args(["serve", "--host", "127.0.0.1", "--port", &port.to_string()])
+                    // OE_DESKTOP=1 marks this backend as one we spawned from the
+                    // desktop shell (so the backend can run desktop-only
+                    // bootstrapping). We deliberately do NOT set it on the attach
+                    // path above, because an already-running dev backend must not
+                    // be treated as a desktop-bootstrapped one.
+                    cmd.env("OE_DESKTOP", "1")
+                        .args(["serve", "--host", "127.0.0.1", "--port", &port.to_string()])
                 }
                 Err(e) => {
                     report_fatal_stage(

@@ -100,6 +100,20 @@ class RefreshRequest(BaseModel):
     refresh_token: str = Field(..., min_length=1, max_length=2048)
 
 
+class FirstRunResponse(BaseModel):
+    """Desktop first-run status (public, never errors).
+
+    Drives the desktop shell's auto-login decision on the ``/login`` route.
+    Every field is best-effort: the endpoint always returns 200 so a transient
+    DB hiccup degrades to the normal login form rather than an error screen.
+    """
+
+    desktop_mode: bool
+    fresh_install: bool
+    has_local_account: bool
+    onboarding_completed: bool | None = None
+
+
 # ── User CRUD ──────────────────────────────────────────────────────────────
 
 

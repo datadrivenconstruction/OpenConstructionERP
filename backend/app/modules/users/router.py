@@ -46,6 +46,7 @@ from app.modules.users.schemas import (
     APIKeyCreatedResponse,
     APIKeyResponse,
     ChangePasswordRequest,
+    FirstRunResponse,
     ForgotPasswordRequest,
     ForgotPasswordResponse,
     LoginRequest,
@@ -290,6 +291,115 @@ async def refresh(
 ) -> TokenResponse:
     """Refresh access token using a refresh token."""
     return await service.refresh_tokens(data.refresh_token)
+
+
+# ── Desktop first-run / bootstrap ───────────────────────────────────────────
+
+# These two endpoints are mounted at ``/api/v1/auth/`` (NOT
+# ``/api/v1/users/auth/``) so they sit on a short, stable, app-level auth path
+# the desktop shell can call without knowing the users-module mount point. The
+# module loader only auto-mounts the module ``router`` (at ``/api/v1/users``),
+# so these live on a dedicated ``desktop_auth_router`` that ``app.main``
+# explicitly includes at the ``/api/v1/auth`` prefix.
+desktop_auth_router = APIRouter(tags=["auth"])
+
+
+# Loopback hosts the desktop sidecar may legitimately be reached on. The Tauri
+# shell talks to the bundled backend over 127.0.0.1, so anything else is a
+# remote caller that must never reach the auto-login path.
+_LOOPBACK_HOSTS: frozenset[str] = frozenset({"127.0.0.1", "::1", "localhost"})
+
+
+def _running_under_pytest() -> bool:
+    """True when the process is a pytest run (``request.client`` may be None).
+
+    The ASGI test transport leaves ``request.client`` unset, so the loopback
+    guard would otherwise reject every test call. We only relax the
+    ``client is None`` case under this marker - a real server with a missing
+    client (which would be unusual) is still rejected.
+    """
+    import os
+
+    return "PYTEST_CURRENT_TEST" in os.environ
+
+
+def _is_loopback_request(request: Request) -> bool:
+    """Return True when the request originates from the local loopback.
+
+    ``request.client`` is ``None`` under the ASGI test transport; that case is
+    treated as loopback only when running under pytest, and rejected otherwise.
+    """
+    client = request.client
+    if client is None:
+        return _running_under_pytest()
+    return client.host in _LOOPBACK_HOSTS
+
+
+@desktop_auth_router.get("/first-run/", response_model=FirstRunResponse)
+@desktop_auth_router.get("/first-run", response_model=FirstRunResponse, include_in_schema=False)
+async def first_run(
+    service: UserService = Depends(_get_service),
+) -> FirstRunResponse:
+    """Report desktop first-run status. Public, no auth, never errors.
+
+    The desktop shell calls this on the ``/login`` route to decide whether to
+    silently auto-provision and log in the local workspace owner. Any failure
+    degrades gracefully to ``desktop_mode=False`` / ``fresh_install=False`` so
+    the client simply shows the normal login form.
+    """
+    from app.config import desktop_mode
+
+    is_desktop = desktop_mode()
+    try:
+        return await service.first_run_status(is_desktop=is_desktop)
+    except Exception:  # noqa: BLE001 - this endpoint must never error
+        return FirstRunResponse(
+            desktop_mode=is_desktop,
+            fresh_install=False,
+            has_local_account=False,
+            onboarding_completed=None,
+        )
+
+
+@desktop_auth_router.post("/desktop-bootstrap/", response_model=TokenResponse)
+@desktop_auth_router.post("/desktop-bootstrap", response_model=TokenResponse, include_in_schema=False)
+async def desktop_bootstrap(
+    request: Request,
+    service: UserService = Depends(_get_service),
+) -> TokenResponse:
+    """Auto-provision / re-authenticate the local desktop workspace owner.
+
+    Guards (all return 403 with a clear detail string when violated):
+      * the backend must be running in desktop mode (sidecar / frozen),
+      * the request must originate from the loopback interface,
+      * the workspace must be a fresh install OR already have the local owner
+        (never lets a caller into a workspace that has real registered users
+        but no local owner).
+
+    On success returns the exact same token shape as ``POST /auth/login``.
+    """
+    from app.config import desktop_mode
+
+    if not desktop_mode():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Desktop bootstrap is only available in the desktop app.",
+        )
+
+    if not _is_loopback_request(request):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Desktop bootstrap is only available from the local machine.",
+        )
+
+    status_ = await service.first_run_status(is_desktop=True)
+    if not (status_.fresh_install or status_.has_local_account):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Desktop bootstrap is not allowed: this workspace already has registered users.",
+        )
+
+    return await service.desktop_bootstrap()
 
 
 @router.post("/auth/forgot-password/", response_model=ForgotPasswordResponse)

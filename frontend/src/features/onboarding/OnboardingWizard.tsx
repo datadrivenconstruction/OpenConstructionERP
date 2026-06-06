@@ -2810,6 +2810,21 @@ export function OnboardingWizard() {
   // Track whether module config step should be shown
   const [showModuleConfig, setShowModuleConfig] = useState(false);
 
+  // Persistent escape hatch (top-right, every step): switch the whole app to
+  // English, mark the language choice as explicit so the locale auto-detect
+  // never overrides it, complete onboarding exactly like the finish path, and
+  // drop the user straight on the dashboard. No confirmation dialog.
+  const handleSkipAll = useCallback(() => {
+    void i18n.changeLanguage('en');
+    try {
+      localStorage.setItem('oe_lang_explicit', '1');
+    } catch {
+      // Storage unavailable -- ignore.
+    }
+    markOnboardingCompleted();
+    navigate('/dashboard');
+  }, [navigate]);
+
   const goNext = useCallback(() => {
     setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
   }, []);
@@ -2960,6 +2975,17 @@ export function OnboardingWizard() {
                   {t('onboarding.skip_setup', { defaultValue: 'Skip setup' })}
                 </button>
               )}
+              {/* Persistent escape hatch on every step: open the app now in
+                  English. A quiet secondary pill so it never competes with the
+                  wizard's primary CTA. */}
+              <button
+                type="button"
+                onClick={handleSkipAll}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-elevated/70 px-3 py-1 text-xs font-medium text-content-tertiary backdrop-blur-sm transition-colors hover:border-oe-blue/40 hover:bg-surface-elevated hover:text-content-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+              >
+                <Globe size={13} strokeWidth={2} />
+                {t('onboarding.skip_all', { defaultValue: 'Skip setup - open in English' })}
+              </button>
             </div>
           </div>
           <ProgressBar current={step} total={TOTAL_STEPS} />

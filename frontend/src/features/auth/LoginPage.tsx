@@ -15,7 +15,13 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { BrandingEditorModal } from '@/app/layout/CustomBranding';
 import { extractErrorMessageFromBody } from '@/shared/lib/api';
+import { isTauri } from '@/shared/lib/desktop';
 import { AuthBackground } from './AuthBackground';
+import {
+  shouldAttemptDesktopBootstrap,
+  shouldQueryFirstRun,
+  type FirstRunStatus,
+} from './desktopBootstrap';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useThemeStore } from '@/stores/useThemeStore';
 
@@ -96,6 +102,19 @@ export function LoginPage() {
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const langRef = useRef<HTMLDivElement>(null);
 
+  // Desktop first-run: when running inside the Tauri shell with no stored
+  // token and no deliberate manual logout this session, we silently auto-sign
+  // in to the local workspace owner. Seed the pending flag synchronously so the
+  // very first paint shows "Preparing your workspace..." rather than flashing
+  // the login form before the bootstrap effect runs.
+  const [bootstrapping, setBootstrapping] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const stored =
+      localStorage.getItem('oe_access_token') || sessionStorage.getItem('oe_access_token');
+    const manual = sessionStorage.getItem('oe_manual_login');
+    return shouldQueryFirstRun(isTauri, Boolean(stored), manual);
+  });
+
   const currentLang =
     SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) ?? SUPPORTED_LANGUAGES[0]!;
 
@@ -104,6 +123,61 @@ export function LoginPage() {
     setEmail('');
     setPassword('');
     setError('');
+  }, []);
+
+  // Desktop auto-bootstrap. Runs once on mount. On ANY failure it silently
+  // falls back to the normal login form (clears `bootstrapping`); it never
+  // surfaces an error to the user because manual login is always a valid path.
+  useEffect(() => {
+    if (!bootstrapping) return;
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        const res = await fetch('/api/v1/auth/first-run', {
+          headers: { Accept: 'application/json' },
+        });
+        if (!res.ok) throw new Error('first-run probe failed');
+        const status = (await res.json()) as FirstRunStatus;
+
+        const manual = sessionStorage.getItem('oe_manual_login');
+        if (!shouldAttemptDesktopBootstrap(status, false, manual)) {
+          throw new Error('bootstrap not applicable');
+        }
+
+        const bootRes = await fetch('/api/v1/auth/desktop-bootstrap', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!bootRes.ok) throw new Error('desktop bootstrap failed');
+        const data = (await bootRes.json()) as {
+          access_token?: string;
+          refresh_token?: string;
+          user?: { email?: string };
+        };
+        if (!data.access_token || !data.refresh_token) {
+          throw new Error('bootstrap response missing tokens');
+        }
+        if (cancelled) return;
+
+        // Persist through the existing auth store path with remember=true so the
+        // desktop owner stays signed in across launches.
+        setTokens(data.access_token, data.refresh_token, true, data.user?.email);
+        navigate(status.onboarding_completed === true ? '/dashboard' : '/onboarding', {
+          replace: true,
+        });
+      } catch {
+        // Silent fallback to the manual login form.
+        if (!cancelled) setBootstrapping(false);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+    // Mount-only: the gate inputs are read fresh inside `run`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -225,6 +299,42 @@ export function LoginPage() {
     { icon: Zap, color: 'text-rose-500 bg-rose-500/10', title: t('login.benefit.allinone', 'BOQ + 4D + 5D + Tendering'), desc: t('login.benefit.allinone_desc', 'Full workflow in one tool.') },
     { icon: Users, color: 'text-cyan-500 bg-cyan-500/10', title: t('login.benefit.free', 'Free for everyone'), desc: t('login.benefit.free_desc', 'No fees. No limits. By estimators.') },
   ]; */
+
+  // Desktop first-run: clean centered pending state while we silently sign in
+  // to the local workspace. Falls back to the form on any failure (see effect).
+  if (bootstrapping) {
+    return (
+      <div className="relative flex h-screen flex-col items-center justify-center bg-surface-secondary overflow-hidden">
+        <AuthBackground />
+        <div className="relative z-10 flex flex-col items-center gap-5 px-6 text-center">
+          <Logo size="lg" animate />
+          <svg
+            className="h-7 w-7 animate-spin text-oe-blue"
+            viewBox="0 0 24 24"
+            aria-hidden
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+              fill="none"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <p className="text-sm font-medium text-content-secondary">
+            {t('auth.preparing_workspace', { defaultValue: 'Preparing your workspace...' })}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative grid h-screen grid-cols-1 lg:grid-cols-2 bg-surface-secondary overflow-hidden">

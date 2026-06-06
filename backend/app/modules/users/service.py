@@ -37,12 +37,17 @@ async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
 
 
 from app.modules.users.models import APIKey, User
-from app.modules.users.repository import APIKeyRepository, UserRepository
+from app.modules.users.repository import (
+    LOCAL_DESKTOP_OWNER_EMAIL,
+    APIKeyRepository,
+    UserRepository,
+)
 from app.modules.users.schemas import (
     AdminUserCreate,
     APIKeyCreate,
     APIKeyCreatedResponse,
     ChangePasswordRequest,
+    FirstRunResponse,
     ForgotPasswordRequest,
     ForgotPasswordResponse,
     LoginRequest,
@@ -512,6 +517,118 @@ class UserService:
         await _safe_publish(
             "users.user.logged_in",
             {"user_id": str(user.id), "demo": True},
+            source_module="oe_users",
+        )
+
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            expires_in=self.settings.jwt_expire_minutes * 60,
+        )
+
+    # ── Desktop first-run / bootstrap ──────────────────────────────────
+
+    async def first_run_status(self, *, is_desktop: bool) -> FirstRunResponse:
+        """Compute the desktop first-run status (never raises).
+
+        Surfaced by ``GET /auth/first-run`` to let the desktop shell decide
+        whether to silently auto-provision and log in the local workspace
+        owner. ``fresh_install`` excludes the seeded demo accounts and the
+        local owner itself, so a desktop install that has only created its own
+        owner is still "fresh" from the standpoint of real registered users.
+
+        Args:
+            is_desktop: Result of :func:`app.config.desktop_mode` - threaded in
+                by the router so the value is resolved once per request.
+
+        Returns:
+            A populated :class:`FirstRunResponse`. The owner's
+            ``onboarding_completed`` flag is read from user metadata and is
+            ``None`` when no local owner exists yet.
+        """
+        owner = await self.user_repo.get_local_desktop_owner()
+        has_local_account = owner is not None and bool((owner.metadata_ or {}).get("local_desktop"))
+
+        onboarding_completed: bool | None = None
+        if owner is not None:
+            onboarding: dict[str, object] = (owner.metadata_ or {}).get("onboarding") or {}
+            onboarding_completed = bool(onboarding.get("completed", False))
+
+        has_real_user = await self.user_repo.has_real_active_user()
+
+        return FirstRunResponse(
+            desktop_mode=is_desktop,
+            fresh_install=not has_real_user,
+            has_local_account=has_local_account,
+            onboarding_completed=onboarding_completed,
+        )
+
+    async def desktop_bootstrap(self) -> TokenResponse:
+        """Provision (first call) or re-authenticate the local desktop owner.
+
+        Mints the SAME token pair as :meth:`login`. All policy guards
+        (desktop-mode, loopback host, fresh-or-owner) are enforced by the
+        router BEFORE this method runs - it assumes it is safe to either
+        create or reuse the ``owner@openestimate.local`` admin.
+
+        First call:
+            Creates an active admin named "Workspace Owner" with a random
+            unguessable password (the account is never password-authenticated)
+            and a ``local_desktop=true`` metadata flag, then issues tokens.
+
+        Subsequent calls:
+            Finds the same row by e-mail, verifies its ``local_desktop`` flag
+            (a manually created row at that address without the flag is
+            rejected with 403), and issues fresh tokens.
+
+        Raises:
+            HTTPException 403 if a row exists at the owner e-mail but is not a
+                genuine local-desktop owner (missing flag / inactive).
+        """
+        owner = await self.user_repo.get_local_desktop_owner()
+
+        if owner is None:
+            # First run - auto-provision the local workspace owner. The
+            # password is a throwaway random value: this account is only ever
+            # entered through the loopback-guarded bootstrap path, never via
+            # the password form, so the hash exists purely to satisfy the
+            # NOT NULL column.
+            owner = User(
+                email=LOCAL_DESKTOP_OWNER_EMAIL,
+                hashed_password=hash_password(secrets.token_urlsafe(32)),
+                full_name="Workspace Owner",
+                role="admin",
+                is_active=True,
+                metadata_={"local_desktop": True},
+            )
+            owner = await self.user_repo.create(owner)
+            logger.info("Desktop bootstrap: created local workspace owner %s", owner.email)
+            await _safe_publish(
+                "users.user.created",
+                {
+                    "user_id": str(owner.id),
+                    "email": owner.email,
+                    "role": "admin",
+                    "is_active": True,
+                    "registration_mode": "desktop_bootstrap",
+                },
+                source_module="oe_users",
+            )
+        elif not (owner.metadata_ or {}).get("local_desktop") or not owner.is_active:
+            # A row sits at the owner e-mail but it is not a genuine, active
+            # local-desktop owner (e.g. someone manually registered that
+            # address). Refuse to hand out admin tokens for it.
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="The local owner account is not available for desktop bootstrap.",
+            )
+
+        access_token = create_access_token(owner, self.settings)
+        refresh_token = create_refresh_token(owner, self.settings)
+
+        await _safe_publish(
+            "users.user.logged_in",
+            {"user_id": str(owner.id), "desktop_bootstrap": True},
             source_module="oe_users",
         )
 
