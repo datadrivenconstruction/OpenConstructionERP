@@ -5,6 +5,7 @@ import { useNavigate, useLocation, useParams, useSearchParams } from 'react-rout
 import {
   Table, Table2, ArrowRight, Copy, Trash2, Plus,
   Search, ArrowUpDown, ChevronDown, GitCompareArrows, X, Loader2,
+  CalendarDays,
 } from 'lucide-react';
 import { Card, Badge, EmptyState, Skeleton, Button, Breadcrumb, FileTypeChips, DismissibleInfo, IntroRichText } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -1045,6 +1046,24 @@ export function BOQListPage() {
                     }
                   >
                     <GitCompareArrows size={13} />
+                  </button>
+
+                  {/* CONN-34: build a 4D schedule straight from this BOQ.
+                      Deep-links into /schedule pre-selecting the project and
+                      pre-opening Generate-from-BOQ with this BOQ chosen, so
+                      the estimate-to-programme step is one click instead of a
+                      manual hunt for the right schedule and BOQ. */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(
+                        `/schedule?project_id=${encodeURIComponent(boq.project_id)}&generateBoqId=${encodeURIComponent(boq.id)}`,
+                      );
+                    }}
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all"
+                    title={t('boq.build_schedule', { defaultValue: 'Build schedule from this BOQ' })}
+                  >
+                    <CalendarDays size={13} />
                   </button>
 
                   <button
