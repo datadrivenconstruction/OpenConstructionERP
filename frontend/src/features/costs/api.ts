@@ -297,6 +297,20 @@ export async function listRegionalIndices(
   );
 }
 
+/** Batch-fetch usage counts for a page of cost items in one request.
+ *  Returns ``{cost_item_id: count}``; ids with zero recorded uses are
+ *  omitted by the backend (treat a missing id as 0). Powers the "used in N
+ *  estimates" indicator on the Cost Database browser. */
+export async function fetchUsageCounts(
+  ids: string[],
+): Promise<Record<string, number>> {
+  if (ids.length === 0) return {};
+  return apiPost<Record<string, number>, { ids: string[] }>(
+    '/v1/costs/usage-counts/',
+    { ids },
+  );
+}
+
 /** Record a usage event so the next certainty fetch reflects it. */
 export async function recordCostItemUsage(
   costItemId: string,

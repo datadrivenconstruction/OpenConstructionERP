@@ -2636,6 +2636,29 @@ class BOQService:
         )
         position = await self.position_repo.create(position)
 
+        # Record a usage-ledger entry so the Cost Database "used in N
+        # estimates" indicator (and the certainty badge frequency) reflect
+        # this add immediately. Append-only; gated on a real cost_item link
+        # and a resolvable project. Wrapped so a ledger failure never blocks
+        # the position create - the indicator is informational, not a gate.
+        if data.cost_item_id is not None and project_id is not None:
+            try:
+                from app.modules.costs.intelligence import CostUsageRecorder
+
+                await CostUsageRecorder(self.session).record(
+                    data.cost_item_id,
+                    project_id=project_id,
+                    unit_rate_at_use=data.unit_rate,
+                    context="boq",
+                )
+            except Exception:  # noqa: BLE001 - ledger is best-effort
+                logger.warning(
+                    "Failed to record cost-item usage for %s on BOQ %s",
+                    data.cost_item_id,
+                    data.boq_id,
+                    exc_info=True,
+                )
+
         await _safe_publish(
             "boq.position.created",
             {

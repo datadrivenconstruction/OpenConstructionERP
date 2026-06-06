@@ -118,6 +118,22 @@ class CertaintyBatchRequest(BaseModel):
     )
 
 
+class UsageCountsRequest(BaseModel):
+    """Request body for ``POST /v1/costs/usage-counts/``.
+
+    Carries the cost-item ids visible on one list page so the "used in N
+    estimates" indicator resolves in a single grouped query instead of one
+    request per row. Bounded to 200 ids, mirroring the certainty batch.
+    """
+
+    ids: list[uuid.UUID] = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Cost-item ids to count usage for (deduplicated server-side).",
+    )
+
+
 # ── Region → currency map ─────────────────────────────────────────────────
 #
 # CWICR catalogues are imported per-region, but the parquet files don't
@@ -4502,6 +4518,52 @@ async def get_cost_item_certainty_batch(
             )
         )
     return out
+
+
+@router.post("/usage-counts/")
+async def get_cost_item_usage_counts(
+    body: UsageCountsRequest,
+    session: SessionDep,
+    user: OptionalUserPayload,
+) -> dict[str, int]:
+    """Return ``{cost_item_id: usage_count}`` for the requested ids.
+
+    Powers the Cost Database "used in N estimates" indicator. One grouped
+    ``count(*)`` over the usage ledger keyed by ``cost_item_id`` resolves
+    the whole visible page in a single round-trip - never one request per
+    row. Ids with zero recorded uses are omitted from the response (the
+    client treats a missing id as count 0), so the payload only carries
+    the rows that actually have usage. Public, mirroring the certainty
+    batch endpoint.
+    """
+    _ = user
+
+    # De-duplicate, preserving order; the schema already caps ``ids`` length
+    # so the grouped IN() can't fan out unboundedly.
+    seen: set[uuid.UUID] = set()
+    ordered_ids: list[uuid.UUID] = []
+    for raw in body.ids:
+        if raw not in seen:
+            seen.add(raw)
+            ordered_ids.append(raw)
+    if not ordered_ids:
+        return {}
+
+    from sqlalchemy import func
+
+    from app.modules.costs.models import CostItemUsage
+
+    rows = await session.execute(
+        select(
+            CostItemUsage.cost_item_id,
+            func.count(CostItemUsage.id).label("cnt"),
+        )
+        .where(CostItemUsage.cost_item_id.in_(ordered_ids))
+        .group_by(CostItemUsage.cost_item_id)
+    )
+    # Only non-zero rows survive the GROUP BY; emit them as string keys so
+    # the JSON object matches the frontend's ``Record<string, number>``.
+    return {str(row[0]): int(row[1] or 0) for row in rows.all()}
 
 
 @router.get("/{item_id}/certainty/", response_model=CertaintyBadge)

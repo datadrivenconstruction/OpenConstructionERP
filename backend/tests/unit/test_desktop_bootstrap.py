@@ -363,3 +363,28 @@ async def test_demo_seed_emails_do_not_break_fresh_install(session: AsyncSession
     status = await _service(session).first_run_status(is_desktop=True)
     assert status.fresh_install is True, "Demo seed must not flip fresh_install to False"
     assert status.has_local_account is False
+
+
+# ── registration metadata regression (task #32) ─────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_register_persists_registration_metadata(session: AsyncSession) -> None:
+    """register() must persist its metadata under the mapped ``metadata_`` attr.
+
+    Regression: the declarative constructor silently swallows ``metadata=``
+    (the mapped attribute is ``metadata_``; the column is named "metadata"),
+    so registration context (ip / user-agent / referrer) was never stored.
+    """
+    service = _service(session)
+    user = await service.register(
+        _register_payload(f"meta-{uuid.uuid4().hex[:8]}@example.com"),
+        client_ip="203.0.113.7",
+        user_agent="pytest-agent/1.0",
+        referrer="https://example.com/signup",
+    )
+
+    stored = (user.metadata_ or {}).get("registration") or {}
+    assert stored.get("registration_ip") == "203.0.113.7"
+    assert stored.get("registration_user_agent") == "pytest-agent/1.0"
+    assert stored.get("registration_referrer") == "https://example.com/signup"

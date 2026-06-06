@@ -42,7 +42,10 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useCostDatabaseStore, REGION_MAP } from '@/stores/useCostDatabaseStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { CostItemMetadata, CertaintyBadge as CertaintyBadgeData } from './api';
+import { buildBoqPositionDraft, type FullCostItem } from './addToBoqHelpers';
+import { fetchUsageCounts } from './api';
 import { CertaintyBadge } from './CertaintyBadge';
+import { UsageBadge } from './UsageBadge';
 import { EscalationCalculator } from './EscalationCalculator';
 import { RegionalAdjustPanel } from './RegionalAdjustPanel';
 import { CostCategoryTree } from '@/features/boq/CostCategoryTree';
@@ -712,6 +715,18 @@ export function CostsPage() {
     return m;
   }, [certaintyList]);
 
+  // Batch-fetch how many estimate (BOQ) positions each visible item is used
+  // in. One grouped request per page (same key strategy as the certainty
+  // batch). The "used in N estimates" badge reads this; adding a position
+  // invalidates the ['costs','usage'] key so the badge flips immediately.
+  const { data: usageCounts } = useQuery<Record<string, number>>({
+    queryKey: ['costs', 'usage', 'batch', certaintyKey],
+    queryFn: () => fetchUsageCounts(visibleIds),
+    enabled: visibleIds.length > 0,
+    staleTime: 30_000,
+    retry: 1,
+  });
+
   // Active filter count & clear all
   const activeFilterCount = [query, unit, source, category].filter(Boolean).length + (region ? 1 : 0) + (specialTab ? 1 : 0);
 
@@ -1267,6 +1282,7 @@ export function CostsPage() {
                         isSelected={selectedIds.has(item.id)}
                         isFavourite={favourites.has(item.id)}
                         band={certaintyById.get(item.id) ?? null}
+                        usageCount={usageCounts?.[item.id] ?? 0}
                         regionCurrency={regionCurrency}
                         onSelect={() => toggleSelect(item.id)}
                         onToggle={() => setExpandedId(isExpanded ? null : item.id)}
@@ -1416,6 +1432,11 @@ export function CostsPage() {
           onSuccess={() => {
             // Track all added items as recently used
             selectedItems.forEach((si) => trackRecentUsage(si));
+            // Refetch the usage indicator so the "used in N estimates" badge
+            // flips immediately for the items just added (and the certainty
+            // frequency reflects the new ledger rows).
+            queryClient.invalidateQueries({ queryKey: ['costs', 'usage'] });
+            queryClient.invalidateQueries({ queryKey: ['costs', 'certainty'] });
             setShowAddToBOQ(false);
             setSelectedIds(new Set());
           }}
@@ -1553,78 +1574,61 @@ function AddToBOQModal({
         const itemCurrency =
           (item.currency || REGION_MAP[item.region ?? '']?.currency || '').trim().toUpperCase();
 
-        // Build rich metadata with cost breakdown + components.
-        // ``metadata.currency`` is the AUTHORITATIVE key the BOQ FX rollup
-        // reads (see ``_position_currency`` in boq/service.py) — set it so a
-        // foreign-currency catalogue rate converts to the project base via
-        // fx_rates instead of being summed as base. ``cost_item_currency``
-        // is kept as the provenance mirror the apply path also stamps.
-        const meta: Record<string, unknown> = {
-          cost_item_id: item.id,
-          cost_item_code: item.code,
-          cost_item_region: item.region,
-          ...(itemCurrency ? { currency: itemCurrency, cost_item_currency: itemCurrency } : {}),
-          ...item.metadata_,
-        };
-
-        // Include resource breakdown for BOQ Grid display
-        // BOQ Grid reads from metadata.resources: Array<{name, code, type, unit, quantity, unit_rate, total, currency}>
-        if (item.components && item.components.length > 0) {
-          // Full component data available — use it directly
-          meta.resources = item.components.map((c) => ({
-            name: c.name,
-            code: c.code,
-            type: c.type,
-            unit: c.unit,
-            quantity: c.quantity,
-            unit_rate: c.unit_rate,
-            total: c.cost,
-            currency: itemCurrency,
-          }));
-          meta.resource_count = item.components.length;
-        } else if (item.metadata_) {
-          // No components stored — synthesize from metadata cost summary
-          const synth: Array<{ name: string; code: string; type: string; unit: string; quantity: number; unit_rate: number; total: number; currency: string }> = [];
-          const m = item.metadata_;
-          if (m.labor_cost && m.labor_cost > 0) {
-            synth.push({ name: t('costs.component_labor', { defaultValue: 'Labor' }), code: '', type: 'labor', unit: item.unit, quantity: 1, unit_rate: m.labor_cost, total: m.labor_cost, currency: itemCurrency });
-          }
-          if (m.material_cost && m.material_cost > 0) {
-            synth.push({ name: t('costs.component_material', { defaultValue: 'Material' }), code: '', type: 'material', unit: item.unit, quantity: 1, unit_rate: m.material_cost, total: m.material_cost, currency: itemCurrency });
-          }
-          if (m.equipment_cost && m.equipment_cost > 0) {
-            synth.push({ name: t('costs.component_equipment', { defaultValue: 'Equipment' }), code: '', type: 'equipment', unit: item.unit, quantity: 1, unit_rate: m.equipment_cost, total: m.equipment_cost, currency: itemCurrency });
-          }
-          if (synth.length > 0) {
-            meta.resources = synth;
-            meta.resource_count = synth.length;
-          }
+        // The /costs list runs in ``?lite=1`` mode, so ``item`` carries
+        // ``components: []`` and a trimmed ``metadata_`` (no ``variants``).
+        // Fetch the FULL cost item so the position inherits ALL resources +
+        // the variant catalog — same "fetch full before apply" pattern the
+        // BOQ "From Database" modal and the match-elements apply flow use.
+        // On a transient fetch failure we fall back to the lite row so the
+        // add still succeeds (degraded fidelity) rather than aborting.
+        let full: FullCostItem;
+        try {
+          full = await apiGet<FullCostItem>(`/v1/costs/${item.id}`);
+        } catch {
+          full = {
+            id: item.id,
+            code: item.code,
+            description: item.description,
+            unit: item.unit,
+            rate: item.rate,
+            currency: item.currency,
+            region: item.region,
+            classification: item.classification ?? {},
+            components: [],
+            metadata_: item.metadata_ ?? {},
+            source: item.source,
+          };
         }
 
-        // Cost breakdown summary
-        if (meta.resources) {
-          const byType: Record<string, number> = {};
-          for (const r of meta.resources as Array<{ type: string; total: number }>) {
-            byType[r.type] = (byType[r.type] ?? 0) + r.total;
-          }
-          meta.cost_breakdown = byType;
-        }
+        // Build the full-fidelity metadata + unit_rate from the complete
+        // cost item: every component becomes a ``metadata.resources[]``
+        // entry, variant-bearing resources auto-default to the mean rate and
+        // carry their ``available_variants`` for later re-pick, and a
+        // top-level abstract-resource variant set is appended as one resource
+        // line. ``metadata.currency`` is the AUTHORITATIVE key the BOQ FX
+        // rollup reads (see ``_position_currency`` in boq/service.py).
+        const { unitRate, metadata } = buildBoqPositionDraft(full, itemCurrency, {
+          labor: t('costs.component_labor', { defaultValue: 'Labor' }),
+          material: t('costs.component_material', { defaultValue: 'Material' }),
+          equipment: t('costs.component_equipment', { defaultValue: 'Equipment' }),
+        });
 
-        // The catalogue currency rides on ``metadata.currency`` (set above) —
-        // that's the key the BOQ FX rollup reads, so a foreign-currency rate
-        // converts to the project base via fx_rates instead of being summed
-        // as base. PositionCreate has no top-level currency field.
+        // ``cost_item_id`` is sent as a top-level PositionCreate field so the
+        // backend validates the reference and runs unit/currency compat
+        // stamping; the variant snapshots are frozen server-side from
+        // ``metadata.variant_default`` / per-resource markers.
         await apiPost(`/v1/boq/boqs/${boqId}/positions/`, {
           boq_id: boqId,
           ordinal,
-          description: item.description,
-          unit: item.unit,
+          description: full.description,
+          unit: full.unit,
           quantity: 1,
-          unit_rate: item.rate,
-          classification: item.classification || {},
+          unit_rate: unitRate,
+          classification: full.classification || {},
           parent_id: sectionId || undefined,
+          cost_item_id: item.id,
           source: 'cost_database',
-          metadata: meta,
+          metadata,
         });
         nextOrdinal++;
       }
@@ -2479,6 +2483,7 @@ function CostItemRow({
   isSelected,
   isFavourite,
   band,
+  usageCount,
   regionCurrency,
   onSelect,
   onToggle,
@@ -2497,6 +2502,9 @@ function CostItemRow({
   isFavourite: boolean;
   /** Pre-resolved certainty band from the page-level batch fetch. */
   band: CertaintyBadgeData | null;
+  /** How many estimate (BOQ) positions this item is used in (page-level
+   *  batch fetch). 0 = not yet used. */
+  usageCount: number;
   /** Active region's currency — fallback when the row's own is empty. */
   regionCurrency: string;
   onSelect: () => void;
@@ -2620,6 +2628,7 @@ function CostItemRow({
         </td>
         <td className="px-4 py-3 text-right font-semibold text-content-primary tabular-nums">
           <div className="inline-flex items-center gap-1.5">
+            <UsageBadge count={usageCount} />
             <CertaintyBadge costItemId={item.id} band={band} />
             <span title={rowCurrency || undefined}>{money(item.rate)}</span>
             {hasVariants && variantStats && (

@@ -276,7 +276,10 @@ class UserService:
             role=role,
             locale=data.locale,
             is_active=is_active,
-            metadata=metadata,
+            # The mapped attribute is metadata_ (column "metadata"); passing
+            # metadata= here is silently swallowed by the declarative
+            # constructor and the registration metadata never persisted.
+            metadata_=metadata,
         )
         user = await self.user_repo.create(user)
 
@@ -328,7 +331,8 @@ class UserService:
             role=data.role,
             locale=data.locale,
             is_active=data.is_active,
-            metadata={"registration": {"created_by": "admin"}},
+            # metadata_ is the mapped attribute; metadata= would be dropped.
+            metadata_={"registration": {"created_by": "admin"}},
         )
         user = await self.user_repo.create(user)
 
