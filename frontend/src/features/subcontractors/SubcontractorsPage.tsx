@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import clsx from 'clsx';
@@ -23,6 +23,9 @@ import {
   CheckCircle2,
   ClipboardCheck,
   FileSignature,
+  Send,
+  ShieldCheck,
+  HeartPulse,
 } from 'lucide-react';
 import {
   Button,
@@ -206,6 +209,7 @@ function RatingStars({ score }: { score: number | string }) {
 export function SubcontractorsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -215,6 +219,25 @@ export function SubcontractorsPage() {
     queryKey: ['subcontractors', 'list'],
     queryFn: () => listSubcontractors({ limit: 200 }),
   });
+
+  // Deep-link target (e.g. from a Contract whose counterparty is this
+  // subcontractor). Once the matching record has loaded we open its detail
+  // drawer, then drop the ?highlight param (replace, preserving other params)
+  // so a refresh or back-navigation does not re-open the drawer.
+  const highlightId = searchParams.get('highlight');
+  useEffect(() => {
+    if (!highlightId) return;
+    if (!(subsQ.data ?? []).some((s) => s.id === highlightId)) return;
+    setSelectedId(highlightId);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('highlight');
+        return next;
+      },
+      { replace: true },
+    );
+  }, [highlightId, subsQ.data, setSearchParams]);
 
   const filtered = useMemo(() => {
     const items = subsQ.data ?? [];
@@ -864,12 +887,28 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   defaultValue: 'Invite to a bid package',
                 })}
               </Link>
+              {/* CONN-43: jump to this subcontractor's contracts, pre-filtered
+                  to it as the counterparty so the agreement is one click away. */}
               <Link
-                to="/contracts"
+                to={`/contracts?counterparty=${sub.id}`}
                 className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
               >
+                <FileSignature size={12} />
                 {t('subcontractors.subcontract', {
                   defaultValue: 'Subcontract agreement',
+                })}
+              </Link>
+              {/* CONN-54: invite this firm to the partner portal with the
+                  invite modal pre-filled (subcontractor role + known contact). */}
+              <Link
+                to={`/portal?invite=1&role=subcontractor&name=${encodeURIComponent(
+                  sub.legal_name,
+                )}`}
+                className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
+              >
+                <Send size={12} />
+                {t('subcontractors.invite_to_portal', {
+                  defaultValue: 'Invite to portal',
                 })}
               </Link>
             </div>
@@ -940,6 +979,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               {tab === 'ratings' && (
                 <RatingsTab
                   subcontractorId={sub.id}
+                  subName={sub.legal_name}
                   data={ratingsQ.data ?? []}
                   loading={ratingsQ.isLoading}
                 />
@@ -1395,12 +1435,46 @@ function ComputeRatingButton({ subcontractorId }: { subcontractorId: string }) {
   );
 }
 
+/**
+ * CONN-44: the monthly score is rolled up from NCRs and safety incidents, so
+ * each dimension links to the source register filtered to this firm. The
+ * ``?sub=`` param is read by the QA/Safety pages where supported; it is emitted
+ * here regardless so the cross-link is in place as those consumers land.
+ */
+function RatingSourceLinks({ subName }: { subName: string }) {
+  const { t } = useTranslation();
+  const q = encodeURIComponent(subName);
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-xs">
+      <span className="text-content-tertiary">
+        {t('subcontractors.score_sources', { defaultValue: 'Trace the score:' })}
+      </span>
+      <Link
+        to={`/ncr?sub=${q}`}
+        className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
+      >
+        <ShieldCheck size={12} />
+        {t('subcontractors.quality_ncrs', { defaultValue: 'Quality NCRs' })}
+      </Link>
+      <Link
+        to={`/safety?sub=${q}`}
+        className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
+      >
+        <HeartPulse size={12} />
+        {t('subcontractors.hse_incidents', { defaultValue: 'HSE incidents' })}
+      </Link>
+    </div>
+  );
+}
+
 function RatingsTab({
   subcontractorId,
+  subName,
   data,
   loading,
 }: {
   subcontractorId: string;
+  subName: string;
   data: Rating[];
   loading: boolean;
 }) {
@@ -1418,6 +1492,7 @@ function RatingsTab({
           </p>
           <ComputeRatingButton subcontractorId={subcontractorId} />
         </div>
+        <RatingSourceLinks subName={subName} />
         <ScorecardTile ratings={data} />
         <EmptyState
           icon={<Star size={20} />}
@@ -1431,6 +1506,7 @@ function RatingsTab({
       <div className="flex items-center justify-end">
         <ComputeRatingButton subcontractorId={subcontractorId} />
       </div>
+      <RatingSourceLinks subName={subName} />
       <ScorecardTile ratings={data} />
       <div className="overflow-x-auto rounded-lg border border-border-light">
       <table className="w-full text-xs">

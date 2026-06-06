@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Users,
@@ -15,6 +15,7 @@ import {
   Ban,
   RotateCcw,
   FileText,
+  ExternalLink,
 } from 'lucide-react';
 import {
   Button,
@@ -31,6 +32,8 @@ import {
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { projectsApi } from '@/features/projects/api';
+import { fetchDocuments } from '@/features/documents/api';
+import { listTickets } from '@/features/service/api';
 import { copyToClipboard } from '@/shared/lib/browser';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useToastStore } from '@/stores/useToastStore';
@@ -85,17 +88,77 @@ const inputCls =
 
 // Legacy labelCls removed — modals migrated to <WideModalField>.
 
+/**
+ * CONN-53: map a granted resource (or an audited document) to its in-app route
+ * so the admin can jump from an access rule / audit row to the thing it covers,
+ * instead of reading a bare UUID. Returns null for types we cannot route to
+ * (the caller then renders the id as plain text). All targets are real routes
+ * registered in App.tsx (/projects/:id, /files, /service, /finance,
+ * /property-dev).
+ */
+function portalResourceLink(type: string, id: string): string | null {
+  if (!id) return null;
+  switch (type) {
+    case 'project':
+      return `/projects/${id}`;
+    case 'development':
+      return '/property-dev';
+    case 'document':
+      return '/files';
+    case 'ticket':
+      return '/service';
+    case 'invoice':
+      return '/finance';
+    default:
+      return null;
+  }
+}
+
 /* ─── Page ─── */
 
 export function PortalPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState<Tab>('users');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<PortalUser | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [grantOpen, setGrantOpen] = useState(false);
+
+  // CONN-54 consumer: a Subcontractor's "Invite to portal" pill deep-links here
+  // with ?invite=1 (plus optional name/email/role) to open the invite modal
+  // pre-filled. Read once, then clear the params (replace) so a refresh or back
+  // navigation does not re-open the modal.
+  const [invitePrefill, setInvitePrefill] = useState<{
+    email: string;
+    full_name: string;
+    portal_role: PortalRole;
+  } | null>(null);
+  useEffect(() => {
+    if (searchParams.get('invite') !== '1') return;
+    const role = searchParams.get('role');
+    setInvitePrefill({
+      email: searchParams.get('email') ?? '',
+      full_name: searchParams.get('name') ?? '',
+      portal_role: (ROLES as string[]).includes(role ?? '')
+        ? (role as PortalRole)
+        : 'client',
+    });
+    setInviteOpen(true);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('invite');
+        next.delete('role');
+        next.delete('email');
+        next.delete('name');
+        return next;
+      },
+      { replace: true },
+    );
+  }, [searchParams, setSearchParams]);
   const [lastInviteLink, setLastInviteLink] = useState<{
     token: string;
     expires_at: string;
@@ -400,7 +463,11 @@ export function PortalPage() {
       {/* Invite modal */}
       {inviteOpen && (
         <InviteModal
-          onClose={() => setInviteOpen(false)}
+          initial={invitePrefill ?? undefined}
+          onClose={() => {
+            setInviteOpen(false);
+            setInvitePrefill(null);
+          }}
           onInvited={(email, token, expires_at) => {
             setLastInviteLink({ email, token, expires_at });
           }}
@@ -653,7 +720,23 @@ function AccessRuleTable({
                   </Badge>
                 </td>
                 <td className="px-4 py-2 font-mono text-xs text-content-secondary truncate max-w-[200px]">
-                  {r.resource_id}
+                  {(() => {
+                    const to = portalResourceLink(r.resource_type, r.resource_id);
+                    return to ? (
+                      <Link
+                        to={to}
+                        className="inline-flex items-center gap-1 text-oe-blue hover:underline"
+                        title={t('portal.open_resource', {
+                          defaultValue: 'Open this resource',
+                        })}
+                      >
+                        <span className="truncate">{r.resource_id}</span>
+                        <ExternalLink size={11} className="shrink-0" />
+                      </Link>
+                    ) : (
+                      r.resource_id
+                    );
+                  })()}
                 </td>
                 <td className="px-4 py-2">
                   <Badge variant="blue">
@@ -749,7 +832,23 @@ function AuditLogTable({
                   </Badge>
                 </td>
                 <td className="px-4 py-2 font-mono text-xs text-content-secondary truncate max-w-[180px]">
-                  {e.document_id}
+                  {(() => {
+                    const to = portalResourceLink(e.document_type, e.document_id);
+                    return to ? (
+                      <Link
+                        to={to}
+                        className="inline-flex items-center gap-1 text-oe-blue hover:underline"
+                        title={t('portal.open_resource', {
+                          defaultValue: 'Open this resource',
+                        })}
+                      >
+                        <span className="truncate">{e.document_id}</span>
+                        <ExternalLink size={11} className="shrink-0" />
+                      </Link>
+                    ) : (
+                      e.document_id
+                    );
+                  })()}
                 </td>
                 <td className="px-4 py-2">
                   <Badge variant={ACTION_VARIANT[e.action] ?? 'neutral'}>
@@ -985,9 +1084,11 @@ function Field({ label, value }: { label: React.ReactNode; value: React.ReactNod
 /* ─── Invite modal ─── */
 
 function InviteModal({
+  initial,
   onClose,
   onInvited,
 }: {
+  initial?: { email?: string; full_name?: string; portal_role?: PortalRole };
   onClose: () => void;
   onInvited: (email: string, token: string, expires_at: string) => void;
 }) {
@@ -1002,9 +1103,9 @@ function InviteModal({
     timezone: string;
     redirect_path: string;
   }>({
-    email: '',
-    full_name: '',
-    portal_role: 'client',
+    email: initial?.email ?? '',
+    full_name: initial?.full_name ?? '',
+    portal_role: initial?.portal_role ?? 'client',
     language: 'en',
     timezone: 'UTC',
     redirect_path: '',
@@ -1181,6 +1282,12 @@ function GrantAccessModal({
     expires_at: '',
   });
 
+  // CONN-53: when granting access to a document we first need a project to
+  // scope the document list (documents are project-scoped). Tickets are listed
+  // org-wide. Both pickers submit the selected UUID to the backend so the
+  // inviter never pastes a raw id.
+  const [docProjectId, setDocProjectId] = useState('');
+
   const grantMut = useMutation({
     mutationFn: () =>
       grantAccess({
@@ -1212,10 +1319,26 @@ function GrantAccessModal({
   const projectsQ = useQuery({
     queryKey: ['portal-grant', 'projects'],
     queryFn: () => projectsApi.list(),
-    // Only load projects when the active resource type actually uses
-    // project ids — saves a list call when granting access to e.g. an
-    // invoice.
-    enabled: form.resource_type === 'project',
+    // Load projects for the project picker AND the document picker (which needs
+    // a project to scope its list).
+    enabled: form.resource_type === 'project' || form.resource_type === 'document',
+    staleTime: 60_000,
+  });
+
+  // CONN-53: document picker — scoped to the chosen project.
+  const documentsQ = useQuery({
+    queryKey: ['portal-grant', 'documents', docProjectId],
+    queryFn: () => fetchDocuments(docProjectId),
+    enabled: form.resource_type === 'document' && !!docProjectId,
+    staleTime: 60_000,
+  });
+
+  // CONN-53: service-ticket picker — org-wide, the portal admin surface is not
+  // project-scoped.
+  const ticketsQ = useQuery({
+    queryKey: ['portal-grant', 'tickets'],
+    queryFn: () => listTickets({ limit: 200 }),
+    enabled: form.resource_type === 'ticket',
     staleTime: 60_000,
   });
 
@@ -1300,11 +1423,12 @@ function GrantAccessModal({
         >
           <select
             value={form.resource_type}
-            onChange={(e) =>
+            onChange={(e) => {
               // Clear the resource id when switching types so we do not
               // submit a stale project id under e.g. "invoice".
-              setForm({ ...form, resource_type: e.target.value, resource_id: '' })
-            }
+              setForm({ ...form, resource_type: e.target.value, resource_id: '' });
+              setDocProjectId('');
+            }}
             className={inputCls}
           >
             <option value="project">{t('portal.rt_project', { defaultValue: 'Project' })}</option>
@@ -1354,6 +1478,85 @@ function GrantAccessModal({
               {(projectsQ.data ?? []).map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
+                </option>
+              ))}
+            </select>
+          </WideModalField>
+        ) : form.resource_type === 'document' ? (
+          <>
+            <WideModalField
+              label={t('portal.doc_project', { defaultValue: 'Project' })}
+              required
+              hint={t('portal.doc_project_hint', {
+                defaultValue: 'Pick the project that holds the document.',
+              })}
+              span={2}
+            >
+              <select
+                value={docProjectId}
+                onChange={(e) => {
+                  setDocProjectId(e.target.value);
+                  setForm({ ...form, resource_id: '' });
+                }}
+                className={inputCls}
+                disabled={projectsQ.isLoading}
+              >
+                <option value="">— {t('common.select', { defaultValue: 'Select' })} —</option>
+                {(projectsQ.data ?? []).map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </WideModalField>
+            <WideModalField
+              label={t('portal.document', { defaultValue: 'Document' })}
+              required
+              hint={t('portal.document_hint', {
+                defaultValue: 'Only this document will be visible to the portal user.',
+              })}
+              span={2}
+            >
+              <select
+                value={form.resource_id}
+                onChange={(e) => setForm({ ...form, resource_id: e.target.value })}
+                className={inputCls}
+                disabled={!docProjectId || documentsQ.isLoading}
+              >
+                <option value="">
+                  {!docProjectId
+                    ? t('portal.pick_project_first', {
+                        defaultValue: 'Pick a project first',
+                      })
+                    : `— ${t('common.select', { defaultValue: 'Select' })} —`}
+                </option>
+                {(documentsQ.data ?? []).map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </WideModalField>
+          </>
+        ) : form.resource_type === 'ticket' ? (
+          <WideModalField
+            label={t('portal.ticket', { defaultValue: 'Service ticket' })}
+            required
+            hint={t('portal.ticket_hint', {
+              defaultValue: 'The portal user will only see this ticket.',
+            })}
+            span={2}
+          >
+            <select
+              value={form.resource_id}
+              onChange={(e) => setForm({ ...form, resource_id: e.target.value })}
+              className={inputCls}
+              disabled={ticketsQ.isLoading}
+            >
+              <option value="">— {t('common.select', { defaultValue: 'Select' })} —</option>
+              {(ticketsQ.data ?? []).map((tk) => (
+                <option key={tk.id} value={tk.id}>
+                  {tk.ticket_number} - {tk.title}
                 </option>
               ))}
             </select>
