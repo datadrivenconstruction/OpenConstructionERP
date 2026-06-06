@@ -20,6 +20,9 @@ import {
   Trash2,
   Download,
   Sparkles,
+  ShoppingCart,
+  HelpCircle,
+  GitBranch,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, InfoHint, DismissibleInfo, IntroRichText, ConfirmDialog, RecoveryCard, SkeletonTable, SkeletonCard } from '@/shared/ui';
 import { useNavigate } from 'react-router-dom';
@@ -1201,6 +1204,7 @@ function DetailView({
   onBack: () => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const userRole = useAuthStore((s) => s.userRole);
@@ -1613,6 +1617,80 @@ function DetailView({
           )}
         </div>
       )}
+
+      {/* Related records — the commitment (PO) and RFI links the CO ties to,
+          plus the source variation when this CO was mirrored from a variation
+          order (service stamps origin + variation ids onto metadata). All ids
+          are already on the GET /{id} payload; we just turn them into chips. */}
+      {(() => {
+        const poIds = order.linked_po_ids ?? [];
+        const rfiIds = order.linked_rfi_ids ?? [];
+        const meta = (order.metadata ?? {}) as {
+          origin?: string;
+          variation_order_id?: string;
+          variation_request_id?: string;
+        };
+        const fromVariation =
+          meta.origin === 'variations.convert_vr_to_vo' &&
+          (meta.variation_order_id || meta.variation_request_id);
+        if (poIds.length === 0 && rfiIds.length === 0 && !fromVariation) {
+          return null;
+        }
+        const chipCls =
+          'flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-2.5 py-1.5 text-xs text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-colors';
+        return (
+          <div className="mb-6">
+            <h3 className="text-base font-semibold text-content-primary mb-3">
+              {t('changeorders.related_records', { defaultValue: 'Related' })}
+            </h3>
+            <div className="flex flex-wrap items-center gap-2">
+              {fromVariation && (
+                <button
+                  type="button"
+                  className={chipCls}
+                  onClick={() => navigate('/variations')}
+                  title={t('changeorders.from_variation_hint', {
+                    defaultValue: 'Open the variation order this change order was created from',
+                  })}
+                >
+                  <GitBranch size={12} />
+                  {t('changeorders.from_variation', { defaultValue: 'From variation' })}
+                </button>
+              )}
+              {poIds.map((poId, i) => (
+                <button
+                  key={`po-${poId}`}
+                  type="button"
+                  className={chipCls}
+                  onClick={() => navigate('/procurement')}
+                  title={poId}
+                >
+                  <ShoppingCart size={12} />
+                  {t('changeorders.linked_po', {
+                    defaultValue: 'PO {{n}}',
+                    n: i + 1,
+                  })}
+                </button>
+              ))}
+              {rfiIds.map((rfiId, i) => (
+                <button
+                  key={`rfi-${rfiId}`}
+                  type="button"
+                  className={chipCls}
+                  onClick={() => navigate('/rfi')}
+                  title={rfiId}
+                >
+                  <HelpCircle size={12} />
+                  {t('changeorders.linked_rfi', {
+                    defaultValue: 'RFI {{n}}',
+                    n: i + 1,
+                  })}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* T3: Procore-style approval chain. Shown when the CO has either
           a chain already or is in 'submitted' state (so an admin/manager
