@@ -3912,6 +3912,19 @@ export function BOQEditorPage() {
           { label: t('nav.assemblies', { defaultValue: 'Assemblies' }), onClick: () => navigate('/assemblies') },
           { label: t('nav.costs', { defaultValue: 'Cost Database' }), onClick: () => navigate('/costs') },
           { label: t('nav.validation', { defaultValue: 'Validation' }), onClick: () => navigate('/validation') },
+          // CONN-83 — outbound AI affordances. Draft a fresh set of positions
+          // with the AI Quick Estimate, or ask the Cost Advisor about rates
+          // while pricing. The Quick Estimate save dialog already defaults to
+          // the globally active project, so no project param is emitted here.
+          // The advisor consumes a ?q= prefill separately under its own batch.
+          {
+            label: t('boq.draft_with_ai', { defaultValue: 'Draft positions with AI' }),
+            onClick: () => navigate('/ai-estimate'),
+          },
+          {
+            label: t('boq.ask_cost_advisor', { defaultValue: 'Ask the Cost Advisor' }),
+            onClick: () => navigate('/advisor'),
+          },
         ]}
       >
         {t('boq_editor.intro_body', {

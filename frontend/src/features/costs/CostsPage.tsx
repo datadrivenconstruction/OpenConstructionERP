@@ -783,6 +783,29 @@ export function CostsPage() {
     }
   }, []);
 
+  // CONN-83 — "Benchmark this rate": deep-link the row's rate into the AI
+  // Cost Advisor as a ready-to-send question, plus the active region so the
+  // advisor scopes its answer to the same catalogue. The advisor consumes
+  // the ?q= prefill separately (its own batch); until then the user lands on
+  // a scoped advisor with the question one click away.
+  const handleBenchmark = useCallback(
+    (item: CostItem) => {
+      const rowCurrency = (item.currency || regionCurrency || '').trim().toUpperCase();
+      const rateLabel = rowCurrency
+        ? `${item.rate} ${rowCurrency}/${item.unit}`
+        : `${item.rate}/${item.unit}`;
+      const question = t('costs.benchmark_question', {
+        defaultValue: 'Is {{rate}} a typical rate for "{{description}}"? How does it compare across regions?',
+        rate: rateLabel,
+        description: item.description,
+      });
+      const params = new URLSearchParams({ q: question });
+      if (region) params.set('region', region);
+      navigate(`/advisor?${params.toString()}`);
+    },
+    [navigate, region, regionCurrency, t],
+  );
+
   // handleLoadMore for future pagination: () => setOffset(prev => prev + PAGE_SIZE)
 
   const toggleSelect = useCallback((id: string) => {
@@ -942,6 +965,20 @@ export function CostsPage() {
               onClick={() => setShowCreateItem(true)}
             >
               {t('costs.add_item', { defaultValue: 'Add Item' })}
+            </Button>
+            {/* CONN-83 — outbound AI affordance. Send the user to the Cost
+                Advisor to sanity-check rates in plain language. Carries the
+                active region as ?region= so the advisor opens scoped to the
+                same catalogue the user is browsing. */}
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Sparkles size={14} />}
+              onClick={() =>
+                navigate(region ? `/advisor?region=${region}` : '/advisor')
+              }
+            >
+              {t('costs.ask_cost_advisor', { defaultValue: 'Ask the Cost Advisor' })}
             </Button>
             <Button
               variant="primary"
@@ -1286,6 +1323,7 @@ export function CostsPage() {
                         onSelect={() => toggleSelect(item.id)}
                         onToggle={() => setExpandedId(isExpanded ? null : item.id)}
                         onCopy={() => handleCopyRate(item)}
+                        onBenchmark={() => handleBenchmark(item)}
                         onToggleFavourite={() => toggleFavourite(item.id)}
                         onDelete={(id) => deleteMutation.mutate(id)}
                         fmt={fmt}
@@ -2487,6 +2525,7 @@ function CostItemRow({
   onSelect,
   onToggle,
   onCopy,
+  onBenchmark,
   onToggleFavourite,
   onDelete,
   fmt,
@@ -2509,6 +2548,9 @@ function CostItemRow({
   onSelect: () => void;
   onToggle: () => void;
   onCopy: () => void;
+  /** CONN-83 — open the AI Cost Advisor pre-loaded with a benchmark question
+   *  about this row's rate. */
+  onBenchmark: () => void;
   onToggleFavourite: () => void;
   onDelete?: (id: string) => void;
   fmt: (n: number) => string;
@@ -2676,6 +2718,14 @@ function CostItemRow({
               ) : (
                 <Copy size={13} />
               )}
+            </button>
+            {/* CONN-83 — Benchmark this rate against the AI Cost Advisor. */}
+            <button
+              onClick={(e) => { e.stopPropagation(); onBenchmark(); }}
+              title={t('costs.benchmark_rate', { defaultValue: 'Benchmark this rate with the AI Cost Advisor' })}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-content-tertiary transition-all hover:bg-violet-500/10 hover:text-violet-500"
+            >
+              <Sparkles size={13} />
             </button>
             {item.source === 'custom' && (
               <button
