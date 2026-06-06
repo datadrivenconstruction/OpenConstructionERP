@@ -27,6 +27,9 @@ import {
   Package,
   CheckCircle2,
   Pencil,
+  Wallet,
+  ClipboardList,
+  ExternalLink,
 } from 'lucide-react';
 import {
   Button,
@@ -47,7 +50,7 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
-import { getErrorMessage } from '@/shared/lib/api';
+import { apiGet, getErrorMessage } from '@/shared/lib/api';
 import { todayLocalISO, isoDateFromLocal, nowLocalISO } from '@/shared/lib/dates';
 import { projectsApi } from '@/features/projects/api';
 import {
@@ -325,6 +328,18 @@ export function DailyDiaryPage() {
         })}
         actions={
           <>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<ClipboardList size={14} />}
+              onClick={() => navigate('/field-reports')}
+              title={t('daily_diary.open_field_report_hint', {
+                defaultValue: 'Open the field-reports register for the daily field report.',
+              })}
+              data-testid="daily-diary-open-field-report"
+            >
+              {t('daily_diary.open_field_report', { defaultValue: "Today's field report" })}
+            </Button>
             {projectId && (
               <Button
                 variant="secondary"
@@ -363,6 +378,14 @@ export function DailyDiaryPage() {
           {
             label: t('daily_diary.intro_link_files', { defaultValue: 'Files' }),
             onClick: () => navigate('/files'),
+          },
+          {
+            label: t('daily_diary.intro_link_payroll', { defaultValue: 'Payroll' }),
+            onClick: () => navigate('/payroll'),
+          },
+          {
+            label: t('daily_diary.intro_link_field_reports', { defaultValue: 'Field Reports' }),
+            onClick: () => navigate('/field-reports'),
           },
         ]}
       >
@@ -862,6 +885,7 @@ function TodayTab({
   onDeleted: () => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const confirmCtx = useConfirm();
@@ -1306,10 +1330,24 @@ function TodayTab({
             <h3 className="text-sm font-semibold uppercase tracking-wide text-content-secondary">
               {t('daily_diary.diary_meta', { defaultValue: 'Diary' })}
             </h3>
-            <span className="inline-flex items-center gap-1 text-xs text-content-tertiary">
-              <Users size={12} />
-              {t('daily_diary.workforce', { defaultValue: 'Workforce' })}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 text-xs text-content-tertiary">
+                <Users size={12} />
+                {t('daily_diary.workforce', { defaultValue: 'Workforce' })}
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate('/payroll')}
+                className="inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue-subtle/10"
+                title={t('daily_diary.workforce_to_payroll_hint', {
+                  defaultValue: 'The headcount you log here flows into the labour roster used by Payroll.',
+                })}
+                data-testid="daily-diary-workforce-payroll"
+              >
+                <Wallet size={11} />
+                {t('daily_diary.view_in_payroll', { defaultValue: 'Payroll' })}
+              </button>
+            </div>
           </div>
           <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
             <div>
@@ -1362,7 +1400,7 @@ function TodayTab({
         </Card>
       </div>
 
-      <EntriesTimeline diaryId={diary.id} sealed={sealed} />
+      <EntriesTimeline projectId={projectId} diaryId={diary.id} sealed={sealed} />
 
       <PhotoGrid
         photos={photosQ.data ?? []}
@@ -1686,20 +1724,40 @@ function WeatherCard({
   );
 }
 
+// Diary entry types that summarise an upstream record from another module.
+// Picking one of these surfaces a source picker so the entry can deep-link
+// back to the incident / inspection it documents (CONN-49).
+const SOURCE_ENTRY_MODULE: Partial<Record<EntryType, 'safety' | 'inspections'>> = {
+  incident_summary: 'safety',
+  inspection_summary: 'inspections',
+};
+
+interface SourceRecord {
+  id: string;
+  label: string;
+}
+
 function EntriesTimeline({
+  projectId,
   diaryId,
   sealed,
 }: {
+  projectId: string;
   diaryId: string;
   sealed: boolean;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [entryType, setEntryType] = useState<EntryType>('general');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [sourceRef, setSourceRef] = useState('');
   const [busy, setBusy] = useState(false);
+
+  // Which upstream module (if any) the chosen entry type links back to.
+  const sourceModule = SOURCE_ENTRY_MODULE[entryType];
 
   // Previously this component only rendered an add-form: created entries
   // were invisible (no list endpoint, no list query). It now reads back
@@ -1709,6 +1767,63 @@ function EntriesTimeline({
     queryFn: () => listEntries(diaryId),
     enabled: !!diaryId,
   });
+
+  // Lightweight pickers: when the entry summarises an incident or an
+  // inspection, fetch the project's records so the user can link the exact
+  // one (stored as source_module + source_ref) instead of pasting a UUID.
+  const incidentsQ = useQuery({
+    queryKey: ['daily-diary', 'src-incidents', projectId],
+    queryFn: async () => {
+      const rows = await apiGet<Record<string, unknown>[]>(
+        `/v1/safety/incidents/?project_id=${encodeURIComponent(projectId)}`,
+      );
+      return rows.map((r) => ({
+        id: String(r.id),
+        label: [r.incident_number, r.description]
+          .filter(Boolean)
+          .map(String)
+          .join(' - ')
+          .slice(0, 80),
+      })) as SourceRecord[];
+    },
+    enabled: !!projectId && sourceModule === 'safety',
+  });
+
+  const inspectionsQ = useQuery({
+    queryKey: ['daily-diary', 'src-inspections', projectId],
+    queryFn: async () => {
+      const rows = await apiGet<Record<string, unknown>[]>(
+        `/v1/inspections/?project_id=${encodeURIComponent(projectId)}`,
+      );
+      return rows.map((r) => ({
+        id: String(r.id),
+        label: [r.inspection_number, r.title]
+          .filter(Boolean)
+          .map(String)
+          .join(' - ')
+          .slice(0, 80),
+      })) as SourceRecord[];
+    },
+    enabled: !!projectId && sourceModule === 'inspections',
+  });
+
+  const sourceOptions: SourceRecord[] =
+    sourceModule === 'safety'
+      ? (incidentsQ.data ?? [])
+      : sourceModule === 'inspections'
+        ? (inspectionsQ.data ?? [])
+        : [];
+
+  // Open the upstream record a source-linked entry was raised from.
+  // Inspections already consume ?highlight (scroll + flash); Safety lands on
+  // the incidents tab today and will consume ?highlight once its batch ships.
+  const openSource = (mod: string, ref: string) => {
+    if (mod === 'inspections') {
+      navigate(`/inspections?highlight=${ref}`);
+    } else if (mod === 'safety' || mod === 'hse') {
+      navigate(`/safety?highlight=${ref}`);
+    }
+  };
 
   const invalidateEntries = () =>
     qc.invalidateQueries({ queryKey: ['daily-diary', 'entries', diaryId] });
@@ -1729,9 +1844,14 @@ function EntriesTimeline({
         entry_time: nowLocalISO(),
         title: title.trim(),
         description: description.trim() || undefined,
+        // Provenance: only sent when the entry summarises an upstream record
+        // and the user picked one. source_ref is a UUID the backend validates.
+        source_module: sourceModule && sourceRef ? sourceModule : undefined,
+        source_ref: sourceModule && sourceRef ? sourceRef : undefined,
       });
       setTitle('');
       setDescription('');
+      setSourceRef('');
       void invalidateEntries();
       addToast({ type: 'success', title: t('daily_diary.entry_created', { defaultValue: 'Entry added' }) });
     } catch (err) {
@@ -1766,7 +1886,12 @@ function EntriesTimeline({
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
             <select
               value={entryType}
-              onChange={(e) => setEntryType(e.target.value as EntryType)}
+              onChange={(e) => {
+                setEntryType(e.target.value as EntryType);
+                // Clear any previously-picked source when switching types so
+                // we never persist an inspection id under an incident entry.
+                setSourceRef('');
+              }}
               className={inputCls}
             >
               {(
@@ -1811,6 +1936,36 @@ function EntriesTimeline({
             rows={2}
             className={clsx(inputCls, 'h-auto py-2')}
           />
+          {sourceModule && (
+            <div>
+              <label className="mb-1 block text-xs font-medium text-content-secondary">
+                {sourceModule === 'safety'
+                  ? t('daily_diary.link_incident', { defaultValue: 'Link a safety incident (optional)' })
+                  : t('daily_diary.link_inspection', { defaultValue: 'Link a quality inspection (optional)' })}
+              </label>
+              <select
+                value={sourceRef}
+                onChange={(e) => setSourceRef(e.target.value)}
+                className={inputCls}
+                data-testid="daily-diary-entry-source"
+              >
+                <option value="">
+                  {t('daily_diary.link_source_none', { defaultValue: 'No linked record' })}
+                </option>
+                {sourceOptions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-2xs text-content-tertiary">
+                {t('daily_diary.link_source_hint', {
+                  defaultValue:
+                    'Linking the source record lets the diary entry deep-link back to it for an audit trail.',
+                })}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -1845,6 +2000,21 @@ function EntriesTimeline({
                     <p className="mt-1 text-xs text-content-secondary whitespace-pre-wrap">
                       {e.description}
                     </p>
+                  )}
+                  {e.source_module && e.source_ref && (
+                    <button
+                      type="button"
+                      onClick={() => openSource(e.source_module as string, e.source_ref as string)}
+                      className="mt-1.5 inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue-subtle/10"
+                      data-testid="daily-diary-entry-view-source"
+                    >
+                      <ExternalLink size={11} />
+                      {e.source_module === 'inspections'
+                        ? t('daily_diary.view_inspection', { defaultValue: 'View inspection' })
+                        : e.source_module === 'safety' || e.source_module === 'hse'
+                          ? t('daily_diary.view_incident', { defaultValue: 'View incident' })
+                          : t('daily_diary.view_source', { defaultValue: 'View source' })}
+                    </button>
                   )}
                   <p className="mt-1 text-2xs text-content-tertiary">
                     <DateDisplay value={e.entry_time} />
