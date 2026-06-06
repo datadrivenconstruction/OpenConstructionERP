@@ -4411,7 +4411,7 @@ export function QuickEstimatePage() {
                 className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary hover:border-oe-blue/40 hover:text-oe-blue transition-colors"
               >
                 <Database size={13} />
-                {t('ai.estimate_link_match', { defaultValue: 'Match Elements' })}
+                {t('ai.estimate_link_match', { defaultValue: 'CAD Match → Cost' })}
               </Link>
               <Link
                 to="/validation"
