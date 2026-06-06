@@ -13,6 +13,26 @@
     "news": "News",
     "download": "Download"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Download",
+      "title": "Get the <i>real</i> desktop app, free.",
+      "lede": "A native build of OpenConstructionERP. No Python, no pip, no Docker, no database to set up. One file, run it, done. Your data stays on your machine.",
+      "chip_no_deps": "No Python, pip, Docker or DB",
+      "chip_local": "Data stays local",
+      "chip_fast": "First launch ~60s, then fast",
+      "chip_oss": "Open source, AGPL-3.0",
+      "flag_detected": "Detected",
+      "btn_download": "Download",
+      "btn_install_terminal": "Install via terminal",
+      "reading": "Reading latest release…",
+      "win_note": "Windows 10/11 - 64-bit installer",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Drag the app into your Applications folder.",
+      "linux_note": "AppImage, deb and rpm",
+      "all_builds": "View all builds and checksums on GitHub"
+    }
+  },
   "hero": {
     "version_meta": "shipped 2026-04-20",
     "headline": "<span class=\"word\"><span>Run</span></span> <span class=\"word\"><span>the</span></span> <span class=\"word\"><span>whole</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>construction</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>project</span></span>",

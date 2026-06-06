@@ -12463,9 +12463,9 @@
 
   <section class="home-dl reveal" id="download" aria-labelledby="home-dl-h2">
     <div class="home-dl-head">
-      <p class="home-dl-eyebrow">Download</p>
-      <h2 class="home-dl-h2" id="home-dl-h2">Get the <i>real</i> desktop app, free.</h2>
-      <p class="home-dl-lede">
+      <p class="home-dl-eyebrow" data-i18n="home.download_cards.eyebrow">Download</p>
+      <h2 class="home-dl-h2" id="home-dl-h2" data-i18n-html="home.download_cards.title">Get the <i>real</i> desktop app, free.</h2>
+      <p class="home-dl-lede" data-i18n="home.download_cards.lede">
         A native build of OpenConstructionERP. No Python, no pip, no Docker, no database to set up.
         One file, run it, done. Your data stays on your machine.
       </p>
@@ -12478,10 +12478,10 @@
     </div>
 
     <ul class="dl-chips" aria-label="What you get">
-      <li class="dl-chip"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M6.5 11.2 3.3 8l-1 1 4.2 4.2 8.2-8.2-1-1z"/></svg>No Python, pip, Docker or DB</li>
-      <li class="dl-chip"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1 2 3.4v4.1c0 3.7 2.5 6.7 6 7.5 3.5-.8 6-3.8 6-7.5V3.4zm0 1.6 4.5 1.8v3.1c0 2.8-1.9 5.2-4.5 5.9-2.6-.7-4.5-3.1-4.5-5.9V4.4z"/></svg>Data stays local</li>
-      <li class="dl-chip"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1.5A6.5 6.5 0 1 0 14.5 8 6.5 6.5 0 0 0 8 1.5zm0 1.3A5.2 5.2 0 1 1 2.8 8 5.2 5.2 0 0 1 8 2.8zM7.4 4.6v3.8l3 1.8.6-1-2.4-1.4V4.6z"/></svg>First launch ~60s, then fast</li>
-      <li class="dl-chip"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1.5 2 4v3.5c0 3.6 2.4 6.4 6 7.5 3.6-1.1 6-3.9 6-7.5V4zm-.7 9.3L4.8 8.3l.9-.9 1.6 1.6 3.1-3.4.9.8z"/></svg>Open source, AGPL-3.0</li>
+      <li class="dl-chip"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M6.5 11.2 3.3 8l-1 1 4.2 4.2 8.2-8.2-1-1z"/></svg><span data-i18n="home.download_cards.chip_no_deps">No Python, pip, Docker or DB</span></li>
+      <li class="dl-chip"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1 2 3.4v4.1c0 3.7 2.5 6.7 6 7.5 3.5-.8 6-3.8 6-7.5V3.4zm0 1.6 4.5 1.8v3.1c0 2.8-1.9 5.2-4.5 5.9-2.6-.7-4.5-3.1-4.5-5.9V4.4z"/></svg><span data-i18n="home.download_cards.chip_local">Data stays local</span></li>
+      <li class="dl-chip"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1.5A6.5 6.5 0 1 0 14.5 8 6.5 6.5 0 0 0 8 1.5zm0 1.3A5.2 5.2 0 1 1 2.8 8 5.2 5.2 0 0 1 8 2.8zM7.4 4.6v3.8l3 1.8.6-1-2.4-1.4V4.6z"/></svg><span data-i18n="home.download_cards.chip_fast">First launch ~60s, then fast</span></li>
+      <li class="dl-chip"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1.5 2 4v3.5c0 3.6 2.4 6.4 6 7.5 3.6-1.1 6-3.9 6-7.5V4zm-.7 9.3L4.8 8.3l.9-.9 1.6 1.6 3.1-3.4.9.8z"/></svg><span data-i18n="home.download_cards.chip_oss">Open source, AGPL-3.0</span></li>
     </ul>
 
     <div class="dl-grid">
@@ -12491,16 +12491,16 @@
           <span class="dl-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5.4 10.4 4.3v6.6H3zM10.4 11.6v6.6L3 17.1V11.6zM11.5 4.1 21 2.7v8.2h-9.5zM21 11.9v8.2l-9.5-1.4v-6.8z"/></svg></span>
           <div class="dl-card-id">
             <h3 class="dl-card-name">Windows</h3>
-            <p class="dl-card-note">Windows 10/11, 64-bit. WebView2 auto-installs.</p>
+            <p class="dl-card-note" data-i18n="home.download_cards.win_note">Windows 10/11 - 64-bit installer</p>
           </div>
-          <span class="dl-rec-flag">Recommended</span>
+          <span class="dl-rec-flag" data-i18n="home.download_cards.flag_detected">Detected</span>
         </header>
         <div class="dl-badges" aria-hidden="true"><span class="dl-badge">x64</span><span class="dl-badge">.exe</span><span class="dl-badge">Win 10+</span></div>
-        <a class="dl-dl dl-primary" id="btn-win" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">
+        <a class="dl-dl dl-primary" id="btn-win" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener" aria-label="Download OpenConstructionERP for Windows">
           <svg viewBox="0 0 16 16" aria-hidden="true" class="dl-dl-i"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg>
-          <span>Download for Windows</span>
+          <span data-i18n="home.download_cards.btn_download">Download</span>
         </a>
-        <p class="dl-meta" id="meta-win"><span class="dl-meta-skel">Reading latest release&hellip;</span></p>
+        <p class="dl-meta" id="meta-win"><span class="dl-meta-skel" data-i18n="home.download_cards.reading">Reading latest release&hellip;</span></p>
       </article>
 
       <!-- macOS -->
@@ -12509,17 +12509,17 @@
           <span class="dl-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1zM14.5 6.3c.6-.7 1-1.6.9-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.4 2.4-1.1z"/></svg></span>
           <div class="dl-card-id">
             <h3 class="dl-card-name">macOS</h3>
-            <p class="dl-card-note">Apple Silicon (aarch64), macOS 10.15+.</p>
+            <p class="dl-card-note" data-i18n="home.download_cards.mac_note">macOS 12+ - Apple Silicon</p>
           </div>
-          <span class="dl-rec-flag">Recommended</span>
+          <span class="dl-rec-flag" data-i18n="home.download_cards.flag_detected">Detected</span>
         </header>
-        <div class="dl-badges" aria-hidden="true"><span class="dl-badge">aarch64</span><span class="dl-badge">.dmg</span><span class="dl-badge">10.15+</span></div>
-        <a class="dl-dl dl-primary" id="btn-mac" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">
+        <div class="dl-badges" aria-hidden="true"><span class="dl-badge">aarch64</span><span class="dl-badge">.dmg</span><span class="dl-badge">12+</span></div>
+        <a class="dl-dl dl-primary" id="btn-mac" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener" aria-label="Download OpenConstructionERP for macOS">
           <svg viewBox="0 0 16 16" aria-hidden="true" class="dl-dl-i"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg>
-          <span>Download for macOS</span>
+          <span data-i18n="home.download_cards.btn_download">Download</span>
         </a>
-        <p class="dl-meta" id="meta-mac"><span class="dl-meta-skel">Reading latest release&hellip;</span></p>
-        <p class="dl-card-foot">Drag the app into your Applications folder.</p>
+        <p class="dl-meta" id="meta-mac"><span class="dl-meta-skel" data-i18n="home.download_cards.reading">Reading latest release&hellip;</span></p>
+        <p class="dl-card-foot" data-i18n="home.download_cards.mac_foot">Drag the app into your Applications folder.</p>
       </article>
 
       <!-- Linux -->
@@ -12528,27 +12528,21 @@
           <span class="dl-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2zm-1.3 4c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zm2.6 0c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zM12 9.3c.8 0 1.7.5 1.7.9 0 .3-.9.7-1.7.7s-1.7-.4-1.7-.7c0-.4.9-.9 1.7-.9z"/></svg></span>
           <div class="dl-card-id">
             <h3 class="dl-card-name">Linux</h3>
-            <p class="dl-card-note">.deb and .AppImage, 64-bit.</p>
+            <p class="dl-card-note" data-i18n="home.download_cards.linux_note">AppImage, deb and rpm</p>
           </div>
-          <span class="dl-rec-flag">Recommended</span>
+          <span class="dl-rec-flag" data-i18n="home.download_cards.flag_detected">Detected</span>
         </header>
         <div class="dl-badges" aria-hidden="true"><span class="dl-badge">amd64</span><span class="dl-badge">.deb</span><span class="dl-badge">.AppImage</span></div>
-        <div class="dl-split">
-          <a class="dl-dl dl-primary" id="btn-deb" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">
-            <svg viewBox="0 0 16 16" aria-hidden="true" class="dl-dl-i"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg>
-            <span>.deb</span>
-          </a>
-          <a class="dl-dl dl-ghost" id="btn-app" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">
-            <svg viewBox="0 0 16 16" aria-hidden="true" class="dl-dl-i"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg>
-            <span>.AppImage</span>
-          </a>
-        </div>
-        <p class="dl-meta" id="meta-linux"><span class="dl-meta-skel">Reading latest release&hellip;</span></p>
+        <a class="dl-dl dl-primary" id="btn-linux" href="/download#card-linux" aria-label="Linux install options for OpenConstructionERP">
+          <svg viewBox="0 0 16 16" aria-hidden="true" class="dl-dl-i"><path d="M2.5 2.5h11a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm0 1.3v2h11v-2zm1.4 3.4-.85.85 1.4 1.4-1.4 1.4.85.85 2.25-2.25zm3.1 3.5v1.2h3.5v-1.2z"/></svg>
+          <span data-i18n="home.download_cards.btn_install_terminal">Install via terminal</span>
+        </a>
+        <p class="dl-meta" id="meta-linux"><span class="dl-meta-skel" data-i18n="home.download_cards.reading">Reading latest release&hellip;</span></p>
       </article>
     </div>
 
     <p class="dl-allnote">
-      <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">View all builds and checksums on GitHub</a>
+      <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener" data-i18n="home.download_cards.all_builds">View all builds and checksums on GitHub</a>
       <span class="dl-sep" aria-hidden="true">/</span>
       <span id="home-dl-version-tag" class="dl-mono"></span>
     </p>
@@ -12602,11 +12596,15 @@
     }
 
     function humanizeBytes(b){ return (b/1048576).toFixed(0) + " MB"; }
-    var map = { win:{btn:"btn-win",meta:"meta-win"}, mac:{btn:"btn-mac",meta:"meta-mac"}, deb:{btn:"btn-deb",meta:"meta-linux"}, app:{btn:"btn-app",meta:"meta-linux"} };
+    var map = { win:{btn:"btn-win",meta:"meta-win"}, mac:{btn:"btn-mac",meta:"meta-mac"} };
+    var LINUX_META = "AppImage, deb and rpm";
 
     function fallback(){
-      ["btn-win","btn-mac","btn-deb","btn-app"].forEach(function(id){ var el=document.getElementById(id); if(el) el.setAttribute("href", RELEASES_PAGE); });
-      ["meta-win","meta-mac","meta-linux"].forEach(function(id){ var el=document.getElementById(id); if(el) el.innerHTML='<a class="dl-mono" style="color:var(--accent-3);text-decoration:none" href="'+RELEASES_PAGE+'" rel="noopener">View all downloads &rarr;</a>'; });
+      /* Win / Mac fall back to the GitHub releases page; Linux always points at
+         the on-site download page (which resolves its own assets). */
+      ["btn-win","btn-mac"].forEach(function(id){ var el=document.getElementById(id); if(el) el.setAttribute("href", RELEASES_PAGE); });
+      ["meta-win","meta-mac"].forEach(function(id){ var el=document.getElementById(id); if(el) el.innerHTML='<a class="dl-mono" style="color:var(--accent-3);text-decoration:none" href="'+RELEASES_PAGE+'" rel="noopener">View all downloads &rarr;</a>'; });
+      var lx=document.getElementById("meta-linux"); if(lx) lx.textContent = LINUX_META;
     }
 
     fetch("https://api.github.com/repos/" + REPO + "/releases/latest", { headers: { "Accept": "application/vnd.github+json" } })
@@ -12615,39 +12613,25 @@
         var v = rel.tag_name || "";
         var assets = rel.assets || [];
         function pick(re){ for(var i=0;i<assets.length;i++){ if(re.test(assets[i].name)) return assets[i]; } return null; }
-        var win=pick(/\.exe$/i), mac=pick(/\.dmg$/i), deb=pick(/\.deb$/i), app=pick(/\.AppImage$/i);
+        var win=pick(/\.exe$/i), mac=pick(/\.dmg$/i);
         var versionTag=document.getElementById("home-dl-version-tag");
         if(versionTag && v) versionTag.textContent = v;
-        function wire(asset, def, splitLabel){
+        function wire(asset, def){
           var btn=document.getElementById(def.btn), meta=document.getElementById(def.meta);
           if(asset && asset.browser_download_url){
             if(btn) btn.setAttribute("href", asset.browser_download_url);
-            if(meta){
-              var size=humanizeBytes(asset.size);
-              if(splitLabel){
-                var prev=meta.getAttribute("data-built")||"";
-                prev += (prev?" &middot; ":"") + splitLabel + " <b>" + size + "</b>";
-                meta.setAttribute("data-built", prev);
-                meta.innerHTML=(v?v+" &middot; ":"")+prev;
-              } else { meta.innerHTML=(v?v+" &middot; ":"")+"<b>"+size+"</b>"; }
-            }
-          } else if(meta && !splitLabel){
+            if(meta) meta.innerHTML=(v?v+" &middot; ":"")+"<b>"+humanizeBytes(asset.size)+"</b>";
+          } else {
             if(btn) btn.setAttribute("href", RELEASES_PAGE);
-            meta.innerHTML='<a class="dl-mono" style="color:var(--accent-3);text-decoration:none" href="'+RELEASES_PAGE+'" rel="noopener">View on GitHub &rarr;</a>';
-          } else if(!asset){ if(btn) btn.setAttribute("href", RELEASES_PAGE); }
+            if(meta) meta.innerHTML='<a class="dl-mono" style="color:var(--accent-3);text-decoration:none" href="'+RELEASES_PAGE+'" rel="noopener">View on GitHub &rarr;</a>';
+          }
         }
-        wire(win, map.win, null);
-        wire(mac, map.mac, null);
+        wire(win, map.win);
+        wire(mac, map.mac);
+        /* Linux routes to the dedicated /download page (which resolves the
+           .deb / .AppImage / .rpm itself); just show the version + format note. */
         var linuxMeta=document.getElementById("meta-linux");
-        if(linuxMeta) linuxMeta.removeAttribute("data-built");
-        wire(deb, map.deb, ".deb");
-        wire(app, map.app, ".AppImage");
-        if(!deb && !app){
-          var lxDocs="https://github.com/"+REPO+"#quick-start";
-          var dEl=document.getElementById("btn-deb"); if(dEl) dEl.setAttribute("href", lxDocs);
-          var aEl=document.getElementById("btn-app"); if(aEl) aEl.setAttribute("href", lxDocs);
-          if(linuxMeta) linuxMeta.innerHTML='Native .deb / .AppImage are still building. On Linux now: <code class="dl-mono">pip install openconstructionerp</code> or Docker &middot; <a style="color:var(--accent-3);text-decoration:none" href="'+lxDocs+'" rel="noopener">Quick Start &rarr;</a>';
-        }
+        if(linuxMeta) linuxMeta.innerHTML=(v?v+" &middot; ":"")+LINUX_META;
       })
       .catch(function(){ fallback(); });
   })();
