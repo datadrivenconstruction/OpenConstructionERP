@@ -7,6 +7,8 @@ import {
   ShieldAlert,
   ClipboardList,
   Users,
+  Gauge,
+  Scale,
 } from 'lucide-react';
 
 /**
@@ -28,7 +30,9 @@ export type PlanningRouteKey =
   | 'schedule-advanced'
   | 'tasks'
   | '5d'
-  | 'risks';
+  | 'risks'
+  | 'capacity'
+  | 'leveling';
 
 interface LinkDef {
   key: PlanningRouteKey | 'meetings';
@@ -71,6 +75,18 @@ export function PlanningCrossLinks({ active }: { active: PlanningRouteKey }) {
       to: '/risks',
       icon: ShieldAlert,
       label: t('planning.link_risks', { defaultValue: 'Risk Register' }),
+    },
+    {
+      key: 'capacity',
+      to: '/portfolio/capacity',
+      icon: Gauge,
+      label: t('planning.link_capacity', { defaultValue: 'Capacity Planning' }),
+    },
+    {
+      key: 'leveling',
+      to: '/portfolio/leveling',
+      icon: Scale,
+      label: t('planning.link_leveling', { defaultValue: 'Resource Leveling' }),
     },
     {
       key: 'meetings',

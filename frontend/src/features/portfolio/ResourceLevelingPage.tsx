@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import {
   User,
   Users,
@@ -11,6 +12,10 @@ import {
   Move,
   Split,
   HelpCircle,
+  Check,
+  ExternalLink,
+  CalendarDays,
+  ArrowUpRight,
 } from 'lucide-react';
 
 import {
@@ -23,15 +28,45 @@ import {
   Breadcrumb,
   DismissibleInfo,
   IntroRichText,
+  ConfirmDialog,
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
-import { getErrorMessage } from '@/shared/lib/api';
+import { PlanningCrossLinks } from '@/features/schedule/PlanningCrossLinks';
+import { useToastStore } from '@/stores/useToastStore';
+import { apiPatch, getErrorMessage } from '@/shared/lib/api';
 import {
   portfolioApi,
+  type LevelingBooking,
   type LevelingCell,
   type LevelingResourceRow,
   type LevelingSuggestion,
 } from './api';
+
+/**
+ * Map a leveling suggestion to the assignment PATCH body that applies it.
+ *
+ * The backend leveling engine only proposes two deterministic actions:
+ *
+ *   - "spread": reduce the largest contributing booking to
+ *     ``suggested_allocation_percent`` so the over-allocated bucket fits the
+ *     resource's declared capacity. This is fully defined by the payload, so we
+ *     can apply it with a single PATCH on ``allocation_percent`` against the
+ *     existing /v1/resources/assignments/{id} endpoint.
+ *   - "shift": move a booking to another period. The engine does NOT compute a
+ *     target period (it would be fabricated data), so there is nothing safe to
+ *     PATCH. We return null and the UI offers a "Review booking" deep link
+ *     instead, leaving the reschedule to a human.
+ *
+ * Returns null when the suggestion is not safely auto-appliable.
+ */
+export function buildApplyPatch(
+  suggestion: LevelingSuggestion,
+): { allocation_percent: number } | null {
+  if (suggestion.action !== 'spread') return null;
+  const pct = suggestion.suggested_allocation_percent;
+  if (typeof pct !== 'number' || pct < 0 || pct > 100) return null;
+  return { allocation_percent: pct };
+}
 
 /** Bucket horizon presets: how many buckets to show per bucket size. */
 const HORIZON: Record<'week' | 'month', number> = { week: 12, month: 6 };
@@ -82,14 +117,60 @@ interface DrawerState {
 
 export function ResourceLevelingPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const pushToast = useToastStore((s) => s.addToast);
   const [bucket, setBucket] = useState<'week' | 'month'>('week');
   const [drawer, setDrawer] = useState<DrawerState | null>(null);
+  // Suggestion pending human confirmation before its assignment PATCH fires.
+  const [pendingApply, setPendingApply] = useState<LevelingSuggestion | null>(null);
   const range = useMemo(() => rangeFor(bucket), [bucket]);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['portfolio', 'leveling', range.start, range.end, bucket],
     queryFn: () => portfolioApi.getLeveling({ start: range.start, end: range.end, bucket }),
     retry: false,
+  });
+
+  // CONN-35: apply a leveling suggestion. Human-confirmed (ConfirmDialog), the
+  // only mutation maps "spread" to a single allocation_percent PATCH on the
+  // existing assignment endpoint; "shift" is never auto-applied (no fabricated
+  // target period). On success we invalidate so the heatmap recomputes.
+  const applyMutation = useMutation({
+    mutationFn: (suggestion: LevelingSuggestion) => {
+      const patch = buildApplyPatch(suggestion);
+      if (!patch) {
+        return Promise.reject(
+          new Error(
+            t('leveling.apply_not_supported', {
+              defaultValue: 'This suggestion cannot be applied automatically.',
+            }),
+          ),
+        );
+      }
+      return apiPatch(`/v1/resources/assignments/${suggestion.target_assignment_id}`, patch);
+    },
+    onSuccess: () => {
+      pushToast({
+        type: 'success',
+        title: t('leveling.apply_done', { defaultValue: 'Booking updated' }),
+        message: t('leveling.apply_done_desc', {
+          defaultValue: 'The allocation was reduced to fit capacity.',
+        }),
+      });
+      setPendingApply(null);
+      setDrawer(null);
+      queryClient.invalidateQueries({ queryKey: ['portfolio', 'leveling'] });
+      queryClient.invalidateQueries({ queryKey: ['portfolio', 'capacity'] });
+    },
+    onError: (err) => {
+      pushToast({
+        type: 'error',
+        title: t('leveling.apply_failed', { defaultValue: 'Could not apply suggestion' }),
+        message: getErrorMessage(err),
+      });
+      setPendingApply(null);
+    },
   });
 
   const buckets = data?.buckets ?? [];
@@ -114,6 +195,10 @@ export function ResourceLevelingPage() {
       <Breadcrumb
         items={[{ label: t('nav.resource_leveling', { defaultValue: 'Resource Leveling' }) }]}
       />
+
+      {/* CONN-37: planning section cross-links so the leveling tool sits in the
+          same connected chain as Capacity, Schedule and the rest. */}
+      <PlanningCrossLinks active="leveling" />
 
       {/* Canonical header row — no in-page H1; the bucket toggle is a view
           switch in the actions slot, on the same h-9 midline. */}
@@ -150,6 +235,20 @@ export function ResourceLevelingPage() {
         title={t('leveling.intro_title', {
           defaultValue: 'Smooth out over-booked crews and machines',
         })}
+        links={[
+          {
+            label: t('leveling.link_capacity', { defaultValue: 'Capacity Planning' }),
+            onClick: () => navigate('/portfolio/capacity'),
+          },
+          {
+            label: t('leveling.link_resources', { defaultValue: 'Resources & Crew' }),
+            onClick: () => navigate('/resources'),
+          },
+          {
+            label: t('leveling.link_schedule', { defaultValue: '4D Schedule' }),
+            onClick: () => navigate('/schedule'),
+          },
+        ]}
         more={
           t('leveling.intro_more', { defaultValue: '' })
             ? <IntroRichText text={t('leveling.intro_more')} />
@@ -401,6 +500,22 @@ export function ResourceLevelingPage() {
                       key={`${s.target_assignment_id}-${s.bucket_index}-${i}`}
                       suggestion={s}
                       bucketLabel={bucketLabel(s.bucket_index)}
+                      onApply={() => setPendingApply(s)}
+                      applying={
+                        applyMutation.isPending &&
+                        pendingApply?.target_assignment_id === s.target_assignment_id &&
+                        pendingApply?.bucket_index === s.bucket_index
+                      }
+                      onOpenProject={
+                        s.target_project_id
+                          ? () => navigate(`/projects/${s.target_project_id}`)
+                          : undefined
+                      }
+                      onOpenSchedule={
+                        s.target_project_id
+                          ? () => navigate(`/schedule?project_id=${s.target_project_id}`)
+                          : undefined
+                      }
                     />
                   ))}
                 </ul>
@@ -433,13 +548,13 @@ export function ResourceLevelingPage() {
                     </div>
                     <ul className="space-y-0.5">
                       {cell.bookings.map((bk) => (
-                        <li
+                        <BookingRow
                           key={bk.assignment_id}
-                          className="flex items-center justify-between text-content-tertiary"
-                        >
-                          <span className="truncate">{bk.project_name}</span>
-                          <span className="tabular-nums">{bk.allocation_percent}%</span>
-                        </li>
+                          booking={bk}
+                          onOpenProject={
+                            bk.project_id ? () => navigate(`/projects/${bk.project_id}`) : undefined
+                          }
+                        />
                       ))}
                     </ul>
                   </li>
@@ -449,20 +564,81 @@ export function ResourceLevelingPage() {
           </div>
         )}
       </SideDrawer>
+
+      {/* CONN-35: confirm before mutating a real assignment. */}
+      <ConfirmDialog
+        open={pendingApply !== null}
+        variant="warning"
+        title={t('leveling.apply_confirm_title', { defaultValue: 'Apply this suggestion?' })}
+        message={
+          pendingApply
+            ? t('leveling.apply_confirm_msg', {
+                defaultValue:
+                  'This reduces the booking on {{project}} to {{pct}}% so the period fits capacity. You can change it back at any time.',
+                project: pendingApply.target_project_name,
+                pct: pendingApply.suggested_allocation_percent,
+              })
+            : ''
+        }
+        confirmLabel={t('leveling.apply', { defaultValue: 'Apply' })}
+        loading={applyMutation.isPending}
+        onCancel={() => setPendingApply(null)}
+        onConfirm={() => {
+          if (pendingApply) applyMutation.mutate(pendingApply);
+        }}
+      />
     </div>
+  );
+}
+
+function BookingRow({
+  booking,
+  onOpenProject,
+}: {
+  booking: LevelingBooking;
+  onOpenProject?: () => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <li className="flex items-center justify-between text-content-tertiary">
+      {onOpenProject ? (
+        <button
+          type="button"
+          onClick={onOpenProject}
+          title={t('leveling.open_project', { defaultValue: 'Open project' })}
+          className="group inline-flex min-w-0 items-center gap-1 truncate text-left text-oe-blue-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue rounded"
+        >
+          <span className="truncate">{booking.project_name}</span>
+          <ArrowUpRight size={11} className="shrink-0 opacity-60 group-hover:opacity-100" />
+        </button>
+      ) : (
+        <span className="truncate">{booking.project_name}</span>
+      )}
+      <span className="tabular-nums">{booking.allocation_percent}%</span>
+    </li>
   );
 }
 
 function SuggestionItem({
   suggestion,
   bucketLabel,
+  onApply,
+  applying,
+  onOpenProject,
+  onOpenSchedule,
 }: {
   suggestion: LevelingSuggestion;
   bucketLabel: string;
+  onApply: () => void;
+  applying: boolean;
+  onOpenProject?: () => void;
+  onOpenSchedule?: () => void;
 }) {
   const { t } = useTranslation();
   const isShift = suggestion.action === 'shift';
   const ActionIcon = isShift ? Move : Split;
+  // Only "spread" maps to a deterministic assignment PATCH (see buildApplyPatch).
+  const canApply = buildApplyPatch(suggestion) !== null;
   return (
     <li className="rounded-lg border border-rose-200/70 bg-rose-50/50 p-3 dark:border-rose-500/30 dark:bg-rose-500/10">
       <div className="flex items-center gap-2">
@@ -479,7 +655,20 @@ function SuggestionItem({
       <p className="mt-1.5 text-xs text-content-secondary">{suggestion.rationale}</p>
       <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-content-tertiary">
         <span>
-          {t('leveling.target_project', { defaultValue: 'Project' })}: {suggestion.target_project_name}
+          {t('leveling.target_project', { defaultValue: 'Project' })}:{' '}
+          {onOpenProject ? (
+            <button
+              type="button"
+              onClick={onOpenProject}
+              className="inline-flex items-center gap-0.5 text-oe-blue-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue rounded"
+              title={t('leveling.open_project', { defaultValue: 'Open project' })}
+            >
+              {suggestion.target_project_name}
+              <ArrowUpRight size={10} className="shrink-0 opacity-70" />
+            </button>
+          ) : (
+            suggestion.target_project_name
+          )}
         </span>
         <span>
           {t('leveling.overflow', { defaultValue: 'Over by' })} {suggestion.overflow_percent}%
@@ -489,6 +678,45 @@ function SuggestionItem({
             {t('leveling.suggested_alloc', { defaultValue: 'Suggested' })}:{' '}
             {suggestion.suggested_allocation_percent}%
           </span>
+        )}
+      </div>
+
+      {/* CONN-35 / CONN-36: apply control + deep links. "spread" can be applied
+          in place; "shift" has no computed target period, so we route the
+          planner to the booking instead of fabricating a date. */}
+      <div className="mt-2.5 flex flex-wrap items-center gap-2">
+        {canApply ? (
+          <button
+            type="button"
+            onClick={onApply}
+            disabled={applying}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-1 disabled:opacity-50"
+          >
+            <Check size={12} />
+            {t('leveling.apply', { defaultValue: 'Apply' })}
+          </button>
+        ) : (
+          onOpenSchedule && (
+            <button
+              type="button"
+              onClick={onOpenSchedule}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-2.5 py-1 text-[11px] font-medium text-content-secondary transition-colors hover:border-oe-blue/40 hover:text-oe-blue-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+            >
+              <CalendarDays size={12} />
+              {t('leveling.review_booking', { defaultValue: 'Review in 4D Schedule' })}
+            </button>
+          )
+        )}
+        {canApply && onOpenSchedule && (
+          <button
+            type="button"
+            onClick={onOpenSchedule}
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-oe-blue-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue rounded"
+            title={t('leveling.view_in_schedule', { defaultValue: 'View in 4D Schedule' })}
+          >
+            <ExternalLink size={11} />
+            {t('leveling.view_in_schedule', { defaultValue: 'View in 4D Schedule' })}
+          </button>
         )}
       </div>
     </li>
