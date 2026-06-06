@@ -3352,6 +3352,12 @@ export function BIMQuantityRulesPage() {
     mutationFn: (id: string) => applyQuantityMaps(id, false),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['bim-quantity-maps'] });
+      // The apply result does not carry a single BOQ id (positions can land
+      // across several BOQs), so the "View in BOQ" action opens the active
+      // project's BOQ list, where the freshly created positions now live.
+      // Only offer the action when something was actually written.
+      const wroteSomething =
+        data.links_created > 0 || data.positions_created > 0;
       addToast({
         type: 'success',
         title: t('bim_rules.toast_applied_title', { defaultValue: 'Rules applied' }),
@@ -3360,6 +3366,16 @@ export function BIMQuantityRulesPage() {
           links: data.links_created,
           positions: data.positions_created,
         }),
+        ...(wroteSomething
+          ? {
+              action: {
+                label: t('bim_rules.toast_applied_view_boq', {
+                  defaultValue: 'View in BOQ',
+                }),
+                onClick: () => navigate('/boq'),
+              },
+            }
+          : {}),
       });
     },
     onError: (err: unknown) => {

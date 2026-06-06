@@ -535,6 +535,8 @@ export function CoordinationHubPage() {
                 <CoordinationKPICards
                   data={dashboardQuery.data}
                   isLoading={dashboardQuery.isLoading}
+                  projectId={projectId}
+                  onNavigate={navigate}
                 />
               </>
             )}

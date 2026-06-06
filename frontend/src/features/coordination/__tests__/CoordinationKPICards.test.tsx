@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 
 // Override the global i18n mock with one that interpolates {{var}}
 // placeholders. The default ``setup.ts`` mock returns ``defaultValue``
@@ -115,5 +115,64 @@ describe('CoordinationKPICards', () => {
     const card = screen.getByTestId('kpi-federations');
     expect(card).toHaveTextContent('12');
     expect(card).toHaveTextContent('48330');
+  });
+
+  it('is not interactive without onNavigate', () => {
+    render(<CoordinationKPICards data={SAMPLE} />);
+    const card = screen.getByTestId('kpi-open-clashes');
+    expect(card).not.toHaveAttribute('role', 'button');
+    expect(card).not.toHaveAttribute('tabindex');
+  });
+
+  it('drills the clash + cost cards into the open clash list scoped to the project', () => {
+    const onNavigate = vi.fn();
+    render(
+      <CoordinationKPICards
+        data={SAMPLE}
+        projectId="p-1"
+        onNavigate={onNavigate}
+      />,
+    );
+    const clashCard = screen.getByTestId('kpi-open-clashes');
+    expect(clashCard).toHaveAttribute('role', 'button');
+    expect(clashCard).toHaveAttribute('tabindex', '0');
+    fireEvent.click(clashCard);
+    expect(onNavigate).toHaveBeenLastCalledWith(
+      '/clash?project=p-1&status=open',
+    );
+
+    fireEvent.click(screen.getByTestId('kpi-cost-impact'));
+    expect(onNavigate).toHaveBeenLastCalledWith(
+      '/clash?project=p-1&status=open',
+    );
+  });
+
+  it('drills rule packs and federations into their own pages', () => {
+    const onNavigate = vi.fn();
+    render(
+      <CoordinationKPICards
+        data={SAMPLE}
+        projectId="p-1"
+        onNavigate={onNavigate}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('kpi-rule-pack'));
+    expect(onNavigate).toHaveBeenLastCalledWith('/bim/rules');
+
+    fireEvent.click(screen.getByTestId('kpi-federations'));
+    expect(onNavigate).toHaveBeenLastCalledWith('/bim/federations');
+  });
+
+  it('activates the drill-down via the keyboard (Enter)', () => {
+    const onNavigate = vi.fn();
+    render(
+      <CoordinationKPICards
+        data={SAMPLE}
+        projectId="p-1"
+        onNavigate={onNavigate}
+      />,
+    );
+    fireEvent.keyDown(screen.getByTestId('kpi-federations'), { key: 'Enter' });
+    expect(onNavigate).toHaveBeenLastCalledWith('/bim/federations');
   });
 });

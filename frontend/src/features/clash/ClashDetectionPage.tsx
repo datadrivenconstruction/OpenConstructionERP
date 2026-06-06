@@ -628,6 +628,26 @@ export function ClashDetectionPage() {
     setParams(next, { replace: true });
   }, [projectId, params, setParams]);
 
+  // ── Coordination-Hub KPI deep-link (``?status=open``) ───────────────────
+  // The Coordination Hub "Open Clashes" / "Open Cost Impact" cards drill in
+  // here filtered to open. We park the requested KPI filter in a ref so the
+  // run-change reset below can re-apply it once a run is opened (the reset
+  // otherwise forces every filter back to "all"), then strip the param so a
+  // refresh / back-forward does not keep re-pinning it.
+  const pendingKpiFilterRef = useRef<'open' | null>(null);
+  const statusDeepLinkRef = useRef(false);
+  useEffect(() => {
+    if (statusDeepLinkRef.current) return;
+    const status = params.get('status') ?? '';
+    if (status !== 'open') return;
+    statusDeepLinkRef.current = true;
+    pendingKpiFilterRef.current = 'open';
+    setKpiFilter('open');
+    const next = new URLSearchParams(params);
+    next.delete('status');
+    setParams(next, { replace: true });
+  }, [params, setParams]);
+
   // Flush any pending write when this page unmounts so the last edit
   // isn't lost between an "apply filter → navigate away" beat.
   useEffect(() => {
@@ -759,7 +779,9 @@ export function ClashDetectionPage() {
     setFPair('');
     setFMinPen(0);
     setFSearch('');
-    setKpiFilter('all');
+    // Honour a pending ``?status=open`` deep-link from the Coordination Hub
+    // KPI cards; otherwise reset to the unfiltered view.
+    setKpiFilter(pendingKpiFilterRef.current ?? 'all');
     setSortKey('idx');
     setSortDir('asc');
     setPage(0);
@@ -1895,6 +1917,20 @@ export function ClashDetectionPage() {
         title={t('info.clash.title', {
           defaultValue: 'Clash detection',
         })}
+        links={[
+          {
+            label: t('clash.link_coordination_hub', {
+              defaultValue: 'Coordination Hub',
+            }),
+            onClick: () => navigate('/coordination'),
+          },
+          {
+            label: t('clash.link_bim_federations', {
+              defaultValue: 'BIM Federations',
+            }),
+            onClick: () => navigate('/bim/federations'),
+          },
+        ]}
       >
         {t('info.clash.body', {
           defaultValue:
