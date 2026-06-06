@@ -514,6 +514,10 @@ export function PropertyDevPage() {
               label: t('finance.title', { defaultValue: 'Finance' }),
               onClick: () => navigate('/finance'),
             },
+            {
+              label: t('nav.accommodation', { defaultValue: 'Accommodation' }),
+              onClick: () => navigate('/accommodation'),
+            },
           ]}
         >
           {t('propdev.intro_body', {

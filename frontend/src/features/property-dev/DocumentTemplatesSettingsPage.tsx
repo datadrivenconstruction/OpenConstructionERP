@@ -79,12 +79,14 @@ import {
   deleteDocumentTemplateLocaleOverride,
   getCustomDocumentTemplateContent,
   getDocumentTemplateLocale,
+  listDevelopments,
   listDocumentTemplates,
   putDocumentTemplateLocale,
   sampleDocumentPreview,
   saveTextCustomDocumentTemplate,
   uploadCustomDocumentTemplate,
   type CustomTemplateTextContentType,
+  type Development,
   type DocumentTemplateEntry,
   type DocumentTemplateLocaleStatus,
   type DocumentTemplateVariableGroup,
@@ -220,6 +222,16 @@ export function DocumentTemplatesSettingsPage() {
     staleTime: 5 * 60_000,
   });
 
+  // Developments feed the active-development picker (CONN-25): operators
+  // pick a development by name instead of pasting a raw UUID, so the
+  // per-development default-template toggles are reachable in two clicks.
+  const developmentsQ = useQuery({
+    queryKey: ['propdev-developments'],
+    queryFn: () => listDevelopments({ limit: 100 }),
+    staleTime: 5 * 60_000,
+  });
+  const developments = developmentsQ.data ?? [];
+
   // Persist the active-dev pick on change.
   useEffect(() => {
     writeActiveDevelopmentId(activeDevId);
@@ -312,24 +324,58 @@ export function DocumentTemplatesSettingsPage() {
             </div>
           </div>
         )}
-        {/* Active development context — used by the per-dev "set as default" toggles */}
-        <div className="mt-3 flex items-center gap-2 text-xs text-content-secondary">
+        {/* Active development context — used by the per-dev "set as default"
+            toggles. A select populated from listDevelopments (CONN-25)
+            replaces the old free-text UUID input so the per-development
+            defaults are reachable without pasting an id. The chosen id is
+            stored under the same localStorage key. */}
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-content-secondary">
           <label htmlFor="propdev-active-dev" className="font-medium">
             {t('property_dev.doc_templates.active_dev_label', {
               defaultValue: 'Active development (for "set as default" toggles):',
             })}
           </label>
-          <input
+          <select
             id="propdev-active-dev"
-            type="text"
-            placeholder={t('property_dev.doc_templates.active_dev_placeholder', {
-              defaultValue: 'Development UUID (optional)',
-            })}
             value={activeDevId ?? ''}
-            onChange={(e) => setActiveDevId(e.target.value.trim() || null)}
-            className="h-7 w-72 max-w-full rounded border border-border bg-surface-primary px-2 text-xs"
+            onChange={(e) => setActiveDevId(e.target.value || null)}
+            disabled={developmentsQ.isLoading}
+            className="h-7 w-72 max-w-full rounded border border-border bg-surface-primary px-2 text-xs disabled:opacity-60"
             data-testid="active-dev-input"
-          />
+          >
+            <option value="">
+              {developmentsQ.isLoading
+                ? t('common.loading', { defaultValue: 'Loading…' })
+                : t('property_dev.doc_templates.active_dev_none', {
+                    defaultValue: 'No development (built-in defaults)',
+                  })}
+            </option>
+            {developments.map((d: Development) => (
+              <option key={d.id} value={d.id}>
+                {d.code ? `${d.code} - ${d.name}` : d.name}
+              </option>
+            ))}
+            {/* Keep a stored id selectable even when it is not in the
+                loaded list (different project scope / stale localStorage). */}
+            {activeDevId &&
+              !developments.some((d: Development) => d.id === activeDevId) && (
+                <option value={activeDevId}>
+                  {t('property_dev.doc_templates.active_dev_unknown', {
+                    defaultValue: 'Saved development ({{id}})',
+                    id: activeDevId.slice(0, 8),
+                  })}
+                </option>
+              )}
+          </select>
+          {developmentsQ.isError && (
+            <button
+              type="button"
+              className="text-xs text-oe-blue underline"
+              onClick={() => developmentsQ.refetch()}
+            >
+              {t('common.retry', { defaultValue: 'Retry' })}
+            </button>
+          )}
           {activeDevId && (
             <button
               type="button"

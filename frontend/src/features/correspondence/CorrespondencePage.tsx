@@ -22,6 +22,7 @@ import {
   Download,
   Upload,
   Loader2,
+  ExternalLink,
 } from 'lucide-react';
 import {
   Button,
@@ -107,6 +108,110 @@ const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 const textareaCls =
   'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+
+/* ── Contact party deep links (CONN-21) ───────────────────────────────── */
+
+/**
+ * From/To fields store either a directory contact UUID (when picked via
+ * the ContactSearchInput) or free text (a typed name). We only deep-link
+ * the value when it is a UUID, and resolve the human name behind it the
+ * same way ContactSearchInput does - a lazy GET /contacts/{id}, cached.
+ */
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isContactId(value: string): boolean {
+  return UUID_RE.test(value.trim());
+}
+
+interface ContactNameShape {
+  company_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  primary_email?: string | null;
+}
+
+function contactDisplayName(c: ContactNameShape, fallback: string): string {
+  const parts: string[] = [];
+  if (c.company_name) parts.push(c.company_name);
+  if (c.first_name || c.last_name) {
+    parts.push([c.first_name, c.last_name].filter(Boolean).join(' '));
+  }
+  return parts.join(' - ') || c.primary_email || fallback;
+}
+
+/**
+ * Render a single correspondence party. A contact-id value becomes a
+ * deep link into the Contacts directory (label is the resolved name);
+ * free-text values render as plain text. Degrades gracefully: while the
+ * name resolves we show a shortened id, and a failed lookup keeps the id.
+ */
+function ContactRef({
+  value,
+  className,
+}: {
+  value: string;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  const trimmed = value.trim();
+  const isId = isContactId(trimmed);
+
+  const { data } = useQuery({
+    queryKey: ['contact-name', trimmed],
+    queryFn: () => apiGet<ContactNameShape>(`/v1/contacts/${trimmed}`),
+    enabled: isId,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+
+  if (!isId) {
+    return <span className={className}>{value}</span>;
+  }
+
+  const label = data ? contactDisplayName(data, trimmed) : trimmed.slice(0, 8);
+
+  return (
+    <Link
+      to={`/contacts?contactId=${encodeURIComponent(trimmed)}`}
+      onClick={(e) => e.stopPropagation()}
+      className={clsx(
+        'inline-flex items-center gap-1 text-oe-blue hover:underline',
+        className,
+      )}
+      title={t('correspondence.open_contact', {
+        defaultValue: 'Open contact record',
+      })}
+    >
+      <span className="truncate">{label}</span>
+      <ExternalLink size={10} aria-hidden="true" className="shrink-0" />
+    </Link>
+  );
+}
+
+/**
+ * Render a comma-joined list of party values (used for the To column,
+ * which is a string[]). Each entry resolves independently.
+ */
+function ContactRefList({
+  values,
+  className,
+}: {
+  values: string[];
+  className?: string;
+}) {
+  if (values.length === 0) return <>{'—'}</>;
+  return (
+    <span className={clsx('inline-flex flex-wrap items-center gap-x-1', className)}>
+      {values.map((v, i) => (
+        <span key={`${v}-${i}`} className="inline-flex items-center">
+          <ContactRef value={v} />
+          {i < values.length - 1 && <span className="text-content-tertiary">,</span>}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 /* ── Create Modal ─────────────────────────────────────────────────────── */
 
@@ -707,20 +812,24 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
           {t(`correspondence.type_${item.correspondence_type ?? 'letter'}`, { defaultValue: TYPE_LABELS[(item.correspondence_type ?? 'letter') as CorrespondenceType] })}
         </Badge>
 
-        {/* From */}
+        {/* From — deep-links to the contact when the value is an id */}
         <span
           className="text-xs text-content-tertiary w-24 truncate shrink-0 hidden lg:block"
           title={fromLabel}
         >
-          {fromLabel}
+          {item.from_contact_id ? (
+            <ContactRef value={item.from_contact_id} className="text-xs" />
+          ) : (
+            fromLabel
+          )}
         </span>
 
-        {/* To */}
+        {/* To — each party deep-links when it is a contact id */}
         <span
           className="text-xs text-content-tertiary w-24 truncate shrink-0 hidden lg:block"
           title={toLabel}
         >
-          {toLabel}
+          <ContactRefList values={item.to_contact_ids ?? []} className="text-xs" />
         </span>
 
         {/* Date */}
@@ -753,12 +862,17 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
       {expanded && (
         <div className="px-4 pb-4 pl-12 space-y-3 animate-fade-in">
           <div className="flex items-center gap-4 text-xs text-content-tertiary flex-wrap">
-            <span>
-              {t('correspondence.label_from', { defaultValue: 'From' })}: {item.from_contact_id}
+            <span className="inline-flex items-center gap-1">
+              {t('correspondence.label_from', { defaultValue: 'From' })}:{' '}
+              {item.from_contact_id ? (
+                <ContactRef value={item.from_contact_id} className="text-xs" />
+              ) : (
+                '—'
+              )}
             </span>
-            <span>
+            <span className="inline-flex items-center gap-1">
               {t('correspondence.label_to', { defaultValue: 'To' })}:{' '}
-              {(item.to_contact_ids ?? []).length > 0 ? (item.to_contact_ids ?? []).join(', ') : '-'}
+              <ContactRefList values={item.to_contact_ids ?? []} className="text-xs" />
             </span>
             <span>
               {t('correspondence.label_sent', { defaultValue: 'Sent' })}:{' '}
