@@ -1274,9 +1274,16 @@ class ResourcesService:
         *,
         project_id: uuid.UUID | None = None,
     ) -> list[dict[str, Any]]:
-        """Flat dispatcher-board: resources + their assignments in [start, end)."""
+        """Flat dispatcher-board: resources + their assignments in [start, end).
+
+        Each assignment is annotated with the human-readable ``project_name`` and
+        ``task_name`` so the board UI can render clickable rows instead of bare
+        UUIDs. The labels are transient attributes (not persisted); the response
+        schema reads them via ``from_attributes``.
+        """
         resources, _ = await self.resource_repo.list_all(limit=500, project_id=project_id)
         assignments = await self.assignment_repo.list_in_window(start, end, project_id=project_id)
+        await self._annotate_assignment_labels(assignments)
         by_resource: dict[uuid.UUID, list[Assignment]] = {}
         for a in assignments:
             by_resource.setdefault(a.resource_id, []).append(a)
@@ -1284,6 +1291,37 @@ class ResourcesService:
         for r in resources:
             entries.append({"resource": r, "assignments": by_resource.get(r.id, [])})
         return entries
+
+    async def _annotate_assignment_labels(self, assignments: list[Assignment]) -> None:
+        """Resolve project/task names for assignments and attach them transiently.
+
+        Two batched lookups (projects + tasks) keep this O(1) round-trips
+        regardless of assignment count. Missing references resolve to an empty
+        string so the UI falls back to a non-linked label rather than rendering
+        a stale UUID.
+        """
+        project_ids = {a.project_id for a in assignments if a.project_id is not None}
+        task_ids = {a.task_id for a in assignments if a.task_id is not None}
+
+        name_by_project: dict[uuid.UUID, str] = {}
+        if project_ids:
+            from app.modules.projects.models import Project
+
+            rows = (
+                await self.session.execute(select(Project.id, Project.name).where(Project.id.in_(project_ids)))
+            ).all()
+            name_by_project = {pid: pname for (pid, pname) in rows}
+
+        name_by_task: dict[uuid.UUID, str] = {}
+        if task_ids:
+            from app.modules.tasks.models import Task
+
+            rows = (await self.session.execute(select(Task.id, Task.title).where(Task.id.in_(task_ids)))).all()
+            name_by_task = {tid: ttitle for (tid, ttitle) in rows}
+
+        for a in assignments:
+            a.project_name = name_by_project.get(a.project_id, "") if a.project_id else ""  # type: ignore[attr-defined]
+            a.task_name = name_by_task.get(a.task_id, "") if a.task_id else ""  # type: ignore[attr-defined]
 
     async def board_conflicts(self, start: datetime, end: datetime) -> list[dict[str, Any]]:
         """List unresolved conflicts in [start, end)."""

@@ -324,7 +324,12 @@ class AssignmentResponse(BaseModel):
     id: UUID
     resource_id: UUID
     project_id: UUID | None = None
+    # Human-readable project / task labels resolved for the dispatcher board so
+    # the UI can render a clickable assignment row instead of a bare UUID. They
+    # are populated by the board endpoint only; other endpoints leave them blank.
+    project_name: str = ""
     task_id: UUID | None = None
+    task_name: str = ""
     work_order_id: str | None = None
     start_at: datetime
     end_at: datetime

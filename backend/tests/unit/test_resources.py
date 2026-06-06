@@ -1988,3 +1988,92 @@ async def test_propose_assignment_explicit_zero_cost_rate_is_preserved() -> None
         f"explicit zero cost_rate was overwritten with {assignment.cost_rate!r} — "
         f"the resource catalogue default leaked through `or`-coalesce"
     )
+
+
+# ── board() surfaces project / task labels for clickable dispatcher rows ────
+
+
+class _NamingSession(_StubSession):
+    """Session stub whose execute() returns id->name rows for the label join."""
+
+    def __init__(self, names: dict[uuid.UUID, str]) -> None:
+        super().__init__()
+        self._names = names
+
+    async def execute(self, stmt: Any) -> Any:  # noqa: ARG002 - stmt not inspected
+        rows = list(self._names.items())
+        return SimpleNamespace(all=lambda: rows)
+
+
+@pytest.mark.asyncio
+async def test_board_annotates_project_and_task_labels() -> None:
+    """The dispatcher board must attach human-readable project_name / task_name
+    to each assignment so the UI renders clickable rows instead of bare UUIDs.
+    """
+    svc = _make_service()
+    r = _make_resource(svc)
+    pid = uuid.uuid4()
+    tid = uuid.uuid4()
+    await svc.assignment_repo.create(
+        SimpleNamespace(
+            id=uuid.uuid4(),
+            resource_id=r.id,
+            project_id=pid,
+            task_id=tid,
+            work_order_id=None,
+            start_at=datetime(2026, 5, 10, 8, 0, tzinfo=UTC),
+            end_at=datetime(2026, 5, 10, 17, 0, tzinfo=UTC),
+            allocation_percent=100,
+            status="confirmed",
+            cost_rate=Decimal("0"),
+            currency="EUR",
+            notes="",
+            created_by=None,
+            metadata_={},
+        )
+    )
+    svc.session = _NamingSession({pid: "Riverside Tower", tid: "Pour slab L3"})
+
+    entries = await svc.board(
+        datetime(2026, 5, 1, tzinfo=UTC),
+        datetime(2026, 6, 1, tzinfo=UTC),
+    )
+    assignments = [a for e in entries for a in e["assignments"]]
+    assert len(assignments) == 1
+    a = assignments[0]
+    assert a.project_name == "Riverside Tower"
+    assert a.task_name == "Pour slab L3"
+
+
+@pytest.mark.asyncio
+async def test_board_labels_blank_when_unassigned() -> None:
+    """Assignments with no project/task get empty labels (no DB round-trip),
+    so the UI falls back to a non-linked 'Unassigned' cell rather than a UUID.
+    """
+    svc = _make_service()
+    r = _make_resource(svc)
+    await svc.assignment_repo.create(
+        SimpleNamespace(
+            id=uuid.uuid4(),
+            resource_id=r.id,
+            project_id=None,
+            task_id=None,
+            work_order_id=None,
+            start_at=datetime(2026, 5, 10, 8, 0, tzinfo=UTC),
+            end_at=datetime(2026, 5, 10, 17, 0, tzinfo=UTC),
+            allocation_percent=100,
+            status="confirmed",
+            cost_rate=Decimal("0"),
+            currency="EUR",
+            notes="",
+            created_by=None,
+            metadata_={},
+        )
+    )
+    entries = await svc.board(
+        datetime(2026, 5, 1, tzinfo=UTC),
+        datetime(2026, 6, 1, tzinfo=UTC),
+    )
+    a = next(a for e in entries for a in e["assignments"])
+    assert a.project_name == ""
+    assert a.task_name == ""

@@ -47,6 +47,7 @@ import {
   WideModal,
   WideModalSection,
   WideModalField,
+  ContactSearchInput,
 } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -180,13 +181,25 @@ const MEETING_STATUSES: MeetingStatus[] = ['scheduled', 'in_progress', 'complete
 
 /* -- Create Meeting Modal -------------------------------------------------- */
 
+/** An attendee linked to a real contact record (id + resolved display name). */
+interface LinkedAttendee {
+  id: string;
+  name: string;
+}
+
 interface MeetingFormData {
   title: string;
   meeting_type: MeetingType;
   date: string;
   location: string;
+  /** Chairperson display name (free text, or the picked contact's name). */
   chairperson: string;
+  /** Contact id when the chairperson was picked from the directory. */
+  chairperson_id: string;
+  /** Ad-hoc attendees typed one per line. */
   attendees: string;
+  /** Attendees linked to contact records - rendered as removable chips. */
+  linkedAttendees: LinkedAttendee[];
   minutes: string;
   attachments: MeetingAttachment[];
 }
@@ -204,7 +217,9 @@ const EMPTY_FORM: MeetingFormData = {
   date: '',
   location: '',
   chairperson: '',
+  chairperson_id: '',
   attendees: '',
+  linkedAttendees: [],
   minutes: '',
   attachments: [],
 };
@@ -213,6 +228,143 @@ function formatBytes(bytes: number): string {
   if (!bytes || bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/* -- People fields (Chairperson + Attendees, shared by Create + Edit) -------
+ *
+ * Chairperson and attendees were previously bare text inputs, so the person
+ * a meeting was chaired by / attended by was a dead string with no path back
+ * to that person's record. These fields let the user pick real contacts from
+ * the directory (ContactSearchInput), keeping a free-text fallback for guests
+ * who are not in the directory. Picked contacts carry their id so the meeting
+ * detail can link straight to /contacts?contactId=<id>.
+ */
+function MeetingPeopleFields({
+  form,
+  set,
+}: {
+  form: MeetingFormData;
+  set: <K extends keyof MeetingFormData>(key: K, value: MeetingFormData[K]) => void;
+}) {
+  const { t } = useTranslation();
+
+  const addLinkedAttendee = (id: string, name: string) => {
+    if (!id || !name) return;
+    // De-dupe by contact id so the same person is not added twice.
+    if (form.linkedAttendees.some((a) => a.id === id)) return;
+    set('linkedAttendees', [...form.linkedAttendees, { id, name }]);
+  };
+
+  const removeLinkedAttendee = (id: string) => {
+    set(
+      'linkedAttendees',
+      form.linkedAttendees.filter((a) => a.id !== id),
+    );
+  };
+
+  return (
+    <>
+      <WideModalField
+        label={t('meetings.field_chairperson', { defaultValue: 'Chairperson' })}
+        span={2}
+        hint={t('meetings.chairperson_hint', {
+          defaultValue:
+            'Pick a contact to link the chair to their directory record.',
+        })}
+      >
+        <ContactSearchInput
+          value={form.chairperson_id}
+          displayValue={form.chairperson}
+          onChange={(contactId, displayName) => {
+            set('chairperson_id', contactId);
+            set('chairperson', displayName);
+          }}
+          placeholder={t('meetings.chairperson_placeholder', {
+            defaultValue: 'Meeting organizer',
+          })}
+        />
+      </WideModalField>
+
+      <WideModalField
+        label={t('meetings.field_attendees', { defaultValue: 'Attendees' })}
+        span={2}
+        hint={t('meetings.attendees_hint', {
+          defaultValue:
+            'Enter each attendee on a separate line. They will be added to the meeting.',
+        })}
+      >
+        <div className="space-y-2">
+          <ContactSearchInput
+            value=""
+            displayValue=""
+            onChange={(contactId, displayName) => addLinkedAttendee(contactId, displayName)}
+            placeholder={t('meetings.attendees_add_contact', {
+              defaultValue: 'Add an attendee from contacts...',
+            })}
+          />
+          {form.linkedAttendees.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {form.linkedAttendees.map((att) => (
+                <span
+                  key={att.id}
+                  className="inline-flex items-center gap-1 rounded-full bg-oe-blue/10 px-2.5 py-1 text-xs text-oe-blue"
+                >
+                  {att.name}
+                  <button
+                    type="button"
+                    onClick={() => removeLinkedAttendee(att.id)}
+                    aria-label={t('meetings.remove_attendee', {
+                      defaultValue: 'Remove {{name}}',
+                      name: att.name,
+                    })}
+                    className="rounded-full hover:bg-oe-blue/20"
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <textarea
+            value={form.attendees}
+            onChange={(e) => set('attendees', e.target.value)}
+            rows={3}
+            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+            placeholder={t('meetings.attendees_placeholder', {
+              defaultValue: 'One name per line',
+            })}
+          />
+        </div>
+      </WideModalField>
+    </>
+  );
+}
+
+/** Merge linked (contact-backed) attendees with free-text lines into the wire
+ * attendee payload. Linked attendees carry their contact id as ``user_id`` so
+ * the saved meeting can link each attendee back to the directory; free-text
+ * lines (guests) are name-only. Free-text names that duplicate a linked
+ * attendee are dropped to avoid a doubled row. */
+function buildAttendeePayload(
+  formData: MeetingFormData,
+): { name: string; user_id?: string }[] {
+  const linked = formData.linkedAttendees.map((a) => ({ name: a.name, user_id: a.id }));
+  const linkedNames = new Set(linked.map((a) => a.name.toLowerCase()));
+  const freeText = formData.attendees
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .filter((name) => !linkedNames.has(name.toLowerCase()))
+    .map((name) => ({ name }));
+  return [...linked, ...freeText];
+}
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** A contact-backed id that we can deep-link to /contacts?contactId=. */
+function isContactId(value: string | null | undefined): value is string {
+  return !!value && UUID_RE.test(value);
 }
 
 /* -- Attachment Dropzone (shared by Create + Edit modals) ------------------ */
@@ -528,38 +680,7 @@ function CreateMeetingModal({
           />
         </WideModalField>
 
-        <WideModalField
-          label={t('meetings.field_chairperson', { defaultValue: 'Chairperson' })}
-          span={2}
-        >
-          <input
-            value={form.chairperson}
-            onChange={(e) => set('chairperson', e.target.value)}
-            className={inputCls}
-            placeholder={t('meetings.chairperson_placeholder', {
-              defaultValue: 'Meeting organizer',
-            })}
-          />
-        </WideModalField>
-
-        <WideModalField
-          label={t('meetings.field_attendees', { defaultValue: 'Attendees' })}
-          span={2}
-          hint={t('meetings.attendees_hint', {
-            defaultValue:
-              'Enter each attendee on a separate line. They will be added to the meeting.',
-          })}
-        >
-          <textarea
-            value={form.attendees}
-            onChange={(e) => set('attendees', e.target.value)}
-            rows={3}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
-            placeholder={t('meetings.attendees_placeholder', {
-              defaultValue: 'One name per line',
-            })}
-          />
-        </WideModalField>
+        <MeetingPeopleFields form={form} set={set} />
 
         <WideModalField
           label={t('meetings.field_minutes', { defaultValue: 'Description / Minutes' })}
@@ -621,8 +742,23 @@ function EditMeetingModal({
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
 
+  // Attendees with a contact id become removable chips; the rest seed the
+  // free-text box so existing meetings keep their roster on edit.
+  const initialLinkedAttendees = useMemo<LinkedAttendee[]>(
+    () =>
+      (meeting.attendees ?? [])
+        .filter((a) => !!a.user_id && !!a.name)
+        .map((a) => ({ id: a.user_id as string, name: a.name })),
+    [meeting.attendees],
+  );
+
   const initialAttendees = useMemo(
-    () => (meeting.attendees ?? []).map((a) => a.name).filter(Boolean).join('\n'),
+    () =>
+      (meeting.attendees ?? [])
+        .filter((a) => !a.user_id)
+        .map((a) => a.name)
+        .filter(Boolean)
+        .join('\n'),
     [meeting.attendees],
   );
 
@@ -635,11 +771,13 @@ function EditMeetingModal({
         : (meeting.date ?? ''),
       location: meeting.location ?? '',
       chairperson: meeting.chairperson ?? '',
+      chairperson_id: meeting.chairperson_id ?? '',
       attendees: initialAttendees,
+      linkedAttendees: initialLinkedAttendees,
       minutes: meeting.minutes ?? (meeting as unknown as { notes?: string }).notes ?? '',
       attachments: [],
     }),
-    [meeting, initialAttendees],
+    [meeting, initialAttendees, initialLinkedAttendees],
   );
 
   const [form, setForm] = useState<MeetingFormData>(initialForm);
@@ -693,15 +831,22 @@ function EditMeetingModal({
     if (normDate !== initDate) diff.meeting_date = normDate;
 
     if (form.location !== initialForm.location) diff.location = form.location || '';
-    if (form.chairperson !== initialForm.chairperson)
-      diff.chairperson_id = form.chairperson || undefined;
+    if (
+      form.chairperson !== initialForm.chairperson ||
+      form.chairperson_id !== initialForm.chairperson_id
+    ) {
+      // Prefer the picked contact id; fall back to typed name for a guest chair.
+      diff.chairperson_id = form.chairperson_id || form.chairperson || undefined;
+      diff.metadata =
+        form.chairperson_id && form.chairperson
+          ? { chairperson_name: form.chairperson }
+          : { chairperson_name: '' };
+    }
 
-    if (form.attendees !== initialForm.attendees) {
-      const list = form.attendees
-        .split('\n')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      diff.attendees = list.map((name) => ({ name }));
+    const linkedChanged =
+      JSON.stringify(form.linkedAttendees) !== JSON.stringify(initialForm.linkedAttendees);
+    if (form.attendees !== initialForm.attendees || linkedChanged) {
+      diff.attendees = buildAttendeePayload(form);
     }
 
     if (form.minutes !== initialForm.minutes) diff.minutes = form.minutes;
@@ -847,20 +992,7 @@ function EditMeetingModal({
           />
         </WideModalField>
 
-        <WideModalField
-          label={t('meetings.field_attendees', { defaultValue: 'Attendees' })}
-          span={2}
-        >
-          <textarea
-            value={form.attendees}
-            onChange={(e) => set('attendees', e.target.value)}
-            rows={3}
-            className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
-            placeholder={t('meetings.attendees_placeholder', {
-              defaultValue: 'One name per line',
-            })}
-          />
-        </WideModalField>
+        <MeetingPeopleFields form={form} set={set} />
 
         <WideModalField
           label={t('meetings.field_minutes', { defaultValue: 'Description / Minutes' })}
@@ -1581,9 +1713,12 @@ const MeetingRow = React.memo(function MeetingRow({
           <DateDisplay value={meeting.date} />
         </span>
 
-        {/* Chairperson */}
+        {/* Chairperson - hide a bare contact id (no resolved name) so the
+            compact row never shows a raw UUID; the expanded detail links it. */}
         <span className="text-xs text-content-tertiary w-28 truncate shrink-0 hidden lg:block">
-          {meeting.chairperson || '\u2014'}
+          {meeting.chairperson && !isContactId(meeting.chairperson)
+            ? meeting.chairperson
+            : '\u2014'}
         </span>
 
         {/* Status badge */}
@@ -1606,6 +1741,25 @@ const MeetingRow = React.memo(function MeetingRow({
           {/* Attendance check-in (Newforma-style) */}
           <AttendanceSection meetingId={meeting.id} />
 
+          {/* Chairperson */}
+          {meeting.chairperson && (
+            <div className="rounded-lg bg-surface-secondary p-3">
+              <p className="text-xs text-content-tertiary mb-2 font-medium uppercase tracking-wide">
+                {t('meetings.label_chairperson', { defaultValue: 'Chairperson' })}
+              </p>
+              {isContactId(meeting.chairperson_id) ? (
+                <Link
+                  to={`/contacts?contactId=${encodeURIComponent(meeting.chairperson_id)}`}
+                  className="inline-flex items-center gap-1 text-sm text-oe-blue hover:underline"
+                >
+                  {meeting.chairperson}
+                </Link>
+              ) : (
+                <span className="text-sm text-content-primary">{meeting.chairperson}</span>
+              )}
+            </div>
+          )}
+
           {/* Attendees */}
           {meeting.attendees && meeting.attendees.length > 0 && (
             <div className="rounded-lg bg-surface-secondary p-3">
@@ -1616,7 +1770,16 @@ const MeetingRow = React.memo(function MeetingRow({
                 {meeting.attendees.map((att) => (
                   <div key={att.id} className="flex items-center gap-2 text-sm">
                     {ATTENDEE_STATUS_ICON[att.status] ?? <Circle size={14} />}
-                    <span className="text-content-primary">{att.name}</span>
+                    {isContactId(att.user_id) ? (
+                      <Link
+                        to={`/contacts?contactId=${encodeURIComponent(att.user_id)}`}
+                        className="text-oe-blue hover:underline"
+                      >
+                        {att.name}
+                      </Link>
+                    ) : (
+                      <span className="text-content-primary">{att.name}</span>
+                    )}
                     {att.role && (
                       <span className="text-xs text-content-tertiary">({att.role})</span>
                     )}
@@ -2077,24 +2240,27 @@ export function MeetingsPage() {
         addToast({ type: 'error', title: t('requiresProject.title'), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
         return;
       }
-      const attendeesList = formData.attendees
-        .split('\n')
-        .map((s) => s.trim())
-        .filter(Boolean);
+      const attendees = buildAttendeePayload(formData);
       createMut.mutate({
         project_id: projectId,
         title: formData.title,
         meeting_type: formData.meeting_type,
         meeting_date: formData.date?.split('T')[0] || formData.date,
         location: formData.location || undefined,
-        chairperson_id: formData.chairperson || undefined,
-        attendees: attendeesList.length > 0
-          ? attendeesList.map((name) => ({ name }))
-          : undefined,
+        // Prefer the picked contact id; fall back to the typed name so a
+        // guest chair (not in the directory) is still recorded.
+        chairperson_id: formData.chairperson_id || formData.chairperson || undefined,
+        attendees: attendees.length > 0 ? attendees : undefined,
         minutes: formData.minutes || undefined,
         document_ids: formData.attachments.length > 0
           ? formData.attachments.map((a) => a.id)
           : undefined,
+        // Persist the chair's display name so the list/detail render a name
+        // instead of the raw contact id stored in chairperson_id.
+        metadata:
+          formData.chairperson_id && formData.chairperson
+            ? { chairperson_name: formData.chairperson }
+            : undefined,
       });
     },
     [createMut, projectId, addToast, t],
