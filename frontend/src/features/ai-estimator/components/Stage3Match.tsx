@@ -30,6 +30,7 @@ import {
 import { Button, EmptyState } from '@/shared/ui';
 import { ResourceBreakdown } from './ResourceBreakdown';
 import { AlternativesDrawer } from './AlternativesDrawer';
+import { MappingTrace, OutlierBadge } from './MappingTrace';
 import {
   scoreBorder,
   scoreColor,
@@ -111,7 +112,13 @@ function MatchCard({
   const confirmed = group.status === 'confirmed' || group.status === 'overridden';
   // Alternatives = every returned candidate other than the chosen one
   // (matched by code, since the group is summarised by chosen_code).
-  const alternatives = (detail?.candidates ?? []).filter((c) => c.code !== group.chosen_code);
+  const candidates = detail?.candidates ?? [];
+  const alternatives = candidates.filter((c) => c.code !== group.chosen_code);
+  // The chosen rate is a benchmark-band outlier when its candidate carries the
+  // rate-sanity flag. We surface it on the header so a suspect rate is never
+  // confirmed unseen (the real DB rate is kept, only flagged).
+  const chosenOutlier =
+    hasRate && candidates.some((c) => c.code === group.chosen_code && c.rate_outlier === true);
 
   // Roving keyboard navigation across the alternative candidate buttons.
   const onAltKeyDown = (e: React.KeyboardEvent<HTMLUListElement>) => {
@@ -168,6 +175,7 @@ function MatchCard({
                     {t(`aiest.method.${group.match_method}`, { defaultValue: group.match_method })}
                   </span>
                 )}
+                {chosenOutlier && <OutlierBadge />}
               </>
             ) : (
               <span className="inline-flex items-center gap-1 text-rose-500">
@@ -209,6 +217,11 @@ function MatchCard({
                   />
                 </div>
               )}
+
+              {/* Why this rate: the three-pass mapping trace (semantic ->
+                  unit/scale -> rate sanity). Auto-opens when the chosen rate is
+                  a flagged outlier so the reason is in view without a click. */}
+              <MappingTrace trace={detail?.mapping_trace} defaultOpen={chosenOutlier} />
 
               {/* Alternatives */}
               {alternatives.length > 0 && (
@@ -257,8 +270,11 @@ function MatchCard({
                             {scorePercent(c.score)}
                           </span>
                           <div className="min-w-0 flex-1">
-                            <div className="truncate text-xs font-medium text-content-primary">
-                              {c.description}
+                            <div className="flex items-center gap-1.5">
+                              <span className="truncate text-xs font-medium text-content-primary">
+                                {c.description}
+                              </span>
+                              {c.rate_outlier === true && <OutlierBadge className="shrink-0" />}
                             </div>
                             <div className="text-[11px] text-content-tertiary">
                               <span className="font-mono">{c.code}</span> ·{' '}
