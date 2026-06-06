@@ -22,6 +22,7 @@ import {
   AlertOctagon,
   Globe2,
   LineChart,
+  Microscope,
 } from 'lucide-react';
 import {
   Button,
@@ -699,6 +700,7 @@ export function SafetyPage() {
 
 function IncidentsTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const addToast = useToastStore((s) => s.addToast);
@@ -911,12 +913,15 @@ function IncidentsTab({ projectId }: { projectId: string }) {
               <th className="px-4 py-3 text-center font-medium text-content-tertiary">
                 {t('common.status', { defaultValue: 'Status' })}
               </th>
+              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+                {t('common.actions', { defaultValue: 'Actions' })}
+              </th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                <td colSpan={8} className="px-4 py-8 text-center text-sm text-content-tertiary">
                   {t('safety.no_incidents_match', { defaultValue: 'No matching incidents' })}
                 </td>
               </tr>
@@ -973,6 +978,23 @@ function IncidentsTab({ projectId }: { projectId: string }) {
                     })}
                   </Badge>
                 </td>
+                <td className="px-4 py-3 text-right whitespace-nowrap">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<Microscope size={14} />}
+                    onClick={() =>
+                      navigate(
+                        `/hse-advanced?tab=incidents&action=investigate&incident_id=${inc.id}`,
+                      )
+                    }
+                    title={t('safety.investigate_hint', {
+                      defaultValue: 'Open a formal HSE investigation for this incident',
+                    })}
+                  >
+                    {t('safety.investigate', { defaultValue: 'Investigate' })}
+                  </Button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -1007,6 +1029,20 @@ function IncidentsTab({ projectId }: { projectId: string }) {
               {inc.days_lost > 0 && (
                 <span className="text-xs font-medium text-semantic-error">{inc.days_lost} {t('safety.days_lost', { defaultValue: 'days lost' })}</span>
               )}
+            </div>
+            <div className="mt-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Microscope size={14} />}
+                onClick={() =>
+                  navigate(
+                    `/hse-advanced?tab=incidents&action=investigate&incident_id=${inc.id}`,
+                  )
+                }
+              >
+                {t('safety.investigate', { defaultValue: 'Investigate' })}
+              </Button>
             </div>
           </Card>
         ))}

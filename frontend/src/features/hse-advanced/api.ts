@@ -284,9 +284,13 @@ export interface CorrectiveAction {
 
 // CAPACreate requires project_id + source_type + title + target_date
 // (schemas.py:648-657). source_type is an enum; the UI defaults to "observation".
+// source_ref is the optional UUID of the originating record (incident, jsa,
+// permit or audit) — populated by the dependent source picker / audit-finding
+// shortcut so the CAPA links back to what raised it.
 export interface CreateCAPAPayload {
   project_id: string;
   source_type: string;
+  source_ref?: string | null;
   title: string;
   target_date: string;
   description?: string;
@@ -569,6 +573,30 @@ export function downloadOsha300Csv(projectId: string, year: number): void {
   a.click();
   document.body.removeChild(a);
 }
+
+/* -- Safety incident options (cross-module picker) ----------------------- */
+
+// Slim projection of a safety incident for the investigation / CAPA source
+// pickers. The full record lives in the Safety module; we only read the few
+// fields needed to label the dropdown and carry the id (which becomes the
+// investigation's incident_ref or the CAPA's source_ref).
+export interface SafetyIncidentOption {
+  id: string;
+  incident_number: string;
+  incident_date: string;
+  incident_type: string;
+  description: string;
+}
+
+/**
+ * Fetch the project's safety incidents so the HSE pages can offer a real
+ * picker instead of a raw-UUID field. Hits the Safety module endpoint
+ * directly (it is the system of record for incidents).
+ */
+export const fetchSafetyIncidents = (projectId: string) =>
+  apiGet<SafetyIncidentOption[] | { items: SafetyIncidentOption[] }>(
+    `/v1/safety/incidents/?project_id=${encodeURIComponent(projectId)}`,
+  );
 
 export const fetchCorrectiveActions = (params: {
   projectId?: string;
