@@ -88,6 +88,8 @@ export interface CreatePunchPayload {
   assigned_to?: string;
   due_date?: string;
   document_id?: string;
+  /** 1-based sheet page the pin sits on (backend accepts page>=1). */
+  page?: number;
   location_x?: number | null;
   location_y?: number | null;
   trade?: string;
