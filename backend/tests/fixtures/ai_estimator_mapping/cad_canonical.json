@@ -1,0 +1,61 @@
+{
+  "format_version": "1.0",
+  "source": {"type": "rvt", "filename": "demo_house.rvt", "converter": "ddc-cad2data/0.3.0"},
+  "metadata": {"project_name": "Mapping harness CAD fixture", "units": "metric"},
+  "comment": "Founder test matrix case 6 (design section 8): a converted CAD/BIM model in our canonical format - walls, slabs and doors. The harness adapts each element into the same envelope extract_bim emits (source=bim, ifc_class carried as a hard filter, canonical quantities), then drives _build_groups so groups form by ifc_class signature. Each group runs the three named mapping passes.",
+  "elements": [
+    {
+      "id": "wall_001",
+      "category": "IfcWall",
+      "ifc_class": "IfcWall",
+      "classification": {"masterformat": "04 20 00"},
+      "quantities": {"area_m2": 24.0},
+      "properties": {"material": "concrete_c30_37"}
+    },
+    {
+      "id": "wall_002",
+      "category": "IfcWall",
+      "ifc_class": "IfcWall",
+      "classification": {"masterformat": "04 20 00"},
+      "quantities": {"area_m2": 18.5},
+      "properties": {"material": "concrete_c30_37"}
+    },
+    {
+      "id": "slab_001",
+      "category": "IfcSlab",
+      "ifc_class": "IfcSlab",
+      "classification": {"masterformat": "03 30 00"},
+      "quantities": {"area_m2": 60.0},
+      "properties": {"material": "concrete_c25_30"}
+    },
+    {
+      "id": "slab_002",
+      "category": "IfcSlab",
+      "ifc_class": "IfcSlab",
+      "classification": {"masterformat": "03 30 00"},
+      "quantities": {"area_m2": 40.0},
+      "properties": {"material": "concrete_c25_30"}
+    },
+    {
+      "id": "door_001",
+      "category": "IfcDoor",
+      "ifc_class": "IfcDoor",
+      "classification": {"masterformat": "08 11 00"},
+      "quantities": {"count": 1.0},
+      "properties": {"material": "steel"}
+    },
+    {
+      "id": "door_002",
+      "category": "IfcDoor",
+      "ifc_class": "IfcDoor",
+      "classification": {"masterformat": "08 11 00"},
+      "quantities": {"count": 1.0},
+      "properties": {"material": "steel"}
+    }
+  ],
+  "expected_groups": [
+    {"ifc_class": "IfcWall", "unit": "m2", "quantity": 42.5, "element_count": 2, "source": "cad"},
+    {"ifc_class": "IfcSlab", "unit": "m2", "quantity": 100.0, "element_count": 2, "source": "cad"},
+    {"ifc_class": "IfcDoor", "unit": "pcs", "quantity": 2.0, "element_count": 2, "source": "cad"}
+  ]
+}
