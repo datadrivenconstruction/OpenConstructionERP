@@ -748,10 +748,14 @@ export function NCRPage() {
   // Deep-link target (e.g. from an inspection's "Open NCR" toast). The matching
   // row auto-expands, scrolls into view and flashes once the data has loaded.
   const highlightId = searchParams.get('highlight');
+  // Subcontractor name passed from the rating "Quality NCRs" cross-link
+  // (CONN-44). Seeds the search box once so the register opens filtered to that
+  // firm; the user can then clear or refine it like any other search.
+  const subParam = searchParams.get('sub');
 
   // State
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(() => subParam ?? '');
   const [statusFilter, setStatusFilter] = useState<NCRStatus | ''>('');
 
   // Data
@@ -909,6 +913,21 @@ export function NCRPage() {
     },
     [createVariationMut],
   );
+
+  // The ?sub seed has been copied into searchQuery on first render; drop the
+  // param (replace, preserving other params) so the search becomes a normal,
+  // user-editable filter and a refresh does not re-pin it.
+  useEffect(() => {
+    if (!subParam) return;
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('sub');
+        return next;
+      },
+      { replace: true },
+    );
+  }, [subParam, setSearchParams]);
 
   // Once the highlighted NCR is present, let the row flash then drop the
   // ?highlight param (replace, preserving other params) so a refresh or
