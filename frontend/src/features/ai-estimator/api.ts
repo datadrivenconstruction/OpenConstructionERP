@@ -306,6 +306,54 @@ export interface CandidateOut {
   currency: string;
   score: number;
   confidence_band: ConfidenceBand;
+  /** Set by the multi-pass mapping's rate-sanity pass when this candidate's
+   *  per-base-unit rate sits outside the per-run benchmark band. The rate is
+   *  never altered - this only flags it for human review. */
+  rate_outlier?: boolean;
+}
+
+// ── Multi-pass mapping trace (design 3.3, surfaced by WP4) ────────────────
+
+/** The pass name on the wire. The backend serialises the field under the
+ *  `pass` key (a Python soft keyword on the backend side). */
+export type MappingPassName = 'semantic' | 'unit_scale' | 'rate_sanity';
+
+/** Rate-sanity benchmark band for one group's candidates. Catalogue-relative
+ *  (median-derived ratio bounds), never an absolute price book. Present only
+ *  on the `rate_sanity` pass. */
+export interface MappingBenchmark {
+  trade: string;
+  unit: string;
+  /** Median-relative bounds, or null when there was no usable median (a lone
+   *  candidate). Real floats, never a fabricated placeholder. */
+  band_low: number | null;
+  band_high: number | null;
+  /** How many candidates fell outside the band (flagged, never dropped). */
+  outliers: number;
+}
+
+/** One named pass of the multi-pass mapping pipeline (design 4.3). */
+export interface MappingPass {
+  /** semantic | unit_scale | rate_sanity (string-typed defensively so an
+   *  unknown future pass name still renders). */
+  pass: MappingPassName | string;
+  kept: number;
+  dropped: number;
+  notes: string;
+  benchmark: MappingBenchmark | null;
+}
+
+/** The assembled multi-pass mapping log for one matched group. Read-only
+ *  provenance written by the matcher into the group metadata; null until the
+ *  group has been matched. */
+export interface MappingTrace {
+  passes: MappingPass[];
+  /** How the top-1 was chosen: vector (deterministic) | unit_scale | llm
+   *  (agent-reasoned) | manual (no candidate grounded). */
+  final_method: string | null;
+  /** Set only when every candidate was a benchmark-band outlier and the group
+   *  was parked for human review. */
+  needs_human_reason: string | null;
 }
 
 export type MatchMethod = 'vector' | 'lexical' | 'resources' | 'llm' | 'manual' | 'auto';
@@ -344,6 +392,14 @@ export interface GroupDetail extends GroupSummary {
   confirmed_by: string | null;
   confirmed_at: string | null;
   notes: string | null;
+  /** Where the quantity came from (e.g. "perimeter x height"). */
+  derivation?: string | null;
+  /** Plain-words estimation assumptions (e.g. "perimeter inferred from area"). */
+  assumptions?: string[];
+  /** Source of the group: dialogue | file | cad | photo. */
+  source?: string | null;
+  /** The three-pass mapping trace (why this rate). Null until matched. */
+  mapping_trace?: MappingTrace | null;
 }
 
 export interface GroupListResponse {
