@@ -2770,6 +2770,7 @@ export function DwgTakeoffPage() {
               <div className="relative z-10 max-w-7xl mx-auto pt-20 pb-4 w-full">
                 <DismissibleInfo
                   storageKey="dwg-takeoff"
+                  className="mb-6 !bg-white/15 dark:!bg-white/15 !border-white/25"
                   title={t('dwg_takeoff.intro_title', { defaultValue: 'Measure straight off the 2D drawing' })}
                   links={[
                     { label: t('dwg_takeoff.intro_link_boq', { defaultValue: 'Open BOQ' }), onClick: () => navigate('/boq') },
