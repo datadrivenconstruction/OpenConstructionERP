@@ -269,6 +269,117 @@ async def test_weak_coverage_band_between_floor_and_medium(session, project_id, 
     assert any(p["coverage"] == "weak" for p in intake.packages)
 
 
+# ── WorkGroup provenance metadata (design 3.1) ───────────────────────────────
+
+
+async def test_composed_groups_carry_source_derivation_assumptions(session, project_id):
+    """Every dialogue-composed group persists source=dialogue + derivation."""
+    service = IntakeService(session)
+    run, intake = await _start(session, project_id, "kitchen renovation 8 m2")
+    intake = await service.confirm_parameters(
+        run, intake, schemas.ConfirmParametersRequest(params={"floor_area_m2": 8.0, "finish_level": "standard"})
+    )
+    groups = await AiEstimatorGroupRepository(session).list_for_run(run.id)
+    assert groups
+    for g in groups:
+        meta = g.metadata_ or {}
+        # The standardised WorkGroup provenance is present on every group.
+        assert meta.get("source") == "dialogue"
+        assert meta.get("derivation"), "a composed group must carry a derivation sentence"
+        assert meta.get("qty_formula"), "the formula id is recorded for traceability"
+        # assumptions is always a list (empty when no proxy was used).
+        assert isinstance(meta.get("assumptions"), list)
+
+
+async def test_group_detail_surfaces_workgroup_provenance(session, project_id):
+    """GroupDetail exposes source / derivation / assumptions read from metadata_."""
+    from app.modules.ai_estimator.service import AiEstimatorService
+
+    service = IntakeService(session)
+    run, intake = await _start(session, project_id, "kitchen renovation 8 m2")
+    await service.confirm_parameters(
+        run, intake, schemas.ConfirmParametersRequest(params={"floor_area_m2": 8.0, "finish_level": "standard"})
+    )
+    groups = await AiEstimatorGroupRepository(session).list_for_run(run.id)
+    detail = AiEstimatorService(session).group_to_detail(groups[0])
+    assert detail.source == "dialogue"
+    assert detail.derivation
+    assert isinstance(detail.assumptions, list)
+    # mapping_trace is unset until the matcher runs (WP3 owns it).
+    assert detail.mapping_trace is None
+
+
+async def test_custom_group_carries_dialogue_source(session, project_id):
+    """A user-added custom work line is also a dialogue-sourced WorkGroup."""
+    service = IntakeService(session)
+    run, intake = await _start(session, project_id, "kitchen renovation 8 m2")
+    intake = await service.confirm_parameters(
+        run, intake, schemas.ConfirmParametersRequest(params={"floor_area_m2": 8.0, "finish_level": "standard"})
+    )
+    intake = await service.edit_packages(
+        run,
+        intake,
+        schemas.IntakePackagesRequest(
+            add=[schemas.WorkPackageSelection(custom_description="Install splashback glass panel", unit="m2")]
+        ),
+    )
+    custom_key = next(p["package_key"] for p in intake.packages if p["package_key"].startswith("custom_"))
+    custom_group_id = intake.packages[[p["package_key"] for p in intake.packages].index(custom_key)]["group_ids"][0]
+    groups = await AiEstimatorGroupRepository(session).list_for_run(run.id)
+    custom = next(g for g in groups if str(g.id) == custom_group_id)
+    meta = custom.metadata_ or {}
+    assert meta.get("source") == "dialogue"
+    assert meta.get("derivation") == "single lump-sum line"
+
+
+# ── Measured-path WorkGroup source (file / cad) ──────────────────────────────
+
+
+async def test_measured_groups_tag_source_from_envelope(session, project_id):
+    """_build_groups tags metadata_.source as file/cad from the envelope source."""
+    from app.modules.ai_estimator.service import AiEstimatorService
+
+    run = AiEstimatorRun(
+        project_id=project_id,
+        user_id=uuid.uuid4(),
+        name="Measured source test",
+        status="grouping",
+        current_stage="grouping",
+        source_inputs={"source": "bim"},
+        group_by=["category", "unit"],
+        # The measured envelopes the grouping pass buckets by signature.
+        metadata_={
+            "envelopes": [
+                {
+                    "id": "e1",
+                    "source": "bim",
+                    "description": "Reinforced concrete wall",
+                    "category": "walls",
+                    "ifc_class": "IfcWall",
+                    "unit_hint": "m2",
+                    "quantities": {"area_m2": 37.5},
+                },
+                {
+                    "id": "e2",
+                    "source": "boq",
+                    "description": "Cement screed floor finish",
+                    "category": "finishes",
+                    "unit_hint": "m2",
+                    "quantities": {"area_m2": 80.0},
+                },
+            ]
+        },
+    )
+    run = await AiEstimatorRunRepository(session).create(run)
+
+    run = await AiEstimatorService(session)._build_groups(run)
+    groups = await AiEstimatorGroupRepository(session).list_for_run(run.id)
+    by_desc = {g.description: g for g in groups}
+    # A BIM-sourced group is cad; a BOQ-sourced group is file. Never dialogue.
+    assert (by_desc["Reinforced concrete wall"].metadata_ or {}).get("source") == "cad"
+    assert (by_desc["Cement screed floor finish"].metadata_ or {}).get("source") == "file"
+
+
 # ── Package board editing ────────────────────────────────────────────────────
 
 

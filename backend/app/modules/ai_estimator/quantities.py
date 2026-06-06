@@ -342,3 +342,89 @@ def compute_quantity(qty_formula: str, params: dict[str, Any], unit: str) -> Qty
     if fn is None:
         return QtyResult(0.0, unit, estimated=False)
     return fn(params, unit)
+
+
+# ── Human-readable derivation + assumptions (for the WorkGroup metadata) ──────
+#
+# A short, layperson-readable formula sentence ("perimeter x height") per
+# qty_formula id, surfaced read-only on the group so the user can see HOW a
+# quantity was derived. Independent of the parameter sheet (it is the shape of
+# the formula, not the numbers).
+_DERIVATION_TEXT: dict[str, str] = {
+    "floor_area": "floor area",
+    "ceiling": "ceiling area equals the floor area",
+    "wall_net": "perimeter x height less openings",
+    "wall_full": "perimeter x height less openings",
+    "partition": "partition length x ceiling height",
+    "fixtures": "fixture count",
+    "points": "floor area x points density",
+    "slope": "plan roof area / cos(pitch)",
+    "facade_net": "facade area less openings",
+    "facade_gross": "gross facade area",
+    "paving": "paving area",
+    "planting": "planting / turf area",
+    "fencing": "fencing length",
+    "debris": "stripped floor area x equivalent depth",
+    "site_area": "site area",
+    "earthworks": "footprint x excavation depth",
+    "lump": "single lump-sum line",
+}
+
+
+def describe_derivation(qty_formula: str, params: dict[str, Any], result: QtyResult) -> tuple[str, list[str]]:
+    """Describe how a quantity was derived, plus the proxy assumptions used.
+
+    Produces the two human-facing provenance fields the WorkGroup metadata
+    standardises (design section 3.1): a short formula sentence (for example
+    ``"perimeter x height less openings"``) and a list of plain-language
+    assumptions naming each proxy that was actually applied for these params
+    (for example ``"perimeter inferred from floor area (aspect 1.4)"``). The
+    assumptions list is non-empty only when a proxy was used; a quantity taken
+    straight from a confirmed value carries no assumptions.
+
+    Nothing here invents a number; it only explains the derivation the pure
+    formula already performed. An unknown ``qty_formula`` yields an empty
+    description, mirroring :func:`compute_quantity`.
+
+    Args:
+        qty_formula: The stable formula id declared on the work package.
+        params: The confirmed (or partial) parameter sheet.
+        result: The :class:`QtyResult` already computed for this package.
+
+    Returns:
+        A ``(derivation_text, assumptions)`` pair. ``derivation_text`` is empty
+        for an unknown formula; ``assumptions`` is empty when no proxy was used.
+    """
+    derivation = _DERIVATION_TEXT.get(qty_formula, "")
+    if not derivation or not result.estimated:
+        return derivation, []
+
+    assumptions: list[str] = []
+    if qty_formula in ("wall_net", "wall_full", "partition", "points", "debris"):
+        if qty_formula in ("wall_net", "wall_full"):
+            if not (_has(params, "perimeter_m") and _num(params, "perimeter_m") > 0):
+                assumptions.append(f"perimeter inferred from floor area (aspect {_DEFAULT_ROOM_ASPECT})")
+            if not _has(params, "ceiling_height_m") or _num(params, "ceiling_height_m") <= 0:
+                assumptions.append(f"ceiling height defaulted to {_DEFAULT_CEILING_HEIGHT_M} m")
+            doors = _num(params, "doors") if _has(params, "doors") else 0.0
+            windows = _num(params, "windows") if _has(params, "windows") else 0.0
+            if doors > 0 or windows > 0:
+                assumptions.append(
+                    f"openings sized from defaults (door {_DEFAULT_DOOR_AREA_M2} m2, "
+                    f"window {_DEFAULT_WINDOW_AREA_M2} m2)"
+                )
+        elif qty_formula == "partition":
+            assumptions.append(f"ceiling height defaulted to {_DEFAULT_CEILING_HEIGHT_M} m")
+        elif qty_formula == "points":
+            assumptions.append(f"points density proxy {_DEFAULT_POINTS_DENSITY} per m2 of floor area")
+        elif qty_formula == "debris":
+            assumptions.append(f"debris depth proxy {_DEFAULT_DEBRIS_DEPTH_M} m over stripped area")
+    elif qty_formula == "fixtures":
+        assumptions.append("fixtures inferred from room count (3 per wet room)")
+    elif qty_formula == "slope":
+        assumptions.append("flat roof assumed (pitch not given)")
+    elif qty_formula == "earthworks":
+        depth = _num(params, "excavation_depth_m") if _has(params, "excavation_depth_m") else 0.5
+        assumptions.append(f"excavation depth proxy {depth} m over the footprint")
+
+    return derivation, assumptions
