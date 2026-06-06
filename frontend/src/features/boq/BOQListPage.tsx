@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import {
   Table, Table2, ArrowRight, Copy, Trash2, Plus,
   Search, ArrowUpDown, ChevronDown, GitCompareArrows, X, Loader2,
@@ -377,6 +377,52 @@ export function BOQListPage() {
       window.history.replaceState({}, '');
     }
   }, [location.state]);
+
+  // Deep link: /boq?positionId=<id> (or the older ?position=<id> from the BIM
+  // viewer). A position id alone does not tell us which BOQ owns it, so we
+  // resolve the owning boq_id from the API and redirect to that BOQ's editor
+  // with the per-position ?highlight convention BOQEditorPage already reads.
+  // Invalid or missing ids leave the user on the list with the param cleared,
+  // never a crash or a hang.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const positionId = searchParams.get('positionId') ?? searchParams.get('position');
+    if (!positionId) return;
+    let cancelled = false;
+    const clearParam = () => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete('positionId');
+          next.delete('position');
+          return next;
+        },
+        { replace: true },
+      );
+    };
+    boqApi
+      .getPosition(positionId)
+      .then((pos) => {
+        if (cancelled) return;
+        if (pos?.boq_id) {
+          // Replace (no extra history entry) so Back returns to wherever the
+          // user came from, not to this transient list state.
+          navigate(`/boq/${pos.boq_id}?highlight=${encodeURIComponent(positionId)}`, {
+            replace: true,
+          });
+        } else {
+          clearParam();
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // Unknown / deleted position: stay on the list, drop the param.
+        clearParam();
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, navigate, setSearchParams]);
 
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');

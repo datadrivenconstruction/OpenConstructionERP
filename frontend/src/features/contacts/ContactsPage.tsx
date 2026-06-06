@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
@@ -52,7 +52,7 @@ import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   fetchContacts,
   fetchContactTags,
@@ -726,11 +726,15 @@ const ContactCard = React.memo(function ContactCard({
   onEdit,
   onDelete,
   onOpenDetail,
+  highlight,
 }: {
   contact: Contact;
   onEdit: (contact: Contact) => void;
   onDelete: (id: string) => void;
   onOpenDetail: (contact: Contact) => void;
+  /** When set (from a ?contactId deep-link) the card scrolls into view and
+   *  flashes a highlight ring, then settles. */
+  highlight?: boolean;
 }) {
   const { t } = useTranslation();
   const prequal = PREQUAL_CONFIG[contact.prequalification_status as PrequalificationStatus] ?? PREQUAL_CONFIG.pending;
@@ -738,7 +742,27 @@ const ContactCard = React.memo(function ContactCard({
   const displayName = contact.company_name || [contact.first_name, contact.last_name].filter(Boolean).join(' ') || '—';
   const personName = [contact.first_name, contact.last_name].filter(Boolean).join(' ');
 
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [flash, setFlash] = useState(false);
+  useEffect(() => {
+    if (!highlight) return;
+    setFlash(true);
+    cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const timer = window.setTimeout(() => setFlash(false), 2400);
+    return () => window.clearTimeout(timer);
+  }, [highlight]);
+
+  // The shared Card is not a forwardRef component, so we anchor the
+  // scroll/flash on a wrapping div (rounded to match the card so the ring
+  // hugs the corners).
   return (
+    <div
+      ref={cardRef}
+      className={clsx(
+        'scroll-mt-24 rounded-xl transition-shadow duration-500',
+        flash && 'ring-2 ring-inset ring-oe-blue bg-oe-blue-subtle',
+      )}
+    >
     <Card className="p-4 animate-card-in hover:shadow-md transition-shadow group">
       {/* Top: company + type badge + actions */}
       <div className="flex items-start justify-between gap-2">
@@ -867,6 +891,7 @@ const ContactCard = React.memo(function ContactCard({
         </div>
       </div>
     </Card>
+    </div>
   );
 });
 
@@ -1139,6 +1164,14 @@ export function ContactsPage() {
   const [countryFilter, setCountryFilter] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
+  // Deep link: /contacts?contactId=<id> (from a camp booking occupant or a
+  // correspondence party). Once the contact is in the loaded set we open its
+  // detail drawer, flash its card and clear the param. Unknown ids just clear
+  // the param and leave the directory untouched.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkContactId = searchParams.get('contactId');
+  const [highlightContactId, setHighlightContactId] = useState<string | null>(null);
+
   // "n" shortcut → open new contact form
   useCreateShortcut(
     useCallback(() => setShowAddModal(true), []),
@@ -1171,6 +1204,44 @@ export function ContactsPage() {
     queryFn: fetchContactTags,
     staleTime: 60_000,
   });
+
+  // Resolve the ?contactId deep link. A type/tag filter or search could be
+  // hiding the target row, so clear those first; then once the contact is in
+  // the loaded set, open its drawer, flash its card and drop the param. If the
+  // query has settled and the id is genuinely absent (deleted / not in the
+  // 500-row window) we still clear the param so a refresh stays clean.
+  useEffect(() => {
+    if (!deepLinkContactId) return;
+    if (typeFilter || selectedTags.length > 0 || searchQuery) {
+      setTypeFilter('');
+      setSelectedTags([]);
+      setSearchQuery('');
+      return;
+    }
+    if (isLoading) return;
+    const match = contacts.find((c) => c.id === deepLinkContactId);
+    if (match) {
+      setDetailContact(match);
+      setHighlightContactId(match.id);
+    }
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('contactId');
+        return next;
+      },
+      { replace: true },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLinkContactId, isLoading, contacts, typeFilter, selectedTags, searchQuery]);
+
+  // Drop the highlight flag once it has had time to flash, so a later filter
+  // change or re-render does not light the card up again.
+  useEffect(() => {
+    if (!highlightContactId) return;
+    const timer = window.setTimeout(() => setHighlightContactId(null), 2600);
+    return () => window.clearTimeout(timer);
+  }, [highlightContactId]);
 
   // Directory KPIs — total + expiring-prequalification surface, fed by
   // the /stats/ endpoint that was previously orphaned.
@@ -1781,6 +1852,7 @@ export function ContactsPage() {
                   onEdit={handleEditContact}
                   onDelete={handleDeleteContact}
                   onOpenDetail={handleOpenDetail}
+                  highlight={highlightContactId === contact.id}
                 />
               ))}
             </div>

@@ -13,7 +13,7 @@
 
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import {
@@ -28,6 +28,8 @@ import {
   Users,
   CalendarCheck2,
   BedDouble,
+  Filter,
+  X,
 } from 'lucide-react';
 
 import {
@@ -116,10 +118,33 @@ export function AccommodationListPage() {
     return map;
   }, [projects]);
 
+  // Deep link: /accommodation?block=<blockId> (worker housing for a Property
+  // Development block). The accommodation row carries property_dev_block_id,
+  // so we filter the grid to that block client-side. A banner explains the
+  // active scope and offers a one-click clear that drops the param.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const blockFilter = searchParams.get('block');
+  const clearBlockFilter = () => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('block');
+        return next;
+      },
+      { replace: true },
+    );
+  };
+
   const filtered = useMemo(() => {
-    if (filter === 'all') return accommodations;
-    return accommodations.filter((a) => a.kind === filter);
-  }, [accommodations, filter]);
+    let list = accommodations;
+    if (blockFilter) {
+      list = list.filter((a) => a.property_dev_block_id === blockFilter);
+    }
+    if (filter !== 'all') {
+      list = list.filter((a) => a.kind === filter);
+    }
+    return list;
+  }, [accommodations, filter, blockFilter]);
 
   // Counts per tab for the badges.
   const counts = useMemo(() => {
@@ -267,6 +292,34 @@ export function AccommodationListPage() {
         </div>
       )}
 
+      {/* Block deep-link scope banner — shown when arriving from a Property
+          Development block. Tells the user the grid is filtered and lets them
+          drop back to the full list. */}
+      {blockFilter && (
+        <div
+          data-testid="accommodation-block-filter-banner"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-oe-blue/30 bg-oe-blue/5 px-4 py-2.5"
+        >
+          <span className="inline-flex items-center gap-2 text-sm text-content-secondary">
+            <Filter size={14} className="text-oe-blue" aria-hidden="true" />
+            {t('accommodation.block_filter.active', {
+              defaultValue:
+                'Showing worker housing linked to the selected development block ({{count}}).',
+              count: filtered.length,
+            })}
+          </span>
+          <button
+            type="button"
+            onClick={clearBlockFilter}
+            data-testid="accommodation-block-filter-clear"
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-elevated px-2.5 py-1 text-2xs font-medium text-content-primary hover:bg-surface-secondary"
+          >
+            <X size={11} aria-hidden="true" />
+            {t('accommodation.block_filter.clear', { defaultValue: 'Show all accommodations' })}
+          </button>
+        </div>
+      )}
+
       {/* Tabs */}
       <div
         role="tablist"
@@ -344,9 +397,13 @@ export function AccommodationListPage() {
               ? t('accommodation.empty_state.title', {
                   defaultValue: 'No accommodations yet',
                 })
-              : t('accommodation.empty_filtered.title', {
-                  defaultValue: 'No properties match this filter',
-                })
+              : blockFilter
+                ? t('accommodation.empty_block.title', {
+                    defaultValue: 'No housing linked to this block',
+                  })
+                : t('accommodation.empty_filtered.title', {
+                    defaultValue: 'No properties match this filter',
+                  })
           }
           description={
             accommodations.length === 0
@@ -354,15 +411,29 @@ export function AccommodationListPage() {
                   defaultValue:
                     'Track three kinds of stays: worker camps for site crews, rentals for staff, and hotels for visiting consultants - each with rooms, bookings and charges.',
                 })
-              : t('accommodation.empty_filtered.description', {
-                  defaultValue:
-                    'Try a different kind, or create a new property of this kind.',
-                })
+              : blockFilter
+                ? t('accommodation.empty_block.description', {
+                    defaultValue:
+                      'No accommodation is linked to this development block yet. Clear the filter to see all properties, or create one and link it from its settings.',
+                  })
+                : t('accommodation.empty_filtered.description', {
+                    defaultValue:
+                      'Try a different kind, or create a new property of this kind.',
+                  })
           }
-          action={{
-            label: t('accommodation.new', { defaultValue: 'New accommodation' }),
-            onClick: () => setCreateOpen(true),
-          }}
+          action={
+            blockFilter
+              ? {
+                  label: t('accommodation.block_filter.clear', {
+                    defaultValue: 'Show all accommodations',
+                  }),
+                  onClick: clearBlockFilter,
+                }
+              : {
+                  label: t('accommodation.new', { defaultValue: 'New accommodation' }),
+                  onClick: () => setCreateOpen(true),
+                }
+          }
         />
       ) : (
         <div
