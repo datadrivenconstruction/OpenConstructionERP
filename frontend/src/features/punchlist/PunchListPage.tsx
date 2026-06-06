@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import {
@@ -149,6 +149,91 @@ const textareaCls =
   'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
 
 type ViewMode = 'list' | 'kanban';
+
+/* ── Source provenance badge ──────────────────────────────────────────── */
+
+/**
+ * Resolve the deep-link target for a punch item raised automatically from
+ * another module. Reads the source ids the backend stamps into `metadata_`:
+ *   - clash: `run_id` (-> the clash run that produced it) / `result_id`
+ *   - inspection: `inspection_id` (-> the originating inspection, highlighted)
+ *   - ncr: `ncr_id` when present (-> the NCR, highlighted), else the register
+ * Returns null for an unknown / source-less item so the caller renders nothing.
+ */
+function resolvePunchSourceLink(item: PunchItem): { source: string; to: string } | null {
+  const md = item.metadata ?? {};
+  const source = typeof md.source === 'string' ? md.source : '';
+  if (source === 'clash') {
+    const runId = typeof md.run_id === 'string' ? md.run_id : '';
+    return { source, to: runId ? `/clash?run=${runId}` : '/clash' };
+  }
+  if (source === 'inspection') {
+    const inspectionId = typeof md.inspection_id === 'string' ? md.inspection_id : '';
+    return {
+      source,
+      to: inspectionId
+        ? `/projects/${item.project_id}/inspections?highlight=${inspectionId}`
+        : '/inspections',
+    };
+  }
+  if (source === 'ncr') {
+    // Backend does not yet stamp an ncr id onto punch metadata; fall back to
+    // the register and highlight the NCR when an id is available.
+    const ncrId =
+      typeof md.ncr_id === 'string'
+        ? md.ncr_id
+        : typeof md.source_ncr_id === 'string'
+        ? md.source_ncr_id
+        : '';
+    return { source, to: ncrId ? `/ncr?highlight=${ncrId}` : '/ncr' };
+  }
+  return null;
+}
+
+function PunchSourceBadge({
+  item,
+  className,
+}: {
+  item: PunchItem;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const link = resolvePunchSourceLink(item);
+  if (!link) return null;
+
+  const config: Record<string, { variant: 'error' | 'blue' | 'warning'; label: string }> = {
+    clash: { variant: 'error', label: t('punch.source_clash', { defaultValue: 'From clash' }) },
+    inspection: {
+      variant: 'blue',
+      label: t('punch.source_inspection', { defaultValue: 'From Inspection' }),
+    },
+    ncr: { variant: 'warning', label: t('punch.source_ncr', { defaultValue: 'From NCR' }) },
+  };
+  const cfg = config[link.source];
+  if (!cfg) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate(link.to);
+      }}
+      className={clsx(
+        'rounded-md transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
+        className,
+      )}
+      title={t('punch.source_open_hint', {
+        defaultValue: 'Open the record this item was raised from',
+      })}
+    >
+      <Badge variant={cfg.variant} size="sm">
+        {cfg.label}
+      </Badge>
+    </button>
+  );
+}
 
 /* ── Stats Cards ──────────────────────────────────────────────────────── */
 
@@ -478,26 +563,11 @@ const PunchKanbanCard = React.memo(function PunchKanbanCard({
         </p>
       )}
 
-      {/* Source badge */}
-      {item.metadata?.source === 'clash' && (
+      {/* Source provenance — a button that deep-links back to the clash,
+          inspection or NCR this item was raised from. */}
+      {resolvePunchSourceLink(item) && (
         <div className="mt-1">
-          <Badge variant="error" size="sm">
-            {t('punch.source_clash', { defaultValue: 'From clash' })}
-          </Badge>
-        </div>
-      )}
-      {item.metadata?.source === 'inspection' && (
-        <div className="mt-1">
-          <Badge variant="blue" size="sm">
-            {t('punch.source_inspection', { defaultValue: 'From Inspection' })}
-          </Badge>
-        </div>
-      )}
-      {item.metadata?.source === 'ncr' && (
-        <div className="mt-1">
-          <Badge variant="warning" size="sm">
-            {t('punch.source_ncr', { defaultValue: 'From NCR' })}
-          </Badge>
+          <PunchSourceBadge item={item} />
         </div>
       )}
 
@@ -656,10 +726,15 @@ function KanbanView({
 export function PunchListPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const { confirm, ...confirmProps } = useConfirm();
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+
+  // Deep-link target (e.g. from an inspection's "Open punch item" toast). The
+  // matching row scrolls into view and flashes once the data has loaded.
+  const highlightId = searchParams.get('highlight');
 
   // State
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -726,6 +801,31 @@ export function PunchListPage() {
   useEffect(() => {
     setSelectedIds(new Set());
   }, [projectId]);
+
+  // A deep-link highlight only renders in the list view (the table row carries
+  // the flash); switch to it so the targeted item is actually visible.
+  useEffect(() => {
+    if (highlightId) setViewMode('list');
+  }, [highlightId]);
+
+  // Once the highlighted item is present, let the row flash then drop the
+  // ?highlight param (replace, preserving other params) so a refresh or
+  // back-navigation does not re-trigger the highlight.
+  useEffect(() => {
+    if (!highlightId) return;
+    if (!punchItems.some((it) => it.id === highlightId)) return;
+    const timer = window.setTimeout(() => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete('highlight');
+          return next;
+        },
+        { replace: true },
+      );
+    }, 2600);
+    return () => window.clearTimeout(timer);
+  }, [highlightId, punchItems, setSearchParams]);
 
   // Invalidation
   const invalidateAll = useCallback(() => {
@@ -1264,6 +1364,7 @@ export function PunchListPage() {
                       onDelete={handleDelete}
                       selected={selectedIds.has(item.id)}
                       onToggleSelect={toggleSelect}
+                      highlight={highlightId === item.id}
                     />
                   ))}
                 </tbody>
@@ -1308,15 +1409,29 @@ const PunchTableRow = React.memo(function PunchTableRow({
   onDelete,
   selected,
   onToggleSelect,
+  highlight,
 }: {
   item: PunchItem;
   onTransition: (id: string, status: PunchStatus) => void;
   onDelete: (id: string) => void;
   selected: boolean;
   onToggleSelect: (id: string) => void;
+  /** When set (from a ?highlight deep-link) the row scrolls into view and
+   *  flashes a highlight ring. */
+  highlight?: boolean;
 }) {
   const { t } = useTranslation();
   const transitions = STATUS_TRANSITION[item.status] ?? [];
+  const rowRef = useRef<HTMLTableRowElement>(null);
+  const [flash, setFlash] = useState(false);
+
+  useEffect(() => {
+    if (!highlight) return;
+    setFlash(true);
+    rowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const timer = window.setTimeout(() => setFlash(false), 2400);
+    return () => window.clearTimeout(timer);
+  }, [highlight]);
 
   const isOverdue =
     item.due_date &&
@@ -1338,14 +1453,20 @@ const PunchTableRow = React.memo(function PunchTableRow({
   }, [item.due_date]);
 
   return (
-    <tr className={clsx(
-      'transition-colors',
-      selected
-        ? 'bg-oe-blue/5 hover:bg-oe-blue/10'
-        : isOverdue
-        ? 'bg-red-50/40 hover:bg-red-50/70 dark:bg-red-950/10 dark:hover:bg-red-950/20'
-        : 'hover:bg-surface-secondary/50',
-    )}>
+    <tr
+      ref={rowRef}
+      className={clsx(
+        'transition-colors scroll-mt-24',
+        flash && 'ring-2 ring-inset ring-oe-blue/50',
+        flash
+          ? 'bg-oe-blue/10'
+          : selected
+          ? 'bg-oe-blue/5 hover:bg-oe-blue/10'
+          : isOverdue
+          ? 'bg-red-50/40 hover:bg-red-50/70 dark:bg-red-950/10 dark:hover:bg-red-950/20'
+          : 'hover:bg-surface-secondary/50',
+      )}
+    >
       <td className="px-3 py-3 w-8">
         <input
           type="checkbox"
@@ -1369,21 +1490,7 @@ const PunchTableRow = React.memo(function PunchTableRow({
             {`(${item.location_x ?? '-'}, ${item.location_y ?? '-'})`}
           </p>
         )}
-        {item.metadata?.source === 'clash' && (
-          <Badge variant="error" size="sm" className="mt-0.5">
-            {t('punch.source_clash', { defaultValue: 'From clash' })}
-          </Badge>
-        )}
-        {item.metadata?.source === 'inspection' && (
-          <Badge variant="blue" size="sm" className="mt-0.5">
-            {t('punch.source_inspection', { defaultValue: 'From Inspection' })}
-          </Badge>
-        )}
-        {item.metadata?.source === 'ncr' && (
-          <Badge variant="warning" size="sm" className="mt-0.5">
-            {t('punch.source_ncr', { defaultValue: 'From NCR' })}
-          </Badge>
-        )}
+        <PunchSourceBadge item={item} className="mt-0.5 inline-block" />
       </td>
       <td className="px-4 py-3">
         <Badge variant={PRIORITY_BADGE_VARIANT[item.priority]} size="sm" className={PRIORITY_BADGE_CLS[item.priority]}>

@@ -345,8 +345,15 @@ interface PunchSummaryData {
   by_status: Record<string, number>;
 }
 
-function QualityDashboardSummary({ projectId }: { projectId: string }) {
+function QualityDashboardSummary({
+  projectId,
+  onOpenIncidents,
+}: {
+  projectId: string;
+  onOpenIncidents: () => void;
+}) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { data: safetyStats, isError: safetyStatsError } = useQuery({
     queryKey: ['safety-stats', projectId],
@@ -406,10 +413,24 @@ function QualityDashboardSummary({ projectId }: { projectId: string }) {
       (punchSummary.by_status?.['in_progress'] ?? 0)
     : 0;
 
+  // Each tile is a drill-down into the filtered source list, the action a PM
+  // instinctively tries when they see a count. Inspections/NCRs/Defects deep-link
+  // to their registers; Open Incidents scrolls to and activates the incidents tab
+  // already on this page.
+  const tileBtnCls =
+    'w-full p-3 text-left rounded-xl transition-colors hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40';
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       <Card padding="none">
-        <div className="p-3">
+        <button
+          type="button"
+          onClick={onOpenIncidents}
+          className={tileBtnCls}
+          title={t('safety.dash_open_incidents_hint', {
+            defaultValue: 'View incidents',
+          })}
+        >
           <div className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('safety.dash_open_incidents', { defaultValue: 'Open Incidents' })}
           </div>
@@ -440,31 +461,50 @@ function QualityDashboardSummary({ projectId }: { projectId: string }) {
               )}
             </>
           )}
-        </div>
+        </button>
       </Card>
       <Card padding="none">
-        <div className="p-3">
+        <button
+          type="button"
+          onClick={() => navigate('/inspections')}
+          className={tileBtnCls}
+          title={t('safety.dash_pending_inspections_hint', {
+            defaultValue: 'View inspections',
+          })}
+        >
           <div className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('safety.dash_pending_inspections', { defaultValue: 'Pending Inspections' })}
           </div>
           <div className="text-lg font-semibold text-content-primary">{pendingInspections}</div>
-        </div>
+        </button>
       </Card>
       <Card padding="none">
-        <div className="p-3">
+        <button
+          type="button"
+          onClick={() => navigate('/ncr')}
+          className={tileBtnCls}
+          title={t('safety.dash_open_ncrs_hint', { defaultValue: 'View NCRs' })}
+        >
           <div className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('safety.dash_open_ncrs', { defaultValue: 'Open NCRs' })}
           </div>
           <div className="text-lg font-semibold text-content-primary">{openNCRs}</div>
-        </div>
+        </button>
       </Card>
       <Card padding="none">
-        <div className="p-3">
+        <button
+          type="button"
+          onClick={() => navigate('/punchlist')}
+          className={tileBtnCls}
+          title={t('safety.dash_open_defects_hint', {
+            defaultValue: 'View punch list',
+          })}
+        >
           <div className="text-2xs uppercase tracking-wide text-content-tertiary">
             {t('safety.dash_open_defects', { defaultValue: 'Open Defects' })}
           </div>
           <div className="text-lg font-semibold text-content-primary">{openDefects}</div>
-        </div>
+        </button>
       </Card>
     </div>
   );
@@ -486,6 +526,9 @@ export function SafetyPage() {
   const projectName = useProjectContextStore((s) => s.activeProjectName);
 
   const [activeTab, setActiveTab] = useState<SafetyTab>('incidents');
+  // Anchors the incidents tab panel so the Open Incidents summary tile can
+  // scroll the list into view after switching to it.
+  const tabsRef = useRef<HTMLDivElement>(null);
   // Arrow-key navigation across the Incidents / Observations tabs (WCAG 2.1.1).
   const onTabKeyDown = useTabKeyboardNav<SafetyTab>({
     ids: SAFETY_TAB_IDS,
@@ -577,7 +620,15 @@ export function SafetyPage() {
       </SectionIntro>
 
       {/* Quality Ecosystem Summary */}
-      {projectId && <QualityDashboardSummary projectId={projectId} />}
+      {projectId && (
+        <QualityDashboardSummary
+          projectId={projectId}
+          onOpenIncidents={() => {
+            setActiveTab('incidents');
+            tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+        />
+      )}
 
       <RequiresProject
         emptyHint={t('safety.select_project', {
@@ -587,7 +638,8 @@ export function SafetyPage() {
       >
         {/* Tab Bar */}
         <div
-          className="flex items-center gap-1 mb-5 border-b border-border-light"
+          ref={tabsRef}
+          className="flex items-center gap-1 mb-5 border-b border-border-light scroll-mt-24"
           role="tablist"
           aria-label={t('safety.tabs_aria', { defaultValue: 'Safety sections' })}
           onKeyDown={onTabKeyDown}

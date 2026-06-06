@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   AlertOctagon,
@@ -415,20 +415,48 @@ const NCRRow = React.memo(function NCRRow({
   ncr,
   onClose,
   onCreateVariation,
+  highlight,
 }: {
   ncr: NCR;
   onClose: (id: string) => void;
   onCreateVariation: (id: string) => void;
+  /** When set (from a ?highlight deep-link) the row auto-expands, scrolls into
+   *  view and flashes a highlight ring. */
+  highlight?: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [flash, setFlash] = useState(false);
+
+  useEffect(() => {
+    if (!highlight) return;
+    setExpanded(true);
+    setFlash(true);
+    rowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const timer = window.setTimeout(() => setFlash(false), 2400);
+    return () => window.clearTimeout(timer);
+  }, [highlight]);
+
   const statusCfg = STATUS_CONFIG[ncr.status] ?? STATUS_CONFIG.identified;
   const typeCfg = NCR_TYPE_COLORS[ncr.ncr_type] ?? 'neutral';
   const severityCfg = SEVERITY_CONFIG[ncr.severity] ?? SEVERITY_CONFIG.minor;
+  // Deep-link to the exact originating inspection (scoped to the NCR's project
+  // and highlighting the linked inspection row). Falls back to the project
+  // route even when the inspection number is unknown.
+  const inspectionDeepLink = ncr.linked_inspection_id
+    ? `/projects/${ncr.project_id}/inspections?highlight=${ncr.linked_inspection_id}`
+    : '/inspections';
 
   return (
-    <div className="border-b border-border-light last:border-b-0">
+    <div
+      ref={rowRef}
+      className={clsx(
+        'border-b border-border-light last:border-b-0 scroll-mt-24 transition-colors duration-500',
+        flash && 'bg-oe-blue/10 ring-2 ring-inset ring-oe-blue/40',
+      )}
+    >
       {/* Main row */}
       <div
         className={clsx(
@@ -548,16 +576,34 @@ const NCRRow = React.memo(function NCRRow({
             </div>
           )}
 
-          {/* Linked Inspection */}
+          {/* Linked Inspection — the INS badge deep-links straight to the
+              originating inspection so the user lands on the exact failed
+              check, not the full register. */}
           {ncr.linked_inspection_number != null && (
             <div className="flex items-center gap-2">
               <ClipboardCheck size={13} className="text-content-tertiary" />
               <span className="text-xs text-content-tertiary">
                 {t('ncr.linked_inspection', { defaultValue: 'Linked Inspection' })}:
               </span>
-              <Badge variant="neutral" size="sm">
-                INS-{String(ncr.linked_inspection_number).padStart(3, '0')}
-              </Badge>
+              {ncr.linked_inspection_id ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(inspectionDeepLink);
+                  }}
+                  className="rounded-md transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                  title={t('ncr.view_inspection', { defaultValue: 'View Inspection' })}
+                >
+                  <Badge variant="blue" size="sm">
+                    INS-{String(ncr.linked_inspection_number).padStart(3, '0')}
+                  </Badge>
+                </button>
+              ) : (
+                <Badge variant="neutral" size="sm">
+                  INS-{String(ncr.linked_inspection_number).padStart(3, '0')}
+                </Badge>
+              )}
             </div>
           )}
 
@@ -650,7 +696,7 @@ const NCRRow = React.memo(function NCRRow({
                 className="text-2xs"
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate('/inspections');
+                  navigate(inspectionDeepLink);
                 }}
               >
                 <ClipboardCheck size={11} className="mr-1" />
@@ -694,9 +740,14 @@ export function NCRPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+
+  // Deep-link target (e.g. from an inspection's "Open NCR" toast). The matching
+  // row auto-expands, scrolls into view and flashes once the data has loaded.
+  const highlightId = searchParams.get('highlight');
 
   // State
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -858,6 +909,25 @@ export function NCRPage() {
     },
     [createVariationMut],
   );
+
+  // Once the highlighted NCR is present, let the row flash then drop the
+  // ?highlight param (replace, preserving other params) so a refresh or
+  // back-navigation does not re-trigger the highlight.
+  useEffect(() => {
+    if (!highlightId) return;
+    if (!ncrs.some((n) => n.id === highlightId)) return;
+    const timer = window.setTimeout(() => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete('highlight');
+          return next;
+        },
+        { replace: true },
+      );
+    }, 2600);
+    return () => window.clearTimeout(timer);
+  }, [highlightId, ncrs, setSearchParams]);
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -1071,7 +1141,13 @@ export function NCRPage() {
 
               {/* Rows */}
               {filtered.map((ncr) => (
-                <NCRRow key={ncr.id} ncr={ncr} onClose={handleClose} onCreateVariation={handleCreateVariation} />
+                <NCRRow
+                  key={ncr.id}
+                  ncr={ncr}
+                  onClose={handleClose}
+                  onCreateVariation={handleCreateVariation}
+                  highlight={highlightId === ncr.id}
+                />
               ))}
             </Card>
           </>
