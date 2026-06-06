@@ -21,6 +21,7 @@ import {
   Tags,
   Gauge,
   HeartPulse,
+  Users,
 } from 'lucide-react';
 import {
   Button,
@@ -240,6 +241,12 @@ export function EquipmentPage() {
           {
             label: t('equipment.intro_link_finance', { defaultValue: 'Finance' }),
             onClick: () => navigate('/finance'),
+          },
+          {
+            label: t('equipment.intro_link_building_assets', {
+              defaultValue: 'Building Assets (FM)',
+            }),
+            onClick: () => navigate('/assets'),
           },
         ]}
       >
@@ -487,6 +494,7 @@ function AssetTable({
 
 function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [tab, setTab] = useState<DrawerTab>('utilization');
@@ -620,6 +628,22 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
           <div className="flex items-center gap-1 shrink-0">
             <button
               type="button"
+              onClick={() => navigate('/resources')}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-oe-blue-text hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors"
+              aria-label={t('equipment.view_assignments', {
+                defaultValue: 'View assignments',
+              })}
+              title={t('equipment.view_assignments_hint', {
+                defaultValue: 'Open the crew and resource assignments for this fleet',
+              })}
+            >
+              <Users size={12} />
+              {t('equipment.view_assignments', {
+                defaultValue: 'View assignments',
+              })}
+            </button>
+            <button
+              type="button"
               onClick={() => setEditOpen(true)}
               disabled={!eq}
               className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-oe-blue-text hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -729,7 +753,16 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   {t('equipment.blocked_banner', {
                     defaultValue:
                       'This unit is blocked from new assignments - its status is not active or a required inspection has expired.',
-                  })}
+                  })}{' '}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/resources')}
+                    className="font-medium underline underline-offset-2 hover:no-underline"
+                  >
+                    {t('equipment.blocked_banner_resources_link', {
+                      defaultValue: 'Review crew assignments in Resources',
+                    })}
+                  </button>
                 </span>
               </div>
             )}

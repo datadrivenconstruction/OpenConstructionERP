@@ -438,7 +438,7 @@ const navGroups: NavGroup[] = [
     ],
   },
   // ── 17. FINANCE ────────────────────────────────────────────────────
-  // Money roll-up: finance, reports, reporting dashboards, snapshots.
+  // Money roll-up: finance, reports, reporting dashboards.
   {
     id: 'grp_finance',
     labelKey: 'sidebar.group.finance',
@@ -450,11 +450,11 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.analytics', to: '/analytics', icon: LineChart, advancedOnly: true },
       { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart, advancedOnly: true },
       { labelKey: 'nav.reporting_dashboards', to: '/reporting', icon: BarChart3, advancedOnly: true },
-      { labelKey: 'nav.snapshots', to: '/dashboards', icon: TrendingUp, advancedOnly: true },
     ],
   },
   // ── 18. CONTROLS & BI ──────────────────────────────────────────────
-  // Project controls, BI dashboards, and the admin-only architecture map.
+  // Project controls, BI dashboards, the model snapshots (parquet/CAD-BIM
+  // baseline) tool, and the admin-only architecture map.
   {
     id: 'grp_controls_bi',
     labelKey: 'sidebar.group.controls_bi',
@@ -464,6 +464,7 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.project_controls', to: '/project-controls', icon: Gauge, advancedOnly: true },
       { labelKey: 'nav.bi_dashboards', to: '/bi-dashboards', icon: BarChart3, advancedOnly: true },
+      { labelKey: 'nav.snapshots', to: '/dashboards', icon: TrendingUp, advancedOnly: true },
       // Architecture Map — internal/dev tool, admin-only so a regular
       // customer's sidebar isn't cluttered with the dependency graph.
       // The route itself is also wrapped in <AdminOnly> in App.tsx.
