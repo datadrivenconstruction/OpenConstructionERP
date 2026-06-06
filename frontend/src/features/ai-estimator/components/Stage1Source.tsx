@@ -84,6 +84,13 @@ export interface Stage1IntakeProps {
   canStart: boolean;
   starting: boolean;
   onStart: () => void;
+  /**
+   * Optional replacement body for the free-text tab. When provided, the text
+   * tab renders this slot (the conversational intake panel) instead of the
+   * plain textarea + Start button. Files / BIM / documents tabs are untouched
+   * and keep the direct run-start path.
+   */
+  textSlot?: React.ReactNode;
 }
 
 /** Pre-run intake screen. */
@@ -107,18 +114,28 @@ export function Stage1Intake(props: Stage1IntakeProps) {
     canStart,
     starting,
     onStart,
+    textSlot,
   } = props;
 
   const [dragOver, setDragOver] = useState(false);
 
+  // The free-text tab unifies with the conversational intake panel (the
+  // founder's named front door): a single line becomes a guided dialogue and
+  // an editable, vector-grounded work-package board. When the slot is present
+  // the textarea, the generic help line and the shared Start button are all
+  // suppressed for the text tab so the panel owns its own flow.
+  const textIsGuided = sourceKind === 'text' && !!textSlot;
+
   return (
     <div className="space-y-5">
-      <p className="text-sm text-content-secondary">
-        {t('aiest.intake.help', {
-          defaultValue:
-            'Bring any source. The agent detects the format, reads it into elements, groups quantities and finds exact catalogue rates. Rates always come from the cost database, never invented.',
-        })}
-      </p>
+      {!textIsGuided && (
+        <p className="text-sm text-content-secondary">
+          {t('aiest.intake.help', {
+            defaultValue:
+              'Bring any source. The agent detects the format, reads it into elements, groups quantities and finds exact catalogue rates. Rates always come from the cost database, never invented.',
+          })}
+        </p>
+      )}
 
       {/* Source-kind tab grid */}
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
@@ -152,7 +169,9 @@ export function Stage1Intake(props: Stage1IntakeProps) {
 
       {/* Per-kind input */}
       <div>
-        {sourceKind === 'text' && (
+        {sourceKind === 'text' && textSlot}
+
+        {sourceKind === 'text' && !textSlot && (
           <textarea
             value={text}
             onChange={(e) => onText(e.target.value)}
@@ -277,16 +296,18 @@ export function Stage1Intake(props: Stage1IntakeProps) {
         )}
       </div>
 
-      <Button
-        variant="primary"
-        size="lg"
-        icon={<Sparkles className="h-4 w-4" />}
-        loading={starting}
-        disabled={!canStart}
-        onClick={onStart}
-      >
-        {t('aiest.intake.start', { defaultValue: 'Start AI estimate' })}
-      </Button>
+      {!textIsGuided && (
+        <Button
+          variant="primary"
+          size="lg"
+          icon={<Sparkles className="h-4 w-4" />}
+          loading={starting}
+          disabled={!canStart}
+          onClick={onStart}
+        >
+          {t('aiest.intake.start', { defaultValue: 'Start AI estimate' })}
+        </Button>
+      )}
     </div>
   );
 }
