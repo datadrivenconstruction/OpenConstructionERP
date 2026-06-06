@@ -13,6 +13,39 @@
     "news": "Новини",
     "download": "Изтегляне"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Изтегляне",
+      "title": "Вземете <i>истинското</i> настолно приложение, безплатно.",
+      "lede": "Нативна компилация на OpenConstructionERP. Без Python, без pip, без Docker, без база данни за настройка. Един файл, стартирате го и готово. Данните ви остават на вашата машина.",
+      "chip_no_deps": "Без Python, pip, Docker или БД",
+      "chip_local": "Данните остават локално",
+      "chip_fast": "Първо стартиране ~60 сек, после бързо",
+      "chip_oss": "Отворен код, AGPL-3.0",
+      "flag_detected": "Открито",
+      "btn_download": "Изтегляне",
+      "btn_install_terminal": "Инсталиране през терминал",
+      "reading": "Зареждане на последното издание…",
+      "win_note": "Windows 10/11 - 64-битов инсталатор",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Плъзнете приложението в папката Приложения.",
+      "linux_note": "AppImage, deb и rpm",
+      "all_builds": "Вижте всички компилации и контролни суми в GitHub",
+      "win_step1": "Изтеглете инсталатора",
+      "win_step2": "Стартирайте го и потвърдете подканата",
+      "win_step3": "Първото стартиране отнема около минута, след това приложението се отваря",
+      "mac_step1": "Изтеглете .dmg файла",
+      "mac_step2": "Плъзнете приложението в Приложения",
+      "mac_step3": "Отворете го от Приложения",
+      "linux_step1": "Поставете командата отгоре в терминала си",
+      "linux_step2": "Тя избира правилния пакет (deb, rpm или AppImage)",
+      "linux_step3": "Стартирайте OpenConstructionERP от менюто с приложения",
+      "dev_title": "За разработчици",
+      "dev_lede": "Предпочитате кода? Инсталирайте с pip или стартирайте целия стек с Docker.",
+      "dev_pip_label": "Пакет за Python",
+      "dev_docker_label": "Цял стек"
+    }
+  },
   "hero": {
     "version_meta": "издадено на 2026-04-20 · втора стабилна версия",
     "sub": "Open-source ERP за строителни екипи - оценки, графици, търгове, договори, задачи на обекта и отчети в една инсталация. Данните за разходи и срокове остават синхронизирани с чертежите и количествената сметка зад тях.",
@@ -67,7 +100,14 @@
     "panel_status": "на живо · 17 слоя",
     "mobile_modules_title": "17 вградени модула",
     "headline": "<span class=\"word\"><span>Управлявайте</span></span> <span class=\"word\"><span>целия</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>строителен</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>проект</span></span>",
-    "download_label": "Или просто изтеглете безплатното десктоп приложение, без Python, без Docker, нищо за настройка:"
+    "download_label": "Или просто изтеглете безплатното десктоп приложение, без Python, без Docker, нищо за настройка:",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Спрете да се борите с инструментите си.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "оценявате.",
     "sub": "Инсталирайте с една команда. Работи на лаптопа ви, VPS или облака по ваш избор. Self-host завинаги или ние ще го направим вместо вас.",
     "btn_install": "Инсталирайте сега",
-    "btn_star": "Звезда в GitHub"
+    "btn_star": "Звезда в GitHub",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "Репото, отворено за всички.",

@@ -13,6 +13,39 @@
     "news": "News",
     "download": "Herunterladen"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Download",
+      "title": "Hol dir die <i>echte</i> Desktop-App, kostenlos.",
+      "lede": "Ein natives Build von OpenConstructionERP. Kein Python, kein pip, kein Docker, keine Datenbank einzurichten. Eine Datei, starten, fertig. Deine Daten bleiben auf deinem Rechner.",
+      "chip_no_deps": "Kein Python, pip, Docker oder DB",
+      "chip_local": "Daten bleiben lokal",
+      "chip_fast": "Erster Start ~60s, danach schnell",
+      "chip_oss": "Open Source, AGPL-3.0",
+      "flag_detected": "Erkannt",
+      "btn_download": "Herunterladen",
+      "btn_install_terminal": "Per Terminal installieren",
+      "reading": "Neueste Version wird geladen…",
+      "win_note": "Windows 10/11 - 64-Bit-Installer",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Zieh die App in deinen Programme-Ordner.",
+      "linux_note": "AppImage, deb und rpm",
+      "all_builds": "Alle Builds und Prüfsummen auf GitHub ansehen",
+      "win_step1": "Installer herunterladen",
+      "win_step2": "Ausführen und die Abfrage bestätigen",
+      "win_step3": "Der erste Start dauert etwa eine Minute, dann öffnet sich die App",
+      "mac_step1": "Die .dmg herunterladen",
+      "mac_step2": "Die App in den Programme-Ordner ziehen",
+      "mac_step3": "Aus dem Programme-Ordner öffnen",
+      "linux_step1": "Den Befehl oben ins Terminal einfügen",
+      "linux_step2": "Er wählt das passende Paket (deb, rpm oder AppImage)",
+      "linux_step3": "OpenConstructionERP über dein App-Menü starten",
+      "dev_title": "Für Entwickler",
+      "dev_lede": "Lieber den Quellcode? Per pip installieren oder den kompletten Stack mit Docker starten.",
+      "dev_pip_label": "Python-Paket",
+      "dev_docker_label": "Kompletter Stack"
+    }
+  },
   "hero": {
     "version_meta": "veröffentlicht 2026-04-20",
     "sub": "Open-Source-ERP für Bauteams - Kalkulation, Terminplanung, Ausschreibungen, Verträge, Baustellenaufgaben und Reporting in einer Installation. Kosten- und Zeitwerte bleiben synchron mit den Plänen und dem zugehörigen LV.",
@@ -67,7 +100,14 @@
     "mod_users_title": "Benutzer",
     "panel_status": "live · 17 Ebenen",
     "mobile_modules_title": "17 integrierte Module",
-    "headline": "<span class=\"word\"><span>Führen</span></span> <span class=\"word\"><span>Sie</span></span> <span class=\"word\"><span>das</span></span> <span class=\"word\"><span>ganze</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>Bau</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>Projekt</span></span>"
+    "headline": "<span class=\"word\"><span>Führen</span></span> <span class=\"word\"><span>Sie</span></span> <span class=\"word\"><span>das</span></span> <span class=\"word\"><span>ganze</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>Bau</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>Projekt</span></span>",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Schluss mit Werkzeugkämpfen.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "kalkulieren.",
     "sub": "Installation mit einem Befehl. Läuft auf Ihrem Laptop, VPS oder der Cloud Ihrer Wahl. Dauerhaft selbst hosten - oder wir übernehmen es.",
     "btn_install": "Jetzt installieren",
-    "btn_star": "Auf GitHub sternen"
+    "btn_star": "Auf GitHub sternen",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "Das Repository, offen für alle.",

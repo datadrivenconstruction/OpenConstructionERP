@@ -13,6 +13,39 @@
     "news": "Notícias",
     "download": "Baixar"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Baixar",
+      "title": "Tenha o <i>verdadeiro</i> app de desktop, grátis.",
+      "lede": "Uma versão nativa do OpenConstructionERP. Sem Python, sem pip, sem Docker, sem banco de dados para configurar. Um arquivo, você executa e pronto. Seus dados ficam na sua máquina.",
+      "chip_no_deps": "Sem Python, pip, Docker ou BD",
+      "chip_local": "Os dados ficam locais",
+      "chip_fast": "Primeiro início ~60s, depois rápido",
+      "chip_oss": "Código aberto, AGPL-3.0",
+      "flag_detected": "Detectado",
+      "btn_download": "Baixar",
+      "btn_install_terminal": "Instalar pelo terminal",
+      "reading": "Lendo a versão mais recente…",
+      "win_note": "Windows 10/11 - instalador de 64 bits",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Arraste o app para a sua pasta de Aplicativos.",
+      "linux_note": "AppImage, deb e rpm",
+      "all_builds": "Ver todas as builds e checksums no GitHub",
+      "win_step1": "Baixe o instalador",
+      "win_step2": "Execute e aceite o aviso",
+      "win_step3": "O primeiro início leva cerca de um minuto e então o app abre",
+      "mac_step1": "Baixe o .dmg",
+      "mac_step2": "Arraste o app para Aplicativos",
+      "mac_step3": "Abra a partir de Aplicativos",
+      "linux_step1": "Cole o comando acima no seu terminal",
+      "linux_step2": "Ele escolhe o pacote certo (deb, rpm ou AppImage)",
+      "linux_step3": "Inicie o OpenConstructionERP pelo menu de aplicativos",
+      "dev_title": "Para desenvolvedores",
+      "dev_lede": "Prefere o código-fonte? Instale com pip ou rode a stack completa com Docker.",
+      "dev_pip_label": "Pacote Python",
+      "dev_docker_label": "Stack completa"
+    }
+  },
   "hero": {
     "version_meta": "lançado 2026-04-20 · segunda versão estável",
     "sub": "ERP open-source para equipas de construção - orçamentação, cronogramas, concursos, contratos, tarefas de obra e relatórios numa só instalação. Os valores de custo e tempo mantêm-se sincronizados com os desenhos e com o BOQ subjacente.",
@@ -67,7 +100,14 @@
     "panel_status": "ativo · 17 camadas",
     "mobile_modules_title": "17 módulos integrados",
     "headline": "<span class=\"word\"><span>Gerencie</span></span> <span class=\"word\"><span>todo</span></span> <span class=\"word\"><span>o</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projeto</span></span> <span class=\"word\"><span>de</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>construção</span></span>",
-    "download_label": "Ou simplesmente baixe o app gratuito para desktop, sem Python, sem Docker, nada para configurar:"
+    "download_label": "Ou simplesmente baixe o app gratuito para desktop, sem Python, sem Docker, nada para configurar:",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Pare de lutar com as suas ferramentas.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "orçamentar.",
     "sub": "Instale com um só comando. Execute no portátil, num VPS ou na cloud à sua escolha. Auto-hospede para sempre, ou deixe-nos fazê-lo por si.",
     "btn_install": "Instalar agora",
-    "btn_star": "Dar star no GitHub"
+    "btn_star": "Dar star no GitHub",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "O repositório, à vista de todos.",

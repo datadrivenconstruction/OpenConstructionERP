@@ -13,6 +13,39 @@
     "news": "Haberler",
     "download": "İndir"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "İndir",
+      "title": "<i>Gerçek</i> masaüstü uygulamasını ücretsiz edinin.",
+      "lede": "OpenConstructionERP'nin yerel bir sürümü. Python yok, pip yok, Docker yok, kurulacak veritabanı yok. Tek dosya, çalıştırın, bitti. Verileriniz kendi makinenizde kalır.",
+      "chip_no_deps": "Python, pip, Docker veya VT yok",
+      "chip_local": "Veriler yerelde kalır",
+      "chip_fast": "İlk açılış ~60s, sonra hızlı",
+      "chip_oss": "Açık kaynak, AGPL-3.0",
+      "flag_detected": "Algılandı",
+      "btn_download": "İndir",
+      "btn_install_terminal": "Terminalden kur",
+      "reading": "En son sürüm okunuyor…",
+      "win_note": "Windows 10/11 - 64 bit kurucu",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Uygulamayı Uygulamalar klasörünüze sürükleyin.",
+      "linux_note": "AppImage, deb ve rpm",
+      "all_builds": "Tüm derlemeleri ve sağlama toplamlarını GitHub'da görün",
+      "win_step1": "Kurucuyu indirin",
+      "win_step2": "Çalıştırın ve istemi onaylayın",
+      "win_step3": "İlk açılış yaklaşık bir dakika sürer, ardından uygulama açılır",
+      "mac_step1": ".dmg dosyasını indirin",
+      "mac_step2": "Uygulamayı Uygulamalar'a sürükleyin",
+      "mac_step3": "Uygulamalar'dan açın",
+      "linux_step1": "Yukarıdaki komutu terminalinize yapıştırın",
+      "linux_step2": "Doğru paketi seçer (deb, rpm veya AppImage)",
+      "linux_step3": "OpenConstructionERP'yi uygulama menünüzden başlatın",
+      "dev_title": "Geliştiriciler için",
+      "dev_lede": "Kaynak kodu mu tercih ediyorsunuz? pip ile kurun veya tüm yığını Docker ile çalıştırın.",
+      "dev_pip_label": "Python paketi",
+      "dev_docker_label": "Tüm yığın"
+    }
+  },
   "hero": {
     "version_meta": "yayınlandı 2026-04-20 · ikinci kararlı sürüm",
     "sub": "İnşaat ekipleri için açık kaynaklı ERP - keşifler, programlar, ihaleler, sözleşmeler, saha görevleri ve raporlama tek kurulumda. Maliyet ve süre verileri çizimler ve arkasındaki metraj ile senkronize kalır.",
@@ -67,7 +100,14 @@
     "panel_status": "canlı · 17 katman",
     "mobile_modules_title": "17 yerleşik modül",
     "headline": "<span class=\"word\"><span>Tüm</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>inşaat</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projesini</span></span> <span class=\"word\"><span>tek elden</span></span> <span class=\"word\"><span>yönetin</span></span>",
-    "download_label": "Ya da ücretsiz masaüstü uygulamasını hemen indirin, Python yok, Docker yok, kurmanız gereken hiçbir şey yok:"
+    "download_label": "Ya da ücretsiz masaüstü uygulamasını hemen indirin, Python yok, Docker yok, kurmanız gereken hiçbir şey yok:",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Araçlarınızla boğuşmayı bırakın.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "başlayın.",
     "sub": "Tek komutla kurun. Dizüstü bilgisayarınızda, VPS'de veya seçtiğiniz bulutta çalıştırın. Sonsuza dek kendi sunucunuzda barındırın ya da bizden destek alın.",
     "btn_install": "Şimdi kurun",
-    "btn_star": "GitHub'da yıldızlayın"
+    "btn_star": "GitHub'da yıldızlayın",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "Repo, herkese açık.",

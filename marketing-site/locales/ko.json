@@ -13,6 +13,39 @@
     "news": "뉴스",
     "download": "다운로드"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "다운로드",
+      "title": "<i>진짜</i> 데스크톱 앱을 무료로 받으세요.",
+      "lede": "OpenConstructionERP의 네이티브 빌드입니다. Python도, pip도, Docker도, 설정할 데이터베이스도 필요 없습니다. 파일 하나, 실행하면 끝. 데이터는 사용자의 컴퓨터에 그대로 남습니다.",
+      "chip_no_deps": "Python, pip, Docker, DB 불필요",
+      "chip_local": "데이터는 로컬에 보관",
+      "chip_fast": "첫 실행 약 60초, 이후 빠름",
+      "chip_oss": "오픈 소스, AGPL-3.0",
+      "flag_detected": "감지됨",
+      "btn_download": "다운로드",
+      "btn_install_terminal": "터미널로 설치",
+      "reading": "최신 릴리스를 읽는 중…",
+      "win_note": "Windows 10/11 - 64비트 설치 프로그램",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "앱을 응용 프로그램 폴더로 끌어다 놓으세요.",
+      "linux_note": "AppImage, deb, rpm",
+      "all_builds": "GitHub에서 모든 빌드와 체크섬 보기",
+      "win_step1": "설치 프로그램 다운로드",
+      "win_step2": "실행하고 표시되는 안내를 수락",
+      "win_step3": "첫 실행은 약 1분 걸리며, 이후 앱이 열립니다",
+      "mac_step1": ".dmg 다운로드",
+      "mac_step2": "앱을 응용 프로그램으로 끌어다 놓기",
+      "mac_step3": "응용 프로그램에서 열기",
+      "linux_step1": "위 명령을 터미널에 붙여넣기",
+      "linux_step2": "알맞은 패키지(deb, rpm 또는 AppImage)를 자동으로 선택합니다",
+      "linux_step3": "앱 메뉴에서 OpenConstructionERP 실행",
+      "dev_title": "개발자용",
+      "dev_lede": "소스가 더 좋으세요? pip로 설치하거나 Docker로 전체 스택을 실행하세요.",
+      "dev_pip_label": "Python 패키지",
+      "dev_docker_label": "전체 스택"
+    }
+  },
   "hero": {
     "version_meta": "2026-04-20 출시 · 두 번째 안정 버전",
     "sub": "건설 팀을 위한 오픈소스 ERP - 견적, 공정표, 입찰, 계약, 현장 업무, 보고서를 한 번의 설치로. 비용과 공기 수치가 도면 및 BOQ와 항상 동기화됩니다.",
@@ -67,7 +100,14 @@
     "panel_status": "실시간 · 17개 레이어",
     "mobile_modules_title": "17개의 내장 모듈",
     "headline": "<span class=\"word italic\" data-anchor=\"primary\"><span>건설</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>프로젝트</span></span> <span class=\"word\"><span>전체를</span></span> <span class=\"word\"><span>한 번에</span></span> <span class=\"word\"><span>운영하세요</span></span>",
-    "download_label": "또는 무료 데스크톱 앱을 바로 다운로드하세요. Python도, Docker도, 별도의 설정도 필요 없습니다:"
+    "download_label": "또는 무료 데스크톱 앱을 바로 다운로드하세요. Python도, Docker도, 별도의 설정도 필요 없습니다:",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "도구와 씨름하지 마십시오.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "견적을 시작하십시오.",
     "sub": "한 번의 명령으로 설치됩니다. 노트북, VPS, 원하는 클라우드에서 실행하십시오. 영구 자체 호스팅 또는 저희가 운영해 드립니다.",
     "btn_install": "지금 설치",
-    "btn_star": "GitHub에서 Star"
+    "btn_star": "GitHub에서 Star",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "공개된 저장소.",
