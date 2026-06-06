@@ -14,7 +14,7 @@
 // from the cost database - the LLM never invents a unit rate. Degrades
 // gracefully when no AI key or vector DB is present.
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -22,6 +22,7 @@ import { Wand2, ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { IntakePanel } from '@/features/ai/intake';
 import { projectsApi, type Project } from '@/features/projects/api';
 import { matchElementsApi } from '@/features/match-elements/api';
 import { fetchDocuments, uploadDocument } from '@/features/documents/api';
@@ -138,12 +139,21 @@ export function AiEstimatorPage() {
   });
   const run: RunRead | undefined = runQ.data;
 
+  // Sync the wizard stage from the run's persisted current_stage only on the
+  // FIRST load of a given run, not on every refetch. After the initial sync the
+  // user (or a deliberate jump, e.g. the intake bridge landing on matching) owns
+  // the stage, so a background run refetch must not snap them backwards. The
+  // intake bridge pre-claims the run id (see syncedRunRef) so its forward jump
+  // to matching survives the first runQ resolution.
+  const syncedRunRef = useRef<string | null>(null);
   useEffect(() => {
-    if (run) {
+    if (!run) return;
+    if (syncedRunRef.current !== run.id) {
+      syncedRunRef.current = run.id;
       setStage(run.current_stage);
       setFurthest((f) => Math.max(f, STAGE_INDEX[run.current_stage]));
-      if (run.boq_id) setAppliedBoqId(run.boq_id);
     }
+    if (run.boq_id) setAppliedBoqId(run.boq_id);
   }, [run]);
 
   // "Running" = a background pass is genuinely still working. Only stage 1
@@ -488,6 +498,9 @@ export function AiEstimatorPage() {
 
   const openRun = useCallback(
     (id: string) => {
+      // Force a fresh stage-sync from the run's persisted stage, even if this is
+      // the same run id we bridged into earlier this session.
+      syncedRunRef.current = null;
       setRunId(id);
       setView('wizard');
       setSearchParams((p) => {
@@ -498,6 +511,50 @@ export function AiEstimatorPage() {
     },
     [setSearchParams],
   );
+
+  // The conversational intake (Stage A-C of the founder flow) bridges to a run
+  // the moment the user confirms the editable group board. The board confirm IS
+  // the grouping checkpoint, so we land the wizard on the matching stage of the
+  // SAME page and kick off the grounded multi-pass match. No navigation away, no
+  // parse_text_scope run: the dialogue's composed groups flow straight into rate
+  // matching.
+  //
+  // pendingIntakeMatch defers the auto-match until runId state has settled (the
+  // match mutation reads runId from closure, so we cannot fire it in the same
+  // tick as setRunId). The effect below consumes the flag.
+  const [pendingIntakeMatch, setPendingIntakeMatch] = useState(false);
+
+  const onIntakeFinished = useCallback(
+    (newRunId: string) => {
+      // Pre-claim the run so the stage-sync effect does not snap us back to the
+      // run's persisted "grouping" stage when runQ first resolves.
+      syncedRunRef.current = newRunId;
+      setRunId(newRunId);
+      setView('wizard');
+      setStage('matching');
+      setFurthest((f) => Math.max(f, STAGE_INDEX.matching));
+      setConfigEdits({});
+      setAppliedBoqId(null);
+      setPendingIntakeMatch(true);
+      setSearchParams((p) => {
+        const next = new URLSearchParams(p);
+        next.set('run', newRunId);
+        return next;
+      });
+      qc.invalidateQueries({ queryKey: ['aiest-runs', projectId] });
+    },
+    [projectId, qc, setSearchParams],
+  );
+
+  // Consume the bridge flag once runId has settled: the composed groups ARE the
+  // grouping output, so matching has not run yet. Fire it so grounded candidates
+  // appear the moment the user lands on the matching stage.
+  useEffect(() => {
+    if (pendingIntakeMatch && runId && stage === 'matching') {
+      setPendingIntakeMatch(false);
+      runMatchM.mutate();
+    }
+  }, [pendingIntakeMatch, runId, stage, runMatchM]);
 
   const backToList = useCallback(() => {
     setView('list');
@@ -686,6 +743,15 @@ export function AiEstimatorPage() {
                   canStart={canStart}
                   starting={startRunM.isPending}
                   onStart={() => startRunM.mutate()}
+                  textSlot={
+                    <IntakePanel
+                      projectId={projectId ?? ''}
+                      initialText={text}
+                      region={project?.region || undefined}
+                      currency={project?.currency || undefined}
+                      onFinished={onIntakeFinished}
+                    />
+                  }
                 />
               )}
               {stage === 'source' && hasRun && isRunning && (
