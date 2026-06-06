@@ -87,12 +87,11 @@ function KPICard({ accent, icon, label, primary, delta, secondary, hint, testId 
       data-testid={testId}
       className={clsx(
         'group relative overflow-hidden rounded-2xl',
-        'border border-white/40 dark:border-white/5',
-        'bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl',
-        'shadow-lg shadow-slate-900/[0.04] dark:shadow-slate-950/30',
-        'transition-all duration-300',
-        'hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-900/[0.08]',
-        'hover:border-white/60 dark:hover:border-white/10',
+        'border border-border-light',
+        'bg-surface-elevated/90',
+        'shadow-xs',
+        'transition-shadow duration-normal ease-oe',
+        'hover:shadow-sm',
       )}
     >
       {/* Top accent bar */}
@@ -163,7 +162,7 @@ function KPICard({ accent, icon, label, primary, delta, secondary, hint, testId 
 
 function SkeletonCard() {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl shadow-lg shadow-slate-900/[0.04] p-5 dark:border-white/5 dark:bg-slate-900/40">
+    <div className="relative overflow-hidden rounded-2xl border border-border-light bg-surface-elevated/90 p-5 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800" />
       <div className="flex items-center gap-2.5">
         <div className="h-9 w-9 animate-pulse rounded-xl bg-slate-200 dark:bg-slate-700" />
@@ -189,7 +188,7 @@ interface StatTileProps {
  *  less visual weight (no accent bar, smaller type). */
 function StatTile({ icon, label, value, footer, hint }: StatTileProps) {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-white/40 bg-white/50 px-4 py-3 backdrop-blur-xl dark:border-white/5 dark:bg-slate-900/30">
+    <div className="relative overflow-hidden rounded-xl border border-border-light bg-surface-elevated/90 px-4 py-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       <div className="flex items-center gap-2 text-content-tertiary">
         <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-content-secondary dark:bg-slate-800">
           {icon}

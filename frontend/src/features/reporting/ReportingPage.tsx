@@ -233,7 +233,7 @@ function KPICard({
   icon?: React.ElementType;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 shadow-xs">
+    <div className="flex items-center gap-3 rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       {Icon && (
         <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${trafficClasses[color]}`}>
           <Icon size={18} />
@@ -990,7 +990,7 @@ function PortfolioValueCard({ currencyEntries }: { currencyEntries: [string, num
   const { t } = useTranslation();
   const label = t('reporting.portfolio_value', { defaultValue: 'Portfolio Value' });
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 shadow-xs">
+    <div className="flex items-center gap-3 rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${trafficClasses.gray}`}>
         <BarChart3 size={18} />
       </div>

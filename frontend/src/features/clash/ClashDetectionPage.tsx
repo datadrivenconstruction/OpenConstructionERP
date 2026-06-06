@@ -4360,7 +4360,7 @@ function Kpi({
       disabled={!interactive}
       onClick={onClick}
       className={clsx(
-        'rounded-xl border bg-surface-elevated p-3 text-left shadow-xs transition-all',
+        'rounded-xl border bg-surface-elevated/90 p-3 text-left shadow-xs transition-all',
         interactive && 'hover:-translate-y-0.5 hover:shadow-md',
         active
           ? 'border-oe-blue ring-2 ring-oe-blue/20'

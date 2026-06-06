@@ -135,7 +135,7 @@ function Metric({
   value: ReactNode;
 }) {
   return (
-    <div>
+    <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       <div className="flex items-center gap-1.5 text-2xs font-medium text-content-tertiary uppercase tracking-wider">
         {icon}
         <span className="truncate">{label}</span>

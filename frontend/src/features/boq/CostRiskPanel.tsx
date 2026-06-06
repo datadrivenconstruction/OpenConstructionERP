@@ -41,12 +41,15 @@ function PercentileCard({
   fmt: Intl.NumberFormat;
   variant?: 'default' | 'green' | 'orange';
 }) {
+  // Accent variants keep their semantic tint; the default tile uses the
+  // canonical translucent KPI surface (90% alpha, no blur) so the page
+  // backdrop's dot grid reads through, matching tiles on /projects.
   const borderClass =
     variant === 'green'
-      ? 'border-emerald-400/50 bg-emerald-50/50 dark:bg-emerald-950/20'
+      ? 'rounded-lg border border-emerald-400/50 bg-emerald-50/50 dark:bg-emerald-950/20'
       : variant === 'orange'
-        ? 'border-amber-400/50 bg-amber-50/50 dark:bg-amber-950/20'
-        : 'border-border-light bg-surface-secondary/30';
+        ? 'rounded-lg border border-amber-400/50 bg-amber-50/50 dark:bg-amber-950/20'
+        : 'rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm';
 
   const valueClass =
     variant === 'green'
@@ -56,7 +59,7 @@ function PercentileCard({
         : 'text-content-primary';
 
   return (
-    <div className={`rounded-lg border px-3 py-2.5 ${borderClass}`}>
+    <div className={`px-3 py-2.5 ${borderClass}`}>
       <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
         {label}
       </div>

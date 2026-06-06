@@ -764,19 +764,19 @@ export function BOQListPage() {
           Canon KPI tile: shared Card, top-aligned label+value, text-lg value. */}
       {stats && allBoqs && allBoqs.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Card padding="sm" className="flex flex-col justify-start">
+          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
             <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
               {isFiltered
                 ? t('boq.matching_estimates', { defaultValue: 'Matching Estimates' })
                 : t('boq.total_estimates', { defaultValue: 'Total Estimates' })}
             </div>
             <div className="mt-1 text-lg font-semibold text-content-primary tabular-nums">{stats.count}</div>
-          </Card>
-          <Card padding="sm" className="flex flex-col justify-start">
+          </div>
+          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
             <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">{t('boq.total_positions', { defaultValue: 'Total Positions' })}</div>
             <div className="mt-1 text-lg font-semibold text-content-primary tabular-nums">{stats.totalPositions.toLocaleString()}</div>
-          </Card>
-          <Card padding="sm" className="flex flex-col justify-start">
+          </div>
+          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
             <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">{t('boq.total_value', { defaultValue: 'Total Value' })}</div>
             {/* Money rule: never blend currencies into one scalar. One
                 labelled total when all share a currency; the dominant
@@ -806,14 +806,14 @@ export function BOQListPage() {
                 </span>
               </div>
             )}
-          </Card>
-          <Card padding="sm" className="flex flex-col justify-start">
+          </div>
+          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
             <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">{t('boq.status', { defaultValue: 'Status' })}</div>
             <div className="mt-1 flex items-center gap-2">
               <Badge variant="blue" size="sm" dot>{stats.drafts} {t('boq.draft', { defaultValue: 'draft' })}</Badge>
               <Badge variant="success" size="sm" dot>{stats.finals} {t('boq.final', { defaultValue: 'final' })}</Badge>
             </div>
-          </Card>
+          </div>
         </div>
       )}
 

@@ -419,7 +419,10 @@ function FinanceSummaryCards({ projectId }: { projectId: string }) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
-          <Card key={card.label} padding="none" className="relative overflow-hidden">
+          <div
+            key={card.label}
+            className="relative overflow-hidden rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm"
+          >
             <div className={`absolute top-0 left-0 right-0 h-1 ${card.accent}`} />
             <div className="p-4 pt-3">
               <div className="flex items-center justify-between mb-2">
@@ -434,7 +437,7 @@ function FinanceSummaryCards({ projectId }: { projectId: string }) {
                 <MoneyDisplay amount={card.value} currency={currency} />
               </div>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
 

@@ -127,7 +127,7 @@ const KPICard = memo(function KPICard({
 }) {
   const { t } = useTranslation();
   return (
-    <Card padding="none" className="flex-1 min-w-[200px] relative overflow-hidden">
+    <div className="relative flex-1 min-w-[200px] overflow-hidden rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       {/* Top accent bar */}
       <div className={`absolute top-0 left-0 right-0 h-1 ${accentColor === 'green' ? 'bg-green-500' : accentColor === 'amber' ? 'bg-amber-500' : accentColor === 'rose' ? 'bg-rose-500' : 'bg-oe-blue'}`} />
       <div className="p-5 pt-4">
@@ -160,7 +160,7 @@ const KPICard = memo(function KPICard({
           </div>
         )}
       </div>
-    </Card>
+    </div>
   );
 });
 
@@ -625,7 +625,10 @@ const EVMKPIBox = memo(function EVMKPIBox({
   }
 
   let colorClass = 'text-content-primary';
-  let bgClass = 'bg-surface-secondary';
+  // Neutral (no threshold) tiles use the canonical translucent KPI surface so
+  // the page dot grid shows through; accent-tinted threshold states keep their
+  // semantic tint below.
+  let bgClass = 'border border-border-light bg-surface-elevated/90 shadow-xs';
 
   if (thresholdMode === 'index') {
     if (value >= 1.0) {

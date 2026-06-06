@@ -868,7 +868,7 @@ function KpiRibbon({
             key={card.label}
             type={clickable ? 'button' : undefined}
             onClick={clickable ? card.onClick : undefined}
-            className={`group flex w-full items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 text-left transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in ${
+            className={`group flex w-full items-center gap-3 rounded-xl border border-border-light bg-surface-elevated/90 p-4 text-left shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-stagger-in ${
               clickable ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-oe-blue/30' : ''
             }`}
             style={{ animationDelay: `${80 + i * 50}ms` }}
@@ -975,7 +975,7 @@ function PortfolioOverview({ projects: _projects }: { projects: ProjectSummary[]
         )}
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-lg bg-surface-secondary p-3">
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('dashboard.active_projects', { defaultValue: 'Active Projects' })}
           </div>
@@ -983,7 +983,7 @@ function PortfolioOverview({ projects: _projects }: { projects: ProjectSummary[]
             {analytics.total_projects}
           </div>
         </div>
-        <div className="rounded-lg bg-surface-secondary p-3">
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('dashboard.total_budget_all', { defaultValue: 'Total Budget' })}
           </div>
@@ -991,7 +991,7 @@ function PortfolioOverview({ projects: _projects }: { projects: ProjectSummary[]
             <MultiCurrencyTotal items={totalBudgetItems} variant="inline" compact />
           </div>
         </div>
-        <div className="rounded-lg bg-surface-secondary p-3">
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('dashboard.with_budget', { defaultValue: 'With Budget' })}
           </div>
@@ -999,7 +999,7 @@ function PortfolioOverview({ projects: _projects }: { projects: ProjectSummary[]
             {analytics.projects_with_budget}
           </div>
         </div>
-        <div className={`rounded-lg p-3 ${hasWarnings ? 'bg-amber-50 dark:bg-amber-900/10' : 'bg-surface-secondary'}`}>
+        <div className={`rounded-xl border border-border-light p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm ${hasWarnings ? 'bg-amber-50 dark:bg-amber-900/10' : 'bg-surface-elevated/90'}`}>
           <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('dashboard.budget_warnings', { defaultValue: 'Budget Warnings' })}
           </div>
@@ -1173,7 +1173,7 @@ function TodaySnapshot({ cards }: { cards?: ProjectCardMetrics[] }) {
             <button
               key={it.id}
               onClick={() => navigate(it.url)}
-              className="group flex items-center gap-3 rounded-lg border border-border-light bg-surface-primary px-4 py-3 text-left transition-all duration-normal ease-oe hover:border-oe-blue/30 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+              className="group flex items-center gap-3 rounded-xl border border-border-light bg-surface-elevated/90 px-4 py-3 text-left shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
             >
               <span className={`${s.iconColor} shrink-0`}>{it.icon}</span>
               <div className="min-w-0 flex-1">
@@ -2568,7 +2568,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
       <CardContent>
         {/* Aggregate Stats */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-6">
-          <div className="rounded-lg bg-surface-secondary p-3">
+          <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
             <div className="text-xs font-medium uppercase tracking-wider text-content-tertiary">
               {t('dashboard.total_projects', { defaultValue: 'Total Projects' })}
             </div>
@@ -2576,7 +2576,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
               {stats.totalProjects}
             </div>
           </div>
-          <div className="rounded-lg bg-surface-secondary p-3">
+          <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
             <div className="text-xs font-medium uppercase tracking-wider text-content-tertiary">
               {t('dashboard.total_boqs', { defaultValue: 'Total BOQs' })}
             </div>
@@ -2584,7 +2584,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
               {stats.totalBoqs}
             </div>
           </div>
-          <div className="rounded-lg bg-surface-secondary p-3 sm:col-span-2">
+          <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm sm:col-span-2">
             <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-content-tertiary">
               {t('dashboard.total_value', { defaultValue: 'Total Value' })}
               {stats.multiCurrency && (

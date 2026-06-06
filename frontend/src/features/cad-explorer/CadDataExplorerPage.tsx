@@ -2737,23 +2737,23 @@ function DescribeSummary({
     <div className="space-y-4">
       {/* Data quality summary */}
       <div className="grid grid-cols-3 gap-3">
-        <Card className="p-3">
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <p className="text-2xs text-content-tertiary uppercase">{t('explorer.data_completeness', { defaultValue: 'Data Completeness' })}</p>
           <p className={`text-lg font-bold tabular-nums ${qualityScore > 50 ? 'text-green-600' : qualityScore > 20 ? 'text-amber-600' : 'text-red-500'}`}>
             {qualityScore.toFixed(1)}%
           </p>
-        </Card>
-        <Card className="p-3">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <p className="text-2xs text-content-tertiary uppercase">{t('explorer.useful_columns', { defaultValue: 'Useful Columns' })}</p>
           <p className="text-lg font-bold text-content-primary tabular-nums">
             {describe.columns.filter((c) => c.non_null > describe.total_elements * 0.5).length}
             <span className="text-xs text-content-quaternary font-normal ml-1">/ {describe.total_columns}</span>
           </p>
-        </Card>
-        <Card className="p-3">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <p className="text-2xs text-content-tertiary uppercase">{t('explorer.sparse_columns', { defaultValue: 'Sparse (<10%)' })}</p>
           <p className="text-lg font-bold text-amber-600 tabular-nums">{lowCoverageCols}</p>
-        </Card>
+        </div>
       </div>
 
       {/* Column statistics table */}
@@ -3566,7 +3566,7 @@ function KpiStrip({ describe }: { describe: DescribeResponse }) {
         return (
           <div
             key={tile.label}
-            className="flex-1 min-w-[120px] flex items-center gap-2.5 rounded-lg border border-border-light/70 bg-surface-primary px-3 py-1.5 shadow-xs"
+            className="flex-1 min-w-[120px] flex items-center gap-2.5 rounded-xl border border-border-light bg-surface-elevated/90 px-3 py-1.5 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm"
             title={tile.hint}
           >
             <div className={`shrink-0 w-7 h-7 rounded-md bg-surface-secondary/70 flex items-center justify-center ${tile.accent}`}>

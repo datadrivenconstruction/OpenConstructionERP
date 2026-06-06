@@ -722,7 +722,7 @@ function KPICard({
   badge?: React.ReactNode;
 }) {
   return (
-    <Card>
+    <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       {/* items-start keeps the icon + text on the same top baseline; the
           text column is a top-anchored flex-col so a single-line value tile
           and a 3-line multi-currency tile share the first-line position
@@ -746,7 +746,7 @@ function KPICard({
           {sub && <p className="mt-0.5 text-xs text-content-secondary">{sub}</p>}
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
 

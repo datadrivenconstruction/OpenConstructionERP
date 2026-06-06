@@ -1139,44 +1139,44 @@ export function TransmittalsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <Card className="p-4 animate-card-in">
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('transmittals.stat_total', { defaultValue: 'Total' })}
           </p>
           <p className="text-lg font-semibold mt-1 tabular-nums text-content-primary">
             {stats.total}
           </p>
-        </Card>
-        <Card className="p-4 animate-card-in">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('transmittals.stat_draft', { defaultValue: 'Draft' })}
           </p>
           <p className="text-lg font-semibold mt-1 tabular-nums text-content-tertiary">
             {stats.draft}
           </p>
-        </Card>
-        <Card className="p-4 animate-card-in">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('transmittals.stat_issued', { defaultValue: 'Issued' })}
           </p>
           <p className="text-lg font-semibold mt-1 tabular-nums text-oe-blue">{stats.issued}</p>
-        </Card>
-        <Card className="p-4 animate-card-in">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('transmittals.stat_acknowledged', { defaultValue: 'Acknowledged' })}
           </p>
           <p className="text-lg font-semibold mt-1 tabular-nums text-semantic-success">
             {stats.acknowledged}
           </p>
-        </Card>
-        <Card className="p-4 animate-card-in">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('transmittals.stat_closed', { defaultValue: 'Closed' })}
           </p>
           <p className="text-lg font-semibold mt-1 tabular-nums text-content-primary">
             {stats.closed}
           </p>
-        </Card>
+        </div>
       </div>
 
       {/* Toolbar */}

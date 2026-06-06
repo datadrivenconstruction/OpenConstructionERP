@@ -695,7 +695,7 @@ function SummaryCard({
   };
 
   return (
-    <Card padding="sm" className="flex-1 min-w-[180px]">
+    <div className="flex-1 min-w-[180px] rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide truncate">
@@ -714,7 +714,7 @@ function SummaryCard({
           {icon}
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -1907,10 +1907,8 @@ export function ProjectDetailPage() {
               {/* KPI Cards Row */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Budget consumed */}
-                <Card
-                  padding="md"
-                  hoverable
-                  className="relative overflow-hidden cursor-pointer"
+                <div
+                  className="relative overflow-hidden cursor-pointer rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                   role="button"
                   tabIndex={0}
                   aria-label={t('projects.dash_budget_consumed', { defaultValue: 'Budget Consumed' })}
@@ -1955,13 +1953,11 @@ export function ProjectDetailPage() {
                       }}
                     />
                   </div>
-                </Card>
+                </div>
 
                 {/* Schedule progress */}
-                <Card
-                  padding="md"
-                  hoverable
-                  className="cursor-pointer"
+                <div
+                  className="cursor-pointer rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                   role="button"
                   tabIndex={0}
                   aria-label={t('projects.dash_schedule_progress', { defaultValue: 'Schedule Progress' })}
@@ -1990,13 +1986,11 @@ export function ProjectDetailPage() {
                       <CalendarClock size={20} strokeWidth={1.75} />
                     </div>
                   </div>
-                </Card>
+                </div>
 
                 {/* Quality score */}
-                <Card
-                  padding="md"
-                  hoverable
-                  className="cursor-pointer"
+                <div
+                  className="cursor-pointer rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                   role="button"
                   tabIndex={0}
                   aria-label={t('projects.dash_quality', { defaultValue: 'Quality Score' })}
@@ -2027,13 +2021,11 @@ export function ProjectDetailPage() {
                       <ShieldCheck size={20} strokeWidth={1.75} />
                     </div>
                   </div>
-                </Card>
+                </div>
 
                 {/* Open items count */}
-                <Card
-                  padding="md"
-                  hoverable
-                  className="cursor-pointer"
+                <div
+                  className="cursor-pointer rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                   role="button"
                   tabIndex={0}
                   aria-label={t('projects.dash_open_items', { defaultValue: 'Open Items' })}
@@ -2060,7 +2052,7 @@ export function ProjectDetailPage() {
                       <ClipboardList size={20} strokeWidth={1.75} />
                     </div>
                   </div>
-                </Card>
+                </div>
               </div>
 
               {/* Budget section — horizontal stacked bar */}

@@ -25,7 +25,9 @@ function StatCard({ label, value, icon, sub }: StatCardProps) {
   return (
     <div
       style={{
-        background: 'var(--chat-surface-1, #fff)',
+        // 90% translucent surface (no blur) so the page dot grid shows
+        // through faintly, matching the canonical StatCard look.
+        background: 'color-mix(in srgb, var(--chat-surface-1, #fff) 90%, transparent)',
         border: '1px solid var(--chat-border, #e5e7eb)',
         borderRadius: 12,
         padding: '14px 16px',

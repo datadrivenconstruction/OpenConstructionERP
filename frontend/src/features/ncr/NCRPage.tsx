@@ -928,13 +928,13 @@ export function NCRPage() {
       <>
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card className="p-4 animate-card-in">
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('ncr.stat_total', { defaultValue: 'Total' })}
           </p>
           <p className="text-lg font-semibold mt-1 tabular-nums text-content-primary">{stats.total}</p>
-        </Card>
-        <Card className="p-4 animate-card-in">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('ncr.stat_open', { defaultValue: 'Open' })}
           </p>
@@ -946,21 +946,21 @@ export function NCRPage() {
           >
             {stats.open}
           </p>
-        </Card>
-        <Card className="p-4 animate-card-in">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('ncr.stat_under_review', { defaultValue: 'Under Review' })}
           </p>
           <p className="text-lg font-semibold mt-1 tabular-nums text-amber-500">{stats.underReview}</p>
-        </Card>
-        <Card className="p-4 animate-card-in">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('ncr.stat_closed', { defaultValue: 'Closed' })}
           </p>
           <p className="text-lg font-semibold mt-1 tabular-nums text-semantic-success">
             {stats.closed}
           </p>
-        </Card>
+        </div>
       </div>
 
       {/* Toolbar */}

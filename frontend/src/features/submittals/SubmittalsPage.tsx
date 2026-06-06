@@ -980,29 +980,29 @@ export function SubmittalsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card className="p-4 animate-card-in">
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('submittals.stat_total', { defaultValue: 'Total' })}
           </p>
           <p className="text-lg font-semibold mt-1 tabular-nums text-content-primary">
             {stats.total}
           </p>
-        </Card>
-        <Card className="p-4 animate-card-in">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('submittals.stat_pending', { defaultValue: 'Pending Review' })}
           </p>
           <p className="text-lg font-semibold mt-1 tabular-nums text-amber-500">{stats.pending}</p>
-        </Card>
-        <Card className="p-4 animate-card-in">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('submittals.stat_approved', { defaultValue: 'Approved' })}
           </p>
           <p className="text-lg font-semibold mt-1 tabular-nums text-semantic-success">
             {stats.approved}
           </p>
-        </Card>
-        <Card className="p-4 animate-card-in">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
             {t('submittals.stat_rejected', { defaultValue: 'Rejected / Resubmit' })}
           </p>
@@ -1014,7 +1014,7 @@ export function SubmittalsPage() {
           >
             {stats.rejected}
           </p>
-        </Card>
+        </div>
       </div>
 
       {/* Toolbar */}

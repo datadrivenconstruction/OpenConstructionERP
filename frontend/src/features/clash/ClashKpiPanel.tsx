@@ -76,15 +76,15 @@ export function ClashKpiPanel({ projectId, runId }: ClashKpiPanelProps) {
     <div className="space-y-4 p-4" data-testid="clash-kpi-panel">
       {/* Top KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="p-4">
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <div className="text-xs uppercase tracking-wide text-content-tertiary">
             {t('clash.kpi.total', { defaultValue: 'Total clashes' })}
           </div>
           <div className="text-3xl font-semibold text-content-primary mt-1">
             {data.total}
           </div>
-        </Card>
-        <Card className="p-4">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <div className="text-xs uppercase tracking-wide text-content-tertiary">
             {t('clash.kpi.open', { defaultValue: 'Open' })}
           </div>
@@ -93,24 +93,24 @@ export function ClashKpiPanel({ projectId, runId }: ClashKpiPanelProps) {
               (data.by_status.active ?? 0) +
               (data.by_status.reviewed ?? 0)}
           </div>
-        </Card>
-        <Card className="p-4">
+        </div>
+        <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <div className="text-xs uppercase tracking-wide text-content-tertiary">
             {t('clash.kpi.resolved', { defaultValue: 'Resolved' })}
           </div>
           <div className="text-3xl font-semibold text-content-primary mt-1">
             {(data.by_status.resolved ?? 0) + (data.by_status.approved ?? 0)}
           </div>
-        </Card>
+        </div>
         {data.mttr_hours != null && (
-          <Card className="p-4">
+          <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
             <div className="text-xs uppercase tracking-wide text-content-tertiary">
               {t('clash.kpi.mttr', { defaultValue: 'Mean time to resolve' })}
             </div>
             <div className="text-3xl font-semibold text-content-primary mt-1">
               {data.mttr_hours.toFixed(1)}h
             </div>
-          </Card>
+          </div>
         )}
       </div>
 
