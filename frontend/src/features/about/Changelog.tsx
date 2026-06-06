@@ -1,15 +1,15 @@
 /**
- * Changelog — Compact two-column release log on the /about page.
+ * Changelog: compact two-column release log on the /about page.
  *
  * Each entry is a single glass-style card with version, date, a short summary
  * line, and an optional tag badge. The card list is rendered as CSS columns
  * (`columns-1 md:columns-2`) so entries of variable height pack into the
- * shorter column automatically — there's no need to manually balance the
+ * shorter column automatically. There is no need to manually balance the
  * two columns, and a single tall summary doesn't leave the other side blank.
  *
  * Source-of-truth: a single hard-coded `CHANGELOG` array (see below). Entries
- * are kept to ≤ 90-char one-liners per the user's "коротко" request — the
- * full prose lives in repo-root CHANGELOG.md.
+ * are kept short and plain per the user's request. The full prose lives in
+ * repo-root CHANGELOG.md.
  */
 
 import { useTranslation } from 'react-i18next';
@@ -21,194 +21,194 @@ type Tag = 'NEW' | 'FIX' | 'BETA' | 'SECURITY' | 'MILESTONE';
 interface ChangelogEntry {
   version: string;
   date: string;
-  /** One short line, ≤ 90 chars. Proper-noun-heavy → kept in English. */
+  /** One short line in plain language. Proper-noun-heavy strings stay in English. */
   summary: string;
   tag?: Tag;
 }
 
-// Sorted newest → oldest. Sort is enforced at runtime below (semver-aware) so
+// Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so
 // out-of-order entries here still display correctly.
 const CHANGELOG: ChangelogEntry[] = [
-  { version: '7.1.0', date: '2026-06-06', tag: 'NEW',       summary: 'The desktop app finally has a real first launch: a fresh install provisions a local workspace owner on its own, signs it in without any form, and lands directly in the setup wizard, language first, then company profile, modules, cost databases, country packs and demo data, with a persistent Skip setup - open in English button on every step. The AI Estimate Builder opens with a conversation instead of a bare form: up to three short rounds of clarifying questions, then a parameter sheet and a work-package board organised by foreman stage where every package shows its real catalogue coverage, and the same flow degrades to a curated form without an AI key. Clash detection turns a whole spatial cluster into one tracked punch item or task with an editable AI-drafted title, priority and confidence. BIM federations gained a member-health report and a downloadable snapshot you can diff against the live federation; quantity rules gained a pre-save testing sandbox, a unit-dimension guard, a coverage report and formula version history. Adding a position from the cost database now carries every resource and the full variant catalogue into the estimate instead of a coarse three-line split, and a new usage badge shows the real count of estimate positions using each item. Navigation answers every click immediately with a progress bar and row spinner while module code loads.' },
-  { version: '7.0.1', date: '2026-06-06', tag: 'FIX',       summary: 'Desktop hotfix for the 7.0.0 Windows app, which could exit silently right after launch because of a misconfigured updater plugin in the launcher. This release removes the broken plugin and shows a clear error dialog if the launcher ever fails to start instead of disappearing. The desktop app now only reuses an already-running backend when its version matches exactly and it answers as healthy, rather than attaching to a stale process from an earlier release. The Windows installer bundles the WebView2 bootstrapper so a first install no longer depends on a network download, all backend dependencies for the desktop build are pinned through a lock file for reproducible installs, and the launcher now logs its real version instead of always reporting 0.1.0.' },
-  { version: '7.0.0', date: '2026-06-06', tag: 'MILESTONE', summary: 'AI Estimate Builder: from a typed scope, a BIM model or uploaded documents to a priced bill of quantities in four guarded stages, where the AI suggests groupings and matches with confidence scores but unit rates only ever come from the cost catalogue. One identity per module everywhere: the module name and icon live in the top app bar next to the project selector, duplicate in-page titles are gone from roughly 90 pages, breadcrumbs render only when they add depth, per-page project pickers are removed, and every page shares the same header layout and vertical rhythm. Every module opens with the same information card whose heading names the problem the module solves and whose body explains what goes in, what comes out and where it flows next, in all 27 languages; collapsing it moves a small info icon into the top bar instead of leaving a stub. Translucent tints across the interface actually render now, fixing card backgrounds and hover accents that were silently dropped at build time. The collaboration hub is a real workspace with live threads, viewpoints, presence and locks. Role-based reporting dashboards resolve to data or an honest empty state instead of permanent skeletons, validation remembers your BOQ and restores the latest report with a Validate deep link from the BOQ editor, supplier catalogs hands purchasing off to Procurement honestly, Monte Carlo risk analysis respects the project currency, the matching wizard speaks all 27 languages, punch-list items can be reopened again, and the daily diary calendar is click-to-create.' },
-  { version: '6.10.0', date: '2026-06-05', tag: 'NEW',      summary: 'Field time and attendance with a real payroll lifecycle: a crew lead records hours on site, those hours roll into a payroll batch that moves through draft, submitted, approved and posted, and posting writes to the ledger once and only once even if a phone replays its offline queue. A cross-module project-controls dashboard pulls cost, schedule, quality, safety, risk and change health into one row of traffic-light tiles you can drill into. Compliance is enforced where it matters: a contract cannot be signed while a required rule pack is failing, a document cannot move to a suitability it has not earned, inspection hold points stop the work until released, and vendor scorecards feed a prequalification gate on purchase orders where a hard-blocked vendor cannot receive an order and a lapsed or rejected prequalification raises a clear warning on the order. AIA G702 and G703 owner billing for US, Canada and Australia projects, gated out of the way everywhere else. A wave of opt-in, human-confirmed AI: a progress-report narrative drafter, event and schedule triggers in the no-code agent builder with a run monitor, jobsite photo intelligence that reads the capture date and flags likely defects, and a project-document assistant that cites its sources. And a subcontractor payment-application portal plus a client progress-reports tab, both scoped per agreement by row-level security.' },
-  { version: '6.9.0', date: '2026-06-05', tag: 'NEW',       summary: 'A screen for the Management of Change register, so a workflow that had a backend but no way to use it is now driven end to end. Cost matching returns results for projects outside the US again. Backup restore is scoped to the user who runs it, so one restore can no longer wipe another user data. Plus a broad hardening pass across the backend modules and the desktop and plain-http fixes from the 6.8 builds.' },
-  { version: '6.8.2', date: '2026-06-05', tag: 'FIX',       summary: 'The Windows, macOS and Linux desktop installers build again. The 6.8.1 desktop build failed to compile because of a mistake in the launcher shutdown handler, so the database launch fix shipped on pip and Docker but no installer was produced. This release carries the same fix with a working build on all three platforms.' },
-  { version: '6.8.1', date: '2026-06-05', tag: 'FIX',       summary: 'The Windows, macOS and Linux desktop app now launches reliably after install. The build was opening an encrypted connection to its own local database and failing on first start, so nothing happened when you ran it. It now connects without TLS over local loopback, where it is not needed, and the launcher shows a clear message and writes a startup log if anything goes wrong instead of failing silently.' },
-  { version: '6.8.0', date: '2026-06-04', tag: 'NEW',       summary: 'Quantity takeoff on DWG drawings now reports real-world metres, where it could read about a thousand times too large before. A wave of features connects the modules to each other and closes gaps against the larger commercial systems, from subcontractor scorecards and progress claims to resource leveling, job costing read-through and offline field work. The interface translation backlog is cleared across the 26 non-English languages.' },
-  { version: '6.7.0', date: '2026-06-03', tag: 'NEW',       summary: 'All 27 interface languages are now fully translated, with extra care on the dashboard and project screens where some English words were still showing through. The AI Agents page adds more ready-made agents and a simple builder so you can create your own from the screen, with no code. Partner packs ship the real Doka Formwork, Batimatech and BIM-Cluster Hessen logos and install cleanly with their catalogue and demo data, and the Batimatech pack defaults to French and loads the Canadian CWICR cost database for Toronto. The example projects are filled out across every module with a real Revit, IFC and DWG model and a PDF plan set attached, and validation runs at install. Generated PDF documents now render correctly in Cyrillic and other non-Latin alphabets, the Windows, macOS and Linux desktop installers now bundle the embedded PostgreSQL engine so the app starts on a fresh machine, and every partner pack installs two demo projects. Fixes: a backup restore that fails part way now rolls back instead of leaving the database half cleared, change-order totals no longer double count on a retried request, validation no longer trips on a not-yet-loaded relation right after a demo install, reinstalling a demo no longer collides on resource codes, and the cost database import and catalogue picker errors are resolved' },
-  { version: '6.6.0', date: '2026-06-02', tag: 'NEW',       summary: 'Embedded PostgreSQL is now the only database. SQLite has been removed from the application and the test suite, finishing the move that began in 6.0.0. The translation-memory cache now lives in the main database, the cost-database importer loads straight into PostgreSQL, and the SQLite-only code paths are gone. The app still boots its own PostgreSQL on first run, or you can point DATABASE_URL at an external one, and the one-time import from a legacy SQLite file still works. Also fixes 3D models on the project map: the tile builder was writing per-feature metadata as inline arrays instead of a binary property table, so the viewer could not read it and the model never loaded. It is now written the way the 3D Tiles format expects, so the geometry shows as soon as a model is placed' },
-  { version: '6.5.0', date: '2026-06-02', tag: 'NEW',       summary: 'A redesigned AI Agents page with a clear gallery and five new working agents: estimate review, cost classification, document search, project cost summary and rate benchmarking, each honest about what it can read. WhatsApp notifications are wired through the Meta Cloud API. Placing a file on the project map works from start to finish with fast, cached map tiles. The bill of quantities shows multiple currencies again with a per-position currency badge and picker, never blended, and the linked-geometry preview explains when a model has no mesh instead of showing a blank panel. The README screenshots were recaptured without the tour overlay, the unfinished field shell is gated behind a pilot flag, and the bill-of-materials build runs on Python 3.12' },
-  { version: '6.4.2', date: '2026-06-02', tag: 'FIX',       summary: 'Geometry fixes so BIM and 3D models sit at ground level (millimetre and imperial placements, and the b3dm map georeference). Partner Packs you can scaffold with pack new and install by dropping a folder or uploading a zip, no restart needed. Conservative security dependency fixes, and a clean backend test collection in CI' },
-  { version: '6.4.1', date: '2026-06-02', tag: 'FIX',       summary: 'Build hygiene: backend ruff lint and formatting cleaned up, and the ruff version pinned so CI and local machines format the same way. No change to how the app runs' },
-  { version: '6.4.0', date: '2026-06-02', tag: 'NEW',       summary: 'Cost spine: estimate, BOQ, budget, purchase orders, contracts and bid packages now share one stable cost line, with a control-account tree and a per-line rollup that shows estimate, budget, committed, contracted and actual figures together with every linked record. Amounts are converted inside a project through its own exchange rates and grouped by currency across projects, never blended. Generating the spine from a BOQ is idempotent. Partner Packs install from the command line, the project map now flies the camera to a 3D model once it has finished loading, and the cost database region loader reports the real component count on a reload' },
-  { version: '6.3.1', date: '2026-06-01', tag: 'FIX',       summary: 'Stability and depth patch: fixes the project geo page crash and restores 3D geometry, backs the dashboard schedule-summary and AI-insights widgets with real endpoints, removes coming-soon teasers, ships a real Daily Diary PDF plus PDF and AI quantity matching with group split and merge, real multi-year holiday calendars, and Partner Pack activation that installs the bundled cost catalogue and resources with a live progress bar' },
-  { version: '6.3.0', date: '2026-06-01', tag: 'NEW',       summary: 'Nine role-based company profiles that tailor the workspace: pick a profile and the sidebar shows just the modules that role needs. Partner Packs banner now opens the in-app packs page, a new US pack logo, and a place-on-map picker on the project geo page' },
-  { version: '6.0.0', date: '2026-05-30', tag: 'MILESTONE', summary: 'PostgreSQL is now the default database with zero setup - a real in-process PG16 boots on first run (no Docker), data under ~/.openestimate/pgdata, with transparent one-time migration from any legacy SQLite file. SQLite stays as an opt-out (--sqlite / OE_USE_SQLITE=1). PG drivers + embedded server moved to base deps. Plus 15 PostgreSQL dialect bugs fixed and a CI regression suite against a real PG16 cluster' },
-  { version: '5.9.2', date: '2026-05-30', tag: 'NEW',       summary: 'PostgreSQL scale foundation (opt-in) - JSON columns emit JSONB, automatic FK/composite/GIN performance indexes, connection-pool hardening, PostgreSQL-safe CWICR import, and a SQLite-to-PostgreSQL migration script. Default SQLite single-command install is unchanged. PyPI metadata de-branded' },
-  // ── v5.x — second stable major ───────────────────────────────────────────
-  { version: '5.5.1', date: '2026-05-28', tag: 'FIX',       summary: 'README CLI-name patch - re-ships the 5.5.0 wheel so the PyPI long-description shows openconstructionerp instead of the legacy openestimate command in the quickstart and doctor hints. No runtime changes' },
-  { version: '5.5.0', date: '2026-05-28', tag: 'NEW',       summary: 'Stability wave (last stable 5.x) - 8 user-reported bug fixes (/takeoff PDF worker + 403, /dwg-takeoff load, BIM walk + Section Box, /bim/federations 3D, CAD/BIM Data Explorer RVT, /projects maps), session-reset fix (JWT persistence), JA locale to 98.5% (1,627 keys), i18n high-impact pass on 26 locales, news related-articles widget on 15 article pages, PR #164 team-member access merged, 9/9 PASS browser verification' },
-  { version: '5.4.3', date: '2026-05-28', tag: 'FIX',       summary: '/geo mode-picker no longer dumps user out to /projects - soft-disabled tabs open in-page picker dialog. Address autocomplete shows "Searching…" row while Nominatim resolves (was perceived empty during 5–10s cold cache)' },
-  { version: '5.4.2', date: '2026-05-28', tag: 'FIX',       summary: 'Converter UX simplification - inline 1-click DWG install on /dwg-takeoff conversion failure, BIM out-of-date overlay shows clean human message (raw stderr hidden behind "Show technical details" disclosure)' },
-  { version: '5.4.1', date: '2026-05-28', tag: 'SECURITY',  summary: '20-wave deep audit landings: 13 security fixes (3+ HIGH), 5 silent-miscalc bugs, 8 race/FSM hardenings, GDPR PII scrub extension, Cesium /geo canvas-collapse fix (postage-stamp regression)' },
-  { version: '5.4.0', date: '2026-05-27', tag: 'NEW',       summary: 'Quality wave - match-quality (IFC classifier + BGE rerank blend + non-billable gate), WCAG-AA round 2 (theme-aware blue-text token + secondary contrast bump), useLLMRun hook + formatters lift, dark-mode button-bg revert' },
-  { version: '5.3.0', date: '2026-05-27', tag: 'NEW',       summary: 'Geo Hub round 2 (storage sweep + 10km accuracy cap + 100dvh), Brazil Tier-1 (BRL + NBR 12721 + RPS PDF), /login dark-mode, /reporting renderer, Daily Diary delete, WCAG-AA contrast pass on 51 files, dashboard rollup' },
-  { version: '5.2.8', date: '2026-05-27', tag: 'FIX',       summary: '/geo tabs reliability + /markups → /takeoff deep-link + /resources inline edit + danger-styled delete' },
-  { version: '5.2.7', date: '2026-05-27', tag: 'NEW',       summary: 'Project-detail widget grid (responsive 1/2/3-col) + one-click in-app upgrade with captured pip log' },
-  { version: '5.2.0', date: '2026-05-26', tag: 'NEW',       summary: 'International BOQ exchange (GAEB X83/X84 + BC3 + NRM Excel + MasterFormat Excel) - Epic I Phase 1' },
-  { version: '5.1.1', date: '2026-05-26', tag: 'NEW',       summary: 'Deep coordination Wave 1 - file versioning + notifications dispatcher + universal audit trail' },
-  { version: '5.0.0', date: '2026-05-26', tag: 'MILESTONE', summary: 'Second stable major - AI providers (Kimi/Ollama/vLLM), BIM degraded-viewable status, Vector DB row engine label, community PRs landed on main' },
+  { version: '7.1.0', date: '2026-06-06', tag: 'NEW',       summary: 'The desktop app now sets itself up on first launch and drops you straight into a step-by-step setup wizard. The AI Estimate Builder asks a few quick questions, then builds a priced work-package list. Clash results turn into a single tracked task. Adding a cost item now brings all its resources into the estimate. Pages respond right away with a loading bar while they open.' },
+  { version: '7.0.1', date: '2026-06-06', tag: 'FIX',       summary: 'Fixes the Windows desktop app that could close on its own right after opening. It now shows a clear error if it cannot start, reuses a running backend only when versions match, and installs without needing a download.' },
+  { version: '7.0.0', date: '2026-06-06', tag: 'MILESTONE', summary: 'New AI Estimate Builder turns a typed scope, a BIM model or uploaded files into a priced bill of quantities, with prices always from the cost catalogue. Every module now has one clean title in the top bar and a short card explaining what it does, in all 27 languages. The collaboration hub is a real workspace, and many modules got fixes so dashboards, validation and matching just work.' },
+  { version: '6.10.0', date: '2026-06-05', tag: 'NEW',      summary: 'Field time tracking with real payroll: a crew lead logs hours, those hours flow into a payroll batch and post to the ledger exactly once. A new project-controls dashboard shows cost, schedule, quality, safety and risk health in one view. Owner billing forms for US, Canada and Australia. New subcontractor payment portal and client progress-reports tab.' },
+  { version: '6.9.0', date: '2026-06-05', tag: 'NEW',       summary: 'New screen for the Management of Change register. Cost matching works again for projects outside the US. Backup restore is now limited to your own data so it cannot wipe another user. Plus broad backend hardening and the desktop fixes from the 6.8 builds.' },
+  { version: '6.8.2', date: '2026-06-05', tag: 'FIX',       summary: 'The Windows, macOS and Linux desktop installers build again, carrying the 6.8.1 database fix that had shipped on pip and Docker but not as an installer.' },
+  { version: '6.8.1', date: '2026-06-05', tag: 'FIX',       summary: 'The desktop app now launches reliably after install. It connects to its own local database correctly and shows a clear message plus a startup log if anything goes wrong, instead of failing silently.' },
+  { version: '6.8.0', date: '2026-06-04', tag: 'NEW',       summary: 'Quantity takeoff on DWG drawings now reports correct real-world metres. A wave of features links the modules together, from subcontractor scorecards and progress claims to resource leveling and offline field work. Interface translation gaps cleared across all 26 non-English languages.' },
+  { version: '6.7.0', date: '2026-06-03', tag: 'NEW',       summary: 'All 27 interface languages are now fully translated. The AI Agents page adds ready-made agents and a no-code builder. Partner packs install cleanly with their catalogue and demo data. Example projects come filled out with real Revit, IFC and DWG models. Generated PDFs now render correctly in Cyrillic and other alphabets, and the desktop installers bundle the database engine so the app starts on a fresh machine.' },
+  { version: '6.6.0', date: '2026-06-02', tag: 'NEW',       summary: 'PostgreSQL is now the only database. The app still starts its own database on first run, or you can point it at an external one. Also fixes 3D models on the project map so geometry shows as soon as a model is placed.' },
+  { version: '6.5.0', date: '2026-06-02', tag: 'NEW',       summary: 'A redesigned AI Agents page with five new working agents: estimate review, cost classification, document search, cost summary and rate benchmarking. WhatsApp notifications. Placing a file on the project map works end to end with fast map tiles. The bill of quantities shows multiple currencies again, never blended.' },
+  { version: '6.4.2', date: '2026-06-02', tag: 'FIX',       summary: 'Geometry fixes so BIM and 3D models sit at ground level. Partner Packs you can build and install by dropping a folder or uploading a zip, with no restart needed. Plus security dependency updates.' },
+  { version: '6.4.1', date: '2026-06-02', tag: 'FIX',       summary: 'Build cleanup only. No change to how the app runs.' },
+  { version: '6.4.0', date: '2026-06-02', tag: 'NEW',       summary: 'Estimate, BOQ, budget, purchase orders, contracts and bid packages now share one cost line, with a rollup that shows estimate, budget, committed, contracted and actual figures next to every linked record. Amounts are grouped by currency and never blended. The project map now flies to a 3D model once it has loaded.' },
+  { version: '6.3.1', date: '2026-06-01', tag: 'FIX',       summary: 'Fixes the project map page crash and restores 3D geometry. The dashboard schedule and AI-insights widgets now use real data, coming-soon teasers are gone, and the Daily Diary PDF plus PDF and AI quantity matching are real. Partner Pack activation installs the bundled cost catalogue with a live progress bar.' },
+  { version: '6.3.0', date: '2026-06-01', tag: 'NEW',       summary: 'Nine role-based company profiles: pick one and the sidebar shows just the modules that role needs. The Partner Packs banner now opens the in-app packs page, plus a place-on-map picker on the project map page.' },
+  { version: '6.0.0', date: '2026-05-30', tag: 'MILESTONE', summary: 'PostgreSQL is now the default database with zero setup. It starts on first run with no Docker, and any old data is migrated for you. Plus 15 database bugs fixed.' },
+  { version: '5.9.2', date: '2026-05-30', tag: 'NEW',       summary: 'Optional PostgreSQL scale foundation: faster JSON storage, automatic performance indexes, and a migration script. The simple single-command install is unchanged.' },
+  // v5.x: second stable major
+  { version: '5.5.1', date: '2026-05-28', tag: 'FIX',       summary: 'Re-ships the 5.5.0 build so the listing shows the correct command name. No runtime changes.' },
+  { version: '5.5.0', date: '2026-05-28', tag: 'NEW',       summary: 'Stability wave: 8 user-reported bug fixes across takeoff, DWG, BIM and the data explorer, a login session fix, and a strong translation pass on 26 languages.' },
+  { version: '5.4.3', date: '2026-05-28', tag: 'FIX',       summary: 'The map mode picker no longer kicks you back to the projects list, and address search now shows a Searching row while it looks up the address.' },
+  { version: '5.4.2', date: '2026-05-28', tag: 'FIX',       summary: 'Converter cleanup: one-click DWG install when a conversion fails, and a clean human message when a BIM file is out of date, with technical details tucked behind a toggle.' },
+  { version: '5.4.1', date: '2026-05-28', tag: 'SECURITY',  summary: 'Deep audit landings: 13 security fixes, 5 quiet calculation bugs, more data-privacy scrubbing, and a fix for the map view collapsing to a tiny square.' },
+  { version: '5.4.0', date: '2026-05-27', tag: 'NEW',       summary: 'Quality wave: better cost matching, a second round of accessibility contrast fixes, and dark-mode button cleanup.' },
+  { version: '5.3.0', date: '2026-05-27', tag: 'NEW',       summary: 'Map hub round 2, Brazil support (currency, standards and tax PDF), dark-mode login, a real reporting renderer, Daily Diary delete, and an accessibility contrast pass across 51 screens.' },
+  { version: '5.2.8', date: '2026-05-27', tag: 'FIX',       summary: 'More reliable map tabs, a markups-to-takeoff deep link, and inline editing on resources.' },
+  { version: '5.2.7', date: '2026-05-27', tag: 'NEW',       summary: 'A responsive widget grid on the project detail page, plus one-click in-app upgrade with a captured install log.' },
+  { version: '5.2.0', date: '2026-05-26', tag: 'NEW',       summary: 'International BOQ exchange: import and export GAEB, BC3, NRM Excel and MasterFormat Excel.' },
+  { version: '5.1.1', date: '2026-05-26', tag: 'NEW',       summary: 'File versioning, a notifications dispatcher, and a universal audit trail.' },
+  { version: '5.0.0', date: '2026-05-26', tag: 'MILESTONE', summary: 'Second stable major: more AI providers, a viewable status for partial BIM files, and community contributions landed.' },
 
-  // ── v4.x — stable major ──────────────────────────────────────────────────
-  { version: '4.1.0', date: '2026-05-21', tag: 'NEW',       summary: 'P1 wave rollup - BIM diagnostic UX, CPM Slice 1, Assembly Library, PWA installable, marketing-site i18n complete' },
-  { version: '4.0.1', date: '2026-05-20', tag: 'FIX',       summary: 'BIM ViewCube orbit-lock fix, marketing forms migrated off formsubmit, denser module cards' },
-  { version: '4.0.0', date: '2026-05-20', tag: 'MILESTONE', summary: 'Stable 4.0 - production-ready; 103 modules; legal/IP audit passed; machine-readable license inventories' },
+  // v4.x: stable major
+  { version: '4.1.0', date: '2026-05-21', tag: 'NEW',       summary: 'Rollup wave: better BIM diagnostics, first critical-path schedule slice, an assembly library, an installable app, and a fully translated marketing site.' },
+  { version: '4.0.1', date: '2026-05-20', tag: 'FIX',       summary: 'BIM view-cube orbit fix, marketing forms moved to a new provider, and denser module cards.' },
+  { version: '4.0.0', date: '2026-05-20', tag: 'MILESTONE', summary: 'Stable 4.0: production-ready, 103 modules, and a passed legal and licensing audit.' },
 
-  // ── v3.x — pro-grade waves, BOQ/BIM rebuild, /match-elements ─────────────
-  { version: '3.12.1', date: '2026-05-20', tag: 'FIX', summary: 'BIM serve-time magic-byte validation, /match-elements catalogue picker, BI starter pack, marketing 34-card grid' },
-  { version: '3.12.0', date: '2026-05-20',             summary: 'Wave 5/6/7 pro-grade - BOQ + Cost Intelligence + Clash A4 + BIM viewpoints + Files CDE + Takeoff PDF/Excel' },
-  { version: '3.11.0', date: '2026-05-20',             summary: 'Wave 3/4 modules + Validation@Import (GAEB/Excel) + GAEB X84 writer + RVT diagnostics + /about redesign' },
-  { version: '3.10.1', date: '2026-05-19',             summary: '/match-elements "how it works" collapsed by default' },
-  { version: '3.10.0', date: '2026-05-19',             summary: '/files ACC-grade wave + Clash collab/metadata + match-elements polish' },
-  { version: '3.9.1',  date: '2026-05-19', tag: 'FIX', summary: 'Clash model labels read as models, not projects' },
-  { version: '3.9.0',  date: '2026-05-19',             summary: 'BOQ section-scoped add + AI model auto-recovery + toolbar polish + dashboard customize + PDF compare' },
-  { version: '3.8.0',  date: '2026-05-19',             summary: 'Clash coordination depth + Match-Elements UX & lifecycle hardening + match determinism fix' },
-  { version: '3.7.0',  date: '2026-05-19',             summary: 'Clash Detection module + GitHub issue sweep + file-manager polish + correctness fixes' },
-  { version: '3.6.1',  date: '2026-05-18', tag: 'FIX', summary: 'Visible nested BOQ hierarchy (recursive parent_id walk), collision-free ordinals, pdf_export float fix' },
-  { version: '3.6.0',  date: '2026-05-18',             summary: 'Multi-level BOQ hierarchy (depth 8) + resource-code dedup + match 7-stage pipeline restored + takeoff h-scroll' },
-  { version: '3.5.0',  date: '2026-05-18',             summary: 'Pipeline Builder (v3037) + BOQ FX-correct CSV/Excel exports + Currency column + frozen FX appendix + reuse codes' },
-  { version: '3.4.1',  date: '2026-05-17', tag: 'FIX', summary: 'Project photos and file thumbnails load reliably; demo projects include Revit + IFC models' },
-  { version: '3.4.0',  date: '2026-05-17',             summary: 'Professional showcase BOQs + colored real-IFC hero BIM + viewer z-fight fix; force-seed on shared prod DB' },
-  { version: '3.3.1',  date: '2026-05-17',             summary: '7-project localized showcase committed as prebuilt snapshot, auto-seeded on fresh install' },
-  { version: '3.3.0',  date: '2026-05-16',             summary: 'Reusable BOQ codes - linked positions, master/instance badges, one-click unlink + deep correctness pass' },
-  { version: '3.2.0',  date: '2026-05-16', tag: 'FIX', summary: 'Clean-install fix (dynamic create_all for 18 modules) + Planning/Field-Ops 10-module audit + 62-page verify' },
-  { version: '3.1.0',  date: '2026-05-15',             summary: 'Deep logic & correctness sweep across 23 modules over 10 waves' },
-  { version: '3.0.9',  date: '2026-05-15',             summary: 'Project setup wizard UI (Slice 2) + converter PE-header integrity gate (closes WinError 216 class)' },
-  { version: '3.0.8',  date: '2026-05-15', tag: 'FIX', summary: 'O_BINARY converter-download fix (WinError 216 root cause) + project setup wizard backend + visible match pipeline' },
-  { version: '3.0.7',  date: '2026-05-14',             summary: 'Resource-based cost-DB import - docs, templates, downloads' },
-  { version: '3.0.6',  date: '2026-05-14',             summary: 'DWG upload responsiveness + 6 new HF regions + sidebar branding' },
-  { version: '3.0.5',  date: '2026-05-14', tag: 'FIX', summary: 'Match-elements correctness pass (4 root-cause bugs) + full Mongolian (2300 keys, 99.2%) + 9 vitest repairs' },
-  { version: '3.0.4',  date: '2026-05-13',             summary: 'Polish pass + community contributor flow' },
-  { version: '3.0.3',  date: '2026-05-13',             summary: 'FSM engine + IFC parser ISO 16739-1:2024 + Ed25519 manifest signing + sidebar collapse + WideModal sweep' },
-  { version: '3.0.1',  date: '2026-05-13',             summary: '18-Modules Wave + India stability (ezdxf, Devanagari OCR, lakh-crore parser, UTM43N/44N + 16 regions)' },
-  { version: '3.0.0',  date: '2026-05-12', tag: 'MILESTONE', summary: 'v3 milestone - rolled up v2.x, deploy procedure validated, 71 modules loaded' },
+  // v3.x: pro-grade waves, BOQ and BIM rebuild, element matching
+  { version: '3.12.1', date: '2026-05-20', tag: 'FIX', summary: 'BIM upload safety checks, a catalogue picker for element matching, and a business-intelligence starter pack.' },
+  { version: '3.12.0', date: '2026-05-20',             summary: 'Pro-grade wave: BOQ, cost intelligence, clash reports, BIM viewpoints, a files area, and PDF or Excel takeoff.' },
+  { version: '3.11.0', date: '2026-05-20',             summary: 'More modules, validation on GAEB and Excel import, a GAEB writer, RVT diagnostics, and an /about page redesign.' },
+  { version: '3.10.1', date: '2026-05-19',             summary: 'The element-matching "how it works" panel is now collapsed by default.' },
+  { version: '3.10.0', date: '2026-05-19',             summary: 'A files area wave with clash collaboration and element-matching polish.' },
+  { version: '3.9.1',  date: '2026-05-19', tag: 'FIX', summary: 'Clash model labels now read as models, not projects.' },
+  { version: '3.9.0',  date: '2026-05-19',             summary: 'Add BOQ rows scoped to a section, automatic AI model recovery, a customizable dashboard, and PDF compare.' },
+  { version: '3.8.0',  date: '2026-05-19',             summary: 'Deeper clash coordination, element-matching polish, and more consistent matching results.' },
+  { version: '3.7.0',  date: '2026-05-19',             summary: 'New Clash Detection module, file-manager polish, and a batch of correctness fixes.' },
+  { version: '3.6.1',  date: '2026-05-18', tag: 'FIX', summary: 'Nested BOQ levels now show correctly, with clean numbering and a PDF export fix.' },
+  { version: '3.6.0',  date: '2026-05-18',             summary: 'Multi-level BOQ up to 8 levels deep, clean resource codes, and the full matching pipeline restored.' },
+  { version: '3.5.0',  date: '2026-05-18',             summary: 'A pipeline builder, currency-correct CSV and Excel exports, a currency column, and a frozen exchange-rate appendix.' },
+  { version: '3.4.1',  date: '2026-05-17', tag: 'FIX', summary: 'Project photos and file thumbnails load reliably, and demo projects include Revit and IFC models.' },
+  { version: '3.4.0',  date: '2026-05-17',             summary: 'Polished showcase BOQs, a colored real-IFC hero model, and a viewer flicker fix.' },
+  { version: '3.3.1',  date: '2026-05-17',             summary: 'A 7-project localized showcase, auto-loaded on a fresh install.' },
+  { version: '3.3.0',  date: '2026-05-16',             summary: 'Reusable BOQ codes: link positions together, see master and instance badges, and unlink in one click.' },
+  { version: '3.2.0',  date: '2026-05-16', tag: 'FIX', summary: 'Clean-install fix so all modules set up correctly, plus a 10-module planning and field-ops audit.' },
+  { version: '3.1.0',  date: '2026-05-15',             summary: 'A deep correctness sweep across 23 modules.' },
+  { version: '3.0.9',  date: '2026-05-15',             summary: 'New project setup wizard and a converter download integrity check.' },
+  { version: '3.0.8',  date: '2026-05-15', tag: 'FIX', summary: 'Fixes a converter download failure on Windows and adds the project setup wizard backend.' },
+  { version: '3.0.7',  date: '2026-05-14',             summary: 'Resource-based cost-database import with docs, templates and downloads.' },
+  { version: '3.0.6',  date: '2026-05-14',             summary: 'Faster DWG uploads, 6 new cost regions, and sidebar branding.' },
+  { version: '3.0.5',  date: '2026-05-14', tag: 'FIX', summary: 'Element-matching correctness fixes and full Mongolian translation.' },
+  { version: '3.0.4',  date: '2026-05-13',             summary: 'Polish pass and a community contributor flow.' },
+  { version: '3.0.3',  date: '2026-05-13',             summary: 'A workflow engine, an updated IFC parser, signed module manifests, and a collapsible sidebar.' },
+  { version: '3.0.1',  date: '2026-05-13',             summary: 'An 18-module wave plus India support: Devanagari reading, local number formats and 16 regions.' },
+  { version: '3.0.0',  date: '2026-05-12', tag: 'MILESTONE', summary: 'v3 milestone: rolled up the 2.x line, validated deploy, and 71 modules loaded.' },
 
-  // ── v2.9.x — pre-v3 rapid iteration ──────────────────────────────────────
-  { version: '2.9.42', date: '2026-05-12',             summary: 'Dashboard backdrop trap fix (relative-isolate stacking context) + style polish' },
-  { version: '2.9.39', date: '2026-05-11',             summary: '12 African catalogues (registry 30→42) + ranker monkeypatch fixes' },
-  { version: '2.9.38', date: '2026-05-11',             summary: '11 classification standards data-driven (was 3) + 80-entry macro bridge + 28 YAML region groups' },
-  { version: '2.9.37', date: '2026-05-11',             summary: 'Africa pack (19 currencies, 24 regions), Apple dashboard backdrop, /match-elements one-click EN install' },
-  { version: '2.9.36', date: '2026-05-10',             summary: '/match-elements 10-pass polish - a11y, perf, toasts, UX' },
-  { version: '2.9.35', date: '2026-05-10',             summary: 'Closed v3 §10 Gap 4 - analytics endpoint + dashboard' },
-  { version: '2.9.34', date: '2026-05-10',             summary: 'Versions bumped, dist built - handover mid-session save' },
-  { version: '2.9.32', date: '2026-05-08',             summary: '/match-elements Phase A - BIM + vector/lexical/resources matchers + UX' },
-  { version: '2.9.26', date: '2026-05-07',             summary: 'v3 Qdrant migration backend - SearchPlan + 29 hard/soft filters + BGE rerank + recall benchmark' },
-  { version: '2.9.25', date: '2026-05-07', tag: 'FIX', summary: '/costs perf index for no-region search + estimator role normalization + dev-DB cleanup' },
-  { version: '2.9.24', date: '2026-05-07',             summary: 'Wave A correctness + DWG one-click install + BIM panel polish' },
-  { version: '2.9.20', date: '2026-05-07',             summary: 'i18n perf split - 5.5 MB → 26 lazy chunks (~96% boot reduction EN)' },
-  { version: '2.9.19', date: '2026-05-07',             summary: 'Bid comparison sticky column + photo MIME hardening (HEIC/HEIF/AVIF/TIFF magic-byte)' },
-  { version: '2.9.18', date: '2026-05-07',             summary: '3-way invoice match + risk owner picker + Gantt resize' },
-  { version: '2.9.17', date: '2026-05-07',             summary: 'Procurement→finance subscriber + CO→budget delta + PO numbering retry + 9-locale tasks importer' },
-  { version: '2.9.16', date: '2026-05-06',             summary: 'Finance correctness + ProjectBudget currency_code + 9 comm subscribers + 22-locale files.* backfill' },
-  { version: '2.9.15', date: '2026-05-06', tag: 'SECURITY', summary: 'Cross-category IDOR sweep (~73 endpoints) - Planning + Communication + Procurement + Documents' },
-  { version: '2.9.14', date: '2026-05-06', tag: 'SECURITY', summary: 'Wave 5 P0 IDOR fixes (risk + changeorders + contacts export) + Settings UI redesign' },
-  { version: '2.9.13', date: '2026-05-06',             summary: 'DDC converter version display on /bim + /quantities, force-update reinstall' },
-  { version: '2.9.12', date: '2026-05-06', tag: 'FIX', summary: 'Upload caps removed (10 routers), webp MIME fix, BOQ 404s, /files i18n in 9 langs' },
-  { version: '2.9.1',  date: '2026-05-05',             summary: 'Multi-currency BOQ (#88) + file manager (#109) + DWG button (#110) + BIM viewer DDC redirect' },
-  { version: '2.9.0',  date: '2026-05-05',             summary: 'CDE deep audit, ISO 19650, suitability lookup, audit log, Gate B' },
+  // v2.9.x: pre-v3 rapid iteration
+  { version: '2.9.42', date: '2026-05-12',             summary: 'Dashboard pop-up layering fix and style polish.' },
+  { version: '2.9.39', date: '2026-05-11',             summary: '12 new African cost catalogues and matching fixes.' },
+  { version: '2.9.38', date: '2026-05-11',             summary: '11 classification standards now data-driven, up from 3.' },
+  { version: '2.9.37', date: '2026-05-11',             summary: 'Africa pack with 19 currencies and 24 regions, plus one-click English install for element matching.' },
+  { version: '2.9.36', date: '2026-05-10',             summary: 'A 10-pass polish of element matching: accessibility, speed and clearer messages.' },
+  { version: '2.9.35', date: '2026-05-10',             summary: 'New analytics endpoint and dashboard.' },
+  { version: '2.9.34', date: '2026-05-10',             summary: 'Version bump and build, a mid-session save.' },
+  { version: '2.9.32', date: '2026-05-08',             summary: 'First phase of element matching: BIM plus several matchers and the UX around them.' },
+  { version: '2.9.26', date: '2026-05-07',             summary: 'Search backend rework with many filters and a recall benchmark.' },
+  { version: '2.9.25', date: '2026-05-07', tag: 'FIX', summary: 'Faster cost search without a region and an estimator role fix.' },
+  { version: '2.9.24', date: '2026-05-07',             summary: 'Correctness fixes, one-click DWG install, and BIM panel polish.' },
+  { version: '2.9.20', date: '2026-05-07',             summary: 'Faster startup: translations now load on demand instead of all at once.' },
+  { version: '2.9.19', date: '2026-05-07',             summary: 'A sticky column in bid comparison and stronger photo upload checks.' },
+  { version: '2.9.18', date: '2026-05-07',             summary: 'Three-way invoice match, a risk owner picker, and Gantt resize.' },
+  { version: '2.9.17', date: '2026-05-07',             summary: 'Procurement now feeds finance, change orders update the budget, and tasks import in 9 languages.' },
+  { version: '2.9.16', date: '2026-05-06',             summary: 'Finance correctness fixes and a 22-language files translation backfill.' },
+  { version: '2.9.15', date: '2026-05-06', tag: 'SECURITY', summary: 'Access-control sweep across roughly 73 endpoints in planning, communication, procurement and documents.' },
+  { version: '2.9.14', date: '2026-05-06', tag: 'SECURITY', summary: 'Access-control fixes on risk, change orders and contact export, plus a settings UI redesign.' },
+  { version: '2.9.13', date: '2026-05-06',             summary: 'Shows the converter version on the BIM and quantities pages, with a force-reinstall option.' },
+  { version: '2.9.12', date: '2026-05-06', tag: 'FIX', summary: 'Removed upload size caps, a photo format fix, BOQ load fixes, and files translated in 9 languages.' },
+  { version: '2.9.1',  date: '2026-05-05',             summary: 'Multi-currency BOQ, a file manager, a DWG button, and a BIM viewer fix.' },
+  { version: '2.9.0',  date: '2026-05-05',             summary: 'A deep files-area audit with ISO 19650 support, suitability codes and an audit log.' },
 
-  // ── v2.8.x — per-project catalogue binding ───────────────────────────────
-  { version: '2.8.3', date: '2026-05-04', tag: 'FIX', summary: 'Clean-install fixes - version label skew, /projects/{id}/boq 404, /costs auto-region' },
-  { version: '2.8.2', date: '2026-05-04',             summary: 'Per-project CWICR catalogue binding shipped - v280–v282 migrations reached prod' },
+  // v2.8.x: per-project catalogue binding
+  { version: '2.8.3', date: '2026-05-04', tag: 'FIX', summary: 'Clean-install fixes: version label, project BOQ load, and automatic cost region.' },
+  { version: '2.8.2', date: '2026-05-04',             summary: 'Each project can now bind its own cost catalogue.' },
 
-  // ── v2.7.x — stable rollup ───────────────────────────────────────────────
-  { version: '2.7.0', date: '2026-05-03', tag: 'SECURITY', summary: 'IDOR batch 4 (markups), N+1 fixes (meetings/fieldreports/punchlist/tasks), 53/53 routes clean' },
+  // v2.7.x: stable rollup
+  { version: '2.7.0', date: '2026-05-03', tag: 'SECURITY', summary: 'Access-control fixes on markups and speed fixes across meetings, field reports, punch list and tasks.' },
 
-  // ── v2.6.x — IDOR sweep, dashboards, compliance ──────────────────────────
-  { version: '2.6.50', date: '2026-05-02', tag: 'SECURITY', summary: 'IDOR batch 4 (markups), N+1 fixes, module-loaded probe, ReactFlow handles fix' },
-  { version: '2.6.7',  date: '2026-04-27',             summary: 'Annotation persistence to backend; full 10-type whitelist in takeoff/schemas.py' },
-  { version: '2.6.4',  date: '2026-04-27',             summary: 'T00–T13 dashboards/compliance backlog complete (5 patches v2.6.0→v2.6.4)' },
-  { version: '2.6.0',  date: '2026-04-26',             summary: 'BCF I/O re-allowed (issues / viewpoints / validation reports) - earlier ban lifted' },
+  // v2.6.x: access-control sweep, dashboards, compliance
+  { version: '2.6.50', date: '2026-05-02', tag: 'SECURITY', summary: 'Access-control fixes on markups, speed fixes, and a workflow-builder handle fix.' },
+  { version: '2.6.7',  date: '2026-04-27',             summary: 'Takeoff annotations now save to the backend, with all annotation types supported.' },
+  { version: '2.6.4',  date: '2026-04-27',             summary: 'Completed the dashboards and compliance backlog across five patches.' },
+  { version: '2.6.0',  date: '2026-04-26',             summary: 'BCF import and export is allowed again for issues, viewpoints and validation reports.' },
 
-  // ── v2.5.x — observability + DWG/PDF takeoff hardening ───────────────────
-  { version: '2.5.0', date: '2026-04-25', tag: 'FIX', summary: 'PDF takeoff page indicator fix (stale closure), alembic v232 merge, viewer state-leak hardening' },
+  // v2.5.x: observability plus DWG and PDF takeoff hardening
+  { version: '2.5.0', date: '2026-04-25', tag: 'FIX', summary: 'PDF takeoff page indicator fix and viewer state hardening.' },
 
-  // ── v2.4.x → 2.0.x ───────────────────────────────────────────────────────
-  { version: '2.4.0', date: '2026-04-22',             summary: 'Observability - reporting, takeoff, BOQ wildcard; GAEB rule set 1→5; i18n for 42 validation rules' },
-  { version: '2.3.1', date: '2026-04-22',             summary: 'Pluggable EmailBackend (console/smtp/noop/memory); Contact.tenant_id; cache error logging' },
-  { version: '2.3.0', date: '2026-04-22',             summary: 'Forgot-password reset link delivery wired end-to-end' },
-  { version: '2.2.0', date: '2026-04-21',             summary: 'Mid-cycle release between 2.1 and 2.3' },
-  { version: '2.1.0', date: '2026-04-20',             summary: 'DWG + PDF takeoff per-tool shortcuts, undo/redo, snap modes; BIM 5D cost colour mode; CAD-BI URL state' },
-  { version: '2.0.0', date: '2026-04-20', tag: 'MILESTONE', summary: 'AI Chat SSE reliability, AI settings encryption, DDC provenance markers, 61/61 tests green' },
+  // v2.4.x down to 2.0.x
+  { version: '2.4.0', date: '2026-04-22',             summary: 'Better reporting and takeoff, more GAEB rule sets, and translation for 42 validation rules.' },
+  { version: '2.3.1', date: '2026-04-22',             summary: 'A pluggable email backend and better cache error logging.' },
+  { version: '2.3.0', date: '2026-04-22',             summary: 'Forgot-password reset links now work end to end.' },
+  { version: '2.2.0', date: '2026-04-21',             summary: 'A mid-cycle release between 2.1 and 2.3.' },
+  { version: '2.1.0', date: '2026-04-20',             summary: 'Per-tool shortcuts, undo and redo, and snap modes on DWG and PDF takeoff, plus a BIM cost colour mode.' },
+  { version: '2.0.0', date: '2026-04-20', tag: 'MILESTONE', summary: 'More reliable AI chat, encrypted AI settings, and all tests green.' },
 
-  // ── v1.9.x — security emergency sprint + DWG ─────────────────────────────
-  { version: '1.9.7', date: '2026-04-19', tag: 'SECURITY', summary: 'Security sprint - 10 critical auth/input-validation holes closed (JWT type, user existence, viewer-default)' },
-  { version: '1.9.6', date: '2026-04-19', tag: 'SECURITY', summary: 'defusedxml GAEB import, magic-byte file validator, Decimal money arithmetic end-to-end' },
-  { version: '1.9.5', date: '2026-04-18',             summary: 'API drift normalised (Submittals, Meetings, Safety, Inspections, NCR) + i18n modernisation' },
-  { version: '1.9.4', date: '2026-04-18',             summary: 'Transmittals edit/delete, DWG scale 1:N, Line/Polyline/Circle tools, security: markdown rejects js:/data:' },
-  { version: '1.9.3', date: '2026-04-18',             summary: 'DWG background uploads, right-click → Create task / Link, Export PDF from Summary tab' },
-  { version: '1.9.2', date: '2026-04-18',             summary: 'BIM duplicate Link-to-BOQ removed; 4D Schedule disabled with coming-soon tooltip' },
-  { version: '1.9.1', date: '2026-04-18',             summary: 'DWG ranked hit-test, Power-BI slicers + Recharts, SavedViews, Meetings 50k-char minutes' },
-  { version: '1.9.0', date: '2026-04-17',             summary: 'BOQ optimistic add, React Query offline-first, Quantity Rules reliably listed' },
+  // v1.9.x: security sprint plus DWG
+  { version: '1.9.7', date: '2026-04-19', tag: 'SECURITY', summary: 'Security sprint: 10 critical login and input-validation holes closed.' },
+  { version: '1.9.6', date: '2026-04-19', tag: 'SECURITY', summary: 'Safer GAEB import, file-type validation, and exact decimal money math throughout.' },
+  { version: '1.9.5', date: '2026-04-18',             summary: 'Aligned several module APIs and modernised translations.' },
+  { version: '1.9.4', date: '2026-04-18',             summary: 'Transmittals edit and delete, DWG scale, line, polyline and circle tools, and safer links.' },
+  { version: '1.9.3', date: '2026-04-18',             summary: 'Background DWG uploads, right-click to create a task or link, and PDF export from the summary tab.' },
+  { version: '1.9.2', date: '2026-04-18',             summary: 'Removed a duplicate BIM link button and disabled the unfinished 4D schedule with a tooltip.' },
+  { version: '1.9.1', date: '2026-04-18',             summary: 'Better DWG click targeting, dashboard slicers and charts, saved views, and longer meeting minutes.' },
+  { version: '1.9.0', date: '2026-04-17',             summary: 'Instant BOQ add, offline-first data loading, and a reliable quantity-rules list.' },
 
-  // ── v1.8.x — BOQ ↔ PDF/DWG deep linking ──────────────────────────────────
-  { version: '1.8.3', date: '2026-04-17',             summary: 'BOQ Linked Geometry "Apply to BOQ" redesign + cross-link module uploads → Documents' },
-  { version: '1.8.2', date: '2026-04-17',             summary: 'Documents file-type routing (PDF/DWG/RVT/IFC) + deep-links + filmstrip taller cards' },
-  { version: '1.8.1', date: '2026-04-17',             summary: 'DWG Takeoff full "Link to BOQ" picker + summary bar + CSV export of measurements' },
-  { version: '1.8.0', date: '2026-04-17',             summary: 'BOQ ↔ PDF Takeoff deep linking, quantity auto-transfers, red/amber link icons' },
+  // v1.8.x: BOQ to PDF and DWG deep linking
+  { version: '1.8.3', date: '2026-04-17',             summary: 'Redesigned Apply to BOQ for linked geometry, and module uploads now flow into Documents.' },
+  { version: '1.8.2', date: '2026-04-17',             summary: 'Documents now route files by type (PDF, DWG, RVT, IFC) with deep links and taller preview cards.' },
+  { version: '1.8.1', date: '2026-04-17',             summary: 'DWG takeoff gains a full Link to BOQ picker, a summary bar, and CSV export of measurements.' },
+  { version: '1.8.0', date: '2026-04-17',             summary: 'BOQ and PDF takeoff deep linking, with quantities that transfer automatically and clear link icons.' },
 
-  // ── v1.7.x — BIM + DWG + cross-module ────────────────────────────────────
-  { version: '1.7.2', date: '2026-04-16',             summary: 'BIM Viewer toolbar shift, Linked Geometry 3-column popover, Σ vs = aggregation semantics' },
-  { version: '1.7.1', date: '2026-04-16',             summary: 'BIM landing redesign, Tasks filter fix, 56 hardcoded colors → semantic tokens, 20+ i18n strings' },
-  { version: '1.7.0', date: '2026-04-15',             summary: 'BIM linked-BOQ panel, DWG polygon measurements, Assemblies JSON I/O, Tasks Kanban' },
+  // v1.7.x: BIM, DWG and cross-module
+  { version: '1.7.2', date: '2026-04-16',             summary: 'BIM viewer toolbar tidy-up and a 3-column linked-geometry popover.' },
+  { version: '1.7.1', date: '2026-04-16',             summary: 'A redesigned BIM landing page, a tasks filter fix, and consistent colour tokens.' },
+  { version: '1.7.0', date: '2026-04-15',             summary: 'BIM linked-BOQ panel, DWG polygon measurements, assembly import and export, and a tasks Kanban.' },
 
-  // ── v1.6.x → v1.0 ────────────────────────────────────────────────────────
-  { version: '1.6.0', date: '2026-04-15',             summary: 'BIM Linked Geometry Preview in BOQ grid + Quantity Picker + DWG polyline area/perimeter' },
-  { version: '1.5.2', date: '2026-04-14', tag: 'FIX', summary: 'Unit dropdown selection fix in BOQ editor, ezdxf compatibility in Docker builds' },
-  { version: '1.5.1', date: '2026-04-14', tag: 'FIX', summary: 'Tendering deadline column truncation, BOQ description editing replaced broken autocomplete' },
-  { version: '1.5.0', date: '2026-04-13', tag: 'SECURITY', summary: '4 vulnerabilities + 2 concurrency bugs fixed; IFC4x3 civil (30+ entities); 185 backend + 55 E2E tests' },
-  { version: '1.4.8', date: '2026-04-11',             summary: 'Real-time collaboration L1 - soft locks + presence; BOQ row-level locking during cell editing' },
-  { version: '1.4.7', date: '2026-04-11',             summary: 'BIM determinate progress, converter preflight + auto-install, vector routes factory (-105 LOC)' },
-  { version: '1.4.6', date: '2026-04-11', tag: 'SECURITY', summary: 'Contacts IDOR fix, collaboration permission checks, notifications subscriber framework' },
-  { version: '1.4.5', date: '2026-04-11',             summary: 'Cross-module integrity audit, 135 new vector-adapter tests, requirements PATCH + bulk-delete' },
-  { version: '1.4.4', date: '2026-04-11', tag: 'FIX', summary: 'Vector auto-backfill memory hazard, Python 3.14 datetime.utcnow() sweep' },
-  { version: '1.4.3', date: '2026-04-11',             summary: 'Requirements ↔ BIM cross-linking (5th link type), 8th vector collection, Global Search facet' },
-  { version: '1.4.2', date: '2026-04-11', tag: 'SECURITY', summary: 'SQL injection guard in LanceDB id-quoting, Qdrant payload mutation fix, frontend deep links' },
-  { version: '1.4.1', date: '2026-04-11',             summary: 'Validation + Chat vector adapters, auto-backfill on startup, Semantic Search Status panel' },
-  { version: '1.4.0', date: '2026-04-11',             summary: 'Semantic memory - 7 vector collections, multilingual embedding (50+ langs), Global Search (Cmd+Shift+K)' },
-  { version: '1.3.32', date: '2026-04-10',            summary: 'BIM health-stats banner, smart-filter chips, 3 new color-by compliance modes at 60 fps' },
-  { version: '1.3.22', date: '2026-04-11',            summary: 'BIM ↔ BOQ linking full E2E UI, Quick Takeoff bulk-link, BIM Quantity Rules page' },
-  { version: '1.3.18', date: '2026-04-10', tag: 'FIX', summary: 'BIM COLLADA materials, camera fit, delete file cleanup; markups in PDF units; zip-slip validation' },
-  { version: '1.3.16', date: '2026-04-10', tag: 'SECURITY', summary: 'validation/tendering/PI ownership checks, AI keys encrypted at rest with Fernet' },
-  { version: '1.3.15', date: '2026-04-10', tag: 'SECURITY', summary: 'BIM/finance/contacts/RFQ permission checks, project analytics scoped by owner' },
-  { version: '1.3.13', date: '2026-04-10',            summary: 'pandas/pyarrow in base deps; BIM geometry visible on first load; demo-mode banner' },
-  { version: '1.3.10', date: '2026-04-10', tag: 'FIX', summary: 'Windows Anaconda startup crash, lazy vector DB loading (-30s startup), SPA routing for prod' },
-  { version: '1.3.8',  date: '2026-04-10',            summary: 'BIM filter panel + element explorer + fast mesh visibility toggle for 16k+ elements' },
-  { version: '1.3.6',  date: '2026-04-10', tag: 'FIX', summary: 'BIM geometry loads (token auth for ColladaLoader), /chat 404 (duplicate prefix removed)' },
-  { version: '1.3.0',  date: '2026-04-10',            summary: 'AI Chat full-page workspace with 11 ERP tools, BIM Viewer redesign, DDC Community Converter' },
-  { version: '1.2.0',  date: '2026-04-09',            summary: 'Project Completion Intelligence (AI co-pilot), Architecture Map, Dashboard KPI cards' },
-  { version: '1.1.0',  date: '2026-04-09',            summary: 'Bridge release between 1.0 milestone and 1.2 PCI features' },
-  { version: '1.0.0',  date: '2026-04-08', tag: 'MILESTONE', summary: 'Interconnected modules across 30+ packages; 14 integrations; 5 demo projects; SVG Gantt + Three.js BIM' },
+  // v1.6.x down to v1.0
+  { version: '1.6.0', date: '2026-04-15',             summary: 'A BIM linked-geometry preview in the BOQ grid, a quantity picker, and DWG area and perimeter.' },
+  { version: '1.5.2', date: '2026-04-14', tag: 'FIX', summary: 'Unit dropdown fix in the BOQ editor and a DWG compatibility fix in Docker builds.' },
+  { version: '1.5.1', date: '2026-04-14', tag: 'FIX', summary: 'Tendering deadline column fix and reliable BOQ description editing.' },
+  { version: '1.5.0', date: '2026-04-13', tag: 'SECURITY', summary: '4 vulnerabilities and 2 concurrency bugs fixed, plus broader IFC civil support.' },
+  { version: '1.4.8', date: '2026-04-11',             summary: 'Real-time collaboration: soft locks, presence, and row locking while you edit a BOQ cell.' },
+  { version: '1.4.7', date: '2026-04-11',             summary: 'Determinate BIM progress and a converter pre-check with auto-install.' },
+  { version: '1.4.6', date: '2026-04-11', tag: 'SECURITY', summary: 'Contacts access-control fix, collaboration permission checks, and a notifications framework.' },
+  { version: '1.4.5', date: '2026-04-11',             summary: 'A cross-module integrity audit plus bulk-delete on requirements.' },
+  { version: '1.4.4', date: '2026-04-11', tag: 'FIX', summary: 'Fixed a memory hazard in vector backfill and updated for newer Python.' },
+  { version: '1.4.3', date: '2026-04-11',             summary: 'Link requirements to BIM, an 8th vector collection, and a global-search facet.' },
+  { version: '1.4.2', date: '2026-04-11', tag: 'SECURITY', summary: 'A SQL injection guard, a vector payload fix, and frontend deep links.' },
+  { version: '1.4.1', date: '2026-04-11',             summary: 'Validation and chat search adapters, startup backfill, and a semantic-search status panel.' },
+  { version: '1.4.0', date: '2026-04-11',             summary: 'Semantic memory: 7 vector collections, multilingual search, and a global search shortcut.' },
+  { version: '1.3.32', date: '2026-04-10',            summary: 'A BIM health banner, smart-filter chips, and 3 new compliance colour modes at 60 fps.' },
+  { version: '1.3.22', date: '2026-04-11',            summary: 'Full BIM-to-BOQ linking in the UI, bulk quick takeoff, and a BIM quantity-rules page.' },
+  { version: '1.3.18', date: '2026-04-10', tag: 'FIX', summary: 'BIM material and camera fixes, markups in PDF units, and safer zip handling.' },
+  { version: '1.3.16', date: '2026-04-10', tag: 'SECURITY', summary: 'Ownership checks on validation, tendering and project intelligence, plus encrypted AI keys.' },
+  { version: '1.3.15', date: '2026-04-10', tag: 'SECURITY', summary: 'Permission checks on BIM, finance, contacts and RFQ, with analytics scoped by owner.' },
+  { version: '1.3.13', date: '2026-04-10',            summary: 'BIM geometry now shows on first load, plus a demo-mode banner.' },
+  { version: '1.3.10', date: '2026-04-10', tag: 'FIX', summary: 'Fixed a Windows startup crash and made startup about 30 seconds faster.' },
+  { version: '1.3.8',  date: '2026-04-10',            summary: 'A BIM filter panel and element explorer that stays fast on very large models.' },
+  { version: '1.3.6',  date: '2026-04-10', tag: 'FIX', summary: 'BIM geometry now loads, and the chat page no longer 404s.' },
+  { version: '1.3.0',  date: '2026-04-10',            summary: 'A full-page AI chat workspace with 11 tools and a redesigned BIM viewer.' },
+  { version: '1.2.0',  date: '2026-04-09',            summary: 'A project completion AI co-pilot, an architecture map, and dashboard KPI cards.' },
+  { version: '1.1.0',  date: '2026-04-09',            summary: 'A bridge release between the 1.0 milestone and the 1.2 features.' },
+  { version: '1.0.0',  date: '2026-04-08', tag: 'MILESTONE', summary: 'Connected modules across 30+ packages, 14 integrations, 5 demo projects, and a 3D BIM viewer.' },
 
-  // ── v0.x — early development ─────────────────────────────────────────────
-  { version: '0.9.1', date: '2026-04-07',             summary: 'Discord webhook + Integration Hub (n8n, Zapier, Make, Google Sheets, Power BI cards)' },
-  { version: '0.9.0', date: '2026-04-07',             summary: '30 backend modules + 13 frontend pages; 35 currencies, 198 countries, 20 languages' },
-  { version: '0.8.0', date: '2026-04-07',             summary: 'Custom BOQ columns (7 presets), one-click renumber, Project Health bar, strong-password policy' },
-  { version: '0.7.0', date: '2026-04-07',             summary: 'Multi-level BOQ sections, Excel import preserves columns, formula engine for assemblies' },
-  { version: '0.6.0', date: '2026-04-07',             summary: 'Resource quantities scale with positions, auto unit-rate, drag-and-drop between sections' },
-  { version: '0.5.0', date: '2026-04-06',             summary: 'PDF Takeoff, professional Excel + PDF export with cover/signature, CAD/BIM pivot → BOQ' },
-  { version: '0.4.0', date: '2026-04-06',             summary: 'Quick modal dialogs for projects/BOQs/assemblies, BOQ list filters by header project' },
-  { version: '0.3.0', date: '2026-04-05',             summary: 'Data Explorer with CSV export, Field Reports, Photo Gallery, Markups, Punch List' },
-  { version: '0.2.1', date: '2026-04-04', tag: 'FIX', summary: 'Stronger document download checks, CORS hardening, login enumeration fix, 9 deps bumped' },
-  { version: '0.1.1', date: '2026-04-01', tag: 'FIX', summary: 'Settings page freeze, DELETE project 500, XSS sanitization in project names, requirements.txt' },
-  { version: '0.1.0', date: '2026-03-27', tag: 'NEW', summary: 'Initial release - 18 validation rules, AI estimation, 55K cost items, 20 languages, AG Grid BOQ' },
+  // v0.x: early development
+  { version: '0.9.1', date: '2026-04-07',             summary: 'A Discord webhook and an integration hub for n8n, Zapier, Make, Google Sheets and Power BI.' },
+  { version: '0.9.0', date: '2026-04-07',             summary: '30 backend modules and 13 pages, with 35 currencies, 198 countries and 20 languages.' },
+  { version: '0.8.0', date: '2026-04-07',             summary: 'Custom BOQ columns, one-click renumber, a project health bar, and a strong-password policy.' },
+  { version: '0.7.0', date: '2026-04-07',             summary: 'Multi-level BOQ sections, Excel import that keeps columns, and a formula engine for assemblies.' },
+  { version: '0.6.0', date: '2026-04-07',             summary: 'Resource quantities scale with positions, automatic unit rates, and drag-and-drop between sections.' },
+  { version: '0.5.0', date: '2026-04-06',             summary: 'PDF takeoff, professional Excel and PDF export, and a CAD or BIM pivot into a BOQ.' },
+  { version: '0.4.0', date: '2026-04-06',             summary: 'Quick dialogs for projects, BOQs and assemblies, plus filters on the BOQ list.' },
+  { version: '0.3.0', date: '2026-04-05',             summary: 'A data explorer with CSV export, field reports, a photo gallery, markups and a punch list.' },
+  { version: '0.2.1', date: '2026-04-04', tag: 'FIX', summary: 'Stronger download checks, a login fix, and dependency updates.' },
+  { version: '0.1.1', date: '2026-04-01', tag: 'FIX', summary: 'Fixed a settings page freeze and a project delete error, with safer project names.' },
+  { version: '0.1.0', date: '2026-03-27', tag: 'NEW', summary: 'First release: 18 validation rules, AI estimation, 55K cost items, 20 languages, and a BOQ grid.' },
 ];
 
 /**
  * Parse a semver-ish version string into a comparable tuple. Falls back to
- * lexical compare for malformed input — that keeps a typo from blowing up
+ * lexical compare for malformed input, which keeps a typo from blowing up
  * the whole list render.
  */
 function parseVersion(v: string): number[] {
@@ -282,7 +282,7 @@ export function Changelog() {
       </div>
 
       {/*
-        CSS columns layout — packs variable-height cards into the shorter
+        CSS columns layout packs variable-height cards into the shorter
         column automatically without the gymnastics of a manual two-list
         split. `break-inside-avoid` on each card keeps a single entry from
         being torn across the column boundary.
