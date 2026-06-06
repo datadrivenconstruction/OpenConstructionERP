@@ -412,6 +412,11 @@ export function createEntry(data: {
   entry_time: string;
   title?: string;
   description?: string;
+  // Optional provenance link to the upstream record this entry summarises
+  // (e.g. a safety incident or a quality inspection). The backend
+  // DiaryEntryCreate schema already accepts both fields.
+  source_module?: string;
+  source_ref?: string;
 }): Promise<DiaryEntry> {
   return apiPost<DiaryEntry>('/v1/daily-diary/diary-entries/', data);
 }

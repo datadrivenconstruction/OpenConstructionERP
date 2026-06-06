@@ -19,6 +19,7 @@ import {
   ShieldAlert,
   Repeat,
   AlarmClock,
+  ExternalLink,
 } from 'lucide-react';
 import {
   Button,
@@ -34,11 +35,12 @@ import {
   ConfirmDialog,
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { UserSearchInput } from '@/shared/ui/UserSearchInput';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useToastStore } from '@/stores/useToastStore';
-import { getErrorMessage } from '@/shared/lib/api';
+import { apiGet, getErrorMessage } from '@/shared/lib/api';
 import {
   listContracts,
   listAssets,
@@ -174,6 +176,50 @@ function dateToIsoDatetime(date: string): string | undefined {
   // Already a datetime (defensive — future callers may pass one through).
   if (date.includes('T') || date.includes(' ')) return date;
   return `${date}T00:00:00+00:00`;
+}
+
+/**
+ * Resolve an internal user id (technician) to a human name. Shares the same
+ * cache key as UserSearchInput so the directory is fetched once. Falls back to
+ * the raw value, which keeps legacy free-text technician names readable after
+ * the picker migration.
+ */
+function useUserNameResolver(): (id?: string | null) => string {
+  const { data: users = [] } = useQuery({
+    queryKey: ['users-search'],
+    queryFn: () =>
+      apiGet<Array<{ id: string; full_name: string; email: string }>>(
+        '/v1/users/?limit=100&is_active=true',
+      ),
+    staleTime: 60_000,
+  });
+  return (id) => {
+    if (!id) return '';
+    const u = users.find((x) => x.id === id);
+    return u ? u.full_name || u.email || id : id;
+  };
+}
+
+/**
+ * Resolve a contact id (service-contract customer) to a display name plus
+ * email, so the contract drawer can name the customer rather than show a UUID.
+ */
+interface ContactLite {
+  id: string;
+  company_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  primary_email?: string | null;
+}
+
+function contactDisplayName(c: ContactLite | undefined, fallback: string): string {
+  if (!c) return fallback;
+  const parts: string[] = [];
+  if (c.company_name) parts.push(c.company_name);
+  if (c.first_name || c.last_name) {
+    parts.push([c.first_name, c.last_name].filter(Boolean).join(' '));
+  }
+  return parts.join(' - ') || c.primary_email || fallback;
 }
 
 /* ─── Page ─── */
@@ -648,6 +694,7 @@ function WorkOrderTable({
   emptyAction: () => void;
 }) {
   const { t } = useTranslation();
+  const resolveUserName = useUserNameResolver();
   if (rows.length === 0) {
     return (
       <EmptyState
@@ -686,7 +733,7 @@ function WorkOrderTable({
               <td className="px-4 py-2 text-xs text-content-secondary">
                 {r.scheduled_for ? <DateDisplay value={r.scheduled_for} /> : '—'}
               </td>
-              <td className="px-4 py-2 text-content-secondary text-xs">{r.technician_id || '—'}</td>
+              <td className="px-4 py-2 text-content-secondary text-xs">{resolveUserName(r.technician_id) || '—'}</td>
               <td className="px-4 py-2">
                 <Badge variant={WO_STATUS_VARIANT[r.status]} dot>{r.status}</Badge>
               </td>
@@ -860,6 +907,7 @@ function DetailDrawer({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -867,6 +915,15 @@ function DetailDrawer({
   const wo = kind === 'work_orders' ? workOrders.find((x) => x.id === id) : null;
   const contract = kind === 'contracts' ? contracts.find((x) => x.id === id) : null;
   const asset = kind === 'assets' ? assets.find((x) => x.id === id) : null;
+
+  // Resolve the contract's customer (a contact) to a readable name + deep
+  // link, so the drawer names the party instead of showing a bare UUID.
+  const customerQ = useQuery({
+    queryKey: ['service', 'contract-customer', contract?.customer_id],
+    queryFn: () =>
+      apiGet<ContactLite>(`/v1/contacts/${contract?.customer_id}`),
+    enabled: !!contract?.customer_id,
+  });
 
   const dispatchMut = useMutation({
     mutationFn: (technicianId: string) =>
@@ -940,7 +997,10 @@ function DetailDrawer({
   });
 
   const [tech, setTech] = useState('');
+  const [techName, setTechName] = useState('');
   const [debrief, setDebrief] = useState({ problem: '', cause: '', solution: '' });
+  // Resolve technician / customer ids to readable names for the drawer.
+  const resolveUserName = useUserNameResolver();
   // Destructive action gate. WOs intentionally have no delete here — they
   // cascade from a ticket; a stand-alone WO delete would orphan the ticket
   // history. WO cancellation should flow through the ticket's "cancel".
@@ -1078,7 +1138,7 @@ function DetailDrawer({
                 <Field label={t('service.priority')} value={<Badge variant={PRIORITY_VARIANT[ticket.priority]}>{ticket.priority}</Badge>} />
                 <Field label={t('service.status')} value={<Badge variant={TICKET_STATUS_VARIANT[ticket.status]} dot>{ticket.status}</Badge>} />
                 <Field label={t('service.reported_at')} value={<DateDisplay value={ticket.reported_at} />} />
-                <Field label={t('service.assigned_to', { defaultValue: 'Assigned to' })} value={ticket.assigned_to || '—'} />
+                <Field label={t('service.assigned_to', { defaultValue: 'Assigned to' })} value={resolveUserName(ticket.assigned_to) || '—'} />
                 <Field label={t('service.sla_due', { defaultValue: 'SLA due' })} value={ticket.sla_due_at ? <DateDisplay value={ticket.sla_due_at} /> : '—'} />
                 {ticket.resolved_at && <Field label={t('service.resolved_at', { defaultValue: 'Resolved at' })} value={<DateDisplay value={ticket.resolved_at} />} />}
               </div>
@@ -1089,13 +1149,19 @@ function DetailDrawer({
                     {t('service.dispatch_ticket', { defaultValue: 'Dispatch to technician' })}
                   </p>
                   <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={tech}
-                      onChange={(e) => setTech(e.target.value)}
-                      placeholder={t('service.technician_id', { defaultValue: 'Technician ID / email' })}
-                      className={inputCls}
-                    />
+                    <div className="flex-1">
+                      <UserSearchInput
+                        value={tech}
+                        displayValue={techName}
+                        onChange={(id, name) => {
+                          setTech(id);
+                          setTechName(name);
+                        }}
+                        placeholder={t('service.technician_search_placeholder', {
+                          defaultValue: 'Search team members...',
+                        })}
+                      />
+                    </div>
                     <Button
                       variant="primary"
                       icon={<Send size={14} />}
@@ -1147,7 +1213,7 @@ function DetailDrawer({
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <Field label={t('service.status')} value={<Badge variant={WO_STATUS_VARIANT[wo.status]} dot>{wo.status}</Badge>} />
                 <Field label={t('service.scheduled_for')} value={wo.scheduled_for ? <DateDisplay value={wo.scheduled_for} /> : '—'} />
-                <Field label={t('service.technician')} value={wo.technician_id || '—'} />
+                <Field label={t('service.technician')} value={resolveUserName(wo.technician_id) || '—'} />
                 <Field label={t('service.billed')} value={<MoneyDisplay amount={Number(wo.billed_amount) || 0} currency={wo.currency || undefined} />} />
               </div>
               {wo.debrief_summary && (
@@ -1236,6 +1302,34 @@ function DetailDrawer({
 
           {contract && (
             <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="col-span-2">
+                <p className="text-xs uppercase tracking-wide text-content-tertiary">
+                  {t('service.customer', { defaultValue: 'Customer' })}
+                </p>
+                {contract.customer_id ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(`/contacts?contactId=${contract.customer_id}`)
+                    }
+                    className="mt-0.5 inline-flex items-center gap-1 text-sm font-medium text-oe-blue hover:underline"
+                    data-testid="service-contract-customer-link"
+                    title={t('service.view_customer_hint', {
+                      defaultValue: 'Open this customer in Contacts.',
+                    })}
+                  >
+                    {contactDisplayName(
+                      customerQ.data,
+                      customerQ.isLoading
+                        ? t('common.loading', { defaultValue: 'Loading...' })
+                        : contract.customer_id,
+                    )}
+                    <ExternalLink size={12} />
+                  </button>
+                ) : (
+                  <p className="mt-0.5 text-sm text-content-primary">—</p>
+                )}
+              </div>
               <Field label={t('service.title_col')} value={contract.title || '—'} />
               <Field label={t('service.status')} value={<Badge variant={CONTRACT_STATUS_VARIANT[contract.status]} dot>{contract.status}</Badge>} />
               <Field label={t('service.period_start', { defaultValue: 'Start' })} value={contract.period_start} />
@@ -1355,11 +1449,13 @@ function CreateModal({
     priority: 'med' as TicketPriority,
   });
 
-  // Work order
+  // Work order. ``technician_name`` is the picker's display value only — the
+  // backend persists the user id in ``technician_id``.
   const [woForm, setWoForm] = useState({
     ticket_id: tickets[0]?.id || '',
     scheduled_for: todayIso(),
     technician_id: '',
+    technician_name: '',
   });
 
   // Contract
@@ -1635,16 +1731,18 @@ function CreateModal({
           </WideModalField>
           <WideModalField
             label={t('service.technician', { defaultValue: 'Technician' })}
-            hint={t('service.technician_hint', {
-              defaultValue: 'Optional - assign on-site engineer.',
+            hint={t('service.technician_hint_picker', {
+              defaultValue: 'Optional - assign an on-site engineer from your team.',
             })}
           >
-            <input
+            <UserSearchInput
               value={woForm.technician_id}
-              onChange={(e) => setWoForm({ ...woForm, technician_id: e.target.value })}
-              className={inputCls}
-              placeholder={t('service.technician_placeholder', {
-                defaultValue: 'John Doe',
+              displayValue={woForm.technician_name}
+              onChange={(id, name) =>
+                setWoForm({ ...woForm, technician_id: id, technician_name: name })
+              }
+              placeholder={t('service.technician_search_placeholder', {
+                defaultValue: 'Search team members...',
               })}
             />
           </WideModalField>
