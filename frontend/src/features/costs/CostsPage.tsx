@@ -44,7 +44,6 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import type { CostItemMetadata, CertaintyBadge as CertaintyBadgeData } from './api';
 import { buildBoqPositionDraft, type FullCostItem } from './addToBoqHelpers';
 import { fetchUsageCounts } from './api';
-import { CertaintyBadge } from './CertaintyBadge';
 import { UsageBadge } from './UsageBadge';
 import { EscalationCalculator } from './EscalationCalculator';
 import { RegionalAdjustPanel } from './RegionalAdjustPanel';
@@ -2628,8 +2627,7 @@ function CostItemRow({
         </td>
         <td className="px-4 py-3 text-right font-semibold text-content-primary tabular-nums">
           <div className="inline-flex items-center gap-1.5">
-            <UsageBadge count={usageCount} />
-            <CertaintyBadge costItemId={item.id} band={band} />
+            <UsageBadge count={usageCount} band={band} />
             <span title={rowCurrency || undefined}>{money(item.rate)}</span>
             {hasVariants && variantStats && (
               <Badge

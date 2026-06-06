@@ -36,10 +36,19 @@ logger = logging.getLogger(__name__)
 # so the integration tests can import them directly when asserting
 # boundary behaviour. Keep aligned with the docstring in
 # ``schemas.CertaintyBadge``.
+#
+# Band meaning (revised so a single fresh use is never alarming red):
+#   * green  - well proven: frequency >= 10 AND used within the last year.
+#   * yellow - in use but not yet proven: at least one use and the most
+#     recent use is no older than CERTAINTY_YELLOW_MAX_AGE_DAYS.
+#   * red    - either never used (frequency 0) or the last use is older
+#     than CERTAINTY_YELLOW_MAX_AGE_DAYS (stale evidence).
 
 CERTAINTY_GREEN_MIN_FREQUENCY = 10
 CERTAINTY_GREEN_MAX_AGE_DAYS = 365
-CERTAINTY_YELLOW_MIN_FREQUENCY = 3
+# Any non-zero frequency reaches at least yellow, so there is no separate
+# yellow frequency floor any more. The only thing that pushes a used item
+# back to red is stale evidence (age above the max below).
 CERTAINTY_YELLOW_MAX_AGE_DAYS = 1095  # ≈ 3 years
 # Sentinel age used when a row has never been logged - keeps the badge
 # JSON-clean (no nulls in the numeric field) and slots into the red
@@ -57,6 +66,17 @@ def classify_certainty(frequency: int, age_days: int) -> CertaintyBand:
     boundary behaviour without going through the DB. Matches the
     contract documented on ``CertaintyBadge``.
 
+    Contract:
+        * ``red`` - the only alarming state: the item was never used
+          (``frequency == 0``) or the last use is stale (older than
+          ``CERTAINTY_YELLOW_MAX_AGE_DAYS``). A single fresh use is never
+          red.
+        * ``green`` - well proven: ``frequency >= 10`` and used within the
+          last year (``age_days < CERTAINTY_GREEN_MAX_AGE_DAYS``).
+        * ``yellow`` - everything in between: at least one use whose most
+          recent occurrence is no older than
+          ``CERTAINTY_YELLOW_MAX_AGE_DAYS``.
+
     Args:
         frequency: Total recorded uses (``>= 0``).
         age_days: Days since the most recent use, or
@@ -65,13 +85,14 @@ def classify_certainty(frequency: int, age_days: int) -> CertaintyBand:
     Returns:
         ``"green"`` / ``"yellow"`` / ``"red"``.
     """
+    # Never used, or evidence too old to trust - the only red cases.
+    if frequency <= 0 or age_days > CERTAINTY_YELLOW_MAX_AGE_DAYS:
+        return "red"
+    # Well proven: high frequency and a recent use.
     if frequency >= CERTAINTY_GREEN_MIN_FREQUENCY and age_days < CERTAINTY_GREEN_MAX_AGE_DAYS:
         return "green"
-    in_yellow_freq = CERTAINTY_YELLOW_MIN_FREQUENCY <= frequency < CERTAINTY_GREEN_MIN_FREQUENCY
-    in_yellow_age = CERTAINTY_GREEN_MAX_AGE_DAYS <= age_days <= CERTAINTY_YELLOW_MAX_AGE_DAYS
-    if in_yellow_freq or in_yellow_age:
-        return "yellow"
-    return "red"
+    # In use but not yet proven (any non-stale use) - reassuring, not alarming.
+    return "yellow"
 
 
 # ── Regional index lookup ─────────────────────────────────────────────────

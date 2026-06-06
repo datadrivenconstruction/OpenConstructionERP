@@ -251,8 +251,9 @@ async def test_record_usage_increments_frequency(http_client, app_instance):
     assert resp.status_code == 201, resp.text
     body = resp.json()
     assert body["certainty"]["frequency"] >= 1
-    # Single use → still in the "rarely used" red band, but last_used_at
-    # is now populated.
+    # A single fresh use is "in use" - reassuring yellow, not alarming red -
+    # and last_used_at is now populated.
+    assert body["certainty"]["confidence_badge"] == "yellow"
     assert body["certainty"]["last_used_at"] is not None
 
     # Re-fetch via GET — must reflect the just-logged row.
@@ -288,14 +289,20 @@ def test_classify_certainty_boundary_cases():
 
     # Green floor: exactly 10 uses, just under 365 days old.
     assert classify_certainty(10, 364) == "green"
-    # Just under green frequency threshold → yellow.
+    # Just under green frequency threshold, recent → yellow.
     assert classify_certainty(9, 100) == "yellow"
     # Green frequency, but stale → yellow (age in [365, 1095]).
     assert classify_certainty(50, 365) == "yellow"
     assert classify_certainty(50, 1095) == "yellow"
-    # Below yellow minimums on both axes → red.
-    assert classify_certainty(2, 100) == "red"
-    # Never used → red regardless of frequency input.
+    # A single fresh use must NOT be red - reassuring yellow instead.
+    assert classify_certainty(1, 0) == "yellow"
+    assert classify_certainty(1, 100) == "yellow"
+    # A low, recent count is in use, so yellow (was red under the old rule).
+    assert classify_certainty(2, 100) == "yellow"
+    # Never used → red regardless of age input.
     assert classify_certainty(0, NEVER_USED_AGE_DAYS) == "red"
+    assert classify_certainty(0, 0) == "red"
+    # Used once but evidence gone stale (past the yellow max age) → red.
+    assert classify_certainty(1, 1096) == "red"
     # Very stale even with high frequency → red.
     assert classify_certainty(100, 1500) == "red"
