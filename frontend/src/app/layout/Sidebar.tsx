@@ -200,9 +200,9 @@ const navGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { labelKey: 'boq.title', to: '/boq', icon: Table2, tourId: 'boq' },
-      { labelKey: 'nav.match_elements', to: '/match-elements', icon: Link2, badge: 'BETA' },
       { labelKey: 'nav.ai_estimator', to: '/ai-estimator', icon: Wand2, badge: 'NEW' },
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles, badge: 'BETA' },
+      { labelKey: 'nav.match_elements', to: '/match-elements', icon: Link2, badge: 'BETA' },
       { labelKey: 'nav.estimation_dashboard', to: '/project-intelligence', icon: BrainCircuit, badge: 'BETA' },
     ],
   },

@@ -774,9 +774,9 @@ export function MatchWizardFlow() {
     <div className="space-y-5 animate-fade-in">
       {/* Canonical top block - module name + icon live in the global top app
           bar; the page renders only its subtitle on the left. */}
-      <Breadcrumb items={[{ label: t('nav.match_elements', { defaultValue: 'CAD Match → Cost' }) }]} />
+      <Breadcrumb items={[{ label: t('nav.match_elements', { defaultValue: 'CAD-BIM Match → Cost' }) }]} />
       <PageHeader
-        srTitle={t('match.wizard.title', { defaultValue: 'CAD Match → Cost' })}
+        srTitle={t('match.wizard.title', { defaultValue: 'CAD-BIM Match → Cost' })}
         subtitle={t('match.wizard.subtitle', {
           defaultValue:
             'A guided flow that turns a BIM model into a priced bill of quantities.',
@@ -785,7 +785,7 @@ export function MatchWizardFlow() {
 
       <DismissibleInfo
         storageKey="match-elements"
-        title={t('info.match-elements.title', { defaultValue: 'CAD Match → Cost' })}
+        title={t('info.match-elements.title', { defaultValue: 'CAD-BIM Match → Cost' })}
       >
         {t('info.match-elements.body', {
           defaultValue:
@@ -806,7 +806,7 @@ export function MatchWizardFlow() {
         <p className="min-w-0 flex-1 text-xs leading-snug text-content-secondary">
           {t('match_elements.beta_blurb', {
             defaultValue:
-              'CAD Match → Cost is a new section and still has rough edges. Found a bug or have an idea? Please file an issue - every report tightens the next release.',
+              'CAD-BIM Match → Cost is a new section and still has rough edges. Found a bug or have an idea? Please file an issue - every report tightens the next release.',
           })}
         </p>
         <a

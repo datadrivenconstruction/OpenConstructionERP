@@ -1009,7 +1009,7 @@ const ROUTE_COMPONENT_MAP: ReadonlyArray<readonly [string, string]> = [
   ['/coordination', 'Model Coordination'],
   ['/assets', 'Asset Register'],
   ['/data-explorer', 'Data Explorer'],
-  ['/match-elements', 'CAD Match to Cost'],
+  ['/match-elements', 'CAD-BIM Match to Cost'],
   ['/boq', 'BOQ'],
   ['/templates', 'BOQ Templates'],
   ['/costs', 'Cost Database'],

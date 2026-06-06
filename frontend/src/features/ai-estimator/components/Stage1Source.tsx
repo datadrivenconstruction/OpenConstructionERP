@@ -424,7 +424,7 @@ export function Stage1Confirm(props: Stage1ConfirmProps) {
             <p className="mt-1 text-xs text-amber-600">
               {t('aiest.confirm1.no_catalogue', {
                 defaultValue:
-                  'No catalogues loaded. Install one from CAD Match → Cost to ground rates.',
+                  'No catalogues loaded. Install one from CAD-BIM Match → Cost to ground rates.',
               })}
             </p>
           )}
