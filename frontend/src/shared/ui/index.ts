@@ -18,6 +18,9 @@ export { Badge } from './Badge';
 
 export { Card, CardHeader, CardContent, CardFooter } from './Card';
 
+export { StatCard } from './StatCard';
+export type { StatCardProps, StatCardTone } from './StatCard';
+
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
 

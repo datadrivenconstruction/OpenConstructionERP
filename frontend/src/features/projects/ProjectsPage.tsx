@@ -445,7 +445,7 @@ export function ProjectsPage() {
         <>
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* 1. Total Projects */}
-            <div className="rounded-xl bg-surface-elevated border border-border-light p-3">
+            <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
               <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
                 {t('projects.stats_total', { defaultValue: 'Total Projects' })}
               </div>
@@ -471,7 +471,7 @@ export function ProjectsPage() {
             </div>
 
             {/* 2. Total BOQs */}
-            <div className="rounded-xl bg-surface-elevated border border-border-light p-3">
+            <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
               <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
                 {t('projects.stats_boqs', { defaultValue: 'Total BOQs' })}
               </div>
@@ -493,7 +493,7 @@ export function ProjectsPage() {
             {/* 3. Total Value — never blend currencies into one scalar.
                 Single currency → one labelled total. Multiple → "Mixed
                 currencies" headline + a per-currency subtotal line. */}
-            <div className="rounded-xl bg-surface-elevated border border-border-light p-3">
+            <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
               <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
                 {t('projects.stats_value', { defaultValue: 'Total Value' })}
               </div>
@@ -544,7 +544,7 @@ export function ProjectsPage() {
             {/* 4. Avg Project Size — per-currency average; never a blended
                 scalar. Single currency → one labelled figure; multiple →
                 "Mixed currencies" + per-currency average chips. */}
-            <div className="rounded-xl bg-surface-elevated border border-border-light p-3">
+            <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
               <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
                 {t('projects.stats_avg', { defaultValue: 'Avg Project Size' })}
               </div>

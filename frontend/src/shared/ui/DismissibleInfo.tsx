@@ -186,7 +186,12 @@ export function DismissibleInfo({
   // space-y-5; a built-in mb-5 doubled the gap below every info card.
   // Tint at 80% of the first visible pass (founder 2026-06-06: "светло
   // синий, добавь немного прозрачности, фон на 80%"): /10 -> /[0.08].
-  const wrapper = `group rounded-xl border border-oe-blue/20 border-l-2 border-l-oe-blue/70 bg-oe-blue/[0.08] dark:bg-oe-blue/[0.11] backdrop-blur-sm shadow-sm animate-fade-in ${
+  // NO backdrop-blur here (founder 2026-06-06: cards "look opaque"): the
+  // app backdrop's texture is a 0.9px dot grid, and even blur-sm wipes it
+  // out completely - the tint then reads as a solid plate. With the blur
+  // gone the grid shows through the 8% tint and the card is visibly
+  // translucent.
+  const wrapper = `group rounded-xl border border-oe-blue/20 border-l-2 border-l-oe-blue/70 bg-oe-blue/[0.08] dark:bg-oe-blue/[0.11] shadow-sm animate-fade-in ${
     className ?? ''
   }`;
 
