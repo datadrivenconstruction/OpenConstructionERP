@@ -19,6 +19,8 @@ import {
   List,
   GitCompare,
   History,
+  Calculator,
+  Ruler,
 } from 'lucide-react';
 
 import {
@@ -221,6 +223,25 @@ export function SnapshotsPage() {
             label: t('nav.bim', { defaultValue: 'BIM' }),
             onClick: () => navigate('/bim'),
           },
+          {
+            // The frozen element/category dataset is the same model a
+            // user prices in CAD-BIM Match -> Cost. Carry the active
+            // project so the wizard lands on the right project (it reads
+            // ?project=). The match wizard sources from BIM models, not
+            // the parquet snapshot itself, so this is a navigation tie,
+            // not a data import.
+            label: t('nav.match_elements', { defaultValue: 'CAD-BIM Match → Cost' }),
+            onClick: () =>
+              navigate(`/match-elements?project=${encodeURIComponent(activeProjectId)}`),
+          },
+          {
+            // PDF Takeoff is the other quantity source feeding the BOQ.
+            // Takeoff scopes to the globally active project (project
+            // context store), so no project param is needed; ?tab= is the
+            // consumed deep-link param.
+            label: t('nav.takeoff', { defaultValue: 'PDF Takeoff' }),
+            onClick: () => navigate('/takeoff?tab=documents'),
+          },
         ]}
       >
         {t('dashboards.intro_body', {
@@ -347,6 +368,10 @@ export function SnapshotsPage() {
               snapshot={s}
               onDelete={() => deleteMutation.mutate(s.id)}
               deleting={deleteMutation.isPending && deleteMutation.variables === s.id}
+              onMatchToCost={() =>
+                navigate(`/match-elements?project=${encodeURIComponent(activeProjectId)}`)
+              }
+              onTakeoff={() => navigate('/takeoff?tab=documents')}
             />
           ))}
         </div>
@@ -397,9 +422,19 @@ interface SnapshotCardProps {
   snapshot: SnapshotSummary;
   onDelete: () => void;
   deleting: boolean;
+  /** Deep link to CAD-BIM Match -> Cost for this snapshot's project. */
+  onMatchToCost: () => void;
+  /** Deep link to PDF Takeoff (project comes from global context). */
+  onTakeoff: () => void;
 }
 
-function SnapshotCard({ snapshot, onDelete, deleting }: SnapshotCardProps) {
+function SnapshotCard({
+  snapshot,
+  onDelete,
+  deleting,
+  onMatchToCost,
+  onTakeoff,
+}: SnapshotCardProps) {
   const { t } = useTranslation();
   return (
     <Card className="overflow-hidden" data-testid={`snapshot-card-${snapshot.id}`}>
@@ -454,6 +489,32 @@ function SnapshotCard({ snapshot, onDelete, deleting }: SnapshotCardProps) {
               ))}
           </div>
         )}
+        {/* Use-this-snapshot deep links (CONN-73). The frozen dataset is
+            the model a user prices in matching or measures off in
+            takeoff; surface both quantity flows straight from the card so
+            the snapshot is not a dead end. */}
+        <div className="flex flex-wrap gap-2 border-t border-neutral-800/60 pt-3">
+          <button
+            type="button"
+            onClick={onMatchToCost}
+            data-testid={`snapshot-match-${snapshot.id}`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:bg-oe-blue/10 hover:text-oe-blue"
+          >
+            <Calculator className="h-3.5 w-3.5" />
+            {t('dashboards.snapshot_match_to_cost', {
+              defaultValue: 'Match to cost',
+            })}
+          </button>
+          <button
+            type="button"
+            onClick={onTakeoff}
+            data-testid={`snapshot-takeoff-${snapshot.id}`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:bg-oe-blue/10 hover:text-oe-blue"
+          >
+            <Ruler className="h-3.5 w-3.5" />
+            {t('dashboards.snapshot_takeoff', { defaultValue: 'Takeoff' })}
+          </button>
+        </div>
       </div>
     </Card>
   );
