@@ -634,6 +634,7 @@ function MarkupDetail({
   siblings,
   onNavigate,
   onOpenInDocument,
+  onOpenBoqPosition,
 }: {
   markup: Markup;
   documentName?: string;
@@ -652,6 +653,12 @@ function MarkupDetail({
    * no ``document_id`` (project-level annotation).
    */
   onOpenInDocument?: (markup: Markup) => void;
+  /**
+   * Jumps to the BOQ that this markup is linked to. Only rendered when
+   * ``linked_boq_position_id`` is set, so the previously-dead "Linked to a
+   * BOQ position" text becomes a live navigation control.
+   */
+  onOpenBoqPosition?: (positionId: string) => void;
 }) {
   const { t } = useTranslation();
   const idx = siblings ? siblings.findIndex((m) => m.id === markup.id) : -1;
@@ -776,11 +783,26 @@ function MarkupDetail({
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide mb-0.5">
             {t('markups.linked_boq', { defaultValue: 'Linked BOQ Position' })}
           </p>
-          <p className="text-sm text-content-secondary">
-            {markup.linked_boq_position_id
-              ? t('markups.linked_to_boq', { defaultValue: 'Linked to a BOQ position' })
-              : t('markups.not_linked', { defaultValue: 'Not linked' })}
-          </p>
+          {markup.linked_boq_position_id ? (
+            <button
+              type="button"
+              onClick={() =>
+                onOpenBoqPosition?.(markup.linked_boq_position_id as string)
+              }
+              data-testid="markup-open-boq-position"
+              title={t('markups.open_linked_boq_hint', {
+                defaultValue: 'Open the linked BOQ position',
+              })}
+              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium text-oe-blue bg-oe-blue-subtle border border-oe-blue/30 hover:bg-oe-blue/10 transition-colors"
+            >
+              <ExternalLink size={11} />
+              {t('markups.open_linked_boq', { defaultValue: 'Open BOQ position' })}
+            </button>
+          ) : (
+            <p className="text-sm text-content-secondary">
+              {t('markups.not_linked', { defaultValue: 'Not linked' })}
+            </p>
+          )}
         </div>
       </div>
       {markup.metadata && Object.keys(markup.metadata).length > 0 && (
@@ -940,6 +962,7 @@ function MarkupTableRow({
   onNavigate,
   userMap,
   onOpenInDocument,
+  onOpenBoqPosition,
 }: {
   markup: Markup;
   isExpanded: boolean;
@@ -952,6 +975,7 @@ function MarkupTableRow({
   onNavigate?: (id: string) => void;
   userMap: Map<string, AssigneeUser>;
   onOpenInDocument?: (markup: Markup) => void;
+  onOpenBoqPosition?: (positionId: string) => void;
 }) {
   const { t } = useTranslation();
   const TypeIcon = TYPE_ICONS[markup.type] ?? PenTool;
@@ -1089,6 +1113,7 @@ function MarkupTableRow({
               siblings={siblings}
               onNavigate={onNavigate}
               onOpenInDocument={onOpenInDocument}
+              onOpenBoqPosition={onOpenBoqPosition}
             />
           </td>
         </tr>
@@ -1362,6 +1387,15 @@ export function MarkupsPage() {
       el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }, [addToast, t]);
+
+  // Deep-link to the BOQ position a markup is linked to. Closes the
+  // loop the "Linked BOQ Position" detail used to only describe in text.
+  const handleOpenBoqPosition = useCallback(
+    (positionId: string) => {
+      navigate(`/boq?positionId=${encodeURIComponent(positionId)}`);
+    },
+    [navigate],
+  );
 
   // Invalidation. Includes the unified feed so hub-scope mutations appear
   // in the "All annotations" tab without a manual reload.
@@ -1900,6 +1934,7 @@ export function MarkupsPage() {
                           onNavigate={goToMarkup}
                           userMap={userMap}
                           onOpenInDocument={handleOpenInDocument}
+                          onOpenBoqPosition={handleOpenBoqPosition}
                         />
                       ))}
                     </tbody>

@@ -14,6 +14,7 @@ import {
   Send,
   Link2,
   FileText,
+  FileCheck,
   Check,
   File,
 } from 'lucide-react';
@@ -956,6 +957,23 @@ const ContainerRow = React.memo(function ContainerRow({
               <Send size={13} className="mr-1" />
               {t('cde.send_transmittal', { defaultValue: 'Send via Transmittal' })}
             </Button>
+            {/* Submit for approval — hands the container off into the
+                Submittals review workflow with the create flow prefilled,
+                closing the CDE -> Submittal -> Transmittal loop. */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/submittals?create=true&container_id=${container.id}`);
+              }}
+              title={t('cde.submit_for_approval_hint', {
+                defaultValue: 'Raise a submittal for this container',
+              })}
+            >
+              <FileCheck size={13} className="mr-1" />
+              {t('cde.submit_for_approval', { defaultValue: 'Submit for approval' })}
+            </Button>
             {/* History drawer */}
             <Button
               variant="ghost"
@@ -1357,6 +1375,10 @@ export function CDEPage() {
           {
             label: t('nav.project_files', { defaultValue: 'Files' }),
             onClick: () => navigate('/files'),
+          },
+          {
+            label: t('submittals.title', { defaultValue: 'Submittals' }),
+            onClick: () => navigate('/submittals'),
           },
           {
             label: t('files.transmittals.open_log', { defaultValue: 'Transmittal log' }),
