@@ -146,6 +146,11 @@ jobs:
         run: npm run lint
 
       - name: Type check
+        # tsc crossed Node's default heap on 2026-06-06 ("Reached heap limit
+        # Allocation failed"), same growth the Build step hit earlier. Give it
+        # the same 6 GB old-space ceiling.
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: npm run typecheck
 
       - name: Build
