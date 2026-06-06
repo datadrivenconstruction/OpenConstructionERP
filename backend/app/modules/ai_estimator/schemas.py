@@ -388,6 +388,64 @@ class GroupSummary(BaseModel):
         return _serialise_money(v)
 
 
+# ── Multi-pass mapping trace (design 3.3) ─────────────────────────────────
+
+
+class MappingBenchmark(BaseModel):
+    """The rate-sanity benchmark band evaluated for one group's candidates.
+
+    Populated only on the ``rate_sanity`` pass. The band is catalogue-relative
+    (computed from the per-run median rate for the group ``(trade, unit)``); it
+    never holds an absolute price book, only the bounds used to flag outliers.
+    """
+
+    trade: str = ""
+    unit: str = ""
+    # Median-relative bounds (``None`` when there is no usable median, e.g. a
+    # lone candidate). Real floats, never a fabricated placeholder.
+    band_low: float | None = None
+    band_high: float | None = None
+    # How many candidates fell outside the band (flagged, never dropped).
+    outliers: int = 0
+
+
+class MappingPass(BaseModel):
+    """One named pass of the multi-pass mapping pipeline (design 4.3).
+
+    Display-only provenance read from the group ``metadata_.mapping_trace`` the
+    matcher writes. ``pass_`` is the pass name (``semantic`` / ``unit_scale`` /
+    ``rate_sanity``); it is serialised back as ``pass`` to match the stored key
+    and the frontend contract (``pass`` is a Python soft keyword, hence the
+    field alias). ``kept`` / ``dropped`` are candidate counts; ``notes`` is a
+    short human sentence; ``benchmark`` is set only on the rate-sanity pass.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    pass_: str = Field(default="", alias="pass", serialization_alias="pass")
+    kept: int = 0
+    dropped: int = 0
+    notes: str = ""
+    benchmark: MappingBenchmark | None = None
+
+
+class MappingTrace(BaseModel):
+    """The assembled multi-pass mapping log for one matched group (design 3.3).
+
+    Read-only on :class:`GroupDetail`: the matcher writes it to the group
+    ``metadata_.mapping_trace`` so the UI can show "why this rate". ``passes``
+    is the ordered pass log (semantic -> unit/scale -> rate sanity);
+    ``final_method`` is how the top-1 was chosen (``vector`` deterministic,
+    ``llm`` agent-reasoned, ``manual`` when no candidate grounded);
+    ``needs_human_reason`` is set only when every candidate was a benchmark-band
+    outlier so the group was parked for human review.
+    """
+
+    passes: list[MappingPass] = Field(default_factory=list)
+    final_method: str | None = None
+    needs_human_reason: str | None = None
+
+
 class GroupDetail(GroupSummary):
     """Full detail for the per-group slide-over / match-review card.
 
@@ -410,7 +468,9 @@ class GroupDetail(GroupSummary):
     source: str | None = None
     derivation: str | None = None
     assumptions: list[str] = Field(default_factory=list)
-    mapping_trace: dict[str, Any] | None = None
+    # The multi-pass mapping trace (design 3.3), typed so the contract is
+    # explicit; ``None`` until the matcher has run on the group.
+    mapping_trace: MappingTrace | None = None
 
 
 class GroupListResponse(BaseModel):

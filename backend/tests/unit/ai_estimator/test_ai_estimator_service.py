@@ -635,3 +635,151 @@ def test_candidate_out_carries_rate_outlier_flag():
     assert clean["rate_outlier"] is False
     flagged = AiEstimatorService._candidate_out(cand, rate_outlier=True)
     assert flagged["rate_outlier"] is True
+
+
+# ── GroupDetail mapping-trace serialisation (WP4, design 3.3) ──────────────
+#
+# The matcher (WP3) writes the multi-pass trace into the group's free
+# ``metadata_.mapping_trace`` JSON. WP4 surfaces it on GroupDetail as a typed
+# ``MappingTrace`` (passes + final_method + optional needs_human_reason). These
+# pin that serialisation, including the ``pass`` key alias and the defensive
+# read path (a display-only trace must never crash the detail endpoint).
+
+
+class _FakeGroup:
+    """A minimal AiEstimatorGroup-like row carrying what the serialisers read."""
+
+    def __init__(self, metadata_=None, candidates=None):
+        import uuid as _uuid
+
+        self.id = _uuid.uuid4()
+        self.run_id = _uuid.uuid4()
+        self.group_key = "finishes|m2"
+        self.description = "Floor tiling"
+        self.trade = "finishes"
+        self.signature = "finishes|m2"
+        self.element_count = 1
+        self.quantities = {"area": 20.0}
+        self.chosen_unit = "m2"
+        self.chosen_code = "TILE-1"
+        self.unit_rate = "45.00"
+        self.currency = "EUR"
+        self.score = 0.84
+        self.confidence = 0.84
+        self.confidence_band = "high"
+        self.match_method = "vector"
+        self.status = "suggested"
+        self.boq_position_id = None
+        self.sort_order = 0
+        self.element_ids = []
+        self.envelope = {}
+        self.resources = []
+        self.candidates = candidates or []
+        self.confirmed_by = None
+        self.confirmed_at = None
+        self.notes = None
+        self.metadata_ = metadata_ or {}
+
+
+def _three_pass_trace():
+    """The canonical three-pass trace shape the matcher persists."""
+    return {
+        "passes": [
+            {"pass": "semantic", "kept": 2, "dropped": 0, "notes": "2 grounded", "benchmark": None},
+            {"pass": "unit_scale", "kept": 2, "dropped": 1, "notes": "1 demoted", "benchmark": None},
+            {
+                "pass": "rate_sanity",
+                "kept": 2,
+                "dropped": 0,
+                "notes": "1 outlier",
+                "benchmark": {"trade": "finishes", "unit": "m2", "band_low": 0.5, "band_high": 8.0, "outliers": 1},
+            },
+        ],
+        "final_method": "vector",
+    }
+
+
+def test_mapping_trace_out_round_trips_three_named_passes():
+    """A stored three-pass trace serialises into a typed MappingTrace whose
+    passes keep their order, names (via the ``pass`` alias), counts and the
+    rate-sanity benchmark band."""
+    trace = AiEstimatorService._mapping_trace_out(_three_pass_trace())
+    assert trace is not None
+    assert [p.pass_ for p in trace.passes] == ["semantic", "unit_scale", "rate_sanity"]
+    assert trace.passes[1].dropped == 1
+    assert trace.final_method == "vector"
+    # The rate-sanity pass carries the real (median-relative) benchmark band.
+    rs = trace.passes[2]
+    assert rs.benchmark is not None
+    assert rs.benchmark.trade == "finishes"
+    assert rs.benchmark.unit == "m2"
+    assert rs.benchmark.outliers == 1
+
+
+def test_mapping_trace_serialises_pass_key_with_alias_in_json():
+    """The JSON contract uses ``pass`` (not the ``pass_`` field name) for every
+    pass, and emits all five structured keys including a null benchmark."""
+    trace = AiEstimatorService._mapping_trace_out(_three_pass_trace())
+    dumped = trace.model_dump(mode="json", by_alias=True)
+    names = [p["pass"] for p in dumped["passes"]]
+    assert names == ["semantic", "unit_scale", "rate_sanity"]
+    for p in dumped["passes"]:
+        assert {"pass", "kept", "dropped", "notes", "benchmark"} <= set(p)
+    # A pass with no benchmark still emits the key (as null), never omits it.
+    assert dumped["passes"][0]["benchmark"] is None
+
+
+def test_mapping_trace_out_carries_needs_human_reason():
+    """When every candidate was a benchmark outlier the matcher parks the group
+    and records the reason; the trace surfaces it read-only."""
+    raw = _three_pass_trace()
+    raw["needs_human_reason"] = "every candidate rate is a benchmark-band outlier"
+    raw["final_method"] = "manual"
+    trace = AiEstimatorService._mapping_trace_out(raw)
+    assert trace is not None
+    assert trace.final_method == "manual"
+    assert trace.needs_human_reason == "every candidate rate is a benchmark-band outlier"
+
+
+@pytest.mark.parametrize("raw", [None, {}, "not-a-dict", 42, []])
+def test_mapping_trace_out_is_none_for_unmatched_or_junk(raw):
+    """An absent / empty / non-dict trace yields None (the group is not matched
+    yet, or the stored provenance is unusable) - never an error."""
+    assert AiEstimatorService._mapping_trace_out(raw) is None
+
+
+def test_mapping_trace_out_degrades_on_malformed_trace():
+    """A structurally-broken stored trace is dropped to None rather than ever
+    crashing the detail view (display-only provenance is best-effort)."""
+    # ``passes`` must be a list of objects; a string here is unparseable.
+    bad = {"passes": "totally-broken", "final_method": "vector"}
+    assert AiEstimatorService._mapping_trace_out(bad) is None
+
+
+def test_group_to_detail_surfaces_typed_mapping_trace():
+    """group_to_detail exposes the multi-pass trace as a typed MappingTrace read
+    from metadata_, alongside the per-candidate rate_outlier flag."""
+    service = AiEstimatorService.__new__(AiEstimatorService)
+    candidates = [
+        AiEstimatorService._candidate_out(_FakeCandidate("TILE-1", "m2", "45.00", score=0.84)),
+        AiEstimatorService._candidate_out(_FakeCandidate("OUT", "m2", "6000.00", score=0.90), rate_outlier=True),
+    ]
+    grp = _FakeGroup(metadata_={"mapping_trace": _three_pass_trace(), "source": "file"}, candidates=candidates)
+
+    detail = service.group_to_detail(grp)
+
+    assert detail.mapping_trace is not None
+    assert [p.pass_ for p in detail.mapping_trace.passes] == ["semantic", "unit_scale", "rate_sanity"]
+    assert detail.source == "file"
+    # The outlier candidate's flag rode through onto the detail.
+    flags = {c.code: c.rate_outlier for c in detail.candidates}
+    assert flags == {"TILE-1": False, "OUT": True}
+
+
+def test_group_to_detail_omits_trace_until_matched():
+    """A group with no mapping_trace in metadata_ (not yet matched) reports None,
+    keeping the field honest rather than fabricating an empty trace."""
+    service = AiEstimatorService.__new__(AiEstimatorService)
+    detail = service.group_to_detail(_FakeGroup(metadata_={"source": "dialogue"}))
+    assert detail.mapping_trace is None
+    assert detail.source == "dialogue"
