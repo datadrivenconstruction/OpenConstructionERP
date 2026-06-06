@@ -101,13 +101,13 @@
     "mobile_modules_title": "17 innebygde moduler",
     "headline": "<span class=\"word\"><span>Driv</span></span> <span class=\"word\"><span>hele</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>bygge</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>prosjektet</span></span>",
     "download_label": "Eller bare last ned den gratis skrivebordsappen, ingen Python, ingen Docker, ingenting å sette opp:",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Last ned skrivebordsappen",
+    "dl_btn_windows": "Last ned for Windows",
+    "dl_btn_macos": "Last ned for macOS",
+    "dl_btn_linux": "Last ned for Linux",
+    "dl_btn_sub": "Gratis - ingen Python, ingen Docker, ingenting å sette opp",
+    "all_platforms": "Alle plattformer",
+    "float_cta": "Last ned"
   },
   "final_cta": {
     "title_line1": "Slutt å kjempe med verktøyene dine.",
@@ -116,8 +116,8 @@
     "sub": "Installer med én kommando. Kjør det på din laptop, VPS eller i skyen du selv velger. Selvhost for alltid, eller la oss ta det.",
     "btn_install": "Installer nå",
     "btn_star": "Gi stjerne på GitHub",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Last ned appen",
+    "btn_download_sub": "Windows, macOS, Linux - gratis og åpen kildekode"
   },
   "sections": {
     "community_title": "Repoet, åpent for alle.",

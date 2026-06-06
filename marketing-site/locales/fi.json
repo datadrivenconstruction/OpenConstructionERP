@@ -101,13 +101,13 @@
     "mobile_modules_title": "17 sisäänrakennettua moduulia",
     "headline": "<span class=\"word\"><span>Ohjaa</span></span> <span class=\"word\"><span>koko</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>rakennus</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projektia</span></span>",
     "download_label": "Tai lataa vain ilmainen työpöytäsovellus, ei Pythonia, ei Dockeria, ei mitään asennettavaa:",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Lataa työpöytäsovellus",
+    "dl_btn_windows": "Lataa Windowsille",
+    "dl_btn_macos": "Lataa macOS:lle",
+    "dl_btn_linux": "Lataa Linuxille",
+    "dl_btn_sub": "Ilmainen - ei Pythonia, ei Dockeria, ei mitään määritettävää",
+    "all_platforms": "Kaikki alustat",
+    "float_cta": "Lataa"
   },
   "final_cta": {
     "title_line1": "Lopeta taistelu työkalujesi kanssa.",
@@ -116,8 +116,8 @@
     "sub": "Asenna yhdellä komennolla. Aja läppärillä, VPS:llä tai haluamassasi pilvessä. Itse isännöity ikuisesti - tai anna meidän hoitaa se.",
     "btn_install": "Asenna nyt",
     "btn_star": "Tähti GitHubissa",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Lataa sovellus",
+    "btn_download_sub": "Windows, macOS, Linux - ilmainen ja avoin lähdekoodi"
   },
   "sections": {
     "community_title": "Repo avoimesti esillä.",

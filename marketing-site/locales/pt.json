@@ -101,13 +101,13 @@
     "mobile_modules_title": "17 módulos integrados",
     "headline": "<span class=\"word\"><span>Gerencie</span></span> <span class=\"word\"><span>todo</span></span> <span class=\"word\"><span>o</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projeto</span></span> <span class=\"word\"><span>de</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>construção</span></span>",
     "download_label": "Ou simplesmente baixe o app gratuito para desktop, sem Python, sem Docker, nada para configurar:",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Baixar o app de desktop",
+    "dl_btn_windows": "Baixar para Windows",
+    "dl_btn_macos": "Baixar para macOS",
+    "dl_btn_linux": "Baixar para Linux",
+    "dl_btn_sub": "Grátis - sem Python, sem Docker, nada para configurar",
+    "all_platforms": "Todas as plataformas",
+    "float_cta": "Baixar"
   },
   "final_cta": {
     "title_line1": "Pare de lutar com as suas ferramentas.",
@@ -116,8 +116,8 @@
     "sub": "Instale com um só comando. Execute no portátil, num VPS ou na cloud à sua escolha. Auto-hospede para sempre, ou deixe-nos fazê-lo por si.",
     "btn_install": "Instalar agora",
     "btn_star": "Dar star no GitHub",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Baixar o app",
+    "btn_download_sub": "Windows, macOS, Linux - grátis e de código aberto"
   },
   "sections": {
     "community_title": "O repositório, à vista de todos.",

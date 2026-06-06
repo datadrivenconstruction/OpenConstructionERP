@@ -101,13 +101,13 @@
     "mobile_modules_title": "17 inbyggda moduler",
     "headline": "<span class=\"word\"><span>Driv</span></span> <span class=\"word\"><span>hela</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>bygg</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projektet</span></span>",
     "download_label": "Eller ladda bara ner den kostnadsfria skrivbordsappen, ingen Python, ingen Docker, inget att installera:",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Ladda ner skrivbordsappen",
+    "dl_btn_windows": "Ladda ner för Windows",
+    "dl_btn_macos": "Ladda ner för macOS",
+    "dl_btn_linux": "Ladda ner för Linux",
+    "dl_btn_sub": "Gratis - ingen Python, ingen Docker, inget att konfigurera",
+    "all_platforms": "Alla plattformar",
+    "float_cta": "Ladda ner"
   },
   "final_cta": {
     "title_line1": "Sluta kämpa mot dina verktyg.",
@@ -116,8 +116,8 @@
     "sub": "Installera med ett kommando. Kör på din laptop, VPS eller molnet du väljer. Egenhosta för evigt, eller låt oss sköta det.",
     "btn_install": "Installera nu",
     "btn_star": "Stjärnmärk på GitHub",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Ladda ner appen",
+    "btn_download_sub": "Windows, macOS, Linux - gratis och öppen källkod"
   },
   "sections": {
     "community_title": "Repot, öppet för alla.",

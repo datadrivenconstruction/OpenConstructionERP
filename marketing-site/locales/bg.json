@@ -101,13 +101,13 @@
     "mobile_modules_title": "17 вградени модула",
     "headline": "<span class=\"word\"><span>Управлявайте</span></span> <span class=\"word\"><span>целия</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>строителен</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>проект</span></span>",
     "download_label": "Или просто изтеглете безплатното десктоп приложение, без Python, без Docker, нищо за настройка:",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Изтеглете десктоп приложението",
+    "dl_btn_windows": "Изтеглете за Windows",
+    "dl_btn_macos": "Изтеглете за macOS",
+    "dl_btn_linux": "Изтеглете за Linux",
+    "dl_btn_sub": "Безплатно - без Python, без Docker, нищо за настройване",
+    "all_platforms": "Всички платформи",
+    "float_cta": "Изтегляне"
   },
   "final_cta": {
     "title_line1": "Спрете да се борите с инструментите си.",
@@ -116,8 +116,8 @@
     "sub": "Инсталирайте с една команда. Работи на лаптопа ви, VPS или облака по ваш избор. Self-host завинаги или ние ще го направим вместо вас.",
     "btn_install": "Инсталирайте сега",
     "btn_star": "Звезда в GitHub",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Изтеглете приложението",
+    "btn_download_sub": "Windows, macOS, Linux - безплатно и с отворен код"
   },
   "sections": {
     "community_title": "Репото, отворено за всички.",
