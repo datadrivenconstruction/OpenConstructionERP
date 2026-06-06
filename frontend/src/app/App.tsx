@@ -1010,8 +1010,8 @@ export default function App() {
         <Route path="/projects/:projectId/payroll" element={<P title="Payroll"><PayrollPage /></P>} />
         <Route path="/daily-diary" element={<P title="Daily Diary"><DailyDiaryPage /></P>} />
         <Route path="/projects/:projectId/daily-diary" element={<P title="Daily Diary"><DailyDiaryPage /></P>} />
-        <Route path="/portal" element={<P title="Subcontractor Portal"><PortalPage /></P>} />
-        <Route path="/projects/:projectId/portal" element={<P title="Subcontractor Portal"><PortalPage /></P>} />
+        <Route path="/portal" element={<P title="Client & Partner Portal"><PortalPage /></P>} />
+        <Route path="/projects/:projectId/portal" element={<P title="Client & Partner Portal"><PortalPage /></P>} />
         <Route path="/resources" element={<P title="Resources & Crew"><ResourcesPage /></P>} />
         <Route path="/projects/:projectId/resources" element={<P title="Resources & Crew"><ResourcesPage /></P>} />
         <Route path="/portfolio/capacity" element={<P title="Capacity Planning"><CapacityPlanningPage /></P>} />
