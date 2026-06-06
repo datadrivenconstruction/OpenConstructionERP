@@ -1504,16 +1504,20 @@ export function QuickEstimatePage() {
   const queryClient = useQueryClient();
 
   // Active tab — read initial value from ?tab= URL param
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const routeLocation = useLocation();
   const isCadRoute = routeLocation.pathname === '/data-explorer';
   const initialTab = isCadRoute ? 'cad' : ((searchParams.get('tab') as InputTab | null) ?? 'text');
   const [activeTab, setActiveTab] = useState<InputTab>(
     ['text', 'photo', 'pdf', 'excel', 'cad', 'paste'].includes(initialTab) ? initialTab : 'text',
   );
+  // ?q=<text> deep-link (e.g. "Use in Quick Estimate" from the AI Advisor,
+  // CONN-81) pre-fills the free-text estimate input. We never auto-submit: the
+  // user reviews and runs it themselves. Read once for the initial value.
+  const queryFromUrl = searchParams.get('q') ?? '';
 
   // Text form state
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(queryFromUrl);
   const [location, setLocation] = useState('');
   const [currency, setCurrency] = useState('');
   const [standard, setStandard] = useState('');
@@ -1563,6 +1567,21 @@ export function QuickEstimatePage() {
   // the history rows can show a spinner while the full job is fetched.
   const [historyReloadKey, setHistoryReloadKey] = useState(0);
   const [reopening, setReopening] = useState(false);
+
+  // The ?q seed has been copied into `description`; strip the param so a reload
+  // or a save-history reopen does not re-pin it over the user's edits.
+  useEffect(() => {
+    if (!queryFromUrl) return;
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('q');
+        return next;
+      },
+      { replace: true },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // a11y refs / ids — used by the textarea label, the disabled-submit
   // hint (aria-describedby), the tablist (role=tab + aria-controls), and

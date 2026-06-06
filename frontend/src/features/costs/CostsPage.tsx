@@ -475,9 +475,13 @@ export function CostsPage() {
   // user-driven changes after that.
   const [searchParams, setSearchParams] = useSearchParams();
   const regionFromUrl = searchParams.get('region') ?? '';
+  // ?q=<text> deep-link from the AI Advisor source-code links (CONN-81) -
+  // pre-fills the search box with the CWICR code so the user lands on that
+  // item. Read once on mount and then stripped, like ?region.
+  const queryFromUrl = searchParams.get('q') ?? '';
 
-  const [query, setQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [query, setQuery] = useState(queryFromUrl);
+  const [debouncedQuery, setDebouncedQuery] = useState(queryFromUrl);
   const [unit, setUnit] = useState('');
   const [source, setSource] = useState('');
   const [category, setCategory] = useState('');
@@ -505,15 +509,25 @@ export function CostsPage() {
   const [recentItems, setRecentItems] = useState<RecentItem[]>(() => loadRecent());
   const [specialTab, setSpecialTab] = useState<'' | 'favourites' | 'recent'>('');
 
-  // One-shot: if mounted with ``?region=X``, push it to the global store
-  // so the tab strip highlights it, then strip the param so a reload
-  // doesn't keep forcing the filter back over user changes.
+  // One-shot: if mounted with ``?region=X`` and/or ``?q=text``, apply them
+  // (push the region to the global store so the tab strip highlights it; the
+  // query is already seeded into state above), then strip the params so a
+  // reload doesn't keep forcing the filter back over user changes.
   useEffect(() => {
-    if (!regionFromUrl) return;
-    setActiveRegion(regionFromUrl);
-    setRegion(regionFromUrl);
-    searchParams.delete('region');
-    setSearchParams(searchParams, { replace: true });
+    if (!regionFromUrl && !queryFromUrl) return;
+    if (regionFromUrl) {
+      setActiveRegion(regionFromUrl);
+      setRegion(regionFromUrl);
+    }
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('region');
+        next.delete('q');
+        return next;
+      },
+      { replace: true },
+    );
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

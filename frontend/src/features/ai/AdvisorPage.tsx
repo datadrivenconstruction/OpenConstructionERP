@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { Breadcrumb, AIDisclaimerBanner, DismissibleInfo, IntroRichText } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useLLMRun } from './hooks/useLLMRun';
@@ -394,14 +394,35 @@ function AiToolsStrip() {
 
 /* ── Main Component ──────────────────────────────────────────────── */
 
+// Region tokens the selector below offers; a ?region deep-link is only honoured
+// when it matches one of these so the <select> always renders a real option.
+const ADVISOR_REGION_OPTIONS = new Set([
+  'DE_BERLIN',
+  'UK_LONDON',
+  'USA_USD',
+  'CA_TORONTO',
+  'FR_PARIS',
+  'ES_BARCELONA',
+  'AE_DUBAI',
+  'SA_RIYADH',
+]);
+
 export function AdvisorPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Deep-link prefill (e.g. "Benchmark this rate" from the Cost Database,
+  // CONN-81): ?q seeds the question, ?region pre-selects the region. We never
+  // auto-send - the user reviews and submits. Read once for the initial state.
+  const questionFromUrl = searchParams.get('q') ?? '';
+  const regionFromUrl = searchParams.get('region') ?? '';
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(questionFromUrl);
   const [aiConfigured, setAiConfigured] = useState<boolean | null>(null); // null = loading
   const [aiProvider, setAiProvider] = useState<string>('');
-  const [region, setRegion] = useState('');
+  const [region, setRegion] = useState(
+    regionFromUrl && ADVISOR_REGION_OPTIONS.has(regionFromUrl) ? regionFromUrl : '',
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
@@ -500,6 +521,22 @@ export function AdvisorPage() {
         setAiProvider(resolveActiveProvider(s, configured));
       })
       .catch(() => setAiConfigured(false));
+  }, []);
+
+  // The ?q / ?region seeds have been copied into state above; strip them so a
+  // reload does not re-pin the prefill over the user's edits.
+  useEffect(() => {
+    if (!questionFromUrl && !regionFromUrl) return;
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('q');
+        next.delete('region');
+        return next;
+      },
+      { replace: true },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const scrollToBottom = useCallback(() => {
