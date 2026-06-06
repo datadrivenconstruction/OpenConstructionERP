@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
@@ -26,6 +26,7 @@ import {
   ArrowUpCircle,
   ListChecks,
   Trash2,
+  ExternalLink,
 } from 'lucide-react';
 import {
   Button,
@@ -85,6 +86,8 @@ import {
   cancelCAPA,
   setCAPAFiveWhys,
   verifyCAPAEffectiveness,
+  fetchSafetyIncidents,
+  type SafetyIncidentOption,
   type IncidentInvestigation,
   type JobSafetyAnalysis,
   type PermitToWork,
@@ -139,6 +142,226 @@ const inputCls =
 const textareaCls =
   'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
 
+/* ── Shared safety-incident picker ──────────────────────────────────────
+ * Replaces the raw-UUID field on the investigation / CAPA-source flows with a
+ * real dropdown of the project's safety incidents (the Safety module is the
+ * system of record). The selected id becomes the investigation's incident_ref
+ * or the CAPA's source_ref, so the new record links back to what raised it.
+ */
+function useSafetyIncidents(projectId: string, enabled = true) {
+  return useQuery({
+    queryKey: ['hse-safety-incidents', projectId],
+    queryFn: () => fetchSafetyIncidents(projectId),
+    select: (d) => normalizeListResponse<SafetyIncidentOption>(d),
+    enabled: enabled && !!projectId,
+    staleTime: 30_000,
+  });
+}
+
+/** Human-readable one-line label for a safety incident option. */
+function incidentOptionLabel(it: SafetyIncidentOption): string {
+  const head = it.incident_number || it.id.slice(0, 8);
+  const type = (it.incident_type || '').replace(/_/g, ' ');
+  const date = it.incident_date ? ` · ${it.incident_date}` : '';
+  return `${head}${type ? ` · ${type}` : ''}${date}`;
+}
+
+function SafetyIncidentPicker({
+  projectId,
+  value,
+  onChange,
+  required,
+  emptyHint,
+}: {
+  projectId: string;
+  value: string;
+  onChange: (id: string) => void;
+  required?: boolean;
+  emptyHint?: string;
+}) {
+  const { t } = useTranslation();
+  const { data, isLoading, isError } = useSafetyIncidents(projectId);
+  const incidents = data ?? [];
+
+  if (isError) {
+    // Fall back to a free-text id field so the flow never dead-ends if the
+    // Safety endpoint is unavailable.
+    return (
+      <input
+        className={inputCls}
+        value={value}
+        placeholder={t('hse_advanced.incident_ref_placeholder', {
+          defaultValue: 'UUID of the linked safety incident',
+        })}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
+  }
+
+  if (!isLoading && incidents.length === 0) {
+    return (
+      <p className="text-sm text-content-tertiary">
+        {emptyHint ??
+          t('hse_advanced.no_incidents_to_link', {
+            defaultValue:
+              'No safety incidents recorded for this project yet. Report one in the Safety module first.',
+          })}
+      </p>
+    );
+  }
+
+  return (
+    <select
+      className={inputCls}
+      value={value}
+      disabled={isLoading}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      <option value="">
+        {required
+          ? t('hse_advanced.select_incident_required', {
+              defaultValue: 'Select an incident…',
+            })
+          : t('hse_advanced.select_incident_none', { defaultValue: 'No linked incident' })}
+      </option>
+      {incidents.map((it) => (
+        <option key={it.id} value={it.id}>
+          {incidentOptionLabel(it)}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+/* CAPA source types that point at a concrete record we can pick + deep-link.
+ * "observation" has no first-class register here, so it carries no source_ref. */
+const CAPA_SOURCE_TYPES = ['observation', 'audit', 'incident', 'jsa', 'permit'] as const;
+
+/** Route a CAPA source (type + ref) to the page that owns it. */
+function capaSourceLink(sourceType: string, sourceRef: string): string | null {
+  if (!sourceRef) return null;
+  switch (sourceType) {
+    case 'incident':
+      return '/safety?tab=incidents';
+    case 'jsa':
+      return '/hse-advanced?tab=jsa';
+    case 'permit':
+      return '/hse-advanced?tab=permits';
+    case 'audit':
+      return '/hse-advanced?tab=audits';
+    default:
+      return null;
+  }
+}
+
+/**
+ * Dependent source-ref picker: for incident/jsa/permit/audit it shows the
+ * matching project register so the CAPA links back to a real record instead of
+ * a pasted UUID. "observation" needs no ref.
+ */
+function CapaSourceRefPicker({
+  projectId,
+  sourceType,
+  value,
+  onChange,
+}: {
+  projectId: string;
+  sourceType: string;
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  const { t } = useTranslation();
+
+  // Each source type fetches its own register; only the active one is enabled
+  // so we never over-fetch. Hooks stay unconditional (rule-of-hooks safe).
+  const jsaQ = useQuery({
+    queryKey: ['hse-jsas', projectId],
+    queryFn: () => fetchJSAs(projectId),
+    select: (d) => normalizeListResponse<JobSafetyAnalysis>(d),
+    enabled: sourceType === 'jsa' && !!projectId,
+    staleTime: 30_000,
+  });
+  const permitQ = useQuery({
+    queryKey: ['hse-permits', projectId],
+    queryFn: () => fetchPermits(projectId),
+    select: (d) => normalizeListResponse<PermitToWork>(d),
+    enabled: sourceType === 'permit' && !!projectId,
+    staleTime: 30_000,
+  });
+  const auditQ = useQuery({
+    queryKey: ['hse-audits', projectId],
+    queryFn: () => fetchAudits(projectId),
+    select: (d) => normalizeListResponse<SafetyAudit>(d),
+    enabled: sourceType === 'audit' && !!projectId,
+    staleTime: 30_000,
+  });
+
+  if (sourceType === 'observation') {
+    return (
+      <p className="text-xs text-content-tertiary">
+        {t('hse_advanced.capa_no_source_ref', {
+          defaultValue: 'Observations are recorded in the Safety module - no record to link here.',
+        })}
+      </p>
+    );
+  }
+
+  if (sourceType === 'incident') {
+    return (
+      <SafetyIncidentPicker
+        projectId={projectId}
+        value={value}
+        onChange={onChange}
+        emptyHint={t('hse_advanced.no_incidents_to_link', {
+          defaultValue:
+            'No safety incidents recorded for this project yet. Report one in the Safety module first.',
+        })}
+      />
+    );
+  }
+
+  const options: { id: string; label: string }[] =
+    sourceType === 'jsa'
+      ? (jsaQ.data ?? []).map((j) => ({
+          id: j.id,
+          label: j.task_description.slice(0, 60) || j.id.slice(0, 8),
+        }))
+      : sourceType === 'permit'
+        ? (permitQ.data ?? []).map((p) => ({
+            id: p.id,
+            label: `${p.permit_number || p.id.slice(0, 8)} · ${p.permit_type.replace(/_/g, ' ')}`,
+          }))
+        : (auditQ.data ?? []).map((a) => ({
+            id: a.id,
+            label: `${a.audit_type.replace(/_/g, ' ')} · ${a.conducted_at.slice(0, 10)}`,
+          }));
+
+  const isLoading = jsaQ.isLoading || permitQ.isLoading || auditQ.isLoading;
+
+  if (!isLoading && options.length === 0) {
+    return (
+      <p className="text-xs text-content-tertiary">
+        {t('hse_advanced.capa_no_source_records', {
+          defaultValue: 'No matching records for this source type yet.',
+        })}
+      </p>
+    );
+  }
+
+  return (
+    <select className={inputCls} value={value} disabled={isLoading} onChange={(e) => onChange(e.target.value)}>
+      <option value="">
+        {t('hse_advanced.capa_select_source', { defaultValue: 'No linked record' })}
+      </option>
+      {options.map((o) => (
+        <option key={o.id} value={o.id}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function HSEAdvancedPage() {
@@ -149,7 +372,35 @@ export function HSEAdvancedPage() {
   const projectName = useProjectContextStore((s) => s.activeProjectName);
   const projectId = routeProjectId || activeProjectId || '';
 
-  const [tab, setTab] = useState<HSETab>('incidents');
+  // Deep-link support: Safety's "Investigate" row action lands here with
+  // ?tab=incidents&action=investigate&incident_id=<id> so the investigation
+  // modal opens pre-filled. The tab param also lets any sibling jump straight
+  // to a section. We read it once on mount, sync the tab, then strip the
+  // params (replace) so a refresh / back-nav does not re-trigger the action.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const initialTab: HSETab = HSE_TAB_IDS.includes(tabParam as HSETab)
+    ? (tabParam as HSETab)
+    : 'incidents';
+
+  const [tab, setTab] = useState<HSETab>(initialTab);
+  const [incidentDeepLink, setIncidentDeepLink] = useState<string | null>(() =>
+    searchParams.get('action') === 'investigate'
+      ? searchParams.get('incident_id') ?? ''
+      : null,
+  );
+
+  useEffect(() => {
+    if (!searchParams.get('action') && !searchParams.get('tab')) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('tab');
+    next.delete('action');
+    next.delete('incident_id');
+    setSearchParams(next, { replace: true });
+    // Run once after mount — the captured initial state above drives behaviour.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const onTabKeyDown = useTabKeyboardNav<HSETab>({
     ids: HSE_TAB_IDS,
     activeId: tab,
@@ -284,7 +535,13 @@ export function HSEAdvancedPage() {
           id={`hse-panel-${tab}`}
           aria-labelledby={`hse-tab-${tab}`}
         >
-          {tab === 'incidents' && <IncidentsTab projectId={projectId} />}
+          {tab === 'incidents' && (
+            <IncidentsTab
+              projectId={projectId}
+              initialInvestigateIncidentId={incidentDeepLink}
+              onConsumeDeepLink={() => setIncidentDeepLink(null)}
+            />
+          )}
           {tab === 'jsa' && <JSATab projectId={projectId} />}
           {tab === 'permits' && <PermitsTab projectId={projectId} />}
           {tab === 'toolbox' && <ToolboxTab projectId={projectId} />}
@@ -703,7 +960,17 @@ function ModalShell({
 
 /* ── Incidents Tab ───────────────────────────────────────────────────── */
 
-function IncidentsTab({ projectId }: { projectId: string }) {
+function IncidentsTab({
+  projectId,
+  initialInvestigateIncidentId,
+  onConsumeDeepLink,
+}: {
+  projectId: string;
+  /** When set (from a Safety "Investigate" deep-link), open the create modal
+   *  pre-filled with this incident id. null means no deep-link. */
+  initialInvestigateIncidentId?: string | null;
+  onConsumeDeepLink?: () => void;
+}) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -718,6 +985,16 @@ function IncidentsTab({ projectId }: { projectId: string }) {
     method: '5_whys' as IncidentInvestigation['method'],
     findings: '',
   });
+
+  // Honour a one-shot deep link from Safety: open the modal pre-filled, then
+  // tell the parent to drop the captured id so it fires only once.
+  useEffect(() => {
+    if (initialInvestigateIncidentId == null) return;
+    setForm((f) => ({ ...f, incident_ref: initialInvestigateIncidentId }));
+    setShowCreate(true);
+    onConsumeDeepLink?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialInvestigateIncidentId]);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['hse-investigations', projectId],
@@ -903,16 +1180,14 @@ function IncidentsTab({ projectId }: { projectId: string }) {
         >
           <div>
             <label className="block text-sm font-medium text-content-primary mb-1.5">
-              {t('hse_advanced.incident_ref', { defaultValue: 'Incident reference (ID)' })}{' '}
+              {t('hse_advanced.incident_ref', { defaultValue: 'Linked safety incident' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
-            <input
-              className={inputCls}
+            <SafetyIncidentPicker
+              projectId={projectId}
               value={form.incident_ref}
-              placeholder={t('hse_advanced.incident_ref_placeholder', {
-                defaultValue: 'UUID of the linked safety incident',
-              })}
-              onChange={(e) => setForm((f) => ({ ...f, incident_ref: e.target.value }))}
+              required
+              onChange={(id) => setForm((f) => ({ ...f, incident_ref: id }))}
             />
           </div>
           <div>
@@ -3257,6 +3532,10 @@ function AuditDetailDrawer({
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [showAddFinding, setShowAddFinding] = useState(false);
+  // When set, opens the shared Create CAPA dialog seeded from this finding,
+  // with the source locked to the originating audit (source_type=audit,
+  // source_ref=audit.id). The finding description becomes the CAPA title.
+  const [capaFromFinding, setCapaFromFinding] = useState<AuditFinding | null>(null);
   const [findingForm, setFindingForm] = useState<{
     item_description: string;
     category: AuditFindingCategory;
@@ -3474,7 +3753,7 @@ function AuditDetailDrawer({
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-content-primary">{f.item_description}</div>
-                  <div className="flex items-center gap-1.5 mt-1">
+                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                     <Badge variant="neutral" size="sm">
                       {t(`hse_advanced.finding_cat_${f.category}`, {
                         defaultValue: f.category,
@@ -3483,6 +3762,22 @@ function AuditDetailDrawer({
                     <Badge variant={FINDING_SEVERITY_COLORS[f.severity]} size="sm">
                       {t(`hse_advanced.finding_sev_${f.severity}`, { defaultValue: f.severity })}
                     </Badge>
+                    {f.corrective_action_ref ? (
+                      <Badge variant="success" size="sm">
+                        {t('hse_advanced.finding_has_capa', { defaultValue: 'CAPA raised' })}
+                      </Badge>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setCapaFromFinding(f)}
+                        className="inline-flex items-center gap-1 text-xs text-oe-blue-text hover:underline"
+                      >
+                        <Wrench size={12} />
+                        {t('hse_advanced.create_capa_from_finding', {
+                          defaultValue: 'Create CAPA',
+                        })}
+                      </button>
+                    )}
                   </div>
                 </div>
                 {!isCompleted && (
@@ -3501,6 +3796,23 @@ function AuditDetailDrawer({
           </ul>
         )}
       </div>
+
+      {capaFromFinding && (
+        <CreateCAPADialog
+          projectId={projectId}
+          lockSource
+          initial={{
+            source_type: 'audit',
+            source_ref: item.id,
+            title: capaFromFinding.item_description.slice(0, 200),
+            description: t('hse_advanced.capa_from_finding_desc', {
+              defaultValue: 'Corrective action for audit finding: {{finding}}',
+              finding: capaFromFinding.item_description,
+            }),
+          }}
+          onClose={() => setCapaFromFinding(null)}
+        />
+      )}
 
       {showAddFinding && (
         <ModalShell
@@ -3645,55 +3957,15 @@ function CAPATab({ projectId }: { projectId: string }) {
 
 function CAPALegacyTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
-  const qc = useQueryClient();
-  const addToast = useToastStore((s) => s.addToast);
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [detail, setDetail] = useState<CorrectiveAction | null>(null);
   const [filter, setFilter] = useState<'all' | 'open' | 'closed'>('open');
-  // CAPACreate requires project_id + source_type + title + target_date.
-  const [form, setForm] = useState({
-    source_type: 'observation',
-    title: '',
-    description: '',
-    target_date: new Date().toISOString().slice(0, 10),
-  });
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['hse-capa', projectId],
     queryFn: () => fetchCAPAs(projectId),
     select: (d) => normalizeListResponse<CorrectiveAction>(d),
-  });
-
-  const createMut = useMutation({
-    mutationFn: () =>
-      createCAPA({
-        project_id: projectId,
-        source_type: form.source_type,
-        title: form.title,
-        description: form.description || undefined,
-        target_date: form.target_date,
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['hse-capa', projectId] });
-      setShowCreate(false);
-      setForm({
-        source_type: 'observation',
-        title: '',
-        description: '',
-        target_date: new Date().toISOString().slice(0, 10),
-      });
-      addToast({
-        type: 'success',
-        title: t('hse_advanced.capa_created', { defaultValue: 'CAPA created' }),
-      });
-    },
-    onError: (e) =>
-      addToast({
-        type: 'error',
-        title: t('hse_advanced.capa_failed', { defaultValue: 'Failed to create CAPA' }),
-        message: getErrorMessage(e),
-      }),
   });
 
   // CAPA status enum: open | in_progress | completed | overdue | cancelled.
@@ -3736,7 +4008,7 @@ function CAPALegacyTab({ projectId }: { projectId: string }) {
         title={t('hse_advanced.no_capa', { defaultValue: 'No corrective actions yet' })}
         description={t('hse_advanced.no_capa_desc', {
           defaultValue:
-            'Corrective and Preventive Actions track what was done to fix an issue and prevent recurrence. They link back to incidents, audits or NCRs.',
+            'Corrective and Preventive Actions track what was done to fix an issue and prevent recurrence. They link back to a safety incident, JSA, permit, audit or observation.',
         })}
         action={{
           label: t('hse_advanced.new_capa', { defaultValue: 'New CAPA' }),
@@ -3871,86 +4143,7 @@ function CAPALegacyTab({ projectId }: { projectId: string }) {
       </Card>
 
       {showCreate && (
-        <ModalShell
-          title={t('hse_advanced.new_capa', { defaultValue: 'New CAPA' })}
-          onClose={() => setShowCreate(false)}
-          footer={
-            <>
-              <Button variant="ghost" onClick={() => setShowCreate(false)}>
-                {t('common.cancel', { defaultValue: 'Cancel' })}
-              </Button>
-              <Button
-                variant="primary"
-                disabled={!form.title.trim() || !form.description.trim() || createMut.isPending}
-                onClick={() => createMut.mutate()}
-              >
-                {t('common.create', { defaultValue: 'Create' })}
-              </Button>
-            </>
-          }
-        >
-          <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
-              {t('common.title', { defaultValue: 'Title' })}{' '}
-              <span className="text-semantic-error">*</span>
-            </label>
-            <input
-              className={inputCls}
-              value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
-              {t('common.description', { defaultValue: 'Description' })}{' '}
-              <span className="text-semantic-error">*</span>
-            </label>
-            <textarea
-              rows={3}
-              className={textareaCls}
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            />
-          </div>
-          {/* api-HIGH fix: the backend CAPACreate has no assigned_to/due_date —
-              the form state only carries source_type + target_date, so the two
-              stray inputs (which referenced non-existent form fields) are
-              replaced by the real source_type select + target_date picker. */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('hse_advanced.source_type', { defaultValue: 'Source' })}
-              </label>
-              <select
-                className={inputCls}
-                value={form.source_type}
-                onChange={(e) => setForm((f) => ({ ...f, source_type: e.target.value }))}
-              >
-                {/* source_type must match the backend enum
-                    ^(incident|jsa|permit|audit|observation)$ — "inspection"
-                    is not accepted and would 422. */}
-                {['observation', 'audit', 'incident', 'jsa', 'permit'].map((s) => (
-                  <option key={s} value={s}>
-                    {t(`hse_advanced.source_type_${s}`, {
-                      defaultValue: s.charAt(0).toUpperCase() + s.slice(1),
-                    })}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('hse_advanced.target_date', { defaultValue: 'Target date' })}
-              </label>
-              <input
-                type="date"
-                className={inputCls}
-                value={form.target_date}
-                onChange={(e) => setForm((f) => ({ ...f, target_date: e.target.value }))}
-              />
-            </div>
-          </div>
-        </ModalShell>
+        <CreateCAPADialog projectId={projectId} onClose={() => setShowCreate(false)} />
       )}
 
       {detail && (
@@ -3961,6 +4154,177 @@ function CAPALegacyTab({ projectId }: { projectId: string }) {
         />
       )}
     </>
+  );
+}
+
+/* ── Create CAPA dialog (shared) ─────────────────────────────────────────
+ * Used by the CAPA tab's "New CAPA" button (full source picker) and by the
+ * audit "Create CAPA" finding shortcut (source locked to the originating
+ * audit). Centralising the create form means source_ref wiring lives in one
+ * place. The backend source_type enum is incident|jsa|permit|audit|observation;
+ * source_ref is the optional UUID of that record.
+ */
+function CreateCAPADialog({
+  projectId,
+  initial,
+  lockSource = false,
+  onClose,
+  onCreated,
+}: {
+  projectId: string;
+  initial?: {
+    source_type?: string;
+    source_ref?: string;
+    title?: string;
+    description?: string;
+  };
+  /** When true the source_type/source_ref come pre-set and are not editable
+   *  (e.g. opened from an audit finding). */
+  lockSource?: boolean;
+  onClose: () => void;
+  onCreated?: () => void;
+}) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const [form, setForm] = useState({
+    source_type: initial?.source_type ?? 'observation',
+    source_ref: initial?.source_ref ?? '',
+    title: initial?.title ?? '',
+    description: initial?.description ?? '',
+    target_date: new Date().toISOString().slice(0, 10),
+  });
+
+  const createMut = useMutation({
+    mutationFn: () =>
+      createCAPA({
+        project_id: projectId,
+        source_type: form.source_type,
+        // "observation" carries no ref; everything else passes the picked id
+        // (or undefined when the user left it blank).
+        source_ref:
+          form.source_type === 'observation' || !form.source_ref ? undefined : form.source_ref,
+        title: form.title,
+        description: form.description || undefined,
+        target_date: form.target_date,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['hse-capa', projectId] });
+      addToast({
+        type: 'success',
+        title: t('hse_advanced.capa_created', { defaultValue: 'CAPA created' }),
+      });
+      onCreated?.();
+      onClose();
+    },
+    onError: (e) =>
+      addToast({
+        type: 'error',
+        title: t('hse_advanced.capa_failed', { defaultValue: 'Failed to create CAPA' }),
+        message: getErrorMessage(e),
+      }),
+  });
+
+  return (
+    <ModalShell
+      title={t('hse_advanced.new_capa', { defaultValue: 'New CAPA' })}
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            disabled={!form.title.trim() || !form.description.trim() || createMut.isPending}
+            onClick={() => createMut.mutate()}
+          >
+            {t('common.create', { defaultValue: 'Create' })}
+          </Button>
+        </>
+      }
+    >
+      <div>
+        <label className="block text-sm font-medium text-content-primary mb-1.5">
+          {t('common.title', { defaultValue: 'Title' })}{' '}
+          <span className="text-semantic-error">*</span>
+        </label>
+        <input
+          className={inputCls}
+          value={form.title}
+          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-content-primary mb-1.5">
+          {t('common.description', { defaultValue: 'Description' })}{' '}
+          <span className="text-semantic-error">*</span>
+        </label>
+        <textarea
+          rows={3}
+          className={textareaCls}
+          value={form.description}
+          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium text-content-primary mb-1.5">
+            {t('hse_advanced.source_type', { defaultValue: 'Source' })}
+          </label>
+          <select
+            className={inputCls}
+            value={form.source_type}
+            disabled={lockSource}
+            onChange={(e) =>
+              // Switching source type clears any previously picked ref.
+              setForm((f) => ({ ...f, source_type: e.target.value, source_ref: '' }))
+            }
+          >
+            {/* source_type must match the backend enum
+                ^(incident|jsa|permit|audit|observation)$. */}
+            {CAPA_SOURCE_TYPES.map((s) => (
+              <option key={s} value={s}>
+                {t(`hse_advanced.source_type_${s}`, {
+                  defaultValue: s.charAt(0).toUpperCase() + s.slice(1),
+                })}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-content-primary mb-1.5">
+            {t('hse_advanced.target_date', { defaultValue: 'Target date' })}
+          </label>
+          <input
+            type="date"
+            className={inputCls}
+            value={form.target_date}
+            onChange={(e) => setForm((f) => ({ ...f, target_date: e.target.value }))}
+          />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-content-primary mb-1.5">
+          {t('hse_advanced.source_record', { defaultValue: 'Linked source record' })}
+        </label>
+        {lockSource ? (
+          <p className="text-sm text-content-secondary">
+            {t('hse_advanced.capa_source_locked', {
+              defaultValue: 'Linked to the originating audit.',
+            })}
+          </p>
+        ) : (
+          <CapaSourceRefPicker
+            projectId={projectId}
+            sourceType={form.source_type}
+            value={form.source_ref}
+            onChange={(id) => setForm((f) => ({ ...f, source_ref: id }))}
+          />
+        )}
+      </div>
+    </ModalShell>
   );
 }
 
@@ -3986,6 +4350,7 @@ function CAPADetailDrawer({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -4190,10 +4555,25 @@ function CAPADetailDrawer({
           <div className="text-xs text-content-tertiary uppercase">
             {t('hse_advanced.source_type', { defaultValue: 'Source' })}
           </div>
-          <div className="text-content-secondary">
-            {t(`hse_advanced.source_type_${item.source_type}`, {
-              defaultValue: item.source_type.replace(/_/g, ' '),
-            })}
+          <div className="text-content-secondary flex items-center gap-2 flex-wrap">
+            <span>
+              {t(`hse_advanced.source_type_${item.source_type}`, {
+                defaultValue: item.source_type.replace(/_/g, ' '),
+              })}
+            </span>
+            {item.source_ref && capaSourceLink(item.source_type, item.source_ref) && (
+              <button
+                type="button"
+                onClick={() => {
+                  const to = capaSourceLink(item.source_type, item.source_ref!);
+                  if (to) navigate(to);
+                }}
+                className="inline-flex items-center gap-1 text-xs text-oe-blue-text hover:underline"
+              >
+                <ExternalLink size={12} />
+                {t('hse_advanced.view_source', { defaultValue: 'View source' })}
+              </button>
+            )}
           </div>
         </div>
         <div>
