@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   useQuery,
   useMutation,
@@ -111,6 +111,7 @@ import {
   updateWarrantyClaim,
   downloadWarrantyClaimPdf,
   listLeads,
+  getLead,
   createLead,
   updateLead,
   deleteLead,
@@ -287,6 +288,16 @@ export function PropertyDevPage() {
   // on a pre-narrowed Warranty view ("Open warranty (3)" → 3 rows).
   const [warrantyStatusPreset, setWarrantyStatusPreset] = useState<string>('');
 
+  // Deep link from Contacts (and elsewhere): /property-dev?tab=leads&leadId=…
+  // or ?tab=buyers&buyerId=…. We honour ?tab= to switch the active tab, and
+  // a leadId/buyerId to open the matching detail drawer. The param set is
+  // read once on mount and cleared with replace so a refresh / share keeps
+  // the user wherever they navigated next. Leads are not development-scoped,
+  // so a leadId resolves directly; buyers resolve against the auto-selected
+  // development's loaded list (best effort).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkConsumedRef = useRef(false);
+
   const developmentsQ = useQuery({
     queryKey: ['propdev', 'developments'],
     queryFn: () => listDevelopments({ limit: 100 }),
@@ -299,6 +310,41 @@ export function PropertyDevPage() {
       if (first) setSelectedDevId(first.id);
     }
   }, [developments, selectedDevId]);
+
+  useEffect(() => {
+    if (deepLinkConsumedRef.current) return;
+    const requestedTab = searchParams.get('tab');
+    const leadId = searchParams.get('leadId');
+    const buyerId = searchParams.get('buyerId');
+    if (!requestedTab && !leadId && !buyerId) return;
+    deepLinkConsumedRef.current = true;
+
+    if (leadId) {
+      setTab('leads');
+      setActiveLeadId(leadId);
+    } else if (buyerId) {
+      setTab('buyers');
+      setActiveBuyerId(buyerId);
+    } else if (
+      requestedTab &&
+      (PROPDEV_TAB_IDS as readonly string[]).includes(requestedTab)
+    ) {
+      setTab(requestedTab as Tab);
+    }
+
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('tab');
+        next.delete('leadId');
+        next.delete('buyerId');
+        return next;
+      },
+      { replace: true },
+    );
+    // Read once on mount; cleared immediately after.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const plotsQ = useQuery({
     queryKey: ['propdev', 'plots', selectedDevId],
@@ -1573,7 +1619,19 @@ function LeadDetailDrawer({
     return ['admin', 'superuser', 'owner', 'manager'].includes(normalized);
   }, [userRole]);
 
-  const lead = leads.find((l) => l.id === leadId);
+  const leadFromList = leads.find((l) => l.id === leadId);
+  // Deep links (e.g. /property-dev?tab=leads&leadId=… from a Contact's
+  // linked-records list) may target a lead that is filtered out of the
+  // currently-loaded development-scoped list. Fall back to a by-id fetch so
+  // the drawer still opens on the exact record. Leads are not strictly
+  // development-bound, so this is safe.
+  const leadFetch = useQuery({
+    queryKey: ['propdev', 'lead', leadId],
+    queryFn: () => getLead(leadId),
+    enabled: !leadFromList && !!leadId,
+    retry: false,
+  });
+  const lead = leadFromList ?? leadFetch.data;
   const [form, setForm] = useState<{
     full_name: string;
     email: string;
@@ -1940,7 +1998,7 @@ function LinkedContactCard({
               })}
             </span>
             <Link
-              to="/contacts"
+              to={`/contacts?contactId=${encodeURIComponent(contactId)}`}
               className="ml-auto inline-flex items-center gap-1 text-xs text-oe-blue hover:underline"
             >
               {t('propdev.open_in_contacts', {
@@ -5995,8 +6053,14 @@ function BuyerDetailDrawer({
                 </li>
               )}
               <li>
+                {/* Scope the Finance jump to this buyer (and plot when set)
+                    so the target can land on the buyer's invoices/payments
+                    once it consumes the params. The query is harmless to a
+                    target that ignores it - it still opens Finance. */}
                 <Link
-                  to="/finance"
+                  to={`/finance?buyer=${encodeURIComponent(buyer.id)}${
+                    plot ? `&plot=${encodeURIComponent(plot.id)}` : ''
+                  }`}
                   className="group flex items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-xs hover:border-oe-blue hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
                 >
                   <span className="flex items-center gap-2">
@@ -6017,8 +6081,12 @@ function BuyerDetailDrawer({
                 </Link>
               </li>
               <li>
+                {/* Carry plot + buyer so Contracts can pre-filter to this
+                    sale once it reads the params. */}
                 <Link
-                  to="/contracts"
+                  to={`/contracts?buyer=${encodeURIComponent(buyer.id)}${
+                    plot ? `&plot=${encodeURIComponent(plot.id)}` : ''
+                  }`}
                   className="group flex items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-xs hover:border-oe-blue hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
                 >
                   <span className="flex items-center gap-2">
@@ -6039,8 +6107,16 @@ function BuyerDetailDrawer({
                 </Link>
               </li>
               <li>
+                {/* When the buyer is bridged to a Contacts record, the most
+                    useful "open in CRM" target is that exact contact card.
+                    The Contacts page already consumes ?contactId (scroll +
+                    flash). Fall back to the CRM landing if unbridged. */}
                 <Link
-                  to="/crm"
+                  to={
+                    buyer.contact_id
+                      ? `/contacts?contactId=${encodeURIComponent(buyer.contact_id)}`
+                      : '/crm'
+                  }
                   className="group flex items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-xs hover:border-oe-blue hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
                 >
                   <span className="flex items-center gap-2">
@@ -6049,9 +6125,13 @@ function BuyerDetailDrawer({
                       className="text-content-tertiary group-hover:text-oe-blue"
                     />
                     <span>
-                      {t('propdev.view_crm', {
-                        defaultValue: 'Open in CRM',
-                      })}
+                      {buyer.contact_id
+                        ? t('propdev.view_contact', {
+                            defaultValue: 'Open buyer contact',
+                          })
+                        : t('propdev.view_crm', {
+                            defaultValue: 'Open in CRM',
+                          })}
                     </span>
                   </span>
                   <ArrowRight

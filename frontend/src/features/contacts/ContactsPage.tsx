@@ -957,7 +957,10 @@ function ContactDetailDrawer({
         }),
         action: {
           label: t('contacts.open_property_dev', { defaultValue: 'Open in Property Dev' }),
-          onClick: () => navigate('/property-dev'),
+          onClick: () =>
+            navigate(
+              `/property-dev?tab=leads&leadId=${encodeURIComponent(lead.id)}`,
+            ),
         },
       });
     },
@@ -1092,7 +1095,11 @@ function ContactDetailDrawer({
                       <button
                         key={lead.id}
                         type="button"
-                        onClick={() => navigate('/property-dev')}
+                        onClick={() =>
+                          navigate(
+                            `/property-dev?tab=leads&leadId=${encodeURIComponent(lead.id)}`,
+                          )
+                        }
                         className="flex w-full items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-left hover:border-oe-blue/50 hover:bg-surface-secondary/50 transition-colors"
                       >
                         <div className="min-w-0">
@@ -1123,7 +1130,11 @@ function ContactDetailDrawer({
                       <button
                         key={buyer.id}
                         type="button"
-                        onClick={() => navigate('/property-dev')}
+                        onClick={() =>
+                          navigate(
+                            `/property-dev?tab=buyers&buyerId=${encodeURIComponent(buyer.id)}`,
+                          )
+                        }
                         className="flex w-full items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-left hover:border-oe-blue/50 hover:bg-surface-secondary/50 transition-colors"
                       >
                         <div className="min-w-0">
