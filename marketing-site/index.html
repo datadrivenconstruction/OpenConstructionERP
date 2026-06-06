@@ -17787,10 +17787,18 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         else labelLayerEl.classList.remove('is-hidden');
       }
 
-      // Float CTA: show after hero, hide near footer
+      // Float CTA: show after hero, hide near footer and while the download
+      // section is on screen (it would cover the Linux button on phones).
       if (floatCtaEl) {
         const nearBottom = docH - y < 220;
-        if (y > window.innerHeight * 0.85 && !nearBottom) floatCtaEl.classList.add('is-visible');
+        let overDownload = false;
+        for (const sid of ['download', 'final-cta']) {
+          const s = document.getElementById(sid);
+          if (!s) continue;
+          const r = s.getBoundingClientRect();
+          if (r.top < window.innerHeight && r.bottom > 0) { overDownload = true; break; }
+        }
+        if (y > window.innerHeight * 0.85 && !nearBottom && !overDownload) floatCtaEl.classList.add('is-visible');
         else floatCtaEl.classList.remove('is-visible');
       }
 
