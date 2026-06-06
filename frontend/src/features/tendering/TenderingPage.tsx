@@ -19,6 +19,11 @@ import {
   Download,
   FileText,
   AlertTriangle,
+  ArrowRight,
+  Users,
+  Check,
+  Search,
+  Loader2,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, RecoveryCard, DismissibleInfo, IntroRichText, SkeletonTable, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -37,6 +42,11 @@ import { AddendumList } from './AddendumList';
 import { LevelingMatrix } from './LevelingMatrix';
 import { classifyCell, recommend } from './analysis';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import {
+  listSubcontractors,
+  type Subcontractor,
+  type PrequalStatus,
+} from '@/features/subcontractors/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -223,6 +233,161 @@ function formatDate(dateStr: string): string {
   }
 }
 
+/* ── Subcontractor directory picker ───────────────────────────────────── */
+
+// CONN-41: add a bid against a known subcontractor instead of retyping the
+// company by hand. Resolves the firm's primary contact email and shows the
+// prequalification status so you compare like for like.
+interface SubcontractorContactLite {
+  id: string;
+  email: string | null;
+  primary: boolean;
+}
+
+const PREQUAL_PICKER_VARIANT: Record<
+  PrequalStatus,
+  'neutral' | 'blue' | 'success' | 'warning' | 'error'
+> = {
+  pending: 'warning',
+  approved: 'success',
+  suspended: 'warning',
+  rejected: 'error',
+};
+
+async function resolveSubcontractorEmail(subId: string): Promise<string> {
+  const contacts = await apiGet<SubcontractorContactLite[]>(
+    `/v1/subcontractors/subcontractors/${subId}/contacts`,
+  ).catch(() => [] as SubcontractorContactLite[]);
+  const primary = contacts.find((c) => c.primary && c.email);
+  return (primary?.email || contacts.find((c) => c.email)?.email || '').trim();
+}
+
+function SubcontractorPickerModal({
+  onPick,
+  onClose,
+}: {
+  onPick: (sub: Subcontractor, email: string) => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const [search, setSearch] = useState('');
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+
+  const subsQ = useQuery({
+    queryKey: ['tendering', 'subcontractor-directory'],
+    queryFn: () => listSubcontractors({ active_only: true, limit: 200 }),
+    staleTime: 60_000,
+  });
+
+  const rows = useMemo(() => {
+    const items = subsQ.data ?? [];
+    const s = search.trim().toLowerCase();
+    if (!s) return items;
+    return items.filter(
+      (it) =>
+        it.legal_name.toLowerCase().includes(s) ||
+        (it.trade_name || '').toLowerCase().includes(s) ||
+        it.trade_categories.some((c) => c.toLowerCase().includes(s)),
+    );
+  }, [subsQ.data, search]);
+
+  const pick = async (sub: Subcontractor) => {
+    setResolvingId(sub.id);
+    const email = await resolveSubcontractorEmail(sub.id);
+    setResolvingId(null);
+    onPick(sub, email);
+    onClose();
+  };
+
+  const fieldCls =
+    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+
+  return (
+    <WideModal
+      open
+      onClose={onClose}
+      title={t('tendering.pick_sub_title', {
+        defaultValue: 'Add bid from Subcontractor Directory',
+      })}
+      subtitle={t('tendering.pick_sub_subtitle', {
+        defaultValue:
+          'Pick a prequalified subcontractor. The prequalification status is shown so you compare like for like.',
+      })}
+      size="lg"
+      footer={
+        <Button variant="ghost" onClick={onClose}>
+          {t('common.cancel', 'Cancel')}
+        </Button>
+      }
+    >
+      <div className="space-y-3">
+        <div className="relative">
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary"
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('tendering.pick_sub_search', {
+              defaultValue: 'Search subcontractors by name or trade…',
+            })}
+            className={`${fieldCls} pl-8`}
+            autoFocus
+          />
+        </div>
+        {subsQ.isLoading ? (
+          <SkeletonTable rows={5} columns={3} />
+        ) : rows.length === 0 ? (
+          <EmptyState
+            icon={<Users size={22} />}
+            title={t('tendering.pick_sub_empty', {
+              defaultValue: 'No subcontractors found',
+            })}
+            description={t('tendering.pick_sub_empty_desc', {
+              defaultValue: 'Add subcontractors in the directory, then add their bids here.',
+            })}
+          />
+        ) : (
+          <div className="max-h-[420px] overflow-y-auto rounded-lg border border-border-light divide-y divide-border-light">
+            {rows.map((sub) => (
+              <button
+                key={sub.id}
+                type="button"
+                onClick={() => pick(sub)}
+                disabled={resolvingId !== null}
+                className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left hover:bg-surface-secondary disabled:opacity-60"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-content-primary">
+                    {sub.legal_name}
+                  </span>
+                  {sub.trade_categories.length > 0 && (
+                    <span className="block truncate text-xs text-content-tertiary">
+                      {sub.trade_categories.slice(0, 3).join(', ')}
+                    </span>
+                  )}
+                </span>
+                <Badge variant={PREQUAL_PICKER_VARIANT[sub.prequalification_status]} dot>
+                  {t(`tendering.prequal_${sub.prequalification_status}`, {
+                    defaultValue: sub.prequalification_status,
+                  })}
+                </Badge>
+                {resolvingId === sub.id ? (
+                  <Loader2 size={14} className="shrink-0 animate-spin text-content-tertiary" />
+                ) : (
+                  <Check size={14} className="shrink-0 text-content-tertiary" />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </WideModal>
+  );
+}
+
 /* ── Select Dropdown ──────────────────────────────────────────────────── */
 
 function SelectDropdown({
@@ -394,6 +559,9 @@ function AddBidDialog({
   const [contactEmail, setContactEmail] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [notes, setNotes] = useState('');
+  // CONN-41: pick a bidder straight from the Subcontractor Directory rather
+  // than retyping the company and email.
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -451,6 +619,17 @@ function AddBidDialog({
       }
     >
       <WideModalSection columns={2}>
+        <WideModalField label={t('tendering.bidder_source', 'Bidder')} span={2}>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Users size={14} />}
+            onClick={() => setPickerOpen(true)}
+            type="button"
+          >
+            {t('tendering.select_from_subs', 'Select from Subcontractors')}
+          </Button>
+        </WideModalField>
         <WideModalField
           label={t('tendering.company_name', 'Company Name')}
           required
@@ -498,6 +677,23 @@ function AddBidDialog({
           />
         </WideModalField>
       </WideModalSection>
+      {pickerOpen && (
+        <SubcontractorPickerModal
+          onPick={(sub, resolvedEmail) => {
+            setCompanyName(sub.legal_name);
+            if (resolvedEmail) setContactEmail(resolvedEmail);
+            if (!resolvedEmail) {
+              addToast({
+                type: 'info',
+                title: t('tendering.sub_no_email', {
+                  defaultValue: 'No contact email on file - enter one if needed.',
+                }),
+              });
+            }
+          }}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </WideModal>
   );
 }
@@ -1056,6 +1252,22 @@ function PackageDetail({
                 {t('tendering.mark_awarded', 'Mark Awarded')}
               </Button>
             )}
+            {/* CONN-40: once a tender is awarded, take the winning scope into
+                Contracts instead of dead-ending. The awarded rates already
+                live on the BOQ, so the contract is formalised downstream. */}
+            {pkg.status === 'awarded' && (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<ArrowRight size={14} />}
+                onClick={() => navigate('/contracts')}
+                title={t('tendering.formalise_contract_title', {
+                  defaultValue: 'Open Contracts to formalise the awarded scope',
+                })}
+              >
+                {t('tendering.formalise_contract', 'Formalise as Contract')}
+              </Button>
+            )}
             {(pkg.status === 'awarded' || pkg.status === 'evaluating') && (
               <Button
                 variant="ghost"
@@ -1383,6 +1595,10 @@ export function TenderingPage() {
           {
             label: t('nav.procurement', { defaultValue: 'Procurement' }),
             onClick: () => navigate('/procurement'),
+          },
+          {
+            label: t('nav.contracts', { defaultValue: 'Contracts' }),
+            onClick: () => navigate('/contracts'),
           },
           {
             label: t('nav.bid_management', { defaultValue: 'Bid Management' }),
