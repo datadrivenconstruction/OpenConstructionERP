@@ -330,6 +330,10 @@ class CandidateOut(BaseModel):
     currency: str = ""
     score: float = 0.0
     confidence_band: ConfidenceBand = "low"
+    # Set by the multi-pass mapping's rate-sanity pass when this candidate's
+    # per-base-unit rate sits outside the per-run benchmark band. The rate is
+    # never altered; this only flags it for human review in the override UI.
+    rate_outlier: bool = False
 
     @field_serializer("unit_rate", when_used="json")
     def _ser_unit_rate(self, v: Decimal) -> str | None:
