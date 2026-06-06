@@ -101,13 +101,13 @@
     "mobile_modules_title": "17 wbudowanych modułów",
     "headline": "<span class=\"word\"><span>Prowadź</span></span> <span class=\"word\"><span>cały</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>projekt</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>budowlany</span></span>",
     "download_label": "Albo po prostu pobierz darmową aplikację desktopową, bez Pythona, bez Dockera, nic do konfiguracji:",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Pobierz aplikację desktopową",
+    "dl_btn_windows": "Pobierz na Windows",
+    "dl_btn_macos": "Pobierz na macOS",
+    "dl_btn_linux": "Pobierz na Linux",
+    "dl_btn_sub": "Za darmo - bez Pythona, bez Dockera, nic nie trzeba konfigurować",
+    "all_platforms": "Wszystkie platformy",
+    "float_cta": "Pobierz"
   },
   "final_cta": {
     "title_line1": "Przestań walczyć z narzędziami.",
@@ -116,8 +116,8 @@
     "sub": "Instalacja jedną komendą. Uruchom na laptopie, VPS-ie lub w wybranej chmurze. Self-host na zawsze, albo pozwól nam się tym zająć.",
     "btn_install": "Zainstaluj teraz",
     "btn_star": "Gwiazdka na GitHubie",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Pobierz aplikację",
+    "btn_download_sub": "Windows, macOS, Linux - za darmo i open source"
   },
   "sections": {
     "community_title": "Repozytorium, otwarte dla wszystkich.",

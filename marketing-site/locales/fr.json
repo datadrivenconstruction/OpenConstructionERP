@@ -101,13 +101,13 @@
     "panel_status": "en direct · 17 couches",
     "mobile_modules_title": "17 modules intégrés",
     "headline": "<span class=\"word\"><span>Pilotez</span></span> <span class=\"word\"><span>tout</span></span> <span class=\"word\"><span>le</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projet</span></span> <span class=\"word\"><span>de</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>construction</span></span>",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Télécharger l'application de bureau",
+    "dl_btn_windows": "Télécharger pour Windows",
+    "dl_btn_macos": "Télécharger pour macOS",
+    "dl_btn_linux": "Télécharger pour Linux",
+    "dl_btn_sub": "Gratuit - pas de Python, pas de Docker, rien à configurer",
+    "all_platforms": "Toutes les plateformes",
+    "float_cta": "Télécharger"
   },
   "final_cta": {
     "title_line1": "Arrêtez de vous battre avec vos outils.",
@@ -116,8 +116,8 @@
     "sub": "Installation en une seule commande. Exécutez-le sur votre ordinateur portable, un VPS ou le cloud de votre choix. Auto-hébergez à vie, ou laissez-nous nous en charger.",
     "btn_install": "Installer maintenant",
     "btn_star": "Star sur GitHub",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Télécharger l'application",
+    "btn_download_sub": "Windows, macOS, Linux - gratuit et open source"
   },
   "sections": {
     "community_title": "Le dépôt, à ciel ouvert.",

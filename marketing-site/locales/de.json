@@ -101,12 +101,12 @@
     "panel_status": "live · 17 Ebenen",
     "mobile_modules_title": "17 integrierte Module",
     "headline": "<span class=\"word\"><span>Führen</span></span> <span class=\"word\"><span>Sie</span></span> <span class=\"word\"><span>das</span></span> <span class=\"word\"><span>ganze</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>Bau</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>Projekt</span></span>",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
+    "dl_btn_generic": "Desktop-App herunterladen",
+    "dl_btn_windows": "Für Windows herunterladen",
+    "dl_btn_macos": "Für macOS herunterladen",
+    "dl_btn_linux": "Für Linux herunterladen",
+    "dl_btn_sub": "Kostenlos - kein Python, kein Docker, nichts einzurichten",
+    "all_platforms": "Alle Plattformen",
     "float_cta": "Download"
   },
   "final_cta": {
@@ -116,8 +116,8 @@
     "sub": "Installation mit einem Befehl. Läuft auf Ihrem Laptop, VPS oder der Cloud Ihrer Wahl. Dauerhaft selbst hosten - oder wir übernehmen es.",
     "btn_install": "Jetzt installieren",
     "btn_star": "Auf GitHub sternen",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "App herunterladen",
+    "btn_download_sub": "Windows, macOS, Linux - kostenlos und Open Source"
   },
   "sections": {
     "community_title": "Das Repository, offen für alle.",

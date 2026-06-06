@@ -101,13 +101,13 @@
     "mobile_modules_title": "17 vestavěných modulů",
     "headline": "<span class=\"word\"><span>Veďte</span></span> <span class=\"word\"><span>celý</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>stavební</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projekt</span></span>",
     "download_label": "Nebo si jednoduše stáhněte bezplatnou desktopovou aplikaci. Žádný Python, žádný Docker, nic se nemusí nastavovat:",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Stáhnout desktopovou aplikaci",
+    "dl_btn_windows": "Stáhnout pro Windows",
+    "dl_btn_macos": "Stáhnout pro macOS",
+    "dl_btn_linux": "Stáhnout pro Linux",
+    "dl_btn_sub": "Zdarma - žádný Python, žádný Docker, nic k nastavování",
+    "all_platforms": "Všechny platformy",
+    "float_cta": "Stáhnout"
   },
   "final_cta": {
     "title_line1": "Přestaňte bojovat se svými nástroji.",
@@ -116,8 +116,8 @@
     "sub": "Instalace jedním příkazem. Spusťte na notebooku, VPS nebo v cloudu dle vašeho výběru. Hostujte si sami navždy, nebo to necháme na nás.",
     "btn_install": "Instalovat nyní",
     "btn_star": "Dát hvězdu na GitHubu",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Stáhnout aplikaci",
+    "btn_download_sub": "Windows, macOS, Linux - zdarma a open source"
   },
   "sections": {
     "community_title": "Repozitář, otevřeně.",

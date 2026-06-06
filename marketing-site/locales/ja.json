@@ -101,13 +101,13 @@
     "mobile_modules_title": "17の組み込みモジュール",
     "headline": "<span class=\"word italic\" data-anchor=\"primary\"><span>建設</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>プロジェクト</span></span> <span class=\"word\"><span>を</span></span> <span class=\"word\"><span>一括で</span></span> <span class=\"word\"><span>運用</span></span>",
     "download_label": "または、無料のデスクトップアプリをダウンロードするだけ。Python不要、Docker不要、セットアップも一切不要です。",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "デスクトップアプリをダウンロード",
+    "dl_btn_windows": "Windows版をダウンロード",
+    "dl_btn_macos": "macOS版をダウンロード",
+    "dl_btn_linux": "Linux版をダウンロード",
+    "dl_btn_sub": "無料 - Python不要、Docker不要、セットアップ不要",
+    "all_platforms": "すべてのプラットフォーム",
+    "float_cta": "ダウンロード"
   },
   "final_cta": {
     "title_line1": "ツールとの戦いはもう終わりです。",
@@ -116,8 +116,8 @@
     "sub": "コマンド一つでインストール。ノートPC、VPS、お好みのクラウドで動作します。永続的にセルフホストするか、当社にお任せください。",
     "btn_install": "今すぐインストール",
     "btn_star": "GitHubでスター",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "アプリをダウンロード",
+    "btn_download_sub": "Windows、macOS、Linux - 無料のオープンソース"
   },
   "sections": {
     "community_title": "オープンなリポジトリ。",

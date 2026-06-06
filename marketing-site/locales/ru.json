@@ -101,13 +101,13 @@
     "panel_status": "live · 17 слоёв",
     "mobile_modules_title": "17 встроенных модулей",
     "headline": "<span class=\"word\"><span>Управляй</span></span> <span class=\"word\"><span>всем</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>строительным</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>проектом</span></span>",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Скачать десктоп-приложение",
+    "dl_btn_windows": "Скачать для Windows",
+    "dl_btn_macos": "Скачать для macOS",
+    "dl_btn_linux": "Скачать для Linux",
+    "dl_btn_sub": "Бесплатно - без Python, без Docker, ничего настраивать не нужно",
+    "all_platforms": "Все платформы",
+    "float_cta": "Скачать"
   },
   "final_cta": {
     "title_line1": "Хватит воевать со своими инструментами.",
@@ -116,8 +116,8 @@
     "sub": "Установка одной командой. Запускайте на ноутбуке, VPS или в облаке на ваш выбор. Self-hosted навсегда - или мы возьмём это на себя.",
     "btn_install": "Установить сейчас",
     "btn_star": "Star на GitHub",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Скачать приложение",
+    "btn_download_sub": "Windows, macOS, Linux - бесплатно и с открытым кодом"
   },
   "sections": {
     "community_title": "Репозиторий - всё открыто.",

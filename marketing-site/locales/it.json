@@ -101,13 +101,13 @@
     "panel_status": "live · 17 livelli",
     "mobile_modules_title": "17 moduli integrati",
     "headline": "<span class=\"word\"><span>Gestisci</span></span> <span class=\"word\"><span>l'intero</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>progetto</span></span> <span class=\"word\"><span>di</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>costruzione</span></span>",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Scarica l'app desktop",
+    "dl_btn_windows": "Scarica per Windows",
+    "dl_btn_macos": "Scarica per macOS",
+    "dl_btn_linux": "Scarica per Linux",
+    "dl_btn_sub": "Gratis - niente Python, niente Docker, nulla da configurare",
+    "all_platforms": "Tutte le piattaforme",
+    "float_cta": "Scarica"
   },
   "final_cta": {
     "title_line1": "Basta combattere con i tuoi strumenti.",
@@ -116,8 +116,8 @@
     "sub": "Installa con un solo comando. Esegui sul tuo portatile, su un VPS o sul cloud che preferisci. Self-hosted per sempre, oppure ce ne occupiamo noi.",
     "btn_install": "Installa ora",
     "btn_star": "Metti una stella su GitHub",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Scarica l'app",
+    "btn_download_sub": "Windows, macOS, Linux - gratuito e open source"
   },
   "sections": {
     "community_title": "Il repository, a cielo aperto.",

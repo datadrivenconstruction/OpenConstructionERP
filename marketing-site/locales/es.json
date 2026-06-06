@@ -101,13 +101,13 @@
     "panel_status": "en vivo · 17 capas",
     "mobile_modules_title": "17 módulos integrados",
     "headline": "<span class=\"word\"><span>Gestiona</span></span> <span class=\"word\"><span>todo</span></span> <span class=\"word\"><span>el</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>proyecto</span></span> <span class=\"word\"><span>de</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>construcción</span></span>",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Descargar la aplicación de escritorio",
+    "dl_btn_windows": "Descargar para Windows",
+    "dl_btn_macos": "Descargar para macOS",
+    "dl_btn_linux": "Descargar para Linux",
+    "dl_btn_sub": "Gratis - sin Python, sin Docker, nada que configurar",
+    "all_platforms": "Todas las plataformas",
+    "float_cta": "Descargar"
   },
   "final_cta": {
     "title_line1": "Deja de pelear con tus herramientas.",
@@ -116,8 +116,8 @@
     "sub": "Instálalo con un solo comando. Ejecútalo en tu portátil, VPS o la nube que prefieras. Autoaloja para siempre, o deja que nosotros lo hagamos.",
     "btn_install": "Instalar ahora",
     "btn_star": "Dar estrella en GitHub",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Descargar la aplicación",
+    "btn_download_sub": "Windows, macOS, Linux - gratis y de código abierto"
   },
   "sections": {
     "community_title": "El repositorio, a la vista.",

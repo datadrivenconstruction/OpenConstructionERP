@@ -101,13 +101,13 @@
     "mobile_modules_title": "17개의 내장 모듈",
     "headline": "<span class=\"word italic\" data-anchor=\"primary\"><span>건설</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>프로젝트</span></span> <span class=\"word\"><span>전체를</span></span> <span class=\"word\"><span>한 번에</span></span> <span class=\"word\"><span>운영하세요</span></span>",
     "download_label": "또는 무료 데스크톱 앱을 바로 다운로드하세요. Python도, Docker도, 별도의 설정도 필요 없습니다:",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "데스크톱 앱 다운로드",
+    "dl_btn_windows": "Windows용 다운로드",
+    "dl_btn_macos": "macOS용 다운로드",
+    "dl_btn_linux": "Linux용 다운로드",
+    "dl_btn_sub": "무료 - Python도 Docker도 필요 없고 설정할 것도 없습니다",
+    "all_platforms": "모든 플랫폼",
+    "float_cta": "다운로드"
   },
   "final_cta": {
     "title_line1": "도구와 씨름하지 마십시오.",
@@ -116,8 +116,8 @@
     "sub": "한 번의 명령으로 설치됩니다. 노트북, VPS, 원하는 클라우드에서 실행하십시오. 영구 자체 호스팅 또는 저희가 운영해 드립니다.",
     "btn_install": "지금 설치",
     "btn_star": "GitHub에서 Star",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "앱 다운로드",
+    "btn_download_sub": "Windows, macOS, Linux - 무료 오픈소스"
   },
   "sections": {
     "community_title": "공개된 저장소.",

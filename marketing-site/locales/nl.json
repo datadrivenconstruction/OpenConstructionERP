@@ -101,13 +101,13 @@
     "mobile_modules_title": "17 ingebouwde modules",
     "headline": "<span class=\"word\"><span>Stuur</span></span> <span class=\"word\"><span>het</span></span> <span class=\"word\"><span>hele</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>bouw</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>project</span></span> <span class=\"word\"><span>aan</span></span>",
     "download_label": "Of download gewoon de gratis desktopapp, geen Python, geen Docker, niets te installeren:",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "Download de desktop-app",
+    "dl_btn_windows": "Downloaden voor Windows",
+    "dl_btn_macos": "Downloaden voor macOS",
+    "dl_btn_linux": "Downloaden voor Linux",
+    "dl_btn_sub": "Gratis - geen Python, geen Docker, niets in te stellen",
+    "all_platforms": "Alle platformen",
+    "float_cta": "Downloaden"
   },
   "final_cta": {
     "title_line1": "Stop met vechten tegen je tools.",
@@ -116,8 +116,8 @@
     "sub": "Installeer met één commando. Draai op je laptop, VPS of de cloud van jouw keuze. Voor altijd zelf-gehost, of laat het aan ons over.",
     "btn_install": "Nu installeren",
     "btn_star": "Ster op GitHub",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Download de app",
+    "btn_download_sub": "Windows, macOS, Linux - gratis en open source"
   },
   "sections": {
     "community_title": "De repo, in het openbaar.",

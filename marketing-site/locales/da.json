@@ -101,12 +101,12 @@
     "mobile_modules_title": "17 indbyggede moduler",
     "headline": "<span class=\"word\"><span>Driv</span></span> <span class=\"word\"><span>hele</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>bygge</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projektet</span></span>",
     "download_label": "Eller download bare den gratis desktop-app, ingen Python, ingen Docker, intet at sætte op:",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
+    "dl_btn_generic": "Download skrivebordsappen",
+    "dl_btn_windows": "Download til Windows",
+    "dl_btn_macos": "Download til macOS",
+    "dl_btn_linux": "Download til Linux",
+    "dl_btn_sub": "Gratis - ingen Python, ingen Docker, intet at sætte op",
+    "all_platforms": "Alle platforme",
     "float_cta": "Download"
   },
   "final_cta": {
@@ -116,8 +116,8 @@
     "sub": "Installér med én kommando. Kør det på din laptop, VPS eller den cloud, du foretrækker. Selvhost for evigt, eller lad os stå for det.",
     "btn_install": "Installér nu",
     "btn_star": "Giv en stjerne på GitHub",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "Download appen",
+    "btn_download_sub": "Windows, macOS, Linux - gratis og open source"
   },
   "sections": {
     "community_title": "Repoet, helt åbent.",

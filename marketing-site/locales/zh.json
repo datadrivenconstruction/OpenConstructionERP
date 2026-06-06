@@ -101,13 +101,13 @@
     "mobile_modules_title": "17个内置模块",
     "headline": "<span class=\"word\"><span>一站式</span></span> <span class=\"word\"><span>管理</span></span> <span class=\"word\"><span>整个</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>建设</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>项目</span></span>",
     "download_label": "或直接下载免费桌面应用，无需 Python，无需 Docker，无需任何配置：",
-    "dl_btn_generic": "Download the desktop app",
-    "dl_btn_windows": "Download for Windows",
-    "dl_btn_macos": "Download for macOS",
-    "dl_btn_linux": "Download for Linux",
-    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
-    "all_platforms": "All platforms",
-    "float_cta": "Download"
+    "dl_btn_generic": "下载桌面应用",
+    "dl_btn_windows": "下载 Windows 版",
+    "dl_btn_macos": "下载 macOS 版",
+    "dl_btn_linux": "下载 Linux 版",
+    "dl_btn_sub": "免费 - 无需 Python、无需 Docker、无需任何配置",
+    "all_platforms": "全部平台",
+    "float_cta": "下载"
   },
   "final_cta": {
     "title_line1": "别再与工具缠斗。",
@@ -116,8 +116,8 @@
     "sub": "一条命令即可安装。在笔记本、VPS 或您选择的云上运行。永久自托管,或交给我们。",
     "btn_install": "立即安装",
     "btn_star": "在 GitHub 加星",
-    "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download": "下载应用",
+    "btn_download_sub": "Windows、macOS、Linux - 免费且开源"
   },
   "sections": {
     "community_title": "代码仓库,完全公开。",
