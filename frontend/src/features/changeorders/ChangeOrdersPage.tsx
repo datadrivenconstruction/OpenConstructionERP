@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import {
   FileEdit,
+  FileText,
   Plus,
   Send,
   CheckCircle2,
@@ -376,11 +377,14 @@ function CreateDialog({
 
 function AddItemDialog({
   orderId,
+  projectId,
   currency,
   onClose,
   onCreated,
 }: {
   orderId: string;
+  // CONN-45: needed to list the project's BOQs in the "Pick from BOQ" flow.
+  projectId: string;
   currency: string;
   onClose: () => void;
   onCreated: () => void;
@@ -393,7 +397,27 @@ function AddItemDialog({
   const [origRate, setOrigRate] = useState(0);
   const [newRate, setNewRate] = useState(0);
   const [unit, setUnit] = useState('');
+  // CONN-45: provenance of a picked BOQ position, stamped onto item metadata
+  // so the change order line stays traceable back to the estimate it amends.
+  const [boqSource, setBoqSource] = useState<BoqPositionPick | null>(null);
+  const [showBoqPicker, setShowBoqPicker] = useState(false);
   const addToast = useToastStore((s) => s.addToast);
+
+  // Pre-fill the form from a chosen BOQ position. The position's quantity/rate
+  // become the ORIGINAL (pre-change) values; the New Qty defaults to the same
+  // so a pure rate change or quantity change is one edit away.
+  const applyBoqPick = (pick: BoqPositionPick) => {
+    setBoqSource(pick);
+    setDesc(pick.description);
+    setUnit(pick.unit);
+    setOrigQty(pick.quantity);
+    setNewQty(pick.quantity);
+    setOrigRate(pick.unit_rate);
+    setNewRate(pick.unit_rate);
+    setShowBoqPicker(false);
+  };
+
+  const clearBoqSource = () => setBoqSource(null);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -405,6 +429,18 @@ function AddItemDialog({
         original_rate: origRate,
         new_rate: newRate,
         unit,
+        // Stamp BOQ provenance when the line was seeded from an estimate
+        // position. The backend item schema already accepts a free-form
+        // metadata dict, so no model/schema change is needed.
+        ...(boqSource
+          ? {
+              metadata: {
+                boq_id: boqSource.boqId,
+                boq_position_id: boqSource.id,
+                boq_position_ordinal: boqSource.ordinal,
+              },
+            }
+          : {}),
       }),
     onSuccess: () => {
       onCreated();
@@ -425,6 +461,7 @@ function AddItemDialog({
     'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
   return (
+    <>
     <WideModal
       open
       onClose={onClose}
@@ -452,6 +489,42 @@ function AddItemDialog({
         title={t('changeorders.section_basic', { defaultValue: 'Item details' })}
         columns={2}
       >
+        {/* CONN-45: seed this line from a BOQ position so the original
+            quantity and rate come straight from the estimate being amended,
+            instead of being re-keyed by hand. */}
+        <div className="sm:col-span-2">
+          {boqSource ? (
+            <div className="flex items-center justify-between gap-2 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-3 py-2 text-xs">
+              <span className="flex min-w-0 items-center gap-2 text-blue-700 dark:text-blue-300">
+                <FileText size={14} className="shrink-0" />
+                <span className="truncate">
+                  {t('changeorders.boq_source_label', {
+                    defaultValue: 'From BOQ position {{ordinal}}',
+                    ordinal: boqSource.ordinal || boqSource.id.slice(0, 8),
+                  })}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={clearBoqSource}
+                className="shrink-0 text-content-tertiary hover:text-semantic-error"
+                aria-label={t('changeorders.boq_source_clear', { defaultValue: 'Clear BOQ link' })}
+              >
+                <XCircle size={14} />
+              </button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowBoqPicker(true)}
+            >
+              <FileText size={14} className="mr-1.5" />
+              {t('changeorders.pick_from_boq', { defaultValue: 'Pick from BOQ' })}
+            </Button>
+          )}
+        </div>
         <WideModalField
           label={t('common.description', { defaultValue: 'Description' })}
           required
@@ -560,6 +633,226 @@ function AddItemDialog({
             {costDelta >= 0 ? '+' : ''}{formatCurrency(costDelta, currency)}
           </span>
         </div>
+      </WideModalSection>
+    </WideModal>
+    {showBoqPicker && (
+      <BoqPositionPickerDialog
+        projectId={projectId}
+        currency={currency}
+        onClose={() => setShowBoqPicker(false)}
+        onPick={applyBoqPick}
+      />
+    )}
+    </>
+  );
+}
+
+/* ── BOQ position picker (CONN-45) ─────────────────────────────────────── */
+
+/** A BOQ position chosen in the picker, flattened to just the fields a
+ *  change-order line seeds from plus enough provenance to deep-link back. */
+interface BoqPositionPick {
+  id: string;
+  boqId: string;
+  ordinal: string;
+  description: string;
+  unit: string;
+  quantity: number;
+  unit_rate: number;
+}
+
+interface BoqListItem {
+  id: string;
+  name: string;
+}
+
+interface BoqPositionRow {
+  id: string;
+  boq_id: string;
+  parent_id: string | null;
+  ordinal: string;
+  description: string;
+  unit: string;
+  quantity: number;
+  unit_rate: number;
+}
+
+interface BoqWithPositions {
+  positions: BoqPositionRow[];
+}
+
+/**
+ * Two-step picker: choose one of the project's BOQs, then a leaf position
+ * within it. Picking a position pre-fills the change-order line's
+ * description, unit and original quantity/rate. Sections (rows with a 0 rate
+ * and 0 quantity that carry children) are still selectable but the buyer
+ * normally picks a priced leaf.
+ */
+function BoqPositionPickerDialog({
+  projectId,
+  currency,
+  onClose,
+  onPick,
+}: {
+  projectId: string;
+  currency: string;
+  onClose: () => void;
+  onPick: (pick: BoqPositionPick) => void;
+}) {
+  const { t } = useTranslation();
+  const [boqId, setBoqId] = useState('');
+  const [search, setSearch] = useState('');
+
+  const { data: boqs = [], isLoading: boqsLoading } = useQuery({
+    queryKey: ['changeorders', 'boqs', projectId],
+    queryFn: () => apiGet<BoqListItem[]>(`/v1/boq/boqs/?project_id=${projectId}`),
+    select: (d): BoqListItem[] => normalizeListResponse(d),
+    enabled: !!projectId,
+  });
+
+  const { data: boqDetail, isLoading: posLoading } = useQuery({
+    queryKey: ['changeorders', 'boq-positions', boqId],
+    queryFn: () => apiGet<BoqWithPositions>(`/v1/boq/boqs/${boqId}`),
+    enabled: !!boqId,
+  });
+
+  const positions = useMemo(() => {
+    const rows = boqDetail?.positions ?? [];
+    const q = search.trim().toLowerCase();
+    const filtered = q
+      ? rows.filter(
+          (p) =>
+            (p.description || '').toLowerCase().includes(q) ||
+            (p.ordinal || '').toLowerCase().includes(q),
+        )
+      : rows;
+    return filtered.slice(0, 300);
+  }, [boqDetail, search]);
+
+  const fieldCls =
+    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+
+  return (
+    <WideModal
+      open
+      onClose={onClose}
+      title={t('changeorders.boq_picker_title', { defaultValue: 'Pick from BOQ' })}
+      size="lg"
+      footer={
+        <Button variant="ghost" onClick={onClose}>
+          {t('common.cancel', { defaultValue: 'Cancel' })}
+        </Button>
+      }
+    >
+      <WideModalSection columns={1}>
+        <WideModalField
+          label={t('changeorders.boq_picker_boq', { defaultValue: 'BOQ' })}
+          htmlFor="boq-picker-boq"
+          span={1}
+        >
+          <select
+            id="boq-picker-boq"
+            value={boqId}
+            onChange={(e) => setBoqId(e.target.value)}
+            disabled={boqsLoading}
+            className={fieldCls}
+          >
+            <option value="">
+              {boqsLoading
+                ? t('common.loading', { defaultValue: 'Loading...' })
+                : boqs.length > 0
+                  ? t('common.select_boq', { defaultValue: 'Select BOQ...' })
+                  : t('boq.no_boqs', { defaultValue: 'No BOQs found' })}
+            </option>
+            {boqs.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </WideModalField>
+
+        {boqId && (
+          <WideModalField
+            label={t('common.search', { defaultValue: 'Search' })}
+            htmlFor="boq-picker-search"
+            span={1}
+          >
+            <input
+              id="boq-picker-search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('changeorders.boq_picker_search_placeholder', {
+                defaultValue: 'Filter by description or ordinal…',
+              })}
+              className={fieldCls}
+              autoComplete="off"
+            />
+          </WideModalField>
+        )}
+
+        {boqId && (
+          posLoading ? (
+            <SkeletonTable rows={6} columns={3} />
+          ) : positions.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-xs text-content-tertiary">
+              {t('changeorders.boq_picker_empty', {
+                defaultValue: 'No positions match. Pick another BOQ or clear the filter.',
+              })}
+            </p>
+          ) : (
+            <div className="max-h-80 overflow-y-auto rounded-lg border border-border">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
+                  <tr>
+                    <th className="px-3 py-2 text-left">
+                      {t('changeorders.boq_picker_ordinal', { defaultValue: 'Ord.' })}
+                    </th>
+                    <th className="px-3 py-2 text-left">
+                      {t('common.description', { defaultValue: 'Description' })}
+                    </th>
+                    <th className="px-3 py-2 text-right">
+                      {t('changeorders.boq_picker_qty', { defaultValue: 'Qty' })}
+                    </th>
+                    <th className="px-3 py-2 text-right">
+                      {t('changeorders.boq_picker_rate', { defaultValue: 'Rate' })}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {positions.map((p) => (
+                    <tr
+                      key={p.id}
+                      onClick={() =>
+                        onPick({
+                          id: p.id,
+                          boqId: p.boq_id || boqId,
+                          ordinal: p.ordinal,
+                          description: p.description,
+                          unit: p.unit,
+                          quantity: Number(p.quantity) || 0,
+                          unit_rate: Number(p.unit_rate) || 0,
+                        })
+                      }
+                      className="cursor-pointer border-t border-border-light hover:bg-surface-secondary"
+                    >
+                      <td className="px-3 py-2 font-mono text-xs text-content-secondary whitespace-nowrap">
+                        {p.ordinal}
+                      </td>
+                      <td className="px-3 py-2 text-content-primary">{p.description}</td>
+                      <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                        {formatQuantity(p.quantity)} {p.unit}
+                      </td>
+                      <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                        {formatCurrency(Number(p.unit_rate) || 0, currency)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        )}
       </WideModalSection>
     </WideModal>
   );
@@ -1489,6 +1782,7 @@ function DetailView({
       {showAddItem && (
         <AddItemDialog
           orderId={orderId}
+          projectId={order.project_id}
           currency={order.currency}
           onClose={() => setShowAddItem(false)}
           onCreated={() => {
@@ -1671,6 +1965,14 @@ export function ChangeOrdersPage() {
           {
             label: t('nav.variations', { defaultValue: 'Variations' }),
             onClick: () => navigate('/variations'),
+          },
+          {
+            // CONN-48: the three change pipelines (MoC, Variations, Change
+            // Orders) stay connected. An approved Management-of-Change item is
+            // the upstream decision a change order commits; surface it here so
+            // the trail is one click away in either direction.
+            label: t('moc.title', { defaultValue: 'Management of Change' }),
+            onClick: () => navigate('/moc'),
           },
         ]}
       >
