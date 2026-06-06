@@ -13,6 +13,39 @@
     "news": "News",
     "download": "Scarica"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Scarica",
+      "title": "Ottieni la <i>vera</i> app desktop, gratis.",
+      "lede": "Una build nativa di OpenConstructionERP. Niente Python, niente pip, niente Docker, nessun database da configurare. Un file, lo avvii e basta. I tuoi dati restano sul tuo computer.",
+      "chip_no_deps": "Senza Python, pip, Docker o DB",
+      "chip_local": "I dati restano in locale",
+      "chip_fast": "Primo avvio ~60s, poi veloce",
+      "chip_oss": "Open source, AGPL-3.0",
+      "flag_detected": "Rilevato",
+      "btn_download": "Scarica",
+      "btn_install_terminal": "Installa da terminale",
+      "reading": "Lettura dell'ultima versione…",
+      "win_note": "Windows 10/11 - installer a 64 bit",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Trascina l'app nella cartella Applicazioni.",
+      "linux_note": "AppImage, deb e rpm",
+      "all_builds": "Vedi tutte le build e i checksum su GitHub",
+      "win_step1": "Scarica l'installer",
+      "win_step2": "Avvialo e accetta la richiesta",
+      "win_step3": "Il primo avvio richiede circa un minuto, poi l'app si apre",
+      "mac_step1": "Scarica il .dmg",
+      "mac_step2": "Trascina l'app in Applicazioni",
+      "mac_step3": "Aprila da Applicazioni",
+      "linux_step1": "Incolla il comando qui sopra nel terminale",
+      "linux_step2": "Sceglie il pacchetto giusto (deb, rpm o AppImage)",
+      "linux_step3": "Avvia OpenConstructionERP dal menu delle app",
+      "dev_title": "Per gli sviluppatori",
+      "dev_lede": "Preferisci i sorgenti? Installa con pip o avvia lo stack completo con Docker.",
+      "dev_pip_label": "Pacchetto Python",
+      "dev_docker_label": "Stack completo"
+    }
+  },
   "hero": {
     "version_meta": "pubblicato il 2026-04-20 · seconda stabile",
     "sub": "ERP open-source per team edili - stime, programmi, gare d'appalto, contratti, attività di cantiere e reportistica in un'unica installazione. Costi e tempi restano allineati ai disegni e al BOQ che c'è dietro.",
@@ -67,7 +100,14 @@
     "mod_users_title": "Utenti",
     "panel_status": "live · 17 livelli",
     "mobile_modules_title": "17 moduli integrati",
-    "headline": "<span class=\"word\"><span>Gestisci</span></span> <span class=\"word\"><span>l'intero</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>progetto</span></span> <span class=\"word\"><span>di</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>costruzione</span></span>"
+    "headline": "<span class=\"word\"><span>Gestisci</span></span> <span class=\"word\"><span>l'intero</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>progetto</span></span> <span class=\"word\"><span>di</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>costruzione</span></span>",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Basta combattere con i tuoi strumenti.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "preventivare.",
     "sub": "Installa con un solo comando. Esegui sul tuo portatile, su un VPS o sul cloud che preferisci. Self-hosted per sempre, oppure ce ne occupiamo noi.",
     "btn_install": "Installa ora",
-    "btn_star": "Metti una stella su GitHub"
+    "btn_star": "Metti una stella su GitHub",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "Il repository, a cielo aperto.",

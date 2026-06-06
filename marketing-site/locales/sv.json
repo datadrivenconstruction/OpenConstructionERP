@@ -13,6 +13,39 @@
     "news": "Nyheter",
     "download": "Ladda ner"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Ladda ner",
+      "title": "Hämta den <i>riktiga</i> skrivbordsappen, gratis.",
+      "lede": "En inbyggd version av OpenConstructionERP. Ingen Python, ingen pip, ingen Docker, ingen databas att ställa in. En fil, kör den, klart. Dina data stannar på din egen dator.",
+      "chip_no_deps": "Ingen Python, pip, Docker eller DB",
+      "chip_local": "Data stannar lokalt",
+      "chip_fast": "Första starten ~60s, sedan snabbt",
+      "chip_oss": "Öppen källkod, AGPL-3.0",
+      "flag_detected": "Identifierad",
+      "btn_download": "Ladda ner",
+      "btn_install_terminal": "Installera via terminalen",
+      "reading": "Läser senaste versionen…",
+      "win_note": "Windows 10/11 - 64-bitars installationsprogram",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Dra appen till din Program-mapp.",
+      "linux_note": "AppImage, deb och rpm",
+      "all_builds": "Visa alla byggen och kontrollsummor på GitHub",
+      "win_step1": "Ladda ner installationsprogrammet",
+      "win_step2": "Kör det och godkänn frågan",
+      "win_step3": "Första starten tar ungefär en minut, sedan öppnas appen",
+      "mac_step1": "Ladda ner .dmg-filen",
+      "mac_step2": "Dra appen till Program",
+      "mac_step3": "Öppna den från Program",
+      "linux_step1": "Klistra in kommandot ovan i din terminal",
+      "linux_step2": "Det väljer rätt paket (deb, rpm eller AppImage)",
+      "linux_step3": "Starta OpenConstructionERP från din appmeny",
+      "dev_title": "För utvecklare",
+      "dev_lede": "Föredrar du källkoden? Installera med pip eller kör hela stacken med Docker.",
+      "dev_pip_label": "Python-paket",
+      "dev_docker_label": "Hela stacken"
+    }
+  },
   "hero": {
     "version_meta": "släppt 2026-04-20 · andra stabila versionen",
     "sub": "Öppen källkod-ERP för byggteam - kalkyler, tidsplaner, anbud, kontrakt, platsuppgifter och rapportering i en installation. Kostnads- och tidssiffror hålls synkade med ritningarna och mängdförteckningen bakom dem.",
@@ -67,7 +100,14 @@
     "panel_status": "live · 17 lager",
     "mobile_modules_title": "17 inbyggda moduler",
     "headline": "<span class=\"word\"><span>Driv</span></span> <span class=\"word\"><span>hela</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>bygg</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projektet</span></span>",
-    "download_label": "Eller ladda bara ner den kostnadsfria skrivbordsappen, ingen Python, ingen Docker, inget att installera:"
+    "download_label": "Eller ladda bara ner den kostnadsfria skrivbordsappen, ingen Python, ingen Docker, inget att installera:",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Sluta kämpa mot dina verktyg.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "kalkylera.",
     "sub": "Installera med ett kommando. Kör på din laptop, VPS eller molnet du väljer. Egenhosta för evigt, eller låt oss sköta det.",
     "btn_install": "Installera nu",
-    "btn_star": "Stjärnmärk på GitHub"
+    "btn_star": "Stjärnmärk på GitHub",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "Repot, öppet för alla.",

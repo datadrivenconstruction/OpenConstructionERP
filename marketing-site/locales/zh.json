@@ -13,6 +13,39 @@
     "news": "新闻",
     "download": "下载"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "下载",
+      "title": "免费获取<i>真正的</i>桌面应用。",
+      "lede": "OpenConstructionERP 的原生构建版本。无需 Python、无需 pip、无需 Docker，也无需配置数据库。一个文件，运行即可。你的数据始终留在本机。",
+      "chip_no_deps": "无需 Python、pip、Docker 或数据库",
+      "chip_local": "数据保留在本地",
+      "chip_fast": "首次启动约 60 秒，之后很快",
+      "chip_oss": "开源，AGPL-3.0",
+      "flag_detected": "已检测",
+      "btn_download": "下载",
+      "btn_install_terminal": "通过终端安装",
+      "reading": "正在读取最新版本…",
+      "win_note": "Windows 10/11 - 64 位安装程序",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "将应用拖入你的“应用程序”文件夹。",
+      "linux_note": "AppImage、deb 和 rpm",
+      "all_builds": "在 GitHub 上查看所有构建版本和校验和",
+      "win_step1": "下载安装程序",
+      "win_step2": "运行它并确认提示",
+      "win_step3": "首次启动约需一分钟，随后应用打开",
+      "mac_step1": "下载 .dmg",
+      "mac_step2": "将应用拖入“应用程序”",
+      "mac_step3": "从“应用程序”中打开",
+      "linux_step1": "将上面的命令粘贴到你的终端",
+      "linux_step2": "它会自动选择合适的安装包（deb、rpm 或 AppImage）",
+      "linux_step3": "从应用菜单启动 OpenConstructionERP",
+      "dev_title": "面向开发者",
+      "dev_lede": "更喜欢源码？用 pip 安装，或用 Docker 运行完整堆栈。",
+      "dev_pip_label": "Python 软件包",
+      "dev_docker_label": "完整堆栈"
+    }
+  },
   "hero": {
     "version_meta": "发布于 2026-04-20 · 第二个稳定版",
     "sub": "面向建筑团队的开源 ERP - 预算、进度、招投标、合同、现场任务与报表一次安装到位。造价与工期数据始终与图纸及其背后的工程量清单保持同步。",
@@ -67,7 +100,14 @@
     "panel_status": "实时 · 17 层",
     "mobile_modules_title": "17个内置模块",
     "headline": "<span class=\"word\"><span>一站式</span></span> <span class=\"word\"><span>管理</span></span> <span class=\"word\"><span>整个</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>建设</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>项目</span></span>",
-    "download_label": "或直接下载免费桌面应用，无需 Python，无需 Docker，无需任何配置："
+    "download_label": "或直接下载免费桌面应用，无需 Python，无需 Docker，无需任何配置：",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "别再与工具缠斗。",
@@ -75,7 +115,9 @@
     "title_line2_italic": "做预算。",
     "sub": "一条命令即可安装。在笔记本、VPS 或您选择的云上运行。永久自托管,或交给我们。",
     "btn_install": "立即安装",
-    "btn_star": "在 GitHub 加星"
+    "btn_star": "在 GitHub 加星",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "代码仓库,完全公开。",

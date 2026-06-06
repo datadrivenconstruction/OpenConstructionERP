@@ -13,6 +13,39 @@
     "news": "أخبار",
     "download": "تنزيل"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "تنزيل",
+      "title": "احصل على تطبيق سطح المكتب <i>الحقيقي</i> مجانًا.",
+      "lede": "نسخة أصلية من OpenConstructionERP. بدون Python ولا pip ولا Docker ولا قاعدة بيانات لإعدادها. ملف واحد، تشغّله، وانتهى الأمر. تبقى بياناتك على جهازك.",
+      "chip_no_deps": "بدون Python أو pip أو Docker أو قاعدة بيانات",
+      "chip_local": "تبقى البيانات محليًا",
+      "chip_fast": "التشغيل الأول ~60 ثانية، ثم سريع",
+      "chip_oss": "مفتوح المصدر، AGPL-3.0",
+      "flag_detected": "تم الاكتشاف",
+      "btn_download": "تنزيل",
+      "btn_install_terminal": "التثبيت عبر الطرفية",
+      "reading": "جارٍ قراءة أحدث إصدار…",
+      "win_note": "Windows 10/11 - مثبّت 64 بت",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "اسحب التطبيق إلى مجلد التطبيقات لديك.",
+      "linux_note": "AppImage و deb و rpm",
+      "all_builds": "اعرض كل الإصدارات وقيم التحقق على GitHub",
+      "win_step1": "نزّل المثبّت",
+      "win_step2": "شغّله ووافق على الطلب",
+      "win_step3": "يستغرق التشغيل الأول نحو دقيقة، ثم يفتح التطبيق",
+      "mac_step1": "نزّل ملف .dmg",
+      "mac_step2": "اسحب التطبيق إلى التطبيقات",
+      "mac_step3": "افتحه من التطبيقات",
+      "linux_step1": "الصق الأمر أعلاه في طرفيتك",
+      "linux_step2": "يختار الحزمة المناسبة (deb أو rpm أو AppImage)",
+      "linux_step3": "شغّل OpenConstructionERP من قائمة التطبيقات لديك",
+      "dev_title": "للمطوّرين",
+      "dev_lede": "تفضّل المصدر؟ ثبّت عبر pip أو شغّل الحزمة الكاملة عبر Docker.",
+      "dev_pip_label": "حزمة Python",
+      "dev_docker_label": "الحزمة الكاملة"
+    }
+  },
   "hero": {
     "version_meta": "صدر في 2026-04-20 · الإصدار الثاني المستقر",
     "sub": "نظام ERP مفتوح المصدر لفرق البناء - تقديرات التكلفة، الجداول الزمنية، المناقصات، العقود، مهام الموقع والتقارير في تثبيت واحد. أرقام التكلفة والوقت تبقى متزامنة مع المخططات وجدول الكميات خلفها.",
@@ -67,7 +100,14 @@
     "panel_status": "مباشر · 17 طبقة",
     "mobile_modules_title": "17 وحدة مدمجة",
     "headline": "<span class=\"word\"><span>أدر</span></span> <span class=\"word\"><span>كامل</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>مشروع</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>البناء</span></span>",
-    "download_label": "أو حمّل تطبيق سطح المكتب المجاني فحسب، بلا Python، بلا Docker، لا شيء لإعداده:"
+    "download_label": "أو حمّل تطبيق سطح المكتب المجاني فحسب، بلا Python، بلا Docker، لا شيء لإعداده:",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "توقّف عن محاربة أدواتك.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "بالتقدير.",
     "sub": "التثبيت بأمر واحد. شغّله على حاسوبك المحمول، على VPS، أو على السحابة التي تختارها. استضافة ذاتية للأبد، أو دعنا نستضيفه لك.",
     "btn_install": "ثبّت الآن",
-    "btn_star": "ضع نجمة على GitHub"
+    "btn_star": "ضع نجمة على GitHub",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "المستودع، مكشوف للجميع.",

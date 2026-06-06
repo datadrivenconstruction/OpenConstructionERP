@@ -13,6 +13,39 @@
     "news": "ニュース",
     "download": "ダウンロード"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "ダウンロード",
+      "title": "<i>本物の</i>デスクトップアプリを無料で。",
+      "lede": "OpenConstructionERP のネイティブビルドです。Python も pip も Docker も不要、データベースのセットアップも不要。ファイル 1 つ、実行するだけで完了。データはあなたのマシンに留まります。",
+      "chip_no_deps": "Python・pip・Docker・DB 不要",
+      "chip_local": "データはローカルに保持",
+      "chip_fast": "初回起動は約 60 秒、以降は高速",
+      "chip_oss": "オープンソース、AGPL-3.0",
+      "flag_detected": "検出済み",
+      "btn_download": "ダウンロード",
+      "btn_install_terminal": "ターミナルでインストール",
+      "reading": "最新リリースを読み込み中…",
+      "win_note": "Windows 10/11 - 64 ビットインストーラー",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "アプリをアプリケーションフォルダにドラッグしてください。",
+      "linux_note": "AppImage、deb、rpm",
+      "all_builds": "すべてのビルドとチェックサムを GitHub で見る",
+      "win_step1": "インストーラーをダウンロード",
+      "win_step2": "実行して表示される確認を許可",
+      "win_step3": "初回起動は約 1 分かかり、その後アプリが開きます",
+      "mac_step1": ".dmg をダウンロード",
+      "mac_step2": "アプリをアプリケーションにドラッグ",
+      "mac_step3": "アプリケーションから開く",
+      "linux_step1": "上のコマンドをターミナルに貼り付け",
+      "linux_step2": "適切なパッケージ（deb、rpm、AppImage）を自動選択します",
+      "linux_step3": "アプリメニューから OpenConstructionERP を起動",
+      "dev_title": "開発者向け",
+      "dev_lede": "ソースがお好みですか? pip でインストールするか、Docker でフルスタックを起動できます。",
+      "dev_pip_label": "Python パッケージ",
+      "dev_docker_label": "フルスタック"
+    }
+  },
   "hero": {
     "version_meta": "2026-04-20リリース · 第2安定版",
     "sub": "建設チームのためのオープンソースERP - 積算、スケジュール、入札、契約、現場タスク、レポートをワンインストールで。コストと工期は図面と背後のBOQと常に同期します。",
@@ -67,7 +100,14 @@
     "panel_status": "稼働中 · 17レイヤー",
     "mobile_modules_title": "17の組み込みモジュール",
     "headline": "<span class=\"word italic\" data-anchor=\"primary\"><span>建設</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>プロジェクト</span></span> <span class=\"word\"><span>を</span></span> <span class=\"word\"><span>一括で</span></span> <span class=\"word\"><span>運用</span></span>",
-    "download_label": "または、無料のデスクトップアプリをダウンロードするだけ。Python不要、Docker不要、セットアップも一切不要です。"
+    "download_label": "または、無料のデスクトップアプリをダウンロードするだけ。Python不要、Docker不要、セットアップも一切不要です。",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "ツールとの戦いはもう終わりです。",
@@ -75,7 +115,9 @@
     "title_line2_italic": "始めましょう。",
     "sub": "コマンド一つでインストール。ノートPC、VPS、お好みのクラウドで動作します。永続的にセルフホストするか、当社にお任せください。",
     "btn_install": "今すぐインストール",
-    "btn_star": "GitHubでスター"
+    "btn_star": "GitHubでスター",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "オープンなリポジトリ。",

@@ -13,6 +13,39 @@
     "news": "Nieuws",
     "download": "Downloaden"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Downloaden",
+      "title": "Haal de <i>echte</i> desktop-app, gratis.",
+      "lede": "Een native build van OpenConstructionERP. Geen Python, geen pip, geen Docker, geen database in te stellen. Eén bestand, uitvoeren, klaar. Je gegevens blijven op je eigen machine.",
+      "chip_no_deps": "Geen Python, pip, Docker of DB",
+      "chip_local": "Gegevens blijven lokaal",
+      "chip_fast": "Eerste start ~60s, daarna snel",
+      "chip_oss": "Open source, AGPL-3.0",
+      "flag_detected": "Gedetecteerd",
+      "btn_download": "Downloaden",
+      "btn_install_terminal": "Installeren via terminal",
+      "reading": "Nieuwste release wordt gelezen…",
+      "win_note": "Windows 10/11 - 64-bit installer",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Sleep de app naar je map Programma's.",
+      "linux_note": "AppImage, deb en rpm",
+      "all_builds": "Bekijk alle builds en checksums op GitHub",
+      "win_step1": "Download de installer",
+      "win_step2": "Voer hem uit en bevestig de melding",
+      "win_step3": "De eerste start duurt ongeveer een minuut, daarna opent de app",
+      "mac_step1": "Download de .dmg",
+      "mac_step2": "Sleep de app naar Programma's",
+      "mac_step3": "Open hem vanuit Programma's",
+      "linux_step1": "Plak de opdracht hierboven in je terminal",
+      "linux_step2": "Hij kiest het juiste pakket (deb, rpm of AppImage)",
+      "linux_step3": "Start OpenConstructionERP vanuit je app-menu",
+      "dev_title": "Voor ontwikkelaars",
+      "dev_lede": "Liever de broncode? Installeer met pip of draai de volledige stack met Docker.",
+      "dev_pip_label": "Python-pakket",
+      "dev_docker_label": "Volledige stack"
+    }
+  },
   "hero": {
     "version_meta": "uitgebracht 2026-04-20 · tweede stabiele",
     "sub": "Open-source ERP voor bouwteams - calculaties, planningen, aanbestedingen, contracten, werkzaamheden op locatie en rapportage in één installatie. Kosten- en tijdcijfers blijven synchroon met de tekeningen en de bijbehorende staat van hoeveelheden.",
@@ -67,7 +100,14 @@
     "panel_status": "live · 17 lagen",
     "mobile_modules_title": "17 ingebouwde modules",
     "headline": "<span class=\"word\"><span>Stuur</span></span> <span class=\"word\"><span>het</span></span> <span class=\"word\"><span>hele</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>bouw</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>project</span></span> <span class=\"word\"><span>aan</span></span>",
-    "download_label": "Of download gewoon de gratis desktopapp, geen Python, geen Docker, niets te installeren:"
+    "download_label": "Of download gewoon de gratis desktopapp, geen Python, geen Docker, niets te installeren:",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Stop met vechten tegen je tools.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "calculeren.",
     "sub": "Installeer met één commando. Draai op je laptop, VPS of de cloud van jouw keuze. Voor altijd zelf-gehost, of laat het aan ons over.",
     "btn_install": "Nu installeren",
-    "btn_star": "Ster op GitHub"
+    "btn_star": "Ster op GitHub",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "De repo, in het openbaar.",

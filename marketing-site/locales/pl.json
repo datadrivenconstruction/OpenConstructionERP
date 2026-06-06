@@ -13,6 +13,39 @@
     "news": "Aktualności",
     "download": "Pobierz"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Pobierz",
+      "title": "Pobierz <i>prawdziwą</i> aplikację desktopową, za darmo.",
+      "lede": "Natywna kompilacja OpenConstructionERP. Bez Pythona, bez pip, bez Dockera, bez bazy danych do skonfigurowania. Jeden plik, uruchamiasz i gotowe. Twoje dane zostają na Twoim komputerze.",
+      "chip_no_deps": "Bez Pythona, pip, Dockera i bazy",
+      "chip_local": "Dane zostają lokalnie",
+      "chip_fast": "Pierwsze uruchomienie ~60s, potem szybko",
+      "chip_oss": "Open source, AGPL-3.0",
+      "flag_detected": "Wykryto",
+      "btn_download": "Pobierz",
+      "btn_install_terminal": "Zainstaluj przez terminal",
+      "reading": "Wczytywanie najnowszego wydania…",
+      "win_note": "Windows 10/11 - instalator 64-bitowy",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Przeciągnij aplikację do folderu Aplikacje.",
+      "linux_note": "AppImage, deb i rpm",
+      "all_builds": "Zobacz wszystkie kompilacje i sumy kontrolne na GitHub",
+      "win_step1": "Pobierz instalator",
+      "win_step2": "Uruchom go i zatwierdź monit",
+      "win_step3": "Pierwsze uruchomienie trwa około minuty, potem aplikacja się otwiera",
+      "mac_step1": "Pobierz plik .dmg",
+      "mac_step2": "Przeciągnij aplikację do Aplikacji",
+      "mac_step3": "Otwórz ją z Aplikacji",
+      "linux_step1": "Wklej powyższe polecenie do terminala",
+      "linux_step2": "Wybierze właściwy pakiet (deb, rpm lub AppImage)",
+      "linux_step3": "Uruchom OpenConstructionERP z menu aplikacji",
+      "dev_title": "Dla programistów",
+      "dev_lede": "Wolisz kod źródłowy? Zainstaluj przez pip albo uruchom pełny stos w Dockerze.",
+      "dev_pip_label": "Pakiet Python",
+      "dev_docker_label": "Pełny stos"
+    }
+  },
   "hero": {
     "version_meta": "wydanie 2026-04-20 · druga stabilna wersja",
     "sub": "Open-source'owy ERP dla zespołów budowlanych - kosztorysy, harmonogramy, przetargi, kontrakty, zadania na budowie i raportowanie w jednej instalacji. Koszty i terminy pozostają zsynchronizowane z rysunkami i przedmiarem robót.",
@@ -67,7 +100,14 @@
     "panel_status": "na żywo · 17 warstw",
     "mobile_modules_title": "17 wbudowanych modułów",
     "headline": "<span class=\"word\"><span>Prowadź</span></span> <span class=\"word\"><span>cały</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>projekt</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>budowlany</span></span>",
-    "download_label": "Albo po prostu pobierz darmową aplikację desktopową, bez Pythona, bez Dockera, nic do konfiguracji:"
+    "download_label": "Albo po prostu pobierz darmową aplikację desktopową, bez Pythona, bez Dockera, nic do konfiguracji:",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Przestań walczyć z narzędziami.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "kosztorysować.",
     "sub": "Instalacja jedną komendą. Uruchom na laptopie, VPS-ie lub w wybranej chmurze. Self-host na zawsze, albo pozwól nam się tym zająć.",
     "btn_install": "Zainstaluj teraz",
-    "btn_star": "Gwiazdka na GitHubie"
+    "btn_star": "Gwiazdka na GitHubie",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "Repozytorium, otwarte dla wszystkich.",

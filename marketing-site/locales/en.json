@@ -30,16 +30,36 @@
       "mac_note": "macOS 12+ - Apple Silicon",
       "mac_foot": "Drag the app into your Applications folder.",
       "linux_note": "AppImage, deb and rpm",
-      "all_builds": "View all builds and checksums on GitHub"
+      "all_builds": "View all builds and checksums on GitHub",
+      "win_step1": "Download the installer",
+      "win_step2": "Run it and accept the prompt",
+      "win_step3": "First launch takes about a minute, then the app opens",
+      "mac_step1": "Download the .dmg",
+      "mac_step2": "Drag the app to Applications",
+      "mac_step3": "Open it from Applications",
+      "linux_step1": "Paste the command above into your terminal",
+      "linux_step2": "It picks the right package (deb, rpm or AppImage)",
+      "linux_step3": "Launch OpenConstructionERP from your app menu",
+      "dev_title": "For developers",
+      "dev_lede": "Prefer the source? Install with pip or run the full stack with Docker.",
+      "dev_pip_label": "Python package",
+      "dev_docker_label": "Full stack"
     }
   },
   "hero": {
-    "version_meta": "shipped 2026-04-20",
+    "version_meta": "open source on GitHub",
     "headline": "<span class=\"word\"><span>Run</span></span> <span class=\"word\"><span>the</span></span> <span class=\"word\"><span>whole</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>construction</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>project</span></span>",
     "sub": "Open-source ERP for construction teams - estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time figures stay in sync with the drawings and the BOQ behind them.",
     "cta_install": "Install now",
     "cta_star": "Star on GitHub",
     "download_label": "Or just download the free desktop app - no Python, no Docker, nothing to set up:",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download",
     "meta_selfhost": "Self-hosted",
     "mod_projects_title": "Projects",
     "mod_projects_sub": "portfolio",
@@ -87,15 +107,17 @@
     "mod_reporting_sub": "exports",
     "mod_users_title": "Users",
     "panel_status": "live · 17 layers",
-    "mobile_modules_title": "17 built-in modules"
+    "mobile_modules_title": "110+ built-in modules"
   },
   "final_cta": {
     "title_line1": "Stop fighting your tools.",
     "title_line2_start": "Start",
     "title_line2_italic": "estimating.",
-    "sub": "Install in one command. Run on your laptop, VPS, or the cloud of your choice. Self-host forever, or let us do it.",
+    "sub": "Download the free desktop app, or install from source. Run on your laptop, VPS, or the cloud of your choice. Self-host forever, or let us do it.",
     "btn_install": "Install now",
-    "btn_star": "Star on GitHub"
+    "btn_star": "Star on GitHub",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "The repo, in the open.",
@@ -116,7 +138,7 @@
     "tab1_title": "BOQ editor",
     "tab1_hint": "Build bills of quantities, priced rows.",
     "tab2_title": "Cost database",
-    "tab2_hint": "55,000 priced positions · 18+ modules.",
+    "tab2_hint": "55,000 priced positions · 110+ modules.",
     "tab3_title": "BIM → BOQ",
     "tab3_hint": "Link IFC and RVT models to estimates.",
     "tab4_title": "AutoCAD → BOQ",
@@ -175,7 +197,7 @@
     "card_punchlist": "Snag tracker with assignees, photos and closeout reporting."
   },
   "community": {
-    "eyebrow": "<span class=\"num\">10</span> · open source",
+    "eyebrow": "<span class=\"num\">01</span> · open source",
     "lede": "AGPL-3.0 on GitHub. Issues and the roadmap live there; if you want to see what's coming next or what broke last week, it's all on the commit log.",
     "hero_eyebrow": "<span class=\"num\">GitHub</span> · datadrivenconstruction",
     "hero_title": "Star the repo, <span class=\"italic\">shape the roadmap.</span>",
@@ -197,7 +219,7 @@
   },
   "numbers": {
     "eyebrow": "<span class=\"num\">03</span> · by the numbers",
-    "lede": "Numbers from the current release. Some of these will be out of date by the time you read this - the repo moves fast.",
+    "lede": "What ships in the box on the current release. Cost data, CAD formats, modules and licensing, with the headline figures in one place.",
     "card1_eyebrow": "cost database",
     "card1_label": "ready-to-use cost items across trades and assemblies.",
     "card1_foot": "updated monthly",
@@ -211,7 +233,7 @@
     "card4_foot": "AGPL-3.0 + Commercial"
   },
   "tour": {
-    "eyebrow": "<span class=\"num\">05</span> · product tour",
+    "eyebrow": "<span class=\"num\">06</span> · product tour",
     "lede": "Seven steps from first-run to finished tender. Follow them in order or jump ahead - each one plays a short capture from the running app.",
     "stage_caption_default": "01 · onboarding",
     "info_title_default": "Onboarding",
@@ -344,8 +366,8 @@
     ]
   },
   "compare": {
-    "eyebrow": "<span class=\"num\">07</span> · how it stacks up",
-    "lede": "Honest table. Commercial suites are genuinely better at a few things - mostly integrations paid for over a decade. Everywhere else, the gap is smaller than sales teams claim.",
+    "eyebrow": "<span class=\"num\">04</span> · how it stacks up",
+    "lede": "A straight side-by-side. Commercial suites lead on a few things, mostly integrations paid for over a decade. On everything else, OpenConstructionERP already matches or beats them, at zero licence cost.",
     "col_capability": "Capability",
     "col_enterprise": "Enterprise estimating suite",
     "col_heavy_civil": "Heavy civil bid tool",
@@ -356,7 +378,7 @@
     "row_multicad": "Multi-CAD ingest (DWG / RVT / IFC / DGN)",
     "row_55k": "55,000+ cost items out of the box",
     "row_crdt": "Real-time multiplayer (CRDT)",
-    "row_20lang": "30 languages in core i18n",
+    "row_20lang": "20 languages in core i18n",
     "row_modular": "Modular plugin architecture",
     "row_cost_label": "Typical cost / seat / yr",
     "row_cost_us": "€ 0 · self-host",
@@ -387,7 +409,7 @@
     "ok": "✓ hot-reloaded · 0.8s"
   },
   "developers": {
-    "eyebrow": "<span class=\"num\">08</span> · developer experience",
+    "eyebrow": "<span class=\"num\">05</span> · developer experience",
     "lede": "Every feature is a Python package with a manifest. You can add one to a running install without rebuilding anything. The APIs are typed; the OpenAPI spec is generated, not hand-maintained.",
     "bullet1_text": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"20 6 9 17 4 12\"/></svg>Module SDK - scaffold one with <code style=\"font-family:'JetBrains Mono',monospace;background:color-mix(in oklab,var(--accent) 10%,transparent);padding:1px 6px;border-radius:4px;font-size:12px\">make module-new</code>",
     "bullet2": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"20 6 9 17 4 12\"/></svg>Typed REST API, auto-generated OpenAPI spec",
@@ -442,7 +464,7 @@
     "tier1_feature1": "All 55,000+ cost items",
     "tier1_feature2": "Multi-CAD ingest (DWG / RVT / IFC / DGN)",
     "tier1_feature3": "BOQ editor + validation pipeline",
-    "tier1_feature4": "All 18 modules out of the box",
+    "tier1_feature4": "All 110+ modules out of the box",
     "tier1_feature5": "Community support on GitHub",
     "tier1_feature6": "AGPL-3.0 license",
     "tier1_cta": "Install free",
@@ -517,7 +539,7 @@
     "q11": "How often do you ship updates?",
     "a11": "Minor releases roughly every 2–3 weeks, patch releases as needed. Changelog lives on GitHub, every tagged version has a Docker image, and migrations are reversible. You decide when to upgrade - self-hosted means nobody forces a deploy window on you.",
     "q12": "Which languages and regions are supported?",
-    "a12": "30 languages ship in the core i18n. Cost database labels, validation rule sets and classification trees are per-region modules - pick the ones you need, add your own. No hard-coded currency, no hard-coded date format."
+    "a12": "20 languages ship in the core i18n. Cost database labels, validation rule sets and classification trees are per-region modules - pick the ones you need, add your own. No hard-coded currency, no hard-coded date format."
   },
   "install_cta": {
     "also_works_with": "Also works with:",
@@ -685,7 +707,7 @@
     "sub": "A snapshot of the construction, engineering and infrastructure teams that registered in the first weeks of OpenConstructionERP - across Europe, North America, MENA, APAC and Australasia."
   },
   "ddc": {
-    "eyebrow": "<span class=\"num\">10</span> · open research lineage",
+    "eyebrow": "<span class=\"num\">07</span> · open research lineage",
     "title": "Built on DataDrivenConstruction.",
     "lede": "OpenConstructionERP grows out of a decade of open construction‑tech research.",
     "trusted_title": "clients & users of DDC solutions",
@@ -1174,14 +1196,14 @@
       "audience_partner_body_v2": "\n          You sell implementation, training, custom modules. We share margins\n          (25–55%) on everything commercial and never compete on services.\n          €0 partnership fee.",
       "audience_client_cta_v2": "See the partner deal →",
       "audience_specialist_body_v2": "\n          You build a connector, training pack or custom module and earn\n          45–55% on every commercial deal it touches. Listed in the marketplace\n          once your first artefact ships.",
-      "cmp_lede_v2": "\n        Standalone summary of what OpenConstructionERP's program offers.\n        We deliberately do not publish side-by-side numeric comparisons\n        with named vendor programs &mdash; their terms change, vary by\n        region, and are best confirmed against each vendor's\n        own public materials. Below is what we commit to in writing.\n      ",
+      "cmp_lede_v2": "\n        Standalone summary of what OpenConstructionERP's program offers.\n        We deliberately do not publish side-by-side numeric comparisons\n        with named vendor programs. Their terms change, vary by\n        region, and are best confirmed against each vendor's\n        own public materials. Below is what we commit to in writing.\n      ",
       "cmp_r1_label_v2": "Annual partnership fee<small>same for everyone</small>",
       "cmp_r1_value_v2": "<b style=\"color:var(--accent);\">&euro;0</b><small style=\"color:var(--ink-3);font-weight:400;\">no certification fee, no annual minimum, no upcharge</small>",
       "cmp_r2_label_v2": "Margin on commercial licences and SaaS<small>partner share</small>",
       "cmp_r2_value_v2": "45%<small style=\"color:var(--ink-3);font-weight:400;\">documented in the partner agreement</small>",
       "cmp_r3_value_v2": "55%<small style=\"color:var(--ink-3);font-weight:400;\">higher share for partner-authored regional content</small>",
       "cmp_r9_value_v2": "25%<small style=\"color:var(--ink-3);font-weight:400;\">paid annually on every renewing customer you brought in</small>",
-      "cmp_disclaimer_v2": "\n      Figures reflect OpenConstructionERP's own partner agreement as\n      published 2026-05-20. We deliberately avoid publishing side-by-side\n      numeric comparisons with named vendor programs &mdash; their terms,\n      regional minima and qualifying criteria change often\n      and are best confirmed against each vendor's own public materials.\n    ",
+      "cmp_disclaimer_v2": "\n      Figures reflect OpenConstructionERP's own partner agreement as\n      published 2026-05-20. We deliberately avoid publishing side-by-side\n      numeric comparisons with named vendor programs. Their terms,\n      regional minima and qualifying criteria change often\n      and are best confirmed against each vendor's own public materials.\n    ",
       "deal_h2": "One partner deal. Same for everyone.",
       "deal_lede": "\n        No tiers, no ladder, no certification gates. The same rate card from\n        day one, whoever you are.\n      ",
       "deal_table_aria": "Partner deal rate card",
@@ -2067,7 +2089,7 @@
       "video_flow": "Onboarding → New project → BoQ → BIM linking → DWG → PDF takeoff → Full estimate → Tasks → Data Explorer → AI estimate → Portfolio.",
       "see_it_title": "See It In Action",
       "gal1_title": "👤 1 · Role-Based Onboarding",
-      "gal1_desc": "Sign in as Admin / Estimator / Manager - the wizard pre-selects the right 17 of 88 modules for your role.",
+      "gal1_desc": "Sign in as Admin / Estimator / Manager - the wizard pre-selects the right 17 of 110+ modules for your role.",
       "gal2_title": "🌍 2 · New Project, Any Region",
       "gal2_desc": "Pick currency, classification standard, regional factor - live map & weather come along for free.",
       "gal3_title": "⚡ 3 · Build the Bill of Quantities",
@@ -2772,7 +2794,7 @@
       "impexp_feat3": "<strong>BOQ import/export</strong> - Excel, CSV, GAEB XML (X83), and clipboard paste with column auto-detection",
       "impexp_feat4": "<strong>PDF export</strong> - Professional PDF reports for BOQs, cost reports, schedules, safety summaries, and meeting minutes",
       "impexp_feat5": "<strong>Excel export</strong> - Full data export with formulas, formatting, section grouping, and filter-ready headers",
-      "config_img1_cap": "Role-based onboarding wizard - sign in as Admin / Estimator / Manager and the wizard pre-selects the right 17 of 88 modules for your role",
+      "config_img1_cap": "Role-based onboarding wizard - sign in as Admin / Estimator / Manager and the wizard pre-selects the right 17 of 110+ modules for your role",
       "config_img2_cap": "New project, any region - pick currency, classification standard, regional factor; map &amp; weather widgets come along automatically",
       "api_intro": "OpenConstructionERP exposes a comprehensive REST API that powers the frontend and can be used for integrations, automation, and custom workflows. Every action available in the UI - creating projects, editing BOQs, running AI estimates, searching costs - is available as an API endpoint. Interactive Swagger documentation with try-it-out buttons is available at <code>/api/docs</code> when running the backend.",
       "pci_intro": "AI-powered project analysis that scores your project across <strong>9 weighted domains</strong> and generates a completeness score from 0 to 100 (grades A through F).",

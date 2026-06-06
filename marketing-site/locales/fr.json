@@ -13,6 +13,39 @@
     "news": "Actualités",
     "download": "Télécharger"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Télécharger",
+      "title": "Obtenez la <i>vraie</i> appli de bureau, gratuitement.",
+      "lede": "Une version native d'OpenConstructionERP. Pas de Python, pas de pip, pas de Docker, aucune base de données à configurer. Un fichier, vous le lancez, c'est fait. Vos données restent sur votre machine.",
+      "chip_no_deps": "Sans Python, pip, Docker ni BdD",
+      "chip_local": "Les données restent en local",
+      "chip_fast": "Premier lancement ~60s, puis rapide",
+      "chip_oss": "Open source, AGPL-3.0",
+      "flag_detected": "Détecté",
+      "btn_download": "Télécharger",
+      "btn_install_terminal": "Installer via le terminal",
+      "reading": "Lecture de la dernière version…",
+      "win_note": "Windows 10/11 - installateur 64 bits",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Glissez l'appli dans votre dossier Applications.",
+      "linux_note": "AppImage, deb et rpm",
+      "all_builds": "Voir tous les builds et sommes de contrôle sur GitHub",
+      "win_step1": "Téléchargez l'installateur",
+      "win_step2": "Lancez-le et acceptez l'invite",
+      "win_step3": "Le premier lancement prend environ une minute, puis l'appli s'ouvre",
+      "mac_step1": "Téléchargez le .dmg",
+      "mac_step2": "Glissez l'appli dans Applications",
+      "mac_step3": "Ouvrez-la depuis Applications",
+      "linux_step1": "Collez la commande ci-dessus dans votre terminal",
+      "linux_step2": "Elle choisit le bon paquet (deb, rpm ou AppImage)",
+      "linux_step3": "Lancez OpenConstructionERP depuis votre menu d'applications",
+      "dev_title": "Pour les développeurs",
+      "dev_lede": "Vous préférez les sources ? Installez avec pip ou lancez la pile complète avec Docker.",
+      "dev_pip_label": "Paquet Python",
+      "dev_docker_label": "Pile complète"
+    }
+  },
   "hero": {
     "version_meta": "publié le 2026-04-20 · deuxième version stable",
     "sub": "ERP open-source pour les équipes du BTP - chiffrages, plannings, appels d'offres, contrats, tâches chantier et reporting en une seule installation. Les coûts et les délais restent synchronisés avec les plans et le bordereau (BOQ) associé.",
@@ -67,7 +100,14 @@
     "mod_users_title": "Utilisateurs",
     "panel_status": "en direct · 17 couches",
     "mobile_modules_title": "17 modules intégrés",
-    "headline": "<span class=\"word\"><span>Pilotez</span></span> <span class=\"word\"><span>tout</span></span> <span class=\"word\"><span>le</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projet</span></span> <span class=\"word\"><span>de</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>construction</span></span>"
+    "headline": "<span class=\"word\"><span>Pilotez</span></span> <span class=\"word\"><span>tout</span></span> <span class=\"word\"><span>le</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projet</span></span> <span class=\"word\"><span>de</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>construction</span></span>",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Arrêtez de vous battre avec vos outils.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "à chiffrer.",
     "sub": "Installation en une seule commande. Exécutez-le sur votre ordinateur portable, un VPS ou le cloud de votre choix. Auto-hébergez à vie, ou laissez-nous nous en charger.",
     "btn_install": "Installer maintenant",
-    "btn_star": "Star sur GitHub"
+    "btn_star": "Star sur GitHub",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "Le dépôt, à ciel ouvert.",

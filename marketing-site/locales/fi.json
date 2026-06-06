@@ -13,6 +13,39 @@
     "news": "Uutiset",
     "download": "Lataa"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Lataa",
+      "title": "Hanki <i>aito</i> työpöytäsovellus, ilmaiseksi.",
+      "lede": "OpenConstructionERP:n natiivikäännös. Ei Pythonia, ei pipiä, ei Dockeria, ei tietokantaa pystytettäväksi. Yksi tiedosto, käynnistä se, valmis. Tietosi pysyvät omalla koneellasi.",
+      "chip_no_deps": "Ei Pythonia, pipiä, Dockeria tai tietokantaa",
+      "chip_local": "Tiedot pysyvät paikallisesti",
+      "chip_fast": "Ensikäynnistys ~60s, sitten nopea",
+      "chip_oss": "Avoin lähdekoodi, AGPL-3.0",
+      "flag_detected": "Tunnistettu",
+      "btn_download": "Lataa",
+      "btn_install_terminal": "Asenna päätteestä",
+      "reading": "Luetaan uusinta julkaisua…",
+      "win_note": "Windows 10/11 - 64-bittinen asennusohjelma",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Vedä sovellus Ohjelmat-kansioosi.",
+      "linux_note": "AppImage, deb ja rpm",
+      "all_builds": "Katso kaikki käännökset ja tarkistussummat GitHubissa",
+      "win_step1": "Lataa asennusohjelma",
+      "win_step2": "Suorita se ja hyväksy kehote",
+      "win_step3": "Ensikäynnistys kestää noin minuutin, sitten sovellus avautuu",
+      "mac_step1": "Lataa .dmg-tiedosto",
+      "mac_step2": "Vedä sovellus Ohjelmat-kansioon",
+      "mac_step3": "Avaa se Ohjelmat-kansiosta",
+      "linux_step1": "Liitä yllä oleva komento päätteeseesi",
+      "linux_step2": "Se valitsee oikean paketin (deb, rpm tai AppImage)",
+      "linux_step3": "Käynnistä OpenConstructionERP sovellusvalikostasi",
+      "dev_title": "Kehittäjille",
+      "dev_lede": "Suositko lähdekoodia? Asenna pipillä tai aja koko pino Dockerilla.",
+      "dev_pip_label": "Python-paketti",
+      "dev_docker_label": "Koko pino"
+    }
+  },
   "hero": {
     "version_meta": "julkaistu 2026-04-20 · toinen vakaa versio",
     "sub": "Avoimen lähdekoodin ERP rakennusalan tiimeille - kustannusarviot, aikataulut, tarjouskilpailut, sopimukset, työmaatehtävät ja raportointi yhdessä asennuksessa. Kustannus- ja aikatiedot pysyvät synkronissa piirustusten ja niiden takana olevan määräluettelon kanssa.",
@@ -67,7 +100,14 @@
     "panel_status": "live · 17 kerrosta",
     "mobile_modules_title": "17 sisäänrakennettua moduulia",
     "headline": "<span class=\"word\"><span>Ohjaa</span></span> <span class=\"word\"><span>koko</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>rakennus</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projektia</span></span>",
-    "download_label": "Tai lataa vain ilmainen työpöytäsovellus, ei Pythonia, ei Dockeria, ei mitään asennettavaa:"
+    "download_label": "Tai lataa vain ilmainen työpöytäsovellus, ei Pythonia, ei Dockeria, ei mitään asennettavaa:",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Lopeta taistelu työkalujesi kanssa.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "laskea kustannuksia.",
     "sub": "Asenna yhdellä komennolla. Aja läppärillä, VPS:llä tai haluamassasi pilvessä. Itse isännöity ikuisesti - tai anna meidän hoitaa se.",
     "btn_install": "Asenna nyt",
-    "btn_star": "Tähti GitHubissa"
+    "btn_star": "Tähti GitHubissa",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "Repo avoimesti esillä.",

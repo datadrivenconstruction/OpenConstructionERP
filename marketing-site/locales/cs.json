@@ -13,6 +13,39 @@
     "news": "Novinky",
     "download": "Stáhnout"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Stáhnout",
+      "title": "Získejte <i>skutečnou</i> desktopovou aplikaci, zdarma.",
+      "lede": "Nativní sestavení OpenConstructionERP. Žádný Python, žádný pip, žádný Docker, žádná databáze k nastavení. Jeden soubor, spustíte a hotovo. Vaše data zůstávají na vašem počítači.",
+      "chip_no_deps": "Bez Pythonu, pip, Dockeru i DB",
+      "chip_local": "Data zůstávají lokálně",
+      "chip_fast": "První spuštění ~60s, pak rychle",
+      "chip_oss": "Otevřený zdroj, AGPL-3.0",
+      "flag_detected": "Rozpoznáno",
+      "btn_download": "Stáhnout",
+      "btn_install_terminal": "Instalovat přes terminál",
+      "reading": "Načítání nejnovějšího vydání…",
+      "win_note": "Windows 10/11 - 64bitový instalátor",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Přetáhněte aplikaci do složky Aplikace.",
+      "linux_note": "AppImage, deb a rpm",
+      "all_builds": "Zobrazit všechna sestavení a kontrolní součty na GitHubu",
+      "win_step1": "Stáhněte instalátor",
+      "win_step2": "Spusťte jej a potvrďte výzvu",
+      "win_step3": "První spuštění trvá asi minutu, pak se aplikace otevře",
+      "mac_step1": "Stáhněte .dmg",
+      "mac_step2": "Přetáhněte aplikaci do Aplikací",
+      "mac_step3": "Otevřete ji z Aplikací",
+      "linux_step1": "Vložte příkaz výše do svého terminálu",
+      "linux_step2": "Vybere správný balíček (deb, rpm nebo AppImage)",
+      "linux_step3": "Spusťte OpenConstructionERP z nabídky aplikací",
+      "dev_title": "Pro vývojáře",
+      "dev_lede": "Dáváte přednost zdrojákům? Nainstalujte přes pip nebo spusťte celý stack přes Docker.",
+      "dev_pip_label": "Balíček Python",
+      "dev_docker_label": "Celý stack"
+    }
+  },
   "hero": {
     "version_meta": "vydáno 2026-04-20 · druhá stabilní",
     "sub": "Open-source ERP pro stavební týmy - rozpočty, harmonogramy, tendry, smlouvy, úkoly na stavbě a reporting v jedné instalaci. Náklady a čas zůstávají v souladu s výkresy a výkazem výměr za nimi.",
@@ -67,7 +100,14 @@
     "panel_status": "živě · 17 vrstev",
     "mobile_modules_title": "17 vestavěných modulů",
     "headline": "<span class=\"word\"><span>Veďte</span></span> <span class=\"word\"><span>celý</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>stavební</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>projekt</span></span>",
-    "download_label": "Nebo si jednoduše stáhněte bezplatnou desktopovou aplikaci. Žádný Python, žádný Docker, nic se nemusí nastavovat:"
+    "download_label": "Nebo si jednoduše stáhněte bezplatnou desktopovou aplikaci. Žádný Python, žádný Docker, nic se nemusí nastavovat:",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Přestaňte bojovat se svými nástroji.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "rozpočtovat.",
     "sub": "Instalace jedním příkazem. Spusťte na notebooku, VPS nebo v cloudu dle vašeho výběru. Hostujte si sami navždy, nebo to necháme na nás.",
     "btn_install": "Instalovat nyní",
-    "btn_star": "Dát hvězdu na GitHubu"
+    "btn_star": "Dát hvězdu na GitHubu",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "Repozitář, otevřeně.",

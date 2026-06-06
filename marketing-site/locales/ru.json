@@ -13,6 +13,39 @@
     "news": "Новости",
     "download": "Загрузка"
   },
+  "home": {
+    "download_cards": {
+      "eyebrow": "Скачать",
+      "title": "Получите <i>настоящее</i> десктопное приложение, бесплатно.",
+      "lede": "Нативная сборка OpenConstructionERP. Без Python, без pip, без Docker, без настройки базы данных. Один файл, запустили и готово. Ваши данные остаются на вашем компьютере.",
+      "chip_no_deps": "Без Python, pip, Docker и БД",
+      "chip_local": "Данные остаются локально",
+      "chip_fast": "Первый запуск ~60 с, затем быстро",
+      "chip_oss": "Открытый код, AGPL-3.0",
+      "flag_detected": "Определено",
+      "btn_download": "Скачать",
+      "btn_install_terminal": "Установить через терминал",
+      "reading": "Чтение последнего релиза…",
+      "win_note": "Windows 10/11 - 64-битный установщик",
+      "mac_note": "macOS 12+ - Apple Silicon",
+      "mac_foot": "Перетащите приложение в папку «Программы».",
+      "linux_note": "AppImage, deb и rpm",
+      "all_builds": "Все сборки и контрольные суммы на GitHub",
+      "win_step1": "Скачайте установщик",
+      "win_step2": "Запустите его и подтвердите запрос",
+      "win_step3": "Первый запуск занимает около минуты, затем приложение откроется",
+      "mac_step1": "Скачайте .dmg",
+      "mac_step2": "Перетащите приложение в «Программы»",
+      "mac_step3": "Откройте его из «Программ»",
+      "linux_step1": "Вставьте команду выше в свой терминал",
+      "linux_step2": "Она выберет нужный пакет (deb, rpm или AppImage)",
+      "linux_step3": "Запустите OpenConstructionERP из меню приложений",
+      "dev_title": "Для разработчиков",
+      "dev_lede": "Предпочитаете исходники? Установите через pip или запустите полный стек в Docker.",
+      "dev_pip_label": "Пакет Python",
+      "dev_docker_label": "Полный стек"
+    }
+  },
   "hero": {
     "version_meta": "выпущено 2026-04-20",
     "sub": "Open-source ERP для строительных команд - сметы, графики, тендеры, контракты, задачи на площадке и отчётность в одной установке. Стоимость и сроки всегда синхронизированы с чертежами и BOQ, стоящими за ними.",
@@ -67,7 +100,14 @@
     "mod_users_title": "Пользователи",
     "panel_status": "live · 17 слоёв",
     "mobile_modules_title": "17 встроенных модулей",
-    "headline": "<span class=\"word\"><span>Управляй</span></span> <span class=\"word\"><span>всем</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>строительным</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>проектом</span></span>"
+    "headline": "<span class=\"word\"><span>Управляй</span></span> <span class=\"word\"><span>всем</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>строительным</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>проектом</span></span>",
+    "dl_btn_generic": "Download the desktop app",
+    "dl_btn_windows": "Download for Windows",
+    "dl_btn_macos": "Download for macOS",
+    "dl_btn_linux": "Download for Linux",
+    "dl_btn_sub": "Free - no Python, no Docker, nothing to set up",
+    "all_platforms": "All platforms",
+    "float_cta": "Download"
   },
   "final_cta": {
     "title_line1": "Хватит воевать со своими инструментами.",
@@ -75,7 +115,9 @@
     "title_line2_italic": "считать смету.",
     "sub": "Установка одной командой. Запускайте на ноутбуке, VPS или в облаке на ваш выбор. Self-hosted навсегда - или мы возьмём это на себя.",
     "btn_install": "Установить сейчас",
-    "btn_star": "Star на GitHub"
+    "btn_star": "Star на GitHub",
+    "btn_download": "Download the app",
+    "btn_download_sub": "Windows, macOS, Linux - free and open source"
   },
   "sections": {
     "community_title": "Репозиторий - всё открыто.",
