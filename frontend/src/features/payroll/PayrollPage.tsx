@@ -271,6 +271,12 @@ export default function PayrollPage() {
             onClick: () => navigate('/field-reports'),
           },
           {
+            label: t('payroll.intro_link_resources', {
+              defaultValue: 'Resources & Crew (pay rates)',
+            }),
+            onClick: () => navigate('/resources'),
+          },
+          {
             label: t('payroll.intro_link_5d', { defaultValue: '5D Cost' }),
             onClick: () => navigate('/5d'),
           },

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   useQuery,
   useMutation,
@@ -302,6 +302,7 @@ function downloadCsv(filename: string, csv: string) {
 export function ResourcesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState<Tab>('resources');
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<ResourceType | ''>('');
@@ -327,6 +328,19 @@ export function ResourcesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Deep link: /resources?resourceId=<id> opens the matching resource drawer
+  // (used by Capacity Planning's clickable resource labels). Consume the param
+  // once so a back/forward or manual close does not re-open the drawer, and
+  // the URL stays clean.
+  useEffect(() => {
+    const rid = searchParams.get('resourceId');
+    if (!rid) return;
+    setSelectedId(rid);
+    const next = new URLSearchParams(searchParams);
+    next.delete('resourceId');
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
   const [createOpen, setCreateOpen] = useState(false);
   const [proposeOpen, setProposeOpen] = useState(false);
   // Per-row edit / delete state. Lifted up here so the modal / confirm
@@ -546,14 +560,26 @@ export function ResourcesPage() {
         actions={
           <>
             {tab === 'assignments' && (
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<Plus size={14} />}
-                onClick={() => setProposeOpen(true)}
-              >
-                {t('resources.propose', { defaultValue: 'Propose Assignment' })}
-              </Button>
+              <>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<CalendarRange size={14} />}
+                  onClick={() => navigate('/portfolio/capacity')}
+                >
+                  {t('resources.assignments_capacity', {
+                    defaultValue: 'Portfolio capacity',
+                  })}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<Plus size={14} />}
+                  onClick={() => setProposeOpen(true)}
+                >
+                  {t('resources.propose', { defaultValue: 'Propose Assignment' })}
+                </Button>
+              </>
             )}
             {tab === 'resources' && (
               <Button
@@ -598,6 +624,14 @@ export function ResourcesPage() {
             : undefined
         }
         links={[
+          {
+            label: t('resources.intro_link_capacity', { defaultValue: 'Capacity Planning' }),
+            onClick: () => navigate('/portfolio/capacity'),
+          },
+          {
+            label: t('resources.intro_link_leveling', { defaultValue: 'Resource Leveling' }),
+            onClick: () => navigate('/portfolio/leveling'),
+          },
           {
             label: t('resources.intro_link_schedule', { defaultValue: '4D Schedule' }),
             onClick: () => navigate('/schedule'),
