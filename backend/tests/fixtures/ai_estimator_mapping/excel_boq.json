@@ -1,0 +1,48 @@
+{
+  "name": "excel_boq_three_lines",
+  "comment": "Founder test matrix case 5 (design section 8): an uploaded Excel BOQ, three measured line items. Fed to a run as pre-parsed rows (source=excel). Each row becomes one signature group with its measured quantity; the multi-pass mapping then grounds each line to a real rate or an honest needs_human. The 'unit' is the catalogue measurement unit the upstream Excel parser emits per line.",
+  "currency": "EUR",
+  "rows": [
+    {
+      "description": "120 m2 brick wall, 240mm",
+      "qty": 120.0,
+      "unit": "m2",
+      "category": "masonry"
+    },
+    {
+      "description": "30 m3 C25/30 concrete foundation",
+      "qty": 30.0,
+      "unit": "m3",
+      "category": "foundations"
+    },
+    {
+      "description": "2 pcs galvanised steel door",
+      "qty": 2.0,
+      "unit": "pcs",
+      "category": "openings"
+    }
+  ],
+  "expected_groups": [
+    {
+      "description_contains": "brick wall",
+      "unit": "m2",
+      "trade": "masonry",
+      "quantity": 120.0,
+      "source": "file"
+    },
+    {
+      "description_contains": "concrete foundation",
+      "unit": "m3",
+      "trade": "foundations",
+      "quantity": 30.0,
+      "source": "file"
+    },
+    {
+      "description_contains": "steel door",
+      "unit": "pcs",
+      "trade": "openings",
+      "quantity": 2.0,
+      "source": "file"
+    }
+  ]
+}
