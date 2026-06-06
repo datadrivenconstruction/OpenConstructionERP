@@ -1336,6 +1336,7 @@ class RequirementsService:
                     "entity": req.entity,
                     "attribute": req.attribute,
                     "priority": req.priority,
+                    "linked_position_id": req.linked_position_id,
                     "cells": cells,
                     "coverage_pct": coverage["coverage_pct"],
                 }

@@ -275,6 +275,53 @@ class TestMatrixPerformance:
         assert payload["coverage_pct"] == pytest.approx(100.0, abs=0.01)
 
     @pytest.mark.asyncio
+    async def test_matrix_surfaces_linked_position_id(self, session: AsyncSession) -> None:
+        """A requirement linked to a BOQ position exposes linked_position_id on its row.
+
+        Powers the matrix BOQ chip (CONN-29) that deep-links to /boq. FK
+        enforcement is off in this fixture so we set the id directly without a
+        backing Position row.
+        """
+        project_id = uuid.uuid4()
+        svc = RequirementsService(session)
+        req_set = await _make_req_set(session, project_id)
+
+        linked_pos = uuid.uuid4()
+        linked_req = await _make_requirement(session, req_set.id, entity="wall", attribute="fire_rating")
+        linked_req.linked_position_id = linked_pos
+        # A second requirement with no link must report None.
+        await _make_requirement(session, req_set.id, entity="roof", attribute="pitch")
+        await session.commit()
+
+        payload = await svc.get_project_matrix(project_id)
+        by_entity = {row["entity"]: row for row in payload["rows"]}
+        assert by_entity["wall"]["linked_position_id"] == linked_pos
+        assert by_entity["roof"]["linked_position_id"] is None
+
+    @pytest.mark.asyncio
+    async def test_matrix_route_exposes_linked_position_id(self, db_session: AsyncSession) -> None:
+        """The HTTP matrix response serializes linked_position_id as a string."""
+        from app.modules.requirements.permissions import register_requirements_permissions
+
+        register_requirements_permissions()
+
+        owner_id = await _make_user(db_session)
+        project_id = await _make_project(db_session, owner_id)
+
+        req_set = await _make_req_set(db_session, project_id)
+        req = await _make_requirement(db_session, req_set.id)
+        linked_pos = uuid.uuid4()
+        req.linked_position_id = linked_pos
+        await db_session.commit()
+
+        app = _build_app(db_session, caller_id=str(owner_id))
+        client = TestClient(app)
+        resp = client.get(f"/v1/requirements/projects/{project_id}/matrix/")
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert body["rows"][0]["linked_position_id"] == str(linked_pos)
+
+    @pytest.mark.asyncio
     async def test_matrix_filter_by_deliverable_type(self, session: AsyncSession) -> None:
         """Filtering by deliverable_type returns only that column."""
         project_id = uuid.uuid4()

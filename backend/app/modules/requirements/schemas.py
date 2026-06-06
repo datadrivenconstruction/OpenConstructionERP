@@ -348,6 +348,9 @@ class MatrixRow(BaseModel):
     entity: str
     attribute: str
     priority: str = "must"
+    # The BOQ position this requirement is linked to, if any. Surfaced so the
+    # matrix can show a clickable "BOQ" chip deep-linking to /boq.
+    linked_position_id: UUID | None = None
     cells: dict[str, MatrixCell] = Field(default_factory=dict)
     coverage_pct: float = 0.0
 

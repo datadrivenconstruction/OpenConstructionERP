@@ -27,7 +27,9 @@ import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import {
   ClipboardList,
+  ExternalLink,
   Filter as FilterIcon,
+  Link2,
   Pencil,
   Plus,
   RefreshCw,
@@ -117,6 +119,28 @@ const TYPE_LABEL: Record<string, string> = {
   pset: 'PSET',
   other: 'Other',
 };
+
+// Where each ISO 19650 deliverable type lives in the app. The cell editor
+// surfaces an "Open deliverable" link routing to the module that proves the
+// requirement (a model in the BIM viewer, a drawing in markups, a schedule in
+// the 4D Gantt, a report in Reports, etc.). The deliverable rows carry only a
+// type (no per-record FK on the backend), so we deep-link to the module home
+// scoped to the active project rather than a single record.
+const DELIVERABLE_ROUTE: Record<string, string> = {
+  model: '/bim',
+  drawing: '/markups',
+  schedule: '/schedule',
+  report: '/reports',
+  cobie: '/files',
+  pset: '/bim',
+  other: '/files',
+};
+
+/** Route for a deliverable type, scoped to the active project where useful. */
+function deliverableRoute(deliverableType: string, projectId: string): string {
+  const base = DELIVERABLE_ROUTE[deliverableType] ?? '/files';
+  return projectId ? `${base}?project=${encodeURIComponent(projectId)}` : base;
+}
 
 // Tailwind colour classes per status — heatmap cell background +
 // accent border + text. Keeps the matrix scannable at a glance.
@@ -484,12 +508,14 @@ interface CellEditorState {
 
 interface CellEditorProps {
   state: CellEditorState;
+  projectId: string;
   onClose: () => void;
   onSaved: () => void;
 }
 
-function CellEditor({ state, onClose, onSaved }: CellEditorProps) {
+function CellEditor({ state, projectId, onClose, onSaved }: CellEditorProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const toast = useToastStore((s) => s.addToast);
   const isEditing = state.cell?.deliverable_id != null;
 
@@ -636,6 +662,36 @@ function CellEditor({ state, onClose, onSaved }: CellEditorProps) {
           <span className="text-content-secondary">{t('requirements.matrix.accepted_at', { defaultValue: 'Accepted at' })}</span>
           <input type="datetime-local" value={acceptedAt} onChange={(e) => setAcceptedAt(e.target.value)} className={INPUT_CLASS} />
         </label>
+      </WideModalSection>
+
+      {/* Open deliverable: route to the module that proves this requirement
+          (model -> BIM viewer, drawing -> markups, schedule -> 4D, etc.). */}
+      <WideModalSection title={t('requirements.matrix.open_deliverable', { defaultValue: 'Open deliverable' })} columns={1}>
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-content-secondary">
+            {t('requirements.matrix.open_deliverable_hint', {
+              defaultValue:
+                'Jump to where this {{type}} deliverable lives to review or attach the evidence that satisfies the requirement.',
+              type: typeLabel,
+            })}
+          </p>
+          <div>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<ExternalLink size={14} />}
+              onClick={() => {
+                navigate(deliverableRoute(state.deliverableType, projectId));
+                onClose();
+              }}
+            >
+              {t('requirements.matrix.open_in_module', {
+                defaultValue: 'Open {{type}}',
+                type: typeLabel,
+              })}
+            </Button>
+          </div>
+        </div>
       </WideModalSection>
     </WideModal>
   );
@@ -1041,6 +1097,21 @@ export function RequirementsMatrixPage() {
                           </span>
                         )}
                       </div>
+                      {row.linked_position_id && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            navigate(`/boq?positionId=${encodeURIComponent(row.linked_position_id as string)}`)
+                          }
+                          title={t('requirements.matrix.open_boq_position', {
+                            defaultValue: 'Open the linked BOQ position',
+                          })}
+                          className="mt-1 inline-flex items-center gap-1 rounded-full border border-oe-blue/30 bg-oe-blue/10 px-2 py-0.5 text-[11px] font-medium text-oe-blue transition hover:bg-oe-blue/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                        >
+                          <Link2 size={11} />
+                          {t('requirements.matrix.linked_boq', { defaultValue: 'BOQ' })}
+                        </button>
+                      )}
                     </td>
                     {sets.length > 1 && !setFilter && (
                       <td className="px-3 py-2 align-middle text-xs text-content-secondary">
@@ -1129,6 +1200,7 @@ export function RequirementsMatrixPage() {
       />
       <CellEditor
         state={cellEditor}
+        projectId={projectId}
         onClose={() => setCellEditor({ open: false, row: null, deliverableType: '', cell: null })}
         onSaved={refresh}
       />

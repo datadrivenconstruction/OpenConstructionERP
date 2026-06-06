@@ -1214,6 +1214,7 @@ async def get_project_eir_matrix(
             entity=row["entity"],
             attribute=row["attribute"],
             priority=row["priority"],
+            linked_position_id=row.get("linked_position_id"),
             cells={k: MatrixCell(**v) for k, v in row["cells"].items()},
             coverage_pct=row["coverage_pct"],
         )
