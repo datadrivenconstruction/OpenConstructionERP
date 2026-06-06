@@ -20,6 +20,8 @@ import {
   ListPlus,
   FileText,
   Info,
+  Users,
+  Check,
 } from 'lucide-react';
 import {
   Button,
@@ -75,6 +77,11 @@ import {
   type BidPackageLineItem,
   type LevelingTable as LevelingTableData,
 } from './api';
+import {
+  listSubcontractors,
+  type Subcontractor,
+  type PrequalStatus,
+} from '@/features/subcontractors/api';
 
 const BID_TAB_IDS = ['packages', 'invitations', 'submissions', 'qa'] as const;
 type Tab = (typeof BID_TAB_IDS)[number];
@@ -199,6 +206,158 @@ function listQAForPackage(packageId: string): Promise<BidQA[]> {
   return apiGet<BidQA[]>(
     `/v1/bid-management/q-and-a/?package_id=${packageId}&limit=200`,
   ).catch(() => [] as BidQA[]);
+}
+
+/* ── Subcontractor directory picker ─────────────────────────────────────── */
+
+// CONN-39 / CONN-41: invite or add a bid against a known subcontractor instead
+// of retyping a company by hand. Resolves the firm's primary contact email so
+// the invitation goes to the right place.
+interface SubcontractorContactLite {
+  id: string;
+  email: string | null;
+  primary: boolean;
+}
+
+const PREQUAL_PICKER_VARIANT: Record<
+  PrequalStatus,
+  'neutral' | 'blue' | 'success' | 'warning' | 'error'
+> = {
+  pending: 'warning',
+  approved: 'success',
+  suspended: 'warning',
+  rejected: 'error',
+};
+
+async function resolveSubcontractorEmail(subId: string): Promise<string> {
+  const contacts = await apiGet<SubcontractorContactLite[]>(
+    `/v1/subcontractors/subcontractors/${subId}/contacts`,
+  ).catch(() => [] as SubcontractorContactLite[]);
+  const primary = contacts.find((c) => c.primary && c.email);
+  return (primary?.email || contacts.find((c) => c.email)?.email || '').trim();
+}
+
+function SubcontractorPickerModal({
+  onPick,
+  onClose,
+}: {
+  onPick: (sub: Subcontractor, email: string) => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const [search, setSearch] = useState('');
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+
+  const subsQ = useQuery({
+    queryKey: ['bid-management', 'subcontractor-directory'],
+    queryFn: () => listSubcontractors({ active_only: true, limit: 200 }),
+    staleTime: 60_000,
+  });
+
+  const rows = useMemo(() => {
+    const items = subsQ.data ?? [];
+    const s = search.trim().toLowerCase();
+    if (!s) return items;
+    return items.filter(
+      (it) =>
+        it.legal_name.toLowerCase().includes(s) ||
+        (it.trade_name || '').toLowerCase().includes(s) ||
+        it.trade_categories.some((c) => c.toLowerCase().includes(s)),
+    );
+  }, [subsQ.data, search]);
+
+  const pick = async (sub: Subcontractor) => {
+    setResolvingId(sub.id);
+    const email = await resolveSubcontractorEmail(sub.id);
+    setResolvingId(null);
+    onPick(sub, email);
+    onClose();
+  };
+
+  return (
+    <WideModal
+      open
+      onClose={onClose}
+      title={t('bid_management.pick_sub_title', {
+        defaultValue: 'Invite from Subcontractor Directory',
+      })}
+      subtitle={t('bid_management.pick_sub_subtitle', {
+        defaultValue:
+          'Pick a prequalified subcontractor. The prequalification status is shown so you compare like for like before inviting.',
+      })}
+      size="lg"
+      footer={
+        <Button variant="ghost" onClick={onClose}>
+          {t('common.cancel', { defaultValue: 'Cancel' })}
+        </Button>
+      }
+    >
+      <div className="space-y-3">
+        <div className="relative">
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary"
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('bid_management.pick_sub_search', {
+              defaultValue: 'Search subcontractors by name or trade…',
+            })}
+            className={clsx(inputCls, 'pl-8')}
+            autoFocus
+          />
+        </div>
+        {subsQ.isLoading ? (
+          <SkeletonTable rows={5} columns={3} />
+        ) : rows.length === 0 ? (
+          <EmptyState
+            icon={<Users size={22} />}
+            title={t('bid_management.pick_sub_empty', {
+              defaultValue: 'No subcontractors found',
+            })}
+            description={t('bid_management.pick_sub_empty_desc', {
+              defaultValue: 'Add subcontractors in the directory, then invite them here.',
+            })}
+          />
+        ) : (
+          <div className="max-h-[420px] overflow-y-auto rounded-lg border border-border-light divide-y divide-border-light">
+            {rows.map((sub) => (
+              <button
+                key={sub.id}
+                type="button"
+                onClick={() => pick(sub)}
+                disabled={resolvingId !== null}
+                className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left hover:bg-surface-secondary disabled:opacity-60"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-content-primary">
+                    {sub.legal_name}
+                  </span>
+                  {sub.trade_categories.length > 0 && (
+                    <span className="block truncate text-xs text-content-tertiary">
+                      {sub.trade_categories.slice(0, 3).join(', ')}
+                    </span>
+                  )}
+                </span>
+                <Badge variant={PREQUAL_PICKER_VARIANT[sub.prequalification_status]} dot>
+                  {t(`bid_management.prequal_${sub.prequalification_status}`, {
+                    defaultValue: sub.prequalification_status,
+                  })}
+                </Badge>
+                {resolvingId === sub.id ? (
+                  <Loader2 size={14} className="shrink-0 animate-spin text-content-tertiary" />
+                ) : (
+                  <Check size={14} className="shrink-0 text-content-tertiary" />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </WideModal>
+  );
 }
 
 export function BidManagementPage() {
@@ -2209,6 +2368,9 @@ function InlineInviteForm({ packageId }: { packageId: string }) {
   const addToast = useToastStore((s) => s.addToast);
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
+  // CONN-39: invite straight from the Subcontractor Directory instead of
+  // retyping a firm by hand, prefilling the company and its primary contact.
+  const [pickerOpen, setPickerOpen] = useState(false);
   const inviteMut = useMutation({
     mutationFn: async () => {
       const bidder = await createBidder({
@@ -2243,9 +2405,21 @@ function InlineInviteForm({ packageId }: { packageId: string }) {
 
   return (
     <Card padding="sm">
-      <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
-        {t('bid_management.invite_bidder', { defaultValue: 'Invite a bidder' })}
-      </p>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+          {t('bid_management.invite_bidder', { defaultValue: 'Invite a bidder' })}
+        </p>
+        <Button
+          size="sm"
+          variant="ghost"
+          icon={<Users size={14} />}
+          onClick={() => setPickerOpen(true)}
+        >
+          {t('bid_management.pick_from_directory', {
+            defaultValue: 'Pick from Subcontractors',
+          })}
+        </Button>
+      </div>
       <div className="space-y-2">
         <input
           value={company}
@@ -2270,6 +2444,23 @@ function InlineInviteForm({ packageId }: { packageId: string }) {
           {t('bid_management.invite', { defaultValue: 'Invite' })}
         </Button>
       </div>
+      {pickerOpen && (
+        <SubcontractorPickerModal
+          onPick={(sub, resolvedEmail) => {
+            setCompany(sub.legal_name);
+            if (resolvedEmail) setEmail(resolvedEmail);
+            if (!resolvedEmail) {
+              addToast({
+                type: 'info',
+                title: t('bid_management.sub_no_email', {
+                  defaultValue: 'No contact email on file - enter one to invite.',
+                }),
+              });
+            }
+          }}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </Card>
   );
 }
