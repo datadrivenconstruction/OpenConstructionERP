@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   FileCheck,
@@ -458,12 +458,14 @@ const SubmittalRow = React.memo(function SubmittalRow({
   onSubmit,
   onReview,
   onEdit,
+  onOpenBoqPosition,
 }: {
   submittal: Submittal;
   projectId: string;
   onSubmit: (id: string) => void;
   onReview: (s: Submittal) => void;
   onEdit: (s: Submittal) => void;
+  onOpenBoqPosition: (positionId: string) => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -590,18 +592,34 @@ const SubmittalRow = React.memo(function SubmittalRow({
             </span>
           </div>
 
-          {/* Linked BOQ items */}
-          {(() => {
-            const ids = (submittal as unknown as { linked_boq_item_ids?: string[] }).linked_boq_item_ids;
-            return ids && ids.length > 0 ? (
-              <div className="text-xs text-content-tertiary">
-                {t('submittals.linked_boq', {
-                  defaultValue: 'Linked to {{count}} BOQ position(s)',
-                  count: ids.length,
+          {/* Linked BOQ items — each id is a live pill that deep-links to
+              the BOQ position it covers, closing CONN-13. */}
+          {submittal.linked_boq_item_ids.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-content-tertiary">
+                {t('submittals.linked_boq_label', {
+                  defaultValue: 'Linked BOQ positions:',
                 })}
-              </div>
-            ) : null;
-          })()}
+              </span>
+              {submittal.linked_boq_item_ids.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenBoqPosition(id);
+                  }}
+                  title={t('submittals.open_linked_boq_hint', {
+                    defaultValue: 'Open this BOQ position',
+                  })}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-oe-blue bg-oe-blue-subtle border border-oe-blue/30 hover:bg-oe-blue/10 transition-colors max-w-[140px]"
+                >
+                  <FileCheck size={11} className="shrink-0" />
+                  <span className="truncate font-mono">{id.slice(0, 8)}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Document reference */}
           <p className="text-2xs text-content-quaternary">
@@ -704,16 +722,41 @@ export function SubmittalsPage() {
   const { t } = useTranslation();
   const { projectId: routeProjectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
 
+  // Deep-link from the CDE container row: ?create=true&container_id=<id>
+  // opens the create flow prefilled so the CDE -> Submittal document-control
+  // hand-off is one click (CONN-14). The source container id is carried into
+  // the create payload metadata so the link is recorded server-side.
+  const autoCreate = searchParams.get('create') === 'true';
+  const sourceContainerId = searchParams.get('container_id') || '';
+
   // State
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(autoCreate);
   const [reviewingSubmittal, setReviewingSubmittal] = useState<Submittal | null>(null);
   const [editingSubmittal, setEditingSubmittal] = useState<Submittal | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<SubmittalStatus | ''>('');
+
+  // Strip the deep-link params once consumed so a reload / back-button does
+  // not re-open the create modal. Keeps the source container id in a ref so
+  // the create handler can still read it after the URL is cleaned.
+  const sourceContainerIdRef = useRef(sourceContainerId);
+  const hasCleanedParams = useRef(false);
+  useEffect(() => {
+    if (hasCleanedParams.current) return;
+    hasCleanedParams.current = true;
+    if (autoCreate) {
+      sourceContainerIdRef.current = sourceContainerId;
+      const next = new URLSearchParams(searchParams);
+      next.delete('create');
+      next.delete('container_id');
+      setSearchParams(next, { replace: true });
+    }
+  }, [autoCreate, sourceContainerId, searchParams, setSearchParams]);
 
   // Data
   const { data: projects = [] } = useQuery({
@@ -858,6 +901,9 @@ export function SubmittalsPage() {
         addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
         return;
       }
+      // When the create flow was opened from a CDE container, record the
+      // source container id so the document-control loop is traceable.
+      const containerId = sourceContainerIdRef.current;
       createMut.mutate({
         project_id: projectId,
         title: formData.title,
@@ -865,9 +911,19 @@ export function SubmittalsPage() {
         spec_section: formData.spec_section || undefined,
         submittal_type: formData.type,
         date_required: formData.date_required || undefined,
+        ...(containerId && { metadata: { cde_container_id: containerId } }),
       });
+      sourceContainerIdRef.current = '';
     },
     [createMut, projectId, addToast, t],
+  );
+
+  // Deep-link a linked-BOQ pill to the BOQ position it covers (CONN-13).
+  const handleOpenBoqPosition = useCallback(
+    (positionId: string) => {
+      navigate(`/boq?positionId=${encodeURIComponent(positionId)}`);
+    },
+    [navigate],
   );
 
   const { confirm, ...confirmProps } = useConfirm();
@@ -963,6 +1019,14 @@ export function SubmittalsPage() {
           {
             label: t('boq.title', { defaultValue: 'Bill of Quantities' }),
             onClick: () => navigate('/boq'),
+          },
+          {
+            label: t('rfi.title', { defaultValue: 'RFIs' }),
+            onClick: () => navigate('/rfi'),
+          },
+          {
+            label: t('cde.title', { defaultValue: 'Common Data Environment' }),
+            onClick: () => navigate('/cde'),
           },
           {
             label: t('transmittals.title', { defaultValue: 'Transmittals' }),
@@ -1139,6 +1203,7 @@ export function SubmittalsPage() {
                   onSubmit={handleSubmit}
                   onReview={handleReview}
                   onEdit={handleEdit}
+                  onOpenBoqPosition={handleOpenBoqPosition}
                 />
               ))}
             </Card>

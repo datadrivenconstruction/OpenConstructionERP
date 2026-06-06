@@ -42,6 +42,10 @@ export interface Submittal {
   date_required: string | null;
   description: string | null;
   review_notes: string | null;
+  /** BOQ position ids this submittal covers (deep-linked from the detail row). */
+  linked_boq_item_ids: string[];
+  /** Flexible blob; carries the source CDE container id when created from CDE. */
+  metadata: Record<string, unknown>;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -59,6 +63,8 @@ export interface CreateSubmittalPayload {
   spec_section?: string;
   submittal_type: SubmittalType;
   date_required?: string;
+  /** Optional blob persisted as-is; used to record the source CDE container. */
+  metadata?: Record<string, unknown>;
 }
 
 export interface UpdateSubmittalPayload {
@@ -86,7 +92,10 @@ export interface ApproveSubmittalPayload {
 
 /* ── Wire <-> UI normaliser ────────────────────────────────────────────── */
 
-type SubmittalWire = Omit<Submittal, 'type' | 'revision'> & {
+type SubmittalWire = Omit<
+  Submittal,
+  'type' | 'revision' | 'linked_boq_item_ids' | 'metadata'
+> & {
   type?: SubmittalType;
   submittal_type?: SubmittalType;
   revision?: number;
@@ -94,6 +103,8 @@ type SubmittalWire = Omit<Submittal, 'type' | 'revision'> & {
   description?: string | null;
   review_notes?: string | null;
   ball_in_court_name?: string | null;
+  linked_boq_item_ids?: string[] | null;
+  metadata?: Record<string, unknown> | null;
 };
 
 function normaliseSubmittal(s: SubmittalWire): Submittal {
@@ -107,6 +118,8 @@ function normaliseSubmittal(s: SubmittalWire): Submittal {
     description: s.description ?? null,
     review_notes: s.review_notes ?? null,
     ball_in_court_name: s.ball_in_court_name ?? null,
+    linked_boq_item_ids: s.linked_boq_item_ids ?? [],
+    metadata: s.metadata ?? {},
   } as Submittal;
 }
 

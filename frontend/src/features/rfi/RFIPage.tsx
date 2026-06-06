@@ -1853,6 +1853,10 @@ export function RFIPage() {
             onClick: () => navigate('/variations'),
           },
           {
+            label: t('submittals.title', { defaultValue: 'Submittals' }),
+            onClick: () => navigate('/submittals'),
+          },
+          {
             label: t('correspondence.title', { defaultValue: 'Correspondence' }),
             onClick: () => navigate('/correspondence'),
           },
