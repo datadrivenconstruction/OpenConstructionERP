@@ -35,6 +35,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 from fastapi import HTTPException
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.ai_estimator import benchmarks, schemas
@@ -2359,6 +2360,32 @@ class AiEstimatorService:
             updated_at=run.updated_at,
         )
 
+    @staticmethod
+    def _mapping_trace_out(raw: Any) -> schemas.MappingTrace | None:
+        """Serialise the stored multi-pass trace into the typed schema (design 3.3).
+
+        The trace lives in the group's free ``metadata_.mapping_trace`` JSON the
+        matcher writes (passes + final_method + optional needs_human_reason). It
+        is display-only provenance, so this read path is deliberately defensive:
+        an absent, non-dict or partially-malformed trace yields ``None`` rather
+        than ever crashing the group-detail endpoint. The pass key ``pass`` is
+        mapped onto the ``pass_`` field alias by the model.
+
+        Args:
+            raw: The ``metadata_.mapping_trace`` value (any JSON-decoded type).
+
+        Returns:
+            The typed :class:`schemas.MappingTrace`, or ``None`` when the group
+            has not been matched yet or the stored trace is unusable.
+        """
+        if not isinstance(raw, dict) or not raw:
+            return None
+        try:
+            return schemas.MappingTrace.model_validate(raw)
+        except ValidationError as exc:  # never break the detail view over bad provenance
+            logger.warning("ai_estimator: unreadable mapping_trace, omitting: %s", exc)
+            return None
+
     def group_to_summary(self, grp: AiEstimatorGroup) -> schemas.GroupSummary:
         """Serialise a group to the grid-row GroupSummary."""
         unit = grp.chosen_unit or "pcs"
@@ -2394,7 +2421,6 @@ class AiEstimatorService:
         summary = self.group_to_summary(grp)
         meta = grp.metadata_ or {}
         assumptions = meta.get("assumptions")
-        mapping_trace = meta.get("mapping_trace")
         return schemas.GroupDetail(
             **summary.model_dump(),
             run_id=grp.run_id,
@@ -2403,7 +2429,7 @@ class AiEstimatorService:
             source=(str(meta["source"]) if meta.get("source") else None),
             derivation=(str(meta["derivation"]) if meta.get("derivation") else None),
             assumptions=[str(a) for a in assumptions] if isinstance(assumptions, list) else [],
-            mapping_trace=mapping_trace if isinstance(mapping_trace, dict) else None,
+            mapping_trace=self._mapping_trace_out(meta.get("mapping_trace")),
             resources=[
                 schemas.ResourceOut(
                     name=str(r.get("name") or ""),
