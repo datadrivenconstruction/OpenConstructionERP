@@ -681,6 +681,11 @@ class MetaResponse(BaseModel):
     score_thresholds: ScoreThresholds
     construction_stages: list[str] = Field(default_factory=list)
     match_group_cap: int
+    # The rate-sanity band factor (decision 2 of the v3 design): a mapping
+    # candidate whose per-base-unit rate is more than this multiple away from
+    # the per-run catalogue median for its (trade, unit) is flagged a low-
+    # confidence outlier for human review. Never replaces a real DB rate.
+    rate_sanity_band_factor: float
 
 
 # ── Intake v2 (conversational intake in front of stage 1) ──────────────────

@@ -655,6 +655,7 @@ async def apply_run(
 async def get_meta(_current_user_id: CurrentUserId) -> schemas.MetaResponse:
     """Expose the module's UI-facing constants so the frontend never hardcodes
     magic numbers. Every value is read from its single existing definition."""
+    from app.modules.ai_estimator.benchmarks import DEFAULT_BAND_FACTOR
     from app.modules.ai_estimator.service import (
         CONFIDENCE_HIGH_THRESHOLD,
         CONFIDENCE_MEDIUM_THRESHOLD,
@@ -667,6 +668,7 @@ async def get_meta(_current_user_id: CurrentUserId) -> schemas.MetaResponse:
         ),
         construction_stages=list(schemas.CONSTRUCTION_STAGES),
         match_group_cap=schemas.DEFAULT_MATCH_GROUP_CAP,
+        rate_sanity_band_factor=DEFAULT_BAND_FACTOR,
     )
 
 
