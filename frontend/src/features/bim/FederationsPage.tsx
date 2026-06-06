@@ -1022,14 +1022,41 @@ function FederationDetailDrawer({
             <p className="mt-0.5 text-sm text-slate-500">{data.description}</p>
           ) : null}
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded p-1 text-slate-500 hover:bg-slate-100"
-          aria-label={t('common.close', { defaultValue: 'Close' })}
-        >
-          ×
-        </button>
+        <div className="flex items-center gap-2">
+          {/* CONN-28: seed a clash run from the federation's member models.
+              Clash detection needs a federated (>1 model) scope, so the
+              action is only offered once the federation has at least two
+              members. The member ids ride the ``?models=`` deep-link that
+              ClashDetectionPage pre-selects into the run config. */}
+          {data && data.members.length >= 2 ? (
+            <Button
+              size="sm"
+              data-testid="federation-run-clash"
+              onClick={() => {
+                const modelIds = data.members
+                  .map((m) => m.bim_model_id)
+                  .filter(Boolean);
+                const qs = new URLSearchParams({
+                  project: data.project_id,
+                  models: modelIds.join(','),
+                });
+                navigate(`/clash?${qs.toString()}`);
+              }}
+            >
+              {t('bim.federation.run_clash', {
+                defaultValue: 'Run clash detection',
+              })}
+            </Button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded p-1 text-slate-500 hover:bg-slate-100"
+            aria-label={t('common.close', { defaultValue: 'Close' })}
+          >
+            ×
+          </button>
+        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto px-6 py-4">

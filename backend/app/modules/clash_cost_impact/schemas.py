@@ -42,6 +42,7 @@ class AffectedPosition(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     position_id: uuid.UUID
+    boq_id: uuid.UUID
     ordinal: str = ""
     description: str = ""
     total: float = 0.0

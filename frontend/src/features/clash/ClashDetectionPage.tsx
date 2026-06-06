@@ -754,19 +754,45 @@ export function ClashDetectionPage() {
     }
   }, [resultsQ.isError]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Default the model selection once models load. When the file manager
-  // deep-links a specific model via ``?model=<id>`` (the "Clash
-  // Detection" action on a BIM file), pre-select THAT model so the run
-  // config is already focused on what the user clicked; otherwise select
-  // every non-empty parsed model.
+  // Default the model selection once models load. Two deep-link shapes
+  // pre-seed the run-config scope:
+  //   * ``?model=<id>`` - the file manager's "Clash Detection" action on a
+  //     single BIM file; pre-select THAT model.
+  //   * ``?models=<id1,id2,...>`` - the BIM Federations "Run clash detection"
+  //     action (CONN-28); pre-select every member model that exists in this
+  //     project's parsed-model list so the federated run is one click away.
+  // Either way we fall back to "every non-empty parsed model" when no
+  // deep-link id matches an actual model.
   const deepLinkModelId = params.get('model') ?? '';
+  const deepLinkModelIds = params.get('models') ?? '';
   useEffect(() => {
     if (modelsQ.data && selModels.length === 0) {
       const nonEmpty = modelsQ.data.filter((m) => m.element_count > 0);
-      const focused =
-        deepLinkModelId && nonEmpty.some((m) => m.id === deepLinkModelId)
-          ? [deepLinkModelId]
-          : nonEmpty.map((m) => m.id);
+      // ``?models=`` (comma-separated) wins over the singular ``?model=``
+      // when both are present. Intersect against the project's real models
+      // so a stale / cross-project id is silently dropped rather than
+      // poisoning the selection.
+      const requestedMulti = deepLinkModelIds
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const multiFocused =
+        requestedMulti.length > 0
+          ? nonEmpty
+              .filter((m) => requestedMulti.includes(m.id))
+              .map((m) => m.id)
+          : [];
+      let focused: string[];
+      if (multiFocused.length > 0) {
+        focused = multiFocused;
+      } else if (
+        deepLinkModelId &&
+        nonEmpty.some((m) => m.id === deepLinkModelId)
+      ) {
+        focused = [deepLinkModelId];
+      } else {
+        focused = nonEmpty.map((m) => m.id);
+      }
       setSelModels(focused);
     }
   }, [modelsQ.data]); // eslint-disable-line react-hooks/exhaustive-deps

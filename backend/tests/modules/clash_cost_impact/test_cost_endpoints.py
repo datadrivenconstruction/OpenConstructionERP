@@ -195,6 +195,12 @@ async def test_clash_impact_happy_path(client: AsyncClient, auth: dict[str, str]
     assert body["total_estimate"] == 900.00  # 500 rework + 400 labour
     assert body["confidence"] == "high"
     assert len(body["affected_positions"]) == 1
+    # CONN-27: each affected position carries its owning BOQ id so the UI
+    # can deep-link to ``/boq/{boq_id}?highlight={position_id}``.
+    affected = body["affected_positions"][0]
+    assert affected["boq_id"]
+    uuid.UUID(affected["boq_id"])  # must be a parseable UUID
+    assert affected["position_id"]
 
 
 @pytest.mark.asyncio

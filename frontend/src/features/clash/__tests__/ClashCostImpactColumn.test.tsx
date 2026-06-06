@@ -14,7 +14,9 @@ import {
   waitFor,
   cleanup,
   act,
+  fireEvent,
 } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // ── apiGet stub ────────────────────────────────────────────────────────────
@@ -50,19 +52,21 @@ function renderColumn(
     defaultOptions: { queries: { retry: false } },
   });
   return render(
-    <QueryClientProvider client={client}>
-      <table>
-        <tbody>
-          <tr>
-            <ClashCostImpactColumn
-              clashId="clash-1"
-              currency="EUR"
-              {...props}
-            />
-          </tr>
-        </tbody>
-      </table>
-    </QueryClientProvider>,
+    <MemoryRouter>
+      <QueryClientProvider client={client}>
+        <table>
+          <tbody>
+            <tr>
+              <ClashCostImpactColumn
+                clashId="clash-1"
+                currency="EUR"
+                {...props}
+              />
+            </tr>
+          </tbody>
+        </table>
+      </QueryClientProvider>
+    </MemoryRouter>,
   );
 }
 
@@ -87,6 +91,7 @@ const samplePayload = {
   affected_positions: [
     {
       position_id: 'pos-1',
+      boq_id: 'boq-9',
       ordinal: '01.01.001',
       description: 'Concrete C30/37',
       total: 5000,
@@ -182,5 +187,63 @@ describe('ClashCostImpactColumn', () => {
       await Promise.resolve();
     });
     expect(apiGetMock).not.toHaveBeenCalled();
+  });
+
+  // ── CONN-27: BOQ drill-down popover ──────────────────────────────────
+  it('opens a popover with per-position BOQ deep-links on high confidence', async () => {
+    apiGetMock.mockResolvedValue(samplePayload);
+    renderColumn();
+    const trigger = await screen.findByTestId('clash-cost-trigger');
+    fireEvent.click(trigger);
+    const link = await screen.findByTestId('clash-cost-position-link');
+    // Deep-link target is /boq/{boq_id}?highlight={position_id} — the
+    // exact contract BOQEditorPage's ?highlight consumer expects.
+    expect(link.getAttribute('href')).toBe('/boq/boq-9?highlight=pos-1');
+    // Ordinal + description surface in the popover row.
+    expect(screen.getByTestId('clash-cost-popover').textContent).toContain(
+      '01.01.001',
+    );
+    expect(screen.getByTestId('clash-cost-popover').textContent).toContain(
+      'Concrete C30/37',
+    );
+  });
+
+  it('does NOT make the cell drillable when confidence is medium', async () => {
+    apiGetMock.mockResolvedValue({
+      ...samplePayload,
+      confidence: 'medium',
+      affected_positions: [],
+    });
+    renderColumn();
+    await waitFor(() =>
+      expect(
+        screen.getByTestId('clash-cost-cell').getAttribute('data-state'),
+      ).toBe('ready'),
+    );
+    // No trigger button rendered — the money cell stays read-only.
+    expect(screen.queryByTestId('clash-cost-trigger')).toBeNull();
+  });
+
+  it('renders a non-navigable row when a position lacks boq_id', async () => {
+    apiGetMock.mockResolvedValue({
+      ...samplePayload,
+      affected_positions: [
+        {
+          position_id: 'pos-x',
+          ordinal: '02.02.002',
+          description: 'Rebar',
+          total: 100,
+        },
+      ],
+    });
+    renderColumn();
+    const trigger = await screen.findByTestId('clash-cost-trigger');
+    fireEvent.click(trigger);
+    await screen.findByTestId('clash-cost-popover');
+    // No link is rendered for a position without an owning boq_id.
+    expect(screen.queryByTestId('clash-cost-position-link')).toBeNull();
+    expect(screen.getByTestId('clash-cost-popover').textContent).toContain(
+      '02.02.002',
+    );
   });
 });
