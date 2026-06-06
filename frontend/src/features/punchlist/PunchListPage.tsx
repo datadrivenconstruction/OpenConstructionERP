@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -306,6 +306,11 @@ interface PunchFormData {
   due_date: string;
   document_id: string;
   location: string;
+  /** Sheet page the pin sits on (1-based). Empty string when no pin. */
+  page: string;
+  /** Normalised pin coordinates on the sheet (0..1), as entered text. */
+  location_x: string;
+  location_y: string;
 }
 
 const EMPTY_FORM: PunchFormData = {
@@ -317,7 +322,31 @@ const EMPTY_FORM: PunchFormData = {
   due_date: '',
   document_id: '',
   location: '',
+  page: '',
+  location_x: '',
+  location_y: '',
 };
+
+/** Minimal drawing/document option for the punch-pin picker. */
+interface PunchDrawingOption {
+  id: string;
+  filename: string;
+}
+
+/**
+ * Build the markups deep-link that reopens the drawing a punch pin sits on.
+ * Mirrors the file-manager consumer in MarkupsPage (`?openDoc=<id>&page=<n>`).
+ * Returns null when there is no document to open.
+ */
+function punchDrawingLink(item: {
+  document_id: string | null;
+  page: number | null;
+}): string | null {
+  if (!item.document_id) return null;
+  const params = new URLSearchParams({ openDoc: item.document_id });
+  if (item.page != null) params.set('page', String(item.page));
+  return `/markups?${params.toString()}`;
+}
 
 const PRIORITY_RADIO_COLORS: Record<PunchPriority, string> = {
   low: 'bg-gray-100 text-gray-700 border-gray-300 peer-checked:bg-gray-200 peer-checked:border-gray-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600',
@@ -331,11 +360,13 @@ function AddPunchModal({
   onSubmit,
   isPending,
   teamMembers,
+  drawings,
 }: {
   onClose: () => void;
   onSubmit: (data: PunchFormData) => void;
   isPending: boolean;
   teamMembers: TeamMember[];
+  drawings: PunchDrawingOption[];
 }) {
   const { t } = useTranslation();
   const [form, setForm] = useState<PunchFormData>(EMPTY_FORM);
@@ -345,7 +376,15 @@ function AddPunchModal({
     setForm((prev) => ({ ...prev, [key]: value }));
 
   const titleError = touched && form.title.trim().length === 0;
-  const canSubmit = form.title.trim().length > 0;
+  // A normalised pin coordinate must sit in the 0..1 range the backend accepts.
+  const coordError = (v: string) => {
+    if (!v.trim()) return false;
+    const n = Number(v);
+    return !Number.isFinite(n) || n < 0 || n > 1;
+  };
+  const xError = touched && coordError(form.location_x);
+  const yError = touched && coordError(form.location_y);
+  const canSubmit = form.title.trim().length > 0 && !coordError(form.location_x) && !coordError(form.location_y);
 
   const handleSubmit = () => {
     setTouched(true);
@@ -515,6 +554,87 @@ function AddPunchModal({
             className={inputCls}
           />
         </WideModalField>
+
+        {/* ── Pin on drawing ──────────────────────────────────────────────
+            Tie the snag to a sheet and an optional normalised pin so it can
+            be reopened on the drawing. The document picker reuses the project
+            documents list (no raw UUID input). */}
+        <WideModalField
+          label={t('punch.field_drawing', { defaultValue: 'Pin on drawing (optional)' })}
+          htmlFor="punch-drawing"
+          span={2}
+        >
+          <select
+            id="punch-drawing"
+            value={form.document_id}
+            onChange={(e) => set('document_id', e.target.value)}
+            className={inputCls}
+          >
+            <option value="">
+              {t('punch.no_drawing', { defaultValue: 'No drawing' })}
+            </option>
+            {drawings.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.filename || d.id.slice(0, 8)}
+              </option>
+            ))}
+          </select>
+        </WideModalField>
+
+        {form.document_id && (
+          <>
+            <WideModalField
+              label={t('punch.field_page', { defaultValue: 'Sheet page' })}
+              htmlFor="punch-page"
+            >
+              <input
+                id="punch-page"
+                type="number"
+                min={1}
+                step={1}
+                value={form.page}
+                onChange={(e) => set('page', e.target.value)}
+                placeholder="1"
+                className={inputCls}
+              />
+            </WideModalField>
+            <WideModalField
+              label={t('punch.field_pin', { defaultValue: 'Pin X / Y (0-1)' })}
+              error={
+                xError || yError
+                  ? t('punch.pin_range_error', {
+                      defaultValue: 'Coordinates must be between 0 and 1',
+                    })
+                  : undefined
+              }
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={0}
+                  max={1}
+                  step="0.001"
+                  value={form.location_x}
+                  onChange={(e) => set('location_x', e.target.value)}
+                  placeholder="0.50"
+                  aria-label={t('punch.field_pin_x', { defaultValue: 'Pin X (0-1)' })}
+                  className={clsx(inputCls, xError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                />
+                <input
+                  type="number"
+                  min={0}
+                  max={1}
+                  step="0.001"
+                  value={form.location_y}
+                  onChange={(e) => set('location_y', e.target.value)}
+                  placeholder="0.50"
+                  aria-label={t('punch.field_pin_y', { defaultValue: 'Pin Y (0-1)' })}
+                  className={clsx(inputCls, yError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                />
+              </div>
+            </WideModalField>
+          </>
+        )}
       </WideModalSection>
     </WideModal>
   );
@@ -785,6 +905,22 @@ export function PunchListPage() {
     enabled: !!projectId,
   });
 
+  // Project documents, used to pin a punch item to a drawing sheet (CONN-57).
+  const { data: drawings = [] } = useQuery({
+    queryKey: ['punchlist-drawings', projectId],
+    queryFn: async (): Promise<PunchDrawingOption[]> => {
+      const rows = await apiGet<{ id: string; filename?: string; name?: string }[]>(
+        `/v1/documents/?project_id=${projectId}`,
+      );
+      return (Array.isArray(rows) ? rows : []).map((r) => ({
+        id: r.id,
+        filename: r.filename ?? r.name ?? '',
+      }));
+    },
+    enabled: !!projectId && showAddModal,
+    staleTime: 60_000,
+  });
+
   // Client-side search
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return punchItems;
@@ -953,6 +1089,9 @@ export function PunchListPage() {
   // Handlers
   const handleCreateSubmit = useCallback(
     (formData: PunchFormData) => {
+      const pageNum = formData.page.trim() ? Number(formData.page) : undefined;
+      const xNum = formData.location_x.trim() ? Number(formData.location_x) : undefined;
+      const yNum = formData.location_y.trim() ? Number(formData.location_y) : undefined;
       createMut.mutate({
         project_id: projectId,
         title: formData.title,
@@ -962,6 +1101,12 @@ export function PunchListPage() {
         assigned_to: formData.assigned_to || undefined,
         due_date: formData.due_date || undefined,
         document_id: formData.document_id || undefined,
+        // Pin is only meaningful when tied to a drawing.
+        page: formData.document_id && pageNum != null && Number.isFinite(pageNum) ? pageNum : undefined,
+        location_x:
+          formData.document_id && xNum != null && Number.isFinite(xNum) ? xNum : undefined,
+        location_y:
+          formData.document_id && yNum != null && Number.isFinite(yNum) ? yNum : undefined,
       });
     },
     [createMut, projectId],
@@ -1381,6 +1526,7 @@ export function PunchListPage() {
           onSubmit={handleCreateSubmit}
           isPending={createMut.isPending}
           teamMembers={teamMembers}
+          drawings={drawings}
         />
       )}
 
@@ -1421,9 +1567,11 @@ const PunchTableRow = React.memo(function PunchTableRow({
   highlight?: boolean;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const transitions = STATUS_TRANSITION[item.status] ?? [];
   const rowRef = useRef<HTMLTableRowElement>(null);
   const [flash, setFlash] = useState(false);
+  const drawingLink = punchDrawingLink(item);
 
   useEffect(() => {
     if (!highlight) return;
@@ -1489,6 +1637,23 @@ const PunchTableRow = React.memo(function PunchTableRow({
           <p className="text-xs text-content-tertiary mt-0.5 truncate max-w-[250px]">
             {`(${item.location_x ?? '-'}, ${item.location_y ?? '-'})`}
           </p>
+        )}
+        {/* Reopen the pinned drawing in the markups viewer (CONN-57). */}
+        {drawingLink && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(drawingLink);
+            }}
+            className="mt-0.5 inline-flex items-center gap-1 rounded-md text-xs text-oe-blue hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+            title={t('punch.open_drawing_hint', {
+              defaultValue: 'Open the drawing this item is pinned to',
+            })}
+          >
+            <MapPin size={11} className="shrink-0" />
+            {t('punch.open_drawing', { defaultValue: 'Open drawing' })}
+          </button>
         )}
         <PunchSourceBadge item={item} className="mt-0.5 inline-block" />
       </td>

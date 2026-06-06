@@ -255,6 +255,46 @@ export default function CloseoutPage() {
       defaultValue: cat.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
     });
 
+  // ── Readiness chips for the two cross-module gates (CONN-59) ────────────
+  // `punch_closure` and `final_inspection_cert` are generated from the Punch
+  // List and Inspections registers respectively. Surface their readiness as
+  // chips that deep-link to the owning module, and a warning when a required
+  // gate is not yet satisfied before a build.
+  const readinessChips = useMemo(() => {
+    const slots = pkg?.slots ?? [];
+    const find = (key: string) => slots.find((s) => s.slot_key === key);
+    const chips: {
+      key: string;
+      label: string;
+      slot: CloseoutSlot | undefined;
+      to: string;
+    }[] = [];
+    const punch = find('punch_closure');
+    if (punch) {
+      chips.push({
+        key: 'punch_closure',
+        label: t('closeout.chip_punch', { defaultValue: 'Punch closure' }),
+        slot: punch,
+        to: '/punchlist',
+      });
+    }
+    const inspection = find('final_inspection_cert');
+    if (inspection) {
+      chips.push({
+        key: 'final_inspection_cert',
+        label: t('closeout.chip_final_inspection', { defaultValue: 'Final inspection' }),
+        slot: inspection,
+        to: '/inspections',
+      });
+    }
+    return chips;
+  }, [pkg?.slots, t]);
+
+  // A required readiness gate that is still empty blocks a clean build.
+  const readinessGap = readinessChips.some(
+    (c) => c.slot?.is_required && c.slot.status === 'empty',
+  );
+
   // ── Render: no project selected ────────────────────────────────────────
   if (!activeProjectId) {
     return (
@@ -442,6 +482,53 @@ export default function CloseoutPage() {
                 </p>
               ) : null}
             </div>
+
+            {/* ── Cross-module readiness chips ──────────────────────────── */}
+            {readinessChips.length > 0 ? (
+              <div className="mt-4 border-t border-border pt-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-content-tertiary">
+                    {t('closeout.readiness_label', { defaultValue: 'Readiness' })}:
+                  </span>
+                  {readinessChips.map((chip) => {
+                    const status = chip.slot?.status ?? 'empty';
+                    const ready = status === 'verified' || status === 'bound';
+                    return (
+                      <button
+                        key={chip.key}
+                        type="button"
+                        onClick={() => navigate(chip.to)}
+                        title={t('closeout.readiness_open_hint', {
+                          defaultValue: 'Open the source module to close this gate',
+                        })}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                      >
+                        {ready ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-semantic-success" />
+                        ) : (
+                          <Circle className="h-3.5 w-3.5 text-content-tertiary" />
+                        )}
+                        {chip.label}
+                        <Badge variant={ready ? 'success' : 'neutral'} size="sm">
+                          {ready
+                            ? t('closeout.readiness_ready', { defaultValue: 'Ready' })
+                            : t('closeout.readiness_outstanding', { defaultValue: 'Outstanding' })}
+                        </Badge>
+                      </button>
+                    );
+                  })}
+                </div>
+                {readinessGap ? (
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-semantic-warning">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                    {t('closeout.readiness_build_warn', {
+                      defaultValue:
+                        'Punch closure or the final inspection certificate is still outstanding - close these before you build the package.',
+                    })}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </Card>
 
           {/* ── Gap panel ──────────────────────────────────────────────── */}

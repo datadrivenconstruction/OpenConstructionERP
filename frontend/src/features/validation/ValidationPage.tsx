@@ -15,6 +15,7 @@ import {
   Wand2,
   Filter,
   ExternalLink,
+  AlertOctagon,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Skeleton, Breadcrumb, DismissibleInfo, IntroRichText } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -455,12 +456,16 @@ function ResultRow({
   onToggle,
   boqId,
   onNavigateToPosition,
+  onRaiseNcr,
 }: {
   result: ValidationResultItem;
   expanded: boolean;
   onToggle: () => void;
   boqId?: string;
   onNavigateToPosition?: (boqId: string, positionId: string) => void;
+  /** Open the NCR module with this finding pre-filled. Only offered for
+   *  failing error rows (a real non-conformance worth a formal record). */
+  onRaiseNcr?: (result: ValidationResultItem) => void;
 }) {
   const { t } = useTranslation();
 
@@ -551,6 +556,23 @@ function ResultRow({
           )}
           {tooltip && (
             <p className="mt-1 text-xs text-content-tertiary italic">{tooltip}</p>
+          )}
+          {/* Raise NCR — turn a blocking validation error into a formal
+              non-conformance, pre-filled from the finding (CONN-58). */}
+          {!result.passed && result.severity === 'error' && onRaiseNcr && (
+            <div className="mt-3 border-t border-border-light pt-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<AlertOctagon size={14} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRaiseNcr(result);
+                }}
+              >
+                {t('validation.raise_ncr', { defaultValue: 'Raise NCR' })}
+              </Button>
+            </div>
           )}
         </div>
       )}
@@ -996,6 +1018,43 @@ export function ValidationPage() {
     });
   }, [report, selectedBoqId, addToast, t]);
 
+  // Raise an NCR from a failing validation finding. Deep-links to the NCR
+  // module with the finding pre-filled (title, description, location and a
+  // source marker). The NCR page consumes these ?create= params; until it
+  // lands, the link still opens the NCR register scoped to the project.
+  const handleRaiseNcr = useCallback(
+    (result: ValidationResultItem) => {
+      const params = new URLSearchParams({ create: '1', source: 'validation' });
+      if (selectedProjectId) params.set('project', selectedProjectId);
+      params.set(
+        'title',
+        t('validation.ncr_title_prefill', {
+          defaultValue: 'Validation: {{rule}}',
+          rule: result.rule_name,
+        }),
+      );
+      const descParts = [result.message];
+      if (result.element_ref) {
+        descParts.push(
+          t('validation.ncr_element_line', {
+            defaultValue: 'BOQ element: {{ref}}',
+            ref: result.element_ref,
+          }),
+        );
+      }
+      descParts.push(
+        t('validation.ncr_rule_line', {
+          defaultValue: 'Failed rule: {{rule}}',
+          rule: result.rule_id,
+        }),
+      );
+      params.set('description', descParts.join('\n'));
+      if (result.element_ref) params.set('element_ref', result.element_ref);
+      navigate(`/ncr?${params.toString()}`);
+    },
+    [selectedProjectId, navigate, t],
+  );
+
   const boqOptions = (boqs || []).map((b) => ({
     value: b.id,
     label: b.name,
@@ -1242,6 +1301,7 @@ export function ValidationPage() {
                   onToggle={() => toggleResult(idx)}
                   boqId={selectedBoqId || undefined}
                   onNavigateToPosition={(bId, posId) => navigate(`/boq/${bId}?highlight=${posId}`)}
+                  onRaiseNcr={handleRaiseNcr}
                 />
               ))}
             </div>
