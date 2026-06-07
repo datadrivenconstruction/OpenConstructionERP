@@ -83,13 +83,15 @@ def test_b005_subtotal_matches_cumulative() -> None:
 
 
 def test_b001_round_currency_half_up_not_bankers() -> None:
+    # _round_currency returns Decimal (v3 §10), so compare against exact
+    # Decimal literals - float literals drift at this magnitude.
     # .625 → half-up → .63 (banker's would give .62)
-    assert _round_currency(Decimal("1234808.625")) == 1234808.63
+    assert _round_currency(Decimal("1234808.625")) == Decimal("1234808.63")
     # .005 → half-up → .01 (banker's would give .00)
-    assert _round_currency(Decimal("0.005")) == 0.01
+    assert _round_currency(Decimal("0.005")) == Decimal("0.01")
     # fractional-cent residue snapped to 2dp
-    assert _round_currency(Decimal("1320.886791")) == 1320.89
-    assert _round_currency(Decimal("999.999999999")) == 1000.00
+    assert _round_currency(Decimal("1320.886791")) == Decimal("1320.89")
+    assert _round_currency(Decimal("999.999999999")) == Decimal("1000.00")
 
 
 def test_b001_round_currency_non_finite_collapses_to_zero() -> None:
