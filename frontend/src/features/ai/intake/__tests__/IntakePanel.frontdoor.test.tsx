@@ -9,7 +9,6 @@
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
-import React from 'react';
 
 // Guard against accidental network on mount: the panel must render the
 // collect-request without calling any intake endpoint.

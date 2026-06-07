@@ -10,7 +10,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { afterEach } from 'vitest';
-import React from 'react';
 
 import { Stage1Intake, type Stage1IntakeProps } from '../Stage1Source';
 

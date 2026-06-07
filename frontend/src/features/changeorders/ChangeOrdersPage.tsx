@@ -502,7 +502,6 @@ function AddItemDialog({
                 <FileText size={14} className="shrink-0" />
                 <span className="truncate">
                   {t('changeorders.boq_source_label', {
-                    defaultValue: 'From BOQ position {{ordinal}}',
                     ordinal: boqSource.ordinal || boqSource.id.slice(0, 8),
                   })}
                 </span>
