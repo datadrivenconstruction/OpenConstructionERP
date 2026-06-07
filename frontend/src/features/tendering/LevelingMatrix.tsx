@@ -264,14 +264,14 @@ export function LevelingMatrix({ packageId, currency }: Props) {
                     <span className="text-content-secondary">
                       {t('tendering.leveling.raw', 'Raw')}:{' '}
                       <span className="tabular-nums text-content-primary">
-                        {formatCurrency(bs.raw_amount, bs.currency || matrixCurrency)}
+                        {formatCurrency(Number(bs.raw_amount), bs.currency || matrixCurrency)}
                       </span>
                     </span>
                     <span className="text-content-secondary">
                       {t('tendering.leveling.leveled', 'Leveled')}:{' '}
                       <span className="tabular-nums font-semibold text-content-primary">
                         {formatCurrency(
-                          bs.leveled_amount,
+                          Number(bs.leveled_amount),
                           bs.currency || matrixCurrency,
                         )}
                       </span>
@@ -380,7 +380,7 @@ export function LevelingMatrix({ packageId, currency }: Props) {
                       className="whitespace-nowrap px-3 py-3 text-right font-bold tabular-nums text-content-primary"
                     >
                       {formatCurrency(
-                        bs.leveled_amount,
+                        Number(bs.leveled_amount),
                         bs.currency || matrixCurrency,
                       )}
                     </td>

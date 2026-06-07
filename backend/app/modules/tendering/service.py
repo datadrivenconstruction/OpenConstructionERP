@@ -57,10 +57,16 @@ def _to_decimal(value: object, default: str = "0") -> Decimal:
 def _round2(value: Decimal) -> float:
     """Round a Decimal to 2 dp at the presentation boundary and emit float.
 
-    The response schemas type these fields as ``float``; rounding happens
-    only here so all intermediate arithmetic stays in Decimal.
+    For the response-schema fields still typed ``float`` (quantities and
+    informational totals); rounding happens only here so all intermediate
+    arithmetic stays in Decimal.
     """
     return float(value.quantize(_CENTS, rounding=ROUND_HALF_UP))
+
+
+def _round2_dec(value: Decimal) -> Decimal:
+    """Round a Decimal to 2 dp and keep it Decimal (v3 §10 money fields)."""
+    return value.quantize(_CENTS, rounding=ROUND_HALF_UP)
 
 
 async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
@@ -961,7 +967,7 @@ class TenderingService:
                         raw_total=_round2(raw_total),
                         leveled_total=_round2(leveled_total),
                         status=cell_status,
-                        unit_rate=_round2(unit_rate),
+                        unit_rate=_round2_dec(unit_rate),
                     )
                 )
             rows.append(
@@ -981,8 +987,8 @@ class TenderingService:
             BidLevelingSummary(
                 bid_id=s["bid_id"],
                 company_name=s["company_name"],
-                raw_amount=_round2(s["raw_amount"]),
-                leveled_amount=_round2(s["leveled_amount"]),
+                raw_amount=_round2_dec(s["raw_amount"]),
+                leveled_amount=_round2_dec(s["leveled_amount"]),
                 matched_lines=s["matched_lines"],
                 scaled_lines=s["scaled_lines"],
                 imputed_lines=s["imputed_lines"],

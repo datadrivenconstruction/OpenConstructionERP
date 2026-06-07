@@ -337,16 +337,24 @@ class AddendumResponse(BaseModel):
 
 
 class BidLevelingSummary(BaseModel):
-    """Per-bid leveling rollup (raw vs leveled, line classification counts)."""
+    """Per-bid leveling rollup (raw vs leveled, line classification counts).
+
+    v3 §10 - the rolled-up amounts are money, so they ride as
+    Decimal-as-string in JSON like every other money field.
+    """
 
     bid_id: str
     company_name: str
-    raw_amount: float = 0.0
-    leveled_amount: float = 0.0
+    raw_amount: Decimal = Decimal("0")
+    leveled_amount: Decimal = Decimal("0")
     matched_lines: int = 0
     scaled_lines: int = 0
     imputed_lines: int = 0
     currency: str = ""
+
+    @field_serializer("raw_amount", "leveled_amount", when_used="json")
+    def _ser_money(self, v: Decimal) -> str | None:
+        return _serialise_money(v)
 
 
 class LevelingMatrixCell(BaseModel):
@@ -357,7 +365,12 @@ class LevelingMatrixCell(BaseModel):
     raw_total: float = 0.0
     leveled_total: float = 0.0
     status: str = ""  # "" | "matched" | "scaled" | "imputed"
-    unit_rate: float = 0.0
+    # v3 §10 - the bidder's unit price is money (Decimal-as-string in JSON).
+    unit_rate: Decimal = Decimal("0")
+
+    @field_serializer("unit_rate", when_used="json")
+    def _ser_money(self, v: Decimal) -> str | None:
+        return _serialise_money(v)
 
 
 class LevelingMatrixRow(BaseModel):
