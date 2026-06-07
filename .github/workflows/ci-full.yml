@@ -1,0 +1,60 @@
+name: CI Full Suite
+
+# Nightly full backend test run (unit + integration). The push gate in
+# ci.yml runs the unit tree only because the integration tree against a
+# service container does not fit the 60 minute job limit. This workflow
+# gives the integration tree a real budget and can also be started by hand.
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  backend-full:
+    name: Backend Full Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: oe
+          POSTGRES_PASSWORD: oe
+          POSTGRES_DB: openconstructionerp_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U oe -d openconstructionerp_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Create empty frontend dist (hatchling force-include)
+        run: |
+          mkdir -p ../frontend/dist
+          touch ../frontend/dist/.gitkeep
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run full test suite
+        env:
+          DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/openconstructionerp_test
+          DATABASE_SYNC_URL: postgresql+psycopg2://oe:oe@localhost:5432/openconstructionerp_test
+        run: pytest -q
