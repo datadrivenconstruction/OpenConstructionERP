@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <title>v7.1.0 - One click to the next record, and an estimator that explains itself - OpenConstructionERP</title>
+  <meta name="description" content="OpenConstructionERP v7.1.0 wires more than 80 places where related records sat side by side without a link, so any related record is one click away in both directions. The AI Estimate Builder now opens with a conversation, asks short clarifying rounds, then two confirmation checkpoints and multi-pass rate mapping where every matched rate carries a visible reason and an outlier badge. A translation sweep brings about seventeen hundred interface strings per language to native copy across all 26 app languages, plus the website's download and partners pages in 19 site languages. Cost positions carry every resource on add, clash clusters become one tracked item, and the desktop app finally has a real first launch." />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://openconstructionerp.com/news/v7-1-0.html" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="OpenConstructionERP" />
+  <meta property="og:url" content="https://openconstructionerp.com/news/v7-1-0.html" />
+  <meta property="og:title" content="v7.1.0 - One click to the next record, and an estimator that explains itself" />
+  <meta property="og:description" content="More than 80 places where related records had no link are now wired both ways, so the next record is one click away. The AI Estimate Builder opens with a conversation, two confirmation checkpoints and rate mapping that shows why each rate was chosen. Plus a 26-language translation sweep and a real desktop first launch." />
+  <meta property="article:published_time" content="2026-06-07T10:00:00Z" />
+  <meta property="article:author" content="Artem Boiko" />
+  <meta property="article:tag" content="Release" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="v7.1.0 - One click to the next record, and an estimator that explains itself" />
+  <meta name="twitter:description" content="80+ related records wired both ways so the next one is one click away, an AI Estimate Builder that explains every rate it picks, and a 26-language translation sweep." />
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#0284c7" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <script>
+    (function () { try { var t = localStorage.getItem('oce-theme') || 'light'; document.documentElement.dataset.theme = t; } catch (e) { document.documentElement.dataset.theme = 'light'; } })();
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "v7.1.0 - One click to the next record, and an estimator that explains itself",
+    "datePublished": "2026-06-07",
+    "author": { "@type": "Person", "name": "Artem Boiko" },
+    "publisher": { "@type": "Organization", "name": "DataDrivenConstruction", "logo": { "@type": "ImageObject", "url": "https://openconstructionerp.com/favicon.svg" } },
+    "mainEntityOfPage": "https://openconstructionerp.com/news/v7-1-0.html"
+  }
+  </script>
+
+  <style>
+    :root { --bg-0: #f7fbff; --bg-1: #edf5ff; --bg-2: #e7f2fd; --ink-0: #0b1220; --ink-1: #1e293b; --ink-2: #475569; --ink-3: #94a3b8; --line-0: rgba(15, 23, 42, 0.05); --line-1: rgba(15, 23, 42, 0.09); --line-2: rgba(15, 23, 42, 0.14); --card: #ffffff; --code-bg: #0f172a; --code-fg: #e2e8f0; --accent: #0284c7; --accent-2: #0ea5e9; --accent-3: #2563eb; --accent-4: #6366f1; --accent-5: #06b6d4; }
+    [data-theme="dark"] { --bg-0: #0b1220; --bg-1: #111a2c; --bg-2: #152238; --ink-0: #eff6ff; --ink-1: #cfe0f5; --ink-2: #94a3b8; --ink-3: #64748b; --line-0: rgba(255,255,255,0.06); --line-1: rgba(255,255,255,0.10); --line-2: rgba(255,255,255,0.16); --card: #111a2c; --code-bg: #0a0f1c; --code-fg: #e2e8f0; --accent: #38bdf8; --accent-2: #7dd3fc; --accent-3: #60a5fa; }
+    *, *::before, *::after { box-sizing: border-box; } html { scroll-behavior: smooth; }
+    body { margin: 0; background: radial-gradient(60% 50% at 50% 0%, color-mix(in oklab, var(--accent) 7%, transparent) 0%, transparent 70%), var(--bg-0); color: var(--ink-0); font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; } a:hover { color: var(--accent); }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+    .narrow { max-width: 720px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+    .nav { position: sticky; top: 0; z-index: 50; background: color-mix(in oklab, var(--bg-0) 88%, transparent); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); border-bottom: 1px solid var(--line-1); }
+    .nav-inner { max-width: 1300px; margin: 0 auto; padding: 12px clamp(20px, 4vw, 48px); display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .nav-left, .nav-right { display: flex; align-items: center; gap: 10px; }
+    .brand { display: inline-flex; align-items: baseline; font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.015em; }
+    .brand-seg-1 { color: var(--ink-0); } .brand-seg-2 { color: var(--ink-2); } .brand-seg-3 { color: var(--accent); font-weight: 800; }
+    .nav-icon-btn { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9px; border: 1px solid var(--line-2); background: transparent; color: var(--ink-2); cursor: pointer; transition: border-color 0.15s ease, color 0.15s ease; }
+    .nav-icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-icon-btn .icon-moon { display: none; }
+    [data-theme="dark"] .nav-icon-btn .icon-sun { display: none; }
+    [data-theme="dark"] .nav-icon-btn .icon-moon { display: block; }
+    .nav-links { display: flex; gap: clamp(10px, 1.6vw, 22px); align-items: center; font-size: 14px; }
+    .nav-links a { color: var(--ink-2); font-weight: 500; padding: 6px 4px; transition: color 0.15s ease; }
+    .nav-links a:hover, .nav-links a.is-active { color: var(--accent); }
+    .nav-links a.is-active { font-weight: 600; }
+    .nav-pill { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease; }
+    .nav-pill.github { border: 1px solid var(--line-2); color: var(--ink-1); background: transparent; }
+    .nav-pill.github:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-pill.cta { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%); color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 8px 18px -8px color-mix(in oklab, var(--accent) 60%, transparent); }
+    .nav-pill.cta:hover { transform: translateY(-1px); color: #fff; }
+    .nav-pill .arrow { transition: transform 0.15s ease; } .nav-pill:hover .arrow { transform: translateX(2px); }
+    @media (max-width: 980px) { .nav-links a:not(.news-link), .nav-pill.github { display: none; } }
+    .article-hero { position: relative; padding: clamp(48px, 7vw, 96px) 0 clamp(32px, 5vw, 48px); overflow: hidden; }
+    .article-hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(to right, color-mix(in oklab, var(--accent) 7%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in oklab, var(--accent) 7%, transparent) 1px, transparent 1px); background-size: 56px 56px; -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 35%, black 30%, transparent 78%); mask-image: radial-gradient(ellipse 75% 60% at 50% 35%, black 30%, transparent 78%); pointer-events: none; opacity: 0.5; }
+    .article-hero > * { position: relative; }
+    .crumbs { font-family: 'Inter Tight', sans-serif; font-size: 13px; color: var(--ink-3); margin-bottom: 18px; }
+    .crumbs a:hover { color: var(--accent); } .crumbs .sep { margin: 0 8px; opacity: 0.5; }
+    .pill-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+    .chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-family: 'Inter Tight', sans-serif; font-size: 11.5px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; }
+    .chip.release { background: color-mix(in oklab, var(--accent) 10%, transparent); color: var(--accent); border: 1px solid color-mix(in oklab, var(--accent) 24%, transparent); }
+    .chip.stable { background: color-mix(in oklab, #16a34a 12%, transparent); color: #16a34a; border: 1px solid color-mix(in oklab, #16a34a 28%, transparent); }
+    [data-theme="dark"] .chip.stable { color: #4ade80; border-color: color-mix(in oklab, #4ade80 32%, transparent); }
+    .pill-meta { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-2); letter-spacing: 0.01em; }
+    .pill-meta + .pill-meta::before { content: "·"; margin: 0 8px; opacity: 0.5; }
+    .article-hero h1 { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: clamp(34px, 5.6vw, 60px); line-height: 1.05; letter-spacing: -0.025em; margin: 0 0 22px; }
+    .article-hero h1 .accent { color: var(--accent); }
+    .article-hero p.lede { font-size: clamp(17px, 1.6vw, 21px); line-height: 1.55; color: var(--ink-2); max-width: 680px; margin: 0 0 28px; }
+    .cover { max-width: 1180px; margin: 0 auto clamp(40px, 6vw, 64px); padding: 0 clamp(20px, 4vw, 48px); }
+    .cover-inner { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line-2); background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); box-shadow: 0 24px 60px -24px rgba(2, 90, 160, 0.22), 0 2px 8px -2px rgba(15, 23, 42, 0.08); aspect-ratio: 21 / 9; display: grid; place-items: center; }
+    .cover-inner .cover-art { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: clamp(56px, 9vw, 128px); color: color-mix(in oklab, var(--accent) 22%, transparent); letter-spacing: -0.04em; }
+    .article { padding: 0 0 clamp(48px, 6vw, 80px); }
+    .article p, .article ul, .article ol { font-size: 17px; line-height: 1.7; color: var(--ink-1); margin: 0 0 18px; }
+    .article ul, .article ol { padding-left: 22px; } .article ul li, .article ol li { margin-bottom: 6px; }
+    .article h2 { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: clamp(24px, 2.6vw, 32px); line-height: 1.15; letter-spacing: -0.02em; margin: 56px 0 18px; color: var(--ink-0); }
+    .article h2:first-child { margin-top: 0; }
+    .article h3 { font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 19px; letter-spacing: -0.01em; margin: 28px 0 10px; color: var(--ink-0); }
+    .article a { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in oklab, var(--accent) 32%, transparent); transition: border-color 0.15s ease; }
+    .article a:hover { border-bottom-color: var(--accent); }
+    .article .btn, .article .btn:hover { border-bottom: none; }
+    .article .btn-primary, .article .btn-primary:hover { color: #fff; }
+    .article .btn-ghost { color: var(--ink-0); }
+    .article .btn-ghost:hover { color: var(--accent); }
+    .article strong { color: var(--ink-0); font-weight: 600; }
+    .article code { font-family: 'JetBrains Mono', monospace; font-size: 0.92em; padding: 1px 6px; border-radius: 5px; background: color-mix(in oklab, var(--accent) 8%, var(--bg-1)); border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--line-1)); color: var(--ink-0); }
+    .highlights { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 14px 0 28px; }
+    @media (max-width: 720px) { .highlights { grid-template-columns: 1fr; } }
+    .hi-card { background: var(--card); border: 1px solid var(--line-1); border-radius: 14px; padding: 20px 20px 22px; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+    .hi-card:hover { transform: translateY(-2px); border-color: color-mix(in oklab, var(--accent) 35%, var(--line-1)); box-shadow: 0 14px 28px -16px rgba(2, 90, 160, 0.18); }
+    .hi-card .hi-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: color-mix(in oklab, var(--accent) 12%, transparent); color: var(--accent); margin-bottom: 14px; }
+    .hi-card .hi-icon svg { width: 18px; height: 18px; }
+    .hi-card h4 { font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 15.5px; letter-spacing: -0.005em; margin: 0 0 6px; color: var(--ink-0); }
+    .hi-card p { font-size: 14px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+    .codewrap { position: relative; background: var(--code-bg); color: var(--code-fg); border-radius: 14px; padding: 22px 24px; margin: 14px 0 30px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.7; overflow-x: auto; border: 1px solid rgba(56, 189, 248, 0.18); box-shadow: 0 18px 40px -20px rgba(2, 90, 160, 0.25); }
+    .codewrap .cmd::before { content: "$ "; color: #64748b; user-select: none; }
+    .codewrap .tok-cmd { color: #7dd3fc; } .codewrap .tok-arg { color: #e2e8f0; } .codewrap .tok-flag { color: #fbbf24; } .codewrap .tok-amp { color: #64748b; padding: 0 4px; }
+    .copy-btn { position: absolute; top: 14px; right: 14px; padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); color: #e2e8f0; font-family: 'Inter Tight', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; }
+    .copy-btn:hover { background: rgba(56, 189, 248, 0.18); border-color: rgba(56, 189, 248, 0.4); }
+    .copy-btn.is-copied { background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.4); color: #86efac; }
+    .cta-block { margin: 56px auto 0; padding: clamp(28px, 4vw, 44px); background: radial-gradient(80% 100% at 0% 0%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 60%), radial-gradient(80% 100% at 100% 100%, color-mix(in oklab, var(--accent-3) 14%, transparent), transparent 60%), var(--card); border: 1px solid color-mix(in oklab, var(--accent) 25%, var(--line-1)); border-radius: 20px; text-align: center; }
+    .cta-block h3 { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: clamp(22px, 2.4vw, 28px); letter-spacing: -0.015em; margin: 0 0 8px; color: var(--ink-0); }
+    .cta-block p { color: var(--ink-2); font-size: 15px; margin: 0 0 22px; }
+    .cta-row { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 12px; font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 14.5px; letter-spacing: -0.005em; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+    .btn .arrow { transition: transform 0.15s ease; } .btn:hover .arrow { transform: translateX(3px); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%); color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 10px 22px -10px color-mix(in oklab, var(--accent) 60%, transparent); }
+    .btn-primary:hover { transform: translateY(-1px); color: #fff; }
+    .btn-ghost { background: transparent; border: 1px solid var(--line-2); color: var(--ink-0); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .pagefoot { border-top: 1px solid var(--line-1); padding: 28px 0; margin-top: 24px; color: var(--ink-2); font-size: 13px; }
+    .pagefoot-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .pagefoot a { color: var(--ink-2); } .pagefoot a:hover { color: var(--accent); }
+    @media (max-width: 540px) { .article p, .article ul, .article ol { font-size: 16px; } }
+  </style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <a class="brand" href="/"><span class="brand-name"><span class="brand-seg-1">Open</span><span class="brand-seg-2">Construction</span><span class="brand-seg-3">ERP</span></span></a>
+      <button type="button" class="nav-icon-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/></svg>
+      </button>
+    </div>
+    <div class="nav-links">
+      <a href="/services.html">Practices</a>
+      <a href="/industries.html">Industries</a>
+      <a href="/standards.html">Standards</a>
+      <a href="/maturity.html">Maturity</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/partners.html">Partners</a>
+      <a href="/news.html" class="news-link is-active">News</a>
+      <a href="/docs.html">Docs</a>
+    </div>
+    <div class="nav-right">
+      <a class="nav-pill github" href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+        <span>GitHub</span>
+      </a>
+      <a class="nav-pill cta" href="/demo"><span>Try demo</span><svg class="arrow" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+    </div>
+  </div>
+</nav>
+
+<section class="article-hero">
+  <div class="narrow">
+    <div class="crumbs">
+      <a href="/">Home</a><span class="sep">/</span>
+      <a href="/news.html">News</a><span class="sep">/</span>
+      <span>v7.1.0 - One click to the next record</span>
+    </div>
+    <div class="pill-row">
+      <span class="chip release">Release</span>
+      <span class="pill-meta">2026-06-07</span>
+      <span class="pill-meta">~6 min read</span>
+    </div>
+    <h1>v7.1.0 - <span class="accent">The next record is one click away</span>,<br />and the estimator explains itself.</h1>
+    <p class="lede">
+      This release closes the gaps between records. More than 80 places
+      where two related things sat next to each other without a link are
+      now wired in both directions, so any related record is one click
+      away. The AI Estimate Builder opens with a conversation, asks a few
+      short clarifying rounds, then stops at two confirmation checkpoints
+      before mapping rates, and every rate it picks carries a plain reason
+      and an outlier badge. A translation sweep brings the interface to
+      native copy in all 26 app languages, and the desktop app finally has
+      a real first launch.
+    </p>
+  </div>
+</section>
+
+<div class="cover"><div class="cover-inner"><div class="cover-art">v7.1.0</div></div></div>
+
+<article class="article">
+  <div class="narrow">
+
+    <p>
+      v7.0.0 made every module open the same way. v7.1.0 connects them.
+      The work was the same on both counts: take a hundred-plus modules
+      that grew up apart and make them behave like one product. Last time
+      that meant one identity and one orientation card per page. This time
+      it means that when you are reading one record and the next step lives
+      in another module, the link is right there, pointing the right way,
+      and it lands you on the exact row. Alongside that, the AI Estimate
+      Builder grew up from a wizard into a guided conversation that shows
+      its reasoning, and about seventeen hundred strings per language were
+      rewritten into proper native copy. Everything here was verified
+      against the live backend, the Alembic head is a single revision, the
+      frontend type-checks clean and the backend is ruff clean.
+    </p>
+
+    <h2>What landed</h2>
+
+    <div class="highlights">
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <h4>80+ links, both directions</h4>
+        <p>
+          More than 80 places where related records sat side by side with
+          no link are now wired both ways. Variations, change orders and
+          contracts cross-reference each other, clashes jump to coordination
+          tasks, NCRs open their inspection, diary entries link field
+          reports, and BI tiles drill into the records behind the number.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h4>The estimator opens with a conversation</h4>
+        <p>
+          The AI Estimate Builder no longer starts at a bare form. You
+          describe the job in your own words and the intake asks up to three
+          short rounds of clarifying questions as chips, toggles and numeric
+          inputs. Without an AI key the same flow degrades to a curated form,
+          and you can switch to the form at any time.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <h4>Two checkpoints before any price</h4>
+        <p>
+          The estimator stops at two explicit confirmation points: a
+          parameter sheet you review, then a work-package board organised by
+          foreman stage, from demolition to commissioning, where each
+          package shows its real catalogue coverage. Nothing gets priced
+          until you sign off on the plan.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
+        <h4>Every rate shows why it was chosen</h4>
+        <p>
+          Rate mapping runs in passes: a semantic match, a unit-scale check
+          and a rate sanity pass. Every matched rate carries a visible
+          "why this rate" trace, so you can see what it matched on, and an
+          outlier badge flags any figure that sits outside the expected
+          range for the item.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h4>A 26-language translation sweep</h4>
+        <p>
+          About seventeen hundred interface strings per language were brought
+          to native copy across all 26 app languages, so the interface reads
+          naturally instead of half-translated. The website's download and
+          partners pages were translated into 19 site languages alongside.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2 5 5 .5-3.5 3.5 1 5-4.5-2.5L7 20l1-5L4.5 11.5 9.5 11z"/></svg>
+        </div>
+        <h4>A real desktop first launch</h4>
+        <p>
+          A fresh desktop install no longer opens on a login form. The app
+          provisions a local workspace owner, signs it in and lands straight
+          in the setup wizard, language first. A "Skip setup - open in
+          English" button sits on every step, and returning launches go
+          straight to the dashboard.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 14 3-3 3 3 5-5"/></svg>
+        </div>
+        <h4>Cost positions carry everything</h4>
+        <p>
+          Adding a position from the cost database into an estimate now
+          brings every resource it owns, not a coarse three-line split.
+          Resources with variants default to the mean rate and keep the full
+          variant catalogue, so a specific variant can be picked later. A
+          usage badge on each row shows where the position is used.
+        </p>
+      </div>
+
+      <div class="hi-card">
+        <div class="hi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
+        </div>
+        <h4>Clash clusters become one work item</h4>
+        <p>
+          Clash detection can turn a whole spatial cluster of clashes into
+          one tracked work item, a punch-list item or a task, instead of
+          chasing dozens individually. The draft title, priority and
+          assignee come with a confidence score, and every member clash
+          records the link both ways.
+        </p>
+      </div>
+
+    </div>
+
+    <h2>The next record is one click away</h2>
+    <p>
+      The change that defines this release is small on any single screen
+      and large across the whole app. For a long time, two records that
+      clearly belong together would sit on the page next to each other with
+      no way to move between them. A variation referenced a change order in
+      prose but did not link to it. A clash named a coordination task you
+      then had to go and find by hand. A number on a BI tile gave you no way
+      to reach the rows that produced it. v7.1.0 wires more than 80 of these
+      gaps, in both directions, so the relationship reads the same from
+      either side. Variations, change orders and contracts cross-reference
+      each other. Clashes jump to coordination tasks. NCRs open their
+      inspection. Daily diary entries link field reports. Procurement lines
+      link supplier catalog items. BI tiles drill into the records behind
+      the number. Quantity takeoff ties into the 5D cost model, capacity
+      planning, procurement and carbon pages, and into the CAD-BIM matching
+      flow, where an estimator actually needs them. Dozens of pages now
+      accept deep links that scroll to and highlight the exact row they
+      point at, so the click does not just open a module, it lands you on
+      the record.
+    </p>
+
+    <h2>An estimator that explains itself</h2>
+    <p>
+      The AI Estimate Builder shipped in v7.0.0 as a four-stage wizard.
+      v7.1.0 turns its front end into a conversation and its rate matching
+      into something you can audit. Instead of filling in a form, you
+      describe the job in plain words, and the intake asks up to three short
+      rounds of clarifying questions, presented as chips, toggles and
+      numeric inputs rather than open text. From there the flow walks
+      through two explicit confirmation checkpoints. First a parameter sheet
+      that captures everything the run will assume. Then a work-package
+      board organised by foreman stage, from demolition through to
+      commissioning, where each package shows its real catalogue coverage,
+      so you can see before any pricing where the cost database is thin.
+    </p>
+    <p>
+      Once you confirm the plan, rate mapping runs in passes: a semantic
+      match against the cost catalogue, a unit-scale check that catches an
+      area rate sitting under a volume quantity, and a rate sanity pass that
+      compares each figure against the expected range for the item. Every
+      matched rate carries a visible "why this rate" trace, so you can read
+      what it matched on rather than trust a number that appeared, and any
+      figure that falls outside the expected range gets an outlier badge.
+      Unit rates still only ever come from the cost catalogue, the model is
+      never allowed to invent a price, and without an AI key the whole flow
+      degrades to a curated form. It is the same human-confirmed pattern the
+      platform has held to from the start, with the reasoning now on the
+      surface.
+    </p>
+
+    <h2>The interface reads in your language</h2>
+    <p>
+      A translation sweep went through the app a language at a time and
+      brought about seventeen hundred interface strings per language to
+      proper native copy, across all 26 app languages. The aim was to fix the
+      half-translated feel where a screen mixes a regional language with
+      stray English, especially in newer modules and on the strings that
+      shipped with the v7.0.0 orientation cards. The website got the same
+      treatment where it mattered most for reach: the download and partners
+      pages are now translated into 19 site languages. Construction
+      terminology is regional, so the work was done with the right local
+      terms in mind rather than run through a blind machine pass.
+    </p>
+
+    <h2>Coordination, federations and BIM rules</h2>
+    <p>
+      Several BIM and coordination surfaces got real depth. Beyond turning a
+      cluster of clashes into one tracked item, BIM federations gained a
+      health report that classifies every member model, ready, processing,
+      failed, stale or empty, into a readiness score with a worst-state
+      headline, plus a portable snapshot you can download and later diff
+      against the live federation to see exactly which models were added,
+      removed or changed between coordination meetings. BIM quantity rules
+      gained a testing sandbox that runs a draft rule against the live model
+      before saving, a unit-dimension guard that warns when an area rule
+      declares a volume unit, a coverage report listing element categories
+      no active rule selects, and a formula version history with one-click
+      restore. BOQ positions generated by rules now carry an honest
+      confidence stamp instead of none. An asset operations module joins the
+      sidebar, and six more modules, QMS, advanced HSE, management of change,
+      NCR, punch list and inspections, got long-form "Show more"
+      walkthroughs.
+    </p>
+
+    <h2>Polish and honest fixes</h2>
+    <p>
+      Navigation now answers every click immediately: moving to a module
+      whose code is still loading shows a progress bar, a spinner on the
+      clicked sidebar row and a busy cursor, so a slow transition reads as
+      loading rather than broken. KPI cards across the platform share one
+      modern style, a slightly translucent surface that lets the page
+      texture show through, with consistent radii, spacing and a soft hover,
+      and info blocks got the same treatment that fixes the washed-out look
+      they had on dashboards. Element matching is now called CAD-BIM Match
+      to Cost and sits with the other estimating tools, and the external
+      portal is called Client &amp; Partner Portal everywhere. On the fixes
+      side, the usage indicator on the cost database changes color now
+      because usage is actually recorded on add, registration metadata
+      captured at sign-up is stored rather than silently dropped, and the
+      in-app changelog was rewritten so each release reads in seconds.
+    </p>
+
+    <h2>Upgrade</h2>
+
+    <div class="codewrap">
+      <button type="button" class="copy-btn" id="copy-upgrade" aria-label="Copy upgrade command">Copy</button>
+<pre><span class="cmd"><span class="tok-cmd">pip</span> <span class="tok-arg">install</span> <span class="tok-flag">--upgrade</span> <span class="tok-arg">openconstructionerp</span></span></pre>
+    </div>
+
+    <p>
+      The Alembic head is a single revision and the normal install path
+      creates the schema from the models and stamps it at the latest
+      version. The desktop installers for Windows, macOS and Linux carry the
+      new first-launch flow, so a fresh install provisions a local workspace
+      and lands in the setup wizard rather than a login form. If you run an
+      external PostgreSQL through <code>DATABASE_URL</code>, nothing about
+      that connection changes. Questions or trouble upgrading, write to
+      <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a>.
+    </p>
+
+    <div class="cta-block">
+      <h3>Try v7.1.0 today.</h3>
+      <p>Live demo in your browser, or self-host in five minutes. AGPL-3.0, no signup required.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="/demo"><span>Try the demo</span><svg class="arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a class="btn btn-ghost" href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+          <span>View on GitHub</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer class="pagefoot">
+  <div class="wrap">
+    <div class="pagefoot-inner">
+      <div>&copy; 2026 Artem Boiko / DataDrivenConstruction &middot; Open source under AGPL-3.0.</div>
+      <div>
+        <a href="/">Home</a> &middot;
+        <a href="/partners.html">Partners</a> &middot;
+        <a href="/news.html">News</a> &middot;
+        <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">GitHub</a> &middot;
+        <a href="https://datadrivenconstruction.io" target="_blank" rel="noopener">DataDrivenConstruction.io</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var btn = document.getElementById('theme-toggle'); if (!btn) return;
+    btn.addEventListener('click', function () {
+      var cur = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+      var next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem('oce-theme', next); } catch (e) {}
+    });
+  })();
+  (function () {
+    var btn = document.getElementById('copy-upgrade'); if (!btn) return;
+    var cmd = 'pip install --upgrade openconstructionerp';
+    btn.addEventListener('click', function () {
+      var done = function () { var prev = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('is-copied'); setTimeout(function () { btn.textContent = prev; btn.classList.remove('is-copied'); }, 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cmd).then(done).catch(function () { var ta = document.createElement('textarea'); ta.value = cmd; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta); done(); });
+      } else { var ta = document.createElement('textarea'); ta.value = cmd; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta); done(); }
+    });
+  })();
+</script>
+
+<script src="/news/assets/related-articles.js" defer></script>
+
+</body>
+</html>
