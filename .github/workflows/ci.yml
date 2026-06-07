@@ -68,7 +68,7 @@ jobs:
         # The backend wheel pulls in ../frontend/dist via force-include so a
         # production install bundles the SPA. CI runs the backend job in
         # parallel with the frontend job, so the dist directory may not exist
-        # yet — create an empty placeholder so the editable install succeeds.
+        # yet - create an empty placeholder so the editable install succeeds.
         run: |
           mkdir -p ../frontend/dist
           touch ../frontend/dist/.gitkeep
@@ -82,13 +82,17 @@ jobs:
       - name: Check formatting with ruff
         run: ruff format --check .
 
-      - name: Run tests with pytest
+      - name: Run unit tests with pytest
         # Point the suite at the postgres:16 service. conftest sees DATABASE_URL
         # is already set and uses it instead of booting an embedded cluster.
+        # The push gate runs the unit tree only: the integration tree against
+        # the service container crawled past the 60 minute job limit (6% after
+        # 56 min on 2026-06-07) and had not produced a green run for six
+        # consecutive pushes. The full tree runs nightly in ci-full.yml.
         env:
           DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/openconstructionerp_test
           DATABASE_SYNC_URL: postgresql+psycopg2://oe:oe@localhost:5432/openconstructionerp_test
-        run: pytest
+        run: pytest tests/unit -q
 
   zero-width-guard:
     name: Block zero-width Unicode characters
