@@ -39,12 +39,12 @@ async def _run(positions: list[dict], unit_system: str | None = None):
 
 
 @pytest.mark.asyncio
-async def test_passes_when_no_unit_system_supplied():
-    """Rule is a no-op (passes silently) when project_unit_system is absent."""
+async def test_skips_when_no_unit_system_supplied():
+    """No project_unit_system → the rule emits NO result at all (E-VAL-008:
+    an otherwise-empty BOQ must stay SKIPPED, not synthetically passed)."""
     positions = [{"ordinal": "01.001", "unit": "m3", "description": "Concrete"}]
     results = await _run(positions, unit_system=None)
-    assert len(results) == 1
-    assert results[0].passed is True
+    assert results == []
 
 
 @pytest.mark.asyncio

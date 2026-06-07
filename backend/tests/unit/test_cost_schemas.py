@@ -4,6 +4,8 @@ Validates CostItemCreate, CostItemUpdate, and CostSearchQuery
 with boundary conditions and constraint enforcement. No database required.
 """
 
+from decimal import Decimal
+
 import pytest
 from pydantic import ValidationError
 
@@ -43,10 +45,11 @@ class TestCostItemCreate:
         with pytest.raises(ValidationError):
             CostItemCreate(code="CONC-001", unit="m3")  # type: ignore[call-arg]
 
-    def test_rate_as_float(self):
+    def test_rate_is_decimal(self):
+        # v3 §10 - money fields validate to Decimal (float input coerced).
         data = CostItemCreate(code="X", unit="m2", rate=42.5)
-        assert isinstance(data.rate, float)
-        assert data.rate == 42.5
+        assert isinstance(data.rate, Decimal)
+        assert data.rate == Decimal("42.5")
 
     def test_rate_zero_allowed(self):
         data = CostItemCreate(code="X", unit="m2", rate=0.0)

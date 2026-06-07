@@ -78,9 +78,13 @@ async def _execute_no_existing(*_args: Any, **_kwargs: Any) -> SimpleNamespace:
     return SimpleNamespace(scalar_one_or_none=lambda: None)
 
 
+async def _refresh_noop(_obj: Any) -> None:
+    """Stub session.refresh — the in-memory snapshot is never expired."""
+
+
 def _make_service() -> ReportingService:
     svc = ReportingService.__new__(ReportingService)
-    svc.session = SimpleNamespace(execute=_execute_no_existing)
+    svc.session = SimpleNamespace(execute=_execute_no_existing, refresh=_refresh_noop)
     svc.kpi_repo = _StubKpiRepo()
     svc.template_repo = _StubTemplateRepo()
     svc.report_repo = _StubReportRepo()

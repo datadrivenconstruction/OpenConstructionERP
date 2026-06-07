@@ -382,5 +382,7 @@ def test_response_survives_empty_numeric_columns():
     resp = _risk_to_response(row)
     assert resp.probability == 0.5  # documented default
     assert resp.impact_cost == 0.0
-    assert resp.risk_score == 0.0
+    # risk_score is ALWAYS recomputed on the canonical 0-5 scale
+    # (F-PFO-RISK-06): default probability 0.5 x medium severity (3) = 1.5.
+    assert resp.risk_score == 1.5
     assert resp.response_cost == 0.0

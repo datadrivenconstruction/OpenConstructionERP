@@ -731,14 +731,16 @@ async def test_collection_count_degrades_gracefully_without_lancedb() -> None:
     assert n == 0
 
 
-def test_vector_available_caches_lancedb_missing(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Simulate a missing lancedb by zeroing find_spec for 'lancedb'."""
+def test_vector_available_false_when_backend_module_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The probe resolves the module from ``settings.vector_backend`` (#162):
+    qdrant -> qdrant_client, lancedb -> lancedb. Zero BOTH so the probe is
+    False regardless of the configured backend."""
     from app.modules.costs import vector_adapter as cost_vec
 
     real_find_spec = importlib.util.find_spec
 
     def fake_find_spec(name: str, *args: Any, **kwargs: Any) -> Any:
-        if name == "lancedb":
+        if name in ("lancedb", "qdrant_client"):
             return None
         return real_find_spec(name, *args, **kwargs)
 

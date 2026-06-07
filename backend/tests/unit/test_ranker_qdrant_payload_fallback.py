@@ -55,8 +55,9 @@ def test_description_from_payload_empty_payload_returns_empty():
 
 
 def test_description_from_payload_partial_payload_uses_available_fields():
+    # Joined with a plain hyphen (platform-wide em-dash removal).
     desc = _description_from_payload({"collection_name": "Walls", "category_type": "CONSTRUCTION"})
-    assert desc == "Walls — Construction"
+    assert desc == "Walls - Construction"
 
 
 def test_description_from_payload_skips_none_and_empty_values():
@@ -68,7 +69,7 @@ def test_description_from_payload_skips_none_and_empty_values():
             "category_type": "BUILDING",
         }
     )
-    assert desc == "Walls — Building"
+    assert desc == "Walls - Building"
 
 
 # ── _hit_to_candidate with empty parquet (typical snapshot install) ──────

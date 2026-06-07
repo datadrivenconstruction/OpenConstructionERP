@@ -177,7 +177,9 @@ def test_rerank_reorders_top_k_by_normalised_logit_score(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Stub model emits logits favouring the originally 2nd candidate —
-    after reranking it should rise to top-1."""
+    after reranking it should rise to top-1. The displayed score is the
+    60/40 prior/BGE blend (BGE is a reordering signal, not a score
+    replacement — see the templated-passage cliff note in rerank())."""
     fake = _stub_reranker([0.0, 5.0, -5.0])  # sigmoid → [0.5, 0.993, 0.0067]
     monkeypatch.setattr(reranker_bge, "_get_reranker", lambda: fake)
 
@@ -188,9 +190,10 @@ def test_rerank_reorders_top_k_by_normalised_logit_score(
     ]
     out = reranker_bge.rerank(cands, _envelope(), k=3)
 
-    # Top-1 should now be "B" (highest normalised score)
+    # Top-1 should now be "B" (highest BGE signal drives the order)
     assert out[0].code == "B"
-    assert out[0].score == pytest.approx(0.993, abs=0.01)
+    # Displayed score = prior 0.80 * 0.6 + bge 0.993 * 0.4.
+    assert out[0].score == pytest.approx(0.80 * 0.6 + 0.993 * 0.4, abs=0.01)
     assert out[2].code == "C"  # lowest
 
 
@@ -215,16 +218,20 @@ def test_rerank_preserves_tail_beyond_top_k(monkeypatch: pytest.MonkeyPatch) -> 
     assert len(pairs) == 2  # only top-2 went to reranker
 
 
-def test_rerank_records_delta_in_boosts_applied(monkeypatch: pytest.MonkeyPatch) -> None:
-    """The ``bge_rerank`` delta must surface in ``boosts_applied`` so
-    the UI can show "why this candidate moved"."""
+def test_rerank_records_raw_and_delta_in_boosts_applied(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Both the raw BGE signal and the blended delta surface in
+    ``boosts_applied`` so the explainability panel can show "BGE rerank
+    pushed this up by X"."""
     fake = _stub_reranker([5.0])  # sigmoid ≈ 0.993
     monkeypatch.setattr(reranker_bge, "_get_reranker", lambda: fake)
 
     cand = _candidate("A", score=0.5)
     out = reranker_bge.rerank([cand], _envelope(), k=1)
-    assert "bge_rerank" in out[0].boosts_applied
-    assert out[0].boosts_applied["bge_rerank"] == pytest.approx(0.993 - 0.5, abs=0.01)
+    assert "bge_rerank_raw" in out[0].boosts_applied
+    assert "bge_rerank_delta" in out[0].boosts_applied
+    assert out[0].boosts_applied["bge_rerank_raw"] == pytest.approx(0.993, abs=0.01)
+    # delta = blended - prior = (0.5*0.6 + 0.993*0.4) - 0.5
+    assert out[0].boosts_applied["bge_rerank_delta"] == pytest.approx(0.993 * 0.4 - 0.5 * 0.4, abs=0.01)
 
 
 def test_rerank_falls_through_on_compute_score_failure(
@@ -251,7 +258,8 @@ def test_rerank_handles_single_pair_returning_scalar(
     monkeypatch.setattr(reranker_bge, "_get_reranker", lambda: fake)
 
     out = reranker_bge.rerank([_candidate("A", score=0.5)], _envelope(), k=1)
-    assert out[0].score == pytest.approx(0.993, abs=0.01)
+    # Blended: prior 0.5 * 0.6 + sigmoid(5.0) 0.993 * 0.4.
+    assert out[0].score == pytest.approx(0.5 * 0.6 + 0.993 * 0.4, abs=0.01)
 
 
 # ── Confidence band wiring ──────────────────────────────────────────────
@@ -260,23 +268,26 @@ def test_rerank_handles_single_pair_returning_scalar(
 def test_rerank_uses_classification_confidence_per_candidate(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """A score just below the HIGH floor with classification_confidence='low'
-    tightens the HIGH floor by 0.03 — must land in MEDIUM, not HIGH.
+    """A blended score just above the HIGH floor with
+    classification_confidence='low' (floor tightened by 0.03) must land
+    in MEDIUM, not HIGH.
 
-    Pin the test score off the resolved threshold rather than a literal
-    so a future band re-calibration is a one-line config change."""
+    Bands derive from the BGE-profile thresholds and the BLENDED score,
+    so resolve thresholds via the profile and pin prior == BGE == target
+    (the 60/40 blend of equal inputs is the target itself)."""
     import math
 
-    from app.core.match_service.config import CONFIDENCE_HIGH_THRESHOLD
+    from app.core.match_service.config import confidence_thresholds_for_model
 
-    # Score 0.01 above HIGH (would normally clear the band) but well
-    # below HIGH+0.03 (the cls=low tightened floor).
-    target_score = CONFIDENCE_HIGH_THRESHOLD + 0.01
+    high, _medium, _low = confidence_thresholds_for_model("bge-m3")
+    # 0.01 above HIGH (would normally clear the band) but well below
+    # HIGH+0.03 (the cls=low tightened floor).
+    target_score = high + 0.01
     logit = math.log(target_score / (1 - target_score))
     fake = _stub_reranker([logit])
     monkeypatch.setattr(reranker_bge, "_get_reranker", lambda: fake)
 
-    cand = _candidate("A", score=0.5)
+    cand = _candidate("A", score=target_score)
     out = reranker_bge.rerank(
         [cand],
         _envelope(),
@@ -289,15 +300,21 @@ def test_rerank_uses_classification_confidence_per_candidate(
 def test_rerank_promotes_band_with_hard_filter_count(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """A 0.78 reranked score with 3 hard filters → HIGH band per §6.4."""
+    """A blended score just below HIGH with 3 hard filters → HIGH band
+    per §6.4 (the promoted floor is high * 0.96)."""
     import math
 
-    target_score = 0.78
+    from app.core.match_service.config import confidence_thresholds_for_model
+
+    high, _medium, _low = confidence_thresholds_for_model("bge-m3")
+    # Above the promoted floor (high * 0.96) but below the plain HIGH floor,
+    # so only the hard-filter promotion can clear it.
+    target_score = high * 0.96 + 0.005
     logit = math.log(target_score / (1 - target_score))
     fake = _stub_reranker([logit])
     monkeypatch.setattr(reranker_bge, "_get_reranker", lambda: fake)
 
-    cand = _candidate("A", score=0.5)
+    cand = _candidate("A", score=target_score)
     out = reranker_bge.rerank([cand], _envelope(), k=1, hard_filters_matched=3)
     assert out[0].confidence_band == "high"
 

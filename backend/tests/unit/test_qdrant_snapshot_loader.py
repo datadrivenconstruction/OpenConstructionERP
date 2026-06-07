@@ -37,6 +37,21 @@ def _clear_settings_cache():
     get_settings.cache_clear()
 
 
+@pytest.fixture(autouse=True)
+def _pure_routing(monkeypatch: pytest.MonkeyPatch):
+    """Disable the live-collection availability probe (pure routing contract).
+
+    ``country_to_collection`` folds unavailable language collections into the
+    best available one when a live Qdrant is reachable. On a dev host whose
+    Qdrant only carries ``cwicr_en_v3`` that turns every non-English region
+    into English and the filename-routing assertions go env-dependent. An
+    empty probe result = "Qdrant unreachable" = naive language-derived name.
+    """
+    from app.modules.costs import qdrant_adapter
+
+    monkeypatch.setattr(qdrant_adapter, "_available_cwicr_collections", lambda: frozenset())
+
+
 # ── Filename routing ─────────────────────────────────────────────────────
 
 

@@ -1756,8 +1756,9 @@ async def test_cash_in_30d_portfolio_groups_by_currency(
 
     result = await kpis.compute("cash_in_30d", finance_session, project_id=None)
     by_cur = result.breakdown.get("by_currency", {})
-    assert by_cur.get("EUR") == "1000"
-    assert by_cur.get("USD") == "400"
+    # Money strings carry cents (v3 §10 quantize-to-2dp).
+    assert by_cur.get("EUR") == "1000.00"
+    assert by_cur.get("USD") == "400.00"
     assert result.breakdown.get("multi_currency") is True
     # Dominant = EUR 1000 (> USD 400). Never the blended 1400 sum.
     assert result.value == Decimal("1000")
@@ -1809,8 +1810,9 @@ async def test_cv_portfolio_groups_by_currency(
     result = await kpis.compute("cv", finance_session, project_id=None)
     by_cur = result.breakdown.get("by_currency", {})
     # No tasks → EV = 0 in each currency, so CV = -AC per currency.
-    assert by_cur.get("EUR") == "-700"
-    assert by_cur.get("USD") == "-300"
+    # Money strings carry cents (v3 §10 quantize-to-2dp).
+    assert by_cur.get("EUR") == "-700.00"
+    assert by_cur.get("USD") == "-300.00"
     assert result.breakdown.get("multi_currency") is True
     # Dominant by magnitude = EUR (-700). Never the blended -1000 scalar.
     assert result.value == Decimal("-700")
