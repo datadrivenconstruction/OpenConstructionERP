@@ -11730,7 +11730,7 @@ const resource = {
     "changeorders.boq_picker_search_placeholder": "Filter by description or ordinal…",
     "changeorders.boq_picker_title": "Pick from BOQ",
     "changeorders.boq_source_clear": "Clear BOQ link",
-    "changeorders.boq_source_label": "From BOQ position {{ordinal}}",
+    "changeorders.boq_source_label": "From BOQ position {{position}}",
     "changeorders.from_variation": "From variation",
     "changeorders.from_variation_hint": "Open the variation order this change order was created from",
     "changeorders.linked_po": "PO {{n}}",
