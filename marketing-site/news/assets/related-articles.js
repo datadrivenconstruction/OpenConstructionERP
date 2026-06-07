@@ -14,6 +14,15 @@
   // for "draw the on-brand SVG placeholder".
   var ARTICLES = [
     {
+      slug: 'v7-1-0',
+      href: '/news/v7-1-0.html',
+      title: 'v7.1.0 - The next record is one click away.',
+      date: '2026-06-07',
+      tag: 'Release',
+      tagClass: 'release',
+      thumb: null
+    },
+    {
       slug: 'v7-0-1',
       href: '/news/v7-0-1.html',
       title: 'v7.0.1 - The desktop launch fix.',
