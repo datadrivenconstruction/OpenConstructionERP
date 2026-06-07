@@ -30,7 +30,10 @@ jobs:
   backend:
     name: Backend CI
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # The unit tree alone needs more than an hour on the standard runner
+    # (the 60 minute limit killed it at 2026-06-07 09:43 + 1h00m15s), so the
+    # budget is doubled. The integration tree lives in ci-full.yml.
+    timeout-minutes: 120
     defaults:
       run:
         working-directory: backend
