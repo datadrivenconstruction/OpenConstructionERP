@@ -9,7 +9,6 @@
 
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import React from 'react';
 
 import { MappingTrace, OutlierBadge } from '../MappingTrace';
 import type { MappingTrace as MappingTraceData } from '../../api';
@@ -124,7 +123,7 @@ describe('MappingTrace (WP7)', () => {
     );
     const passes = screen.getAllByTestId('aiest-trace-pass');
     expect(passes).toHaveLength(1);
-    expect(passes[0].getAttribute('data-pass')).toBe('mystery_pass');
+    expect(passes[0]?.getAttribute('data-pass')).toBe('mystery_pass');
     expect(screen.getByText('mystery_pass')).toBeInTheDocument();
   });
 });

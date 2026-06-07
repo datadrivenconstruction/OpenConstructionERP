@@ -797,6 +797,13 @@ export function CostsPage() {
     }
   }, []);
 
+  // Current region info for subtitle
+  const regionInfo = region ? REGION_MAP[region] : null;
+  // Fallback currency for rows whose own `currency` is empty — derived
+  // from the active region's catalogue. Empty when "All regions" + no
+  // per-row currency, in which case the bare formatted number is shown.
+  const regionCurrency = regionInfo?.currency ?? '';
+
   // CONN-83 — "Benchmark this rate": deep-link the row's rate into the AI
   // Cost Advisor as a ready-to-send question, plus the active region so the
   // advisor scopes its answer to the same catalogue. The advisor consumes
@@ -861,13 +868,6 @@ export function CostsPage() {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(n);
-
-  // Current region info for subtitle
-  const regionInfo = region ? REGION_MAP[region] : null;
-  // Fallback currency for rows whose own `currency` is empty — derived
-  // from the active region's catalogue. Empty when "All regions" + no
-  // per-row currency, in which case the bare formatted number is shown.
-  const regionCurrency = regionInfo?.currency ?? '';
 
   // Currency-aware money formatter. Catalogues mix EUR / AED / SAR / USD,
   // so a bare number is ambiguous — always render the ISO code. Falls
