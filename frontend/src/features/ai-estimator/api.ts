@@ -233,7 +233,8 @@ export interface RunRead {
   provider: string | null;
   model_used: string | null;
   total_tokens: number | null;
-  cost_usd_estimate: number | null;
+  /** Money field - Decimal-as-string in JSON (v3 §10). */
+  cost_usd_estimate: number | string | null;
   duration_ms: number | null;
   validation_report: ValidationReport | null;
   grand_total: string | null;

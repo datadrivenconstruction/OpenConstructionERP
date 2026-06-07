@@ -204,7 +204,9 @@ class RunRead(BaseModel):
     provider: str | None = None
     model_used: str | None = None
     total_tokens: int = 0
-    cost_usd_estimate: float = 0.0
+    # v3 §10 - money on the wire is Decimal-as-string (the DB column stays
+    # Float: tiny USD values, no precision risk; the contract is uniform).
+    cost_usd_estimate: Decimal = Decimal("0")
     duration_ms: int = 0
     validation_report: dict[str, Any] | None = None
     # Decimal-as-string in JSON.
@@ -216,7 +218,7 @@ class RunRead(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    @field_serializer("grand_total", when_used="json")
+    @field_serializer("grand_total", "cost_usd_estimate", when_used="json")
     def _ser_grand_total(self, v: Decimal | None) -> str | None:
         return _serialise_money(v)
 
