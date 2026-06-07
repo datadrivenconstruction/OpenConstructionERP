@@ -78,8 +78,10 @@ class TestRouters:
     def test_compliance_router_is_importable(self) -> None:
         from app.modules.compliance_ai.router import router
 
+        # No local prefix - the module loader mounts at /api/v1/compliance-ai;
+        # a router-level prefix would double-mount (latent skeleton bug, fixed).
         paths = {route.path for route in router.routes}
-        assert "/compliance-ai/_health" in paths
+        assert "/_health" in paths
 
     def test_cost_match_router_is_importable(self) -> None:
         from app.modules.cost_match.router import router

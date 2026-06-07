@@ -171,6 +171,14 @@ class _StubResourceSkillRepo:
     async def list_for_resource(self, rid: uuid.UUID) -> list[Any]:
         return [r for r in self.rows.values() if r.resource_id == rid]
 
+    async def list_for_resources(self, rids: list[uuid.UUID]) -> dict[uuid.UUID, list[Any]]:
+        # Bulk variant (N+1 fix) - mapping resource_id -> [link, ...].
+        out: dict[uuid.UUID, list[Any]] = {}
+        for r in self.rows.values():
+            if r.resource_id in rids:
+                out.setdefault(r.resource_id, []).append(r)
+        return out
+
     async def find_pair(self, rid: uuid.UUID, sid: uuid.UUID) -> Any:
         for r in self.rows.values():
             if r.resource_id == rid and r.skill_id == sid:
@@ -250,6 +258,21 @@ class _StubWindowRepo:
             out = [r for r in out if r.start_at <= end_at]
         return out
 
+    async def list_for_resources(
+        self,
+        rids: list[uuid.UUID],
+        *,
+        start_at: datetime | None = None,
+        end_at: datetime | None = None,
+    ) -> dict[uuid.UUID, list[Any]]:
+        # Bulk variant (N+1 fix) - same overlap filter, grouped by resource.
+        out: dict[uuid.UUID, list[Any]] = {}
+        for rid in rids:
+            rows = await self.list_for_resource(rid, start_at=start_at, end_at=end_at)
+            if rows:
+                out[rid] = rows
+        return out
+
     async def create(self, w: Any) -> Any:
         if getattr(w, "id", None) is None:
             w.id = uuid.uuid4()
@@ -321,6 +344,22 @@ class _StubAssignmentRepo:
                 continue
             if a.start_at < end and a.end_at > start:
                 out.append(a)
+        return out
+
+    async def assignments_for_resources_in_window(
+        self,
+        rids: list[uuid.UUID],
+        start: datetime,
+        end: datetime,
+        *,
+        active_only: bool = True,
+    ) -> dict[uuid.UUID, list[Any]]:
+        # Bulk variant (N+1 fix) - mapping resource_id -> overlapping assignments.
+        out: dict[uuid.UUID, list[Any]] = {}
+        for rid in rids:
+            rows = await self.assignments_for_resource_in_window(rid, start, end, active_only=active_only)
+            if rows:
+                out[rid] = rows
         return out
 
     async def list_in_window(

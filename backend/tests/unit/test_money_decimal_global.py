@@ -206,6 +206,10 @@ def _is_money_named(field_name: str) -> bool:
         return False
     if field_name.endswith(("_pct", "_percentage", "_count", "_mb")):
         return False
+    # ``pct_of_budget`` and friends are ratios even though a money word
+    # appears later in the name.
+    if field_name.startswith(("pct_", "percent_")):
+        return False
     return bool(MONEY_NAME_RE.match(field_name))
 
 
@@ -222,6 +226,13 @@ def _is_money_named(field_name: str) -> bool:
 #     quantity in the bid context, not a unit price. The cap is set to
 #     1 so any further regression — a new ``: float`` money field on a
 #     schema, or a callable wrongly downcast — is caught by CI.
+#   * v7.1.0 gate audit: the estimator + bid-leveling waves regressed 4
+#     genuine money floats (ai_estimator.RunRead.cost_usd_estimate,
+#     tendering.BidLevelingSummary.raw_amount / .leveled_amount,
+#     tendering.LevelingMatrixCell.unit_rate) — all converted to
+#     Decimal-as-string; ``pct_of_budget`` taught to the ratio filter.
+#     ``BidComparisonRow.budget_quantity`` remains the single documented
+#     exception, so the cap stays 1.
 # Sibling agents that fix further money fields should *lower* this
 # constant to lock in their progress. New money-as-float fields ADDED
 # to a schema will push the count over the cap and fail CI.

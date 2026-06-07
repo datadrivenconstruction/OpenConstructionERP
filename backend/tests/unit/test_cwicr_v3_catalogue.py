@@ -24,6 +24,19 @@ from app.modules.costs.cwicr_v3_catalogue import (
 from app.modules.costs.qdrant_adapter import country_to_collection
 
 
+@pytest.fixture(autouse=True)
+def _pure_routing(monkeypatch: pytest.MonkeyPatch):
+    """Disable the live-collection availability probe (pure routing contract).
+
+    A sparsely populated dev Qdrant (only ``cwicr_en_v3``) otherwise folds
+    every non-English region into English and the registry-vs-adapter
+    assertions go env-dependent. Empty probe = naive language-derived name.
+    """
+    from app.modules.costs import qdrant_adapter
+
+    monkeypatch.setattr(qdrant_adapter, "_available_cwicr_collections", lambda: frozenset())
+
+
 def test_registry_size_is_intentional():
     """Region target from v3 plan §2.1 + Africa pack + HF region expansion —
     guards against accidental drops."""

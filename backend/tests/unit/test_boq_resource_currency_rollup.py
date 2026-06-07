@@ -241,11 +241,13 @@ async def test_prueba2_section_subtotal_converts_usd_resource(session):
     expected = Decimal("94.248") + Decimal("3") + Decimal("72") + Decimal("70750000")
 
     assert len(structured.sections) == 1
-    # Place #1 — the section subtotal the contributor circled.
-    assert structured.sections[0].subtotal == pytest.approx(float(expected))
-    assert structured.direct_cost == pytest.approx(float(expected))
+    # Place #1 — the section subtotal the contributor circled. The rollup
+    # returns Decimal now (v3 §10); coerce before approx — pytest.approx
+    # cannot subtract a Decimal from a float.
+    assert float(structured.sections[0].subtotal) == pytest.approx(float(expected))
+    assert float(structured.direct_cost) == pytest.approx(float(expected))
     # Grand Total has no markups here so it equals direct cost.
-    assert structured.grand_total == pytest.approx(float(expected))
+    assert float(structured.grand_total) == pytest.approx(float(expected))
     # The OLD buggy value would have been ~50_169.248 (USD summed as ARS).
     assert structured.direct_cost > 70_000_000
 
