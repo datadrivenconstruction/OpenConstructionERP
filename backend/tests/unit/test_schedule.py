@@ -29,12 +29,25 @@ from app.modules.schedule.service import ScheduleService, _normalize_deps, compu
 PROJECT_ID = uuid.uuid4()
 
 
+async def _session_get_none(*_args: Any, **_kwargs: Any) -> None:
+    """Stub for ``AsyncSession.get`` — Gantt resolves the project for the
+    regional work calendar; returning None falls back to the default region."""
+
+
+class _StubRelationshipRepo:
+    """No canonical predecessor edges — the completion guard passes through."""
+
+    async def list_predecessors(self, activity_id: uuid.UUID) -> list[Any]:
+        return []
+
+
 def _make_service() -> ScheduleService:
     service = ScheduleService.__new__(ScheduleService)
-    service.session = SimpleNamespace()
+    service.session = SimpleNamespace(get=_session_get_none)
     service.schedule_repo = _StubScheduleRepo()
     service.activity_repo = _StubActivityRepo()
     service.work_order_repo = _StubWorkOrderRepo()
+    service.relationship_repo = _StubRelationshipRepo()
     return service
 
 
@@ -326,11 +339,28 @@ async def test_link_boq_position_duplicate_rejected() -> None:
 
 @pytest.mark.asyncio
 async def test_gantt_data_generation() -> None:
+    # Unfinished activities whose planned end is already past are reported as
+    # "delayed" (effective status), so keep the open tasks in the future to
+    # pin the plain status mapping here. The delay derivation has its own test.
     svc = _make_service()
     schedule = await _create_schedule(svc)
     await _create_activity(svc, schedule.id, name="Task A", status="completed")
-    await _create_activity(svc, schedule.id, name="Task B", status="in_progress")
-    await _create_activity(svc, schedule.id, name="Task C", status="not_started")
+    await _create_activity(
+        svc,
+        schedule.id,
+        name="Task B",
+        status="in_progress",
+        start_date="2026-12-01",
+        end_date="2026-12-15",
+    )
+    await _create_activity(
+        svc,
+        schedule.id,
+        name="Task C",
+        status="not_started",
+        start_date="2027-01-04",
+        end_date="2027-01-15",
+    )
 
     gantt = await svc.get_gantt_data(schedule.id)
     assert len(gantt.activities) == 3

@@ -147,8 +147,13 @@ async def test_submit_prequal_with_explicit_score_wins() -> None:
 
 
 @pytest.mark.asyncio
-async def test_submit_prequal_computes_score_from_yes_no_answers() -> None:
-    """Auto-scorer: 3 yes / 1 no -> 75."""
+async def test_submit_prequal_scores_against_canonical_spec() -> None:
+    """Canonical keys score against the full 8-question spec (TC-14).
+
+    4 of the 8 DEFAULT_PREQUAL_QUESTIONS are answered correctly; the 4
+    unanswered required questions count as incorrect (they do NOT shrink
+    the denominator) -> 4 / 8 * 100 = 50.
+    """
     svc = _make_service()
     sub = await _make_sub(svc)
     with patch("app.modules.subcontractors.service.event_bus.publish_detached"):
@@ -159,11 +164,31 @@ async def test_submit_prequal_computes_score_from_yes_no_answers() -> None:
                 "wcb_coverage": True,
                 "references_available": "Yes",
                 "has_open_incidents": "no",
-                # Non-Yes/No answer — must NOT poison denominator.
+                # Non-Yes/No answer — ignored by the scorer either way.
                 "annual_revenue": 1_000_000,
             },
         )
-    # 3 yes out of 4 counted = 75.
+    assert result.prequal_score == 50
+
+
+@pytest.mark.asyncio
+async def test_submit_prequal_generic_fallback_for_unknown_keys() -> None:
+    """Third-party questionnaires (no canonical keys) use the generic
+    any-yes/no scorer: 3 yes out of 4 counted -> 75; the numeric answer
+    must NOT poison the denominator."""
+    svc = _make_service()
+    sub = await _make_sub(svc)
+    with patch("app.modules.subcontractors.service.event_bus.publish_detached"):
+        result = await svc.submit_prequal(
+            sub.id,
+            questionnaire_data={
+                "q1_custom": "yes",
+                "q2_custom": True,
+                "q3_custom": "Yes",
+                "q4_custom": "no",
+                "q5_revenue": 1_000_000,
+            },
+        )
     assert result.prequal_score == 75
 
 

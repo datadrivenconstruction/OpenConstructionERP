@@ -247,25 +247,28 @@ class TestAccessToken:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
         assert payload["role"] == "manager"
 
-    def test_access_token_contains_permissions(self):
+    def test_access_token_omits_permissions(self):
+        """Slim-JWT contract (v5.9.0): the token carries identity claims only.
+
+        Embedding the resolved permission list added ~12 KB for an admin and
+        pushed the Authorization header past dev-proxy limits (HTTP 431).
+        Permissions are re-hydrated from the DB role on every request, so the
+        claim must stay OUT of the payload.
+        """
         settings = _make_settings()
         user = _make_user(role="editor")
         token = create_access_token(user, settings)
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
-        perms = payload["permissions"]
-        assert "test.read" in perms
-        assert "test.write" in perms
-        assert "test.admin" not in perms
+        assert "permissions" not in payload
 
-    def test_access_token_admin_gets_all_permissions(self):
+    def test_access_token_admin_omits_permissions_too(self):
+        """Admins resolve the full permission set server-side, never in the JWT."""
         settings = _make_settings()
         user = _make_user(role="admin")
         token = create_access_token(user, settings)
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
-        perms = payload["permissions"]
-        assert "test.read" in perms
-        assert "test.write" in perms
-        assert "test.admin" in perms
+        assert "permissions" not in payload
+        assert payload["role"] == "admin"
 
     def test_access_token_type_is_access(self):
         settings = _make_settings()
