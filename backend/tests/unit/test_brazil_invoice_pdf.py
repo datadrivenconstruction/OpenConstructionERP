@@ -55,18 +55,20 @@ def test_br_date_flips_iso_to_brazilian() -> None:
     assert _br_date("2026-12-31") == "31/12/2026"
 
 
-def test_br_date_returns_em_dash_for_missing() -> None:
-    assert _br_date(None) == "—"
-    assert _br_date("") == "—"
-    assert _br_date("short") == "—"
+def test_br_date_returns_hyphen_for_missing() -> None:
+    # The platform-wide typography rule replaced em-dashes with plain
+    # hyphens in all user-visible text, including PDF placeholders.
+    assert _br_date(None) == "-"
+    assert _br_date("") == "-"
+    assert _br_date("short") == "-"
 
 
 # ── _val placeholder ─────────────────────────────────────────────────────
 
 
-def test_val_em_dash_fallback() -> None:
-    assert _val(None) == "—"
-    assert _val("") == "—"
+def test_val_hyphen_fallback() -> None:
+    assert _val(None) == "-"
+    assert _val("") == "-"
     assert _val("CNPJ 12.345.678/0001-90") == "CNPJ 12.345.678/0001-90"
 
 
