@@ -1,5 +1,12 @@
 // @ts-nocheck
 import '@testing-library/jest-dom';
+import { configure } from '@testing-library/dom';
+
+// Under full-suite parallel load (worker starvation on 2-core CI runners and
+// local runs) the default 1s `findBy*`/`waitFor` budget intermittently expires
+// before chained React Query mocks resolve and re-render. 5s only raises the
+// upper bound — fast tests stay exactly as fast.
+configure({ asyncUtilTimeout: 5000 });
 
 // Node's `undici`-backed `fetch` rejects an `AbortSignal` created via the
 // jsdom-provided `AbortController` ("Expected signal to be an instance of
