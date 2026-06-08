@@ -11,8 +11,8 @@ Professional BOQ, 4D scheduling, 5D cost model, and tendering - all in one open-
 [▶ Watch the 12-min walkthrough](https://www.youtube.com/watch?v=X06cIaroAeI) · [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
-[![Version](https://img.shields.io/github/v/release/datadrivenconstruction/OpenConstructionERP?label=version&color=green&v=7.0.0)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest)
-[![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi&v=7.0.0)](https://pypi.org/project/openconstructionerp/)
+[![Version](https://img.shields.io/github/v/release/datadrivenconstruction/OpenConstructionERP?label=version&color=green&v=7.3.0)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest)
+[![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi&v=7.3.0)](https://pypi.org/project/openconstructionerp/)
 [![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp)
 [![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers)
 <br/>
@@ -220,7 +220,7 @@ Construction cost estimation software is expensive, closed-source, and locked to
 <tr><td><b>Price</b></td><td align="center"><b>Free forever</b></td><td align="center">~&#8364;500/mo</td><td align="center">~&#8364;300/mo</td><td align="center">~&#8364;200/mo</td><td align="center">~&#8364;30/mo</td></tr>
 <tr><td><b>AI estimation</b></td><td align="center">&#10004; 7 LLM providers</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
 <tr><td><b>UI languages</b></td><td align="center"><b>27</b></td><td align="center">5</td><td align="center">3</td><td align="center">2</td><td align="center">8</td></tr>
-<tr><td><b>Regional standards</b></td><td align="center"><b>30+</b></td><td align="center">4</td><td align="center">3</td><td align="center">2</td><td align="center">&mdash;</td></tr>
+<tr><td><b>Regional standards</b></td><td align="center"><b>30+</b></td><td align="center">4</td><td align="center">3</td><td align="center">2</td><td align="center">-</td></tr>
 <tr><td><b>BOQ editor</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td></tr>
 <tr><td><b>CAD/BIM takeoff</b></td><td align="center">&#10004; RVT IFC DWG DGN</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">PDF only</td></tr>
 <tr><td><b>4D/5D planning</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
@@ -734,7 +734,7 @@ Ensure your estimates meet regulatory standards before submission:
 
 - **42 built-in rules** across 13 rule sets - DIN 276, NRM, MasterFormat, GAEB, and universal BOQ quality checks
 - **Real-time validation** - Run checks with Ctrl+Shift+V. Each position gets a pass/warning/error indicator
-- **Quality score** - Overall BOQ quality percentage (0–100%) visible in the toolbar
+- **Quality score** - Overall BOQ quality percentage (0-100%) visible in the toolbar
 - **Drill-down** - Click any finding to jump directly to the affected BOQ position and fix it
 - **Custom rules** - Define project-specific validation rules via the rule builder or Python scripting
 
@@ -859,7 +859,15 @@ irm https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP
 
 If you would rather not think about PATH at all, use this. It picks Docker if installed, otherwise uv, otherwise a dedicated Python virtual environment, installs OpenConstructionERP there, puts the `openconstructionerp` command on your PATH automatically, and finishes with a short panel showing the URL, the demo login and how to start. It also offers to launch right away. Open a new terminal afterwards and `openconstructionerp` just works. Runs at **http://localhost:8080**.
 
-### Alternative 2: Docker compose
+### Alternative 2: Docker
+
+Fastest, using the published image:
+
+```bash
+docker run -d -p 8080:8080 -v oe_data:/data ghcr.io/datadrivenconstruction/openconstructionerp:latest
+```
+
+Or build from source:
 
 ```bash
 git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
@@ -867,7 +875,7 @@ cd OpenConstructionERP
 make quickstart
 ```
 
-Open **http://localhost:8080** - builds everything in ~2 minutes.
+Open **http://localhost:8080**. The published image starts in seconds; a from-source build takes ~2 minutes.
 
 ### Alternative 3: Local development (clone + npm + uvicorn)
 

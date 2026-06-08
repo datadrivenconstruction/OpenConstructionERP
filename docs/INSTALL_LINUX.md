@@ -1,6 +1,6 @@
 # Installing OpenConstructionERP on Linux (Ubuntu / Debian)
 
-This page covers the Linux-specific gotchas that the generic `pip install openconstructionerp` instruction does not. If you are on Ubuntu 23.04 or newer (including Ubuntu 26), read this first — `pip install` directly to system Python will fail.
+This page covers the Linux-specific gotchas that the generic `pip install openconstructionerp` instruction does not. If you are on Ubuntu 23.04 or newer (including Ubuntu 26), read this first - `pip install` directly to system Python will fail.
 
 Tested on Ubuntu 22.04, 24.04, 26.04 and Debian 12.
 
@@ -31,7 +31,7 @@ error: externally-managed-environment
 × This environment is externally managed
 ```
 
-This is intentional and protects your OS. There are two correct fixes — pick one.
+This is intentional and protects your OS. There are two correct fixes - pick one.
 
 ### Fix A: virtual environment (recommended)
 
@@ -53,7 +53,7 @@ pipx install openconstructionerp
 
 pipx creates a private venv per-tool and exposes the `openestimate` command on your `PATH`. Restart the shell after `ensurepath`.
 
-Do **not** use `pip install --break-system-packages` — it can corrupt your system Python.
+Do **not** use `pip install --break-system-packages` - it can corrupt your system Python.
 
 ---
 
@@ -81,7 +81,7 @@ sudo apt install -y python3.12 python3.12-venv
 
 ## 3. System packages for source-build fallback
 
-OpenConstructionERP depends on pandas, pyarrow, opencv-python-headless, Pillow, asyncpg, psycopg2-binary, cryptography. All of these publish manylinux wheels, so a fresh `pip install` on a supported architecture downloads pre-built binaries — no compiler needed.
+OpenConstructionERP depends on pandas, pyarrow, opencv-python-headless, Pillow, asyncpg, psycopg2-binary, cryptography. All of these publish manylinux wheels, so a fresh `pip install` on a supported architecture downloads pre-built binaries - no compiler needed.
 
 If pip falls back to building from source (uncommon CPU architecture, very new Python, locked-down corporate mirror), install the development headers first:
 
