@@ -2008,6 +2008,12 @@ export function BIMPage() {
   // from the top selector (which would otherwise snap the user back to this model's project).
   const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
   const autoDetectedRef = useRef<string | null>(null);
+  // Set only when auto-detect has CONFIRMED the deep-linked model genuinely
+  // does not exist (404). Until then the model pick effect must not fall back
+  // to models[0] of a (still-resolving, possibly other-project) list - doing so
+  // briefly activates an unrelated model and fires the model-switch reset
+  // effect, which wipes a filter/grouping the user just applied.
+  const urlModelMissingRef = useRef(false);
   useEffect(() => {
     if (!urlModelId) return;
     if (autoDetectedRef.current === urlModelId) return;
@@ -2015,15 +2021,18 @@ export function BIMPage() {
     const modelInList = models.find((m) => m.id === urlModelId);
     if (modelInList) {
       autoDetectedRef.current = urlModelId;
+      urlModelMissingRef.current = false;
       return;
     }
     fetchBIMModel(urlModelId).then((model) => {
       autoDetectedRef.current = urlModelId;
+      urlModelMissingRef.current = false;
       if (model?.project_id && model.project_id !== projectId) {
         setActiveProject(model.project_id, '');
       }
     }).catch(() => {
       autoDetectedRef.current = urlModelId;
+      urlModelMissingRef.current = true;
       // Surface the missing-model state so the user doesn't think the
       // model is "empty" — previously a 404 here was silent and the UI
       // fell back to "No elements to display" (audit P1-13).
@@ -2047,8 +2056,22 @@ export function BIMPage() {
     if (urlModelId && autoDetectedRef.current !== urlModelId) return;
     const currentInList = activeModelId && models.some((m) => m.id === activeModelId);
     if (currentInList) return;
-    const target = urlModelId && models.find((m) => m.id === urlModelId) ? urlModelId : models[0]!.id;
-    setActiveModelId(target);
+    if (urlModelId) {
+      // Deep link to a specific model. Activate it the moment it appears in the
+      // list. Until then - while its project is still resolving and `models`
+      // may be the wrong project's list - do NOT fall back to models[0]: that
+      // briefly activates an unrelated model and fires the model-switch reset
+      // effect, wiping the user's just-applied filter/grouping (the "grouping
+      // reverts to the whole project a second later" bug). Only fall back once
+      // auto-detect has CONFIRMED the model is genuinely missing (404), so the
+      // user still sees something instead of an empty viewer.
+      if (models.some((m) => m.id === urlModelId)) {
+        setActiveModelId(urlModelId);
+        return;
+      }
+      if (!urlModelMissingRef.current) return;
+    }
+    setActiveModelId(models[0]!.id);
   }, [models, activeModelId, urlModelId]);
 
   // Sync URL when active model changes

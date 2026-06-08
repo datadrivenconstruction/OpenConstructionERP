@@ -1326,14 +1326,22 @@ export function BIMViewer({
   // Load DAE geometry when URL is available (after elements are loaded)
   const onGeometryLoadedRef = useRef(onGeometryLoaded);
   onGeometryLoadedRef.current = onGeometryLoaded;
-  // True while a deep-link isolation OR a clash-focus point is active. The
-  // post-load camera re-fit (which frames the FULL model) must NOT run in
-  // that case — it would override the deep-link framing the isolate/clash
-  // effect is about to apply, leaving the user staring at the whole model
-  // again (the original "nothing happens" symptom).
-  const deepLinkActiveRef = useRef(false);
-  deepLinkActiveRef.current =
-    !!(isolatedIds && isolatedIds.length > 0) || !!focusPoint;
+  // True while ANY narrowing is active: a panel filter/grouping predicate, a
+  // deep-link isolation, or a clash-focus point. The post-load camera re-fit
+  // (which frames the FULL model) must NOT run in that case — it would
+  // override the subset framing that the filter / isolate / clash effect is
+  // about to apply, leaving the user staring at the whole model again.
+  //
+  // This matters most for large RVT/IFC models: their geometry streams in
+  // over many seconds, so a user typically applies a filter BEFORE the GLB
+  // finishes. When it finishes, this load-completion path runs — and without
+  // ``filterPredicate`` in this guard it used to zoomToFit() back to the whole
+  // model a second or two after the click, which read as "the grouping briefly
+  // works then the whole project shows again". Small models load instantly so
+  // the window never opened, which is why it only ever reproduced on Revit/IFC.
+  const narrowingActiveRef = useRef(false);
+  narrowingActiveRef.current =
+    !!(isolatedIds && isolatedIds.length > 0) || !!focusPoint || !!filterPredicate;
   useEffect(() => {
     if (!elementMgrRef.current || !geometryUrl || !elements?.length) return;
     const mgr = elementMgrRef.current;
@@ -1404,10 +1412,12 @@ export function BIMViewer({
           // updateMatrixWorld(true), so a stale matrix tree cannot
           // sabotage the bbox computation.
           const fit = () => {
-            // Skip the full-model fit when a deep-link isolation / clash
-            // focus is pending — the isolate/clash effect frames the right
-            // subset/point instead (re-triggered by geometryReadyNonce).
-            if (deepLinkActiveRef.current) return;
+            // Skip the full-model fit when ANY narrowing is pending - a panel
+            // filter/grouping predicate, a deep-link isolation, or a clash
+            // focus. The corresponding effect frames the right subset/point
+            // instead (re-triggered by geometryReadyNonce). Without this the
+            // post-load fit would yank the camera back to the whole model.
+            if (narrowingActiveRef.current) return;
             sceneRef.current?.zoomToFit();
           };
           fit();
