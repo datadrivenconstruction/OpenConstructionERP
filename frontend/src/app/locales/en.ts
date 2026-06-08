@@ -11216,6 +11216,7 @@ const resource = {
     "aiest.split.confirm": "Move {{n}} into a new group",
     // stage 3 - rate matching
     "aiest.match.no_rate": "No rate found",
+    "aiest.match.no_price": "matched, no price in catalogue",
     "aiest.match.loading_detail": "Loading candidates...",
     "aiest.match.breakdown": "Resource breakdown",
     "aiest.match.hide_alts": "Hide alternatives",

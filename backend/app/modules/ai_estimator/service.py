@@ -1405,11 +1405,18 @@ class AiEstimatorService:
 
     @staticmethod
     def _candidate_unit_rate(candidate: Any) -> str | None:
-        """Per-base-unit rate as a Decimal-string, stripping any unit multiplier."""
+        """Per-base-unit rate as a Decimal-string, stripping any unit multiplier.
+
+        Returns ``None`` when there is no real rate (a non-positive value), so a
+        grounded-but-unpriced code stores a NULL rate rather than ``"0"``. A
+        ``"0"`` would surface in the UI as a fabricated $0.00; null reads as the
+        honest "matched, no price" state and the apply/preview path coerces it
+        back to ``Decimal("0")`` for the rollup via :func:`_dec`.
+        """
         raw_rate = _dec(getattr(candidate, "unit_rate", 0))
         mult, _unit = _split_unit_multiplier(getattr(candidate, "unit", "") or "")
         rate = (raw_rate / mult) if mult > 0 else raw_rate
-        return format(rate, "f")
+        return format(rate, "f") if rate > 0 else None
 
     @staticmethod
     def _candidate_out(candidate: Any, *, rate_outlier: bool = False) -> dict[str, Any]:
@@ -1420,12 +1427,15 @@ class AiEstimatorService:
         benchmark band. It is only ``True`` on a candidate the sanity pass flagged;
         the rate itself is never altered.
         """
+        raw_rate = _dec(getattr(candidate, "unit_rate", 0))
         return {
             "candidate_id": getattr(candidate, "id", None),
             "code": getattr(candidate, "code", "") or "",
             "description": (getattr(candidate, "description", "") or "")[:300],
             "unit": getattr(candidate, "unit", "") or "",
-            "unit_rate": format(_dec(getattr(candidate, "unit_rate", 0)), "f"),
+            # Null, not "0", when the grounded code is unpriced - the override UI
+            # shows "no price" rather than a fabricated $0.00.
+            "unit_rate": format(raw_rate, "f") if raw_rate > 0 else None,
             "currency": getattr(candidate, "currency", "") or "",
             "score": round(float(getattr(candidate, "score", 0.0) or 0.0), 4),
             "confidence_band": getattr(candidate, "confidence_band", "low"),
@@ -2400,7 +2410,9 @@ class AiEstimatorService:
             chosen_unit=unit,
             primary_quantity=float(_quantity_for_unit(grp.quantities or {}, unit) or 0.0),
             chosen_code=grp.chosen_code,
-            unit_rate=(Decimal(grp.unit_rate) if grp.unit_rate else None),
+            # Treat a stored "0" (legacy rows / manual override of an unpriced
+            # code) as no rate, so the grid never shows a fabricated $0.00.
+            unit_rate=(_dec(grp.unit_rate) if grp.unit_rate and _dec(grp.unit_rate) > 0 else None),
             currency=grp.currency,
             score=grp.score,
             confidence=grp.confidence,
@@ -2449,7 +2461,13 @@ class AiEstimatorService:
                     code=str(c.get("code") or ""),
                     description=str(c.get("description") or ""),
                     unit=str(c.get("unit") or ""),
-                    unit_rate=_dec(c.get("unit_rate")),
+                    # Preserve a null rate (unpriced code) instead of coercing it
+                    # back to 0; only a positive stored value is a real rate.
+                    unit_rate=(
+                        _dec(c.get("unit_rate"))
+                        if c.get("unit_rate") not in (None, "") and _dec(c.get("unit_rate")) > 0
+                        else None
+                    ),
                     currency=str(c.get("currency") or ""),
                     score=float(c.get("score", 0.0) or 0.0),
                     confidence_band=c.get("confidence_band") or "low",

@@ -327,8 +327,11 @@ class CandidateOut(BaseModel):
     code: str = ""
     description: str = ""
     unit: str = ""
-    # Decimal-as-string in JSON.
-    unit_rate: Decimal = Decimal("0")
+    # Decimal-as-string in JSON, or null when the grounded code carries no
+    # price (e.g. the code resolved by vector search but the cost table has no
+    # priced row for it). Null is the honest "matched, not priced" state - the
+    # UI shows that rather than a fabricated $0.00.
+    unit_rate: Decimal | None = None
     currency: str = ""
     score: float = 0.0
     confidence_band: ConfidenceBand = "low"
@@ -338,7 +341,7 @@ class CandidateOut(BaseModel):
     rate_outlier: bool = False
 
     @field_serializer("unit_rate", when_used="json")
-    def _ser_unit_rate(self, v: Decimal) -> str | None:
+    def _ser_unit_rate(self, v: Decimal | None) -> str | None:
         return _serialise_money(v)
 
 
