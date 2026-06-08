@@ -206,25 +206,32 @@ def _infer_failure_cause(*, reason: str, exit_code: int | None, stderr_text: str
 
     The frontend dispatches on this string - keep the values stable.
     Currently supported:
-      * ``converter_outdated`` - CLI parse error (exit 15 + unknown-arg
-        substring, or any exit with the substring).  Triggers the
+      * ``converter_outdated`` - the converter rejected an argument with an
+        explicit unknown/unexpected-argument message in stderr.  Triggers the
         Reinstall CTA.
       * ``timeout`` - converter hung.
       * ``empty_output`` - converter ran, produced no rows.
-      * ``unknown`` - anything else; UI shows the generic guidance.
+      * ``unknown`` - anything else; UI shows the generic guidance + Retry.
     """
     lower = stderr_text.lower()
     if any(m in lower for m in _OUTDATED_CLI_STDERR_MARKERS):
-        return "converter_outdated"
-    if exit_code == 15:
-        # Exit 15 from the DDC CLIs almost always means "argument parse
-        # error".  Even with empty stderr, surfacing the Reinstall CTA is
-        # the right call - a fresh install can only help.
         return "converter_outdated"
     if reason == "timeout":
         return "timeout"
     if reason == "empty_output":
         return "empty_output"
+    # A bare exit code (even 15) with no unknown-argument stderr marker is NOT
+    # proof the converter is outdated: a current v18 binary exits 15 when it is
+    # handed an arg shape it doesn't understand (e.g. a mis-probed legacy
+    # invocation), and unrelated runtime faults exit non-zero too. Only the
+    # explicit markers above drive the Reinstall CTA, so a healthy converter is
+    # never falsely reported as out of date - the user gets generic, retryable
+    # guidance instead.
+    logger.debug(
+        "DDC failure not classified as outdated (exit_code=%s, reason=%s); generic guidance",
+        exit_code,
+        reason,
+    )
     return "unknown"
 
 
@@ -564,10 +571,20 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                     caps.get("accepts_depth_mode") or caps.get("accepts_no_collada_flag")
                 )
                 stderr_hit = _stderr_indicates_unknown_arg(stderr)
-                if already_bare:
+                parse_error = rc == 15 or stderr_hit
+                # A bare positional call that the binary rejects as an unknown
+                # or unexpected argument is strong evidence the --help probe
+                # mis-detected a current v18 flag CLI as legacy (the probe can
+                # yield nothing on a timeout, a GUI banner, or a Mark-of-the-Web
+                # block). A genuinely legacy binary ACCEPTS the bare positional
+                # shape, so it would not raise a parse error here - so retry the
+                # legacy/bare failure with the v18 flag shape instead of giving
+                # up (this is what previously surfaced as a false "out of date").
+                suspected_v18 = already_bare and parse_error
+                if already_bare and not parse_error:
                     return rc, stdout, stderr
-                if rc == 15 or stderr_hit:
-                    if cli_profile == CLI_PROFILE_V18_FLAG:
+                if parse_error:
+                    if cli_profile == CLI_PROFILE_V18_FLAG or suspected_v18:
                         # v18 retry: keep the flag CLI but drop the
                         # output-suppression flags + mode preset - leaves
                         # ``[exe, input, -x out, --force-path]`` (or -d).
@@ -582,7 +599,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                             bare_args.extend(["-x", str(out_path)])
                         else:
                             bare_args.extend(["-d", str(out_path)])
-                        if caps.get("accepts_flag_force_path"):
+                        if caps.get("accepts_flag_force_path") or suspected_v18:
                             bare_args.append("--force-path")
                     else:
                         bare_args = _build_args(
@@ -601,11 +618,26 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                     )
                     rc2, stdout2, stderr2 = _invoke(bare_args)
                     if rc2 == 0:
-                        # Latch the diagnostic so the caller can record
-                        # cause="converter_outdated" once the conversion
-                        # completes - the user keeps their result, but the
-                        # next page-load nudges them to reinstall.
-                        outdated_cli_observed = True
+                        if suspected_v18:
+                            # The probe was wrong, not the binary: a healthy v18
+                            # converter was mis-detected as legacy. Drop the
+                            # stale capability cache so the next conversion uses
+                            # the v18 profile directly, and do NOT flag the
+                            # converter as outdated.
+                            try:
+                                from app.modules.boq.cad_import import (
+                                    invalidate_converter_capabilities,
+                                )
+
+                                invalidate_converter_capabilities(ext)
+                            except Exception:  # noqa: BLE001
+                                pass
+                        else:
+                            # Latch the diagnostic so the caller can record
+                            # cause="converter_outdated" once the conversion
+                            # completes - the user keeps their result, but the
+                            # next page-load nudges them to reinstall.
+                            outdated_cli_observed = True
                         return rc2, stdout2, stderr2
                     # Second attempt also failed - surface the original
                     # error so the user sees the parse complaint, not a
