@@ -24,7 +24,8 @@ from pathlib import Path
 
 import pytest
 
-from app.modules.bim_hub.ifc_processor import _generate_collada_boxes
+from app.modules.bim_hub import ifc_processor
+from app.modules.bim_hub.ifc_processor import _convert_dae_to_glb, _generate_collada_boxes
 
 _NS = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
 
@@ -119,3 +120,42 @@ def test_collada_node_id_falls_back_when_mesh_ref_missing(temp_dir):
     assert node.get("name") != "Anonymous Wall"
     # The generator also writes the resolved id back onto the element.
     assert elements[0]["mesh_ref"] == node.get("id")
+
+
+# ── GLB fallback: never ship scrambled node names ──────────────────────────
+
+
+def test_glb_conversion_keeps_node_names(temp_dir):
+    """Happy path: a box DAE converts to GLB and bbox matching succeeds."""
+    pytest.importorskip("trimesh")
+    dae_path, _bb = _generate_collada_boxes(_elements(), temp_dir)
+
+    glb = _convert_dae_to_glb(dae_path, temp_dir)
+
+    # trimesh is present and the boxes have distinct bboxes, so matching
+    # works and the GLB is produced.
+    assert glb is not None
+    assert glb.exists()
+    assert glb.suffix == ".glb"
+
+
+def test_glb_dropped_when_name_patch_throws(temp_dir, monkeypatch):
+    """If node-name patching throws, drop the GLB so the DAE (correct names) wins.
+
+    An unpatched GLB carries trimesh's reordered node names, which would push
+    the viewer into positional fallback - the exact "grouping reverts to the
+    whole model" symptom.  The converter must return ``None`` so the caller
+    serves the DAE instead.
+    """
+    pytest.importorskip("trimesh")
+    dae_path, _bb = _generate_collada_boxes(_elements(), temp_dir)
+
+    def _boom(_path):
+        raise RuntimeError("bbox parse failed")
+
+    monkeypatch.setattr(ifc_processor, "_dae_element_bboxes", _boom)
+
+    glb = _convert_dae_to_glb(dae_path, temp_dir)
+
+    assert glb is None
+    assert not (temp_dir / "geometry.glb").exists()

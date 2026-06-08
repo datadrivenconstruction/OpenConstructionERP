@@ -1701,11 +1701,24 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
         # Post-process: reassign GLB node/mesh names using bbox matching
         # against DAE shapes.  This replaces the previous approach which
         # blindly trusted trimesh's scene-graph names.
+        #
+        # Trimesh reorders meshes, so an unpatched GLB carries scrambled
+        # names that force the viewer into positional fallback - the same
+        # "grouping snaps back to the whole model" failure the DAE node-name
+        # fix addresses.  Track whether the names can be trusted: if patching
+        # has bboxes to work with but matches none, or the patch step throws,
+        # we drop the GLB and let the viewer load the DAE, whose <node name>
+        # equals the element id by construction.
+        patch_failed = False
+        had_element_bboxes = False
+        total_mesh_nodes = 0
+        matched = 0
         try:
             import json as _json
             import struct as _struct
 
             element_bboxes, _element_to_shape = _dae_element_bboxes(dae_path)
+            had_element_bboxes = bool(element_bboxes)
             if element_bboxes:
                 # Parse GLB: header(12) + json_chunk_header(8) + json
                 json_len = _struct.unpack("<I", glb_data[12:16])[0]
@@ -1837,7 +1850,23 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
                         + bin_chunk
                     )
         except Exception as patch_err:  # noqa: BLE001 - non-fatal post-process
-            logger.debug("GLB node-name patching skipped: %s", patch_err, exc_info=True)
+            patch_failed = True
+            logger.warning(
+                "GLB node-name patching failed: %s - serving the DAE instead", patch_err
+            )
+
+        # If the names are unreliable, prefer the DAE: its <node name> equals
+        # the element id, so mesh matching (and therefore filtering/grouping)
+        # stays correct.  A larger wire transfer is the right trade for that.
+        if patch_failed or (had_element_bboxes and total_mesh_nodes > 0 and matched == 0):
+            logger.warning(
+                "GLB node names unreliable (patch_failed=%s, bbox-matched %d/%d) - "
+                "dropping GLB so the viewer loads the DAE with correct element ids",
+                patch_failed,
+                matched,
+                total_mesh_nodes,
+            )
+            return None
 
         glb_target.write_bytes(glb_data)
 
