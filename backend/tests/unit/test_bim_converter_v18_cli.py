@@ -183,6 +183,19 @@ def test_classify_word_complete_alone_does_not_imply_v18() -> None:
     assert cad_import._classify_help_text(blob) == cad_import.CLI_PROFILE_LEGACY
 
 
+def test_classify_short_flags_only_is_v18() -> None:
+    """‌⁠‍A v18 build whose --help advertises only the short output flags
+    (``-x``/``-d``/``-m``) and none of the optional long ``--no-*`` /
+    ``--force-path`` tokens must STILL classify as a flag CLI. Dropping it
+    to legacy made the bundled v18 reject the bare positional call with exit
+    15, which surfaced as a false 'converter out of date'."""
+    blob = "usage: [options] [input]\n  -x path  xlsx output\n  -d path  collada\n  -m text  mode\n"
+    assert cad_import._classify_help_text(blob) == cad_import.CLI_PROFILE_V18_FLAG
+    # xlsx flag without any geometry/mode flag is ambiguous -> stays legacy.
+    only_xlsx = "usage:\n  -x path  xlsx output\n"
+    assert cad_import._classify_help_text(only_xlsx) == cad_import.CLI_PROFILE_LEGACY
+
+
 # ── Capability detection ──────────────────────────────────────────────────
 
 

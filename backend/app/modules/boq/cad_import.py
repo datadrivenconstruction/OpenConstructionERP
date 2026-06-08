@@ -1173,6 +1173,17 @@ _V18_EXCLUSIVE_TOKENS = (
 # (not ``--no-collada``).
 _V17_EXCLUSIVE_TOKENS = ("-no-collada",)
 
+# v18 always advertises the short OUTPUT flags ``-x``/``--xlsx`` (Excel) and
+# ``-d``/``--dae`` (COLLADA), plus ``-m``/``--mode``. The long ``--no-*`` /
+# ``--force-path`` flags in ``_V18_EXCLUSIVE_TOKENS`` are OPTIONAL, so a v18
+# build whose --help lists only the short flags must STILL be recognised as a
+# flag CLI - otherwise we drop it to the legacy positional path and the v18
+# binary rejects the bare ``[exe, input, output]`` call with exit 15
+# ("arguments were not expected"), which used to surface as a false
+# "converter out of date".
+_V18_XLSX_TOKENS = ("-x", "--xlsx")
+_V18_GEOMETRY_TOKENS = ("-d", "--dae", "-m", "--mode")
+
 
 def _tokenize_help(text: str) -> set[str]:
     """‌⁠‍Split DDC --help output into a set of whitespace-delimited tokens.
@@ -1210,6 +1221,10 @@ def _classify_help_text(text: str) -> str:
         return CLI_PROFILE_V18_FLAG
     if any(tok in tokens for tok in _V17_EXCLUSIVE_TOKENS):
         return CLI_PROFILE_V17_POSITIONAL
+    # A v18 build whose --help advertises the short output flags (but none of
+    # the optional long ``--no-*`` flags) is still a flag CLI, not legacy.
+    if any(tok in tokens for tok in _V18_XLSX_TOKENS) and any(tok in tokens for tok in _V18_GEOMETRY_TOKENS):
+        return CLI_PROFILE_V18_FLAG
     return CLI_PROFILE_LEGACY
 
 
