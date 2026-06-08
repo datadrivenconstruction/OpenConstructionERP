@@ -193,7 +193,12 @@ No green-checkmark-only sign-off. Run order: `tsc -b` -> unit/component tests ->
       components are unit-tested + tsc-clean; the AISmartPanel integration is the first live surface)
 
 ### Wave 1 - Broken / highest-traffic (worst offenders, parallel)
-- [ ] `reporting` - EmptyState + ErrorState + intro; remove perpetual skeleton; `'N/A'` via `fmt()`
+- [x] `reporting` - ALREADY DONE (the audit's defect list was stale): the perpetual skeleton is gated on
+      the fast `projects.list()` only, `'N/A'` is gone (a shared `EMPTY` placeholder via `fmt()`/`fmtNum()`/
+      `toMoneyNum()`), `EmptyState` + error+retry blocks (`StatsErrorBlock`, `loadError`) and the intro
+      `DismissibleInfo` are all present. OPEN: the empty placeholder is a literal em-dash glyph
+      (`EMPTY = '-'` uses U+2014) - confirm whether the strict no-em-dash-in-user-text rule should swap it
+      for a hyphen. Remaining gated items below are unchanged.
 - [ ] `documents`/`files` - intro (only flagship with none); resolve IA naming first
 - [ ] `validation` - persist last BOQ/report (check 6); shorten the 4-click path
 - [ ] `match-elements` - intro + SuggestionCard/ConfidenceBadge (only if IA decision = keep)
