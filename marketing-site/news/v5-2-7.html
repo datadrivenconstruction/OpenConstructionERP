@@ -183,7 +183,7 @@
       Two visible improvements on top of v5.2.6. The 13 widgets on
       <code>/projects/:id</code> finally lay out as a responsive grid instead of one
       tall stack, and the in-app update checker gains a real <strong>Apply
-      update</strong> button &mdash; same Python interpreter, captured pip log,
+      update</strong> button - same Python interpreter, captured pip log,
       humanised restart hint.
     </p>
   </div>
@@ -195,8 +195,8 @@
   <div class="narrow">
 
     <p>
-      v5.2.6 closed five first-touch papercuts. v5.2.7 keeps the same theme &mdash;
-      the things you see in the first five minutes &mdash; and fixes two more: the
+      v5.2.6 closed five first-touch papercuts. v5.2.7 keeps the same theme -
+      the things you see in the first five minutes - and fixes two more: the
       single most-visited page in the app (the project detail view) was rendering as
       an awkward narrow stack on wide screens, and the &ldquo;update available&rdquo;
       banner had been quietly broken for so long that nobody noticed it never fired.
@@ -212,10 +212,10 @@
         </div>
         <h4>Project-detail widget grid</h4>
         <p>
-          The 13 widgets on <code>/projects/:id</code> &mdash; RFI inbox, Change
+          The 13 widgets on <code>/projects/:id</code> - RFI inbox, Change
           orders pulse, Daily diary, HSE incidents, Variations, Quality NCRs,
           Compliance, Schedule summary, Budget burn, Recent files, Photo strip,
-          AI insights, Activity feed &mdash; were rendered as a single tall column
+          AI insights, Activity feed - were rendered as a single tall column
           since the original <code>ec5aec1e</code> widget customizer landed.
           Desktop users saw an awkward narrow stack on otherwise-wide screens.
           v5.2.7 wraps the block in
@@ -246,7 +246,7 @@
           <strong>same interpreter</strong> serving the API
           (<code>sys.executable</code>), captures stdout/stderr for the installer
           log, and returns <code>restart_required</code> plus a humanised restart
-          hint &mdash; Python caches imports, so the running process keeps the old
+          hint - Python caches imports, so the running process keeps the old
           wheel until restart. Gated by <code>ALLOW_RUNTIME_UPGRADE</code> (default
           on for dev / Windows installer, off for managed VPS deploys). The
           frontend UpdateChecker modal gains an <strong>Apply update</strong>
@@ -264,7 +264,7 @@
       a daily-driver page from &ldquo;why is this so narrow&rdquo; to
       &ldquo;obviously a project dashboard.&rdquo; The single column was a holdover
       from the first version of the widget customizer, when the block was hidden
-      behind a feature flag &mdash; nobody re-evaluated the layout once the flag
+      behind a feature flag - nobody re-evaluated the layout once the flag
       flipped on.
     </p>
     <p>
@@ -285,7 +285,7 @@
     </div>
 
     <p>
-      No Alembic migration in this release &mdash; head stays at <code>v3144</code>.
+      No Alembic migration in this release - head stays at <code>v3144</code>.
       On a managed deploy, set <code>ALLOW_RUNTIME_UPGRADE=false</code> if you
       don&rsquo;t want the in-app button to be live (the version banner still works;
       the Apply button just falls back to copy-paste). On dev and the Windows

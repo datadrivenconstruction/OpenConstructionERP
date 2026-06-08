@@ -185,7 +185,7 @@
       <span class="pill-meta">2026-05-20</span>
       <span class="pill-meta">~5 min read</span>
     </div>
-    <h1>v3.11.0 &mdash; <span class="accent">Validation moves to the import edge.</span></h1>
+    <h1>v3.11.0 - <span class="accent">Validation moves to the import edge.</span></h1>
     <p class="lede">
       Wave 3/4 modules ship with eight new Alembic revisions
       (<code>v3088</code> &rarr; <code>v3095</code>), validation lifts out of the
@@ -209,7 +209,7 @@
     <p>
       v3.11.0 is the release where the import path became as serious as the
       editor. Until v3.10 the platform validated BOQ data after it was loaded
-      &mdash; meaning bad files landed in the database and surfaced only when a
+      - meaning bad files landed in the database and surfaced only when a
       user opened the editor and saw red. v3.11.0 inverts that: the validation
       framework runs <em>during</em> import, the report is returned with the
       upload response, and the project state stays consistent.
@@ -257,7 +257,7 @@
           v3.11.0 wraps the DDC <code>cad2data</code> bridge in a
           <code>RvtDiagnostics</code> collector that captures version-band
           mismatches, missing family categories, unmapped property sets and
-          empty levels &mdash; and surfaces them as a structured report instead
+          empty levels - and surfaces them as a structured report instead
           of a stack trace.
         </p>
       </div>
@@ -266,7 +266,7 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
         </div>
-        <h4>Wave 3/4 modules &mdash; eight migrations</h4>
+        <h4>Wave 3/4 modules - eight migrations</h4>
         <p>
           Eight new Alembic revisions (<code>v3088</code> through
           <code>v3095</code>) bring the Wave 3/4 modules online: extended
@@ -280,7 +280,7 @@
 
     <h2>Why Validation@Import is the load-bearing change</h2>
     <p>
-      The validation framework existed before v3.11.0 &mdash; rule sets for DIN
+      The validation framework existed before v3.11.0 - rule sets for DIN
       276, GAEB structure, and the universal <code>boq_quality</code> pack had
       been registered since v3.0. What was missing was a place to run them
       that was not the editor. A user uploading a tender package wants a
@@ -294,7 +294,7 @@
       and a drill-down. Either way, the rule that triggered, the offending
       element reference (BOQ ordinal, cell coordinate, CAD element id) and the
       remediation message are all in the response body. That last part is what
-      makes the import flow self-explanatory &mdash; no more guessing why the
+      makes the import flow self-explanatory - no more guessing why the
       file did not load.
     </p>
 

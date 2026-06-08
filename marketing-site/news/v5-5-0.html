@@ -183,7 +183,7 @@
     <h1>v5.5.0 - <span class="accent">Eight user-reported fixes</span>,<br />verified one by one in a real browser.</h1>
     <p class="lede">
       v5.3.0 closed six audit bundles. v5.5.0 closes eight individual bug reports
-      that came back from real sessions &mdash; PDF takeoff worker, PDF document
+      that came back from real sessions - PDF takeoff worker, PDF document
       <code>403</code>, JWT session reset, the CAD/BIM Data Explorer choking on
       RVT, the BIM Section Box, Walk mode, the <code>/bim/federations</code> 3D
       tab, and DWG load. Every fix sat in front of a Playwright probe before it
@@ -202,7 +202,7 @@
 
     <p>
       The shape of this wave is different from v5.3.0. That release was six deep
-      bundles &mdash; each one its own audit pass on a feature area. v5.5.0 is
+      bundles - each one its own audit pass on a feature area. v5.5.0 is
       eight individual user-reported bugs, each fixed end-to-end and verified
       against a real browser before commit. It&rsquo;s the version where the
       regressions that real users tripped on while exploring the platform
@@ -218,7 +218,7 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
         </div>
-        <h4>PDF takeoff worker &mdash; the &ldquo;Setting up fake worker failed&rdquo; banner</h4>
+        <h4>PDF takeoff worker - the &ldquo;Setting up fake worker failed&rdquo; banner</h4>
         <p>
           The PWA service-worker glob pattern only captured <code>.js</code>, not
           <code>.mjs</code>, so the <code>pdf.worker.min.mjs</code> bundle never
@@ -235,10 +235,10 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
-        <h4>PDF document <code>403</code> &mdash; path-whitelist regression</h4>
+        <h4>PDF document <code>403</code> - path-whitelist regression</h4>
         <p>
           The takeoff download endpoint guarded against path traversal by
-          whitelisting <code>~/.openestimator</code> &mdash; but the live
+          whitelisting <code>~/.openestimator</code> - but the live
           installer persists data under <code>~/.openestimate</code>, so
           downloads ate a <code>403</code> on the legitimate path. The
           whitelist now accepts both spellings plus the
@@ -252,9 +252,9 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
         </div>
-        <h4>JWT session reset &mdash; &ldquo;sessions were dropping&rdquo;</h4>
+        <h4>JWT session reset - &ldquo;sessions were dropping&rdquo;</h4>
         <p>
-          On dev installs the JWT secret was a process-random value &mdash; so
+          On dev installs the JWT secret was a process-random value - so
           every backend restart invalidated every issued token, kicking users
           back to <code>/login</code> with no signal that anything had changed.
           The secret now persists to
@@ -269,7 +269,7 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
         </div>
-        <h4>CAD/BIM Data Explorer RVT &mdash; the v17/v18 CLI break</h4>
+        <h4>CAD/BIM Data Explorer RVT - the v17/v18 CLI break</h4>
         <p>
           The CAD-to-Excel pipeline still passed v17-style positional args
           (<code>out.xlsx standard -no-collada</code>) to a DDC cad2data v18
@@ -286,7 +286,7 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
         </div>
-        <h4>BIM Section Box + Walk mode &mdash; on-demand rendering</h4>
+        <h4>BIM Section Box + Walk mode - on-demand rendering</h4>
         <p>
           Both worked logically but didn&rsquo;t paint. The Three.js scene
           uses on-demand rendering with a dirty flag; <code>SectionBox</code>
@@ -304,14 +304,14 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
         </div>
-        <h4><code>/bim/federations</code> 3D &mdash; replaced the broken viewer</h4>
+        <h4><code>/bim/federations</code> 3D - replaced the broken viewer</h4>
         <p>
           The embedded <code>FederatedViewer</code> tab was throwing
           &ldquo;Geometry fetch failed&rdquo; toasts because federations were
           assembling viewers for member models whose geometry hadn&rsquo;t
           processed yet. v5.5.0 drops the in-page viewer and replaces it with
           a list of member-model rows, each with a HEAD geometry probe.
-          Available members deep-link to <code>/bim/:modelId</code> &mdash; the
+          Available members deep-link to <code>/bim/:modelId</code> - the
           single-model viewer that already works. Missing-geometry rows are
           greyed and not clickable. No more dead 3D tab.
         </p>
@@ -321,7 +321,7 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
         </div>
-        <h4>DWG load &mdash; same v17/v18 CLI break, takeoff path</h4>
+        <h4>DWG load - same v17/v18 CLI break, takeoff path</h4>
         <p>
           The DWG takeoff endpoint hit the same v17/v18 fork as the CAD
           Explorer and degraded silently with a misleading &ldquo;please upload
@@ -337,7 +337,7 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2a14 14 0 0 1 0 20M12 2a14 14 0 0 0 0 20"/></svg>
         </div>
-        <h4>Japanese locale &mdash; 1,627 keys, 98.5&nbsp;% coverage</h4>
+        <h4>Japanese locale - 1,627 keys, 98.5&nbsp;% coverage</h4>
         <p>
           The JA backlog from issue&nbsp;#245 was the largest single
           locale-translation push the project has run: 1,627 keys translated
@@ -355,7 +355,7 @@
     <p>
       Every fix went through a sequential Playwright/Chromium probe against
       <code>127.0.0.1:8001</code> with a freshly built
-      <code>frontend/dist</code> &mdash; one item, one before-and-after pair of
+      <code>frontend/dist</code> - one item, one before-and-after pair of
       screenshots, one decision. Sequential, not parallel: the local SQLite
       backend can&rsquo;t survive concurrent audits. Tally:
       <strong>9 PASS / 0 FAIL</strong>. 22 before/after screenshots,
@@ -368,14 +368,14 @@
       cycle deserves a unit test in <code>backend/tests/unit/</code>.
     </p>
 
-    <h2>The other half &mdash; PRs, dependencies, news widget</h2>
+    <h2>The other half - PRs, dependencies, news widget</h2>
     <p>
       Six contributor pull requests landed via cherry-pick + squash review
       after a malicious-code audit:
       Dependabot upgrades for FastAPI, uvicorn, pydantic, the dnd-kit family,
       and a docs typo fix from
       <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/pulls" target="_blank" rel="noopener">community contributors</a>.
-      PR&nbsp;#161 was deliberately skipped &mdash; it touched the
+      PR&nbsp;#161 was deliberately skipped - it touched the
       money-decimal layer in a way that conflicted with the multi-currency
       audit in the v5.4.x line and would have been a net regression. PR&nbsp;#164
       from <code>@Mourdi59</code> remained intact from v5.3.0.
@@ -412,7 +412,7 @@
     </div>
 
     <p>
-      No Alembic migration in this release &mdash; head stays at <code>v3144</code>
+      No Alembic migration in this release - head stays at <code>v3144</code>
       (the v3145 demo-address backfill drafted during the wave was deferred to
       the 6.x line). 116 modules. Frontend ships the PWA glob-pattern fix, the
       Section Box / Walk on-demand wiring, the new federations list, the JA

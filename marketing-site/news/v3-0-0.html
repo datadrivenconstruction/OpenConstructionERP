@@ -187,7 +187,7 @@
       <span class="pill-meta">2026-05-13</span>
       <span class="pill-meta">~6 min read</span>
     </div>
-    <h1>v3.0.0 &mdash; <span class="accent">The first stable v3 major.</span><br />18 modules, FSM engine, ISO 16739-1 IFC.</h1>
+    <h1>v3.0.0 - <span class="accent">The first stable v3 major.</span><br />18 modules, FSM engine, ISO 16739-1 IFC.</h1>
     <p class="lede">
       A consolidation release. After a fast v2 cycle, v3.0.0 lands eighteen
       business modules on the same module-loader, replaces ad-hoc status fields
@@ -209,7 +209,7 @@
   <div class="narrow">
 
     <p>
-      v3.0.0 is not a single big new feature &mdash; it is the release that put
+      v3.0.0 is not a single big new feature - it is the release that put
       the platform&rsquo;s skeleton in place. Eighteen modules now share one
       module-loader, one event bus, one validation framework, one auth layer.
       Status fields stop being free-form strings and become explicit finite-state
@@ -284,7 +284,7 @@
     <p>
       The 18-module wave is the precondition for everything that follows. Once
       every module speaks the same loader / FSM / validation contract, adding a
-      new module is a manifest file plus business logic &mdash; not a refactor.
+      new module is a manifest file plus business logic - not a refactor.
       Six of the modules that landed here (Projects, BOQ, Costs, BIM Hub, Match
       Elements, Reporting) became the core that v3.6 and v3.11 built on top of.
     </p>
@@ -299,7 +299,7 @@
     </p>
     <p>
       And the IFC parser closes the last CAD-format gap. The platform now reads
-      DWG, DGN, RVT, IFC2x3 and IFC4 into one canonical schema &mdash; without
+      DWG, DGN, RVT, IFC2x3 and IFC4 into one canonical schema - without
       any GPL-incompatible runtime dependency. The downstream BIM Hub, Match
       Elements and Take-off pipelines all consume the same JSON, regardless of
       which converter produced it.
@@ -314,7 +314,7 @@
 
     <p>
       v3.0.0 introduced the v3 alembic baseline. Subsequent v3 minors layered
-      additional migrations on top &mdash; see the v3.6 and v3.11 release notes
+      additional migrations on top - see the v3.6 and v3.11 release notes
       for those. The 18-module set runs on a single PostgreSQL (or SQLite for
       local dev) and benefits from Qdrant when the optional <code>QDRANT_URL</code>
       environment variable is set.

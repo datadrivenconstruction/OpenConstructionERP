@@ -202,7 +202,7 @@
       v5.2.8 was a polish wave on top of a one-day release. v5.3.0 is the opposite
       shape: six unrelated deep dives, each one its own audit and each one shipped
       with tests. Nothing in this release is a feature in the &ldquo;new module&rdquo;
-      sense &mdash; everything closes a real bug or a real gap that was visible from
+      sense - everything closes a real bug or a real gap that was visible from
       a single user session. The cumulative effect is what makes this the cut we&rsquo;re
       labelling the last stable release of the 5.x line.
     </p>
@@ -215,7 +215,7 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
         </div>
-        <h4>Geo Hub round 2 &mdash; storage leaks, accuracy cap, iOS</h4>
+        <h4>Geo Hub round 2 - storage leaks, accuracy cap, iOS</h4>
         <p>
           <code>delete_tileset</code> deleted the DB row and left the actual
           tileset bytes orphaned in MinIO. v5.3.0 calls
@@ -233,14 +233,14 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L3 7v6c0 5 4 9 9 11 5-2 9-6 9-11V7l-9-5z"/><path d="M9 12l2 2 4-4"/></svg>
         </div>
-        <h4>Brazil Tier-1 &mdash; BRL + NBR 12721 + RPS PDF</h4>
+        <h4>Brazil Tier-1 - BRL + NBR 12721 + RPS PDF</h4>
         <p>
           From a real user note: <em>&ldquo;there is no invoice support for BRL&rdquo;</em>.
           v5.3.0 adds <code>BRL</code> to the finance shortlist, ships a
           500-line <code>br_invoice_pdf.py</code> renderer with proper prestador /
           tomador blocks and reten&ccedil;&otilde;es (ISS, PIS, COFINS, CSLL, INSS, IRRF), and
-          two new validation rules &mdash; <code>NBR12721ClassificationRequired</code>
-          and <code>NBR12721ValidSection</code> covering S1&ndash;S11 cost groups.
+          two new validation rules - <code>NBR12721ClassificationRequired</code>
+          and <code>NBR12721ValidSection</code> covering S1-S11 cost groups.
           The BOQ importer now recognises <code>nbr</code> and <code>sinapi</code>
           codes; S&atilde;o Paulo defaults to SINAPI as its regional cost reference. 15
           new tests cover the renderer and the rules.
@@ -274,7 +274,7 @@
         <p>
           <code>/reporting</code> had a list of generated reports but no way to
           look at one. v5.3.0 adds a View button per row that opens
-          <code>ReportViewerModal</code> &mdash; sandboxed
+          <code>ReportViewerModal</code> - sandboxed
           <code>&lt;iframe srcDoc=...&gt;</code> for the HTML, blob URL for the
           new-tab link, distinct error states for 410 (expired) / 404 / network.
           Daily Diary entries finally get a Trash2 ghost button gated on
@@ -288,11 +288,11 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
         </div>
-        <h4>WCAG-AA contrast pass &mdash; 51 frontend files</h4>
+        <h4>WCAG-AA contrast pass - 51 frontend files</h4>
         <p>
           The top axe-core offender across the app was
           <code>text-oe-blue</code> on top of <code>bg-oe-blue-subtle</code>
-          &mdash; 3.1:1, below the 4.5:1 AA threshold for normal text. Bulk
+          - 3.1:1, below the 4.5:1 AA threshold for normal text. Bulk
           rewrite of 51 files and 126 lines moves those pairs to
           <code>text-oe-blue-dark</code>, which clears AA on every co-occurrence.
           Includes the global project-picker chip in <code>Header.tsx</code> and
@@ -312,7 +312,7 @@
           bounds validation (+136 LOC, 41 tests covering IDOR isolation and
           rollup parity). External contribution PR #164 from
           <code>@Mourdi59</code> merged via author-attributed commit
-          (<code>b169a687</code>) &mdash; <code>set_user_module_access</code> was
+          (<code>b169a687</code>) - <code>set_user_module_access</code> was
           silently dropping its <code>metadata</code> payload because
           SQLAlchemy reserves the attribute name. Three v3 release announcements
           backfilled and the broken <code>og:image</code> on
@@ -328,7 +328,7 @@
       The 5.x line opened with the deep-coordination initiative (v5.1.1, file
       versioning + notification dispatcher + audit trail), settled into a
       release-every-two-days cadence through v5.2.x, and ends here. None of the
-      bundles in v5.3.0 are speculative &mdash; every one of them came out of a
+      bundles in v5.3.0 are speculative - every one of them came out of a
       user report, an audit pass, or a contributor PR. The stable mark means
       this is the build we&rsquo;d pin in production for a customer engagement
       while the 6.x line lands its bigger architectural moves (multi-tenant RLS,
@@ -353,7 +353,7 @@
     </div>
 
     <p>
-      No Alembic migration in this release &mdash; head stays at <code>v3144</code>.
+      No Alembic migration in this release - head stays at <code>v3144</code>.
       Backend ships the BR invoice renderer, two new validation rules, the Geo
       Hub storage-sweep helper, the dashboard rollup endpoint, and the metadata
       payload fix on <code>set_user_module_access</code>. Frontend ships the

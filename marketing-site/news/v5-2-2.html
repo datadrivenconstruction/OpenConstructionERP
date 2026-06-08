@@ -197,7 +197,7 @@
   <div class="narrow">
 
     <p>
-      v5.2.0 was a long-running feature wave &mdash; Epic I, four native BOQ formats,
+      v5.2.0 was a long-running feature wave - Epic I, four native BOQ formats,
       one regional-exchange import surface. v5.2.2 is the opposite: a tightly-scoped
       bug-fix release that closes seven small issues a careful user would hit in their
       first half-hour with the app. Each one is a credibility bug, not a data-loss
@@ -246,7 +246,7 @@
         <h4>Validation banner stops lying about empty runs</h4>
         <p>
           <code>/validation</code> showed a green &ldquo;All passed&rdquo; banner even
-          when the run produced zero results &mdash; e.g. a freshly imported project
+          when the run produced zero results - e.g. a freshly imported project
           before any rules had executed. v5.2.2 gates that banner on
           <code>total &gt; 0</code> so a vacuous-truth zero-rule run no longer reads
           as a successful validation pass.
@@ -261,7 +261,7 @@
         <p>
           <code>ProjectWidgets</code> was calling <code>/v1/changeorders/summary</code>
           without a trailing slash, and FastAPI was matching it as
-          <code>{order_id}=summary</code> &mdash; serving an HTTP 405 because no
+          <code>{order_id}=summary</code> - serving an HTTP 405 because no
           <code>GET</code> handler existed for that synthetic path. Adding the trailing
           slash routes the call to the real <code>summary</code> endpoint, and the
           dashboard tile renders the change-order rollup it was meant to all along.
@@ -304,11 +304,11 @@
 
     <h2>Why this matters</h2>
     <p>
-      None of these are headline features &mdash; a v5.2.x patch never is &mdash; but
+      None of these are headline features - a v5.2.x patch never is - but
       together they remove a noticeable layer of friction. A dashboard route that
       doesn&rsquo;t resolve to the dashboard, a takeoff page that paints stale
       glyphs, a validation banner that congratulates you for doing nothing, a widget
-      that 405s on a missing trailing slash &mdash; each is small in isolation, each
+      that 405s on a missing trailing slash - each is small in isolation, each
       reads as &ldquo;this product is half-finished&rdquo; in aggregate. The
       backend-API fix on <code>safety.IncidentResponse</code> matters
       independently: the SAF-A3 audit fields are part of the regulatory contract on
@@ -324,7 +324,7 @@
     </div>
 
     <p>
-      No Alembic migration in this release &mdash; head stays unchanged. The
+      No Alembic migration in this release - head stays unchanged. The
       <code>safety.IncidentResponse</code> change is additive (the columns already
       exist on the model and DB), so the only consumer-visible difference is six new
       keys appearing on the wire. Frontend ships the route change, the takeoff

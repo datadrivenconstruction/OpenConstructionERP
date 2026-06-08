@@ -185,7 +185,7 @@
       <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/issues/162">issue&nbsp;#162</a>.
       The <code>costs.vector_adapter</code> health probe was hardcoded to <code>lancedb</code>
       while production has defaulted to <code>qdrant</code> since v3, so every cost
-      upsert and reindex silently no-op&apos;d &mdash; <code>/match-elements</code>
+      upsert and reindex silently no-op&apos;d - <code>/match-elements</code>
       read &ldquo;AI Semantic Search is offline&rdquo; even when Qdrant itself was
       healthy. Backend probe now matches <code>settings.vector_backend</code>, and
       <code>backend/.env.example</code> got a full rewrite while we were there.
@@ -199,8 +199,8 @@
   <div class="narrow">
 
     <p>
-      This is a small surface area &mdash; two files in the costs module and a
-      rewritten <code>.env.example</code> &mdash; but the user-visible blast radius
+      This is a small surface area - two files in the costs module and a
+      rewritten <code>.env.example</code> - but the user-visible blast radius
       was significant. Anybody running a default install (Qdrant since v3, never
       LanceDB) had <strong>no working semantic search</strong>: BOQ position vectors
       weren&rsquo;t indexed, similarity-search lookups in the
@@ -223,7 +223,7 @@
           <code>_vector_available()</code> in <code>costs/vector_adapter.py</code> now
           dispatches on <code>settings.vector_backend</code>: it probes
           <code>qdrant_client</code> when the backend is <code>qdrant</code> (the
-          default since v3 &mdash; <code>config.py:237</code>) and only falls back to
+          default since v3 - <code>config.py:237</code>) and only falls back to
           probing <code>lancedb</code> when the backend is explicitly
           <code>lancedb</code>. Symptom was unmistakable once you knew the cause:
           <code>/match-elements</code> showed &ldquo;AI Semantic Search is offline&rdquo;
@@ -257,13 +257,13 @@
       Issue #162 is the kind of bug that punishes people for trying the right setup
       first. The whole point of switching the production default from LanceDB to
       Qdrant in v3 was to give users a real vector store with persistence,
-      replication, and a UI &mdash; the price for that was a separate service to run.
+      replication, and a UI - the price for that was a separate service to run.
       Anyone who set up Qdrant exactly as documented, then opened
       <code>/match-elements</code>, was told their semantic search was offline. The
       probe was looking for the wrong library. The fix is a five-line dispatch but
       it restores the headline AI feature on every default install. The
       <code>.env.example</code> rewrite is in the same release because the two
-      surfaces share the same root cause &mdash; configuration that drifted from its
+      surfaces share the same root cause - configuration that drifted from its
       defaults without anyone noticing.
     </p>
 
@@ -275,7 +275,7 @@
     </div>
 
     <p>
-      No Alembic migration, no DB change &mdash; the Qdrant collection itself is
+      No Alembic migration, no DB change - the Qdrant collection itself is
       created lazily on first upsert, so after the upgrade the next cost-row
       <code>save()</code> will populate the index and AI semantic search returns to
       service on its own. No manual reindex needed. If you customised

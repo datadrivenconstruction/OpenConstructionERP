@@ -185,7 +185,7 @@
       <span class="pill-meta">2026-05-18</span>
       <span class="pill-meta">~4 min read</span>
     </div>
-    <h1>v3.6 &mdash; <span class="accent">BOQs that nest as deep as a real project does.</span></h1>
+    <h1>v3.6 - <span class="accent">BOQs that nest as deep as a real project does.</span></h1>
     <p class="lede">
       Real construction estimates do not stop at two levels. v3.6.0 raises the
       hard cap to <code>MAX_NESTING_DEPTH=8</code>, teaches the BOQ editor a
@@ -207,7 +207,7 @@
 
     <p>
       The Bill of Quantities is the load-bearing screen of the entire estimating
-      flow. Until v3.6, OpenConstructionERP capped BOQ depth at two levels &mdash;
+      flow. Until v3.6, OpenConstructionERP capped BOQ depth at two levels -
       enough for a textbook example, not enough for a real tender package where
       <em>Building &rsaquo; Substructure &rsaquo; Foundations &rsaquo; Strip
       footings &rsaquo; Concrete &rsaquo; C30/37</em> is a perfectly ordinary
@@ -228,7 +228,7 @@
         <p>
           The validator and the FastAPI schema both moved to a single shared
           constant <code>MAX_NESTING_DEPTH = 8</code>. Anything deeper raises a
-          structured <code>422</code> with the failing ordinal path included &mdash;
+          structured <code>422</code> with the failing ordinal path included -
           no more silent flattening when an import file went two levels past
           the old cap.
         </p>
@@ -266,13 +266,13 @@
         <div class="hi-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg>
         </div>
-        <h4>v3.6.1 &mdash; the visible-tree fix</h4>
+        <h4>v3.6.1 - the visible-tree fix</h4>
         <p>
           v3.6.0 stored the deeper rows correctly but one render path in
           <code>BoqGridContainer</code> still trimmed at depth&nbsp;2 because the
           group-row builder used a static column join. v3.6.1 switched it to
           the same recursive walk the service layer uses. Without it, deep rows
-          were invisible &mdash; with it, they expand cleanly.
+          were invisible - with it, they expand cleanly.
         </p>
       </div>
 
@@ -305,7 +305,7 @@
 
     <p>
       Alembic head moves to <code>v3037</code>. Existing two-level BOQs are
-      unchanged &mdash; the migration only adds index support for deeper trees.
+      unchanged - the migration only adds index support for deeper trees.
       No data backfill is required.
     </p>
 

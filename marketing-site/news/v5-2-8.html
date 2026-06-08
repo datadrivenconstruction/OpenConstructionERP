@@ -197,7 +197,7 @@
 
     <p>
       v5.2.7 closed two layout papercuts. v5.2.8 keeps the same first-touch theme
-      and fixes three more &mdash; one each on the three pages a new user lands on
+      and fixes three more - one each on the three pages a new user lands on
       most often: Geo Hub, Markups, and Resources. None of them are big features.
       All three remove friction that should never have shipped in the first place.
     </p>
@@ -215,13 +215,13 @@
           The Geo Hub mode picker had three tabs (Global / Project / Development).
           Two of them quietly disabled themselves whenever the page was opened
           without a <code>projectId</code> or <code>developmentId</code> in scope
-          &mdash; which is exactly how most users arrive (from the sidebar shortcut,
+          - which is exactly how most users arrive (from the sidebar shortcut,
           before having opened a project). v5.2.8 changes the tabs to
           <code>aria-disabled</code> with a sensible navigate fallback: Project tab
           on no-scope sends the user to <code>/projects</code> to pick one;
           Development tab routes to <code>/property-dev</code>. The Cesium viewer
           also stopped silently swallowing <code>searchPin</code> writes that
-          arrived before <code>cesiumStatus === &apos;loaded&apos;</code> &mdash;
+          arrived before <code>cesiumStatus === &apos;loaded&apos;</code> -
           those now <code>console.warn</code> and re-fire once the viewer is ready.
         </p>
       </div>
@@ -235,7 +235,7 @@
           Clicking a markup element on <code>/markups</code> built a URL like
           <code>/takeoff?tab=measurements&amp;docId=Housing+design+standards.pdf&amp;measurementId=...</code>.
           Until v5.2.8 the target page rendered blank because nothing knew how to
-          read the query string &mdash; the takeoff page only ever booted from
+          read the query string - the takeoff page only ever booted from
           <code>localStorage</code>. Now <code>TakeoffPage</code> reads
           <code>?docId&amp;?measurementId&amp;?tab</code>, resolves <code>docId</code>
           first by filename (with an extension-stripped fallback) and then by UUID
@@ -253,7 +253,7 @@
         <h4>/resources inline edit + danger-styled delete</h4>
         <p>
           <code>/resources</code> shipped with a table that only let you create
-          rows &mdash; existing rows were effectively read-only, despite the
+          rows - existing rows were effectively read-only, despite the
           backend exposing <code>PATCH /resources/&#123;id&#125;</code> and
           <code>DELETE</code> all along. v5.2.8 adds a pencil icon and a trash icon
           to every row. The pencil opens an <code>EditResourceModal</code> that
@@ -271,11 +271,11 @@
 
     <h2>Why this matters</h2>
     <p>
-      All three of these are first-impression bugs &mdash; users hit them in the
+      All three of these are first-impression bugs - users hit them in the
       first session, before they have a mental model of the app. None of them are
       data-loss bugs; all three are credibility bugs. A tab that does nothing when
       you click it, a deep link that opens a blank page, a row you can&rsquo;t
-      edit despite the API supporting it &mdash; these read as &ldquo;this product
+      edit despite the API supporting it - these read as &ldquo;this product
       is half-finished&rdquo; even when the underlying feature is fully built. The
       cumulative cost is much higher than the line counts suggest.
     </p>
@@ -299,7 +299,7 @@
     </div>
 
     <p>
-      No Alembic migration in this release &mdash; head stays at <code>v3144</code>.
+      No Alembic migration in this release - head stays at <code>v3144</code>.
       Frontend ships the new <code>EditResourceModal</code>, the takeoff query-string
       parser, the Geo tab navigate-fallback, and one keyframe rule
       (<code>@keyframes ledgerRowFlash</code>) in <code>index.css</code>. CI shipped
@@ -307,7 +307,7 @@
       <code>frontend/dist</code> into the wheel (once via <code>cp -r</code>, once
       via the <code>force-include</code> map in <code>pyproject.toml</code>), and
       PyPI&rsquo;s strict mode now rejects archives with duplicate filenames in
-      local headers &mdash; that path is fixed so future tags publish themselves.
+      local headers - that path is fixed so future tags publish themselves.
     </p>
 
     <div class="cta-block">
