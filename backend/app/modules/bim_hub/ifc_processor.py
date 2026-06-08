@@ -3323,9 +3323,9 @@ def _generate_collada_boxes(
         g_max_y = max(g_max_y, y + w)
         g_max_z = max(g_max_z, z + h)
 
-        # Use the element's original mesh_ref (Revit ElementId) as the
-        # COLLADA node id so the frontend viewer can match meshes to
-        # elements by name. Fall back to stable_id or index.
+        # Use the element's original mesh_ref (Revit ElementId / IFC GlobalId)
+        # as the COLLADA node identity so the frontend viewer can match meshes
+        # to elements. Fall back to stable_id or index.
         node_id = str(elem.get("mesh_ref") or elem.get("stable_id") or f"n{i}")
         elem["mesh_ref"] = node_id
         elem["bounding_box"] = {
@@ -3370,7 +3370,16 @@ def _generate_collada_boxes(
         p = ET.SubElement(tri, "p")
         p.text = "0 1 2 0 2 3 4 6 5 4 7 6 0 4 5 0 5 1 2 6 7 2 7 3 0 3 7 0 7 4 1 5 6 1 6 2"
 
-        node = ET.SubElement(vscene, "node", id=node_id, name=elem.get("name", f"e{i}"))
+        # Three.js ColladaLoader sets Object3D.name from the node's ``name``
+        # attribute (NOT ``id``), and the frontend matches meshes to elements
+        # on that name against ``mesh_ref``. So the node name MUST be node_id,
+        # not the human label - otherwise matching falls back to the positional
+        # nearest-bbox pairing and filtering/grouping stops lining up with the
+        # geometry (the IFC "grouping shows the whole model" symptom). This is
+        # the same correction _patch_collada_node_names applies to the DDC/Revit
+        # real-DAE path; here we just emit it correctly at generation time. The
+        # human label is preserved on the <geometry name=...> above.
+        node = ET.SubElement(vscene, "node", id=node_id, name=node_id)
         mat = ET.SubElement(node, "matrix", sid="transform")
         mat.text = f"1 0 0 {x:.4f} 0 1 0 {y:.4f} 0 0 1 {z:.4f} 0 0 0 1"
         ET.SubElement(node, "instance_geometry", url=f"#{gid}")
