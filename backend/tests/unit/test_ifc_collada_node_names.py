@@ -79,9 +79,7 @@ def test_collada_node_name_equals_element_id_not_label(temp_dir):
         node_id = node.get("id")
         node_name = node.get("name")
         # The decisive invariant the viewer relies on.
-        assert node_name == node_id, (
-            f"node name {node_name!r} must equal id {node_id!r} for mesh matching"
-        )
+        assert node_name == node_id, f"node name {node_name!r} must equal id {node_id!r} for mesh matching"
         # And it must be the stable id, never the human label.
         assert node_name not in labels, f"node name leaked the human label: {node_name!r}"
         seen_ids.add(node_id)

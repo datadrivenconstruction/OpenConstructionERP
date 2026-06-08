@@ -83,10 +83,6 @@ function parseArgs() {
   return { keys, locales };
 }
 
-// A standalone token that looks like an i18n key (e.g. "boq.empty_state.title").
-const RAW_KEY = /(?:^|\s)([a-z][a-z0-9_]*(?:\.[a-z0-9_]+){1,}|[a-z][a-zA-Z0-9]*_[a-z0-9_]+)(?:\s|$)/;
-const KEYISH = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/;
-
 async function login(page) {
   await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' });
   const demoBtn = page.locator('button').filter({ hasText: DEMO_EMAIL }).first();

@@ -1851,9 +1851,7 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
                     )
         except Exception as patch_err:  # noqa: BLE001 - non-fatal post-process
             patch_failed = True
-            logger.warning(
-                "GLB node-name patching failed: %s - serving the DAE instead", patch_err
-            )
+            logger.warning("GLB node-name patching failed: %s - serving the DAE instead", patch_err)
 
         # If the names are unreliable, prefer the DAE: its <node name> equals
         # the element id, so mesh matching (and therefore filtering/grouping)
