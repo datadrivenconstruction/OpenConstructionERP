@@ -91,6 +91,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import { useBIMUploadStore, type BIMUploadJob } from '@/stores/useBIMUploadStore';
+import { useDwgUploadStore } from '@/stores/useDwgUploadStore';
 import { apiGet } from '@/shared/lib/api';
 import {
   fetchBIMModels,
@@ -486,19 +487,36 @@ function UploadPanel({
   const handleFileSelect = useCallback((f: File) => {
     const ext = getFileExtension(f.name);
     if (DWG_EXTENSIONS.has(ext)) {
+      // DWG/DXF are 2D takeoff drawings, not 3D BIM models. Hand the picked
+      // file straight to the DWG Drawings module so the user does not have to
+      // re-pick it there, then open that module where the upload is already
+      // running.
+      if (projectId) {
+        useDwgUploadStore.getState().startUpload({
+          file: f,
+          projectId,
+          modelName: f.name.replace(/\.[^.]+$/, ''),
+          discipline,
+        });
+      }
       addToast({
         type: 'info',
-        title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Takeoff module' }),
-        message: t('bim.dwg_redirect_msg', { defaultValue: 'Redirecting to DWG Takeoff...' }),
+        title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Drawings module' }),
+        message: projectId
+          ? t('bim.dwg_handoff_msg', { defaultValue: 'Sending your drawing to DWG Drawings...' })
+          : t('bim.dwg_redirect_msg', { defaultValue: 'Opening DWG Drawings...' }),
       });
       navigate('/dwg-takeoff');
       return;
     }
-    if (!CAD_EXTENSIONS.has(ext) && !DATA_EXTENSIONS.has(ext)) { setUploadError(t('bim.upload_unsupported_format', { defaultValue: 'Unsupported file format. Please upload .rvt or .ifc files.' })); return; }
+    // Simple picker accepts native 3D BIM only (RVT/IFC). Tabular data
+    // (CSV/XLSX) lives behind the explicit "Advanced" toggle, which uses its
+    // own file input, so anything else dropped here is rejected up front.
+    if (!CAD_EXTENSIONS.has(ext)) { setUploadError(t('bim.upload_unsupported_format', { defaultValue: 'Unsupported file format. Please upload RVT, IFC or DWG files.' })); return; }
     setFile(f);
     setUploadError(ext === '.rvt' ? t('bim.upload_rvt_note') : null);
     if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, ''));
-  }, [modelName, t, addToast, navigate]);
+  }, [modelName, t, addToast, navigate, projectId, discipline]);
 
   const resetForm = useCallback(() => {
     setFile(null); setDataFile(null); setGeometryFile(null); setModelName(''); setUploadError(null);
@@ -521,7 +539,12 @@ function UploadPanel({
   }, [globalJobs, projectId]);
 
   const handleUpload = useCallback(async () => {
-    if (!projectId) return;
+    if (!projectId) {
+      // Without a resolved project the upload silently did nothing before,
+      // which read as "the button is dead". Surface the real reason instead.
+      setUploadError(t('bim.upload_no_project', { defaultValue: 'No active project yet. Open a project, then upload again.' }));
+      return;
+    }
     setUploading(true);
     setUploadError(null);
     setUploadProgress(0);
@@ -751,7 +774,7 @@ function UploadPanel({
             htmlFor="bim-upload-file-input"
             role="button"
             tabIndex={0}
-            aria-label={t('bim.upload_dropzone_aria', { defaultValue: 'Upload BIM file (RVT, IFC, CSV, XLSX)' })}
+            aria-label={t('bim.upload_dropzone_aria', { defaultValue: 'Upload BIM file (RVT, IFC, DWG)' })}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -780,12 +803,11 @@ function UploadPanel({
                 <div className="flex items-center gap-1.5 mt-1">
                   <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-oe-blue/10 text-oe-blue border border-oe-blue/20">.rvt</span>
                   <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-oe-blue/10 text-oe-blue border border-oe-blue/20">.ifc</span>
-                  <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-surface-tertiary text-content-quaternary">.csv</span>
-                  <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-surface-tertiary text-content-quaternary">.xlsx</span>
+                  <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-oe-blue/10 text-oe-blue border border-oe-blue/20">.dwg</span>
                 </div>
               </>
             )}
-            <input id="bim-upload-file-input" ref={fileInputRef} type="file" accept=".rvt,.ifc,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
+            <input id="bim-upload-file-input" ref={fileInputRef} type="file" accept=".rvt,.ifc,.dwg,.dxf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
           </label>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -871,7 +893,7 @@ function UploadPanel({
 
       {/* Footer */}
       <div className="px-5 py-4 border-t border-border-light">
-        <button onClick={handleUpload} disabled={!canUpload} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-sm hover:shadow-md">
+        <button data-testid="bim-upload-submit" onClick={handleUpload} disabled={!canUpload} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-sm hover:shadow-md">
           {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
           {uploading ? t('bim.uploading') : t('bim.upload_panel_title')}
         </button>
@@ -1240,6 +1262,27 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
+  // DWG/DXF are 2D drawings, not 3D BIM. Hand the file to the DWG Drawings
+  // module so it is not lost on the redirect, then open that module.
+  const handleLandingDwg = useCallback((f: File) => {
+    if (projectId) {
+      useDwgUploadStore.getState().startUpload({
+        file: f,
+        projectId,
+        modelName: f.name.replace(/\.[^.]+$/, ''),
+        discipline: 'architecture',
+      });
+    }
+    addToast({
+      type: 'info',
+      title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Drawings module' }),
+      message: projectId
+        ? t('bim.dwg_handoff_msg', { defaultValue: 'Sending your drawing to DWG Drawings...' })
+        : t('bim.dwg_redirect_msg', { defaultValue: 'Opening DWG Drawings...' }),
+    });
+    navigate('/dwg-takeoff');
+  }, [projectId, addToast, t, navigate]);
+
   const handleUpload = useCallback(async () => {
     if (!file || !projectId) return;
     setUploading(true); setUploadError(null);
@@ -1357,13 +1400,9 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     const f = e.dataTransfer.files?.[0];
                     if (f) {
                       const ext = getFileExtension(f.name);
-                      if (DWG_EXTENSIONS.has(ext)) {
-                        addToast({ type: 'info', title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Takeoff module' }), message: t('bim.dwg_redirect_msg', { defaultValue: 'Redirecting to DWG Takeoff...' }) });
-                        navigate('/dwg-takeoff');
-                        return;
-                      }
-                      if (!CAD_EXTENSIONS.has(ext) && !DATA_EXTENSIONS.has(ext)) {
-                        addToast({ type: 'error', title: t('bim.upload_unsupported_format', { defaultValue: 'Unsupported file format. Please upload .rvt or .ifc files.' }) });
+                      if (DWG_EXTENSIONS.has(ext)) { handleLandingDwg(f); return; }
+                      if (!CAD_EXTENSIONS.has(ext)) {
+                        addToast({ type: 'error', title: t('bim.upload_unsupported_format', { defaultValue: 'Unsupported file format. Please upload RVT, IFC or DWG files.' }) });
                         return;
                       }
                       setFile(f);
@@ -1401,7 +1440,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                       </p>
                     </>
                   )}
-                  <input ref={fileInputRef} type="file" accept=".rvt,.ifc" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }} />
+                  <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.dwg,.dxf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (!f) return; if (DWG_EXTENSIONS.has(getFileExtension(f.name))) { handleLandingDwg(f); return; } setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); }} />
                 </label>
                 {file && (
                   <div className="mt-4 space-y-3">
