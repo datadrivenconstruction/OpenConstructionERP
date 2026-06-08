@@ -807,7 +807,8 @@ export function AiEstimatorPage() {
                 <Stage3Match
                   runId={runId!}
                   groups={groups}
-                  loading={groupsQ.isLoading || runMatchM.isPending}
+                  loading={groupsQ.isLoading}
+                  matching={runMatchM.isPending}
                   locale={locale}
                   aiConnected={progressQ.data?.ai_connected ?? readiness.llmReady}
                   highThreshold={groupsQ.data?.confidence_high_threshold ?? meta.thresholds.high}
