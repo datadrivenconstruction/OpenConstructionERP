@@ -1085,7 +1085,7 @@ export function ValidationPage() {
         })}
         more={
           t('validation.intro_more', { defaultValue: '' })
-            ? <IntroRichText text={t('validation.intro_more')} />
+            ? <IntroRichText text={t('validation.intro_more', { defaultValue: '' })} />
             : undefined
         }
         links={[

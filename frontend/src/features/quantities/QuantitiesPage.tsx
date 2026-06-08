@@ -553,7 +553,11 @@ function InstallProgressPanel({
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-medium text-content-secondary">
-              {error ? 'Failed' : result ? 'Complete' : phaseLabels[phase]}
+              {error
+                ? t('quantities.status_failed', { defaultValue: 'Failed' })
+                : result
+                  ? t('quantities.status_complete', { defaultValue: 'Complete' })
+                  : phaseLabels[phase]}
             </span>
             <span
               className={clsx(
@@ -582,7 +586,12 @@ function InstallProgressPanel({
         {/* Phase steps */}
         {installing && (
           <div className="flex items-center gap-1 text-2xs">
-            {['Download', 'Extract', 'Verify', 'Done'].map((label, i) => (
+            {[
+              t('quantities.step_download', { defaultValue: 'Download' }),
+              t('quantities.step_extract', { defaultValue: 'Extract' }),
+              t('quantities.step_verify', { defaultValue: 'Verify' }),
+              t('quantities.step_done', { defaultValue: 'Done' }),
+            ].map((label, i) => (
               <div key={label} className="flex items-center gap-1">
                 <div
                   className={clsx(
