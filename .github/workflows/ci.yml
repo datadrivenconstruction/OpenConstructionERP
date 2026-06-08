@@ -49,12 +49,21 @@ jobs:
         run: python scripts/check_no_brand_tokens.py
 
   backend:
-    name: Backend CI
+    name: Backend CI (shard ${{ matrix.shard }}/6)
     runs-on: ubuntu-latest
-    # The unit tree alone needs more than an hour on the standard runner
-    # (the 60 minute limit killed it at 2026-06-07 09:43 + 1h00m15s), so the
-    # budget is doubled. The integration tree lives in ci-full.yml.
-    timeout-minutes: 120
+    # The unit tree has ~6300 tests and most of them touch the shared
+    # PostgreSQL, so run serially it blew past even the doubled 120 minute
+    # budget and was cancelled on every push (no green Backend CI since the
+    # unit gate landed). pytest-split fans the collected tree across six matrix
+    # shards, each on its own runner with its own throwaway PostgreSQL service,
+    # so there is no cross-shard database contention and every shard finishes
+    # well inside the cap. The integration tree still runs nightly in
+    # ci-full.yml.
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
     defaults:
       run:
         working-directory: backend
@@ -109,14 +118,36 @@ jobs:
       - name: Run unit tests with pytest
         # Point the suite at the postgres:16 service. conftest sees DATABASE_URL
         # is already set and uses it instead of booting an embedded cluster.
-        # The push gate runs the unit tree only: the integration tree against
-        # the service container crawled past the 60 minute job limit (6% after
-        # 56 min on 2026-06-07) and had not produced a green run for six
-        # consecutive pushes. The full tree runs nightly in ci-full.yml.
+        # Only this shard's slice of tests/unit runs here: pytest-split
+        # partitions the collected tree deterministically across --splits so
+        # every test runs in exactly one shard and the union is the whole unit
+        # tree. The per-test --timeout matches the nightly so a single hung test
+        # becomes a reported failure instead of a silent 90 minute stall. The
+        # full integration tree runs nightly in ci-full.yml.
         env:
           DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/openconstructionerp_test
           DATABASE_SYNC_URL: postgresql+psycopg2://oe:oe@localhost:5432/openconstructionerp_test
-        run: pytest tests/unit -q
+        run: >-
+          pytest tests/unit -q -ra --durations=25
+          --timeout=900 --timeout-method=thread
+          --splits 6 --group ${{ matrix.shard }}
+
+  backend-gate:
+    name: Backend CI
+    # One stable status check that is green only when every backend shard
+    # passed. Keeps a single "Backend CI" check for branch protection and
+    # at-a-glance status while the work is fanned across the shard matrix above.
+    needs: [backend]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all backend shards to pass
+        run: |
+          if [ "${{ needs.backend.result }}" != "success" ]; then
+            echo "Backend shards did not all pass: ${{ needs.backend.result }}"
+            exit 1
+          fi
+          echo "All backend shards passed."
 
   zero-width-guard:
     name: Block zero-width Unicode characters

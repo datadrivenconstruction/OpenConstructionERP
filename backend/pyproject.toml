@@ -171,6 +171,11 @@ dev = [
     # single hung test into a reported failure so the run finishes and the
     # durations report points at the real slow spots.
     "pytest-timeout>=2.3.0",
+    # Splits the unit tree across the Backend CI shard matrix (--splits/--group)
+    # so the ~6300 mostly database-bound unit tests finish inside the job budget
+    # instead of being cancelled at the timeout on every push. Without a
+    # .test_durations file it splits by test count, which is enough here.
+    "pytest-split>=0.8.2",
     "httpx>=0.28.0",
     "factory-boy>=3.3.0",
     # Pinned exactly: the CI "ruff format --check" gate compares against the
