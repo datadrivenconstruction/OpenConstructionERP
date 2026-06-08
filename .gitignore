@@ -307,3 +307,14 @@ frontend/tsc_result.txt
 frontend/tsc_out.txt
 frontend/_final_tsc.txt
 frontend/qa-*.mjs
+
+# Transient i18n debt dumps and one-off translation backfill scripts (mirror kept
+# integration strings; untracked to keep brand names out of the repo)
+scripts/_mn_*.json
+scripts/_mn_gaps_dump.txt
+scripts/_visible_gap.json
+scripts/_categorize_mixed.py
+scripts/_dump_heavily.py
+scripts/_find_mixed.py
+scripts/_top_leaked_words.py
+scripts/translate_mn_*.py
