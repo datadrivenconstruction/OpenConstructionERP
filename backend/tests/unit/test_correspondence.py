@@ -25,10 +25,10 @@ from __future__ import annotations
 import uuid
 from typing import AsyncIterator
 
+import httpx
 import pytest
 import pytest_asyncio
 from fastapi import FastAPI
-from fastapi.testclient import TestClient
 
 from app.dependencies import (
     get_current_user_id,
@@ -212,7 +212,7 @@ class TestAttachmentMagicByteGate:
         await db_session.commit()
 
         app = _build_app(db_session, caller_id=nonlocal_owner)
-        client = TestClient(app)
+        transport = httpx.ASGITransport(app=app)
 
         # ``evil.png`` whose body is HTML with a <script> payload —
         # extension + Content-Type are the attacker's; only magic bytes
@@ -222,10 +222,11 @@ class TestAttachmentMagicByteGate:
         # excludes ``xml`` to keep the XSS-prone HTML payload out, so the
         # upload gate returns 415.
         fake_png = b"<html><script>alert('xss')</script></html>"
-        resp = client.post(
-            f"/v1/correspondence/{item.id}/attachments/",
-            files={"file": ("evil.png", fake_png, "image/png")},
-        )
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                f"/v1/correspondence/{item.id}/attachments/",
+                files={"file": ("evil.png", fake_png, "image/png")},
+            )
         assert resp.status_code == 415, resp.text
         # And nothing was written to disk.
         attachments_dir = tmp_path / "attachments"
@@ -255,13 +256,14 @@ class TestAttachmentMagicByteGate:
         await db_session.commit()
 
         app = _build_app(db_session, caller_id=owner)
-        client = TestClient(app)
+        transport = httpx.ASGITransport(app=app)
 
         pdf_body = b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n...rest of file..."
-        resp = client.post(
-            f"/v1/correspondence/{item.id}/attachments/",
-            files={"file": ("contract.pdf", pdf_body, "application/pdf")},
-        )
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                f"/v1/correspondence/{item.id}/attachments/",
+                files={"file": ("contract.pdf", pdf_body, "application/pdf")},
+            )
         assert resp.status_code == 200, resp.text
         payload = resp.json()
         assert len(payload["attachments"]) == 1
@@ -290,9 +292,10 @@ class TestProjectScopeIDOR:
         )
         await db_session.commit()
 
-        # The TestClient runs as the attacker.
+        # The HTTP client runs as the attacker.
         app = _build_app(db_session, caller_id=str(attacker_id))
-        client = TestClient(app)
-        resp = client.get(f"/v1/correspondence/{victim_corr.id}")
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.get(f"/v1/correspondence/{victim_corr.id}")
         assert resp.status_code == 404, resp.text
         assert "Confidential" not in resp.text

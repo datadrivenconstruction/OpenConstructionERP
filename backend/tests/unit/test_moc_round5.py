@@ -18,10 +18,10 @@ import uuid
 from collections.abc import AsyncIterator
 from decimal import Decimal
 
+import httpx
 import pytest
 import pytest_asyncio
 from fastapi import FastAPI, HTTPException
-from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit_log import ActivityLog
@@ -331,8 +331,9 @@ class TestMoCIDOR:
         await session.commit()
 
         app = _build_app(session, attacker)
-        client = TestClient(app, raise_server_exceptions=False)
-        resp = client.get(f"/v1/moc/{entry.id}")
+        transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.get(f"/v1/moc/{entry.id}")
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
@@ -346,8 +347,9 @@ class TestMoCIDOR:
         await session.commit()
 
         app = _build_app(session, attacker)
-        client = TestClient(app, raise_server_exceptions=False)
-        resp = client.patch(f"/v1/moc/{entry.id}", json={"title": "Hijacked"})
+        transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.patch(f"/v1/moc/{entry.id}", json={"title": "Hijacked"})
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
@@ -361,8 +363,9 @@ class TestMoCIDOR:
         await session.commit()
 
         app = _build_app(session, attacker)
-        client = TestClient(app, raise_server_exceptions=False)
-        resp = client.delete(f"/v1/moc/{entry.id}")
+        transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.delete(f"/v1/moc/{entry.id}")
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
@@ -377,8 +380,9 @@ class TestMoCIDOR:
         await session.commit()
 
         app = _build_app(session, attacker)
-        client = TestClient(app, raise_server_exceptions=False)
-        resp = client.post(f"/v1/moc/{entry.id}/review", json={})
+        transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(f"/v1/moc/{entry.id}/review", json={})
         assert resp.status_code == 404
 
 
