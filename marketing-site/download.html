@@ -36,7 +36,7 @@
   "operatingSystem": "Windows, macOS, Linux",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "downloadUrl": "https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest",
-  "softwareVersion": "7.1.0",
+  "softwareVersion": "7.3.0",
   "license": "https://www.gnu.org/licenses/agpl-3.0.html",
   "url": "https://openconstructionerp.com/download",
   "publisher": { "@type": "Organization", "name": "DataDrivenConstruction" }
@@ -128,7 +128,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .pagefoot a:hover{color:var(--accent)}
 
 /* ---------- download experience (designed + judged) ---------- */
-.dl-main{max-width:1120px;margin:0 auto;padding:104px 24px 80px;color:var(--ink-1);min-width:0;width:100%;}
+.dl-main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:78px 24px 76px;color:var(--ink-1);min-width:0;width:100%;}
 .dl-mono{font-family:"JetBrains Mono",ui-monospace,monospace;}
 .dl-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
 
@@ -138,55 +138,75 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .dl-h1{font-family:"Inter Tight",Inter,sans-serif;font-weight:680;font-size:clamp(34px,5.4vw,58px);line-height:1.04;letter-spacing:-.02em;color:var(--ink-0);margin:0 0 18px;}
 .dl-serif{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-weight:400;color:var(--accent);letter-spacing:0;}
 .dl-h2{font-family:"Inter Tight",Inter,sans-serif;font-weight:660;font-size:clamp(24px,3vw,32px);letter-spacing:-.015em;color:var(--ink-0);margin:0 0 8px;}
-.dl-lede{font-size:clamp(15px,1.7vw,18px);line-height:1.6;color:var(--ink-2);max-width:60ch;margin:0 0 26px;}
+.dl-lede{font-size:clamp(15px,1.7vw,18px);line-height:1.6;color:var(--ink-2);max-width:58ch;margin:0 0 22px;}
 .dl-section-head{margin:0 0 26px;}
 .dl-sub{color:var(--ink-2);font-size:15px;line-height:1.55;margin:0;max-width:62ch;}
 
 /* ---------- hero ---------- */
-.dl-hero{margin-bottom:46px;}
-.dl-rec{display:inline-flex;align-items:center;gap:9px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12.5px;letter-spacing:.02em;color:var(--ink-1);background:var(--card-bg);border:1px solid var(--line-1);border-radius:999px;padding:8px 15px;backdrop-filter:blur(8px);margin-bottom:26px;}
+.dl-hero{display:grid;grid-template-columns:minmax(0,1fr) 392px;gap:36px;align-items:center;margin-bottom:34px;padding:22px 0 12px;}
+.dl-hero-copy{min-width:0;padding:22px 0;}
+.dl-hero-action{position:relative;background:linear-gradient(180deg,color-mix(in srgb,var(--card-bg) 94%,#fff 8%),var(--card-bg));border:1px solid color-mix(in srgb,var(--accent) 26%,var(--line-1));border-radius:22px;padding:22px;box-shadow:0 2px 4px rgba(15,23,42,.04),0 28px 70px -30px color-mix(in srgb,var(--accent-3) 38%,transparent);backdrop-filter:blur(12px);overflow:hidden;}
+[data-theme="dark"] .dl-hero-action{background:linear-gradient(180deg,color-mix(in srgb,var(--card-bg) 90%,#fff 4%),var(--card-bg));}
+.dl-hero-action::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));}
+.dl-rec{display:inline-flex;align-items:center;gap:9px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12.5px;letter-spacing:.02em;color:var(--ink-1);background:var(--card-bg);border:1px solid var(--line-1);border-radius:999px;padding:8px 15px;backdrop-filter:blur(8px);margin:0 0 16px;}
 .dl-rec-dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3);box-shadow:0 0 0 0 transparent;}
 .dl-rec.is-ready .dl-rec-dot{background:var(--accent-2);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent-2) 22%,transparent);}
 .dl-rec b{color:var(--accent);font-weight:700;}
+.dl-hero-btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:70px;font-family:"Inter Tight",Inter,sans-serif;font-size:19px;font-weight:720;letter-spacing:0;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2) 48%,var(--accent-3));border-radius:18px;text-decoration:none;box-shadow:0 18px 42px -15px color-mix(in srgb,var(--accent-3) 82%,transparent),inset 0 1px 0 rgba(255,255,255,.24);transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;}
+.dl-hero-btn:hover{transform:translateY(-2px);filter:saturate(1.04);box-shadow:0 24px 52px -15px color-mix(in srgb,var(--accent-3) 86%,transparent),inset 0 1px 0 rgba(255,255,255,.28);}
+.dl-hero-btn svg{width:22px;height:22px;fill:currentColor;flex:none;}
+.dl-hero-action-meta{margin:12px 0 0;text-align:center;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;color:var(--ink-2);min-height:17px;}
 
 .dl-chips{list-style:none;display:flex;flex-wrap:wrap;gap:10px;margin:0;padding:0;}
 .dl-chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);background:var(--card-bg);border:1px solid var(--line-0);border-radius:8px;padding:7px 12px;backdrop-filter:blur(6px);}
 .dl-chip-i{width:15px;height:15px;flex:none;fill:var(--accent-2);}
+.dl-route{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:22px 0 0;max-width:680px;}
+.dl-route-a{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:12px 14px;border:1px solid var(--line-1);border-radius:13px;background:color-mix(in srgb,var(--card-bg) 84%,transparent);box-shadow:0 1px 2px rgba(15,23,42,.03);transition:transform .18s ease,border-color .18s ease,background .18s ease;}
+.dl-route-a:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--accent) 45%,var(--line-1));background:color-mix(in srgb,var(--accent) 6%,var(--card-bg));}
+.dl-route-os{font-family:"Inter Tight",Inter,sans-serif;font-weight:650;font-size:15px;color:var(--ink-0);}
+.dl-route-type{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;color:var(--ink-2);}
+.dl-route-a svg{width:17px;height:17px;fill:var(--accent);flex:none;}
 
 /* ---------- platform grid ---------- */
-.dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-.dl-card{position:relative;display:flex;flex-direction:column;background:var(--card-bg);border:1px solid var(--line-1);border-radius:16px;padding:22px 20px 20px;box-shadow:var(--shadow-card);backdrop-filter:blur(10px);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;overflow:hidden;}
-.dl-card::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-3));opacity:0;transition:opacity .25s ease;}
-.dl-card:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(15,23,42,.05),0 22px 48px -22px rgba(15,23,42,.32);border-color:var(--line-2);}
-.dl-card.is-rec{border-color:color-mix(in srgb,var(--accent) 42%,var(--line-2));box-shadow:0 2px 4px rgba(15,23,42,.05),0 22px 50px -22px color-mix(in srgb,var(--accent) 40%,transparent);}
+.dl-platforms{scroll-margin-top:86px;}
+.dl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:stretch;}
+.dl-card{position:relative;display:flex;flex-direction:column;min-height:100%;scroll-margin-top:86px;background:linear-gradient(180deg,color-mix(in srgb,var(--card-bg) 92%,#fff 8%),var(--card-bg));border:1px solid var(--line-1);border-radius:18px;padding:24px 22px 22px;box-shadow:var(--shadow-card);backdrop-filter:blur(10px);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;overflow:hidden;}
+[data-theme="dark"] .dl-card{background:linear-gradient(180deg,color-mix(in srgb,var(--card-bg) 90%,#fff 4%),var(--card-bg));}
+.dl-card::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));opacity:.36;transition:opacity .25s ease;}
+.dl-card:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(15,23,42,.05),0 28px 58px -22px rgba(15,23,42,.36);border-color:var(--line-2);}
+.dl-card.is-rec{border-color:color-mix(in srgb,var(--accent) 48%,var(--line-2));box-shadow:0 2px 4px rgba(15,23,42,.05),0 28px 60px -22px color-mix(in srgb,var(--accent) 44%,transparent);}
 .dl-card.is-rec::before{opacity:1;}
 
-.dl-card-head{display:flex;align-items:flex-start;gap:13px;margin-bottom:16px;}
-.dl-glyph{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:11px;background:color-mix(in srgb,var(--accent) 9%,transparent);border:1px solid var(--line-1);}
-.dl-glyph svg{width:24px;height:24px;fill:var(--ink-0);}
+.dl-card-head{display:flex;align-items:flex-start;gap:14px;min-height:92px;margin-bottom:18px;}
+.dl-glyph{flex:none;width:50px;height:50px;display:grid;place-items:center;border-radius:14px;background:color-mix(in srgb,var(--accent) 11%,transparent);border:1px solid var(--line-1);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);}
+.dl-glyph svg{width:27px;height:27px;fill:var(--ink-0);}
 .dl-card-id{flex:1;min-width:0;}
-.dl-card-name{font-family:"Inter Tight",Inter,sans-serif;font-size:19px;font-weight:640;color:var(--ink-0);margin:1px 0 4px;letter-spacing:-.01em;}
-.dl-card-note{font-size:12.5px;line-height:1.45;color:var(--ink-2);margin:0;}
+.dl-card-name{font-family:"Inter Tight",Inter,sans-serif;font-size:21px;font-weight:680;color:var(--ink-0);margin:0 0 5px;letter-spacing:0;}
+.dl-card-note{font-size:13.5px;line-height:1.45;color:var(--ink-2);margin:0;}
 .dl-rec-flag{display:none;position:absolute;top:14px;right:14px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-3));padding:4px 9px;border-radius:999px;}
 .dl-card.is-rec .dl-rec-flag{display:inline-block;}
 .dl-card.is-rec .dl-card-head{padding-right:96px;}
 
-.dl-badges{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px;}
-.dl-badge{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.04em;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line-0);border-radius:6px;padding:3px 7px;}
+.dl-badges{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 20px;}
+.dl-badge{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line-0);border-radius:8px;padding:4px 8px;}
 
-.dl-dl{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;font-family:Inter,sans-serif;font-size:14.5px;font-weight:600;padding:12px 16px;border-radius:12px;text-decoration:none;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease;}
-.dl-dl-i{width:16px;height:16px;flex:none;fill:currentColor;}
+.dl-dl{display:inline-flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:64px;font-family:"Inter Tight",Inter,sans-serif;font-size:18px;font-weight:700;letter-spacing:0;padding:17px 20px;border-radius:16px;text-decoration:none;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,filter .18s ease;}
+.dl-dl-i{width:21px;height:21px;flex:none;fill:currentColor;}
 a.dl-dl.btn-primary{color:#fff;}
-.dl-dl.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-3));color:#fff;box-shadow:0 8px 20px -10px color-mix(in srgb,var(--accent-3) 70%,transparent);}
-.dl-dl.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 26px -10px color-mix(in srgb,var(--accent-3) 75%,transparent);}
+.dl-dl.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2) 52%,var(--accent-3));color:#fff;box-shadow:0 16px 34px -14px color-mix(in srgb,var(--accent-3) 78%,transparent),inset 0 1px 0 rgba(255,255,255,.22);}
+.dl-dl.btn-primary:hover{transform:translateY(-2px);filter:saturate(1.04);box-shadow:0 22px 42px -14px color-mix(in srgb,var(--accent-3) 82%,transparent),inset 0 1px 0 rgba(255,255,255,.26);}
 .dl-dl-ghost{background:transparent;color:var(--accent);border:1px solid var(--line-2);}
 .dl-dl-ghost:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);border-color:var(--accent);transform:translateY(-2px);}
 
-.dl-split{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-.dl-meta{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;color:var(--ink-2);margin:11px 0 0;min-height:16px;text-align:center;}
+.dl-split{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.dl-meta{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;color:var(--ink-2);margin:12px 0 0;min-height:17px;text-align:center;}
 .dl-meta b{color:var(--ink-1);font-weight:600;}
 .dl-meta-skel{opacity:.7;}
 .dl-card-foot{font-size:11.5px;color:var(--ink-2);margin:9px 0 0;text-align:center;}
+.dl-steps{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:9px;}
+.dl-step{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;font-size:12.8px;line-height:1.42;color:var(--ink-2);}
+.dl-step-n{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent) 18%,var(--line-1));}
+.dl-step b{font-weight:650;color:var(--ink-1);}
 
 .dl-allnote{margin:22px 0 0;font-size:13px;color:var(--ink-2);display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:center;}
 .dl-allnote a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 35%,transparent);}
@@ -249,6 +269,9 @@ a.dl-dl.btn-primary{color:#fff;}
 
 /* ---------- responsive ---------- */
 @media(max-width:980px){
+  .dl-hero{grid-template-columns:1fr;align-items:start;gap:22px;}
+  .dl-hero-action{max-width:520px;}
+  .dl-route{max-width:none;}
   .dl-grid{grid-template-columns:1fr 1fr;}
   #card-linux{grid-column:1 / -1;}
   .dl-cmp-row{grid-template-columns:1fr 1fr 1fr 1fr;}
@@ -256,13 +279,20 @@ a.dl-dl.btn-primary{color:#fff;}
   .dl-helpers{grid-template-columns:1fr;}
 }
 @media(max-width:720px){
+  .dl-main{padding:74px 24px 64px;}
+  .dl-h1{font-size:clamp(32px,10vw,42px);}
+  .dl-route{grid-template-columns:1fr;}
+  .dl-hero-action{padding:20px;border-radius:20px;}
+  .dl-hero-btn{min-height:66px;font-size:18px;}
   .dl-grid{grid-template-columns:1fr;}
   #card-linux{grid-column:auto;}
   .dl-cmp-wrap{overflow-x:auto;}
   .dl-cmp-row{grid-template-columns:120px repeat(3,minmax(120px,1fr));min-width:540px;}
 }
 @media(max-width:540px){
-  .dl-main{padding-top:96px;}
+  .dl-main{padding-top:70px;}
+  .dl-hero{padding-top:12px;}
+  .dl-hero-copy{padding:8px 0 0;}
   .dl-firstrun{flex-direction:column;gap:10px;}
   .dl-cmd{flex-wrap:wrap;}
   .dl-copy-label{display:none;}
@@ -319,24 +349,48 @@ a.dl-dl.btn-primary{color:#fff;}
 <main class="dl-main" id="dl-top">
   <!-- ===================== HERO ===================== -->
   <section class="dl-hero" aria-labelledby="dl-h1">
-    <p class="dl-eyebrow" data-i18n="page.download.hero_eyebrow">Download</p>
-    <h1 class="dl-h1" id="dl-h1" data-i18n-html="page.download.hero_title">Get the <span class="dl-serif">real</span> desktop app.</h1>
-    <p class="dl-lede" data-i18n="page.download.hero_lede">
-      A native build of OpenConstructionERP. No Python, no pip, no Docker, no database to set up.
-      One file, run it, done. Your data stays on your machine.
-    </p>
+    <div class="dl-hero-copy">
+      <p class="dl-eyebrow" data-i18n="page.download.hero_eyebrow">Download</p>
+      <h1 class="dl-h1" id="dl-h1" data-i18n-html="page.download.hero_title">Get the <span class="dl-serif">real</span> desktop app.</h1>
+      <p class="dl-lede" data-i18n="page.download.hero_lede">
+        A native build of OpenConstructionERP. No Python, no pip, no Docker, no database to set up.
+        One file, run it, done. Your data stays on your machine.
+      </p>
 
-    <div class="dl-rec" id="dl-rec" role="status" aria-live="polite">
-      <span class="dl-rec-dot" aria-hidden="true"></span>
-      <span id="dl-rec-text">Detecting your platform&hellip;</span>
+      <ul class="dl-chips" aria-label="What you get" data-i18n-aria-label="page.download.hero_chips_aria">
+        <li class="dl-chip" data-i18n-html="page.download.hero_chip_no_deps"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M6.5 11.2 3.3 8l-1 1 4.2 4.2 8.2-8.2-1-1z"/></svg>No Python, pip, Docker or DB</li>
+        <li class="dl-chip" data-i18n-html="page.download.hero_chip_local"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1 2 3.4v4.1c0 3.7 2.5 6.7 6 7.5 3.5-.8 6-3.8 6-7.5V3.4zm0 1.6 4.5 1.8v3.1c0 2.8-1.9 5.2-4.5 5.9-2.6-.7-4.5-3.1-4.5-5.9V4.4z"/></svg>Data stays local</li>
+        <li class="dl-chip" data-i18n-html="page.download.hero_chip_fast"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1.5A6.5 6.5 0 1 0 14.5 8 6.5 6.5 0 0 0 8 1.5zm0 1.3A5.2 5.2 0 1 1 2.8 8 5.2 5.2 0 0 1 8 2.8zM7.4 4.6v3.8l3 1.8.6-1-2.4-1.4V4.6z"/></svg>First launch ~60s, then fast</li>
+        <li class="dl-chip" data-i18n-html="page.download.hero_chip_oss"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1.5 2 4v3.5c0 3.6 2.4 6.4 6 7.5 3.6-1.1 6-3.9 6-7.5V4zm-.7 9.3L4.8 8.3l.9-.9 1.6 1.6 3.1-3.4.9.8z"/></svg>Open source, AGPL-3.0</li>
+      </ul>
+
+      <nav class="dl-route" aria-label="Jump to platform download">
+        <a class="dl-route-a" href="#card-windows">
+          <span><span class="dl-route-os">Windows</span><br><span class="dl-route-type">.exe installer</span></span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8.6 3.3 7.7 4.2l2.6 2.6H2v1.4h8.3l-2.6 2.6.9.9L12.8 8z"/></svg>
+        </a>
+        <a class="dl-route-a" href="#card-macos">
+          <span><span class="dl-route-os">macOS</span><br><span class="dl-route-type">.dmg package</span></span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8.6 3.3 7.7 4.2l2.6 2.6H2v1.4h8.3l-2.6 2.6.9.9L12.8 8z"/></svg>
+        </a>
+        <a class="dl-route-a" href="#card-linux">
+          <span><span class="dl-route-os">Linux</span><br><span class="dl-route-type">.deb / AppImage</span></span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8.6 3.3 7.7 4.2l2.6 2.6H2v1.4h8.3l-2.6 2.6.9.9L12.8 8z"/></svg>
+        </a>
+      </nav>
     </div>
 
-    <ul class="dl-chips" aria-label="What you get" data-i18n-aria-label="page.download.hero_chips_aria">
-      <li class="dl-chip" data-i18n-html="page.download.hero_chip_no_deps"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M6.5 11.2 3.3 8l-1 1 4.2 4.2 8.2-8.2-1-1z"/></svg>No Python, pip, Docker or DB</li>
-      <li class="dl-chip" data-i18n-html="page.download.hero_chip_local"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1 2 3.4v4.1c0 3.7 2.5 6.7 6 7.5 3.5-.8 6-3.8 6-7.5V3.4zm0 1.6 4.5 1.8v3.1c0 2.8-1.9 5.2-4.5 5.9-2.6-.7-4.5-3.1-4.5-5.9V4.4z"/></svg>Data stays local</li>
-      <li class="dl-chip" data-i18n-html="page.download.hero_chip_fast"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1.5A6.5 6.5 0 1 0 14.5 8 6.5 6.5 0 0 0 8 1.5zm0 1.3A5.2 5.2 0 1 1 2.8 8 5.2 5.2 0 0 1 8 2.8zM7.4 4.6v3.8l3 1.8.6-1-2.4-1.4V4.6z"/></svg>First launch ~60s, then fast</li>
-      <li class="dl-chip" data-i18n-html="page.download.hero_chip_oss"><svg viewBox="0 0 16 16" aria-hidden="true" class="dl-chip-i"><path d="M8 1.5 2 4v3.5c0 3.6 2.4 6.4 6 7.5 3.6-1.1 6-3.9 6-7.5V4zm-.7 9.3L4.8 8.3l.9-.9 1.6 1.6 3.1-3.4.9.8z"/></svg>Open source, AGPL-3.0</li>
-    </ul>
+    <aside class="dl-hero-action" aria-label="Recommended installer">
+      <div class="dl-rec" id="dl-rec" role="status" aria-live="polite">
+        <span class="dl-rec-dot" aria-hidden="true"></span>
+        <span id="dl-rec-text">Detecting your platform&hellip;</span>
+      </div>
+      <a class="dl-hero-btn" id="btn-hero-download" href="#card-windows">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg>
+        <span id="hero-download-label">Download for Windows</span>
+      </a>
+      <p class="dl-hero-action-meta" id="meta-hero">Latest stable desktop build</p>
+    </aside>
   </section>
 
   <!-- ===================== PLATFORM MATRIX ===================== -->
@@ -367,6 +421,11 @@ a.dl-dl.btn-primary{color:#fff;}
           <span data-i18n="page.download.btn_win">Download for Windows</span>
         </a>
         <p class="dl-meta" id="meta-win"><span class="dl-meta-skel">Reading latest release&hellip;</span></p>
+        <ol class="dl-steps" aria-label="Windows install steps">
+          <li class="dl-step"><span class="dl-step-n">1</span><span><b>Download</b> the Windows installer.</span></li>
+          <li class="dl-step"><span class="dl-step-n">2</span><span><b>Run</b> the file and allow WebView2 if Windows asks.</span></li>
+          <li class="dl-step"><span class="dl-step-n">3</span><span><b>Open</b> the app. The first local setup can take about a minute.</span></li>
+        </ol>
       </article>
 
       <!-- macOS -->
@@ -393,7 +452,11 @@ a.dl-dl.btn-primary{color:#fff;}
           <span data-i18n="page.download.btn_mac">Download for macOS</span>
         </a>
         <p class="dl-meta" id="meta-mac"><span class="dl-meta-skel">Reading latest release&hellip;</span></p>
-        <p class="dl-card-foot" data-i18n="page.download.mac_foot">Drag the app into your Applications folder.</p>
+        <ol class="dl-steps" aria-label="macOS install steps">
+          <li class="dl-step"><span class="dl-step-n">1</span><span><b>Download</b> the DMG for Apple Silicon.</span></li>
+          <li class="dl-step"><span class="dl-step-n">2</span><span><b>Drag</b> OpenConstructionERP into Applications.</span></li>
+          <li class="dl-step"><span class="dl-step-n">3</span><span><b>Open</b> it from Applications. If macOS asks, confirm the open action.</span></li>
+        </ol>
       </article>
 
       <!-- Linux -->
@@ -426,6 +489,11 @@ a.dl-dl.btn-primary{color:#fff;}
           </a>
         </div>
         <p class="dl-meta" id="meta-linux"><span class="dl-meta-skel">Reading latest release&hellip;</span></p>
+        <ol class="dl-steps" aria-label="Linux install steps">
+          <li class="dl-step"><span class="dl-step-n">1</span><span><b>Use .deb</b> for Debian, Ubuntu, Mint and related systems.</span></li>
+          <li class="dl-step"><span class="dl-step-n">2</span><span><b>Use AppImage</b> when you want a portable file.</span></li>
+          <li class="dl-step"><span class="dl-step-n">3</span><span><b>Start</b> the app. Your local database is created automatically.</span></li>
+        </ol>
       </article>
 
     </div>
@@ -646,6 +714,9 @@ a.dl-dl.btn-primary{color:#fff;}
   var labels = { windows:"Windows", macos:"your Mac", linux:"Linux" };
   var recText = document.getElementById("dl-rec-text");
   var recBox = document.getElementById("dl-rec");
+  var heroBtn = document.getElementById("btn-hero-download");
+  var heroLabel = document.getElementById("hero-download-label");
+  var heroMeta = document.getElementById("meta-hero");
 
   function promote(which){
     ["windows","macos","linux"].forEach(function(k){
@@ -658,6 +729,9 @@ a.dl-dl.btn-primary{color:#fff;}
     recBox.classList.add("is-ready");
     var nice = os === "macos" ? "your Mac" : (os === "windows" ? "Windows" : "Linux");
     recText.innerHTML = "Recommended for <b>" + nice + "</b>";
+    if(heroLabel) heroLabel.textContent = os === "macos" ? "Download for macOS" : (os === "linux" ? "Choose Linux package" : "Download for Windows");
+    if(heroBtn) heroBtn.setAttribute("href", os === "linux" ? "#card-linux" : ("#card-" + os));
+    if(heroMeta) heroMeta.textContent = os === "linux" ? "Pick .deb or .AppImage below" : "Latest stable desktop build";
     promote(os);
     var promoted = document.getElementById("card-" + os);
     if(promoted && promoted.parentNode && os !== "windows"){
@@ -666,6 +740,9 @@ a.dl-dl.btn-primary{color:#fff;}
   } else {
     recBox.classList.add("is-ready");
     recText.textContent = "Pick your platform below";
+    if(heroLabel) heroLabel.textContent = "Choose your download";
+    if(heroBtn) heroBtn.setAttribute("href", "#card-windows");
+    if(heroMeta) heroMeta.textContent = "Windows, macOS and Linux builds";
     /* leave all three equal */
   }
 
@@ -709,8 +786,14 @@ a.dl-dl.btn-primary{color:#fff;}
         var meta = document.getElementById(def.meta);
         if(asset && asset.browser_download_url){
           if(btn) btn.setAttribute("href", asset.browser_download_url);
+          if(heroBtn && ((os === "windows" && def.btn === "btn-win") || (os === "macos" && def.btn === "btn-mac"))){
+            heroBtn.setAttribute("href", asset.browser_download_url);
+          }
           if(meta){
             var size = humanizeBytes(asset.size);
+            if(heroMeta && ((os === "windows" && def.btn === "btn-win") || (os === "macos" && def.btn === "btn-mac"))){
+              heroMeta.innerHTML = (v ? v + " &middot; " : "") + size;
+            }
             if(splitLabel){
               /* linux shares one meta line, append non-destructively */
               var prev = meta.getAttribute("data-built") || "";

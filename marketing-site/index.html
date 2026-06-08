@@ -9584,6 +9584,7 @@
     .gnf-card-inner img {
       display: block;
       width: 100%;
+      height: auto;
       aspect-ratio: 4/3;
       object-fit: cover;
       border-radius: 3px;
@@ -11384,8 +11385,8 @@
         "operatingSystem": "Linux, macOS, Windows, Docker, Kubernetes",
         "url": "https://openconstructionerp.com/",
         "description": "Open-source construction ERP with AI-powered BOQ, multi-CAD ingest (DWG, RVT, IFC), 55,000+ cost items, real-time collaboration and 20-language i18n. Self-host under AGPL-3.0.",
-        "softwareVersion": "3.0.4",
-        "releaseNotes": "New AI takeoff, multi-CAD canonical format, real-time multiplayer via Yjs CRDT.",
+        "softwareVersion": "7.3.0",
+        "releaseNotes": "Reliable desktop install with self-healing upgrade, AI estimator showing real cost matches, and BIM element grouping and search working across 26 languages.",
         "license": "https://www.gnu.org/licenses/agpl-3.0.html",
         "author": { "@id": "https://datadrivenconstruction.io/#organization" },
         "publisher": { "@id": "https://datadrivenconstruction.io/#organization" },
@@ -11939,56 +11940,135 @@
 
       <!-- One big OS-detected download CTA + quiet "All platforms" + tertiary star -->
       <style>
-        .hero-cta-stack { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
-        .hero-cta-main { display: flex; align-items: center; flex-wrap: wrap; gap: 16px 22px; }
+        .hero-cta-stack { display: inline-flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+        .hero-cta-main { display: grid; grid-template-columns: minmax(300px, 335px) 72px 72px; align-items: stretch; gap: 12px; }
         /* The big primary download button */
         .btn-hero-dl {
+          position: relative; overflow: hidden; isolation: isolate;
           display: inline-flex; align-items: center; gap: 13px;
-          padding: 17px 30px; border-radius: 16px;
+          min-height: 72px;
+          height: 72px;
+          padding: 12px 24px; border-radius: 16px;
           font-family: 'Inter Tight', Inter, sans-serif;
-          font-size: 18px; font-weight: 640; letter-spacing: -0.01em;
+          font-size: 18px; font-weight: 680; letter-spacing: -0.01em;
           color: #fff; text-decoration: none; cursor: pointer;
-          background: linear-gradient(135deg, var(--accent), var(--accent-3));
-          box-shadow: 0 14px 34px -12px color-mix(in srgb, var(--accent-3) 70%, transparent),
-                      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+          background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 46%, var(--accent-3) 100%);
+          box-shadow: 0 18px 42px -14px color-mix(in srgb, var(--accent-3) 82%, transparent),
+                      0 2px 6px rgba(15, 23, 42, 0.12),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.30);
           transition: transform 0.22s ease, box-shadow 0.25s ease, filter 0.25s ease;
           border: 1px solid transparent;
         }
+        .btn-hero-dl > * { position: relative; z-index: 1; }
+        .btn-hero-dl::after {
+          content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+          background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.28) 50%, transparent 68%);
+          transform: translateX(-130%);
+          transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-hero-dl:hover::after { transform: translateX(130%); }
         .btn-hero-dl:hover {
           transform: translateY(-2px);
-          box-shadow: 0 22px 48px -12px color-mix(in srgb, var(--accent-3) 78%, transparent),
-                      inset 0 1px 0 rgba(255, 255, 255, 0.22);
-          filter: saturate(1.04);
+          box-shadow: 0 26px 54px -14px color-mix(in srgb, var(--accent-3) 86%, transparent),
+                      0 3px 8px rgba(15, 23, 42, 0.14),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.34);
+          filter: saturate(1.05);
         }
         .btn-hero-dl:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
         .btn-hero-dl .dl-glyph-i { width: 24px; height: 24px; fill: currentColor; flex: none; }
         .btn-hero-dl .hero-dl-sub { display: block; font-size: 11.5px; font-weight: 500; opacity: 0.86; margin-top: 2px; letter-spacing: 0.01em; }
         .btn-hero-dl .hero-dl-stack { display: flex; flex-direction: column; line-height: 1.15; text-align: left; }
-        /* Quiet "All platforms" secondary link */
-        .hero-allplatforms {
-          display: inline-flex; align-items: center; gap: 7px;
-          font-size: 14.5px; font-weight: 560; color: var(--ink-2);
-          text-decoration: none; cursor: pointer;
-          transition: color 0.2s ease, gap 0.2s ease;
+        .hero-platform-icons {
+          display: contents;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
         }
-        .hero-allplatforms svg { width: 15px; height: 15px; flex: none; transition: transform 0.2s ease; }
-        .hero-allplatforms:hover { color: var(--accent); gap: 9px; }
-        .hero-allplatforms:hover svg { transform: translateY(2px); }
-        [data-theme="light"] .hero-allplatforms:hover { color: var(--accent-3); }
-        /* Tertiary GitHub star pill */
-        .hero-star-pill {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 8px 15px; border-radius: 999px;
-          font-size: 13px; font-weight: 540; color: var(--ink-2);
-          background: transparent; border: 1px solid var(--line-1);
+        .hero-platform-icon {
+          position: relative;
+          min-height: 72px;
+          height: 72px;
+          width: 72px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 17px;
+          color: var(--ink-1);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.80));
+          border: 1px solid var(--line-1);
+          border-radius: 16px;
+          box-shadow: 0 14px 34px -22px rgba(15, 23, 42, 0.38), inset 0 1px 0 rgba(255,255,255,.7);
           text-decoration: none;
-          transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+          backdrop-filter: blur(10px);
+          font-family: 'Inter Tight', Inter, sans-serif;
+          font-size: 18px;
+          font-weight: 700;
+          line-height: 1.14;
+          letter-spacing: 0;
+          transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
         }
-        .hero-star-pill svg { width: 15px; height: 15px; fill: currentColor; flex: none; }
-        .hero-star-pill:hover { color: var(--ink-0); border-color: var(--line-2); background: color-mix(in oklab, var(--accent) 5%, transparent); }
+        .hero-platform-icon svg { width: 24px; height: 24px; fill: currentColor; flex: none; }
+        .hero-platform-icon span { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+        .hero-platform-icon:hover {
+          transform: translateY(-2px);
+          color: var(--accent-3);
+          border-color: color-mix(in srgb, var(--accent-3) 38%, var(--line-1));
+          box-shadow: 0 16px 34px -20px color-mix(in srgb, var(--accent-3) 52%, transparent);
+        }
+        [data-theme="dark"] .hero-platform-icon {
+          color: var(--ink-1);
+          background: rgba(255, 255, 255, 0.08);
+          border-color: var(--line-1);
+        }
+        .hero-star-pill {
+          display: inline-flex;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 12px;
+          width: 335px;
+          height: 72px;
+          min-height: 72px;
+          padding: 12px 18px;
+          border-radius: 16px;
+          font-family: 'Inter Tight', Inter, sans-serif;
+          font-size: 16px;
+          font-weight: 700;
+          letter-spacing: 0;
+          color: var(--ink-1);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.66));
+          border: 1px solid var(--line-1);
+          box-shadow: 0 12px 28px -22px rgba(15, 23, 42, 0.36), inset 0 1px 0 rgba(255,255,255,.7);
+          text-decoration: none;
+          backdrop-filter: blur(10px);
+          transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+        }
+        .hero-star-pill svg { width: 21px; height: 21px; fill: currentColor; flex: none; }
+        .hero-star-text { display: flex; flex-direction: column; line-height: 1.13; min-width: 0; }
+        .hero-star-title { color: var(--ink-0); }
+        .hero-star-sub { margin-top: 3px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+        .hero-star-pill:hover {
+          transform: translateY(-2px);
+          color: var(--accent-3);
+          border-color: color-mix(in srgb, var(--accent-3) 34%, var(--line-1));
+          background: rgba(255, 255, 255, 0.9);
+          box-shadow: 0 18px 38px -24px color-mix(in srgb, var(--accent-3) 50%, transparent);
+        }
+        [data-theme="dark"] .hero-star-pill {
+          color: var(--ink-1);
+          background: rgba(255, 255, 255, 0.08);
+          border-color: var(--line-1);
+          box-shadow: none;
+        }
         @media (max-width: 560px) {
-          .btn-hero-dl { width: 100%; justify-content: center; padding: 16px 22px; font-size: 17px; }
-          .hero-cta-main { gap: 13px 18px; }
+          .btn-hero-dl { width: 100%; height: 72px; justify-content: center; padding: 12px 18px; font-size: 17px; }
+          .hero-cta-stack { display: flex; width: 100%; gap: 10px; }
+          .hero-cta-main { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+          .hero-cta-main .btn-hero-dl { grid-column: 1 / -1; }
+          .hero-platform-icons { display: contents; }
+          .hero-platform-icon { width: 100%; min-height: 62px; padding: 14px 12px; font-size: 16px; }
+          .hero-star-pill { width: 100%; height: 64px; min-height: 64px; font-size: 15px; justify-content: center; }
+          .hero-star-sub { font-size: 11.5px; }
         }
       </style>
       <div class="hero-cta-stack" id="fx-ctas">
@@ -12000,16 +12080,25 @@
               <span class="hero-dl-sub" data-i18n="hero.dl_btn_sub">Free - no Python, no Docker, nothing to set up</span>
             </span>
           </a>
-          <a class="hero-allplatforms" href="#download" data-i18n="hero.all_platforms">
-            All platforms
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-          </a>
+          <span class="hero-platform-icons" aria-label="Other platform downloads">
+            <a class="hero-platform-icon" href="/download#card-macos" aria-label="Download for macOS">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1zM14.5 6.3c.6-.7 1-1.6.9-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.4 2.4-1.1z"/></svg>
+              <span>macOS</span>
+            </a>
+            <a class="hero-platform-icon" href="/download#card-linux" aria-label="Linux install options">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2zm-1.3 4c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zm2.6 0c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zM12 9.3c.8 0 1.7.5 1.7.9 0 .3-.9.7-1.7.7s-1.7-.4-1.7-.7c0-.4.9-.9 1.7-.9z"/></svg>
+              <span>Linux</span>
+            </a>
+          </span>
         </div>
-        <a class="hero-star-pill" href="https://github.com/datadrivenconstruction" target="_blank" rel="noopener">
+        <a class="hero-star-pill" href="https://github.com/datadrivenconstruction" target="_blank" rel="noopener" aria-label="Support the project - star it on GitHub">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
           </svg>
-          <span data-i18n="hero.cta_star">Star on GitHub</span>
+          <span class="hero-star-text">
+            <span class="hero-star-title">Support the project</span>
+            <span class="hero-star-sub">Star it on GitHub</span>
+          </span>
         </a>
       </div>
 
@@ -12398,7 +12487,7 @@
   <!-- rewires each button to the real latest .exe/.dmg/.deb/.AppImage.  -->
   <!-- ================================================================ -->
   <style>
-    .home-dl{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:46px 24px 24px;}
+    .home-dl{position:relative;z-index:1;width:100%;max-width:1360px;margin:0 auto;padding:50px clamp(24px,4.2vw,56px) 28px;}
     [data-theme="light"] .home-dl{--card-bg:rgba(255,255,255,.74);--shadow-card:0 2px 4px rgba(15,23,42,.05),0 18px 44px -24px rgba(15,23,42,.22);}
     [data-theme="dark"]  .home-dl{--card-bg:rgba(20,33,55,.62);--shadow-card:0 2px 4px rgba(0,0,0,.25),0 18px 44px -24px rgba(0,0,0,.6);}
     .home-dl-head{text-align:center;margin:0 0 26px;}
@@ -12419,32 +12508,33 @@
     .dl-chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);background:var(--card-bg);border:1px solid var(--line-0);border-radius:8px;padding:7px 12px;backdrop-filter:blur(6px);}
     .dl-chip-i{width:15px;height:15px;flex:none;fill:var(--accent-2);}
 
-    .dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-    .dl-card{position:relative;display:flex;flex-direction:column;background:var(--card-bg);border:1px solid var(--line-1);border-radius:16px;padding:22px 20px 20px;box-shadow:var(--shadow-card);backdrop-filter:blur(10px);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;overflow:hidden;}
-    .dl-card::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-3));opacity:0;transition:opacity .25s ease;}
-    .dl-card:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(15,23,42,.05),0 24px 50px -22px rgba(15,23,42,.34);border-color:var(--line-2);}
-    .dl-card.is-rec{border-color:color-mix(in srgb,var(--accent) 42%,var(--line-2));box-shadow:0 2px 4px rgba(15,23,42,.05),0 24px 52px -22px color-mix(in srgb,var(--accent) 40%,transparent);}
+    .dl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:stretch;}
+    .dl-card{position:relative;display:flex;flex-direction:column;min-height:100%;background:linear-gradient(180deg,color-mix(in srgb,var(--card-bg) 92%,#fff 8%),var(--card-bg));border:1px solid var(--line-1);border-radius:18px;padding:24px 22px 24px;box-shadow:var(--shadow-card);backdrop-filter:blur(10px);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;overflow:hidden;}
+    [data-theme="dark"] .dl-card{background:linear-gradient(180deg,color-mix(in srgb,var(--card-bg) 90%,#fff 4%),var(--card-bg));}
+    .dl-card::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));opacity:.36;transition:opacity .25s ease;}
+    .dl-card:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(15,23,42,.05),0 28px 58px -22px rgba(15,23,42,.36);border-color:var(--line-2);}
+    .dl-card.is-rec{border-color:color-mix(in srgb,var(--accent) 48%,var(--line-2));box-shadow:0 2px 4px rgba(15,23,42,.05),0 28px 60px -22px color-mix(in srgb,var(--accent) 44%,transparent);}
     .dl-card.is-rec::before{opacity:1;}
-    .dl-card-head{display:flex;align-items:flex-start;gap:13px;margin-bottom:16px;}
-    .dl-glyph{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:11px;background:color-mix(in srgb,var(--accent) 9%,transparent);border:1px solid var(--line-1);}
-    .dl-glyph svg{width:24px;height:24px;fill:var(--ink-0);}
+    .dl-card-head{display:flex;align-items:flex-start;gap:14px;min-height:86px;margin-bottom:16px;}
+    .dl-glyph{flex:none;width:50px;height:50px;display:grid;place-items:center;border-radius:14px;background:color-mix(in srgb,var(--accent) 11%,transparent);border:1px solid var(--line-1);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);}
+    .dl-glyph svg{width:27px;height:27px;fill:var(--ink-0);}
     .dl-card-id{flex:1;min-width:0;}
-    .dl-card-name{font-family:"Inter Tight",Inter,sans-serif;font-size:19px;font-weight:640;color:var(--ink-0);margin:1px 0 4px;letter-spacing:-.01em;}
-    .dl-card-note{font-size:12.5px;line-height:1.45;color:var(--ink-2);margin:0;}
+    .dl-card-name{font-family:"Inter Tight",Inter,sans-serif;font-size:21px;font-weight:680;color:var(--ink-0);margin:0 0 5px;letter-spacing:0;}
+    .dl-card-note{font-size:13.5px;line-height:1.45;color:var(--ink-2);margin:0;}
     .dl-rec-flag{display:none;position:absolute;top:14px;right:14px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-3));padding:4px 9px;border-radius:999px;}
     .dl-card.is-rec .dl-rec-flag{display:inline-block;}
     .dl-card.is-rec .dl-card-head{padding-right:96px;}
-    .dl-badges{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px;}
-    .dl-badge{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.04em;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line-0);border-radius:6px;padding:3px 7px;}
-    .dl-dl{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:54px;font-family:'Inter Tight',Inter,sans-serif;font-size:16.5px;font-weight:640;letter-spacing:-.005em;padding:15px 18px;border-radius:13px;text-decoration:none;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease;}
-    .dl-dl-i{width:18px;height:18px;flex:none;fill:currentColor;}
-    a.dl-dl.dl-primary{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-3));box-shadow:0 8px 20px -10px color-mix(in srgb,var(--accent-3) 70%,transparent);}
-    a.dl-dl.dl-primary:hover{transform:translateY(-2px);box-shadow:0 12px 26px -10px color-mix(in srgb,var(--accent-3) 75%,transparent);}
+    .dl-badges{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 18px;}
+    .dl-badge{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line-0);border-radius:8px;padding:4px 8px;}
+    .dl-dl{display:inline-flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:64px;font-family:'Inter Tight',Inter,sans-serif;font-size:18px;font-weight:700;letter-spacing:0;padding:17px 20px;border-radius:16px;text-decoration:none;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,filter .18s ease;}
+    .dl-dl-i{width:21px;height:21px;flex:none;fill:currentColor;}
+    a.dl-dl.dl-primary{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2) 52%,var(--accent-3));box-shadow:0 16px 34px -14px color-mix(in srgb,var(--accent-3) 78%,transparent),inset 0 1px 0 rgba(255,255,255,.22);}
+    a.dl-dl.dl-primary:hover{transform:translateY(-2px);filter:saturate(1.04);box-shadow:0 22px 42px -14px color-mix(in srgb,var(--accent-3) 82%,transparent),inset 0 1px 0 rgba(255,255,255,.26);}
     a.dl-dl.dl-ghost{background:transparent;color:var(--accent);border:1px solid var(--line-2);}
     [data-theme="light"] a.dl-dl.dl-ghost{color:var(--accent-3);}
     a.dl-dl.dl-ghost:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);border-color:var(--accent);transform:translateY(-2px);}
     .dl-split{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-    .dl-meta{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;color:var(--ink-2);margin:11px 0 0;min-height:16px;text-align:center;}
+    .dl-meta{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;color:var(--ink-2);margin:13px 0 0;min-height:17px;text-align:center;}
     .dl-meta b{color:var(--ink-1);font-weight:600;}
     .dl-meta-skel{opacity:.7;}
     .dl-card-foot{font-size:11.5px;color:var(--ink-2);margin:9px 0 0;text-align:center;}
@@ -12458,12 +12548,12 @@
     .dl-dl:focus-visible,.dl-allnote a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px;}
 
     /* Short, visible numbered install steps under each card */
-    .dl-steps{list-style:none;margin:16px 0 0;padding:14px 0 0;border-top:1px solid var(--line-0);counter-reset:dlstep;display:flex;flex-direction:column;gap:11px;}
+    .dl-steps{list-style:none;margin:18px 0 0;padding:18px 0 0;border-top:1px solid var(--line-0);counter-reset:dlstep;display:flex;flex-direction:column;gap:11px;}
     .dl-steps li{display:flex;align-items:flex-start;gap:11px;font-size:13.5px;line-height:1.45;color:var(--ink-1);counter-increment:dlstep;}
     .dl-steps li::before{content:counter(dlstep);flex:none;width:23px;height:23px;display:grid;place-items:center;border-radius:999px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-3));margin-top:1px;}
     .dl-steps-title{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 2px;}
     /* Linux terminal command line with copy button (under the Linux card) */
-    .dl-termrow{display:flex;align-items:center;gap:8px;margin-top:13px;}
+    .dl-termrow{display:flex;align-items:center;gap:8px;margin-top:14px;margin-bottom:2px;}
     .dl-term{flex:1;display:flex;align-items:center;gap:9px;min-width:0;background:var(--code-bg,#0f172a);border:1px solid var(--line-1);border-radius:11px;padding:11px 13px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12.5px;color:#e2e8f0;overflow:hidden;}
     .dl-term .dollar{color:var(--accent-2);font-weight:600;flex:none;}
     .dl-term code{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -12580,12 +12670,12 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           </button>
         </div>
+        <p class="dl-meta" id="meta-linux"><span class="dl-meta-skel" data-i18n="home.download_cards.reading">Reading latest release&hellip;</span></p>
         <ol class="dl-steps" aria-label="How to install on Linux">
           <li data-i18n="home.download_cards.linux_step1">Paste the command above into your terminal</li>
           <li data-i18n="home.download_cards.linux_step2">It picks the right package (deb, rpm or AppImage)</li>
           <li data-i18n="home.download_cards.linux_step3">Launch OpenConstructionERP from your app menu</li>
         </ol>
-        <p class="dl-meta" id="meta-linux"><span class="dl-meta-skel" data-i18n="home.download_cards.reading">Reading latest release&hellip;</span></p>
       </article>
     </div>
 
@@ -12941,7 +13031,7 @@
           <p class="hp-now" aria-live="polite">
             <span class="hp-now-num" id="hp-now-num">01</span>
             <span class="hp-now-name" id="hp-now-name" data-i18n="demo.now_name_default">BOQ editor</span>
-            <span class="hp-now-sep" aria-hidden="true">&mdash;</span>
+            <span class="hp-now-sep" aria-hidden="true">-</span>
             <span class="hp-now-desc" id="hp-now-desc" data-i18n="demo.now_desc_default">Build bills of quantities, priced rows</span>
           </p>
         </div>
@@ -14083,7 +14173,7 @@
               <path class="df-mini-out-st df-mini-st" d="M 4 6 L 9 12 L 4 18 M 24 6 L 19 12 L 24 18 M 17 4 L 11 20"/>
             </g>
             <text class="df-name" x="1048" y="343">REST &middot; webhooks</text>
-            <text class="df-tag"  x="1048" y="358">to ERP / SAP / Procore</text>
+            <text class="df-tag"  x="1048" y="358">to ERP / SAP / PM tools</text>
 
             <!-- JSON · Parquet canonical -->
             <rect class="df-rect-out" x="1000" y="372" width="200" height="48" rx="10"/>
@@ -14575,23 +14665,23 @@
           <tr>
             <td class="feature-col" data-i18n="compare.row_cost_label">Typical cost / seat / yr</td>
             <td class="us-cell" style="color: var(--accent); font-weight: 500;" data-i18n="compare.row_cost_us">&euro; 0 &middot; self-host</td>
-            <td>&euro; 10&ndash;15k</td>
-            <td>&euro; 6&ndash;12k</td>
-            <td>&euro; 3&ndash;8k</td>
+            <td>&euro; 10-15k</td>
+            <td>&euro; 6-12k</td>
+            <td>&euro; 3-8k</td>
           </tr>
           <tr>
             <td class="feature-col" data-i18n="compare.row_impl_label">Implementation / onboarding</td>
             <td class="us-cell" style="color: var(--accent); font-weight: 500;" data-i18n="compare.row_impl_us">&euro; 0 &middot; docs + community</td>
-            <td>&euro; 20&ndash;80k</td>
-            <td>&euro; 15&ndash;40k</td>
-            <td>&euro; 30&ndash;150k</td>
+            <td>&euro; 20-80k</td>
+            <td>&euro; 15-40k</td>
+            <td>&euro; 30-150k</td>
           </tr>
           <tr>
             <td class="feature-col" data-i18n="compare.row_term_label">Contract term</td>
             <td class="us-cell" style="color: var(--accent); font-weight: 500;" data-i18n="compare.row_term_us">None &middot; cancel anytime</td>
-            <td data-i18n="compare.row_term_enterprise">1&ndash;3 yr lock-in</td>
-            <td data-i18n="compare.row_term_heavy">1&ndash;3 yr lock-in</td>
-            <td data-i18n="compare.row_term_legacy">3&ndash;5 yr lock-in</td>
+            <td data-i18n="compare.row_term_enterprise">1-3 yr lock-in</td>
+            <td data-i18n="compare.row_term_heavy">1-3 yr lock-in</td>
+            <td data-i18n="compare.row_term_legacy">3-5 yr lock-in</td>
           </tr>
         </tbody>
       </table>
@@ -15600,7 +15690,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         <div class="cb-svc-meta" data-i18n="custom.svc1_meta">FROM 4 WEEKS</div>
         <p data-i18n="custom.svc1_desc">Discovery → workshop → modules picked → built → deployed on your hardware. Source delivered.</p>
         <ul>
-          <li data-i18n="custom.svc1_li1">4–12 weeks total</li>
+          <li data-i18n="custom.svc1_li1">4-12 weeks total</li>
           <li data-i18n="custom.svc1_li2">AGPL or commercial license</li>
           <li data-i18n="custom.svc1_li3">30 days post-launch support</li>
         </ul>
@@ -15611,7 +15701,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
           <span class="cb-svc-num">02</span>
         </div>
         <h3 data-i18n="custom.svc2_title">Workshops</h3>
-        <div class="cb-svc-meta" data-i18n="custom.svc2_meta">1–3 DAYS · ON-SITE OR REMOTE</div>
+        <div class="cb-svc-meta" data-i18n="custom.svc2_meta">1-3 DAYS · ON-SITE OR REMOTE</div>
         <p data-i18n="custom.svc2_desc">Hands-on sessions: estimating, BIM-to-BOQ, AI takeoff, GAEB pipelines. Recorded for your team library.</p>
         <ul>
           <li data-i18n="custom.svc2_li1">Up to 12 participants</li>
@@ -15642,14 +15732,14 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         <div class="gnf-card" style="--rot: -2.5deg; z-index: 3;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/Lindner-scaled.png" alt="Lindner Group" loading="lazy" decoding="async" width="800" height="600"><div class="gnf-cap"><span>Lindner Group</span></div></div></div>
         <div class="gnf-card" style="--rot: 2.5deg; z-index: 4;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/OTWB-1-scaled.png" alt="OTWB" loading="lazy" decoding="async" width="800" height="600"><div class="gnf-cap"><span>OTWB</span></div></div></div>
         <div class="gnf-card" style="--rot: 5deg; z-index: 3;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/ShapeMaker-1-scaled.png" alt="ShapeMaker" loading="lazy" decoding="async" width="800" height="600"><div class="gnf-cap"><span>ShapeMaker</span></div></div></div>
-        <div class="gnf-card gnf-card-nda" style="--rot: 7deg; z-index: 2;" aria-label="Confidential workshop &mdash; Tier-1 GC DACH"><div class="gnf-card-inner"><div class="gnf-nda-img"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="11" width="15" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><div class="gnf-nda-bars"><span></span><span></span><span></span></div></div><div class="gnf-cap"><span>Under NDA</span></div></div></div>
+        <div class="gnf-card gnf-card-nda" style="--rot: 7deg; z-index: 2;" aria-label="Confidential workshop - Tier-1 GC DACH"><div class="gnf-card-inner"><div class="gnf-nda-img"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="11" width="15" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><div class="gnf-nda-bars"><span></span><span></span><span></span></div></div><div class="gnf-cap"><span>Under NDA</span></div></div></div>
       </div>
       <div class="gnf-track">
         <div class="gnf-card" style="--rot: -4deg; z-index: 2;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/Bauindustrie-scaled.png" alt="Bauindustrie Bayern &amp; TUM" loading="lazy" decoding="async" width="800" height="600"><div class="gnf-cap"><span>Bauindustrie Bayern &amp; TUM</span></div></div></div>
         <div class="gnf-card" style="--rot: -1.5deg; z-index: 3;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/BIMClusterBW-scaled.png" alt="BIM Cluster BW" loading="lazy" decoding="async" width="800" height="600"><div class="gnf-cap"><span>BIM Cluster BW</span></div></div></div>
         <div class="gnf-card" style="--rot: 3deg; z-index: 4;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/BIMDAYGVA-scaled.png" alt="BIM DAY GENF" loading="lazy" decoding="async" width="800" height="600"><div class="gnf-cap"><span>BIM DAY GENF</span></div></div></div>
         <div class="gnf-card" style="--rot: 6deg; z-index: 3;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/04/Herbert_workshop.png" alt="Herbert Gruppe" loading="lazy" decoding="async" width="800" height="600"><div class="gnf-cap"><span>Herbert Gruppe</span></div></div></div>
-        <div class="gnf-card gnf-card-nda" style="--rot: 8deg; z-index: 2;" aria-label="Confidential workshop &mdash; Public infrastructure agency CH"><div class="gnf-card-inner"><div class="gnf-nda-img"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="11" width="15" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><div class="gnf-nda-bars"><span></span><span></span><span></span></div></div><div class="gnf-cap"><span>Under NDA</span></div></div></div>
+        <div class="gnf-card gnf-card-nda" style="--rot: 8deg; z-index: 2;" aria-label="Confidential workshop - Public infrastructure agency CH"><div class="gnf-card-inner"><div class="gnf-nda-img"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="11" width="15" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><div class="gnf-nda-bars"><span></span><span></span><span></span></div></div><div class="gnf-cap"><span>Under NDA</span></div></div></div>
       </div>
 
     </div>
@@ -15667,7 +15757,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         </div>
       </article>
       <article class="gnf-tst">
-        <p class="gnf-tst-quote" data-i18n="workshops.t2_quote">What happens when you not only organize construction processes, but also analyse them intelligently? This was the topic of our workshop with Artem Boiko on &ldquo;Data-Driven Construction&rdquo;. The focus was on the question of how we can make better use of existing data &ndash; to make construction projects more efficient, more transparent and less error-prone. Using specific application examples, Artem showed how structured construction data can help to maintain an overview, identify supplements at an early stage and improve communication between planning and execution. Particularly exciting: how digital tools and models can already be used today to automate processes. Data-driven construction is no longer a topic for the future &ndash; we are right in the middle of it. The workshop showed how great the potential is if we work together and really make data work for us.</p>
+        <p class="gnf-tst-quote" data-i18n="workshops.t2_quote">What happens when you not only organize construction processes, but also analyse them intelligently? This was the topic of our workshop with Artem Boiko on &ldquo;Data-Driven Construction&rdquo;. The focus was on the question of how we can make better use of existing data - to make construction projects more efficient, more transparent and less error-prone. Using specific application examples, Artem showed how structured construction data can help to maintain an overview, identify supplements at an early stage and improve communication between planning and execution. Particularly exciting: how digital tools and models can already be used today to automate processes. Data-driven construction is no longer a topic for the future - we are right in the middle of it. The workshop showed how great the potential is if we work together and really make data work for us.</p>
         <button type="button" class="gnf-tst-toggle" data-gnf-toggle aria-expanded="false"><span class="more-label" data-i18n="workshops.read_more">Read more</span><span class="less-label" data-i18n="workshops.read_less">Show less</span></button>
         <div class="gnf-tst-author">
           <div class="gnf-tst-avatar"><img src="assets/stills/people/stefan.jpg" alt="Stefan Traxinger" loading="lazy" decoding="async" width="48" height="48" /></div>
@@ -15830,10 +15920,10 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
             <label for="cb-size" data-i18n="custom.field_team_size">Team size</label>
             <select id="cb-size" name="team_size">
               <option value="" data-i18n="custom.field_select">Select…</option>
-              <option value="1-5">1 – 5</option>
-              <option value="6-20">6 – 20</option>
-              <option value="21-100">21 – 100</option>
-              <option value="101-500">101 – 500</option>
+              <option value="1-5">1 - 5</option>
+              <option value="6-20">6 - 20</option>
+              <option value="21-100">21 - 100</option>
+              <option value="101-500">101 - 500</option>
               <option value="500+">500+</option>
             </select>
           </div>
@@ -16051,7 +16141,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
           </span>
         </summary>
         <div class="faq-a" data-i18n-html="faq.a11">
-          Minor releases roughly every 2&ndash;3 weeks, patch releases as needed. Changelog lives on
+          Minor releases roughly every 2-3 weeks, patch releases as needed. Changelog lives on
           GitHub, every tagged version has a Docker image, and migrations are reversible. You decide
           when to upgrade. Self-hosted means nobody forces a deploy window on you.
         </div>
@@ -16887,7 +16977,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
                 <h3>Partner-paid layer - <em>where the margin lives.</em></h3>
                 <p class="p8020-row-sub">
                   Services and commercial SKUs sold by partners on top of the open
-                  core. Partners keep <strong>25–100%</strong> depending on the line.
+                  core. Partners keep <strong>25-100%</strong> depending on the line.
                 </p>
               </div>
             </div>
@@ -16926,7 +17016,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
               <div class="p8020-paid-head">
                 <span class="p8020-paid-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
                 <span class="p8020-paid-name">Commercial licences</span>
-                <span class="p8020-paid-margin">25–65%</span>
+                <span class="p8020-paid-margin">25-65%</span>
               </div>
               <p class="p8020-paid-desc">OCERP commercial licence, CWICR cost DB and cad2data converters (DWG · RVT · IFC · DGN). Resold by partners at tier rate.</p>
             </div>
@@ -16988,10 +17078,16 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
             <span class="hero-dl-sub" data-i18n="final_cta.btn_download_sub">Windows, macOS, Linux - free and open source</span>
           </span>
         </a>
-        <a class="hero-allplatforms" href="#download" data-i18n="hero.all_platforms">
-          All platforms
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-        </a>
+        <span class="hero-platform-icons" aria-label="Other platform downloads">
+          <a class="hero-platform-icon" href="/download#card-macos" aria-label="Download for macOS">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1zM14.5 6.3c.6-.7 1-1.6.9-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.4 2.4-1.1z"/></svg>
+            <span>macOS</span>
+          </a>
+          <a class="hero-platform-icon" href="/download#card-linux" aria-label="Linux install options">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2zm-1.3 4c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zm2.6 0c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zM12 9.3c.8 0 1.7.5 1.7.9 0 .3-.9.7-1.7.7s-1.7-.4-1.7-.7c0-.4.9-.9 1.7-.9z"/></svg>
+            <span>Linux</span>
+          </a>
+        </span>
       </div>
       <div class="final-cta-reassure">
         <span>
@@ -17449,23 +17545,23 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
               <div class="pa-bands-mini">
                 <div class="pa-band-mini">
                   <div class="pa-band-mini-name">Found.</div>
-                  <div class="pa-band-mini-range">0–11</div>
+                  <div class="pa-band-mini-range">0-11</div>
                 </div>
                 <div class="pa-band-mini">
                   <div class="pa-band-mini-name">Devel.</div>
-                  <div class="pa-band-mini-range">12–22</div>
+                  <div class="pa-band-mini-range">12-22</div>
                 </div>
                 <div class="pa-band-mini">
                   <div class="pa-band-mini-name">Estab.</div>
-                  <div class="pa-band-mini-range">23–32</div>
+                  <div class="pa-band-mini-range">23-32</div>
                 </div>
                 <div class="pa-band-mini">
                   <div class="pa-band-mini-name">Advan.</div>
-                  <div class="pa-band-mini-range">33–39</div>
+                  <div class="pa-band-mini-range">33-39</div>
                 </div>
                 <div class="pa-band-mini">
                   <div class="pa-band-mini-name">Leader</div>
-                  <div class="pa-band-mini-range">40–44</div>
+                  <div class="pa-band-mini-range">40-44</div>
                 </div>
               </div>
               <div style="margin-top:12px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#475569; letter-spacing:0.04em;">
