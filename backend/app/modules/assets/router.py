@@ -138,4 +138,4 @@ async def append_service_log(
     """
     entry = payload.model_dump(exclude_none=True)
     entry["logged_by"] = user_id
-    return await service.append_service_log(element_id, entry=entry)
+    return await service.append_service_log(element_id, entry=entry, actor_user_id=user_id)

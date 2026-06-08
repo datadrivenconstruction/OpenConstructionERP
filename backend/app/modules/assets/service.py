@@ -375,19 +375,34 @@ class AssetOpsService:
         element_id: uuid.UUID,
         *,
         entry: dict[str, Any],
+        actor_user_id: str | None = None,
     ) -> ServiceLogResponse:
         """Append a service event to an asset's ``asset_info.service_log``.
 
         Reuses the BIM Hub element repository's JSON-merge writer so the
         canonical persistence path (and its tracked-asset auto-flip) is
         respected. 404 if the element is missing.
+
+        IDOR defence: an element is addressed by its own UUID, but it belongs
+        to a model that belongs to a project. Before mutating it we resolve the
+        parent project and verify the caller has access, exactly like every
+        other write path in this module. Without this check any user holding
+        ``bim.update`` could append history to any element in any tenant by
+        enumerating UUIDs.
         """
+        from app.dependencies import verify_project_access
+        from app.modules.bim_hub.models import BIMModel
         from app.modules.bim_hub.repository import BIMElementRepository
 
         repo = BIMElementRepository(self.session)
         element = await repo.get(element_id)
         if element is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Asset not found")
+
+        model = await self.session.get(BIMModel, element.model_id)
+        if model is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Asset not found")
+        await verify_project_access(model.project_id, actor_user_id or "", self.session)
 
         info = dict(element.asset_info or {})
         log = info.get("service_log")
