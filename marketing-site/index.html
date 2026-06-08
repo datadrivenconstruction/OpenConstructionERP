@@ -1162,11 +1162,11 @@
     }
     .hf-trace path {
       fill: none;
-      stroke: color-mix(in oklab, var(--accent) 28%, transparent);
+      stroke: color-mix(in oklab, var(--accent) 20%, transparent);
       stroke-width: 1;
-      stroke-dasharray: 2 5;
+      stroke-dasharray: 1 6;
       stroke-linecap: round;
-      opacity: 0.5;
+      opacity: 0.22;
     }
     .hf-pulse {
       fill: none;
@@ -2191,14 +2191,14 @@
 
     .headline {
       font-family: 'Inter Tight', 'Inter', sans-serif;
-      font-weight: 500;
+      font-weight: 580;
       color: var(--ink-0);
-      font-size: clamp(34px, 4.4vw, 68px);
-      line-height: 1.12;
+      font-size: clamp(34px, 4.4vw, 64px);
+      line-height: 1.05;
       letter-spacing: -0.035em;
-      max-width: 13ch;
+      max-width: 15ch;
       margin: 0;
-      padding-bottom: 0.1em;
+      padding-bottom: 0.12em;
       text-align: left;
     }
     .headline .italic {
@@ -11685,9 +11685,9 @@
     <a href="#demo"      data-label="Demo"></a>
     <a href="#tour"      data-label="Tour"></a>
     <a href="#compare"   data-label="Compare"></a>
-    <a href="#developers" data-label="Developers"></a>
+    <a href="#developers" data-label="Developers" aria-label="Developers"></a>
     <a href="#voices"    data-label="Why"></a>
-    <a href="#community" data-label="Community"></a>
+    <a href="#community" data-label="Community" aria-label="Community"></a>
     <a href="#pricing"   data-label="Pricing"></a>
     <a href="#license"   data-label="License"></a>
     <a href="#faq"       data-label="FAQ"></a>
@@ -14173,7 +14173,7 @@
               <path class="df-mini-out-st df-mini-st" d="M 4 6 L 9 12 L 4 18 M 24 6 L 19 12 L 24 18 M 17 4 L 11 20"/>
             </g>
             <text class="df-name" x="1048" y="343">REST &middot; webhooks</text>
-            <text class="df-tag"  x="1048" y="358">to ERP / SAP / PM tools</text>
+            <text class="df-tag"  x="1048" y="358">to ERP / accounting / PM tools</text>
 
             <!-- JSON · Parquet canonical -->
             <rect class="df-rect-out" x="1000" y="372" width="200" height="48" rx="10"/>

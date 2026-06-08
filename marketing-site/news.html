@@ -378,7 +378,7 @@
       color: var(--ink-3);
       letter-spacing: 0.01em;
     }
-    .card h3 {
+    .card h2, .card h3 {
       font-family: 'Inter Tight', sans-serif;
       font-weight: 700;
       font-size: 20px;
@@ -387,7 +387,7 @@
       margin: 4px 0 0;
       color: var(--ink-0);
     }
-    .card.is-featured h3 {
+    .card.is-featured h2, .card.is-featured h3 {
       font-size: clamp(24px, 2.4vw, 30px);
       line-height: 1.18;
     }
@@ -447,6 +447,17 @@
     .pagefoot a { color: var(--ink-2); }
     .pagefoot a:hover { color: var(--accent); }
   </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "News and releases",
+    "description": "Release announcements and concept papers from OpenConstructionERP.",
+    "url": "https://openconstructionerp.com/news.html",
+    "isPartOf": { "@type": "WebSite", "name": "OpenConstructionERP", "url": "https://openconstructionerp.com" }
+  }
+  </script>
 </head>
 <body>
 
@@ -530,7 +541,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_8min">~8 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_concept_title">An open construction ERP for teams who want to own their stack.</h3>
+            <h2 data-i18n="page.news.card_concept_title">An open construction ERP for teams who want to own their stack.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_concept_excerpt">
               Estimating, CAD/BIM take-off, 4D/5D scheduling, procurement and site billing - in
               one self-hosted system under <code>AGPL-3.0</code>. 116 modules in v5.2.0, 55,000+
@@ -559,7 +570,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_6min">~6 min read</span>
             </div>
-            <h3>v7.3.0 - A desktop install that heals itself.</h3>
+            <h2>v7.3.0 - A desktop install that heals itself.</h2>
             <p class="excerpt">
               Everything since v7.1.0, in one place. The desktop app installs
               reliably and an upgrade from a broken install now repairs itself,
@@ -592,7 +603,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_6min">~6 min read</span>
             </div>
-            <h3>v7.1.0 - The next record is one click away.</h3>
+            <h2>v7.1.0 - The next record is one click away.</h2>
             <p class="excerpt">
               More than 80 places where related records had no link are now
               wired both ways, so any related record is one click away and deep
@@ -625,7 +636,7 @@
               <span class="card-date">·</span>
               <span class="card-date">~3 min read</span>
             </div>
-            <h3>v7.0.1 - The desktop launch fix.</h3>
+            <h2>v7.0.1 - The desktop launch fix.</h2>
             <p class="excerpt">
               The v7.0.0 desktop app could quit about two seconds after launch
               without ever showing a window. v7.0.1 removes the cause, an
@@ -656,7 +667,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_6min">~6 min read</span>
             </div>
-            <h3>v7.0.0 - One way in, for every module.</h3>
+            <h2>v7.0.0 - One way in, for every module.</h2>
             <p class="excerpt">
               Every module now opens the same way: one name and icon in the top
               bar, an info card that names the problem it solves and explains
@@ -688,7 +699,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_6min">~6 min read</span>
             </div>
-            <h3>v6.10.0 - Field payroll, project controls, compliance gates.</h3>
+            <h2>v6.10.0 - Field payroll, project controls, compliance gates.</h2>
             <p class="excerpt">
               The TOP-30 competitive wave lands. Field time and attendance with a payroll
               lifecycle and idempotent posting to the general ledger, a cross-module
@@ -718,7 +729,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_6min">~6 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v550_title">v5.5.0 - Stability wave + full Japanese locale + 9-of-9 verified.</h3>
+            <h2 data-i18n="page.news.card_v550_title">v5.5.0 - Stability wave + full Japanese locale + 9-of-9 verified.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v550_excerpt">
               Last stable 5.x cut. Eight user-reported bugs fixed end-to-end (PDF worker,
               PDF <code>403</code>, JWT session reset, CAD/BIM Data Explorer RVT, BIM
@@ -749,7 +760,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_5min">~5 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v530_title">v5.3.0 - Geo Hub round 2 + Brazil Tier-1 + login dark-mode + WCAG-AA.</h3>
+            <h2 data-i18n="page.news.card_v530_title">v5.3.0 - Geo Hub round 2 + Brazil Tier-1 + login dark-mode + WCAG-AA.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v530_excerpt">
               Six deep bundles and the last stable cut of the 5.x line. Geo Hub closes its
               storage leaks and caps accuracy at 10&nbsp;km; Brazil gets <code>BRL</code>,
@@ -779,7 +790,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_3min">~3 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v528_title">v5.2.8 - /geo tabs reliability + /markups deep-link + /resources inline edit.</h3>
+            <h2 data-i18n="page.news.card_v528_title">v5.2.8 - /geo tabs reliability + /markups deep-link + /resources inline edit.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v528_excerpt">
               Three first-touch fixes on top of v5.2.7. The Geo Hub Global / Project /
               Development tabs always navigate to the right scope instead of being dead
@@ -809,7 +820,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_4min">~4 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v527_title">v5.2.7 - Project-detail widget grid + one-click in-app upgrade.</h3>
+            <h2 data-i18n="page.news.card_v527_title">v5.2.7 - Project-detail widget grid + one-click in-app upgrade.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v527_excerpt">
               Two visible improvements on top of v5.2.6. The 13 widgets on
               <code>/projects/:id</code> finally lay out as a responsive 1/2/3-column grid
@@ -838,7 +849,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_4min">~4 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v526_title">v5.2.6 - Demo login JustWorks. WCAG-AA contrast. Reporting renderer. Dashboard rollup. 1197 JA keys.</h3>
+            <h2 data-i18n="page.news.card_v526_title">v5.2.6 - Demo login JustWorks. WCAG-AA contrast. Reporting renderer. Dashboard rollup. 1197 JA keys.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v526_excerpt">
               A quality-of-life wave on top of v5.2.5's install-crash fix. The documented demo
               password works, ~700 contrast violations cleared at the token layer,
@@ -866,7 +877,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_3min">~3 min read</span>
             </div>
-            <h3 data-i18n-html="page.news.card_v525_title">v5.2.5 - Install-crash fix. Fresh <code>pip install</code> works again.</h3>
+            <h2 data-i18n-html="page.news.card_v525_title">v5.2.5 - Install-crash fix. Fresh <code>pip install</code> works again.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v525_excerpt">
               Unblocks fresh installs that crashed on the 4.5.0 wheel by pinning
               <code>fastapi&nbsp;&gt;=&nbsp;0.116</code>. Plus a restored <code>/dashboard</code>
@@ -894,7 +905,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_3min">~3 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v523_title">v5.2.3 - Issue #162 vector-backend gate. Semantic search finally on by default.</h3>
+            <h2 data-i18n="page.news.card_v523_title">v5.2.3 - Issue #162 vector-backend gate. Semantic search finally on by default.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v523_excerpt">
               The <code>costs.vector_adapter</code> health probe was hardcoded to LanceDB
               while production defaults to Qdrant since v3, so every cost upsert silently
@@ -923,7 +934,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_4min">~4 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v522_title">v5.2.2 - /dashboard route + W10/W13/SAF-A3 + a11y bundle.</h3>
+            <h2 data-i18n="page.news.card_v522_title">v5.2.2 - /dashboard route + W10/W13/SAF-A3 + a11y bundle.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v522_excerpt">
               Seven small fixes on top of v5.2.0. <code>/dashboard</code> now renders
               DashboardPage instead of redirecting, the takeoff viewer cancels in-flight
@@ -953,7 +964,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_5min">~5 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v520_title">v5.2.0 - International BOQ. GAEB · BC3 · NRM · MasterFormat under one roof.</h3>
+            <h2 data-i18n="page.news.card_v520_title">v5.2.0 - International BOQ. GAEB · BC3 · NRM · MasterFormat under one roof.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v520_excerpt">
               Epic I lands native I/O for the four BOQ formats that cover roughly 70% of the
               Tier-1 construction market - DACH, Spain, UK and US - plus one drag-and-drop
@@ -980,7 +991,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_3min">~3 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v510_title">v5.1.0 - Wave 1 polish. TypeScript strict everywhere, dispatcher hardening.</h3>
+            <h2 data-i18n="page.news.card_v510_title">v5.1.0 - Wave 1 polish. TypeScript strict everywhere, dispatcher hardening.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v510_excerpt">
               A tight follow-up to v5.0. Full <code>strict</code> TypeScript over the new
               notifications and file-version surface, dispatcher retry + de-dup, and the
@@ -1007,7 +1018,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_4min">~4 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v500_title">v5.0.0 - The Deep-Coordination foundation. Notifications · file versioning · audit trail.</h3>
+            <h2 data-i18n="page.news.card_v500_title">v5.0.0 - The Deep-Coordination foundation. Notifications · file versioning · audit trail.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v500_excerpt">
               The first stable v5 major. Wave 1 of the Deep-Coordination initiative lands
               three pieces of cross-module infrastructure that every workflow above them now
@@ -1034,7 +1045,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_5min">~5 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v400_title">v4.0.0 - Stable Major. 103 modules, public API, multi-tenant security pass.</h3>
+            <h2 data-i18n="page.news.card_v400_title">v4.0.0 - Stable Major. 103 modules, public API, multi-tenant security pass.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v400_excerpt">
               The first stable major. A pro-grade BIM Hub, real clash detection, the BOQ pro
               rebuild, a 7-stage Match Elements pipeline, a starter pack of BI dashboards and
@@ -1063,7 +1074,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_5min">~5 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v3110_title">v3.11.0 - Validation@Import. GAEB X84 writer. RVT diagnostics.</h3>
+            <h2 data-i18n="page.news.card_v3110_title">v3.11.0 - Validation@Import. GAEB X84 writer. RVT diagnostics.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v3110_excerpt">
               Wave 3/4 modules land with eight new Alembic revisions
               (<code>v3088</code>→<code>v3095</code>). Validation moves out of the editor and
@@ -1092,7 +1103,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_4min">~4 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v360_title">v3.6.0 / v3.6.1 - Multi-level BOQ hierarchy. Recursive parent_id tree walk.</h3>
+            <h2 data-i18n="page.news.card_v360_title">v3.6.0 / v3.6.1 - Multi-level BOQ hierarchy. Recursive parent_id tree walk.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v360_excerpt">
               BOQs that nest as deep as a real project does. The hard cap rises to
               <code>MAX_NESTING_DEPTH=8</code>, the editor switches to a recursive
@@ -1121,7 +1132,7 @@
               <span class="card-date">·</span>
               <span class="card-date" data-i18n="page.news.read_6min">~6 min read</span>
             </div>
-            <h3 data-i18n="page.news.card_v300_title">v3.0.0 - First stable v3 major. 18 modules, FSM engine, ISO 16739-1 IFC.</h3>
+            <h2 data-i18n="page.news.card_v300_title">v3.0.0 - First stable v3 major. 18 modules, FSM engine, ISO 16739-1 IFC.</h2>
             <p class="excerpt" data-i18n-html="page.news.card_v300_excerpt">
               The release that put the platform's skeleton in place. Eighteen business
               modules on one loader, a deterministic FSM engine replacing ad-hoc status
