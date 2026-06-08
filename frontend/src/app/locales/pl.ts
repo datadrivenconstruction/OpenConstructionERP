@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Wysoka pewność",
+    "confidence_badge.medium": "Średnia pewność",
+    "confidence_badge.low": "Niska pewność",
+    "confidence_badge.score": "{{pct}}%",
+    "suggestion.accept": "Akceptuj",
+    "suggestion.edit": "Edytuj",
+    "suggestion.reject": "Odrzuć",
+    "suggestion.learn_more": "Dowiedz się więcej",
+    "error_explain.retry": "Ponów",
+    "error_explain.contact_support": "Skontaktuj się z pomocą techniczną",
+    "glossary.example_prefix": "Przykład:",
     "boq.intro_title": "Każda pozycja robót wyceniona i podsumowana",
     "boq.intro_body": "Wypisz pozycje robót, ilości i ceny jednostkowe projektu i obserwuj, jak składają się na bieżącą sumę. Ceny pochodzą z bazy kosztów, a ilości z przedmiaru BIM lub PDF, a gotowy kosztorys zasila walidację, budżet i pakiety przetargowe.",
     "boq.intro_more": "Ta strona to twoja półka kosztorysów we wszystkich projektach. Użyj **Nowy kosztorys**, by zacząć jeden, albo otwórz istniejącą kartę, by pracować w siatce. Każdy wiersz pokazuje projekt, liczbę pozycji, status (szkic, w przeglądzie, finalny) i sumę całkowitą we własnej walucie projektu. Szukaj wg nazwy, filtruj wg projektu lub statusu i sortuj wg nazwy, wartości lub daty. Karty statystyk u góry pozostają zsynchronizowane z zastosowanym filtrem.\n\nCo tu płynie:\n\n- Suma całkowita każdego kosztorysu jest budowana ze stawek jednostkowych, które ciągniesz z **Bazy danych kosztów**, oraz ilości, które przynosisz z **Przedmiaru**, **Ilości** lub **BIM**.\n- Ukończony kosztorys zasila **Walidację**, budżet **Finansów** oraz pakiety przetargowe w **Przetargach** i **Zarządzaniu ofertami**.\n\n**Jak wykorzystać to najlepiej:** Użyj **Duplikuj**, by odprysnąć wersję co-jeśli przed zmianą stawek, potem użyj **Porównaj**, by ustawić obie obok siebie. Porównanie odejmuje sumy tylko, gdy oba kosztorysy współdzielą walutę, więc zlecenie w EUR nigdy nie miesza się z USD. Sortuj wg wartości, by szybko znaleźć największe kosztorysy.",

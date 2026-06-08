@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Suuri varmuus",
+    "confidence_badge.medium": "Keskitason varmuus",
+    "confidence_badge.low": "Vähäinen varmuus",
+    "confidence_badge.score": "{{pct}} %",
+    "suggestion.accept": "Hyväksy",
+    "suggestion.edit": "Muokkaa",
+    "suggestion.reject": "Hylkää",
+    "suggestion.learn_more": "Lue lisää",
+    "error_explain.retry": "Yritä uudelleen",
+    "error_explain.contact_support": "Ota yhteyttä tukeen",
+    "glossary.example_prefix": "Esimerkki:",
     "boq.intro_title": "Jokainen suorite hinnoiteltu ja summattu",
     "boq.intro_body": "Listaa hankkeen suoritteet, määrät ja yksikköhinnat ja katso niiden kertyvän reaaliaikaiseksi loppusummaksi. Hinnat tulevat kustannustietokannasta ja määrät BIM- tai PDF-määrälaskennasta, ja valmis kustannusarvio syöttää tarkistuksen, budjetin ja tarjouspaketit.",
     "boq.intro_more": "Tämä sivu on arviohyllysi jokaisen projektin yli. Käytä **Uusi arvio** aloittaaksesi sellaisen, tai avaa olemassa oleva kortti työskennelläksesi ruudukossa. Jokainen rivi näyttää projektin, nimikemäärän, tilan (luonnos, tarkastuksessa, lopullinen) ja loppusumman kyseisen projektin omassa valuutassa. Hae nimellä, suodata projektin tai tilan mukaan, ja lajittele nimen, arvon tai päivän mukaan. Tilastokortit yläosassa pysyvät synkronoituina soveltamasi suodattimen kanssa.\n\nMikä virtaa tänne:\n\n- Jokaisen arvion loppusumma rakennetaan yksikköhinnoista jotka vedät **Kustannustietokannasta** ja määristä jotka tuot **Määrälaskennasta**, **Määristä** tai **BIM:stä**.\n- Valmis arvio syötetään **Validointiin**, **Talous**-budjettiin ja tarjouspaketteihin **Tarjouspyynnöissä** ja **Tarjoushallinnassa**.\n\n**Hyödynnä se täysin:** Käytä **Monista** luodaksesi entä-jos-version ennen hintojen muuttamista, käytä sitten **Vertaile** asettaaksesi kaksi rinnakkain. Vertailu vähentää loppusummia vain kun molemmat arviot jakavat valuutan, joten EUR-työtä ei koskaan sekoiteta USD-työn kanssa. Lajittele arvon mukaan löytääksesi suurimmat arviosi nopeasti.",

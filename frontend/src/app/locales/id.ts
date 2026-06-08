@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Keyakinan tinggi",
+    "confidence_badge.medium": "Keyakinan sedang",
+    "confidence_badge.low": "Keyakinan rendah",
+    "confidence_badge.score": "{{pct}}%",
+    "suggestion.accept": "Terima",
+    "suggestion.edit": "Edit",
+    "suggestion.reject": "Tolak",
+    "suggestion.learn_more": "Pelajari selengkapnya",
+    "error_explain.retry": "Coba lagi",
+    "error_explain.contact_support": "Hubungi dukungan",
+    "glossary.example_prefix": "Contoh:",
     "boq.intro_title": "Setiap item pekerjaan dihargai dan dijumlahkan",
     "boq.intro_body": "Daftarkan item pekerjaan, volume, dan harga satuan suatu proyek lalu lihat semuanya terkumpul menjadi total langsung. Harga satuan berasal dari basis data biaya dan volume dari pengambilan kuantitas BIM atau PDF, dan estimasi yang selesai mengalir ke validasi, anggaran, dan paket tender.",
     "boq.intro_more": "Halaman ini adalah rak estimasi Anda di setiap proyek. Gunakan **New Estimate** untuk memulai satu, atau buka kartu yang ada untuk bekerja di kisi. Setiap baris menunjukkan proyek, jumlah posisi, status (draft, in review, final) dan grand total dalam mata uang proyek itu sendiri. Cari berdasarkan nama, saring berdasarkan proyek atau status, dan urutkan berdasarkan nama, nilai atau tanggal. Kartu statistik di atas tetap sinkron dengan saringan apa pun yang Anda terapkan.\n\nApa yang mengalir di sini:\n\n- Grand total setiap estimasi dibangun dari tarif satuan yang Anda tarik dari **Cost Database** dan kuantitas yang Anda bawa dari **Takeoff**, **Quantities** atau **BIM**.\n- Estimasi yang selesai mengisi **Validation**, anggaran **Finance** dan paket tender di **Tendering** dan **Bid Management**.\n\n**Memaksimalkannya:** Gunakan **Duplicate** untuk membuat versi what-if sebelum Anda mengubah tarif, lalu gunakan **Compare** untuk meletakkan keduanya berdampingan. Perbandingan hanya mengurangi total saat kedua estimasi berbagi mata uang, sehingga pekerjaan EUR tidak pernah dicampur dengan USD. Urutkan berdasarkan nilai untuk menemukan estimasi terbesar Anda dengan cepat.",

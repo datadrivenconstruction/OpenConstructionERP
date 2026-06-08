@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Vysoká spolehlivost",
+    "confidence_badge.medium": "Střední spolehlivost",
+    "confidence_badge.low": "Nízká spolehlivost",
+    "confidence_badge.score": "{{pct}} %",
+    "suggestion.accept": "Přijmout",
+    "suggestion.edit": "Upravit",
+    "suggestion.reject": "Odmítnout",
+    "suggestion.learn_more": "Zjistit více",
+    "error_explain.retry": "Zkusit znovu",
+    "error_explain.contact_support": "Kontaktovat podporu",
+    "glossary.example_prefix": "Příklad:",
     "boq.intro_title": "Každá položka prací oceněná a sečtená",
     "boq.intro_body": "Vypište položky prací, množství a jednotkové ceny projektu a sledujte, jak se sčítají do živého součtu. Ceny pocházejí z cenové databáze a množství z výkazu výměr z BIM nebo PDF, a hotový rozpočet napájí validaci, rozpočet a nabídkové balíčky.",
     "boq.intro_more": "Tato stránka je vaše polička s odhady napříč každým projektem. Použijte **Nový odhad** k zahájení jednoho, nebo otevřete existující kartu k práci v mřížce. Každý řádek ukazuje projekt, počet pozic, stav (koncept, v posouzení, finální) a celkový součet v měně daného projektu. Vyhledávejte podle názvu, filtrujte podle projektu nebo stavu a řaďte podle názvu, hodnoty nebo data. Statistické karty nahoře zůstávají v synchronizaci s tím, jaký filtr jste aplikovali.\n\nCo sem plyne:\n\n- Celkový součet každého odhadu se sestavuje z jednotkových sazeb, které taháte z **Databáze nákladů**, a výměr, které přinášíte z **Odběru výměr**, **Výměr** nebo **BIM**.\n- Hotový odhad napájí **Validaci**, rozpočet ve **Financích** a tendrové balíčky v **Tendrech** a **Správě nabídek**.\n\n**Jak z toho vytěžit nejvíc:** Použijte **Duplikovat** k vytvoření verze co-kdyby, než změníte sazby, pak použijte **Porovnat** k jejich postavení vedle sebe. Porovnání odečítá součty pouze tehdy, když oba odhady sdílejí měnu, takže zakázka v EUR se nikdy nemíchá s USD. Řaďte podle hodnoty, abyste rychle našli své největší odhady.",

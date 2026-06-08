@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Affidabilità alta",
+    "confidence_badge.medium": "Affidabilità media",
+    "confidence_badge.low": "Affidabilità bassa",
+    "confidence_badge.score": "{{pct}}%",
+    "suggestion.accept": "Accetta",
+    "suggestion.edit": "Modifica",
+    "suggestion.reject": "Rifiuta",
+    "suggestion.learn_more": "Scopri di più",
+    "error_explain.retry": "Riprova",
+    "error_explain.contact_support": "Contatta l'assistenza",
+    "glossary.example_prefix": "Esempio:",
     "reporting.info_title": "Dashboard di progetto per ruolo",
     "reporting.info_body": "Dashboard di KPI in tempo reale per un progetto alla volta, organizzate per ruolo. Per i dati che abbracciano tutti i progetti usa l'Analitica; per i documenti PDF ed Excel scaricabili usa i Report.",
     "reporting.info_link_analytics": "Analitica tra progetti",

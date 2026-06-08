@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Hohe Konfidenz",
+    "confidence_badge.medium": "Mittlere Konfidenz",
+    "confidence_badge.low": "Geringe Konfidenz",
+    "confidence_badge.score": "{{pct}} %",
+    "suggestion.accept": "Übernehmen",
+    "suggestion.edit": "Bearbeiten",
+    "suggestion.reject": "Ablehnen",
+    "suggestion.learn_more": "Mehr erfahren",
+    "error_explain.retry": "Erneut versuchen",
+    "error_explain.contact_support": "Support kontaktieren",
+    "glossary.example_prefix": "Beispiel:",
     "reporting.info_title": "Rollenbasierte Projekt-Dashboards",
     "reporting.info_body": "Live-KPI-Dashboards für jeweils ein Projekt, nach Rolle gegliedert. Für projektübergreifende Kennzahlen nutzen Sie die Analytik; für herunterladbare PDF- und Excel-Dokumente die Berichte.",
     "reporting.info_link_analytics": "Projektübergreifende Analytik",

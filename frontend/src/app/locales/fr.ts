@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Confiance élevée",
+    "confidence_badge.medium": "Confiance moyenne",
+    "confidence_badge.low": "Confiance faible",
+    "confidence_badge.score": "{{pct}} %",
+    "suggestion.accept": "Accepter",
+    "suggestion.edit": "Modifier",
+    "suggestion.reject": "Refuser",
+    "suggestion.learn_more": "En savoir plus",
+    "error_explain.retry": "Réessayer",
+    "error_explain.contact_support": "Contacter le support",
+    "glossary.example_prefix": "Exemple :",
     "reporting.info_title": "Tableaux de bord projet par rôle",
     "reporting.info_body": "Tableaux de bord d'indicateurs en direct pour un projet à la fois, organisés par rôle. Pour les chiffres couvrant tous les projets, utilisez l'Analytique ; pour les documents PDF et Excel téléchargeables, utilisez les Rapports.",
     "reporting.info_link_analytics": "Analytique multi-projets",

@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Hoge betrouwbaarheid",
+    "confidence_badge.medium": "Gemiddelde betrouwbaarheid",
+    "confidence_badge.low": "Lage betrouwbaarheid",
+    "confidence_badge.score": "{{pct}}%",
+    "suggestion.accept": "Accepteren",
+    "suggestion.edit": "Bewerken",
+    "suggestion.reject": "Afwijzen",
+    "suggestion.learn_more": "Meer informatie",
+    "error_explain.retry": "Opnieuw proberen",
+    "error_explain.contact_support": "Contact opnemen met support",
+    "glossary.example_prefix": "Voorbeeld:",
     "reporting.info_title": "Projectdashboards per rol",
     "reporting.info_body": "Live KPI-dashboards voor één project tegelijk, geordend per rol. Voor cijfers over alle projecten gebruikt u Analyse; voor downloadbare PDF- en Excel-documenten gebruikt u Rapporten.",
     "reporting.info_link_analytics": "Projectoverstijgende analyse",

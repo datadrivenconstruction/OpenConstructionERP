@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Độ tin cậy cao",
+    "confidence_badge.medium": "Độ tin cậy trung bình",
+    "confidence_badge.low": "Độ tin cậy thấp",
+    "confidence_badge.score": "{{pct}}%",
+    "suggestion.accept": "Chấp nhận",
+    "suggestion.edit": "Chỉnh sửa",
+    "suggestion.reject": "Từ chối",
+    "suggestion.learn_more": "Tìm hiểu thêm",
+    "error_explain.retry": "Thử lại",
+    "error_explain.contact_support": "Liên hệ hỗ trợ",
+    "glossary.example_prefix": "Ví dụ:",
     "boq.intro_title": "Mọi hạng mục công việc đều được định giá và cộng tổng",
     "boq.intro_body": "Liệt kê các hạng mục công việc, khối lượng và đơn giá của một dự án rồi theo dõi chúng cộng dồn thành tổng giá trực tiếp. Đơn giá lấy từ cơ sở dữ liệu chi phí và khối lượng từ bóc tách BIM hoặc PDF, dự toán hoàn chỉnh sẽ cấp dữ liệu cho kiểm tra, ngân sách và hồ sơ mời thầu.",
     "boq.intro_more": "Trang này là kệ các bản ước tính của bạn xuyên mọi dự án. Dùng **Ước tính mới** để bắt đầu một cái, hoặc mở một thẻ hiện có để làm việc trong lưới. Mỗi dòng hiển thị dự án, số lượng vị trí, trạng thái (nháp, đang xem xét, cuối cùng) và tổng cộng theo loại tiền của chính dự án đó. Tìm theo tên, lọc theo dự án hoặc trạng thái, và sắp xếp theo tên, giá trị hoặc ngày. Các thẻ số liệu trên đầu vẫn đồng bộ với bất kỳ bộ lọc nào bạn đã áp dụng.\n\nLuồng dữ liệu chảy ở đây:\n\n- Tổng cộng của mỗi bản ước tính được dựng từ các đơn giá bạn lấy từ **Cơ sở dữ liệu chi phí** và các khối lượng bạn mang từ **Bóc tách**, **Khối lượng** hoặc **BIM**.\n- Một bản ước tính hoàn tất cấp dữ liệu cho **Kiểm định**, ngân sách **Tài chính** và các gói thầu trong **Đấu thầu** và **Quản lý hồ sơ thầu**.\n\n**Tận dụng tối đa:** Dùng **Nhân bản** để tách ra một phiên bản giả định trước khi bạn đổi giá, rồi dùng **So sánh** để đặt hai cái cạnh nhau. So sánh chỉ trừ các tổng khi cả hai bản ước tính chia sẻ một loại tiền, nên một công việc EUR không bao giờ bị trộn với một công việc USD. Sắp xếp theo giá trị để tìm nhanh các bản ước tính lớn nhất của bạn.",

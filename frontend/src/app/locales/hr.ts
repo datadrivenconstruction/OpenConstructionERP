@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Visoka pouzdanost",
+    "confidence_badge.medium": "Srednja pouzdanost",
+    "confidence_badge.low": "Niska pouzdanost",
+    "confidence_badge.score": "{{pct}} %",
+    "suggestion.accept": "Prihvati",
+    "suggestion.edit": "Uredi",
+    "suggestion.reject": "Odbij",
+    "suggestion.learn_more": "Saznajte više",
+    "error_explain.retry": "Pokušaj ponovno",
+    "error_explain.contact_support": "Kontaktirajte podršku",
+    "glossary.example_prefix": "Primjer:",
     "boq.intro_title": "Svaka stavka radova procijenjena i zbrojena",
     "boq.intro_body": "Popišite stavke radova, količine i jedinične cijene projekta i gledajte kako se zbrajaju u živi ukupni iznos. Cijene dolaze iz baze troškova, a količine iz iskaza po BIM-u ili PDF-u, a gotova procjena hrani validaciju, proračun i natječajne pakete.",
     "boq.intro_more": "Ova je stranica vaša polica procjena kroz sve projekte. Koristite **Nova procjena** za pokretanje, ili otvorite postojeću karticu za rad u mreži. Svaki redak pokazuje projekt, broj stavki, status (skica, u pregledu, konačno) i ukupni iznos u vlastitoj valuti tog projekta. Pretražujte po nazivu, filtrirajte po projektu ili statusu, te razvrstavajte po nazivu, vrijednosti ili datumu. Statističke kartice na vrhu ostaju usklađene s filtrom koji ste primijenili.\n\nŠto ovdje teče:\n\n- Ukupni iznos svake procjene gradi se od jediničnih cijena koje povučete iz **Baze troškova** i količina koje donesete iz **Iskaza mjera**, **Količina** ili **BIM-a**.\n- Gotova procjena hrani **Validaciju**, proračun u **Financijama** te natječajne pakete u **Natječajima** i **Upravljanju ponudama**.\n\n**Kako najbolje iskoristiti:** Koristite **Dupliciraj** da izdvojite inačicu za analizu prije nego što promijenite cijene, zatim **Usporedi** da ih postavite jednu uz drugu. Usporedba oduzima ukupne iznose samo kad obje procjene dijele valutu, pa se posao u EUR-u nikad ne miješa s onim u USD-u. Razvrstajte po vrijednosti da brzo nađete svoje najveće procjene.",

@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Hög säkerhet",
+    "confidence_badge.medium": "Medelhög säkerhet",
+    "confidence_badge.low": "Låg säkerhet",
+    "confidence_badge.score": "{{pct}} %",
+    "suggestion.accept": "Acceptera",
+    "suggestion.edit": "Redigera",
+    "suggestion.reject": "Avvisa",
+    "suggestion.learn_more": "Läs mer",
+    "error_explain.retry": "Försök igen",
+    "error_explain.contact_support": "Kontakta support",
+    "glossary.example_prefix": "Exempel:",
     "boq.intro_title": "Varje post prissatt och summerad",
     "boq.intro_body": "Lista projektets poster, mängder och à-priser och se dem rulla upp till en löpande summa. Priserna kommer från kostnadsdatabasen och mängderna från BIM- eller PDF-mängdavtagning, och den färdiga kalkylen matar validering, budgeten och anbudspaketen.",
     "boq.intro_more": "Den här sidan är din hylla med kalkyler över varje projekt. Använd **Ny kalkyl** för att starta en, eller öppna ett befintligt kort för att arbeta i rutnätet. Varje rad visar projektet, antalet poster, status (utkast, under granskning, slutlig) och slutsumman i projektets egen valuta. Sök efter namn, filtrera efter projekt eller status, och sortera efter namn, värde eller datum. Statistikkorten längst upp förblir i synk med vilket filter du än tillämpat.\\n\\nVad som flödar hit:\\n\\n- Varje kalkyls slutsumma byggs från de à-priser du hämtar från **Kostnadsdatabasen** och de mängder du tar med från **Mängdavtagning**, **Mängder** eller **BIM**.\\n- En färdig kalkyl matar **Validering**, **Ekonomi**-budgeten och anbudspaketen i **Anbud** och **Anbudshantering**.\\n\\n**Få ut mesta möjliga av den:** Använd **Duplicera** för att spinna av en vad-om-version innan du ändrar à-priser, använd sedan **Jämför** för att ställa de två sida vid sida. Jämförelsen subtraherar bara totaler när båda kalkylerna delar valuta, så ett EUR-jobb blandas aldrig med ett USD. Sortera efter värde för att snabbt hitta dina största kalkyler.",

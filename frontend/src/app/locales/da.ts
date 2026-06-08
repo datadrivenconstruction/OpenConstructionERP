@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Høj sikkerhed",
+    "confidence_badge.medium": "Middel sikkerhed",
+    "confidence_badge.low": "Lav sikkerhed",
+    "confidence_badge.score": "{{pct}} %",
+    "suggestion.accept": "Accepter",
+    "suggestion.edit": "Rediger",
+    "suggestion.reject": "Afvis",
+    "suggestion.learn_more": "Læs mere",
+    "error_explain.retry": "Prøv igen",
+    "error_explain.contact_support": "Kontakt support",
+    "glossary.example_prefix": "Eksempel:",
     "boq.intro_title": "Hver post prissat og lagt sammen",
     "boq.intro_body": "Oplist projektets poster, mængder og enhedspriser, og se dem rulle op til en løbende sum. Priserne kommer fra omkostningsdatabasen og mængderne fra BIM- eller PDF-opmåling, og det færdige tilbud føder validering, budgettet og udbudspakkerne.",
     "boq.intro_more": "Denne side er din hylde af estimater på tværs af hvert projekt. Brug **Nyt estimat** for at starte et, eller åbn et eksisterende kort for at arbejde i gitteret. Hver række viser projektet, positionsantal, status (udkast, under gennemgang, endelig) og den samlede sum i det projekts egen valuta. Søg efter navn, filtrér efter projekt eller status, og sortér efter navn, værdi eller dato. Stat-kortene øverst forbliver synkroniseret med det filter, du har anvendt.\n\nHvad flyder her:\n\n- Hvert estimats samlede sum er bygget af de enhedspriser, du trækker fra **Omkostningsdatabasen** og de mængder, du bringer fra **Opmåling**, **Mængder** eller **BIM**.\n- Et færdigt estimat fodrer **Validering**, **Finans**-budgettet og udbudspakker i **Udbud** og **Tilbudsstyring**.\n\n**Få mest muligt ud af det:** Brug **Dublér** for at udskille en hvad-hvis-version, før du ændrer takster, brug derefter **Sammenlign** for at sætte de to side om side. Sammenligning trækker kun totaler fra, når begge estimater deler en valuta, så et EUR-job blandes aldrig med et USD. Sortér efter værdi for at finde dine største estimater hurtigt.",

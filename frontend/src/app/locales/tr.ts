@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Yüksek güven",
+    "confidence_badge.medium": "Orta güven",
+    "confidence_badge.low": "Düşük güven",
+    "confidence_badge.score": "%{{pct}}",
+    "suggestion.accept": "Kabul et",
+    "suggestion.edit": "Düzenle",
+    "suggestion.reject": "Reddet",
+    "suggestion.learn_more": "Daha fazla bilgi",
+    "error_explain.retry": "Yeniden dene",
+    "error_explain.contact_support": "Destek ile iletişime geçin",
+    "glossary.example_prefix": "Örnek:",
     "boq.intro_title": "Her iş kalemi fiyatlandırılmış ve toplanmış",
     "boq.intro_body": "Bir projenin iş kalemlerini, miktarlarını ve birim fiyatlarını listeleyin ve bunların canlı bir toplama dönüştüğünü görün. Fiyatlar maliyet veritabanından, miktarlar BIM veya PDF metrajından gelir; tamamlanan keşif doğrulamayı, bütçeyi ve ihale paketlerini besler.",
     "boq.intro_more": "Bu sayfa, her projedeki tahminlerinizin rafıdır. Bir tane başlatmak için **Yeni Tahmin**'i kullanın veya ızgarada çalışmak için mevcut bir kartı açın. Her satır projeyi, pozisyon sayısını, durumu (taslak, incelemede, kesin) ve o projenin kendi para biriminde genel toplamı gösterir. Ada göre arayın, projeye veya duruma göre filtreleyin ve ada, değere veya tarihe göre sıralayın. Üstteki istatistik kartları, uyguladığınız filtreyle eşitlenir.\n\nBuraya ne akar:\n\n- Her tahminin genel toplamı, **Maliyet Veritabanı**'ndan çektiğiniz birim fiyatlardan ve **Metraj**, **Miktarlar** veya **BIM**'den getirdiğiniz miktarlardan oluşturulur.\n- Tamamlanmış bir tahmin, **Doğrulama**'yı, **Finans** bütçesini ve **İhale** ile **Teklif Yönetimi**'ndeki ihale paketlerini besler.\n\n**En iyi şekilde yararlanmak için:** Fiyatları değiştirmeden önce bir senaryo sürümü çıkarmak için **Çoğalt**'ı kullanın, ardından ikisini yan yana koymak için **Karşılaştır**'ı kullanın. Karşılaştırma yalnızca her iki tahmin de bir para birimini paylaştığında toplamları çıkarır, böylece bir EUR iş asla bir USD ile harmanlanmaz. En büyük tahminlerinizi hızlıca bulmak için değere göre sıralayın.",

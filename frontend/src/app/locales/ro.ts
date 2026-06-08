@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Încredere ridicată",
+    "confidence_badge.medium": "Încredere medie",
+    "confidence_badge.low": "Încredere scăzută",
+    "confidence_badge.score": "{{pct}}%",
+    "suggestion.accept": "Acceptați",
+    "suggestion.edit": "Editați",
+    "suggestion.reject": "Respingeți",
+    "suggestion.learn_more": "Aflați mai multe",
+    "error_explain.retry": "Reîncercați",
+    "error_explain.contact_support": "Contactați asistența",
+    "glossary.example_prefix": "Exemplu:",
     "boq.intro_title": "Fiecare articol de lucrări evaluat și totalizat",
     "boq.intro_body": "Enumerați articolele de lucrări, cantitățile și prețurile unitare ale unui proiect și urmăriți cum se adună într-un total viu. Prețurile vin din baza de costuri, iar cantitățile din antemăsurătoarea BIM sau PDF, iar devizul finalizat alimentează validarea, bugetul și pachetele de licitație.",
     "boq.intro_more": "Această pagină este raftul dvs. de estimări din fiecare proiect. Folosiți **Estimare nouă** pentru a începe una, sau deschideți un card existent pentru a lucra în grilă. Fiecare rând arată proiectul, numărul de poziții, starea (schiță, în revizuire, final) și totalul general în moneda proprie a proiectului. Căutați după nume, filtrați după proiect sau stare și sortați după nume, valoare sau dată. Cardurile de statistici din partea de sus rămân sincronizate cu orice filtru ați aplicat.\n\nCe curge aici:\n\n- Totalul general al fiecărei estimări este construit din prețurile unitare pe care le trageți din **Baza de costuri** și cantitățile pe care le aduceți din **Antemăsurătoare**, **Cantități** sau **BIM**.\n- O estimare finalizată alimentează **Validarea**, bugetul din **Finanțe** și pachetele de licitație din **Licitație** și **Gestionarea ofertelor**.\n\n**Pentru a profita la maximum:** Folosiți **Duplică** pentru a deriva o versiune what-if înainte de a schimba prețurile, apoi folosiți **Compară** pentru a le pune pe cele două una lângă alta. Comparația scade totalurile doar când ambele estimări împart o monedă, deci o lucrare în EUR nu este niciodată amestecată cu una în USD. Sortați după valoare pentru a găsi rapid cele mai mari estimări.",

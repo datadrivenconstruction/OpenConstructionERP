@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Confianza alta",
+    "confidence_badge.medium": "Confianza media",
+    "confidence_badge.low": "Confianza baja",
+    "confidence_badge.score": "{{pct}} %",
+    "suggestion.accept": "Aceptar",
+    "suggestion.edit": "Editar",
+    "suggestion.reject": "Rechazar",
+    "suggestion.learn_more": "Más información",
+    "error_explain.retry": "Reintentar",
+    "error_explain.contact_support": "Contactar con soporte",
+    "glossary.example_prefix": "Ejemplo:",
     "reporting.info_title": "Paneles de proyecto por rol",
     "reporting.info_body": "Paneles de KPI en vivo para un proyecto a la vez, organizados por rol. Para cifras que abarcan todos los proyectos use Analítica; para documentos PDF y Excel descargables use Informes.",
     "reporting.info_link_analytics": "Analítica entre proyectos",

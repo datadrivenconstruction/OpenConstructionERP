@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "高置信度",
+    "confidence_badge.medium": "中置信度",
+    "confidence_badge.low": "低置信度",
+    "confidence_badge.score": "{{pct}}%",
+    "suggestion.accept": "接受",
+    "suggestion.edit": "编辑",
+    "suggestion.reject": "拒绝",
+    "suggestion.learn_more": "了解更多",
+    "error_explain.retry": "重试",
+    "error_explain.contact_support": "联系支持",
+    "glossary.example_prefix": "示例：",
     "boq.intro_title": "每个工作项均计价并汇总",
     "boq.intro_body": "列出项目的工作项、工程量和单价，看着它们实时汇总成总价。单价来自成本数据库，工程量来自 BIM 或 PDF 算量，完成的估价单再流入校验、预算和招标包。",
     "boq.intro_more": "本页是您跨每个项目的估价单架子。用 **新建估价单** 开始一份，或打开一张已有卡片在网格中工作。每行显示项目、清单项数、状态（草稿、评审中、最终）以及以该项目本币计的总价。按名称搜索，按项目或状态过滤，并按名称、金额或日期排序。顶部的统计卡片与您应用的任何过滤条件保持同步。\n\n各项流向：\n\n- 每份估价单的总价由您从 **成本数据库** 拉取的单价，以及您从 **算量**、**工程量** 或 **BIM** 带来的工程量构成。\n- 一份完成的估价单馈入 **校验**、**财务** 预算，以及 **招标** 和 **投标管理** 中的招标包。\n\n**用好它的窍门：** 在更改费率之前，用 **复制** 派生一个假设情景版本，然后用 **对比** 把两者并排摆放。仅当两份估价单共用一种货币时，对比才会相减总价，因此一个欧元项目绝不会与一个美元项目混算。按金额排序可快速找到您最大的估价单。",

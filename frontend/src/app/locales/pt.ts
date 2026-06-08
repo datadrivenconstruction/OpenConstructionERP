@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "Confiança alta",
+    "confidence_badge.medium": "Confiança média",
+    "confidence_badge.low": "Confiança baixa",
+    "confidence_badge.score": "{{pct}}%",
+    "suggestion.accept": "Aceitar",
+    "suggestion.edit": "Editar",
+    "suggestion.reject": "Rejeitar",
+    "suggestion.learn_more": "Saber mais",
+    "error_explain.retry": "Tentar novamente",
+    "error_explain.contact_support": "Contactar o suporte",
+    "glossary.example_prefix": "Exemplo:",
     "reporting.info_title": "Painéis de projeto por função",
     "reporting.info_body": "Painéis de KPI em tempo real para um projeto de cada vez, organizados por função. Para números que abrangem todos os projetos use a Analítica; para documentos PDF e Excel para download use os Relatórios.",
     "reporting.info_link_analytics": "Analítica entre projetos",
