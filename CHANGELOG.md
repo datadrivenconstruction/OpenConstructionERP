@@ -5,6 +5,24 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.3.0] - 2026-06-08
+
+### Added
+
+- A schedule-quality validation pack with seven checks for project schedules: missing logic links, dangling activities, negative or excessive lag, hard date constraints that fight the logic, and out-of-sequence progress among them. Schedules now go through the same traffic-light validation as a BOQ or a BIM import, so a weak schedule is flagged instead of trusted.
+- Self-explaining modules. A shared set of in-app guidance pieces now runs across the platform: confidence badges, suggestion chips, plain-language error states, an inline glossary tooltip and consistent grid headers. The first wave of construction glossary terms landed in all languages so the same word means the same thing on every screen.
+
+### Changed
+
+- Interface text, documentation and code comments were swept to neutral, format-level names (IFC, DWG, RVT, GAEB, NRM) rather than specific product names, and a repository check keeps new contributions on the same footing.
+
+### Fixed
+
+- Grouping and filtering on uploaded IFC models in the BIM viewer line up with the geometry again. Each shape is matched to its element by a stable id, so picking a storey, a category or an entity type isolates exactly those elements and the view stays on that selection instead of snapping back to the whole model a moment later. Verified end to end on a real IFC model: a wall, member or storey filter keeps just that subset on screen and holds.
+- The BIM upload picker accepts RVT, IFC and DWG only now, and a dropped DWG is routed straight to the Drawings takeoff where it belongs instead of failing as an unsupported 3D model.
+- Appending a maintenance entry to an asset now verifies you have access to that asset's project first, closing a gap where that one endpoint skipped the per-project access check.
+- More interface text is translated: the converter install progress labels and a validation page introduction that were still showing in English.
+
 ## [7.2.0] - 2026-06-08
 
 ### Fixed
