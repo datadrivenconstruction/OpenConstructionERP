@@ -8,66 +8,66 @@
         "rank": 1,
         "feature": "Clash and validation lifecycle events into notifications and downstream work items",
         "section": "Model Coordination",
-        "rationale": "The clash module publishes zero events (confirmed: grep for event_bus in backend/app/modules/clash returns nothing) and notifications/events.py subscribes to none of clash, document, or validation (confirmed _SUBSCRIPTIONS list, events.py:576-593). A high-severity clash or failed validation is silent until someone manually opens the page. Autodesk Construction IQ and ACC tie clash resolution into RFI/issue workflows; this is the cheapest high-value parity move because the event bus and the subscriber pattern already exist (bim_hub/service.py uses publish_detached).",
+        "rationale": "The clash module publishes zero events (confirmed: grep for event_bus in backend/app/modules/clash returns nothing) and notifications/events.py subscribes to none of clash, document, or validation (confirmed _SUBSCRIPTIONS list, events.py:576-593). A high-severity clash or failed validation is silent until someone manually opens the page. The leading construction management platforms tie clash resolution into RFI/issue workflows; this is the cheapest high-value parity move because the event bus and the subscriber pattern already exist (bim_hub/service.py uses publish_detached).",
         "effort": "M",
         "impact": "high",
         "competitors": [
-          "Autodesk ACC",
-          "Procore",
-          "Aconex Model Coordination"
+          "construction management platform",
+          "field-and-financials construction platform",
+          "construction CDE platform model coordination"
         ]
       },
       {
         "rank": 2,
         "feature": "Integrated mobile field time and attendance with payroll-to-job-cost pipeline",
         "section": "Field Operations",
-        "rationale": "Three modules already count workforce in parallel (daily_diary labour_count, fieldreports.workforce, resources.assignment) with no single source of truth, and there is no labour-hours capture that flows to cost. Labour is 30-50 percent of construction cost and without actual hours per task, EVM and cost-to-complete are guesswork. Buildertrend, Trimble Vista/Spectrum, Procore all treat this as table stakes.",
+        "rationale": "Three modules already count workforce in parallel (daily_diary labour_count, fieldreports.workforce, resources.assignment) with no single source of truth, and there is no labour-hours capture that flows to cost. Labour is 30-50 percent of construction cost and without actual hours per task, EVM and cost-to-complete are guesswork. SMB construction management platforms, construction accounting suites and field-and-financials construction platforms all treat this as table stakes.",
         "effort": "XL",
         "impact": "high",
         "competitors": [
-          "Buildertrend",
-          "Trimble Vista",
-          "Procore",
-          "Nevaris Baulohn"
+          "SMB construction management platform",
+          "construction accounting suite",
+          "field-and-financials construction platform",
+          "integrated 5D estimating suite payroll"
         ]
       },
       {
         "rank": 3,
         "feature": "Real-time, event-driven KPI refresh and live EVM with actuals integration",
         "section": "Planning",
-        "rationale": "full_evm, eac and costmodel modules exist (confirmed) but EVM is snapshot-based and reporting KPIs only recompute on a 12-hour cron (auto_recalculate_kpis), so a closed risk or new finance transaction does not move the dashboard for hours. Finance, schedule, risk, safety already publish events; wiring them to invalidate/refresh KPIs converts day-old aggregates into live project health. Autodesk Cost Management and Primavera P6 2026 ship continuous EVM with forecast curves.",
+        "rationale": "full_evm, eac and costmodel modules exist (confirmed) but EVM is snapshot-based and reporting KPIs only recompute on a 12-hour cron (auto_recalculate_kpis), so a closed risk or new finance transaction does not move the dashboard for hours. Finance, schedule, risk, safety already publish events; wiring them to invalidate/refresh KPIs converts day-old aggregates into live project health. Construction management platform cost management and enterprise CPM scheduling ship continuous EVM with forecast curves.",
         "effort": "L",
         "impact": "high",
         "competitors": [
-          "Autodesk Build Cost Management",
-          "Primavera P6",
-          "Procore Analytics"
+          "construction management platform cost management",
+          "enterprise CPM scheduling",
+          "field-and-financials construction platform analytics"
         ]
       },
       {
         "rank": 4,
-        "feature": "Bi-directional ERP/accounting connectors (NetSuite, Sage, QuickBooks, DATEV, Oracle Fusion)",
+        "feature": "Bi-directional ERP/accounting connectors (mature cloud ERPs, mid-market accounting suites, SMB bookkeeping tools, regional accounting standards, enterprise ERP)",
         "section": "Finance & Procurement",
-        "rationale": "OCERP has a finance module and webhooks but no turnkey bi-directional accounting sync, so contracts to change orders to invoices to GL is manual re-keying. Accounting teams spend 10-15 hours per month reconciling. Every enterprise competitor ships this (Agave for Autodesk, Procore ERP Connector, Nevaris on D365/DATEV). High enterprise-deal value, but a real connector per ERP is heavy.",
+        "rationale": "OCERP has a finance module and webhooks but no turnkey bi-directional accounting sync, so contracts to change orders to invoices to GL is manual re-keying. Accounting teams spend 10-15 hours per month reconciling. Every enterprise competitor ships this (integration middleware for the construction management platform, the field-and-financials construction platform ERP connector, the integrated 5D estimating suite on enterprise ERPs). High enterprise-deal value, but a real connector per ERP is heavy.",
         "effort": "XL",
         "impact": "high",
         "competitors": [
-          "Procore ERP Connector",
-          "Autodesk Agave",
-          "Nevaris Finance"
+          "field-and-financials construction platform ERP connector",
+          "construction integration middleware",
+          "integrated 5D estimating suite finance"
         ]
       },
       {
         "rank": 5,
         "feature": "Cross-project portfolio resource leveling and capacity planning",
         "section": "Planning",
-        "rationale": "Resources are per-project only; there is no global resource pool or cross-project conflict detection, so a contractor running 5+ sites juggles shared crews and equipment by hand. Primavera P6 EPS and Trimble Spectrum are built around this and it expands the addressable market to mid-to-large GCs. Builds on the existing resources model rather than greenfield.",
+        "rationale": "Resources are per-project only; there is no global resource pool or cross-project conflict detection, so a contractor running 5+ sites juggles shared crews and equipment by hand. Enterprise CPM scheduling EPS and construction accounting suites are built around this and it expands the addressable market to mid-to-large GCs. Builds on the existing resources model rather than greenfield.",
         "effort": "L",
         "impact": "high",
         "competitors": [
-          "Primavera P6",
-          "Trimble Spectrum",
-          "Asta Powerproject"
+          "enterprise CPM scheduling",
+          "construction accounting suite",
+          "desktop CPM planning tool"
         ]
       },
       {
@@ -78,21 +78,21 @@
         "effort": "L",
         "impact": "high",
         "competitors": [
-          "Primavera P6",
-          "Asta Powerproject"
+          "enterprise CPM scheduling",
+          "desktop CPM planning tool"
         ]
       },
       {
         "rank": 7,
         "feature": "AI photo intelligence: jobsite image analysis, auto-tagging and georeferencing",
         "section": "Field Operations",
-        "rationale": "Photos are the highest-volume unstructured data on site (thousands per project). The /photos route exists but does no AI extraction, batch upload, EXIF/GPS capture or defect classification. Procore Photo Intelligence and Buildertrend auto-organize and analyze; this saves 15-20 hours per week and feeds safety and quality. Distinct, well-scoped CV pipeline that aligns with the existing cv-pipeline service plan.",
+        "rationale": "Photos are the highest-volume unstructured data on site (thousands per project). The /photos route exists but does no AI extraction, batch upload, EXIF/GPS capture or defect classification. The field-and-financials construction platform photo intelligence and SMB construction management platforms auto-organize and analyze; this saves 15-20 hours per week and feeds safety and quality. Distinct, well-scoped CV pipeline that aligns with the existing cv-pipeline service plan.",
         "effort": "L",
         "impact": "high",
         "competitors": [
-          "Procore Photo Intelligence",
-          "Buildertrend",
-          "Fieldwire"
+          "field-and-financials construction platform photo intelligence",
+          "SMB construction management platform",
+          "field task-management app"
         ]
       },
       {
@@ -103,57 +103,57 @@
         "effort": "M",
         "impact": "high",
         "competitors": [
-          "Autodesk Build",
-          "RIB iTWO"
+          "construction management platform",
+          "5D design-to-delivery suite"
         ]
       },
       {
         "rank": 9,
         "feature": "Lien waiver automation and invoice-approval enforcement",
         "section": "Finance & Procurement",
-        "rationale": "No lien waiver tracking anywhere; in US mechanic-lien states paying an invoice without a waiver exposes the GC to supplier liens. Approval routes exist but do not gate payment on waiver receipt. Procore, Buildertrend and GCPay all enforce this. Self-contained finance/procurement workflow with clear legal value.",
+        "rationale": "No lien waiver tracking anywhere; in US mechanic-lien states paying an invoice without a waiver exposes the GC to supplier liens. Approval routes exist but do not gate payment on waiver receipt. The field-and-financials construction platform, SMB construction management platforms and subcontractor payment platforms all enforce this. Self-contained finance/procurement workflow with clear legal value.",
         "effort": "M",
         "impact": "high",
         "competitors": [
-          "Procore",
-          "Buildertrend",
-          "Autodesk GCPay"
+          "field-and-financials construction platform",
+          "SMB construction management platform",
+          "subcontractor payment platform"
         ]
       },
       {
         "rank": 10,
         "feature": "Commitment management: PO and subcontract approval workflows with live budget sync",
         "section": "Commercial",
-        "rationale": "Procurement has PO/GR but no PO-approval workflow or commitment-level budget tracking; commitments are the layer that actually drives project budget and prevents overruns. Procore Commitments and Autodesk Cost Management treat this as core. Builds on existing procurement and approval_routes.",
+        "rationale": "Procurement has PO/GR but no PO-approval workflow or commitment-level budget tracking; commitments are the layer that actually drives project budget and prevents overruns. The field-and-financials construction platform commitments and construction management platform cost management treat this as core. Builds on existing procurement and approval_routes.",
         "effort": "L",
         "impact": "high",
         "competitors": [
-          "Procore",
-          "Autodesk Cost Management"
+          "field-and-financials construction platform",
+          "construction management platform cost management"
         ]
       },
       {
         "rank": 11,
         "feature": "Change Order AI auto-draft from RFI, daily log and scope plus impact simulator",
         "section": "Commercial",
-        "rationale": "Change orders are the biggest profit killer; OCERP has the changeorders module but no AI draft and no what-if cost/schedule impact before signing. Procore and Trimble compress CO cycle from 5-15 days to 1-2. Variations cost impact already exists to seed the estimate, so this leverages prior work.",
+        "rationale": "Change orders are the biggest profit killer; OCERP has the changeorders module but no AI draft and no what-if cost/schedule impact before signing. The field-and-financials construction platform and other project management platforms compress CO cycle from 5-15 days to 1-2. Variations cost impact already exists to seed the estimate, so this leverages prior work.",
         "effort": "L",
         "impact": "high",
         "competitors": [
-          "Procore Change Order AI",
-          "Trimble ProjectSight"
+          "field-and-financials construction platform change order AI",
+          "project management platform"
         ]
       },
       {
         "rank": 12,
         "feature": "Inspection and Test Plan (ITP) workflow with hold points and quality gates",
         "section": "Quality",
-        "rationale": "QMS has ITP fragments but there is no structured ITP with hold points, evidence capture and audit-ready sign-off connected to source specs, which design-build and EPC contractors require. Aconex Test Plans (2026) is built around this. Medium effort that closes a compliance gap for major contractors.",
+        "rationale": "QMS has ITP fragments but there is no structured ITP with hold points, evidence capture and audit-ready sign-off connected to source specs, which design-build and EPC contractors require. The construction CDE platform test plans (2026) is built around this. Medium effort that closes a compliance gap for major contractors.",
         "effort": "M",
         "impact": "high",
         "competitors": [
-          "Aconex",
-          "RIB iTWO"
+          "construction CDE platform",
+          "5D design-to-delivery suite"
         ]
       },
       {
@@ -164,94 +164,94 @@
         "effort": "S",
         "impact": "medium",
         "competitors": [
-          "Procore",
-          "Oracle Aconex Advisor for Safety"
+          "field-and-financials construction platform",
+          "construction CDE platform safety advisor"
         ]
       },
       {
         "rank": 14,
         "feature": "Native offline-first mobile app with sync-on-reconnect",
         "section": "Field Operations",
-        "rationale": "The product is web-first; the /field shell is a confirmed stub (FieldShellPage.tsx:65,79 renders 'Project pending' and 'coming in pilot'). Sites have unreliable connectivity and crews expect native UX. Fieldwire, Buildertrend and Procore are mobile-first. Large effort but it is the gateway for most other field features (photos, time, diary, inspections).",
+        "rationale": "The product is web-first; the /field shell is a confirmed stub (FieldShellPage.tsx:65,79 renders 'Project pending' and 'coming in pilot'). Sites have unreliable connectivity and crews expect native UX. Field task-management apps, SMB construction management platforms and the field-and-financials construction platform are mobile-first. Large effort but it is the gateway for most other field features (photos, time, diary, inspections).",
         "effort": "XL",
         "impact": "high",
         "competitors": [
-          "Fieldwire",
-          "Buildertrend",
-          "Procore"
+          "field task-management app",
+          "SMB construction management platform",
+          "field-and-financials construction platform"
         ]
       },
       {
         "rank": 15,
         "feature": "Automated client/owner progress reporting with narrative summarization",
         "section": "Communication",
-        "rationale": "PMs spend 8-15 hours per week on owner updates; OCERP has a portal but no auto-generated progress report from photos, task completion and budget-vs-actual. Buildertrend claims an 85 percent reduction in reporting time. Medium effort that directly improves client retention and reduces PM overhead.",
+        "rationale": "PMs spend 8-15 hours per week on owner updates; OCERP has a portal but no auto-generated progress report from photos, task completion and budget-vs-actual. SMB construction management platforms claim an 85 percent reduction in reporting time. Medium effort that directly improves client retention and reduces PM overhead.",
         "effort": "M",
         "impact": "high",
         "competitors": [
-          "Buildertrend",
-          "Procore"
+          "SMB construction management platform",
+          "field-and-financials construction platform"
         ]
       },
       {
         "rank": 16,
-        "feature": "Semantic AI assistant over project documents (Procore Assist equivalent)",
+        "feature": "Semantic AI assistant over project documents (construction-platform assistant equivalent)",
         "section": "Analytics & Reports",
         "rationale": "erp_chat is advisory only and global search is keyword based; there is no cross-module semantic retrieval that answers 'show me all NCRs on Electrical from June' across RFIs, submittals, logs and PDFs. The vector/Qdrant stack is already in the architecture. Reduces document-hunt time from hours to seconds and lifts engagement.",
         "effort": "L",
         "impact": "high",
         "competitors": [
-          "Procore Assist",
-          "Datagrid"
+          "field-and-financials construction platform assistant",
+          "construction AI document assistant"
         ]
       },
       {
         "rank": 17,
         "feature": "Auto-revision comparison for drawing/BIM changes with cost impact",
         "section": "Takeoff",
-        "rationale": "Takeoff supports PDF/DWG but cannot diff two drawing revisions and quantify the delta. Design change is the number-one source of overruns; RIB CostX highlights added/removed geometry and rolls cost impact. High value for estimating accuracy, distinct algorithmic work.",
+        "rationale": "Takeoff supports PDF/DWG but cannot diff two drawing revisions and quantify the delta. Design change is the number-one source of overruns; model-based takeoff tools highlight added/removed geometry and roll cost impact. High value for estimating accuracy, distinct algorithmic work.",
         "effort": "L",
         "impact": "high",
         "competitors": [
-          "RIB CostX",
-          "Autodesk Forma Takeoff"
+          "model-based takeoff tool",
+          "model-based takeoff platform"
         ]
       },
       {
         "rank": 18,
         "feature": "ML-based quantity extraction and symbol recognition from drawings",
         "section": "Takeoff",
-        "rationale": "Match Elements is BETA but there is no production ML symbol/shape recognition that auto-populates BOQ from PDFs or models. Takeoff is 30 percent of the bid cycle; Forma Takeoff and Nemetschek Steel Genie cut it by half. Heavy CV/ML investment but central to the AI-first positioning.",
+        "rationale": "Match Elements is BETA but there is no production ML symbol/shape recognition that auto-populates BOQ from PDFs or models. Takeoff is 30 percent of the bid cycle; model-based takeoff platforms and AI steel takeoff tools cut it by half. Heavy CV/ML investment but central to the AI-first positioning.",
         "effort": "XL",
         "impact": "high",
         "competitors": [
-          "Autodesk Forma Takeoff",
-          "Nemetschek Steel Genie"
+          "model-based takeoff platform",
+          "AI steel takeoff tool"
         ]
       },
       {
         "rank": 19,
         "feature": "Predictive schedule and cost risk analytics with early-warning alerts",
         "section": "Planning",
-        "rationale": "project_intelligence and risk exist but there is no forward-looking ML that flags slippage or overrun weeks ahead. Primavera P6 2026 Predictive Performance Analytics and nPlan are built on this. Differentiates against Procore/Autodesk and buys mitigation time, but needs historical training data to be credible.",
+        "rationale": "project_intelligence and risk exist but there is no forward-looking ML that flags slippage or overrun weeks ahead. Enterprise CPM scheduling predictive analytics and dedicated predictive schedule-risk AI are built on this. Differentiates against the leading construction management platforms and buys mitigation time, but needs historical training data to be credible.",
         "effort": "L",
         "impact": "high",
         "competitors": [
-          "Primavera P6 2026",
-          "nPlan",
-          "Procore Helix"
+          "enterprise CPM scheduling",
+          "predictive schedule-risk AI",
+          "field-and-financials construction platform predictive AI"
         ]
       },
       {
         "rank": 20,
         "feature": "Vendor and subcontractor performance scorecards with prequalification",
         "section": "Commercial",
-        "rationale": "subcontractors and supplier_catalogs exist and subcontractors already bumps a rating from ncr/safety/schedule events, but there is no aggregated scorecard, no prequalification gating, and the rating change publishes no event so Bid Management cannot filter by rating. Trimble Spectrum and TradeTapp ship this. Builds directly on existing rating plumbing.",
+        "rationale": "subcontractors and supplier_catalogs exist and subcontractors already bumps a rating from ncr/safety/schedule events, but there is no aggregated scorecard, no prequalification gating, and the rating change publishes no event so Bid Management cannot filter by rating. Construction accounting suites and subcontractor prequalification platforms ship this. Builds directly on existing rating plumbing.",
         "effort": "M",
         "impact": "high",
         "competitors": [
-          "Trimble Spectrum",
-          "Autodesk TradeTapp"
+          "construction accounting suite",
+          "subcontractor prequalification platform"
         ]
       },
       {
@@ -262,32 +262,32 @@
         "effort": "M",
         "impact": "medium",
         "competitors": [
-          "Autodesk Docs/Forma",
-          "Trimble Connect",
-          "Aconex"
+          "construction management platform docs",
+          "BIM collaboration platform",
+          "construction CDE platform"
         ]
       },
       {
         "rank": 22,
         "feature": "Subcontractor portal with mobile invoice submission and payment tracking",
         "section": "Commercial",
-        "rationale": "The /portal route exists but lacks sub-facing invoice submission, payment status and contract terms. Invoice cycles run 20-40 days; a self-serve portal cuts re-submission loops and payment time. Buildertrend and Procore ship this. Builds on the existing portal shell.",
+        "rationale": "The /portal route exists but lacks sub-facing invoice submission, payment status and contract terms. Invoice cycles run 20-40 days; a self-serve portal cuts re-submission loops and payment time. SMB construction management platforms and the field-and-financials construction platform ship this. Builds on the existing portal shell.",
         "effort": "L",
         "impact": "medium",
         "competitors": [
-          "Buildertrend",
-          "Procore"
+          "SMB construction management platform",
+          "field-and-financials construction platform"
         ]
       },
       {
         "rank": 23,
         "feature": "Persistent clash detection profiles and multi-property clash grouping",
         "section": "Model Coordination",
-        "rationale": "Clash detection is per-run with no saved rule sets and no multi-dimension grouping (discipline + system + level), so weekly re-runs require re-tuning and a 500-item report is unmanageable. Autodesk Clash Checks and grouping make recurring coordination cheap. Low effort relative to value since the detection engine already exists.",
+        "rationale": "Clash detection is per-run with no saved rule sets and no multi-dimension grouping (discipline + system + level), so weekly re-runs require re-tuning and a 500-item report is unmanageable. BIM coordination platform clash checks and grouping make recurring coordination cheap. Low effort relative to value since the detection engine already exists.",
         "effort": "M",
         "impact": "medium",
         "competitors": [
-          "Autodesk BIM Collaborate Pro"
+          "BIM coordination platform"
         ]
       },
       {
@@ -298,20 +298,20 @@
         "effort": "S",
         "impact": "medium",
         "competitors": [
-          "Primavera P6",
-          "Procore"
+          "enterprise CPM scheduling",
+          "field-and-financials construction platform"
         ]
       },
       {
         "rank": 25,
         "feature": "Digital handover and closeout package assembly",
         "section": "Documents",
-        "rationale": "There is document management but no closeout workflow that gathers as-builts, O&M manuals, warranties and asset status into a validated handover package. Average closeout takes 284 days and loses 30 percent of data; Autodesk Build Handover (2025) and OmTrak target this. Medium effort, strong owner-facing value, leverages the documents and CDE modules.",
+        "rationale": "There is document management but no closeout workflow that gathers as-builts, O&M manuals, warranties and asset status into a validated handover package. Average closeout takes 284 days and loses 30 percent of data; the construction management platform handover (2025) and dedicated handover and O&M manuals platforms target this. Medium effort, strong owner-facing value, leverages the documents and CDE modules.",
         "effort": "L",
         "impact": "medium",
         "competitors": [
-          "Autodesk Build Handover",
-          "OmTrak"
+          "construction management platform handover",
+          "handover and O&M manuals platform"
         ]
       },
       {
@@ -322,57 +322,57 @@
         "effort": "M",
         "impact": "medium",
         "competitors": [
-          "Trimble Spectrum",
-          "Viewpoint",
-          "CMiC"
+          "construction accounting suite",
+          "construction ERP platform",
+          "construction ERP suite"
         ]
       },
       {
         "rank": 27,
         "feature": "Compliance rule engine enforced at workflow level with pre-built rule packs",
         "section": "Quality",
-        "rationale": "validation rules and a compliance DSL exist but are static and not enforced at the workflow boundary (you can still create an SCO on a draft contract), and there are no jurisdiction rule packs (ISO 19650, OSHA, IBC). Autodesk condition-based rules (2025+) block non-compliant data at entry. Builds on the existing DSL; mostly authoring and a workflow gate.",
+        "rationale": "validation rules and a compliance DSL exist but are static and not enforced at the workflow boundary (you can still create an SCO on a draft contract), and there are no jurisdiction rule packs (ISO 19650, OSHA, IBC). Construction management platform condition-based rules (2025+) block non-compliant data at entry. Builds on the existing DSL; mostly authoring and a workflow gate.",
         "effort": "M",
         "impact": "medium",
         "competitors": [
-          "Autodesk Cost Management",
-          "Aconex"
+          "construction management platform cost management",
+          "construction CDE platform"
         ]
       },
       {
         "rank": 28,
         "feature": "Model-based progress visualization (asset status overlay in 3D viewer)",
         "section": "Field Operations",
-        "rationale": "BIM viewer and progress tracking exist separately but are not fused; there is no color-coded completion overlay on the model linking elements to tasks, invoices and punch items. Autodesk Build (Nov 2025) ships this and Sablono pioneered QR-based 4D progress. Medium effort tying two existing capabilities together.",
+        "rationale": "BIM viewer and progress tracking exist separately but are not fused; there is no color-coded completion overlay on the model linking elements to tasks, invoices and punch items. The construction management platform (Nov 2025) ships this and 4D progress-tracking platforms pioneered QR-based 4D progress. Medium effort tying two existing capabilities together.",
         "effort": "L",
         "impact": "medium",
         "competitors": [
-          "Autodesk Build",
-          "Sablono"
+          "construction management platform",
+          "4D progress-tracking platform"
         ]
       },
       {
         "rank": 29,
         "feature": "No-code agent builder for workflow automation",
         "section": "Communication",
-        "rationale": "Beyond approval_routes there is no low-code automation; end users cannot define agents that draft an RFI from a log or compile a weekly status. Procore launched 18+ agents plus Agent Builder in 2025. High ceiling but it is a platform-grade build that should follow the event-coordination groundwork.",
+        "rationale": "Beyond approval_routes there is no low-code automation; end users cannot define agents that draft an RFI from a log or compile a weekly status. The field-and-financials construction platform launched 18+ agents plus an agent builder in 2025. High ceiling but it is a platform-grade build that should follow the event-coordination groundwork.",
         "effort": "XL",
         "impact": "medium",
         "competitors": [
-          "Procore Agent Builder",
-          "Oracle Unifier"
+          "field-and-financials construction platform agent builder",
+          "capital program cost-controls suite"
         ]
       },
       {
         "rank": 30,
         "feature": "Time-location (Takt / line-of-balance) scheduling for repetitive work",
         "section": "Planning",
-        "rationale": "The schedule module is Gantt-only; heavy civil and repetitive vertical work (floors, units, roads) benefit from takt and line-of-balance views that smooth crew flow. RIB iTWO and Asta support both. Lower priority than the planning correctness and resource items above, but a recognized differentiator for civil contractors.",
+        "rationale": "The schedule module is Gantt-only; heavy civil and repetitive vertical work (floors, units, roads) benefit from takt and line-of-balance views that smooth crew flow. The 5D design-to-delivery suite and desktop CPM planning tools support both. Lower priority than the planning correctness and resource items above, but a recognized differentiator for civil contractors.",
         "effort": "M",
         "impact": "low",
         "competitors": [
-          "RIB iTWO",
-          "Asta Powerproject"
+          "5D design-to-delivery suite",
+          "desktop CPM planning tool"
         ]
       }
     ],
@@ -553,7 +553,7 @@
           "Change Order AI auto-draft plus cost/schedule impact simulator",
           "Vendor and subcontractor performance scorecards with prequalification gating",
           "Vendor blacklist and KYC-expiry bridges into bid_management and subcontractors",
-          "First bi-directional ERP/accounting connector (start with one: QuickBooks or DATEV)"
+          "First bi-directional ERP/accounting connector (start with one: a popular SMB bookkeeping tool or a regional accounting standard)"
         ]
       },
       {

@@ -122,19 +122,19 @@
    "test": "1. Backend integration: (a) Create a PO in procurement with amount 100k → verify finance event fires → check ProjectBudget.committed += 100k → trigger bi_dashboards.kpi_recompute event → verify KPI invalidation watermark advances. (b) Record schedule progress on activity → verify schedule event fires → check if KPI snapshot includes updated schedule_progress_pct. (c) Create a risk → verify event fires → check KPI snapshot includes updated risk_score_avg. 2. Frontend: (a) Open dashboard (/projects/:id) → manually trigger PO issue from same browser in new tab → verify KPI card on dashboard auto-refreshes within 5s without user clicking refresh (WebSocket/SSE). (b) Open BI Dashboard → enable auto-refresh toggle → record field report progress → verify KPI cards update live. (c) Portfolio dashboard (/dashboard) → trigger multiple events (GR, contract signed, risk created) → verify all KPI badges update together, not stale. 3. Polling fallback: (a) Close WebSocket connection (simulate offline) → verify dashboard falls back to 60s polling without user noticing. (b) Re-establish connection → verify no duplicate updates."
   },
   {
-   "feature": "Bi-directional ERP/accounting connectors (NetSuite, Sage, QuickBooks, DATEV, Oracle)",
+   "feature": "Bi-directional ERP/accounting connectors (mature cloud ERP, mid-market accounting suite, SMB bookkeeping tool, regional accounting standard, enterprise ERP)",
    "status": "missing",
    "effort": "XL",
    "needs_migration": true,
-   "remaining": "Design and implement a complete bi-directional ERP/accounting connector abstraction: 1) Create connector abstract base class/protocol in backend/app/modules/finance/connectors/base.py defining sync interfaces; 2) Implement individual connectors for NetSuite, Sage, QuickBooks, DATEV, Oracle in separate modules; 3) Add AccountingConnectorConfig model to track enabled connectors, credentials, and sync schedules; 4) Implement bidirectional sync service (push invoices/payments to remote systems, pull GL/accounts data); 5) Add webhook/event subscription to trigger outbound syncs; 6) Create frontend pages for connector setup, credential management, and sync logs; 7) Add background job for scheduled syncs; 8) Implement field mapping UI between ERP invoice/payment fields and remote system requirements; 9) Add error handling and retry logic for failed syncs; 10) Create comprehensive test suite for mock connectors",
+   "remaining": "Design and implement a complete bi-directional ERP/accounting connector abstraction: 1) Create connector abstract base class/protocol in backend/app/modules/finance/connectors/base.py defining sync interfaces; 2) Implement individual connectors for a mature cloud ERP, a mid-market accounting suite, an SMB bookkeeping tool, a regional accounting standard, and an enterprise ERP in separate modules; 3) Add AccountingConnectorConfig model to track enabled connectors, credentials, and sync schedules; 4) Implement bidirectional sync service (push invoices/payments to remote systems, pull GL/accounts data); 5) Add webhook/event subscription to trigger outbound syncs; 6) Create frontend pages for connector setup, credential management, and sync logs; 7) Add background job for scheduled syncs; 8) Implement field mapping UI between ERP invoice/payment fields and remote system requirements; 9) Add error handling and retry logic for failed syncs; 10) Create comprehensive test suite for mock connectors",
    "files": [
     "backend/app/modules/finance/connectors/__init__.py",
     "backend/app/modules/finance/connectors/base.py",
-    "backend/app/modules/finance/connectors/netsuite.py",
-    "backend/app/modules/finance/connectors/quickbooks.py",
-    "backend/app/modules/finance/connectors/sage.py",
-    "backend/app/modules/finance/connectors/datev.py",
-    "backend/app/modules/finance/connectors/oracle.py",
+    "backend/app/modules/finance/connectors/cloud_erp.py",
+    "backend/app/modules/finance/connectors/smb_bookkeeping.py",
+    "backend/app/modules/finance/connectors/accounting_suite.py",
+    "backend/app/modules/finance/connectors/regional_standard.py",
+    "backend/app/modules/finance/connectors/enterprise_erp.py",
     "backend/app/modules/finance/models.py (add AccountingConnectorConfig, SyncLog, FieldMapping tables)",
     "backend/app/modules/finance/router.py (add connector CRUD endpoints)",
     "backend/app/modules/finance/service.py (add sync dispatcher)",
@@ -154,8 +154,8 @@
     "backend/app/modules/finance/events.py",
     "backend/app/core/job_runner.py"
    ],
-   "ui": "Route: /finance/connectors (new page under Finance module). Components: 1) Connector Gallery showing NetSuite, Sage, QuickBooks, DATEV, Oracle with setup status (not connected/connecting/connected); 2) Setup wizard per connector type capturing API credentials (OAuth or key-based per system); 3) Field Mapping UI to define how ERP invoice fields (invoice_number, amount_total, etc.) map to each remote system's required fields; 4) Sync Schedule panel (real-time on event, hourly, daily, weekly); 5) Sync Logs viewer showing last sync timestamp, success/failure status, error details; 6) Test Connection button; 7) Enable/Disable toggle for each connector. Make it clear which systems are one-way (push only) vs bidirectional. Show sync direction icons. Error states must display which field mapping is missing or which API call failed.",
-   "test": "Test route /finance/connectors: 1) Click \\\"Add Connector\\\", select NetSuite → verify wizard opens with OAuth flow fields; 2) Fill API credentials → click Test Connection → verify success/error message; 3) Define field mappings (invoice_number → ExtID, amount_total → LineItems[].Amount) → save; 4) Set sync to \\\"On Invoice Approved\\\" event → create test invoice, approve it → verify sync log shows delivery attempt; 5) Toggle connector off → create another invoice, approve → verify sync log has no new entry; 6) For pull sync: click \\\"Sync Now\\\" → verify it fetches GL accounts from remote system and logs them; 7) Verify sync logs page shows timeline of all attempts (success in green, failures in red with error detail); 8) Verify data reconciliation: open invoice in ERP, check its remote_system_id field is populated with the synced ID. Screenshots must show: connector gallery with status badges, completed field mapping, sync logs with timestamps, test connection success modal, error message for invalid credentials.\""
+   "ui": "Route: /finance/connectors (new page under Finance module). Components: 1) Connector Gallery showing a mature cloud ERP, a mid-market accounting suite, an SMB bookkeeping tool, a regional accounting standard and an enterprise ERP with setup status (not connected/connecting/connected); 2) Setup wizard per connector type capturing API credentials (OAuth or key-based per system); 3) Field Mapping UI to define how ERP invoice fields (invoice_number, amount_total, etc.) map to each remote system's required fields; 4) Sync Schedule panel (real-time on event, hourly, daily, weekly); 5) Sync Logs viewer showing last sync timestamp, success/failure status, error details; 6) Test Connection button; 7) Enable/Disable toggle for each connector. Make it clear which systems are one-way (push only) vs bidirectional. Show sync direction icons. Error states must display which field mapping is missing or which API call failed.",
+   "test": "Test route /finance/connectors: 1) Click \\\"Add Connector\\\", select the mature cloud ERP → verify wizard opens with OAuth flow fields; 2) Fill API credentials → click Test Connection → verify success/error message; 3) Define field mappings (invoice_number → ExtID, amount_total → LineItems[].Amount) → save; 4) Set sync to \\\"On Invoice Approved\\\" event → create test invoice, approve it → verify sync log shows delivery attempt; 5) Toggle connector off → create another invoice, approve → verify sync log has no new entry; 6) For pull sync: click \\\"Sync Now\\\" → verify it fetches GL accounts from remote system and logs them; 7) Verify sync logs page shows timeline of all attempts (success in green, failures in red with error detail); 8) Verify data reconciliation: open invoice in ERP, check its remote_system_id field is populated with the synced ID. Screenshots must show: connector gallery with status badges, completed field mapping, sync logs with timestamps, test connection success modal, error message for invalid credentials.\""
   },
   {
    "feature": "Cross-project portfolio resource leveling and capacity planning",
@@ -1068,18 +1068,18 @@
       "notes": "Deliberately ONE combined lane because ranks 6, 9, 20 all contend on procurement/service.py+events.py, subcontractors/service.py+models.py, finance/events.py, and ProcurementPage.tsx. Combining them avoids same-wave file collisions. Sequence internally: PO/contract approval+budget-sync (6) first (it moves the finance/events.py budget sync), then waiver gating (9), then scorecard/prequal persistence + gating (20). This lane is the SOLE owner of finance/events.py in W3."
      },
      {
-      "lane": "B — Bi-directional ERP/accounting connectors (finance-connectors owner)",
+      "lane": "B - Bi-directional ERP/accounting connectors (finance-connectors owner)",
       "items": [
        4
       ],
       "files": [
        "backend/app/modules/finance/connectors/__init__.py",
        "backend/app/modules/finance/connectors/base.py",
-       "backend/app/modules/finance/connectors/netsuite.py",
-       "backend/app/modules/finance/connectors/quickbooks.py",
-       "backend/app/modules/finance/connectors/sage.py",
-       "backend/app/modules/finance/connectors/datev.py",
-       "backend/app/modules/finance/connectors/oracle.py",
+       "backend/app/modules/finance/connectors/cloud_erp.py",
+       "backend/app/modules/finance/connectors/smb_bookkeeping.py",
+       "backend/app/modules/finance/connectors/accounting_suite.py",
+       "backend/app/modules/finance/connectors/regional_standard.py",
+       "backend/app/modules/finance/connectors/enterprise_erp.py",
        "backend/app/modules/finance/models.py",
        "backend/app/modules/finance/router.py",
        "backend/app/modules/finance/service.py",

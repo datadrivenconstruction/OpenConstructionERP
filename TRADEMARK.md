@@ -95,8 +95,7 @@ use of names, logos, and trademarks.
 
 ## 5. Comparative references
 
-Third-party products (RIB iTWO, Exactal CostX, Sage Estimating,
-Bluebeam, and others named in [NOTICE](./NOTICE)) are
+Third-party products named in [NOTICE](./NOTICE) are
 referenced in this repository for factual comparison of
 publicly available features. Those marks remain the property of
 their respective owners. Such comparative references are made

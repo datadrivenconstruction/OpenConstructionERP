@@ -281,7 +281,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Removed the coming-soon connector teasers (Microsoft 365, Google Workspace, WhatsApp, and the Procore and MS Project marketplace placeholders) so nothing in the interface is a dead end.
+- Removed the coming-soon connector teasers (Microsoft 365, Google Workspace, WhatsApp, and the construction management platform and MS Project marketplace placeholders) so nothing in the interface is a dead end.
 
 ## [6.3.0] - 2026-06-01
 
@@ -1796,11 +1796,11 @@ Identical to 3.12.1: no migration steps required. Existing 3.12.x installs upgra
 
 - /match-elements: the "How matching works - read this first" explainer is now collapsed by default with a white background, keeping the wizard's first screen tidy. Click to expand the full 8-stage tour.
 
-## [3.10.0] - 2026-05-19 · /files ACC-grade wave + Clash collab/metadata + match-elements polish
+## [3.10.0] - 2026-05-19 · /files enterprise-CDE-grade wave + Clash collab/metadata + match-elements polish
 
 ### Added
 
-- /files: 10 new sub-modules bringing the document hub to ACC/Aconex parity - `file_versions` (rollback + diff metadata), `file_trash` (30-day soft-delete + recycle bin route), `file_search` (cross-project + content search, /files/search), `file_tags` (polymorphic tags + bulk tag drawer), `file_saved_views` (per-project filter snapshots), `file_distribution` (named distribution lists + bulk recipients), `file_comments` (threaded comments anchored to file_kind+file_id), `file_references` (referenced-in panel from BOQ/Punch/RFI/etc.), `file_transmittals` (formal transmittal wizard + PDF cover, /files/transmittals), `file_approvals` (multi-step approval drawer with stamp burn + sidecar JSON fallback).
+- /files: 10 new sub-modules bringing the document hub to construction-CDE-platform parity - `file_versions` (rollback + diff metadata), `file_trash` (30-day soft-delete + recycle bin route), `file_search` (cross-project + content search, /files/search), `file_tags` (polymorphic tags + bulk tag drawer), `file_saved_views` (per-project filter snapshots), `file_distribution` (named distribution lists + bulk recipients), `file_comments` (threaded comments anchored to file_kind+file_id), `file_references` (referenced-in panel from BOQ/Punch/RFI/etc.), `file_transmittals` (formal transmittal wizard + PDF cover, /files/transmittals), `file_approvals` (multi-step approval drawer with stamp burn + sidecar JSON fallback).
 - /files page: ISO 19650 naming-violation banner, Save-view button, extension overflow popover (RVT/RFA/NWD/DWF/DOCX/MPP/PPTX/ZIP), Recently Viewed strip, keyboard-shortcut sheet, bulk soft-delete & bulk-tag bar, drag-drop into folder cards, FileTree with SavedViews rail and Trash node.
 - Clash A2/A3: per-result collaboration locks (`a1b2c3d4e5f6_add_collab_lock_table`) and result-level metadata (`v3048_clash_a2_metadata`, `v3049_clash_collab`) - assignment, status, severity ladder.
 - Sidebar: subdued "beta" badges on recently shipped modules.
@@ -3454,7 +3454,7 @@ Phase 3 + Phase 4 of vector match + concurrent-match perf hardening, shipped tog
 ### Fixed
 - **GAEB import / export - 8 concrete fixes uncovered by deep audit.**
   - Encoding sniff on import: `decodeXmlBuffer()` now reads the `<?xml encoding=...?>` prolog and uses the matching `TextDecoder`. Legacy DACH GAEB files in ISO-8859-1/Windows-1252 no longer corrupt ä/ö/ü/ß into `U+FFFD`.
-  - Unit codes: `GAEB_UNIT_CODES` map translates internal canonical units (`m2`/`m3`/`pcs`/`lsum`/`hr`) to GAEB DA short codes (`m²`/`m³`/`Stk`/`psch`/`Std`) on export, with reverse map on import. RIB iTWO / Sirados / ORCA round-trip works.
+  - Unit codes: `GAEB_UNIT_CODES` map translates internal canonical units (`m2`/`m3`/`pcs`/`lsum`/`hr`) to GAEB DA short codes (`m²`/`m³`/`Stk`/`psch`/`Std`) on export, with reverse map on import. Round-trip with common DACH GAEB tools works.
   - Hierarchy: `buildSectionTree()` walks dotted ordinals and creates arbitrarily-deep section nodes with recursive `renderSection()`. Multi-level Los → Titel → Position structures no longer flatten on export.
   - Line breaks: import-side `normaliseRunWhitespace()` collapses only horizontal whitespace, preserves `\n`. Export emits one `<Text>` per paragraph instead of one blob.
   - Version & namespace: emits spec-compliant `<VersMajor>3</VersMajor><VersMinor>3</VersMinor>` (was non-standard `<Version>3.3</Version>`); namespace correctly uses `DA81` for X81, `DA83` for X83 etc.
@@ -3564,7 +3564,7 @@ Phase 3 + Phase 4 of vector match + concurrent-match perf hardening, shipped tog
 ## [2.6.18] - 2026-04-28
 
 ### Fixed
-- **BOQ resource calculation model - corrected to per-unit norms** (CostX / Candy / iTWO / ProEst convention). Resources are now stored as quantities-per-1-unit-of-position. Position `unit_rate = Σ(r.quantity × r.unit_rate)` (no division by qty). Position `total = quantity × unit_rate`. Changing position quantity no longer scales resource quantities or recomputes unit_rate - only the total scales. Three sites fixed:
+- **BOQ resource calculation model - corrected to per-unit norms** (the standard estimating-suite convention). Resources are now stored as quantities-per-1-unit-of-position. Position `unit_rate = Σ(r.quantity × r.unit_rate)` (no division by qty). Position `total = quantity × unit_rate`. Changing position quantity no longer scales resource quantities or recomputes unit_rate - only the total scales. Three sites fixed:
   - `frontend/.../BOQGrid.tsx` `onCellValueChanged`: removed proportional resource scaling on qty edit.
   - `frontend/.../BOQEditorPage.tsx` `handleUpdateResource`: dropped `/ posQty` divisor.
   - `backend/.../service.py` `update_position`: only `triggered_by_resources` (not `triggered_by_qty`) recomputes unit_rate; formula is `sum`, no division.

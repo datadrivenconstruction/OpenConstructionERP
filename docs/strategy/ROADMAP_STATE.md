@@ -117,7 +117,7 @@ DEV ENV: backend `:8000` = `python -m app.cli serve --data-dir C:/Users/Artem Bo
 
 ## What we are building
 
-The nine connective-tissue features from the competitive analysis (benchmarked against Nevaris, iTWO, Autodesk Construction Cloud, Procore). The theme: we already own the modules, the differentiated work is connecting them into one system of record, not adding more modules. Two facts from our own code prove it: `approval_routes` is a built generic approval engine that no module imports yet, and `contracts` already carries ProgressClaim / Schedule of Values / retention models that are not surfaced in any UI.
+The nine connective-tissue features from the competitive analysis (benchmarked against leading construction ERP and project-controls suites). The theme: we already own the modules, the differentiated work is connecting them into one system of record, not adding more modules. Two facts from our own code prove it: `approval_routes` is a built generic approval engine that no module imports yet, and `contracts` already carries ProgressClaim / Schedule of Values / retention models that are not surfaced in any UI.
 
 ## Read these, in order
 
