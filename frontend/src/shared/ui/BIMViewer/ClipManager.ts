@@ -1,6 +1,6 @@
 /**
- * ClipManager — interactive section box + single clipping plane (Navisworks /
- * Aconex grade) built on Three.js `renderer.localClippingEnabled` +
+ * ClipManager — interactive section box + single clipping plane
+ * (coordination-tool grade) built on Three.js `renderer.localClippingEnabled` +
  * per-material `clippingPlanes`.
  *
  * Two independent, mutually-exclusive cut modes:

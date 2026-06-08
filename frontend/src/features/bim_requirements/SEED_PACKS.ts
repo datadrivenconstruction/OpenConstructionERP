@@ -266,7 +266,7 @@ const ROOM_NAMING_CONVENTION_YAML = `# Room-code naming convention.
 #
 # IfcSpace.Name must match the canonical "<DEPT>.<LEVEL>.<ROOM>" pattern,
 # e.g. "OR.02.001" for Operating Room, Level 02, Room 001. This is the
-# typical Helsinki / Solibri-style room-coding scheme used to bridge
+# typical Helsinki model-checking-tool-style room-coding scheme used to bridge
 # architectural plans to FM systems and BIMQ exports.
 schema_version: "1.0"
 pack:

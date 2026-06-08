@@ -1,5 +1,5 @@
 /**
- * PdfCompare — Bluebeam-grade PDF revision comparison viewer.
+ * PdfCompare — professional-grade PDF revision comparison viewer.
  *
  * Three compare modes:
  *  - Overlay (onion-skin): B drawn over A with an opacity slider.

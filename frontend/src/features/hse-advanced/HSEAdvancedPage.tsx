@@ -630,7 +630,7 @@ function FilterChips<T extends string>({
 /**
  * Renders the year selector + download button that triggers an OSHA 300
  * incident-log CSV export. Surfaces high in the page header so it is one
- * click away from any tab — matches Procore / Sphera placement.
+ * click away from any tab — matches construction management and EHS platform placement.
  */
 function Osha300Download({ projectId }: { projectId: string }) {
   const { t } = useTranslation();

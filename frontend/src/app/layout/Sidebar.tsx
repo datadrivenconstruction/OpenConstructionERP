@@ -841,8 +841,8 @@ const PRODUCT_TOUR_NAV_TESTIDS: Record<string, string> = {
 };
 
 // Two-key keyboard shortcuts for the most-trafficked routes. The
-// sequence is `G` then a single letter — same convention Linear and
-// GitHub use, so muscle memory transfers. We surface the hint inline
+// sequence is `G` then a single letter — the same convention modern
+// SaaS apps use, so muscle memory transfers. We surface the hint inline
 // next to the item so users can discover the shortcut without docs.
 const KBD_HINTS: Record<string, string> = {
   '/': 'G D',
@@ -1103,7 +1103,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   }, []);
 
   // ── Two-key navigation shortcuts (G then X) ──────────────────────────
-  // Linear/GitHub-style. We listen at document level for the leading
+  // Modern-SaaS-style. We listen at document level for the leading
   // `G`, then within 1.5 s any single letter from KBD_BY_LETTER fires
   // the matching navigation. Ignores all keystrokes that originate
   // from text fields so it doesn't conflict with form input.
@@ -1221,7 +1221,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       className="oe-sidebar relative flex h-full w-sidebar flex-col bg-surface-primary"
       style={{
         // Right-edge depth — 1px hairline + a soft 12px fade. Replaces
-        // the hard `border-r border-border-light` for a Linear/Vercel
+        // the hard `border-r border-border-light` for a modern-SaaS
         // feel: definition without rigidity.
         boxShadow:
           '1px 0 0 rgba(15, 23, 42, 0.05), 4px 0 12px -8px rgba(15, 23, 42, 0.06)',
@@ -1350,7 +1350,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         />
       </button>
 
-      {/* Search-as-jumper — Linear-style. Triggers the existing global
+      {/* Search-as-jumper — modern-SaaS-style. Triggers the existing global
           semantic-search palette. Keeps the visible affordance for
           users who don't know the ⌘K shortcut, while still surfacing
           it for those who do. When iconified, collapses to a single
@@ -1883,7 +1883,7 @@ function NavGroupSection({
     );
   }
   // Expanded sidebar — render a clear section header with a subtle dot
-  // glyph on the leading edge (Linear-style "rest" indicator) so the
+  // glyph on the leading edge (modern-SaaS-style "rest" indicator) so the
   // grouping reads as a list, not a wall of indistinguishable rows.
   // Header is a real button so the entire row toggles the section, and
   // keyboard focus shows a clean ring without bleeding outside the
@@ -2079,7 +2079,7 @@ function SidebarItem({
             // it flips to oe-blue. No layout shift between states. The
             // accent bar is the entire visual change for "active",
             // alongside the subtle background tint and bolded label.
-            // This is the Linear/Vercel pattern — solid, calm, fast.
+            // This is the modern-SaaS pattern — solid, calm, fast.
             'relative flex items-center rounded-md border-l-2 border-transparent',
             'transition-colors duration-fast ease-oe',
             compact

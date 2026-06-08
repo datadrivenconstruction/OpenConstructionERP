@@ -1,7 +1,7 @@
 /**
  * Clash Detection — geometric AABB interference / clearance coordination
  * over canonical BIM elements, with a discipline×discipline clash matrix,
- * a Navisworks/Solibri-grade clash-review workspace and one-click BCF export.
+ * a BIM-coordination-tool-grade clash-review workspace and one-click BCF export.
  *
  * Route: /clash  (project chosen via ?project= query param)
  *
@@ -194,7 +194,7 @@ const TOLERANCE_PRESETS: { mm: number; key: string; label: string }[] = [
 ];
 
 /** Result-table aggregation (client-side only — no backend round-trip).
- *  `none` keeps the flat sortable list. The rest mirror the Navisworks
+ *  `none` keeps the flat sortable list. The rest mirror the BIM-coordination-tool
  *  "Group clashes" axes a reviewer triages by. */
 type ResultGroupBy =
   | 'none'
@@ -481,7 +481,7 @@ export function ClashDetectionPage() {
   const [selModels, setSelModels] = useState<string[]>([]);
   const [runName, setRunName] = useState('');
   const [runDesc, setRunDesc] = useState('');
-  // Navisworks-style "Type": hard interpenetration only, clearance
+  // BIM-coordination-tool-style "Type": hard interpenetration only, clearance
   // (proximity) only, or both. `both` is the universal default.
   const [clashType, setClashType] = useState<ClashType>('both');
   // Federated noise filter — drop pairs whose two elements are in the
@@ -2188,7 +2188,7 @@ export function ClashDetectionPage() {
                 </div>
               )}
 
-              {/* CLASH TYPE — Navisworks-style "Type" rule selector. The
+              {/* CLASH TYPE — BIM-coordination-tool-style "Type" rule selector. The
                   single most load-bearing run parameter: it decides
                   WHICH interference the engine reports. Hard = real
                   interpenetration; Clearance = proximity (no overlap)
@@ -3031,7 +3031,7 @@ export function ClashDetectionPage() {
                     </select>
 
                     {/* Result aggregation — group the review list the way
-                        a coordinator triages (Navisworks "Group by"). */}
+                        a coordinator triages (BIM coordination tool "Group by"). */}
                     <label className="flex items-center gap-1.5 text-2xs text-content-tertiary">
                       <Layers className="h-3.5 w-3.5" />
                       <span className="font-medium uppercase tracking-wide">
@@ -5000,7 +5000,7 @@ function ChunkRow({
 }
 
 /**
- * One side (A or B) of a Navisworks-style selection-set clash.
+ * One side (A or B) of a BIM-coordination-tool-style selection-set clash.
  *
  * A "set" is the union of the ticked disciplines + element types — every
  * chip widens it. Searchable, count-annotated, scroll-bounded so a model
@@ -5026,7 +5026,7 @@ function SelectionSetPicker({
 }) {
   const { t } = useTranslation();
   const [q, setQ] = useState('');
-  // A set can carry chips from multiple grouping params (Navisworks-style
+  // A set can carry chips from multiple grouping params (BIM-coordination-tool-style
   // union); the badge reflects every chip — built-in lists plus every
   // `property:<key>` map — and the list shows the active one.
   const selectedCount =

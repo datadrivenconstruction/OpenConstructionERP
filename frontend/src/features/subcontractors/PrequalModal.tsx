@@ -1,7 +1,7 @@
 /**
  * Subcontractor prequalification questionnaire modal.
  *
- * Wave 4 / T12 — BuildingConnected-style yes/no questionnaire. The
+ * Wave 4 / T12 — subcontractor-prequalification-platform-style yes/no questionnaire. The
  * answers are submitted as a flat ``Record<string, "yes" | "no">`` to
  * the ``POST /v1/subcontractors/{id}/prequal`` endpoint; the backend
  * derives the numeric score (0-100, % of Yes answers) when none is
@@ -35,8 +35,8 @@ interface QuestionDef {
 }
 
 /**
- * The generic 7-question prequal questionnaire. Real BuildingConnected /
- * Procore templates pull from a per-org Q-bank — we ship a sensible
+ * The generic 7-question prequal questionnaire. Real subcontractor
+ * prequalification platform templates pull from a per-org Q-bank — we ship a sensible
  * default so the feature works out of the box; future iterations can
  * source this from a tenant-scoped table.
  */

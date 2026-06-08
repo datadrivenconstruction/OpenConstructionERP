@@ -3,7 +3,7 @@
  *
  * All radii are tightened to Apple-current scale (iOS 17+/macOS Sequoia/
  * visionOS / WWDC25 Liquid Glass): 12px outer card, 8px inner preview,
- * 10px buttons & icon chips, 6px Notion-style block tags, 5px mono chip.
+ * 10px buttons & icon chips, 6px modern-SaaS-style block tags, 5px mono chip.
  * Pills (rounded-full) stay pill only where the semantic is genuinely
  * a pill (tags, dots, segmented tabs).
  *
@@ -282,7 +282,7 @@ function ButtonsSection() {
           </span>
         </Specimen>
 
-        <Specimen no={7} name="Bevel Hairline" family="SaaS Modern" note="Тонкая верхняя hairline + inner bottom shadow. Linear / Arc style.">
+        <Specimen no={7} name="Bevel Hairline" family="SaaS Modern" note="Тонкая верхняя hairline + inner bottom shadow. Modern SaaS style.">
           <button className="inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-medium text-white bg-content-primary shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),inset_0_-1px_0_0_rgba(0,0,0,0.4),0_1px_2px_rgba(0,0,0,0.2)] hover:bg-content-primary/90 active:translate-y-px transition-all duration-fast">
             <FileText className="h-4 w-4" /> Open report
           </button>
@@ -294,7 +294,7 @@ function ButtonsSection() {
           </button>
         </Specimen>
 
-        <Specimen no={9} name="Outline Refined" family="Minimal" note="Linear-style тонкий border, мягкая заливка на hover. Для secondary actions.">
+        <Specimen no={9} name="Outline Refined" family="Minimal" note="Modern-SaaS-style тонкий border, мягкая заливка на hover. Для secondary actions.">
           <button className="inline-flex h-10 items-center gap-2 px-5 rounded-[10px] text-sm font-medium text-content-primary border border-border bg-surface-primary hover:bg-surface-secondary hover:border-content-tertiary transition-all duration-normal ease-oe">
             <FileText className="h-4 w-4" /> Open report
           </button>
@@ -509,7 +509,7 @@ function TagsSection() {
           </span>
         </Specimen>
 
-        <Specimen no={10} name="Squircle Solid" family="iOS Native" note="Notion/iOS Section-style: пастельный блок с r=6px. Для категорий и tag-таксономий.">
+        <Specimen no={10} name="Squircle Solid" family="iOS Native" note="iOS Section-style: пастельный блок с r=6px. Для категорий и tag-таксономий.">
           <div className="flex items-center gap-1.5">
             <span className="inline-flex h-6 items-center rounded-[6px] px-2 text-2xs font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">Concrete</span>
             <span className="inline-flex h-6 items-center rounded-[6px] px-2 text-2xs font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">Rebar</span>
@@ -652,7 +652,7 @@ function BackgroundsSection() {
           bgClass="bg-surface-secondary"
         />
 
-        <BgSpecimen no={2} name="Dot Grid (subtle)" family="Linear / Vercel"
+        <BgSpecimen no={2} name="Dot Grid (subtle)" family="Modern SaaS"
           note="Сетка точек 0.9px с прозрачностью 16%, шаг 24px. Едва видна - добавляет «текстуру», но не отвлекает от таблиц/BOQ."
           bgStyle={{
             backgroundColor: 'var(--oe-bg-secondary)',

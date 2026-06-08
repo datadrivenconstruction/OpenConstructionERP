@@ -17,8 +17,8 @@ import { triggerDownload } from '@/shared/lib/api';
  * Map our internal canonical units (lowercase ASCII) to the short codes
  * that GAEB-compliant readers expect in the <QU> element.
  *
- * GAEB DA XML doesn't enforce a closed list, but DACH AVA software (RIB iTWO,
- * California, Sirados, ORCA) consistently uses these symbolic forms with
+ * GAEB DA XML doesn't enforce a closed list, but DACH AVA software
+ * consistently uses these symbolic forms with
  * superscript digits and German abbreviations.
  *
  * Anything not in this map is forwarded verbatim — units.py:APPROVED_UNITS

@@ -2260,7 +2260,7 @@ export function CostDatabaseSearchModal({
       {/* Variant picker — anchored to the Add button so positioning is
           stable across the multi-item add loop.  Rendered outside the
           modal's overflow:hidden body via createPortal in VariantPicker.
-          Default strategy is "mean" (matches CostX/iTWO defaults); the
+          Default strategy is "mean" (matches integrated 5D estimating suite defaults); the
           legacy "median" tag in the Cost-DB browser remains available
           via the `defaultStrategy` prop on direct callers. */}
       {activeVariantPick && activeVariantPick.item.metadata_?.variants

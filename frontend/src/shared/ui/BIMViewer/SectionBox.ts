@@ -6,7 +6,7 @@
  * Why a standalone helper (separate from the existing `ClipManager`):
  * `ClipManager` is tightly coupled to `SceneManager` and the in-house
  * normalised-extent / hatched-cap workflow.  `SectionBox` is an additive
- * BIMcollab-style affordance — driven by selection or world bounds — that
+ * BIM-coordination-tool-style affordance — driven by selection or world bounds — that
  * the new `ViewerToolbar` plugs straight into the raw Three.js trio
  * (scene / camera / renderer) without needing the rest of the viewer's
  * managers.  The two coexist cleanly because they operate on the same
@@ -20,7 +20,7 @@
  *   - The six planes face INWARD so geometry outside the box is clipped.
  *   - A translucent wireframe box is rendered as a readability cue.
  *   - Ctrl/Cmd-drag on a TransformControls handle snaps the dragged face
- *     to integer-millimetre offsets (per BIMcollab research).
+ *     to integer-millimetre offsets (per BIM coordination tool research).
  */
 
 import * as THREE from 'three';

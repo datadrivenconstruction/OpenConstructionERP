@@ -1275,7 +1275,7 @@ function FederationDetailDrawer({
             {activeTab === 'types' ? (
               <div data-testid="federation-tab-panel-types" role="tabpanel" id="federation-tab-panel-types" aria-labelledby="federation-tab-types">
                 {/* Slice 2: federation-flat (NOT per-model) element-type
-                    tree. Mirrors BIMcollab Zoom — IfcClass is the primary
+                    tree. Mirrors BIM coordination tools — IfcClass is the primary
                     axis so cross-model selections ("color all
                     IfcDuctSegment red") are a single click. */}
                 <FederationTypeTree

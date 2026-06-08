@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// AttendanceSection — Newforma-style check-in widget shown inside the
+// AttendanceSection — meeting-minutes-tool-style check-in widget shown inside the
 // MeetingRow's expanded panel. Lists current attendees with a check-in
 // chip (green ✓ checked, grey pending), offers a "Check me in" button
 // for the JWT user, and a small modal for recording walk-in attendees.

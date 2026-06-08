@@ -8,8 +8,8 @@
  * `SceneManager.setViewPreset`.
  *
  * WHY: Architects expect a View Cube. It is the most discoverable way
- * to reorient a model — they have used it for two decades in Revit /
- * Navisworks / ArchiCAD. We render a tiny independent three.js scene
+ * to reorient a model — they have used it for two decades in mainstream
+ * BIM authoring and coordination tools. We render a tiny independent three.js scene
  * so the widget never competes with the main viewport for raycasts or
  * render time.
  */

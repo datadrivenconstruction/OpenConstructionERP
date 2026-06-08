@@ -3,7 +3,7 @@
 
 /** Keyboard shortcuts for the /files page — Phase-0 quick win.
  *
- * Mirrors Procore / ACC conventions: `/` focuses the search box, `g` /
+ * Mirrors construction management platform conventions: `/` focuses the search box, `g` /
  * `l` toggle grid/list view, `Delete` bulk-deletes the current
  * selection, `Escape` clears selection + closes the preview, `?` opens
  * the cheatsheet.

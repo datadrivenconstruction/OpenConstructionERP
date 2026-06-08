@@ -1,8 +1,8 @@
 /**
  * TeamStrip — horizontal row of avatar circles for a project's members.
  *
- * Rendered on ProjectDetailPage above the tab bar (similar to Linear / Asana /
- * GitHub project pages). Shows up to 6 overlapping avatar circles with the
+ * Rendered on ProjectDetailPage above the tab bar (similar to modern project
+ * collaboration tools). Shows up to 6 overlapping avatar circles with the
  * member's initials when no avatar URL is available; a tooltip on hover
  * surfaces the full name + role. After 6 members an aggregate "+N more"
  * chip is rendered which opens a modal listing every member. The trailing

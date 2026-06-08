@@ -55,7 +55,8 @@ export function AssemblyEditorPage() {
   const [catalogPickerType, setCatalogPickerType] = useState<ResourceType | null>(null);
   // The "+ Add" split-button reveals six typed seeds — material is the
   // common case, the rest cover the standard professional vocabulary
-  // (HeavyBid: M/L/E/S; iTWO/Гранд-Смета also include operator + overhead).
+  // (estimating tools split M/L/E/S; integrated 5D estimating suites also
+  // include operator + overhead).
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [showTagEditor, setShowTagEditor] = useState(false);
   const [tagInput, setTagInput] = useState('');
@@ -523,7 +524,7 @@ export function AssemblyEditorPage() {
       {/* Two-column workspace: components table on the left, M/L/E
           breakdown summary on the right. The summary is sticky so it
           stays visible as the user scrolls a long component list — this
-          is the same pattern HeavyBid / Sage estimating tools use to
+          is the same pattern professional estimating tools use to
           keep the rolled-up cost driver split always in view. */}
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-4">
       {/* Components Table */}
@@ -1569,7 +1570,7 @@ function ApplyToBOQModal({
 
 /**
  * Sticky right-rail summary that mirrors the cost-driver split a
- * professional estimator expects (HeavyBid, Sage, iTWO all show this
+ * professional estimator expects (professional estimating tools show this
  * always-visible). Renders one bar per resource type used by the
  * assembly, plus a final "Total rate / unit" line that already includes
  * the bid factor uplift.

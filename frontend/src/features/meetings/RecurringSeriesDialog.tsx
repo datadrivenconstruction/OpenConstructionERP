@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// RecurringSeriesDialog — create a Newforma-style meeting series.
+// RecurringSeriesDialog — create a meeting-minutes-tool-style meeting series.
 //
 // Mirrors the master-meeting fields from the normal "New Meeting" form,
 // plus a small recurrence panel: FREQ (DAILY/WEEKLY/MONTHLY), BYDAY

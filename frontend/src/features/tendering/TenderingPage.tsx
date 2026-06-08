@@ -1282,7 +1282,7 @@ function PackageDetail({
         </div>
       </Card>
 
-      {/* Sub-tab strip — RIB iTWO-style: bids ↔ addenda ↔ leveling.
+      {/* Sub-tab strip — integrated-5D-estimating-suite-style: bids ↔ addenda ↔ leveling.
           Addenda (``/packages/{id}/addenda/``) and Leveling
           (``/packages/{id}/leveling-matrix/`` + ``/level-bids/``) are now
           backed by real endpoints on tendering/router.py, so the tabs are

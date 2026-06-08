@@ -142,7 +142,7 @@ export interface PortalIssueResponse {
 
 /**
  * Backend 401 ``detail.code`` discriminator. The verify endpoint is
- * single-use (Slack/Notion/Linear convention) so the frontend needs to
+ * single-use (common modern-SaaS convention) so the frontend needs to
  * distinguish "this link was already redeemed" (render the "request a
  * new link" CTA) from the generic invalid/expired/revoked bucket.
  */

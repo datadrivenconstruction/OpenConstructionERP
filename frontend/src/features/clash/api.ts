@@ -86,7 +86,7 @@ export interface ClashHistoryEntry {
   after: string | null;
 }
 
-/** Which interference an engine pass reports — the Navisworks-style
+/** Which interference an engine pass reports — the BIM-coordination-tool-style
  *  "Type" rule selector. `both` is the back-compatible default. */
 export type ClashType = 'hard' | 'clearance' | 'both';
 
@@ -202,7 +202,7 @@ export type ClashGroupBy =
   | 'ifc_entity'
   | `property:${string}`;
 
-/** One side of a Navisworks-style selection-set clash. A "set" is the
+/** One side of a BIM-coordination-tool-style selection-set clash. A "set" is the
  *  union of the chosen disciplines / element types / categories / IFC
  *  entities + arbitrary element-property values — every chip (from
  *  whichever grouping parameter) widens it. */
@@ -277,7 +277,7 @@ export interface ClashRunCreateBody {
   name?: string;
   description?: string | null;
   model_ids: string[];
-  /** Navisworks-style "Type": hard interpenetration only, clearance
+  /** BIM-coordination-tool-style "Type": hard interpenetration only, clearance
    *  (proximity) only, or both. Defaults to `both` server-side. */
   clash_type?: ClashType;
   /** Federated noise filter — only report cross-model pairs. No effect

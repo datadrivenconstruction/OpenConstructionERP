@@ -1738,7 +1738,7 @@ const MeetingRow = React.memo(function MeetingRow({
       {/* Expanded detail */}
       {expanded && (
         <div className="px-4 pb-4 pl-12 space-y-3 animate-fade-in">
-          {/* Attendance check-in (Newforma-style) */}
+          {/* Attendance check-in (meeting-minutes-tool-style) */}
           <AttendanceSection meetingId={meeting.id} />
 
           {/* Chairperson */}
@@ -2096,7 +2096,7 @@ export function MeetingsPage() {
       }),
   });
 
-  // Newforma-style recurring series.
+  // Meeting-minutes-tool-style recurring series.
   const createSeriesMut = useMutation({
     mutationFn: (data: CreateSeriesPayload) => createSeries(data),
     onSuccess: (res) => {

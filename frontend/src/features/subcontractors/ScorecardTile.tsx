@@ -32,8 +32,8 @@ function toNum(v: number | string | null | undefined): number {
 
 /**
  * Map a 0..100 score to a Tailwind colour token. We use the same
- * thresholds as the BuildingConnected scorecard so PM users from
- * that tool see a familiar palette.
+ * thresholds as a typical subcontractor prequalification platform scorecard
+ * so PM users see a familiar palette.
  *
  * >= 80 green, >= 60 amber, < 60 red.
  */

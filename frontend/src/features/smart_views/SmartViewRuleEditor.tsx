@@ -10,7 +10,7 @@
 //   4. Sticky footer with Cancel / Save     (delegates POST vs PUT)
 //
 // Rules are kept in local state and only POST'd / PUT'd on Save — this
-// matches BIMcollab Zoom's "edit as draft, commit as one" UX and lets a
+// matches a BIM coordination tool's "edit as draft, commit as one" UX and lets a
 // user iterate freely without spamming the API.
 
 import { useState, useMemo, useEffect, type ChangeEvent, type DragEvent } from 'react';

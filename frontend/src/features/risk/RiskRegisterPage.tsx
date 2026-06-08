@@ -672,7 +672,7 @@ export function RiskRegisterPage() {
 
       {/* ── Tabs: Register (qualitative) vs Monte Carlo (quantitative) ──
           The register tab keeps the existing 5x5 matrix + heatmap +
-          filter table. The Monte Carlo tab adds Primavera-style PERT
+          filter table. The Monte Carlo tab adds enterprise-CPM-style PERT
           simulation with P50/P80/P95 confidence bands. */}
       {projectId && (
         <div

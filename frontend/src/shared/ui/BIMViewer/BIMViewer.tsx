@@ -63,7 +63,7 @@ import { aggregateBIMQuantities, type AggResult } from './aggregation';
 import { SelectionManager } from './SelectionManager';
 import { MeasureManager } from './MeasureManager';
 import { ClipManager } from './ClipManager';
-// Slice: BIMcollab-style additive viewer tools (Section Box from selection,
+// Slice: BIM-coordination-tool-style additive viewer tools (Section Box from selection,
 // Walk mode, point-to-point Measure). Wired in additively next to the
 // existing managers so they coexist without disrupting current flows.
 import { SectionBox } from './SectionBox';
@@ -671,7 +671,7 @@ export function BIMViewer({
   const selectionMgrRef = useRef<SelectionManager | null>(null);
   const measureMgrRef = useRef<MeasureManager | null>(null);
   const clipMgrRef = useRef<ClipManager | null>(null);
-  // BIMcollab-style additive helpers (Section Box / Walk / Measure).
+  // BIM-coordination-tool-style additive helpers (Section Box / Walk / Measure).
   // Initialised inside the scene-setup useEffect below and disposed in its
   // cleanup. Exposed via state so the ViewerToolbar overlay can render
   // once they're ready.
@@ -1166,7 +1166,7 @@ export function BIMViewer({
     // ── Additive viewer tools (Slice: Section Box / Walk / Measure) ──
     // These are independent of the existing ClipManager/MeasureManager —
     // they're surfaced through the floating `ViewerToolbar` overlay and
-    // intended as BIMcollab-style affordances. Mutual exclusion (only one
+    // intended as BIM-coordination-tool-style affordances. Mutual exclusion (only one
     // active at a time) is enforced by the toolbar; the helpers themselves
     // only operate on the shared Three.js scene/camera/renderer.
     const sectionBox = new SectionBox({

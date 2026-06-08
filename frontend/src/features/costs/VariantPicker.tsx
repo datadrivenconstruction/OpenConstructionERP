@@ -40,7 +40,7 @@ export interface VariantPickerProps {
    *  `stats[defaultStrategy]` is preferred; otherwise `floor(len/2)`. */
   defaultIndex?: number;
   /** Which `VariantStats` field drives the auto-default.  `"mean"` is the
-   *  production default for new applies (matches CostX/iTWO behaviour);
+   *  production default for new applies (matches integrated 5D estimating suite behaviour);
    *  `"median"` is kept for the legacy panel that tags the median row in
    *  the cost-DB browser. */
   defaultStrategy?: 'mean' | 'median';

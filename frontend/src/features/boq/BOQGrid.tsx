@@ -1804,7 +1804,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
       // Position quantity is a multiplier on the per-unit unit_rate.
       // Resources are stored as PER-UNIT norms (qty per 1 unit of
-      // position) — same convention as CostX, Candy, iTWO, ProEst —
+      // position) — same convention as integrated 5D estimating suites —
       // so changing position qty must NOT touch resource qty/rate or
       // unit_rate. Backend re-derives total = qty × unit_rate.
       if (field === 'quantity') {

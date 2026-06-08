@@ -209,7 +209,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
       )}
     >
       {/* Soft hairline at the bottom — replaces a hard 1px border for
-          a calmer Linear/Vercel-style separation from the page below. */}
+          a calmer modern-SaaS-style separation from the page below. */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
       {/* ── Zone 1 (Workspace): mobile menu + project breadcrumb + title ── */}
@@ -395,7 +395,7 @@ function ModuleInfoReopener() {
 /* ── Theme Toggle ──────────────────────────────────────────────────────── */
 
 /** Single icon-button that cycles light → dark → system. The icon swaps
- *  to mirror the *current* theme, not the *next* one (Linear/Vercel
+ *  to mirror the *current* theme, not the *next* one (modern-SaaS
  *  convention) — users glance at it to see what mode they're in,
  *  click to advance. Lives in Zone 4 next to the avatar so theme +
  *  identity sit together. */

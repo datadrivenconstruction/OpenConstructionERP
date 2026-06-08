@@ -5,7 +5,7 @@
  * `ViewerToolbar` wires this in alongside `SectionBox` and `WalkMode`
  * without needing the full `MeasureManager` (which is tied to the
  * existing SceneManager/ElementManager + supports polygon/angle modes
- * + DOM-overlay labels).  `MeasureTool` is the simpler, BIMcollab-style
+ * + DOM-overlay labels).  `MeasureTool` is the simpler, BIM-coordination-tool-style
  * distance ruler that the brief asked for.
  *
  * Interaction:

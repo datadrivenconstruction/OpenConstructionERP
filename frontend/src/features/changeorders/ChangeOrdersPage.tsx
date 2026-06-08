@@ -105,7 +105,7 @@ interface ChangeOrder {
   item_count: number;
   created_at: string;
   updated_at: string;
-  // T3: Procore-style approval chain + commitment / RFI links.
+  // T3: construction-management-platform-style approval chain + commitment / RFI links.
   linked_po_ids?: string[];
   linked_rfi_ids?: string[];
   current_approval_step?: number | null;
@@ -1283,7 +1283,7 @@ function DetailView({
     onError: (err: Error) => addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message }),
   });
 
-  // ── T3: Procore-style approval chain ───────────────────────────────────
+  // ── T3: construction-management-platform-style approval chain ──────────
   // Fetched alongside the order detail so the timeline is always in sync
   // with the cursor. Cheap query — typically 1-5 rows.
   const { data: approvals = [] } = useQuery<ApprovalRow[]>({
@@ -1691,7 +1691,7 @@ function DetailView({
         );
       })()}
 
-      {/* T3: Procore-style approval chain. Shown when the CO has either
+      {/* T3: construction-management-platform-style approval chain. Shown when the CO has either
           a chain already or is in 'submitted' state (so an admin/manager
           can start one). Hidden on plain draft/approved/rejected COs with
           no chain to avoid cluttering simple workflows. */}

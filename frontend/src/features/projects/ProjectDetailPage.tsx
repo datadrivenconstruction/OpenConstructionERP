@@ -1781,8 +1781,8 @@ export function ProjectDetailPage() {
       {!isWidgetHidden('team') && (
       <>
       {/* ── Team Strip ──────────────────────────────────────────────────── */}
-      {/* Horizontal avatar row positioned above the tab bar (see Linear /
-          Asana). Only the owner / admin sees the manage controls — for
+      {/* Horizontal avatar row positioned above the tab bar (see modern
+          project collaboration tools). Only the owner / admin sees the manage controls — for
           other authenticated users the strip is read-only. The owner
           check below leans on the JWT ``sub`` claim because the auth
           store doesn't keep ``userId`` separately yet. */}

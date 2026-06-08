@@ -41,7 +41,7 @@ export interface ApprovalAdvanceBody {
   comments?: string;
 }
 
-/** Start a Procore-style multi-step approval chain on a change order. */
+/** Start a construction-management-platform-style multi-step approval chain on a change order. */
 export function startApprovalChain(
   changeOrderId: string,
   approverUserIds: string[],

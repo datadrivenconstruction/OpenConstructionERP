@@ -119,7 +119,7 @@ export function AboutPage() {
               {[
                 { v: '3.12.0', date: '2026-05-20', note: t('about.recent_3_12_0', { defaultValue: 'Wave 5/6/7 pro-grade - BOQ + Cost Intel + Clash A4 + Files CDE' }) },
                 { v: '3.11.0', date: '2026-05-20', note: t('about.recent_3_11_0', { defaultValue: 'Wave 3/4 modules · Validation@Import · X84 export · /about redesign' }) },
-                { v: '3.10.0', date: '2026-05-19', note: t('about.recent_3_10_0', { defaultValue: '/files ACC-grade wave · Clash collab/metadata · match polish' }) },
+                { v: '3.10.0', date: '2026-05-19', note: t('about.recent_3_10_0', { defaultValue: '/files CDE-grade wave · Clash collab/metadata · match polish' }) },
               ].map(r => (
                 <li key={r.v} className="flex items-start gap-2 text-2xs leading-snug">
                   <span className="shrink-0 inline-flex items-center rounded-md bg-oe-blue/10 text-oe-blue font-mono font-semibold px-1.5 py-0.5">

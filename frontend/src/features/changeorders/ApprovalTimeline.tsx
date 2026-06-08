@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * ApprovalTimeline — vertical Procore-style approval-chain renderer.
+ * ApprovalTimeline — vertical construction-management-platform-style approval-chain renderer.
  *
  * Renders one node per step with:
  *   - circular avatar (status colour: amber/green/red)

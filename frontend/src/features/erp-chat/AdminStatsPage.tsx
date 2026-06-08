@@ -1,7 +1,7 @@
 /**
  * T8 — ERP-Chat admin observability dashboard.
  *
- * Mirrors Autodesk AI Assist / Trimble Construction One AI's admin views:
+ * Mirrors construction management platform AI admin views:
  * token spend, prompt-cache hit rate, thumbs feedback rate, top thumbed-down
  * prompts, and a per-day breakdown — all gated behind the manager+
  * `erp_chat.admin` permission server-side.

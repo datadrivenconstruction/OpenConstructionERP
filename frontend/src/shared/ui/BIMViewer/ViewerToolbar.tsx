@@ -1,5 +1,5 @@
 /**
- * ViewerToolbar — floating overlay surfacing the three BIMcollab-style
+ * ViewerToolbar — floating overlay surfacing the three BIM-coordination-tool-style
  * tools added by this slice: Section Box, Walk mode, Measure.
  *
  * Only one tool is active at a time (mutual exclusion is enforced at the

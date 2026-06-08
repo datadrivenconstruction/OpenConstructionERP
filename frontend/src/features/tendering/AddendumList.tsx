@@ -1,6 +1,7 @@
 /**
- * Addendum panel for a tender package — mirrors RIB iTWO Tender / Aconex
- * mid-tender clarifications. Lists revisions oldest → newest, exposes a
+ * Addendum panel for a tender package — mirrors integrated 5D estimating
+ * suite and construction CDE platform mid-tender clarifications. Lists
+ * revisions oldest → newest, exposes a
  * "Publish" action on drafts, and surfaces a bidder ack chip for each
  * record so the buyer can see at a glance who has acknowledged what.
  */

@@ -1,5 +1,5 @@
 /**
- * API helpers for the Tendering module — RIB iTWO-style addenda + bid leveling.
+ * API helpers for the Tendering module — integrated-5D-estimating-suite-style addenda + bid leveling.
  *
  * Backed by /api/v1/tendering/ — see backend/app/modules/tendering/router.py
  */

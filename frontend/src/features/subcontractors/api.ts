@@ -39,7 +39,7 @@ export interface Subcontractor {
   website?: string | null;
   notes?: string | null;
   is_active: boolean;
-  // ── Wave 4 / T12: BuildingConnected-style prequal + insurance tracking ──
+  // ── Wave 4 / T12: subcontractor-prequalification-platform-style prequal + insurance tracking ──
   prequal_score?: number | null;
   insurance_expiry_date?: string | null; // ISO date (yyyy-mm-dd)
   insurance_doc_id?: string | null;

@@ -6,7 +6,7 @@
  * Counter-intuitive design note
  * -----------------------------
  * Most BIM viewers nest the federation tree as
- * ``Federation › Model › Storey › Element``. BIMcollab Zoom inverts it
+ * ``Federation › Model › Storey › Element``. Some BIM coordination tools invert it
  * to ``Federation › IfcClass › [all instances across all models]``. The
  * flat-by-class layout is what makes "color all mechanical ducts red
  * across 12 models" a single click instead of a 12-step traversal.
