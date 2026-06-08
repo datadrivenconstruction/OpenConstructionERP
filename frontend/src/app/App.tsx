@@ -1,5 +1,5 @@
-import { Suspense, lazy, useState, useCallback, useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
+import { Suspense, lazy, useState, useCallback, useEffect, useLayoutEffect, useContext, createContext } from 'react';
+import { Routes, Route, Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
 import { AppLayout } from './layout';
 import { DashboardPage } from '@/features/dashboard';
 import { LoginPage, RegisterPage, ForgotPasswordPage } from '@/features/auth';
@@ -520,16 +520,48 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function P({ title, children }: { title: string; children: React.ReactNode }) {
+// Lets each page hand its header title up to the persistent AppShell.
+const PageTitleContext = createContext<(title: string) => void>(() => {});
+
+// The persistent application shell.  Previously every protected route's element
+// was `<P title><Page/></P>`, and because <AppLayout> (the sidebar + header)
+// lived INSIDE each route element, React Router tore the whole chrome down and
+// rebuilt it on every navigation — the same per-route remount that forced
+// ProductTour out of AppLayout (see AppLayout's BUG-UI02 note) and that made
+// each module feel slow to open.  AppShell hoists AppLayout above the router
+// <Outlet/> so the sidebar + header mount exactly once and only the page area
+// swaps.  The ErrorBoundary is keyed by pathname so a crashed page recovers on
+// the next navigation, matching the old per-route boundary; the Suspense
+// boundary stays mounted so the v7 startTransition smooth-nav keeps the
+// previous page on screen while the next chunk loads.
+function AppShell() {
+  const [title, setTitle] = useState('');
+  const location = useLocation();
   return (
     <RequireAuth>
       <AppLayout title={title}>
-        <ErrorBoundary>
-          <Suspense fallback={<PageLoadingInline />}>{children}</Suspense>
-        </ErrorBoundary>
+        <Suspense fallback={<PageLoadingInline />}>
+          <ErrorBoundary key={location.pathname}>
+            <PageTitleContext.Provider value={setTitle}>
+              <Outlet />
+            </PageTitleContext.Provider>
+          </ErrorBoundary>
+        </Suspense>
       </AppLayout>
     </RequireAuth>
   );
+}
+
+// Per-page wrapper kept at every route call site.  It no longer builds its own
+// layout — it just publishes the page's header title to the surrounding
+// AppShell.  useLayoutEffect runs before paint so the heading swaps without a
+// visible flash of the previous page's title.
+function P({ title, children }: { title: string; children: React.ReactNode }) {
+  const setTitle = useContext(PageTitleContext);
+  useLayoutEffect(() => {
+    setTitle(title);
+  }, [setTitle, title]);
+  return <>{children}</>;
 }
 
 /** Mounts global keyboard shortcuts, the shortcuts help dialog, and the command palette. */
@@ -797,11 +829,15 @@ export default function App() {
           <RequireAuth><Suspense fallback={<LoadingScreen />}><OnboardingWizard /></Suspense></RequireAuth>
         } />
 
-        {/* App — all protected, all real pages */}
+        {/* App — all protected, all real pages.  Every route below shares one
+            persistent <AppShell/> (sidebar + header mount once); the matched
+            page renders into its <Outlet/>.  RequireAuth lives in AppShell, so
+            the inner per-page `<P>` only sets the header title now. */}
+        <Route element={<AppShell />}>
         {/* BUG-215 — authenticated users hitting `/` land on the dashboard
             (the canonical post-login surface). Unauthenticated users fall
-            through to <P>, which calls RequireAuth and bounces them to
-            /login (preserving the marketing-flavoured public landing path). */}
+            through to RequireAuth in AppShell and are bounced to /login
+            (preserving the marketing-flavoured public landing path). */}
         <Route
           path="/"
           element={
@@ -1101,6 +1137,7 @@ export default function App() {
 
         {/* 404 — catch-all for unknown routes */}
         <Route path="*" element={isAuthenticated ? <P title="Not Found"><NotFoundPage /></P> : <Navigate to="/login" replace />} />
+        </Route>
       </Routes>
       <ToastContainer />
       <FloatingQueuePanel />
