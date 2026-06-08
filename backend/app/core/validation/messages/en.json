@@ -270,6 +270,39 @@
       "suggestion": "Cap modifiers between -50% and +200% to avoid unrealistic plot prices"
     }
   },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "Activity '{activity}' has no {ends} logic (open end / dangling activity)",
+      "both": "predecessor or successor",
+      "predecessor": "predecessor",
+      "successor": "successor",
+      "suggestion": "Tie the activity into the network with a predecessor and a successor link, or type it as a start/finish milestone"
+    },
+    "negative_lag": {
+      "fail": "Relationship {predecessor} -> {successor} uses negative lag ({lag} days), which is a lead and distorts the critical path",
+      "suggestion": "Replace the lead with an explicit activity or an SS/FF relationship so the sequence stays defensible"
+    },
+    "excessive_lag": {
+      "fail": "Relationship {predecessor} -> {successor} has lag {lag} days, above the {threshold}-day threshold",
+      "suggestion": "Model the waiting time as its own activity (procurement, cure, approval) so it can carry status and be levelled"
+    },
+    "hard_constraints": {
+      "fail": "Activity '{activity}' has a hard date constraint ({constraint}) that overrides the network logic",
+      "suggestion": "Use a soft constraint (start-no-earlier-than) or drive the date through logic so the activity can move when predecessors slip"
+    },
+    "negative_float": {
+      "fail": "Activity '{activity}' has negative total float ({float} days), so the schedule is not achievable as logic-tied",
+      "suggestion": "Re-sequence the work, relax a hard constraint, or add a documented recovery plan to bring float back to zero or above"
+    },
+    "high_float": {
+      "fail": "Activity '{activity}' has very high total float ({float} days), above the {threshold}-day threshold",
+      "suggestion": "Check for a missing successor link - high float usually means the activity is only loosely tied to the network"
+    },
+    "missing_duration": {
+      "fail": "Activity '{activity}' has an invalid duration ({duration} days) for a non-milestone task",
+      "suggestion": "Set a positive working-day duration, or type the row as a milestone if it is genuinely a zero-duration event"
+    }
+  },
   "errors": {
     "resource_not_found": "Resource not found",
     "project_not_found": "Project not found",

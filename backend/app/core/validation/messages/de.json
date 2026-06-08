@@ -270,6 +270,39 @@
       "suggestion": "Modifikatoren auf -50% bis +200% begrenzen, um unrealistische Preise zu vermeiden"
     }
   },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "Vorgang '{activity}' hat keine {ends}-Verknuepfung (offenes Ende / haengender Vorgang)",
+      "both": "Vorgaenger- oder Nachfolger",
+      "predecessor": "Vorgaenger",
+      "successor": "Nachfolger",
+      "suggestion": "Den Vorgang mit Vorgaenger und Nachfolger ins Netz einbinden oder als Start-/Endmeilenstein kennzeichnen"
+    },
+    "negative_lag": {
+      "fail": "Beziehung {predecessor} -> {successor} nutzt negative Pufferzeit ({lag} Tage), also einen Vorlauf, der den kritischen Pfad verzerrt",
+      "suggestion": "Den Vorlauf durch einen eigenen Vorgang oder eine SS/FF-Beziehung ersetzen, damit die Abfolge nachvollziehbar bleibt"
+    },
+    "excessive_lag": {
+      "fail": "Beziehung {predecessor} -> {successor} hat eine Pufferzeit von {lag} Tagen, ueber dem Schwellwert von {threshold} Tagen",
+      "suggestion": "Die Wartezeit als eigenen Vorgang abbilden (Beschaffung, Aushaertung, Freigabe), damit sie einen Status tragen kann"
+    },
+    "hard_constraints": {
+      "fail": "Vorgang '{activity}' hat eine feste Terminvorgabe ({constraint}), die die Netzplanlogik ueberschreibt",
+      "suggestion": "Eine weiche Vorgabe (Anfang-nicht-frueher-als) nutzen oder den Termin ueber Logik steuern, damit der Vorgang bei Verzug mitwandert"
+    },
+    "negative_float": {
+      "fail": "Vorgang '{activity}' hat negativen Gesamtpuffer ({float} Tage), der Terminplan ist so nicht haltbar",
+      "suggestion": "Ablauf neu ordnen, eine feste Vorgabe loesen oder einen dokumentierten Aufholplan ergaenzen, bis der Puffer wieder bei null oder darueber liegt"
+    },
+    "high_float": {
+      "fail": "Vorgang '{activity}' hat sehr hohen Gesamtpuffer ({float} Tage), ueber dem Schwellwert von {threshold} Tagen",
+      "suggestion": "Auf einen fehlenden Nachfolger pruefen - hoher Puffer bedeutet meist, dass der Vorgang nur lose mit dem Netz verbunden ist"
+    },
+    "missing_duration": {
+      "fail": "Vorgang '{activity}' hat eine ungueltige Dauer ({duration} Tage) fuer einen Nicht-Meilenstein",
+      "suggestion": "Eine positive Arbeitstage-Dauer setzen oder die Zeile als Meilenstein kennzeichnen, falls es wirklich ein Ereignis ohne Dauer ist"
+    }
+  },
   "errors": {
     "resource_not_found": "Ressource nicht gefunden",
     "project_not_found": "Projekt nicht gefunden",

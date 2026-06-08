@@ -4606,6 +4606,595 @@ class PropDevPriceMatrixNoNegativeModifier(ValidationRule):
         return results
 
 
+# ── Schedule Quality Rules (C1 - DCMA-14-style health checks) ───────────────
+#
+# A small pack of network-quality checks over a project schedule, modelled
+# on the public DCMA 14-point assessment used as an owner / audit gate on
+# public work. Each rule inspects the schedule data the platform already
+# stores (activities + relationships from the schedule module), so the pack
+# is migration-free: no new tables, no new columns.
+#
+# Expected ValidationContext.data shape (a dict):
+#
+#   {
+#     "activities": [
+#       {
+#         "id": "a1",
+#         "name": "Excavate footings",
+#         "duration_days": 5,
+#         "activity_type": "task",          # "milestone" rows are exempt where noted
+#         "total_float": 3,                 # int | None - from the CPM pass
+#         "is_critical": false,
+#         "constraint_type": "must_finish_on",  # None for ASAP/ALAP (soft)
+#         "dependencies": [...],            # inline links - counted as logic too
+#       },
+#       ...
+#     ],
+#     "relationships": [
+#       {"predecessor_id": "a1", "successor_id": "a2",
+#        "relationship_type": "FS", "lag_days": 0},
+#       ...
+#     ],
+#   }
+#
+# Field names mirror the schedule ORM (``Activity`` + ``ScheduleRelationship``)
+# so a loader can flatten the rows straight into these dicts. Rules return the
+# same RuleResult shape as every other rule in this file.
+
+# Constraint types that hard-pin an activity date and therefore override the
+# schedule logic (DCMA "hard constraint" check). ASAP / ALAP and the
+# soft "no earlier / no later" window constraints are NOT flagged - only the
+# constraints that fully fix a date are.
+_HARD_CONSTRAINT_TYPES: frozenset[str] = frozenset(
+    {
+        "must_start_on",
+        "must_finish_on",
+        "mandatory_start",
+        "mandatory_finish",
+    },
+)
+
+# Activity types that legitimately carry zero duration - missing-duration and
+# open-end logic checks skip these.
+_ZERO_DURATION_ACTIVITY_TYPES: frozenset[str] = frozenset(
+    {
+        "milestone",
+        "start_milestone",
+        "finish_milestone",
+        "hammock",
+        "wbs",
+        "summary",
+        "level_of_effort",
+    },
+)
+
+
+def _get_activities(context: ValidationContext) -> list[dict[str, Any]]:
+    """Extract the activity list from context data (tolerant of shapes).
+
+    Accepts either ``{"activities": [...]}`` or ``{"tasks": [...]}`` or a bare
+    list. Returns ``[]`` when no activities are present so a rule stays
+    SKIPPED rather than firing false positives on an empty schedule.
+    """
+    data = context.data
+    if isinstance(data, dict):
+        acts = data.get("activities")
+        if isinstance(acts, list):
+            return acts
+        tasks = data.get("tasks")
+        if isinstance(tasks, list):
+            return tasks
+        return []
+    if isinstance(data, list):
+        return data
+    return []
+
+
+def _get_relationships(context: ValidationContext) -> list[dict[str, Any]]:
+    """Extract explicit relationship rows from context data.
+
+    Accepts ``relationships`` or the legacy alias ``links``. Returns ``[]``
+    when none are present.
+    """
+    data = context.data
+    if isinstance(data, dict):
+        for key in ("relationships", "links"):
+            rels = data.get(key)
+            if isinstance(rels, list):
+                return rels
+    return []
+
+
+def _activity_label(act: dict[str, Any]) -> str:
+    """Best-effort human label for an activity in a message."""
+    for key in ("activity_code", "wbs_code", "name", "id"):
+        val = act.get(key)
+        if isinstance(val, str) and val.strip():
+            return val.strip()
+        if val is not None and not isinstance(val, str):
+            return str(val)
+    return "?"
+
+
+def _is_zero_duration_type(act: dict[str, Any]) -> bool:
+    """True when the activity type is one that legitimately has no duration."""
+    act_type = str(act.get("activity_type") or "").strip().lower()
+    return act_type in _ZERO_DURATION_ACTIVITY_TYPES
+
+
+def _inline_dependency_count(act: dict[str, Any]) -> int:
+    """Count inline dependencies stored on the activity row itself.
+
+    The schedule ``Activity.dependencies`` JSON column can hold links inline
+    (separate from the ``ScheduleRelationship`` table). Count them so an
+    activity that only uses inline links is not falsely flagged as an open
+    end.
+    """
+    deps = act.get("dependencies")
+    if isinstance(deps, list):
+        return len(deps)
+    return 0
+
+
+class ScheduleOpenEnds(ValidationRule):
+    """Flags activities with no predecessor and/or no successor logic.
+
+    DCMA "logic" check: every activity except the project start and finish
+    should have at least one predecessor and one successor so the network
+    is fully tied together. Dangling activities (open ends) make the
+    critical-path and float numbers unreliable. Milestone / summary rows are
+    exempt because a start milestone legitimately has no predecessor and a
+    finish milestone legitimately has no successor.
+    """
+
+    rule_id = "schedule_quality.open_ends"
+    name = "Schedule Open Ends"
+    standard = "schedule_quality"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "Flags activities missing predecessor and/or successor logic (open "
+        "ends / dangling activities) so the critical path stays defensible."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        activities = _get_activities(context)
+        if not activities:
+            return []
+        relationships = _get_relationships(context)
+        has_pred: set[str] = set()
+        has_succ: set[str] = set()
+        for rel in relationships:
+            pred = rel.get("predecessor_id")
+            succ = rel.get("successor_id")
+            if pred is not None and succ is not None:
+                has_succ.add(str(pred))
+                has_pred.add(str(succ))
+
+        results: list[RuleResult] = []
+        for act in activities:
+            if _is_zero_duration_type(act):
+                continue
+            act_id = str(act.get("id") or "")
+            inline = _inline_dependency_count(act)
+            # An inline dependency means the activity has a predecessor link.
+            missing_pred = act_id not in has_pred and inline == 0
+            missing_succ = act_id not in has_succ
+            passed = not (missing_pred or missing_succ)
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                if missing_pred and missing_succ:
+                    ends = translate("schedule_quality.open_ends.both", locale=locale)
+                elif missing_pred:
+                    ends = translate("schedule_quality.open_ends.predecessor", locale=locale)
+                else:
+                    ends = translate("schedule_quality.open_ends.successor", locale=locale)
+                message = translate(
+                    "schedule_quality.open_ends.fail",
+                    locale=locale,
+                    activity=_activity_label(act),
+                    ends=ends,
+                )
+                suggestion = translate("schedule_quality.open_ends.suggestion", locale=locale)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=act.get("id"),
+                    details=(
+                        {} if passed else {"missing_predecessor": missing_pred, "missing_successor": missing_succ}
+                    ),
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
+class ScheduleNegativeLag(ValidationRule):
+    """Flags relationships that use negative lag (a lead).
+
+    DCMA "negative lag (leads)" check: a negative lag lets a successor start
+    before its predecessor logically allows, which distorts the forward pass
+    and hides true sequencing. Leads should be re-modelled as explicit
+    activities or SS/FF relationships instead.
+    """
+
+    rule_id = "schedule_quality.negative_lag"
+    name = "Schedule Negative Lag"
+    standard = "schedule_quality"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags relationships with negative lag (leads), which distort the critical path."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        relationships = _get_relationships(context)
+        if not relationships:
+            return []
+        results: list[RuleResult] = []
+        for rel in relationships:
+            lag = _to_number(rel.get("lag_days", 0))
+            if lag is None or lag is _NOT_A_NUMBER:
+                continue  # Non-numeric lag is a data issue, not a lead - skip.
+            lag_val: float = lag  # type: ignore[assignment]
+            passed = lag_val >= 0
+            pred = str(rel.get("predecessor_id") or "?")
+            succ = str(rel.get("successor_id") or "?")
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "schedule_quality.negative_lag.fail",
+                    locale=locale,
+                    predecessor=pred,
+                    successor=succ,
+                    lag=_fmt_decimal(lag_val, places=0),
+                )
+                suggestion = translate("schedule_quality.negative_lag.suggestion", locale=locale)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=rel.get("successor_id"),
+                    details=({} if passed else {"lag_days": lag_val, "predecessor_id": pred, "successor_id": succ}),
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
+class ScheduleExcessiveLag(ValidationRule):
+    """Flags relationships with lag above a sensible threshold.
+
+    DCMA "high lag" check: a large positive lag often hides a missing
+    activity (procurement, cure time, approval) that should be modelled
+    explicitly so it can carry status and be levelled. The threshold can be
+    overridden per project via ``metadata["schedule_quality"]["max_lag_days"]``.
+    """
+
+    rule_id = "schedule_quality.excessive_lag"
+    name = "Schedule Excessive Lag"
+    standard = "schedule_quality"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags relationships whose lag exceeds the configured threshold (default 20 working days)."
+
+    DEFAULT_MAX_LAG_DAYS = 20
+
+    def _max_lag(self, context: ValidationContext) -> float:
+        meta = getattr(context, "metadata", None) or {}
+        cfg = meta.get("schedule_quality") if isinstance(meta, dict) else None
+        if isinstance(cfg, dict):
+            override = _to_number(cfg.get("max_lag_days"))
+            if override is not None and override is not _NOT_A_NUMBER and override > 0:  # type: ignore[operator]
+                return override  # type: ignore[return-value]
+        return float(self.DEFAULT_MAX_LAG_DAYS)
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        relationships = _get_relationships(context)
+        if not relationships:
+            return []
+        max_lag = self._max_lag(context)
+        results: list[RuleResult] = []
+        for rel in relationships:
+            lag = _to_number(rel.get("lag_days", 0))
+            if lag is None or lag is _NOT_A_NUMBER:
+                continue
+            lag_val: float = lag  # type: ignore[assignment]
+            passed = lag_val <= max_lag
+            pred = str(rel.get("predecessor_id") or "?")
+            succ = str(rel.get("successor_id") or "?")
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "schedule_quality.excessive_lag.fail",
+                    locale=locale,
+                    predecessor=pred,
+                    successor=succ,
+                    lag=_fmt_decimal(lag_val, places=0),
+                    threshold=_fmt_decimal(max_lag, places=0),
+                )
+                suggestion = translate("schedule_quality.excessive_lag.suggestion", locale=locale)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=rel.get("successor_id"),
+                    details=({} if passed else {"lag_days": lag_val, "threshold": max_lag}),
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
+class ScheduleHardConstraints(ValidationRule):
+    """Flags activities pinned by a hard date constraint.
+
+    DCMA "hard constraint" check: must-start-on / must-finish-on constraints
+    override the network logic and prevent activities from moving when their
+    predecessors slip, which masks delay. They should be used sparingly and
+    documented. Soft window constraints (start-no-earlier, ASAP, ALAP) are
+    not flagged.
+    """
+
+    rule_id = "schedule_quality.hard_constraints"
+    name = "Schedule Hard Constraints"
+    standard = "schedule_quality"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags activities with a hard date constraint (must-start-on / must-finish-on) that overrides logic."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        activities = _get_activities(context)
+        if not activities:
+            return []
+        results: list[RuleResult] = []
+        for act in activities:
+            constraint = str(act.get("constraint_type") or "").strip().lower()
+            is_hard = constraint in _HARD_CONSTRAINT_TYPES
+            passed = not is_hard
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "schedule_quality.hard_constraints.fail",
+                    locale=locale,
+                    activity=_activity_label(act),
+                    constraint=constraint,
+                )
+                suggestion = translate("schedule_quality.hard_constraints.suggestion", locale=locale)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=act.get("id"),
+                    details=({} if passed else {"constraint_type": constraint}),
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
+class ScheduleNegativeFloat(ValidationRule):
+    """Flags activities whose total float is negative.
+
+    DCMA "negative float" check: negative total float means the activity is
+    already behind the dates the network needs, usually because a hard
+    constraint or an external deadline conflicts with the logic. It signals
+    the plan is not achievable as drawn and needs re-sequencing or a
+    documented recovery plan.
+    """
+
+    rule_id = "schedule_quality.negative_float"
+    name = "Schedule Negative Float"
+    standard = "schedule_quality"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags activities with negative total float - the schedule is not achievable as currently logic-tied."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        activities = _get_activities(context)
+        if not activities:
+            return []
+        results: list[RuleResult] = []
+        for act in activities:
+            raw_float = act.get("total_float")
+            if raw_float is None:
+                continue  # No CPM result yet - nothing to judge.
+            tf = _to_number(raw_float)
+            if tf is None or tf is _NOT_A_NUMBER:
+                continue
+            tf_val: float = tf  # type: ignore[assignment]
+            passed = tf_val >= 0
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "schedule_quality.negative_float.fail",
+                    locale=locale,
+                    activity=_activity_label(act),
+                    float=_fmt_decimal(tf_val, places=0),
+                )
+                suggestion = translate("schedule_quality.negative_float.suggestion", locale=locale)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=act.get("id"),
+                    details=({} if passed else {"total_float": tf_val}),
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
+class ScheduleHighFloat(ValidationRule):
+    """Flags activities with an unusually large total float.
+
+    DCMA "high float" check: a very large total float (default over 44
+    working days, roughly two months) usually means the activity is missing
+    a successor link or is only loosely tied to the network, so its dates are
+    not really controlled by the plan. The threshold can be overridden via
+    ``metadata["schedule_quality"]["max_total_float_days"]``.
+    """
+
+    rule_id = "schedule_quality.high_float"
+    name = "Schedule High Float"
+    standard = "schedule_quality"
+    severity = Severity.INFO
+    category = RuleCategory.CONSISTENCY
+    description = "Flags activities whose total float exceeds the configured threshold (default 44 working days)."
+
+    DEFAULT_MAX_TOTAL_FLOAT_DAYS = 44
+
+    def _max_float(self, context: ValidationContext) -> float:
+        meta = getattr(context, "metadata", None) or {}
+        cfg = meta.get("schedule_quality") if isinstance(meta, dict) else None
+        if isinstance(cfg, dict):
+            override = _to_number(cfg.get("max_total_float_days"))
+            if override is not None and override is not _NOT_A_NUMBER and override > 0:  # type: ignore[operator]
+                return override  # type: ignore[return-value]
+        return float(self.DEFAULT_MAX_TOTAL_FLOAT_DAYS)
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        activities = _get_activities(context)
+        if not activities:
+            return []
+        threshold = self._max_float(context)
+        results: list[RuleResult] = []
+        for act in activities:
+            raw_float = act.get("total_float")
+            if raw_float is None:
+                continue
+            tf = _to_number(raw_float)
+            if tf is None or tf is _NOT_A_NUMBER:
+                continue
+            tf_val: float = tf  # type: ignore[assignment]
+            # Negative float is owned by ScheduleNegativeFloat - keep orthogonal.
+            if tf_val < 0:
+                continue
+            passed = tf_val <= threshold
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "schedule_quality.high_float.fail",
+                    locale=locale,
+                    activity=_activity_label(act),
+                    float=_fmt_decimal(tf_val, places=0),
+                    threshold=_fmt_decimal(threshold, places=0),
+                )
+                suggestion = translate("schedule_quality.high_float.suggestion", locale=locale)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=act.get("id"),
+                    details=({} if passed else {"total_float": tf_val, "threshold": threshold}),
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
+class ScheduleMissingDuration(ValidationRule):
+    """Flags non-milestone activities with a zero or missing duration.
+
+    DCMA "invalid dates / missing duration" family: a task with no duration
+    is either an unfinished plan entry or a milestone that has not been typed
+    as one. Genuine milestone / summary rows are exempt. A negative duration
+    is always invalid regardless of type.
+    """
+
+    rule_id = "schedule_quality.missing_duration"
+    name = "Schedule Missing Duration"
+    standard = "schedule_quality"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags non-milestone activities with a zero, missing, or negative duration."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        activities = _get_activities(context)
+        if not activities:
+            return []
+        results: list[RuleResult] = []
+        for act in activities:
+            is_zero_type = _is_zero_duration_type(act)
+            dur = _to_number(act.get("duration_days"))
+            if dur is None or dur is _NOT_A_NUMBER:
+                dur_val = 0.0
+            else:
+                dur_val = dur  # type: ignore[assignment]
+            if is_zero_type:
+                # Milestones may be 0 but must never be negative.
+                passed = dur_val >= 0
+            else:
+                passed = dur_val > 0
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "schedule_quality.missing_duration.fail",
+                    locale=locale,
+                    activity=_activity_label(act),
+                    duration=_fmt_decimal(dur_val, places=0),
+                )
+                suggestion = translate("schedule_quality.missing_duration.suggestion", locale=locale)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=act.get("id"),
+                    details=({} if passed else {"duration_days": dur_val}),
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
 # ── Registration ────────────────────────────────────────────────────────────
 
 
@@ -4691,6 +5280,14 @@ def register_builtin_rules() -> None:
         (PropDevReservationExpiryInFuture(), None),
         (PropDevBrokerCommissionRateWithinBounds(), None),
         (PropDevPriceMatrixNoNegativeModifier(), None),
+        # Schedule Quality (C1 - DCMA-14-style health checks)
+        (ScheduleOpenEnds(), None),
+        (ScheduleNegativeLag(), None),
+        (ScheduleExcessiveLag(), None),
+        (ScheduleHardConstraints(), None),
+        (ScheduleNegativeFloat(), None),
+        (ScheduleHighFloat(), None),
+        (ScheduleMissingDuration(), None),
     ]
 
     for rule, sets in rules:
