@@ -5,6 +5,24 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.2.0] - 2026-06-08
+
+### Fixed
+
+- The desktop app could get stuck on "Recovering the local database" forever on Windows PCs whose regional format is set to Turkish. The bundled database tool rejected the non-ASCII locale name ("Turkish_Türkiye.1254") during first-time setup, so the local database never finished initialising. Setup now always creates the database with a neutral locale, and on top of that it clears a half-finished database folder left by an earlier failed attempt, so a machine that was already stuck heals itself on the next launch instead of failing the same way. Verified end to end against a real local PostgreSQL on a fresh install and on an upgrade from a broken folder.
+- The AI Estimate Builder no longer shows a fake $0.00 for a matched code that has no price in the catalogue. The match step and the alternatives list now say "matched, no price in catalogue", so an unpriced code reads honestly and you can pick a priced alternative. The rollup still treats it as zero so totals stay correct and the line stays flagged for review.
+- The RVT converter stopped reporting "Converter is out of date" when it was actually current.
+- Filters and groupings on IFC models in the BIM viewer behave correctly again across storeys, categories and entity groups.
+
+### Changed
+
+- Moving between modules is faster. The sidebar and header stay mounted as you navigate instead of being rebuilt on every page, so switching modules no longer tears down and re-creates the whole shell each time.
+- The BIM viewer's filter and property-search panel is now fully translated in all 26 languages. The search box, the category, level and grouping controls, and the property-search operators were showing in English everywhere because their text lived only in code; that text is now in the catalogue and translated. The remaining stage-2 translation gaps were closed in the same pass.
+- The AI Estimate Builder is clearer end to end: parameter names read as plain words instead of code-style snake_case, the match step shows a live progress bar so a long run no longer looks frozen, and matched rates are grouped by trade instead of one long list.
+- Element matching can use your own AI key to re-rank candidates for better results. You turn it on at the match step, and the key stays scoped to your own workspace so it is never shared across tenants.
+- Module badges were tidied: well-developed modules dropped the BETA tag, rougher ones keep it, and the old NEW tag is gone.
+- The DWG takeoff drawing card reads clearly on the dark canvas now, and the PDF takeoff toolbar wraps to two rows instead of showing a scrollbar.
+
 ## [7.1.0] - 2026-06-07
 
 ### Added
