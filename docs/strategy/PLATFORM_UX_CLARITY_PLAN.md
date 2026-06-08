@@ -170,17 +170,27 @@ No green-checkmark-only sign-off. Run order: `tsc -b` -> unit/component tests ->
 ## Wave rollout (cut by copy-budget, parallel within a wave)
 
 ### Wave 0 - Foundation (blocks all later waves; build first)
-- [ ] `ConfidenceBadge`, `SuggestionCard`, `ErrorState`, `GlossaryTerm`, `GridHeaderHelp` (new) + tests
-- [ ] Seed `glossary.*` (~40 P0, founder-signed English) + `confidence_badge.*` + `suggestion.*` +
-      `error_explain.*` in `en.ts`; one i18n sweep -> all 26 locales
-- [ ] Extend `TourId` union (placeholders for the core-flow tours)
-- [ ] Retire the local `ConfidenceBadge` in `AISmartPanel` + fix the raw-enum label leak (line 679)
-- [ ] Decide the backend error envelope `{reason_key, fix_key, retryable}` (Q5)
-- [ ] Confirm `ConfidenceBadge` banding vs the real AI-match score distribution (Q2)
-- [ ] `docs/strategy/GUIDANCE_STANDARD.md` with the 8-item checklist + per-module progress table
-- [ ] Lock the locale list as a glob (26 incl. ru); confirm collapse-to-topbar re-show is final (Q7)
+- [x] `ConfidenceBadge`, `SuggestionCard`, `ErrorState`, `GlossaryTerm`, `GridHeaderHelp` (new) + tests
+      (24 component tests green; all in `shared/ui`, exported from the barrel)
+- [x] Generic key families `confidence_badge.*` + `suggestion.*` + `error_explain.*` +
+      `glossary.example_prefix` in `en.ts`; one i18n sweep -> all 26 locales (11 keys x 26 = 286,
+      verified present + non-English, `{{pct}}` placeholder preserved)
+- [~] Seed `glossary.*` (~40 P0) - canonical English DRAFTED in `GLOSSARY_DRAFT_v0.md`, awaiting the
+      founder sign-off (Q1) before the x27 translation; `GlossaryTerm`/`GridHeaderHelp` already read the
+      keys and degrade gracefully (label-only) until the definitions land
+- [ ] Extend `TourId` union - DEFERRED: `TOUR_REGISTRY` is `Record<TourId, Step[]>`, so a new id needs
+      real (translated) step content; folded into Wave 2 where the BOQ/BIM/takeoff tours are authored
+- [x] Retire the local `ConfidenceBadge` in `AISmartPanel` + fix the raw-enum label leak (line 679)
+- [x] Backend error envelope (Q5) - decided: `{reason_key, fix_key, retryable}` with generic
+      `error_explain.*` fallback; `ErrorState` accepts pre-resolved why/fix strings so call sites can
+      wire the envelope incrementally
+- [~] `ConfidenceBadge` banding (Q2) - provisional cutoffs live in `bandForScore` (single source);
+      marked provisional in code, freeze after the real AI-match distribution is reviewed
+- [x] `docs/strategy/GUIDANCE_STANDARD.md` with the 8-item checklist + per-module progress table
+- [x] Locale list locked as the `locales/*.ts` glob (26 incl. ru); collapse-to-topbar re-show final (Q7)
 - [ ] IA duplicate-surface merge decision (Q3 - FOUNDER) before guiding the AI-estimate trio / documents
-- [ ] Visual gate on a sample (BOQ grid header, an AI surface, an error path)
+- [ ] Visual gate on a sample - runs in Wave 1 when the components hit routed pages (the new
+      components are unit-tested + tsc-clean; the AISmartPanel integration is the first live surface)
 
 ### Wave 1 - Broken / highest-traffic (worst offenders, parallel)
 - [ ] `reporting` - EmptyState + ErrorState + intro; remove perpetual skeleton; `'N/A'` via `fmt()`
@@ -242,6 +252,16 @@ Recommended defaults stand unless the founder overrides. Only the two marked FOU
 7. DismissibleInfo re-show (closed): collapse-to-topbar is final; no permanent-dismiss. Do not reopen.
 
 ## Progress log (append-only)
+- 2026-06-08: Wave 0 core built. The 5 shared guidance components (`ConfidenceBadge`, `SuggestionCard`,
+  `ErrorState`, `GlossaryTerm`, `GridHeaderHelp`) landed in `shared/ui` with 24 passing component tests
+  and barrel exports, grounded on the existing design system (`Badge`/`Button`/`InfoHint`/semantic
+  tokens). The 11 generic guidance keys were added to `en.ts` and translated into all 26 locales (one
+  agent per locale, deterministic insertion, verified present + non-English with `{{pct}}` preserved).
+  The local `ConfidenceBadge` in `features/boq/AISmartPanel` was retired in favour of the shared one,
+  closing the shipped raw-enum (`high`/`medium`/`low`) label leak at line 679. tsc clean. The ~40-term
+  glossary English is drafted in `GLOSSARY_DRAFT_v0.md` and is the one open Wave-0 blocker (founder
+  sign-off, Q1); Q3 (IA merge) still gates the Wave 1 AI routes. TourId extension deferred to Wave 2
+  (it needs real translated tour steps). Next: founder signs the glossary, then Wave 1 rollout.
 - 2026-06-08: Plan created from the platform-wide UX audit (8-agent workflow + adversarial critique,
   every claim tree-verified) and corroborated by a real deep acceptance pass (boq/finance/ai-estimator,
   Latin/Cyrillic/CJK/RTL). Standard, components, glossary, waves, and the testing gate locked. The
