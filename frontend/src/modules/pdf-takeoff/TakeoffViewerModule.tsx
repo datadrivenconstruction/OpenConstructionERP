@@ -2950,8 +2950,12 @@ export default function TakeoffViewerModule({
         <div className="flex gap-4 min-w-0">
           {/* Left: PDF + Toolbar */}
           <div className="flex-1 min-w-0 space-y-2">
-            {/* Toolbar */}
-            <div className="flex items-center gap-1 rounded-lg border border-border bg-surface-primary p-1.5 overflow-x-auto">
+            {/* Toolbar - two rows so every control is always visible without a
+                horizontal scrollbar. Row 1: page navigation, zoom and the
+                drawing tools; row 2: scale, calibration, legend and the
+                history/file actions. */}
+            <div className="flex flex-col gap-1.5 rounded-lg border border-border bg-surface-primary p-1.5">
+              <div className="flex items-center gap-1 flex-wrap">
               {/* Page nav */}
               <button onClick={prevPage} disabled={currentPage <= 1} className="p-1.5 rounded hover:bg-surface-secondary disabled:opacity-30 transition-colors" aria-label={t('takeoff_viewer.prev_page', { defaultValue: 'Previous page' })}>
                 <ChevronLeft size={16} />
@@ -3062,9 +3066,10 @@ export default function TakeoffViewerModule({
                   <Icon size={14} />
                 </button>
               ))}
+              </div>
 
-              <span className="w-px h-5 bg-border mx-1" />
-
+              {/* Row 2: scale, calibration, legend, history and file */}
+              <div className="flex items-center gap-1 flex-wrap">
               {/* Scale */}
               <button
                 onClick={() => { setCalibrationMode(false); setSettingScale(true); setScalePoints([]); }}
@@ -3181,6 +3186,7 @@ export default function TakeoffViewerModule({
                 <Upload size={14} />
                 <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
               </label>
+              </div>
             </div>
 
             {/* Canvas — the PDF render surface is a genuinely-needed internal
@@ -3188,14 +3194,14 @@ export default function TakeoffViewerModule({
                 The cap must match the height actually left over after the
                 page chrome the parent column does NOT subtract: header (52)
                 + main pt-6/pb-4 (40) + takeoff tabs bar (~56) + module
-                spacing + toolbar (~44) + bottom Documents filmstrip (~175).
-                The old `100vh - 280px` under-reserved by ~80px, so the
-                canvas + right sidebar pushed the workspace past the
-                fixed-height column and forced a second scrollbar. */}
+                spacing + toolbar (~80, two rows) + bottom Documents
+                filmstrip (~175). The old `100vh - 280px` under-reserved by
+                ~80px, so the canvas + right sidebar pushed the workspace past
+                the fixed-height column and forced a second scrollbar. */}
             <div
               ref={containerRef}
               className="relative rounded-lg border border-border overflow-auto bg-gray-100 dark:bg-gray-900"
-              style={{ maxHeight: 'calc(100vh - 360px)', maxWidth: '100%' }}
+              style={{ maxHeight: 'calc(100vh - 396px)', maxWidth: '100%' }}
             >
               <canvas ref={canvasRef} className="block" />
               <canvas
