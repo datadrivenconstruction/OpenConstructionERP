@@ -165,6 +165,12 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=6.0.0",
     "pytest-xdist>=3.5.0",
+    # Per-test wall-clock guard. The nightly full suite runs the integration
+    # tree serially against one PostgreSQL and used to be killed by the job
+    # timeout with no signal of where it stalled. A per-test timeout turns a
+    # single hung test into a reported failure so the run finishes and the
+    # durations report points at the real slow spots.
+    "pytest-timeout>=2.3.0",
     "httpx>=0.28.0",
     "factory-boy>=3.3.0",
     # Pinned exactly: the CI "ruff format --check" gate compares against the

@@ -57,4 +57,10 @@ jobs:
         env:
           DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/openconstructionerp_test
           DATABASE_SYNC_URL: postgresql+psycopg2://oe:oe@localhost:5432/openconstructionerp_test
-        run: pytest -q
+        # A per-test timeout so one hung test can no longer eat the whole 6h
+        # budget with the run cancelled and no signal of where it stalled - it
+        # becomes a reported failure and the suite carries on. --durations and
+        # -ra then make the slow spots and failures readable without scrolling
+        # six hours of Postgres logs. 900s is generous: no real unit or
+        # integration test should approach 15 minutes.
+        run: pytest -q -ra --durations=50 --timeout=900 --timeout-method=thread
