@@ -1,6 +1,6 @@
 # ERP Platform Depth - Build Plan
 
-> STATUS: PLANNING (NetSuite-class benchmark merged; construction-suite benchmark pending)
+> STATUS: PLANNING (mature cloud-ERP benchmark merged; construction project-controls benchmark merged)
 > LAST UPDATED: 2026-06-08
 > OWNER: DataDrivenConstruction
 > SCOPE: adopt the highest-value, globally-needed ERP modules/functions and wire them into our
