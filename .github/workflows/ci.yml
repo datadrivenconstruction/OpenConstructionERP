@@ -27,6 +27,27 @@ jobs:
         # top entry doesn't match the source-of-truth backend version.
         run: python scripts/check_version_sync.py
 
+  brand-check:
+    name: Brand Token Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify no competitor or vendor brand token leaked in
+        # Enforces the brand rule automatically so it never depends on a
+        # reviewer remembering: no competitor or vendor product name in
+        # code, UI strings, changelog, or docs. The script stores only
+        # SHA-256 hashes of the brand tokens (the denylist itself is
+        # brand-free) and permits a small reviewed set of functional
+        # interop names via scripts/brand_token_allowlist.txt.
+        run: python scripts/check_no_brand_tokens.py
+
   backend:
     name: Backend CI
     runs-on: ubuntu-latest

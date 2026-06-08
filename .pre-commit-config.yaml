@@ -49,3 +49,14 @@ repos:
         language: system
         pass_filenames: false
         files: ^(backend/pyproject\.toml|frontend/package\.json|CHANGELOG\.md|frontend/src/features/about/Changelog\.tsx)$
+
+      # Block competitor/vendor brand names from entering the repo. Scans the
+      # staged files only (so it guards new work without a full-tree pass), and
+      # permits the small reviewed set of functional interop names in
+      # scripts/brand_token_allowlist.txt. The check stores only token hashes,
+      # so the denylist itself never names a brand.
+      - id: brand-token-check
+        name: Block competitor/vendor brand tokens
+        entry: python scripts/check_no_brand_tokens.py
+        language: system
+        pass_filenames: true

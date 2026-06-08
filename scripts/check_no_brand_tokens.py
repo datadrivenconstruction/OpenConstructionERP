@@ -50,6 +50,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 # Add a hash here (python -c "import hashlib;print(hashlib.sha256(b'<token>').hexdigest())")
 # to extend coverage. Keep to unambiguous coined brand tokens to avoid matching
 # ordinary words.
+#
+# Functional-interop brand names (CAD/BIM import formats like Revit/AutoCAD/Tekla
+# and explicit integration targets) are deliberately NOT hashed here: they have
+# legitimate functional uses the platform needs, and are governed by the
+# allowlist plus human review instead. Only unambiguous coined product names with
+# no functional use are denylisted.
 _DENY_HASHES: frozenset[str] = frozenset(
     {
         "a62ee5ab3e8914010c0f75ff149f9415c839c64ccf4d8ed91d13b456dbc1d813",
@@ -58,6 +64,37 @@ _DENY_HASHES: frozenset[str] = frozenset(
         "fff045f2575092eee58374e6b24e2c3efae8533ac17811cf15939d4fd09a5284",
         "55af965522a877fbb91c42cc317bc592e7ac2282c8b986ea24d9d19b87f3e6de",
         "175144ba7727300741c47f7c881c12c1da553776a583e10c620cd4d24dc2d1ed",
+        "6a3007f60515e405e5f64b07885dd24b25262525761bd45808afed3f82425b8e",
+        "bf6c262b9b067db8fdc18a6cb0e78d1244553b65c4e9e48d3546af68e0a437a9",
+        "423d16ce8c066ceb5714dbb2f9d16eaa59e3571d0318367039755e7e64ceb32f",
+        "46c955d11d47c3d563abeefd1eca2b7c9546169b20d2f24cbb897f2fd4ed9ef8",
+        "c04ecdbcc01c4eb5a7f93222146d5f4ed5f280a2ed134f7c7c9d4a52c268b6f0",
+        "7d451b6eb01abdb0edf3c7fc440f6d06b3aa93223bca35dc207c31aa07da7121",
+        "66d4c34f63b321e5d488acb27ceeff03e58861dc822786ecc16228ab966e560a",
+        "9c13fc96144b74b5f10957d73a193662ca94dccb1148041280a9f673267150da",
+        "f271bb49840f247f06d44e248a58da4f07a15ac13d19c908f3562cf4c27758ea",
+        "a5c4fcc701283c5ed540c2963ba42e1f7af1ef3fed2e491525ef0c3a06d3272b",
+        "5b02e0eece69d3f4ad8c913705c45d562b1fdd9672d294bb7ebd7aae75f68bad",
+        "01fdc206bcfcd06718f3b964c4d6925905d879cee45d7611d4d3e4f414625239",
+        "33df103969d7c653bc10754a41a8dc2156aabd7c33647241926d465ba721bb97",
+        "f87e86b8abde90aa4ce0d2547c4465280baad22e833afadbebac3d670ea43617",
+        "31135ce02873713edfb32a09bf723e1f436fdb080a8457189147a3f34a9412aa",
+        "469be0d71cacd255ba602021b352bdba3c4c736eb3dafb824b48fc8c80971209",
+        "21ab87a7ea9a7f6f2c7894beb361a8644f8fed69cad090265583d2edceb4966d",
+        "9a2e8e955be161ed90ccef3ab2ce3a6a1e439de4a12b8af75536fd0f2ca1b66f",
+        "78f01fedb12362675c783eb39ac7afa7c63a9c8d6d56e0542f1565cf026a8612",
+        "7bc4be30839398ae59b2f9b2b8144671794537ad9bd829c9e73a93fbd9e51821",
+        "fb6061067f2f48fe42db037321556e2c2ecee66c56b75ce935523d51bae05565",
+        "48a712c1a4da10ef9c77d217372b97e875800f6a80e4f5bec36ed1b0fe3e921b",
+        "2779934ff606047d5b140b82939b66fc88c9ba101a05d156086d71c1285d4bfb",
+        "0b955e689bea821d4646d62739a8dec68ee9baf50c4b1e9f7e6fe8e23c75fc03",
+        "1cf0fde0df3ac7d0d4af1ad80ebd7bdcdb5c27eb2518594d55a3f59773cc3f3f",
+        "a2f98c7785a1629a12cc425bef2583336aef29d12b6c18fcee64f1469454289d",
+        "3ccbd9105a45d8fcd4a0101c6532c599f6f59cfa4d4ce378792f547a869a4bea",
+        "404e91050d105f97f8785b94706814e4a6ead40fea25c0ecf9efefa6bea999f5",
+        "58b4537b616e657203a685e86b79ab85c981615d4c0ad243608f457cbbe0de34",
+        "8ae56be495a96f1f31eabe97921415525913c2985c70b473631f52dee05c25be",
+        "e0a27b93a6c5fd64c53a87e60bf2eff7113e271567044c910576f2c5dd760e0f",
     }
 )
 

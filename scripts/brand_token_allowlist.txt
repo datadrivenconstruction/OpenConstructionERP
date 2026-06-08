@@ -15,3 +15,12 @@ backend/app/modules/schedule/router.py||XER
 # Integration-targets description: lists the external systems the platform can
 # connect to via API, so a user knows what actually integrates.
 locales/||community_type_integration_desc
+
+# Functional schedule import-format parsers named in design docs (same case as the
+# XER allowlist above: the code actually parses these exchange formats).
+docs/MASTER_PLAN_v2.7.md||XER
+docs/rfc/35-eac-v2-platform.md||PMXML
+
+# Portuguese-language demo content: an "acrilica" facade-paint line in the Sao Paulo
+# demo pack uses the ordinary Portuguese word for "textured", not a brand.
+demo_packs/residential-saopaulo||acrilica
