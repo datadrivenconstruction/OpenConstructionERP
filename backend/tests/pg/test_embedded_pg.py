@@ -147,6 +147,69 @@ def test_pre_initialize_cluster_passes_c_locale_on_windows(tmp_path, monkeypatch
     assert "--locale=C" in calls["args"]
 
 
+def test_clear_incomplete_cluster_wipes_debris_without_pg_version(tmp_path) -> None:
+    """A pgdata with no PG_VERSION is leftover debris and gets cleared.
+
+    Regression for the upgrade path: a build that aborted initdb (the Turkish
+    locale bug, a power loss, an antivirus lock) leaves files behind, and initdb
+    refuses to run in a non-empty directory. Clearing them lets the fixed build
+    re-create the cluster cleanly instead of failing the same way forever.
+    """
+    pgdata = tmp_path / "pgdata"
+    pgdata.mkdir()
+    (pgdata / "postmaster.opts").write_text("junk\n")
+    (pgdata / "base").mkdir()
+    (pgdata / "base" / "1").write_text("partial\n")
+    assert list(pgdata.iterdir())  # non-empty before
+
+    embedded_pg._clear_incomplete_cluster(pgdata)
+
+    assert pgdata.is_dir()  # the directory itself is preserved (mounts/ACLs)
+    assert list(pgdata.iterdir()) == []  # but emptied of debris
+
+
+def test_clear_incomplete_cluster_keeps_a_real_cluster(tmp_path) -> None:
+    """A directory that already has PG_VERSION is a real cluster, left untouched."""
+    pgdata = tmp_path / "pgdata"
+    pgdata.mkdir()
+    (pgdata / "PG_VERSION").write_text("16\n")
+    (pgdata / "base").mkdir()
+    embedded_pg._clear_incomplete_cluster(pgdata)
+    assert (pgdata / "PG_VERSION").exists()
+    assert (pgdata / "base").is_dir()
+
+
+def test_pre_initialize_cluster_clears_debris_then_inits(tmp_path, monkeypatch) -> None:
+    """On Windows, a non-empty pgdata without PG_VERSION is cleared, then inited."""
+    import sys
+    import types
+
+    pgdata = tmp_path / "pgdata"
+    pgdata.mkdir()
+    # Debris from a previous failed init: present, no PG_VERSION.
+    (pgdata / "postmaster.opts").write_text("leftover\n")
+    monkeypatch.setattr(embedded_pg.os, "name", "nt")
+
+    seen: dict[str, object] = {}
+
+    def fake_pgexec(command, args, **_kwargs):
+        # initdb must find an EMPTY directory (debris already cleared).
+        seen["dir_empty_at_initdb"] = list(pgdata.iterdir()) == []
+        seen["command"] = command
+        (pgdata / "PG_VERSION").write_text("16\n")
+        return ""
+
+    fake_mod = types.ModuleType("pixeltable_pgserver.pgexec")
+    fake_mod.pgexec = fake_pgexec
+    if "pixeltable_pgserver" not in sys.modules:
+        monkeypatch.setitem(sys.modules, "pixeltable_pgserver", types.ModuleType("pixeltable_pgserver"))
+    monkeypatch.setitem(sys.modules, "pixeltable_pgserver.pgexec", fake_mod)
+
+    assert embedded_pg._pre_initialize_cluster(pgdata) is True
+    assert seen["command"] == "initdb"
+    assert seen["dir_empty_at_initdb"] is True  # debris cleared before initdb ran
+
+
 @pytest.mark.asyncio
 async def test_boot_sets_urls_connects_and_shuts_down(tmp_path, monkeypatch) -> None:
     # Preserve the URLs the session fixture set; boot() writes os.environ directly.

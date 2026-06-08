@@ -364,6 +364,48 @@ def _initdb_args(pgdata: Path) -> tuple[str, ...]:
     )
 
 
+def _clear_incomplete_cluster(pgdata: Path) -> None:
+    """Empty a ``pgdata`` directory that has no ``PG_VERSION`` (a failed initdb).
+
+    A valid PostgreSQL cluster always has a ``PG_VERSION`` file; its absence
+    means initdb never finished -- the locale abort on a Turkish Windows box, a
+    power loss, or an antivirus lock mid-init all leave debris behind. initdb
+    then refuses to run because the target directory "exists but is not empty",
+    so a user upgrading from a build that failed this way would keep failing.
+    Since a directory without ``PG_VERSION`` is never a usable cluster, clearing
+    its contents loses nothing recoverable and lets a fresh initdb proceed.
+
+    Removes the directory's contents, not the directory itself, so any mount
+    point or ACLs on ``pgdata`` survive. Best-effort: a file we cannot remove is
+    logged, not fatal (the subsequent initdb will surface a clear error).
+    """
+    if (pgdata / "PG_VERSION").exists():
+        return
+    try:
+        entries = list(pgdata.iterdir())
+    except OSError:
+        return
+    if not entries:
+        return
+    import shutil
+
+    logger.warning(
+        "embedded PostgreSQL data dir %s has no PG_VERSION but holds %d leftover "
+        "entries from a failed or interrupted initialisation; clearing them so the "
+        "cluster can be re-created cleanly",
+        pgdata,
+        len(entries),
+    )
+    for entry in entries:
+        try:
+            if entry.is_dir() and not entry.is_symlink():
+                shutil.rmtree(entry, ignore_errors=True)
+            else:
+                entry.unlink()
+        except OSError as exc:
+            logger.warning("could not remove %s while clearing an incomplete cluster: %r", entry, exc)
+
+
 def _pre_initialize_cluster(pgdata: Path) -> bool:
     """On Windows, create the PG cluster with an ASCII-safe locale, once.
 
@@ -383,6 +425,11 @@ def _pre_initialize_cluster(pgdata: Path) -> bool:
         return False
     if (pgdata / "PG_VERSION").exists():
         return False
+    # A previous build (e.g. the released one without this fix) may have aborted
+    # initdb partway and left unusable debris; initdb will not run in a non-empty
+    # directory, so clear that first. This is what unblocks a user upgrading from
+    # a build that was stuck "Recovering the local database" forever.
+    _clear_incomplete_cluster(pgdata)
     try:
         from pixeltable_pgserver.pgexec import pgexec
     except Exception as exc:  # noqa: BLE001
