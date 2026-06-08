@@ -81,6 +81,35 @@ _SKIP_PARTS = {
 # it anyway to keep the report clean.
 _SELF = Path(__file__).resolve()
 
+# Reviewed functional-interop exceptions (e.g. an import-format name or an
+# integration-target list that tells a user what they can actually connect to).
+# Each line is `<path-substr>||<line-substr>`: a hit is allowed only when the
+# file path contains <path-substr> (empty = any file) AND the matched line
+# contains <line-substr>. This stays precise - a new brand on a different line
+# is still caught, because it will not carry the reviewed context substring.
+_ALLOWLIST_FILE = REPO_ROOT / "scripts" / "brand_token_allowlist.txt"
+
+
+def _load_allowlist() -> list[tuple[str, str]]:
+    entries: list[tuple[str, str]] = []
+    if not _ALLOWLIST_FILE.is_file():
+        return entries
+    for raw in _ALLOWLIST_FILE.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "||" not in line:
+            continue
+        path_sub, _, line_sub = line.partition("||")
+        entries.append((path_sub.strip(), line_sub.strip()))
+    return entries
+
+
+def _is_allowed(relpath: str, line: str, allowlist: list[tuple[str, str]]) -> bool:
+    rp = relpath.replace("\\", "/")
+    return any(
+        (not path_sub or path_sub in rp) and line_sub and line_sub in line
+        for path_sub, line_sub in allowlist
+    )
+
 
 def _git_files(args: list[str]) -> list[Path]:
     out = subprocess.run(
@@ -124,8 +153,8 @@ def _mask(token: str) -> str:
     return f"{token[0]}{'*' * (len(token) - 2)}{token[-1]} (len {len(token)})"
 
 
-def _scan_file(path: Path) -> list[tuple[int, str]]:
-    hits: list[tuple[int, str]] = []
+def _scan_file(path: Path) -> list[tuple[int, str, str]]:
+    hits: list[tuple[int, str, str]] = []
     try:
         text = path.read_text(encoding="utf-8")
     except (UnicodeDecodeError, OSError):
@@ -136,7 +165,7 @@ def _scan_file(path: Path) -> list[tuple[int, str]]:
             if not (_MIN_LEN <= len(token) <= _MAX_LEN):
                 continue
             if hashlib.sha256(token.encode("utf-8")).hexdigest() in _DENY_HASHES:
-                hits.append((lineno, _mask(token)))
+                hits.append((lineno, _mask(token), line))
     return hits
 
 
@@ -151,7 +180,9 @@ def main(argv: list[str]) -> int:
     else:
         candidates = _tracked_text_files()
 
+    allowlist = _load_allowlist()
     failures: list[str] = []
+    allowed = 0
     for path in candidates:
         rp = path.resolve()
         if rp == _SELF:
@@ -162,11 +193,14 @@ def main(argv: list[str]) -> int:
             continue
         if not rp.is_file():
             continue
-        for lineno, masked in _scan_file(rp):
-            try:
-                shown = rp.relative_to(REPO_ROOT)
-            except ValueError:
-                shown = rp
+        try:
+            shown = str(rp.relative_to(REPO_ROOT))
+        except ValueError:
+            shown = str(rp)
+        for lineno, masked, line in _scan_file(rp):
+            if _is_allowed(shown, line, allowlist):
+                allowed += 1
+                continue
             failures.append(f"{shown}:{lineno}: brand token {masked}")
 
     if failures:
@@ -179,7 +213,8 @@ def main(argv: list[str]) -> int:
         )
         return 1
 
-    print(f"[OK] no brand tokens in {len(candidates)} scanned file(s)")
+    note = f" ({allowed} reviewed interop exception(s) allowed)" if allowed else ""
+    print(f"[OK] no brand tokens in {len(candidates)} scanned file(s){note}")
     return 0
 
 

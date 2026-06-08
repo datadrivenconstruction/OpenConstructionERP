@@ -1,0 +1,17 @@
+# Reviewed functional-interop exceptions for check_no_brand_tokens.py.
+# Founder-approved 2026-06-08: functional interop names stay (they tell a user
+# what they can actually import or connect to); everything else is scrubbed.
+#
+# Format: <path-substr>||<line-substr>
+# A brand token is allowed ONLY on a line whose file path contains <path-substr>
+# (empty = any file) AND whose text contains <line-substr>. This stays precise:
+# a new brand on any other line is still caught, because it will not carry the
+# reviewed context substring. Keep this list as small as the genuine interop set.
+
+# Schedule importer: the named tab-delimited exchange format is functional interop
+# (the import endpoint parses real files of this format).
+backend/app/modules/schedule/router.py||XER
+
+# Integration-targets description: lists the external systems the platform can
+# connect to via API, so a user knows what actually integrates.
+locales/||community_type_integration_desc
