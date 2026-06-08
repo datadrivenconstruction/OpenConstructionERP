@@ -162,6 +162,20 @@ def boot(data_dir: Path | str) -> bool:
     # not running" path; clearing it first keeps boot on the clean-start path.
     _clear_stale_pidfile(resolved_pgdata)
 
+    # Embedded PG must initialise with an ASCII-safe locale. PostgreSQL's initdb
+    # rejects a locale *name* that contains non-ASCII characters, and the bundled
+    # initdb otherwise inherits the operating-system locale. On a Turkish Windows
+    # box that locale is "Turkish_Türkiye.1254": initdb aborts with `locale name
+    # ... contains non-ASCII characters`, then pixeltable crashes a second time
+    # decoding that CP1254 error text as UTF-8, and the cluster is left stuck
+    # "Recovering the local database" forever. Force the C locale for every PG
+    # child process, and on Windows -- where env vars do NOT override the OS
+    # locale that initdb reads -- pre-create the cluster ourselves with an
+    # explicit --locale=C so pixeltable's own (locale-inheriting) initdb is
+    # skipped. Both are no-ops once the cluster exists.
+    _apply_ascii_locale_env()
+    _pre_initialize_cluster(resolved_pgdata)
+
     emit_stage("pg", "start", "Starting embedded PostgreSQL")
 
     # Window for the whole bring-up, including a possibly slow crash recovery.
@@ -304,6 +318,86 @@ def _clear_stale_pidfile(pgdata: Path) -> None:
         logger.info("removed stale postmaster.pid (dead pid %d) in %s", pid, pgdata)
     except OSError as exc:
         logger.warning("could not remove stale postmaster.pid in %s: %r", pgdata, exc)
+
+
+#: Locale overrides forced onto every embedded-PG child process. PostgreSQL's
+#: initdb rejects locale *names* that contain non-ASCII characters; the C locale
+#: is always ASCII and deterministic, which is exactly what an internal app
+#: cluster wants (byte-order collation, no linguistic surprises).
+_ASCII_LOCALE_ENV = {
+    "LC_ALL": "C",
+    "LANG": "C",
+    "LC_CTYPE": "C",
+    "LC_COLLATE": "C",
+    "LC_MESSAGES": "C",
+}
+
+
+def _apply_ascii_locale_env() -> None:
+    """Force a C locale for the embedded-PG subprocesses (initdb / postgres).
+
+    Set in this process's environment so every child PG binary inherits it.
+    Safe for the Python app itself: its locale was fixed at interpreter start and
+    it does all file I/O as explicit UTF-8, so mutating ``os.environ`` now only
+    affects the child processes we spawn, not Python's own text handling.
+    """
+    for key, value in _ASCII_LOCALE_ENV.items():
+        os.environ[key] = value
+
+
+def _initdb_args(pgdata: Path) -> tuple[str, ...]:
+    """``initdb`` arguments matching pixeltable-pgserver, plus an explicit C locale.
+
+    Kept identical to ``pixeltable_pgserver.postgres_server`` (auth=trust, utf8
+    encoding, superuser ``postgres``) so a cluster we pre-create is exactly what
+    pixeltable expects -- it then finds ``PG_VERSION`` and skips its own initdb.
+    """
+    return (
+        "--auth=trust",
+        "--auth-local=trust",
+        "--encoding=utf8",
+        "--locale=C",
+        "-U",
+        "postgres",
+        "-D",
+        str(pgdata),
+    )
+
+
+def _pre_initialize_cluster(pgdata: Path) -> bool:
+    """On Windows, create the PG cluster with an ASCII-safe locale, once.
+
+    Returns ``True`` if this call initialised the cluster, ``False`` if it was
+    already initialised, not applicable (non-Windows), or the pre-init failed --
+    in which case we leave it to pixeltable's own path, so we are never worse off
+    than before.
+
+    Windows-only on purpose: on POSIX, initdb honours the ``LC_*``/``LANG``
+    environment, so :func:`_apply_ascii_locale_env` already steers it to C. On
+    Windows the C runtime's locale comes from the OS regional settings, not env
+    vars, so the only reliable way to dodge a non-ASCII OS locale is to pass
+    ``--locale=C`` to initdb explicitly, which we do here before pixeltable's
+    ``get_server()`` runs.
+    """
+    if os.name != "nt":
+        return False
+    if (pgdata / "PG_VERSION").exists():
+        return False
+    try:
+        from pixeltable_pgserver.pgexec import pgexec
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("could not import pixeltable pgexec for pre-init: %r", exc)
+        return False
+    try:
+        pgexec("initdb", _initdb_args(pgdata))
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(
+            "pre-initialising embedded PostgreSQL with --locale=C failed; falling back to pixeltable's own initdb: %r",
+            exc,
+        )
+        return False
+    logger.info("pre-initialised embedded PostgreSQL cluster (locale=C) at %s", pgdata)
+    return True
 
 
 def _port_from_pidfile(pgdata: Path) -> int | None:

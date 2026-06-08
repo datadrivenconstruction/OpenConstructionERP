@@ -78,6 +78,75 @@ def test_clear_stale_pidfile_keeps_live(tmp_path, monkeypatch) -> None:
     assert pidfile.exists()
 
 
+def test_initdb_args_force_c_locale(tmp_path) -> None:
+    """initdb is always pre-created with an explicit ASCII-safe --locale=C.
+
+    Regression guard for the Turkish-Windows boot hang: without --locale=C the
+    bundled initdb inherits a non-ASCII OS locale name ("Turkish_Türkiye.1254")
+    and aborts, leaving the cluster stuck "recovering" forever.
+    """
+    args = embedded_pg._initdb_args(tmp_path / "pgdata")
+    assert "--locale=C" in args
+    # Stay byte-for-byte compatible with pixeltable so it skips its own initdb.
+    assert "--encoding=utf8" in args
+    assert "--auth=trust" in args
+    assert args[-2:] == ("-D", str(tmp_path / "pgdata"))
+    assert "postgres" in args  # superuser name must match pixeltable's
+
+
+def test_apply_ascii_locale_env_sets_c(monkeypatch) -> None:
+    for key in embedded_pg._ASCII_LOCALE_ENV:
+        monkeypatch.delenv(key, raising=False)
+    embedded_pg._apply_ascii_locale_env()
+    assert os.environ["LC_ALL"] == "C"
+    assert os.environ["LANG"] == "C"
+    assert os.environ["LC_CTYPE"] == "C"
+    assert os.environ["LC_COLLATE"] == "C"
+
+
+def test_pre_initialize_cluster_noop_on_posix(tmp_path, monkeypatch) -> None:
+    """On POSIX the env-var locale fix is enough, so pre-init is a no-op."""
+    monkeypatch.setattr(embedded_pg.os, "name", "posix")
+    assert embedded_pg._pre_initialize_cluster(tmp_path / "pgdata") is False
+
+
+def test_pre_initialize_cluster_skips_when_already_inited(tmp_path, monkeypatch) -> None:
+    """A cluster that already has PG_VERSION is never re-initialised."""
+    pgdata = tmp_path / "pgdata"
+    pgdata.mkdir()
+    (pgdata / "PG_VERSION").write_text("16\n")
+    monkeypatch.setattr(embedded_pg.os, "name", "nt")
+    assert embedded_pg._pre_initialize_cluster(pgdata) is False
+
+
+def test_pre_initialize_cluster_passes_c_locale_on_windows(tmp_path, monkeypatch) -> None:
+    """On Windows, a fresh cluster is pre-created via initdb --locale=C."""
+    import sys
+    import types
+
+    pgdata = tmp_path / "pgdata"
+    pgdata.mkdir()
+    monkeypatch.setattr(embedded_pg.os, "name", "nt")
+
+    calls: dict[str, object] = {}
+
+    def fake_pgexec(command, args, **_kwargs):
+        calls["command"] = command
+        calls["args"] = tuple(args)
+        (pgdata / "PG_VERSION").write_text("16\n")  # simulate a real initdb
+        return ""
+
+    fake_mod = types.ModuleType("pixeltable_pgserver.pgexec")
+    fake_mod.pgexec = fake_pgexec
+    if "pixeltable_pgserver" not in sys.modules:
+        monkeypatch.setitem(sys.modules, "pixeltable_pgserver", types.ModuleType("pixeltable_pgserver"))
+    monkeypatch.setitem(sys.modules, "pixeltable_pgserver.pgexec", fake_mod)
+
+    assert embedded_pg._pre_initialize_cluster(pgdata) is True
+    assert calls["command"] == "initdb"
+    assert "--locale=C" in calls["args"]
+
+
 @pytest.mark.asyncio
 async def test_boot_sets_urls_connects_and_shuts_down(tmp_path, monkeypatch) -> None:
     # Preserve the URLs the session fixture set; boot() writes os.environ directly.
