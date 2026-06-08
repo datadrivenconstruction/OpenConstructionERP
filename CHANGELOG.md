@@ -1509,7 +1509,7 @@ Single head at `v3098`.
 - **Request correlation IDs.** New `app/middleware/request_id.py` (`RequestIDMiddleware`) generates `uuid4().hex[:16]` (or honours a client-supplied `X-Request-ID` matching `^[A-Za-z0-9_-]{1,64}$`), stores it in a `ContextVar`, echoes it on every response. Wired into the root logger via `RequestIDLogFilter` so every log line in the process gets the request ID injected. Format prefix is now `[%(request_id)s]`.
 - **Slow-query logging.** SQLAlchemy `before_cursor_execute` / `after_cursor_execute` event listeners measure each statement; anything over `OE_SLOW_QUERY_MS` (default 500 ms) is logged at WARNING with structured `extra={elapsed_ms, statement[:200], executemany}`. Covers both async and sync engines.
 - **`/api/health` deepened.** Adds `alembic_head_matches` (script head vs DB current rev) and `frontend_dist_present` (`_frontend_dist/index.html` exists). Either being false flips top-level `status` to `"degraded"` (still 200 - load balancers can probe without page-flapping).
-- **Operator runbook.** New `docs/RUNBOOK.md` (156 lines): service basics, restart / logs / health probes, deploy procedure, sqlite backup-restore, alembic `DATABASE_SYNC_URL` gotcha, rollback, common-500 causes. Extracted from internal memory so on-call doesn't need Claude or Artem to recover the box.
+- **Operator runbook.** New `docs/RUNBOOK.md` (156 lines): service basics, restart / logs / health probes, deploy procedure, sqlite backup-restore, alembic `DATABASE_SYNC_URL` gotcha, rollback, common-500 causes. Extracted from internal memory so on-call can recover the box without paging the original author.
 - **Client-error sink endpoint.** New module `oe_client_errors`: `POST /api/v1/client-errors/` accepts anonymised payloads (length-capped: message ≤ 2048, ≤ 64 stack lines, ua / path ≤ 512), per-IP 30/min rate limit, logs at WARNING with structured `extra`. Frontend `errorLogger.ts` now POSTs alongside localStorage (fire-and-forget, `keepalive: true`, gated by `VITE_ENABLE_ERROR_REPORTING`).
 - **FK indexes migration (`v3096_round3_fk_indexes`).** Adds 6 missing indexes: `oe_contracts_progress_claim_line.contract_line_id`, `oe_clash_issue.{first_seen,last_seen,resolved}_run_id`, `oe_crm_opportunity.lost_reason_code`, `oe_equipment_work_order.schedule_id`. Inspector-guarded so re-running is safe. The other 8 audit-flagged FKs turned out to be already covered by composite indexes.
 
@@ -4020,7 +4020,7 @@ Stability release. No migration needed for 2.4.0 upgrades.
 - New modules: `oe_dashboards`, `oe_compliance_ai`, `oe_cost_match` (auto-discovered).
 - `snapshot_storage.py` + `duckdb_pool.py` core primitives.
 - `duckdb>=1.2.0` + `rapidfuzz>=3.0.0` promoted to base deps.
-- ADR-001 (snapshot storage model) + `CLAUDE-DASHBOARDS.md` 13-task plan.
+- ADR-001 (snapshot storage model) + `DASHBOARDS_PLAN.md` 13-task plan.
 - 25 new unit tests. Full suite: 1470/1470 green.
 
 ## [2.4.0] - 2026-04-22
