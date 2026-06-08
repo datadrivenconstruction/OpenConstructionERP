@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "confidence_badge.high": "High confidence",
+    "confidence_badge.medium": "Medium confidence",
+    "confidence_badge.low": "Low confidence",
+    "confidence_badge.score": "{{pct}}%",
+    "suggestion.accept": "Accept",
+    "suggestion.edit": "Edit",
+    "suggestion.reject": "Reject",
+    "suggestion.learn_more": "Learn more",
+    "error_explain.retry": "Retry",
+    "error_explain.contact_support": "Contact support",
+    "glossary.example_prefix": "Example:",
     "theme.label": "Theme",
     "theme.light": "Light",
     "theme.dark": "Dark",
