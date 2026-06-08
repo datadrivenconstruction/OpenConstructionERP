@@ -347,6 +347,19 @@ testpaths = ["tests"]
 # package, never a stale ``pip install openconstructionerp`` in site-packages.
 pythonpath = ["."]
 asyncio_mode = "auto"
+# Restore a single shared event loop for the whole test session. These suites
+# were written against pytest-asyncio 0.21, where one session-wide loop was the
+# default, so many of them use module-scoped async fixtures that yield an
+# AsyncSession reused by every test in the module. pytest-asyncio 1.x defaults
+# each test and fixture to its own function-scoped loop, which left those
+# module-scoped connections bound to a loop that was already closed and
+# surfaced as "attached to a different loop" and "another operation is in
+# progress" cascades once the sharded gate actually ran the suite to
+# completion. Pinning both loop scopes to "session" puts every test and fixture
+# back on one loop. NullPool (set in conftest) still opens a fresh connection
+# per checkout, so nothing leaks across that shared loop.
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 # Run serially. The suite shares one PostgreSQL database that conftest sets
 # up at import time, and the first user it registers is bootstrapped as the
 # admin every later test depends on. Under pytest-xdist each worker is a
