@@ -694,6 +694,10 @@ export const matchElementsApi = {
       group_keys?: string[];
       max_groups?: number;
       top_k?: number;
+      // Optional model/provider hint for the method="llm" re-rank, e.g.
+      // "gpt-4o". The key is resolved server-side from the user's own AI
+      // settings; only the model hint travels from the client.
+      llm_model?: string;
     },
     opts?: { signal?: AbortSignal },
   ) =>

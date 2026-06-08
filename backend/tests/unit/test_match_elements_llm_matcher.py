@@ -225,5 +225,83 @@ class TestRankDegradation:
         assert "llm_no_pick" in out[0].boosts_applied
 
 
+# ── _resolve_ai bring-your-own-AI scoping ─────────────────────────────────
+
+
+class _FakeRepo:
+    """Records which user_id was asked for and returns a per-user sentinel."""
+
+    last_user_id: uuid.UUID | None = None
+
+    def __init__(self, session) -> None:  # noqa: ANN001
+        self._session = session
+
+    async def get_by_user_id(self, user_id: uuid.UUID):
+        _FakeRepo.last_user_id = user_id
+        # Return a marker object so the fake resolver can prove it received
+        # THIS user's settings row (and not a global "first row wins" one).
+        return {"owner": user_id}
+
+
+class TestResolveAiScoping:
+    """The AI re-rank must use the requesting user's own key, never another
+    tenant's - the multi-tenant leak fix."""
+
+    def _patch(self, monkeypatch, resolver):
+        import app.modules.ai.ai_client as ai_client
+        import app.modules.ai.repository as ai_repo
+
+        _FakeRepo.last_user_id = None
+        monkeypatch.setattr(ai_repo, "AISettingsRepository", _FakeRepo)
+        monkeypatch.setattr(ai_client, "resolve_provider_key_model", resolver)
+
+    def test_scopes_lookup_to_requesting_user(self, monkeypatch):
+        user_a = uuid.uuid4()
+
+        def _resolver(settings, model_override=None):
+            # Proves the per-user row (not a global scan) reached the resolver.
+            assert settings == {"owner": user_a}
+            return ("anthropic", "sk-user-a", None)
+
+        self._patch(monkeypatch, _resolver)
+        matcher = LLMMatcher(session=object(), user_id=user_a)
+        resolved = _run(matcher._resolve_ai())
+        assert resolved == ("anthropic", "sk-user-a", None)
+        assert _FakeRepo.last_user_id == user_a
+
+    def test_no_user_id_skips_db_and_uses_env(self, monkeypatch):
+        def _resolver(settings, model_override=None):
+            # No user => no DB row; resolver falls back to env/config.
+            assert settings is None
+            return ("openai", "env-key", None)
+
+        self._patch(monkeypatch, _resolver)
+        matcher = LLMMatcher(session=object(), user_id=None)
+        resolved = _run(matcher._resolve_ai())
+        assert resolved == ("openai", "env-key", None)
+        assert _FakeRepo.last_user_id is None  # repo never queried
+
+    def test_no_key_anywhere_degrades_to_none(self, monkeypatch):
+        def _resolver(settings, model_override=None):
+            raise ValueError("No AI API key configured.")
+
+        self._patch(monkeypatch, _resolver)
+        matcher = LLMMatcher(session=object(), user_id=uuid.uuid4())
+        assert _run(matcher._resolve_ai()) is None
+
+    def test_model_override_forwarded_to_resolver(self, monkeypatch):
+        seen: dict[str, str | None] = {}
+
+        def _resolver(settings, model_override=None):
+            seen["model"] = model_override
+            return ("openai", "sk", "gpt-4o")
+
+        self._patch(monkeypatch, _resolver)
+        matcher = LLMMatcher(session=object(), user_id=uuid.uuid4(), model_override="gpt-4o")
+        resolved = _run(matcher._resolve_ai())
+        assert seen["model"] == "gpt-4o"
+        assert resolved == ("openai", "sk", "gpt-4o")
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

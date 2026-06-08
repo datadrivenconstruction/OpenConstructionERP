@@ -298,6 +298,13 @@ class RunMatchRequest(BaseModel):
     # by element_count so the user gets actionable matches in seconds.
     max_groups: int = Field(default=10, ge=1, le=200)
     top_k: int = Field(default=10, ge=1, le=50)
+    # Bring-your-own-AI: when method="llm" the AI re-rank uses the
+    # requesting user's own provider key (Settings > AI). Optionally steer
+    # which model/provider does the re-rank for this run, e.g. "gpt-4o" or
+    # "claude-opus" - resolves to the matching provider's stored key. None
+    # means "use the user's default provider/model". The key itself is
+    # never sent from the client; only the model hint is.
+    llm_model: str | None = Field(default=None, max_length=100)
 
 
 class ConfirmMatchRequest(BaseModel):

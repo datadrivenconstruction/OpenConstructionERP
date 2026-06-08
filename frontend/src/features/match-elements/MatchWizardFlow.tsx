@@ -22,7 +22,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   ArrowLeft,
@@ -51,6 +51,8 @@ import {
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi, type Project } from '@/features/projects/api';
+import { aiApi } from '@/features/ai/api';
+import { hasLlmKey } from '@/features/ai-estimator/useAiReadiness';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { BIMModelPicker } from '@/shared/ui/BIMModelPicker';
@@ -330,6 +332,7 @@ export function MatchWizardFlow() {
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
 
@@ -350,6 +353,12 @@ export function MatchWizardFlow() {
   const [stageHint, setStageHint] = useState<ConstructionStage | ''>('');
   const [useNet, setUseNet] = useState(true);
   const [autoThreshold, setAutoThreshold] = useState(0.88);
+  // Bring-your-own-AI: when on, the match runs the LLM re-rank (method
+  // "llm") over the vector shortlist using the user's own provider key,
+  // instead of the deterministic vector ranking alone. Gated on a
+  // connected AI key below; the backend degrades to vector if the key
+  // disappears, so this never blocks a run.
+  const [useAiRerank, setUseAiRerank] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   // Stage-3 user overrides for the bound cost catalogue + display currency.
   // ``catalogueId`` is a CWICR-v3 region string (e.g. "de", "us") OR null
@@ -491,9 +500,26 @@ export function MatchWizardFlow() {
       }),
   });
 
+  // Is the user's own AI connected? Shared 'ai-settings' query key so this
+  // dedupes with the AI Estimate Builder / Settings probes.
+  const aiSettingsQ = useQuery({
+    queryKey: ['ai-settings'],
+    queryFn: aiApi.getSettings,
+    staleTime: 60_000,
+    retry: false,
+  });
+  const aiConnected = hasLlmKey(aiSettingsQ.data);
+
   const runMatchM = useMutation({
     mutationFn: () =>
-      matchElementsApi.runMatch(sessionId!, { method: 'vector', max_groups: 200, top_k: 10 }),
+      matchElementsApi.runMatch(sessionId!, {
+        // Use the AI re-rank only when the user asked for it AND has a key
+        // connected; otherwise the deterministic vector ranking. The
+        // backend scopes the re-rank to this user's own provider key.
+        method: useAiRerank && aiConnected ? 'llm' : 'vector',
+        max_groups: 200,
+        top_k: 10,
+      }),
     onError: (e: Error) => {
       setMatchStatus('error');
       setMatchError(e.message);
@@ -1223,6 +1249,75 @@ export function MatchWizardFlow() {
                           'Groups whose best candidate scores above this are confirmed automatically; the rest wait for your review.',
                       })}
                     </p>
+                  </div>
+
+                  {/* Bring-your-own-AI: optional LLM re-rank over the vector
+                      shortlist, using the user's own provider key. */}
+                  <div className="rounded-xl border border-border-light bg-surface-elevated p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10">
+                        <Sparkles className="h-4 w-4 text-indigo-500" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm font-medium text-content-primary">
+                            {t('match.wizard.aiRerankTitle', {
+                              defaultValue: 'Re-rank with your own AI',
+                            })}
+                          </span>
+                          {aiConnected ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                              <Check className="h-3 w-3" />
+                              {t('match.wizard.aiConnected', {
+                                defaultValue: 'AI connected',
+                              })}
+                              {aiSettingsQ.data?.preferred_model
+                                ? ` · ${aiSettingsQ.data.preferred_model}`
+                                : ''}
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[11px] font-medium text-content-tertiary">
+                              {t('match.wizard.aiNotConnected', {
+                                defaultValue: 'Not connected',
+                              })}
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1 text-xs text-content-tertiary">
+                          {t('match.wizard.aiRerankNote', {
+                            defaultValue:
+                              'The semantic search picks a shortlist of real catalogue rows, then your AI re-orders it for the best match and sets a confidence. It can only re-order real candidates, never invent a code. Connect your provider key in Settings to turn this on.',
+                          })}
+                        </p>
+
+                        {aiConnected ? (
+                          <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-content-primary">
+                            <input
+                              type="checkbox"
+                              checked={useAiRerank}
+                              onChange={(e) => setUseAiRerank(e.target.checked)}
+                              className="h-4 w-4 accent-oe-blue"
+                            />
+                            {t('match.wizard.aiRerankToggle', {
+                              defaultValue: 'Use my AI to re-rank candidates (more accurate)',
+                            })}
+                          </label>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            className="mt-3"
+                            icon={<ExternalLink className="h-4 w-4" />}
+                            onClick={() => navigate('/settings?tab=ai')}
+                          >
+                            {t('match.wizard.aiConnectCta', {
+                              defaultValue: 'Connect your AI',
+                            })}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
