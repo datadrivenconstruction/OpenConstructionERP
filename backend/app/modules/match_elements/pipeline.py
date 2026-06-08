@@ -844,8 +844,11 @@ async def _run_match(
         group_keys=keys[:cap],
         max_groups=min(len(keys), 200),
         top_k=int((stage.inputs or {}).get("top_k", 10)),
+        llm_model=(stage.inputs or {}).get("llm_model"),
     )
-    summaries = await service.run_match(db, session.id, req)
+    # Scope the AI re-rank to the session owner's own provider key
+    # (bring-your-own-AI) rather than whichever tenant saved a key first.
+    summaries = await service.run_match(db, session.id, req, user_id=session.created_by)
     confirmed = sum(1 for s in summaries if s.status == "confirmed")
     suggested = sum(1 for s in summaries if s.status == "suggested")
     return {

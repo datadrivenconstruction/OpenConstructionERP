@@ -151,44 +151,56 @@ class LLMMatcher:
 
     name = "llm"
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self,
+        session: AsyncSession,
+        *,
+        user_id: uuid.UUID | None = None,
+        model_override: str | None = None,
+    ) -> None:
         self.session = session
         self._vector = VectorMatcher(session)
+        # Whose AI key to re-rank with. Bring-your-own-AI: the re-rank uses
+        # the requesting user's own provider key, never another tenant's.
+        self.user_id = user_id
+        # Optional per-run model/provider hint (e.g. "gpt-4o", "claude-opus").
+        # Steers which of the user's configured providers does the re-rank.
+        self.model_override = model_override
 
     async def _resolve_ai(self) -> tuple[str, str, str | None] | None:
         """Resolve ``(provider, api_key, model)`` or ``None`` when unset.
 
-        Mirrors the lookup the image adapter uses: try any usable
-        :class:`AISettings` row, then fall back to env / config.json via
-        :func:`resolve_provider_key_model`. Every failure path returns
-        ``None`` so the caller degrades gracefully.
+        Scoped to ``self.user_id`` so the AI re-rank always runs on the
+        requesting user's own provider key (bring-your-own-AI), never on
+        whichever tenant happened to save a key first.
+        ``resolve_provider_key_model`` also reaches into env vars /
+        config.json when the user's row has no key, so a single-tenant
+        deploy that keeps its key in the environment still works with
+        ``user_id`` set. Every failure path returns ``None`` so the caller
+        degrades to the deterministic vector ranking.
         """
         try:
             from app.modules.ai.ai_client import resolve_provider_key_model
-            from app.modules.ai.models import AISettings
+            from app.modules.ai.repository import AISettingsRepository
         except ImportError as exc:
             logger.warning("LLMMatcher: AI module not available: %s", exc)
             return None
 
-        from sqlalchemy import select
-
-        # Try stored settings rows first (single-tenant: the first row
-        # with a usable key wins). resolve_provider_key_model also reaches
-        # into env vars / config.json when the row has no key, so a single
-        # call with settings=None still finds an env key.
-        try:
-            rows = (await self.session.execute(select(AISettings).limit(50))).scalars().all()
-        except Exception as exc:  # noqa: BLE001 - AI is best-effort
-            logger.warning("LLMMatcher: AISettings lookup failed: %s", exc)
-            rows = []
-
-        for row in [*rows, None]:
+        settings = None
+        if self.user_id is not None:
             try:
-                provider, api_key, model = resolve_provider_key_model(row)
-            except ValueError:
-                continue
-            if provider and (api_key or provider in ("ollama", "vllm")):
-                return provider, api_key, model
+                settings = await AISettingsRepository(self.session).get_by_user_id(self.user_id)
+            except Exception as exc:  # noqa: BLE001 - AI is best-effort
+                logger.warning("LLMMatcher: AISettings lookup failed: %s", exc)
+                settings = None
+
+        try:
+            provider, api_key, model = resolve_provider_key_model(settings, self.model_override)
+        except ValueError:
+            # No usable key for this user (and none in env/config).
+            return None
+        if provider and (api_key or provider in ("ollama", "vllm")):
+            return provider, api_key, model
         return None
 
     def _degrade(

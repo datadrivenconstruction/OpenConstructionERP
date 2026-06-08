@@ -707,7 +707,12 @@ async def run_match(
 ) -> list[schemas.GroupSummary]:
     await _assert_session_access(session, session_id, current_user_id)
     try:
-        return await get_service().run_match(session, session_id, spec)
+        return await get_service().run_match(
+            session,
+            session_id,
+            spec,
+            user_id=_u(current_user_id),
+        )
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc)) from exc
 

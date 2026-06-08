@@ -1417,7 +1417,14 @@ class MatchElementsService:
             "(expected one of: bim, dwg, text, boq, image, photo, pdf)."
         )
 
-    def _matcher(self, name: str, db: AsyncSession):
+    def _matcher(
+        self,
+        name: str,
+        db: AsyncSession,
+        *,
+        user_id: uuid.UUID | None = None,
+        llm_model: str | None = None,
+    ):
         if name == "vector":
             return VectorMatcher(db)
         if name == "lexical":
@@ -1431,9 +1438,10 @@ class MatchElementsService:
             return ResourcesMatcher(db)
         if name == "llm":
             # AI-assisted re-rank over a vector-prefiltered shortlist.
+            # Scoped to the requesting user's own AI key (bring-your-own-AI).
             # Degrades to the vector matcher (with a logged note) when no
             # AI provider key is configured - never raises NotImplemented.
-            return LLMMatcher(db)
+            return LLMMatcher(db, user_id=user_id, model_override=llm_model)
         raise ValueError(f"Unknown matcher: {name}")
 
     # ── Sessions ──────────────────────────────────────────────────────
@@ -2181,6 +2189,7 @@ class MatchElementsService:
         db: AsyncSession,
         session_id: uuid.UUID,
         spec: schemas.RunMatchRequest,
+        user_id: uuid.UUID | None = None,
     ) -> list[schemas.GroupSummary]:
         sess = await db.get(MatchSession, session_id)
         if sess is None:
@@ -2346,7 +2355,12 @@ class MatchElementsService:
                 )
                 return []
 
-        matcher = self._matcher(spec.method, db)
+        matcher = self._matcher(
+            spec.method,
+            db,
+            user_id=user_id,
+            llm_model=spec.llm_model,
+        )
 
         # Stage 2: loading source elements (BIM / Excel rows / text /
         # photo). For BIM models this is the per-element fetch + join
