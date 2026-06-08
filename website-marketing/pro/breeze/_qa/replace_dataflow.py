@@ -335,7 +335,7 @@ NEW_BLOCK = """‌⁠‍  <!-- SECTION 9.5 — DATA FLOW (project file → price
             <div class="df-node-icon"><svg viewBox="0 0 26 22">
               <path class="df-st" d="M 5 7 L 8 11 L 5 15 M 21 7 L 18 11 L 21 15 M 14 6 L 11 16"/>
             </svg></div>
-            <div class="df-node-text"><span class="df-node-name">REST · webhooks</span><span class="df-node-tag">to ERP / SAP / Procore</span></div>
+            <div class="df-node-text"><span class="df-node-name">REST · webhooks</span><span class="df-node-tag">to ERP / SAP / PM tools</span></div>
           </div>
 
           <div class="df-node df-node-out">

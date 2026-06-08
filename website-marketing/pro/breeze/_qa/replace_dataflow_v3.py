@@ -346,7 +346,7 @@ NEW_BLOCK = """‌⁠‍  <!-- SECTION 9.5 — DATA FLOW (project file → price
               <path class="df-mini-out-st df-mini-st" d="M 4 6 L 9 12 L 4 18 M 24 6 L 19 12 L 24 18 M 17 4 L 11 20"/>
             </g>
             <text class="df-name" x="1048" y="330">REST · webhooks</text>
-            <text class="df-tag"  x="1048" y="345">to ERP / SAP / Procore</text>
+            <text class="df-tag"  x="1048" y="345">to ERP / SAP / PM tools</text>
 
             <!-- JSON · Parquet canonical -->
             <rect class="df-rect-out" x="1000" y="372" width="200" height="48" rx="10"/>

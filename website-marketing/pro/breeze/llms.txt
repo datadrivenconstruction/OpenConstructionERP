@@ -25,7 +25,7 @@
 - Validation Pipeline: Configurable rule engine across DIN 276 / NRM / MasterFormat / GAEB / DPGF, with traffic-light reports linked to elements.
 - Collaboration: Real-time multiplayer BOQ editing via Yjs CRDT.
 - Module Marketplace: Plugin system with manifest-based modules.
-- Reports & Exports: PDF, GAEB XML, XLSX/CSV, JSON/Parquet, REST/webhooks to ERP/SAP/Procore.
+- Reports & Exports: PDF, GAEB XML, XLSX/CSV, JSON/Parquet, REST/webhooks to ERP/SAP/PM systems.
 
 ## Standards supported
 
