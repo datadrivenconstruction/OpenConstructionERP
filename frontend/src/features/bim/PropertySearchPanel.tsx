@@ -272,7 +272,9 @@ export default function PropertySearchPanel({
         >
           {OPS.map((o) => (
             <option key={o.value} value={o.value}>
-              {o.label}
+              {o.value === 'LIKE'
+                ? t('bim.property_search_op_contains', { defaultValue: 'contains' })
+                : o.label}
             </option>
           ))}
         </select>
