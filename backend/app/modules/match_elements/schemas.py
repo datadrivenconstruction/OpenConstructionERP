@@ -211,7 +211,7 @@ class GroupSummary(BaseModel):
     primary_quantity: float = 0.0
     # Gross/net pair; opening_warning fires when the host has openings
     # in IFC but gross == net, indicating the upstream IFC export bug
-    # the user should know about (see Autodesk revit-ifc #496/#742).
+    # the user should know about (a known issue in common BIM-to-IFC exporters).
     gross_quantity: float | None = None
     net_quantity: float | None = None
     opening_warning: bool = False

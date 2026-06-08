@@ -85,7 +85,7 @@ class ChatMessage(Base):
 
     # ── Per-turn observability (T8 / v3089) ─────────────────────────────
     # These supplement the legacy ``tokens_used`` total with the split
-    # input/output breakdown Autodesk AI and Trimble AI surface in their
+    # input/output breakdown construction AI assistants surface in their
     # admin dashboards, plus prompt-cache hit + wall-clock latency. All
     # four are nullable because older rows pre-date the migration.
     tokens_input: Mapped[int | None] = mapped_column(Integer, nullable=True)

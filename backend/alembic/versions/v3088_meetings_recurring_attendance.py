@@ -1,13 +1,13 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Meetings — Newforma-style recurring series + attendance check-in.
+"""Meetings - recurring series + attendance check-in.
 
-Newforma Project Meetings and Procore Meetings both ship a *recurring
-series* model — a single "master" meeting carries an iCal-style RRULE
+Construction management platform meetings modules typically ship a *recurring
+series* model - a single "master" meeting carries an iCal-style RRULE
 (``FREQ=WEEKLY;BYDAY=MO;COUNT=12``) and the system materialises future
-occurrences from it.  Both products also ship *attendance check-in*
-with optional signature capture for verified records (Newforma's
-"Meeting Attendance" workflow + Procore's Mobile Check-In).
+occurrences from it.  They also ship *attendance check-in*
+with optional signature capture for verified records (a meeting attendance
+workflow plus mobile check-in).
 
 Our ``meetings`` module is currently flat one-off events.  This
 migration adds the schema underpinnings to lift that limitation:

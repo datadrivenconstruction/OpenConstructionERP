@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Notifications — per-event-type channel preferences + digest queue (T9).
 
-Wave 3 / T9 — every commercial construction ERP (Procore, ACC, Aconex) ships
+Wave 3 / T9 - every commercial construction ERP ships
 hourly/daily digest emails and per-event-type channel routing (email vs in-app
 vs Slack vs none). The ``notifications`` module had neither.
 

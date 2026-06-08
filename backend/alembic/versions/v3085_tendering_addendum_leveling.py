@@ -1,9 +1,10 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tendering: RIB iTWO-style bid leveling + addendum tracking.
+"""Tendering: integrated 5D estimating suite style bid leveling + addendum tracking.
 
-Closes the gap with Aconex Tender / RIB iTWO Tender by introducing two
-first-class tendering concepts our module lacked:
+Closes the gap with construction CDE platform tendering and integrated 5D
+estimating suite tendering by introducing two first-class tendering concepts
+our module lacked:
 
 * **Addenda** — mid-tender clarifications/revisions every bidder must
   acknowledge. A new ``oe_tender_addendum`` table holds the revision

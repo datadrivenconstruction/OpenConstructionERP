@@ -1654,7 +1654,7 @@ class ChangeOrderService:
             await self.session.rollback()
             raise
 
-    # ── T3: Procore-style multi-step approval chain ──────────────────────
+    # ── T3: construction management platform style multi-step approval chain ──
 
     async def _has_approval_chain(self, order_id: uuid.UUID) -> bool:
         """True iff this CO has at least one row in its approval chain.

@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """HSE — OSHA 300 recordable columns + standalone CorrectiveAction FSM table.
 
-Sphera SafetyStratus and Procore Quality & Safety ship a full OSHA Form 300
+Mature EHS and construction management platforms ship a full OSHA Form 300
 incident log export plus a corrective-action workflow with a formal
 verification step. Our ``hse_advanced`` module already carries the bulk of
 the workflow (CAPA, audits, investigations, KPIs) but is missing the

@@ -4,7 +4,7 @@
 
 WHY THIS FILE IS IN THE REPO
 ============================
-Competitive tools (Revizto, Navisworks AI, etc.) ship "AI clash triage"
+Competitive BIM coordination tools ship "AI clash triage"
 as a paid black box - you cannot see the prompt, you cannot tune it,
 you cannot reason about why a verdict was produced. OpenConstructionERP
 takes the opposite stance: the prompt lives HERE, in version control,

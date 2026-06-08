@@ -4,8 +4,8 @@
 
 Adds the PERT three-point estimate columns + the persisted-simulation
 JSON blob to ``oe_risk_register``. Together these power the Monte Carlo
-simulation (T1 / Wave 1) — equivalent in spirit to what Primavera Risk
-Analysis and Predict! by Riskwise expose for schedule + cost risk:
+simulation (T1 / Wave 1) - equivalent in spirit to what schedule risk
+analysis tools expose for schedule + cost risk:
 
 * ``cost_p10`` / ``cost_p50`` / ``cost_p90``  — optimistic / most-likely /
   pessimistic cost impact (currency-neutral; the project's currency is

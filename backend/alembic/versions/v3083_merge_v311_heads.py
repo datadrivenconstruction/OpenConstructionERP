@@ -6,8 +6,8 @@ After parallel work three migrations branched off ``v3071_merge_clash_and_files`
 
 * ``v3080_risk_pert_columns``            — Risk Register Monte Carlo (PERT) cols.
 * ``v3081_punchlist_reopen_audit``       — Punch List reopen audit trail.
-* ``v3082_changeorders_approval_chain``  — Procore-style multi-step approval
-  chain + commitment / RFI links on change orders.
+* ``v3082_changeorders_approval_chain``  - construction management platform
+  style multi-step approval chain + commitment / RFI links on change orders.
 
 This revision is empty; it only marks the merge point so ``alembic
 upgrade head`` resolves to a single revision.

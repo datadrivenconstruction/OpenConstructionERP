@@ -3,7 +3,7 @@
 """Clash — severity / signature / comments / due_date triage delta.
 
 Additive, all backward-compatible columns on ``oe_clash_result`` so a
-clash can be triaged like a Navisworks/BIM-coordination issue and so
+clash can be triaged like a BIM-coordination issue and so
 triage persists across re-runs (carry-forward keyed on ``signature``):
 
 * ``severity``  — NOT NULL String(16) default ``'medium'``. Geometry-

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Clash — Navisworks-style selection sets + element_type snapshot.
+"""Clash - BIM-coordination tool style selection sets + element_type snapshot.
 
 Additive columns, all backward-compatible:
 

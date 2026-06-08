@@ -500,8 +500,8 @@ def allowed_capa_transitions(current: str) -> list[str]:
 def allowed_corrective_action_transitions(current: str) -> list[str]:
     """‌⁠‍Pure slim CorrectiveAction FSM (incident-scoped).
 
-    Strict linear lifecycle modelled on Procore Quality & Safety + Sphera
-    SafetyStratus: ``pending → in_progress → verified → closed``. Any other
+    Strict linear lifecycle modelled on mainstream construction quality
+    and EHS suites: ``pending → in_progress → verified → closed``. Any other
     transition (e.g. ``pending → verified`` or ``closed → in_progress``)
     is rejected by :meth:`HSEAdvancedService.transition_corrective_action`.
     """

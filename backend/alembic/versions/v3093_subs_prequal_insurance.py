@@ -1,9 +1,9 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Subcontractors — BuildingConnected-style prequal score + insurance tracking.
+"""Subcontractors - prequal score + insurance tracking.
 
-Wave 4 / T12 — brings ``oe_subcontractors_subcontractor`` toward
-BuildingConnected / Procore parity for the three lifecycle gaps that
+Wave 4 / T12 - brings ``oe_subcontractors_subcontractor`` toward
+construction management platform parity for the three lifecycle gaps that
 are still missing on a flat sub record:
 
 * ``prequal_score`` (Integer) — denormalised numeric score derived from

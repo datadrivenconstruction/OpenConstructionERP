@@ -75,7 +75,7 @@ class Subcontractor(Base):
     website: Mapped[str | None] = mapped_column(String(500), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    # ── Wave 4 / T12: BuildingConnected-style prequal + insurance tracking ──
+    # ── Wave 4 / T12: construction management platform style prequal + insurance tracking ──
     # All nullable so legacy rows (created before v3093) still load.
     prequal_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
     insurance_expiry_date: Mapped[date | None] = mapped_column(

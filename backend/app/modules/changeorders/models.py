@@ -3,7 +3,7 @@
 Tables:
     oe_changeorders_order   - change order header with status, cost/schedule impact
     oe_changeorders_item    - individual line items within a change order
-    oe_changeorder_approval - ordered per-approver decisions (Procore-style chain)
+    oe_changeorder_approval - ordered per-approver decisions (construction management platform style chain)
 """
 
 import uuid
@@ -84,7 +84,7 @@ class ChangeOrder(Base):
         server_default="{}",
     )
 
-    # T3: Procore-style commitment / RFI links. Stored as JSON arrays of
+    # T3: construction management platform style commitment / RFI links. Stored as JSON arrays of
     # UUID strings rather than association tables - the cardinality is
     # tiny (typically <10 entries per CO) and the data is read-heavy /
     # display-only, so the indirection isn't worth a join. The column is
@@ -168,7 +168,7 @@ class ChangeOrderItem(Base):
         return f"<ChangeOrderItem {self.description[:40]} ({self.change_type})>"
 
 
-# Per-step decision vocabulary for a Procore-style approval chain.
+# Per-step decision vocabulary for a construction management platform style approval chain.
 APPROVAL_DECISIONS: tuple[str, ...] = ("pending", "approved", "rejected")
 
 

@@ -3,8 +3,8 @@
 """Clash — explicit run configuration (type / scope / description).
 
 Additive, all backward-compatible columns on ``oe_clash_run`` so a run
-is reproducible and identifiable in history (Navisworks-style run
-configuration):
+is reproducible and identifiable in history (BIM-coordination tool style
+run configuration):
 
 * ``description``       — nullable Text. Free-text note (scope / intent /
                           reviewer). NULL on every pre-existing run.

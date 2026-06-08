@@ -439,7 +439,7 @@ async def execute_order(
     return _order_to_response(order)
 
 
-# ── T3: Procore-style multi-step approval chain ─────────────────────────────
+# ── T3: construction management platform style multi-step approval chain ────
 
 
 def _approval_to_response(row: object) -> ApprovalRow:
@@ -469,7 +469,7 @@ async def start_approval_chain(
     _perm: None = Depends(RequirePermission("changeorders.approve")),
     service: ChangeOrderService = Depends(_get_service),
 ) -> list[ApprovalRow]:
-    """Start a sequential Procore-style approval chain on a change order.
+    """Start a sequential construction management platform style approval chain on a change order.
 
     Requires ``changeorders.approve`` so that an arbitrary editor can't
     hand-pick their own approver list and shortcut the four-eyes

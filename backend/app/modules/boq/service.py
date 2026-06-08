@@ -3225,8 +3225,8 @@ class BOQService:
         new_unit_rate = fields.get("unit_rate", position.unit_rate)
 
         # Resource model: each resource entry is a PER-UNIT norm
-        # (quantity per 1 unit of position) - same convention as CostX,
-        # Candy, iTWO, ProEst. Therefore:
+        # (quantity per 1 unit of position) - same convention as
+        # mainstream estimating and 5D takeoff tools. Therefore:
         #   unit_rate (of position) = Σ(r.quantity × r.unit_rate)   [no division by qty]
         #   total    (of position) = position.quantity × unit_rate
         #

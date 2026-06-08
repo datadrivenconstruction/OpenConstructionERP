@@ -1,4 +1,4 @@
-"""Unit tests for Wave 4 / T12 — BuildingConnected-style prequal + insurance.
+"""Unit tests for Wave 4 / T12 - construction management platform style prequal + insurance.
 
 Covers the four service entry points added by the T12 milestone:
 

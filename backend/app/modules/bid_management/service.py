@@ -1644,7 +1644,7 @@ class BidManagementService:
     ) -> dict[str, Any]:
         """Return Q&A entries the given bidder is permitted to see.
 
-        Visibility rules (Aconex-style):
+        Visibility rules (construction CDE platform style):
         * is_public=True   → visible to everyone (anonymised question).
         * is_public=False  → visible only if bidder_id appears in
           ``visible_to_bidder_ids`` OR if the bidder asked the question.

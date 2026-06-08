@@ -118,8 +118,8 @@ class HSECorrectiveAction(Base):
 
     Distinct from :class:`app.modules.hse_advanced.models.CorrectiveAction`
     (which is the audit/JSA/observation-scoped CAPA carrying 5-Whys and
-    effectiveness verification). This table is the lightweight Procore /
-    Sphera-style "open a CA off an incident" record with a single
+    effectiveness verification). This table is the lightweight
+    construction-suite style "open a CA off an incident" record with a single
     pending → in_progress → verified → closed lifecycle.
     """
 

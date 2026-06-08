@@ -754,7 +754,7 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
     MarketplaceModule(
         id="converter-rvt",
         name="Revit (RVT) Parser",
-        description="Native Revit file parser. No Autodesk license required. Extracts families, parameters, quantities, and spatial structure.",
+        description="Native Revit file parser. No proprietary CAD vendor license required. Extracts families, parameters, quantities, and spatial structure.",
         category="converter",
         icon="FileInput",
         version="0.5.0",

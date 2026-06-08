@@ -184,7 +184,7 @@ class ChangeOrderResponse(BaseModel):
     item_count: int = 0
 
     _coerce_decimal = field_validator("cost_impact", mode="before")(lambda cls, v: _decimal_to_str(v))
-    # T3: Procore-style commitment / RFI links + approval-chain cursor.
+    # T3: construction management platform style commitment / RFI links + approval-chain cursor.
     # Normalised to ``[]`` on read so legacy COs that pre-date v3082
     # (where the columns are physically NULL) still serialize cleanly.
     linked_po_ids: list[str] = Field(default_factory=list)
@@ -267,7 +267,7 @@ class ChangeOrderItemUpdate(BaseModel):
         return _validate_non_negative_decimal(v)
 
 
-# ── Approval-chain schemas (T3 - Procore-style multi-step approval) ──────────
+# ── Approval-chain schemas (T3 - construction management platform style multi-step approval) ──
 
 
 class ApprovalStartRequest(BaseModel):

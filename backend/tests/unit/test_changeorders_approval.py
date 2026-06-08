@@ -1,4 +1,4 @@
-"""Unit tests for the Procore-style multi-step approval chain (T3).
+"""Unit tests for the construction management platform style multi-step approval chain (T3).
 
 Covers:
 

@@ -2,8 +2,8 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """‌⁠‍Requirements: ISO 19650 EIR deliverable matrix.
 
-Wave 4 / T13 — gives the requirements module a Bentley OpenBuildings /
-Trimble Tilos style EIR (Employer Information Requirements) traceability
+Wave 4 / T13 - gives the requirements module an integrated BIM and
+scheduling suite style EIR (Employer Information Requirements) traceability
 ledger. Each requirement can demand one or more deliverables (model,
 drawing, schedule, report, COBie, PSET) at a target LOD/LOI per
 BIMForum / ISO 19650, due at a project milestone.

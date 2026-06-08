@@ -2,8 +2,8 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Change-orders multi-step approval chain + commitment / RFI links.
 
-Procore-style change management routes a CO through an ordered list of
-approvers. Each step records the assigned approver, their decision
+Construction management platform style change management routes a CO
+through an ordered list of approvers. Each step records the assigned approver, their decision
 (``pending``/``approved``/``rejected``), an optional comment, and the
 timestamp of the decision. The CO header carries the cursor pointing at
 the *currently active* step plus JSON arrays linking the CO to its

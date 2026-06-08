@@ -117,8 +117,8 @@ DEMO_PROJECTS = [
             "name": "Advanced Commercial Complex - Boston",
             "description": (
                 "New-build commercial office + structural steel frame, "
-                "~1,200 m² gross floor area. Demo project reuses Autodesk "
-                "Revit Advanced Sample (structural) + Basic Sample (arch). "
+                "~1,200 m² gross floor area. Demo project reuses public "
+                "Revit sample models (structural + architectural). "
                 "Estimate target budget USD 4.2M."
             ),
             "region": "US",

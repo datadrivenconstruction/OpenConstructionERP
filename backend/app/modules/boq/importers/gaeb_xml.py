@@ -7,8 +7,8 @@ Native parser for the German/Austrian/Swiss tender exchange format:
 * **X84 / DP 84** - Nebenangebote (alternative bids)
 * **X86 / DP 86** - Auftragserteilung (order award) - Epic I11.
 
-Namespace-agnostic: matches by tag local-name so files from iTWO,
-California.pro, Nevaris, RIB X4 etc. import without pre-normalisation.
+Namespace-agnostic: matches by tag local-name so files from any
+mainstream GAEB authoring tool import without pre-normalisation.
 
 Security: parses via ``defusedxml`` - XXE, billion-laughs and DTD-based
 attacks are rejected up-front.
@@ -136,8 +136,8 @@ def _detect_da_kind(root: ET.Element) -> str:
     """Return ``"x81" | "x83" | "x84" | "x86" | "x"`` (unknown DA).
 
     GAEB DA files carry a top-level ``<GAEB><GAEBInfo><DPType>83</DPType></GAEBInfo>``
-    style header. We probe a few common shapes - RIB/iTWO put the DP
-    number on the ``<Award>`` element instead.
+    style header. We probe a few common shapes - some integrated 5D
+    estimating suites put the DP number on the ``<Award>`` element instead.
     """
     for el in root.iter():
         tag = _local(el.tag)

@@ -78,7 +78,7 @@ class Meeting(Base):
         server_default="[]",
     )
 
-    # ── Newforma-style recurring series ─────────────────────────────────
+    # ── Construction-suite style recurring series ───────────────────────
     # series_id stamps both the master AND every materialised occurrence,
     # so a single WHERE series_id = ? scoops the entire series. For a
     # one-off meeting this stays NULL.

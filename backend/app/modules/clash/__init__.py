@@ -10,8 +10,8 @@ detection just reads what is already there.
 
 Surfaces a discipline×discipline clash **matrix** plus a per-pair result
 list with a review workflow, and can push selected clashes out as native
-BCF topics (via the ``oe_bcf`` module) so they round-trip into Solibri /
-Navisworks / BIMcollab without vendor lock-in.
+BCF topics (via the ``oe_bcf`` module) so they round-trip into common
+BIM coordination viewers without vendor lock-in.
 """
 
 

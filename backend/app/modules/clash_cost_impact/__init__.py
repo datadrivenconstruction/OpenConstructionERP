@@ -3,9 +3,8 @@
 
 Bridges the clash detection module (BIM coordination) with the BOQ module
 (construction estimation) to surface a defensible monetary rework
-estimate for every clash. Competitors that ship coordination tools in
-isolation (Solibri, Navisworks, Revizto, BIMcollab) cannot expose this
-column - they have no BOQ side to anchor the cost against.
+estimate for every clash. Standalone BIM coordination tools cannot
+expose this column - they have no BOQ side to anchor the cost against.
 
 The module is read-only against both source modules:
     * Clash rows resolve via ``a_stable_id`` / ``b_stable_id`` (snapshotted

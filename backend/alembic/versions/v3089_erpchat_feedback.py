@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """ERP-Chat — per-turn feedback + observability columns (T8 / Wave 3).
 
-Autodesk AI Assist and Trimble's Construction One AI surface a thumbs
+Construction AI assistants typically surface a thumbs
 up/down on every assistant turn, plus an admin dashboard with token
 spend, prompt-cache hit rate, and feedback-rate trend. Our ``erp_chat``
 module persists messages but has neither — operators can't tell *why* a

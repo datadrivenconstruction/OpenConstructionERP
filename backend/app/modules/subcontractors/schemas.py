@@ -130,7 +130,7 @@ class SubcontractorResponse(BaseModel):
     website: str | None = None
     notes: str | None = None
     is_active: bool = True
-    # ── Wave 4 / T12: BuildingConnected-style prequal + insurance tracking ──
+    # ── Wave 4 / T12: construction management platform style prequal + insurance tracking ──
     prequal_score: int | None = None
     insurance_expiry_date: date | None = None
     insurance_doc_id: UUID | None = None

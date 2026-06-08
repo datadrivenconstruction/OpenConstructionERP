@@ -4306,7 +4306,7 @@ async def export_boq_gaeb(
             ET.SubElement(rec_item, "LblTx").text = desc_text
 
     # ── Trailing BoQInfo with totals ──────────────────────────────────────
-    # GAEB consumers (RIB iTWO, Nevaris, California.pro, …) reconcile the
+    # GAEB consumers (mainstream estimating and 5D suites) reconcile the
     # document total against Σ(item IT). The body emits only per-position
     # ``IT`` lines (which sum to the DIRECT cost) and no surcharge lines, so
     # ``TotPr`` MUST equal the direct cost for the file to be internally
@@ -5057,8 +5057,8 @@ async def import_boq_gaeb(
       - **X81** - Leistungsverzeichnis (BOQ skeleton)
 
     Namespace-agnostic parser - falls back to tag-local-name matching so
-    files from different GAEB toolchains (iTWO, California.pro, Nevaris,
-    etc.) all import without pre-normalization.
+    files from different GAEB toolchains (any mainstream GAEB authoring
+    tool) all import without pre-normalization.
 
     Security: uses ``defusedxml`` to harden against XXE, billion-laughs,
     and other XML-parser-level attacks on user-uploaded files.

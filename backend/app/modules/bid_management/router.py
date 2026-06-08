@@ -338,7 +338,7 @@ async def package_qa_board(
     bidder_id: uuid.UUID | None = Query(default=None),
     _perm: None = Depends(RequirePermission("bid_management.read")),
 ) -> BidderQABoardResponse:
-    """‌⁠‍Aconex-style Q&A board filtered to one bidder (or all when owner)."""
+    """‌⁠‍Construction CDE platform style Q&A board filtered to one bidder (or all when owner)."""
     await _verify_package_access(session, package_id, user_id)
     svc = BidManagementService(session)
     board = await svc.qa_board_for_bidder(package_id, bidder_id)

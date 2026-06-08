@@ -7,7 +7,7 @@ Additive schema delta covering every Wave A4 surface in one migration:
 * ``oe_clash_run.rules``       — NOT NULL JSON default ``'[]'``.
                                  Per-discipline-pair tolerance rules
                                  the engine consults during the broad
-                                 phase (Navisworks-style rule rows).
+                                 phase (BIM-coordination tool style rule rows).
 * ``oe_clash_result.cluster_id`` — nullable Integer. Run-scoped spatial
                                  cluster id assigned by the
                                  post-detection grid-bucket DBSCAN.

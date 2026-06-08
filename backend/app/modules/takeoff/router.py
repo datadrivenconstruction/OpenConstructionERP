@@ -113,7 +113,7 @@ _CONVERTER_META: list[dict[str, Any]] = [
     {
         "id": "rvt",
         "name": "Revit (RVT) Parser",
-        "description": "Native Revit file parser. Supports Revit 2015-2026. Extracts families, parameters, quantities, and spatial structure without an Autodesk license. Bundles format readers for every Revit version 2011-2026, which is why the download is large.",
+        "description": "Native Revit file parser. Supports Revit 2015-2026. Extracts families, parameters, quantities, and spatial structure without a proprietary CAD vendor license. Bundles format readers for every Revit version 2011-2026, which is why the download is large.",
         "engine": "DDC Community",
         "extensions": [".rvt", ".rfa"],
         "exe": "RvtExporter.exe",

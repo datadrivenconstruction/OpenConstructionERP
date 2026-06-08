@@ -253,8 +253,8 @@ def compute_cpm(network: TaskNetwork) -> dict[Any, CPMResult]:
     Disconnected sub-networks are scheduled independently: each
     sub-network's "sinks" (nodes with no successors) have their LF
     pinned to the project finish of that sub-network only, NOT to the
-    global project finish across sub-networks. This matches MS Project
-    behaviour for unrelated activity islands.
+    global project finish across sub-networks. This matches desktop
+    scheduling tool behaviour for unrelated activity islands.
     """
     cycle = network.detect_cycle()
     if cycle is not None:

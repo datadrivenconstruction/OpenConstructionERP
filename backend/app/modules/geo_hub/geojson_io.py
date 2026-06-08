@@ -29,8 +29,8 @@ support:
 * ``<MultiGeometry>`` -> ``GeometryCollection`` (best-effort)
 * ``<ExtendedData>`` / ``<Data>`` -> ``properties``
 
-That covers boundary / easement / drone scan exports from QGIS, Google
-Earth and Trimble. Anything more exotic falls back to a coordinate-less
+That covers boundary / easement / drone scan exports from common GIS
+and survey tools. Anything more exotic falls back to a coordinate-less
 ``Feature`` with the unparsed text in ``properties._unparsed``.
 """
 
@@ -288,7 +288,7 @@ def kml_looks_like_kml(payload: str | bytes) -> bool:
     KML 2.x always emits one) or ``<kml`` (some hand-edited or
     application-emitted files skip the prolog). We strip the UTF-8 BOM
     and leading whitespace before checking so well-formed inputs from
-    Google Earth, QGIS, Trimble, etc., all pass.
+    common GIS and survey tools all pass.
 
     The check is intentionally permissive: anything XML-looking falls
     through to :func:`kml_to_geojson` which then runs ``defusedxml``'s

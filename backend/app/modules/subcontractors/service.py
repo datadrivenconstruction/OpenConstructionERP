@@ -2034,7 +2034,7 @@ class SubcontractorService:
             logger.debug("compute_monthly_rating: count on %s failed", table, exc_info=True)
             return 0
 
-    # ── Wave 4 / T12 - BuildingConnected-style prequal + insurance ─────
+    # ── Wave 4 / T12 - construction management platform style prequal + insurance ─
 
     async def submit_prequal(
         self,

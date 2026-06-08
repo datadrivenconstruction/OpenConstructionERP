@@ -116,7 +116,7 @@ def _compute_typed_total(
 
     Resource-typed rows take the same triple as a base, then layer the
     industry-standard adjustments on top so a professional estimator
-    can express things HeavyBid / Sage / iTWO let them express:
+    can express things mainstream estimating and 5D suites let them express:
 
     * **material**  base × (1 + waste_pct/100)
     * **labor**     ``crew_size`` is a quantity multiplier (already

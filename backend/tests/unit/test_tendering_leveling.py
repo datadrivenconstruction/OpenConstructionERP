@@ -1,4 +1,4 @@
-"""Unit tests for RIB iTWO-style bid leveling + addendum tracking.
+"""Unit tests for integrated 5D estimating suite style bid leveling + addendum tracking.
 
 Covers:
 - ``revision_no`` auto-increments per package (1, 2, ...) across
@@ -11,8 +11,8 @@ Covers:
       (the omitted line is imputed at the bid's mean unit-rate × reference
       quantity → leveled total > raw total by exactly that penalty).
 
-SKIP STATUS (v4.3): This whole test file targets a RIB iTWO-style
-addendum + bid-leveling feature that DOES NOT YET EXIST in
+SKIP STATUS (v4.3): This whole test file targets an integrated 5D estimating
+suite style addendum + bid-leveling feature that DOES NOT YET EXIST in
 ``app.modules.tendering``. The current module ships ``PackageCreate``,
 ``BidCreate``, ``BidLineItem`` etc. but no ``Addendum`` model, no
 ``AddendumCreate`` schema, no ``create_addendum`` / ``publish_addendum``
@@ -30,7 +30,7 @@ is in the v4.3 tendering backlog. Re-enable when:
        ``app.modules.tendering.schemas``,
     4. ``TenderBid.leveled_amount`` + ``leveling_notes`` columns ship.
 
-Tracked in v4.3 backlog ("RIB iTWO addendum + bid leveling").
+Tracked in v4.3 backlog ("addendum + bid leveling").
 """
 
 from __future__ import annotations
@@ -48,7 +48,7 @@ import pytest
 # Re-enable when the v4.3 tendering backlog items above are done.
 pytestmark = pytest.mark.skip(
     reason=(
-        "RIB iTWO addendum + bid leveling not yet implemented in "
+        "addendum + bid leveling not yet implemented in "
         "app.modules.tendering (AddendumCreate / create_addendum / "
         "level_bids missing). Tracked in v4.3 backlog."
     ),

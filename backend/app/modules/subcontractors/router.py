@@ -981,7 +981,7 @@ async def validate_tax_id_endpoint(
     return validate_tax_id(body.country, body.tax_id)
 
 
-# ── Wave 4 / T12 - BuildingConnected-style prequal + insurance + block ──
+# ── Wave 4 / T12 - construction management platform style prequal + insurance + block ──
 
 
 @router.post(
