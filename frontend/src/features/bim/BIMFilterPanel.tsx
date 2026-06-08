@@ -450,11 +450,18 @@ export default function BIMFilterPanel({
       if (!v) return new Set();
       return new Set(Array.isArray(v) ? v : [v]);
     };
+    const typeSet = toSet(fc.element_type);
+    // A saved group that targets annotation/analytical (noise) categories
+    // would render nothing while buildingsOnly is on, because the noise filter
+    // hides exactly those elements. Drop buildingsOnly when the group asks for
+    // noise types so applying the group actually reveals its elements.
+    const targetsNoise = [...typeSet].some((tpe) => isNoiseCategory(tpe));
     setState((prev) => ({
       ...prev,
       search: typeof fc.name_contains === 'string' ? fc.name_contains : '',
       storeys: toSet(fc.storey),
-      types: toSet(fc.element_type),
+      types: typeSet,
+      buildingsOnly: targetsNoise ? false : prev.buildingsOnly,
     }));
     setActiveGroupId(group.id);
     onApplyGroup?.(group);
@@ -821,7 +828,13 @@ export default function BIMFilterPanel({
       if (isolationSet && !isolationSet.has(el.id)) return false;
       const tpe = getTypeKey(el, format);
       if (state.buildingsOnly && isNoiseCategory(tpe)) return false;
-      if (state.storeys.size > 0 && !state.storeys.has(el.storey || '—'))
+      // Mirror applyFilters()/the 3D viewport: a storey filter only narrows
+      // elements that actually carry a storey, so storey-less elements stay
+      // visible in the panel exactly as they do in the viewport. The two
+      // predicates used to drift (the panel excluded storey-less elements via
+      // `el.storey || '—'` while the viewport kept them), which made the panel
+      // list, counts and CSV export disagree with what was shown in 3D.
+      if (state.storeys.size > 0 && el.storey && !state.storeys.has(el.storey))
         return false;
       // Type filter — must mirror applyFilters() above: match either the
       // category (e.g. "Walls") OR the individual Type Name (e.g.

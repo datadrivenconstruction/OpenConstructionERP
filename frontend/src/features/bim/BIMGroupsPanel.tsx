@@ -322,7 +322,7 @@ export default function BIMGroupsPanel({
             return (
               <div
                 key={group.id}
-                className="rounded-md border border-border-light bg-surface-secondary/50 transition-colors hover:bg-surface-secondary"
+                className="group rounded-md border border-border-light bg-surface-secondary/50 transition-colors hover:bg-surface-secondary"
                 onMouseEnter={() => onHighlightGroup(group)}
                 onMouseLeave={() => onHighlightGroup(null)}
                 onContextMenu={(e) => handleContextMenu(e, group.id)}
