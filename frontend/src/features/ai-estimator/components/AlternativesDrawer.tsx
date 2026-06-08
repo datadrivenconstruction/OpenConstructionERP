@@ -120,9 +120,17 @@ export function AlternativesDrawer({
                       </div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-content-tertiary">
                         <span className="font-mono">{c.code}</span>
-                        <span>
-                          {fmtMoneyStr(c.unit_rate, c.currency, locale)} / {c.unit}
-                        </span>
+                        {c.unit_rate != null && Number(c.unit_rate) > 0 ? (
+                          <span>
+                            {fmtMoneyStr(c.unit_rate, c.currency, locale)} / {c.unit}
+                          </span>
+                        ) : (
+                          <span className="text-amber-600 dark:text-amber-400">
+                            {t('aiest.match.no_price', {
+                              defaultValue: 'matched, no price in catalogue',
+                            })}
+                          </span>
+                        )}
                         <span className={clsx('font-medium', bandTone(c.confidence_band))}>
                           {t(`aiest.band.${c.confidence_band}`, { defaultValue: c.confidence_band })}
                         </span>

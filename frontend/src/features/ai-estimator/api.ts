@@ -303,7 +303,9 @@ export interface CandidateOut {
   code: string;
   description: string;
   unit: string;
-  unit_rate: string;
+  /** Decimal-as-string, or null when the grounded code carries no price
+   *  ("matched, no price" - the UI shows that, not a fabricated $0.00). */
+  unit_rate: string | null;
   currency: string;
   score: number;
   confidence_band: ConfidenceBand;

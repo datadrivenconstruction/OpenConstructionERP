@@ -31,6 +31,7 @@ from decimal import Decimal
 
 import pytest
 
+from app.modules.ai_estimator import schemas
 from app.modules.ai_estimator import service as svc
 from app.modules.ai_estimator.service import (
     CONFIDENCE_HIGH_THRESHOLD,
@@ -117,6 +118,20 @@ def test_candidate_unit_rate_divides_by_multiplier():
     assert _dec(AiEstimatorService._candidate_unit_rate(_Cand())) == Decimal("185")
 
 
+def test_candidate_unit_rate_is_none_when_unpriced():
+    """An unpriced grounded code yields None, never "0" (no fabricated $0.00)."""
+
+    class _Zero:
+        unit_rate = "0"
+        unit = "m3"
+
+    class _Missing:
+        unit = "m2"  # no unit_rate attribute at all
+
+    assert AiEstimatorService._candidate_unit_rate(_Zero()) is None
+    assert AiEstimatorService._candidate_unit_rate(_Missing()) is None
+
+
 # ── Confidence (real score or None, never a placeholder) ─────────────────────
 
 
@@ -175,6 +190,30 @@ def test_candidate_out_serialises_grounded_only_fields():
     assert out["currency"] == "EUR"
     assert out["score"] == pytest.approx(0.8346, abs=1e-4)  # rounded to 4 dp
     assert out["confidence_band"] == "high"
+
+
+def test_candidate_out_emits_null_rate_when_unpriced():
+    """A grounded code with no price serialises unit_rate as None, not "0".
+
+    The override UI then renders "no price" instead of a misleading $0.00; the
+    CandidateOut schema accepts the null and serialises it back as null.
+    """
+
+    class _Unpriced:
+        id = "cand-2"
+        code = "WALL-002"
+        description = "Unpriced wall code"
+        unit = "m3"
+        unit_rate = "0"
+        currency = "EUR"
+        score = 0.51
+        confidence_band = "low"
+
+    out = AiEstimatorService._candidate_out(_Unpriced())
+    assert out["unit_rate"] is None
+    # Round-trips through the schema as JSON null (never "0").
+    dumped = schemas.CandidateOut(**out).model_dump(mode="json")
+    assert dumped["unit_rate"] is None
 
 
 # ── Trade taxonomy (deterministic, works with no AI) ─────────────────────────

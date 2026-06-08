@@ -167,6 +167,10 @@ function MatchCard({
   const detail = detailQ.data;
 
   const hasRate = group.chosen_code != null;
+  // A code can be matched yet carry no price (the cost table has no priced row
+  // for it). Then unit_rate is null and we show "matched, no price" rather than
+  // a fabricated $0.00.
+  const hasPrice = group.unit_rate != null && Number(group.unit_rate) > 0;
   const confirmed = group.status === 'confirmed' || group.status === 'overridden';
   // Alternatives = every returned candidate other than the chosen one
   // (matched by code, since the group is summarised by chosen_code).
@@ -224,10 +228,17 @@ function MatchCard({
             {hasRate ? (
               <>
                 <span className="font-mono">{group.chosen_code}</span>
-                <span>
-                  {fmtMoneyStr(group.unit_rate, group.currency, locale)} /{' '}
-                  {group.chosen_unit ?? ''}
-                </span>
+                {hasPrice ? (
+                  <span>
+                    {fmtMoneyStr(group.unit_rate, group.currency, locale)} /{' '}
+                    {group.chosen_unit ?? ''}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                    <AlertTriangle className="h-3 w-3" />
+                    {t('aiest.match.no_price', { defaultValue: 'matched, no price in catalogue' })}
+                  </span>
+                )}
                 {group.match_method && (
                   <span className="rounded bg-surface-muted px-1 py-0.5 text-[10px] uppercase">
                     {t(`aiest.method.${group.match_method}`, { defaultValue: group.match_method })}
@@ -336,7 +347,17 @@ function MatchCard({
                             </div>
                             <div className="text-[11px] text-content-tertiary">
                               <span className="font-mono">{c.code}</span> ·{' '}
-                              {fmtMoneyStr(c.unit_rate, c.currency, locale)} / {c.unit}
+                              {c.unit_rate != null && Number(c.unit_rate) > 0 ? (
+                                <>
+                                  {fmtMoneyStr(c.unit_rate, c.currency, locale)} / {c.unit}
+                                </>
+                              ) : (
+                                <span className="text-amber-600 dark:text-amber-400">
+                                  {t('aiest.match.no_price', {
+                                    defaultValue: 'matched, no price in catalogue',
+                                  })}
+                                </span>
+                              )}
                             </div>
                           </div>
                           <Button
