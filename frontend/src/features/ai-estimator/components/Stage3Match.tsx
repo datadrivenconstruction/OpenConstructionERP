@@ -46,6 +46,10 @@ export interface Stage3MatchProps {
   runId: string;
   groups: GroupSummary[];
   loading: boolean;
+  /** True while the batched match pass is still running. Drives the live
+   *  progress bar and lets results stream in instead of hiding behind a
+   *  skeleton until every batch finishes. */
+  matching?: boolean;
   locale?: string;
   aiConnected: boolean;
   highThreshold: number;
@@ -69,6 +73,60 @@ function sortForReview(groups: GroupSummary[]): GroupSummary[] {
     return 3;
   };
   return [...groups].sort((a, b) => rank(a) - rank(b) || a.sort_order - b.sort_order);
+}
+
+/** A group still wants a human look: unmatched, flagged, or no rate yet. */
+function needsAttention(g: GroupSummary): boolean {
+  return (
+    g.status === 'needs_human' ||
+    g.status === 'unmatched' ||
+    g.confidence_band === 'low' ||
+    g.chosen_code == null
+  );
+}
+
+/** Readable section title for a trade key when no `aiest.trade.<key>` exists. */
+function humanizeTrade(trade: string): string {
+  return trade
+    .replace(/[_-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^./, (c) => c.toUpperCase());
+}
+
+interface TradeSection {
+  trade: string | null;
+  groups: GroupSummary[];
+  attention: number;
+}
+
+/** Bucket groups by trade, sort each bucket for review, and order the
+ *  buckets so trades that still need attention float to the top. */
+function buildTradeSections(groups: GroupSummary[]): TradeSection[] {
+  const buckets = new Map<string, GroupSummary[]>();
+  for (const g of groups) {
+    const key = g.trade ?? '';
+    const list = buckets.get(key);
+    if (list) list.push(g);
+    else buckets.set(key, [g]);
+  }
+  const sections: TradeSection[] = [];
+  for (const [key, list] of buckets) {
+    const sorted = sortForReview(list);
+    sections.push({
+      trade: key || null,
+      groups: sorted,
+      attention: sorted.filter(needsAttention).length,
+    });
+  }
+  // Trades with open items first (most first), then alphabetically; the
+  // "no trade" bucket always sinks to the bottom.
+  return sections.sort((a, b) => {
+    if (!a.trade && b.trade) return 1;
+    if (a.trade && !b.trade) return -1;
+    if (a.attention !== b.attention) return b.attention - a.attention;
+    return (a.trade ?? '').localeCompare(b.trade ?? '');
+  });
 }
 
 function MatchCard({
@@ -356,6 +414,7 @@ export function Stage3Match(props: Stage3MatchProps) {
     runId,
     groups,
     loading,
+    matching = false,
     locale,
     aiConnected,
     highThreshold,
@@ -370,8 +429,19 @@ export function Stage3Match(props: Stage3MatchProps) {
 
   const [threshold, setThreshold] = useState(Math.round(highThreshold * 100));
   const [altGroupId, setAltGroupId] = useState<string | null>(null);
+  // Group the result cards by trade (default) so a long match list reads as
+  // "concrete, masonry, finishes" instead of one flat scroll. A toggle keeps
+  // the old flat priority view for users who prefer it.
+  const [groupByTrade, setGroupByTrade] = useState(true);
+  const [collapsedTrades, setCollapsedTrades] = useState<Record<string, boolean>>({});
 
   const ordered = useMemo(() => sortForReview(groups), [groups]);
+  const tradeSections = useMemo(() => buildTradeSections(groups), [groups]);
+  // Only worth grouping when there is more than one trade to separate.
+  const canGroup = useMemo(
+    () => new Set(groups.map((g) => g.trade ?? '')).size > 1,
+    [groups],
+  );
 
   const stats = useMemo(() => {
     let confirmed = 0;
@@ -383,7 +453,28 @@ export function Stage3Match(props: Stage3MatchProps) {
     return { confirmed, noRate };
   }, [groups]);
 
-  if (loading) {
+  // Live match progress: a group is "done" once it has been ranked (score or
+  // a chosen code) or the user has already resolved it. Since the page
+  // invalidates the group list after every batch, this advances as the match
+  // runs - the bar the founder asked for, instead of a frozen skeleton.
+  const matchProgress = useMemo(() => {
+    const total = groups.length;
+    if (total === 0) return { total: 0, done: 0, pct: 0 };
+    const done = groups.filter(
+      (g) =>
+        g.score != null ||
+        g.chosen_code != null ||
+        g.status === 'confirmed' ||
+        g.status === 'overridden' ||
+        g.status === 'skipped',
+    ).length;
+    return { total, done, pct: Math.round((done / total) * 100) };
+  }, [groups]);
+
+  // Only show the bare skeleton on the very first load, before any group
+  // exists. Once groups are present we render them and stream match results
+  // in, with the progress bar on top.
+  if (loading && groups.length === 0) {
     return (
       <div className="space-y-2.5">
         {[0, 1, 2].map((i) => (
@@ -417,6 +508,34 @@ export function Stage3Match(props: Stage3MatchProps) {
         })}
       </p>
 
+      {/* Live match progress. Streams while the batched pass runs so the
+          stage never looks frozen. */}
+      {matching && (
+        <div className="rounded-lg border border-oe-blue/30 bg-oe-blue/5 px-3 py-2.5">
+          <div className="flex items-center gap-2 text-sm font-medium text-content-primary">
+            <Loader2 className="h-4 w-4 animate-spin text-oe-blue" />
+            {matchProgress.total > 0
+              ? t('aiest.match.progress_n', {
+                  defaultValue: 'Matching {{done}} of {{total}} groups…',
+                  done: matchProgress.done,
+                  total: matchProgress.total,
+                })
+              : t('aiest.match.progress', { defaultValue: 'Matching groups…' })}
+            {matchProgress.total > 0 && (
+              <span className="ml-auto tabular-nums text-xs text-content-secondary">
+                {matchProgress.pct}%
+              </span>
+            )}
+          </div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-muted">
+            <div
+              className="h-full rounded-full bg-oe-blue transition-all duration-500"
+              style={{ width: `${Math.max(6, matchProgress.pct)}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Honest disclosure: large group sets are matched in batches so the
           vector search never blocks the UI. Match-all iterates until every
           group has been processed. */}
@@ -448,6 +567,23 @@ export function Stage3Match(props: Stage3MatchProps) {
               n: stats.noRate,
             })}
           </span>
+        )}
+
+        {canGroup && (
+          <button
+            type="button"
+            onClick={() => setGroupByTrade((v) => !v)}
+            aria-pressed={groupByTrade}
+            className={clsx(
+              'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium transition',
+              groupByTrade
+                ? 'border-oe-blue bg-oe-blue/5 text-oe-blue'
+                : 'border-border text-content-secondary hover:bg-surface-secondary',
+            )}
+          >
+            <ListFilter className="h-3 w-3" />
+            {t('aiest.match.group_by_trade', { defaultValue: 'Group by trade' })}
+          </button>
         )}
 
         {/* Bulk-confirm with threshold control */}
@@ -483,8 +619,8 @@ export function Stage3Match(props: Stage3MatchProps) {
         </div>
       </div>
 
-      <div className="space-y-2.5">
-        {ordered.map((g) => (
+      {(() => {
+        const renderCard = (g: GroupSummary) => (
           <MatchCard
             key={g.id}
             runId={runId}
@@ -497,8 +633,74 @@ export function Stage3Match(props: Stage3MatchProps) {
             rematching={rematchingId === g.id}
             onOpenAlternatives={setAltGroupId}
           />
-        ))}
-      </div>
+        );
+
+        if (!groupByTrade || !canGroup) {
+          return <div className="space-y-2.5">{ordered.map(renderCard)}</div>;
+        }
+
+        return (
+          <div className="space-y-3">
+            {tradeSections.map((section) => {
+              const sectionKey = section.trade ?? '__none__';
+              // Sections with open items start expanded; resolved trades start
+              // collapsed so the user's eye lands on what still needs work.
+              const collapsed =
+                collapsedTrades[sectionKey] ?? section.attention === 0;
+              const title = section.trade
+                ? t(`aiest.trade.${section.trade}`, {
+                    defaultValue: humanizeTrade(section.trade),
+                  })
+                : t('aiest.match.no_trade', { defaultValue: 'Other' });
+              return (
+                <div
+                  key={sectionKey}
+                  className="overflow-hidden rounded-lg border border-border-light"
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCollapsedTrades((prev) => ({
+                        ...prev,
+                        [sectionKey]: !collapsed,
+                      }))
+                    }
+                    aria-expanded={!collapsed}
+                    className="flex w-full items-center gap-2 bg-surface-muted px-3 py-2 text-left"
+                  >
+                    {collapsed ? (
+                      <ChevronRight className="h-4 w-4 shrink-0 text-content-tertiary" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 shrink-0 text-content-tertiary" />
+                    )}
+                    <Layers3 className="h-3.5 w-3.5 shrink-0 text-content-tertiary" />
+                    <span className="text-sm font-medium text-content-primary">
+                      {title}
+                    </span>
+                    <span className="text-xs text-content-tertiary">
+                      {section.groups.length}
+                    </span>
+                    {section.attention > 0 && (
+                      <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+                        <AlertTriangle className="h-3 w-3" />
+                        {t('aiest.match.attention_n', {
+                          defaultValue: '{{n}} to review',
+                          n: section.attention,
+                        })}
+                      </span>
+                    )}
+                  </button>
+                  {!collapsed && (
+                    <div className="space-y-2.5 p-2.5">
+                      {section.groups.map(renderCard)}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {altGroupId && (
         <AlternativesDrawer

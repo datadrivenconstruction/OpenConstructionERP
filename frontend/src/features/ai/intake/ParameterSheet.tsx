@@ -27,6 +27,23 @@ function displayValue(value: unknown): string {
   return String(value);
 }
 
+// Turn a raw parameter key into a readable label when no `aiest.param.<key>`
+// translation exists yet, so the sheet never shows bare snake_case like
+// "gross_floor_area_m2". Unit suffixes become proper symbols (m2 -> m²) and
+// the first letter is capitalised: "gross_floor_area_m2" -> "Gross floor
+// area m²".
+function humanizeParamKey(key: string): string {
+  return key
+    .replace(/_/g, ' ')
+    .replace(/\bm2\b/g, 'm²')
+    .replace(/\bm3\b/g, 'm³')
+    .replace(/\bpct\b/g, '%')
+    .replace(/\bdeg\b/g, '°')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^./, (c) => c.toUpperCase());
+}
+
 export function ParameterSheet({
   state,
   editable,
@@ -53,7 +70,7 @@ export function ParameterSheet({
       ) : (
         <dl className="space-y-1.5">
           {entries.map(([key, value]) => {
-            const label = t(`aiest.param.${key}`, { defaultValue: key });
+            const label = t(`aiest.param.${key}`, { defaultValue: humanizeParamKey(key) });
             return (
               <div
                 key={key}
