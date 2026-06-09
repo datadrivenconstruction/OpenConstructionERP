@@ -160,6 +160,37 @@ async def _seed(session: AsyncSession, project_id, **overrides) -> BIMElement:
     return el
 
 
+class _OwnedProject:
+    """Small holder for a seeded (user, project) pair used by write-path tests."""
+
+    __slots__ = ("project_id", "user_id")
+
+    def __init__(self, project_id, user_id):
+        self.project_id = project_id
+        self.user_id = user_id
+
+
+async def _seed_owned_project(session: AsyncSession) -> _OwnedProject:
+    """Seed a real user and a project they own; return both ids.
+
+    The asset write paths call ``verify_project_access``, which only passes for
+    the project owner (or an admin / team member). Tests that exercise a write
+    must therefore have a real project row with a matching owner.
+    """
+    from app.modules.projects.models import Project
+    from app.modules.users.models import User
+
+    user = User(email=f"asset-owner-{uuid.uuid4().hex[:8]}@example.test", hashed_password="x")
+    session.add(user)
+    await session.flush()
+
+    project = Project(name="Asset Ops Test", owner_id=user.id)
+    session.add(project)
+    await session.flush()
+
+    return _OwnedProject(project_id=project.id, user_id=user.id)
+
+
 class TestAssetOpsService:
     @pytest.mark.asyncio
     async def test_list_enriches_with_health_and_sorts_by_attention(self, session):
@@ -282,7 +313,11 @@ class TestAssetOpsService:
 
     @pytest.mark.asyncio
     async def test_append_service_log_persists_and_recomputes(self, session):
-        pid = uuid.uuid4()
+        # append_service_log enforces project access (IDOR defence), so the
+        # element's parent project must exist and the caller must own it. Seed
+        # a real owner + project and pass that owner as the actor.
+        owner_id = await _seed_owned_project(session)
+        pid = owner_id.project_id
         el = await _seed(
             session,
             pid,
@@ -293,6 +328,7 @@ class TestAssetOpsService:
         resp = await svc.append_service_log(
             el.id,
             entry={"date": "2026-06-01", "note": "Replaced bearing", "kind": "repair"},
+            actor_user_id=str(owner_id.user_id),
         )
         assert len(resp.service_log) == 1
         assert resp.service_log[0]["note"] == "Replaced bearing"

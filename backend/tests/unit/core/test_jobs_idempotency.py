@@ -23,7 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.job_run import JobRun
 from app.core.job_runner import submit_job
-from tests._pg import isolated_engine
+from tests._pg import isolated_database_url, isolated_engine
 
 
 @pytest_asyncio.fixture
@@ -143,17 +143,23 @@ async def test_concurrent_submits_with_same_key_dedupe(session_factory) -> None:
         assert len(rows) == 1
 
 
-@pytest.mark.asyncio
-async def test_idempotency_key_uniqueness_across_threads(
-    session_factory,
-    monkeypatch,
-) -> None:
+def test_idempotency_key_uniqueness_across_threads(monkeypatch) -> None:
     """Same key used from multiple threads (sync wrapper) must not duplicate.
 
-    Each thread spins its own event loop via ``asyncio.run`` — the
-    contract here is that the UNIQUE constraint on ``idempotency_key``
-    plus the IntegrityError-recovery branch in ``submit_job`` collapse
-    every concurrent caller onto one row.
+    Each thread spins its own event loop and builds its OWN engine bound to
+    that loop, all pointing at the SAME throwaway database. The contract here
+    is that the UNIQUE constraint on ``idempotency_key`` plus the
+    IntegrityError-recovery branch in ``submit_job`` collapse every concurrent
+    caller onto one row.
+
+    This is a synchronous test on purpose. asyncpg connections (and
+    SQLAlchemy's async pool, with its first-connect ``asyncio.Lock``) are
+    bound to the loop that first touches them. Sharing one engine across the
+    five worker loops deadlocks: the lock binds to whichever loop wins, and
+    the others hang forever on a cross-loop future, then trip the
+    pytest-timeout signal at 300s. Giving each thread its own loop-local
+    engine against the shared database keeps the cross-connection commit
+    visibility the dedup contract needs without any cross-loop sharing.
 
     NOTE: We use ``monkeypatch.setattr`` (process-wide for the test
     duration) rather than ``with patch(...)`` inside each thread, because
@@ -161,6 +167,8 @@ async def test_idempotency_key_uniqueness_across_threads(
     races leave the module attribute swapped permanently if two threads
     overlap, which leaks the mock into later tests in the same session.
     """
+    from sqlalchemy.ext.asyncio import create_async_engine
+    from sqlalchemy.pool import NullPool
 
     def fake_dispatch(_job_id):
         return "thread-task-id"
@@ -170,27 +178,36 @@ async def test_idempotency_key_uniqueness_across_threads(
         fake_dispatch,
     )
 
-    def submit_sync() -> str:
-        async def _run() -> str:
-            jr = await submit_job(
-                kind="test.noop",
-                payload={},
-                idempotency_key="threaded-key",
-                session_factory=session_factory,
-            )
-            return str(jr.id)
+    with isolated_database_url() as db_url:
 
-        # Use a fresh loop per thread and tear it down explicitly so
-        # we do not leak event-loop state into other tests in the same
-        # pytest session.
-        loop = asyncio.new_event_loop()
-        try:
-            return loop.run_until_complete(_run())
-        finally:
-            loop.close()
+        def submit_sync() -> str:
+            # A fresh loop per thread, and a fresh engine + session factory
+            # built INSIDE that loop, so the asyncpg connection and the
+            # pool's first-connect lock bind to this thread's loop only.
+            # NullPool keeps no connection alive past the loop's teardown.
+            loop = asyncio.new_event_loop()
 
-    with ThreadPoolExecutor(max_workers=5) as pool:
-        ids = list(pool.map(lambda _: submit_sync(), range(5)))
+            async def _run() -> str:
+                engine = create_async_engine(db_url, future=True, poolclass=NullPool)
+                factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+                try:
+                    jr = await submit_job(
+                        kind="test.noop",
+                        payload={},
+                        idempotency_key="threaded-key",
+                        session_factory=factory,
+                    )
+                    return str(jr.id)
+                finally:
+                    await engine.dispose()
+
+            try:
+                return loop.run_until_complete(_run())
+            finally:
+                loop.close()
+
+        with ThreadPoolExecutor(max_workers=5) as pool:
+            ids = list(pool.map(lambda _: submit_sync(), range(5)))
 
     # Every thread must observe the same JobRun id.
     assert len(set(ids)) == 1

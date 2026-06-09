@@ -142,6 +142,30 @@ def ensure_template() -> None:
     _template_ready = True
 
 
+def _create_throwaway_db() -> str:
+    """Clone the session template into a fresh throwaway database and return its name."""
+    ensure_template()
+    db_name = f"oe_test_{uuid.uuid4().hex[:16]}"
+    conn = _connect_admin()
+    try:
+        conn.cursor().execute(f'CREATE DATABASE "{db_name}" TEMPLATE "{_TEMPLATE_DB}"')
+    finally:
+        conn.close()
+    return db_name
+
+
+def _drop_throwaway_db(db_name: str) -> None:
+    """Terminate backends and drop a throwaway database created by ``_create_throwaway_db``."""
+    conn = _connect_admin()
+    try:
+        cur = conn.cursor()
+        _terminate_backends(cur, db_name)
+        cur.execute(f'DROP DATABASE IF EXISTS "{db_name}"')
+        cur.close()
+    finally:
+        conn.close()
+
+
 @contextlib.asynccontextmanager
 async def isolated_engine() -> AsyncIterator[AsyncEngine]:
     """Yield an async engine bound to a throwaway, schema-loaded database.
@@ -149,28 +173,35 @@ async def isolated_engine() -> AsyncIterator[AsyncEngine]:
     The database is cloned from the session template (fast, no ``create_all``)
     and dropped when the context exits.
     """
-    ensure_template()
-    db_name = f"oe_test_{uuid.uuid4().hex[:16]}"
-
-    conn = _connect_admin()
-    try:
-        conn.cursor().execute(f'CREATE DATABASE "{db_name}" TEMPLATE "{_TEMPLATE_DB}"')
-    finally:
-        conn.close()
-
+    db_name = _create_throwaway_db()
     engine = create_async_engine(_async_url_for(db_name), future=True)
     try:
         yield engine
     finally:
         await engine.dispose()
-        conn = _connect_admin()
-        try:
-            cur = conn.cursor()
-            _terminate_backends(cur, db_name)
-            cur.execute(f'DROP DATABASE IF EXISTS "{db_name}"')
-            cur.close()
-        finally:
-            conn.close()
+        _drop_throwaway_db(db_name)
+
+
+@contextlib.contextmanager
+def isolated_database_url():
+    """Yield the asyncpg URL of a throwaway, schema-loaded database (sync context).
+
+    Unlike :func:`isolated_engine`, this hands out only the connection URL and
+    does NOT open an async engine. It is the right primitive when several
+    independent event loops (e.g. one per worker thread) each need to build
+    their OWN engine bound to their OWN loop against the SAME database. Sharing
+    a single async engine across foreign loops deadlocks: SQLAlchemy's pool and
+    its first-connect ``asyncio.Lock`` bind to whichever loop touches them
+    first, so the other loops hang forever on a cross-loop future.
+
+    The database is cloned from the session template (fast, no ``create_all``)
+    and dropped when the context exits.
+    """
+    db_name = _create_throwaway_db()
+    try:
+        yield _async_url_for(db_name)
+    finally:
+        _drop_throwaway_db(db_name)
 
 
 def _ensure_unit_db() -> None:
