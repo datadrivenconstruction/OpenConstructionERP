@@ -1843,6 +1843,28 @@ class BIMHubService:
                 detail="BIM element not found",
             )
 
+        # Idempotency guard. ``oe_bim_boq_link`` has a UNIQUE constraint on
+        # (boq_position_id, bim_element_id). Re-linking the same element to a
+        # position it is already linked to (the user clicks "Add to BOQ" twice,
+        # or a group/bulk link includes an already-linked element) would
+        # otherwise hit that constraint on flush and surface as a raw 500
+        # "Internal server error". Return a clean 409 instead - the frontend
+        # treats a 409 whose message contains "already" as a no-op so bulk
+        # linking stays idempotent.
+        existing = next(
+            (
+                lnk
+                for lnk in await self.link_repo.list_by_boq_position(data.boq_position_id)
+                if lnk.bim_element_id == data.bim_element_id
+            ),
+            None,
+        )
+        if existing is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This BIM element is already linked to that BOQ position",
+            )
+
         link = BOQElementLink(
             boq_position_id=data.boq_position_id,
             bim_element_id=data.bim_element_id,
@@ -1852,7 +1874,17 @@ class BIMHubService:
             created_by=user_id,
             metadata_=data.metadata,
         )
-        link = await self.link_repo.create(link)
+        try:
+            link = await self.link_repo.create(link)
+        except IntegrityError as exc:
+            # Lost a race with a concurrent writer that inserted the same
+            # (position, element) pair between our pre-check and flush. Roll
+            # back the failed flush and report the same friendly 409.
+            await self.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This BIM element is already linked to that BOQ position",
+            ) from exc
 
         # Keep Position.cad_element_ids in sync (legacy JSON mirror).
         await self._append_cad_element_id(data.boq_position_id, data.bim_element_id)

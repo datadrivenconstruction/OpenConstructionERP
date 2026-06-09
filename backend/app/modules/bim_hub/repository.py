@@ -13,6 +13,7 @@ from sqlalchemy.orm import noload
 
 from app.core.sql_json import json_path_text
 from app.modules.bim_hub.models import (
+    NON_3D_MODEL_FORMATS,
     BIMElement,
     BIMFederation,
     BIMFederationModel,
@@ -39,13 +40,30 @@ class BIMModelRepository:
         *,
         offset: int = 0,
         limit: int = 50,
+        include_non_3d: bool = False,
     ) -> tuple[list[BIMModel], int]:
         """List BIM models for a project with pagination.
 
         Elements are NOT loaded in list queries - use get() for a single model
         with elements when needed.
+
+        By default 2D drawing formats (DWG/DXF/DGN) are excluded: they carry no
+        3D mesh and belong to the dedicated DWG Takeoff module, never the BIM 3D
+        Takeoff surface. Pass ``include_non_3d=True`` only for maintenance views
+        that intentionally want every row (e.g. orphan cleanup).
         """
         base = select(BIMModel).where(BIMModel.project_id == project_id)
+
+        if not include_non_3d:
+            # Drop rows whose normalised format CONTAINS a 2D drawing token
+            # (dwg/dxf/dgn). Substring matching (not exact) mirrors the Python
+            # ``is_non_3d_format`` helper so values like "autocad_dwg" or
+            # ".dwg" are excluded consistently across both layers. NULL / empty
+            # formats are kept (legacy rows + generic uploads stay visible in
+            # the 3D list).
+            norm_fmt = func.lower(func.coalesce(BIMModel.model_format, ""))
+            for token in NON_3D_MODEL_FORMATS:
+                base = base.where(norm_fmt.notlike(f"%{token}%"))
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()

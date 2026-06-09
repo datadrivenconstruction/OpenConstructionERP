@@ -10,8 +10,9 @@ SQLite). It restores a real CAD-to-BOQ project from committed assets:
     app/scripts/flagship_assets/house_plans.pdf      reference plan set
 
 It creates: the project (+ WGS84 geo anchor so it shows on the map), the IFC
-and RVT BIM models with their real converted elements and geometry, a DWG
-drawing entry, a costed BOQ whose positions carry real CWICR rates +
+and RVT BIM 3D models with their real converted elements and geometry, a DWG
+drawing entry in the dedicated DWG Takeoff module (never the BIM 3D Hub, since
+a 2D drawing has no mesh), a costed BOQ whose positions carry real CWICR rates +
 material/labour/equipment resource breakdowns, BIM<->BOQ links for every
 element in each priced group (bidirectional navigation), project resources,
 and the PDF plan set.
@@ -68,6 +69,7 @@ async def _purge(session: AsyncSession, pid: uuid.UUID) -> None:
     """
     from app.modules.bim_hub.models import BIMElement, BIMModel, BOQElementLink
     from app.modules.boq.models import BOQ, Position
+    from app.modules.dwg_takeoff.models import DwgDrawing
     from app.modules.projects.models import Project
     from app.modules.resources.models import Resource
 
@@ -81,6 +83,11 @@ async def _purge(session: AsyncSession, pid: uuid.UUID) -> None:
     if model_ids:
         await session.execute(delete(BIMElement).where(BIMElement.model_id.in_(model_ids)))
         await session.execute(delete(BIMModel).where(BIMModel.id.in_(model_ids)))
+    # DWG Takeoff drawings cascade on the project delete below, but a prior
+    # install may have seeded the flagship DWG as a BIM model under the same
+    # deterministic id; the BIMModel delete above already cleared that. Drop
+    # any DWG drawing rows explicitly too so a forced re-seed never PK-collides.
+    await session.execute(delete(DwgDrawing).where(DwgDrawing.project_id == pid))
     # Resources FK is ON DELETE SET NULL, so drop them explicitly.
     await session.execute(delete(Resource).where(Resource.home_project_id == pid))
     proj = await session.get(Project, pid)
@@ -101,9 +108,10 @@ async def install_flagship(
         return {"status": "skipped", "reason": "no flagship assets"}
 
     from app.modules.bim_hub.file_storage import save_geometry
-    from app.modules.bim_hub.models import BIMElement, BIMModel, BOQElementLink
+    from app.modules.bim_hub.models import BIMElement, BIMModel, BOQElementLink, is_non_3d_format
     from app.modules.boq.models import BOQ, Position
     from app.modules.documents.models import Document
+    from app.modules.dwg_takeoff.models import DwgDrawing
     from app.modules.geo_hub.models import GeoAnchor
     from app.modules.projects.models import Project
     from app.modules.resources.models import Resource
@@ -154,11 +162,48 @@ async def install_flagship(
         )
 
     # ── BIM models + elements + geometry ────────────────────────────────
+    # Only true 3D formats (IFC, RVT, ...) become BIM 3D models. 2D drawing
+    # formats (DWG/DXF/DGN) belong to the dedicated DWG Takeoff module: they
+    # carry no 3D mesh, so seeding them as ready BIM models made the 3D viewer
+    # request geometry that can never exist and fire the "marked ready but its
+    # 3D geometry file is no longer on the server" 404 on a fresh install.
     elem_uuid: dict[tuple[str, str], uuid.UUID] = {}
     model_count = 0
     elem_count = 0
+    dwg_count = 0
     for m in spec["models"]:
         mid = uuid.UUID(m["id"])
+
+        # Route 2D drawings to the DWG Takeoff module, never the BIM 3D Hub.
+        if is_non_3d_format(m.get("model_format")):
+            fmt = (m.get("model_format") or "dwg").lower().lstrip(".")
+            session.add(
+                DwgDrawing(
+                    id=mid,
+                    project_id=pid,
+                    name=m["name"],
+                    filename=f"{m['name']}.{fmt}",
+                    file_format=fmt,
+                    # No source file ships with the flagship assets - this is a
+                    # metadata-only reference row so the DWG Takeoff module
+                    # lists the drawing. Status "uploaded" (not "ready") keeps
+                    # the UI honest: there are no parsed entities to render yet.
+                    file_path="",
+                    size_bytes=0,
+                    status="uploaded",
+                    discipline=m.get("discipline"),
+                    created_by=str(owner),
+                    metadata_={
+                        "source": "flagship_seed",
+                        "seed_reference_only": True,
+                        "element_count": m.get("element_count", 0),
+                    },
+                )
+            )
+            dwg_count += 1
+            await session.flush()
+            continue
+
         canonical_key: str | None = None
         if m.get("geometry_asset"):
             gpath = ASSETS / m["geometry_asset"]
@@ -169,12 +214,12 @@ async def install_flagship(
         # geometry blob was written can be "ready" - the geometry endpoint
         # treats a "ready" model with no blob as a data-loss error and
         # returns the alarming `geometry_missing` 404 ("marked ready but its
-        # 3D geometry file is no longer on the server"). The flagship DWG is
-        # a data-only drawing with no bundled mesh; mark it "needs_converter"
-        # so the same endpoint returns the honest `geometry_absent` state
-        # ("no 3D geometry: the converter for its format is not available")
-        # instead of pretending geometry was lost. The BOQ "Linked Geometry"
-        # preview reads the same endpoint and so becomes honest too.
+        # 3D geometry file is no longer on the server"). A 3D model with no
+        # bundled mesh is marked "needs_converter" so the same endpoint
+        # returns the honest `geometry_absent` state ("no 3D geometry: the
+        # converter for its format is not available") instead of pretending
+        # geometry was lost. The BOQ "Linked Geometry" preview reads the same
+        # endpoint and so becomes honest too.
         model_status = "ready" if canonical_key else "needs_converter"
         session.add(
             BIMModel(
@@ -374,6 +419,7 @@ async def install_flagship(
         "project_id": str(pid),
         "models": model_count,
         "elements": elem_count,
+        "dwg_drawings": dwg_count,
         "positions": npos,
         "links": nlinks,
         "resources": len(spec.get("resources", [])),
