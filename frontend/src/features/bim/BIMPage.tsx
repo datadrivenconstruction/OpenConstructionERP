@@ -105,6 +105,7 @@ import {
   deleteElementGroup,
   installBIMConverter,
   retryBIMModelProcessing,
+  isNon3DBimFormat,
   type BIMElementGroup,
 } from './api';
 
@@ -488,7 +489,7 @@ function UploadPanel({
     const ext = getFileExtension(f.name);
     if (DWG_EXTENSIONS.has(ext)) {
       // DWG/DXF are 2D takeoff drawings, not 3D BIM models. Hand the picked
-      // file straight to the DWG Drawings module so the user does not have to
+      // file straight to the DWG Takeoff module so the user does not have to
       // re-pick it there, then open that module where the upload is already
       // running.
       if (projectId) {
@@ -501,10 +502,10 @@ function UploadPanel({
       }
       addToast({
         type: 'info',
-        title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Drawings module' }),
+        title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Takeoff module' }),
         message: projectId
-          ? t('bim.dwg_handoff_msg', { defaultValue: 'Sending your drawing to DWG Drawings...' })
-          : t('bim.dwg_redirect_msg', { defaultValue: 'Opening DWG Drawings...' }),
+          ? t('bim.dwg_handoff_msg', { defaultValue: 'Sending your drawing to DWG Takeoff...' })
+          : t('bim.dwg_redirect_msg', { defaultValue: 'Opening DWG Takeoff...' }),
       });
       navigate('/dwg-takeoff');
       return;
@@ -1262,7 +1263,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
-  // DWG/DXF are 2D drawings, not 3D BIM. Hand the file to the DWG Drawings
+  // DWG/DXF are 2D drawings, not 3D BIM. Hand the file to the DWG Takeoff
   // module so it is not lost on the redirect, then open that module.
   const handleLandingDwg = useCallback((f: File) => {
     if (projectId) {
@@ -1275,10 +1276,10 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
     }
     addToast({
       type: 'info',
-      title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Drawings module' }),
+      title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Takeoff module' }),
       message: projectId
-        ? t('bim.dwg_handoff_msg', { defaultValue: 'Sending your drawing to DWG Drawings...' })
-        : t('bim.dwg_redirect_msg', { defaultValue: 'Opening DWG Drawings...' }),
+        ? t('bim.dwg_handoff_msg', { defaultValue: 'Sending your drawing to DWG Takeoff...' })
+        : t('bim.dwg_redirect_msg', { defaultValue: 'Opening DWG Takeoff...' }),
     });
     navigate('/dwg-takeoff');
   }, [projectId, addToast, t, navigate]);
@@ -1952,7 +1953,16 @@ export function BIMPage() {
   const clearBIMLinkSelection = useBIMLinkSelectionStore((s) => s.clear);
 
   const modelsQuery = useQuery({ queryKey: ['bim-models', projectId], queryFn: () => fetchBIMModels(projectId), enabled: !!projectId, staleTime: 5 * 60_000 });
-  const models = modelsQuery.data?.items ?? [];
+  // Defense in depth: never surface 2D drawing formats (DWG/DXF/DGN) in the
+  // BIM 3D Takeoff filmstrip, picker or deep-link resolver. Those belong to the
+  // DWG Takeoff module and carry no 3D mesh, so the viewer must never try to
+  // load geometry for them. The backend list query already filters these out;
+  // this guard keeps the UI correct even against a stale cache or a backend
+  // that predates the server-side filter.
+  const models = useMemo(
+    () => (modelsQuery.data?.items ?? []).filter((m) => !isNon3DBimFormat(m.model_format || m.format)),
+    [modelsQuery.data],
+  );
   const hasModels = models.length > 0;
   const showFullPageUpload = showUploadOverride !== null ? showUploadOverride : !hasModels;
 
