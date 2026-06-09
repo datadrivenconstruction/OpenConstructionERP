@@ -664,80 +664,121 @@ async def _seed_demo_account() -> None:
             await session.commit()
 
         # ── 3. Project seed (outside the user session) ────────────────
-        # Installs the classic 5 ORM demo projects when SEED_SHOWCASE is
-        # enabled. The ORM installer below is the seeding path on PostgreSQL.
+        # Two distinct seeding paths run on PostgreSQL, picked by whether a
+        # partner pack is active:
+        #
+        #   PACK MODE  (a pack is active): seed ONLY that pack's own country
+        #     project(s) so the workspace reflects the partner's region,
+        #     currency and classification - nothing else.
+        #
+        #   GENERIC MODE (no pack): seed the rich nine-project showcase - the
+        #     eight country projects in SHOWCASE_DEMO_IDS plus the flagship
+        #     reference project installed further below - so a fresh, vanilla
+        #     install lands a fully worked-out, globe-spanning portfolio.
+        #
+        # Both paths install each project in its own try/except so one failure
+        # never aborts the rest of the seed.
         if project_count == 0:
-            # The flagship "Residential House" project (installed below) is now
-            # the single, deeply-worked reference showcase: real DDC-converted
-            # IFC/RVT/DWG models, geometry, and a CWICR-priced BIM-linked BOQ.
-            # The 5 ORM demo projects are OPT-IN only now - set SEED_SHOWCASE=1
-            # to restore them. A clean install therefore shows the flagship
-            # (plus a partner-pack project when a pack is active).
-            showcase_enabled = os.environ.get("SEED_SHOWCASE", "false").lower() in (
-                "1",
-                "true",
-                "yes",
-            )
-            if showcase_enabled:
-                # Fresh-install fallback: cap strictly at 5 (DEFAULT_DEMO_IDS).
-                # Drift-prevention: if the constant ever exceeds five, we abort
-                # so a future PR can't silently re-introduce demo bloat.
-                from app.core.demo_projects import DEFAULT_DEMO_IDS, install_demo_project
+            from app.core.partner_pack.discovery import get_active_pack
 
-                if len(DEFAULT_DEMO_IDS) > 5:
-                    logger.error(
-                        "DEFAULT_DEMO_IDS has %d entries - fresh-install seed is capped at 5. Aborting auto-seed.",
-                        len(DEFAULT_DEMO_IDS),
-                    )
-                    return
+            active = None
+            try:
+                active = get_active_pack()
+            except Exception:
+                logger.debug("Active partner pack lookup failed (treating as none)", exc_info=True)
 
-                async with async_session_factory() as fb_session:
-                    for demo_id in DEFAULT_DEMO_IDS:
+            if active is not None:
+                # PACK MODE - seed only the active pack's project(s). Prefer the
+                # manifest's explicit demo_template_ids (filtered to ids that
+                # resolve in DEMO_TEMPLATES), then fall back to the single
+                # PACK_DEMO_PROJECT flagship mapping. Tag every row with the
+                # pack slug so scope_project_query keeps the workspace clean.
+                from app.core.demo_projects import (
+                    DEMO_TEMPLATES,
+                    PACK_DEMO_PROJECT,
+                    install_demo_project,
+                )
+
+                pack_ids: list[str] = []
+                for demo_id in getattr(active, "demo_template_ids", None) or []:
+                    if demo_id in DEMO_TEMPLATES and demo_id not in pack_ids:
+                        pack_ids.append(demo_id)
+                if not pack_ids:
+                    fallback = PACK_DEMO_PROJECT.get(active.slug)
+                    if fallback:
+                        pack_ids = [fallback]
+
+                for demo_id in pack_ids:
+                    async with async_session_factory() as pk_session:
                         try:
-                            result = await install_demo_project(fb_session, demo_id)
+                            pk_result = await install_demo_project(
+                                pk_session, demo_id, partner_pack=active.slug
+                            )
+                            await pk_session.commit()
                             logger.info(
-                                "Demo project installed: %s (%s positions, %s %s)",
+                                "Partner-pack demo installed: %s for pack %s (%s positions)",
                                 demo_id,
-                                result.get("positions"),
-                                result.get("currency"),
-                                result.get("grand_total"),
+                                active.slug,
+                                pk_result.get("positions"),
                             )
                         except Exception:
-                            logger.warning("Failed to install demo %s (skipping)", demo_id)
-                    await fb_session.commit()
+                            await pk_session.rollback()
+                            logger.warning(
+                                "Failed to install partner-pack demo %s (skipping)",
+                                demo_id,
+                            )
+                if not pack_ids:
+                    logger.info(
+                        "Partner pack %s is active but maps to no demo project; skipping demo seed.",
+                        active.slug,
+                    )
+            else:
+                # GENERIC MODE - seed the rich showcase by default. Tests ask for
+                # a fast startup (OE_TEST_FAST_STARTUP), and operators can opt out
+                # with OE_SKIP_SHOWCASE=1; both skip the eight-project loop. The
+                # flagship below still installs and provides the ninth project.
+                _fast_startup = os.environ.get("OE_TEST_FAST_STARTUP", "").lower() in (
+                    "1",
+                    "true",
+                    "yes",
+                )
+                _skip_showcase = os.environ.get("OE_SKIP_SHOWCASE", "").lower() in (
+                    "1",
+                    "true",
+                    "yes",
+                )
+                if _fast_startup or _skip_showcase:
+                    logger.debug(
+                        "Showcase seed skipped (%s)",
+                        "OE_TEST_FAST_STARTUP" if _fast_startup else "OE_SKIP_SHOWCASE",
+                    )
+                else:
+                    from app.core.demo_projects import SHOWCASE_DEMO_IDS, install_demo_project
 
-            # Partner-pack flagship: when a pack is active, also install its
-            # country project so the fresh workspace reflects the partner's
-            # region, currency and classification (runs after the ORM demo
-            # seed). Independent session so a failure never rolls back the
-            # base seed.
-            try:
-                from app.core.partner_pack.discovery import get_active_pack
-
-                _pack = get_active_pack()
-                if _pack is not None:
-                    from app.core.demo_projects import PACK_DEMO_PROJECT, install_demo_project
-
-                    _pack_demo = PACK_DEMO_PROJECT.get(_pack.slug)
-                    if _pack_demo:
-                        async with async_session_factory() as pk_session:
+                    # One fresh session per project with its own commit/rollback,
+                    # mirroring PACK MODE above. On PostgreSQL a failure inside
+                    # install_demo_project aborts the surrounding transaction, so
+                    # a single shared session plus one trailing commit would let
+                    # one bad demo poison the txn and roll back every project that
+                    # had already seeded. Isolating each project prevents that.
+                    for demo_id in SHOWCASE_DEMO_IDS:
+                        async with async_session_factory() as sc_session:
                             try:
-                                pk_result = await install_demo_project(pk_session, _pack_demo, partner_pack=_pack.slug)
-                                await pk_session.commit()
+                                result = await install_demo_project(sc_session, demo_id)
+                                await sc_session.commit()
                                 logger.info(
-                                    "Partner-pack demo installed: %s for pack %s (%s positions)",
-                                    _pack_demo,
-                                    _pack.slug,
-                                    pk_result.get("positions"),
+                                    "Showcase demo installed: %s (%s positions, %s %s)",
+                                    demo_id,
+                                    result.get("positions"),
+                                    result.get("currency"),
+                                    result.get("grand_total"),
                                 )
                             except Exception:
-                                await pk_session.rollback()
+                                await sc_session.rollback()
                                 logger.warning(
-                                    "Failed to install partner-pack demo %s (skipping)",
-                                    _pack_demo,
+                                    "Failed to install showcase demo %s (skipping)",
+                                    demo_id,
                                 )
-            except Exception:
-                logger.debug("Partner-pack demo auto-install skipped", exc_info=True)
 
         # Flagship "Residential House" reference project - an ORM installer
         # running on PostgreSQL so the full CAD-to-BOQ showcase (real
@@ -2189,6 +2230,42 @@ def create_app() -> FastAPI:
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
             logger.info("PostgreSQL tables created/verified")
+
+            # Stamp the alembic version table to head on a fresh managed DB.
+            # create_all above materialises the full current schema, so the
+            # database is by definition at head; recording that lets the
+            # health check report a clean state instead of "degraded" on
+            # every fresh install, and makes a later ``alembic upgrade head``
+            # a correct no-op rather than an attempt to replay the whole
+            # chain against already-present tables. This is the runtime
+            # counterpart of alembic/env.py's fresh-blank-DB shortcut (which
+            # only fires when ops run migrations before the app ever boots).
+            # Only stamps when the version table is empty/absent so it never
+            # clobbers an existing migration state. Non-fatal.
+            def _stamp_head_if_unstamped(sync_conn: object) -> str | None:
+                from pathlib import Path as _StampPath
+
+                from alembic.config import Config as _StampConfig
+                from alembic.runtime.migration import MigrationContext as _StampMigCtx
+                from alembic.script import ScriptDirectory as _StampScriptDir
+
+                mig_ctx = _StampMigCtx.configure(sync_conn)
+                if mig_ctx.get_current_revision() is not None:
+                    return None  # already stamped - leave existing state untouched
+                ini = _StampPath(__file__).resolve().parent.parent / "alembic.ini"
+                if not ini.is_file():
+                    return None
+                script = _StampScriptDir.from_config(_StampConfig(str(ini)))
+                mig_ctx.stamp(script, "heads")
+                return script.get_current_head()
+
+            try:
+                async with engine.begin() as conn:
+                    stamped = await conn.run_sync(_stamp_head_if_unstamped)
+                if stamped:
+                    logger.info("Alembic version stamped to head %s on fresh DB", stamped)
+            except Exception:
+                logger.debug("Alembic head stamp skipped (non-fatal)", exc_info=True)
         else:
             logger.info("Using external database (Alembic manages schema)")
 

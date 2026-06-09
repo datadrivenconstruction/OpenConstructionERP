@@ -221,8 +221,29 @@ class ModuleLoader:
                         module_name,
                         legacy_prefix,
                     )
-        except ModuleNotFoundError:
-            logger.debug("No router for module %s", module_name)
+        except ModuleNotFoundError as exc:
+            # Distinguish two very different cases that both surface as
+            # ModuleNotFoundError:
+            #   1. The module simply has no router.py - expected, stay quiet.
+            #   2. router.py exists but one of its (transitive) imports is
+            #      missing - the router silently disappears and every one of
+            #      the module's endpoints 404s. That must never be swallowed.
+            # The missing module's dotted name is on the exception. When it is
+            # the router module itself, case 1; otherwise a dependency of the
+            # router failed to import (case 2) and we log loudly so a missing
+            # package can be diagnosed instead of producing phantom 404s.
+            if exc.name in (router_module_name, f"{package_path}.router"):
+                logger.debug("No router for module %s", module_name)
+            else:
+                logger.warning(
+                    "Router for module %s was NOT mounted: import of %r failed "
+                    "(%s). The module's API endpoints are unavailable - this "
+                    "usually means a required dependency is not installed.",
+                    module_name,
+                    exc.name,
+                    exc,
+                    exc_info=True,
+                )
 
         # Load models (for Alembic discovery)
         try:

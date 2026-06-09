@@ -318,3 +318,23 @@ scripts/_dump_heavily.py
 scripts/_find_mixed.py
 scripts/_top_leaked_words.py
 scripts/translate_mn_*.py
+
+# Session-local scratch, repro snapshots and secrets (never commit)
+/.ci_latest_run
+/.oe_token.txt
+/.oe_projects.txt
+/_projects.json
+/_m_*.json
+/_backend_restart.*
+/tmp_rvt_repro*.py
+backend/app/scripts/_flagship_dump.txt
+backend/app/scripts/_snap_dump.txt
+frontend/_qa/
+frontend/scripts/_apply_translations.cjs
+frontend/scripts/_dupcheck.cjs
+frontend/scripts/_extract_missing_keys.cjs
+frontend/scripts/_finalize_i18n.sh
+frontend/scripts/_i18n_stage2_state.cjs
+frontend/scripts/_stage2_tx/
+frontend/scripts/_validate_out.cjs
+frontend/scripts/_vite.out
