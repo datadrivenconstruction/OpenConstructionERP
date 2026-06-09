@@ -279,6 +279,69 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
     }
   }
 
+  /** After the backend accepts a CAD upload it converts the model in a
+   *  fire-and-forget background task, and the model record reaches its
+   *  terminal status (ready / degraded / needs_converter / error) some time
+   *  later. The dock progress is otherwise a simulated timer that parks at
+   *  95%, so poll the real model record and finish the job when the model is
+   *  genuinely ready. Without this the dock hangs at "Finalizing model
+   *  setup..." until the stale-job janitor force-errors it, even though the
+   *  model already loaded fine. Lives at module scope so it survives page
+   *  navigation. */
+  async function reconcileModelStatus(jobId: string, modelId: string, generatePdf: boolean) {
+    const POLL_INTERVAL_MS = 3500;
+    const POLL_MAX_ATTEMPTS = 700; // ~40 min upper bound, matches the janitor
+
+    for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
+      if (!get().jobs.has(jobId)) return;
+      await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+      if (!get().jobs.has(jobId)) return;
+
+      let model: Awaited<ReturnType<typeof fetchBIMModel>>;
+      try {
+        model = await fetchBIMModel(modelId);
+      } catch {
+        // Transient network blip, keep polling.
+        continue;
+      }
+
+      if (model.status === 'ready' || model.status === 'degraded') {
+        patchJob(jobId, {
+          status: 'ready',
+          progress: 100,
+          stage: 'bim_upload.stage_done',
+          modelId,
+          elementCount: model.element_count ?? 0,
+          completedAt: Date.now(),
+        });
+        if (generatePdf) void waitForReadyThenGeneratePdf(jobId, modelId);
+        return;
+      }
+      if (model.status === 'needs_converter' || model.status === 'converter_required') {
+        patchJob(jobId, {
+          status: 'converter_required',
+          progress: 0,
+          stage: 'bim_upload.stage_converter_required',
+          modelId,
+          completedAt: Date.now(),
+        });
+        return;
+      }
+      if (model.status === 'error') {
+        patchJob(jobId, {
+          status: 'error',
+          progress: 0,
+          stage: 'bim_upload.stage_failed',
+          modelId,
+          errorMessage: 'Could not extract elements from this CAD file.',
+          completedAt: Date.now(),
+        });
+        return;
+      }
+      // Otherwise still processing, leave the dock at 95% and poll on.
+    }
+  }
+
   /** Run the actual upload. This is a plain async function, not a hook. */
   async function executeUpload(jobId: string, params: StartUploadParams) {
     startStageTimer(jobId);
@@ -307,25 +370,45 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
             st !== 'error');
 
         if (isSuccessStatus) {
-          patchJob(jobId, {
-            status: 'ready',
-            progress: 100,
-            stage: 'bim_upload.stage_done',
-            modelId: res.model_id,
-            elementCount: cnt,
-            completedAt: Date.now(),
-          });
-
-          // PDF generation is intentionally deferred until the model record
-          // reaches status="ready" on the backend.  Triggering it earlier
-          // makes the PDF DDC subprocess race the model conversion DDC, and
-          // both crawl — the user reported the upload "freezing forever".
-          // We poll model status here in the store so the call survives
-          // page navigation; once the model is ready we fire-and-forget the
-          // PDF endpoint and surface its lifecycle via job.pdfStatus.
-          if (params.generatePdfSheets && res.model_id) {
-            const modelIdForPdf = res.model_id;
-            void waitForReadyThenGeneratePdf(jobId, modelIdForPdf);
+          if (st === 'ready') {
+            // Backend already finished (fast path or an already-processed
+            // model). Mark the dock job done right away.
+            patchJob(jobId, {
+              status: 'ready',
+              progress: 100,
+              stage: 'bim_upload.stage_done',
+              modelId: res.model_id,
+              elementCount: cnt,
+              completedAt: Date.now(),
+            });
+            if (params.generatePdfSheets && res.model_id) {
+              void waitForReadyThenGeneratePdf(jobId, res.model_id);
+            }
+          } else if (res.model_id) {
+            // Backend accepted the file and is converting it in a background
+            // task (status "processing"). Keep the dock in the finalizing
+            // state and reconcile against the real model record, so the job
+            // completes when the model is genuinely ready instead of lying
+            // with an instant 100% or hanging at 95% until the janitor fires.
+            // PDF export, when requested, is chained once the model is ready.
+            patchJob(jobId, {
+              status: 'converting',
+              progress: 95,
+              stage: 'bim_upload.stage_finalizing',
+              modelId: res.model_id,
+            });
+            void reconcileModelStatus(jobId, res.model_id, params.generatePdfSheets ?? false);
+          } else {
+            // No model id and not a terminal failure. Close the job rather
+            // than leave it spinning forever.
+            patchJob(jobId, {
+              status: 'ready',
+              progress: 100,
+              stage: 'bim_upload.stage_done',
+              modelId: res.model_id,
+              elementCount: cnt,
+              completedAt: Date.now(),
+            });
           }
         } else if (st === 'converter_required' || st === 'needs_converter') {
           patchJob(jobId, {
