@@ -2365,7 +2365,7 @@ const resource = {
     "nav.sustainability": "Устойчивост",
     "nav.takeoff": "PDF измерване",
     "nav.pdf_measurements": "PDF измервания",
-    "nav.dwg_takeoff": "DWG чертежи",
+    "nav.dwg_takeoff": "DWG измерване",
     "nav.pdf_documents": "PDF документи и AI",
     "nav.benchmarks": "Ценови бенчмарки",
     "nav.collaboration": "Сътрудничество",

@@ -2403,7 +2403,7 @@ const resource = {
     "nav.sustainability": "Sürdürülebilirlik",
     "nav.takeoff": "PDF Metraj Çıkarma",
     "nav.pdf_measurements": "PDF Ölçümler",
-    "nav.dwg_takeoff": "DWG Çizimler",
+    "nav.dwg_takeoff": "DWG Metraj Çıkarma",
     "nav.pdf_documents": "PDF Belgeler & AI",
     "nav.benchmarks": "Maliyet Kıyaslamaları",
     "nav.collaboration": "İş Birliği",

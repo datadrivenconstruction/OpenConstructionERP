@@ -2216,7 +2216,7 @@ const resource = {
     "nav.sustainability": "स्थिरता",
     "nav.takeoff": "PDF मात्रा गणना",
     "nav.pdf_measurements": "PDF माप",
-    "nav.dwg_takeoff": "DWG ड्रॉइंग",
+    "nav.dwg_takeoff": "DWG मात्रा गणना",
     "nav.pdf_documents": "PDF दस्तावेज़ और AI",
     "nav.benchmarks": "लागत बेंचमार्क",
     "nav.collaboration": "सहयोग",

@@ -2385,7 +2385,7 @@ const resource = {
     "nav.sustainability": "Udržitelnost",
     "nav.takeoff": "PDF výkaz výměr",
     "nav.pdf_measurements": "PDF měření",
-    "nav.dwg_takeoff": "DWG výkresy",
+    "nav.dwg_takeoff": "DWG výkaz výměr",
     "nav.pdf_documents": "PDF dokumenty & AI",
     "nav.benchmarks": "Cenové benchmarky",
     "nav.collaboration": "Spolupráce",

@@ -2365,7 +2365,7 @@ const resource = {
     "nav.sustainability": "Kestävyys",
     "nav.takeoff": "PDF-määrälaskenta",
     "nav.pdf_measurements": "PDF-mittaukset",
-    "nav.dwg_takeoff": "DWG-piirustukset",
+    "nav.dwg_takeoff": "DWG-määrälaskenta",
     "nav.pdf_documents": "PDF-asiakirjat ja tekoäly",
     "nav.benchmarks": "Kustannusvertailu",
     "nav.collaboration": "Yhteistyö",

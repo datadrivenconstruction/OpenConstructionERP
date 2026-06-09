@@ -2385,7 +2385,7 @@ const resource = {
     "nav.sustainability": "지속가능성",
     "nav.takeoff": "PDF 물량산출",
     "nav.pdf_measurements": "PDF 측정",
-    "nav.dwg_takeoff": "DWG 도면",
+    "nav.dwg_takeoff": "DWG 물량산출",
     "nav.pdf_documents": "PDF 문서 & AI",
     "nav.benchmarks": "원가 벤치마크",
     "nav.collaboration": "협업",

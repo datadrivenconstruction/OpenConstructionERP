@@ -1870,7 +1870,7 @@ const resource = {
     "nav.sustainability": "Nachhaltigkeit",
     "nav.takeoff": "PDF-Aufmaß",
     "nav.pdf_measurements": "PDF-Messungen",
-    "nav.dwg_takeoff": "DWG-Zeichnungen",
+    "nav.dwg_takeoff": "DWG-Aufmaß",
     "nav.pdf_documents": "PDF-Dokumente & KI",
     "nav.benchmarks": "Kostenkennwerte",
     "nav.collaboration": "Zusammenarbeit",

@@ -1328,7 +1328,7 @@ const resource = {
     "nav.sustainability": "Durabilité",
     "nav.takeoff": "Métré PDF",
     "nav.pdf_measurements": "Mesures PDF",
-    "nav.dwg_takeoff": "Dessins DWG",
+    "nav.dwg_takeoff": "Métré DWG",
     "nav.pdf_documents": "Documents PDF & IA",
     "nav.benchmarks": "Indices de coûts",
     "nav.collaboration": "Collaboration",
