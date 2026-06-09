@@ -32,6 +32,10 @@ Thank you to everyone who has contributed.
   ([#174](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/174)), and
   takeoff documents open in the in-app viewer instead of a broken download navigation
   ([#172](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/172)).
+- **Jérémy Christillin** ([@bvisible](https://github.com/bvisible)): feedback and feature
+  proposals for the PDF takeoff module, in-canvas measurement editing and LLM-assisted
+  plan reading
+  ([#194](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/194)).
 
 See the full list of everyone who has contributed:
 
