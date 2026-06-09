@@ -75,6 +75,11 @@ dependencies = [
     "pandas>=2.2.0,<3",
     "pyarrow>=23.0.1,<25",
     "trimesh>=4.0.0",
+    # trimesh's COLLADA loader is a thin wrapper over pycollada (imported as
+    # "collada"); without it trimesh.load() of a .dae raises ImportError and the
+    # BIM Hub DAE-to-GLB conversion silently degrades to serving the larger raw
+    # DAE. Required so the GLB path actually runs.
+    "pycollada>=0.8",
     "ezdxf>=0.18.0",
     "duckdb>=1.2.0,<2",
     "rapidfuzz>=3.0.0",
