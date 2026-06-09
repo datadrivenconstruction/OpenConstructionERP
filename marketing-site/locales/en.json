@@ -123,7 +123,8 @@
     "btn_install": "Install now",
     "btn_star": "Star on GitHub",
     "btn_download": "Download the app",
-    "btn_download_sub": "Windows, macOS, Linux - free and open source"
+    "btn_download_sub": "Windows, macOS, Linux - free and open source",
+    "install_label": "Install from source"
   },
   "sections": {
     "community_title": "The repo, in the open.",

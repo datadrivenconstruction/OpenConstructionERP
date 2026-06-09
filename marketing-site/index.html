@@ -10269,6 +10269,28 @@
       background: color-mix(in oklab, #22c55e 12%, transparent);
     }
     .final-cta-install .dollar { color: var(--accent-2); font-weight: 500; }
+    /* Pip pill internals: a small "Install from source" caption, the mono
+       command, and a copy glyph that flips to a check on copy. */
+    .final-cta-install .fci-label {
+      font-family: Inter, sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--accent-3);
+      padding-right: 12px; margin-right: 2px;
+      border-right: 1px solid var(--line-1);
+    }
+    .final-cta-install .fci-cmd { color: var(--ink-1); white-space: nowrap; }
+    .final-cta-install .fci-copy { display: inline-flex; align-items: center; color: var(--ink-3); }
+    .final-cta-install:hover .fci-copy { color: var(--accent-3); }
+    .final-cta-install .fci-copy svg { width: 15px; height: 15px; }
+    .final-cta-install .fci-check { display: none; color: #22c55e; }
+    .final-cta-install.is-copied .fci-copy { color: #22c55e; }
+    .final-cta-install.is-copied .fci-copy svg:not(.fci-check) { display: none; }
+    .final-cta-install.is-copied .fci-check { display: inline; }
+    @media (max-width: 480px) {
+      .final-cta-install { flex-wrap: wrap; justify-content: center; row-gap: 6px; padding: 12px 16px; }
+      .final-cta-install .fci-label { border-right: 0; padding-right: 0; width: 100%; text-align: center; }
+      .final-cta-install .fci-cmd { white-space: normal; word-break: break-word; }
+    }
 
     /* Install method tabs (pip/docker/curl/git) + "also works with" footer */
     .final-install-wrap {
@@ -11954,9 +11976,13 @@
       <!-- ============================================================ -->
       <style>
         .hero-install {
+          /* Fill the hero text column so the card spans the same generous
+             width as the row of OS download cards lower on the page, lining
+             its left edge up with the headline and tagline above it. */
           margin: 22px 0 26px;
-          padding: 18px 18px 16px;
-          max-width: 540px;
+          padding: 20px 20px 18px;
+          width: 100%;
+          box-sizing: border-box;
           background: var(--card-bg);
           border: 1px solid var(--line-1);
           border-radius: 16px;
@@ -12193,7 +12219,7 @@
       <div class="hero-cta-stack" id="fx-ctas">
         <div class="hero-cta-main">
           <a class="btn-hero-dl" id="hero-dl-btn" href="#download" rel="noopener" aria-label="Download for your platform">
-            <svg class="dl-glyph-i" id="hero-dl-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3v10.2L7.5 9.7 6 11.2 12 17l6-5.8-1.5-1.5L13 13.2V3zM5 18.5V20a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 20v-1.5h-2V19H7v-.5z"/></svg>
+            <svg class="dl-glyph-i" id="hero-dl-glyph" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M11 3v10.2L7.5 9.7 6 11.2 12 17l6-5.8-1.5-1.5L13 13.2V3zM5 18.5V20a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 20v-1.5h-2V19H7v-.5z"/></svg>
             <span class="hero-dl-stack">
               <span id="hero-dl-label" data-i18n="hero.dl_btn_generic">Download the desktop app</span>
               <span class="hero-dl-sub" data-i18n="hero.dl_btn_sub">Free - no Python, no Docker, nothing to set up</span>
@@ -12205,7 +12231,7 @@
               <span>macOS</span>
             </a>
             <a class="hero-platform-icon" href="/download#card-linux" aria-label="Linux install options">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2zm-1.3 4c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zm2.6 0c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zM12 9.3c.8 0 1.7.5 1.7.9 0 .3-.9.7-1.7.7s-1.7-.4-1.7-.7c0-.4.9-.9 1.7-.9z"/></svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.3c-2.05 0-3.55 1.6-3.55 3.95 0 .95.3 1.55.3 2.3 0 .85-.55 1.4-1.3 2.4-.9 1.2-1.95 2.7-1.95 4.75 0 1.45.5 2.55 1.3 3.35l-1.2 2.05c-.22.38.05.85.49.85H7.1c.18.5.62.85 1.2.95 1.05.18 2.2-.05 2.85-.6.27-.22.5-.32.85-.32s.58.1.85.32c.65.55 1.8.78 2.85.6.58-.1 1.02-.45 1.2-.95h1.01c.44 0 .71-.47.49-.85l-1.2-2.05c.8-.8 1.3-1.9 1.3-3.35 0-2.05-1.05-3.55-1.95-4.75-.75-1-1.3-1.55-1.3-2.4 0-.75.3-1.35.3-2.3C15.55 3.9 14.05 2.3 12 2.3Zm-1.65 3.5c.48 0 .82.45.82 1s-.34 1-.82 1-.83-.45-.83-1 .35-1 .83-1Zm3.3 0c.48 0 .83.45.83 1s-.35 1-.83 1-.82-.45-.82-1 .34-1 .82-1Zm-1.65 2.45c.6 0 1.55.3 1.95.85.12.17-.02.38-.25.45l-1.4.45c-.2.06-.4.06-.6 0l-1.4-.45c-.23-.07-.37-.28-.25-.45.4-.55 1.35-.85 1.95-.85Z"/></svg>
               <span>Linux</span>
             </a>
           </span>
@@ -12803,7 +12829,7 @@
       <!-- Linux -->
       <article class="dl-card" id="card-linux" data-os="linux">
         <header class="dl-card-head">
-          <span class="dl-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2zm-1.3 4c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zm2.6 0c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zM12 9.3c.8 0 1.7.5 1.7.9 0 .3-.9.7-1.7.7s-1.7-.4-1.7-.7c0-.4.9-.9 1.7-.9z"/></svg></span>
+          <span class="dl-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.3c-2.05 0-3.55 1.6-3.55 3.95 0 .95.3 1.55.3 2.3 0 .85-.55 1.4-1.3 2.4-.9 1.2-1.95 2.7-1.95 4.75 0 1.45.5 2.55 1.3 3.35l-1.2 2.05c-.22.38.05.85.49.85H7.1c.18.5.62.85 1.2.95 1.05.18 2.2-.05 2.85-.6.27-.22.5-.32.85-.32s.58.1.85.32c.65.55 1.8.78 2.85.6.58-.1 1.02-.45 1.2-.95h1.01c.44 0 .71-.47.49-.85l-1.2-2.05c.8-.8 1.3-1.9 1.3-3.35 0-2.05-1.05-3.55-1.95-4.75-.75-1-1.3-1.55-1.3-2.4 0-.75.3-1.35.3-2.3C15.55 3.9 14.05 2.3 12 2.3Zm-1.65 3.5c.48 0 .82.45.82 1s-.34 1-.82 1-.83-.45-.83-1 .35-1 .83-1Zm3.3 0c.48 0 .83.45.83 1s-.35 1-.83 1-.82-.45-.82-1 .34-1 .82-1Zm-1.65 2.45c.6 0 1.55.3 1.95.85.12.17-.02.38-.25.45l-1.4.45c-.2.06-.4.06-.6 0l-1.4-.45c-.23-.07-.37-.28-.25-.45.4-.55 1.35-.85 1.95-.85Z"/></svg></span>
           <div class="dl-card-id">
             <h3 class="dl-card-name">Linux</h3>
             <p class="dl-card-note" data-i18n="home.download_cards.linux_note">AppImage, deb and rpm</p>
@@ -12967,7 +12993,7 @@
     var OS_GLYPH = {
       windows: "M3 5.4 10.4 4.3v6.6H3zM10.4 11.6v6.6L3 17.1V11.6zM11.5 4.1 21 2.7v8.2h-9.5zM21 11.9v8.2l-9.5-1.4v-6.8z",
       macos:   "M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1zM14.5 6.3c.6-.7 1-1.6.9-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.4 2.4-1.1z",
-      linux:   "M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2zm-1.3 4c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zm2.6 0c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zM12 9.3c.8 0 1.7.5 1.7.9 0 .3-.9.7-1.7.7s-1.7-.4-1.7-.7c0-.4.9-.9 1.7-.9z"
+      linux:   "M12 2.3c-2.05 0-3.55 1.6-3.55 3.95 0 .95.3 1.55.3 2.3 0 .85-.55 1.4-1.3 2.4-.9 1.2-1.95 2.7-1.95 4.75 0 1.45.5 2.55 1.3 3.35l-1.2 2.05c-.22.38.05.85.49.85H7.1c.18.5.62.85 1.2.95 1.05.18 2.2-.05 2.85-.6.27-.22.5-.32.85-.32s.58.1.85.32c.65.55 1.8.78 2.85.6.58-.1 1.02-.45 1.2-.95h1.01c.44 0 .71-.47.49-.85l-1.2-2.05c.8-.8 1.3-1.9 1.3-3.35 0-2.05-1.05-3.55-1.95-4.75-.75-1-1.3-1.55-1.3-2.4 0-.75.3-1.35.3-2.3C15.55 3.9 14.05 2.3 12 2.3Zm-1.65 3.5c.48 0 .82.45.82 1s-.34 1-.82 1-.83-.45-.83-1 .35-1 .83-1Zm3.3 0c.48 0 .83.45.83 1s-.35 1-.83 1-.82-.45-.82-1 .34-1 .82-1Zm-1.65 2.45c.6 0 1.55.3 1.95.85.12.17-.02.38-.25.45l-1.4.45c-.2.06-.4.06-.6 0l-1.4-.45c-.23-.07-.37-.28-.25-.45.4-.55 1.35-.85 1.95-.85Z"
     };
     var EN_DL = { generic:"Download the desktop app", windows:"Download for Windows", macos:"Download for macOS", linux:"Download for Linux" };
     function dictKey(dict, key){
@@ -17285,6 +17311,19 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         Download the free desktop app, or install from source. Run on your laptop, VPS,
         or the cloud of your choice. Self-host forever, or let us do it.
       </p>
+
+      <!-- Install-from-source path: one tasteful pip line with copy.
+           The pill copies its data-copy command and flashes is-copied;
+           wired by a tiny binding right after this section. -->
+      <button type="button" class="final-cta-install" id="final-cta-pip" data-copy="pip install openconstructionerp" aria-label="Copy the pip install command">
+        <span class="fci-label" data-i18n="final_cta.install_label">Install from source</span>
+        <span class="fci-cmd"><span class="dollar" aria-hidden="true">$</span> pip install openconstructionerp</span>
+        <span class="fci-copy" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <svg class="fci-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </span>
+      </button>
+
       <div class="final-cta-row">
         <a class="btn-hero-dl" href="#download">
           <svg class="dl-glyph-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3v10.2L7.5 9.7 6 11.2 12 17l6-5.8-1.5-1.5L13 13.2V3zM5 18.5V20a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 20v-1.5h-2V19H7v-.5z"/></svg>
@@ -17299,7 +17338,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
             <span>macOS</span>
           </a>
           <a class="hero-platform-icon" href="/download#card-linux" aria-label="Linux install options">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2zm-1.3 4c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zm2.6 0c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zM12 9.3c.8 0 1.7.5 1.7.9 0 .3-.9.7-1.7.7s-1.7-.4-1.7-.7c0-.4.9-.9 1.7-.9z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.3c-2.05 0-3.55 1.6-3.55 3.95 0 .95.3 1.55.3 2.3 0 .85-.55 1.4-1.3 2.4-.9 1.2-1.95 2.7-1.95 4.75 0 1.45.5 2.55 1.3 3.35l-1.2 2.05c-.22.38.05.85.49.85H7.1c.18.5.62.85 1.2.95 1.05.18 2.2-.05 2.85-.6.27-.22.5-.32.85-.32s.58.1.85.32c.65.55 1.8.78 2.85.6.58-.1 1.02-.45 1.2-.95h1.01c.44 0 .71-.47.49-.85l-1.2-2.05c.8-.8 1.3-1.9 1.3-3.35 0-2.05-1.05-3.55-1.95-4.75-.75-1-1.3-1.55-1.3-2.4 0-.75.3-1.35.3-2.3C15.55 3.9 14.05 2.3 12 2.3Zm-1.65 3.5c.48 0 .82.45.82 1s-.34 1-.82 1-.83-.45-.83-1 .35-1 .83-1Zm3.3 0c.48 0 .83.45.83 1s-.35 1-.83 1-.82-.45-.82-1 .34-1 .82-1Zm-1.65 2.45c.6 0 1.55.3 1.95.85.12.17-.02.38-.25.45l-1.4.45c-.2.06-.4.06-.6 0l-1.4-.45c-.23-.07-.37-.28-.25-.45.4-.55 1.35-.85 1.95-.85Z"/></svg>
             <span>Linux</span>
           </a>
         </span>
@@ -17320,6 +17359,41 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
       </div>
     </div>
   </section>
+
+  <!-- Copy-to-clipboard for the final-CTA pip pill. The shared .dl-copy
+       handler is bound inside the download section's script which runs
+       before this markup is parsed, so this pill gets its own tiny binding
+       using the same copy + is-copied flash pattern. -->
+  <script>
+  (function(){
+    var pill = document.getElementById("final-cta-pip");
+    if(!pill) return;
+    pill.addEventListener("click", function(){
+      var cmd = pill.getAttribute("data-copy") || "";
+      var done = function(){
+        pill.classList.add("is-copied");
+        setTimeout(function(){ pill.classList.remove("is-copied"); }, 1500);
+      };
+      try{
+        navigator.clipboard.writeText(cmd).then(done, function(){
+          try{
+            var ta = document.createElement("textarea");
+            ta.value = cmd; ta.style.position = "fixed"; ta.style.opacity = "0";
+            document.body.appendChild(ta); ta.select();
+            document.execCommand("copy"); document.body.removeChild(ta); done();
+          }catch(e){}
+        });
+      }catch(e){
+        try{
+          var ta2 = document.createElement("textarea");
+          ta2.value = cmd; ta2.style.position = "fixed"; ta2.style.opacity = "0";
+          document.body.appendChild(ta2); ta2.select();
+          document.execCommand("copy"); document.body.removeChild(ta2); done();
+        }catch(_){}
+      }
+    });
+  })();
+  </script>
 
 
   <!-- ================================================================ -->
