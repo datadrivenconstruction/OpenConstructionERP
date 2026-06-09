@@ -124,7 +124,8 @@
     "btn_star": "Star on GitHub",
     "btn_download": "Download the app",
     "btn_download_sub": "Windows, macOS, Linux - free and open source",
-    "install_label": "Install from source"
+    "install_label": "Or install from source",
+    "install_foot": "One command and the full ERP is running. PostgreSQL is built in, nothing else to set up. See the <a href=\"/docs.html\">install docs</a>."
   },
   "sections": {
     "community_title": "The repo, in the open.",

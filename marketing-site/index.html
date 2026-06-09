@@ -10244,52 +10244,79 @@
       0%, 100% { opacity: 0.4; transform: scale(1); }
       50%      { opacity: 0.9; transform: scale(1.08); }
     }
+    /* Install-from-source panel: prominent terminal-style command chips with
+       working copy buttons. Sits above the download button, clearly framed so
+       the pip line reads as a real, copyable command rather than a tiny pill. */
     .final-cta-install {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 20px;
-      padding: 11px 18px;
-      border-radius: 999px;
-      border: 1px solid var(--line-1);
-      background: color-mix(in oklab, #ffffff 65%, transparent);
+      max-width: 620px;
+      margin: 4px auto 26px;
+      padding: 20px 22px 18px;
+      border-radius: 18px;
+      border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--line-1));
+      background: color-mix(in oklab, #ffffff 60%, transparent);
+      box-shadow: 0 24px 56px -36px color-mix(in oklab, var(--accent) 42%, rgba(15, 23, 42, 0.3)), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      text-align: left;
+    }
+    [data-theme="dark"] .final-cta-install {
+      border-color: color-mix(in oklab, var(--accent) 22%, var(--line-1));
+      box-shadow: 0 24px 56px -36px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .final-cta-install-head {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin: 0 0 13px;
       font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 13px;
-      color: var(--ink-1);
-      cursor: pointer;
-      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-    }
-    .final-cta-install:hover {
-      transform: translateY(-1px);
-      border-color: color-mix(in oklab, var(--accent) 50%, var(--line-1));
-      background: color-mix(in oklab, #ffffff 82%, transparent);
-    }
-    .final-cta-install.is-copied {
-      border-color: #22c55e;
-      background: color-mix(in oklab, #22c55e 12%, transparent);
-    }
-    .final-cta-install .dollar { color: var(--accent-2); font-weight: 500; }
-    /* Pip pill internals: a small "Install from source" caption, the mono
-       command, and a copy glyph that flips to a check on copy. */
-    .final-cta-install .fci-label {
-      font-family: Inter, sans-serif;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
       color: var(--accent-3);
-      padding-right: 12px; margin-right: 2px;
-      border-right: 1px solid var(--line-1);
     }
-    .final-cta-install .fci-cmd { color: var(--ink-1); white-space: nowrap; }
-    .final-cta-install .fci-copy { display: inline-flex; align-items: center; color: var(--ink-3); }
-    .final-cta-install:hover .fci-copy { color: var(--accent-3); }
-    .final-cta-install .fci-copy svg { width: 15px; height: 15px; }
-    .final-cta-install .fci-check { display: none; color: #22c55e; }
-    .final-cta-install.is-copied .fci-copy { color: #22c55e; }
-    .final-cta-install.is-copied .fci-copy svg:not(.fci-check) { display: none; }
-    .final-cta-install.is-copied .fci-check { display: inline; }
-    @media (max-width: 480px) {
-      .final-cta-install { flex-wrap: wrap; justify-content: center; row-gap: 6px; padding: 12px 16px; }
-      .final-cta-install .fci-label { border-right: 0; padding-right: 0; width: 100%; text-align: center; }
-      .final-cta-install .fci-cmd { white-space: normal; word-break: break-word; }
+    .final-cta-install-head svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.2; }
+    .fci-row { display: flex; align-items: stretch; gap: 9px; }
+    .fci-row + .fci-row { margin-top: 10px; }
+    .fci-term {
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; gap: 10px;
+      background: var(--code-bg, #0f172a);
+      border: 1px solid var(--line-1);
+      border-radius: 12px;
+      padding: 13px 15px;
+    }
+    .fci-tag {
+      flex: none;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--accent-2);
+      padding: 3px 7px; border-radius: 6px;
+      background: color-mix(in srgb, var(--accent-2) 18%, transparent);
+    }
+    .fci-dollar { flex: none; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; font-weight: 600; color: var(--accent-2); }
+    .fci-cmd {
+      flex: 1; min-width: 0;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 14px; line-height: 1.45; color: #e2e8f0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    /* Reuse the shared .dl-copy button + .is-copied flash, with a "Copied"
+       tooltip via ::after so the state reads on the dark CTA background. */
+    .final-cta-install .dl-copy { position: relative; flex: none; width: 44px; height: 44px; align-self: center; }
+    .final-cta-install .dl-copy.is-copied::after {
+      content: "Copied"; position: absolute; bottom: calc(100% + 7px); left: 50%;
+      transform: translateX(-50%); white-space: nowrap;
+      font-family: Inter, sans-serif; font-size: 11px; font-weight: 600;
+      color: #fff; background: var(--accent-3);
+      padding: 3px 8px; border-radius: 6px; pointer-events: none;
+      box-shadow: 0 6px 16px -6px rgba(15, 23, 42, 0.5);
+    }
+    .fci-foot {
+      margin: 13px 0 0;
+      font-size: 12.5px; line-height: 1.5; color: var(--ink-2);
+      text-align: center;
+    }
+    .fci-foot a { color: var(--accent-3); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent-3) 35%, transparent); }
+    .fci-foot a:hover { border-bottom-color: var(--accent-3); }
+    @media (max-width: 520px) {
+      .final-cta-install { padding: 16px 14px 14px; }
+      .fci-cmd { font-size: 13px; }
     }
 
     /* Install method tabs (pip/docker/curl/git) + "also works with" footer */
@@ -10330,7 +10357,6 @@
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
     }
     .final-install-tab svg { color: currentColor; }
-    .final-cta-install { margin-top: 0; }
 
     .final-install-alt {
       display: inline-flex;
@@ -11951,7 +11977,7 @@
 
       <div class="eyebrow" id="fx-eyebrow">
         <span class="dot" aria-hidden="true"></span>
-        <span><b id="latest-version">Latest release</b> &middot; <span id="latest-version-meta" data-i18n="hero.version_meta">open source on GitHub</span></span>
+        <span><b id="latest-version">v7.3.0</b> &middot; <span id="latest-version-meta" data-i18n="hero.version_meta">open source on GitHub</span></span>
       </div>
 
       <h1 class="headline" id="headline" data-i18n-html="hero.headline">
@@ -11967,121 +11993,6 @@
         contracts, site tasks and reporting in one install. Cost and time figures
         stay in sync with the drawings and the BOQ behind them.
       </p>
-
-      <!-- ============================================================ -->
-      <!-- Fastest-path install block, right under the tagline.         -->
-      <!-- Two one-command paths first (pip, docker), then prebuilt     -->
-      <!-- installers as the next step. Copy buttons reuse the shared    -->
-      <!-- .dl-copy handler (data-copy), wired further down the page.   -->
-      <!-- ============================================================ -->
-      <style>
-        .hero-install {
-          /* Fill the hero text column so the card spans the same generous
-             width as the row of OS download cards lower on the page, lining
-             its left edge up with the headline and tagline above it. */
-          margin: 22px 0 26px;
-          padding: 20px 20px 18px;
-          width: 100%;
-          box-sizing: border-box;
-          background: var(--card-bg);
-          border: 1px solid var(--line-1);
-          border-radius: 16px;
-          box-shadow: 0 20px 48px -28px rgba(15, 23, 42, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.55);
-          backdrop-filter: blur(10px);
-        }
-        [data-theme="dark"] .hero-install { box-shadow: 0 20px 48px -28px rgba(0, 0, 0, 0.6); }
-        .hero-install-eyebrow {
-          display: inline-flex; align-items: center; gap: 7px;
-          margin: 0 0 12px;
-          font-family: Inter, sans-serif;
-          font-size: 11.5px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
-          color: var(--accent-3);
-        }
-        .hero-install-eyebrow svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; }
-        .hero-cmd { display: block; }
-        .hero-cmd + .hero-cmd { margin-top: 13px; }
-        /* Small caption above each chip so the pip/docker badge can never
-           sit over the command text. */
-        .hero-cmd-tag {
-          display: inline-block; margin: 0 0 5px;
-          font-family: "JetBrains Mono", ui-monospace, monospace;
-          font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
-          color: var(--accent-3);
-        }
-        .hero-cmd-row { display: flex; align-items: flex-start; gap: 8px; }
-        .hero-cmd-chip {
-          flex: 1; min-width: 0;
-          display: flex; align-items: flex-start; gap: 10px;
-          background: var(--code-bg, #0f172a);
-          border: 1px solid var(--line-1);
-          border-radius: 11px;
-          padding: 12px 14px;
-        }
-        .hero-cmd-pfx {
-          font-family: "JetBrains Mono", ui-monospace, monospace;
-          font-size: 13px; font-weight: 600; color: var(--accent-2); flex: none;
-          line-height: 1.5;
-        }
-        /* Full command always visible: wraps to a second line, never clips. */
-        .hero-cmd-code {
-          font-family: "JetBrains Mono", ui-monospace, monospace;
-          font-size: 13px; line-height: 1.5; color: #e2e8f0;
-          flex: 1; min-width: 0;
-          white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;
-        }
-        /* Reuse the existing .dl-copy button + .is-copied flash; just add a
-           "Copied" affordance via ::after so the state reads in the hero. */
-        .hero-install .dl-copy { position: relative; }
-        .hero-install .dl-copy.is-copied::after {
-          content: "Copied"; position: absolute; bottom: calc(100% + 7px); left: 50%;
-          transform: translateX(-50%); white-space: nowrap;
-          font-family: Inter, sans-serif; font-size: 11px; font-weight: 600;
-          color: #fff; background: var(--accent-3);
-          padding: 3px 8px; border-radius: 6px; pointer-events: none;
-          box-shadow: 0 6px 16px -6px rgba(15, 23, 42, 0.5);
-        }
-        @media (max-width: 560px) {
-          /* The hero grid does not collapse to one column, so its text track
-             can be wider than the viewport on very narrow screens. Cap the
-             install card to the actual viewport width so it never gets
-             clipped, and let each command chip wrap internally instead. */
-          .hero-install { max-width: calc(100vw - 40px); width: calc(100vw - 40px); padding: 16px 14px 14px; }
-          .hero-cmd-code { font-size: 12px; }
-        }
-      </style>
-      <div class="hero-install" id="hero-install">
-        <p class="hero-install-eyebrow" data-i18n="hero.install_eyebrow">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
-          <span>Up and running in one command</span>
-        </p>
-
-        <div class="hero-cmd">
-          <span class="hero-cmd-tag" aria-hidden="true">pip</span>
-          <div class="hero-cmd-row">
-            <div class="hero-cmd-chip">
-              <span class="hero-cmd-pfx" aria-hidden="true">$</span>
-              <code class="hero-cmd-code">pip install openconstructionerp</code>
-            </div>
-            <button type="button" class="dl-copy" data-copy="pip install openconstructionerp" aria-label="Copy the pip install command">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="hero-cmd">
-          <span class="hero-cmd-tag" aria-hidden="true">docker</span>
-          <div class="hero-cmd-row">
-            <div class="hero-cmd-chip">
-              <span class="hero-cmd-pfx" aria-hidden="true">$</span>
-              <code class="hero-cmd-code">docker run -d -p 8080:8080 -v oe_data:/data ghcr.io/datadrivenconstruction/openconstructionerp:latest</code>
-            </div>
-            <button type="button" class="dl-copy" data-copy="docker run -d -p 8080:8080 -v oe_data:/data ghcr.io/datadrivenconstruction/openconstructionerp:latest" aria-label="Copy the docker run command">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            </button>
-          </div>
-        </div>
-
-      </div>
 
       <!-- One big OS-detected download CTA + quiet "All platforms" + tertiary star -->
       <style>
@@ -12624,6 +12535,134 @@
 
   </section>
 
+  <!-- ================================================================ -->
+  <!-- HERO INSTALL STRIP - "Up and running in one command"             -->
+  <!-- Sits as a compact full-width row directly beneath the hero. The   -->
+  <!-- outer wrapper shares the exact spine as the ready-builds card row -->
+  <!-- below (.home-dl: max-width 1360px + the same side padding), so    -->
+  <!-- the install card lines up edge-to-edge with the Windows/macOS/    -->
+  <!-- Linux .dl-grid cards. Copy buttons reuse the shared .dl-copy       -->
+  <!-- handler (data-copy), wired in the download section's script.      -->
+  <!-- ================================================================ -->
+  <style>
+    .hero-install-strip {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 18px clamp(24px, 4.2vw, 56px) 4px;
+      box-sizing: border-box;
+    }
+    .hero-install {
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 14px 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--line-1);
+      border-radius: 16px;
+      box-shadow: 0 18px 44px -30px rgba(15, 23, 42, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+    }
+    [data-theme="dark"] .hero-install { box-shadow: 0 18px 44px -30px rgba(0, 0, 0, 0.6); }
+    .hero-install-eyebrow {
+      flex: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      max-width: 188px;
+      margin: 0;
+      font-family: Inter, sans-serif;
+      font-size: 12px; font-weight: 700; line-height: 1.25; letter-spacing: 0.01em;
+      color: var(--ink-1);
+    }
+    .hero-install-eyebrow svg { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--accent-3); stroke-width: 2.2; }
+    /* Command lane: the two one-command paths sit side by side and share the
+       remaining width so the whole strip stays one compact line on desktop. */
+    .hero-cmd-lane { flex: 1; min-width: 0; display: flex; gap: 10px; }
+    .hero-cmd { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+    .hero-cmd-chip {
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; gap: 9px;
+      background: var(--code-bg, #0f172a);
+      border: 1px solid var(--line-1);
+      border-radius: 11px;
+      padding: 9px 12px;
+    }
+    .hero-cmd-tag {
+      flex: none;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--accent-2);
+      padding: 2px 6px; border-radius: 5px;
+      background: color-mix(in srgb, var(--accent-2) 16%, transparent);
+    }
+    .hero-cmd-pfx {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 13px; font-weight: 600; color: var(--accent-2); flex: none;
+    }
+    /* One tidy line on desktop: ellipsis if it cannot fit, so the strip stays
+       short. The full command is preserved on the copy button's data-copy. */
+    .hero-cmd-code {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 13px; line-height: 1.5; color: #e2e8f0;
+      flex: 1; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    /* Reuse the existing .dl-copy button + .is-copied flash; add a
+       "Copied" affordance via ::after so the state reads in the strip. */
+    .hero-install .dl-copy { position: relative; flex: none; }
+    .hero-install .dl-copy.is-copied::after {
+      content: "Copied"; position: absolute; bottom: calc(100% + 7px); left: 50%;
+      transform: translateX(-50%); white-space: nowrap;
+      font-family: Inter, sans-serif; font-size: 11px; font-weight: 600;
+      color: #fff; background: var(--accent-3);
+      padding: 3px 8px; border-radius: 6px; pointer-events: none;
+      box-shadow: 0 6px 16px -6px rgba(15, 23, 42, 0.5);
+    }
+    /* Tablet: stack the eyebrow above the two commands, keep commands in a row. */
+    @media (max-width: 1080px) {
+      .hero-install { flex-wrap: wrap; }
+      .hero-install-eyebrow { max-width: none; width: 100%; }
+    }
+    /* Narrow: each command on its own row, with the command allowed to wrap. */
+    @media (max-width: 720px) {
+      .hero-install-strip { padding: 16px 24px 2px; }
+      .hero-cmd-lane { flex-direction: column; width: 100%; }
+      .hero-cmd-code { white-space: normal; word-break: break-word; overflow-wrap: anywhere; text-overflow: clip; }
+    }
+  </style>
+  <div class="hero-install-strip">
+    <div class="hero-install" id="hero-install">
+      <p class="hero-install-eyebrow" data-i18n="hero.install_eyebrow">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        <span>Up and running in one command</span>
+      </p>
+      <div class="hero-cmd-lane">
+        <div class="hero-cmd">
+          <div class="hero-cmd-chip">
+            <span class="hero-cmd-tag" aria-hidden="true">pip</span>
+            <span class="hero-cmd-pfx" aria-hidden="true">$</span>
+            <code class="hero-cmd-code">pip install openconstructionerp</code>
+          </div>
+          <button type="button" class="dl-copy" data-copy="pip install openconstructionerp" aria-label="Copy the pip install command">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </button>
+        </div>
+        <div class="hero-cmd">
+          <div class="hero-cmd-chip">
+            <span class="hero-cmd-tag" aria-hidden="true">docker</span>
+            <span class="hero-cmd-pfx" aria-hidden="true">$</span>
+            <code class="hero-cmd-code">docker run -p 8080:8080 ghcr.io/datadrivenconstruction/openconstructionerp</code>
+          </div>
+          <button type="button" class="dl-copy" data-copy="docker run -d -p 8080:8080 -v oe_data:/data ghcr.io/datadrivenconstruction/openconstructionerp:latest" aria-label="Copy the docker run command">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ================================================================ -->
   <!-- SECTION 1.05 - DOWNLOAD THE DESKTOP APP (native, no setup)        -->
@@ -17312,18 +17351,6 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         or the cloud of your choice. Self-host forever, or let us do it.
       </p>
 
-      <!-- Install-from-source path: one tasteful pip line with copy.
-           The pill copies its data-copy command and flashes is-copied;
-           wired by a tiny binding right after this section. -->
-      <button type="button" class="final-cta-install" id="final-cta-pip" data-copy="pip install openconstructionerp" aria-label="Copy the pip install command">
-        <span class="fci-label" data-i18n="final_cta.install_label">Install from source</span>
-        <span class="fci-cmd"><span class="dollar" aria-hidden="true">$</span> pip install openconstructionerp</span>
-        <span class="fci-copy" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          <svg class="fci-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        </span>
-      </button>
-
       <div class="final-cta-row">
         <a class="btn-hero-dl" href="#download">
           <svg class="dl-glyph-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3v10.2L7.5 9.7 6 11.2 12 17l6-5.8-1.5-1.5L13 13.2V3zM5 18.5V20a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 20v-1.5h-2V19H7v-.5z"/></svg>
@@ -17343,6 +17370,42 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
           </a>
         </span>
       </div>
+
+      <!-- Install-from-source: prominent terminal chips with working copy
+           buttons. The .dl-copy buttons here are wired by the dedicated
+           binding right after this section (the shared download-section
+           handler runs before this markup is parsed). -->
+      <div class="final-cta-install" id="final-cta-install">
+        <p class="final-cta-install-head">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          <span data-i18n="final_cta.install_label">Or install from source</span>
+        </p>
+        <div class="fci-row">
+          <div class="fci-term">
+            <span class="fci-tag" aria-hidden="true">pip</span>
+            <span class="fci-dollar" aria-hidden="true">$</span>
+            <code class="fci-cmd">pip install openconstructionerp</code>
+          </div>
+          <button type="button" class="dl-copy" data-copy="pip install openconstructionerp" aria-label="Copy the pip install command">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </button>
+        </div>
+        <div class="fci-row">
+          <div class="fci-term">
+            <span class="fci-tag" aria-hidden="true">docker</span>
+            <span class="fci-dollar" aria-hidden="true">$</span>
+            <code class="fci-cmd">docker run -p 8080:8080 ghcr.io/datadrivenconstruction/openconstructionerp</code>
+          </div>
+          <button type="button" class="dl-copy" data-copy="docker run -d -p 8080:8080 -v oe_data:/data ghcr.io/datadrivenconstruction/openconstructionerp:latest" aria-label="Copy the docker run command">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </button>
+        </div>
+        <p class="fci-foot" data-i18n-html="final_cta.install_foot">
+          One command and the full ERP is running. PostgreSQL is built in, nothing else to set up.
+          See the <a href="/docs.html">install docs</a>.
+        </p>
+      </div>
+
       <div class="final-cta-reassure">
         <span>
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -17360,37 +17423,39 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
     </div>
   </section>
 
-  <!-- Copy-to-clipboard for the final-CTA pip pill. The shared .dl-copy
-       handler is bound inside the download section's script which runs
-       before this markup is parsed, so this pill gets its own tiny binding
-       using the same copy + is-copied flash pattern. -->
+  <!-- Copy-to-clipboard for the final-CTA install chips. The shared .dl-copy
+       handler is bound inside the download section's script which runs before
+       this markup is parsed, so these chips get their own binding using the
+       same copy + is-copied flash pattern as the rest of the page. -->
   <script>
   (function(){
-    var pill = document.getElementById("final-cta-pip");
-    if(!pill) return;
-    pill.addEventListener("click", function(){
-      var cmd = pill.getAttribute("data-copy") || "";
-      var done = function(){
-        pill.classList.add("is-copied");
-        setTimeout(function(){ pill.classList.remove("is-copied"); }, 1500);
-      };
-      try{
-        navigator.clipboard.writeText(cmd).then(done, function(){
-          try{
-            var ta = document.createElement("textarea");
-            ta.value = cmd; ta.style.position = "fixed"; ta.style.opacity = "0";
-            document.body.appendChild(ta); ta.select();
-            document.execCommand("copy"); document.body.removeChild(ta); done();
-          }catch(e){}
-        });
-      }catch(e){
+    var panel = document.getElementById("final-cta-install");
+    if(!panel) return;
+    panel.querySelectorAll(".dl-copy").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var cmd = btn.getAttribute("data-copy") || "";
+        var done = function(){
+          btn.classList.add("is-copied");
+          setTimeout(function(){ btn.classList.remove("is-copied"); }, 1500);
+        };
         try{
-          var ta2 = document.createElement("textarea");
-          ta2.value = cmd; ta2.style.position = "fixed"; ta2.style.opacity = "0";
-          document.body.appendChild(ta2); ta2.select();
-          document.execCommand("copy"); document.body.removeChild(ta2); done();
-        }catch(_){}
-      }
+          navigator.clipboard.writeText(cmd).then(done, function(){
+            try{
+              var ta = document.createElement("textarea");
+              ta.value = cmd; ta.style.position = "fixed"; ta.style.opacity = "0";
+              document.body.appendChild(ta); ta.select();
+              document.execCommand("copy"); document.body.removeChild(ta); done();
+            }catch(e){}
+          });
+        }catch(e){
+          try{
+            var ta2 = document.createElement("textarea");
+            ta2.value = cmd; ta2.style.position = "fixed"; ta2.style.opacity = "0";
+            document.body.appendChild(ta2); ta2.select();
+            document.execCommand("copy"); document.body.removeChild(ta2); done();
+          }catch(_){}
+        }
+      });
     });
   })();
   </script>
