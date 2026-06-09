@@ -10221,10 +10221,11 @@
       justify-content: center;
       gap: 12px;
       align-items: center;
-      /* Constrain to the same width as the install-from-source panel below
-         so the two blocks line up edge to edge. The big download button
-         flexes to fill the leftover space next to the platform icons. */
-      width: min(100%, 520px);
+      /* Constrain to exactly the same width as the install-from-source panel
+         below (620px) so the two blocks line up edge to edge. The big
+         download button flexes to fill the leftover space next to the
+         platform icons. */
+      width: min(100%, 620px);
       margin-inline: auto;
     }
     .final-cta-row .btn-hero-dl { flex: 1 1 320px; }
@@ -10255,7 +10256,7 @@
        the pip line reads as a real, copyable command rather than a tiny pill. */
     .final-cta-install {
       max-width: 620px;
-      margin: 4px auto 26px;
+      margin: 24px auto 26px;
       padding: 20px 22px 18px;
       border-radius: 18px;
       border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--line-1));
