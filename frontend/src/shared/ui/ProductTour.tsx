@@ -123,6 +123,36 @@ async function persistTourState(
  *  launches via the `oe:start-tour` event bypass this guard. */
 const AUTO_START_BLOCKED_PREFIXES = ['/login', '/register', '/forgot-password', '/onboarding', '/setup'];
 
+/** localStorage flag the OnboardingWizard sets on every completion path
+ *  (`markOnboardingCompleted`). The first-run tour is GATED on this so the
+ *  spotlight never lands on top of the setup wizard. The tour and the
+ *  onboarding flow are two distinct first-run experiences and must not run
+ *  at once. Kept as a local string (not imported from the onboarding feature)
+ *  to avoid a shared/ui to features import cycle; the key is the stable
+ *  contract between the two. */
+const ONBOARDING_COMPLETED_KEY = 'oe_onboarding_completed';
+
+/** Window event the OnboardingWizard dispatches the instant onboarding is
+ *  completed/skipped. The auto-start effect listens for it so the global tour
+ *  can begin the moment the wizard closes instead of only on the next reload.
+ *  Mirrors `ONBOARDING_COMPLETED_EVENT` exported from the onboarding feature. */
+const ONBOARDING_COMPLETED_EVENT = 'oe:onboarding-completed';
+
+/** Whether the user has finished (or skipped) the onboarding wizard. The
+ *  tour's first-run auto-start requires this to be true. Reads the same
+ *  localStorage flag the wizard and the dashboard first-run redirect use, so
+ *  a returning user whose flag the dashboard has already primed from the
+ *  server is correctly treated as "onboarding done". */
+function isOnboardingDone(): boolean {
+  try {
+    return localStorage.getItem(ONBOARDING_COMPLETED_KEY) === 'true';
+  } catch {
+    // Storage unavailable: fail OPEN so a user who can never persist the
+    // onboarding flag is not permanently locked out of the tour.
+    return true;
+  }
+}
+
 /** Routes that count as the dashboard for auto-start eligibility. */
 const DASHBOARD_ROUTES = new Set(['/', '/dashboard']);
 
@@ -1122,6 +1152,37 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
     };
   }, []);
 
+  /* ── Onboarding gate ─────────────────────────────────────────────────── */
+  /**
+   * The first-run tour must start ONLY AFTER the onboarding wizard is
+   * finished or skipped, otherwise the spotlight overlay lands on top of
+   * the setup wizard (the two distinct first-run experiences collide).
+   *
+   * Seeded from the persisted flag so a returning user (who finished
+   * onboarding long ago, or whose flag the dashboard primed from the
+   * server) is gated open immediately. Flipped true the instant onboarding
+   * completes via the `oe:onboarding-completed` event, so the tour begins
+   * the moment the wizard closes instead of waiting for a reload. Also
+   * re-checked on route change (the auto-start effect lists it as a dep)
+   * which covers the dashboard's server-flag priming path.
+   */
+  const [onboardingDone, setOnboardingDone] = useState<boolean>(() => isOnboardingDone());
+  useEffect(() => {
+    const onDone = () => setOnboardingDone(true);
+    window.addEventListener(ONBOARDING_COMPLETED_EVENT, onDone);
+    // Cross-tab / dashboard-primed flag: pick up a flip we didn't fire.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === ONBOARDING_COMPLETED_KEY && e.newValue === 'true') {
+        setOnboardingDone(true);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener(ONBOARDING_COMPLETED_EVENT, onDone);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
+
   /* ── First-login auto-start ──────────────────────────────────────────── */
   useEffect(() => {
     if (active) return;
@@ -1130,6 +1191,15 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
     // localStorage — otherwise a fresh browser would briefly auto-pop
     // the tour even when the user dismissed it on another machine.
     if (!serverHydrated) return;
+
+    // GATE: never auto-start over an unfinished onboarding wizard. A brand
+    // new user lands on the dashboard with neither flag set; the dashboard
+    // first-run redirect then sends them to /onboarding. Without this guard
+    // the 600ms timer below armed on the dashboard and the tour popped on
+    // top of the wizard. Re-check live (not just the seeded state) so a flag
+    // primed between renders is honoured. Manual launches via the
+    // `oe:start-tour` event are unaffected; they live in a separate effect.
+    if (!onboardingDone && !isOnboardingDone()) return;
 
     let completed = 'false';
     try {
@@ -1155,7 +1225,7 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
       setActive(true);
     }, 600);
     return () => window.clearTimeout(id);
-  }, [active, location.pathname, defaultTourId, serverHydrated]);
+  }, [active, location.pathname, defaultTourId, serverHydrated, onboardingDone]);
 
   /* ── Navigation handlers ─────────────────────────────────────────────── */
   const handleNext = useCallback(() => {
