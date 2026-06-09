@@ -11946,6 +11946,167 @@
         stay in sync with the drawings and the BOQ behind them.
       </p>
 
+      <!-- ============================================================ -->
+      <!-- Fastest-path install block, right under the tagline.         -->
+      <!-- Two one-command paths first (pip, docker), then prebuilt     -->
+      <!-- installers as the next step. Copy buttons reuse the shared    -->
+      <!-- .dl-copy handler (data-copy), wired further down the page.   -->
+      <!-- ============================================================ -->
+      <style>
+        .hero-install {
+          margin: 22px 0 26px;
+          padding: 18px 18px 16px;
+          max-width: 540px;
+          background: var(--card-bg);
+          border: 1px solid var(--line-1);
+          border-radius: 16px;
+          box-shadow: 0 20px 48px -28px rgba(15, 23, 42, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+          backdrop-filter: blur(10px);
+        }
+        [data-theme="dark"] .hero-install { box-shadow: 0 20px 48px -28px rgba(0, 0, 0, 0.6); }
+        .hero-install-eyebrow {
+          display: inline-flex; align-items: center; gap: 7px;
+          margin: 0 0 12px;
+          font-family: Inter, sans-serif;
+          font-size: 11.5px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+          color: var(--accent-3);
+        }
+        .hero-install-eyebrow svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; }
+        .hero-cmd { display: block; }
+        .hero-cmd + .hero-cmd { margin-top: 13px; }
+        /* Small caption above each chip so the pip/docker badge can never
+           sit over the command text. */
+        .hero-cmd-tag {
+          display: inline-block; margin: 0 0 5px;
+          font-family: "JetBrains Mono", ui-monospace, monospace;
+          font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+          color: var(--accent-3);
+        }
+        .hero-cmd-row { display: flex; align-items: flex-start; gap: 8px; }
+        .hero-cmd-chip {
+          flex: 1; min-width: 0;
+          display: flex; align-items: flex-start; gap: 10px;
+          background: var(--code-bg, #0f172a);
+          border: 1px solid var(--line-1);
+          border-radius: 11px;
+          padding: 12px 14px;
+        }
+        .hero-cmd-pfx {
+          font-family: "JetBrains Mono", ui-monospace, monospace;
+          font-size: 13px; font-weight: 600; color: var(--accent-2); flex: none;
+          line-height: 1.5;
+        }
+        /* Full command always visible: wraps to a second line, never clips. */
+        .hero-cmd-code {
+          font-family: "JetBrains Mono", ui-monospace, monospace;
+          font-size: 13px; line-height: 1.5; color: #e2e8f0;
+          flex: 1; min-width: 0;
+          white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;
+        }
+        /* Reuse the existing .dl-copy button + .is-copied flash; just add a
+           "Copied" affordance via ::after so the state reads in the hero. */
+        .hero-install .dl-copy { position: relative; }
+        .hero-install .dl-copy.is-copied::after {
+          content: "Copied"; position: absolute; bottom: calc(100% + 7px); left: 50%;
+          transform: translateX(-50%); white-space: nowrap;
+          font-family: Inter, sans-serif; font-size: 11px; font-weight: 600;
+          color: #fff; background: var(--accent-3);
+          padding: 3px 8px; border-radius: 6px; pointer-events: none;
+          box-shadow: 0 6px 16px -6px rgba(15, 23, 42, 0.5);
+        }
+        .hero-install-or {
+          display: flex; align-items: center; gap: 12px;
+          margin: 15px 0 13px;
+          font-family: Inter, sans-serif; font-size: 12px; font-weight: 600;
+          color: var(--ink-3);
+        }
+        .hero-install-or::before, .hero-install-or::after {
+          content: ""; flex: 1; height: 1px; background: var(--line-1);
+        }
+        .hero-builds { display: flex; flex-wrap: wrap; gap: 8px; }
+        .hero-build {
+          flex: 1; min-width: 96px;
+          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+          padding: 11px 12px; border-radius: 10px;
+          font-family: "Inter Tight", Inter, sans-serif;
+          font-size: 13.5px; font-weight: 640; color: var(--ink-1);
+          text-decoration: none;
+          background: var(--bg-0);
+          border: 1px solid var(--line-1);
+          transition: transform 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+        }
+        .hero-build svg { width: 16px; height: 16px; fill: currentColor; flex: none; }
+        .hero-build:hover {
+          transform: translateY(-1px);
+          color: var(--accent-3);
+          border-color: color-mix(in srgb, var(--accent-3) 40%, var(--line-1));
+          box-shadow: 0 12px 26px -18px color-mix(in srgb, var(--accent-3) 60%, transparent);
+        }
+        .hero-build:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        @media (max-width: 560px) {
+          /* The hero grid does not collapse to one column, so its text track
+             can be wider than the viewport on very narrow screens. Cap the
+             install card to the actual viewport width so it never gets
+             clipped, and let each command chip scroll internally instead. */
+          .hero-install { max-width: calc(100vw - 40px); width: calc(100vw - 40px); padding: 16px 14px 14px; }
+          .hero-cmd-code { font-size: 12px; }
+          .hero-build { min-width: 0; flex-basis: calc(33.333% - 6px); padding: 10px 8px; font-size: 12.5px; }
+          .hero-build span { display: none; }
+          .hero-build svg { width: 18px; height: 18px; }
+        }
+      </style>
+      <div class="hero-install" id="hero-install">
+        <p class="hero-install-eyebrow" data-i18n="hero.install_eyebrow">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          <span>Up and running in one command</span>
+        </p>
+
+        <div class="hero-cmd">
+          <span class="hero-cmd-tag" aria-hidden="true">pip</span>
+          <div class="hero-cmd-row">
+            <div class="hero-cmd-chip">
+              <span class="hero-cmd-pfx" aria-hidden="true">$</span>
+              <code class="hero-cmd-code">pip install openconstructionerp</code>
+            </div>
+            <button type="button" class="dl-copy" data-copy="pip install openconstructionerp" aria-label="Copy the pip install command">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-cmd">
+          <span class="hero-cmd-tag" aria-hidden="true">docker</span>
+          <div class="hero-cmd-row">
+            <div class="hero-cmd-chip">
+              <span class="hero-cmd-pfx" aria-hidden="true">$</span>
+              <code class="hero-cmd-code">docker run -d -p 8080:8080 -v oe_data:/data ghcr.io/datadrivenconstruction/openconstructionerp:latest</code>
+            </div>
+            <button type="button" class="dl-copy" data-copy="docker run -d -p 8080:8080 -v oe_data:/data ghcr.io/datadrivenconstruction/openconstructionerp:latest" aria-label="Copy the docker run command">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-install-or" role="separator">
+          <span data-i18n="hero.install_or">or grab a prebuilt installer</span>
+        </div>
+
+        <div class="hero-builds">
+          <a class="hero-build" href="/download#card-windows" aria-label="Download the prebuilt Windows installer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.4 10.4 4.3v6.6H3zM10.4 11.6v6.6L3 17.1V11.6zM11.5 4.1 21 2.7v8.2h-9.5zM21 11.9v8.2l-9.5-1.4v-6.8z"/></svg>
+            <span>Windows</span>
+          </a>
+          <a class="hero-build" href="/download#card-macos" aria-label="Download the prebuilt macOS installer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1zM14.5 6.3c.6-.7 1-1.6.9-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.4 2.4-1.1z"/></svg>
+            <span>macOS</span>
+          </a>
+          <a class="hero-build" href="/download#card-linux" aria-label="Download the prebuilt Linux installer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2zm-1.3 4c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zm2.6 0c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9zM12 9.3c.8 0 1.7.5 1.7.9 0 .3-.9.7-1.7.7s-1.7-.4-1.7-.7c0-.4.9-.9 1.7-.9z"/></svg>
+            <span>Linux</span>
+          </a>
+        </div>
+      </div>
+
       <!-- One big OS-detected download CTA + quiet "All platforms" + tertiary star -->
       <style>
         .hero-cta-stack { display: inline-flex; flex-direction: column; gap: 12px; margin-top: 4px; }
@@ -12570,17 +12731,33 @@
     .dl-copy.is-copied{color:#fff;background:var(--accent-2);border-color:var(--accent-2);}
     .dl-copy svg{width:15px;height:15px;}
 
-    /* For-developers sub-block (pip / docker copyable commands) */
-    .dl-dev{margin:34px auto 0;max-width:760px;padding:24px 22px;background:var(--card-bg);border:1px solid var(--line-1);border-radius:16px;box-shadow:var(--shadow-card);backdrop-filter:blur(10px);}
-    .dl-dev-head{display:flex;align-items:center;gap:10px;margin:0 0 4px;}
-    .dl-dev-head svg{width:17px;height:17px;flex:none;stroke:var(--accent-2);}
-    .dl-dev-h3{font-family:"Inter Tight",Inter,sans-serif;font-size:17px;font-weight:640;color:var(--ink-0);margin:0;letter-spacing:-.01em;}
-    .dl-dev-lede{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin:0 0 16px;}
-    .dl-dev-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-    .dl-dev-col{display:flex;flex-direction:column;gap:8px;}
-    .dl-dev-label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:640;color:var(--ink-1);}
-    .dl-dev-label .dl-dev-tag{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.05em;color:var(--ink-3);background:var(--bg-2);border:1px solid var(--line-0);border-radius:5px;padding:2px 6px;}
-    @media(max-width:820px){.dl-dev-grid{grid-template-columns:1fr;}}
+    /* For-developers sub-block (pip / docker copyable commands).
+       Enlarged "one command and you are running" panel: clear hierarchy,
+       big copyable command chips, an obvious primary run line. */
+    .dl-dev{position:relative;margin:44px auto 0;max-width:860px;padding:34px 32px 30px;background:var(--card-bg);border:1px solid var(--line-1);border-radius:20px;box-shadow:0 30px 70px -38px rgba(15,23,42,.45),inset 0 1px 0 rgba(255,255,255,.5);backdrop-filter:blur(12px);overflow:hidden;}
+    .dl-dev::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));opacity:.9;}
+    [data-theme="dark"] .dl-dev{box-shadow:0 30px 70px -40px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.06);}
+    .dl-dev-eyebrow{display:inline-flex;align-items:center;gap:7px;margin:0 0 12px;font-family:Inter,sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-3);}
+    .dl-dev-eyebrow svg{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;}
+    .dl-dev-head{display:flex;align-items:center;gap:11px;margin:0 0 6px;}
+    .dl-dev-head svg{width:20px;height:20px;flex:none;stroke:var(--accent-2);}
+    .dl-dev-h3{font-family:"Inter Tight",Inter,sans-serif;font-size:24px;font-weight:680;color:var(--ink-0);margin:0;letter-spacing:-.015em;}
+    .dl-dev-lede{font-size:15px;line-height:1.55;color:var(--ink-2);margin:0 0 22px;max-width:62ch;}
+    .dl-dev-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+    .dl-dev-col{min-width:0;display:flex;flex-direction:column;gap:10px;padding:18px 18px 16px;background:var(--bg-0);border:1px solid var(--line-0);border-radius:14px;transition:border-color .18s ease,box-shadow .18s ease;}
+    .dl-dev-col:hover{border-color:color-mix(in srgb,var(--accent-3) 30%,var(--line-1));box-shadow:0 18px 40px -28px color-mix(in srgb,var(--accent-3) 50%,transparent);}
+    .dl-dev-label{display:flex;align-items:center;gap:8px;font-family:"Inter Tight",Inter,sans-serif;font-size:15px;font-weight:660;color:var(--ink-0);letter-spacing:-.01em;}
+    .dl-dev-label .dl-dev-tag{margin-left:auto;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.05em;color:var(--accent-3);background:color-mix(in srgb,var(--accent-3) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent-3) 28%,transparent);border-radius:6px;padding:3px 8px;}
+    .dl-dev-hint{font-size:12.5px;line-height:1.45;color:var(--ink-2);margin:2px 0 0;}
+    /* Bigger command chips inside the dev panel */
+    .dl-dev .dl-termrow{min-width:0;margin-top:4px;align-items:flex-start;}
+    /* Full command always visible inside the dev panel: the chip grows to
+       fit and the command wraps to a second line, never clips or ellipses. */
+    .dl-dev .dl-term{min-width:0;align-items:flex-start;padding:13px 15px;font-size:13.5px;line-height:1.5;border-radius:12px;overflow:visible;}
+    .dl-dev .dl-term .dollar{line-height:1.5;}
+    .dl-dev .dl-term code{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;overflow:visible;text-overflow:clip;}
+    .dl-dev .dl-copy{width:42px;height:42px;}
+    @media(max-width:820px){.dl-dev{padding:26px 18px 22px;}.dl-dev-h3{font-size:21px;}.dl-dev-grid{grid-template-columns:1fr;}}
 
     @media(max-width:980px){.dl-grid{grid-template-columns:1fr 1fr;}#card-linux{grid-column:1 / -1;}}
     @media(max-width:720px){.dl-grid{grid-template-columns:1fr;}#card-linux{grid-column:auto;}}
@@ -12687,31 +12864,51 @@
       </article>
     </div>
 
-    <!-- For developers: pip / docker copyable commands (merged from the old install section) -->
-    <div class="dl-dev">
+    <!-- Install via pip or docker - the same one-command offer, enlarged
+         and given clear hierarchy. Copy buttons reuse the shared .dl-copy
+         handler. The hero block above carries the short version. -->
+    <div class="dl-dev" id="dl-dev">
+      <p class="dl-dev-eyebrow" data-i18n="home.download_cards.dev_eyebrow">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        <span>One command and you are running</span>
+      </p>
       <div class="dl-dev-head">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="8 6 2 12 8 18"></polyline><polyline points="16 6 22 12 16 18"></polyline></svg>
-        <h3 class="dl-dev-h3" data-i18n="home.download_cards.dev_title">For developers</h3>
+        <h3 class="dl-dev-h3" data-i18n="home.download_cards.dev_title">Install via pip or Docker</h3>
       </div>
-      <p class="dl-dev-lede" data-i18n="home.download_cards.dev_lede">Prefer the source? Install with pip or run the full stack with Docker.</p>
+      <p class="dl-dev-lede" data-i18n="home.download_cards.dev_lede">Already have Python or Docker? Pick a line, paste it, and the full ERP is up. No build step, no extra database to set up, your data stays on your machine.</p>
       <div class="dl-dev-grid">
         <div class="dl-dev-col">
-          <span class="dl-dev-label" data-i18n="home.download_cards.dev_pip_label">Python package<span class="dl-dev-tag">pip</span></span>
+          <span class="dl-dev-label"><span data-i18n="home.download_cards.dev_pip_label">Python package</span><span class="dl-dev-tag">pip</span></span>
           <div class="dl-termrow">
             <div class="dl-term"><span class="dollar" aria-hidden="true">$</span><code>pip install openconstructionerp</code></div>
-            <button type="button" class="dl-copy" data-copy="pip install openconstructionerp" aria-label="Copy pip install command">
+            <button type="button" class="dl-copy" data-copy="pip install openconstructionerp" aria-label="Copy the pip install command">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             </button>
           </div>
+          <div class="dl-termrow">
+            <div class="dl-term"><span class="dollar" aria-hidden="true">$</span><code>openconstructionerp</code></div>
+            <button type="button" class="dl-copy" data-copy="openconstructionerp" aria-label="Copy the run command">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+          </div>
+          <p class="dl-dev-hint" data-i18n="home.download_cards.dev_pip_hint">Needs Python 3.12+. Installs, then opens at http://localhost:8080.</p>
         </div>
         <div class="dl-dev-col">
-          <span class="dl-dev-label" data-i18n="home.download_cards.dev_docker_label">Full stack<span class="dl-dev-tag">docker</span></span>
+          <span class="dl-dev-label"><span data-i18n="home.download_cards.dev_docker_label">Full stack</span><span class="dl-dev-tag">docker</span></span>
           <div class="dl-termrow">
-            <div class="dl-term"><span class="dollar" aria-hidden="true">$</span><code>git clone &hellip;/OpenConstructionERP &amp;&amp; make quickstart</code></div>
-            <button type="button" class="dl-copy" data-copy="git clone https://github.com/datadrivenconstruction/OpenConstructionERP && cd OpenConstructionERP && make quickstart" aria-label="Copy docker quickstart command">
+            <div class="dl-term"><span class="dollar" aria-hidden="true">$</span><code>docker compose -f docker-compose.quickstart.yml up</code></div>
+            <button type="button" class="dl-copy" data-copy="docker compose -f docker-compose.quickstart.yml up" aria-label="Copy the docker compose command">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             </button>
           </div>
+          <div class="dl-termrow">
+            <div class="dl-term"><span class="dollar" aria-hidden="true">$</span><code>docker run -d -p 8080:8080 -v oe_data:/data ghcr.io/datadrivenconstruction/openconstructionerp:latest</code></div>
+            <button type="button" class="dl-copy" data-copy="docker run -d -p 8080:8080 -v oe_data:/data ghcr.io/datadrivenconstruction/openconstructionerp:latest" aria-label="Copy the docker run command">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+          </div>
+          <p class="dl-dev-hint" data-i18n="home.download_cards.dev_docker_hint">Bundles PostgreSQL and the app. Open http://localhost:8080 when it boots.</p>
         </div>
       </div>
     </div>
