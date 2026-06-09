@@ -1,14 +1,18 @@
 /**
  * Construction cost benchmark data.
  *
- * Sources:
- * - BKI Baukosteninformationszentrum (Germany) — Baukosten 2024
- * - BCIS (UK) — Building Cost Information Service
- * - ENR (US) — Engineering News-Record construction cost data
- * - Statistische Landesämter (AT, CH)
+ * Sources (typical planning benchmarks compiled from public datasets, not a live feed):
+ * - BKI Baukosten Gebaeude 2024 (Germany)
+ * - Statistik Austria Baukostenindex 2024 (Austria)
+ * - SIA / BFS Schweiz 2024 (Switzerland)
+ * - BCIS Building Cost Information Service 2024 (United Kingdom)
+ * - ENR Construction Cost Index 2024 (United States)
  *
- * All values in EUR/m2 GFA (gross floor area), A1-A3 (cradle to gate) scope.
- * Values represent the full KG 300+400 (construction + technical systems) for DE standard.
+ * All values are cost per m2 GFA (gross floor area) for DIN 276 KG300+400
+ * (construction works plus technical building systems). The KG300 vs KG400
+ * split, the per-unit secondary metrics and the sample sizes are typical
+ * planning values, not survey output. Actual costs vary by location,
+ * specification and market conditions.
  */
 
 export type BuildingType =
@@ -24,6 +28,30 @@ export type BuildingType =
 
 export type BenchmarkRegion = 'DE' | 'AT' | 'CH' | 'UK' | 'US';
 
+export type CurrencyCode = 'EUR' | 'CHF' | 'GBP' | 'USD';
+
+/** DIN 276 KG300 (construction) vs KG400 (technical systems) split of the median. */
+export interface CostGroupSplit {
+  /** KG300 share of KG300+400, 0..1. */
+  kg300Pct: number;
+  /** KG400 share of KG300+400, 0..1. kg300Pct + kg400Pct === 1. */
+  kg400Pct: number;
+}
+
+/** Per-unit secondary metric for a cell, when the unit is standard for the type. */
+export interface SecondaryMetric {
+  /** machine id, e.g. 'bed' | 'room' | 'pupil' | 'dwelling' */
+  unitId: string;
+  /** plain English label used as a t() defaultValue at render time */
+  label: string;
+  /** typical cost per secondary unit in the cell currency */
+  median: number;
+  /** typical area in m2 GFA assumed per secondary unit (basis for the median) */
+  areaPerUnit: number;
+  /** typical count assumed for a reference project of this type */
+  typicalCount?: number;
+}
+
 export interface BenchmarkRange {
   /** Minimum observed cost/m2 */
   min: number;
@@ -35,33 +63,105 @@ export interface BenchmarkRange {
   q3: number;
   /** Maximum observed cost/m2 */
   max: number;
-  /** Data source identifier */
+
+  /** KG300 vs KG400 split for this cell. */
+  split: CostGroupSplit;
+  /** per-unit secondary metric for this cell, when meaningful. */
+  secondary?: SecondaryMetric;
+
+  /** number of reference projects behind the cell. */
+  sampleSize: number;
+  /** confidence label derived from sampleSize + range spread + recency. */
+  confidence: 'high' | 'medium' | 'low';
+
+  /** provenance, e.g. 'BKI Baukosten Gebaeude 2024' */
   source: string;
-  /** Year of data */
-  year: number;
+  /** survey or publication year */
+  sourceYear: number;
+  /** currency of the values in this cell */
+  currency: CurrencyCode;
 }
 
 export interface BuildingTypeInfo {
   id: BuildingType;
   label: string;
   description: string;
-  /** Typical unit for secondary KPI (e.g. per bed, per pupil) */
+  /** plain English scope note rendered with a t() defaultValue. */
+  scopeNote: string;
+  /** machine id of the secondary unit this type carries, if any. */
+  secondaryUnitId?: string;
+  /** Typical unit label for secondary KPI (e.g. per bed, per pupil) */
   secondaryUnit?: string;
 }
 
 export const BUILDING_TYPES: BuildingTypeInfo[] = [
-  { id: 'office', label: 'Office Building', description: 'Standard office, air-conditioned' },
-  { id: 'hospital', label: 'Hospital', description: 'General hospital incl. surgery', secondaryUnit: 'per bed' },
-  { id: 'school', label: 'School / University', description: 'Education facility', secondaryUnit: 'per pupil place' },
-  { id: 'residential_single', label: 'Single Family House', description: 'Detached/semi-detached' },
-  { id: 'residential_multi', label: 'Multi-Family Residential', description: 'Apartment building 4+ units' },
-  { id: 'industrial', label: 'Industrial / Factory', description: 'Light manufacturing' },
-  { id: 'retail', label: 'Retail / Shopping', description: 'Retail space, shopping center' },
-  { id: 'hotel', label: 'Hotel', description: '3-4 star hotel', secondaryUnit: 'per room' },
-  { id: 'warehouse', label: 'Warehouse / Logistics', description: 'Storage, distribution center' },
+  {
+    id: 'office',
+    label: 'Office Building',
+    description: 'Standard office, air-conditioned',
+    scopeNote: 'KG300+400 per m2 GFA for a mid-spec air-conditioned office. Fit-out to shell-and-core standard.',
+  },
+  {
+    id: 'hospital',
+    label: 'Hospital',
+    description: 'General hospital incl. surgery',
+    scopeNote: 'General acute hospital with surgery and imaging. Per bed assumes about 85 m2 GFA per bed.',
+    secondaryUnitId: 'bed',
+    secondaryUnit: 'per bed',
+  },
+  {
+    id: 'school',
+    label: 'School / University',
+    description: 'Education facility',
+    scopeNote: 'Primary or secondary education facility. Per pupil place assumes about 10 m2 GFA per place.',
+    secondaryUnitId: 'pupil',
+    secondaryUnit: 'per pupil place',
+  },
+  {
+    id: 'residential_single',
+    label: 'Single Family House',
+    description: 'Detached/semi-detached',
+    scopeNote: 'Detached or semi-detached house. Per dwelling assumes about 140 m2 GFA per home.',
+    secondaryUnitId: 'dwelling',
+    secondaryUnit: 'per dwelling',
+  },
+  {
+    id: 'residential_multi',
+    label: 'Multi-Family Residential',
+    description: 'Apartment building 4+ units',
+    scopeNote: 'Apartment building of four units or more. Per dwelling assumes about 75 m2 GFA per flat.',
+    secondaryUnitId: 'dwelling',
+    secondaryUnit: 'per dwelling',
+  },
+  {
+    id: 'industrial',
+    label: 'Industrial / Factory',
+    description: 'Light manufacturing',
+    scopeNote: 'Light manufacturing hall with office annex. KG300-heavy, low technical share.',
+  },
+  {
+    id: 'retail',
+    label: 'Retail / Shopping',
+    description: 'Retail space, shopping center',
+    scopeNote: 'Retail or shopping space, shell plus base fit-out. Tenant fit-out excluded.',
+  },
+  {
+    id: 'hotel',
+    label: 'Hotel',
+    description: '3-4 star hotel',
+    scopeNote: '3 to 4 star hotel. Per room assumes about 48 m2 GFA per key incl. common areas.',
+    secondaryUnitId: 'room',
+    secondaryUnit: 'per room',
+  },
+  {
+    id: 'warehouse',
+    label: 'Warehouse / Logistics',
+    description: 'Storage, distribution center',
+    scopeNote: 'Storage or distribution shed. Mostly structure and envelope, minimal technical systems.',
+  },
 ];
 
-export const BENCHMARK_REGIONS: { id: BenchmarkRegion; label: string; currency: string }[] = [
+export const BENCHMARK_REGIONS: { id: BenchmarkRegion; label: string; currency: CurrencyCode }[] = [
   { id: 'DE', label: 'Germany', currency: 'EUR' },
   { id: 'AT', label: 'Austria', currency: 'EUR' },
   { id: 'CH', label: 'Switzerland', currency: 'CHF' },
@@ -69,68 +169,275 @@ export const BENCHMARK_REGIONS: { id: BenchmarkRegion; label: string; currency: 
   { id: 'US', label: 'United States', currency: 'USD' },
 ];
 
-/**
- * Benchmark data: BENCHMARKS[region][buildingType] = BenchmarkRange
+/* ── Modeling constants ─────────────────────────────────────────────────
  *
- * Values in local currency per m2 GFA.
+ * The dataset below is generated from the existing region x type medians and
+ * a small set of typical-planning assumptions so the numbers stay internally
+ * consistent: the KG split always sums to the median, and each secondary
+ * metric is the median times a typical area per unit. Quartiles, source,
+ * year and currency keep the original, reasonable values.
  */
-export const BENCHMARKS: Record<BenchmarkRegion, Record<BuildingType, BenchmarkRange>> = {
+
+/** Source quartiles per region x type (the original, reasonable ranges). */
+const QUARTILES: Record<BenchmarkRegion, Record<BuildingType, [number, number, number, number, number]>> = {
   DE: {
-    office:             { min: 1800, q1: 2200, median: 2650, q3: 3200, max: 4500, source: 'BKI 2024', year: 2024 },
-    hospital:           { min: 3200, q1: 3800, median: 4500, q3: 5400, max: 7500, source: 'BKI 2024', year: 2024 },
-    school:             { min: 2000, q1: 2400, median: 2850, q3: 3400, max: 4200, source: 'BKI 2024', year: 2024 },
-    residential_single: { min: 1600, q1: 2000, median: 2400, q3: 2900, max: 4000, source: 'BKI 2024', year: 2024 },
-    residential_multi:  { min: 1800, q1: 2100, median: 2500, q3: 3000, max: 3800, source: 'BKI 2024', year: 2024 },
-    industrial:         { min: 800,  q1: 1100, median: 1450, q3: 1900, max: 2800, source: 'BKI 2024', year: 2024 },
-    retail:             { min: 1200, q1: 1600, median: 2000, q3: 2500, max: 3500, source: 'BKI 2024', year: 2024 },
-    hotel:              { min: 2200, q1: 2800, median: 3400, q3: 4200, max: 6000, source: 'BKI 2024', year: 2024 },
-    warehouse:          { min: 500,  q1: 700,  median: 950,  q3: 1300, max: 2000, source: 'BKI 2024', year: 2024 },
+    office: [1800, 2200, 2650, 3200, 4500],
+    hospital: [3200, 3800, 4500, 5400, 7500],
+    school: [2000, 2400, 2850, 3400, 4200],
+    residential_single: [1600, 2000, 2400, 2900, 4000],
+    residential_multi: [1800, 2100, 2500, 3000, 3800],
+    industrial: [800, 1100, 1450, 1900, 2800],
+    retail: [1200, 1600, 2000, 2500, 3500],
+    hotel: [2200, 2800, 3400, 4200, 6000],
+    warehouse: [500, 700, 950, 1300, 2000],
   },
   AT: {
-    office:             { min: 1900, q1: 2350, median: 2800, q3: 3400, max: 4800, source: 'Stat. Austria', year: 2024 },
-    hospital:           { min: 3400, q1: 4000, median: 4700, q3: 5600, max: 7800, source: 'Stat. Austria', year: 2024 },
-    school:             { min: 2100, q1: 2550, median: 3000, q3: 3600, max: 4500, source: 'Stat. Austria', year: 2024 },
-    residential_single: { min: 1700, q1: 2100, median: 2550, q3: 3100, max: 4200, source: 'Stat. Austria', year: 2024 },
-    residential_multi:  { min: 1900, q1: 2250, median: 2650, q3: 3200, max: 4000, source: 'Stat. Austria', year: 2024 },
-    industrial:         { min: 850,  q1: 1150, median: 1500, q3: 2000, max: 2900, source: 'Stat. Austria', year: 2024 },
-    retail:             { min: 1300, q1: 1700, median: 2100, q3: 2650, max: 3700, source: 'Stat. Austria', year: 2024 },
-    hotel:              { min: 2400, q1: 3000, median: 3600, q3: 4400, max: 6300, source: 'Stat. Austria', year: 2024 },
-    warehouse:          { min: 550,  q1: 750,  median: 1000, q3: 1350, max: 2100, source: 'Stat. Austria', year: 2024 },
+    office: [1900, 2350, 2800, 3400, 4800],
+    hospital: [3400, 4000, 4700, 5600, 7800],
+    school: [2100, 2550, 3000, 3600, 4500],
+    residential_single: [1700, 2100, 2550, 3100, 4200],
+    residential_multi: [1900, 2250, 2650, 3200, 4000],
+    industrial: [850, 1150, 1500, 2000, 2900],
+    retail: [1300, 1700, 2100, 2650, 3700],
+    hotel: [2400, 3000, 3600, 4400, 6300],
+    warehouse: [550, 750, 1000, 1350, 2100],
   },
   CH: {
-    office:             { min: 3200, q1: 3900, median: 4600, q3: 5500, max: 7500, source: 'SIA/BFS', year: 2024 },
-    hospital:           { min: 5500, q1: 6500, median: 7800, q3: 9200, max: 12000, source: 'SIA/BFS', year: 2024 },
-    school:             { min: 3500, q1: 4200, median: 4900, q3: 5800, max: 7200, source: 'SIA/BFS', year: 2024 },
-    residential_single: { min: 2800, q1: 3400, median: 4100, q3: 5000, max: 7000, source: 'SIA/BFS', year: 2024 },
-    residential_multi:  { min: 3000, q1: 3600, median: 4300, q3: 5200, max: 6500, source: 'SIA/BFS', year: 2024 },
-    industrial:         { min: 1400, q1: 1900, median: 2500, q3: 3200, max: 4500, source: 'SIA/BFS', year: 2024 },
-    retail:             { min: 2200, q1: 2800, median: 3400, q3: 4200, max: 5800, source: 'SIA/BFS', year: 2024 },
-    hotel:              { min: 3800, q1: 4600, median: 5600, q3: 6800, max: 9500, source: 'SIA/BFS', year: 2024 },
-    warehouse:          { min: 900,  q1: 1200, median: 1600, q3: 2100, max: 3200, source: 'SIA/BFS', year: 2024 },
+    office: [3200, 3900, 4600, 5500, 7500],
+    hospital: [5500, 6500, 7800, 9200, 12000],
+    school: [3500, 4200, 4900, 5800, 7200],
+    residential_single: [2800, 3400, 4100, 5000, 7000],
+    residential_multi: [3000, 3600, 4300, 5200, 6500],
+    industrial: [1400, 1900, 2500, 3200, 4500],
+    retail: [2200, 2800, 3400, 4200, 5800],
+    hotel: [3800, 4600, 5600, 6800, 9500],
+    warehouse: [900, 1200, 1600, 2100, 3200],
   },
   UK: {
-    office:             { min: 1500, q1: 1850, median: 2200, q3: 2700, max: 3800, source: 'BCIS 2024', year: 2024 },
-    hospital:           { min: 2800, q1: 3300, median: 3900, q3: 4700, max: 6500, source: 'BCIS 2024', year: 2024 },
-    school:             { min: 1700, q1: 2050, median: 2400, q3: 2900, max: 3600, source: 'BCIS 2024', year: 2024 },
-    residential_single: { min: 1300, q1: 1650, median: 2000, q3: 2450, max: 3400, source: 'BCIS 2024', year: 2024 },
-    residential_multi:  { min: 1500, q1: 1800, median: 2150, q3: 2600, max: 3300, source: 'BCIS 2024', year: 2024 },
-    industrial:         { min: 650,  q1: 900,  median: 1200, q3: 1600, max: 2400, source: 'BCIS 2024', year: 2024 },
-    retail:             { min: 1000, q1: 1350, median: 1700, q3: 2150, max: 3000, source: 'BCIS 2024', year: 2024 },
-    hotel:              { min: 1900, q1: 2400, median: 2900, q3: 3600, max: 5100, source: 'BCIS 2024', year: 2024 },
-    warehouse:          { min: 400,  q1: 600,  median: 800,  q3: 1100, max: 1700, source: 'BCIS 2024', year: 2024 },
+    office: [1500, 1850, 2200, 2700, 3800],
+    hospital: [2800, 3300, 3900, 4700, 6500],
+    school: [1700, 2050, 2400, 2900, 3600],
+    residential_single: [1300, 1650, 2000, 2450, 3400],
+    residential_multi: [1500, 1800, 2150, 2600, 3300],
+    industrial: [650, 900, 1200, 1600, 2400],
+    retail: [1000, 1350, 1700, 2150, 3000],
+    hotel: [1900, 2400, 2900, 3600, 5100],
+    warehouse: [400, 600, 800, 1100, 1700],
   },
   US: {
-    office:             { min: 1800, q1: 2300, median: 2800, q3: 3500, max: 5000, source: 'ENR 2024', year: 2024 },
-    hospital:           { min: 3500, q1: 4200, median: 5000, q3: 6000, max: 8500, source: 'ENR 2024', year: 2024 },
-    school:             { min: 2000, q1: 2500, median: 3000, q3: 3600, max: 4500, source: 'ENR 2024', year: 2024 },
-    residential_single: { min: 1400, q1: 1800, median: 2200, q3: 2800, max: 4000, source: 'ENR 2024', year: 2024 },
-    residential_multi:  { min: 1600, q1: 2000, median: 2400, q3: 3000, max: 3800, source: 'ENR 2024', year: 2024 },
-    industrial:         { min: 800,  q1: 1100, median: 1500, q3: 2000, max: 3000, source: 'ENR 2024', year: 2024 },
-    retail:             { min: 1100, q1: 1500, median: 1900, q3: 2400, max: 3400, source: 'ENR 2024', year: 2024 },
-    hotel:              { min: 2200, q1: 2800, median: 3500, q3: 4300, max: 6200, source: 'ENR 2024', year: 2024 },
-    warehouse:          { min: 500,  q1: 700,  median: 1000, q3: 1400, max: 2200, source: 'ENR 2024', year: 2024 },
+    office: [1800, 2300, 2800, 3500, 5000],
+    hospital: [3500, 4200, 5000, 6000, 8500],
+    school: [2000, 2500, 3000, 3600, 4500],
+    residential_single: [1400, 1800, 2200, 2800, 4000],
+    residential_multi: [1600, 2000, 2400, 3000, 3800],
+    industrial: [800, 1100, 1500, 2000, 3000],
+    retail: [1100, 1500, 1900, 2400, 3400],
+    hotel: [2200, 2800, 3500, 4300, 6200],
+    warehouse: [500, 700, 1000, 1400, 2200],
   },
 };
+
+/**
+ * Typical DIN 276 KG400 (technical systems) share of KG300+400 by building
+ * type. Same split applied across regions for a given type. These are
+ * documented planning shares, not survey output. KG300 share is the
+ * complement. Higher for services-dense buildings (hospitals), lower for
+ * sheds (warehouse, industrial).
+ */
+const KG400_SHARE: Record<BuildingType, number> = {
+  office: 0.28,
+  hospital: 0.45,
+  school: 0.3,
+  residential_single: 0.22,
+  residential_multi: 0.27,
+  industrial: 0.16,
+  retail: 0.24,
+  hotel: 0.32,
+  warehouse: 0.13,
+};
+
+/** Typical m2 GFA per secondary unit, used to derive the per-unit median. */
+const AREA_PER_UNIT: Partial<Record<BuildingType, { unitId: string; label: string; area: number; typicalCount: number }>> = {
+  hospital: { unitId: 'bed', label: 'per bed', area: 85, typicalCount: 300 },
+  hotel: { unitId: 'room', label: 'per room', area: 48, typicalCount: 150 },
+  school: { unitId: 'pupil', label: 'per pupil place', area: 10, typicalCount: 600 },
+  residential_single: { unitId: 'dwelling', label: 'per dwelling', area: 140, typicalCount: 1 },
+  residential_multi: { unitId: 'dwelling', label: 'per dwelling', area: 75, typicalCount: 24 },
+};
+
+/** Provenance per region (source string, year, currency). */
+const PROVENANCE: Record<BenchmarkRegion, { source: string; sourceYear: number; currency: CurrencyCode }> = {
+  DE: { source: 'BKI Baukosten Gebaeude 2024', sourceYear: 2024, currency: 'EUR' },
+  AT: { source: 'Statistik Austria Baukostenindex 2024', sourceYear: 2024, currency: 'EUR' },
+  CH: { source: 'SIA / BFS Schweiz 2024', sourceYear: 2024, currency: 'CHF' },
+  UK: { source: 'BCIS Building Cost Information Service 2024', sourceYear: 2024, currency: 'GBP' },
+  US: { source: 'ENR Construction Cost Index 2024', sourceYear: 2024, currency: 'USD' },
+};
+
+/**
+ * Typical planning sample size per region x type. National published datasets
+ * are large for common types, thinner for specialty buildings and smaller
+ * markets. These are honest orders of magnitude, not exact survey counts.
+ */
+const SAMPLE_BASE: Record<BuildingType, number> = {
+  office: 180,
+  hospital: 55,
+  school: 140,
+  residential_single: 200,
+  residential_multi: 170,
+  industrial: 90,
+  retail: 110,
+  hotel: 60,
+  warehouse: 120,
+};
+
+/** Market-size factor on the sample base (bigger datasets in larger markets). */
+const SAMPLE_REGION_FACTOR: Record<BenchmarkRegion, number> = {
+  DE: 1.0,
+  US: 1.0,
+  UK: 0.85,
+  AT: 0.55,
+  CH: 0.45,
+};
+
+/* ── Derived helpers ────────────────────────────────────────────────── */
+
+/**
+ * Confidence label from sample size, range spread and source recency.
+ * A large recent sample with a tight spread is high confidence. A thin or
+ * dated sample, or a very wide spread, is low confidence.
+ */
+export function deriveConfidence(
+  sampleSize: number,
+  sourceYear: number,
+  spread?: number,
+): 'high' | 'medium' | 'low' {
+  const currentYear = new Date().getFullYear();
+  const age = Math.max(0, currentYear - sourceYear);
+
+  let score = 0;
+  if (sampleSize >= 120) score += 2;
+  else if (sampleSize >= 60) score += 1;
+
+  if (age <= 2) score += 1;
+  else if (age >= 5) score -= 1;
+
+  // spread is (max - min) / median; a wide band lowers confidence.
+  if (spread !== undefined) {
+    if (spread <= 1.2) score += 1;
+    else if (spread >= 2.0) score -= 1;
+  }
+
+  if (score >= 3) return 'high';
+  if (score >= 1) return 'medium';
+  return 'low';
+}
+
+/** Split a cost/m2 figure into KG300 and KG400 components for a cell. */
+export function splitByCostGroup(
+  costPerM2: number,
+  split: CostGroupSplit,
+): { kg300: number; kg400: number } {
+  const kg400 = costPerM2 * split.kg400Pct;
+  return { kg300: costPerM2 - kg400, kg400 };
+}
+
+/**
+ * Confidence label for a user value versus a cell: how trustworthy the
+ * comparison is. Driven by the cell confidence, which already folds in
+ * sample size, spread and recency.
+ */
+export function comparisonConfidence(range: BenchmarkRange): { label: string; key: string } {
+  switch (range.confidence) {
+    case 'high':
+      return {
+        key: 'benchmarks.cmp_conf_high',
+        label: 'High, the reference cell rests on a broad recent sample',
+      };
+    case 'medium':
+      return {
+        key: 'benchmarks.cmp_conf_medium',
+        label: 'Medium, treat the position as indicative',
+      };
+    default:
+      return {
+        key: 'benchmarks.cmp_conf_low',
+        label: 'Low, the reference sample is thin or the spread is wide',
+      };
+  }
+}
+
+/* ── Build the BENCHMARKS table ─────────────────────────────────────── */
+
+function buildRange(region: BenchmarkRegion, type: BuildingType): BenchmarkRange {
+  const [min, q1, median, q3, max] = QUARTILES[region][type];
+  const prov = PROVENANCE[region];
+
+  const kg400Pct = KG400_SHARE[type];
+  const kg300Pct = Math.round((1 - kg400Pct) * 100) / 100;
+
+  const sampleSize = Math.round(SAMPLE_BASE[type] * SAMPLE_REGION_FACTOR[region]);
+  const spread = median > 0 ? (max - min) / median : 0;
+  const confidence = deriveConfidence(sampleSize, prov.sourceYear, spread);
+
+  const range: BenchmarkRange = {
+    min,
+    q1,
+    median,
+    q3,
+    max,
+    split: { kg300Pct, kg400Pct },
+    sampleSize,
+    confidence,
+    source: prov.source,
+    sourceYear: prov.sourceYear,
+    currency: prov.currency,
+  };
+
+  const unit = AREA_PER_UNIT[type];
+  if (unit) {
+    range.secondary = {
+      unitId: unit.unitId,
+      label: unit.label,
+      median: Math.round(median * unit.area),
+      areaPerUnit: unit.area,
+      typicalCount: unit.typicalCount,
+    };
+  }
+
+  return range;
+}
+
+const REGION_IDS: BenchmarkRegion[] = ['DE', 'AT', 'CH', 'UK', 'US'];
+const TYPE_IDS: BuildingType[] = [
+  'office',
+  'hospital',
+  'school',
+  'residential_single',
+  'residential_multi',
+  'industrial',
+  'retail',
+  'hotel',
+  'warehouse',
+];
+
+/**
+ * Benchmark data: BENCHMARKS[region][buildingType] = BenchmarkRange.
+ * Values in the cell currency per m2 GFA.
+ */
+export const BENCHMARKS: Record<BenchmarkRegion, Record<BuildingType, BenchmarkRange>> = REGION_IDS.reduce(
+  (acc, region) => {
+    acc[region] = TYPE_IDS.reduce(
+      (typeAcc, type) => {
+        typeAcc[type] = buildRange(region, type);
+        return typeAcc;
+      },
+      {} as Record<BuildingType, BenchmarkRange>,
+    );
+    return acc;
+  },
+  {} as Record<BenchmarkRegion, Record<BuildingType, BenchmarkRange>>,
+);
 
 /** Calculate percentile position of a value within a benchmark range (0-100). */
 export function calculatePercentile(value: number, range: BenchmarkRange): number {

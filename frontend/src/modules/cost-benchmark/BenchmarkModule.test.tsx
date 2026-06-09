@@ -55,7 +55,7 @@ describe('BenchmarkModule', () => {
     const btSelect = screen.getAllByRole('combobox')[0];
     fireEvent.change(btSelect, { target: { value: 'hospital' } });
     // Should now show hospital benchmarks
-    expect(screen.getByText(/Hospital — Germany/)).toBeInTheDocument();
+    expect(screen.getByText(/Hospital, Germany/)).toBeInTheDocument();
   });
 
   it('should update when region changes', () => {

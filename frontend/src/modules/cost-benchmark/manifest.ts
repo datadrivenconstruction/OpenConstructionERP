@@ -20,6 +20,12 @@ export const manifest: ModuleManifest = {
       component: BenchmarkModule,
     },
   ],
+  // navItems intentionally empty. The /benchmarks row already lives in the
+  // sidebar as a static entry in the grp_cost_data group (Sidebar.tsx), gated
+  // by moduleKey 'cost-benchmark' and advancedOnly. The sidebar only pulls
+  // dynamic module navItems for its static group ids (grp_*, regional), never
+  // for the legacy 'tools' group string a manifest would declare here, so an
+  // entry would either render nowhere or duplicate the existing nav source.
   navItems: [],
   searchEntries: [
     {
