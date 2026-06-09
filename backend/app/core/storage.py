@@ -37,6 +37,7 @@ import hashlib
 import hmac
 import json
 import logging
+import os
 import secrets
 import shutil
 import time
@@ -1241,10 +1242,17 @@ def _is_not_found(exc: BaseException) -> bool:
 def _default_local_base_dir() -> Path:
     """Where local blobs live by default.
 
-    Resolves to ``<repo>/data/`` - same layout as v1.3.x so upgrading
-    installs don't need to touch disk.  ``app/core/storage.py`` →
-    ``parents[3]`` == repo root.
+    The desktop and CLI runtimes export ``OE_CLI_DATA_DIR`` (a writable
+    per-user directory such as ``~/.openestimate``); honour it first so a
+    per-machine install under a read-only location like Program Files still
+    has somewhere to write its blobs. ``DATA_DIR`` is respected next for
+    custom deployments. Otherwise resolve to ``<repo>/data/`` - the same
+    layout as v1.3.x so upgrading installs don't need to touch disk.
+    ``app/core/storage.py`` -> ``parents[3]`` == repo root.
     """
+    override = os.environ.get("OE_CLI_DATA_DIR") or os.environ.get("DATA_DIR")
+    if override:
+        return Path(override)
     return Path(__file__).resolve().parents[3] / "data"
 
 

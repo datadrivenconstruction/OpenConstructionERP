@@ -305,18 +305,32 @@ def _normalize_entity(raw: dict[str, Any], index: int) -> dict[str, Any]:
     return result
 
 
+def _dwg_data_base() -> str:
+    """Base directory for DWG blobs.
+
+    The desktop and CLI runtimes export ``OE_CLI_DATA_DIR`` (a writable
+    per-user directory such as ``~/.openestimate``); honour it first so a
+    per-machine install under a read-only location like Program Files still
+    has somewhere to write. ``DATA_DIR`` is respected next for custom
+    deployments, then ``<cwd>/data`` for a source checkout.
+    """
+    return (
+        os.environ.get("OE_CLI_DATA_DIR")
+        or os.environ.get("DATA_DIR")
+        or os.path.join(os.getcwd(), "data")
+    )
+
+
 def _get_upload_dir() -> str:
-    """‌⁠‍Get the upload directory for DWG files."""
-    base = os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data"))
-    upload_dir = os.path.join(base, "dwg_uploads")
+    """Get the upload directory for DWG files."""
+    upload_dir = os.path.join(_dwg_data_base(), "dwg_uploads")
     os.makedirs(upload_dir, exist_ok=True)
     return upload_dir
 
 
 def _get_entities_dir() -> str:
     """Get the storage directory for parsed entity JSON files."""
-    base = os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data"))
-    entities_dir = os.path.join(base, "dwg_entities")
+    entities_dir = os.path.join(_dwg_data_base(), "dwg_entities")
     os.makedirs(entities_dir, exist_ok=True)
     return entities_dir
 
@@ -396,7 +410,7 @@ def _process_dxf_sync(file_path: str, entities_key: str, thumbnail_key: str) -> 
 
     # Generate and save SVG thumbnail
     svg_content = generate_svg_thumbnail(file_path)
-    thumb_dir = os.path.join(os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data")), "dwg_thumbnails")
+    thumb_dir = os.path.join(_dwg_data_base(), "dwg_thumbnails")
     thumb_path = os.path.join(thumb_dir, thumbnail_key)
     os.makedirs(os.path.dirname(thumb_path), exist_ok=True)
     with open(thumb_path, "w", encoding="utf-8") as f:
@@ -1324,7 +1338,7 @@ class DwgTakeoffService:
         # Remove entities and thumbnail files for all versions
         versions = await self.version_repo.list_for_drawing(drawing_id)
         entities_dir = _get_entities_dir()
-        thumb_dir = os.path.join(os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data")), "dwg_thumbnails")
+        thumb_dir = os.path.join(_dwg_data_base(), "dwg_thumbnails")
         for version in versions:
             if version.entities_key:
                 ent_path = os.path.join(entities_dir, version.entities_key)
@@ -1832,7 +1846,7 @@ class DwgTakeoffService:
         if not drawing.thumbnail_key:
             return None
 
-        thumb_dir = os.path.join(os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data")), "dwg_thumbnails")
+        thumb_dir = os.path.join(_dwg_data_base(), "dwg_thumbnails")
         thumb_path = os.path.join(thumb_dir, drawing.thumbnail_key)
         if not os.path.exists(thumb_path):
             return None
