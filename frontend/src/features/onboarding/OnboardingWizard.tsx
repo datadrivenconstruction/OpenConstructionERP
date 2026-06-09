@@ -62,14 +62,13 @@ import {
 } from './countryPacks';
 import {
   fetchInstalledPacks,
-  fullInstallPack,
+  fullInstallPackStream,
   packInitials,
   packCountryCode,
   packCountryName,
   partnerPackLogoUrl,
   FULL_INSTALL_STEPS,
   type InstalledPartnerPack,
-  type FullInstallStep,
   type FullInstallStepName,
   type FullInstallStepStatus,
 } from './partnerPacksApi';
@@ -800,29 +799,37 @@ function ReadyPackPicker({
       if (installing) return;
       setInstalling(true);
       setInstalledSlug(null);
+      // Reset the live checklist to pending; the SSE stream flips each row to
+      // running and then to its final status as the server works through the
+      // steps, so the user sees real per-step progress instead of one long
+      // frozen spinner.
       setStepStates({
-        apply_pack: 'running',
-        locale: 'running',
-        cost_db: 'running',
-        vector_db: 'running',
-        demos: 'running',
+        apply_pack: 'pending',
+        locale: 'pending',
+        cost_db: 'pending',
+        vector_db: 'skipped',
+        demos: 'pending',
       });
 
+      let ok = false;
       try {
-        const res = await fullInstallPack(pack.slug, 2);
-        const next: Record<FullInstallStepName, ChecklistState> = {
-          apply_pack: 'skipped',
-          locale: 'skipped',
-          cost_db: 'skipped',
-          vector_db: 'skipped',
-          demos: 'skipped',
-        };
-        for (const s of res.steps as FullInstallStep[]) {
-          next[s.step] = s.status;
-        }
-        setStepStates(next);
+        await fullInstallPackStream(
+          pack.slug,
+          (evt) => {
+            if (evt.type === 'step_start') {
+              const k = evt.step as FullInstallStepName;
+              setStepStates((prev) => (k in prev ? { ...prev, [k]: 'running' } : prev));
+            } else if (evt.type === 'step_done') {
+              const k = evt.step as FullInstallStepName;
+              setStepStates((prev) => (k in prev ? { ...prev, [k]: evt.status } : prev));
+            } else if (evt.type === 'done') {
+              ok = evt.ok;
+            }
+          },
+          { demoCount: 2 },
+        );
 
-        if (res.ok) {
+        if (ok) {
           setInstalledSlug(pack.slug);
           onActivateLocale(pack.default_locale);
           addToast({
@@ -975,7 +982,7 @@ function ReadyPackPicker({
                     })}
               </div>
               <ul className="space-y-1.5">
-                {FULL_INSTALL_STEPS.map((step) => {
+                {FULL_INSTALL_STEPS.filter((step) => step !== 'vector_db').map((step) => {
                   const StepIcon = FULL_INSTALL_STEP_ICONS[step];
                   const state = stepStates[step];
                   return (
@@ -1627,35 +1634,36 @@ function PartnerPackInstaller({
       setInstalling(true);
       setInstallFailed(false);
       setInstalledSlug(null);
-      // Mark every step "running" up front so the spinner reflects the
-      // single long-running call (the endpoint runs them server-side and
-      // returns the per-step outcome in one response).
+      // Reset the checklist to pending; the SSE stream below flips each row to
+      // running and then to its final status as the server runs the steps, so
+      // the user watches real per-step progress instead of one frozen spinner.
       setStepStates({
-        apply_pack: 'running',
-        locale: 'running',
-        cost_db: 'running',
-        vector_db: 'running',
-        demos: 'running',
+        apply_pack: 'pending',
+        locale: 'pending',
+        cost_db: 'pending',
+        vector_db: 'skipped',
+        demos: 'pending',
       });
 
+      let ok = false;
       try {
-        const res = await fullInstallPack(pack.slug, 2);
-        // Map the response steps onto the checklist; any step the server
-        // didn't report (shouldn't happen) stays "skipped" rather than
-        // spinning forever.
-        const next: Record<FullInstallStepName, ChecklistState> = {
-          apply_pack: 'skipped',
-          locale: 'skipped',
-          cost_db: 'skipped',
-          vector_db: 'skipped',
-          demos: 'skipped',
-        };
-        for (const s of res.steps as FullInstallStep[]) {
-          next[s.step] = s.status;
-        }
-        setStepStates(next);
+        await fullInstallPackStream(
+          pack.slug,
+          (evt) => {
+            if (evt.type === 'step_start') {
+              const k = evt.step as FullInstallStepName;
+              setStepStates((prev) => (k in prev ? { ...prev, [k]: 'running' } : prev));
+            } else if (evt.type === 'step_done') {
+              const k = evt.step as FullInstallStepName;
+              setStepStates((prev) => (k in prev ? { ...prev, [k]: evt.status } : prev));
+            } else if (evt.type === 'done') {
+              ok = evt.ok;
+            }
+          },
+          { demoCount: 2 },
+        );
 
-        if (res.ok) {
+        if (ok) {
           setInstalledSlug(pack.slug);
           // Activate the pack's locale client-side, then send the user to
           // their freshly installed country projects.

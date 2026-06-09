@@ -125,7 +125,12 @@ export async function fullInstallPack(
       slug,
       set_locale: true,
       install_cost_db: true,
-      vectorize: true,
+      // The semantic vector index is intentionally NOT built during activation.
+      // It only powers AI fuzzy search of cost items (which degrades to exact /
+      // keyword search when absent) and is by far the slowest step (embedding
+      // 55K+ items on CPU), so building it inline made activation appear frozen
+      // for minutes. It can be built later on demand.
+      vectorize: false,
       demo_count: demoCount,
     },
     { longRunning: true },
@@ -203,9 +208,18 @@ export type StreamInstallEvent =
 export async function fullInstallPackStream(
   slug: string,
   onEvent: (event: StreamInstallEvent) => void,
-  opts: { demoCount?: number; confirmDisables?: boolean; signal?: AbortSignal } = {},
+  opts: {
+    demoCount?: number;
+    confirmDisables?: boolean;
+    vectorize?: boolean;
+    signal?: AbortSignal;
+  } = {},
 ): Promise<void> {
-  const { demoCount = 2, confirmDisables = false, signal } = opts;
+  // ``vectorize`` defaults to false: the semantic index only powers AI fuzzy
+  // search (graceful fallback when absent) and is the slowest step by far, so
+  // building it inline made activation look stuck. Pass ``vectorize: true``
+  // only from an explicit "build search index" action.
+  const { demoCount = 2, confirmDisables = false, vectorize = false, signal } = opts;
   const token = getAuthToken();
   const response = await fetch(`${API_BASE}/v1/partner-pack/full-install-stream`, {
     method: 'POST',
@@ -218,7 +232,7 @@ export async function fullInstallPackStream(
       slug,
       set_locale: true,
       install_cost_db: true,
-      vectorize: true,
+      vectorize,
       confirm_disables: confirmDisables,
       demo_count: demoCount,
     }),

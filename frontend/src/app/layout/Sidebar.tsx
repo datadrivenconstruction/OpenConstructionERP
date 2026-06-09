@@ -209,7 +209,7 @@ const navGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { labelKey: 'boq.title', to: '/boq', icon: Table2, tourId: 'boq' },
-      { labelKey: 'nav.ai_estimator', to: '/ai-estimator', icon: Wand2, badge: 'BETA' },
+      { labelKey: 'nav.ai_estimator', to: '/ai-estimator', icon: Wand2 },
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles, badge: 'BETA' },
       { labelKey: 'nav.match_elements', to: '/match-elements', icon: Link2, badge: 'BETA' },
       { labelKey: 'nav.estimation_dashboard', to: '/project-intelligence', icon: BrainCircuit, badge: 'BETA' },
@@ -278,10 +278,10 @@ const navGroups: NavGroup[] = [
     defaultOpen: false,
     hideInSimple: true,
     items: [
-      { labelKey: 'nav.coordination_hub', to: '/coordination', icon: LayoutDashboard, badge: 'BETA' },
-      { labelKey: 'nav.bim_federations', to: '/bim/federations', icon: Layers, badge: 'BETA' },
-      { labelKey: 'nav.clash_detection', to: '/clash', icon: Radar, badge: 'BETA' },
-      { labelKey: 'nav.bim_rules', to: '/bim/rules?mode=requirements', icon: SlidersHorizontal, badge: 'BETA' },
+      { labelKey: 'nav.coordination_hub', to: '/coordination', icon: LayoutDashboard },
+      { labelKey: 'nav.bim_federations', to: '/bim/federations', icon: Layers },
+      { labelKey: 'nav.clash_detection', to: '/clash', icon: Radar },
+      { labelKey: 'nav.bim_rules', to: '/bim/rules?mode=requirements', icon: SlidersHorizontal },
       { labelKey: 'nav.eir_matrix', to: '/requirements/matrix', icon: FileCheck, advancedOnly: true },
     ],
   },
@@ -381,7 +381,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.equipment', to: '/equipment', icon: Truck },
       { labelKey: 'nav.resources', to: '/resources', icon: Users },
       { labelKey: 'nav.payroll', to: '/payroll', icon: Wallet, advancedOnly: true },
-      { labelKey: 'nav.assets', to: '/assets', icon: Package, badge: 'BETA' },
+      { labelKey: 'nav.assets', to: '/assets', icon: Package },
     ],
   },
   // ── 13. QUALITY ────────────────────────────────────────────────────
@@ -514,7 +514,7 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.ai_agents', to: '/ai-agents', icon: Bot, badge: 'BETA' },
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
-      { labelKey: 'nav.erp_chat', to: '/chat', icon: MessageSquare, badge: 'BETA' },
+      { labelKey: 'nav.erp_chat', to: '/chat', icon: MessageSquare },
       { labelKey: 'nav.pipelines', to: '/pipelines', icon: GitBranch, moduleKey: 'pipelines', advancedOnly: true },
     ],
   },
