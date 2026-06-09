@@ -314,11 +314,7 @@ def _dwg_data_base() -> str:
     has somewhere to write. ``DATA_DIR`` is respected next for custom
     deployments, then ``<cwd>/data`` for a source checkout.
     """
-    return (
-        os.environ.get("OE_CLI_DATA_DIR")
-        or os.environ.get("DATA_DIR")
-        or os.path.join(os.getcwd(), "data")
-    )
+    return os.environ.get("OE_CLI_DATA_DIR") or os.environ.get("DATA_DIR") or os.path.join(os.getcwd(), "data")
 
 
 def _get_upload_dir() -> str:
