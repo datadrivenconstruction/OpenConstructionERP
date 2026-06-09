@@ -1278,6 +1278,43 @@ async def _process_cad_in_background(
         except Exception:  # noqa: BLE001 - pre-flight is best-effort
             logger.exception("RVT converter pre-flight check failed for %s", model_id)
 
+    # IFC pre-provision: always try to get the real DDC IfcExporter so the
+    # viewer shows accurate meshes, not the crude box placeholder. IFC has a
+    # text fallback (so we do NOT gate the import on the converter the way RVT
+    # does), but on a fresh install the converter is missing and the inline
+    # ``ensure_converter`` call inside ``process_ifc_file`` would race a cold
+    # ~30 MB download. Provisioning it here, up front and off the request path,
+    # means the conversion below uses the real converter on the first upload
+    # instead of silently degrading to placeholder geometry. This is
+    # best-effort: a genuine failure (offline / locked-down host) just falls
+    # through to the text fallback, so the import still completes.
+    if ext.lower() == ".ifc":
+        try:
+            from app.modules.boq.cad_import import (
+                ensure_converter as _ensure,
+            )
+            from app.modules.boq.cad_import import (
+                find_converter as _fc,
+            )
+
+            if _fc("ifc") is None:
+                logger.info(
+                    "IFC converter not present for model %s - provisioning the DDC IfcExporter before conversion",
+                    model_id,
+                )
+                converter_path = await asyncio.to_thread(_ensure, "ifc")
+                logger.info("IFC converter provisioned at %s for model %s", converter_path, model_id)
+        except Exception as exc:  # noqa: BLE001 - provisioning is best-effort
+            # Do NOT fail the import here: the text fallback still produces a
+            # usable (placeholder) result, and the metadata path below will
+            # honestly flag it as placeholder so the UI nudges the user.
+            logger.warning(
+                "IFC converter auto-provision failed for model %s (%s) - "
+                "falling back to the built-in text parser (placeholder geometry)",
+                model_id,
+                exc,
+            )
+
     try:
         content = await get_storage_backend().get(cad_storage_key)
 
