@@ -61,6 +61,16 @@ The Windows installer is configured as a per-machine NSIS install and fetches We
 
 You do not normally build all three platforms by hand. The workflow at `.github/workflows/desktop-release.yml` runs on any pushed version tag (`v*`). It builds the sidecar on Windows, macOS arm64, and Ubuntu in parallel, then builds the matching Tauri bundle on each runner and attaches the installers to the GitHub Release for that tag. Tag a version, let CI run, and the `.exe`, `.dmg`, `.AppImage`, and `.deb` files appear on the release.
 
+## Signing the Windows installers
+
+The Windows `.exe` and `.msi` are signed with an Authenticode certificate after they are built. The certificate is a GlobalSign certificate held in an Azure Key Vault HSM, and the private key never leaves the vault. The release workflow signs each Windows installer by calling out to the vault with AzureSignTool, then re-uploads the signed files over the unsigned ones, so the binaries on the published release are the signed binaries.
+
+For signing to run, set these five repository secrets in GitHub Actions:
+
+AZURE_KV_URL is the Key Vault URL, for example https://myvault.vault.azure.net. AZURE_KV_CERT_NAME is the certificate name inside the vault. AZURE_KV_CLIENT_ID is the service principal application (client) id. AZURE_KV_CLIENT_SECRET is the Key Vault client secret for that service principal, and it must be a freshly rotated secret. AZURE_KV_TENANT_ID is the Entra (Azure AD) tenant id.
+
+If these secrets are not set, on forks, on pull requests, or before you add them, the signing step skips cleanly and the build still succeeds with unsigned installers. The macOS and Linux installers are not signed by this step.
+
 ## Layout
 
 ```

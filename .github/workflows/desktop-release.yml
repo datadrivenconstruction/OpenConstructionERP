@@ -200,3 +200,153 @@ jobs:
             Docs: https://openconstructionerp.com/docs  .  Report an issue: https://github.com/datadrivenconstruction/OpenConstructionERP/issues
           releaseDraft: true
           prerelease: false
+
+  # Authenticode code signing for the Windows installers.
+  #
+  # The tauri-action above uploads the Windows .exe (NSIS) and .msi to the
+  # release as a draft, so the assets are never visible to users until the
+  # founder publishes the release by hand. This job runs on the Windows
+  # runner after the build, signs each Windows installer with the founder's
+  # GlobalSign certificate held in Azure Key Vault, and re-uploads the
+  # signed files over the unsigned ones. By the time the draft is published
+  # the binaries users download are the signed binaries.
+  #
+  # The private key never leaves the Key Vault HSM, so signing calls out to
+  # Azure Key Vault through AzureSignTool. The maintainer must set these
+  # five GitHub Actions secrets for signing to run:
+  #
+  #   AZURE_KV_URL            the Key Vault URL, for example https://myvault.vault.azure.net
+  #   AZURE_KV_CERT_NAME      the certificate name inside the vault
+  #   AZURE_KV_CLIENT_ID      the service principal application (client) id
+  #   AZURE_KV_CLIENT_SECRET  a freshly rotated Key Vault client secret for that service principal
+  #   AZURE_KV_TENANT_ID      the Entra (Azure AD) tenant id
+  #
+  # AZURE_KV_CLIENT_SECRET must be a fresh, rotated secret. If the secrets
+  # are not set, on forks, on pull requests, or before the founder adds
+  # them, the signing step skips cleanly and the build still succeeds with
+  # unsigned installers.
+  sign-windows:
+    name: Sign Windows installers
+    needs: build-tauri
+    runs-on: windows-latest
+    steps:
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Install AzureSignTool
+        run: dotnet tool install --global AzureSignTool
+
+      - name: Download Windows installers from the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          mkdir -p signing
+          # Pull only the Windows installers from this tag's release. The
+          # release may still be a draft at this point, which gh handles
+          # fine with a write-scoped token.
+          gh release download "$TAG" \
+            --repo "${{ github.repository }}" \
+            --dir signing \
+            --pattern '*.exe' \
+            --pattern '*.msi' \
+            --skip-existing || true
+          ls -la signing || true
+
+      - name: Sign the Windows installers with AzureSignTool
+        env:
+          # All five Azure values come from repository secrets. Nothing is
+          # ever hardcoded. If the client secret is empty the step skips.
+          AZURE_KV_URL: ${{ secrets.AZURE_KV_URL }}
+          AZURE_KV_CERT_NAME: ${{ secrets.AZURE_KV_CERT_NAME }}
+          AZURE_KV_CLIENT_ID: ${{ secrets.AZURE_KV_CLIENT_ID }}
+          AZURE_KV_CLIENT_SECRET: ${{ secrets.AZURE_KV_CLIENT_SECRET }}
+          AZURE_KV_TENANT_ID: ${{ secrets.AZURE_KV_TENANT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Graceful skip: when the signing secret is not configured, on
+          # forks, on pull requests, or before the founder adds the secret,
+          # leave the build green with unsigned installers instead of failing.
+          if [ -z "${AZURE_KV_CLIENT_SECRET:-}" ]; then
+            echo "AZURE_KV_CLIENT_SECRET signing secret not set, skipping Windows code signing."
+            exit 0
+          fi
+
+          shopt -s nullglob
+          files=(signing/*.exe signing/*.msi)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No Windows installers were downloaded, nothing to sign."
+            exit 0
+          fi
+
+          for f in "${files[@]}"; do
+            echo "Signing $f"
+            # The timestamp URL and the sha256 digest are public and may be
+            # literals. Everything Azure specific is read from secrets above.
+            azuresigntool sign \
+              -kvu "$AZURE_KV_URL" \
+              -kvc "$AZURE_KV_CERT_NAME" \
+              -kvi "$AZURE_KV_CLIENT_ID" \
+              -kvs "$AZURE_KV_CLIENT_SECRET" \
+              -kvt "$AZURE_KV_TENANT_ID" \
+              -tr http://timestamp.globalsign.com/tsa/r6advanced1 \
+              -td sha256 \
+              "$f"
+          done
+
+      - name: Verify the signatures
+        env:
+          AZURE_KV_CLIENT_SECRET: ${{ secrets.AZURE_KV_CLIENT_SECRET }}
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          # Skip when signing was skipped.
+          if [ -z "${AZURE_KV_CLIENT_SECRET:-}" ]; then
+            echo "Signing was skipped, nothing to verify."
+            exit 0
+          fi
+
+          # signtool ships with the Windows SDK and is not on PATH. Find the
+          # newest copy if it exists. Verification is best effort: a missing
+          # signtool must not fail the build.
+          signtool="$(find '/c/Program Files (x86)/Windows Kits/10/bin' \
+            -name signtool.exe -path '*x64*' 2>/dev/null | sort | tail -n 1 || true)"
+          if [ -z "$signtool" ]; then
+            echo "signtool not found, skipping signature verification."
+            exit 0
+          fi
+
+          shopt -s nullglob
+          for f in signing/*.exe signing/*.msi; do
+            echo "Verifying $f"
+            "$signtool" verify /pa /v "$f" || echo "Verification reported an issue for $f (not failing the build)."
+          done
+
+      - name: Re-upload the signed installers to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          AZURE_KV_CLIENT_SECRET: ${{ secrets.AZURE_KV_CLIENT_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Nothing to replace if signing was skipped.
+          if [ -z "${AZURE_KV_CLIENT_SECRET:-}" ]; then
+            echo "Signing was skipped, leaving the original installers in place."
+            exit 0
+          fi
+
+          shopt -s nullglob
+          for f in signing/*.exe signing/*.msi; do
+            echo "Uploading signed $f"
+            gh release upload "$TAG" "$f" \
+              --repo "${{ github.repository }}" \
+              --clobber
+          done
