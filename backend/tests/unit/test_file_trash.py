@@ -131,7 +131,16 @@ async def test_soft_delete_with_explicit_payload_keeps_original_alone(
         kind="report",  # arbitrary kind, no real row needed
         original_id=fake_id,
         canonical_name="manual.snapshot",
-        payload={"name": "manual.snapshot", "size_bytes": 8192},
+        payload={
+            "name": "manual.snapshot",
+            "size_bytes": 8192,
+            # GeneratedReport NOT NULL columns the snapshot must carry so
+            # the trash row could be restored.
+            "project_id": str(project_id),
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "report_type": "manual",
+            "title": "Manual snapshot",
+        },
     )
     assert trash.payload_json["size_bytes"] == 8192
     assert trash.file_size == 8192  # derived property
@@ -194,7 +203,13 @@ async def test_purge_requires_matching_token(session: AsyncSession) -> None:
         kind="report",
         original_id=uuid.uuid4().hex,
         canonical_name="x",
-        payload={"name": "x"},
+        payload={
+            "name": "x",
+            "project_id": str(project_id),
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "report_type": "manual",
+            "title": "x",
+        },
     )
 
     with pytest.raises(HTTPException) as exc_info:
@@ -220,7 +235,13 @@ async def test_purge_expired_trash_removes_only_old_rows(
         kind="report",
         original_id="old-id",
         canonical_name="old.pdf",
-        payload={"name": "old.pdf"},
+        payload={
+            "name": "old.pdf",
+            "project_id": str(project_id),
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "report_type": "manual",
+            "title": "old.pdf",
+        },
         retention_days=30,
         actor_id=user_id,
     )
@@ -233,7 +254,13 @@ async def test_purge_expired_trash_removes_only_old_rows(
         kind="report",
         original_id="young-id",
         canonical_name="young.pdf",
-        payload={"name": "young.pdf"},
+        payload={
+            "name": "young.pdf",
+            "project_id": str(project_id),
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "report_type": "manual",
+            "title": "young.pdf",
+        },
         retention_days=30,
         actor_id=user_id,
     )
@@ -260,7 +287,13 @@ async def test_purge_expired_respects_per_row_retention(
         kind="report",
         original_id="short",
         canonical_name="a",
-        payload={},
+        payload={
+            "name": "a",
+            "project_id": str(project_id),
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "report_type": "manual",
+            "title": "a",
+        },
         retention_days=7,
     )
     b = await svc.soft_delete(
@@ -268,7 +301,13 @@ async def test_purge_expired_respects_per_row_retention(
         kind="report",
         original_id="long",
         canonical_name="b",
-        payload={},
+        payload={
+            "name": "b",
+            "project_id": str(project_id),
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "report_type": "manual",
+            "title": "b",
+        },
         retention_days=30,
     )
     ten_days_ago = datetime.now(UTC) - timedelta(days=10)
@@ -292,14 +331,28 @@ async def test_stats_counts_only_active_trash(session: AsyncSession) -> None:
         kind="report",
         original_id="id-a",
         canonical_name="a",
-        payload={"name": "a", "size_bytes": 1024},
+        payload={
+            "name": "a",
+            "size_bytes": 1024,
+            "project_id": str(project_id),
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "report_type": "manual",
+            "title": "a",
+        },
     )
     b = await svc.soft_delete(
         project_id=project_id,
         kind="report",
         original_id="id-b",
         canonical_name="b",
-        payload={"name": "b", "size_bytes": 2048},
+        payload={
+            "name": "b",
+            "size_bytes": 2048,
+            "project_id": str(project_id),
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "report_type": "manual",
+            "title": "b",
+        },
     )
     # Mark `a` as restored so stats ignores it.
     a.restored_at = datetime.now(UTC)

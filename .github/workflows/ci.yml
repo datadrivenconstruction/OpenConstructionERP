@@ -129,7 +129,7 @@ jobs:
           DATABASE_SYNC_URL: postgresql+psycopg2://oe:oe@localhost:5432/openconstructionerp_test
         run: >-
           pytest tests/unit -q -ra --durations=25
-          --timeout=900 --timeout-method=thread
+          --timeout=300 --timeout-method=signal
           --splits 6 --group ${{ matrix.shard }}
 
   backend-gate:

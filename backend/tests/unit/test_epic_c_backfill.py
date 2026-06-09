@@ -159,7 +159,7 @@ async def test_v3143_backfill_inserts_one_chain_row_per_source(
                 now(),
                 now(),
                 {table}.{project_col}::text,
-                :kind,
+                cast(:kind as text),
                 {id_cast},
                 1,
                 {canonical_expr},
@@ -176,7 +176,7 @@ async def test_v3143_backfill_inserts_one_chain_row_per_source(
             WHERE NOT EXISTS (
                 SELECT 1 FROM oe_file_version fv
                 WHERE fv.project_id = {table}.{project_col}::text
-                  AND fv.file_kind = :kind
+                  AND fv.file_kind = cast(:kind as text)
                   AND fv.file_id = {id_cast}
             )
             """
