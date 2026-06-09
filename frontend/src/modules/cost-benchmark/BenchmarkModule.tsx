@@ -6,6 +6,8 @@ import {
   BENCHMARK_REGIONS,
   BENCHMARKS,
   calculatePercentile,
+  splitByCostGroup,
+  comparisonConfidence,
   type BuildingType,
   type BenchmarkRegion,
 } from './data/benchmarks';
@@ -34,6 +36,32 @@ function getPercentileLabelKey(pct: number): { key: string; defaultValue: string
   return { key: 'benchmarks.pct_above_avg', defaultValue: 'Above average (premium)' };
 }
 
+function getConfidenceMeta(level: 'high' | 'medium' | 'low'): {
+  key: string;
+  defaultValue: string;
+  className: string;
+} {
+  if (level === 'high') {
+    return {
+      key: 'benchmarks.conf_high',
+      defaultValue: 'High',
+      className: 'text-emerald-600 dark:text-emerald-400',
+    };
+  }
+  if (level === 'medium') {
+    return {
+      key: 'benchmarks.conf_medium',
+      defaultValue: 'Medium',
+      className: 'text-amber-600 dark:text-amber-400',
+    };
+  }
+  return {
+    key: 'benchmarks.conf_low',
+    defaultValue: 'Low',
+    className: 'text-content-tertiary',
+  };
+}
+
 /* ── Component ─────────────────────────────────────────────────────── */
 
 export default function BenchmarkModule() {
@@ -55,6 +83,15 @@ export default function BenchmarkModule() {
     const diffPct = benchmarkRange.median > 0 ? (diffFromMedian / benchmarkRange.median) * 100 : 0;
     return { costPerM2, percentile, diffFromMedian, diffPct };
   }, [totalCost, gfa, benchmarkRange]);
+
+  // KG300 vs KG400 split of the user's own cost/m2 (sums to the user value).
+  const kgSplit = useMemo(
+    () => splitByCostGroup(analysis.costPerM2, benchmarkRange.split),
+    [analysis.costPerM2, benchmarkRange.split],
+  );
+
+  const cmpConfidence = useMemo(() => comparisonConfidence(benchmarkRange), [benchmarkRange]);
+  const dataConfidence = getConfidenceMeta(benchmarkRange.confidence);
 
   // Percentile marker position (for the visual bar)
   const markerLeft = useMemo(() => {
@@ -91,6 +128,22 @@ export default function BenchmarkModule() {
             {t('benchmarks.subtitle', { defaultValue: 'Compare your estimate against industry benchmarks' })}
           </p>
         </div>
+      </div>
+
+      {/* Source line + data-basis honesty note */}
+      <div className="rounded-xl border border-border bg-surface-secondary/40 px-4 py-3">
+        <p className="text-xs text-content-tertiary">
+          <span className="font-medium text-content-secondary">
+            {t('benchmarks.source', { defaultValue: 'Source' })}:
+          </span>{' '}
+          {benchmarkRange.source} ({benchmarkRange.sourceYear}), {regionInfo.label}, {regionInfo.currency}
+        </p>
+        <p className="mt-1 text-xs text-content-quaternary">
+          {t('benchmarks.data_basis', {
+            defaultValue:
+              'These are typical planning benchmarks compiled from the named public sources, not a live feed. The KG split and per-unit figures are typical planning values. Actual costs vary by location, specification and market.',
+          })}
+        </p>
       </div>
 
       {/* Input controls */}
@@ -201,7 +254,7 @@ export default function BenchmarkModule() {
       {/* Visual benchmark bar */}
       <div className="rounded-xl border border-border bg-surface-primary p-5">
         <h3 className="text-sm font-semibold text-content-primary mb-4">
-          {buildingInfo.label} — {regionInfo.label} ({benchmarkRange.source})
+          {buildingInfo.label}, {regionInfo.label} ({benchmarkRange.source} {benchmarkRange.sourceYear})
         </h3>
 
         {/* Bar chart */}
@@ -260,10 +313,96 @@ export default function BenchmarkModule() {
         </div>
       </div>
 
+      {/* KG300 / KG400 split strip + optional secondary metric */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {/* KG split strip */}
+        <div className={`rounded-xl border border-border bg-surface-primary p-5 ${buildingInfo.secondaryUnitId ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
+          <h3 className="mb-1 text-sm font-semibold text-content-primary">
+            {t('benchmarks.kg_split_title', { defaultValue: 'Cost group split of your cost / m2' })}
+          </h3>
+          <p className="mb-4 text-xs text-content-tertiary">
+            {t('benchmarks.kg_split_hint', {
+              defaultValue: 'DIN 276 KG300 construction works versus KG400 technical systems, typical split for this type.',
+            })}
+          </p>
+
+          {/* Two-segment bar */}
+          <div className="flex h-9 w-full overflow-hidden rounded-lg" role="img"
+            aria-label={t('benchmarks.kg_split_aria', {
+              defaultValue: 'KG300 {{kg300}} percent, KG400 {{kg400}} percent',
+              kg300: Math.round(benchmarkRange.split.kg300Pct * 100),
+              kg400: Math.round(benchmarkRange.split.kg400Pct * 100),
+            })}
+          >
+            <div
+              className="flex items-center justify-center bg-oe-blue/80 text-2xs font-semibold text-white"
+              style={{ width: `${benchmarkRange.split.kg300Pct * 100}%` }}
+            >
+              {Math.round(benchmarkRange.split.kg300Pct * 100)}%
+            </div>
+            <div
+              className="flex items-center justify-center bg-amber-500/80 text-2xs font-semibold text-white"
+              style={{ width: `${benchmarkRange.split.kg400Pct * 100}%` }}
+            >
+              {Math.round(benchmarkRange.split.kg400Pct * 100)}%
+            </div>
+          </div>
+
+          {/* Labels + values */}
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-surface-secondary p-3">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-sm bg-oe-blue/80" />
+                <span className="text-xs font-medium text-content-secondary">
+                  {t('benchmarks.kg300', { defaultValue: 'KG300 Construction' })}
+                </span>
+              </div>
+              <p className="mt-1 text-base font-bold text-content-primary">
+                {formatCurrency(kgSplit.kg300, regionInfo.currency)}/m2
+              </p>
+            </div>
+            <div className="rounded-lg bg-surface-secondary p-3">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-sm bg-amber-500/80" />
+                <span className="text-xs font-medium text-content-secondary">
+                  {t('benchmarks.kg400', { defaultValue: 'KG400 Technical' })}
+                </span>
+              </div>
+              <p className="mt-1 text-base font-bold text-content-primary">
+                {formatCurrency(kgSplit.kg400, regionInfo.currency)}/m2
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Secondary metric card (only when the type defines one) */}
+        {buildingInfo.secondaryUnitId && benchmarkRange.secondary && (
+          <div className="rounded-xl border border-border bg-surface-primary p-5">
+            <h3 className="mb-1 text-sm font-semibold text-content-primary">
+              {t('benchmarks.secondary_title', { defaultValue: 'Per-unit benchmark' })}
+            </h3>
+            <p className="text-xs text-content-tertiary">
+              {t(`benchmarks.unit_${benchmarkRange.secondary.unitId}`, {
+                defaultValue: benchmarkRange.secondary.label,
+              })}
+            </p>
+            <p className="mt-3 text-2xl font-bold text-content-primary">
+              {formatCurrency(benchmarkRange.secondary.median, regionInfo.currency)}
+            </p>
+            <p className="mt-1 text-xs text-content-quaternary">
+              {t('benchmarks.secondary_basis', {
+                defaultValue: 'Median basis, about {{area}} m2 GFA per unit.',
+                area: benchmarkRange.secondary.areaPerUnit,
+              })}
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* All building types comparison */}
       <div className="rounded-xl border border-border bg-surface-primary p-5">
         <h3 className="text-sm font-semibold text-content-primary mb-3">
-          {t('benchmarks.all_types', { defaultValue: 'All Building Types' })} — {regionInfo.label}
+          {t('benchmarks.all_types', { defaultValue: 'All Building Types' })}, {regionInfo.label}
         </h3>
         <div className="space-y-2">
           {BUILDING_TYPES.map((bt) => {
@@ -304,14 +443,62 @@ export default function BenchmarkModule() {
         </div>
       </div>
 
-      {/* Data source disclaimer */}
-      <div className="flex items-start gap-2 text-xs text-content-quaternary">
-        <Info className="h-4 w-4 mt-0.5 shrink-0" />
-        <p>
-          {t('benchmarks.disclaimer', {
-            defaultValue: 'Benchmark data from BKI (DE), BCIS (UK), ENR (US), Stat. Austria (AT), SIA/BFS (CH). Values represent KG 300+400 (construction + technical systems) costs per m2 GFA. Actual costs vary by location, specification, and market conditions.',
-          })}
-        </p>
+      {/* Data and confidence footer */}
+      <div className="rounded-xl border border-border bg-surface-primary p-5">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div>
+            <p className="text-2xs uppercase tracking-wide text-content-quaternary">
+              {t('benchmarks.source', { defaultValue: 'Source' })}
+            </p>
+            <p className="mt-0.5 text-sm font-medium text-content-primary break-words">{benchmarkRange.source}</p>
+          </div>
+          <div>
+            <p className="text-2xs uppercase tracking-wide text-content-quaternary">
+              {t('benchmarks.year', { defaultValue: 'Year' })}
+            </p>
+            <p className="mt-0.5 text-sm font-medium text-content-primary">{benchmarkRange.sourceYear}</p>
+          </div>
+          <div>
+            <p className="text-2xs uppercase tracking-wide text-content-quaternary">
+              {t('benchmarks.sample_size', { defaultValue: 'Planning sample' })}
+            </p>
+            <p className="mt-0.5 text-sm font-medium text-content-primary">
+              {t('benchmarks.sample_count', {
+                defaultValue: 'about {{count}} projects',
+                count: benchmarkRange.sampleSize,
+              })}
+            </p>
+          </div>
+          <div>
+            <p className="text-2xs uppercase tracking-wide text-content-quaternary">
+              {t('benchmarks.data_confidence', { defaultValue: 'Data confidence' })}
+            </p>
+            <p className={`mt-0.5 text-sm font-semibold ${dataConfidence.className}`}>
+              {t(dataConfidence.key, { defaultValue: dataConfidence.defaultValue })}
+            </p>
+          </div>
+        </div>
+
+        {/* Comparison confidence for the user's entered cost */}
+        <div className="mt-4 border-t border-border pt-3">
+          <p className="text-xs text-content-tertiary">
+            <span className="font-medium text-content-secondary">
+              {t('benchmarks.comparison_confidence', { defaultValue: 'Comparison confidence' })}:
+            </span>{' '}
+            {t(cmpConfidence.key, { defaultValue: cmpConfidence.label })}
+          </p>
+        </div>
+
+        {/* Standing disclaimer */}
+        <div className="mt-3 flex items-start gap-2 text-xs text-content-quaternary">
+          <Info className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            {t('benchmarks.disclaimer', {
+              defaultValue:
+                'Benchmark data from BKI (DE), Statistik Austria (AT), SIA / BFS (CH), BCIS (UK) and ENR (US). Values represent KG 300+400 (construction plus technical systems) costs per m2 GFA. Actual costs vary by location, specification and market conditions.',
+            })}
+          </p>
+        </div>
       </div>
     </div>
   );
