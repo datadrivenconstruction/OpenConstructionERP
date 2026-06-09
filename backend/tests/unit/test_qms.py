@@ -250,7 +250,11 @@ async def test_inspection_complete_with_required_signatures(svc: QMSService) -> 
     ) as spy:
         insp = await svc.complete_inspection(insp.id, result="passed")
     assert insp.status == "passed"
-    assert spy.call_args.args[0] == "qms.inspection.passed"
+    # complete_inspection emits the generic passed event, and for a hold or
+    # witness point it also fans out a dedicated hold_point_passed event. The
+    # generic event must be among those published (call_args is only the last).
+    published = [call.args[0] for call in spy.call_args_list]
+    assert "qms.inspection.passed" in published
 
 
 @pytest.mark.asyncio

@@ -125,7 +125,8 @@ async def test_dashboard_happy_path_returns_canonical_shape(app_factory, db_sess
         assert body["federations"]["count"] == 0
         assert body["clashes"]["open_count"] == 0
         assert body["bcf_activity"]["topics_exported_30d"] == 0
-        assert body["open_cost_impact_total"] == 0.0
+        # Money serialises as a Decimal string; the default total is still zero.
+        assert float(body["open_cost_impact_total"]) == 0.0
     finally:
         app.dependency_overrides.clear()
 
