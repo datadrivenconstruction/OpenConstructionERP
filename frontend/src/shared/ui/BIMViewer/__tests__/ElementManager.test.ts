@@ -162,6 +162,132 @@ describe('ElementManager.isolate (intersection with filter predicate)', () => {
 });
 
 /**
+ * applyFilter direction — selecting groups in the in-viewer filter panel
+ * ISOLATES them (shows ONLY the selected groups, hides everything else).
+ * A non-empty predicate keeps the elements it returns true for; everything
+ * else is hidden. Clearing the filter (predicate that matches all) restores
+ * full visibility. These tests pin the direction so a future refactor can
+ * never silently invert it back into a hide-list.
+ */
+describe('ElementManager.applyFilter (isolate direction)', () => {
+  let scene: SceneManager;
+  let mgr: ElementManager;
+
+  beforeEach(() => {
+    scene = makeFakeSceneManager();
+    mgr = new ElementManager(scene);
+    mgr.loadElements(sampleElements(), { skipPlaceholders: false });
+  });
+
+  it('keeps ONLY the predicate-true elements visible (placeholder boxes)', () => {
+    // User selects the "Walls" category chip -> predicate true for walls.
+    const visible = mgr.applyFilter((el) => el.element_type === 'Walls');
+    expect(visible).toBe(2);
+    expect(mgr.getMesh('w1')!.visible).toBe(true);
+    expect(mgr.getMesh('w2')!.visible).toBe(true);
+    // The unselected door must be hidden, NOT the other way around.
+    expect(mgr.getMesh('d1')!.visible).toBe(false);
+  });
+
+  it('treats multi-select as a union (Walls OR Doors keeps both)', () => {
+    const selected = new Set(['Walls', 'Doors']);
+    const visible = mgr.applyFilter((el) => selected.has(el.element_type ?? ''));
+    expect(visible).toBe(3);
+    expect(mgr.getMesh('w1')!.visible).toBe(true);
+    expect(mgr.getMesh('w2')!.visible).toBe(true);
+    expect(mgr.getMesh('d1')!.visible).toBe(true);
+  });
+
+  it('restores full visibility when the filter is cleared (match-all)', () => {
+    mgr.applyFilter((el) => el.element_type === 'Walls'); // isolate walls
+    expect(mgr.getMesh('d1')!.visible).toBe(false);
+    // An empty selection emits a match-all predicate -> everything visible.
+    const visible = mgr.applyFilter(() => true);
+    expect(visible).toBe(3);
+    expect(mgr.getMesh('w1')!.visible).toBe(true);
+    expect(mgr.getMesh('w2')!.visible).toBe(true);
+    expect(mgr.getMesh('d1')!.visible).toBe(true);
+  });
+});
+
+/**
+ * applyFilter on a DAE/GLB-loaded scene — the large Revit/IFC path. After
+ * geometry parses, meshes live under `daeGroup` keyed by `userData.elementId`.
+ * The filter must isolate the selected category there too (the in-viewer
+ * panel reported the opposite on these models). Built by driving the same
+ * private `processLoadedScene` the other suites use.
+ */
+describe('ElementManager.applyFilter on a DAE-loaded scene', () => {
+  let scene: SceneManager;
+  let mgr: ElementManager;
+
+  function manyElements(): BIMElementData[] {
+    const out: BIMElementData[] = [];
+    for (let i = 0; i < 3; i++) {
+      out.push({
+        id: `wall_${i}`,
+        name: `Wall ${i}`,
+        element_type: 'Walls',
+        discipline: 'architectural',
+        mesh_ref: `wall_${i}`,
+        bounding_box: { min_x: i, min_y: 0, min_z: 0, max_x: i + 1, max_y: 1, max_z: 1 },
+      });
+    }
+    for (let i = 0; i < 2; i++) {
+      out.push({
+        id: `door_${i}`,
+        name: `Door ${i}`,
+        element_type: 'Doors',
+        discipline: 'architectural',
+        mesh_ref: `door_${i}`,
+        bounding_box: { min_x: 10 + i, min_y: 0, min_z: 0, max_x: 11 + i, max_y: 1, max_z: 1 },
+      });
+    }
+    return out;
+  }
+
+  function buildDaeScene(elements: BIMElementData[]): THREE.Group {
+    const g = new THREE.Group();
+    for (const el of elements) {
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 1, 1),
+        new THREE.MeshStandardMaterial(),
+      );
+      // Backend patches DAE node names to equal mesh_ref so the matcher binds.
+      mesh.name = el.mesh_ref!;
+      g.add(mesh);
+    }
+    return g;
+  }
+
+  beforeEach(() => {
+    scene = makeFakeSceneManager();
+    mgr = new ElementManager(scene);
+    const all = manyElements();
+    mgr.loadElements(all, { skipPlaceholders: true });
+    (
+      mgr as unknown as {
+        processLoadedScene: (s: THREE.Object3D, p?: unknown, isGLB?: boolean) => void;
+      }
+    ).processLoadedScene(buildDaeScene(all), undefined, true);
+  });
+
+  it('isolates the selected category (Walls visible, Doors hidden)', () => {
+    const visible = mgr.applyFilter((el) => el.element_type === 'Walls');
+    expect(visible).toBe(3);
+    for (let i = 0; i < 3; i++) expect(mgr.getMesh(`wall_${i}`)!.visible).toBe(true);
+    for (let i = 0; i < 2; i++) expect(mgr.getMesh(`door_${i}`)!.visible).toBe(false);
+  });
+
+  it('clearing the filter shows the whole model again', () => {
+    mgr.applyFilter((el) => el.element_type === 'Walls');
+    mgr.applyFilter(() => true);
+    for (let i = 0; i < 3; i++) expect(mgr.getMesh(`wall_${i}`)!.visible).toBe(true);
+    for (let i = 0; i < 2; i++) expect(mgr.getMesh(`door_${i}`)!.visible).toBe(true);
+  });
+});
+
+/**
  * Up-axis handling in `processLoadedScene` — branch by loader.
  *
  *  - GLB scenes need an explicit -90° X rotation: GLTFLoader does no

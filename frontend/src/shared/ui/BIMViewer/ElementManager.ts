@@ -2246,10 +2246,32 @@ export class ElementManager {
     // This catches meshes that are in the scene graph but may not be
     // the same object reference as meshMap (Three.js ColladaLoader
     // can nest meshes inside intermediate Group nodes).
+    //
+    // Two rules keep this isolate-correct on large Revit/IFC models:
+    //   1. Skip any mesh that carries a `batchHandle`. On big models
+    //      (>= 10k meshes) the geometry is collapsed into BatchedMesh
+    //      instances and the original mesh is parked at `visible = false`
+    //      because the batch draws it now. The meshMap loop above already
+    //      drove the batch instance via setVisibleAt. Re-showing the
+    //      original here would draw the isolated subset twice (z-fighting)
+    //      and was the only place this pass diverged from `isolate()`.
+    //   2. For a non-batched matched mesh, show it only when its element
+    //      passes the predicate; hide everything else (unmatched DAE
+    //      background included) so the selected groups are isolated rather
+    //      than overlaid on the full model.
     if (this.daeGroup) {
       this.daeGroup.traverse((obj) => {
         if (obj instanceof THREE.Mesh) {
-          const ud = obj.userData as { elementId?: string | null };
+          const ud = obj.userData as {
+            elementId?: string | null;
+            batchHandle?: { batched: THREE.BatchedMesh; instanceId: number };
+          };
+          // Batched original — rendering is owned by the BatchedMesh; leave
+          // the parked original hidden so we never double-draw the subset.
+          if (ud.batchHandle) {
+            obj.visible = false;
+            return;
+          }
           if (ud.elementId) {
             obj.visible = visibleIds.has(ud.elementId);
           } else {
