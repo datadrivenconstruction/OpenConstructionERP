@@ -2100,6 +2100,10 @@
       letter-spacing: -0.01em;
       color: var(--ink-0);
       line-height: 1.1;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .d-label .s {
       font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -2108,6 +2112,10 @@
       letter-spacing: 0.03em;
       line-height: 1.2;
       text-transform: uppercase;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* Connector line svg below */
@@ -12572,7 +12580,7 @@
     .dl-dev-col{display:flex;flex-direction:column;gap:8px;}
     .dl-dev-label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:640;color:var(--ink-1);}
     .dl-dev-label .dl-dev-tag{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.05em;color:var(--ink-3);background:var(--bg-2);border:1px solid var(--line-0);border-radius:5px;padding:2px 6px;}
-    @media(max-width:560px){.dl-dev-grid{grid-template-columns:1fr;}}
+    @media(max-width:820px){.dl-dev-grid{grid-template-columns:1fr;}}
 
     @media(max-width:980px){.dl-grid{grid-template-columns:1fr 1fr;}#card-linux{grid-column:1 / -1;}}
     @media(max-width:720px){.dl-grid{grid-template-columns:1fr;}#card-linux{grid-column:auto;}}
@@ -20030,8 +20038,15 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
           const tooCloseToText = screenX < MIN_SCREEN_X;
           const labelRight = tx + LABEL_W;
           const labelBottom = ty + LABEL_H;
-          const labelClipped = tx < panelRect.left - 4
-                            || labelRight > panelRect.right + 4
+          // Keep tags fully inside both the panel and the viewport so a label
+          // can never bleed past the right edge of the page (the panel itself
+          // can extend beyond the viewport on wide screens). Out-of-bounds
+          // labels are cycled out rather than clamped - clamping would detach
+          // the tag from its building anchor and bend the leader line.
+          const clipRight = Math.min(panelRect.right, viewportW) - 6;
+          const clipLeft = Math.max(panelRect.left, 0) + 2;
+          const labelClipped = tx < clipLeft
+                            || labelRight > clipRight
                             || ty < panelRect.top - 10
                             || labelBottom > panelRect.bottom + 10;
 
