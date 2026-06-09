@@ -15,6 +15,10 @@ import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 
 export interface PastedRow {
   ordinal: string;
+  /** True when the ordinal was auto-generated (no ordinal column in the
+   *  paste), so the importer should let the backend assign it instead of
+   *  forwarding a placeholder that may collide with existing rows. */
+  ordinalAuto: boolean;
   description: string;
   unit: string;
   quantity: number;
@@ -38,6 +42,14 @@ const HEADER_MAP: Record<string, string> = {
   qty: 'quantity', quantity: 'quantity', menge: 'quantity', amount: 'quantity', 'qty.': 'quantity',
   rate: 'unit_rate', 'unit rate': 'unit_rate', 'unit_rate': 'unit_rate', price: 'unit_rate',
   einzelpreis: 'unit_rate', ep: 'unit_rate', 'unit price': 'unit_rate',
+  // French (devis) — accented and unaccented spellings both reach here
+  // because the key is lower-cased with only '.' and '*' stripped.
+  désignation: 'description', designation: 'description', libellé: 'description', libelle: 'description',
+  prestation: 'description', ouvrage: 'description', dénomination: 'description', denomination: 'description',
+  unité: 'unit', unite: 'unit', un: 'unit', 'u/m': 'unit',
+  qté: 'quantity', qte: 'quantity', quantité: 'quantity', quantite: 'quantity', qrté: 'quantity', nombre: 'quantity',
+  pu: 'unit_rate', 'prix unitaire': 'unit_rate', 'prix unit': 'unit_rate', 'prix u': 'unit_rate',
+  'pu ht': 'unit_rate', 'p u': 'unit_rate', prix: 'unit_rate',
 };
 
 function detectColumns(headerCells: string[]): Record<number, string> {
@@ -57,13 +69,35 @@ const DEFAULT_ORDER = ['description', 'unit', 'quantity', 'unit_rate'];
 
 function parseNumber(s: string): number {
   if (!s) return 0;
+  // Strip everything except digits, separators and sign (drops currency
+  // symbols, NBSP/space thousands grouping like "12 500,00", etc.).
   const cleaned = s.replace(/[^\d.,-]/g, '');
-  // Detect European format: 1.234,56
-  if (/^\d{1,3}(\.\d{3})*(,\d+)?$/.test(cleaned)) {
-    return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
+  if (!cleaned) return 0;
+
+  const commas = (cleaned.match(/,/g) || []).length;
+  const dots = (cleaned.match(/\./g) || []).length;
+
+  let normalised = cleaned;
+  if (commas && dots) {
+    // Both present: the right-most separator is the decimal point, the
+    // other is thousands grouping. (1.234,56 → 1234.56 ; 1,234.56 → 1234.56)
+    if (cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.')) {
+      normalised = cleaned.replace(/\./g, '').replace(',', '.');
+    } else {
+      normalised = cleaned.replace(/,/g, '');
+    }
+  } else if (commas > 1) {
+    // Repeated commas can only be thousands grouping (1,234,567).
+    normalised = cleaned.replace(/,/g, '');
+  } else if (dots > 1) {
+    // Repeated dots can only be thousands grouping (1.234.567).
+    normalised = cleaned.replace(/\./g, '');
+  } else if (commas === 1) {
+    // A lone comma is the decimal separator (European 185,00 / 1,45).
+    normalised = cleaned.replace(',', '.');
   }
-  // US/UK format: 1,234.56
-  return parseFloat(cleaned.replace(/,/g, '')) || 0;
+  // else: a lone dot (US 185.00) or no separator — already parseable as-is.
+  return parseFloat(normalised) || 0;
 }
 
 function parseRows(raw: string): { rows: PastedRow[]; detectedHeaders: string[] } {
@@ -101,8 +135,10 @@ function parseRows(raw: string): { rows: PastedRow[]; detectedHeaders: string[] 
     const desc = row['description'] || '';
     if (!desc) continue; // Skip empty descriptions
 
+    const explicitOrdinal = (row['ordinal'] || '').trim();
     rows.push({
-      ordinal: row['ordinal'] || String(autoOrdinal++).padStart(2, '0'),
+      ordinal: explicitOrdinal || String(autoOrdinal++).padStart(2, '0'),
+      ordinalAuto: !explicitOrdinal,
       description: desc,
       unit: row['unit'] || 'pcs',
       quantity: parseNumber(row['quantity'] || '1'),

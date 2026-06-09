@@ -3168,7 +3168,12 @@ export function BOQEditorPage() {
     try {
       const items = rows.map((r) => ({
         boq_id: boqId,
-        ordinal: r.ordinal,
+        // Only forward an ordinal when it came from a real column in the
+        // pasted data. Auto-generated placeholders ("01", "02", …) collided
+        // with rows already in the BOQ and made the backend 409 the whole
+        // batch ("Import failed"). Omitting them lets the server append
+        // collision-free ordinals.
+        ...(r.ordinalAuto ? {} : { ordinal: r.ordinal }),
         description: r.description,
         unit: r.unit,
         quantity: r.quantity,
@@ -3183,6 +3188,8 @@ export function BOQEditorPage() {
       setExcelPasteOpen(false);
       invalidateAll();
     } catch (err) {
+      // Surface the real backend reason (permission, ordinal conflict, …)
+      // instead of a bare "Import failed" the user can't act on.
       addToast({
         type: 'error',
         title: t('boq.paste_import_failed', { defaultValue: 'Import failed' }),

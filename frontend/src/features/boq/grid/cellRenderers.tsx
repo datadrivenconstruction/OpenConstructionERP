@@ -1643,7 +1643,9 @@ const BimLinkPopover = forwardRef<
   }, [onClose]);
 
   const [glbOk, setGlbOk] = useState(true);
-  const [geomError, setGeomError] = useState<string | null>(null);
+  // Geometry-load failure reason is captured for future surfacing; only the
+  // setter is consumed today (the value is intentionally write-only for now).
+  const [, setGeomError] = useState<string | null>(null);
   const [showAllProps, setShowAllProps] = useState(false);
   const [showAllSums, setShowAllSums] = useState(false);
   const { data, isLoading } = useQuery({

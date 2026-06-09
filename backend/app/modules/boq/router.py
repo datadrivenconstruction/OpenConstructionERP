@@ -1831,12 +1831,44 @@ async def bulk_add_positions(
             detail="'items' list is required and must not be empty",
         )
 
-    # Determine next ordinal base from existing positions (cheap, one query)
+    # Snapshot existing ordinals so any *auto-assigned* ordinal is guaranteed
+    # collision-free. The previous ``existing_count + idx + 1`` scheme 409'd
+    # on a second import (or any non-contiguous numbering) because it ignored
+    # the ordinals actually present - the root cause of "Excel paste import
+    # silently fails on a BOQ that already has rows". Ordinals the caller
+    # supplies explicitly are still honoured verbatim.
+    existing_ordinals: set[str] = set()
     try:
         boq_data = await service.get_boq_with_positions(boq_id)
-        existing_count = len(boq_data.positions) if boq_data.positions else 0
+        for _pos in boq_data.positions or []:
+            _ord = getattr(_pos, "ordinal", None)
+            if _ord:
+                existing_ordinals.add(str(_ord))
     except HTTPException:
-        existing_count = 0
+        pass
+
+    existing_count = len(existing_ordinals)
+    used_ordinals: set[str] = set(existing_ordinals)
+
+    def _max_numeric(ordinals: set[str]) -> int:
+        best = 0
+        for o in ordinals:
+            try:
+                best = max(best, int(str(o).strip()))
+            except (ValueError, TypeError):
+                continue
+        return best
+
+    _next_seq = _max_numeric(existing_ordinals)
+
+    def _next_free_ordinal() -> str:
+        nonlocal _next_seq
+        while True:
+            _next_seq += 1
+            candidate = f"{_next_seq:03d}"
+            if candidate not in used_ordinals:
+                used_ordinals.add(candidate)
+                return candidate
 
     # Validate every row up-front. A bad row aborts the whole batch with
     # 422; the previous serial loop accepted partial success which made
@@ -1845,7 +1877,12 @@ async def bulk_add_positions(
     errors: list[dict[str, Any]] = []
     for idx, item in enumerate(items):
         try:
-            ordinal = item.get("ordinal", f"{existing_count + idx + 1:03d}")
+            raw_ordinal = str(item.get("ordinal", "") or "").strip()
+            if raw_ordinal:
+                ordinal = raw_ordinal
+                used_ordinals.add(ordinal)
+            else:
+                ordinal = _next_free_ordinal()
             description = str(item.get("description", "")).strip()
             if not description:
                 description = f"Position {existing_count + idx + 1}"
