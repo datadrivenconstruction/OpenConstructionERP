@@ -28,6 +28,29 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
 
+# Source formats that are 2D drawings, not 3D models. These can never carry a
+# real mesh, so they must never appear in the BIM 3D Takeoff lists / pickers /
+# viewer. DWG/DXF belong to the dedicated DWG Takeoff module; DGN and 2D PDF
+# sheets are handled elsewhere too. The BIM 3D list query filters these out so
+# the 3D viewer is never handed a model whose geometry cannot exist (the source
+# of the "marked ready but its 3D geometry file is no longer on the server"
+# 404 reported on fresh installs). Matching is substring + case-insensitive so
+# values like ".dwg", "DWG", "autocad_dwg" all resolve correctly.
+NON_3D_MODEL_FORMATS: frozenset[str] = frozenset({"dwg", "dxf", "dgn"})
+
+
+def is_non_3d_format(model_format: str | None) -> bool:
+    """Return True when ``model_format`` is a 2D drawing format (no 3D mesh).
+
+    Used to keep DWG/DXF/DGN drawings out of the BIM 3D Takeoff surface. A
+    ``None``/empty format is treated as 3D-eligible (legacy rows predating the
+    format column, and generic uploads, still show in the 3D list).
+    """
+    if not model_format:
+        return False
+    fmt = model_format.strip().lower().lstrip(".")
+    return any(token in fmt for token in NON_3D_MODEL_FORMATS)
+
 
 class BIMModel(Base):
     """‌⁠‍Imported BIM/CAD model - one record per uploaded file version."""
