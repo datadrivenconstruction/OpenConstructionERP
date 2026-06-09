@@ -245,7 +245,7 @@ def test_rollup_returns_exact_decimal_no_accumulated_rounding(monkeypatch):
 
     import asyncio
 
-    result = asyncio.get_event_loop().run_until_complete(svc.rollup_for_project(project.id, status_filter="open"))
+    result = asyncio.run(svc.rollup_for_project(project.id, status_filter="open"))
     assert result is not None
     # Exact sum: 3 × 0.005 = 0.015 → ROUND_HALF_UP → 0.02.
     # If we summed the rounded floats instead we'd get 0.01 + 0.01 + 0.01
@@ -276,7 +276,7 @@ def test_rollup_empty_project_uses_project_currency_not_eur_hardcode():
     svc._load_project = types.MethodType(_fake_load_project, svc)  # type: ignore[method-assign]
     svc._open_clashes_for_project = types.MethodType(_fake_open, svc)  # type: ignore[method-assign]
 
-    result = asyncio.get_event_loop().run_until_complete(svc.rollup_for_project(project.id, status_filter="open"))
+    result = asyncio.run(svc.rollup_for_project(project.id, status_filter="open"))
     assert result is not None
     assert result["currency"] == ""
     assert result["total_open_impact"] == 0.0

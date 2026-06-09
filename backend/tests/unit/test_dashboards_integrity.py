@@ -190,7 +190,7 @@ class TestDtypeMismatch:
             project_id="p",
         )
         col = report.columns[0]
-        assert col.dtype.startswith("object") or col.dtype == "string"
+        assert col.dtype.startswith("object") or col.dtype in ("string", "str")
         assert col.inferred_type == "numeric"
         assert "dtype_mismatch" in col.issues
 
