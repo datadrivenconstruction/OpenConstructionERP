@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { Sidebar, FloatingRecentButton } from './Sidebar';
 import { Header, resolvePageTitleKey } from './Header';
+import { DesktopToolbar } from './DesktopToolbar';
 import { FeedbackDialog } from '@/shared/ui';
 import { FloatingQueuePanel } from './FloatingQueuePanel';
 import { GlobalProgress } from '@/shared/ui/GlobalProgress';
@@ -132,6 +133,11 @@ export function AppLayout({ title, children }: AppLayoutProps) {
           Full-bleed pages (BIM viewer, DWG takeoff, AI chat) negate it
           via `-mx-4 sm:-mx-7` on their root div. */}
       <div className="lg:pl-sidebar">
+        {/* Desktop-only browser-style chrome (Back/Forward/Reload/Home,
+            address field, open-in-browser, favorites). Renders null in the
+            normal web build. Sits above the Header so it reads as window
+            chrome. */}
+        <DesktopToolbar />
         <Header
           title={title}
           onMenuClick={openSidebar}

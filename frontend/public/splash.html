@@ -198,6 +198,78 @@
 
     .copybtn:hover { background: #f4f7fc; }
 
+    /* One-time "app window or browser" launch choice */
+    .choice {
+      display: none;
+      margin-top: 24px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+    }
+
+    .choice.show { display: block; }
+
+    .choice h2 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .choice p {
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .choice-buttons {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .choice-btn {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 13px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+    }
+
+    .choice-btn small {
+      display: block;
+      margin-top: 3px;
+      font-size: 12.5px;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .choice-btn:hover { border-color: #c7d2e8; }
+    .choice-btn:active { transform: translateY(1px); }
+
+    .choice-btn.primary {
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--brand-blue), var(--brand-violet));
+      color: #fff;
+      box-shadow: 0 8px 22px rgba(0, 102, 255, 0.22);
+    }
+
+    .choice-btn.primary small { color: rgba(255, 255, 255, 0.85); }
+    .choice-btn.primary:hover { box-shadow: 0 10px 26px rgba(0, 102, 255, 0.3); }
+
+    .choice-note {
+      margin-top: 14px;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
     @media (max-width: 380px) {
       .product { font-size: 23px; }
       .logo { width: 70px; height: 70px; }
@@ -237,6 +309,23 @@
     <p class="hint" id="hint">First run sets up your local database. This can take a minute or two, please wait.</p>
     <p class="logpath" id="logpath"></p>
     <button class="copybtn" id="copybtn" type="button">Copy details</button>
+
+    <!-- One-time launch choice: app window (default) or normal web browser. -->
+    <section class="choice" id="choice" aria-live="polite">
+      <h2>How would you like to open OpenConstructionERP?</h2>
+      <p>You can use it as its own app window, or open it in the web browser you already use. You can switch any time later.</p>
+      <div class="choice-buttons">
+        <button class="choice-btn primary" id="choice-app" type="button">
+          Open as an app window
+          <small>Recommended. A dedicated window, no browser tabs.</small>
+        </button>
+        <button class="choice-btn" id="choice-browser" type="button">
+          Open in my browser
+          <small>Use your normal web browser at the local address.</small>
+        </button>
+      </div>
+      <p class="choice-note" id="choice-note"></p>
+    </section>
   </main>
 
   <script>
@@ -353,6 +442,107 @@
       setError(detail || 'Startup failed.');
     }
 
+    // --- Launch choice: app window (default) or normal web browser ----------
+    //
+    // The launcher calls setAppUrl() once it knows the local address, then
+    // offerLaunchChoice(url) when the backend is ready. If the user has already
+    // made a choice on a previous run we honour it silently. Otherwise we show a
+    // small, friendly card. The app window is always the default, so if the user
+    // does nothing we proceed to it automatically after a short wait and never
+    // leave anyone stuck on this screen.
+
+    var APP_URL = '';
+    // Remembered preference: 'app' or 'browser'. localStorage on the splash
+    // origin (tauri://) persists across launches.
+    var LAUNCH_PREF_KEY = 'oe_launch_preference';
+    var autoContinueTimer = null;
+
+    function setAppUrl(url) {
+      APP_URL = url || APP_URL;
+    }
+
+    function readLaunchPref() {
+      try { return window.localStorage.getItem(LAUNCH_PREF_KEY); }
+      catch (e) { return null; }
+    }
+
+    function writeLaunchPref(value) {
+      try { window.localStorage.setItem(LAUNCH_PREF_KEY, value); }
+      catch (e) { /* private mode or storage blocked; ignore */ }
+    }
+
+    function gotoAppWindow() {
+      if (!APP_URL) { return; }
+      window.location.replace(APP_URL);
+    }
+
+    // Ask the native shell to open the running app in the OS default browser.
+    // Falls back to opening the URL directly if the command bridge is missing.
+    function openInBrowser() {
+      var invoke = window.__TAURI__ &&
+        ((window.__TAURI__.core && window.__TAURI__.core.invoke) ||
+          window.__TAURI__.invoke);
+      if (invoke) {
+        try {
+          invoke('open_app_in_browser');
+          return true;
+        } catch (e) { /* fall through to window.open */ }
+      }
+      try { window.open(APP_URL, '_blank'); return true; }
+      catch (e) { return false; }
+    }
+
+    function hideChoice() {
+      var card = document.getElementById('choice');
+      if (card) { card.classList.remove('show'); }
+      if (autoContinueTimer) { clearTimeout(autoContinueTimer); autoContinueTimer = null; }
+    }
+
+    function offerLaunchChoice(url) {
+      if (url) { APP_URL = url; }
+      if (!APP_URL) { return; }
+
+      var pref = readLaunchPref();
+      if (pref === 'browser') {
+        // Remembered: open the browser, but still show the app window so the
+        // shell is not left blank and the tray menu stays available.
+        openInBrowser();
+        gotoAppWindow();
+        return;
+      }
+      if (pref === 'app') {
+        gotoAppWindow();
+        return;
+      }
+
+      // No saved choice yet: show the card and let the user pick. Hide the boot
+      // checklist and hint so the screen is calm and focused on the question.
+      var checklist = document.getElementById('checklist');
+      var hint = document.getElementById('hint');
+      var statusEl = document.getElementById('status');
+      if (checklist) { checklist.style.display = 'none'; }
+      if (hint) { hint.style.display = 'none'; }
+      if (statusEl) { statusEl.style.display = 'none'; }
+
+      var card = document.getElementById('choice');
+      if (card) { card.classList.add('show'); }
+
+      // Safety net: if the user walks away, default to the app window so they
+      // are never stranded on this screen. This does NOT save a preference, so
+      // the choice is offered again next time.
+      var seconds = 20;
+      var note = document.getElementById('choice-note');
+      function tick() {
+        if (note) {
+          note.textContent = 'Opening as an app window in ' + seconds + ' seconds.';
+        }
+        seconds -= 1;
+        if (seconds < 0) { gotoAppWindow(); return; }
+        autoContinueTimer = setTimeout(tick, 1000);
+      }
+      tick();
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       renderChecklist();
       bootStage('launcher', 'done', '');
@@ -378,6 +568,30 @@
               setTimeout(function () { btn.textContent = 'Copy details'; }, 1500);
             }
           } catch (e) { /* clipboard not available; ignore */ }
+        });
+      }
+
+      // Launch-choice buttons. Each remembers the pick so we do not ask again.
+      var appBtn = document.getElementById('choice-app');
+      if (appBtn) {
+        appBtn.addEventListener('click', function () {
+          writeLaunchPref('app');
+          hideChoice();
+          gotoAppWindow();
+        });
+      }
+      var browserBtn = document.getElementById('choice-browser');
+      if (browserBtn) {
+        browserBtn.addEventListener('click', function () {
+          writeLaunchPref('browser');
+          hideChoice();
+          var note = document.getElementById('choice-note');
+          if (note) { note.textContent = 'Opening in your browser...'; }
+          openInBrowser();
+          // Keep the app window open too (showing the same app), so closing the
+          // browser tab does not leave the user with nothing, and the tray menu
+          // remains reachable.
+          setTimeout(gotoAppWindow, 600);
         });
       }
     });
