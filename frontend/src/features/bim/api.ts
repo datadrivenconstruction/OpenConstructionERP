@@ -21,6 +21,24 @@ import { isModuleLoaded } from '@/shared/lib/moduleProbe';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 
+/* ── Format helpers ────────────────────────────────────────────────────── */
+
+/** Source formats that are 2D drawings, not 3D models (no mesh ever). */
+const NON_3D_BIM_FORMATS = ['dwg', 'dxf', 'dgn'];
+
+/**
+ * True when a model's source format is a 2D drawing (DWG/DXF/DGN) that can
+ * never carry 3D geometry. Such models belong to the DWG Takeoff module and
+ * must never appear in the BIM 3D Takeoff filmstrip, picker or viewer. Mirrors
+ * the backend `is_non_3d_format` guard so the UI stays correct even against a
+ * stale cache. Empty / unknown formats are treated as 3D-eligible.
+ */
+export function isNon3DBimFormat(format: string | null | undefined): boolean {
+  if (!format) return false;
+  const fmt = format.trim().toLowerCase().replace(/^\./, '');
+  return NON_3D_BIM_FORMATS.some((token) => fmt.includes(token));
+}
+
 /* ── Response Types ────────────────────────────────────────────────────── */
 
 export interface BIMModelsResponse {
