@@ -2516,7 +2516,7 @@ const resource = {
     "nav.sustainability": "Održivost",
     "nav.takeoff": "PDF iskaz količina",
     "nav.pdf_measurements": "PDF mjerenja",
-    "nav.dwg_takeoff": "DWG nacrti",
+    "nav.dwg_takeoff": "DWG iskaz količina",
     "nav.pdf_documents": "PDF dokumenti i AI",
     "nav.benchmarks": "Mjerila troškova",
     "nav.collaboration": "Suradnja",

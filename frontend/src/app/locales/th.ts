@@ -2516,7 +2516,7 @@ const resource = {
     "nav.sustainability": "ความยั่งยืน",
     "nav.takeoff": "การถอดปริมาณจาก PDF",
     "nav.pdf_measurements": "การวัดจาก PDF",
-    "nav.dwg_takeoff": "แบบ DWG",
+    "nav.dwg_takeoff": "การถอดปริมาณจาก DWG",
     "nav.pdf_documents": "เอกสาร PDF และ AI",
     "nav.benchmarks": "เกณฑ์เปรียบเทียบต้นทุน",
     "nav.collaboration": "การทำงานร่วมกัน",

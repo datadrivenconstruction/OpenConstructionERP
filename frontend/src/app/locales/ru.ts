@@ -2476,7 +2476,7 @@ const resource = {
     "nav.sustainability": "Экологичность",
     "nav.takeoff": "Подсчёт по PDF",
     "nav.pdf_measurements": "PDF-измерения",
-    "nav.dwg_takeoff": "Чертежи DWG",
+    "nav.dwg_takeoff": "Подсчёт по DWG",
     "nav.pdf_documents": "PDF-документы и ИИ",
     "nav.benchmarks": "Бенчмарки стоимости",
     "nav.collaboration": "Совместная работа",

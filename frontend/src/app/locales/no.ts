@@ -3966,7 +3966,7 @@ const resource = {
     "nav.sustainability": "Barekraft",
     "nav.takeoff": "PDF Mengdeuttak",
     "nav.pdf_measurements": "PDF-målinger",
-    "nav.dwg_takeoff": "DWG-tegninger",
+    "nav.dwg_takeoff": "DWG Mengdeuttak",
     "nav.pdf_documents": "PDF-dokumenter & AI",
     "nav.benchmarks": "Kostnadsreferanser",
     "nav.collaboration": "Samarbeid",

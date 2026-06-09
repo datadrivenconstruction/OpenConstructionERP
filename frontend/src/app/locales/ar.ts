@@ -4788,7 +4788,7 @@ const resource = {
     "nav.de_din": "تبادل DIN 276 ألمانيا",
     "nav.docs": "التوثيق",
     "nav.documents": "المستندات",
-    "nav.dwg_takeoff": "رسومات DWG",
+    "nav.dwg_takeoff": "حصر كميات DWG",
     "nav.erp_chat": "دردشة الذكاء الاصطناعي",
     "nav.es_pbc_exchange": "تبادل PBC إسبانيا",
     "nav.estimation_dashboard": "لوحة التسعير",

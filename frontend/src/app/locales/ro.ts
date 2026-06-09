@@ -2516,7 +2516,7 @@ const resource = {
     "nav.sustainability": "Sustenabilitate",
     "nav.takeoff": "Antemăsurătoare PDF",
     "nav.pdf_measurements": "Măsurători PDF",
-    "nav.dwg_takeoff": "Desene DWG",
+    "nav.dwg_takeoff": "Antemăsurătoare DWG",
     "nav.pdf_documents": "Documente PDF și AI",
     "nav.benchmarks": "Repere de cost",
     "nav.collaboration": "Colaborare",

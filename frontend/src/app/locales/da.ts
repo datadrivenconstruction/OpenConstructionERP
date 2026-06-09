@@ -3966,7 +3966,7 @@ const resource = {
     "nav.sustainability": "Bæredygtighed",
     "nav.takeoff": "PDF-opmåling",
     "nav.pdf_measurements": "PDF-målinger",
-    "nav.dwg_takeoff": "DWG-tegninger",
+    "nav.dwg_takeoff": "DWG-opmåling",
     "nav.pdf_documents": "PDF-dokumenter & AI",
     "nav.benchmarks": "Prisbenchmarks",
     "nav.collaboration": "Samarbejde",

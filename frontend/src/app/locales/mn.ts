@@ -4705,7 +4705,7 @@ const resource = {
     "nav.de_din": "DE DIN 276 солилцоо",
     "nav.docs": "Баримт бичиг",
     "nav.documents": "Баримт бичиг",
-    "nav.dwg_takeoff": "DWG Зургууд",
+    "nav.dwg_takeoff": "DWG-ээс хэмжээ авах",
     "nav.equipment": "Тоног төхөөрөмж ба тээвэр",
     "nav.erp_chat": "AI чат",
     "nav.es_pbc_exchange": "ES PBC солилцоо",

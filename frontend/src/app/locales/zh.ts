@@ -2234,7 +2234,7 @@ const resource = {
     "nav.sustainability": "可持续性",
     "nav.takeoff": "PDF 算量",
     "nav.pdf_measurements": "PDF 测量",
-    "nav.dwg_takeoff": "DWG 图纸",
+    "nav.dwg_takeoff": "DWG 算量",
     "nav.pdf_documents": "PDF 文档与 AI",
     "nav.benchmarks": "造价基准",
     "nav.collaboration": "协作",

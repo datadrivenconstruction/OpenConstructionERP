@@ -2516,7 +2516,7 @@ const resource = {
     "nav.sustainability": "Keberlanjutan",
     "nav.takeoff": "Perhitungan Kuantitas PDF",
     "nav.pdf_measurements": "Pengukuran PDF",
-    "nav.dwg_takeoff": "Gambar DWG",
+    "nav.dwg_takeoff": "Perhitungan Kuantitas DWG",
     "nav.pdf_documents": "Dokumen PDF & AI",
     "nav.benchmarks": "Tolok Ukur Biaya",
     "nav.collaboration": "Kolaborasi",

@@ -2516,7 +2516,7 @@ const resource = {
     "nav.sustainability": "Tính bền vững",
     "nav.takeoff": "Bóc tách khối lượng PDF",
     "nav.pdf_measurements": "Đo lường PDF",
-    "nav.dwg_takeoff": "Bản vẽ DWG",
+    "nav.dwg_takeoff": "Bóc tách khối lượng DWG",
     "nav.pdf_documents": "Tài liệu PDF và AI",
     "nav.benchmarks": "Chuẩn so sánh chi phí",
     "nav.collaboration": "Cộng tác",
