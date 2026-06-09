@@ -68,7 +68,11 @@ dependencies = [
     "structlog>=24.4.0",
     "pyyaml>=6.0",
     "defusedxml>=0.7.1",
-    "pandas>=2.2.0,<4",
+    # Capped below 3.0: pandas 3.0 changed string-column type inference (a
+    # numeric-looking string column now infers as "string" not "numeric"),
+    # which the dashboards integrity detector and its tests were written
+    # against. Revisit and lift the cap when adopting pandas 3 deliberately.
+    "pandas>=2.2.0,<3",
     "pyarrow>=23.0.1,<25",
     "trimesh>=4.0.0",
     "ezdxf>=0.18.0",
