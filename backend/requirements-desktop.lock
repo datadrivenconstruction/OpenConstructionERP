@@ -84,6 +84,7 @@ numpy==2.4.6
     # via
     #   ezdxf
     #   pandas
+    #   pycollada
     #   trimesh
 openpyxl==3.1.5
     # via openconstructionerp (pyproject.toml)
@@ -113,6 +114,8 @@ pyasn1==0.6.3
     # via
     #   python-jose
     #   rsa
+pycollada==0.9.3
+    # via openconstructionerp (pyproject.toml)
 pycparser==3.0 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
     # via cffi
 pydantic==2.13.4
@@ -132,6 +135,7 @@ python-dateutil==2.9.0.post0
     # via
     #   openconstructionerp (pyproject.toml)
     #   pandas
+    #   pycollada
 python-dotenv==1.2.2
     # via
     #   pydantic-settings
