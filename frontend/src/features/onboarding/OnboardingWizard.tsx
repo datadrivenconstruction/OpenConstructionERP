@@ -282,12 +282,32 @@ function maskApiKey(key: string): string {
   return key.slice(0, 8) + '\u2022'.repeat(Math.min(key.length - 8, 24));
 }
 
+/**
+ * Window event fired the moment onboarding is marked completed (any exit
+ * path: finish, skip-all, skip-setup, country-pack install). The global
+ * ProductTour listens for this so its first-run auto-start can fire the
+ * instant onboarding ends instead of only on the next reload, and, more
+ * importantly, so the tour never mounts while onboarding is still open.
+ */
+export const ONBOARDING_COMPLETED_EVENT = 'oe:onboarding-completed';
+
 /** Mark onboarding as completed (local fast-path + best-effort server sync). */
 export function markOnboardingCompleted(): void {
   try {
     localStorage.setItem('oe_onboarding_completed', 'true');
   } catch {
     // Storage unavailable -- ignore.
+  }
+  // Notify the global ProductTour (gated to start only AFTER onboarding) that
+  // it may now auto-start. Dispatched on every completion path because they
+  // all funnel through this helper. Guarded for non-browser (SSR/test) envs.
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(ONBOARDING_COMPLETED_EVENT));
+    }
+  } catch {
+    // CustomEvent unavailable -- ignore; the tour falls back to its
+    // route/storage re-evaluation on the next dashboard mount.
   }
   // Best-effort server sync so the per-user completed flag is set on every
   // exit path (skip, the explore-all link, apply-a-pack), not just the full
@@ -600,10 +620,13 @@ function StepWelcome({
 function StepStartChoice({
   onQuickStart,
   onChooseProfile,
+  onReadyPack,
   onBack,
 }: {
   onQuickStart: () => void;
   onChooseProfile: () => void;
+  /** Open the ready-made pack picker (a turnkey country starter pack). */
+  onReadyPack: () => void;
   onBack: () => void;
 }) {
   const { t } = useTranslation();
@@ -619,12 +642,12 @@ function StepStartChoice({
         })}
       </p>
 
-      <div className="mt-10 w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-7">
+      <div className="mt-10 w-full max-w-5xl grid grid-cols-1 sm:grid-cols-3 gap-5">
         {/* Quick Start card */}
         <button
           onClick={onQuickStart}
           className={clsx(
-            'group relative flex flex-col items-start rounded-3xl p-10 text-left min-h-[360px]',
+            'group relative flex flex-col items-start rounded-3xl p-8 text-left min-h-[340px]',
             'bg-surface-elevated/70 backdrop-blur-md shadow-sm shadow-black/[0.04]',
             'hover:bg-oe-blue-subtle/30 hover:shadow-2xl hover:shadow-oe-blue/10 hover:-translate-y-1',
             'transition-all duration-300 ease-oe active:scale-[0.98]',
@@ -633,15 +656,44 @@ function StepStartChoice({
           <Badge variant="blue" size="sm" className="mb-4">
             {t('onboarding.recommended', { defaultValue: 'Recommended' })}
           </Badge>
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-6 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
-            <Sparkles size={30} />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Sparkles size={26} />
           </div>
-          <h3 className="text-2xl font-bold text-content-primary">
+          <h3 className="text-xl font-bold text-content-primary">
             {t('onboarding.quick_start', { defaultValue: 'Quick Start' })}
           </h3>
-          <p className="mt-3 text-base text-content-secondary leading-relaxed">
+          <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
             {t('onboarding.quick_start_desc', {
               defaultValue: 'All essential modules pre-activated. Start working immediately.',
+            })}
+          </p>
+        </button>
+
+        {/* Ready-made pack card — a turnkey country starter pack that
+            provisions modules, regional config and sample data in one click,
+            then skips straight to the finish step. */}
+        <button
+          onClick={onReadyPack}
+          className={clsx(
+            'group relative flex flex-col items-start rounded-3xl p-8 text-left min-h-[340px]',
+            'bg-surface-elevated/70 backdrop-blur-md shadow-sm shadow-black/[0.04]',
+            'hover:bg-oe-blue-subtle/30 hover:shadow-2xl hover:shadow-oe-blue/10 hover:-translate-y-1',
+            'transition-all duration-300 ease-oe active:scale-[0.98]',
+          )}
+        >
+          <Badge variant="blue" size="sm" className="mb-4">
+            {t('onboarding.turnkey', { defaultValue: 'Turnkey' })}
+          </Badge>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Boxes size={26} />
+          </div>
+          <h3 className="text-xl font-bold text-content-primary">
+            {t('onboarding.ready_pack', { defaultValue: 'Ready-made Pack' })}
+          </h3>
+          <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
+            {t('onboarding.ready_pack_desc', {
+              defaultValue:
+                'Pick a country starter pack. It installs the language, cost databases, modules and sample projects for you.',
             })}
           </p>
         </button>
@@ -650,20 +702,20 @@ function StepStartChoice({
         <button
           onClick={onChooseProfile}
           className={clsx(
-            'group relative flex flex-col items-start rounded-3xl p-10 text-left min-h-[360px]',
+            'group relative flex flex-col items-start rounded-3xl p-8 text-left min-h-[340px]',
             'bg-surface-elevated/70 backdrop-blur-md shadow-sm shadow-black/[0.04]',
             'hover:bg-oe-blue-subtle/30 hover:shadow-2xl hover:shadow-oe-blue/10 hover:-translate-y-1',
             'transition-all duration-300 ease-oe active:scale-[0.98]',
           )}
         >
-          <div className="h-[24px] mb-4" aria-hidden />
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-secondary text-content-secondary mb-6 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
-            <Settings2 size={30} />
+          <div className="h-[22px] mb-4" aria-hidden />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-secondary text-content-secondary mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Settings2 size={26} />
           </div>
-          <h3 className="text-2xl font-bold text-content-primary">
+          <h3 className="text-xl font-bold text-content-primary">
             {t('onboarding.choose_profile', { defaultValue: 'Choose Your Profile' })}
           </h3>
-          <p className="mt-3 text-base text-content-secondary leading-relaxed">
+          <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
             {t('onboarding.choose_profile_desc', {
               defaultValue: 'Select your role and customize which modules you need.',
             })}
@@ -678,6 +730,328 @@ function StepStartChoice({
       </div>
     </div>
   );
+}
+
+// ── Step 2b: Ready-made pack picker ─────────────────────────────────────────
+//
+// A turnkey starter pack: the user picks one country pack from a clean icon
+// grid, we run the same one-click full-install the country picker uses
+// (``fullInstallPack`` -> apply pack + locale + cost DB + vector DB + demos),
+// then skip the remaining onboarding steps and jump straight to Finish. The
+// completion path (``markOnboardingCompleted``, run by the caller via
+// ``onInstalled``) is identical to the normal Finish, so the tour-gating event
+// still fires. On failure we fall back to the normal multi-step flow with a
+// clear message (``onFallback``).
+
+function ReadyPackPicker({
+  onActivateLocale,
+  onInstalled,
+  onFallback,
+  onBack,
+}: {
+  /** Activate the pack's locale client-side (shared with the wizard). */
+  onActivateLocale: (locale: string) => void;
+  /** Called once the pack is fully installed; the wizard records the slug
+   *  and advances to the Finish step. */
+  onInstalled: (slug: string) => void;
+  /** Called when install fails so the wizard can drop back to the normal
+   *  multi-step flow with a clear message. */
+  onFallback: () => void;
+  /** Return to the start-choice cards. */
+  onBack: () => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['partner-pack', 'installed'],
+    queryFn: fetchInstalledPacks,
+    staleTime: 60_000,
+  });
+
+  const packs: InstalledPartnerPack[] = data?.installed ?? [];
+
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [installing, setInstalling] = useState(false);
+  const [stepStates, setStepStates] = useState<Record<FullInstallStepName, ChecklistState>>(
+    () => ({ apply_pack: 'pending', locale: 'pending', cost_db: 'pending', vector_db: 'pending', demos: 'pending' }),
+  );
+  const [installedSlug, setInstalledSlug] = useState<string | null>(null);
+
+  // Default-select the first pack once they load.
+  useEffect(() => {
+    if (!selectedSlug && packs.length > 0) {
+      setSelectedSlug(packs[0]?.slug ?? null);
+    }
+  }, [packs, selectedSlug]);
+
+  const selectedPack = packs.find((p) => p.slug === selectedSlug) ?? null;
+
+  const handleSelect = useCallback(
+    (slug: string) => {
+      if (installing) return;
+      setSelectedSlug(slug);
+    },
+    [installing],
+  );
+
+  const handleInstall = useCallback(
+    async (pack: InstalledPartnerPack) => {
+      if (installing) return;
+      setInstalling(true);
+      setInstalledSlug(null);
+      setStepStates({
+        apply_pack: 'running',
+        locale: 'running',
+        cost_db: 'running',
+        vector_db: 'running',
+        demos: 'running',
+      });
+
+      try {
+        const res = await fullInstallPack(pack.slug, 2);
+        const next: Record<FullInstallStepName, ChecklistState> = {
+          apply_pack: 'skipped',
+          locale: 'skipped',
+          cost_db: 'skipped',
+          vector_db: 'skipped',
+          demos: 'skipped',
+        };
+        for (const s of res.steps as FullInstallStep[]) {
+          next[s.step] = s.status;
+        }
+        setStepStates(next);
+
+        if (res.ok) {
+          setInstalledSlug(pack.slug);
+          onActivateLocale(pack.default_locale);
+          addToast({
+            type: 'success',
+            title: t('onboarding.pp_install_success', {
+              defaultValue: '{{country}} workspace installed',
+              country: packCountryName(pack),
+            }),
+          });
+          // Brief pause so the green checklist is visible, then hand control
+          // back to the wizard which records the slug and jumps to Finish.
+          window.setTimeout(() => onInstalled(pack.slug), 900);
+        } else {
+          // Partial failure -- fall back to the normal multi-step flow.
+          addToast({
+            type: 'error',
+            title: t('onboarding.ready_pack_failed', {
+              defaultValue: 'Could not finish the ready-made pack',
+            }),
+            message: t('onboarding.ready_pack_fallback', {
+              defaultValue: 'Continuing with step-by-step setup instead.',
+            }),
+          });
+          setInstalling(false);
+          onFallback();
+        }
+      } catch (err) {
+        addToast({
+          type: 'error',
+          title: t('onboarding.ready_pack_failed', {
+            defaultValue: 'Could not finish the ready-made pack',
+          }),
+          message: err instanceof Error ? err.message : t('onboarding.ready_pack_fallback', {
+            defaultValue: 'Continuing with step-by-step setup instead.',
+          }),
+        });
+        setInstalling(false);
+        onFallback();
+      }
+    },
+    [installing, onActivateLocale, onInstalled, onFallback, addToast, t],
+  );
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-4">
+        <Boxes size={24} />
+      </div>
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.ready_pack_title', { defaultValue: 'Pick a ready-made pack' })}
+      </h2>
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.ready_pack_subtitle', {
+          defaultValue:
+            'One click sets up the language, cost databases, modules and sample projects. You can change anything later.',
+        })}
+      </p>
+
+      {isLoading && (
+        <div className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-content-tertiary">
+          <Loader2 size={16} className="animate-spin text-oe-blue" />
+          {t('onboarding.pp_loading', { defaultValue: 'Loading available country packs…' })}
+        </div>
+      )}
+
+      {!isLoading && (isError || packs.length === 0) && (
+        <div className="mt-8 w-full max-w-md">
+          <div className="flex items-start gap-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 px-3 py-3 text-xs text-amber-700 dark:text-amber-400">
+            <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+            <span>
+              {t('onboarding.ready_pack_none', {
+                defaultValue:
+                  'No ready-made packs are available right now. Continue with step-by-step setup instead.',
+              })}
+            </span>
+          </div>
+          <div className="mt-5 flex items-center justify-center gap-3">
+            <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+              {t('common.back', { defaultValue: 'Back' })}
+            </Button>
+            <Button variant="primary" onClick={onFallback} icon={<ArrowRight size={16} />} iconPosition="right">
+              {t('onboarding.ready_pack_continue_steps', { defaultValue: 'Continue setup' })}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Pack icon grid — tidy square tiles, one per pack. */}
+      {!isLoading && packs.length > 0 && (
+        <div className="mt-7 grid w-full max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3">
+          {packs.map((pack) => {
+            const isSelected = selectedSlug === pack.slug;
+            const country = packCountryName(pack);
+            const flag = packCountryCode(pack);
+            return (
+              <button
+                key={pack.slug}
+                type="button"
+                onClick={() => handleSelect(pack.slug)}
+                disabled={installing}
+                aria-pressed={isSelected}
+                className={clsx(
+                  'group relative flex flex-col items-center gap-2.5 rounded-xl p-4 text-center transition-all duration-200',
+                  isSelected
+                    ? 'bg-oe-blue-subtle/50 ring-2 ring-oe-blue/45 shadow-sm'
+                    : 'bg-surface-secondary/70 ring-1 ring-transparent hover:bg-surface-secondary hover:shadow-sm hover:-translate-y-0.5',
+                  installing && 'opacity-60 cursor-not-allowed',
+                )}
+              >
+                {isSelected && (
+                  <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white shadow-sm">
+                    <Check size={12} strokeWidth={3} />
+                  </span>
+                )}
+                <PackLogo pack={pack} />
+                <div className="flex items-center gap-1.5">
+                  {flag && <CountryFlag code={flag} size={14} className="shrink-0" />}
+                  <span className="truncate text-sm font-semibold text-content-primary">
+                    {country}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-2xs text-content-quaternary">
+                  <span className="inline-flex items-center gap-1">
+                    <Languages size={11} />
+                    {pack.default_locale.toUpperCase()}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Database size={11} />
+                    {pack.default_currency}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Install confirm / progress for the chosen pack. */}
+      {!isLoading && selectedPack && (
+        <div className="mt-6 w-full max-w-md">
+          {installing && (
+            <div className="mb-4 rounded-xl bg-surface-secondary/50 p-3">
+              <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-content-secondary">
+                <Loader2 size={13} className="animate-spin text-oe-blue" />
+                {installedSlug
+                  ? t('onboarding.pp_checklist_done', { defaultValue: 'Workspace ready' })
+                  : t('onboarding.pp_checklist_running', {
+                      defaultValue: 'Setting up {{country}}…',
+                      country: packCountryName(selectedPack),
+                    })}
+              </div>
+              <ul className="space-y-1.5">
+                {FULL_INSTALL_STEPS.map((step) => {
+                  const StepIcon = FULL_INSTALL_STEP_ICONS[step];
+                  const state = stepStates[step];
+                  return (
+                    <li key={step} className="flex items-center gap-2.5 text-xs">
+                      <ChecklistGlyph state={state} />
+                      <StepIcon size={13} className="shrink-0 text-content-quaternary" />
+                      <span className="flex-1 text-content-secondary">{packStepLabel(t, step)}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+
+          <Button
+            variant="primary"
+            onClick={() => handleInstall(selectedPack)}
+            loading={installing}
+            disabled={installing}
+            icon={installedSlug ? <CheckCircle2 size={16} /> : <Rocket size={16} />}
+            className="w-full"
+          >
+            {installedSlug
+              ? t('onboarding.pp_installed', {
+                  defaultValue: '{{country}} workspace installed',
+                  country: packCountryName(selectedPack),
+                })
+              : installing
+                ? t('onboarding.pp_installing', {
+                    defaultValue: 'Installing {{country}} workspace…',
+                    country: packCountryName(selectedPack),
+                  })
+                : t('onboarding.ready_pack_install', {
+                    defaultValue: 'Set up {{country}}',
+                    country: packCountryName(selectedPack),
+                  })}
+          </Button>
+
+          {!installing && (
+            <p className="mt-2 text-center text-2xs text-content-tertiary">
+              {t('onboarding.ready_pack_install_hint', {
+                defaultValue: 'This may take a few seconds while everything is provisioned.',
+              })}
+            </p>
+          )}
+        </div>
+      )}
+
+      {!installing && (
+        <div className="mt-5">
+          <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+            {t('common.back', { defaultValue: 'Back' })}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Localized label for one full-install step (shared by both pack pickers). */
+function packStepLabel(
+  t: ReturnType<typeof useTranslation>['t'],
+  step: FullInstallStepName,
+): string {
+  switch (step) {
+    case 'apply_pack':
+      return t('onboarding.pp_step_apply', { defaultValue: 'Apply pack' });
+    case 'locale':
+      return t('onboarding.pp_step_locale', { defaultValue: 'Language' });
+    case 'cost_db':
+      return t('onboarding.pp_step_cost_db', { defaultValue: 'Cost database' });
+    case 'vector_db':
+      return t('onboarding.pp_step_vector_db', { defaultValue: 'Vector database' });
+    case 'demos':
+      return t('onboarding.pp_step_demos', { defaultValue: 'Example projects' });
+  }
 }
 
 // ── Step 3: Company Profile (industry cards) ────────────────────────────────
@@ -2628,11 +3002,17 @@ function StepFinish({
   companyType,
   enabledModules,
   presets,
+  packInstalled = false,
 }: {
   onBack: () => void;
   companyType: string | null;
   enabledModules: Set<string>;
   presets: ApiCompanyPreset[];
+  /** A ready-made pack already provisioned modules + regional config + sample
+   *  data server-side. When true, Finish must NOT overwrite those module
+   *  preferences or re-POST a generic onboarding payload, and it lands on the
+   *  freshly seeded projects. */
+  packInstalled?: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -2651,6 +3031,20 @@ function StepFinish({
   const handleFinish = useCallback(async () => {
     setSaving(true);
 
+    // Apply advanced mode (default for onboarding) in every path.
+    setViewMode('advanced');
+
+    if (packInstalled) {
+      // The ready-made pack already configured modules, locale, classification
+      // and sample data on the server. Don't clobber that here -- just mark
+      // onboarding complete (which fires the tour-gating event) and open the
+      // seeded projects.
+      markOnboardingCompleted();
+      setSaving(false);
+      navigate('/projects');
+      return;
+    }
+
     // 1. Apply module preferences to the store
     const allModuleKeys = ALL_MODULES.map((m) => m.key);
     for (const key of allModuleKeys) {
@@ -2659,10 +3053,7 @@ function StepFinish({
       }
     }
 
-    // 2. Apply advanced mode (default for onboarding)
-    setViewMode('advanced');
-
-    // 3. Save onboarding state to server
+    // 2. Save onboarding state to server
     try {
       await apiPost('/v1/users/me/onboarding/', {
         company_type: companyType ?? 'full_enterprise',
@@ -2674,12 +3065,12 @@ function StepFinish({
       // Non-critical -- local state is already applied
     }
 
-    // 4. Mark completed locally
+    // 3. Mark completed locally
     markOnboardingCompleted();
 
     setSaving(false);
     navigate('/');
-  }, [companyType, enabledModules, navigate, setModuleEnabled, setViewMode]);
+  }, [companyType, enabledModules, navigate, packInstalled, setModuleEnabled, setViewMode]);
 
   return (
     <div className="flex flex-col items-center justify-center text-center">
@@ -2698,29 +3089,49 @@ function StepFinish({
       </h2>
 
       <p className="mt-3 max-w-md text-base text-content-secondary leading-relaxed">
-        {t('onboarding.finish_subtitle', {
-          defaultValue:
-            "Your workspace is configured and ready to use.",
-        })}
+        {packInstalled
+          ? t('onboarding.finish_subtitle_pack', {
+              defaultValue:
+                'Your ready-made pack is installed. Language, cost databases, modules and sample projects are all set up.',
+            })
+          : t('onboarding.finish_subtitle', {
+              defaultValue: 'Your workspace is configured and ready to use.',
+            })}
       </p>
 
       {/* Summary line */}
       <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-surface-secondary px-4 py-2 text-sm text-content-primary">
-        {companyType && presetLabel && (
+        {packInstalled ? (
           <>
             <span className="font-semibold">
-              {presetLabel}
+              {t('onboarding.ready_pack', { defaultValue: 'Ready-made Pack' })}
             </span>
             <span className="text-content-tertiary">|</span>
+            <span>
+              {t('onboarding.finish_pack_seeded', { defaultValue: 'Sample projects ready' })}
+            </span>
+            <span className="text-content-tertiary">|</span>
+            <span>
+              {SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language)?.name || i18n.language}
+            </span>
+          </>
+        ) : (
+          <>
+            {companyType && presetLabel && (
+              <>
+                <span className="font-semibold">{presetLabel}</span>
+                <span className="text-content-tertiary">|</span>
+              </>
+            )}
+            <span>
+              {enabledCount} {t('onboarding.modules_label', { defaultValue: 'modules' })}
+            </span>
+            <span className="text-content-tertiary">|</span>
+            <span>
+              {SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language)?.name || i18n.language}
+            </span>
           </>
         )}
-        <span>
-          {enabledCount} {t('onboarding.modules_label', { defaultValue: 'modules' })}
-        </span>
-        <span className="text-content-tertiary">|</span>
-        <span>
-          {SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language)?.name || i18n.language}
-        </span>
       </div>
 
       <p className="mt-5 text-xs text-content-tertiary max-w-md">
@@ -2809,6 +3220,12 @@ export function OnboardingWizard() {
   const [quickStart, setQuickStart] = useState(false);
   // Track whether module config step should be shown
   const [showModuleConfig, setShowModuleConfig] = useState(false);
+  // Ready-made pack flow: when true, step 1 swaps its choice cards for the
+  // pack picker. ``packInstalledSlug`` records the slug once a pack is fully
+  // installed so the Finish step shows pack-appropriate copy and does not
+  // overwrite the modules the pack just configured.
+  const [readyPackView, setReadyPackView] = useState(false);
+  const [packInstalledSlug, setPackInstalledSlug] = useState<string | null>(null);
 
   // Persistent escape hatch (top-right, every step): switch the whole app to
   // English, mark the language choice as explicit so the locale auto-detect
@@ -2875,6 +3292,43 @@ export function OnboardingWizard() {
     setShowModuleConfig(false);
     // Go to step 2 (profile)
     setStep(2);
+  }, []);
+
+  // ── Ready-made pack handlers ──────────────────────────────────────────────
+
+  /** Set the UI locale and persist it as an explicit user choice (shared with
+   *  the country-pack data step). */
+  const applyLocale = useCallback((locale: string) => {
+    i18n.changeLanguage(locale);
+    try {
+      localStorage.setItem('oe_lang_explicit', '1');
+    } catch {
+      // storage unavailable -- locale still applied for this session
+    }
+  }, []);
+
+  /** "Ready-made Pack" card -> swap the step-1 cards for the pack picker. */
+  const handleReadyPack = useCallback(() => {
+    setReadyPackView(true);
+  }, []);
+
+  /** Pack fully installed -> record the slug and jump straight to Finish.
+   *  ``markOnboardingCompleted`` (and its tour-gating event) runs from the
+   *  Finish step's primary action, so the completion path matches the normal
+   *  flow exactly. */
+  const handleReadyPackInstalled = useCallback((slug: string) => {
+    setPackInstalledSlug(slug);
+    setReadyPackView(false);
+    setStep(5);
+  }, []);
+
+  /** Install failed -> fall back to the normal multi-step flow (the picker
+   *  already surfaced a clear toast explaining the fallback). */
+  const handleReadyPackFallback = useCallback(() => {
+    setReadyPackView(false);
+    setQuickStart(false);
+    setShowModuleConfig(false);
+    setStep(2); // company profile
   }, []);
 
   const handleConfigureIndividually = useCallback(() => {
@@ -3003,11 +3457,20 @@ export function OnboardingWizard() {
               {step === 0 && (
                 <StepWelcome onNext={goNext} onLanguageChange={handleLanguageChange} />
               )}
-              {step === 1 && (
+              {step === 1 && !readyPackView && (
                 <StepStartChoice
                   onQuickStart={handleQuickStart}
                   onChooseProfile={handleChooseProfile}
+                  onReadyPack={handleReadyPack}
                   onBack={goBack}
+                />
+              )}
+              {step === 1 && readyPackView && (
+                <ReadyPackPicker
+                  onActivateLocale={applyLocale}
+                  onInstalled={handleReadyPackInstalled}
+                  onFallback={handleReadyPackFallback}
+                  onBack={() => setReadyPackView(false)}
                 />
               )}
               {step === 2 && (
@@ -3041,10 +3504,11 @@ export function OnboardingWizard() {
               )}
               {step === 5 && (
                 <StepFinish
-                  onBack={() => setStep(4)}
+                  onBack={() => (packInstalledSlug ? setStep(1) : setStep(4))}
                   companyType={companyType}
                   enabledModules={enabledModules}
                   presets={presets}
+                  packInstalled={packInstalledSlug !== null}
                 />
               )}
             </StepTransition>
