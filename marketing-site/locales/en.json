@@ -45,6 +45,8 @@
       "dev_lede": "Already have Python or Docker? Pick a line, paste it, and the full ERP is up. No build step, no extra database to set up, your data stays on your machine.",
       "dev_pip_label": "Python package",
       "dev_docker_label": "Full stack",
+      "dev_pip_sub": "Install, then run",
+      "dev_docker_sub": "One line, app plus database",
       "dev_pip_hint": "Needs Python 3.12+. Installs, then opens at http://localhost:8080.",
       "dev_docker_hint": "Bundles PostgreSQL and the app. Open http://localhost:8080 when it boots."
     }
@@ -54,7 +56,6 @@
     "headline": "<span class=\"word\"><span>Run</span></span> <span class=\"word\"><span>the</span></span> <span class=\"word\"><span>whole</span></span> <span class=\"word italic\" data-anchor=\"primary\"><span>construction</span></span> <span class=\"word italic\" data-anchor=\"secondary\"><span>project</span></span>",
     "sub": "Open-source ERP for construction teams - estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time figures stay in sync with the drawings and the BOQ behind them.",
     "install_eyebrow": "Up and running in one command",
-    "install_or": "or grab a prebuilt installer",
     "cta_install": "Install now",
     "cta_star": "Star on GitHub",
     "download_label": "Or just download the free desktop app - no Python, no Docker, nothing to set up:",
