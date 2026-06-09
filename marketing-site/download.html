@@ -94,29 +94,76 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 @keyframes drift{0%{transform:translate3d(-3%,-2%,0) scale(1)}50%{transform:translate3d(4%,3%,0) scale(1.08)}100%{transform:translate3d(-2%,4%,0) scale(.96)}}
 @media(prefers-reduced-motion:reduce){.blob{animation:none}}
 
-/* ---------- nav ---------- */
-.nav{position:fixed;top:0;left:0;right:0;height:64px;z-index:60;display:flex;align-items:center;padding:0 clamp(16px,3vw,32px);background:color-mix(in oklab,var(--bg-0) 80%,transparent);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border-bottom:1px solid var(--line-0);}
-.nav-inner{width:100%;max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.brand{display:inline-flex;align-items:center;gap:10px;font-family:'Inter Tight','Inter',sans-serif;font-weight:600;font-size:15px;letter-spacing:-.01em;color:var(--ink-0)}
-.brand-mark{width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);box-shadow:0 6px 16px -8px color-mix(in oklab,var(--accent) 70%,transparent)}
-.brand-mark svg{color:#fff}
-.brand-seg-2{color:var(--ink-2)}
-.brand-seg-3{color:var(--accent);font-weight:800}
-[data-theme="dark"] .brand-seg-3{color:var(--accent)}
-.nav-right{display:inline-flex;align-items:center;gap:10px}
+/* ---------- nav (mirrors the homepage primary nav) ---------- */
+.nav{position:fixed;top:0;left:0;right:0;height:64px;z-index:60;display:flex;align-items:center;padding:0 clamp(16px,3vw,32px);background:color-mix(in oklab,var(--bg-0) 74%,transparent);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border-bottom:1px solid var(--line-0);transition:background .4s ease,border-color .4s ease;}
+.nav.is-scrolled{background:color-mix(in oklab,var(--bg-0) 92%,transparent);border-bottom-color:var(--line-1);}
+.nav-inner{width:100%;max-width:1440px;margin:0 auto;padding:0 clamp(0px,2vw,32px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px;}
+.nav-left{display:inline-flex;align-items:center;gap:10px;}
+.brand{display:inline-flex;align-items:center;gap:10px;font-family:'Inter Tight','Inter',sans-serif;font-weight:600;font-size:15px;letter-spacing:-.01em;color:var(--ink-0);}
+.brand-name{display:inline-flex;}
+.brand-seg-1{color:var(--ink-0);}
+.brand-seg-2{color:var(--accent);}
+.brand-seg-3{color:var(--ink-0);}
+[data-theme="dark"] .brand-seg-3{color:var(--ink-0);}
+
 .theme-toggle{width:36px;height:36px;border-radius:999px;border:1px solid var(--line-1);display:inline-flex;align-items:center;justify-content:center;color:var(--ink-1);background:color-mix(in oklab,var(--card-bg) 60%,transparent);transition:border-color .2s,color .2s,transform .2s}
 .theme-toggle:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
-.theme-toggle svg{width:17px;height:17px}
-.theme-toggle .icon-sun{display:none}
-.theme-toggle .icon-moon{display:block}
-[data-theme="dark"] .theme-toggle .icon-sun{display:block}
-[data-theme="dark"] .theme-toggle .icon-moon{display:none}
-.github-pill{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 13px;border-radius:999px;border:1px solid var(--line-1);font-family:'Inter Tight','Inter',sans-serif;font-weight:600;font-size:13px;color:var(--ink-1);background:color-mix(in oklab,var(--card-bg) 60%,transparent);transition:border-color .2s,color .2s,transform .2s}
-.github-pill:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
-.github-pill svg{width:15px;height:15px;fill:currentColor}
-.nav-back{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line-1);font-family:'Inter Tight','Inter',sans-serif;font-weight:500;font-size:13px;color:var(--ink-1);background:color-mix(in oklab,var(--card-bg) 60%,transparent);transition:transform .2s,border-color .2s,color .2s}
-.nav-back:hover{transform:translateY(-1px);border-color:var(--accent);color:var(--accent)}
-@media(max-width:620px){.github-pill span,.nav-back span{display:none}.github-pill,.nav-back{padding:0 11px}}
+.theme-toggle svg{width:16px;height:16px;display:block;}
+.theme-toggle .icon-sun{display:inline-block;}
+.theme-toggle .icon-moon{display:none;}
+[data-theme="dark"] .theme-toggle .icon-sun{display:none;}
+[data-theme="dark"] .theme-toggle .icon-moon{display:inline-block;}
+
+.nav-links{display:inline-flex;align-items:center;gap:clamp(10px,1.5vw,18px);font-size:13.5px;color:var(--ink-1);font-weight:500;}
+.nav-links a{transition:color .2s ease;}
+.nav-links a:hover{color:var(--accent);}
+.nav-links a.is-active{color:var(--accent);position:relative;}
+.nav-links a.is-active::after{content:'';position:absolute;left:50%;bottom:-4px;width:4px;height:4px;border-radius:999px;background:var(--accent);transform:translateX(-50%);}
+
+.nav-right{justify-self:end;display:inline-flex;align-items:center;gap:7px;}
+
+.github-pill{height:36px;display:inline-flex;align-items:center;gap:7px;padding:0 14px;border-radius:999px;border:1px solid color-mix(in oklab,var(--ink-0) 18%,var(--line-1));background:color-mix(in oklab,var(--ink-0) 4%,transparent);color:var(--ink-0);font-family:'Inter Tight','Inter',sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.01em;text-decoration:none;transition:transform .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease;}
+.github-pill:hover{transform:translateY(-1px);background:color-mix(in oklab,var(--ink-0) 8%,transparent);border-color:color-mix(in oklab,var(--ink-0) 30%,var(--line-1));box-shadow:0 6px 16px -8px rgba(15,23,42,.25);}
+[data-theme="dark"] .github-pill{background:color-mix(in oklab,#ffffff 6%,transparent);border-color:color-mix(in oklab,#ffffff 12%,var(--line-1));color:var(--ink-0);}
+[data-theme="dark"] .github-pill:hover{background:color-mix(in oklab,#ffffff 12%,transparent);}
+.github-pill svg{width:15px;height:15px;fill:currentColor;}
+
+.install-pill{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;background:var(--accent);color:#fff;font-size:13px;font-weight:500;letter-spacing:-.005em;text-decoration:none;transition:transform .2s ease,background .25s ease,box-shadow .25s ease;box-shadow:0 6px 18px -6px rgba(14,165,233,.55);}
+[data-theme="dark"] .install-pill{color:var(--ink-0);box-shadow:0 6px 18px -6px rgba(56,189,248,.45);}
+.install-pill:hover{transform:translateY(-1px);box-shadow:0 10px 22px -6px rgba(14,165,233,.65);}
+.install-pill svg{display:block;}
+
+.nav-burger{display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--line-1);background:color-mix(in oklab,#ffffff 60%,transparent);cursor:pointer;color:var(--ink-0);transition:background .2s ease,border-color .2s ease;}
+.nav-burger:hover{border-color:color-mix(in oklab,var(--accent) 40%,var(--line-1));}
+.nav-burger svg{width:18px;height:18px;}
+.nav-burger .icon-close{display:none;}
+body.nav-open .nav-burger .icon-open{display:none;}
+body.nav-open .nav-burger .icon-close{display:block;}
+
+.mobile-menu{position:fixed;inset:0;z-index:50;background:color-mix(in oklab,var(--bg-0) 90%,transparent);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:80px 28px 40px;display:flex;flex-direction:column;gap:6px;opacity:0;pointer-events:none;transform:translateY(-8px);transition:opacity .3s ease,transform .3s ease;}
+body.nav-open .mobile-menu{opacity:1;pointer-events:auto;transform:translateY(0);}
+.mobile-menu a{font-family:'Inter Tight',sans-serif;font-weight:500;font-size:24px;letter-spacing:-.02em;color:var(--ink-0);text-decoration:none;padding:16px 4px;border-bottom:1px solid var(--line-1);display:flex;align-items:center;justify-content:space-between;transition:color .2s ease,padding-left .2s ease;}
+.mobile-menu a:hover,.mobile-menu a:focus-visible{color:var(--accent);padding-left:12px;}
+.mobile-menu a .arrow{width:18px;height:18px;color:var(--ink-3);transition:color .2s ease,transform .2s ease;}
+.mobile-menu a:hover .arrow{color:var(--accent);transform:translateX(4px);}
+.mobile-menu .cta-row{margin-top:20px;display:flex;gap:10px;}
+.mobile-menu .cta-row .install-pill{flex:1;justify-content:center;}
+
+.github-pill:focus-visible,.install-pill:focus-visible,.theme-toggle:focus-visible,.nav-burger:focus-visible,.nav-links a:focus-visible,.brand:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:999px;}
+
+@media(max-width:820px){
+  .nav-links{display:none;}
+  .nav-inner{grid-template-columns:auto 1fr auto;gap:10px;}
+  .nav-right .github-pill,.nav-right .install-pill{display:none;}
+  .nav-burger{display:inline-flex;}
+}
+@media(max-width:520px){
+  .nav-inner{padding:0 4px;gap:8px;}
+  .nav-left{gap:6px;}
+  .brand{font-size:14px;}
+  .theme-toggle{width:34px;height:34px;}
+  .nav-burger{width:38px;height:38px;}
+}
 
 /* ---------- base button ---------- */
 .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:12px;font-weight:600;font-size:14px;color:#fff;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-3) 100%);box-shadow:0 8px 20px -10px color-mix(in oklab,var(--accent) 60%,transparent);transition:transform .2s,box-shadow .2s}
@@ -328,28 +375,72 @@ a.dl-dl.btn-primary{color:#fff;}
   <div class="blob blob-b"></div>
 </div>
 
-<nav class="nav">
+<nav class="nav" id="nav" aria-label="Primary">
   <div class="nav-inner">
-    <a class="brand" href="/" aria-label="OpenConstructionERP home" data-i18n-aria-label="page.download.nav_brand_aria">
-      <span class="brand-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><polyline points="2 8.5 12 15 22 8.5"/><line x1="12" y1="22" x2="12" y2="15"/></svg></span>
-      <span><span>Open</span><span class="brand-seg-2">Construction</span><span class="brand-seg-3">ERP</span></span>
-    </a>
-    <div class="nav-right">
+    <div class="nav-left">
+      <a class="brand" href="/" aria-label="OpenConstructionERP home" data-i18n-aria-label="page.download.nav_brand_aria">
+        <span class="brand-name">
+          <span class="brand-seg brand-seg-1">Open</span><span class="brand-seg brand-seg-2">Construction</span><span class="brand-seg brand-seg-3">ERP</span>
+        </span>
+      </a>
+
       <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle light and dark theme" data-i18n-aria-label="page.download.nav_theme_toggle_aria">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/></svg>
       </button>
+    </div>
+
+    <div class="nav-links">
+      <a href="/#tour" data-i18n="nav.tour">Tour</a>
+      <a href="/#compare" data-i18n="nav.compare">Compare</a>
+      <a href="/#pricing" data-i18n="nav.pricing">Pricing</a>
+      <a href="/#faq" data-i18n="nav.faq">FAQ</a>
+      <a href="/docs.html" data-i18n="nav.docs">Docs</a>
+      <a href="/news.html" data-i18n="nav.news">News</a>
+    </div>
+
+    <div class="nav-right">
       <a class="github-pill" href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener" aria-label="OpenConstructionERP on GitHub" data-i18n-aria-label="page.download.nav_github_aria">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
-        <span>GitHub</span>
+        <span data-i18n="nav.github">GitHub</span>
       </a>
-      <a class="nav-back" href="/">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
-        <span data-i18n="page.download.nav_home">Home</span>
+
+      <a class="install-pill is-active" href="/download" aria-current="page">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span data-i18n="nav.download">Download</span>
       </a>
+
+      <button type="button" class="nav-burger" id="nav-burger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+        <svg class="icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="4" y1="7" x2="20" y2="7"/>
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <line x1="4" y1="17" x2="20" y2="17"/>
+        </svg>
+        <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="6" y1="6" x2="18" y2="18"/>
+          <line x1="6" y1="18" x2="18" y2="6"/>
+        </svg>
+      </button>
     </div>
   </div>
 </nav>
+
+<!-- Mobile menu overlay - shown when body has .nav-open -->
+<div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Mobile navigation" aria-modal="true">
+  <a href="/#tour"><span data-i18n="nav.tour">Tour</span><svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  <a href="/#compare"><span data-i18n="nav.compare">Compare</span><svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  <a href="/#pricing"><span data-i18n="nav.pricing">Pricing</span><svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  <a href="/#faq"><span data-i18n="nav.faq">FAQ</span><svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  <a href="/docs.html"><span data-i18n="nav.docs">Docs</span><svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  <a href="/news.html"><span data-i18n="nav.news">News</span><svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  <div class="cta-row">
+    <a class="install-pill" href="/download"><span data-i18n="nav.download">Download</span></a>
+  </div>
+</div>
 
 <main class="dl-main" id="dl-top">
   <!-- ===================== HERO ===================== -->
@@ -690,6 +781,31 @@ a.dl-dl.btn-primary{color:#fff;}
     try{ localStorage.setItem('oce-theme', next); }catch(e){}
     btn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
   });
+})();
+
+/* Nav scroll state + mobile burger menu, mirroring the homepage nav. */
+(function(){
+  var nav = document.getElementById('nav');
+  if(nav){
+    var onScroll = function(){ nav.classList.toggle('is-scrolled', window.scrollY > 8); };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+  var burger = document.getElementById('nav-burger');
+  var menu = document.getElementById('mobile-menu');
+  if(burger && menu){
+    var body = document.body;
+    function setOpen(open){
+      body.classList.toggle('nav-open', open);
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      body.style.overflow = open ? 'hidden' : '';
+    }
+    burger.addEventListener('click', function(){ setOpen(!body.classList.contains('nav-open')); });
+    menu.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', function(){ setOpen(false); }); });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && body.classList.contains('nav-open')) setOpen(false);
+    });
+  }
 })();
 </script>
 

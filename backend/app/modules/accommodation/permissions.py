@@ -25,6 +25,9 @@ ACCOMMODATION_PERMISSIONS: dict[str, Role] = {
     # Charges
     "accommodation.charge.create": Role.EDITOR,
     "accommodation.charge.update": Role.EDITOR,
+    # Deleting a billed line-item is a financial correction - gate it at
+    # MANAGER like the other destructive actions (accommodation.delete).
+    "accommodation.charge.delete": Role.MANAGER,
     # Cross-module integrations
     "accommodation.bootstrap_from_propdev": Role.EDITOR,
     # Suggest-from-HR is EDITOR (not VIEWER): its only purpose is to drive

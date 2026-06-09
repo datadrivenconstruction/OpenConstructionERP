@@ -347,9 +347,7 @@ async def _seed_flagship_modules(
     # so skip. A forced re-seed (_purge) does not clear these decoration rows,
     # so this guard also prevents force-reseed duplication.
     try:
-        existing = (
-            await session.execute(select(RFI.id).where(RFI.project_id == pid).limit(1))
-        ).scalar_one_or_none()
+        existing = (await session.execute(select(RFI.id).where(RFI.project_id == pid).limit(1))).scalar_one_or_none()
         if existing is not None:
             return {"status": "already", "reason": "modules present"}
     except Exception:  # noqa: BLE001 - table may not exist; fall through to seed
@@ -363,6 +361,238 @@ async def _seed_flagship_modules(
     except Exception:  # noqa: BLE001 - never break the flagship install
         logger.warning("flagship: operational module seeding failed (non-fatal)", exc_info=True)
         return {"status": "error"}
+
+
+async def _seed_flagship_schedule_risk_co(
+    session: AsyncSession,
+    pid: uuid.UUID,
+    owner: uuid.UUID,
+    spec: dict,
+) -> dict:
+    """Seed the flagship's programme, risk register, change orders and a
+    validation report.
+
+    install_flagship builds the BOQ, BIM and operational modules, but unlike the
+    showcase installer (install_demo_project) it never laid down a schedule, a
+    risk register, change orders or a validation report, so those pages opened
+    empty on the reference project users land on first. This fills them from the
+    flagship's own sections so the figures read against its real trades and
+    total, and runs the real validation engine over its BOQ so the traffic-light
+    dashboard (the platform's signature feature) is populated. Fully idempotent:
+    it skips when a schedule already exists, and every failure is swallowed so a
+    missing or disabled module never aborts the flagship install.
+    """
+    from datetime import UTC, datetime, timedelta
+
+    try:
+        from app.core.demo_projects import _generate_module_data
+        from app.modules.changeorders.models import ChangeOrder, ChangeOrderItem
+        from app.modules.risk.models import RiskItem
+        from app.modules.schedule.models import Activity, Schedule
+    except Exception:  # noqa: BLE001 - module set unavailable; skip decoration
+        logger.debug("flagship: schedule/risk/co models unavailable, skipping", exc_info=True)
+        return {"status": "skipped", "reason": "models unavailable"}
+
+    # Idempotency guard: a schedule already present means this ran before.
+    try:
+        existing = (
+            await session.execute(select(Schedule.id).where(Schedule.project_id == pid).limit(1))
+        ).scalar_one_or_none()
+        if existing is not None:
+            return {"status": "already", "reason": "schedule present"}
+    except Exception:  # noqa: BLE001 - table may not exist; fall through to seed
+        logger.debug("flagship: schedule presence check failed, attempting seed", exc_info=True)
+
+    counts = {"activities": 0, "risks": 0, "change_orders": 0, "validation": 0}
+    try:
+        template = _flagship_template(spec)
+        base = datetime(2026, 4, 1)
+        months = max(int(getattr(template, "total_months", 9) or 9), 1)
+        cur = template.currency or "USD"
+
+        def _sec_total(sec: tuple) -> float:
+            items = sec[3] if len(sec) > 3 else []
+            return sum(float(it[3]) * float(it[4]) for it in items)
+
+        # ── Programme + one activity per BOQ section (front-loaded overlap) ──
+        secs = list(getattr(template, "sections", []) or [])
+        schedule = Schedule(
+            id=uuid.uuid4(),
+            project_id=pid,
+            name=f"Programme - {template.project_name}",
+            schedule_type="master",
+            description=f"{months}-month construction programme",
+            start_date=base.strftime("%Y-%m-%d"),
+            end_date=(base + timedelta(days=months * 30)).strftime("%Y-%m-%d"),
+            status="active",
+            created_by=owner,
+            metadata_={},
+        )
+        session.add(schedule)
+        await session.flush()
+
+        grand = sum(_sec_total(s) for s in secs) or 1.0
+        now = datetime.now()
+        start = base
+        prev_end = base
+        prev_id = None
+        for i, sec in enumerate(secs):
+            sec_total = _sec_total(sec)
+            n_items = len(sec[3]) if len(sec) > 3 else 0
+            pct = sec_total / grand
+            dur = max(14, int(months * 30 * pct))
+            if i > 0:
+                # Overlap each phase with the previous one (realistic build
+                # sequence) but never start before the programme window opens.
+                start = max(base, prev_end - timedelta(days=int(dur * 0.35)))
+            end = start + timedelta(days=dur)
+            prev_end = end
+            # Progress relative to the real current date so finished phases read
+            # complete and future ones planned - no false "delayed" badges from
+            # backdated activities sitting at low progress.
+            if end <= now:
+                prog = 100
+            elif start >= now:
+                prog = 0
+            else:
+                prog = max(0, min(99, int((now - start).days / max(dur, 1) * 100)))
+            status = "completed" if prog >= 100 else "in_progress" if prog > 0 else "planned"
+            critical = i % 3 == 0
+            session.add(
+                Activity(
+                    id=uuid.uuid4(),
+                    schedule_id=schedule.id,
+                    name=(sec[1] if len(sec) > 1 else "") or f"Phase {i + 1}",
+                    description=f"{n_items} pos, {sec_total:,.0f} {cur}",
+                    wbs_code=(sec[0] if sec else "") or str(i + 1),
+                    start_date=start.strftime("%Y-%m-%d"),
+                    end_date=end.strftime("%Y-%m-%d"),
+                    duration_days=dur,
+                    # progress_pct is String(10) in the schema; asyncpg is strict,
+                    # so it must be a str, not an int.
+                    progress_pct=str(prog),
+                    status=status,
+                    color="#ef4444" if critical else "#0071e3",
+                    dependencies=[str(prev_id)] if prev_id else [],
+                    boq_position_ids=[],
+                    is_critical=critical,
+                    sort_order=i + 1,
+                    metadata_={"is_critical": critical},
+                )
+            )
+            await session.flush()
+            prev_id = (
+                await session.execute(
+                    select(Activity.id)
+                    .where(Activity.schedule_id == schedule.id)
+                    .order_by(Activity.sort_order.desc())
+                    .limit(1)
+                )
+            ).scalar_one()
+            counts["activities"] += 1
+
+        # ── Risk register + change orders, derived from the same template ───
+        generated = _generate_module_data(template, pid, owner, FLAGSHIP_DEMO_ID, base)
+
+        for r in generated.get("risks", []):
+            r_code, r_title, r_desc, r_cat, r_prob, r_cost, r_days, r_sev, r_mitig, r_status = r
+            risk_score = round(r_prob * (r_cost + r_days * 5000), 2)
+            session.add(
+                RiskItem(
+                    id=uuid.uuid4(),
+                    project_id=pid,
+                    code=r_code,
+                    title=r_title,
+                    description=r_desc,
+                    category=r_cat,
+                    probability=str(r_prob),
+                    impact_cost=str(round(r_cost, 2)),
+                    impact_schedule_days=r_days,
+                    impact_severity=r_sev,
+                    risk_score=str(risk_score),
+                    status=r_status,
+                    mitigation_strategy=r_mitig,
+                    contingency_plan="",
+                    owner_name="Project Manager",
+                    response_cost="0",
+                    currency=cur,
+                    metadata_={},
+                )
+            )
+            counts["risks"] += 1
+        await session.flush()
+
+        now_iso = datetime.now(UTC).isoformat()
+        for co in generated.get("change_orders", []):
+            co_code, co_title, co_desc, co_reason, co_status, co_cost, co_days, co_items = co
+            change = ChangeOrder(
+                id=uuid.uuid4(),
+                project_id=pid,
+                code=co_code,
+                title=co_title,
+                description=co_desc,
+                reason_category=co_reason,
+                status=co_status,
+                submitted_by=str(owner),
+                approved_by=str(owner) if co_status == "approved" else None,
+                submitted_at=now_iso,
+                approved_at=now_iso if co_status == "approved" else None,
+                cost_impact=str(round(co_cost, 2)),
+                schedule_impact_days=co_days,
+                currency=cur,
+                metadata_={},
+            )
+            session.add(change)
+            await session.flush()
+            for idx, item in enumerate(co_items):
+                ci_desc, ci_type, ci_oq, ci_nq, ci_or, ci_nr, ci_unit = item
+                delta = round(float(ci_nq) * float(ci_nr) - float(ci_oq) * float(ci_or), 2)
+                session.add(
+                    ChangeOrderItem(
+                        id=uuid.uuid4(),
+                        change_order_id=change.id,
+                        description=ci_desc,
+                        change_type=ci_type,
+                        original_quantity=ci_oq,
+                        new_quantity=ci_nq,
+                        original_rate=ci_or,
+                        new_rate=ci_nr,
+                        cost_delta=str(delta),
+                        unit=ci_unit,
+                        sort_order=idx + 1,
+                        metadata_={},
+                    )
+                )
+            counts["change_orders"] += 1
+        await session.flush()
+
+        # ── Validation report (run the real engine over the flagship BOQ) ───
+        # Mirrors install_demo_project: exercises product code so the flagship's
+        # validation dashboard - the platform's signature traffic-light view -
+        # is never empty. Resilient: a validation hiccup never aborts the seed.
+        try:
+            from app.core.validation.rules import register_builtin_rules
+            from app.modules.boq.models import BOQ
+            from app.modules.validation.service import ValidationModuleService
+
+            boq_id = (await session.execute(select(BOQ.id).where(BOQ.project_id == pid).limit(1))).scalar_one_or_none()
+            if boq_id is not None:
+                register_builtin_rules()
+                rule_sets = list(getattr(template, "validation_rule_sets", None) or ["boq_quality"])
+                await ValidationModuleService(session).run_validation(
+                    project_id=pid,
+                    boq_id=boq_id,
+                    rule_sets=rule_sets,
+                    user_id=owner,
+                )
+                counts["validation"] = 1
+        except Exception:  # noqa: BLE001 - validation hiccup never aborts install
+            logger.warning("flagship: validation report not seeded (non-fatal)", exc_info=True)
+
+        return {"status": "ok", **counts}
+    except Exception:  # noqa: BLE001 - never break the flagship install
+        logger.warning("flagship: schedule/risk/co seeding failed (non-fatal)", exc_info=True)
+        return {"status": "error", **counts}
 
 
 async def install_flagship(
@@ -403,6 +633,10 @@ async def install_flagship(
             name=pj["name"],
             description=pj["description"],
             region="US",
+            # The column defaults to "DE"; set it from the baked US address so a
+            # US (Denver) reference project does not look German to the country
+            # rules and the AIA G702/G703 payment eligibility logic.
+            country_code=(addr.get("country_code") or "US"),
             classification_standard="masterformat",
             currency=pj.get("currency", "USD"),
             locale="en",
@@ -702,6 +936,12 @@ async def install_flagship(
     # lands in the single transaction below.
     modules_result = await _seed_flagship_modules(session, pid, owner, spec)
 
+    # ── programme, risk register and change orders ──────────────────────
+    # The operational seeder above does not lay these down, so the reference
+    # project opened on Schedule/Risks/Change Orders empty. Seed them from the
+    # flagship's own sections. Same single transaction; non-fatal on failure.
+    schedule_result = await _seed_flagship_schedule_risk_co(session, pid, owner, spec)
+
     await session.commit()
     result = {
         "status": "ok",
@@ -714,6 +954,7 @@ async def install_flagship(
         "links": nlinks,
         "resources": len(spec.get("resources", [])),
         "modules": modules_result,
+        "schedule_risk_co": schedule_result,
     }
     logger.info("Flagship installed: %s", result)
     return result

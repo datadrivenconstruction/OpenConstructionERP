@@ -28,6 +28,8 @@ vi.mock('../api', () => ({
   listAccommodationBookings: vi.fn(),
   createBooking: vi.fn(),
   createCharge: vi.fn(),
+  updateCharge: vi.fn(),
+  deleteCharge: vi.fn(),
   getBooking: vi.fn(),
   updateBooking: vi.fn(),
   updateAccommodation: vi.fn(),
@@ -42,7 +44,14 @@ vi.mock('../api', () => ({
       : s === 'checked_in'
         ? ['checked_out', 'cancelled']
         : [],
+  allowedChargeTransitions: (s: string) =>
+    s === 'pending'
+      ? ['invoiced', 'paid', 'waived']
+      : s === 'invoiced'
+        ? ['paid', 'waived']
+        : [],
   isBookingTerminal: (s: string) => s === 'checked_out' || s === 'cancelled',
+  isChargeLocked: (s: string) => s === 'paid' || s === 'waived',
   listRoomBookings: vi.fn(),
 }));
 

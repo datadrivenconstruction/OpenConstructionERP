@@ -125,6 +125,20 @@ _DEEP_LINK_TEMPLATES: dict[str, str] = {
 }
 
 
+def _fmt_number(value: Any) -> str:
+    """Plain numeric string for a KPI tile value, never scientific notation.
+
+    ``str(Decimal("0E+2"))`` yields ``"0E+2"``; the dashboard tiles need a bare
+    number (they render their own unit), so normalise the same way
+    :func:`_fmt_value` does but without the unit/currency decoration.
+    """
+    dec = _to_decimal_or_none(value)
+    if dec is None:
+        return str(value)
+    normalised = dec.quantize(Decimal(1)) if dec == dec.to_integral_value() else dec.normalize()
+    return f"{normalised:f}"
+
+
 def _fmt_value(value: Any, unit: str, breakdown: dict[str, Any] | None) -> str:
     """Render a KPI value for an alert message without scientific notation.
 
@@ -264,7 +278,7 @@ class ProjectControlsService:
                     {
                         "code": code,
                         "label": _label_for(code),
-                        "value": str(comp.value),
+                        "value": _fmt_number(comp.value),
                         "unit": comp.unit,
                         "status": status,
                         "source_record_count": record_count,

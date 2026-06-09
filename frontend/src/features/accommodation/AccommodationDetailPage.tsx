@@ -43,6 +43,7 @@ import {
   Plus,
   AlertTriangle,
   Trash2,
+  Pencil,
   MoreHorizontal,
   Users,
   CircleCheck,
@@ -82,9 +83,13 @@ import {
   deleteAccommodation,
   createBooking,
   createCharge,
+  updateCharge,
+  deleteCharge,
   bootstrapFromPropDev,
   allowedBookingTransitions,
+  allowedChargeTransitions,
   isBookingTerminal,
+  isChargeLocked,
   listAccommodationBookings,
   updateBooking,
   getBooking,
@@ -93,6 +98,7 @@ import {
   type RoomStatus,
   type Booking,
   type BookingStatus,
+  type Charge,
   type ChargeKind,
   type ChargeStatus,
 } from './api';
@@ -1593,6 +1599,8 @@ function BookingChargesPanel({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [editorOpen, setEditorOpen] = useState(false);
+  const [editCharge, setEditCharge] = useState<Charge | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Charge | null>(null);
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -1609,6 +1617,71 @@ function BookingChargesPanel({
   const bookingDetail = useQuery({
     queryKey: ['accommodation', 'booking-detail', bookingId],
     queryFn: () => getBooking(bookingId),
+  });
+
+  // Shared cache invalidation after any charge mutation - refresh both the
+  // booking detail (charge list) and the parent booking lists (which feed
+  // the picker rail).
+  const invalidateCharges = () => {
+    queryClient.invalidateQueries({
+      queryKey: ['accommodation', 'booking-detail', bookingId],
+    });
+    queryClient.invalidateQueries({
+      queryKey: ['accommodation', 'bookings', accommodationId],
+    });
+  };
+
+  // Status transition (mark invoiced / paid / waived) - the backend gates
+  // illegal jumps and locks settled records, so we surface its error.
+  const transitionMutation = useMutation({
+    mutationFn: ({
+      chargeId,
+      target,
+    }: {
+      chargeId: string;
+      target: ChargeStatus;
+    }) => updateCharge(chargeId, { status: target }),
+    onSuccess: (_res, vars) => {
+      invalidateCharges();
+      addToast({
+        type: 'success',
+        title: t(`accommodation.charges.transition_toast.${vars.target}`, {
+          defaultValue: 'Charge updated',
+        }),
+      });
+    },
+    onError: (err) =>
+      addToast({
+        type: 'error',
+        title: t('accommodation.charges.update_failed', {
+          defaultValue: 'Could not update charge',
+        }),
+        message: getErrorMessage(err),
+      }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (chargeId: string) => deleteCharge(chargeId),
+    onSuccess: () => {
+      invalidateCharges();
+      addToast({
+        type: 'success',
+        title: t('accommodation.charges.deleted_toast', {
+          defaultValue: 'Charge deleted',
+        }),
+      });
+      setDeleteTarget(null);
+    },
+    onError: (err) => {
+      addToast({
+        type: 'error',
+        title: t('accommodation.charges.delete_failed', {
+          defaultValue: 'Could not delete charge',
+        }),
+        message: getErrorMessage(err),
+      });
+      setDeleteTarget(null);
+    },
   });
 
   if (bookingDetail.isLoading) {
@@ -1730,40 +1803,21 @@ function BookingChargesPanel({
                     </span>
                   </td>
                   <td className="px-3 py-2 text-right">
-                    {c.status === 'pending' ? (
-                      <button
-                        type="button"
-                        onClick={() => navigate(financeInvoicesPath)}
-                        data-testid={`charge-invoice-${c.id}`}
-                        className="inline-flex items-center gap-1 rounded-md border border-oe-blue/30 bg-oe-blue/5 px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue/10"
-                        title={t('accommodation.charges.invoice_hint', {
-                          defaultValue:
-                            'Raise this charge as an invoice in Finance.',
-                        })}
-                      >
-                        <Wallet size={11} aria-hidden="true" />
-                        {t('accommodation.charges.invoice_in_finance', {
-                          defaultValue: 'Invoice in Finance',
-                        })}
-                      </button>
-                    ) : c.status === 'invoiced' || c.status === 'paid' ? (
-                      <button
-                        type="button"
-                        onClick={() => navigate(financeInvoicesPath)}
-                        data-testid={`charge-view-invoice-${c.id}`}
-                        className="inline-flex items-center gap-1 text-2xs font-medium text-oe-blue hover:underline"
-                        title={t('accommodation.charges.view_invoice_hint', {
-                          defaultValue: 'Open the Finance invoices register.',
-                        })}
-                      >
-                        <FileText size={11} aria-hidden="true" />
-                        {t('accommodation.charges.view_invoice', {
-                          defaultValue: 'View in Finance',
-                        })}
-                      </button>
-                    ) : (
-                      <span className="text-2xs text-content-tertiary">—</span>
-                    )}
+                    <ChargeRowActions
+                      charge={c}
+                      busy={
+                        transitionMutation.isPending || deleteMutation.isPending
+                      }
+                      onOpenFinance={() => navigate(financeInvoicesPath)}
+                      onTransition={(target) =>
+                        transitionMutation.mutate({
+                          chargeId: c.id,
+                          target,
+                        })
+                      }
+                      onEdit={() => setEditCharge(c)}
+                      onDelete={() => setDeleteTarget(c)}
+                    />
                   </td>
                 </tr>
               ))}
@@ -1777,12 +1831,7 @@ function BookingChargesPanel({
           bookingId={bookingId}
           onClose={() => setEditorOpen(false)}
           onCreated={() => {
-            queryClient.invalidateQueries({
-              queryKey: ['accommodation', 'booking-detail', bookingId],
-            });
-            queryClient.invalidateQueries({
-              queryKey: ['accommodation', 'bookings', accommodationId],
-            });
+            invalidateCharges();
             addToast({
               type: 'success',
               title: t('accommodation.charges.created_toast', {
@@ -1793,7 +1842,232 @@ function BookingChargesPanel({
           }}
         />
       )}
+
+      {editCharge && (
+        <EditChargeModal
+          charge={editCharge}
+          onClose={() => setEditCharge(null)}
+          onSaved={() => {
+            invalidateCharges();
+            addToast({
+              type: 'success',
+              title: t('accommodation.charges.updated_toast', {
+                defaultValue: 'Charge updated',
+              }),
+            });
+            setEditCharge(null);
+          }}
+        />
+      )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) deleteMutation.mutate(deleteTarget.id);
+        }}
+        title={t('accommodation.charges.confirm_delete_title', {
+          defaultValue: 'Delete this charge?',
+        })}
+        message={t('accommodation.charges.confirm_delete_message', {
+          defaultValue:
+            'This permanently removes the charge from the booking. Only pending or invoiced charges can be deleted - settled ones are locked.',
+        })}
+        confirmLabel={t('accommodation.charges.delete', {
+          defaultValue: 'Delete charge',
+        })}
+        variant="danger"
+        loading={deleteMutation.isPending}
+      />
     </Card>
+  );
+}
+
+/**
+ * Per-row charge actions: a Finance deep link plus a 3-dot menu driving the
+ * charge state machine (mark invoiced / paid / waived), edit and delete.
+ * Settled / written-off charges are locked - the menu collapses to a
+ * read-only "View in Finance" link mirroring the backend guard.
+ */
+function ChargeRowActions({
+  charge,
+  busy,
+  onOpenFinance,
+  onTransition,
+  onEdit,
+  onDelete,
+}: {
+  charge: Charge;
+  busy: boolean;
+  onOpenFinance: () => void;
+  onTransition: (target: ChargeStatus) => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onClick = (e: MouseEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const locked = isChargeLocked(charge.status);
+  const transitions = allowedChargeTransitions(charge.status);
+
+  // Locked (paid / waived) charges are read-only: surface only the Finance
+  // link so the operator can inspect the settled record.
+  if (locked) {
+    return (
+      <button
+        type="button"
+        onClick={onOpenFinance}
+        data-testid={`charge-view-invoice-${charge.id}`}
+        className="inline-flex items-center gap-1 text-2xs font-medium text-oe-blue hover:underline"
+        title={t('accommodation.charges.view_invoice_hint', {
+          defaultValue: 'Open the Finance invoices register.',
+        })}
+      >
+        <FileText size={11} aria-hidden="true" />
+        {t('accommodation.charges.view_invoice', {
+          defaultValue: 'View in Finance',
+        })}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative inline-flex items-center gap-1.5"
+    >
+      {charge.status === 'pending' ? (
+        <button
+          type="button"
+          onClick={onOpenFinance}
+          data-testid={`charge-invoice-${charge.id}`}
+          className="inline-flex items-center gap-1 rounded-md border border-oe-blue/30 bg-oe-blue/5 px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue/10"
+          title={t('accommodation.charges.invoice_hint', {
+            defaultValue: 'Raise this charge as an invoice in Finance.',
+          })}
+        >
+          <Wallet size={11} aria-hidden="true" />
+          {t('accommodation.charges.invoice_in_finance', {
+            defaultValue: 'Invoice in Finance',
+          })}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={onOpenFinance}
+          data-testid={`charge-view-invoice-${charge.id}`}
+          className="inline-flex items-center gap-1 text-2xs font-medium text-oe-blue hover:underline"
+          title={t('accommodation.charges.view_invoice_hint', {
+            defaultValue: 'Open the Finance invoices register.',
+          })}
+        >
+          <FileText size={11} aria-hidden="true" />
+          {t('accommodation.charges.view_invoice', {
+            defaultValue: 'View in Finance',
+          })}
+        </button>
+      )}
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={t('accommodation.charges.row_menu_aria', {
+          defaultValue: 'Charge actions',
+        })}
+        onClick={() => !busy && setOpen((v) => !v)}
+        disabled={busy}
+        data-testid={`charge-actions-${charge.id}`}
+        className={clsx(
+          'inline-flex h-7 w-7 items-center justify-center rounded-md border border-transparent transition focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
+          busy
+            ? 'cursor-not-allowed text-content-tertiary opacity-40'
+            : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
+        )}
+      >
+        <MoreHorizontal size={16} aria-hidden="true" />
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-20 mt-1 min-w-[11rem] rounded-lg border border-border bg-surface-elevated shadow-lg"
+          data-testid={`charge-actions-menu-${charge.id}`}
+        >
+          {transitions.map((target) => (
+            <button
+              key={target}
+              role="menuitem"
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onTransition(target);
+              }}
+              data-testid={`charge-action-${target}-${charge.id}`}
+              className="block w-full px-3 py-2 text-left text-xs hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none"
+            >
+              {t(`accommodation.charges.mark.${target}`, {
+                defaultValue:
+                  target === 'invoiced'
+                    ? 'Mark invoiced'
+                    : target === 'paid'
+                      ? 'Mark paid'
+                      : target === 'waived'
+                        ? 'Waive charge'
+                        : target,
+              })}
+            </button>
+          ))}
+          <div className="my-1 border-t border-border-light" />
+          <button
+            role="menuitem"
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              onEdit();
+            }}
+            data-testid={`charge-edit-${charge.id}`}
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none"
+          >
+            <Pencil size={12} aria-hidden="true" />
+            {t('accommodation.charges.edit', { defaultValue: 'Edit charge' })}
+          </button>
+          <button
+            role="menuitem"
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              onDelete();
+            }}
+            data-testid={`charge-delete-${charge.id}`}
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-semantic-error hover:bg-surface-secondary focus:bg-surface-secondary focus:outline-none"
+          >
+            <Trash2 size={12} aria-hidden="true" />
+            {t('accommodation.charges.delete', { defaultValue: 'Delete charge' })}
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -1970,6 +2244,193 @@ function AddChargeModal({
             onChange={(e) => setDescription(e.target.value)}
             className={inputCls}
             data-testid="charge-description"
+          />
+        </WideModalField>
+      </WideModalSection>
+    </WideModal>
+  );
+}
+
+/**
+ * EditChargeModal - correct an existing charge in place.
+ *
+ * Mirrors AddChargeModal's fields but pre-fills from the charge and PATCHes
+ * via /charges/{id}. Status is not editable here (the row menu drives the
+ * lifecycle); editing is blocked entirely once a charge is locked, which
+ * the caller already enforces by only opening this on mutable charges.
+ * Money stays a string end-to-end - never parseFloat.
+ */
+function EditChargeModal({
+  charge,
+  onClose,
+  onSaved,
+}: {
+  charge: Charge;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const [kind, setKind] = useState<ChargeKind>(charge.kind);
+  const [description, setDescription] = useState(charge.description ?? '');
+  /** Decimal as string - never parseFloat. */
+  const [amount, setAmount] = useState(charge.amount);
+  const [currency, setCurrency] = useState(charge.currency ?? '');
+  const [periodStart, setPeriodStart] = useState(charge.period_start ?? '');
+  const [periodEnd, setPeriodEnd] = useState(charge.period_end ?? '');
+
+  const mutation = useMutation({
+    mutationFn: () =>
+      updateCharge(charge.id, {
+        kind,
+        description: description.trim() || null,
+        amount: amount.trim(),
+        // Blank currency re-inherits server-side from room / project.
+        currency: currency.trim(),
+        period_start: periodStart || null,
+        period_end: periodEnd || null,
+      }),
+    onSuccess: () => onSaved(),
+    onError: (err) =>
+      addToast({
+        type: 'error',
+        title: t('accommodation.charges.update_failed', {
+          defaultValue: 'Could not update charge',
+        }),
+        message: getErrorMessage(err),
+      }),
+  });
+
+  const inputCls =
+    'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+
+  // Same money discipline as AddChargeModal - validate via regex, no float.
+  const amountValid = /^\d+(?:\.\d+)?$/.test(amount.trim());
+
+  return (
+    <WideModal
+      open
+      onClose={onClose}
+      title={t('accommodation.charges.edit_modal_title', {
+        defaultValue: 'Edit charge',
+      })}
+      size="md"
+      busy={mutation.isPending}
+      footer={
+        <>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => mutation.mutate()}
+            loading={mutation.isPending}
+            disabled={!amountValid}
+            data-testid="charge-edit-submit"
+          >
+            {t('common.save', { defaultValue: 'Save changes' })}
+          </Button>
+        </>
+      }
+    >
+      <WideModalSection columns={2}>
+        <WideModalField
+          label={t('accommodation.charges.kind', { defaultValue: 'Kind' })}
+          required
+        >
+          <select
+            value={kind}
+            onChange={(e) => setKind(e.target.value as ChargeKind)}
+            className={inputCls}
+            data-testid="charge-edit-kind"
+          >
+            {(['base_rent', 'extra', 'deposit', 'refund'] as const).map((k) => (
+              <option key={k} value={k}>
+                {t(`accommodation.charge.kind.${k}`, { defaultValue: k })}
+              </option>
+            ))}
+          </select>
+        </WideModalField>
+        <WideModalField
+          label={t('accommodation.charges.amount', { defaultValue: 'Amount' })}
+          required
+          hint={t('accommodation.charges.amount_hint', {
+            defaultValue: 'Decimal - e.g. 199.99. Stays exact through to billing.',
+          })}
+          error={
+            !amountValid
+              ? t('accommodation.charges.amount_invalid', {
+                  defaultValue: 'Enter a non-negative decimal.',
+                })
+              : undefined
+          }
+        >
+          <input
+            type="text"
+            inputMode="decimal"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className={inputCls}
+            data-testid="charge-edit-amount"
+          />
+        </WideModalField>
+        <WideModalField
+          label={t('accommodation.charges.currency', {
+            defaultValue: 'Currency (ISO 4217)',
+          })}
+          hint={t('accommodation.charges.currency_hint', {
+            defaultValue: 'Empty → inherit from room / project.',
+          })}
+        >
+          <input
+            type="text"
+            maxLength={3}
+            value={currency}
+            onChange={(e) =>
+              setCurrency(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))
+            }
+            className={`${inputCls} font-mono uppercase`}
+            data-testid="charge-edit-currency"
+          />
+        </WideModalField>
+        <WideModalField
+          label={t('accommodation.charges.period_start', {
+            defaultValue: 'Period start',
+          })}
+        >
+          <input
+            type="date"
+            value={periodStart}
+            onChange={(e) => setPeriodStart(e.target.value)}
+            className={inputCls}
+          />
+        </WideModalField>
+        <WideModalField
+          label={t('accommodation.charges.period_end', {
+            defaultValue: 'Period end',
+          })}
+        >
+          <input
+            type="date"
+            value={periodEnd}
+            onChange={(e) => setPeriodEnd(e.target.value)}
+            className={inputCls}
+          />
+        </WideModalField>
+        <WideModalField
+          label={t('accommodation.charges.description', {
+            defaultValue: 'Description',
+          })}
+          span={2}
+        >
+          <input
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className={inputCls}
+            data-testid="charge-edit-description"
           />
         </WideModalField>
       </WideModalSection>

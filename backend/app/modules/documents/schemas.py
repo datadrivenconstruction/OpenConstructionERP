@@ -173,6 +173,30 @@ class PhotoTimelineGroup(BaseModel):
     photos: list[PhotoResponse]
 
 
+class RecentPhotoResponse(BaseModel):
+    """A recent photo across the projects the caller can access.
+
+    Powers the dashboard "Latest site photos" widget. Carries just
+    enough to render a labelled thumbnail and deep-link to the owning
+    project's photo gallery: the project name (joined from the projects
+    table), a capture / upload date for the relative-time label, and a
+    relative file URL the frontend loads through ``AuthImage``.
+    """
+
+    id: UUID
+    project_id: UUID
+    project_name: str
+    caption: str | None = None
+    category: str = "site"
+    taken_at: datetime | None = None
+    created_at: datetime
+    # Relative API path the frontend already uses for photo thumbnails
+    # (served via the authenticated thumb route, full-file fallback on a
+    # missing thumbnail). Mirrors ``getPhotoThumbUrl`` in the documents
+    # feature so the widget reuses the exact same URL shape.
+    file_url: str
+
+
 # ── Sheet schemas ──────────────────────────────────────────────────────
 
 

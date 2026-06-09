@@ -1356,6 +1356,51 @@ class PhotoService:
         sorted_dates = sorted(groups.keys(), reverse=True)
         return [{"date": d, "photos": groups[d]} for d in sorted_dates]
 
+    async def recent_across_projects(
+        self,
+        user_id: str | None,
+        *,
+        limit: int = 12,
+    ) -> list[tuple[ProjectPhoto, str]]:
+        """Return the most recent photos across every project the caller can see.
+
+        Access control mirrors the dashboard / project-list endpoints
+        (owner-OR-member, admins see every project) so the widget never
+        leaks photos from a project the user cannot open. The accessible
+        project-id set is resolved here and handed to the repository join,
+        so the SQL can never return a row outside that set.
+        """
+        if not user_id:
+            return []
+
+        from sqlalchemy import select as _select
+
+        from app.modules.projects.models import Project
+        from app.modules.teams.access import member_project_ids_subquery
+        from app.modules.users.repository import UserRepository
+
+        try:
+            user_uuid = uuid.UUID(str(user_id))
+        except (TypeError, ValueError):
+            return []
+
+        # Owner-OR-member set, mirroring ``list_projects`` / ``dashboard_cards``
+        # / ``file_types_by_project``. Admins bypass the ownership check and
+        # see photos for every project.
+        user = await UserRepository(self.session).get_by_id(user_uuid)
+        is_admin = user is not None and getattr(user, "role", "") == "admin"
+        if is_admin:
+            proj_stmt = _select(Project.id)
+        else:
+            proj_stmt = _select(Project.id).where(
+                (Project.owner_id == user_uuid) | (Project.id.in_(member_project_ids_subquery(user_uuid)))
+            )
+        accessible_ids = list((await self.session.execute(proj_stmt)).scalars().all())
+        if not accessible_ids:
+            return []
+
+        return await self.repo.recent_across_projects(accessible_ids, limit=limit)
+
     # ── Update ─────────────────────────────────────────────────────────────
 
     async def update_photo(

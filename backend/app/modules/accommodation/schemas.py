@@ -279,6 +279,33 @@ class ChargeCreate(BaseModel):
         return self
 
 
+class ChargeUpdate(BaseModel):
+    """Partial update for a charge.
+
+    The service layer enforces which fields may change for a given charge
+    status (a ``paid`` charge is locked) and which status transitions are
+    legal; this schema only validates field shapes. ``currency=""`` keeps
+    the existing inherit-on-blank behaviour.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    kind: str | None = Field(default=None, pattern=_CHARGE_KIND_PATTERN)
+    description: str | None = None
+    amount: Decimal | None = Field(default=None, ge=0)
+    currency: str | None = Field(default=None, pattern=_CURRENCY_PATTERN)
+    period_start: date | None = None
+    period_end: date | None = None
+    status: str | None = Field(default=None, pattern=_CHARGE_STATUS_PATTERN)
+    metadata: dict[str, Any] | None = None
+
+    @model_validator(mode="after")
+    def _validate_period(self) -> ChargeUpdate:
+        if self.period_start is not None and self.period_end is not None and self.period_end < self.period_start:
+            raise ValueError("period_end must not precede period_start")
+        return self
+
+
 class ChargeResponse(BaseModel):
     """Read shape for a charge."""
 

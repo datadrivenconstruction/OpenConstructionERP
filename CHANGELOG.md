@@ -5,6 +5,20 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.4.0] - 2026-06-10
+
+### Added
+
+- Real site photos everywhere. Every example project now opens with real construction photos in its gallery, and the dashboard carries a "Latest site photos" strip that pulls the newest photos across your projects with the project name and date. The placeholder swatches that used to fill the gallery are gone, so a photo opens to a real image instead of a blank tile.
+- Point Cloud, in beta. A new reality-capture page registers laser scan, photogrammetry and LIDAR clouds against the project, with a scan registry and direct-to-storage ingest. The cloud viewer, model registration and deviation analysis follow in later releases.
+- Demo data for every module that used to start empty. Cost models, management-of-change entries, tender packages, takeoff measurements, accommodation, markups, the resource catalogue, BIM federations and clash runs all arrive populated, so each screen shows real example data out of the box.
+
+### Fixed
+
+- Cross-module links now open the real file. A takeoff measurement or a markup opened from the markups hub lands on the actual drawing PDF with the measurement or annotation in view, instead of an empty "file not found" viewer. The cause was twofold: the example documents pointed at files that were never written to disk, and two deep links carried the wrong address. Both are corrected and verified end to end on a fresh install.
+- The AI Estimate Builder no longer fails when you confirm the parameter sheet. Confirming the parameters now reaches the work-package board reliably. A single database session was being used by several lookups at once and crashed the request, which is fixed by running the lookups in sequence.
+- Quality pass on the accommodation, formwork, closeout and markups modules: charge edit and delete on accommodation, currency inheritance, reuse caps on formwork, and a completeness count on closeout that no longer overstates progress.
+
 ## [7.3.0] - 2026-06-08
 
 ### Added

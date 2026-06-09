@@ -220,6 +220,14 @@ class StampTemplateUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
+    # Category is validated on update too, mirroring StampTemplateCreate.
+    # Without this field a stamp seeded with an out-of-contract category
+    # could never be corrected through the API, and an arbitrary value
+    # could be patched in. ``None`` keeps PATCH semantics (field absent).
+    category: str | None = Field(
+        default=None,
+        pattern=r"^(predefined|custom)$",
+    )
     text: str | None = Field(default=None, min_length=1, max_length=500)
     color: str | None = Field(default=None, max_length=20)
     background_color: str | None = Field(default=None, max_length=20)

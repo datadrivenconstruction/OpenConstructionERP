@@ -75,6 +75,15 @@ const TYPE_LABELS: Record<CorrespondenceType, string> = {
   memo: 'Memo',
 };
 
+/* correspondence_type is a free string column, so demo and imported data can
+   carry values outside TYPE_LABELS (e.g. "report"). Humanize anything unknown
+   ("method_statement" -> "Method Statement") so a missing label never falls
+   through to a raw i18n key in the UI. */
+const prettyType = (tp: string): string =>
+  tp.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+const correspondenceTypeLabel = (tp: string | null | undefined): string =>
+  (tp ? (TYPE_LABELS as Record<string, string>)[tp] : undefined) ?? prettyType(tp || 'letter');
+
 const DIRECTION_CARD_CONFIG: Record<
   CorrespondenceDirection,
   { icon: React.ElementType; color: string; selectedColor: string; description: string }
@@ -809,7 +818,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
 
         {/* Type */}
         <Badge variant="neutral" size="sm" className="hidden md:inline-flex">
-          {t(`correspondence.type_${item.correspondence_type ?? 'letter'}`, { defaultValue: TYPE_LABELS[(item.correspondence_type ?? 'letter') as CorrespondenceType] })}
+          {t(`correspondence.type_${item.correspondence_type ?? 'letter'}`, { defaultValue: correspondenceTypeLabel(item.correspondence_type) })}
         </Badge>
 
         {/* From — deep-links to the contact when the value is an id */}

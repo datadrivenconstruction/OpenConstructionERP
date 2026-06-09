@@ -6,7 +6,7 @@ Endpoint groups:
     /systems/                              - catalogue CRUD + seed
     /assignments/                          - per-project assignment CRUD
     /assignments/{id}/schedule-lines/      - pour-cycle sub-resource
-    /schedule-lines/{id}                   - schedule-line delete
+    /schedule-lines/{id}                   - schedule-line update + delete
 
 Tenant scoping follows the Wave-5 IDOR posture: requests for an object
 the caller cannot see return **404, never 403**, so we never leak the
@@ -32,12 +32,13 @@ from app.modules.formwork.schemas import (
     FormworkAssignmentUpdate,
     FormworkScheduleLineCreate,
     FormworkScheduleLineResponse,
+    FormworkScheduleLineUpdate,
     FormworkSystemCreate,
     FormworkSystemResponse,
     FormworkSystemSeedResult,
     FormworkSystemUpdate,
 )
-from app.modules.formwork.service import FormworkService
+from app.modules.formwork.service import FormworkService, ReuseCountExceedsMaxError
 
 router = APIRouter(tags=["formwork"])
 
@@ -262,6 +263,11 @@ async def create_assignment(
             status_code=404,
             detail="Formwork system not found",
         ) from exc
+    except ReuseCountExceedsMaxError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
     return _assignment_to_response(obj)
 
 
@@ -296,6 +302,11 @@ async def update_assignment(
         raise HTTPException(
             status_code=404,
             detail="Formwork system not found",
+        ) from exc
+    except ReuseCountExceedsMaxError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
         ) from exc
     if obj is None:  # defensive - load_or_404 already proved existence
         raise HTTPException(
@@ -358,15 +369,11 @@ async def add_schedule_line(
     return _line_to_response(obj)
 
 
-@router.delete(
-    "/schedule-lines/{line_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-async def delete_schedule_line(
+async def _verify_schedule_line_access(
+    session,
     line_id: uuid.UUID,
-    session: SessionDep,
-    user_id: CurrentUserId,
-) -> None:
+    user_id: str,
+) -> FormworkScheduleLine:
     obj = await session.get(FormworkScheduleLine, line_id)
     if obj is None:
         # IDOR: probing /schedule-lines/<random-uuid> never leaks existence.
@@ -382,5 +389,35 @@ async def delete_schedule_line(
             detail="Formwork schedule line not found",
         )
     await verify_project_access(parent.project_id, user_id, session)
+    return obj
+
+
+@router.patch(
+    "/schedule-lines/{line_id}",
+    response_model=FormworkScheduleLineResponse,
+)
+async def update_schedule_line(
+    line_id: uuid.UUID,
+    data: FormworkScheduleLineUpdate,
+    session: SessionDep,
+    user_id: CurrentUserId,
+) -> FormworkScheduleLineResponse:
+    await _verify_schedule_line_access(session, line_id, user_id)
+    service = FormworkService(session)
+    obj = await service.update_schedule_line(line_id, data)
+    assert obj is not None  # the access check above proved existence
+    return _line_to_response(obj)
+
+
+@router.delete(
+    "/schedule-lines/{line_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_schedule_line(
+    line_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+) -> None:
+    await _verify_schedule_line_access(session, line_id, user_id)
     service = FormworkService(session)
     await service.schedule_repo.delete(line_id)

@@ -217,6 +217,18 @@ export interface ChargeCreatePayload {
   metadata?: Record<string, unknown>;
 }
 
+export interface ChargeUpdatePayload {
+  kind?: ChargeKind;
+  description?: string | null;
+  /** Decimal as string. */
+  amount?: string;
+  currency?: string;
+  period_start?: string | null;
+  period_end?: string | null;
+  status?: ChargeStatus;
+  metadata?: Record<string, unknown>;
+}
+
 export interface BootstrapFromPropDevResult {
   accommodation_id: string;
   block_id: string;
@@ -378,6 +390,17 @@ export function listCharges(bookingId: string): Promise<Charge[]> {
   return apiGet<Charge[]>(`/v1/accommodation/bookings/${bookingId}/charges`);
 }
 
+export function updateCharge(
+  chargeId: string,
+  data: ChargeUpdatePayload,
+): Promise<Charge> {
+  return apiPatch<Charge>(`/v1/accommodation/charges/${chargeId}`, data);
+}
+
+export function deleteCharge(chargeId: string): Promise<void> {
+  return apiDelete(`/v1/accommodation/charges/${chargeId}`);
+}
+
 /* ── Cross-module integrations ───────────────────────────────────────── */
 
 export function bootstrapFromPropDev(
@@ -417,4 +440,30 @@ export function allowedBookingTransitions(
 
 export function isBookingTerminal(status: BookingStatus): boolean {
   return status === 'checked_out' || status === 'cancelled';
+}
+
+/**
+ * Mirror the backend charge lifecycle (service.py _CHARGE_TRANSITIONS):
+ * pending -> invoiced -> paid, with `waived` reachable from any
+ * non-settled state. `paid` / `waived` are terminal (locked records).
+ */
+const CHARGE_TRANSITIONS: Record<ChargeStatus, ChargeStatus[]> = {
+  pending: ['invoiced', 'paid', 'waived'],
+  invoiced: ['paid', 'waived'],
+  paid: [],
+  waived: [],
+};
+
+export function allowedChargeTransitions(
+  current: ChargeStatus,
+): ChargeStatus[] {
+  return CHARGE_TRANSITIONS[current] ?? [];
+}
+
+/**
+ * A charge is locked (read-only - no edit, delete or status change) once
+ * it is settled or written off. Mirrors service._LOCKED_CHARGE_STATUSES.
+ */
+export function isChargeLocked(status: ChargeStatus): boolean {
+  return status === 'paid' || status === 'waived';
 }

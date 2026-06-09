@@ -177,6 +177,22 @@ class FormworkScheduleLineCreate(BaseModel):
     notes: str | None = None
 
 
+class FormworkScheduleLineUpdate(BaseModel):
+    """Partial update for a pour-cycle schedule line.
+
+    ``project_id`` and ``assignment_id`` are immutable (a line cannot be
+    moved to a different parent), so they are deliberately absent here.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    pour_no: int | None = Field(default=None, ge=1, le=10_000)
+    pour_date: date | None = None
+    level_label: str | None = Field(default=None, max_length=120)
+    area_m2: Decimal | None = Field(default=None, ge=0)
+    notes: str | None = None
+
+
 class FormworkScheduleLineResponse(BaseModel):
     """A pour-cycle schedule line as returned by the API."""
 

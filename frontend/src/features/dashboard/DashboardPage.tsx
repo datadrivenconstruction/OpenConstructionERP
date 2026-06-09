@@ -48,6 +48,7 @@ import { DashboardProjectsMap } from './components/DashboardProjectsMap';
 import { ShowAllProjectsCard } from './components/ShowAllProjectsCard';
 import { WeatherSiteWidget } from './components/NewWidgets';
 import { OperationsSnapshotCard } from './components/OperationsSnapshotCard';
+import { LatestSitePhotosCard } from './components/LatestSitePhotosCard';
 import { LabourCostWidget } from './LabourCostWidget';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { DashboardLayoutManager } from './DashboardLayoutManager';
@@ -2242,6 +2243,7 @@ function DashboardPageInner() {
     operations_snapshot: <OperationsSnapshotCard projects={projects} />,
     weather_site: <WeatherSiteWidget projects={projects} />,
     labour_cost: <LabourCostWidget />,
+    latest_photos: <LatestSitePhotosCard />,
   };
 
   return (

@@ -26,12 +26,30 @@ from app.modules.formwork.schemas import (
     FormworkAssignmentCreate,
     FormworkAssignmentUpdate,
     FormworkScheduleLineCreate,
+    FormworkScheduleLineUpdate,
     FormworkSystemCreate,
     FormworkSystemUpdate,
     default_seed_systems,
 )
 
 _TWO_DP = Decimal("0.01")
+
+
+class ReuseCountExceedsMaxError(ValueError):
+    """Raised when an assignment's ``reuse_count`` exceeds the system cap.
+
+    A formwork system carries a manufacturer reuse limit (``reuses_max``).
+    Pricing an assignment with more reuses than the panels physically
+    survive would understate the unit cost, so the service rejects it
+    instead of silently producing a too-cheap figure.
+    """
+
+    def __init__(self, reuse_count: int, reuses_max: int) -> None:
+        self.reuse_count = reuse_count
+        self.reuses_max = reuses_max
+        super().__init__(
+            f"reuse_count {reuse_count} exceeds the system reuses_max {reuses_max}",
+        )
 
 
 def _q(v: Decimal) -> Decimal:
@@ -53,15 +71,22 @@ def compute_cost(
         unit_cost = unit_rate * (1 + waste_pct/100) / reuse_count
         total     = area_m2  * unit_cost
 
+    Both figures are persisted and shown to the user, so ``total`` is
+    derived from the **rounded** ``unit_cost`` (not the raw quotient).
+    Otherwise ``area_m2 * computed_unit_cost`` recomputed client-side
+    would not match the stored ``computed_total`` whenever the quotient
+    carried fractional cents (e.g. unit_rate 65.00, waste 5%, reuse 2 =>
+    34.125, where area 100 gave 3412.50 stored vs 3413.00 displayed).
+
     ``reuse_count`` is guaranteed >= 1 by the schema; we still defend
     against 0 here in case the service is called from a future import
     path that bypasses Pydantic.
     """
     reuses = max(int(reuse_count), 1)
     waste_factor = Decimal("1") + (Decimal(waste_pct) / Decimal("100"))
-    unit_cost = (Decimal(unit_rate) * waste_factor) / Decimal(reuses)
-    total = Decimal(area_m2) * unit_cost
-    return _q(unit_cost), _q(total)
+    unit_cost = _q((Decimal(unit_rate) * waste_factor) / Decimal(reuses))
+    total = _q(Decimal(area_m2) * unit_cost)
+    return unit_cost, total
 
 
 class FormworkService:
@@ -118,6 +143,8 @@ class FormworkService:
         system = await self.system_repo.get_by_id(data.formwork_system_id)
         if system is None:
             raise LookupError("formwork_system_not_found")
+        if data.reuse_count > system.reuses_max:
+            raise ReuseCountExceedsMaxError(data.reuse_count, system.reuses_max)
         unit_cost, total = compute_cost(
             unit_rate=system.unit_rate,
             area_m2=data.area_m2,
@@ -154,6 +181,8 @@ class FormworkService:
         system = await self.system_repo.get_by_id(obj.formwork_system_id)
         if system is None:
             raise LookupError("formwork_system_not_found")
+        if obj.reuse_count > system.reuses_max:
+            raise ReuseCountExceedsMaxError(obj.reuse_count, system.reuses_max)
         unit_cost, total = compute_cost(
             unit_rate=system.unit_rate,
             area_m2=obj.area_m2,
@@ -182,3 +211,23 @@ class FormworkService:
             notes=data.notes,
         )
         return await self.schedule_repo.create(obj)
+
+    async def update_schedule_line(
+        self,
+        line_id: uuid.UUID,
+        data: FormworkScheduleLineUpdate,
+    ) -> FormworkScheduleLine | None:
+        """Patch a pour-cycle line in place.
+
+        Only the fields the caller actually sent are touched, so the
+        nullable ``pour_date`` / ``notes`` can be explicitly cleared by
+        sending them as ``null`` while an omitted field is left untouched.
+        ``project_id`` and ``assignment_id`` are never reparented.
+        """
+        obj = await self.schedule_repo.get_by_id(line_id)
+        if obj is None:
+            return None
+        for field, value in data.model_dump(exclude_unset=True).items():
+            setattr(obj, field, value)
+        await self.session.flush()
+        return obj

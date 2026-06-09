@@ -49,6 +49,7 @@ from app.modules.documents.schemas import (
     PhotoResponse,
     PhotoTimelineGroup,
     PhotoUpdate,
+    RecentPhotoResponse,
     ShareLinkAccessRequest,
     ShareLinkAccessResponse,
     ShareLinkCreate,
@@ -551,6 +552,48 @@ async def get_timeline(
             photos=[_photo_to_response(p) for p in g["photos"]],
         )
         for g in groups
+    ]
+
+
+# ── Recent photos across the caller's projects ──────────────────────────
+
+
+@router.get(
+    "/photos/recent/",
+    response_model=list[RecentPhotoResponse],
+    dependencies=[Depends(RequirePermission("documents.read"))],
+)
+async def list_recent_photos(
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    limit: int = Query(default=12, ge=1, le=48),
+    service: PhotoService = Depends(_get_photo_service),
+) -> list[RecentPhotoResponse]:
+    """Most recent photos across every project the caller can access.
+
+    Powers the dashboard "Latest site photos" widget. Access control is
+    enforced in the service: only projects the user owns or is a member
+    of (admins: all) contribute photos, so this never leaks site
+    documentation from a project the caller cannot open. Ordered newest
+    first by ``taken_at`` with ``created_at`` as the null fallback.
+
+    Each item carries the project name (joined server-side) and a
+    relative thumbnail URL matching the existing ``/photos/{id}/thumb/``
+    route the gallery already loads through ``AuthImage``.
+    """
+    rows = await service.recent_across_projects(user_id, limit=limit)
+    return [
+        RecentPhotoResponse(
+            id=photo.id,
+            project_id=photo.project_id,
+            project_name=project_name,
+            caption=photo.caption,
+            category=photo.category,
+            taken_at=photo.taken_at,
+            created_at=photo.created_at,
+            file_url=f"/api/v1/documents/photos/{photo.id}/thumb/",
+        )
+        for photo, project_name in rows
     ]
 
 

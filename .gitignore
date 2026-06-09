@@ -153,6 +153,8 @@ test-screenshots/
 !frontend/public/*.jpeg
 # Partner-pack company logos are real shipped assets, not dev screenshots
 !packs/**/logo.png
+# Bundled demo site photos are real shipped seed assets, not dev screenshots
+!backend/app/scripts/flagship_assets/site_photos/*.jpg
 
 # QA test scripts (contain demo credentials)
 backend/qa_*.py

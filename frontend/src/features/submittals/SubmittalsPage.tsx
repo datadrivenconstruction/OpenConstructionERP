@@ -96,6 +96,14 @@ const TYPE_LABELS: Record<SubmittalType, string> = {
   warranty: 'Warranty',
 };
 
+/* type is a free string column, so demo and imported data can carry values
+   outside TYPE_LABELS (e.g. "method_statement"). Humanize anything unknown so a
+   missing label never falls through to a raw i18n key in the UI. */
+const prettySubmittalType = (tp: string): string =>
+  tp.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+const submittalTypeLabel = (tp: string | null | undefined): string =>
+  (tp ? (TYPE_LABELS as Record<string, string>)[tp] : undefined) ?? prettySubmittalType(tp || 'shop_drawing');
+
 const STATUS_LABELS: Record<SubmittalStatus, string> = {
   draft: 'Draft',
   submitted: 'Submitted',
@@ -506,7 +514,7 @@ const SubmittalRow = React.memo(function SubmittalRow({
 
         {/* Type badge */}
         <Badge variant="neutral" size="sm" className="hidden md:inline-flex">
-          {t(`submittals.type_${submittal.type}`, { defaultValue: TYPE_LABELS[submittal.type] })}
+          {t(`submittals.type_${submittal.type}`, { defaultValue: submittalTypeLabel(submittal.type) })}
         </Badge>
 
         {/* Status badge + pipeline. Stacked column so the dot-stepper

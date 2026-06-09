@@ -1,0 +1,122 @@
+[
+  {
+    "file": "01.jpg",
+    "caption": "Site hoarding and excavation start",
+    "category": "site",
+    "taken_at": "2024-08-10T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  },
+  {
+    "file": "02.jpg",
+    "caption": "Shoring and deep excavation",
+    "category": "progress",
+    "taken_at": "2024-09-20T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  },
+  {
+    "file": "03.jpg",
+    "caption": "Mat slab foundation pour",
+    "category": "progress",
+    "taken_at": "2024-11-05T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  },
+  {
+    "file": "04.jpg",
+    "caption": "Concrete core and tower crane",
+    "category": "progress",
+    "taken_at": "2024-12-15T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  },
+  {
+    "file": "05.jpg",
+    "caption": "Flying formwork on a typical floor",
+    "category": "progress",
+    "taken_at": "2025-02-01T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  },
+  {
+    "file": "06.jpg",
+    "caption": "Rebar placement on the slab",
+    "category": "progress",
+    "taken_at": "2025-03-12T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  },
+  {
+    "file": "07.jpg",
+    "caption": "Superstructure rising",
+    "category": "progress",
+    "taken_at": "2025-05-01T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  },
+  {
+    "file": "08.jpg",
+    "caption": "Window wall installation",
+    "category": "progress",
+    "taken_at": "2025-07-10T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  },
+  {
+    "file": "09.jpg",
+    "caption": "Tower crane lifting materials",
+    "category": "progress",
+    "taken_at": "2025-09-01T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  },
+  {
+    "file": "10.jpg",
+    "caption": "Interior framing and drywall",
+    "category": "progress",
+    "taken_at": "2025-11-15T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  },
+  {
+    "file": "11.jpg",
+    "caption": "MEP rough-in on a residential floor",
+    "category": "progress",
+    "taken_at": "2026-01-10T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  },
+  {
+    "file": "12.jpg",
+    "caption": "Facade complete at dusk",
+    "category": "site",
+    "taken_at": "2026-02-20T11:00:00",
+    "tags": [
+      "demo",
+      "site-photo"
+    ]
+  }
+]

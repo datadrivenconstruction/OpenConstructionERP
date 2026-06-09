@@ -152,8 +152,12 @@ class CloseoutService:
         for slot in required:
             st = self._slot_status(slot, bindings.get(slot.id), has_built=has_built)
             # A required slot counts as delivered only when verified, OR when it
-            # is a generated artifact that the build will always produce.
-            if st == "verified" or (slot.source_kind == "generated" and slot.generated_artifact in _GENERATED_KINDS):
+            # is a generated artifact that the LAST BUILD actually produced. A
+            # generated artifact does not exist until the package is built, so
+            # it must not inflate completeness before that (has_built gates it).
+            if st == "verified" or (
+                slot.source_kind == "generated" and slot.generated_artifact in _GENERATED_KINDS and has_built
+            ):
                 delivered_count += 1
 
         pct = 100 if required_count == 0 else round(delivered_count * 100 / required_count)
@@ -174,19 +178,26 @@ class CloseoutService:
         await self.session.flush()
         return package
 
-    async def gaps(self, package: CloseoutPackage) -> list[str]:
-        """Titles of required slots not yet satisfied (the gap list)."""
+    async def gaps(self, package: CloseoutPackage, *, treat_built: bool | None = None) -> list[str]:
+        """Titles of required slots not yet satisfied (the gap list).
+
+        ``treat_built`` overrides whether generated artifacts are treated as
+        present. It defaults to the package's real build state, but the build
+        job passes ``True`` so the package it is producing reports its
+        generated artifacts as delivered in its own cover / manifest.
+        """
         slots = await self.repo.list_slots(package.id)
-        status_map = await self._slot_status_map(package)
+        bindings = await self.repo.list_bindings_for_package(package.id)
+        has_built = bool(package.package_key) if treat_built is None else treat_built
         out: list[str] = []
         for slot in slots:
             if not slot.is_required:
                 continue
-            st = status_map.get(slot.id, "empty")
+            st = self._slot_status(slot, bindings.get(slot.id), has_built=has_built)
             if st == "verified":
                 continue
-            if slot.source_kind == "generated" and slot.generated_artifact in _GENERATED_KINDS:
-                # Generated and present once built; never a hard gap.
+            if slot.source_kind == "generated" and slot.generated_artifact in _GENERATED_KINDS and has_built:
+                # Generated artifact present in the last build; not a gap.
                 continue
             out.append(slot.title)
         return out
@@ -198,9 +209,23 @@ class CloseoutService:
     # ── Slot CRUD ────────────────────────────────────────────────────────
 
     async def add_slot(self, package: CloseoutPackage, data: dict[str, Any]) -> CloseoutSlot:
+        # ``slot_key`` keys the build idempotency hash, validation-rule
+        # element_ref and slot routing, so it must be unique within a package.
+        slot_key = str(data["slot_key"]).strip()
+        if not slot_key:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="slot_key must not be empty",
+            )
+        existing = await self.repo.list_slots(package.id)
+        if any(s.slot_key == slot_key for s in existing):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"A slot with key '{slot_key}' already exists in this package",
+            )
         slot = CloseoutSlot(
             package_id=package.id,
-            slot_key=data["slot_key"],
+            slot_key=slot_key,
             title=data["title"],
             category=data.get("category", "other"),
             discipline=data.get("discipline"),
@@ -211,8 +236,10 @@ class CloseoutService:
             metadata_=dict(data.get("metadata") or {}),
         )
         await self.repo.add_slot(slot)
-        await self.recompute_completeness(package)
+        # Mark stale first so completeness recomputes against the cleared build
+        # state (a fresh slot can invalidate a previously built / issued ZIP).
         await self._mark_stale(package)
+        await self.recompute_completeness(package)
         await self.session.commit()
         await self.session.refresh(slot)
         return slot
@@ -232,6 +259,7 @@ class CloseoutService:
         self.session.add(slot)
         await self.session.flush()
         package = await self.get_package_or_404(slot.package_id)
+        await self._mark_stale(package)
         await self.recompute_completeness(package)
         await self.session.commit()
         await self.session.refresh(slot)
@@ -241,6 +269,7 @@ class CloseoutService:
         package_id = slot.package_id
         await self.repo.delete_slot(slot.id)
         package = await self.get_package_or_404(package_id)
+        await self._mark_stale(package)
         await self.recompute_completeness(package)
         await self.session.commit()
 
@@ -284,8 +313,8 @@ class CloseoutService:
             metadata_=dict(metadata or {}),
         )
         await self.repo.add_binding(binding)
-        await self.recompute_completeness(package)
         await self._mark_stale(package)
+        await self.recompute_completeness(package)
         await self.session.commit()
         await self.session.refresh(binding)
         return binding
@@ -293,8 +322,8 @@ class CloseoutService:
     async def unbind_slot(self, slot: CloseoutSlot) -> None:
         package = await self.get_package_or_404(slot.package_id)
         await self.repo.delete_bindings_for_slot(slot.id)
-        await self.recompute_completeness(package)
         await self._mark_stale(package)
+        await self.recompute_completeness(package)
         await self.session.commit()
 
     async def verify_slot(self, slot: CloseoutSlot, *, is_verified: bool, verified_by: str | None) -> CloseoutBinding:
@@ -311,8 +340,8 @@ class CloseoutService:
         self.session.add(binding)
         await self.session.flush()
         package = await self.get_package_or_404(slot.package_id)
-        await self.recompute_completeness(package)
         await self._mark_stale(package)
+        await self.recompute_completeness(package)
         await self.session.commit()
         await self.session.refresh(binding)
         return binding
@@ -552,7 +581,9 @@ class CloseoutService:
             if blob is not None:
                 generated.append(("generated/final_inspection_certificates.pdf", blob))
 
-        gaps = await self.gaps(package)
+        # The build is producing the generated artifacts right now, so report
+        # them as present for this package's own cover / manifest readiness.
+        gaps = await self.gaps(package, treat_built=True)
         ready = len(gaps) == 0 and package.required_slot_count > 0
 
         # ── Cover PDF ────────────────────────────────────────────────────

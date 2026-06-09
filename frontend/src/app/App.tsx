@@ -49,6 +49,9 @@ const TakeoffPage = lazy(() =>
 const CadDataExplorerPage = lazy(() =>
   import('@/features/cad-explorer/CadDataExplorerPage').then((m) => ({ default: m.CadDataExplorerPage }))
 );
+const PointCloudPage = lazy(() =>
+  import('@/features/pointcloud/PointCloudPage').then((m) => ({ default: m.PointCloudPage }))
+);
 const MatchElementsPage = lazy(() =>
   import('@/features/match-elements/MatchElementsPage').then((m) => ({ default: m.MatchElementsPage }))
 );
@@ -857,6 +860,7 @@ export default function App() {
         <Route path="/cad-explorer" element={<Navigate to="/data-explorer" replace />} />
         <Route path="/data-explorer" element={<P title="Data Explorer"><CadDataExplorerPage /></P>} />
         <Route path="/match-elements" element={<P title="Match Elements"><MatchElementsPage /></P>} />
+        <Route path="/pointcloud" element={<P title="Point Cloud"><PointCloudPage /></P>} />
         <Route path="/bim" element={<P title="BIM Viewer"><BIMPage /></P>} />
         <Route path="/bim/federations" element={<P title="BIM Federations"><FederationsPage /></P>} />
         <Route path="/bim/rules" element={<P title="BIM Rules"><BIMQuantityRulesPage /></P>} />

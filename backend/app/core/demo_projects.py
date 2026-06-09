@@ -62,37 +62,6 @@ def _id() -> uuid.UUID:
     return uuid.uuid4()
 
 
-# A 1x1 PNG - a valid, tiny image the photo endpoint can serve even when
-# Pillow is unavailable, so a seeded photo never 404s on disk.
-_FALLBACK_PNG = bytes.fromhex(
-    "89504e470d0a1a0a0000000d4948445200000001000000010802000000907753de"
-    "0000000c4944415408d763a8a9a90100028a01354f9f2be40000000049454e44ae426082"
-)
-
-
-def _write_placeholder_png(path, color: tuple[int, int, int], caption: str) -> None:
-    """Write a small valid PNG to ``path`` (a real on-disk file, not a stub).
-
-    Uses Pillow to render a labelled colour swatch when available, otherwise
-    falls back to a committed 1x1 PNG byte string. Either way the file exists on
-    disk so the photo-serving endpoint returns the image instead of a 404.
-    """
-    try:
-        from PIL import Image, ImageDraw
-
-        img = Image.new("RGB", (640, 420), color)
-        draw = ImageDraw.Draw(img)
-        # Plain label, no font dependency - default bitmap font is always present.
-        draw.text((24, 24), "OpenEstimate demo", fill=(255, 255, 255))
-        draw.text((24, 48), caption[:48], fill=(255, 255, 255))
-        img.save(str(path), format="PNG")
-    except Exception:
-        # Pillow missing or render failure - still materialise a valid image.
-        from pathlib import Path as _Path
-
-        _Path(path).write_bytes(_FALLBACK_PNG)
-
-
 def _make_section(
     *,
     boq_id: uuid.UUID,
@@ -9056,52 +9025,13 @@ async def _seed_module_data(
     except Exception:
         logger.debug("Full EVM module not loaded, skipping demo forecasts", exc_info=True)
 
-    # ── Project photos (real placeholder files so the strip never 404s) ─
-    try:
-        from app.modules.documents.models import ProjectPhoto
-        from app.modules.documents.service import PHOTO_BASE
-
-        _photo_specs = [
-            ("Site overview", "site", (203, 213, 225)),
-            ("Foundation works", "progress", (148, 163, 184)),
-            ("Structure rising", "progress", (100, 116, 139)),
-            ("Facade installation", "progress", (71, 85, 105)),
-            ("Interior fit-out", "progress", (51, 65, 85)),
-        ]
-        # Photos are CASCADE on project, so a force-reinstall already removed
-        # any prior rows; clear by project_id defensively for partial re-seeds.
-        await session.execute(delete(ProjectPhoto).where(ProjectPhoto.project_id == project_id))
-        await session.flush()
-        photo_dir = PHOTO_BASE / "demo" / str(project_id)
-        photo_dir.mkdir(parents=True, exist_ok=True)
-        photo_count = 0
-        for p_idx, (caption, category, color) in enumerate(_photo_specs):
-            fname = f"{_pkey}_{p_idx + 1:02d}.png"
-            fpath = photo_dir / fname
-            try:
-                _write_placeholder_png(fpath, color, caption)
-            except Exception:
-                logger.debug("Placeholder photo write failed for %s", fpath, exc_info=True)
-                continue
-            session.add(
-                ProjectPhoto(
-                    id=_id(),
-                    project_id=project_id,
-                    filename=fname,
-                    file_path=str(fpath),
-                    caption=caption,
-                    category=category,
-                    tags=["demo"],
-                    taken_at=base + timedelta(days=p_idx * 21),
-                    created_by=owner_str,
-                    metadata_={"demo_id": demo_id, "is_demo": True},
-                )
-            )
-            photo_count += 1
-        await session.flush()
-        results["photos"] = photo_count
-    except Exception:
-        logger.debug("Documents/photos module not loaded, skipping demo photos", exc_info=True)
+    # ── Project photos ──────────────────────────────────────────────────
+    # Real construction photos are seeded centrally by
+    # ``app.modules.documents.photos_seed.seed_photos`` (wired into the demo
+    # account startup seeders) once every project exists, so the gallery and
+    # the dashboard "latest photos" widget render real images. This block used
+    # to write small placeholder swatches, which looked like broken thumbnails
+    # and also shadowed the real seeder, so it was removed.
 
     await session.flush()
     return results
@@ -9179,6 +9109,11 @@ async def install_demo_project(
         name=template.project_name,
         description=template.project_description,
         region=template.region,
+        # The column defaults to "DE"; derive the real ISO-3166 code from the
+        # template's country so a Toronto / Delhi / Sao Paulo project does not
+        # look German to the country rules (falls back to the default when the
+        # country name is not mapped).
+        country_code=(_country_code_for(template) or "DE"),
         classification_standard=template.classification_standard,
         currency=template.currency,
         locale=template.locale,
@@ -9413,6 +9348,7 @@ async def install_demo_project(
         # Auto-generate schedule activities from BOQ sections
         current_start = start
         prev_id = None
+        sched_now = datetime.now()
 
         for i, sec in enumerate(sections_list):
             sec_items = [p for p in items_list if str(p.parent_id) == str(sec.id)]
@@ -9421,10 +9357,20 @@ async def install_demo_project(
             dur = max(14, int(total_months * 30 * pct))
 
             if i > 0:
-                current_start = current_start - timedelta(days=int(dur * 0.35))
+                # Overlap with the previous phase but never start before the
+                # programme window opens. A large phase after a short one could
+                # otherwise be backdated and pick up a false "delayed" status.
+                current_start = max(start, current_start - timedelta(days=int(dur * 0.35)))
 
             end_date = current_start + timedelta(days=dur)
-            prog = min(90, int((i / max(len(sections_list), 1)) * 75 + 10))
+            # Progress relative to the current date so finished phases read
+            # complete and future ones planned (no false "delayed" badges).
+            if end_date <= sched_now:
+                prog = 100
+            elif current_start >= sched_now:
+                prog = 0
+            else:
+                prog = max(0, min(99, int((sched_now - current_start).days / max(dur, 1) * 100)))
 
             act = Activity(
                 id=_id(),
@@ -9436,7 +9382,7 @@ async def install_demo_project(
                 end_date=end_date.strftime("%Y-%m-%d"),
                 duration_days=dur,
                 progress_pct=str(prog),  # see note above - String(10), asyncpg-strict
-                status="in_progress" if prog > 0 else "planned",
+                status="completed" if prog >= 100 else "in_progress" if prog > 0 else "planned",
                 color="#ef4444" if i % 3 == 0 else "#0071e3",
                 dependencies=[str(prev_id)] if prev_id else [],
                 boq_position_ids=[str(p.id) for p in sec_items],

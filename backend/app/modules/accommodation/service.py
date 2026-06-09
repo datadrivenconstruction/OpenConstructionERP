@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.accommodation.models import (
     Accommodation,
     Booking,
+    Charge,
     Room,
 )
 
@@ -45,6 +46,43 @@ def is_valid_booking_transition(current: str, target: str) -> bool:
     if current == target:
         return True  # idempotent updates are fine
     return target in _BOOKING_TRANSITIONS.get(current, set())
+
+
+# Charge lifecycle: pending → invoiced → paid, with ``waived`` reachable
+# from any non-paid state (an operator can write off a charge before it is
+# settled). ``paid`` and ``waived`` are terminal: a settled or written-off
+# line-item is a closed financial record and must not silently change.
+_CHARGE_TRANSITIONS: dict[str, set[str]] = {
+    "pending": {"invoiced", "paid", "waived"},
+    "invoiced": {"paid", "waived"},
+    "paid": set(),
+    "waived": set(),
+}
+
+# Charge statuses whose line-items are locked against edit / delete. Once a
+# charge is settled (``paid``) or written off (``waived``) it is part of the
+# financial trail and may only be inspected, never mutated or removed.
+_LOCKED_CHARGE_STATUSES: tuple[str, ...] = ("paid", "waived")
+
+
+def is_valid_charge_transition(current: str, target: str) -> bool:
+    """Return True iff ``current → target`` is allowed by the charge machine."""
+    if current == target:
+        return True  # idempotent updates are fine
+    return target in _CHARGE_TRANSITIONS.get(current, set())
+
+
+def assert_charge_mutable(charge: Charge) -> None:
+    """Raise 409 if the charge's status forbids edits / deletion.
+
+    A ``paid`` or ``waived`` charge is a closed financial record; correcting
+    it means reversing the settlement first, not editing the line in place.
+    """
+    if charge.status in _LOCKED_CHARGE_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(f"Charge is {charge.status} and can no longer be modified"),
+        )
 
 
 # ── Project-access helper (IDOR gate) ─────────────────────────────────────
@@ -164,6 +202,30 @@ async def get_booking_or_404(
         )
     room, accom = await get_room_or_404(session, booking.room_id, user_id)
     return booking, room, accom
+
+
+async def get_charge_or_404(
+    session: AsyncSession,
+    charge_id: uuid.UUID,
+    user_id: str,
+) -> tuple[Charge, Booking, Room, Accommodation]:
+    """Load a charge + its booking / room / accommodation, IDOR-gated.
+
+    Returns 404 (never 403) when the caller cannot reach the parent
+    project, consistent with the rest of the module.
+    """
+    charge = await session.get(Charge, charge_id)
+    if charge is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Charge not found",
+        )
+    booking, room, accom = await get_booking_or_404(
+        session,
+        charge.booking_id,
+        user_id,
+    )
+    return charge, booking, room, accom
 
 
 # ── Booking creation gate ────────────────────────────────────────────────
@@ -578,7 +640,32 @@ async def inherit_currency_for_room(
     accommodation: Accommodation,
     explicit: str,
 ) -> str:
-    """Apply the v3 EUR-default-kill rule: fall back to project currency."""
-    if explicit:
-        return explicit
+    """Apply the v3 EUR-default-kill rule: fall back to project currency.
+
+    A blank-or-whitespace explicit value inherits rather than persisting a
+    meaningless ``"  "`` string. The schema already strips whitespace on
+    the happy path, but normalising here keeps every caller safe even if a
+    future write path skips the schema layer.
+    """
+    if explicit and explicit.strip():
+        return explicit.strip()
     return await _resolve_project_currency(session, accommodation.project_id)
+
+
+async def resolve_charge_currency(
+    session: AsyncSession,
+    room: Room,
+    accommodation: Accommodation,
+    explicit: str | None,
+) -> str:
+    """Resolve a charge currency: explicit → room → project, never blank-stored.
+
+    Treats ``None`` / empty / whitespace-only ``explicit`` as "inherit" so a
+    charge never lands a meaningless ``"  "`` in the DB (Defect #5). Falls
+    back room → project, mirroring the create path.
+    """
+    if explicit and explicit.strip():
+        return explicit.strip()
+    if room.base_rate_currency and room.base_rate_currency.strip():
+        return room.base_rate_currency.strip()
+    return await inherit_currency_for_room(session, accommodation, "")

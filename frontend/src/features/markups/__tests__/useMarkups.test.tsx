@@ -178,4 +178,49 @@ describe('useMarkups', () => {
     await waitFor(() => expect(result.current.markups.length).toBe(1));
     expect(result.current.commentCounts['m-1']).toBe(0);
   });
+
+  it('flags markups in commentCountErrors when the comments fetch fails', async () => {
+    apiGet.mockImplementationOnce(async () => [
+      {
+        id: 'm-1',
+        project_id: 'p-1',
+        document_id: 'd-1',
+        page: 1,
+        type: 'rectangle',
+        geometry: {},
+        text: null,
+        color: '#3b82f6',
+        line_width: 2,
+        opacity: 1,
+        author_id: 'u-1',
+        status: 'active',
+        label: null,
+        measurement_value: null,
+        measurement_unit: null,
+        stamp_template_id: null,
+        linked_boq_position_id: null,
+        metadata: {},
+        created_by: 'u-1',
+        created_at: '2026-05-12T00:00:00Z',
+        updated_at: '2026-05-12T00:00:00Z',
+      },
+    ]);
+    // The comments fetch rejects: the count must fall back to 0 AND the id
+    // must surface in commentCountErrors so the badge is not silently 0.
+    apiGet.mockImplementationOnce(async () => {
+      throw new Error('comments fetch failed');
+    });
+
+    const { result } = renderHook(
+      () =>
+        useMarkups({ projectId: 'p-1', documentId: 'd-1', pageNumber: 1 }),
+      { wrapper: wrapper() },
+    );
+
+    await waitFor(() =>
+      expect(result.current.commentCountErrors.has('m-1')).toBe(true),
+    );
+    expect(result.current.commentCounts['m-1']).toBe(0);
+    expect(result.current.error).toBeTruthy();
+  });
 });

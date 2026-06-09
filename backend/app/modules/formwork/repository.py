@@ -77,10 +77,20 @@ class FormworkSystemRepository(_CRUDBase):
         self,
         tenant_id: uuid.UUID | None,
     ) -> set[str]:
-        """Used by the seed endpoint to skip already-installed defaults."""
-        stmt = select(FormworkSystem.name).where(
-            (FormworkSystem.tenant_id == tenant_id) if tenant_id is not None else FormworkSystem.tenant_id.is_(None)
-        )
+        """Names visible to ``tenant_id``, used by the seed endpoint to skip
+        already-installed defaults.
+
+        Visibility must match :meth:`list_filtered`: a tenant sees its own
+        rows **and** global (``tenant_id IS NULL``) rows. If we only matched
+        the exact tenant here, seeding for a tenant would re-insert a
+        tenant-scoped copy of every default that already exists globally,
+        and the catalogue list would then show each starter system twice.
+        """
+        stmt = select(FormworkSystem.name)
+        if tenant_id is not None:
+            stmt = stmt.where((FormworkSystem.tenant_id == tenant_id) | (FormworkSystem.tenant_id.is_(None)))
+        else:
+            stmt = stmt.where(FormworkSystem.tenant_id.is_(None))
         result = await self.session.execute(stmt)
         return {row[0] for row in result.all()}
 

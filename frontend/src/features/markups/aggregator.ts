@@ -132,9 +132,15 @@ export function fromMarkupsHub(
     status: (m.status as UnifiedMarkup['status']) || 'active',
     author: m.created_by || m.author_id || 'unknown',
     createdAt: m.created_at,
+    // The markups page reads ``openDoc`` + ``markup`` (+ optional ``page``)
+    // from the query string, NOT ``documentId``/``markupId`` - emitting the
+    // wrong names left the deep link inert (it opened the page but never
+    // selected the document or highlighted the row).
     deepLink: m.document_id
-      ? `/markups?documentId=${encodeURIComponent(m.document_id)}&markupId=${m.id}`
-      : `/markups?markupId=${m.id}`,
+      ? `/markups?openDoc=${encodeURIComponent(m.document_id)}&markup=${m.id}${
+          m.page ? `&page=${m.page}` : ''
+        }`
+      : `/markups?markup=${m.id}`,
   };
 }
 
@@ -195,8 +201,11 @@ export function fromPdfMeasurement(
     status: 'active',
     author: m.created_by || 'unknown',
     createdAt: m.created_at,
+    // The takeoff page restores the viewer from ``?doc=`` (not ``docId``)
+    // when ``tab=measurements``; ``measurementId`` then selects and scrolls
+    // to the row. Emitting ``docId`` left the viewer blank.
     deepLink: m.document_id
-      ? `/takeoff?tab=measurements&docId=${encodeURIComponent(m.document_id)}&measurementId=${m.id}`
+      ? `/takeoff?tab=measurements&doc=${encodeURIComponent(m.document_id)}&measurementId=${m.id}`
       : `/takeoff?tab=measurements&measurementId=${m.id}`,
   };
 }

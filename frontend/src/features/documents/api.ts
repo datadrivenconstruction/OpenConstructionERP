@@ -135,7 +135,10 @@ export async function fetchPhoto(id: string): Promise<PhotoItem> {
 }
 
 export function getPhotoFileUrl(id: string): string {
-  return `/api/v1/documents/photos/${id}/file`;
+  // Trailing slash is required: the backend route is
+  // ``/photos/{id}/file/`` and the API runs with redirect_slashes off,
+  // so the slashless form 404s and the full-size view never loads.
+  return `/api/v1/documents/photos/${id}/file/`;
 }
 
 /** Thumbnail endpoint. Falls back to the full file server-side when no

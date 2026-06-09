@@ -1,5 +1,5 @@
 /**
- * useMarkups — React-Query hook that loads markups for a single
+ * useMarkups - React-Query hook that loads markups for a single
  * (document, page) pair and exposes a per-markup comment-count map for
  * badge rendering.
  *
@@ -30,6 +30,10 @@ export interface UseMarkupsResult {
   /** ``markup_id -> comment_count``. Empty until the per-markup queries
    *  resolve; falls back to 0 for unseen ids. */
   commentCounts: Record<string, number>;
+  /** Set of markup ids whose comment fetch errored. The UI can mark the
+   *  badge as unknown (e.g. a muted dash) instead of silently showing 0,
+   *  which would hide the fact that comments exist. */
+  commentCountErrors: Set<string>;
   isLoading: boolean;
   error: Error | null;
 }
@@ -81,14 +85,27 @@ export function useMarkups({
     })),
   });
 
-  const commentCounts = useMemo(() => {
-    const out: Record<string, number> = {};
+  const { commentCounts, commentCountErrors } = useMemo(() => {
+    const counts: Record<string, number> = {};
+    const errors = new Set<string>();
     markups.forEach((m, idx) => {
       const q = commentQueries[idx];
-      // Treat in-flight queries as 0 — the badge updates on resolve.
-      out[m.id] = q?.data ? q.data.length : 0;
+      const data = q?.data;
+      // React Query keeps the last good ``data`` on a refetch error, so a
+      // populated array is still the truthy count. Only when there is no
+      // data AND the query errored do we flag the id as unknown rather
+      // than silently reporting 0 (which would hide that comments exist).
+      if (Array.isArray(data)) {
+        counts[m.id] = data.length;
+      } else {
+        // In-flight queries report 0; errored-with-no-data are flagged.
+        counts[m.id] = 0;
+        if (q?.isError) {
+          errors.add(m.id);
+        }
+      }
     });
-    return out;
+    return { commentCounts: counts, commentCountErrors: errors };
   }, [markups, commentQueries]);
 
   const error =
@@ -99,6 +116,7 @@ export function useMarkups({
   return {
     markups,
     commentCounts,
+    commentCountErrors,
     isLoading: markupsQuery.isLoading,
     error,
   };

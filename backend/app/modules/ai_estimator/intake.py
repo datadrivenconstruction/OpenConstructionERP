@@ -103,10 +103,9 @@ _PROBE_LOW_FLOOR = 0.30
 # The composer's total probe-call ceiling (20 cells x 3 phrasings). Beyond it,
 # only the first phrasing of each cell is probed (honest cap, like the matcher).
 _PROBE_CALL_CAP = 60
-# Bounded concurrency for the probe fan-out (the rest of the module follows the
-# same asyncio.gather + semaphore pattern).
-_PROBE_CONCURRENCY = 6
-# top_k for a probe (small - we only need the top-1 score).
+# top_k for a probe (small - we only need the top-1 score). The probes share the
+# request's single AsyncSession (which is not concurrency-safe), so they run
+# serially - see ``_compose`` for the rationale - rather than fanning out.
 _PROBE_TOP_K = 5
 
 
@@ -629,14 +628,24 @@ class IntakeService:
                 await self._delete_groups(entry.get("group_ids") or [])
 
         sort_base = await self._next_sort_order(run.id)
-        semaphore = asyncio.Semaphore(_PROBE_CONCURRENCY)
+        # The probe goes through ``rank()``, which uses THIS request's shared
+        # AsyncSession. An AsyncSession is not safe for concurrent use, so the
+        # cells are probed one at a time (the per-phrasing fan-out inside
+        # ``_probe_best`` is likewise serialised). Running them through
+        # ``asyncio.gather`` here corrupted the session mid-request: every probe
+        # failed with MissingGreenlet (silently degrading the whole board to
+        # gaps) and, worse, the shared ``run`` instance was left expired so the
+        # very next ``run.currency`` read in ``_persist_group`` raised and 500'd
+        # the confirm-parameters call. Sequential probing keeps the session
+        # consistent and the real grounded scores intact.
+        semaphore = asyncio.Semaphore(1)
 
         async def _probe_cell(pkg: WorkPackage, stage: str) -> dict[str, Any]:
             phrasings = pkg.probes if not probe_first_only else pkg.probes[:1]
             best_desc, best_score = await self._probe_best(run, phrasings, pkg.unit, stage, semaphore)
             return {"pkg": pkg, "stage": stage, "desc": best_desc, "score": best_score}
 
-        results = await asyncio.gather(*[_probe_cell(pkg, stage) for pkg, stage in cells])
+        results: list[dict[str, Any]] = [await _probe_cell(pkg, stage) for pkg, stage in cells]
 
         # Persist groups in build-stage order so the board reads top-to-bottom.
         results.sort(key=lambda r: (FOREMAN_STAGES.index(r["stage"]), r["pkg"].key))

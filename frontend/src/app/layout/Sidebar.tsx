@@ -199,7 +199,25 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.project_files', to: '/files', icon: HardDrive },
     ],
   },
-  // ── 2. ESTIMATING ──────────────────────────────────────────────────
+  // ── 2. TAKEOFF ─────────────────────────────────────────────────────
+  // Quantity extraction across every source: 2D drawings (quantities, PDF
+  // measurements, DWG takeoff) and the 3D BIM model (BIM 3D Takeoff). Comes
+  // before Estimating - you measure quantities first, then price them. The
+  // pure spatial surfaces (geo, point cloud, CAD-BIM explorer) stay in the
+  // "Reality Capture & 3D" group below.
+  {
+    id: 'grp_takeoff',
+    labelKey: 'sidebar.group.takeoff',
+    defaultLabel: 'Takeoff',
+    defaultOpen: false,
+    items: [
+      { labelKey: 'nav.quantities', to: '/quantities', icon: Ruler },
+      { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
+      { labelKey: 'nav.dwg_takeoff', to: '/dwg-takeoff', icon: PencilRuler },
+      { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box },
+    ],
+  },
+  // ── 3. ESTIMATING ──────────────────────────────────────────────────
   // The project's cost work-product: BOQ, the BIM↔catalogue match, the
   // AI estimate and the estimation intelligence dashboard.
   {
@@ -212,12 +230,12 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.ai_estimator', to: '/ai-estimator', icon: Wand2 },
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles, badge: 'BETA' },
       { labelKey: 'nav.match_elements', to: '/match-elements', icon: Link2, badge: 'BETA' },
-      { labelKey: 'nav.estimation_dashboard', to: '/project-intelligence', icon: BrainCircuit, badge: 'BETA' },
+      { labelKey: 'nav.estimation_dashboard', to: '/project-intelligence', icon: BrainCircuit },
     ],
   },
-  // ── 3. COST DATA ───────────────────────────────────────────────────
+  // ── 4. COST DATA ───────────────────────────────────────────────────
   // Cross-project reference data: cost databases, catalogues, assemblies,
-  // and the cost-benchmark surface (re-added — it was dropped before).
+  // and the cost-benchmark surface (re-added - it was dropped before).
   {
     id: 'grp_cost_data',
     labelKey: 'sidebar.group.cost_data',
@@ -230,26 +248,12 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.benchmarks', to: '/benchmarks', icon: BarChart3, moduleKey: 'cost-benchmark', advancedOnly: true },
     ],
   },
-  // ── 4. TAKEOFF ─────────────────────────────────────────────────────
-  // 2D quantity extraction from drawings (quantities, PDF measurements,
-  // DWG takeoff). The 3D / spatial surfaces (geo, BIM viewer, CAD-BIM
-  // explorer) moved to the dedicated "Reality Capture & 3D" group below.
-  {
-    id: 'grp_takeoff',
-    labelKey: 'sidebar.group.takeoff',
-    defaultLabel: 'Takeoff',
-    defaultOpen: false,
-    items: [
-      { labelKey: 'nav.quantities', to: '/quantities', icon: Ruler },
-      { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
-      { labelKey: 'nav.dwg_takeoff', to: '/dwg-takeoff', icon: PencilRuler },
-    ],
-  },
   // ── 5. REALITY CAPTURE & 3D ─────────────────────────────────────────
   // The 3D / spatial cluster: the geo overlay (site/spatial context),
-  // point-cloud reality capture (laser scan / photogrammetry / LiDAR),
-  // the BIM viewer and the CAD-BIM data explorer. This is the founder-
-  // requested dedicated home for spatial surfaces (point-cloud plan
+  // point-cloud reality capture (laser scan / photogrammetry / LiDAR) and
+  // the CAD-BIM data explorer. The BIM 3D model viewer moved up to Takeoff
+  // (it is a quantity-extraction surface). This is the founder-requested
+  // dedicated home for spatial surfaces (point-cloud plan
   // `docs/strategy/POINTCLOUD_AND_SPATIAL_PLAN.md`, section 4); it
   // supersedes the earlier "no separate sidebar section" note for this
   // spatial context only. `oe_pointcloud`'s frontend manifest injects its
@@ -264,7 +268,6 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'sidebar.geo_hub', to: '/geo', icon: Globe },
       { labelKey: 'nav.point_cloud', to: '/pointcloud', icon: ScanLine, badge: 'BETA' },
-      { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box },
       { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties, advancedOnly: true },
     ],
   },

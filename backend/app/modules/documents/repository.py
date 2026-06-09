@@ -224,6 +224,42 @@ class PhotoRepository:
 
         return items, total
 
+    async def recent_across_projects(
+        self,
+        project_ids: list[uuid.UUID],
+        *,
+        limit: int = 12,
+    ) -> list[tuple[ProjectPhoto, str]]:
+        """Return the most recent photos across ``project_ids``, newest first.
+
+        Joins each photo to its project so the caller gets the project
+        name in one round trip. Ordering prefers ``taken_at`` (when the
+        shutter fired) and falls back to ``created_at`` for photos with no
+        EXIF capture date, so a freshly uploaded photo without EXIF still
+        sorts sensibly. Returns ``(photo, project_name)`` pairs.
+
+        An empty ``project_ids`` list short-circuits to ``[]`` so we never
+        emit a ``WHERE project_id IN ()`` that some backends choke on.
+        """
+        if not project_ids:
+            return []
+
+        from app.modules.projects.models import Project
+
+        # coalesce(taken_at, created_at) gives a single sortable instant so
+        # null capture dates fall back to upload time instead of sinking to
+        # the bottom of the list.
+        sort_instant = func.coalesce(ProjectPhoto.taken_at, ProjectPhoto.created_at)
+        stmt = (
+            select(ProjectPhoto, Project.name)
+            .join(Project, Project.id == ProjectPhoto.project_id)
+            .where(ProjectPhoto.project_id.in_(project_ids))
+            .order_by(sort_instant.desc(), ProjectPhoto.created_at.desc())
+            .limit(limit)
+        )
+        rows = (await self.session.execute(stmt)).all()
+        return [(row[0], row[1]) for row in rows]
+
     async def update_fields(self, photo_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on a photo."""
         stmt = update(ProjectPhoto).where(ProjectPhoto.id == photo_id).values(**fields)
