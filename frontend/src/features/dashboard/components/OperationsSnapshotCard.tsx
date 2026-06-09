@@ -228,7 +228,7 @@ export function OperationsSnapshotCard({ projects }: { projects?: ProjectRef[] }
 
   return (
     <div className="animate-card-in" style={{ animationDelay: '160ms' }}>
-      <Card>
+      <Card className="!bg-surface-elevated/70">
         <div className="px-4 pt-3 pb-1">
           <h3 className="text-sm font-semibold text-content-primary">
             {t('dashboard.snapshot_title', { defaultValue: 'Operations snapshot' })}

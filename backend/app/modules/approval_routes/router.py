@@ -30,6 +30,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.dependencies import (
     CurrentUserId,
+    CurrentUserPayload,
     RequirePermission,
     SessionDep,
     verify_project_access,
@@ -378,9 +379,15 @@ async def submit_decision(
     payload: DecisionSubmit,
     session: SessionDep,
     user_id: CurrentUserId,
+    user_payload: CurrentUserPayload,
     service: ApprovalRouteService = Depends(_get_service),
 ) -> InstanceResponse:
-    """Approve / reject the current step on an instance."""
+    """Approve / reject the current step on an instance.
+
+    The caller's app role (from the JWT payload) is passed through so the
+    service can enforce a role-based step's approver role, not just the
+    ``approval_routes.decide`` permission.
+    """
     instance = await service.get_instance(instance_id)
     route = await service.get_route(instance.route_id)
     if route.project_id is not None:
@@ -389,6 +396,7 @@ async def submit_decision(
         instance_id,
         payload,
         approver_id=_safe_user_uuid(user_id),
+        caller_role=user_payload.get("role"),
     )
     return await _instance_to_response(updated, service)
 

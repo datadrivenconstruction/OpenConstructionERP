@@ -2331,6 +2331,43 @@ class BOQService:
                 fx_map[code] = rate
         return base, fx_map
 
+    async def _resolve_project_fx_by_project(
+        self,
+        project_id: uuid.UUID,
+    ) -> tuple[str, dict[str, str]]:
+        """Resolve ``(base_currency, {code: rate})`` keyed by ``project_id``.
+
+        Sibling of :meth:`_resolve_project_fx` for the project-scoped rollups
+        (Project Intelligence widgets) that already hold a project id rather
+        than a BOQ id, so they can convert foreign-currency position totals to
+        the project BASE before summing. Best-effort: any failure returns
+        ``("", {})`` so the widget degrades to raw sums rather than a 500.
+        """
+        try:
+            from app.modules.projects.models import Project
+
+            row = (
+                await self.session.execute(
+                    select(Project.currency, Project.fx_rates).where(Project.id == project_id),
+                )
+            ).first()
+        except Exception:  # noqa: BLE001 - never break a widget on this lookup
+            logger.debug("Project FX lookup failed for project %s", project_id, exc_info=True)
+            return "", {}
+        if not row:
+            return "", {}
+        base = str(row[0]).strip()[:3].upper() if row[0] else ""
+        raw = row[1] if isinstance(row[1], list) else []
+        fx_map: dict[str, str] = {}
+        for entry in raw:
+            if not isinstance(entry, dict):
+                continue
+            code = str(entry.get("code") or "").strip().upper()
+            rate = str(entry.get("rate") or "").strip()
+            if code and rate:
+                fx_map[code] = rate
+        return base, fx_map
+
     async def _find_content_duplicate(
         self,
         boq_id: uuid.UUID,
@@ -4819,11 +4856,15 @@ class BOQService:
         positions = await self.position_repo.list_all_for_boq(boq_id)
         markups = await self.markup_repo.list_for_boq(boq_id)
 
-        # Direct cost: sum of totals for non-section items only
+        # Direct cost: sum of totals for non-section items only, converted to
+        # the project BASE currency so foreign-currency lines are not blended
+        # into the base figure (FX-aware, consistent with get_boq_structured).
+        # Best-effort FX: a lookup failure degrades to raw sums rather than a 500.
+        base_ccy, fx_map = await self._resolve_project_fx(boq_id)
         direct_cost = Decimal("0")
         for pos in positions:
             if not _is_section(pos):
-                direct_cost += Decimal(str(_str_to_float(pos.total)))
+                direct_cost += _leaf_total_base_with_resources(pos, fx_map, base_ccy or "")
 
         calculated = _calculate_markup_amounts(direct_cost, markups)
         return direct_cost, calculated
@@ -4955,17 +4996,23 @@ class BOQService:
             resources = [r for r in resources if isinstance(r, dict)]
             snapshots.append((pos.id, resources, pos.quantity))
 
+        # Resolve the project FX table once so foreign-currency resources are
+        # converted to the project BASE currency before summing, exactly as
+        # ``update_position`` does. Best-effort: a lookup failure returns
+        # ("", {}) so the derivation degrades to a raw sum rather than a 500.
+        fx_base_ccy, fx_map = await self._resolve_project_fx(boq_id)
+
         updated = 0
         skipped = 0
         for pos_id, resources, pos_qty_raw in snapshots:
             if resources:
-                # Per-unit norm: unit_rate = Σ(r.qty × r.rate), NO division
-                # by position quantity (mirrors update_position).
-                total_resource_cost = sum(
-                    float(r.get("quantity", 0) or 0) * float(r.get("unit_rate", 0) or 0) for r in resources
-                )
-                if total_resource_cost > 0:
-                    new_unit_rate = _quantize_money_str(str(total_resource_cost))
+                # Per-unit norm: unit_rate = Σ(r.qty × r.rate in base), NO
+                # division by position quantity (mirrors update_position).
+                # Each resource is converted from its own currency to the
+                # project base before summing so the stored rate never blends
+                # currencies (Issue #88 / #157).
+                new_unit_rate = _quantize_money_str(_resource_total_in_base(resources, fx_map, fx_base_ccy or ""))
+                if _to_decimal(new_unit_rate) > 0:
                     new_total = _compute_total(pos_qty_raw, new_unit_rate)
                     await self.position_repo.update_fields(
                         pos_id,
@@ -8400,6 +8447,12 @@ class BOQService:
         if not positions:
             return []
 
+        # Convert each position total to the project BASE currency before
+        # bucketing so foreign-currency lines are not blended into the base
+        # rollup (consistent with get_boq_structured). Best-effort FX: a
+        # lookup failure degrades to raw sums rather than a 500.
+        base_ccy, fx_map = await self._resolve_project_fx_by_project(project_id)
+
         buckets: dict[str, dict[str, Any]] = {}
         for pos in positions:
             classification = pos.classification or {}
@@ -8407,15 +8460,15 @@ class BOQService:
             key = code or "(unclassified)"
             entry = buckets.setdefault(
                 key,
-                {"code": key, "label": key, "total": 0.0, "position_count": 0},
+                {"code": key, "label": key, "total": Decimal("0"), "position_count": 0},
             )
-            entry["total"] += _str_to_float(pos.total)
+            entry["total"] += _leaf_total_base_with_resources(pos, fx_map, base_ccy or "")
             entry["position_count"] += 1
 
         rows = list(buckets.values())
         rows.sort(key=lambda r: (-r["total"], r["code"]))
         for row in rows:
-            row["total"] = round(row["total"], 2)
+            row["total"] = float(_round_currency(row["total"]))
         return rows
 
     async def get_anomalies(self, project_id: uuid.UUID) -> list[dict[str, Any]]:

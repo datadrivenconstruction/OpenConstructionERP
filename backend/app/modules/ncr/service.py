@@ -39,11 +39,8 @@ class NCRService:
         user_id: str | None = None,
     ) -> NCR:
         """‌⁠‍Create a new NCR with auto-generated number."""
-        ncr_number = await self.repo.next_ncr_number(data.project_id)
-
         ncr = NCR(
             project_id=data.project_id,
-            ncr_number=ncr_number,
             title=data.title,
             description=data.description,
             ncr_type=data.ncr_type,
@@ -62,6 +59,9 @@ class NCRService:
             metadata_=data.metadata,
         )
         ncr = await self.repo.create(ncr)
+        # The repository assigns ncr_number (with a collision retry) at insert
+        # time, so read the committed value back for logging and notifications.
+        ncr_number = ncr.ncr_number
         logger.info(
             "NCR created: %s (%s/%s) for project %s",
             ncr_number,

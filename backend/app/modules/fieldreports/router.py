@@ -110,6 +110,7 @@ async def get_summary(
     session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("fieldreports.read")),
     service: FieldReportService = Depends(_get_service),
 ) -> FieldReportSummary:
     """‌⁠‍Aggregated field report stats for a project."""
@@ -127,6 +128,7 @@ async def get_calendar(
     project_id: uuid.UUID = Query(...),
     month: str = Query(..., pattern=r"^\d{4}-\d{2}$"),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("fieldreports.read")),
     service: FieldReportService = Depends(_get_service),
 ) -> list[FieldReportResponse]:
     """Get reports for a month (calendar view). Month format: YYYY-MM."""
@@ -509,6 +511,7 @@ async def import_field_reports_file(
     session: SessionDep,
     project_id: uuid.UUID = Query(...),
     _user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("fieldreports.create")),
     file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
     service: FieldReportService = Depends(_get_service),
 ) -> dict[str, Any]:
@@ -687,6 +690,7 @@ async def export_field_reports(
     session: SessionDep,
     project_id: uuid.UUID = Query(...),
     _user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("fieldreports.read")),
     service: FieldReportService = Depends(_get_service),
 ) -> StreamingResponse:
     """Export all field reports for a project as an Excel file."""

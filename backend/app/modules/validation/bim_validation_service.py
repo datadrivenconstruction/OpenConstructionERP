@@ -95,7 +95,17 @@ class BIMValidationService:
             )
 
         # 3. Run each rule against every in-scope element
+        #
+        # Counting semantics (kept internally consistent, see step 5):
+        #   total_checks    -> number of (rule, element) checks executed.
+        #   passed_count    -> checks that produced zero failures.
+        #   failed_checks   -> checks that produced at least one failure.
+        #   error/warning/info_count -> number of FAILURES by severity. A
+        #     single failing check can emit several failures, so these can
+        #     sum to more than failed_checks. The invariant we persist is
+        #     passed_count + failed_checks == total_checks (== total_rules).
         passed_count = 0
+        failed_checks = 0
         warning_count = 0
         error_count = 0
         info_count = 0
@@ -125,6 +135,7 @@ class BIMValidationService:
                     total_weight += rule_weight
                     continue
 
+                failed_checks += 1
                 for failure in failures:
                     total_weight += SEVERITY_WEIGHTS.get(str(failure.severity), 1.0)
                     if failure.severity == "error":
@@ -176,10 +187,17 @@ class BIMValidationService:
             )
 
         # 4. Derive overall status + score
+        #
+        # info findings used to be swallowed: a model with only info-level
+        # failures was reported as a clean "passed". They are real unresolved
+        # findings, so surface them with an "info" status rather than hiding
+        # them. errors/warnings still take precedence.
         if error_count > 0:
             status_value = "errors"
         elif warning_count > 0:
             status_value = "warnings"
+        elif info_count > 0:
+            status_value = "info"
         else:
             status_value = "passed"
 
@@ -193,14 +211,16 @@ class BIMValidationService:
 
         duration_ms = round((time.monotonic() - started) * 1000, 2)
         logger.info(
-            "BIM validation done: model=%s elements=%d rules=%d checks=%d passed=%d warn=%d err=%d duration=%.1fms",
+            "BIM validation done: model=%s elements=%d rules=%d checks=%d passed=%d failed=%d warn=%d err=%d info=%d duration=%.1fms",
             model_id,
             total,
             len(rules),
             total_checks,
             passed_count,
+            failed_checks,
             warning_count,
             error_count,
+            info_count,
             duration_ms,
         )
 
@@ -234,6 +254,11 @@ class BIMValidationService:
                 "rule_ids": [r.rule_id for r in rules],
                 "truncated": truncated,
                 "info_count": info_count,
+                # total_rules counts checks; passed_count + failed_check_count
+                # == total_rules. The severity *_count fields above count
+                # failures, which can exceed failed_check_count when one check
+                # emits several failures.
+                "failed_check_count": failed_checks,
             },
         )
         await self.report_repo.create(db_report)

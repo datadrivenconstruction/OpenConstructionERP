@@ -42,7 +42,7 @@ TEMPLATE = DemoTemplate(
         "lat": 28.5921,
         "lng": 77.2290,
     },
-    validation_rule_sets=["masterformat", "boq_quality", "project_completeness"],
+    validation_rule_sets=["cpwd", "masterformat", "boq_quality", "project_completeness"],
     boq_name="Bill of Quantities - CPWD DSR 2021 (Civil & Services)",
     boq_description=(
         "Detailed BoQ prepared on CPWD Delhi Schedule of Rates 2021, "

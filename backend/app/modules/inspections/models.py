@@ -6,7 +6,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import JSON, Float, ForeignKey, Index, String, Text
+from sqlalchemy import JSON, Float, ForeignKey, Index, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -21,6 +21,14 @@ class QualityInspection(Base):
             "ix_oe_inspections_inspection_project_type",
             "project_id",
             "inspection_type",
+        ),
+        # Per-project uniqueness of the human-facing INS-NNN number. COUNT+1
+        # numbering races under concurrent creates; this constraint forces a
+        # retry instead of a duplicate.
+        UniqueConstraint(
+            "project_id",
+            "inspection_number",
+            name="uq_oe_inspections_inspection_project_number",
         ),
     )
 

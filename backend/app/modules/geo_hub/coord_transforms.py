@@ -174,6 +174,11 @@ def transform(
 ) -> tuple[float, float, float]:
     """Transform one (x, y, z) triple between two EPSG codes.
 
+    Axis convention is lon, lat (``always_xy``): for geographic EPSG 4326
+    ``x`` is longitude and ``y`` is latitude, both in degrees. This matches
+    the ``always_xy=True`` pyproj fallback so the built-in fast paths and
+    the library path agree on argument order.
+
     Supports the common WGS84 / Web Mercator / ECEF pairs without any
     external library. Falls through to ``pyproj`` if available for
     anything else (UTM zones, ETRS89, ...). Raises ``NotImplementedError``
@@ -182,19 +187,19 @@ def transform(
     if src_epsg == dst_epsg:
         return x, y, z
 
-    # Built-in fast paths first.
+    # Built-in fast paths first. Geographic 4326 is (lon=x, lat=y).
     if src_epsg == 4326 and dst_epsg == 3857:
-        ex, ey = wgs84_to_web_mercator(x, y)
+        ex, ey = wgs84_to_web_mercator(lat_deg=y, lon_deg=x)
         return ex, ey, z
     if src_epsg == 3857 and dst_epsg == 4326:
         lat, lon = web_mercator_to_wgs84(x, y)
-        return lat, lon, z
+        return lon, lat, z
     if src_epsg == 4326 and dst_epsg == 4978:  # ECEF
-        ex, ey, ez = wgs84_to_ecef(x, y, z)
+        ex, ey, ez = wgs84_to_ecef(lat_deg=y, lon_deg=x, alt_m=z)
         return ex, ey, ez
     if src_epsg == 4978 and dst_epsg == 4326:
         lat, lon, alt = ecef_to_wgs84(x, y, z)
-        return lat, lon, alt
+        return lon, lat, alt
 
     if _has_pyproj():  # pragma: no cover - installer-dependent
         import pyproj
@@ -217,7 +222,10 @@ def project_points(
     dst_epsg: int,
     points: Iterable[tuple[float, float, float]],
 ) -> list[tuple[float, float, float]]:
-    """Vectorised wrapper around :func:`transform`. Pure-Python loop."""
+    """Vectorised wrapper around :func:`transform`. Pure-Python loop.
+
+    Shares the lon, lat (``always_xy``) axis convention of :func:`transform`.
+    """
     return [transform(src_epsg, dst_epsg, x, y, z) for (x, y, z) in points]
 
 

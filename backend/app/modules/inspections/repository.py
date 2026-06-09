@@ -3,9 +3,32 @@
 import uuid
 
 from sqlalchemy import func, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.inspections.models import QualityInspection
+
+# How many times a colliding number is re-derived before giving up. A handful
+# of concurrent writers only ever need one or two retries; the cap stops a
+# pathological hot loop.
+_NUMBER_RETRY_LIMIT = 5
+
+
+def _next_suffix(numbers: list[str]) -> int:
+    """Return MAX(trailing integer) + 1 over a list of ``PREFIX-NNN`` codes.
+
+    Robust to deletions (the highest issued suffix is never reused) and to
+    rows whose number doesn't match the expected ``PREFIX-<int>`` shape
+    (those are simply ignored). Returns 1 when nothing parseable exists.
+    """
+    highest = 0
+    for number in numbers:
+        if not number:
+            continue
+        suffix = number.rsplit("-", 1)[-1]
+        if suffix.isdigit():
+            highest = max(highest, int(suffix))
+    return highest + 1
 
 
 class InspectionRepository:
@@ -44,16 +67,40 @@ class InspectionRepository:
         return items, total
 
     async def next_inspection_number(self, project_id: uuid.UUID) -> str:
-        """Generate the next inspection number (INS-001, INS-002, ...)."""
-        stmt = select(func.count()).select_from(QualityInspection).where(QualityInspection.project_id == project_id)
-        count = (await self.session.execute(stmt)).scalar_one()
-        return f"INS-{count + 1:03d}"
+        """Generate the next inspection number (INS-001, INS-002, ...).
+
+        Derived from MAX(numeric suffix)+1 rather than COUNT(*)+1: a COUNT
+        drops after any delete, so the next create would re-issue an already
+        used INS- number, and a failed insert never moves the count so a retry
+        could not advance. Scanning the existing numbers and taking the highest
+        suffix keeps the sequence monotonic and lets a collision retry progress.
+        """
+        stmt = select(QualityInspection.inspection_number).where(QualityInspection.project_id == project_id)
+        numbers = (await self.session.execute(stmt)).scalars().all()
+        return f"INS-{_next_suffix(numbers):03d}"
 
     async def create(self, inspection: QualityInspection) -> QualityInspection:
-        """Insert a new inspection."""
-        self.session.add(inspection)
-        await self.session.flush()
-        return inspection
+        """Insert an inspection, deriving its number with a retry on collision.
+
+        The number comes from MAX(suffix)+1, which can race two concurrent
+        creates onto the same value. The per-project unique constraint turns
+        that race into an IntegrityError; we roll back the failed insert, re-read
+        the MAX and try again.
+        """
+        # Read project_id once: after a savepoint rollback the instance is
+        # expired, so reading it inside the loop could trigger a lazy load.
+        project_id = inspection.project_id
+        for _ in range(_NUMBER_RETRY_LIMIT):
+            inspection.inspection_number = await self.next_inspection_number(project_id)
+            savepoint = await self.session.begin_nested()
+            self.session.add(inspection)
+            try:
+                await self.session.flush()
+            except IntegrityError:
+                await savepoint.rollback()
+                continue
+            return inspection
+        raise RuntimeError(f"Could not allocate a unique inspection number for project {project_id}")
 
     async def update_fields(self, inspection_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on an inspection."""

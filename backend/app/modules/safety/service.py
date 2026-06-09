@@ -145,13 +145,10 @@ class SafetyService:
         user_id: str | None = None,
     ) -> SafetyIncident:
         """Create a new safety incident."""
-        incident_number = await self.incident_repo.next_incident_number(data.project_id)
-
         corrective_actions = [entry.model_dump() for entry in data.corrective_actions]
 
         incident = SafetyIncident(
             project_id=data.project_id,
-            incident_number=incident_number,
             title=data.title,
             # Store a canonical ISO YYYY-MM-DD string so the "days without
             # incident / LTI" billboard never has to guess on read.
@@ -173,6 +170,9 @@ class SafetyService:
             metadata_=data.metadata,
         )
         incident = await self.incident_repo.create(incident)
+        # The repository assigns incident_number (with a collision retry) at
+        # insert time, so read the committed value back for logging/events.
+        incident_number = incident.incident_number
         logger.info(
             "Safety incident created: %s (%s) for project %s",
             incident_number,
@@ -292,12 +292,10 @@ class SafetyService:
 
         Emits ``safety.observation.high_risk`` event when risk_score > 15.
         """
-        observation_number = await self.observation_repo.next_observation_number(data.project_id)
         risk_score = data.severity * data.likelihood
 
         observation = SafetyObservation(
             project_id=data.project_id,
-            observation_number=observation_number,
             observation_type=data.observation_type,
             description=data.description,
             location=data.location,
@@ -311,6 +309,9 @@ class SafetyService:
             metadata_=data.metadata,
         )
         observation = await self.observation_repo.create(observation)
+        # The repository assigns observation_number (with a collision retry) at
+        # insert time, so read the committed value back for logging/events.
+        observation_number = observation.observation_number
         logger.info(
             "Safety observation created: %s (%s, risk=%d) for project %s",
             observation_number,
@@ -413,12 +414,19 @@ class SafetyService:
         if not fields:
             return observation
 
+        # Capture the risk score before the update so we can detect a genuine
+        # upward crossing of the critical threshold. The refresh below would
+        # overwrite it with the new value.
+        prior_risk_score = observation.risk_score
+
         await self.observation_repo.update_fields(observation_id, **fields)
         await self.session.refresh(observation)
 
-        # Emit high-risk event if risk_score crossed the critical threshold
+        # Emit high-risk event only when the score crosses upward into the
+        # critical band (prior <= 15 < new). Editing an already-high-risk
+        # observation must not re-spam the event on every save.
         new_risk_score = fields.get("risk_score", observation.risk_score)
-        if new_risk_score > 15:
+        if prior_risk_score <= 15 < new_risk_score:
             event_bus.publish_detached(
                 "safety.observation.high_risk",
                 data={

@@ -10216,12 +10216,18 @@
       margin-inline: auto;
     }
     .final-cta-row {
-      display: inline-flex;
+      display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 12px;
       align-items: center;
+      /* Constrain to the same width as the install-from-source panel below
+         so the two blocks line up edge to edge. The big download button
+         flexes to fill the leftover space next to the platform icons. */
+      width: min(100%, 520px);
+      margin-inline: auto;
     }
+    .final-cta-row .btn-hero-dl { flex: 1 1 320px; }
     .final-cta-row .btn-primary {
       position: relative;
       overflow: visible;
@@ -12046,10 +12052,11 @@
           height: 72px;
           width: 72px;
           display: inline-flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 10px;
-          padding: 17px;
+          gap: 4px;
+          padding: 9px 8px;
           color: var(--ink-1);
           background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.80));
           border: 1px solid var(--line-1);
@@ -12064,8 +12071,10 @@
           letter-spacing: 0;
           transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
         }
-        .hero-platform-icon svg { width: 24px; height: 24px; fill: currentColor; flex: none; }
-        .hero-platform-icon span { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+        .hero-platform-icon svg { width: 26px; height: 26px; fill: currentColor; flex: none; }
+        /* Show the platform name in words under the glyph (Apple, Linux) instead
+           of leaving it screen-reader-only. Keeps the 72px square tidy. */
+        .hero-platform-icon span { font-size: 11px; font-weight: 700; line-height: 1; letter-spacing: 0.01em; white-space: nowrap; }
         .hero-platform-icon:hover {
           transform: translateY(-2px);
           color: var(--accent-3);
@@ -12126,8 +12135,118 @@
           .hero-star-pill { width: 100%; height: 64px; min-height: 64px; font-size: 15px; justify-content: center; }
           .hero-star-sub { font-size: 11.5px; }
         }
+
+        /* "Up and running in one command" install card. Sits as the first row
+           of the CTA stack, directly above the download button. The card is
+           capped at 335px (the primary download button's column width,
+           minmax(300px, 335px)) and aligned to the start of the stack, so it
+           lines up with just the Download button, not the full row with the
+           macOS/Linux icons. The two read as one clean, stacked pair. */
+        .hero-install {
+          width: 100%;
+          max-width: 335px;
+          align-self: start;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          padding: 14px 16px 15px;
+          background: var(--card-bg);
+          border: 1px solid var(--line-1);
+          border-radius: 16px;
+          box-shadow: 0 14px 34px -24px rgba(15, 23, 42, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+          backdrop-filter: blur(10px);
+        }
+        [data-theme="dark"] .hero-install {
+          background: rgba(255, 255, 255, 0.06);
+          box-shadow: 0 14px 34px -24px rgba(0, 0, 0, 0.6);
+        }
+        .hero-install-eyebrow {
+          display: inline-flex; align-items: center; gap: 8px;
+          margin: 0;
+          font-family: Inter, sans-serif;
+          font-size: 12px; font-weight: 700; line-height: 1.2; letter-spacing: 0.01em;
+          color: var(--ink-1);
+        }
+        .hero-install-eyebrow svg {
+          flex: none; width: 15px; height: 15px;
+          fill: none; stroke: var(--accent-3); stroke-width: 2.2;
+          stroke-linecap: round; stroke-linejoin: round;
+        }
+        .hero-cmd-lane { display: flex; flex-direction: column; gap: 8px; }
+        .hero-cmd { display: flex; align-items: stretch; gap: 8px; }
+        .hero-cmd-chip {
+          flex: 1; min-width: 0;
+          display: flex; align-items: center; gap: 9px;
+          background: var(--code-bg, #0f172a);
+          border: 1px solid var(--line-1);
+          border-radius: 11px;
+          padding: 9px 12px;
+        }
+        .hero-cmd-tag {
+          flex: none;
+          font-family: "JetBrains Mono", ui-monospace, monospace;
+          font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+          color: var(--accent-2);
+          padding: 2px 7px; border-radius: 5px;
+          background: color-mix(in srgb, var(--accent-2) 18%, transparent);
+        }
+        .hero-cmd-pfx {
+          font-family: "JetBrains Mono", ui-monospace, monospace;
+          font-size: 13px; font-weight: 600; color: var(--accent-2); flex: none;
+        }
+        .hero-cmd-code {
+          font-family: "JetBrains Mono", ui-monospace, monospace;
+          font-size: 12.5px; line-height: 1.5; color: #e2e8f0;
+          flex: 1; min-width: 0;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .hero-install .dl-copy {
+          position: relative; flex: none;
+          width: 40px; min-width: 40px;
+        }
+        .hero-install .dl-copy.is-copied::after {
+          content: "Copied"; position: absolute; bottom: calc(100% + 7px); left: 50%;
+          transform: translateX(-50%); white-space: nowrap;
+          font-family: Inter, sans-serif; font-size: 11px; font-weight: 600;
+          color: #fff; background: var(--accent-3);
+          padding: 3px 8px; border-radius: 6px; pointer-events: none;
+          box-shadow: 0 6px 16px -6px rgba(15, 23, 42, 0.5);
+        }
+        @media (max-width: 560px) {
+          .hero-install { max-width: none; }
+          .hero-cmd-code { white-space: normal; word-break: break-word; overflow-wrap: anywhere; text-overflow: clip; }
+        }
       </style>
       <div class="hero-cta-stack" id="fx-ctas">
+        <div class="hero-install" id="hero-install">
+          <p class="hero-install-eyebrow" data-i18n="hero.install_eyebrow">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+            <span>Up and running in one command</span>
+          </p>
+          <div class="hero-cmd-lane">
+            <div class="hero-cmd">
+              <div class="hero-cmd-chip">
+                <span class="hero-cmd-tag" aria-hidden="true">pip</span>
+                <span class="hero-cmd-pfx" aria-hidden="true">$</span>
+                <code class="hero-cmd-code">pip install openconstructionerp</code>
+              </div>
+              <button type="button" class="dl-copy" data-copy="pip install openconstructionerp" aria-label="Copy the pip install command">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            </div>
+            <div class="hero-cmd">
+              <div class="hero-cmd-chip">
+                <span class="hero-cmd-tag" aria-hidden="true">docker</span>
+                <span class="hero-cmd-pfx" aria-hidden="true">$</span>
+                <code class="hero-cmd-code">docker run -p 8080:8080 ghcr.io/datadrivenconstruction/openconstructionerp</code>
+              </div>
+              <button type="button" class="dl-copy" data-copy="docker run -d -p 8080:8080 -v oe_data:/data ghcr.io/datadrivenconstruction/openconstructionerp:latest" aria-label="Copy the docker run command">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="hero-cta-main">
           <a class="btn-hero-dl" id="hero-dl-btn" href="#download" rel="noopener" aria-label="Download for your platform">
             <svg class="dl-glyph-i" id="hero-dl-glyph" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M11 3v10.2L7.5 9.7 6 11.2 12 17l6-5.8-1.5-1.5L13 13.2V3zM5 18.5V20a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 20v-1.5h-2V19H7v-.5z"/></svg>
@@ -12534,135 +12653,6 @@
     </div>
 
   </section>
-
-  <!-- ================================================================ -->
-  <!-- HERO INSTALL STRIP - "Up and running in one command"             -->
-  <!-- Sits as a compact full-width row directly beneath the hero. The   -->
-  <!-- outer wrapper shares the exact spine as the ready-builds card row -->
-  <!-- below (.home-dl: max-width 1360px + the same side padding), so    -->
-  <!-- the install card lines up edge-to-edge with the Windows/macOS/    -->
-  <!-- Linux .dl-grid cards. Copy buttons reuse the shared .dl-copy       -->
-  <!-- handler (data-copy), wired in the download section's script.      -->
-  <!-- ================================================================ -->
-  <style>
-    .hero-install-strip {
-      position: relative;
-      z-index: 5;
-      width: 100%;
-      max-width: 1360px;
-      margin: 0 auto;
-      padding: 18px clamp(24px, 4.2vw, 56px) 4px;
-      box-sizing: border-box;
-    }
-    .hero-install {
-      width: 100%;
-      box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      padding: 14px 18px;
-      background: var(--card-bg);
-      border: 1px solid var(--line-1);
-      border-radius: 16px;
-      box-shadow: 0 18px 44px -30px rgba(15, 23, 42, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(10px);
-    }
-    [data-theme="dark"] .hero-install { box-shadow: 0 18px 44px -30px rgba(0, 0, 0, 0.6); }
-    .hero-install-eyebrow {
-      flex: none;
-      display: inline-flex; align-items: center; gap: 8px;
-      max-width: 188px;
-      margin: 0;
-      font-family: Inter, sans-serif;
-      font-size: 12px; font-weight: 700; line-height: 1.25; letter-spacing: 0.01em;
-      color: var(--ink-1);
-    }
-    .hero-install-eyebrow svg { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--accent-3); stroke-width: 2.2; }
-    /* Command lane: the two one-command paths sit side by side and share the
-       remaining width so the whole strip stays one compact line on desktop. */
-    .hero-cmd-lane { flex: 1; min-width: 0; display: flex; gap: 10px; }
-    .hero-cmd { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
-    .hero-cmd-chip {
-      flex: 1; min-width: 0;
-      display: flex; align-items: center; gap: 9px;
-      background: var(--code-bg, #0f172a);
-      border: 1px solid var(--line-1);
-      border-radius: 11px;
-      padding: 9px 12px;
-    }
-    .hero-cmd-tag {
-      flex: none;
-      font-family: "JetBrains Mono", ui-monospace, monospace;
-      font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-      color: var(--accent-2);
-      padding: 2px 6px; border-radius: 5px;
-      background: color-mix(in srgb, var(--accent-2) 16%, transparent);
-    }
-    .hero-cmd-pfx {
-      font-family: "JetBrains Mono", ui-monospace, monospace;
-      font-size: 13px; font-weight: 600; color: var(--accent-2); flex: none;
-    }
-    /* One tidy line on desktop: ellipsis if it cannot fit, so the strip stays
-       short. The full command is preserved on the copy button's data-copy. */
-    .hero-cmd-code {
-      font-family: "JetBrains Mono", ui-monospace, monospace;
-      font-size: 13px; line-height: 1.5; color: #e2e8f0;
-      flex: 1; min-width: 0;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    /* Reuse the existing .dl-copy button + .is-copied flash; add a
-       "Copied" affordance via ::after so the state reads in the strip. */
-    .hero-install .dl-copy { position: relative; flex: none; }
-    .hero-install .dl-copy.is-copied::after {
-      content: "Copied"; position: absolute; bottom: calc(100% + 7px); left: 50%;
-      transform: translateX(-50%); white-space: nowrap;
-      font-family: Inter, sans-serif; font-size: 11px; font-weight: 600;
-      color: #fff; background: var(--accent-3);
-      padding: 3px 8px; border-radius: 6px; pointer-events: none;
-      box-shadow: 0 6px 16px -6px rgba(15, 23, 42, 0.5);
-    }
-    /* Tablet: stack the eyebrow above the two commands, keep commands in a row. */
-    @media (max-width: 1080px) {
-      .hero-install { flex-wrap: wrap; }
-      .hero-install-eyebrow { max-width: none; width: 100%; }
-    }
-    /* Narrow: each command on its own row, with the command allowed to wrap. */
-    @media (max-width: 720px) {
-      .hero-install-strip { padding: 16px 24px 2px; }
-      .hero-cmd-lane { flex-direction: column; width: 100%; }
-      .hero-cmd-code { white-space: normal; word-break: break-word; overflow-wrap: anywhere; text-overflow: clip; }
-    }
-  </style>
-  <div class="hero-install-strip">
-    <div class="hero-install" id="hero-install">
-      <p class="hero-install-eyebrow" data-i18n="hero.install_eyebrow">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
-        <span>Up and running in one command</span>
-      </p>
-      <div class="hero-cmd-lane">
-        <div class="hero-cmd">
-          <div class="hero-cmd-chip">
-            <span class="hero-cmd-tag" aria-hidden="true">pip</span>
-            <span class="hero-cmd-pfx" aria-hidden="true">$</span>
-            <code class="hero-cmd-code">pip install openconstructionerp</code>
-          </div>
-          <button type="button" class="dl-copy" data-copy="pip install openconstructionerp" aria-label="Copy the pip install command">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          </button>
-        </div>
-        <div class="hero-cmd">
-          <div class="hero-cmd-chip">
-            <span class="hero-cmd-tag" aria-hidden="true">docker</span>
-            <span class="hero-cmd-pfx" aria-hidden="true">$</span>
-            <code class="hero-cmd-code">docker run -p 8080:8080 ghcr.io/datadrivenconstruction/openconstructionerp</code>
-          </div>
-          <button type="button" class="dl-copy" data-copy="docker run -d -p 8080:8080 -v oe_data:/data ghcr.io/datadrivenconstruction/openconstructionerp:latest" aria-label="Copy the docker run command">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- ================================================================ -->
   <!-- SECTION 1.05 - DOWNLOAD THE DESKTOP APP (native, no setup)        -->
@@ -17360,9 +17350,9 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
           </span>
         </a>
         <span class="hero-platform-icons" aria-label="Other platform downloads">
-          <a class="hero-platform-icon" href="/download#card-macos" aria-label="Download for macOS">
+          <a class="hero-platform-icon" href="/download#card-macos" aria-label="Download for macOS (Apple)">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1zM14.5 6.3c.6-.7 1-1.6.9-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.4 2.4-1.1z"/></svg>
-            <span>macOS</span>
+            <span>Apple</span>
           </a>
           <a class="hero-platform-icon" href="/download#card-linux" aria-label="Linux install options">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.3c-2.05 0-3.55 1.6-3.55 3.95 0 .95.3 1.55.3 2.3 0 .85-.55 1.4-1.3 2.4-.9 1.2-1.95 2.7-1.95 4.75 0 1.45.5 2.55 1.3 3.35l-1.2 2.05c-.22.38.05.85.49.85H7.1c.18.5.62.85 1.2.95 1.05.18 2.2-.05 2.85-.6.27-.22.5-.32.85-.32s.58.1.85.32c.65.55 1.8.78 2.85.6.58-.1 1.02-.45 1.2-.95h1.01c.44 0 .71-.47.49-.85l-1.2-2.05c.8-.8 1.3-1.9 1.3-3.35 0-2.05-1.05-3.55-1.95-4.75-.75-1-1.3-1.55-1.3-2.4 0-.75.3-1.35.3-2.3C15.55 3.9 14.05 2.3 12 2.3Zm-1.65 3.5c.48 0 .82.45.82 1s-.34 1-.82 1-.83-.45-.83-1 .35-1 .83-1Zm3.3 0c.48 0 .83.45.83 1s-.35 1-.83 1-.82-.45-.82-1 .34-1 .82-1Zm-1.65 2.45c.6 0 1.55.3 1.95.85.12.17-.02.38-.25.45l-1.4.45c-.2.06-.4.06-.6 0l-1.4-.45c-.23-.07-.37-.28-.25-.45.4-.55 1.35-.85 1.95-.85Z"/></svg>

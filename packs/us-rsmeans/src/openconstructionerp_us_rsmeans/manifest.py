@@ -42,6 +42,7 @@ MANIFEST = PartnerPackManifest(
     ],
     default_modules=[],   # empty = show all
     hidden_modules=[],
+    demo_template_ids=["medical-us"],
     branding=PartnerBranding(
         primary_color="#0A3161",   # Old Glory blue
         accent_color="#B31942",    # Old Glory red

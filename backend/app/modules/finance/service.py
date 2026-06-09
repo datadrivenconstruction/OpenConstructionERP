@@ -1430,11 +1430,12 @@ class FinanceService:
         - ETC  = EAC - AC                (estimate to complete)
         - TCPI = (BAC - EV) / (BAC - AC) (to-complete performance index)
 
-        Client-supplied BAC/PV/EV/AC values that are exactly "0" are
-        replaced with values derived from the project's current budget and
+        When all of BAC/PV/EV/AC are exactly "0" (a truly empty snapshot)
+        the values are derived from the project's current budget and
         paid-invoice totals (same aggregation that powers ``get_dashboard``).
-        Non-zero client values are honoured unchanged so power users can
-        still record bespoke snapshots.
+        Any explicitly-supplied value, including a single legitimate 0 such
+        as ev=0 on an early project, is honoured unchanged so power users
+        can still record bespoke snapshots.
         """
         bac = _parse_decimal(data.bac, "bac")
         ev = _parse_decimal(data.ev, "ev")
@@ -1442,7 +1443,10 @@ class FinanceService:
         ac = _parse_decimal(data.ac, "ac")
 
         zero = Decimal("0")
-        if bac == zero or pv == zero or ev == zero or ac == zero:
+        # Only derive baselines for a truly empty snapshot (all four zero).
+        # A legitimately-supplied single 0 (e.g. ev=0 on an early project)
+        # must be respected, not overwritten with a derived value.
+        if bac == zero and pv == zero and ev == zero and ac == zero:
             budget_agg = await self.budgets.aggregate_for_dashboard(
                 project_id=data.project_id,
             )
@@ -1657,7 +1661,7 @@ class FinanceService:
             overdue_count=overdue_count,
             invoices_draft=status_counts["draft"],
             invoices_pending=status_counts["pending"],
-            invoices_approved=status_counts["approved"],
+            invoices_approved=status_counts["approved"] + status_counts.get("sent", 0),
             invoices_paid=status_counts["paid"],
             total_budget_original=round(total_budget_original, 2),
             total_budget_revised=round(total_budget_revised, 2),

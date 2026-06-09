@@ -1489,6 +1489,69 @@ class AiEstimatorService:
             )
         return out
 
+    async def _ensure_resources(
+        self, grp: Any, qty: Decimal, unit_rate: Decimal
+    ) -> list[dict[str, Any]]:
+        """Guarantee a non-empty resource buildup for an applied position.
+
+        Founder principle: every position carries resources. Prefers the chosen
+        catalogue candidate's real labour/material/plant components; when the
+        catalogue row carries none, falls back to a transparent labour/material
+        split that sums exactly to the unit rate so no position is ever stored
+        without a buildup. The split is clearly flagged ``estimated`` (not
+        catalogue-grounded), surfaced for human review, never silently
+        authoritative.
+        """
+        qf = float(qty)
+        # 1) Re-derive from the chosen candidate when the group lost its
+        #    breakdown (the override / merge / split paths null it out).
+        candidate_id = getattr(grp, "candidate_id", None)
+        if candidate_id:
+            comps = await self._resource_breakdown(candidate_id)
+            if comps:
+                return [{**c, "quantity": float(c.get("factor", 1.0) or 1.0) * qf} for c in comps]
+        # 2) Transparent labour/material split that sums to the unit rate.
+        rate = float(unit_rate)
+        if rate <= 0 or qf <= 0:
+            return []
+        unit = getattr(grp, "chosen_unit", None) or "pcs"
+        out: list[dict[str, Any]] = []
+        for rtype, share in (("labor", 0.40), ("material", 0.60)):
+            out.append(
+                {
+                    "name": f"{rtype.capitalize()} allowance",
+                    "code": "",
+                    "unit": unit,
+                    "type": rtype,
+                    "factor": 1.0,
+                    "unit_rate": format(_dec(rate * share), "f"),
+                    "quantity": qf,
+                    "estimated": True,
+                }
+            )
+        return out
+
+    def _resource_rollup(self, resources: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
+        """Roll resource leaves up to a per-type {total, pct} map for the
+        material / labour / equipment badge on the BOQ, mirroring the assembly
+        apply path so an AI-applied position renders the same split.
+        """
+        totals: dict[str, Decimal] = {}
+        for c in resources:
+            if not isinstance(c, dict):
+                continue
+            rtype = str(c.get("type") or "other")
+            q = _dec(c.get("quantity") or 0)
+            r = _dec(c.get("unit_rate") or c.get("rate") or 0)
+            ttl = _dec(c.get("total")) if c.get("total") is not None else q * r
+            totals[rtype] = totals.get(rtype, Decimal("0")) + ttl
+        subtotal = sum(totals.values(), Decimal("0"))
+        out: dict[str, dict[str, float]] = {}
+        if subtotal > 0:
+            for rtype, ttl in totals.items():
+                out[rtype] = {"total": float(ttl), "pct": float((ttl / subtotal) * Decimal("100"))}
+        return out
+
     async def _build_agent_runner(self, run: AiEstimatorRun) -> Any:
         """Build the ReAct runner for stage-3 reasoning, or None to degrade.
 
@@ -2094,6 +2157,12 @@ class AiEstimatorService:
                 for c in (grp.resources or [])
                 if isinstance(c, dict)
             ]
+            # Every position must carry a resource buildup. When the group has
+            # none (a bare price row, or an override/merge/split path that
+            # nulled it), backfill from the candidate's catalogue components or
+            # a transparent labour/material split that sums to the unit rate.
+            if not scaled_resources:
+                scaled_resources = await self._ensure_resources(grp, qty, unit_rate)
             metadata: dict[str, Any] = {
                 "ai_estimator_run_id": str(run.id),
                 "group_key": grp.group_key,
@@ -2102,6 +2171,12 @@ class AiEstimatorService:
                 "score": grp.score,
                 "candidates_considered": len(grp.candidates or []),
                 "resources": scaled_resources,
+                "resource_breakdown": self._resource_rollup(scaled_resources),
+                # Stamp the line currency so the FX-aware BOQ rollup converts a
+                # non-base-currency rate instead of summing it as base. The run
+                # already records correct per-currency subtotals; without this
+                # the BOQ Direct Cost would blend currencies.
+                "currency": currency,
             }
             if grp.candidate_id:
                 metadata["cost_item_id"] = grp.candidate_id

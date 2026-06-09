@@ -260,7 +260,9 @@ export function CountryCombobox({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKey}
-              placeholder="Search country (English or local script)…"
+              placeholder={t('country_combobox.search_placeholder', {
+                defaultValue: 'Search country (English or local script)…',
+              })}
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-content-tertiary"
               aria-label={t('country_combobox.search_aria', { defaultValue: 'Search countries' })}
             />

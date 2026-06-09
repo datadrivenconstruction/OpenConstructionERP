@@ -191,8 +191,13 @@ def _build_match_metadata(
     * ``matched_by_user_id`` - acting user; ``None`` for admin/service
       callers that don't carry a sub claim.
     * ``bim_element_id`` - cross-reference back to the source BIM element.
+    * ``currency`` - ISO 4217 code of the accepted candidate rate. The BOQ
+      service reads this key to convert a foreign-currency unit_rate into
+      the project base; without it a EUR rate is summed as USD. Only
+      stamped when the candidate carries a code so an empty value never
+      lies about the home currency (the reader treats absent as base).
     """
-    return {
+    metadata: dict[str, Any] = {
         "cost_item_code": accepted.code,
         "match_score": round(float(accepted.score), 4),
         "match_vector_score": round(float(accepted.vector_score), 4),
@@ -202,6 +207,10 @@ def _build_match_metadata(
         "matched_by_user_id": user_id or None,
         "bim_element_id": bim_element_id,
     }
+    accepted_currency = (accepted.currency or "").strip()
+    if accepted_currency:
+        metadata["currency"] = accepted_currency
+    return metadata
 
 
 async def _resolve_audit_entry_id(

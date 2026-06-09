@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Download Module Variants - OpenConstructionERP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f9fc;
+  --panel:#ffffff;
+  --panel-soft:#f9fbfd;
+  --ink:#111827;
+  --muted:#5b677a;
+  --line:rgba(17,24,39,.10);
+  --line-strong:rgba(17,24,39,.16);
+  --blue:#0877c8;
+  --blue-2:#0ea5e9;
+  --blue-3:#2563eb;
+  --green:#16a34a;
+  --slate:#172033;
+  --shadow:0 1px 2px rgba(15,23,42,.04),0 22px 55px -32px rgba(15,23,42,.38);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100vh;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 15% 0%,rgba(14,165,233,.13),transparent 34%),
+    radial-gradient(circle at 90% 18%,rgba(37,99,235,.10),transparent 30%),
+    linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);
+}
+a{text-decoration:none;color:inherit}
+.page{width:100%;max-width:1480px;margin:0 auto;padding:32px clamp(18px,3.6vw,56px) 70px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:32px}
+.brand{font-family:"Inter Tight",Inter,sans-serif;font-size:18px;font-weight:760;letter-spacing:0}
+.brand span{color:var(--blue)}
+.back{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.72);padding:10px 14px;font-size:13px;font-weight:650;color:var(--muted)}
+.hero{max-width:820px;margin:0 0 32px}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:var(--blue-3);font-weight:700;margin:0 0 12px}
+h1{font-family:"Inter Tight",Inter,sans-serif;font-size:clamp(34px,5vw,62px);line-height:1.02;letter-spacing:0;margin:0 0 16px}
+.lead{font-size:17px;line-height:1.62;color:var(--muted);max-width:68ch;margin:0}
+.variant{margin-top:34px;padding:28px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.72);box-shadow:var(--shadow);backdrop-filter:blur(12px)}
+.variant-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:20px}
+.variant-title{font-family:"Inter Tight",Inter,sans-serif;font-size:24px;font-weight:760;letter-spacing:0;margin:0}
+.variant-note{max-width:520px;font-size:13.5px;line-height:1.5;color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.card{position:relative;display:flex;flex-direction:column;min-height:320px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,var(--panel-soft));padding:22px;box-shadow:0 18px 42px -34px rgba(15,23,42,.45);overflow:hidden}
+.card.is-rec{border-color:rgba(8,119,200,.38)}
+.card.is-rec::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--blue-2),var(--blue-3))}
+.os-head{display:flex;align-items:flex-start;gap:14px;min-height:82px}
+.glyph{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;background:#eaf5ff;border:1px solid rgba(8,119,200,.15);flex:none}
+.glyph svg{width:25px;height:25px;fill:#0f172a}
+.os-name{font-family:"Inter Tight",Inter,sans-serif;font-size:22px;font-weight:760;margin:0 0 5px}
+.os-note{font-size:13.5px;line-height:1.45;color:var(--muted);margin:0}
+.badges{display:flex;flex-wrap:wrap;gap:7px;margin:18px 0 20px}
+.badge{font-family:"JetBrains Mono",monospace;font-size:11px;color:#536175;background:#eef5fb;border:1px solid #d9e8f4;border-radius:8px;padding:4px 8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:11px;width:100%;min-height:62px;border-radius:15px;font-family:"Inter Tight",Inter,sans-serif;font-size:18px;font-weight:760;color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue-2) 50%,var(--blue-3));box-shadow:0 18px 38px -18px rgba(37,99,235,.65)}
+.btn svg{width:20px;height:20px;fill:currentColor}
+.btn.secondary{color:var(--blue);background:#fff;border:1px solid var(--line-strong);box-shadow:none}
+.meta{font-family:"JetBrains Mono",monospace;font-size:11.5px;text-align:center;color:var(--muted);margin:12px 0 0}
+.steps{list-style:none;margin:auto 0 0;padding:18px 0 0;border-top:1px solid var(--line);display:grid;gap:10px}
+.steps li{display:flex;gap:10px;font-size:13.5px;color:#273447;line-height:1.42}
+.steps b{width:23px;height:23px;border-radius:999px;display:grid;place-items:center;background:#e7f2fd;color:var(--blue);font-family:"JetBrains Mono",monospace;font-size:12px;flex:none}
+
+.v2{background:#101725;color:#edf4ff;border-color:rgba(255,255,255,.10)}
+.v2 .variant-title,.v2 .os-name{color:#f8fbff}
+.v2 .variant-note,.v2 .os-note,.v2 .meta{color:#9fb0c8}
+.agent-shell{display:grid;grid-template-columns:1.05fr 1fr;gap:22px}
+.agent-primary{border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,#162033,#111827);border-radius:18px;padding:24px;box-shadow:0 30px 70px -40px rgba(0,0,0,.85)}
+.agent-status{display:flex;align-items:center;gap:9px;font-family:"JetBrains Mono",monospace;font-size:12px;color:#9fb0c8;margin-bottom:22px}
+.pulse{width:9px;height:9px;border-radius:50%;background:#38bdf8;box-shadow:0 0 0 5px rgba(56,189,248,.13)}
+.agent-title{font-family:"Inter Tight",Inter,sans-serif;font-size:34px;line-height:1.08;margin:0 0 12px;color:#fff}
+.agent-lede{font-size:15px;line-height:1.6;color:#aab8cc;margin:0 0 22px}
+.agent-btn{min-height:70px;border-radius:16px}
+.agent-rail{display:grid;gap:12px}
+.agent-row{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.045);border-radius:14px;padding:14px}
+.agent-row .glyph{width:42px;height:42px;border-radius:12px;background:rgba(56,189,248,.10);border-color:rgba(56,189,248,.18)}
+.agent-row .glyph svg{width:22px;height:22px;fill:#d9edff}
+.agent-row h3{font-family:"Inter Tight";font-size:17px;margin:0 0 2px;color:#fff}
+.agent-row p{font-size:12.5px;color:#9fb0c8;margin:0}
+.agent-row span{font-family:"JetBrains Mono";font-size:11px;color:#7dd3fc}
+
+.v3-layout{display:grid;grid-template-columns:430px 1fr;gap:22px}
+.command{border:1px solid var(--line);border-radius:16px;background:#0f172a;color:#e5edf7;padding:22px}
+.command h3{font-family:"Inter Tight";font-size:25px;margin:0 0 12px;color:#fff}
+.terminal{font-family:"JetBrains Mono";font-size:13px;background:#090e18;border:1px solid rgba(255,255,255,.11);border-radius:12px;padding:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:18px 0}
+.command .btn{background:linear-gradient(135deg,#0891b2,#2563eb)}
+.mini-list{display:grid;gap:12px}
+.mini{display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:13px;border:1px solid var(--line);border-radius:15px;background:#fff;padding:16px}
+.mini h3{font-family:"Inter Tight";font-size:19px;margin:0 0 3px}.mini p{font-size:13px;color:var(--muted);margin:0}
+
+.v4-table{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr 170px;align-items:center;border-top:1px solid var(--line)}
+.row:first-child{border-top:0;background:#f3f7fb}
+.row span{padding:16px;font-size:14px;color:#273447}.row strong{font-family:"Inter Tight";font-size:16px;color:var(--ink)}
+.row .btn{min-height:46px;font-size:15px;border-radius:11px}
+
+.v5 .grid{gap:14px}
+.v5 .card{min-height:250px;border-radius:12px;padding:18px;box-shadow:none}
+.v5 .os-head{min-height:58px}.v5 .glyph{width:40px;height:40px}.v5 .os-name{font-size:19px}.v5 .btn{min-height:54px;font-size:16px;border-radius:12px}.v5 .steps{display:none}
+
+.hero-lab{display:grid;gap:18px}
+.hero-option{border:1px solid var(--line);border-radius:18px;background:#fff;padding:24px;box-shadow:0 16px 44px -34px rgba(15,23,42,.45);overflow:hidden}
+.hero-option h3{font-family:"Inter Tight";font-size:27px;line-height:1.08;margin:0 0 10px}
+.hero-option p{font-size:14.5px;line-height:1.55;color:var(--muted);margin:0}
+.hero-option .mini-eyebrow{font-family:"JetBrains Mono";font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue-3);font-weight:700;margin-bottom:12px}
+.hero-grid-2{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:22px;align-items:center}
+.hero-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.metric{border:1px solid var(--line);border-radius:12px;background:#f8fbff;padding:12px}
+.metric b{display:block;font-family:"Inter Tight";font-size:20px}.metric span{font-size:12px;color:var(--muted)}
+.hero-panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#f9fbfd,#fff);padding:18px}
+.hero-panel-row{display:flex;justify-content:space-between;gap:14px;border-bottom:1px solid var(--line);padding:10px 0;font-size:13px;color:var(--muted)}
+.hero-panel-row:last-child{border-bottom:0}.hero-panel-row strong{color:var(--ink)}
+.hero-command{background:#0f172a;color:#dbeafe;border-radius:16px;padding:18px;font-family:"JetBrains Mono";font-size:13px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.hero-command div{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.09)}.hero-command div:last-child{border-bottom:0}
+.hero-agent{background:#111827;color:#f8fbff}.hero-agent p{color:#aab8cc}.hero-agent .mini-eyebrow{color:#7dd3fc}
+.agent-nodes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.node{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:13px;padding:13px;font-size:12px;color:#aab8cc}.node b{display:block;color:#fff;margin-bottom:4px}
+.button-lab{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.button-swatch{display:grid;gap:12px;align-content:start;border:1px solid var(--line);border-radius:16px;background:#fff;padding:18px;min-height:190px}
+.button-swatch h3{font-family:"Inter Tight";font-size:16px;margin:0}.button-swatch p{font-size:12.5px;line-height:1.45;color:var(--muted);margin:0}
+.download-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;border-radius:14px;font-family:"Inter Tight";font-size:16px;font-weight:760}
+.download-btn svg{width:18px;height:18px;fill:currentColor}
+.btn-a{color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue-2),var(--blue-3));box-shadow:0 16px 32px -18px rgba(37,99,235,.75)}
+.btn-b{color:var(--blue);background:#fff;border:1px solid rgba(8,119,200,.28)}
+.btn-c{color:#fff;background:#111827;box-shadow:0 16px 34px -24px rgba(0,0,0,.75)}
+.btn-d{color:#0f172a;background:#eaf5ff;border:1px solid #c7e2f5}
+.btn-e{color:#fff;background:linear-gradient(135deg,#0f766e,#0ea5e9)}
+.btn-sub{display:block;font-family:Inter;font-size:11px;font-weight:600;opacity:.76;margin-top:2px}
+
+@media(max-width:1040px){.grid,.agent-shell,.v3-layout{grid-template-columns:1fr}.row{grid-template-columns:1fr}.row span{padding:12px 16px}.variant-head{display:block}.variant-note{margin-top:8px}}
+@media(max-width:1040px){.hero-grid-2,.button-lab{grid-template-columns:1fr}.agent-nodes{grid-template-columns:1fr}}
+@media(max-width:640px){.page{padding:22px 16px 56px}.top{align-items:flex-start}.variant{padding:18px;border-radius:16px}.grid{gap:16px}.card{min-height:auto}.steps{margin-top:18px}.agent-title{font-size:28px}.mini{grid-template-columns:42px 1fr}.mini .btn{grid-column:1 / -1}.row .btn{width:100%}.hero-option{padding:18px}.hero-metrics{grid-template-columns:1fr}.button-swatch{min-height:auto}}
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="top">
+    <a class="brand" href="/">Open<span>Construction</span>ERP</a>
+    <a class="back" href="/">Back to site</a>
+  </header>
+
+  <section class="hero">
+    <p class="eyebrow">Download module test page</p>
+    <h1>Five quiet, professional install module directions.</h1>
+    <p class="lead">These are visual candidates for the homepage download module. The copy and links can stay identical; the layout, hierarchy, spacing, and interaction weight are what changes.</p>
+  </section>
+
+  <section class="variant">
+    <div class="variant-head">
+      <h2 class="variant-title">A. First homepage block variants</h2>
+      <p class="variant-note">Five first-screen directions for the very top module of the homepage. These are intentionally calm: product-first, dense enough for B2B, and not visually loud.</p>
+    </div>
+    <div class="hero-lab">
+      <article class="hero-option">
+        <div class="hero-grid-2">
+          <div>
+            <div class="mini-eyebrow">01. Product workspace</div>
+            <h3>Open-source construction ERP for estimates, schedules and tenders.</h3>
+            <p>A direct product-first hero. Clear value proposition, restrained proof metrics, and one primary download action.</p>
+            <div class="hero-metrics"><div class="metric"><b>55K+</b><span>cost items</span></div><div class="metric"><b>24</b><span>languages</span></div><div class="metric"><b>100+</b><span>modules</span></div></div>
+          </div>
+          <div class="hero-panel"><div class="hero-panel-row"><strong>BOQ</strong><span>live quantities</span></div><div class="hero-panel-row"><strong>Schedule</strong><span>4D planning</span></div><div class="hero-panel-row"><strong>Cost</strong><span>5D model</span></div><div class="hero-panel-row"><strong>Tenders</strong><span>vendor workflow</span></div></div>
+        </div>
+      </article>
+
+      <article class="hero-option">
+        <div class="hero-grid-2">
+          <div>
+            <div class="mini-eyebrow">02. Install-first</div>
+            <h3>Download the desktop app. Start with real demo data in minutes.</h3>
+            <p>Useful if conversion is the goal. It puts installation first, but keeps the product context immediately visible.</p>
+            <div class="hero-metrics"><div class="metric"><b>0</b><span>Docker setup</span></div><div class="metric"><b>~60s</b><span>first launch</span></div><div class="metric"><b>local</b><span>data store</span></div></div>
+          </div>
+          <div class="hero-panel"><a class="btn" href="#">Download for Windows</a><p class="meta">v7.1.0 · 191 MB · signed installer</p></div>
+        </div>
+      </article>
+
+      <article class="hero-option">
+        <div class="hero-grid-2">
+          <div>
+            <div class="mini-eyebrow">03. Operator dashboard</div>
+            <h3>One workspace for the commercial side of construction delivery.</h3>
+            <p>More operational and less marketing-like. Good for professional buyers who scan for scope and workflows.</p>
+            <div class="hero-metrics"><div class="metric"><b>BOQ</b><span>measurement</span></div><div class="metric"><b>BIM</b><span>takeoff</span></div><div class="metric"><b>ERP</b><span>controls</span></div></div>
+          </div>
+          <div class="hero-panel"><div class="hero-panel-row"><strong>Project margin</strong><span>tracked</span></div><div class="hero-panel-row"><strong>Budget changes</strong><span>audited</span></div><div class="hero-panel-row"><strong>Procurement</strong><span>linked</span></div></div>
+        </div>
+      </article>
+
+      <article class="hero-option hero-agent">
+        <div class="hero-grid-2">
+          <div>
+            <div class="mini-eyebrow">04. Agent workspace</div>
+            <h3>AI-assisted construction workflows, controlled by your project data.</h3>
+            <p>A Hermes-style direction for the first block: agent nodes look active, but the composition stays restrained and enterprise-oriented.</p>
+            <div class="agent-nodes"><div class="node"><b>Takeoff agent</b>PDF, DWG, BIM quantities</div><div class="node"><b>Cost agent</b>catalogue matching</div><div class="node"><b>Report agent</b>variance and tender notes</div></div>
+          </div>
+          <div class="hero-command"><div>$ detect project region</div><div>$ match quantities to cost items</div><div>$ generate tender summary</div></div>
+        </div>
+      </article>
+
+      <article class="hero-option">
+        <div class="hero-grid-2">
+          <div>
+            <div class="mini-eyebrow">05. Standards-first</div>
+            <h3>Built around real estimating standards, not generic task lists.</h3>
+            <p>Best if the first screen should signal construction credibility: NRM, DIN 276, MasterFormat, GAEB and regional catalogues.</p>
+            <div class="hero-metrics"><div class="metric"><b>NRM</b><span>UK</span></div><div class="metric"><b>DIN 276</b><span>DACH</span></div><div class="metric"><b>GAEB</b><span>exchange</span></div></div>
+          </div>
+          <div class="hero-panel"><div class="hero-panel-row"><strong>Cost database</strong><span>55,000+ items</span></div><div class="hero-panel-row"><strong>Classifications</strong><span>regional packs</span></div><div class="hero-panel-row"><strong>Reports</strong><span>export-ready</span></div></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="variant">
+    <div class="variant-head">
+      <h2 class="variant-title">B. Download button variants</h2>
+      <p class="variant-note">Five button treatments that can be used in the first block or in the platform-card module. All are intentionally professional and controlled.</p>
+    </div>
+    <div class="button-lab">
+      <div class="button-swatch"><h3>Primary gradient</h3><a class="download-btn btn-a" href="#"><svg viewBox="0 0 16 16"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg>Download</a><p>Most conversion-focused. Strong, but still clean.</p></div>
+      <div class="button-swatch"><h3>Outlined product</h3><a class="download-btn btn-b" href="#"><svg viewBox="0 0 16 16"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg>Download app</a><p>Quieter. Better when the surrounding module already has visual weight.</p></div>
+      <div class="button-swatch"><h3>Dark executive</h3><a class="download-btn btn-c" href="#"><svg viewBox="0 0 16 16"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg>Get desktop app</a><p>More premium and less SaaS-blue. Good with light modules.</p></div>
+      <div class="button-swatch"><h3>Soft system</h3><a class="download-btn btn-d" href="#"><svg viewBox="0 0 16 16"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg>Download<span class="btn-sub">Windows detected</span></a><p>Helpful when OS detection needs to be visible inside the button.</p></div>
+      <div class="button-swatch"><h3>Two-line CTA</h3><a class="download-btn btn-e" href="#"><svg viewBox="0 0 16 16"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg><span>Download<span class="btn-sub">free desktop build</span></span></a><p>Best when the button needs reassurance without extra text nearby.</p></div>
+    </div>
+  </section>
+
+  <section class="variant">
+    <div class="variant-head">
+      <h2 class="variant-title">01. Wide platform cards</h2>
+      <p class="variant-note">Closest to the current homepage, but wider and calmer. Good if the goal is to preserve the existing structure.</p>
+    </div>
+    <div class="grid">
+      <article class="card is-rec">
+        <div class="os-head"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M3 5.4 10.4 4.3v6.6H3zM10.4 11.6v6.6L3 17.1V11.6zM11.5 4.1 21 2.7v8.2h-9.5zM21 11.9v8.2l-9.5-1.4v-6.8z"/></svg></span><div><h3 class="os-name">Windows</h3><p class="os-note">Windows 10/11, 64-bit installer</p></div></div>
+        <div class="badges"><span class="badge">x64</span><span class="badge">.exe</span><span class="badge">Win 10+</span></div><a class="btn" href="#"><svg viewBox="0 0 16 16"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg>Download</a><p class="meta">v7.1.0 · 191 MB</p>
+        <ol class="steps"><li><b>1</b>Download installer</li><li><b>2</b>Run and accept the prompt</li><li><b>3</b>First launch sets up local data</li></ol>
+      </article>
+      <article class="card"><div class="os-head"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1zM14.5 6.3c.6-.7 1-1.6.9-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.4 2.4-1.1z"/></svg></span><div><h3 class="os-name">macOS</h3><p class="os-note">Apple Silicon, macOS 12+</p></div></div><div class="badges"><span class="badge">aarch64</span><span class="badge">.dmg</span><span class="badge">12+</span></div><a class="btn" href="#"><svg viewBox="0 0 16 16"><path d="M7.3 1v7.1L5.1 5.9l-.9.9L8 10.6l3.8-3.8-.9-.9-2.2 2.2V1zM2.5 12.2v1.3a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1.3h-1.3v1h-8.4v-1z"/></svg>Download</a><p class="meta">v7.1.0 · 186 MB</p><ol class="steps"><li><b>1</b>Download the DMG</li><li><b>2</b>Move app to Applications</li><li><b>3</b>Open from Applications</li></ol></article>
+      <article class="card"><div class="os-head"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2z"/></svg></span><div><h3 class="os-name">Linux</h3><p class="os-note">AppImage, deb and rpm</p></div></div><div class="badges"><span class="badge">amd64</span><span class="badge">.deb</span><span class="badge">.AppImage</span></div><a class="btn" href="#"><svg viewBox="0 0 16 16"><path d="M2.5 2.5h11a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm0 1.3v2h11v-2zm1.4 3.4-.85.85 1.4 1.4-1.4 1.4.85.85 2.25-2.25z"/></svg>Install via terminal</a><p class="meta">curl installer · package auto-detect</p><ol class="steps"><li><b>1</b>Paste command</li><li><b>2</b>Installer picks package</li><li><b>3</b>Launch from app menu</li></ol></article>
+    </div>
+  </section>
+
+  <section class="variant v2">
+    <div class="variant-head"><h2 class="variant-title">02. Hermes-style agent console</h2><p class="variant-note">A restrained AI-agent inspired layout: one recommended installer acts like the primary agent, with other platforms as callable runners.</p></div>
+    <div class="agent-shell">
+      <div class="agent-primary"><div class="agent-status"><span class="pulse"></span> platform agent selected Windows</div><h2 class="agent-title">Install the desktop workspace.</h2><p class="agent-lede">The page detects the user platform, chooses the cleanest path, and keeps alternatives visible without competing for attention.</p><a class="btn agent-btn" href="#">Download for Windows</a><p class="meta">v7.1.0 · signed installer · local data</p></div>
+      <div class="agent-rail">
+        <div class="agent-row"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M3 5.4 10.4 4.3v6.6H3zM10.4 11.6v6.6L3 17.1V11.6zM11.5 4.1 21 2.7v8.2h-9.5zM21 11.9v8.2l-9.5-1.4v-6.8z"/></svg></span><div><h3>Windows agent</h3><p>Installer, WebView2 included</p></div><span>ready</span></div>
+        <div class="agent-row"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1z"/></svg></span><div><h3>macOS agent</h3><p>DMG flow, Applications folder</p></div><span>ready</span></div>
+        <div class="agent-row"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2z"/></svg></span><div><h3>Linux agent</h3><p>Terminal command or packages</p></div><span>ready</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="variant">
+    <div class="variant-head"><h2 class="variant-title">03. Primary command panel</h2><p class="variant-note">Best when the homepage should push one recommended action, while still preserving platform cards as secondary choices.</p></div>
+    <div class="v3-layout">
+      <div class="command"><h3>Recommended install</h3><p class="os-note">Native app for the detected platform. No Python, no Docker, no database setup.</p><div class="terminal">$ openconstructionerp-installer.exe</div><a class="btn" href="#">Download for Windows</a><p class="meta">latest release · direct asset link</p></div>
+      <div class="mini-list"><div class="mini"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M3 5.4 10.4 4.3v6.6H3zM10.4 11.6v6.6L3 17.1V11.6zM11.5 4.1 21 2.7v8.2h-9.5zM21 11.9v8.2l-9.5-1.4v-6.8z"/></svg></span><div><h3>Windows</h3><p>x64 installer</p></div><a class="btn" href="#">Download</a></div><div class="mini"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1z"/></svg></span><div><h3>macOS</h3><p>Apple Silicon DMG</p></div><a class="btn secondary" href="#">Download</a></div><div class="mini"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2z"/></svg></span><div><h3>Linux</h3><p>deb, rpm, AppImage</p></div><a class="btn secondary" href="#">Options</a></div></div>
+    </div>
+  </section>
+
+  <section class="variant">
+    <div class="variant-head"><h2 class="variant-title">04. Enterprise comparison row</h2><p class="variant-note">More compact and procurement-like. Useful if the audience values comparison over visual cards.</p></div>
+    <div class="v4-table">
+      <div class="row"><span><strong>Platform</strong></span><span><strong>Package</strong></span><span><strong>Best path</strong></span><span></span></div>
+      <div class="row"><span>Windows</span><span>.exe · x64</span><span>No setup, WebView2 included</span><span><a class="btn" href="#">Download</a></span></div>
+      <div class="row"><span>macOS</span><span>.dmg · aarch64</span><span>Drag to Applications</span><span><a class="btn secondary" href="#">Download</a></span></div>
+      <div class="row"><span>Linux</span><span>.deb · AppImage</span><span>Package or terminal install</span><span><a class="btn secondary" href="#">Options</a></span></div>
+    </div>
+  </section>
+
+  <section class="variant v5">
+    <div class="variant-head"><h2 class="variant-title">05. Dense professional cards</h2><p class="variant-note">Quiet, space-efficient, and suitable for a long homepage where this module must not dominate the page.</p></div>
+    <div class="grid">
+      <article class="card is-rec"><div class="os-head"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M3 5.4 10.4 4.3v6.6H3zM10.4 11.6v6.6L3 17.1V11.6zM11.5 4.1 21 2.7v8.2h-9.5zM21 11.9v8.2l-9.5-1.4v-6.8z"/></svg></span><div><h3 class="os-name">Windows</h3><p class="os-note">Installer · 191 MB</p></div></div><div class="badges"><span class="badge">detected</span><span class="badge">x64</span></div><a class="btn" href="#">Download</a><p class="meta">First launch prepares local database</p></article>
+      <article class="card"><div class="os-head"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1z"/></svg></span><div><h3 class="os-name">macOS</h3><p class="os-note">DMG · 186 MB</p></div></div><div class="badges"><span class="badge">aarch64</span><span class="badge">12+</span></div><a class="btn secondary" href="#">Download</a><p class="meta">Move to Applications</p></article>
+      <article class="card"><div class="os-head"><span class="glyph"><svg viewBox="0 0 24 24"><path d="M12 2c-2 0-3.3 1.7-3.3 3.9 0 1.4.5 2.2.5 3.2 0 1-1.1 1.9-2 3.6-.8 1.6-1.8 3.3-1.8 4.8 0 .9.5 1.4 1.2 1.6.2.6.1 1.3.9 1.6 1 .4 2.6.5 3.6-.2.3-.2.6-.3.9-.3.3 0 .6.1.9.3 1 .7 2.6.6 3.6.2.8-.3.7-1 .9-1.6.7-.2 1.2-.7 1.2-1.6 0-1.5-1-3.2-1.8-4.8-.9-1.7-2-2.6-2-3.6 0-1 .5-1.8.5-3.2C15.3 3.7 14 2 12 2z"/></svg></span><div><h3 class="os-name">Linux</h3><p class="os-note">deb or AppImage</p></div></div><div class="badges"><span class="badge">amd64</span><span class="badge">terminal</span></div><a class="btn secondary" href="#">Options</a><p class="meta">Package auto-detect available</p></article>
+    </div>
+  </section>
+</main>
+</body>
+</html>

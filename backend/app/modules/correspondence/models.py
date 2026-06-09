@@ -6,7 +6,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import JSON, ForeignKey, String, Text
+from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -16,6 +16,18 @@ class Correspondence(Base):
     """‌⁠‍A project correspondence record (letter, email, notice)."""
 
     __tablename__ = "oe_correspondence_correspondence"
+    # ``reference_number`` must be unique per project - the auto-generator
+    # uses ``MAX(suffix)+1`` which has a TOCTOU race under concurrent
+    # creates; without this constraint two parallel POSTs would silently
+    # persist ``COR-005`` twice. With the constraint the second commit
+    # raises ``IntegrityError`` and the service layer retries.
+    __table_args__ = (
+        UniqueConstraint(
+            "project_id",
+            "reference_number",
+            name="uq_oe_correspondence_correspondence_project_reference",
+        ),
+    )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),

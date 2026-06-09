@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openconstructionerp-china-gbt50500"
+version = "0.1.0"
+description = "Pre-configured partner pack for Chinese contractors and developers - GB/T 50500-2013 Bill of Quantities pricing code, GB 50854 quantity calculation code, GB-code structural bundle (GB 50010, GB 50011, GB 50009, GB 50016), GB/T 50378 green building, and VAT general tax method. English + Simplified Chinese UI."
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.11"
+authors = [
+    { name = "OpenConstructionERP", email = "info@datadrivenconstruction.io" },
+]
+keywords = ["openconstructionerp", "ocerp", "partner-pack", "china", "gbt50500", "gb50854", "boq", "green-building", "vat", "shanghai", "chinese"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Other Audience",
+    "Topic :: Office/Business",
+    "Natural Language :: Chinese (Simplified)",
+    "Natural Language :: English",
+]
+dependencies = [
+    "openconstructionerp>=5.5.0",
+]
+
+[project.urls]
+Source = "https://github.com/DataDrivenConstruction/openconstructionerp"
+
+[project.entry-points."openconstructionerp.partner_packs"]
+china-gbt50500 = "openconstructionerp_china_gbt50500:MANIFEST"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+openconstructionerp_china_gbt50500 = [
+    "logo.svg",
+    "onboarding.yaml",
+    "locales/*.json",
+    "rule_packs/*.json",
+]

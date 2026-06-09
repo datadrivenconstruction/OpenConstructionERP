@@ -55,7 +55,7 @@ TEMPLATE = DemoTemplate(
         "lat": 43.6433,
         "lng": -79.4019,
     },
-    validation_rule_sets=["masterformat", "boq_quality"],
+    validation_rule_sets=["masterformat", "boq_quality", "project_completeness"],
     boq_name="Detailed Estimate - MasterFormat 2020",
     boq_description=(
         "Class B elemental/trade estimate to MasterFormat 2020, divisions "

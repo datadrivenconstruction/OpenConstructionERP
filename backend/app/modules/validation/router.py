@@ -302,7 +302,12 @@ async def delete_report(
     dependencies=[Depends(RequirePermission("validation.create"))],
 )
 async def import_ids(
+    user_id: CurrentUserId,
+    session: SessionDep,
     file: UploadFile = File(..., description="An IDS XML file (.ids or .xml)"),
+    project_id: uuid.UUID = Query(
+        ..., description="Project the imported rules belong to"
+    ),
     rule_set: str = Query(
         default="ids_custom",
         description="Rule set name to register the imported rules under.",
@@ -310,10 +315,19 @@ async def import_ids(
 ) -> dict[str, Any]:
     """Parse an IDS file and register one ValidationRule per <specification>.
 
-    The rules are added to the in-process rule registry under ``rule_set``
-    (default ``ids_custom``) so subsequent ``/validation/run`` calls can
-    apply them.  Returns the count and the list of generated rule ids.
+    Requires ``project_id`` and verifies the caller owns the project before
+    registering, mirroring every other validation endpoint. The rules are
+    added to the in-process rule registry under a project-namespaced rule
+    set (``{rule_set}:{project_id}``) so imported rules cannot leak across
+    tenants or projects.  Returns the count and the list of generated rule
+    ids.
+
+    NOTE: the registry is process-global and in-memory, so namespacing gates
+    which ``/validation/run`` calls can apply these rules but they are not yet
+    persisted per project (lost on restart). Durable per-project storage needs
+    a dedicated table - tracked as residual.
     """
+    await _require_project_access(session, project_id, user_id)
     try:
         payload = await file.read()
     except Exception as exc:  # noqa: BLE001
@@ -336,15 +350,17 @@ async def import_ids(
             detail=str(exc),
         ) from exc
 
+    scoped_rule_set = f"{rule_set}:{project_id}"
     rule_ids: list[str] = []
     for rule in rules:
-        rule_registry.register(rule, rule_sets=[rule_set, "IDS"])
+        rule_registry.register(rule, rule_sets=[scoped_rule_set, "IDS"])
         rule_ids.append(rule.rule_id)
 
     return {
         "rules_created": len(rule_ids),
         "rule_ids": rule_ids,
-        "rule_set": rule_set,
+        "rule_set": scoped_rule_set,
+        "project_id": str(project_id),
         "filename": file.filename,
     }
 
@@ -404,7 +420,7 @@ async def list_rule_sets(
 async def validation_report_similar(
     report_id: uuid.UUID,
     session: SessionDep,
-    _user_id: CurrentUserId,
+    user_id: CurrentUserId,
     limit: int = Query(default=5, ge=1, le=20),
     cross_project: bool = Query(default=True),
 ) -> dict[str, Any]:
@@ -412,9 +428,9 @@ async def validation_report_similar(
     from app.core.vector_index import find_similar
     from app.modules.validation.vector_adapter import validation_report_adapter
 
-    row = await session.get(ValidationReport, report_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Validation report not found")
+    # Verify the caller owns the source report's project before running
+    # cross-project similarity, mirroring get_report/export_report_sarif.
+    row = await _require_report_access(session, report_id, user_id)
     project_id = str(row.project_id) if row.project_id else None
     hits = await find_similar(
         validation_report_adapter,

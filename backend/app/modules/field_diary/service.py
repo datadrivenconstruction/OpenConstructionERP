@@ -895,10 +895,8 @@ class FieldSyncService:
             )
 
         repo = InspectionRepository(self.session)
-        number = await repo.next_inspection_number(project_id)
         inspection = QualityInspection(
             project_id=project_id,
-            inspection_number=number,
             inspection_type=data.inspection_type,
             title=data.title,
             location=data.location,

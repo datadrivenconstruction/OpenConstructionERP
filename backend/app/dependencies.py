@@ -268,6 +268,60 @@ async def get_optional_user_payload(
         return None
 
 
+# ── API-key auth (additive, JWT stays primary) ─────────────────────────────
+
+
+async def get_user_from_api_key(
+    request: Request,
+) -> "User":
+    """Resolve an ``X-API-Key`` header to its owning user.
+
+    Additive entry point that runs entirely separate from the JWT path.
+    The header value is hashed with the same SHA-256 scheme used at key
+    creation (see :func:`app.modules.users.service.generate_api_key`) and
+    looked up via :meth:`APIKeyRepository.get_by_hash`, which already
+    rejects inactive or expired keys. The key's ``last_used_at`` is touched
+    on each successful resolution.
+
+    Raises:
+        HTTPException 401 if the header is missing, unknown, expired, or its
+        owning user does not exist / is inactive.
+    """
+    import hashlib
+
+    from app.modules.users.models import User as _UserModel
+    from app.modules.users.repository import APIKeyRepository
+
+    header = request.headers.get("x-api-key")
+    if not header:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "ApiKey"},
+        )
+
+    key_hash = hashlib.sha256(header.encode()).hexdigest()
+    async with async_session_factory() as session:
+        api_key = await APIKeyRepository(session).get_by_hash(key_hash)
+        if api_key is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid API key",
+                headers={"WWW-Authenticate": "ApiKey"},
+            )
+        await APIKeyRepository(session).update_last_used(api_key.id)
+        user = await session.get(_UserModel, api_key.user_id)
+        if user is None or not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found or inactive",
+            )
+        return user
+
+
+ApiKeyUser = Annotated["User", Depends(get_user_from_api_key)]
+
+
 # ── Permission checker ─────────────────────────────────────────────────────
 
 

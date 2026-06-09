@@ -811,7 +811,7 @@ export function BOQListPage() {
           Canon KPI tile: shared Card, top-aligned label+value, text-lg value. */}
       {stats && allBoqs && allBoqs.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+          <div className="flex flex-col justify-start rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
             <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
               {isFiltered
                 ? t('boq.matching_estimates', { defaultValue: 'Matching Estimates' })
@@ -819,11 +819,11 @@ export function BOQListPage() {
             </div>
             <div className="mt-1 text-lg font-semibold text-content-primary tabular-nums">{stats.count}</div>
           </div>
-          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+          <div className="flex flex-col justify-start rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
             <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">{t('boq.total_positions', { defaultValue: 'Total Positions' })}</div>
             <div className="mt-1 text-lg font-semibold text-content-primary tabular-nums">{stats.totalPositions.toLocaleString()}</div>
           </div>
-          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+          <div className="flex flex-col justify-start rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
             <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">{t('boq.total_value', { defaultValue: 'Total Value' })}</div>
             {/* Money rule: never blend currencies into one scalar. One
                 labelled total when all share a currency; the dominant
@@ -854,7 +854,7 @@ export function BOQListPage() {
               </div>
             )}
           </div>
-          <div className="flex flex-col justify-start rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
+          <div className="flex flex-col justify-start rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-gradient-to-b from-slate-50/70 to-slate-100/45 dark:from-slate-800/50 dark:to-slate-900/35 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
             <div className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">{t('boq.status', { defaultValue: 'Status' })}</div>
             <div className="mt-1 flex items-center gap-2">
               <Badge variant="blue" size="sm" dot>{stats.drafts} {t('boq.draft', { defaultValue: 'draft' })}</Badge>

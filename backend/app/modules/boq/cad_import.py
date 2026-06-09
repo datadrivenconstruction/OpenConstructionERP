@@ -1392,7 +1392,12 @@ def detect_converter_capabilities(extension: str) -> dict[str, Any]:
                 cwd=str(exe.parent),
                 env=_converter_subprocess_env(exe),
                 input=b"\n",
-                timeout=8,
+                # A cold first probe loads the bundled Qt6 DLLs (~26 MB) and
+                # may be slowed by an AV scan of the just-downloaded binary.
+                # 8s was tight enough to time out on that cold path, cache the
+                # legacy profile, and send the v17 positional shape that a v18
+                # binary rejects with exit 15. Give the probe room to answer.
+                timeout=20,
             )
         except (FileNotFoundError, PermissionError, OSError) as exc:
             logger.debug("Converter probe (%s %s) failed to start: %s", exe, flag, exc)
@@ -1547,18 +1552,6 @@ async def convert_cad_to_excel(
     # the CAD/BIM Data Explorer surfaced as "CAD conversion failed for
     # .rvt file" on every fresh-install with a current DDC binary.
     output_xlsx = output_dir / (input_path.stem + ".xlsx")
-    caps = detect_converter_capabilities(extension)
-    args = build_ddc_args(
-        converter,
-        input_path,
-        caps=caps,
-        xlsx_out=output_xlsx,
-        mode="standard",
-        # XLSX-only conversion: ask the binary to skip the COLLADA pass.
-        # v18 emits ``--no-dae``; v17 emits ``-no-collada``. The legacy
-        # profile (no flag) just runs both, which is harmless here.
-        include_no_dae=True,
-    )
 
     try:
         import subprocess
@@ -1567,7 +1560,20 @@ async def convert_cad_to_excel(
         # DDC converters need DLLs (Qt6Core.dll etc.) from their own directory
         converter_dir = converter.parent
 
-        def _run_converter() -> subprocess.CompletedProcess:
+        def _compose(caps: dict[str, Any]) -> list[str]:
+            # XLSX-only conversion: ask the binary to skip the COLLADA pass.
+            # v18 emits ``--no-dae``; v17 emits ``-no-collada``. The legacy
+            # profile (no flag) just runs both, which is harmless here.
+            return build_ddc_args(
+                converter,
+                input_path,
+                caps=caps,
+                xlsx_out=output_xlsx,
+                mode="standard",
+                include_no_dae=True,
+            )
+
+        def _run_converter(args: list[str]) -> subprocess.CompletedProcess:
             return subprocess.run(
                 args,
                 stdout=subprocess.PIPE,
@@ -1578,28 +1584,71 @@ async def convert_cad_to_excel(
                 timeout=300,
             )
 
-        loop = asyncio.get_event_loop()
-        with ThreadPoolExecutor(max_workers=1) as pool:
-            result = await loop.run_in_executor(pool, _run_converter)
+        def _collect_output() -> Path | None:
+            # Find the generated Excel file in the output directory.
+            for f in output_dir.iterdir():
+                if f.suffix in (".xlsx", ".xls"):
+                    return f
+            # Also check if xlsx was written directly (not in output_dir).
+            if output_xlsx.exists():
+                return output_xlsx
+            return None
+
+        async def _attempt(args: list[str]) -> subprocess.CompletedProcess:
+            loop = asyncio.get_event_loop()
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                return await loop.run_in_executor(pool, _run_converter, args)
+
+        caps = detect_converter_capabilities(extension)
+        args = _compose(caps)
+        result = await _attempt(args)
+        if result.returncode == 0:
+            found = _collect_output()
+            if found is not None:
+                return found
+
+        # First attempt failed. The dominant cause is a mis-detected CLI
+        # profile: a v18 binary probed before its Qt DLLs settled (or while an
+        # AV scan held the freshly downloaded files) gets cached as legacy, so
+        # we send the v17 positional shape and the binary aborts with exit 15
+        # ("arguments were not expected"). That surfaced to the user as
+        # "CAD conversion failed for .rvt file". Drop the cached capabilities,
+        # force a fresh probe, and retry once with the corrected shape -
+        # self-healing within the same request, no service restart needed.
+        first_err = (result.stderr or b"").decode(errors="replace")
+        logger.warning(
+            "Converter first attempt failed for %s (exit %d): %s - re-probing "
+            "CLI shape and retrying once.",
+            input_path.name,
+            result.returncode,
+            first_err[:300],
+        )
+        invalidate_converter_capabilities(extension)
+        retry_caps = detect_converter_capabilities(extension)
+        retry_args = _compose(retry_caps)
+        if retry_args != args:
+            # Clear any partial output the aborted first run may have left so
+            # ``_collect_output`` cannot return a stale or corrupt file.
+            if output_xlsx.exists():
+                try:
+                    output_xlsx.unlink()
+                except OSError:
+                    pass
+            result = await _attempt(retry_args)
+            if result.returncode == 0:
+                found = _collect_output()
+                if found is not None:
+                    return found
 
         if result.returncode != 0:
             logger.error(
-                "Converter failed (exit %d): %s",
+                "Converter failed (exit %d) for %s: %s",
                 result.returncode,
-                result.stderr.decode(errors="replace")[:500],
+                input_path.name,
+                (result.stderr or b"").decode(errors="replace")[:500],
             )
-            return None
-
-        # Find the generated Excel file in the output directory
-        for f in output_dir.iterdir():
-            if f.suffix in (".xlsx", ".xls"):
-                return f
-
-        # Also check if xlsx was written directly (not in output_dir)
-        if output_xlsx.exists():
-            return output_xlsx
-
-        logger.error("No Excel output found in %s after conversion", output_dir)
+        else:
+            logger.error("No Excel output found in %s after conversion", output_dir)
         return None
 
     except subprocess.TimeoutExpired:

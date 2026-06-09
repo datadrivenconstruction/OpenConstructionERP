@@ -115,7 +115,9 @@ async def project_id(client: AsyncClient, auth: dict[str, str]) -> str:
 
 
 @pytest.mark.asyncio
-async def test_import_ids_endpoint_creates_rules(client: AsyncClient, auth: dict[str, str]) -> None:
+async def test_import_ids_endpoint_creates_rules(
+    client: AsyncClient, auth: dict[str, str], project_id: str
+) -> None:
     """Uploading the multi-spec fixture creates 3 rules in the registry."""
     fixture = FIXTURES / "ids_10_multi_specification.xml"
     files = {
@@ -128,6 +130,7 @@ async def test_import_ids_endpoint_creates_rules(client: AsyncClient, auth: dict
     resp = await client.post(
         "/api/v1/validation/import-ids",
         files=files,
+        params={"project_id": project_id},
         headers=auth,
     )
     assert resp.status_code == 200, f"unexpected: {resp.status_code} {resp.text[:300]}"
@@ -135,16 +138,22 @@ async def test_import_ids_endpoint_creates_rules(client: AsyncClient, auth: dict
     assert body["rules_created"] == 3
     assert len(body["rule_ids"]) == 3
     assert all(rid.startswith("ids.") for rid in body["rule_ids"])
-    assert body["rule_set"] == "ids_custom"
+    # Rule set is namespaced with the project id so imported rules cannot
+    # leak across tenants/projects.
+    assert body["rule_set"] == f"ids_custom:{project_id}"
+    assert body["project_id"] == project_id
 
 
 @pytest.mark.asyncio
-async def test_import_ids_rejects_garbage(client: AsyncClient, auth: dict[str, str]) -> None:
-    """Malformed payload → 422 with a helpful detail."""
+async def test_import_ids_rejects_garbage(
+    client: AsyncClient, auth: dict[str, str], project_id: str
+) -> None:
+    """Malformed payload returns 422 with a helpful detail."""
     files = {"file": ("not_ids.xml", b"<<<not xml>>>", "application/xml")}
     resp = await client.post(
         "/api/v1/validation/import-ids",
         files=files,
+        params={"project_id": project_id},
         headers=auth,
     )
     assert resp.status_code == 422

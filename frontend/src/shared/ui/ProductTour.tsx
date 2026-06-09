@@ -219,6 +219,9 @@ export const DEFAULT_PRODUCT_TOUR_STEPS: ProductTourStep[] = [
     titleKey: 'tour.step.4.title',
     bodyKey: 'tour.step.4.body',
     preferredPosition: 'right',
+    // BIM viewer moved into the collapsed-by-default "Reality Capture & 3D"
+    // group (grp_reality); reveal it so the spotlight can latch on.
+    revealGroupId: 'grp_reality',
   },
   {
     selector: '[data-testid="sidebar-nav-property-dev"]',
@@ -233,8 +236,9 @@ export const DEFAULT_PRODUCT_TOUR_STEPS: ProductTourStep[] = [
     titleKey: 'tour.step.6.title',
     bodyKey: 'tour.step.6.body',
     preferredPosition: 'right',
-    // Row lives in the collapsed-by-default "cad_bim_analytics" group.
-    revealGroupId: 'cad_bim_analytics',
+    // Geo Hub moved into the collapsed-by-default "Reality Capture & 3D"
+    // group (grp_reality); reveal it so the spotlight can latch on.
+    revealGroupId: 'grp_reality',
   },
   {
     selector: '[data-testid="header-help-menu"]',

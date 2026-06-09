@@ -27,6 +27,7 @@ from __future__ import annotations
 import gzip
 import json
 import logging
+import os
 import uuid
 from pathlib import Path
 from typing import Any
@@ -38,6 +39,19 @@ logger = logging.getLogger(__name__)
 
 ASSETS = Path(__file__).resolve().parent / "flagship_assets"
 SPEC_PATH = ASSETS / "flagship.json"
+
+
+def _samples_base() -> Path:
+    """Folder holding the optional native CAD/BIM sample sources.
+
+    Resolved from ``OE_DEMO_CAD_SAMPLES`` and falls back to the bundled
+    sample folder under the user home. Sample sources are entirely optional:
+    when a file is absent the document entry is skipped, never fatal.
+    """
+    env = os.environ.get("OE_DEMO_CAD_SAMPLES")
+    if env:
+        return Path(env)
+    return Path.home() / "OpenConstructionERP_sample_data"
 
 # Per-project namespace seed - distinct from seed_flagship's namespace so the
 # generalized demo assets never collide with the dedicated flagship project.
@@ -54,8 +68,44 @@ _ELEMS_PER_POSITION = 4
 # ── Bundle specifications ─────────────────────────────────────────────────
 #
 # Each bundle reuses one flagship model (selected by ``source_format``) and a
-# subset of its element groups for BOQ linking. ``geometry_asset`` /
-# ``pdf_asset`` are filenames under ``flagship_assets/``.
+# subset of its element groups for BOQ linking. ``geometry_asset`` is a
+# filename under ``flagship_assets/``.
+#
+# ``documents`` lists the real, downloadable files attached to every project
+# that maps to the bundle. Each entry is a dict:
+#
+#     kind:        "asset"  -> read bytes from flagship_assets/<src>
+#                  "sample" -> read bytes from the CAD samples folder
+#                              (resolved via OE_DEMO_CAD_SAMPLES); skipped when
+#                              the file is absent, never fatal.
+#     src:         source path. For "asset" it is a filename under
+#                  flagship_assets/; for "sample" it is a path relative to the
+#                  samples base (e.g. "PDF/Housing design standards2 LPG.pdf").
+#     name:        display name written to the Document row.
+#     category:    Document.category ("drawing" / "specification" / "model").
+#     mime:        MIME type for the stored bytes.
+#     tags:        list of tags for the Document row.
+#     description: short Document.description.
+#
+# Every bundle ships at least two real PDFs (a plan set + a spec) so the
+# Documents screen never shows byte-less stubs.
+
+_DRAWINGS_PDF = {
+    "kind": "asset",
+    "src": "house_plans.pdf",
+    "category": "drawing",
+    "mime": "application/pdf",
+    "tags": ["drawings", "plan-set"],
+}
+_SPEC_PDF = {
+    "kind": "asset",
+    "src": "housing_standards.pdf",
+    "name": "Design standards and specification.pdf",
+    "category": "specification",
+    "mime": "application/pdf",
+    "tags": ["specification", "standards"],
+    "description": "Reference design standards and specification",
+}
 
 BUNDLES: dict[str, dict[str, Any]] = {
     "residential_ifc": {
@@ -65,9 +115,23 @@ BUNDLES: dict[str, dict[str, Any]] = {
         "discipline": "architectural",
         "model_format": "ifc",
         "link_groups": ["ifc_walls", "ifc_cover"],
-        "pdf_asset": "house_plans.pdf",
-        "pdf_name": "Architectural plan set.pdf",
-        "pdf_title": "Reference architectural plan set",
+        "documents": [
+            {
+                **_DRAWINGS_PDF,
+                "name": "Architectural plan set.pdf",
+                "description": "Reference architectural plan set",
+            },
+            dict(_SPEC_PDF),
+            {
+                "kind": "sample",
+                "src": "IFC/ARC_SampleHouse_IFC4.ifc",
+                "name": "Architectural model source.ifc",
+                "category": "model",
+                "mime": "application/x-step",
+                "tags": ["bim", "ifc", "source-model"],
+                "description": "Native IFC source model",
+            },
+        ],
     },
     "commercial_rvt": {
         "source_format": "rvt",
@@ -76,9 +140,23 @@ BUNDLES: dict[str, dict[str, Any]] = {
         "discipline": "structural",
         "model_format": "rvt",
         "link_groups": ["rvt_walls", "rvt_floors", "rvt_columns", "rvt_foundation"],
-        "pdf_asset": "house_plans.pdf",
-        "pdf_name": "Coordinated drawing set.pdf",
-        "pdf_title": "Reference coordinated drawing set",
+        "documents": [
+            {
+                **_DRAWINGS_PDF,
+                "name": "Coordinated drawing set.pdf",
+                "description": "Reference coordinated drawing set",
+            },
+            dict(_SPEC_PDF),
+            {
+                "kind": "sample",
+                "src": "RVT_Revit/ARC_rac_basic_sample_2023.rvt",
+                "name": "Coordinated model source.rvt",
+                "category": "model",
+                "mime": "application/octet-stream",
+                "tags": ["bim", "revit", "source-model"],
+                "description": "Native Revit source model",
+            },
+        ],
     },
 }
 
@@ -95,6 +173,7 @@ BUNDLE_MAP: dict[str, str] = {
     # Core built-ins
     "residential-berlin": "residential_ifc",
     "office-london": "commercial_rvt",
+    "office-shanghai": "commercial_rvt",
     "medical-us": "commercial_rvt",
     "warehouse-dubai": "commercial_rvt",
     "school-paris": "commercial_rvt",
@@ -327,42 +406,65 @@ async def _attach_demo_assets_inner(
                 n_links += 1
         await session.flush()
 
-    # ── 4. Real PDF plan set (best-effort) ──────────────────────────────
-    doc_written = False
-    pdf_name = bundle.get("pdf_asset")
-    if pdf_name:
-        try:
-            asset = ASSETS / pdf_name
-            doc_id = _u(str(pid), "doc", pdf_name)
-            existing_doc = await session.get(Document, doc_id)
-            if asset.exists() and existing_doc is None:
-                from app.modules.documents.service import UPLOAD_BASE  # type: ignore
+    # ── 4. Real downloadable documents (best-effort, per entry) ──────────
+    # Every bundle declares a ``documents`` list. We materialize each one as
+    # real bytes on disk plus a Document row pointing at the absolute path, so
+    # the Documents screen offers genuine HTTP-200 downloads (no byte-less
+    # stubs). Each entry is isolated: a missing or unreadable source skips
+    # THAT entry only and never aborts the rest of the install.
+    from app.modules.documents.service import UPLOAD_BASE  # type: ignore
 
-                up = Path(UPLOAD_BASE) / str(pid)
-                up.mkdir(parents=True, exist_ok=True)
-                fname = f"{uuid.uuid5(_NS, f'{pid}:pdf:{pdf_name}').hex[:12]}_{bundle['pdf_name']}"
-                dest = up / fname
-                data = asset.read_bytes()
-                dest.write_bytes(data)
-                session.add(
-                    Document(
-                        id=doc_id,
-                        project_id=pid,
-                        name=bundle["pdf_name"],
-                        description=bundle.get("pdf_title", ""),
-                        category="drawing",
-                        file_size=len(data),
-                        mime_type="application/pdf",
-                        file_path=str(dest),
-                        uploaded_by=owner,
-                        tags=["drawings", "plan-set"],
-                        metadata_={"source": "demo_asset_seed", "bundle": bundle_key},
-                    )
+    samples_base = _samples_base()
+    up = Path(UPLOAD_BASE) / str(pid)
+    docs_written = 0
+    for entry in bundle.get("documents", []):
+        try:
+            kind = entry.get("kind", "asset")
+            src = entry.get("src", "")
+            name = entry.get("name") or Path(src).name
+            if kind == "sample":
+                source_path = samples_base / src
+            else:
+                source_path = ASSETS / src
+            if not source_path.exists():
+                # Optional source absent (common for native CAD samples) - skip.
+                continue
+
+            doc_id = _u(str(pid), "doc", name)
+            existing_doc = await session.get(Document, doc_id)
+            if existing_doc is not None:
+                docs_written += 1
+                continue
+
+            up.mkdir(parents=True, exist_ok=True)
+            fname = f"{uuid.uuid5(_NS, f'{pid}:doc:{name}').hex[:12]}_{name}"
+            dest = up / fname
+            data = source_path.read_bytes()
+            dest.write_bytes(data)
+            session.add(
+                Document(
+                    id=doc_id,
+                    project_id=pid,
+                    name=name,
+                    description=entry.get("description", ""),
+                    category=entry.get("category", "drawing"),
+                    file_size=len(data),
+                    mime_type=entry.get("mime", "application/octet-stream"),
+                    file_path=str(dest),
+                    uploaded_by=owner,
+                    tags=list(entry.get("tags", [])),
+                    metadata_={"source": "demo_asset_seed", "bundle": bundle_key},
                 )
-                await session.flush()
-                doc_written = True
-        except Exception:  # noqa: BLE001 - PDF is non-critical
-            logger.warning("seed_demo_assets: PDF attach skipped for %s", pid, exc_info=True)
+            )
+            await session.flush()
+            docs_written += 1
+        except Exception:  # noqa: BLE001 - a single document is non-critical
+            logger.warning(
+                "seed_demo_assets: document attach skipped for %s (%s)",
+                pid,
+                entry.get("name") or entry.get("src"),
+                exc_info=True,
+            )
 
     result = {
         "status": "ok",
@@ -371,7 +473,7 @@ async def _attach_demo_assets_inner(
         "elements": len(elem_uuid),
         "links": n_links,
         "geometry": bool(canonical_key),
-        "pdf": doc_written,
+        "documents": docs_written,
         "bundle": bundle_key,
     }
     logger.info("Demo assets attached: %s", result)

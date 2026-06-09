@@ -5,6 +5,7 @@ import uuid
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.correspondence.models import Correspondence
@@ -12,6 +13,11 @@ from app.modules.correspondence.repository import CorrespondenceRepository
 from app.modules.correspondence.schemas import CorrespondenceCreate, CorrespondenceUpdate
 
 logger = logging.getLogger(__name__)
+
+# Max attempts when ``next_reference_number`` collides under concurrent
+# creates. Five gives ample slack for high-throughput contention without
+# letting a buggy / faulty unique-constraint state pin the request loop.
+_MAX_NUMBER_RETRIES = 5
 
 
 async def _safe_publish(name: str, data: dict, source_module: str = "oe_correspondence") -> None:
@@ -41,50 +47,84 @@ class CorrespondenceService:
         data: CorrespondenceCreate,
         user_id: str | None = None,
     ) -> Correspondence:
-        """‌⁠‍Create a new correspondence record with auto-generated reference number."""
-        reference_number = await self.repo.next_reference_number(data.project_id)
+        """‌⁠‍Create a new correspondence record with auto-generated reference number.
 
-        correspondence = Correspondence(
-            project_id=data.project_id,
-            reference_number=reference_number,
-            direction=data.direction,
-            subject=data.subject,
-            from_contact_id=data.from_contact_id,
-            to_contact_ids=data.to_contact_ids,
-            date_sent=data.date_sent,
-            date_received=data.date_received,
-            correspondence_type=data.correspondence_type,
-            linked_document_ids=data.linked_document_ids,
-            linked_transmittal_id=data.linked_transmittal_id,
-            linked_rfi_id=data.linked_rfi_id,
-            notes=data.notes,
-            created_by=user_id,
-            metadata_=data.metadata,
-        )
-        correspondence = await self.repo.create(correspondence)
-        # PII discipline: log only structural fields (ref number, direction,
-        # type, project id). Subject and notes can contain personal data -
-        # legal names, addresses, allegations - and structured-log sinks
-        # outside our control (Sentry, Datadog) shouldn't see them.
-        logger.info(
-            "Correspondence created: %s (%s/%s) for project %s",
-            reference_number,
-            data.direction,
-            data.correspondence_type,
+        Concurrent-create race: ``next_reference_number`` computes the next
+        ordinal from ``MAX(suffix)+1`` which has TOCTOU semantics. Two parallel
+        POSTs can read the same MAX and both attempt to insert ``COR-005``. The
+        unique constraint on ``(project_id, reference_number)`` turns the second
+        insert into ``IntegrityError`` and we simply re-roll the number. After
+        ``_MAX_NUMBER_RETRIES`` collisions we surface 409 rather than spin.
+        """
+        last_exc: Exception | None = None
+        for attempt in range(_MAX_NUMBER_RETRIES):
+            reference_number = await self.repo.next_reference_number(data.project_id)
+
+            correspondence = Correspondence(
+                project_id=data.project_id,
+                reference_number=reference_number,
+                direction=data.direction,
+                subject=data.subject,
+                from_contact_id=data.from_contact_id,
+                to_contact_ids=data.to_contact_ids,
+                date_sent=data.date_sent,
+                date_received=data.date_received,
+                correspondence_type=data.correspondence_type,
+                linked_document_ids=data.linked_document_ids,
+                linked_transmittal_id=data.linked_transmittal_id,
+                linked_rfi_id=data.linked_rfi_id,
+                notes=data.notes,
+                created_by=user_id,
+                metadata_=data.metadata,
+            )
+            try:
+                correspondence = await self.repo.create(correspondence)
+            except IntegrityError as exc:
+                last_exc = exc
+                logger.warning(
+                    "Reference-number collision on attempt %d for project %s (number=%s); retrying",
+                    attempt + 1,
+                    data.project_id,
+                    reference_number,
+                )
+                continue
+            # PII discipline: log only structural fields (ref number, direction,
+            # type, project id). Subject and notes can contain personal data -
+            # legal names, addresses, allegations - and structured-log sinks
+            # outside our control (Sentry, Datadog) shouldn't see them.
+            logger.info(
+                "Correspondence created: %s (%s/%s) for project %s",
+                reference_number,
+                data.direction,
+                data.correspondence_type,
+                data.project_id,
+            )
+            # Publish correspondence.created so the vector indexer embeds the
+            # new row for semantic search / the floating-chat assistant
+            # (item 16).
+            await _safe_publish(
+                "correspondence.created",
+                {
+                    "project_id": str(data.project_id),
+                    "correspondence_id": str(correspondence.id),
+                    "reference_number": reference_number,
+                },
+            )
+            return correspondence
+
+        # All retries exhausted - translate to 409 so the caller can retry
+        # at the HTTP layer with a clear contract.
+        logger.error(
+            "Reference-number collision still unresolved after %d retries for project %s",
+            _MAX_NUMBER_RETRIES,
             data.project_id,
         )
-        # Publish correspondence.created so the vector indexer embeds the
-        # new row for semantic search / the floating-chat assistant
-        # (item 16).
-        await _safe_publish(
-            "correspondence.created",
-            {
-                "project_id": str(data.project_id),
-                "correspondence_id": str(correspondence.id),
-                "reference_number": reference_number,
-            },
-        )
-        return correspondence
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                f"Could not allocate a unique reference number after {_MAX_NUMBER_RETRIES} attempts; please retry."
+            ),
+        ) from last_exc
 
     async def get_correspondence(self, correspondence_id: uuid.UUID) -> Correspondence:
         correspondence = await self.repo.get_by_id(correspondence_id)

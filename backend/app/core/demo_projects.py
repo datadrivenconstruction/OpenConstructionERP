@@ -62,6 +62,37 @@ def _id() -> uuid.UUID:
     return uuid.uuid4()
 
 
+# A 1x1 PNG - a valid, tiny image the photo endpoint can serve even when
+# Pillow is unavailable, so a seeded photo never 404s on disk.
+_FALLBACK_PNG = bytes.fromhex(
+    "89504e470d0a1a0a0000000d4948445200000001000000010802000000907753de"
+    "0000000c4944415408d763a8a9a90100028a01354f9f2be40000000049454e44ae426082"
+)
+
+
+def _write_placeholder_png(path, color: tuple[int, int, int], caption: str) -> None:
+    """Write a small valid PNG to ``path`` (a real on-disk file, not a stub).
+
+    Uses Pillow to render a labelled colour swatch when available, otherwise
+    falls back to a committed 1x1 PNG byte string. Either way the file exists on
+    disk so the photo-serving endpoint returns the image instead of a 404.
+    """
+    try:
+        from PIL import Image, ImageDraw
+
+        img = Image.new("RGB", (640, 420), color)
+        draw = ImageDraw.Draw(img)
+        # Plain label, no font dependency - default bitmap font is always present.
+        draw.text((24, 24), "OpenEstimate demo", fill=(255, 255, 255))
+        draw.text((24, 48), caption[:48], fill=(255, 255, 255))
+        img.save(str(path), format="PNG")
+    except Exception:
+        # Pillow missing or render failure - still materialise a valid image.
+        from pathlib import Path as _Path
+
+        _Path(path).write_bytes(_FALLBACK_PNG)
+
+
 def _make_section(
     *,
     boq_id: uuid.UUID,
@@ -1978,6 +2009,24 @@ DEFAULT_DEMO_IDS: tuple[str, ...] = (
     "medical-us",  # international healthcare - US MasterFormat, USD
 )
 
+# Rich generic-install showcase: the eight non-flagship country projects that a
+# normal (no pack) install seeds alongside the flagship reference project so the
+# fresh workspace lands a fully worked-out, globe-spanning portfolio. Ordered to
+# read residential -> industrial -> education -> healthcare -> commercial across
+# DACH, Gulf, FR, US, China, Brazil, India and Canada. Each id resolves to a
+# DemoTemplate (built-in or pack-authored, auto-registered from demo_packs/) so
+# install_demo_project materializes the full module set per project.
+SHOWCASE_DEMO_IDS: tuple[str, ...] = (
+    "residential-berlin",  # Germany - DIN 276, EUR
+    "warehouse-dubai",  # UAE - industrial, AED
+    "school-paris",  # France - education, EUR
+    "medical-us",  # USA - MasterFormat healthcare, USD
+    "office-shanghai",  # China - GB/T 50500, CNY
+    "residential-saopaulo",  # Brazil - SINAPI, BRL
+    "govt-building-delhi",  # India - CPWD, INR
+    "condo-toronto",  # Canada - residential, CAD
+)
+
 # Catalog info for the marketplace / frontend
 DEMO_CATALOG: list[dict] = [
     {
@@ -2052,9 +2101,10 @@ DEMO_CATALOG: list[dict] = [
 PACK_DEMO_PROJECT: dict[str, str] = {
     "aus": "mixed-use-sydney",
     "nzs": "commercial-auckland",
-    "batimatech-ca": "office-montreal",
-    "bimhessen-de": "office-frankfurt",
+    "batimatech-ca": "condo-toronto",
+    "bimhessen-de": "residential-berlin",
     "brazil-sinapi": "residential-saopaulo",
+    "china-gbt50500": "office-shanghai",
     "doker-formwork": "rc-structure-formwork",
     "india-cpwd": "govt-building-delhi",
     "modular-prefab": "modular-housing",
@@ -2071,6 +2121,7 @@ _COUNTRY_ISO2: dict[str, str] = {
     "New Zealand": "NZ",
     "Canada": "CA",
     "Germany": "DE",
+    "China": "CN",
     "Brazil": "BR",
     "India": "IN",
     "Netherlands": "NL",
@@ -2087,6 +2138,7 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "commercial-auckland": "Commercial",
     "office-montreal": "Commercial",
     "office-frankfurt": "Commercial",
+    "office-shanghai": "Commercial",
     "residential-saopaulo": "Residential",
     "rc-structure-formwork": "Structural",
     "govt-building-delhi": "Public",
@@ -2117,6 +2169,7 @@ _CURRENCY_SYMBOL: dict[str, str] = {
     "AUD": "A$",
     "NZD": "NZ$",
     "CAD": "C$",
+    "CNY": "¥",
 }
 
 
@@ -2301,6 +2354,240 @@ def _make_resources(
             res["waste_pct"] = 3
         resources.append(res)
     return resources
+
+
+# Trade-keyword -> (material, labor, equipment) share triple. The founder rule
+# is that EVERY priced BOQ position carries a resource buildup, so the helper
+# below always returns a non-empty split whose money sums EXACTLY to the
+# position total. The keyword buckets follow the brief: earthwork/demolition
+# style work is equipment-heavy, trades like formwork/rebar/finishes are
+# labour-heavy, supplied materials (concrete/steel/cladding/MEP gear) are
+# material-heavy, and anything unmatched gets a balanced default.
+_EQUIPMENT_HEAVY = (0.20, 0.35, 0.45)  # material, labor, equipment
+_LABOUR_HEAVY = (0.35, 0.55, 0.10)
+_MATERIAL_HEAVY = (0.60, 0.30, 0.10)
+_BALANCED = (0.55, 0.35, 0.10)
+
+_EQUIPMENT_HEAVY_KW = (
+    "earthwork",
+    "excavat",
+    "aushub",
+    "demolition",
+    "abbruch",
+    "dewater",
+    "wasserhaltung",
+    "piling",
+    "pile",
+    "pfahl",
+    "pieux",
+    "grading",
+    "terrassement",
+    "spundwand",
+    "sheet piling",
+    "backfill",
+    "compaction",
+    "verdichtung",
+    "paving",
+    "asphalt",
+    "site clearance",
+    "haul road",
+    "borehole",
+)
+_LABOUR_HEAVY_KW = (
+    "formwork",
+    "schalung",
+    "coffrage",
+    "reinforcement",
+    "rebar",
+    "bewehrung",
+    "armature",
+    "masonry",
+    "mauerwerk",
+    "brick",
+    "block",
+    "maconnerie",
+    "plaster",
+    "putz",
+    "render",
+    "enduit",
+    "paint",
+    "anstrich",
+    "peinture",
+    "coating",
+    "tile",
+    "fliese",
+    "carrelage",
+    "screed",
+    "estrich",
+    "drywall",
+    "trockenbau",
+    "gipskarton",
+    "finish",
+    "ausbau",
+    "flooring",
+    "parquet",
+    "bodenbelag",
+)
+_MATERIAL_HEAVY_KW = (
+    "concrete",
+    "beton",
+    "c30",
+    "c25",
+    "c20",
+    "steel",
+    "stahl",
+    "acier",
+    "membrane",
+    "abdichtung",
+    "waterproof",
+    "insulation",
+    "daemmung",
+    "isolation",
+    "window",
+    "fenster",
+    "glazing",
+    "door",
+    "tuer",
+    "porte",
+    "cladding",
+    "fassade",
+    "bardage",
+    "hvac",
+    "heating",
+    "lueftung",
+    "electrical",
+    "elektro",
+    "plumbing",
+    "sanitaer",
+    "elevator",
+    "aufzug",
+    "lift",
+    "photovoltaic",
+    "solar",
+)
+
+
+def _trade_shares(description: str, classification: dict | None) -> tuple[float, float, float]:
+    """Pick a (material, labor, equipment) cost-share triple by trade keywords.
+
+    Looks at the position description first, then the classification codes, and
+    returns the bucket whose keyword matches. Falls back to a balanced split so
+    the result is never empty. Shares always sum to 1.0.
+    """
+    haystack = (description or "").lower()
+    if classification:
+        haystack += " " + " ".join(str(v) for v in classification.values()).lower()
+    if any(k in haystack for k in _EQUIPMENT_HEAVY_KW):
+        return _EQUIPMENT_HEAVY
+    if any(k in haystack for k in _LABOUR_HEAVY_KW):
+        return _LABOUR_HEAVY
+    if any(k in haystack for k in _MATERIAL_HEAVY_KW):
+        return _MATERIAL_HEAVY
+    return _BALANCED
+
+
+def _short_trade(description: str) -> str:
+    """Return a short, readable trade label from a position description."""
+    text = " ".join(str(description or "").split())
+    # Drop a parenthetical gloss, keep the leading noun phrase.
+    text = text.split("(")[0].strip()
+    return (text[:48] or "works").strip()
+
+
+def _resources_for_position(
+    description: str,
+    unit: str,
+    quantity: float,
+    unit_rate: float,
+    classification: dict | None = None,
+) -> list[dict]:
+    """Build a per-trade labour/material/equipment buildup for one BOQ position.
+
+    Mirrors the ai_estimator apply shape (``_ensure_resources`` /
+    ``_resource_rollup``) so a seeded position renders the same M/L/E badge and
+    drill-down as an AI-applied one. The invariant the BOQ relies on is
+    ``Sum(leaf.quantity * leaf.unit_rate) == position.quantity *
+    position.unit_rate`` (the position total): each leaf carries ``quantity =
+    position quantity`` and ``unit_rate = unit_rate * share``. The split is
+    flagged ``estimated`` so it is never presented as catalogue-grounded.
+
+    Returns an empty list for sections / zero-priced rows (nothing to build up).
+    """
+    rate = float(unit_rate or 0)
+    qty = float(quantity or 0)
+    res_unit = unit or "pcs"
+    if rate <= 0 or qty <= 0:
+        return []
+
+    mat_share, lab_share, eq_share = _trade_shares(description, classification)
+    trade = _short_trade(description)
+    rate_dec = Decimal(str(rate))
+    out: list[dict] = []
+    specs = (
+        ("Material", "material", mat_share),
+        ("Labour", "labor", lab_share),
+        ("Equipment", "equipment", eq_share),
+    )
+    # Distribute the per-unit rate across the three leaves so the leaf rates sum
+    # to EXACTLY ``unit_rate`` (no rounding drift): the last leaf takes the
+    # remainder. Each leaf's quantity is the position quantity, so
+    # Sum(qty * leaf_rate) == qty * unit_rate == position total.
+    allocated = Decimal("0")
+    for idx, (label, rtype, share) in enumerate(specs):
+        if idx == len(specs) - 1:
+            leaf_rate = rate_dec - allocated
+        else:
+            leaf_rate = (rate_dec * Decimal(str(share))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            allocated += leaf_rate
+        out.append(
+            {
+                "name": f"{label} - {trade}",
+                "code": "",
+                "type": rtype,
+                "unit": res_unit,
+                "factor": 1.0,
+                "unit_rate": format(leaf_rate, "f"),
+                "quantity": qty,
+                "estimated": True,
+            }
+        )
+    return out
+
+
+def _resource_breakdown_rollup(resources: list[dict]) -> dict[str, dict[str, float]]:
+    """Roll resource leaves up to a per-type ``{type: {total, pct}}`` map.
+
+    Mirrors the assembly apply path (assemblies/service.py) and the
+    ai_estimator ``_resource_rollup`` so the BOQ can render a "60% Mat - 30% Lab
+    - 10% Eq" badge without re-walking the leaves. ``total`` is money (the leaf
+    ``total`` when present, else ``quantity * unit_rate``); ``pct`` is the share
+    of the rolled subtotal and the pcts sum to 100.
+    """
+    totals: dict[str, Decimal] = {}
+    for r in resources:
+        if not isinstance(r, dict):
+            continue
+        rtype = str(r.get("type") or "other")
+        if r.get("total") is not None:
+            try:
+                ttl = Decimal(str(r.get("total")))
+            except (ArithmeticError, ValueError):
+                ttl = Decimal("0")
+        else:
+            try:
+                ttl = Decimal(str(r.get("quantity") or 0)) * Decimal(str(r.get("unit_rate") or 0))
+            except (ArithmeticError, ValueError):
+                ttl = Decimal("0")
+        totals[rtype] = totals.get(rtype, Decimal("0")) + ttl
+    subtotal = sum(totals.values(), Decimal("0"))
+    out: dict[str, dict[str, float]] = {}
+    if subtotal > 0:
+        for rtype, ttl in totals.items():
+            out[rtype] = {
+                "total": float(ttl),
+                "pct": float((ttl / subtotal) * Decimal("100")),
+            }
+    return out
 
 
 def _enrich_position_metadata(description: str, unit: str, unit_rate: float, classification: dict) -> dict:
@@ -3488,6 +3775,14 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             ],
         )
 
+    # Every position carries a structured M/L/E rollup so the BOQ badge renders
+    # without re-walking the leaves. Computed from whichever resource array the
+    # trade branch above produced; ``_make_resources`` leaves carry a per-unit
+    # ``total`` so the pcts are share-correct.
+    breakdown = _resource_breakdown_rollup(meta.get("resources", []))
+    if breakdown:
+        meta["resource_breakdown"] = breakdown
+
     return meta
 
 
@@ -4383,25 +4678,16 @@ def _generate_module_data(
             break  # one measurement per trade keeps the spread varied
 
     # ── Documents (6-8 realistic project docs derived from the template) ─
-    # Naming for the BOQ/tender export follows the project's classification
-    # standard so a German DIN/GAEB project ships a "GAEB X83 tender export",
-    # a UK NRM job ships an "NRM2 BOQ", a US MasterFormat job a
-    # "MasterFormat BOQ", etc. Every entry matches the ``DocumentDef`` tuple
-    # shape consumed at the document-seeding block.
+    # Every entry is a PDF so the demo workspace never ships a byte-less
+    # non-PDF stub that would 404 on download. PDF stubs self-heal to a
+    # placeholder when the real file is absent; native CAD / model source
+    # files arrive through the per-project ASSETS bundle, not here. The
+    # tender-export document keeps the project's classification standard in
+    # its description and tags so a German DIN/GAEB job still reads as a GAEB
+    # export and a Brazilian SINAPI job as a SINAPI planilha. Every entry
+    # matches the ``DocumentDef`` tuple shape consumed at the
+    # document-seeding block.
     std = (template.classification_standard or "").lower()
-    boq_export_name = {
-        "din276": "GAEB X83 tender export.x83",
-        "gaeb": "GAEB X83 tender export.x83",
-        "nrm": "NRM2 BOQ.xlsx",
-        "masterformat": "MasterFormat BOQ.xlsx",
-        "dpgf": "DPGF tender export.xlsx",
-        "sinapi": "SINAPI planilha orcamentaria.xlsx",
-    }.get(std, "Bill of Quantities export.xlsx")
-    boq_export_mime = (
-        "application/xml"
-        if boq_export_name.endswith(".x83")
-        else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
     lead_trade = trades[0][1] if trades else "General works"
     second_trade = trades[1][1] if len(trades) > 1 else lead_trade
     documents: list[dict] = [
@@ -4430,10 +4716,10 @@ def _generate_module_data(
             ["structural", "calculations", "engineering"],
         ),
         (
-            boq_export_name,
-            f"Priced bill of quantities / tender export for {proj}.",
+            "Priced bill of quantities tender export.pdf",
+            f"Priced bill of quantities / {std or 'boq'} tender export for {proj}.",
             "tender",
-            boq_export_mime,
+            "application/pdf",
             640_000,
             ["boq", "tender", std or "boq"],
         ),
@@ -8469,6 +8755,354 @@ async def _seed_module_data(
     except Exception:
         logger.debug("Takeoff module not loaded, skipping demo takeoff measurements")
 
+    # Shared inputs for the gap-module blocks below: real trades / firms from
+    # the template, the project's currency, and an approximate project value.
+    _ccy = (template.currency or "")[:3]
+    _trades = _section_trades(template)
+    _firms_list = _firms(template)
+    _proj_value = 0.0
+    for _sec in template.sections:
+        for _item in _sec[3] if len(_sec) > 3 else []:
+            try:
+                _proj_value += float(_item[3]) * float(_item[4])
+            except (TypeError, ValueError, IndexError):
+                continue
+    if _proj_value <= 0:
+        _proj_value = 1_000_000.0
+    # Deterministic id/code seed so a re-seed (force_reinstall / qa-reset)
+    # overwrites the same rows instead of duplicating.
+    _pkey = str(project_id)[:8]
+
+    # ── Assemblies (project recipes so /assemblies is never empty) ─────
+    try:
+        from app.modules.assemblies.models import Assembly, Component
+
+        # Three canonical recipes anchored to the first real trades. Globally
+        # unique ``code`` -> delete-by-code first to stay idempotent (the
+        # project FK is ON DELETE SET NULL, so a re-seed would otherwise
+        # collide on the old code).
+        _asm_specs = [
+            (
+                "RC wall C30/37, 25 cm",
+                "m3",
+                [
+                    ("Concrete C30/37 ready-mix", "material", 1.05, "m3", 118.0),
+                    ("Reinforcement steel BSt 500", "material", 110.0, "kg", 1.35),
+                    ("Formwork two-sided", "material", 4.0, "m2", 28.0),
+                    ("Concreting + formwork crew", "labor", 6.5, "h", 48.0),
+                    ("Concrete pump + vibrator", "equipment", 0.8, "h", 85.0),
+                ],
+            ),
+            (
+                "Masonry wall, 24 cm",
+                "m2",
+                [
+                    ("Blocks + mortar", "material", 1.0, "m2", 32.0),
+                    ("Bricklayers", "labor", 1.1, "h", 48.0),
+                    ("Scaffolding + tools", "equipment", 0.2, "h", 35.0),
+                ],
+            ),
+            (
+                "Interior plaster + paint",
+                "m2",
+                [
+                    ("Plaster + paint materials", "material", 1.0, "m2", 9.0),
+                    ("Plasterers + painters", "labor", 0.7, "h", 44.0),
+                    ("Tools", "equipment", 0.1, "h", 25.0),
+                ],
+            ),
+        ]
+        _asm_codes = [f"DEMO-{_pkey}-ASM{i + 1}" for i in range(len(_asm_specs))]
+        await session.execute(delete(Assembly).where(Assembly.code.in_(_asm_codes)))
+        await session.flush()
+        asm_count = 0
+        for a_idx, (a_name, a_unit, comps) in enumerate(_asm_specs):
+            a_total = Decimal("0")
+            comp_objs = []
+            for c_idx, (c_desc, c_type, c_factor, c_unit, c_cost) in enumerate(comps):
+                c_qty = Decimal(str(c_factor))
+                c_unit_cost = Decimal(str(c_cost))
+                c_line = (c_qty * c_unit_cost).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                a_total += c_line
+                comp_objs.append(
+                    Component(
+                        id=_id(),
+                        assembly_id=None,  # set after parent flush
+                        description=c_desc,
+                        resource_type=c_type,
+                        factor=str(c_factor),
+                        quantity=str(c_factor),
+                        unit=c_unit,
+                        unit_cost=str(c_cost),
+                        total=str(c_line),
+                        sort_order=c_idx + 1,
+                        metadata_={},
+                    )
+                )
+            asm = Assembly(
+                id=_id(),
+                code=_asm_codes[a_idx],
+                name=a_name,
+                description=f"Demo project assembly for {template.project_name}",
+                unit=a_unit,
+                category="structure",
+                classification={},
+                total_rate=str(a_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)),
+                currency=_ccy,
+                is_template=False,
+                project_id=project_id,
+                owner_id=owner_id,
+                is_active=True,
+                metadata_={"demo_id": demo_id, "is_demo": True},
+            )
+            session.add(asm)
+            await session.flush()
+            for comp in comp_objs:
+                comp.assembly_id = asm.id
+                session.add(comp)
+            asm_count += 1
+        await session.flush()
+        results["assemblies"] = asm_count
+    except Exception:
+        logger.debug("Assemblies module not loaded, skipping demo assemblies", exc_info=True)
+
+    # ── Equipment rentals (1-2 plant rentals on the project) ──────────
+    try:
+        from app.modules.equipment.models import Equipment, EquipmentRental
+
+        _eq_specs = [
+            ("Tower crane", "crane", 980.0, 140.0),
+            ("Mobile excavator", "excavator", 420.0, 60.0),
+        ]
+        _eq_codes = [f"DEMO-{_pkey}-EQ{i + 1}" for i in range(len(_eq_specs))]
+        # Equipment.code is globally unique; rentals cascade-delete with the
+        # equipment unit. Clear by code to keep the re-seed idempotent.
+        await session.execute(delete(Equipment).where(Equipment.code.in_(_eq_codes)))
+        await session.flush()
+        rental_count = 0
+        for e_idx, (e_name, e_type, day_rate, hour_rate) in enumerate(_eq_specs):
+            eq = Equipment(
+                id=_id(),
+                code=_eq_codes[e_idx],
+                name=e_name,
+                type_code=e_type,
+                ownership="rented",
+                status="active",
+                currency=_ccy,
+                metadata_={"demo_id": demo_id, "is_demo": True},
+            )
+            session.add(eq)
+            await session.flush()
+            session.add(
+                EquipmentRental(
+                    id=_id(),
+                    equipment_id=eq.id,
+                    project_id=project_id,
+                    start_date=base.strftime("%Y-%m-%d"),
+                    end_date=(base + timedelta(days=90 + e_idx * 30)).strftime("%Y-%m-%d"),
+                    internal_rate_per_day=Decimal(str(day_rate)),
+                    internal_rate_per_hour=Decimal(str(hour_rate)),
+                    currency=_ccy,
+                    status="active",
+                    metadata_={"demo_id": demo_id, "is_demo": True},
+                )
+            )
+            rental_count += 1
+        results["equipment_rentals"] = rental_count
+    except Exception:
+        logger.debug("Equipment module not loaded, skipping demo rentals", exc_info=True)
+
+    # ── Subcontractors chain (sub + agreement + work package + payment) ─
+    try:
+        from app.modules.subcontractors.models import (
+            PaymentApplication,
+            PaymentApplicationLine,
+            SubcontractAgreement,
+            Subcontractor,
+            WorkPackage,
+        )
+
+        sub_name, sub_email = _firms_list[0]
+        sub_trade = _trades[0][1] if _trades else "General works"
+        country = (_country_code_for(template) or "")[:2] or None
+        # Idempotent: drop any prior demo subcontractor for this project (the
+        # agreement/work-package/payment rows cascade off the agreement, which
+        # cascades off the project; the subcontractor itself is project-agnostic
+        # so we scope it by a deterministic metadata marker via legal_name).
+        _sub_marker = f"{sub_name} [demo {_pkey}]"
+        await session.execute(delete(Subcontractor).where(Subcontractor.legal_name == _sub_marker))
+        await session.flush()
+        sub = Subcontractor(
+            id=_id(),
+            legal_name=_sub_marker,
+            trade_name=sub_name,
+            trade_categories=[sub_trade],
+            prequalification_status="approved",
+            rating_score=Decimal("4.20"),
+            country=country,
+            is_active=True,
+            created_by=owner_str,
+            metadata_={"demo_id": demo_id, "is_demo": True},
+        )
+        session.add(sub)
+        await session.flush()
+
+        agr_value = Decimal(str(round(_proj_value * 0.18, 2)))
+        agreement = SubcontractAgreement(
+            id=_id(),
+            subcontractor_id=sub.id,
+            project_id=project_id,
+            title=f"{sub_trade} subcontract",
+            total_value=agr_value,
+            currency=_ccy,
+            start_date=base.date(),
+            end_date=(base + timedelta(days=240)).date(),
+            retention_percent=Decimal("5.0"),
+            status="active",
+            created_by=owner_str,
+            metadata_={"demo_id": demo_id, "is_demo": True},
+        )
+        session.add(agreement)
+        await session.flush()
+
+        wp = WorkPackage(
+            id=_id(),
+            agreement_id=agreement.id,
+            name=f"{sub_trade} - package 1",
+            scope=f"{sub_trade} works for {template.project_name}",
+            planned_value=agr_value,
+            completion_percent=Decimal("35.00"),
+            status="in_progress",
+        )
+        session.add(wp)
+        await session.flush()
+
+        gross = (agr_value * Decimal("0.35")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        retention = (gross * Decimal("0.05")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        net = gross - retention
+        pay_app = PaymentApplication(
+            id=_id(),
+            agreement_id=agreement.id,
+            application_number="PA-001",
+            period_start=base.date(),
+            period_end=(base + timedelta(days=30)).date(),
+            gross_amount=gross,
+            retention_amount=retention,
+            net_amount=net,
+            currency=_ccy,
+            status="submitted",
+            submitted_at=base + timedelta(days=32),
+            created_by=owner_str,
+            metadata_={"demo_id": demo_id, "is_demo": True},
+        )
+        session.add(pay_app)
+        await session.flush()
+        session.add(
+            PaymentApplicationLine(
+                id=_id(),
+                payment_application_id=pay_app.id,
+                work_package_id=wp.id,
+                claimed_amount=gross,
+                certified_amount=gross,
+                approved_amount=gross,
+            )
+        )
+        await session.flush()
+        results["subcontractors"] = 1
+    except Exception:
+        logger.debug("Subcontractors module not loaded, skipping demo chain", exc_info=True)
+
+    # ── EVM forecast snapshots (so cost-control shows a curve) ─────────
+    try:
+        from app.modules.full_evm.models import EVMForecast
+
+        bac = Decimal(str(round(_proj_value, 2)))
+        # Two snapshots a month apart: a slight cost overrun trend (CPI < 1) so
+        # the forecast EAC sits above BAC and the curve is visibly non-flat.
+        _ev_specs = [
+            (base + timedelta(days=60), Decimal("0.96"), Decimal("0.30")),
+            (base + timedelta(days=90), Decimal("0.94"), Decimal("0.42")),
+        ]
+        ev_count = 0
+        for f_date, cpi, pct in _ev_specs:
+            eac = (bac / cpi).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            ac = (bac * pct).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            etc = (eac - ac).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            vac = (bac - eac).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            denom = bac - ac
+            tcpi = (
+                ((bac - (bac * pct)) / denom).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+                if denom > 0
+                else Decimal("1")
+            )
+            session.add(
+                EVMForecast(
+                    id=_id(),
+                    project_id=project_id,
+                    forecast_date=f_date.strftime("%Y-%m-%d"),
+                    etc_=str(etc),
+                    eac=str(eac),
+                    vac=str(vac),
+                    tcpi=str(tcpi),
+                    forecast_method="cpi",
+                    confidence_range_low=str((eac * Decimal("0.97")).quantize(Decimal("0.01"))),
+                    confidence_range_high=str((eac * Decimal("1.05")).quantize(Decimal("0.01"))),
+                    notes="Demo baseline forecast",
+                    metadata_={"demo_id": demo_id, "is_demo": True},
+                )
+            )
+            ev_count += 1
+        results["evm_forecasts"] = ev_count
+    except Exception:
+        logger.debug("Full EVM module not loaded, skipping demo forecasts", exc_info=True)
+
+    # ── Project photos (real placeholder files so the strip never 404s) ─
+    try:
+        from app.modules.documents.models import ProjectPhoto
+        from app.modules.documents.service import PHOTO_BASE
+
+        _photo_specs = [
+            ("Site overview", "site", (203, 213, 225)),
+            ("Foundation works", "progress", (148, 163, 184)),
+            ("Structure rising", "progress", (100, 116, 139)),
+            ("Facade installation", "progress", (71, 85, 105)),
+            ("Interior fit-out", "progress", (51, 65, 85)),
+        ]
+        # Photos are CASCADE on project, so a force-reinstall already removed
+        # any prior rows; clear by project_id defensively for partial re-seeds.
+        await session.execute(delete(ProjectPhoto).where(ProjectPhoto.project_id == project_id))
+        await session.flush()
+        photo_dir = PHOTO_BASE / "demo" / str(project_id)
+        photo_dir.mkdir(parents=True, exist_ok=True)
+        photo_count = 0
+        for p_idx, (caption, category, color) in enumerate(_photo_specs):
+            fname = f"{_pkey}_{p_idx + 1:02d}.png"
+            fpath = photo_dir / fname
+            try:
+                _write_placeholder_png(fpath, color, caption)
+            except Exception:
+                logger.debug("Placeholder photo write failed for %s", fpath, exc_info=True)
+                continue
+            session.add(
+                ProjectPhoto(
+                    id=_id(),
+                    project_id=project_id,
+                    filename=fname,
+                    file_path=str(fpath),
+                    caption=caption,
+                    category=category,
+                    tags=["demo"],
+                    taken_at=base + timedelta(days=p_idx * 21),
+                    created_by=owner_str,
+                    metadata_={"demo_id": demo_id, "is_demo": True},
+                )
+            )
+            photo_count += 1
+        await session.flush()
+        results["photos"] = photo_count
+    except Exception:
+        logger.debug("Documents/photos module not loaded, skipping demo photos", exc_info=True)
+
     await session.flush()
     return results
 
@@ -8673,6 +9307,23 @@ async def install_demo_project(
         sec_total = sum(float(p.total or 0) for p in sec_items)
         if sec_total > 0:
             budget_sort += 1
+            b_rate = round(sec_total, 2)
+            # Every priced position carries a resource buildup. The lump-sum
+            # section row gets a deterministic trade split (by section title)
+            # that sums exactly to its rate, plus the M/L/E rollup badge.
+            b_resources = _resources_for_position(
+                description=sec.description,
+                unit="LS",
+                quantity=1.0,
+                unit_rate=b_rate,
+                classification=sec.classification or {},
+            )
+            b_meta: dict = {}
+            if b_resources:
+                b_meta["resources"] = b_resources
+                breakdown = _resource_breakdown_rollup(b_resources)
+                if breakdown:
+                    b_meta["resource_breakdown"] = breakdown
             b_pos = _make_position(
                 boq_id=budget_boq_id,
                 parent_id=b_sec.id,
@@ -8680,9 +9331,10 @@ async def install_demo_project(
                 description=f"{sec.description} - Lump Sum",
                 unit="LS",
                 quantity=1.0,
-                unit_rate=round(sec_total, 2),
+                unit_rate=b_rate,
                 sort_order=budget_sort,
                 classification=sec.classification or {},
+                metadata=b_meta,
             )
             session.add(b_pos)
 
@@ -9437,14 +10089,6 @@ async def install_demo_project(
                 ["permit", "official"],
             ),
             (
-                "Grundriss_EG_Rev3.dwg",
-                "Ground floor plan revision 3",
-                "drawing",
-                "application/acad",
-                2_800_000,
-                ["floorplan", "architecture"],
-            ),
-            (
                 "Statik_Berechnung_v2.pdf",
                 "Structural calculation report",
                 "engineering",
@@ -9494,14 +10138,6 @@ async def install_demo_project(
                 15_200_000,
                 ["MEP", "schematic"],
             ),
-            (
-                "Cost_Plan_Stage3_NRM1.xlsx",
-                "NRM 1 Stage 3 cost plan spreadsheet",
-                "estimate",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                2_100_000,
-                ["cost", "NRM"],
-            ),
         ],
         "medical-us": [
             (
@@ -9511,14 +10147,6 @@ async def install_demo_project(
                 "application/pdf",
                 2_800_000,
                 ["FGI", "healthcare", "compliance"],
-            ),
-            (
-                "MEP_Coordination_BIM.rvt",
-                "MEP coordination BIM model",
-                "model",
-                "application/octet-stream",
-                125_000_000,
-                ["BIM", "MEP", "coordination"],
             ),
             (
                 "ICRA_Plan_Phase1.pdf",
@@ -9535,14 +10163,6 @@ async def install_demo_project(
                 "application/pdf",
                 35_000_000,
                 ["structural", "steel", "shop-drawings"],
-            ),
-            (
-                "Medical_Equipment_List_v4.xlsx",
-                "Medical equipment list with specifications",
-                "specification",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                850_000,
-                ["equipment", "medical"],
             ),
         ],
         "school-paris": [
@@ -9561,14 +10181,6 @@ async def install_demo_project(
                 "application/pdf",
                 3_800_000,
                 ["thermal", "RE2020"],
-            ),
-            (
-                "Plan_Masse_et_Paysager.dwg",
-                "Site plan and landscape design",
-                "drawing",
-                "application/acad",
-                4_100_000,
-                ["site-plan", "landscape"],
             ),
             (
                 "Rapport_Geotechnique.pdf",

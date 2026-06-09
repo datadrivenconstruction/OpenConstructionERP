@@ -319,19 +319,24 @@ class PunchListService:
             existing_meta["assigned_at"] = now.isoformat()
             update_fields["metadata_"] = existing_meta
 
-        # in_progress → resolved: set resolved_at
+        # in_progress → resolved: set resolved_at and record who resolved it so the
+        # four-eyes verify gate can reject the same user later, even when the item
+        # has no assignee.
         if target == "resolved":
             update_fields["resolved_at"] = now
+            resolved_meta = dict(getattr(item, "metadata_", None) or {})
+            resolved_meta["resolved_by"] = user_id
+            update_fields["metadata_"] = resolved_meta
 
-        # resolved/in_progress → verified: must be different user than the assigned worker
+        # resolved/in_progress → verified: must be a different user than the one who
+        # resolved the item. A null assignee must not disable the guard, so we compare
+        # against the recorded resolver (metadata_.resolved_by) instead of assigned_to.
         if target == "verified":
-            # Check who resolved it (by checking created_by or assigned_to as a proxy)
-            # The resolver is typically the assigned user; we compare against created_by
-            # for a simple "different user" check
-            if item.assigned_to and item.assigned_to == user_id:
+            resolved_by = (getattr(item, "metadata_", None) or {}).get("resolved_by")
+            if resolved_by and resolved_by == user_id:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Verification must be done by a different user than the assigned resolver",
+                    detail="Verification must be done by a different user than the resolver",
                 )
             update_fields["verified_at"] = now
             update_fields["verified_by"] = user_id

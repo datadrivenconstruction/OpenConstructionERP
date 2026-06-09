@@ -36,6 +36,7 @@ import {
   PencilRuler,
   ListChecks,
   Camera,
+  ScanLine,
   TableProperties,
   Wallet,
   HardHat,
@@ -148,6 +149,14 @@ interface NavGroup {
    *  reference/setup groups (Regional, Modules, Settings) away from
    *  the project-work surface above. */
   separator?: boolean;
+  /** Registry key used to pull dynamic module nav items into this group,
+   *  when it differs from `id`. The render loop calls
+   *  `getModuleNavItems(group.dynamicGroupKey ?? group.id)`. Used by
+   *  `grp_reality`, whose stable internal id is `grp_reality` but whose
+   *  module-injection contract (so `oe_pointcloud`'s manifest can add its
+   *  own row) is the shorter `reality` key documented in the point-cloud
+   *  plan (`docs/strategy/POINTCLOUD_AND_SPATIAL_PLAN.md`, section 4). */
+  dynamicGroupKey?: string;
 }
 
 // Navigation groups — collapsible thematic sections (v6.10.0 redesign).
@@ -222,8 +231,9 @@ const navGroups: NavGroup[] = [
     ],
   },
   // ── 4. TAKEOFF ─────────────────────────────────────────────────────
-  // Quantity extraction from drawings + 3D models, plus the geo overlay
-  // (site/spatial context) and the CAD-BIM data explorer.
+  // 2D quantity extraction from drawings (quantities, PDF measurements,
+  // DWG takeoff). The 3D / spatial surfaces (geo, BIM viewer, CAD-BIM
+  // explorer) moved to the dedicated "Reality Capture & 3D" group below.
   {
     id: 'grp_takeoff',
     labelKey: 'sidebar.group.takeoff',
@@ -233,12 +243,32 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.quantities', to: '/quantities', icon: Ruler },
       { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
       { labelKey: 'nav.dwg_takeoff', to: '/dwg-takeoff', icon: PencilRuler },
-      { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box },
-      { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties, advancedOnly: true },
-      { labelKey: 'sidebar.geo_hub', to: '/geo', icon: Globe },
     ],
   },
-  // ── 5. MODEL COORDINATION ──────────────────────────────────────────
+  // ── 5. REALITY CAPTURE & 3D ─────────────────────────────────────────
+  // The 3D / spatial cluster: the geo overlay (site/spatial context),
+  // point-cloud reality capture (laser scan / photogrammetry / LiDAR),
+  // the BIM viewer and the CAD-BIM data explorer. This is the founder-
+  // requested dedicated home for spatial surfaces (point-cloud plan
+  // `docs/strategy/POINTCLOUD_AND_SPATIAL_PLAN.md`, section 4); it
+  // supersedes the earlier "no separate sidebar section" note for this
+  // spatial context only. `oe_pointcloud`'s frontend manifest injects its
+  // own rows here via `getModuleNavItems('reality')` (the group's
+  // `dynamicGroupKey`).
+  {
+    id: 'grp_reality',
+    labelKey: 'sidebar.group.reality',
+    defaultLabel: 'Reality Capture & 3D',
+    dynamicGroupKey: 'reality',
+    defaultOpen: false,
+    items: [
+      { labelKey: 'sidebar.geo_hub', to: '/geo', icon: Globe },
+      { labelKey: 'nav.point_cloud', to: '/pointcloud', icon: ScanLine, badge: 'BETA' },
+      { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box },
+      { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties, advancedOnly: true },
+    ],
+  },
+  // ── 6. MODEL COORDINATION ──────────────────────────────────────────
   // Multi-model BIM/CAD coordination: clash, federations, rule packs,
   // EIR matrix. Distinct from Takeoff so quantity-only users skip it.
   {
@@ -255,7 +285,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.eir_matrix', to: '/requirements/matrix', icon: FileCheck, advancedOnly: true },
     ],
   },
-  // ── 6. SCHEDULING ──────────────────────────────────────────────────
+  // ── 7. SCHEDULING ──────────────────────────────────────────────────
   // The time plan: master schedule, advanced CPM, takt, tasks.
   {
     id: 'grp_scheduling',
@@ -270,7 +300,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'tasks.title', to: '/tasks', icon: ClipboardList },
     ],
   },
-  // ── 7. COST CONTROL & RISK ─────────────────────────────────────────
+  // ── 8. COST CONTROL & RISK ─────────────────────────────────────────
   // 5D cost model, portfolio capacity/leveling, risk register and the
   // Monte-Carlo risk-analysis tool (re-surfaced from the module registry).
   {
@@ -287,7 +317,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.risk_analysis', to: '/risk-analysis', icon: Radar, moduleKey: 'risk-analysis', advancedOnly: true },
     ],
   },
-  // ── 8. COMMERCIAL ──────────────────────────────────────────────────
+  // ── 9. COMMERCIAL ──────────────────────────────────────────────────
   // CRM lead → contract award → subcontractors, bid management, tender.
   {
     id: 'grp_commercial',
@@ -303,7 +333,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'tendering.title', to: '/tendering', icon: FileText, moduleKey: 'tendering', advancedOnly: true },
     ],
   },
-  // ── 9. PROCUREMENT & CHANGE ────────────────────────────────────────
+  // ── 10. PROCUREMENT & CHANGE ───────────────────────────────────────
   // Variations / MoC, supplier catalogues, procurement, change orders.
   {
     id: 'grp_procurement',
@@ -319,7 +349,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.change_orders', to: '/changeorders', icon: FileEdit, advancedOnly: true },
     ],
   },
-  // ── 10. FIELD OPERATIONS ───────────────────────────────────────────
+  // ── 11. FIELD OPERATIONS ───────────────────────────────────────────
   // Day-to-day site: diary, field reports, service tickets, the
   // subcontractor portal. The /portal/payments route is intentionally
   // NOT listed here: it is the external, magic-link-authed surface for
@@ -339,7 +369,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.portal', to: '/portal', icon: Globe },
     ],
   },
-  // ── 11. RESOURCES & ASSETS ─────────────────────────────────────────
+  // ── 12. RESOURCES & ASSETS ─────────────────────────────────────────
   // Crews, equipment, payroll, the physical asset register.
   {
     id: 'grp_resources',
@@ -354,7 +384,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.assets', to: '/assets', icon: Package, badge: 'BETA' },
     ],
   },
-  // ── 12. QUALITY ────────────────────────────────────────────────────
+  // ── 13. QUALITY ────────────────────────────────────────────────────
   // Validation, inspections, NCR, punchlist — "the work passes".
   {
     id: 'grp_quality',
@@ -370,7 +400,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'closeout.title', to: '/closeout', icon: PackageCheck },
     ],
   },
-  // ── 13. SAFETY & ESG ───────────────────────────────────────────────
+  // ── 14. SAFETY & ESG ───────────────────────────────────────────────
   // Safety, HSE, QMS plus the ESG surfaces (carbon, sustainability —
   // the latter re-surfaced from the module registry).
   {
@@ -387,7 +417,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.sustainability', to: '/sustainability', icon: Leaf, moduleKey: 'sustainability', advancedOnly: true },
     ],
   },
-  // ── 14. COMMUNICATION ──────────────────────────────────────────────
+  // ── 15. COMMUNICATION ──────────────────────────────────────────────
   // Contacts, meetings, RFIs, correspondence, and the real-time
   // collaboration surface (re-added — it was dropped before).
   {
@@ -404,7 +434,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.collaboration', to: '/collaboration', icon: Users, moduleKey: 'collaboration', advancedOnly: true },
     ],
   },
-  // ── 15. DOCUMENTS ──────────────────────────────────────────────────
+  // ── 16. DOCUMENTS ──────────────────────────────────────────────────
   // Outbound paperwork + the CDE binder, project photos, drawing markups.
   {
     id: 'grp_documents',
@@ -420,7 +450,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.markups', to: '/markups', icon: PenTool },
     ],
   },
-  // ── 16. REAL ESTATE ────────────────────────────────────────────────
+  // ── 17. REAL ESTATE ────────────────────────────────────────────────
   // Developer workflows: property dev, accommodation, dashboards, the
   // two long-lived settings catalogues (house types, doc templates).
   {
@@ -437,7 +467,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.property_dev_doc_templates', to: '/property-dev/settings/document-templates', icon: FileText, advancedOnly: true },
     ],
   },
-  // ── 17. FINANCE ────────────────────────────────────────────────────
+  // ── 18. FINANCE ────────────────────────────────────────────────────
   // Money roll-up: finance, reports, reporting dashboards.
   {
     id: 'grp_finance',
@@ -452,7 +482,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.reporting_dashboards', to: '/reporting', icon: BarChart3, advancedOnly: true },
     ],
   },
-  // ── 18. CONTROLS & BI ──────────────────────────────────────────────
+  // ── 19. CONTROLS & BI ──────────────────────────────────────────────
   // Project controls, BI dashboards, the model snapshots (parquet/CAD-BIM
   // baseline) tool, and the admin-only architecture map.
   {
@@ -471,7 +501,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.architecture_map', to: '/architecture', icon: GitBranch, advancedOnly: true, adminOnly: true },
     ],
   },
-  // ── 19. AUTOMATION & AI ────────────────────────────────────────────
+  // ── 20. AUTOMATION & AI ────────────────────────────────────────────
   // AI agents, advisor, ERP chat, and the pipeline builder (listed
   // statically — its manifest group `ai` no longer matches any group id,
   // so there is no dynamic duplication).
@@ -1363,14 +1393,14 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             'group flex items-center gap-2 rounded-md border border-border-light bg-surface-secondary/60 text-[12px] text-content-tertiary hover:border-content-quaternary/30 hover:bg-surface-secondary hover:text-content-secondary transition-colors',
             iconified ? 'h-8 w-8 justify-center' : 'w-full px-2.5 py-1.5',
           )}
-          aria-label={t('search.open', { defaultValue: 'Open search' })}
-          title={iconified ? t('search.open', { defaultValue: 'Open search' }) : undefined}
+          aria-label={t('common.search', { defaultValue: 'Search' })}
+          title={iconified ? t('common.search', { defaultValue: 'Search' }) : undefined}
         >
           <Search size={13} strokeWidth={1.75} className="shrink-0" />
           {!iconified && (
             <>
               <span className="truncate">
-                {t('search.placeholder', { defaultValue: 'Search…' })}
+                {t('common.search', { defaultValue: 'Search' })}
               </span>
               <kbd className="ms-auto hidden sm:inline-flex items-center gap-0.5 rounded border border-border-light bg-surface-primary px-1 py-px text-[9px] font-medium text-content-quaternary group-hover:text-content-tertiary">
                 ⌘K
@@ -1444,8 +1474,11 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           // Hide entire group in simple mode if flagged
           if (group.hideInSimple && !isAdvanced) return null;
 
-          // Merge static items + dynamic module items for this group
-          const dynamicItems: NavItem[] = getModuleNavItems(group.id)
+          // Merge static items + dynamic module items for this group.
+          // Most groups inject by their own `id`; `grp_reality` overrides
+          // with `dynamicGroupKey: 'reality'` so `oe_pointcloud`'s manifest
+          // can add its row via the documented `reality` registry key.
+          const dynamicItems: NavItem[] = getModuleNavItems(group.dynamicGroupKey ?? group.id)
             .filter((mi) => {
               const moduleId = mi.labelKey.split('.')[1] ?? mi.to.slice(1);
               return isModuleEnabled(moduleId);

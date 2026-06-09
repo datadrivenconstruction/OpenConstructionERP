@@ -3293,6 +3293,7 @@ class MatchElementsService:
                         "match_method": "custom",
                         "match_confidence": g.confidence or "",
                         "custom_position": True,
+                        "currency": currency,
                     }
                     pos = Position(
                         boq_id=boq_id,
@@ -3405,6 +3406,7 @@ class MatchElementsService:
                     "match_signature": g.signature or "",
                     "match_method": g.chosen_method or "manual",
                     "match_confidence": g.confidence or "",
+                    "currency": currency,
                 }
                 if ci:
                     metadata["cost_item_id"] = str(ci.id)

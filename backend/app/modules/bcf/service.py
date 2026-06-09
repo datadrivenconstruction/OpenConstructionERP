@@ -687,8 +687,15 @@ class BCFExportService:
 
         writer = BCFWriter().set_project(str(project_id), project_name or str(project_id))
 
+        added_guids = set()
         for r in rows:
             topic = self._clash_to_topic(r, author=author)
+            # _load_clash_rows already de-dups recurring clashes by
+            # signature, but guard the GUID here too so a stray duplicate
+            # can never surface as an unhandled 500.
+            if topic.guid in added_guids:
+                continue
+            added_guids.add(topic.guid)
             # Synthesise a viewpoint from the centroid if we have one.
             cx = float(getattr(r, "cx", 0.0) or 0.0)
             cy = float(getattr(r, "cy", 0.0) or 0.0)
@@ -725,9 +732,27 @@ class BCFExportService:
             q = q.where(ClashResult.status == status_filter)
         if severity_filter:
             q = q.where(ClashResult.severity == severity_filter)
-        q = q.order_by(ClashResult.signature, ClashResult.created_at)
+        # Newest first within each signature so the de-dup below keeps the
+        # most recent occurrence of a recurring clash. A recurring clash
+        # carries an identical run-independent signature once per run, and
+        # the topic GUID is keyed off that signature - emitting every run
+        # would raise a duplicate-GUID error in BCFWriter.add_topic.
+        q = q.order_by(ClashResult.signature, ClashResult.created_at.desc())
         result = await self.session.execute(q)
-        return list(result.scalars().all())
+        rows = list(result.scalars().all())
+
+        deduped = []
+        seen_signatures = set()
+        for r in rows:
+            signature = getattr(r, "signature", "") or ""
+            # Empty-signature rows get a unique topic GUID in
+            # _clash_to_topic, so they must never be collapsed together.
+            if signature:
+                if signature in seen_signatures:
+                    continue
+                seen_signatures.add(signature)
+            deduped.append(r)
+        return deduped
 
     def _clash_to_topic(self, r, *, author: str):
         """Map one :class:`ClashResult` row to a :class:`BCFTopic`."""

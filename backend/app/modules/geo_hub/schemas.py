@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 # Regex patterns shared across create + update + response shapes.
 _SOURCE_KIND_PATTERN = r"^(bim_model|federation|development|upload|point_cloud|photogrammetry)$"
 _TILESET_STATUS_PATTERN = r"^(draft|generating|ready|failed|obsolete)$"
-_TILE_FORMAT_PATTERN = r"^(b3dm|i3dm|pnts|cmpt)$"
+_TILE_FORMAT_PATTERN = r"^(b3dm|i3dm|pnts|cmpt|copc)$"
 _JOB_STATE_PATTERN = r"^(queued|running|completed|failed|cancelled)$"
 _IMAGERY_PROVIDER_PATTERN = r"^(osm|bing|wms|wmts|custom)$"
 _TERRAIN_PROVIDER_PATTERN = r"^(cesium_world|quantized_mesh|ellipsoid)$"

@@ -2342,26 +2342,18 @@ class ClashService:
             if str(issue.first_seen_run_id) == str(run_id):
                 new += 1
                 continue
+            # First seen before this run and present again now. The upsert
+            # path flipped a resolved/archived issue back to ``persisted``
+            # and cleared ``resolved_run_id``, so the lifecycle signal is:
+            # an issue is reopened this run iff it transitioned
+            # resolved/archived -> persisted during this run, i.e. it was
+            # absent from the previous run (``sig not in prev_sigs``) but
+            # has an older identity. If it was also in the previous run it
+            # simply persisted across both.
             if sig in prev_sigs:
                 persisted += 1
-                # Reopened: issue resurfaced after a resolved/archived spell
-                # and is now persisted. We detect this via resolved_run_id
-                # being non-null (set on the resolution diff, cleared on
-                # next reopen) - but the upsert clears it on the reopen, so
-                # we approximate via ``missing_run_count``: any issue
-                # whose missing count was > 0 just before this run is a
-                # reopen. The upsert resets it to 0, so we infer via the
-                # history of the previous run: simpler heuristic - count
-                # an issue as reopened when its first_seen_run_id is older
-                # than the previous run but it was *not* present in that
-                # previous run.
-                if prev_run is not None and sig not in prev_sigs and str(issue.first_seen_run_id) != str(run_id):
-                    reopened += 1
-            else:
-                # Present this run, not present in prev_sigs, but not
-                # first-seen this run - that's a reopen.
-                if prev_run is not None and str(issue.first_seen_run_id) != str(run_id):
-                    reopened += 1
+            elif prev_run is not None:
+                reopened += 1
         # Resolved: count of issues whose resolved_run_id == run_id (the
         # finalize_run pass stamps these).
         all_issues = await self.repo.issues_for_project(project_id)

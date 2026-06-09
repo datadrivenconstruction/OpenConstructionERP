@@ -468,6 +468,11 @@ async def update_me(
 ) -> UserResponse:
     """Update current user profile."""
     fields = data.model_dump(exclude_unset=True)
+
+    # Map schema field 'metadata' to model column 'metadata_'
+    if "metadata" in fields:
+        fields["metadata_"] = fields.pop("metadata")
+
     user = await service.update_profile(uuid.UUID(user_id), **fields)
     return UserResponse.model_validate(user)
 

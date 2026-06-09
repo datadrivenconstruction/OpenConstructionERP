@@ -45,6 +45,7 @@ MANIFEST = PartnerPackManifest(
     ],
     default_modules=[],   # empty = show all (Shape A, no module hiding)
     hidden_modules=[],
+    demo_template_ids=["condo-toronto"],
     branding=PartnerBranding(
         primary_color="#1C9BD7",  # batimatech cyan
         accent_color="#1B3A5B",  # batimatech navy

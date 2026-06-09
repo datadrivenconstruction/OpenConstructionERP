@@ -287,9 +287,19 @@ class MaterialRequisition(Base):
     """
 
     __tablename__ = "oe_procurement_requisition"
-    __table_args__ = (Index("ix_req_project_status", "project_id", "status"),)
+    __table_args__ = (
+        Index("ix_req_project_status", "project_id", "status"),
+        UniqueConstraint(
+            "project_id",
+            "req_number",
+            name="uq_procurement_req_project_number",
+        ),
+    )
 
     project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    # Human-facing sequential number per project (e.g. "MR-0001"). Generated
+    # service-side with a retry-on-collision loop, scoped unique per project.
+    req_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
     requester_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     approver_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)

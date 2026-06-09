@@ -1656,10 +1656,8 @@ class ServiceService:
         from app.modules.ncr.repository import NCRRepository
 
         ncr_repo = NCRRepository(self.session)
-        ncr_number = await ncr_repo.next_ncr_number(contract.project_id)
         ncr = NCR(
             project_id=contract.project_id,
-            ncr_number=ncr_number,
             title=data.title,
             description=data.description,
             ncr_type=data.ncr_type,
@@ -1676,6 +1674,9 @@ class ServiceService:
             },
         )
         ncr = await ncr_repo.create(ncr)
+        # create() re-derives ncr_number with a collision retry, so read the
+        # committed value back rather than the pre-fetched one.
+        ncr_number = ncr.ncr_number
 
         # Echo the link back onto the WO metadata for round-trip discoverability.
         wo_meta = dict(wo.metadata_ or {})

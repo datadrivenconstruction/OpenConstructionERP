@@ -6,8 +6,8 @@ Coverage:
     * Happy path: 3-step route, 2 user-pinned approvers, all approve →
       instance status flips to ``approved``.
     * Reject midway: second-step rejection short-circuits the workflow.
-    * ``majority`` mode: 2-of-3 approve a single role-based step
-      advances; 1-of-3 + 2 rejected fails.
+    * ``majority`` mode: over a declared 3-approver population a single
+      approval does not clear the gate; 2-of-3 advances.
     * ``any`` mode: first approval clears a role-based step.
     * Race / duplicate decision: the UniqueConstraint prevents two
       decision rows from the same approver on the same step.
@@ -197,12 +197,17 @@ async def test_reject_midway_finalises_instance_as_rejected(
 async def test_majority_mode_advances_after_majority_approve(
     session: AsyncSession,
 ) -> None:
-    """Role-based step with mode=majority: 2 approve, 1 reject -> advance."""
+    """Role-based majority step over a declared 3-approver population.
+
+    A single approval no longer clears the gate (that evaluated only the
+    rows submitted, not the eligible population). With
+    ``required_approver_count=3`` the step clears once 2 distinct approvers
+    approve (2*2 > 3).
+    """
     svc = ApprovalRouteService(session)
     project_id, owner_id = await _seed_project(session)
     u1 = await _add_user(session, "u1")
     u2 = await _add_user(session, "u2")
-    u3 = await _add_user(session, "u3")
     u4 = await _add_user(session, "u4")
 
     route = await svc.create_route(
@@ -211,7 +216,12 @@ async def test_majority_mode_advances_after_majority_approve(
             name="majority gate",
             target_kind="rfi",
             steps=[
-                StepCreate(ordinal=1, approver_role="reviewer", mode="majority"),
+                StepCreate(
+                    ordinal=1,
+                    approver_role="reviewer",
+                    mode="majority",
+                    required_approver_count=3,
+                ),
                 StepCreate(ordinal=2, approver_user_id=u4, mode="all"),
             ],
         ),
@@ -223,11 +233,21 @@ async def test_majority_mode_advances_after_majority_approve(
         started_by=owner_id,
     )
 
-    # u1 approves: 1 approved / 1 acted → 1*2 > 1 → majority cleared → advance.
+    # u1 approves: 1 of 3 → 1*2 > 3 is False → gate stays pending.
     instance = await svc.submit_decision(
         instance.id,
         DecisionSubmit(step_id=steps[0].id, decision="approved"),
         approver_id=u1,
+        caller_role="reviewer",
+    )
+    assert instance.current_step_ordinal == 1  # still on step 1
+
+    # u2 approves: 2 of 3 → 2*2 > 3 → majority cleared → advance.
+    instance = await svc.submit_decision(
+        instance.id,
+        DecisionSubmit(step_id=steps[0].id, decision="approved"),
+        approver_id=u2,
+        caller_role="reviewer",
     )
     assert instance.current_step_ordinal == 2  # advanced to step 2
 
@@ -264,6 +284,7 @@ async def test_any_mode_advances_on_first_approval(session: AsyncSession) -> Non
         instance.id,
         DecisionSubmit(step_id=steps[0].id, decision="approved"),
         approver_id=u1,
+        caller_role="qa",
     )
     assert instance.status == "approved"  # single-step route → done
 

@@ -129,6 +129,12 @@ class Step(Base):
         default="all",
         server_default="all",
     )
+    # Eligible-approver population for a role-based ``all`` / ``majority``
+    # step. The engine cannot expand a role to its members, so when the
+    # route author needs a true quorum they persist the expected count
+    # here and the advance logic evaluates against it. NULL means the
+    # author did not declare a quorum.
+    required_approver_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
     sla_hours: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     def __repr__(self) -> str:  # pragma: no cover

@@ -161,8 +161,19 @@ class APIKeyRepository:
         return await self.session.get(APIKey, key_id)
 
     async def get_by_hash(self, key_hash: str) -> APIKey | None:
-        """Get API key by its hash (for authentication)."""
-        stmt = select(APIKey).where(APIKey.key_hash == key_hash, APIKey.is_active.is_(True))
+        """Get API key by its hash (for authentication).
+
+        Rejects keys that are inactive or past their ``expires_at``. A NULL
+        ``expires_at`` means the key never expires.
+        """
+        from datetime import datetime
+
+        now = datetime.now(UTC)
+        stmt = select(APIKey).where(
+            APIKey.key_hash == key_hash,
+            APIKey.is_active.is_(True),
+            (APIKey.expires_at.is_(None)) | (APIKey.expires_at > now),
+        )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -184,8 +195,9 @@ class APIKeyRepository:
         await self.session.execute(stmt)
 
     async def update_last_used(self, key_id: uuid.UUID) -> None:
-        """Update the last_used_at timestamp."""
+        """Update the last_used_at timestamp and persist it."""
         from datetime import datetime
 
         stmt = update(APIKey).where(APIKey.id == key_id).values(last_used_at=datetime.now(UTC))
         await self.session.execute(stmt)
+        await self.session.commit()

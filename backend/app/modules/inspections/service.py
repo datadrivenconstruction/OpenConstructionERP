@@ -75,15 +75,12 @@ class InspectionService:
 
         Validates checklist_data structure before persisting.
         """
-        inspection_number = await self.repo.next_inspection_number(data.project_id)
-
         checklist = [entry.model_dump() for entry in data.checklist_data]
         if checklist:
             _validate_checklist_structure(checklist)
 
         inspection = QualityInspection(
             project_id=data.project_id,
-            inspection_number=inspection_number,
             inspection_type=data.inspection_type,
             title=data.title,
             description=data.description,
@@ -98,6 +95,9 @@ class InspectionService:
             metadata_=data.metadata,
         )
         inspection = await self.repo.create(inspection)
+        # The repository assigns inspection_number (with a collision retry) at
+        # insert time, so read the committed value back for logging.
+        inspection_number = inspection.inspection_number
         logger.info(
             "Inspection created: %s (%s) for project %s",
             inspection_number,

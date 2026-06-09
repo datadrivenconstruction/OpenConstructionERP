@@ -36,6 +36,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit_log import log_activity
 from app.core.events import event_bus
+from app.core.permissions import ROLE_HIERARCHY, _resolve_role
 from app.modules.approval_routes.models import (
     INSTANCE_STATUSES,
     STEP_MODES,
@@ -85,6 +86,30 @@ def _safe_publish(name: str, data: dict[str, object]) -> None:
         event_bus.publish_detached(name, data, source_module="approval_routes")
     except Exception:  # pragma: no cover - defensive, e.g. no running loop
         logger.debug("approval_routes event publish skipped: %s", name)
+
+
+def _caller_role_satisfies(caller_role: str | None, required_role: str) -> bool:
+    """Whether the caller's effective role meets a role-based step's gate.
+
+    The route author configures ``approver_role`` as an app role name
+    (admin / manager / editor / viewer) or an industry alias. A caller
+    clears the gate when their role is an exact match OR ranks at or above
+    the required role in the permission hierarchy. Aliases (estimator,
+    owner, ...) are resolved to their canonical Role first - mirroring
+    :data:`app.core.permissions.ROLE_ALIASES`, the same translation
+    ``documents._iso_role_for`` performs - so a "quantity_surveyor"
+    satisfies an "editor" step. Unknown roles cannot satisfy a gate, so an
+    unrecognised caller or required role fails closed.
+    """
+    caller = (caller_role or "").strip().lower()
+    required = (required_role or "").strip().lower()
+    if caller and caller == required:
+        return True
+    caller_resolved = _resolve_role(caller)
+    required_resolved = _resolve_role(required)
+    if caller_resolved is None or required_resolved is None:
+        return False
+    return ROLE_HIERARCHY.get(caller_resolved, -99) >= ROLE_HIERARCHY.get(required_resolved, 99)
 
 
 class ApprovalRouteService:
@@ -163,6 +188,7 @@ class ApprovalRouteService:
                 approver_role=s.approver_role,
                 approver_user_id=s.approver_user_id,
                 mode=s.mode,
+                required_approver_count=s.required_approver_count,
                 sla_hours=s.sla_hours,
             )
             for s in payload.steps
@@ -223,6 +249,7 @@ class ApprovalRouteService:
                     approver_role=s.approver_role,
                     approver_user_id=s.approver_user_id,
                     mode=s.mode,
+                    required_approver_count=s.required_approver_count,
                     sla_hours=s.sla_hours,
                 )
                 for s in payload.steps
@@ -417,6 +444,7 @@ class ApprovalRouteService:
         payload: DecisionSubmit,
         *,
         approver_id: uuid.UUID | None,
+        caller_role: str | None = None,
     ) -> Instance:
         """Record a decision on the current step + auto-advance.
 
@@ -480,6 +508,22 @@ class ApprovalRouteService:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not the named approver for this step",
+            )
+
+        # Role-based step: the caller must actually hold the required role.
+        # Without this, anyone with the ``approval_routes.decide`` permission
+        # could clear a step pinned to a higher role (e.g. an editor signing
+        # off a "manager" gate). The caller role is translated through the
+        # permission hierarchy / aliases the same way other role-gated
+        # services resolve it.
+        if (
+            step.approver_user_id is None
+            and step.approver_role
+            and not _caller_role_satisfies(caller_role, step.approver_role)
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Caller role does not satisfy the approver role for this step",
             )
 
         now = datetime.now(UTC)
@@ -661,24 +705,40 @@ class ApprovalRouteService:
             # defaults driven by ``mode``:
             #
             #   any       - first approval advances
-            #   all       - every distinct approver who acted has to
-            #               approve; we can only check that there are at
-            #               least 1 approval AND no rejection rows
-            #               (rejections short-circuit upstream)
-            #   majority  - > 50% of approvers who acted on this step
-            #               approved (rejections short-circuit)
+            #   all       - every eligible approver has to approve, with no
+            #               rejection rows (rejections short-circuit upstream)
+            #   majority  - > 50% of the eligible approvers approved
+            #               (rejections short-circuit)
             #
             # The consumer can override this by passing an explicit
             # ``approver_user_id`` list when defining the route - at that
             # point the step becomes user-pinned per row.
+            #
+            # ``all`` / ``majority`` must NOT clear on a single approval:
+            # that evaluated only the rows submitted so far, not the
+            # eligible population, so the very first approver closed a gate
+            # that was meant to require several. When the route author has
+            # declared the eligible population on the step
+            # (``required_approver_count``) we evaluate against it; without
+            # it we cannot know the true population, so we require more than
+            # one distinct approver to have approved (with no rejection) as
+            # the safe non-deadlocking fallback.
+            quorum = step.required_approver_count
+            approver_count = len({s.approver_user_id for s in approvals})
+            rejections = [s for s in states if s.decision == "rejected"]
             if step.mode == "any":
                 cleared = len(approvals) >= 1
             elif step.mode == "majority":
-                total_acted = len([s for s in states if s.decision != "pending"])
-                cleared = total_acted >= 1 and len(approvals) * 2 > total_acted
-            else:  # "all" - fall back to ≥1 approver acted with no rejections.
-                rejections = [s for s in states if s.decision == "rejected"]
-                cleared = len(approvals) >= 1 and len(rejections) == 0
+                if quorum is not None and quorum >= 1:
+                    cleared = approver_count * 2 > quorum and len(rejections) == 0
+                else:
+                    total_acted = len([s for s in states if s.decision != "pending"])
+                    cleared = total_acted >= 2 and len(approvals) * 2 > total_acted
+            else:  # "all"
+                if quorum is not None and quorum >= 1:
+                    cleared = approver_count >= quorum and len(rejections) == 0
+                else:
+                    cleared = approver_count >= 2 and len(rejections) == 0
 
         if not cleared:
             return None

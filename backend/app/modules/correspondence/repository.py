@@ -3,6 +3,7 @@
 import uuid
 
 from sqlalchemy import func, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.correspondence.models import Correspondence
@@ -40,20 +41,56 @@ class CorrespondenceRepository:
         return list(result.scalars().all()), total
 
     async def next_reference_number(self, project_id: uuid.UUID) -> str:
-        """‌⁠‍Generate the next reference number using MAX to avoid collisions after deletions."""
-        stmt = select(func.max(Correspondence.reference_number)).where(Correspondence.project_id == project_id)
-        max_number = (await self.session.execute(stmt)).scalar_one()
-        if max_number is None:
-            return "COR-001"
-        try:
-            numeric = int(max_number.split("-", 1)[1])
-        except (IndexError, ValueError):
-            numeric = 0
-        return f"COR-{numeric + 1:03d}"
+        """‌⁠‍Generate the next reference number using MAX to avoid collisions after deletions.
+
+        Numbers are server-generated as ``COR-%03d``. We select the existing
+        numbers for the project and compute the max ordinal in Python rather
+        than pushing ``MAX(reference_number)`` into SQL: the column is a string,
+        so a SQL ``MAX`` sorts lexically and ``COR-1000`` sorts below
+        ``COR-999`` once the suffix grows past three digits, which would pin the
+        generator and emit a permanent duplicate stream. Parsing the trailing
+        digits in Python keeps the ordinal monotonic and tolerates legacy /
+        seed rows whose suffix is not a clean integer. The candidate set is
+        scoped to a single project so the read stays small.
+        """
+        stmt = select(Correspondence.reference_number).where(Correspondence.project_id == project_id)
+        numbers = (await self.session.execute(stmt)).scalars().all()
+
+        max_num = 0
+        for number in numbers:
+            if not number:
+                continue
+            # Take the trailing run of digits (handles ``COR-007`` and tolerates
+            # legacy variants like ``COR-007-A`` by reading the leading numeric
+            # part of the suffix); ignore rows with no numeric ordinal at all.
+            suffix = number.rsplit("-", 1)[-1]
+            digits = ""
+            for ch in suffix:
+                if ch.isdigit():
+                    digits += ch
+                else:
+                    break
+            if digits:
+                max_num = max(max_num, int(digits))
+
+        return f"COR-{max_num + 1:03d}"
 
     async def create(self, correspondence: Correspondence) -> Correspondence:
+        """‌⁠‍Persist a new correspondence record.
+
+        Raises :class:`sqlalchemy.exc.IntegrityError` on unique-constraint
+        collision - the service layer retries with a fresh reference number
+        when this happens (concurrent create race).
+        """
         self.session.add(correspondence)
-        await self.session.flush()
+        try:
+            await self.session.flush()
+        except IntegrityError:
+            # Roll back only this flush so the surrounding transaction stays
+            # alive for the service-layer retry. The caller decides whether to
+            # re-issue with a new number or to surface the error as HTTP 409.
+            await self.session.rollback()
+            raise
         return correspondence
 
     async def update_fields(self, correspondence_id: uuid.UUID, **fields: object) -> None:

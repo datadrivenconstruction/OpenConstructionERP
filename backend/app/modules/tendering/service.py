@@ -589,10 +589,17 @@ class TenderingService:
             pos = await self.session.get(Position, pos_uuid)
             if pos is None:
                 continue
+            # A bid stores position_id values as free-form JSON; never trust
+            # them to belong to this package's BOQ. Skip any foreign position
+            # so a winning bid can only ever overwrite rates in its own BOQ.
+            if pos.boq_id != package.boq_id:
+                continue
             qty = _to_decimal(pos.quantity)
             new_total = qty * rate
             await self.session.execute(
-                update(Position).where(Position.id == pos.id).values(unit_rate=str(rate), total=str(new_total))
+                update(Position)
+                .where(Position.id == pos.id, Position.boq_id == package.boq_id)
+                .values(unit_rate=str(rate), total=str(new_total))
             )
             updated += 1
 

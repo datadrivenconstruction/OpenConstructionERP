@@ -1083,15 +1083,17 @@ class ReportingService:
 
                     fin_svc = FinanceService(self.session)
                     dashboard = await fin_svc.get_dashboard(project_id=pid)
-                    if dashboard.get("total_budget") and float(dashboard["total_budget"]) > 0:
-                        total_budget = float(dashboard["total_budget"])
-                        total_actual = float(dashboard.get("total_actual", 0))
-                        budget_consumed_pct = str(round((total_actual / total_budget) * 100, 1))
-                except Exception:
+                    # get_dashboard returns FinanceDashboardResponse.model_dump():
+                    # budget_consumed_pct is already computed from
+                    # total_budget_revised and total_actual, so read it directly.
+                    if dashboard.get("budget_consumed_pct") is not None:
+                        budget_consumed_pct = str(dashboard["budget_consumed_pct"])
+                except Exception as exc:
                     logger.warning(
-                        "reporting.kpi_recalc finance.get_dashboard failed for project_id=%s - "
-                        "budget_consumed_pct will be null",
+                        "reporting.kpi_recalc finance.get_dashboard failed for project_id=%s "
+                        "(%s) - budget_consumed_pct will be null",
                         pid,
+                        type(exc).__name__,
                         exc_info=True,
                     )
 
@@ -1100,14 +1102,18 @@ class ReportingService:
 
                     cm_svc = CostModelService(self.session)
                     cm_dash = await cm_svc.get_dashboard(pid)
-                    if cm_dash.get("cpi"):
-                        cpi = str(cm_dash["cpi"])
-                    if cm_dash.get("spi"):
-                        spi = str(cm_dash["spi"])
-                except Exception:
+                    # get_dashboard returns a DashboardResponse (Pydantic model),
+                    # which has no .get() - read cpi/spi as attributes.
+                    if cm_dash.cpi:
+                        cpi = str(cm_dash.cpi)
+                    if cm_dash.spi:
+                        spi = str(cm_dash.spi)
+                except Exception as exc:
                     logger.warning(
-                        "reporting.kpi_recalc costmodel.get_dashboard failed for project_id=%s - cpi/spi will be null",
+                        "reporting.kpi_recalc costmodel.get_dashboard failed for project_id=%s "
+                        "(%s) - cpi/spi will be null",
                         pid,
+                        type(exc).__name__,
                         exc_info=True,
                     )
 

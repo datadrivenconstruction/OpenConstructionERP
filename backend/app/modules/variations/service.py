@@ -306,40 +306,6 @@ async def _safe_by_currency(repo: Any, method_name: str, project_id: uuid.UUID) 
     return result if isinstance(result, dict) else {}
 
 
-async def _load_project_currency_meta(session: AsyncSession, project_id: uuid.UUID) -> Any:
-    """Load the owning ``Project`` (currency + fx_rates) for FX conversion.
-
-    Currency bug fix support: the dashboard money roll-ups must be
-    labelled and FX-converted to the PROJECT currency, never a row
-    currency. Imported lazily to avoid a hard import cycle and so the
-    variations module stays decoupled from projects at import time.
-    Returns ``None`` defensively if the project can't be loaded.
-    """
-    try:
-        from sqlalchemy import select
-
-        from app.modules.projects.models import Project
-
-        result = await session.execute(select(Project).where(Project.id == project_id))
-        return result.scalar_one_or_none()
-    except Exception:  # noqa: BLE001 -- dashboard must never 500 on FX metadata
-        return None
-
-
-async def _safe_by_currency(repo: Any, method_name: str, project_id: uuid.UUID) -> dict[str, Decimal]:
-    """Call a repo's ``*_by_currency`` helper if present, else return ``{}``.
-
-    Mirrors the ``hasattr(... "pending_count")`` guard already used in
-    ``get_dashboard`` so in-memory test stubs (which don't implement the
-    new per-currency aggregations) keep working without a hard failure.
-    """
-    method = getattr(repo, method_name, None)
-    if method is None:
-        return {}
-    result = await method(project_id)
-    return result if isinstance(result, dict) else {}
-
-
 def compute_cost_impact_total(impacts: Iterable[Any]) -> Decimal:
     """Sum the ``total`` of every cost-impact line.
 

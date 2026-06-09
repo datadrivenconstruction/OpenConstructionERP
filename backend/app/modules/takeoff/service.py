@@ -562,6 +562,62 @@ def _pick_takeoff_value(measurement: Any) -> float | None:
         return None
 
 
+# Dimension groups for the push_quantity compatibility guard. A measurement
+# value is only a valid BOQ quantity when its dimension (length / area /
+# volume / count) matches the target position's unit; otherwise an m2 takeoff
+# pushed onto a per-m3 position would silently produce a wrong total.
+_UNIT_DIMENSION: dict[str, str] = {
+    "m": "length",
+    "lm": "length",
+    "ml": "length",
+    "m2": "area",
+    "m3": "volume",
+    "kg": "mass",
+    "t": "mass",
+    "pcs": "count",
+    "ea": "count",
+    "stk": "count",
+    "lsum": "lsum",
+    "h": "time",
+}
+
+# Measurement ``type`` to dimension. The geometric type is the authoritative
+# dimension of a takeoff value; ``measurement_unit`` is only a fallback.
+_MEASUREMENT_TYPE_DIMENSION: dict[str, str] = {
+    "distance": "length",
+    "polyline": "length",
+    "area": "area",
+    "volume": "volume",
+    "count": "count",
+}
+
+
+def _unit_dimension(unit: str | None) -> str | None:
+    """Map a unit code to its dimension group, or ``None`` when unknown.
+
+    Folds superscripts (``m²`` -> ``m2``) and case so the comparison works
+    on the spellings the BOQ and takeoff editors actually store.
+    """
+    if not unit:
+        return None
+    cleaned = unit.strip().lower().replace("²", "2").replace("³", "3")
+    cleaned = cleaned.replace("^", "").replace("**", "")
+    return _UNIT_DIMENSION.get(cleaned)
+
+
+def _measurement_dimension(measurement: Any) -> str | None:
+    """Dimension of a takeoff measurement from its ``type``, then unit.
+
+    Returns ``None`` when neither the type nor the unit maps to a known
+    dimension so the push guard can stay conservative and allow it.
+    """
+    mtype = (getattr(measurement, "type", None) or "").strip().lower()
+    dim = _MEASUREMENT_TYPE_DIMENSION.get(mtype)
+    if dim is not None:
+        return dim
+    return _unit_dimension(getattr(measurement, "measurement_unit", None))
+
+
 # Directory where uploaded PDF files are stored on disk
 _TAKEOFF_DOCUMENTS_DIR = Path.home() / ".openestimator" / "takeoff_documents"
 
@@ -1509,6 +1565,28 @@ class TakeoffService:
         position = await boq_service.position_repo.get_by_id(position_uuid)
         if position is None:
             logger.warning("push_quantity: BOQ position %s not found - skipping", boq_position_id)
+            return
+
+        # Dimensional compatibility guard. Copying the scalar straight into the
+        # quantity and recomputing the total only makes sense when the
+        # measurement and the position measure the same thing. An m2 takeoff
+        # pushed onto a per-m3 position would otherwise silently yield a wrong
+        # total, so refuse the push on a real dimension mismatch and leave the
+        # existing BOQ quantity untouched. Unknown units on either side stay
+        # permissive (no dimension to compare) so custom/legacy units are not
+        # blocked.
+        measurement_dim = _measurement_dimension(measurement)
+        position_dim = _unit_dimension(getattr(position, "unit", None))
+        if measurement_dim is not None and position_dim is not None and measurement_dim != position_dim:
+            logger.warning(
+                "push_quantity: measurement %s dimension %s is incompatible with BOQ position %s "
+                "unit %r (%s) - refusing to overwrite the quantity",
+                getattr(measurement, "id", "?"),
+                measurement_dim,
+                boq_position_id,
+                getattr(position, "unit", None),
+                position_dim,
+            )
             return
 
         await boq_service.position_repo.update_fields(position.id, quantity=str(value))

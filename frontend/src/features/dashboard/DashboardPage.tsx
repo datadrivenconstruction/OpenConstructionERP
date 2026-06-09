@@ -959,7 +959,7 @@ function PortfolioOverview({ projects: _projects }: { projects: ProjectSummary[]
 
   return (
     <div
-      className="rounded-xl border border-border-light bg-surface-primary p-4 animate-card-in"
+      className="rounded-xl border border-border-light bg-surface-primary/70 p-4 animate-card-in"
       style={{ animationDelay: '70ms' }}
     >
       <div className="flex items-center gap-2 mb-3">
@@ -1149,7 +1149,7 @@ function TodaySnapshot({ cards }: { cards?: ProjectCardMetrics[] }) {
 
   return (
     <div
-      className="rounded-xl border border-border-light bg-surface-primary p-4 animate-card-in"
+      className="rounded-xl border border-border-light bg-surface-primary/70 p-4 animate-card-in"
       style={{ animationDelay: '80ms' }}
     >
       <div className="flex items-center gap-2 mb-3">
@@ -1596,7 +1596,7 @@ function SystemStatusSummary({
 
 /* ── Quick Upload Card ────────────────────────────────────────────────── */
 
-function QuickUploadCard() {
+function QuickUploadCard({ projects }: { projects?: ProjectSummary[] }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -1606,17 +1606,27 @@ function QuickUploadCard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // When no project is active globally, let the user pick a target right here
+  // instead of dead-ending the upload. The pick is local to this card and does
+  // not change the global active project.
+  const [pickedProjectId, setPickedProjectId] = useState<string>('');
+
+  const uploadProjectId = activeProjectId ?? (pickedProjectId || null);
+  const uploadProjectName =
+    activeProjectName ||
+    projects?.find((p) => p.id === uploadProjectId)?.name ||
+    '';
 
   const { data: documents } = useQuery({
-    queryKey: ['documents', activeProjectId],
-    queryFn: () => fetchDocuments(activeProjectId ?? ''),
-    enabled: !!activeProjectId,
+    queryKey: ['documents', uploadProjectId],
+    queryFn: () => fetchDocuments(uploadProjectId ?? ''),
+    enabled: !!uploadProjectId,
     staleTime: 30_000,
   });
 
   const handleFiles = useCallback(
     async (files: FileList | File[]) => {
-      if (!activeProjectId) {
+      if (!uploadProjectId) {
         addToast({
           type: 'warning',
           title: t('dashboard.upload_no_project', {
@@ -1640,7 +1650,7 @@ function QuickUploadCard() {
 
       for (const file of validFiles) {
         try {
-          await uploadDocument(activeProjectId, file, 'other');
+          await uploadDocument(uploadProjectId, file, 'other');
           successCount += 1;
         } catch (err) {
           failCount += 1;
@@ -1653,7 +1663,7 @@ function QuickUploadCard() {
       }
 
       setUploading(false);
-      await queryClient.invalidateQueries({ queryKey: ['documents', activeProjectId] });
+      await queryClient.invalidateQueries({ queryKey: ['documents', uploadProjectId] });
       await queryClient.invalidateQueries({ queryKey: ['documents'] });
 
       if (successCount > 0) {
@@ -1672,7 +1682,7 @@ function QuickUploadCard() {
         });
       }
     },
-    [activeProjectId, addToast, queryClient, t],
+    [uploadProjectId, addToast, queryClient, t],
   );
 
   const onDrop = useCallback(
@@ -1697,7 +1707,9 @@ function QuickUploadCard() {
   }, []);
 
   const documentCount = (documents as DocumentItem[] | undefined)?.length ?? 0;
-  const hasProject = !!activeProjectId;
+  const hasProject = !!uploadProjectId;
+  const noActiveProject = !activeProjectId;
+  const selectableProjects = (projects ?? []).filter((p) => p.id && p.name);
 
   return (
     <div className="animate-card-in" style={{ animationDelay: '120ms' }}>
@@ -1746,12 +1758,43 @@ function QuickUploadCard() {
               {hasProject
                 ? t('dashboard.upload_desc', {
                     defaultValue: 'Upload to {{project}} - PDF, DWG, IFC, RVT, images.',
-                    project: activeProjectName || t('dashboard.active_project', { defaultValue: 'active project' }),
+                    project: uploadProjectName || t('dashboard.active_project', { defaultValue: 'active project' }),
                   })
-                : t('dashboard.upload_select_project', {
-                    defaultValue: 'Select an active project to upload files.',
-                  })}
+                : selectableProjects.length > 0
+                  ? t('dashboard.upload_pick_project', {
+                      defaultValue: 'Pick a project to upload into.',
+                    })
+                  : t('dashboard.upload_need_project', {
+                      defaultValue: 'Create a project first, then upload files here.',
+                    })}
             </p>
+            {noActiveProject && selectableProjects.length > 0 && (
+              <select
+                value={pickedProjectId}
+                onChange={(e) => setPickedProjectId(e.target.value)}
+                className="mt-2 h-8 w-full max-w-xs rounded-lg border border-border bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                aria-label={t('dashboard.upload_pick_project', { defaultValue: 'Pick a project to upload into.' })}
+              >
+                <option value="">
+                  {t('dashboard.upload_choose_project', { defaultValue: 'Choose a project' })}
+                </option>
+                {selectableProjects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            {noActiveProject && selectableProjects.length === 0 && (
+              <button
+                type="button"
+                className="mt-2 inline-flex items-center gap-1 text-2xs font-medium text-oe-blue hover:text-oe-blue-text transition-colors"
+                onClick={() => navigate('/projects/new')}
+              >
+                <span>{t('dashboard.upload_create_project', { defaultValue: 'Create a project' })}</span>
+                <ArrowRight size={11} />
+              </button>
+            )}
             <div className="mt-2 flex items-center gap-3 text-2xs text-content-tertiary">
               <button
                 type="button"
@@ -2133,7 +2176,7 @@ function DashboardPageInner() {
 
     bim_coverage: <BIMCoverageCard />,
 
-    quick_upload: <QuickUploadCard />,
+    quick_upload: <QuickUploadCard projects={projects} />,
 
     onboarding: (
       <OnboardingSteps projects={projects} regionStats={regionStats} boqs={allBoqs} vectorCount={vectorCount} />

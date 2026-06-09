@@ -18,7 +18,7 @@ export type TilesetStatus =
   | 'failed'
   | 'obsolete';
 
-export type TileFormat = 'b3dm' | 'i3dm' | 'pnts' | 'cmpt';
+export type TileFormat = 'b3dm' | 'i3dm' | 'pnts' | 'cmpt' | 'copc';
 
 export type TileJobState =
   | 'queued'

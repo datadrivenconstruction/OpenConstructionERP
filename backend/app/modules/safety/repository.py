@@ -3,9 +3,15 @@
 import uuid
 
 from sqlalchemy import func, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.safety.models import SafetyIncident, SafetyObservation
+
+# How many times a colliding number is re-derived before giving up. A handful
+# of concurrent writers only ever need one or two retries; the cap stops a
+# pathological hot loop.
+_NUMBER_RETRY_LIMIT = 5
 
 
 def _next_suffix(numbers: list[str]) -> int:
@@ -68,9 +74,27 @@ class IncidentRepository:
         return f"INC-{_next_suffix(numbers):03d}"
 
     async def create(self, incident: SafetyIncident) -> SafetyIncident:
-        self.session.add(incident)
-        await self.session.flush()
-        return incident
+        """Insert an incident, deriving its number with a retry on collision.
+
+        The number comes from MAX(suffix)+1, which can race two concurrent
+        creates onto the same value. The per-project unique constraint turns
+        that race into an IntegrityError; we roll back the failed insert, re-read
+        the MAX and try again.
+        """
+        # Read project_id once: after a savepoint rollback the instance is
+        # expired, so reading it inside the loop could trigger a lazy load.
+        project_id = incident.project_id
+        for _ in range(_NUMBER_RETRY_LIMIT):
+            incident.incident_number = await self.next_incident_number(project_id)
+            savepoint = await self.session.begin_nested()
+            self.session.add(incident)
+            try:
+                await self.session.flush()
+            except IntegrityError:
+                await savepoint.rollback()
+                continue
+            return incident
+        raise RuntimeError(f"Could not allocate a unique incident number for project {project_id}")
 
     async def update_fields(self, incident_id: uuid.UUID, **fields: object) -> None:
         stmt = update(SafetyIncident).where(SafetyIncident.id == incident_id).values(**fields)
@@ -124,9 +148,27 @@ class ObservationRepository:
         return f"OBS-{_next_suffix(numbers):03d}"
 
     async def create(self, observation: SafetyObservation) -> SafetyObservation:
-        self.session.add(observation)
-        await self.session.flush()
-        return observation
+        """Insert an observation, deriving its number with a retry on collision.
+
+        The number comes from MAX(suffix)+1, which can race two concurrent
+        creates onto the same value. The per-project unique constraint turns
+        that race into an IntegrityError; we roll back the failed insert, re-read
+        the MAX and try again.
+        """
+        # Read project_id once: after a savepoint rollback the instance is
+        # expired, so reading it inside the loop could trigger a lazy load.
+        project_id = observation.project_id
+        for _ in range(_NUMBER_RETRY_LIMIT):
+            observation.observation_number = await self.next_observation_number(project_id)
+            savepoint = await self.session.begin_nested()
+            self.session.add(observation)
+            try:
+                await self.session.flush()
+            except IntegrityError:
+                await savepoint.rollback()
+                continue
+            return observation
+        raise RuntimeError(f"Could not allocate a unique observation number for project {project_id}")
 
     async def update_fields(self, observation_id: uuid.UUID, **fields: object) -> None:
         stmt = update(SafetyObservation).where(SafetyObservation.id == observation_id).values(**fields)

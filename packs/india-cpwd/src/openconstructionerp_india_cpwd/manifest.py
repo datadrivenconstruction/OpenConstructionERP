@@ -51,8 +51,9 @@ MANIFEST = PartnerPackManifest(
         # Tax & statutory
         "india_tax_construction",    # GST + TDS 194C + BOCW labour cess
     ],
-    default_modules=[],   # empty = show all (Shape A — no module hiding)
+    default_modules=[],   # empty = show all (Shape A - no module hiding)
     hidden_modules=[],
+    demo_template_ids=["govt-building-delhi"],
     branding=PartnerBranding(
         primary_color="#FF9933",   # Saffron (Indian flag, Kesari)
         accent_color="#138808",    # India Green (Indian flag)

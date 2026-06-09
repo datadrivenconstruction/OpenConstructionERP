@@ -298,19 +298,25 @@ class ProjectService:
                 source_module="oe_projects",
             )
 
-        # Auto-create a default team for the new project
+        # Auto-create a default team for the new project. Wrapped in a
+        # SAVEPOINT so a team-layer failure (missing teams table on minimal
+        # installs, etc.) rolls back only the savepoint instead of poisoning
+        # the outer transaction and 500-ing the whole project create.
         try:
             from app.modules.teams.models import Team, TeamMembership
 
-            default_team = Team(
-                project_id=project.id,
-                name="Default Team",
-                is_default=True,
-            )
-            self.session.add(default_team)
-            await self.session.flush()
-            self.session.add(TeamMembership(team_id=default_team.id, user_id=owner_id, role="lead"))
-            await self.session.flush()
+            async with self.session.begin_nested():
+                default_team = Team(
+                    project_id=project.id,
+                    name="Default Team",
+                    is_default=True,
+                )
+                self.session.add(default_team)
+                await self.session.flush()
+                self.session.add(
+                    TeamMembership(team_id=default_team.id, user_id=owner_id, role="lead")
+                )
+                await self.session.flush()
             logger.info("Default team created for project %s", project.id)
         except Exception:
             logger.debug("Auto-create default team skipped (teams module may not be loaded)")

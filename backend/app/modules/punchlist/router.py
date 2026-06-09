@@ -350,6 +350,7 @@ async def pin_to_sheet(
 @router.post("/items/{item_id}/photos/", response_model=PunchItemResponse)
 async def upload_photo(
     item_id: uuid.UUID,
+    session: SessionDep,
     file: UploadFile = File(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("punchlist.update")),
@@ -361,6 +362,8 @@ async def upload_photo(
     magic bytes against :data:`ALLOWED_PHOTO_TYPES` (jpeg, png, gif, webp,
     heic, heif, tiff). SVG and any other format are rejected with 415.
     """
+    existing = await service.get_item(item_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     try:
         content = await file.read()
     except Exception:

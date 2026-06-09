@@ -74,6 +74,7 @@ MANIFEST = PartnerPackManifest(
     ],
     default_modules=[],   # empty = show all
     hidden_modules=[],
+    demo_template_ids=["residential-saopaulo"],
     branding=PartnerBranding(
         primary_color="#009C3B",   # Brazil green (flag)
         accent_color="#FFDF00",    # Brazil yellow (flag)

@@ -8,7 +8,18 @@ Tables:
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -18,6 +29,12 @@ class SafetyIncident(Base):
     """‌⁠‍A safety incident report tracking injuries, near misses, and property damage."""
 
     __tablename__ = "oe_safety_incident"
+    # Per-project uniqueness of the human-facing INC-NNN number. MAX(suffix)+1
+    # races under concurrent creates; this constraint forces a retry instead of
+    # a duplicate.
+    __table_args__ = (
+        UniqueConstraint("project_id", "incident_number", name="uq_oe_safety_incident_project_number"),
+    )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -164,6 +181,12 @@ class SafetyObservation(Base):
     """‌⁠‍A proactive safety observation with risk scoring."""
 
     __tablename__ = "oe_safety_observation"
+    # Per-project uniqueness of the human-facing OBS-NNN number. MAX(suffix)+1
+    # races under concurrent creates; this constraint forces a retry instead of
+    # a duplicate.
+    __table_args__ = (
+        UniqueConstraint("project_id", "observation_number", name="uq_oe_safety_observation_project_number"),
+    )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),

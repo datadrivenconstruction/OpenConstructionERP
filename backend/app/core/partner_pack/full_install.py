@@ -314,7 +314,7 @@ def _pack_country(slug: str) -> str | None:
     return (row.get("country") or "").strip() or None
 
 
-def _demo_install_list(slug: str, demo_count: int) -> list[str]:
+def _demo_install_list(slug: str, demo_count: int, country_fill: bool = True) -> list[str]:
     """Build the ordered, de-duplicated demo install list for the pack.
 
     A pack's manifest may declare an explicit ``demo_template_ids`` list. When
@@ -326,6 +326,16 @@ def _demo_install_list(slug: str, demo_count: int) -> list[str]:
     behaviour: flagship (``PACK_DEMO_PROJECT[slug]``) first, then every other
     ``DEMO_CATALOG`` demo sharing the flagship's ``country``. The result is
     truncated to ``demo_count``.
+
+    Args:
+        slug: The pack slug to build the install list for.
+        demo_count: Maximum number of demos to return.
+        country_fill: When True (default) and the manifest declares no explicit
+            ``demo_template_ids``, the flagship is padded with other demos
+            sharing its country. When False, the list is restricted to exactly
+            what the pack pins - the manifest's ``demo_template_ids`` or, if it
+            declares none, only the single ``PACK_DEMO_PROJECT[slug]`` flagship.
+            Use False to seed a pack's own project(s) and nothing else.
     """
     from app.core.demo_projects import DEMO_CATALOG, DEMO_TEMPLATES, PACK_DEMO_PROJECT
     from app.core.partner_pack.discovery import get_pack_by_slug
@@ -346,6 +356,11 @@ def _demo_install_list(slug: str, demo_count: int) -> list[str]:
             return ordered[:demo_count]
 
     flagship = PACK_DEMO_PROJECT.get(slug)
+
+    # Pack-only mode: return just the flagship, never the country fill.
+    if not country_fill:
+        return [flagship][:demo_count] if flagship else []
+
     country = _pack_country(slug)
 
     ordered = []

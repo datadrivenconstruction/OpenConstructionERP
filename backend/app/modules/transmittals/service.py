@@ -376,6 +376,12 @@ class TransmittalService:
                 detail="Recipient not found for this transmittal",
             )
 
+        if recipient.responded_at is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Recipient has already responded to this transmittal",
+            )
+
         project_id_s = str(transmittal.project_id)
         sender_user_id_s = str(transmittal.created_by) if transmittal.created_by else None
         responder_user_id_s = str(recipient.recipient_user_id) if recipient.recipient_user_id else None

@@ -38,7 +38,7 @@ TEMPLATE = DemoTemplate(
         "lat": -23.5614,
         "lng": -46.6722,
     },
-    validation_rule_sets=["boq_quality", "project_completeness"],
+    validation_rule_sets=["sinapi", "nbr", "boq_quality", "project_completeness"],
     boq_name="Orcamento Sintetico - Padrao SINAPI",
     boq_description=(
         "Orcamento sintetico por etapas conforme pratica brasileira, "

@@ -286,6 +286,12 @@ def _validate_3way_match(
     return violations
 
 
+# Small rounding tolerance when comparing cumulative received vs ordered, so
+# trailing-decimal noise on quantity strings does not spuriously reject a
+# receipt that completes a line exactly.
+_RECEIPT_TOLERANCE = Decimal("0.001")
+
+
 def _to_decimal(value: object) -> Decimal:
     try:
         return Decimal(str(value or "0"))
@@ -984,6 +990,39 @@ class ProcurementService:
 
     # ── Goods Receipts ───────────────────────────────────────────────────────
 
+    async def _confirmed_received_by_item(
+        self,
+        po_item_ids: list[uuid.UUID],
+        *,
+        exclude_receipt_id: uuid.UUID | None = None,
+    ) -> dict[uuid.UUID, Decimal]:
+        """Sum quantity_received on confirmed GR lines, grouped by po_item_id.
+
+        Used to enforce a cumulative over-receipt cap: prior confirmed receipts
+        count against the PO line's ordered quantity. ``exclude_receipt_id``
+        drops one receipt from the sum (used at confirm time so the GR being
+        confirmed is not double-counted against itself).
+        """
+        if not po_item_ids:
+            return {}
+        from sqlalchemy import func as _func
+        from sqlalchemy import select as _select
+
+        stmt = (
+            _select(
+                GoodsReceiptItem.po_item_id,
+                _func.coalesce(_func.sum(numeric_value(GoodsReceiptItem.quantity_received)), 0),
+            )
+            .join(GoodsReceipt, GoodsReceipt.id == GoodsReceiptItem.receipt_id)
+            .where(GoodsReceipt.status == "confirmed")
+            .where(GoodsReceiptItem.po_item_id.in_(po_item_ids))
+            .group_by(GoodsReceiptItem.po_item_id)
+        )
+        if exclude_receipt_id is not None:
+            stmt = stmt.where(GoodsReceiptItem.receipt_id != exclude_receipt_id)
+        rows = (await self.session.execute(stmt)).all()
+        return {row[0]: _to_decimal(row[1]) for row in rows}
+
     async def create_goods_receipt(
         self,
         data: GRCreate,
@@ -1007,8 +1046,13 @@ class ProcurementService:
                 ),
             )
 
-        # Validate GR item quantities against PO items
+        # Validate GR item quantities against PO items. The cap is cumulative:
+        # quantity already received on prior confirmed GRs for the same
+        # po_item_id counts against the ordered quantity, so a 100-unit line
+        # cannot be over-received across two separate receipts (over-receipt bug).
         po_items_by_id = {item.id: item for item in po.items}
+        linked_ids = [it.po_item_id for it in data.items if it.po_item_id is not None]
+        already_received = await self._confirmed_received_by_item(linked_ids)
         for item_data in data.items:
             if item_data.po_item_id is not None:
                 po_item = po_items_by_id.get(item_data.po_item_id)
@@ -1023,11 +1067,12 @@ class ProcurementService:
                     received = Decimal(item_data.quantity_received)
                 except (InvalidOperation, ValueError, TypeError):
                     continue  # let DB-level validation handle bad numbers
-                if received > ordered:
+                prior = already_received.get(item_data.po_item_id, Decimal("0"))
+                if prior + received > ordered + _RECEIPT_TOLERANCE:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail=(
-                            f"Received quantity ({received}) exceeds ordered quantity "
+                            f"Received quantity ({prior + received}) exceeds ordered quantity "
                             f"({ordered}) for PO item '{po_item.description}'"
                         ),
                     )
@@ -1132,10 +1177,52 @@ class ProcurementService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Cannot confirm goods receipt in status '{gr.status}'",
             )
+
+        # Re-apply the cumulative over-receipt cap at confirm time: prior
+        # confirmed receipts on the same po_item_id plus this receipt's lines
+        # must not exceed the ordered quantity. ``exclude_receipt_id`` keeps
+        # this GR out of the prior sum so it is not counted against itself.
+        po = await self.get_po(gr.po_id)
+        po_items_by_id = {item.id: item for item in po.items}
+        linked_ids = [it.po_item_id for it in gr.items if it.po_item_id is not None]
+        already_received = await self._confirmed_received_by_item(
+            linked_ids,
+            exclude_receipt_id=gr_id,
+        )
+        this_receipt: dict[uuid.UUID, Decimal] = {}
+        for gr_item in gr.items:
+            if gr_item.po_item_id is None:
+                continue
+            this_receipt[gr_item.po_item_id] = this_receipt.get(
+                gr_item.po_item_id, Decimal("0")
+            ) + _to_decimal(gr_item.quantity_received)
+        for po_item_id, new_received in this_receipt.items():
+            po_item = po_items_by_id.get(po_item_id)
+            if po_item is None:
+                continue
+            ordered = _to_decimal(po_item.quantity)
+            prior = already_received.get(po_item_id, Decimal("0"))
+            if prior + new_received > ordered + _RECEIPT_TOLERANCE:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Received quantity ({prior + new_received}) exceeds ordered quantity "
+                        f"({ordered}) for PO item '{po_item.description}'"
+                    ),
+                )
+
         await self.gr_repo.update(gr_id, status="confirmed")
 
-        # Update PO status based on total received quantities
+        # gr_repo.update() calls session.expire_all(), which detaches the
+        # eager-loaded relationships on the ``po`` fetched above for the cap
+        # check; a later synchronous attribute/relationship access would then
+        # lazy-load from sync context and raise MissingGreenlet on the async
+        # session. Re-fetch a fresh, fully eager-loaded PO for the status
+        # rollup and the receipt-value computation below (this also sees the
+        # GR just flipped to confirmed).
         po = await self.get_po(gr.po_id)
+
+        # Update PO status based on total received quantities
         if po.status in ("issued", "partially_received"):
             all_fully_received = self._check_po_fully_received(po)
             if all_fully_received:
@@ -1524,6 +1611,79 @@ class MaterialRequisitionService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
+    async def _next_req_number(self, project_id: uuid.UUID) -> str:
+        """Generate the next "MR-<digits>" number for a project.
+
+        Uses the NUMERIC MAX of the existing requisition suffixes (not a
+        COUNT+1) so generation stays correct under concurrency and past
+        MR-9999. Only canonical ``MR-<digits>`` rows are cast.
+        """
+        from sqlalchemy import Integer as _SAInteger
+        from sqlalchemy import cast as _cast
+        from sqlalchemy import func as _func
+        from sqlalchemy import select as _select
+
+        stmt = _select(
+            _func.coalesce(
+                _func.max(_cast(_func.substr(MaterialRequisition.req_number, 4), _SAInteger)),
+                0,
+            )
+        ).where(
+            MaterialRequisition.project_id == project_id,
+            MaterialRequisition.req_number.regexp_match("^MR-[0-9]+$"),
+        )
+        max_suffix = (await self.session.execute(stmt)).scalar_one()
+        return f"MR-{max_suffix + 1:04d}"
+
+    async def _create_req_with_retry(
+        self,
+        *,
+        project_id: uuid.UUID,
+        requester_id: str | None,
+        title: str | None,
+        required_date: str | None,
+        lead_time_days: int,
+        estimated_delivery_date: str | None,
+        notes: str | None,
+    ) -> MaterialRequisition:
+        """Insert a MaterialRequisition row, retrying on req_number collisions.
+
+        Mirrors ``_create_po_with_retry``: re-read MAX(req_number) and retry up
+        to ``_MAX_RETRIES`` times on a unique-constraint IntegrityError; 503
+        when retries are exhausted.
+        """
+        _MAX_RETRIES = 5
+        last_exc: IntegrityError | None = None
+        for _attempt in range(_MAX_RETRIES):
+            req_number = await self._next_req_number(project_id)
+            req = MaterialRequisition(
+                project_id=project_id,
+                req_number=req_number,
+                requester_id=requester_id,
+                status="draft",
+                title=title,
+                required_date=required_date,
+                lead_time_days=lead_time_days,
+                estimated_delivery_date=estimated_delivery_date,
+                notes=notes,
+            )
+            self.session.add(req)
+            try:
+                await self.session.flush()
+            except IntegrityError as exc:
+                last_exc = exc
+                await self.session.rollback()
+                continue  # collision - try again with a fresh MAX read
+            return req
+
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "Could not generate a unique requisition number after "
+                f"{_MAX_RETRIES} attempts (concurrent contention). Please retry."
+            ),
+        ) from last_exc
+
     async def create_requisition(
         self,
         project_id: uuid.UUID,
@@ -1542,35 +1702,20 @@ class MaterialRequisitionService:
             items: optional list of dicts with keys description, quantity_requested,
                    unit_cost - extended_cost is computed as qty * unit_cost.
         """
-        from sqlalchemy import func as sa_func
-        from sqlalchemy import select
-
-        # Generate a sequential req_number like MR-0001
-        try:
-            count_stmt = select(sa_func.count()).select_from(
-                select(MaterialRequisition).where(MaterialRequisition.project_id == project_id).subquery()
-            )
-            row_count = (await self.session.execute(count_stmt)).scalar_one()
-        except Exception:
-            row_count = 0
-        req_number = f"MR-{row_count + 1:04d}"
-
         est_delivery = _compute_delivery_date(required_date, lead_time_days)
-        req = MaterialRequisition(
+        # Insert the requisition with a per-project sequential req_number, retrying
+        # on the unique-constraint collision a concurrent insert can cause. The
+        # number is derived from the NUMERIC MAX of existing "MR-<digits>" rows
+        # (not a non-atomic COUNT+1) so it stays correct past MR-9999.
+        req = await self._create_req_with_retry(
             project_id=project_id,
             requester_id=requester_id,
-            status="draft",
             title=title,
             required_date=required_date,
             lead_time_days=lead_time_days,
             estimated_delivery_date=est_delivery,
             notes=notes,
         )
-        # Attach req_number as a plain attribute (no DB column) for test compatibility.
-        # A real migration would add a proper column - this is a schema-less stub.
-        req.req_number = req_number  # type: ignore[attr-defined]
-        self.session.add(req)
-        await self.session.flush()
 
         # Optionally create line items
         if items:

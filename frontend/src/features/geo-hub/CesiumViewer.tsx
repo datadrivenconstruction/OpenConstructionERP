@@ -517,6 +517,69 @@ function _sceneModeEnum(cesium: CesiumLike, mode: GeoSceneMode): number {
   }
 }
 
+/**
+ * True when a {@link Tileset} row describes a point cloud rather than the
+ * default b3dm / glTF box path. Point clouds are tiled out-of-core by the
+ * converter into a ``pnts`` octree or a range-readable ``copc`` keystone and
+ * referenced by ``tile_pipeline.build_point_cloud_tileset_json`` - they need
+ * point-cloud shading + Eye-Dome Lighting, which we MUST NOT apply to the
+ * mesh tilesets (it would silently no-op there, but the guard keeps the
+ * intent explicit and avoids touching the proven mesh render path).
+ */
+function _isPointCloudTileset(ts: {
+  source_kind?: string;
+  tile_format?: string;
+}): boolean {
+  return (
+    ts.source_kind === 'point_cloud' ||
+    ts.tile_format === 'pnts' ||
+    ts.tile_format === 'copc'
+  );
+}
+
+/** Minimal shape of the runtime ``Cesium3DTileset.pointCloudShading`` bag. */
+interface CesiumPointCloudShadingLike {
+  /** Size-attenuate points by distance so far points don't vanish. */
+  attenuation?: boolean;
+  /** Eye-Dome Lighting - depth-based shading that reads structure in a
+   *  flat cloud (edges/contours) without per-point normals. */
+  eyeDomeLighting?: boolean;
+  /** EDL strength multiplier. Cesium default 1.0; a touch higher reads
+   *  construction scans (façades, terrain breaks) more clearly. */
+  eyeDomeLightingStrength?: number;
+  /** EDL sampling radius in pixels. */
+  eyeDomeLightingRadius?: number;
+  /** Upper bound on per-point screen size when attenuating (pixels). */
+  maximumAttenuation?: number;
+}
+
+/**
+ * Enable point-cloud shading + Eye-Dome Lighting on a loaded tileset.
+ *
+ * Cesium exposes ``Cesium3DTileset.pointCloudShading`` (a ``PointCloudShading``
+ * instance) on every tileset, but the flags only take effect when the tileset
+ * actually contains ``pnts`` content - so this is a no-op on mesh tilesets and
+ * we still gate the call to point clouds to keep the mesh path untouched.
+ *
+ * Best-effort: a stripped Cesium build without the bag, or a disposed
+ * primitive, degrades to plain points rather than throwing.
+ */
+function _applyPointCloudShading(tileset: unknown): void {
+  try {
+    const pcs = (tileset as { pointCloudShading?: CesiumPointCloudShadingLike })
+      .pointCloudShading;
+    if (!pcs) return;
+    pcs.attenuation = true;
+    pcs.eyeDomeLighting = true;
+    pcs.eyeDomeLightingStrength = 1.2;
+    pcs.eyeDomeLightingRadius = 1.0;
+    pcs.maximumAttenuation = 4.0;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('[geo_hub] point-cloud shading setup failed', err);
+  }
+}
+
 export function CesiumViewer({
   mode,
   mapConfig,
@@ -810,6 +873,13 @@ export function CesiumViewer({
               // when ``focusedTilesetId`` matches. Cleared on cleanup
               // along with the rest of the viewer state.
               loadedTilesetsRef.current.set(ts.id, tileset);
+              // Point clouds (pnts octree / copc keystone) render flat and
+              // hard to read without depth shading. Turn on attenuation +
+              // Eye-Dome Lighting for them only - gated so the proven
+              // b3dm / glTF mesh render path is never touched.
+              if (_isPointCloudTileset(ts)) {
+                _applyPointCloudShading(tileset);
+              }
               // Apply any pre-existing show/opacity prefs immediately so
               // the user doesn't briefly see a hidden tileset flash in
               // before the dedicated state-effect catches up. Reads the

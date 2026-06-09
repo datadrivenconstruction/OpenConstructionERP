@@ -2734,6 +2734,7 @@ const resource = {
     "nav.cad_bim_explorer": "CAD-BIM BI Explorer",
     "nav.match_elements": "CAD-BIM Match → Cost",
     "nav.bim_viewer": "BIM 3D Takeoff",
+    "nav.point_cloud": "Point Cloud",
     "nav.clash_detection": "Clash Detection",
     "nav.bim_rules": "BIM Rules",
     "nav.quantity_rules": "Quantity Rules",
@@ -2957,6 +2958,7 @@ const resource = {
     "sidebar.group.estimating": "Estimating",
     "sidebar.group.cost_data": "Cost Data",
     "sidebar.group.takeoff": "Takeoff",
+    "sidebar.group.reality": "Reality Capture & 3D",
     "sidebar.group.coordination": "Model Coordination",
     "sidebar.group.scheduling": "Scheduling",
     "sidebar.group.cost_control": "Cost Control & Risk",
@@ -8449,6 +8451,7 @@ const resource = {
     // --- CountryCombobox (shared/ui) ---
     "country_combobox.placeholder": "Pick a country",
     "country_combobox.search_aria": "Search countries",
+    "country_combobox.search_placeholder": "Search country (English or local script)…",
     "country_combobox.no_match": "No country matches \"{{query}}\". Switch to",
     "country_combobox.global_none": "Global / no country",
     "country_combobox.custom_region": "Custom region (free text)",

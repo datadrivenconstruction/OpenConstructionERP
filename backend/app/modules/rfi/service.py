@@ -495,7 +495,7 @@ class RFIService:
             rfi_id,
             official_response=official_response,
             responded_by=responded_by,
-            responded_at=datetime.now(UTC).strftime("%Y-%m-%d"),
+            responded_at=datetime.now(UTC).isoformat(),
             status="answered",
             ball_in_court=str(rfi.raised_by),
         )
@@ -843,7 +843,12 @@ class RFIService:
             if rfi.schedule_impact:
                 schedule_impact_count += 1
 
-            # Average response time (only for answered/closed with responded_at)
+            # Average response time (only for answered/closed with responded_at).
+            # ``responded_at`` is stored as a full ISO timestamp; fromisoformat
+            # also parses legacy date-only values so older rows still work, they
+            # just resolve to midnight UTC. Both ends are full timestamps now, so
+            # a same-day answer yields a small positive elapsed time instead of a
+            # negative one. The floor only catches genuine clock skew.
             if rfi.status in ("answered", "closed") and rfi.responded_at and rfi.created_at:
                 try:
                     resp_date = datetime.fromisoformat(str(rfi.responded_at))
