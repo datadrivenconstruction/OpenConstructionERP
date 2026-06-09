@@ -20,6 +20,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
 use tauri::{
+    menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     Manager, RunEvent,
 };
@@ -30,6 +31,92 @@ struct AppState {
     /// Handle to the spawned backend process so it survives past setup() and
     /// can be killed when the app exits.
     backend_child: Mutex<Option<CommandChild>>,
+    /// The local URL the app is served on (e.g. http://127.0.0.1:8732/).
+    ///
+    /// Resolved once the backend is healthy and the webview is pointed at it.
+    /// Stored here so the tray menu and the "open in your browser" command can
+    /// hand the user the exact same address the app window is showing, even
+    /// though the port is chosen dynamically at startup.
+    app_url: Mutex<Option<String>>,
+}
+
+/// Open a URL or file path in the operating system's default handler.
+///
+/// Uses the platform opener directly (`cmd /c start` on Windows, `open` on
+/// macOS, `xdg-open` on Linux) for the same reason `open_log_file` does: it is
+/// fully cross-platform, adds no dependency, and avoids the tauri shell
+/// plugin's deprecated `open`. For a URL this lands the user in their normal
+/// web browser at the local address.
+fn open_with_os_default(target: &str) -> std::io::Result<std::process::Child> {
+    if cfg!(target_os = "windows") {
+        // The empty "" is start's title argument; without it a quoted target is
+        // mis-parsed as the window title and nothing opens.
+        std::process::Command::new("cmd")
+            .args(["/c", "start", "", target])
+            .spawn()
+    } else if cfg!(target_os = "macos") {
+        std::process::Command::new("open").arg(target).spawn()
+    } else {
+        std::process::Command::new("xdg-open").arg(target).spawn()
+    }
+}
+
+/// Open the running app in the user's default web browser.
+///
+/// Exposed to the splash first-run card and to any in-app control (via
+/// `withGlobalTauri`). Reads the resolved local URL from `AppState`; if startup
+/// has not gotten that far yet it returns a friendly error the caller can show.
+///
+/// `path` lets the in-app toolbar open the EXACT page the user is on rather
+/// than just the home page. It is treated as a path within the app (for example
+/// "/boq" or "/projects/123/finance"); anything that is not a clean local path
+/// is ignored and the home page is opened, so a caller can never be redirected
+/// somewhere off the local origin.
+#[tauri::command]
+fn open_app_in_browser(app: tauri::AppHandle, path: Option<String>) -> Result<(), String> {
+    let base = {
+        let state = app.state::<AppState>();
+        let guard = state.app_url.lock().unwrap();
+        guard.clone()
+    };
+    let base = base.ok_or_else(|| {
+        "The app is still starting. Please try again in a moment.".to_string()
+    })?;
+    let url = build_local_url(&base, path.as_deref());
+    open_with_os_default(&url)
+        .map(|_| ())
+        .map_err(|e| format!("Could not open your browser: {e}"))
+}
+
+/// Combine the resolved local base URL with a caller-supplied app path.
+///
+/// Only same-origin paths are honoured: the path must start with a single "/"
+/// (not "//", which a browser reads as a protocol-relative host) and must not
+/// contain a scheme. Anything else falls back to the bare base URL. This keeps
+/// the "open in browser" action firmly on the local app and never lets a path
+/// argument send the user to an arbitrary site.
+fn build_local_url(base: &str, path: Option<&str>) -> String {
+    let trimmed = base.trim_end_matches('/');
+    match path {
+        Some(p)
+            if p.starts_with('/')
+                && !p.starts_with("//")
+                && !p.contains("://")
+                && !p.contains('\\') =>
+        {
+            format!("{trimmed}{p}")
+        }
+        _ => format!("{trimmed}/"),
+    }
+}
+
+/// Return the resolved local URL the app is served on, for the UI to display or
+/// open. Empty string until the backend is healthy and the URL is known.
+#[tauri::command]
+fn get_app_url(app: tauri::AppHandle) -> String {
+    let state = app.state::<AppState>();
+    let guard = state.app_url.lock().unwrap();
+    guard.clone().unwrap_or_default()
 }
 
 /// Open the launcher diagnostic log in the OS default handler.
@@ -211,6 +298,33 @@ fn find_available_port() -> u16 {
     portpicker::pick_unused_port().unwrap_or(8732)
 }
 
+/// Record the resolved local URL so the tray menu and the "open in your
+/// browser" command can hand the user the same address the window is showing.
+///
+/// Also tells the webview the URL (via `setAppUrl`) so the splash first-run
+/// card and any in-app control can offer the browser option without having to
+/// re-derive the dynamic port.
+fn set_app_url(handle: &tauri::AppHandle, url: &str) {
+    {
+        let state = handle.state::<AppState>();
+        *state.app_url.lock().unwrap() = Some(url.to_string());
+    }
+    let url_js = js_escape(url);
+    eval_in_splash(
+        handle,
+        format!("(function(){{if(typeof setAppUrl==='function'){{setAppUrl('{url_js}');}}}})()"),
+    );
+}
+
+/// Bring the main app window to the front (used by the tray).
+fn show_main_window(handle: &tauri::AppHandle) {
+    if let Some(window) = handle.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+    }
+}
+
 /// Ports an already-running OpenConstructionERP backend is likely to be on.
 ///
 /// Checked in order before we spawn our own sidecar. This is what lets the
@@ -369,8 +483,13 @@ fn main() {
         .plugin(tauri_plugin_process::init())
         .manage(AppState {
             backend_child: Mutex::new(None),
+            app_url: Mutex::new(None),
         })
-        .invoke_handler(tauri::generate_handler![open_log_file])
+        .invoke_handler(tauri::generate_handler![
+            open_log_file,
+            open_app_in_browser,
+            get_app_url
+        ])
         .setup(move |app| {
             let handle = app.handle().clone();
             log_line(&format!("setup() running; backend port = {port}"));
@@ -381,26 +500,83 @@ fn main() {
             boot_stage(&handle, "launcher", "done", "");
             boot_stage(&handle, "sidecar", "active", "Locating the backend");
 
-            // Tray icon is a nice-to-have; never let its failure abort startup.
-            match TrayIconBuilder::new()
-                .tooltip("OpenConstructionERP")
-                .on_tray_icon_event(|tray, event| {
-                    if let TrayIconEvent::Click {
-                        button: MouseButton::Left,
-                        button_state: MouseButtonState::Up,
-                        ..
-                    } = event
-                    {
-                        if let Some(window) = tray.app_handle().get_webview_window("main") {
-                            let _ = window.show();
-                            let _ = window.set_focus();
+            // Tray icon with a right-click menu. The menu is the always-present
+            // home for the "open in your browser" choice the founder asked for:
+            // however the app was started, the user can right-click the tray
+            // icon and pick whether to keep using the app window or hand the
+            // local address to their normal web browser. Building the tray is a
+            // nice-to-have, so its failure must never abort startup.
+            let tray_menu_result = (|| {
+                let show_item = MenuItemBuilder::with_id("tray_show", "Show app window")
+                    .build(app)?;
+                let browser_item =
+                    MenuItemBuilder::with_id("tray_open_browser", "Open in your browser")
+                        .build(app)?;
+                let quit_item = MenuItemBuilder::with_id("tray_quit", "Quit").build(app)?;
+                let sep = PredefinedMenuItem::separator(app)?;
+                MenuBuilder::new(app)
+                    .item(&show_item)
+                    .item(&browser_item)
+                    .item(&sep)
+                    .item(&quit_item)
+                    .build()
+            })();
+
+            let tray_build = match tray_menu_result {
+                Ok(menu) => TrayIconBuilder::new()
+                    .icon(app.default_window_icon().cloned().unwrap_or_else(|| {
+                        // Should never happen (the bundle always ships an icon),
+                        // but fall back to a 1x1 transparent pixel rather than
+                        // panic, keeping the no-panic startup contract.
+                        tauri::image::Image::new_owned(vec![0, 0, 0, 0], 1, 1)
+                    }))
+                    .tooltip("OpenConstructionERP")
+                    .menu(&menu)
+                    // Keep the existing left-click-to-show behaviour. The menu
+                    // shows on right-click; suppressing menu-on-left-click means
+                    // a single left click still just raises the window.
+                    .show_menu_on_left_click(false)
+                    .on_menu_event(|app, event| match event.id().as_ref() {
+                        "tray_show" => show_main_window(app),
+                        "tray_open_browser" => {
+                            if let Err(e) = open_app_in_browser(app.clone(), None) {
+                                log_line(&format!("tray: open in browser failed: {e}"));
+                            }
                         }
-                    }
-                })
-                .build(app)
-            {
-                Ok(_) => {}
-                Err(e) => log_line(&format!("warning: tray icon build failed (non-fatal): {e}")),
+                        "tray_quit" => app.exit(0),
+                        _ => {}
+                    })
+                    .on_tray_icon_event(|tray, event| {
+                        if let TrayIconEvent::Click {
+                            button: MouseButton::Left,
+                            button_state: MouseButtonState::Up,
+                            ..
+                        } = event
+                        {
+                            show_main_window(tray.app_handle());
+                        }
+                    })
+                    .build(app),
+                Err(e) => {
+                    log_line(&format!("warning: tray menu build failed (non-fatal): {e}"));
+                    // Fall back to the plain icon-only tray (left-click shows).
+                    TrayIconBuilder::new()
+                        .tooltip("OpenConstructionERP")
+                        .on_tray_icon_event(|tray, event| {
+                            if let TrayIconEvent::Click {
+                                button: MouseButton::Left,
+                                button_state: MouseButtonState::Up,
+                                ..
+                            } = event
+                            {
+                                show_main_window(tray.app_handle());
+                            }
+                        })
+                        .build(app)
+                }
+            };
+            if let Err(e) = tray_build {
+                log_line(&format!("warning: tray icon build failed (non-fatal): {e}"));
             }
 
             // Attach to an existing healthy backend instead of booting a second
@@ -437,16 +613,23 @@ fn main() {
                 boot_stage(&handle, "migrate", "done", "");
                 boot_stage(&handle, "server", "done", "");
                 boot_stage(&handle, "open", "done", "Ready");
+                let url = format!("http://127.0.0.1:{existing}/");
+                set_app_url(&handle, &url);
                 let handle_nav = handle.clone();
                 tauri::async_runtime::spawn(async move {
                     // Give the splash script a moment to finish loading, then
-                    // navigate the webview to the running app.
+                    // let it offer the one-time "app window or browser" choice
+                    // before navigating the webview to the running app.
                     tokio::time::sleep(std::time::Duration::from_millis(400)).await;
                     if let Some(window) = handle_nav.get_webview_window("main") {
-                        let url = format!("http://127.0.0.1:{existing}/");
                         let _ = window.show();
                         let _ = window.set_focus();
-                        let _ = window.eval(&format!("window.location.replace('{url}')"));
+                        let url_js = js_escape(&url);
+                        let _ = window.eval(&format!(
+                            "(function(){{if(typeof offerLaunchChoice==='function'){{\
+                                offerLaunchChoice('{url_js}');}}\
+                                else{{window.location.replace('{url_js}');}}}})()"
+                        ));
                     }
                 });
                 // We did not spawn a sidecar, so there is no child to manage and
@@ -618,11 +801,21 @@ before it finished starting.",
                     log_line("backend healthy; navigating to app");
                     boot_stage(&handle_clone, "server", "done", "");
                     boot_stage(&handle_clone, "open", "done", "Ready");
+                    let url = format!("http://127.0.0.1:{port}/");
+                    set_app_url(&handle_clone, &url);
                     if let Some(window) = handle_clone.get_webview_window("main") {
-                        let url = format!("http://127.0.0.1:{port}/");
                         let _ = window.show();
                         let _ = window.set_focus();
-                        let _ = window.eval(&format!("window.location.replace('{url}')"));
+                        // Let the splash offer the one-time "app window or
+                        // browser" choice; if that helper is missing for any
+                        // reason, fall straight through to the app window so the
+                        // user is never left on the splash.
+                        let url_js = js_escape(&url);
+                        let _ = window.eval(&format!(
+                            "(function(){{if(typeof offerLaunchChoice==='function'){{\
+                                offerLaunchChoice('{url_js}');}}\
+                                else{{window.location.replace('{url_js}');}}}})()"
+                        ));
                     }
                 } else {
                     log_line("backend did not become healthy within the startup window");

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, ChevronDown, ChevronRight, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, CheckCircle2, XCircle, Bug, BookOpen, Loader2, Upload, HelpCircle, Mail, ExternalLink, Github, Sun, Moon, Monitor, Info } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, CheckCircle2, XCircle, Bug, BookOpen, Loader2, Upload, HelpCircle, Mail, ExternalLink, Github, Sun, Moon, Monitor, Info, Globe } from 'lucide-react';
 import clsx from 'clsx';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -24,6 +24,7 @@ import {
 import { APP_VERSION, APP_BUILD_FINGERPRINT } from '@/shared/lib/version';
 import { useToastStore } from '@/stores/useToastStore';
 import { useI18nReady } from '@/shared/lib/useI18nReady';
+import { isTauri, openAppInBrowser } from '@/shared/lib/desktop';
 import { SupportUsButton } from './SupportUsButton';
 import { SubscribeButton } from './SubscribeButton';
 import { getRouteIcon } from './routeIcons';
@@ -203,10 +204,14 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   return (
     <header
       className={clsx(
-        'sticky top-0 z-30 relative',
+        'sticky z-30 relative',
         'flex h-header items-center justify-between gap-3 px-4 sm:px-6 lg:px-8',
         'bg-surface-primary/80 backdrop-blur-xl',
       )}
+      // In the desktop shell the browser-style toolbar (h-9 = 36px) sits above
+      // the header, so the header pins just below it instead of under it. In the
+      // normal web build there is no toolbar and it pins to the true top.
+      style={{ top: isTauri ? '36px' : 0 }}
     >
       {/* Soft hairline at the bottom — replaces a hard 1px border for
           a calmer modern-SaaS-style separation from the page below. */}
@@ -864,6 +869,36 @@ function HelpMenu() {
             <span className="flex-1">{t('nav.github', { defaultValue: 'GitHub repository' })}</span>
             <ExternalLink size={11} className="text-content-quaternary shrink-0" />
           </a>
+
+          {/* Desktop only: open the same app in the user's normal web browser.
+              The app window stays open; this just gives people who prefer
+              browser tabs the local address in one click. */}
+          {isTauri && (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                void openAppInBrowser().then((ok) => {
+                  if (!ok) {
+                    addToast({
+                      type: 'warning',
+                      title: t('desktop.open_in_browser_failed', {
+                        defaultValue: 'Could not open your browser',
+                      }),
+                    });
+                  }
+                });
+              }}
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            >
+              <Globe size={14} className="text-content-tertiary shrink-0" />
+              <span className="flex-1 text-left">
+                {t('desktop.open_in_browser', { defaultValue: 'Open in your browser' })}
+              </span>
+              <ExternalLink size={11} className="text-content-quaternary shrink-0" />
+            </button>
+          )}
 
           <div className="my-1 border-t border-border-light" role="separator" />
 
