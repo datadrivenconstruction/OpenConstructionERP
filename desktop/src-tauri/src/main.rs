@@ -298,6 +298,26 @@ fn find_available_port() -> u16 {
     portpicker::pick_unused_port().unwrap_or(8732)
 }
 
+/// Resolve the bundled read-only converters directory shipped as an app
+/// resource, if present.
+///
+/// The Windows installer ships the small (~30 MB) DDC IFC converter under
+/// `resources/converters/ifc_windows/` so a fresh install can convert .ifc
+/// offline with zero first-use download. We resolve the Tauri resource dir and
+/// return the `converters` subfolder only when it actually exists on disk.
+/// Returns `None` on platforms or builds that did not ship the converter (every
+/// non-Windows build, and any Windows build where the workflow download step was
+/// skipped), so the backend silently falls back to its normal install path.
+fn bundled_converters_dir(app: &tauri::App) -> Option<PathBuf> {
+    let resource_dir = app.path().resource_dir().ok()?;
+    let converters = resource_dir.join("converters");
+    if converters.is_dir() {
+        Some(converters)
+    } else {
+        None
+    }
+}
+
 /// Record the resolved local URL so the tray menu and the "open in your
 /// browser" command can hand the user the same address the window is showing.
 ///
@@ -494,6 +514,16 @@ fn main() {
             let handle = app.handle().clone();
             log_line(&format!("setup() running; backend port = {port}"));
 
+            // Resolve the bundled read-only converters dir (Windows ships the
+            // DDC IFC converter as an app resource) BEFORE the attach/spawn
+            // branches so we can hand its path to whichever sidecar we start.
+            // None on builds that did not ship it, in which case the backend
+            // keeps its normal auto-download behaviour.
+            let bundled_converters = bundled_converters_dir(app);
+            if let Some(ref dir) = bundled_converters {
+                log_line(&format!("bundled converters dir: {}", dir.display()));
+            }
+
             // Surface the log path and the first two checklist steps right away
             // so the user sees a live boot screen the instant the window paints.
             report_log_path(&handle);
@@ -656,8 +686,21 @@ fn main() {
                     // bootstrapping). We deliberately do NOT set it on the attach
                     // path above, because an already-running dev backend must not
                     // be treated as a desktop-bootstrapped one.
-                    cmd.env("OE_DESKTOP", "1")
-                        .args(["serve", "--host", "127.0.0.1", "--port", &port.to_string()])
+                    let mut cmd = cmd.env("OE_DESKTOP", "1").args([
+                        "serve",
+                        "--host",
+                        "127.0.0.1",
+                        "--port",
+                        &port.to_string(),
+                    ]);
+                    // Point the backend at the bundled read-only converters so
+                    // an .ifc upload converts offline with no first-use download.
+                    // Only set when we actually shipped a converters dir; absent
+                    // env keeps the normal auto-download path intact.
+                    if let Some(ref dir) = bundled_converters {
+                        cmd = cmd.env("OE_BUNDLED_CONVERTERS_DIR", dir.as_os_str());
+                    }
+                    cmd
                 }
                 Err(e) => {
                     report_fatal_stage(

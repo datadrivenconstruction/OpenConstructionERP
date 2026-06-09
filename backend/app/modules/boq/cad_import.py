@@ -230,6 +230,25 @@ def find_converter(extension: str) -> Path | None:
     if ddc_bin and ddc_bin not in search_paths:
         search_paths.insert(0, ddc_bin)
 
+    # Read-only converter dir bundled into the desktop installer. The Tauri
+    # shell ships the small (~30 MB) Windows IFC converter as an app resource
+    # and points us at it via OE_BUNDLED_CONVERTERS_DIR so a fresh install can
+    # convert .ifc offline with zero first-use download. The layout mirrors the
+    # auto-installer's: <bundled>/{ext}_windows/{Exporter}.exe, plus a flat
+    # <bundled>/ fallback for a single-converter bundle. Best-effort and
+    # backward compatible: when the env var is unset (pip installs, dev runs,
+    # non-Windows, or a bundle that did not ship this format) nothing changes
+    # and the normal install/download path still applies. We insert it FIRST
+    # here so the per-format user-install dir, appended just below, ends up
+    # ahead of it: a user who deliberately installed a newer converter still
+    # wins over the read-only bundled copy.
+    bundled_dir = os.environ.get("OE_BUNDLED_CONVERTERS_DIR")
+    if bundled_dir:
+        bundled_root = Path(bundled_dir)
+        for cand in (bundled_root, bundled_root / f"{extension}_windows"):
+            if cand not in search_paths:
+                search_paths.insert(0, cand)
+
     # Per-format Windows install dir written by the BIM converter
     # auto-installer (takeoff/router.py:install_converter). The
     # installer drops files at ~/.openestimator/converters/{ext}_windows/

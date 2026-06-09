@@ -155,6 +155,82 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x desktop/src-tauri/binaries/*
 
+      # Bundle the small (~30 MB) DDC IFC converter into the Windows installer
+      # so a fresh install converts .ifc files offline with no first-use
+      # download. We fetch the public converter repo as a zipball for the pinned
+      # ref, extract only the DDC_WINDOWS_Converters/DDC_CONVERTER_IFC subtree,
+      # and drop it under resources/converters/ifc_windows/ (the layout the
+      # backend resolver expects via OE_BUNDLED_CONVERTERS_DIR). Windows only,
+      # because the bundled exe is win_amd64; the much larger RVT converter is
+      # deliberately NOT bundled and stays on demand. The step retries on
+      # transient network failures and never code-signs these binaries (they are
+      # upstream artifacts shipped as resources, not our own executables).
+      - name: Bundle IFC converter (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          # Same override knobs the runtime auto-installer honours, so a fork or
+          # a pinned release branch can be selected without editing this file.
+          OE_CONVERTER_REPO: ${{ vars.OE_CONVERTER_REPO || 'datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN' }}
+          OE_CONVERTER_REF: ${{ vars.OE_CONVERTER_REF || 'main' }}
+          # Lifts the unauthenticated API rate limit on the runner. The converter
+          # repo is public, so a read with the default job token is enough.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $repo = $env:OE_CONVERTER_REPO
+          $ref  = $env:OE_CONVERTER_REF
+          $subPath = 'DDC_WINDOWS_Converters/DDC_CONVERTER_IFC'
+          $destRoot = 'desktop/src-tauri/resources/converters/ifc_windows'
+          # The API zipball endpoint accepts any ref - branch, tag, or SHA - so a
+          # pinned tag works the same as the default branch with no URL change.
+          $zipUrl = "https://api.github.com/repos/$repo/zipball/$ref"
+          $tmpZip = Join-Path $env:RUNNER_TEMP 'ddc_ifc.zip'
+          $tmpDir = Join-Path $env:RUNNER_TEMP 'ddc_ifc_extract'
+          # GITHUB_TOKEN lifts the unauthenticated API rate limit on the runner.
+          $headers = @{ 'User-Agent' = 'OpenConstructionERP-desktop-build' }
+          if ($env:GH_TOKEN) { $headers['Authorization'] = "Bearer $($env:GH_TOKEN)" }
+
+          # Resilient download with a few retries on transient network errors.
+          $ok = $false
+          for ($i = 1; $i -le 5; $i++) {
+            try {
+              Write-Host "Downloading IFC converter zipball (attempt $i): $zipUrl"
+              Invoke-WebRequest -Uri $zipUrl -OutFile $tmpZip -Headers $headers -UseBasicParsing -TimeoutSec 180
+              $ok = $true
+              break
+            } catch {
+              Write-Host "Attempt $i failed: $($_.Exception.Message)"
+              Start-Sleep -Seconds ([math]::Min(30, 5 * $i))
+            }
+          }
+          if (-not $ok) { throw "Could not download the IFC converter zipball after 5 attempts." }
+
+          if (Test-Path $tmpDir) { Remove-Item -Recurse -Force $tmpDir }
+          Expand-Archive -Path $tmpZip -DestinationPath $tmpDir -Force
+
+          # The zipball extracts to a single top-level <repo>-<ref> folder.
+          $top = Get-ChildItem -Path $tmpDir -Directory | Select-Object -First 1
+          if ($null -eq $top) { throw "Unexpected zip layout: no top-level directory found." }
+          $srcDir = Join-Path $top.FullName $subPath
+          if (-not (Test-Path $srcDir)) {
+            throw "Converter subpath not found in zipball: $subPath (looked under $($top.FullName))."
+          }
+
+          # Reset the destination so a re-run never mixes stale files in.
+          if (Test-Path $destRoot) { Remove-Item -Recurse -Force $destRoot }
+          New-Item -ItemType Directory -Force -Path $destRoot | Out-Null
+          Copy-Item -Path (Join-Path $srcDir '*') -Destination $destRoot -Recurse -Force
+
+          $exe = Join-Path $destRoot 'IfcExporter.exe'
+          if (-not (Test-Path $exe)) {
+            Get-ChildItem -Recurse $destRoot | Select-Object -First 50 FullName | Format-Table -AutoSize
+            throw "IfcExporter.exe missing after extraction at $exe."
+          }
+          $sizeMb = [math]::Round((Get-Item $exe).Length / 1MB, 2)
+          $totalMb = [math]::Round(((Get-ChildItem -Recurse $destRoot | Measure-Object -Property Length -Sum).Sum) / 1MB, 2)
+          Write-Host "Bundled IFC converter: IfcExporter.exe = $sizeMb MB, total resource = $totalMb MB"
+
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:

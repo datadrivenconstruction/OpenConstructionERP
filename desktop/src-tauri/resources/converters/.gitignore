@@ -1,0 +1,6 @@
+# The desktop release workflow downloads the DDC IFC converter binaries into
+# this directory at build time. Never commit those binaries; keep only the
+# directory, its README, and this ignore file in version control.
+*
+!.gitignore
+!README.md

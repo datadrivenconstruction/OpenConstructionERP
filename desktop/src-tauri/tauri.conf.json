@@ -55,6 +55,9 @@
     "externalBin": [
       "binaries/openestimate-server"
     ],
+    "resources": {
+      "resources/converters": "converters"
+    },
     "windows": {
       "webviewInstallMode": {
         "type": "embedBootstrapper"
