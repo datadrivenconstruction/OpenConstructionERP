@@ -815,9 +815,7 @@ class AIService:
                 create_kwargs["metadata_"] = _merge_overrides({}, data.model_overrides)
             current_meta = create_kwargs.get("metadata_", {})
             if isinstance(current_meta, dict):
-                create_kwargs["metadata_"] = _merge_base_urls(
-                    current_meta, data.ollama_base_url, data.vllm_base_url
-                )
+                create_kwargs["metadata_"] = _merge_base_urls(current_meta, data.ollama_base_url, data.vllm_base_url)
             settings = AISettings(**create_kwargs)
             settings = await self.settings_repo.create(settings)
         else:
@@ -833,9 +831,7 @@ class AIService:
             has_base_url_update = data.ollama_base_url is not None or data.vllm_base_url is not None
             if has_base_url_update:
                 base_meta = fields.get("metadata_", settings.metadata_)
-                fields["metadata_"] = _merge_base_urls(
-                    base_meta, data.ollama_base_url, data.vllm_base_url
-                )
+                fields["metadata_"] = _merge_base_urls(base_meta, data.ollama_base_url, data.vllm_base_url)
 
             if fields:
                 await self.settings_repo.update_fields(settings.id, **fields)
