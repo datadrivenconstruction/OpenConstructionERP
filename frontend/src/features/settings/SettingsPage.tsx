@@ -1713,6 +1713,7 @@ interface ConverterRow {
 
 interface ConverterStatusResponse {
   converters: ConverterRow[];
+  results?: ConverterRow[];
   any_outdated: boolean;
   network_ok: boolean;
   checked_at: string;
@@ -1834,7 +1835,7 @@ function ConverterStatusPanel() {
               </div>
             )}
             <ul className="space-y-2">
-              {data.converters.map((c) => {
+              {(data.converters ?? data.results ?? []).map((c) => {
                 const status: 'outdated' | 'current' | 'missing' = !c.installed
                   ? 'missing'
                   : c.is_outdated

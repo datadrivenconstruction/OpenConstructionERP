@@ -1629,6 +1629,7 @@ def create_app() -> FastAPI:
             return {
                 "network_ok": True,
                 "any_outdated": False,
+                "converters": [],
                 "results": [],
                 "platform": sys.platform,
                 "note": (
@@ -1724,6 +1725,7 @@ def create_app() -> FastAPI:
 
         response = {
             "converters": results,
+            "results": results,
             "any_outdated": any_outdated,
             "network_ok": network_ok,
             "checked_at": _dt.now(UTC).isoformat(),
