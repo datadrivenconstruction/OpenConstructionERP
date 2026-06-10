@@ -2727,7 +2727,7 @@ const resource = {
     "bim.models": "Models",
     "bim.element_tree": "Element Tree",
     "bim.loading_model": "Loading model...",
-    "bim.no_elements": "No elements to display",
+    "bim.no_elements": "No BIM elements found",
     "bim.geometry_load_failed": "Could not load 3D geometry",
     "bim.geometry_retry": "Retry",
     "bim.geometry_dismiss": "Dismiss",

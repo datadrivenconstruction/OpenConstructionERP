@@ -3349,7 +3349,7 @@ export function BIMViewer({
           <div className="flex flex-col items-center gap-2 text-center">
             <Box size={40} className="text-content-tertiary" />
             <span className="text-sm text-content-tertiary">
-              {t('bim.no_elements', { defaultValue: 'No elements to display' })}
+              {t('bim.no_elements', { defaultValue: 'No BIM elements found' })}
             </span>
           </div>
         </div>

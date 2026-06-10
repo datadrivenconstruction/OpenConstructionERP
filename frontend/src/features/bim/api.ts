@@ -709,7 +709,10 @@ export async function uploadBIMData(
   }
 
   if (!response.ok) {
-    let detail = `Upload failed (HTTP ${response.status})`;
+    let detail =
+      response.status === 413
+        ? 'The file is too large. Please try a smaller one.'
+        : `Upload failed (HTTP ${response.status})`;
     try {
       const body = await response.json();
       detail = extractErrorMessageFromBody(body) ?? detail;
@@ -1327,7 +1330,10 @@ export async function uploadCADFile(
   }
 
   if (!response.ok) {
-    let detail = `Upload failed (HTTP ${response.status})`;
+    let detail =
+      response.status === 413
+        ? 'The file is too large. Please try a smaller one.'
+        : `Upload failed (HTTP ${response.status})`;
     try {
       const body = await response.json();
       detail = extractErrorMessageFromBody(body) ?? detail;
