@@ -14,6 +14,15 @@
   // for "draw the on-brand SVG placeholder".
   var ARTICLES = [
     {
+      slug: 'v7-5-0',
+      href: '/news/v7-5-0.html',
+      title: 'v7.5.0 - WordPress for construction companies.',
+      date: '2026-06-10',
+      tag: 'Release',
+      tagClass: 'release',
+      thumb: '/news/assets/v7-5-0-hero.png'
+    },
+    {
       slug: 'v7-3-0',
       href: '/news/v7-3-0.html',
       title: 'v7.3.0 - A desktop install that heals itself.',
@@ -235,7 +244,7 @@
   // ---- Inline CSS - uses the page's own theme tokens ------------
   var CSS = [
     '.oce-more-rail{',
-    '  margin:clamp(48px,7vw,80px) auto 0;',
+    '  margin:clamp(72px,10vw,120px) auto 0;',
     '  padding:0 clamp(20px,4vw,48px);',
     '  max-width:1180px;',
     '  font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;',
@@ -357,7 +366,7 @@
     '    top:var(--oce-rail-top,640px);',
     '    height:var(--oce-rail-height,2400px);',
     '    right:max(24px,calc(50% - 720px));',
-    '    width:280px;',
+    '    width:248px;',
     '    pointer-events:none;',
     '  }',
     '  .oce-more-rail--rail .oce-more-rail__inner{',
@@ -369,9 +378,10 @@
     '  }',
     '  .oce-more-rail--rail .oce-more-rail__title{font-size:16px;}',
     '  .oce-more-rail--rail .oce-more-rail__all{font-size:13px;}',
-    '  .oce-more-rail--rail .oce-more-rail__grid{grid-template-columns:1fr;gap:14px;}',
-    '  .oce-more-rail--rail .oce-mini-card__media{aspect-ratio:16/9;}',
-    '  .oce-more-rail--rail .oce-mini-card__title{font-size:13.5px;-webkit-line-clamp:3;}',
+    '  .oce-more-rail--rail .oce-more-rail__grid{grid-template-columns:1fr;gap:12px;}',
+    '  .oce-more-rail--rail .oce-mini-card__media{aspect-ratio:16/7;}',
+    '  .oce-more-rail--rail .oce-mini-card__body{padding:11px 13px 13px;gap:6px;}',
+    '  .oce-more-rail--rail .oce-mini-card__title{font-size:13px;-webkit-line-clamp:2;}',
     '  /* The below-article inline band remains as a closing wrap-up  */',
     '  /* even on rail screens - feels like a magazine end-strip.     */',
     '}',
