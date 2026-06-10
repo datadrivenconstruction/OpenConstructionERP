@@ -185,6 +185,52 @@ class BIMModelUpdate(BaseModel):
     metadata: dict[str, Any] | None = None
 
 
+class BIMResumableUploadInitRequest(BaseModel):
+    """Start a chunked BIM upload session."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    name: str = Field(..., min_length=1, max_length=255)
+    discipline: str = Field(default="architecture", max_length=50)
+    filename: str = Field(..., min_length=1, max_length=255)
+    file_size: int = Field(..., ge=1)
+    chunk_size_bytes: int = Field(default=8 * 1024 * 1024, ge=1, le=50 * 1024 * 1024)
+    conversion_depth: str = Field(default="standard", max_length=20)
+
+
+class BIMResumableUploadPartResponse(BaseModel):
+    """Response for a single uploaded chunk."""
+
+    model_id: UUID
+    part_number: int
+    etag: str
+    size_bytes: int
+    uploaded_bytes: int
+    next_part_number: int
+    complete: bool = False
+
+
+class BIMResumableUploadStatusResponse(BaseModel):
+    """Current state of a resumable BIM upload session."""
+
+    model_id: UUID
+    project_id: UUID
+    upload_id: str
+    key: str
+    filename: str
+    file_size: int
+    chunk_size_bytes: int
+    model_format: str
+    name: str
+    discipline: str | None = None
+    conversion_depth: str | None = None
+    status: str
+    uploaded_bytes: int
+    next_part_number: int
+    uploaded_parts: list[BIMResumableUploadPartResponse] = Field(default_factory=list)
+
+
 class BIMModelResponse(BaseModel):
     """BIM model returned from the API."""
 

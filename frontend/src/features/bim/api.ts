@@ -152,6 +152,217 @@ export interface BIMCadUploadResponse {
   message?: string | null;
 }
 
+interface BIMResumableUploadInitResponse {
+  model_id: string | null;
+  project_id: string;
+  upload_id: string | null;
+  key: string | null;
+  filename: string | null;
+  file_size: number;
+  chunk_size_bytes: number;
+  model_format: string;
+  name: string | null;
+  discipline?: string | null;
+  conversion_depth?: string | null;
+  status: string;
+  uploaded_bytes: number;
+  next_part_number: number;
+  uploaded_parts: Array<{
+    model_id: string;
+    part_number: number;
+    etag: string;
+    size_bytes: number;
+    uploaded_bytes: number;
+    next_part_number: number;
+    complete: boolean;
+  }>;
+  message?: string | null;
+  converter_id?: string | null;
+  install_endpoint?: string | null;
+  error_message?: string | null;
+}
+
+interface BIMResumableUploadPartResponse {
+  model_id: string;
+  part_number: number;
+  etag: string;
+  size_bytes: number;
+  uploaded_bytes: number;
+  next_part_number: number;
+  complete: boolean;
+}
+
+const BIM_RESUMABLE_UPLOAD_THRESHOLD_BYTES = 8 * 1024 * 1024;
+const BIM_RESUMABLE_UPLOAD_MAX_RETRIES = 3;
+
+async function parseBIMUploadError(response: Response, fallback: string): Promise<string> {
+  let detail = fallback;
+  try {
+    const body = await response.json();
+    detail = extractErrorMessageFromBody(body) ?? detail;
+  } catch {
+    // ignore parse errors
+  }
+  return detail;
+}
+
+async function initiateResumableCADUpload(
+  projectId: string,
+  name: string,
+  discipline: string,
+  file: File,
+  conversionDepth?: 'standard' | 'medium' | 'complete',
+): Promise<BIMResumableUploadInitResponse> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'X-DDC-Client': 'OE/1.0',
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const response = await fetch('/api/v1/bim_hub/upload-cad/resumable/', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      project_id: projectId,
+      name,
+      discipline,
+      filename: file.name,
+      file_size: file.size,
+      chunk_size_bytes: BIM_RESUMABLE_UPLOAD_THRESHOLD_BYTES,
+      conversion_depth: conversionDepth,
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await parseBIMUploadError(
+      response,
+      response.status === 413
+        ? 'The file is too large. Please try a smaller one.'
+        : `Upload failed (HTTP ${response.status})`,
+    );
+    throw new Error(detail);
+  }
+
+  return response.json();
+}
+
+async function uploadBIMResumablePart(
+  modelId: string,
+  partNumber: number,
+  chunk: Blob,
+  signal?: AbortSignal,
+): Promise<BIMResumableUploadPartResponse> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'Content-Type': 'application/octet-stream',
+    'X-DDC-Client': 'OE/1.0',
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const response = await fetch(
+    `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/upload/parts/${partNumber}/`,
+    {
+      method: 'PUT',
+      headers,
+      body: chunk,
+      signal,
+    },
+  );
+
+  if (!response.ok) {
+    const detail = await parseBIMUploadError(
+      response,
+      response.status === 413
+        ? 'The file is too large. Please try a smaller one.'
+        : `Upload failed (HTTP ${response.status})`,
+    );
+    throw new Error(detail);
+  }
+
+  return response.json();
+}
+
+async function completeBIMResumableUpload(modelId: string, signal?: AbortSignal): Promise<BIMCadUploadResponse> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'X-DDC-Client': 'OE/1.0',
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const response = await fetch(`/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/upload/complete/`, {
+    method: 'POST',
+    headers,
+    body: '{}',
+    signal,
+  });
+
+  if (!response.ok) {
+    const detail = await parseBIMUploadError(
+      response,
+      response.status === 413
+        ? 'The file is too large. Please try a smaller one.'
+        : `Upload failed (HTTP ${response.status})`,
+    );
+    throw new Error(detail);
+  }
+
+  return response.json();
+}
+
+async function uploadCADFileResumable(
+  projectId: string,
+  name: string,
+  discipline: string,
+  file: File,
+  signal?: AbortSignal,
+  conversionDepth?: 'standard' | 'medium' | 'complete',
+): Promise<BIMCadUploadResponse> {
+  const init = await initiateResumableCADUpload(projectId, name, discipline, file, conversionDepth);
+  if (init.status !== 'uploading' || !init.model_id) {
+    return init as unknown as BIMCadUploadResponse;
+  }
+
+  const chunkSize = Math.max(1, init.chunk_size_bytes || BIM_RESUMABLE_UPLOAD_THRESHOLD_BYTES);
+  let offset = 0;
+  let partNumber = init.next_part_number || 1;
+
+  while (offset < file.size) {
+    const chunk = file.slice(offset, Math.min(offset + chunkSize, file.size));
+    let lastErr: unknown;
+
+    for (let attempt = 1; attempt <= BIM_RESUMABLE_UPLOAD_MAX_RETRIES; attempt += 1) {
+      try {
+        await uploadBIMResumablePart(init.model_id, partNumber, chunk, signal);
+        lastErr = undefined;
+        break;
+      } catch (err) {
+        lastErr = err;
+        if (err instanceof DOMException && err.name === 'AbortError') throw err;
+        if (attempt < BIM_RESUMABLE_UPLOAD_MAX_RETRIES) {
+          await new Promise((resolve) => setTimeout(resolve, attempt * 500));
+          continue;
+        }
+      }
+    }
+
+    if (lastErr) {
+      throw lastErr instanceof Error
+        ? lastErr
+        : new Error('Upload failed before it reached the server. If this is a very large file, a proxy in front of the app may be blocking it.');
+    }
+
+    offset += chunk.size;
+    partNumber += 1;
+  }
+
+  return completeBIMResumableUpload(init.model_id, signal);
+}
+
 /* ── Converter Management (BIM preflight + auto-install) ─────────────── */
 
 /** Health states surfaced by the backend smoke test:
@@ -1297,6 +1508,10 @@ export async function uploadCADFile(
   signal?: AbortSignal,
   conversionDepth?: 'standard' | 'medium' | 'complete',
 ): Promise<BIMCadUploadResponse> {
+  if (file.size > BIM_RESUMABLE_UPLOAD_THRESHOLD_BYTES) {
+    return uploadCADFileResumable(projectId, name, discipline, file, signal, conversionDepth);
+  }
+
   const formData = new FormData();
   formData.append('file', file);
 

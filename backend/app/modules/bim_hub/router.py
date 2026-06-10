@@ -61,9 +61,10 @@ import json
 import logging
 import pathlib
 import uuid
+from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Header, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Header, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import JSONResponse, RedirectResponse, StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -72,8 +73,20 @@ from app.core.http_headers import content_disposition_attachment
 from app.core.i18n import get_locale
 from app.core.rate_limiter import upload_limiter
 from app.core.validation.messages import translate
+from app.core.storage import get_storage_backend
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.bim_hub import file_storage as bim_file_storage
+from app.modules.bim_hub.resumable_uploads import (
+    DEFAULT_CHUNK_SIZE_BYTES,
+    create_manifest,
+    get_manifest,
+    next_part_number,
+    parts_from_manifest,
+    remember_part,
+    session_from_manifest,
+    set_manifest,
+    uploaded_bytes,
+)
 from app.modules.bim_hub.schemas import (
     AssetInfoUpdateRequest,
     AssetListResponse,
@@ -95,6 +108,9 @@ from app.modules.bim_hub.schemas import (
     BIMQuantityMapListResponse,
     BIMQuantityMapResponse,
     BIMQuantityMapUpdate,
+    BIMResumableUploadInitRequest,
+    BIMResumableUploadPartResponse,
+    BIMResumableUploadStatusResponse,
     BOQElementLinkBrief,
     BOQElementLinkCreate,
     BOQElementLinkListResponse,
@@ -1279,12 +1295,13 @@ async def _process_cad_in_background(
             logger.exception("RVT converter pre-flight check failed for %s", model_id)
 
     try:
-        content = await get_storage_backend().get(cad_storage_key)
-
         with tempfile.TemporaryDirectory(prefix="oe-bim-bg-") as _tmp_str:
             _tmp_dir = _Path(_tmp_str)
             _tmp_cad_path = _tmp_dir / f"original{ext}"
-            await asyncio.to_thread(_tmp_cad_path.write_bytes, content)
+            with _tmp_cad_path.open("wb") as out:
+                async for chunk in bim_file_storage.open_geometry_stream(cad_storage_key):
+                    if chunk:
+                        out.write(chunk)
 
             result = await asyncio.to_thread(process_ifc_file, _tmp_cad_path, _tmp_dir, conversion_depth)
             element_count = result["element_count"]
@@ -1689,12 +1706,13 @@ async def _generate_pdf_in_background(
         return
 
     try:
-        content = await get_storage_backend().get(cad_storage_key)
-
         with tempfile.TemporaryDirectory(prefix="oe-bim-pdf-") as _tmp_str:
             _tmp_dir = _Path(_tmp_str)
             _tmp_cad_path = _tmp_dir / f"original{ext}"
-            await asyncio.to_thread(_tmp_cad_path.write_bytes, content)
+            with _tmp_cad_path.open("wb") as out:
+                async for chunk in bim_file_storage.open_geometry_stream(cad_storage_key):
+                    if chunk:
+                        out.write(chunk)
 
             pdf_target = (_tmp_dir / "sheets.pdf").resolve()
 
@@ -1762,6 +1780,386 @@ async def _generate_pdf_in_background(
 
     except Exception as exc:
         logger.exception("PDF generation failed for model %s: %s", model_id, exc)
+
+
+def _resumable_parts_response(model_id: uuid.UUID, manifest: dict[str, Any]) -> list[dict[str, Any]]:
+    parts = parts_from_manifest(manifest)
+    uploaded = uploaded_bytes(parts)
+    return [
+        {
+            "model_id": str(model_id),
+            "part_number": part.part_number,
+            "etag": part.etag,
+            "size_bytes": part.size_bytes,
+            "uploaded_bytes": uploaded,
+            "next_part_number": next_part_number(parts),
+            "complete": False,
+        }
+        for part in parts
+    ]
+
+
+def _resumable_status_payload(model: Any, manifest: dict[str, Any]) -> dict[str, Any]:
+    parts = parts_from_manifest(manifest)
+    uploaded = uploaded_bytes(parts)
+    ext = pathlib.Path(str(manifest.get("filename") or model.name or "")).suffix.lower().lstrip(".")
+    return {
+        "model_id": str(model.id),
+        "project_id": str(model.project_id),
+        "upload_id": str(manifest.get("upload_id") or ""),
+        "key": str(manifest.get("key") or ""),
+        "filename": str(manifest.get("filename") or model.name or ""),
+        "file_size": int(manifest.get("file_size") or 0),
+        "chunk_size_bytes": int(manifest.get("chunk_size_bytes") or DEFAULT_CHUNK_SIZE_BYTES),
+        "model_format": ext,
+        "name": str(manifest.get("name") or model.name or ""),
+        "discipline": manifest.get("discipline"),
+        "conversion_depth": manifest.get("conversion_depth"),
+        "status": str(model.status),
+        "uploaded_bytes": uploaded,
+        "next_part_number": next_part_number(parts),
+        "uploaded_parts": [
+            {
+                "model_id": str(model.id),
+                "part_number": part.part_number,
+                "etag": part.etag,
+                "size_bytes": part.size_bytes,
+                "uploaded_bytes": uploaded,
+                "next_part_number": next_part_number(parts),
+                "complete": False,
+            }
+            for part in parts
+        ],
+    }
+
+
+@router.post("/upload-cad/resumable/", status_code=201)
+async def initiate_resumable_upload(
+    payload: BIMResumableUploadInitRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.create")),
+    service: BIMHubService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Start a resumable BIM CAD upload session."""
+
+    try:
+        project_uuid = uuid.UUID(str(payload.project_id))
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid project_id: {exc}") from exc
+
+    await _verify_project_access(service.session, project_uuid, user_id or "")
+
+    allowed, _ = upload_limiter.is_allowed(str(user_id or "anon"))
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many uploads. Please wait a moment and try again.",
+            headers={"Retry-After": "60"},
+        )
+
+    filename = payload.filename.strip()
+    if not filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No filename provided.")
+
+    ext = pathlib.Path(filename).suffix.lower()
+    if ext not in _ALLOWED_CAD_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(f"Unsupported file type '{ext}'. Accepted: {', '.join(sorted(_ALLOWED_CAD_EXTENSIONS))}"),
+        )
+
+    if ext in _NEEDS_CONVERTER_EXTS:
+        from app.modules.boq.cad_import import find_converter
+
+        if find_converter(ext.lstrip(".")) is None:
+            install_endpoint = f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/"
+            return JSONResponse(
+                status_code=status.HTTP_202_ACCEPTED,
+                content={
+                    "status": "converter_required",
+                    "format": ext.lstrip("."),
+                    "converter_id": ext.lstrip("."),
+                    "message": (
+                        f"{ext.upper().lstrip('.')} files require the {ext.upper().lstrip('.')} converter, "
+                        "which is not installed on this server. Install the converter before uploading."
+                    ),
+                    "install_endpoint": install_endpoint,
+                    "model_id": None,
+                    "name": None,
+                    "file_size": 0,
+                    "element_count": 0,
+                    "error_message": None,
+                },
+                headers={
+                    "Retry-After": "60",
+                    "Link": f'<{install_endpoint}>; rel="install-converter"',
+                },
+            )
+
+    from app.modules.bim_hub.models import BIMModel
+
+    model_name = (payload.name or pathlib.Path(filename).stem).strip() or filename
+    model_format = ext.lstrip(".")
+    model = BIMModel(
+        project_id=project_uuid,
+        name=model_name,
+        discipline=payload.discipline,
+        model_format=model_format,
+        status="uploading",
+        metadata_={},
+        created_by=uuid.UUID(str(user_id)) if user_id else None,
+    )
+    service.session.add(model)
+    await service.session.flush()
+
+    key = bim_file_storage.original_cad_key(project_uuid, model.id, ext)
+    storage_backend = get_storage_backend()
+    session = await storage_backend.initiate_multipart(key, content_type="application/octet-stream")
+
+    manifest = create_manifest(
+        upload_id=session.upload_id,
+        key=key,
+        filename=filename,
+        file_size=payload.file_size,
+        chunk_size_bytes=payload.chunk_size_bytes or DEFAULT_CHUNK_SIZE_BYTES,
+        content_type="application/octet-stream",
+        model_format=model_format,
+        project_id=str(project_uuid),
+        model_id=str(model.id),
+        name=model_name,
+        discipline=payload.discipline,
+        conversion_depth=payload.conversion_depth,
+    )
+    manifest["backend"] = session.backend
+    set_manifest(model, manifest)
+    await service.session.commit()
+
+    logger.info(
+        "Resumable BIM upload initiated: model=%s key=%s size=%d chunk=%d",
+        model.id,
+        key,
+        payload.file_size,
+        payload.chunk_size_bytes,
+    )
+    return {
+        "model_id": str(model.id),
+        "project_id": str(project_uuid),
+        "upload_id": session.upload_id,
+        "key": key,
+        "filename": filename,
+        "file_size": payload.file_size,
+        "chunk_size_bytes": payload.chunk_size_bytes or DEFAULT_CHUNK_SIZE_BYTES,
+        "model_format": model_format,
+        "name": model_name,
+        "discipline": payload.discipline,
+        "conversion_depth": payload.conversion_depth,
+        "status": "uploading",
+        "uploaded_bytes": 0,
+        "next_part_number": 1,
+        "uploaded_parts": [],
+    }
+
+
+@router.get("/models/{model_id}/upload/", status_code=200)
+async def get_resumable_upload_status(
+    model_id: uuid.UUID,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
+    service: BIMHubService = Depends(_get_service),
+) -> dict[str, Any]:
+    model = await _verify_model_access(service, model_id, user_id or "")
+    manifest = get_manifest(model)
+    if not manifest:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No resumable upload is associated with this model.")
+    return _resumable_status_payload(model, manifest)
+
+
+@router.put("/models/{model_id}/upload/parts/{part_number}/", status_code=200)
+async def upload_resumable_part(
+    model_id: uuid.UUID,
+    part_number: int,
+    request: Request,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
+    service: BIMHubService = Depends(_get_service),
+) -> BIMResumableUploadPartResponse:
+    model = await _verify_model_access(service, model_id, user_id or "")
+    manifest = get_manifest(model)
+    if not manifest:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No resumable upload is associated with this model.")
+
+    body = await request.body()
+    if not body:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Chunk body is empty.")
+
+    session = session_from_manifest(manifest)
+    try:
+        part = await get_storage_backend().upload_part(session, part_number, body)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    remember_part(manifest, part)
+    set_manifest(model, manifest)
+    model.status = "uploading"
+    await service.session.commit()
+
+    parts = parts_from_manifest(manifest)
+    total_uploaded = uploaded_bytes(parts)
+    next_part = next_part_number(parts)
+    logger.info(
+        "Resumable BIM upload part stored: model=%s part=%d size=%d uploaded=%d",
+        model_id,
+        part_number,
+        part.size_bytes,
+        total_uploaded,
+    )
+    return BIMResumableUploadPartResponse(
+        model_id=model_id,
+        part_number=part_number,
+        etag=part.etag,
+        size_bytes=part.size_bytes,
+        uploaded_bytes=total_uploaded,
+        next_part_number=next_part,
+        complete=False,
+    )
+
+
+@router.post("/models/{model_id}/upload/complete/", status_code=202)
+async def complete_resumable_upload(
+    model_id: uuid.UUID,
+    background_tasks: BackgroundTasks,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
+    service: BIMHubService = Depends(_get_service),
+) -> dict[str, Any]:
+    model = await _verify_model_access(service, model_id, user_id or "")
+    manifest = get_manifest(model)
+    if not manifest:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No resumable upload is associated with this model.")
+
+    parts = parts_from_manifest(manifest)
+    if not parts:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Upload has no parts yet.")
+
+    session = session_from_manifest(manifest)
+    storage_backend = get_storage_backend()
+    try:
+        stored = await storage_backend.complete_multipart(session, parts)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    filename = str(manifest.get("filename") or model.name or f"model.{(model.model_format or 'ifc')}")
+    ext = pathlib.Path(filename).suffix.lower()
+    model_format = ext.lstrip(".") or (model.model_format or "ifc")
+    model_name = str(manifest.get("name") or model.name or pathlib.Path(filename).stem or filename)
+    conversion_depth = str(manifest.get("conversion_depth") or "standard")
+    saved_cad_key = stored.key
+
+    # Clear resumable upload metadata now that the blob is safely in storage.
+    metadata = dict(model.metadata_ or {})
+    metadata.pop("resumable_upload", None)
+    metadata["original_file_name"] = filename
+    metadata["original_file_size"] = stored.size_bytes
+    metadata["upload_completed_at"] = datetime.now(UTC).isoformat()
+    model.metadata_ = metadata
+    model.canonical_file_path = saved_cad_key
+    model.model_format = model_format
+    model.name = model_name
+    model.discipline = str(manifest.get("discipline") or model.discipline or "architecture")
+    model.status = "processing"
+    model.error_message = None
+    model.element_count = 0
+
+    # Reuse the existing preflight logic for converter-gated formats.
+    if ext in _NEEDS_CONVERTER_EXTS:
+        from app.modules.boq.cad_import import find_converter
+
+        if find_converter(ext.lstrip(".")) is None:
+            model.status = "needs_converter"
+            model.error_message = (
+                f"{ext.upper().lstrip('.')} converter not installed - install it from the BIM converter banner, "
+                f"then click Re-process on this model."
+            )
+            await service.session.commit()
+            install_endpoint = f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/"
+            return JSONResponse(
+                status_code=status.HTTP_202_ACCEPTED,
+                content={
+                    "status": "converter_required",
+                    "format": ext.lstrip("."),
+                    "converter_id": ext.lstrip("."),
+                    "message": (
+                        f"{ext.upper().lstrip('.')} files require the {ext.upper().lstrip('.')} converter, which is not installed on this server. "
+                        "Your file has been saved - install the converter and click Re-process on the model card to finish the upload."
+                    ),
+                    "install_endpoint": install_endpoint,
+                    "model_id": str(model.id),
+                    "name": model_name,
+                    "file_size": stored.size_bytes,
+                    "element_count": 0,
+                    "error_message": None,
+                },
+                headers={
+                    "Retry-After": "60",
+                    "Link": (
+                        f'<{install_endpoint}>; rel="install-converter", '
+                        f"</api/v1/bim_hub/{model.id}/retry/>; rel=\"reprocess-model\""
+                    ),
+                },
+            )
+
+    await service.session.commit()
+
+    processable = ext in (".ifc", ".rvt")
+    if processable:
+        background_tasks.add_task(
+            _process_cad_in_background,
+            project_id=str(model.project_id),
+            model_id=str(model.id),
+            cad_storage_key=saved_cad_key,
+            ext=ext,
+            conversion_depth=conversion_depth,
+        )
+    else:
+        model.status = "needs_converter"
+        model.error_message = (
+            f"{ext.upper().lstrip('.')} files require an external converter. Convert to IFC first, then re-upload."
+        )
+        await service.session.flush()
+        await service.session.commit()
+
+    return {
+        "model_id": str(model.id),
+        "name": model_name,
+        "format": model_format,
+        "file_size": stored.size_bytes,
+        "status": "processing" if processable else "needs_converter",
+        "element_count": 0,
+        "error_message": model.error_message,
+        "geometry_type": (model.metadata_ or {}).get("geometry_type", "unknown"),
+        "converter_id": ext.lstrip(".") if not processable else None,
+        "install_endpoint": (
+            f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/" if not processable else None
+        ),
+    }
+
+
+@router.delete("/models/{model_id}/upload/", status_code=204)
+async def abort_resumable_upload(
+    model_id: uuid.UUID,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
+    service: BIMHubService = Depends(_get_service),
+) -> None:
+    model = await _verify_model_access(service, model_id, user_id or "")
+    manifest = get_manifest(model)
+    if manifest:
+        try:
+            await get_storage_backend().abort_multipart(session_from_manifest(manifest))
+        except Exception as exc:  # noqa: BLE001 - best effort cleanup
+            logger.warning("Failed to abort multipart upload for model %s: %s", model_id, exc)
+    model.status = "cancelled"
+    await service.session.commit()
 
 
 @router.post("/upload-cad/", status_code=201)
