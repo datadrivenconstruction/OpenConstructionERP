@@ -616,7 +616,10 @@ class FinanceService:
             total_actual = Decimal("0")
 
             for inv in paid_invoices:
-                inv_currency = (inv.currency_code or "").strip().upper()
+                # getattr keeps this resilient when an invoice row predates the
+                # currency_code column (or a caller passes a lightweight stub):
+                # a missing/blank code means "base currency" and buckets under "".
+                inv_currency = (getattr(inv, "currency_code", "") or "").strip().upper()
                 items = list(inv.line_items or [])
                 if items:
                     for item in items:
@@ -648,8 +651,10 @@ class FinanceService:
             # type-coercion warning on PostgreSQL (BUG-FINANCE-ACT01).
             for budget in budgets:
                 # Match the bucket priced in the budget row's own currency only,
-                # so a row stamped EUR never absorbs a USD invoice's amount.
-                budget_currency = (budget.currency_code or "").strip().upper()
+                # so a row stamped EUR never absorbs a USD invoice's amount. A
+                # row without a currency_code (legacy/stub) buckets under "" and
+                # so still matches base-currency invoice amounts as before.
+                budget_currency = (getattr(budget, "currency_code", "") or "").strip().upper()
                 key = (budget.wbs_id, budget.category, budget_currency)
                 budget.actual = bucketed.get(key, Decimal("0"))
 
