@@ -4935,7 +4935,7 @@ const resource = {
     "bim.upload_remove_file": "Kaldır",
     "bim.upload_rvt_note": "Not: RVT dosyaları DDC cad2data gerektirir. IFC kullanmayı düşünün.",
     "bim.upload_simple_mode_toggle": "Basit moda geç",
-    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Maks 500 MB",
+    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Maks 2 GB",
     "bim.upload_success_desc": "Model başarıyla yüklendi.",
     "bim.upload_title": "BIM Verisi Yükle",
     "bim.upload_unsupported_format": "Desteklenmeyen format.",

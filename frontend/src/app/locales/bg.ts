@@ -4935,7 +4935,7 @@ const resource = {
     "bim.upload_remove_file": "Премахване",
     "bim.upload_rvt_note": "Забележка: RVT файловете изискват DDC cad2data. Обмислете IFC.",
     "bim.upload_simple_mode_toggle": "Превключване към опростен режим",
-    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Макс 500 MB",
+    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Макс 2 GB",
     "bim.upload_success_desc": "Моделът е качен успешно.",
     "bim.upload_title": "Качване на BIM данни",
     "bim.upload_unsupported_format": "Неподдържан формат.",

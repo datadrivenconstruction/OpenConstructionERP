@@ -4938,7 +4938,7 @@ const resource = {
     "bim.upload_remove_file": "Hapus",
     "bim.upload_rvt_note": "Catatan: File RVT memerlukan DDC cad2data. Pertimbangkan IFC.",
     "bim.upload_simple_mode_toggle": "Beralih ke mode sederhana",
-    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Maks 500 MB",
+    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Maks 2 GB",
     "bim.upload_success_desc": "Model berhasil diunggah.",
     "bim.upload_title": "Unggah Data BIM",
     "bim.upload_unsupported_format": "Format tidak didukung.",

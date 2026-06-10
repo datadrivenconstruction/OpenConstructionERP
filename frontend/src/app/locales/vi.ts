@@ -4938,7 +4938,7 @@ const resource = {
     "bim.upload_remove_file": "Xóa",
     "bim.upload_rvt_note": "Lưu ý: Tệp RVT yêu cầu DDC cad2data. Hãy cân nhắc dùng IFC.",
     "bim.upload_simple_mode_toggle": "Chuyển sang chế độ đơn giản",
-    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Tối đa 500 MB",
+    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Tối đa 2 GB",
     "bim.upload_success_desc": "Đã tải lên mô hình thành công.",
     "bim.upload_title": "Tải lên dữ liệu BIM",
     "bim.upload_unsupported_format": "Định dạng không được hỗ trợ.",

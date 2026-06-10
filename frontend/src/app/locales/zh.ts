@@ -4936,7 +4936,7 @@ const resource = {
     "bim.upload_remove_file": "移除",
     "bim.upload_rvt_note": "注意：RVT 文件需要 DDC cad2data，建议使用 IFC。",
     "bim.upload_simple_mode_toggle": "切换至简洁模式",
-    "bim.upload_size_hint": "Revit (.rvt)、IFC (.ifc) · 最大 500 MB",
+    "bim.upload_size_hint": "Revit (.rvt)、IFC (.ifc) · 最大 2 GB",
     "bim.upload_success_desc": "模型上传成功。",
     "bim.upload_title": "上传 BIM 数据",
     "bim.upload_unsupported_format": "不支持的格式。",

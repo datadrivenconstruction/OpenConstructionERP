@@ -6864,7 +6864,7 @@ const resource = {
     "bim.upload_remove_file": "Fjern",
     "bim.upload_rvt_note": "Merk: RVT-filer krever DDC cad2data. Vurder IFC.",
     "bim.upload_simple_mode_toggle": "Bytt til enkel modus",
-    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Maks 500 MB",
+    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Maks 2 GB",
     "bim.upload_success_desc": "Modell lastet opp.",
     "bim.upload_title": "Last opp BIM-data",
     "bim.upload_unsupported_format": "Format som ikke støttes.",

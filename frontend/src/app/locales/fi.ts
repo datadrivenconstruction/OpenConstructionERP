@@ -4935,7 +4935,7 @@ const resource = {
     "bim.upload_remove_file": "Poista",
     "bim.upload_rvt_note": "Huom.: RVT-tiedostot edellyttävät DDC cad2data -palvelua. Harkitse IFC-muotoa.",
     "bim.upload_simple_mode_toggle": "Vaihda yksinkertaiseen tilaan",
-    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · enintään 500 Mt",
+    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · enintään 2 Gt",
     "bim.upload_success_desc": "Malli ladattu onnistuneesti.",
     "bim.upload_title": "Lataa BIM-data",
     "bim.upload_unsupported_format": "Ei tuettu muoto.",

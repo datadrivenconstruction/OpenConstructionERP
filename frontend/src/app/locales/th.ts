@@ -4938,7 +4938,7 @@ const resource = {
     "bim.upload_remove_file": "ลบ",
     "bim.upload_rvt_note": "หมายเหตุ: ไฟล์ RVT ต้องใช้ DDC cad2data พิจารณาใช้ IFC",
     "bim.upload_simple_mode_toggle": "เปลี่ยนเป็นโหมดเรียบง่าย",
-    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · สูงสุด 500 MB",
+    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · สูงสุด 2 GB",
     "bim.upload_success_desc": "อัปโหลดแบบจำลองสำเร็จ",
     "bim.upload_title": "อัปโหลดข้อมูล BIM",
     "bim.upload_unsupported_format": "รูปแบบไม่รองรับ",

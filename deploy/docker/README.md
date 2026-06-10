@@ -46,7 +46,7 @@ putting a different proxy (Caddy, Traefik, a cloud load balancer) in front of
 the app:
 
 - Upload size. Drawings and BIM files are large, so the body limit is raised to
-  `100M`. The nginx default of `1M` rejects most takeoff and CAD uploads with a
+  `2G`. The nginx default of `1M` rejects most takeoff and CAD uploads with a
   413 before the request ever reaches FastAPI.
 - `.mjs` module workers. The PDF takeoff viewer loads pdf.js as an ES module
   worker. nginx-alpine has no MIME mapping for `.mjs` and would serve it as

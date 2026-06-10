@@ -4936,7 +4936,7 @@ const resource = {
     "bim.upload_remove_file": "削除",
     "bim.upload_rvt_note": "注: RVTファイルにはDDC cad2dataが必要です。IFCの使用をご検討ください。",
     "bim.upload_simple_mode_toggle": "シンプルモードに切り替え",
-    "bim.upload_size_hint": "Revit (.rvt)、IFC (.ifc) · 最大500MB",
+    "bim.upload_size_hint": "Revit (.rvt)、IFC (.ifc) · 最大2GB",
     "bim.upload_success_desc": "モデルのアップロードに成功しました。",
     "bim.upload_title": "BIMデータをアップロード",
     "bim.upload_unsupported_format": "サポートされていない形式。",

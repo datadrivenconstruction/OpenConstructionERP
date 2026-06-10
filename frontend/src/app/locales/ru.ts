@@ -5553,7 +5553,7 @@ const resource = {
     "bim.upload_remove_file": "Удалить",
     "bim.upload_rvt_note": "Примечание: для RVT-файлов требуется DDC cad2data. Рекомендуется IFC.",
     "bim.upload_simple_mode_toggle": "Перейти в простой режим",
-    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Макс. 500 МБ",
+    "bim.upload_size_hint": "Revit (.rvt), IFC (.ifc) · Макс. 2 ГБ",
     "bim.upload_unsupported_format": "Неподдерживаемый формат.",
     "match_elements.title": "Сопоставление элементов",
     "match_elements.subtitle": "Сопоставить элементы BIM → позиции CWICR. BIM активен; DWG / PDF / Фото добавим в следующих фазах.",
