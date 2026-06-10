@@ -925,6 +925,12 @@ class AssemblyService:
         if not base_rate.is_finite() or base_rate < 0:
             base_rate = Decimal("0")
 
+        # ``regional_mult`` is captured as a reusable Decimal so the
+        # per-resource rates below can carry the SAME regional premium the
+        # position unit_rate gets. It stays Decimal("1") whenever the
+        # region is absent or its stored factor is garbage / non-finite,
+        # mirroring the effective_rate fall-through contract.
+        regional_mult = Decimal("1")
         if data.region and data.region in assembly.regional_factors:
             try:
                 factor = Decimal(str(assembly.regional_factors[data.region]))
@@ -935,8 +941,10 @@ class AssemblyService:
                 # existing fall-through contract for an absent region).
                 effective_rate = base_rate
             else:
+                regional_mult = factor
                 effective_rate = base_rate * factor
                 if not effective_rate.is_finite():
+                    regional_mult = Decimal("1")
                     effective_rate = base_rate
         else:
             effective_rate = base_rate
@@ -981,14 +989,54 @@ class AssemblyService:
         # Issue #128 - scale each component's money fields by the same FX
         # multiplier as the rate so the resource breakdown stays
         # consistent with the converted unit_rate.
-        fx_mult_f = float(fx_multiplier)
+        # Per-resource uplift = bid_factor * regional * fx. The BOQ resource
+        # invariant is position.unit_rate == SUM(r.quantity * r.unit_rate)
+        # (see boq/service.py _resource_total_in_base and update_position).
+        # The component's STORED ``total`` already folds in factor, the raw
+        # quantity, unit_cost and any typed uplift (factor*quantity*unit_cost
+        # with waste/burden/fuel layered on). What it does NOT fold in is the
+        # assembly-level bid_factor, the regional premium, or the FX
+        # conversion - those live only in ``effective_rate``. If we emit raw
+        # quantity*unit_cost rows the later resource-triggered recompute in
+        # BOQ.update_position collapses unit_rate to that factor-less,
+        # bid-less, regional-less, fx-less sum and silently corrupts the line.
+        # So we make each row self-consistent: keep the per-unit quantity and
+        # set unit_rate = (comp.total / quantity) * uplift, so that
+        # quantity*unit_rate == comp.total*uplift, and the sum over all rows
+        # reproduces effective_rate exactly.
+        try:
+            bid_mult = Decimal(str(assembly.bid_factor))
+        except (InvalidOperation, ValueError):
+            bid_mult = Decimal("1")
+        if not bid_mult.is_finite() or bid_mult < 0:
+            bid_mult = Decimal("1")
+        resource_uplift = bid_mult * regional_mult * fx_multiplier
+        if not resource_uplift.is_finite() or resource_uplift < 0:
+            resource_uplift = Decimal("1")
         for comp in components:
             res_type = comp.resource_type or _infer_legacy(comp.description or "")
-            comp_total = _str_to_float(comp.total) * fx_mult_f
+            # The component's adjusted contribution (factor*quantity*unit_cost
+            # plus typed uplift), scaled by the assembly-level uplift.
             try:
-                breakdown_totals[res_type] = breakdown_totals.get(res_type, Decimal("0")) + Decimal(str(comp_total))
+                comp_total_dec = Decimal(str(comp.total or "0")) * resource_uplift
             except (InvalidOperation, ValueError):
-                pass
+                comp_total_dec = Decimal("0")
+            if not comp_total_dec.is_finite():
+                comp_total_dec = Decimal("0")
+            comp_total = float(comp_total_dec)
+            # Keep the per-unit norm as the raw component quantity so the
+            # /boq resource grid still shows the real takeoff figure; derive
+            # unit_rate so that quantity*unit_rate == comp_total. When the
+            # quantity is zero (lump-sum row) collapse to quantity=1 so the
+            # product still carries the full contribution rather than 0.
+            comp_qty = _str_to_float(comp.quantity)
+            if comp_qty > 0:
+                res_quantity = comp_qty
+                res_unit_rate = comp_total / comp_qty
+            else:
+                res_quantity = 1.0
+                res_unit_rate = comp_total
+            breakdown_totals[res_type] = breakdown_totals.get(res_type, Decimal("0")) + comp_total_dec
 
             resources.append(
                 {
@@ -996,8 +1044,8 @@ class AssemblyService:
                     "code": "",
                     "type": res_type,
                     "unit": comp.unit or "",
-                    "quantity": _str_to_float(comp.quantity),
-                    "unit_rate": _str_to_float(comp.unit_cost) * fx_mult_f,
+                    "quantity": res_quantity,
+                    "unit_rate": res_unit_rate,
                     "total": comp_total,
                     # Pass through useful metadata (vendor, waste_pct,
                     # crew_size, …) so downstream consumers can inspect

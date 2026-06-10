@@ -201,6 +201,11 @@ class InvoiceRepository:
             Invoice.due_date < today,
             Invoice.status.notin_(("paid", "cancelled")),
             Invoice.due_date.isnot(None),
+            # due_date is a VARCHAR; an empty string is a valid persisted value
+            # (a draft with no due date set). Lexically "" < today is True, so
+            # without this guard blank-due-date invoices pollute the overdue KPI
+            # as phantom overdues. Exclude them.
+            Invoice.due_date != "",
         )
         if project_id is not None:
             overdue_base = overdue_base.where(Invoice.project_id == project_id)
@@ -331,11 +336,20 @@ class PaymentRepository:
         joining to the parent invoice so a project dashboard never blends in
         other tenants' payments.
         """
-        from sqlalchemy import Numeric, cast
+        from sqlalchemy import Numeric, case, cast
 
+        # Net out refunds. Refunds are stored as a positive ``amount`` with
+        # ``is_refund=True`` (see service.create_payment), and the refund guard
+        # treats them as reducing net cash. Summing them positively would
+        # inflate total_payments (a 100 payment + 100 refund must net to 0, not
+        # 200), so subtract refund rows instead of adding them.
+        net_amount = case(
+            (Payment.is_refund.is_(True), -cast(Payment.amount, Numeric)),
+            else_=cast(Payment.amount, Numeric),
+        )
         base = select(
             Payment.currency_code,
-            func.coalesce(func.sum(cast(Payment.amount, Numeric)), 0),
+            func.coalesce(func.sum(net_amount), 0),
         )
         if project_id is not None:
             base = base.where(Payment.invoice_id.in_(select(Invoice.id).where(Invoice.project_id == project_id)))

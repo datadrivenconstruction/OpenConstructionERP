@@ -1352,7 +1352,13 @@ class ChangeOrderService:
                 rate = Decimal(str(item.new_rate or "0"))
             except (InvalidOperation, ValueError):
                 rate = Decimal("0")
-            line_total = qty * rate
+            # The BOQ subtotal must move by the same amount the budget/EVM
+            # does. Budget writeback is driven by order.cost_impact, which is
+            # the sum of each item's stored cost_delta (the scope-change
+            # amount), not the gross new-line value qty*rate. For a 'modified'
+            # item the gross value overstates the change, so roll the section
+            # total from cost_delta to keep BOQ and budget in lockstep.
+            line_total = _dec(item.cost_delta)
             item_total += line_total
 
             position = Position(
@@ -1402,15 +1408,41 @@ class ChangeOrderService:
             "section_total": str(item_total),
         }
 
-    async def reject_order(self, order_id: uuid.UUID, user_id: str) -> ChangeOrder:
+    async def reject_order(
+        self,
+        order_id: uuid.UUID,
+        user_id: str,
+        *,
+        _from_chain: bool = False,
+    ) -> ChangeOrder:
         """Reject a submitted change order.
 
         BUG-351: writes to dedicated ``rejected_by`` / ``rejected_at`` fields
         rather than reusing the ``approved_*`` columns. Audit trails and
         dashboards now show "rejected by X" instead of "approved by X"
         when a CO is refused.
+
+        Like ``approve_order``, the legacy single-step reject is gated on the
+        presence of an approval chain. While a chain is in flight the reject
+        must go through ``advance_approval`` so the per-step authorization
+        (the assigned approver check) is enforced - otherwise any user with
+        the approve permission could short-circuit a multi-approver chain
+        from the reject side, the same bypass the approve gate prevents. The
+        ``_from_chain=True`` escape hatch lets the chain path reuse this code
+        without tripping the gate.
         """
         order = await self.get_order(order_id)
+        # Gate the legacy single-step reject on the presence of an approval
+        # chain so a non-approver cannot kill an in-flight chain without the
+        # per-step authorization advance_approval enforces.
+        if not _from_chain and await self._has_approval_chain(order_id):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "This change order has a multi-step approval chain. "
+                    "Use POST /v1/changeorders/{id}/advance-approval instead."
+                ),
+            )
         await self._assert_not_self_approval(order, user_id, "reject")
         self._validate_transition(order.status, "rejected")
         # Snapshot pre-transition state for the audit row.
@@ -1418,11 +1450,15 @@ class ChangeOrderService:
         code_snapshot = order.code
 
         now = datetime.now(UTC).isoformat()[:19]
+        # Clear the chain cursor on reject so a rejected CO never retains a
+        # live cursor pointing at a still-pending step (mirrors the chain
+        # reject path in advance_approval).
         await self.repo.update_fields(
             order_id,
             status="rejected",
             rejected_by=user_id,
             rejected_at=now,
+            current_approval_step=None,
         )
         await _safe_audit(
             self.session,

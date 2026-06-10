@@ -360,12 +360,26 @@ class CostItemService:
         """
         created: list[CostItem] = []
         skipped_codes: list[str] = []
+        # Track (code, region) pairs already queued in this batch so an
+        # intra-payload duplicate skips the same way a DB duplicate does.
+        # Without this the second occurrence also passes the DB existence
+        # check, both rows reach bulk_create, and the flush violates the
+        # uq_costs_code_region unique constraint with an uncaught
+        # IntegrityError that 500s the whole import.
+        seen: set[tuple[str, str | None]] = set()
 
         for data in items_data:
+            key = (data.code, data.region)
+            if key in seen:
+                skipped_codes.append(data.code)
+                continue
+
             existing = await self.repo.get_by_code(data.code, region=data.region)
             if existing is not None:
                 skipped_codes.append(data.code)
                 continue
+
+            seen.add(key)
 
             item = CostItem(
                 code=data.code,
@@ -762,6 +776,11 @@ class CostBenchmarkService:
         has both a cost and an area in the filtered set.
         """
         from app.modules.boq.models import BOQ, Position
+        from app.modules.boq.service import (
+            _is_section,
+            _leaf_total_base_with_resources,
+            _project_fx_map,
+        )
 
         # ── 1. Resolve the candidate projects (tenant-scoped + filtered) ──
         projects = await self._candidate_projects(
@@ -774,22 +793,40 @@ class CostBenchmarkService:
             return self._empty(cost_per_m2)
 
         project_ids = [p.id for p in projects]
+        projects_by_id = {p.id: p for p in projects}
 
-        # ── 2. One grouped query for each project's BOQ direct-cost total ──
-        # Sum the per-position totals across every BOQ of the project. The
-        # totals are decimal-strings; we cast in Python (below) so a stray
-        # non-numeric legacy value is skipped rather than aborting the query.
+        # ── 2. One query for each project's BOQ leaf positions ────────────
+        # Sum each project's BOQ in its OWN base currency. Position.total is
+        # stored in the position's NATIVE currency (per-position
+        # metadata.currency or foreign-priced resources), so a blind SUM of
+        # the raw strings blends currencies inside a single project (e.g.
+        # 100000 ARS + 25000 USD added as 125000). We mirror the canonical
+        # BOQ rollup: convert every leaf into the project base via the
+        # project's FX table before accumulating, so the per-project cost/m2
+        # is genuinely single-currency (Issues #111/#131/#88/#157). Section
+        # rows are skipped exactly as the direct-cost rollup does.
         rows = (
             await self.session.execute(
-                select(BOQ.project_id, Position.total)
+                select(BOQ.project_id, Position)
                 .join(Position, Position.boq_id == BOQ.id)
                 .where(BOQ.project_id.in_(project_ids))
             )
         ).all()
+        # Cache each project's (base_currency, fx_map) so we build it once.
+        fx_by_project: dict[uuid.UUID, tuple[str, dict[str, str]]] = {}
         totals_by_project: dict[uuid.UUID, Decimal] = {}
-        for proj_id, raw_total in rows:
-            amount = _parse_decimal(raw_total)
-            if amount is None:
+        for proj_id, pos in rows:
+            if _is_section(pos):
+                continue
+            fx = fx_by_project.get(proj_id)
+            if fx is None:
+                proj = projects_by_id.get(proj_id)
+                base_ccy = (getattr(proj, "currency", "") or "").strip().upper()
+                fx = (base_ccy, _project_fx_map(proj))
+                fx_by_project[proj_id] = fx
+            base_ccy, fx_map = fx
+            amount = _leaf_total_base_with_resources(pos, fx_map, base_ccy)
+            if amount is None or amount <= 0:
                 continue
             totals_by_project[proj_id] = totals_by_project.get(proj_id, Decimal("0")) + amount
 
@@ -810,7 +847,8 @@ class CostBenchmarkService:
             return self._empty(cost_per_m2)
 
         # ── 4. Pick the currency bucket (never mix currencies) ────────────
-        target_currency = (currency or "").strip().upper()
+        requested_currency = (currency or "").strip().upper()
+        target_currency = requested_currency
         if not target_currency:
             # Use the dominant currency among the usable projects.
             counts: dict[str, int] = {}
@@ -820,6 +858,18 @@ class CostBenchmarkService:
 
         values = sorted(v for v, cur in per_project if cur == target_currency)
         if not values:
+            if requested_currency:
+                # The caller pinned a currency that no usable project matches.
+                # Do NOT fall back to a different-currency bucket; say so plainly
+                # so the percentile is never computed across currencies.
+                return {
+                    "currency": requested_currency,
+                    "own_portfolio": None,
+                    "percentile_vs_own": None,
+                    "explanation": (
+                        f"No comparable projects priced in {requested_currency} to position your value against."
+                    ),
+                }
             return self._empty(cost_per_m2)
 
         # ── 5. Distribution statistics ────────────────────────────────────
@@ -835,11 +885,28 @@ class CostBenchmarkService:
             "note": (f"Based on {count} of your {'project' if count == 1 else 'projects'} with cost and area."),
         }
 
+        # ── 6. Position the caller's value, but only within ITS OWN currency.
+        # ``cost_per_m2`` is a bare number with no currency attached. We may
+        # only position it against ``values`` when we KNOW it is denominated
+        # in ``target_currency``. That is true only when the request named the
+        # currency explicitly: then ``values`` was filtered to that same
+        # currency above, so the comparison is single-currency. When the
+        # currency was omitted, ``target_currency`` is the auto-selected
+        # dominant bucket, which may differ from the caller's value currency,
+        # so positioning would silently compare across currencies. In that
+        # case we return ``percentile_vs_own=None`` with a note rather than a
+        # misleading percentile.
         percentile_vs_own: float | None = None
         explanation = ""
         if cost_per_m2 is not None:
-            percentile_vs_own = _position_in_distribution(cost_per_m2, values)
-            explanation = self._explain(cost_per_m2, portfolio["median"], percentile_vs_own)
+            if requested_currency:
+                percentile_vs_own = _position_in_distribution(cost_per_m2, values)
+                explanation = self._explain(cost_per_m2, portfolio["median"], percentile_vs_own)
+            else:
+                explanation = (
+                    "Specify the currency of your value to position it against your "
+                    f"portfolio. The distribution below is in {target_currency}."
+                )
 
         return {
             "currency": target_currency,

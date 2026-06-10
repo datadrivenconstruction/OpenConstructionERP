@@ -2336,8 +2336,17 @@ class ScheduleService:
 
         for act_cpm in cpm_result.all_activities:
             duration = act_cpm.duration_days
-            optimistic = max(3, int(duration * _PERT_OPTIMISTIC))
-            pessimistic = max(duration + 2, int(duration * _PERT_PESSIMISTIC))
+            if duration <= 0:
+                # Zero-duration milestone: no spread, so O = M = P = duration
+                # keeps the three-point ordering valid and the variance at 0.
+                optimistic = duration
+                pessimistic = duration
+            else:
+                # Floors can push optimistic above the most-likely duration for
+                # short tasks, so clamp the bounds to preserve O <= M <= P and
+                # keep std_dev non-negative.
+                optimistic = min(max(3, int(duration * _PERT_OPTIMISTIC)), duration)
+                pessimistic = max(duration + 2, int(duration * _PERT_PESSIMISTIC), optimistic)
             expected = (optimistic + 4 * duration + pessimistic) / 6.0
             std_dev = (pessimistic - optimistic) / 6.0
             variance = std_dev**2

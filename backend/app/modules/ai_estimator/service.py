@@ -1826,11 +1826,19 @@ class AiEstimatorService:
                     status_code=400,
                     detail="candidate_id must be one of this group's existing candidates.",
                 )
+            # Recompute confidence from the newly chosen candidate so the stored
+            # score/confidence/confidence_band describe this candidate, not the
+            # previously suggested one (mirrors update_group's override path).
+            # An explicit spec.confidence below still overrides this.
+            score = self._real_confidence(cand.get("score"))
             fields.update(
                 candidate_id=cand.get("candidate_id"),
                 chosen_code=cand.get("code"),
                 unit_rate=cand.get("unit_rate"),
                 currency=cand.get("currency") or None,
+                score=score,
+                confidence=score,
+                confidence_band=cand.get("confidence_band") or _confidence_band(score),
                 resources=await self._resource_breakdown(cand.get("candidate_id")),
                 match_method="manual",
             )
@@ -1899,8 +1907,14 @@ class AiEstimatorService:
                 fx = fx_map.get(currency)
                 if fx:
                     base_line = line * _dec(fx)
-            grand_total += base_line
-            subtotals[currency or base_currency] = subtotals.get(currency or base_currency, Decimal("0")) + line
+            # Only confirmed/overridden groups are written by apply(), so only
+            # those roll into the headline total. 'suggested' rows are still
+            # listed below for review (confirmed=False) but excluded here, so
+            # the preview total can never exceed what apply books.
+            is_confirmed = grp.status in ("confirmed", "overridden")
+            if is_confirmed:
+                grand_total += base_line
+                subtotals[currency or base_currency] = subtotals.get(currency or base_currency, Decimal("0")) + line
 
             confidence = grp.confidence
             rows.append(
@@ -1917,7 +1931,7 @@ class AiEstimatorService:
                     confidence=confidence,
                     confidence_band=grp.confidence_band or _confidence_band(confidence),  # type: ignore[arg-type]
                     resources=resources,
-                    confirmed=False,
+                    confirmed=is_confirmed,
                 )
             )
             validation_positions.append(

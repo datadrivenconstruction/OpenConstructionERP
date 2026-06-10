@@ -21,10 +21,10 @@ import uuid
 from datetime import date, datetime
 from typing import Any
 
-from fastapi import APIRouter, Body, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.schedule.models import (
     EAC_LINK_MODES,
     Activity,
@@ -150,6 +150,44 @@ def _parse_as_of(as_of_date: str | None) -> date:
         ) from exc
 
 
+async def _verify_schedule_access(session: SessionDep, schedule_id: uuid.UUID, user_id: str) -> Schedule:
+    """Load a schedule and verify the caller owns its project. Admins bypass.
+
+    Returns HTTP 404 on both "schedule missing" and "access denied" so the
+    schedule_id can't be enumerated by a foreign tenant, mirroring
+    ``_verify_schedule_owner`` in the v1 router.
+    """
+    schedule = await session.get(Schedule, schedule_id)
+    if schedule is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Schedule {schedule_id} not found",
+        )
+    await verify_project_access(schedule.project_id, user_id, session)
+    return schedule
+
+
+async def _verify_task_access(session: SessionDep, task_id: uuid.UUID, user_id: str) -> Activity:
+    """Load an activity and verify the caller owns its schedule's project.
+
+    Returns HTTP 404 on both "task missing" and "access denied" so a foreign
+    tenant cannot enumerate or mutate activities they do not own.
+    """
+    activity = await session.get(Activity, task_id)
+    if activity is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Activity {task_id} not found",
+        )
+    await _verify_schedule_access(session, activity.schedule_id, user_id)
+    return activity
+
+
+async def _verify_link_access(session: SessionDep, link: EacScheduleLink, user_id: str) -> None:
+    """Verify the caller owns the project behind ``link`` via its task -> schedule."""
+    await _verify_task_access(session, link.task_id, user_id)
+
+
 # ── Schedules v2 router ────────────────────────────────────────────────────
 
 
@@ -157,6 +195,7 @@ def _parse_as_of(as_of_date: str | None) -> date:
     "/{schedule_id}/import",
     response_model=CsvImportResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def import_schedule(
     schedule_id: uuid.UUID,
@@ -170,6 +209,7 @@ async def import_schedule(
     should pre-convert to the canonical CSV column set or use the existing
     v1 import endpoints for those formats.
     """
+    await _verify_schedule_access(session, schedule_id, user_id)
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
@@ -200,6 +240,7 @@ async def import_schedule(
     "/tasks/{task_id}/progress",
     response_model=ProgressEntryResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def record_progress(
     task_id: uuid.UUID,
@@ -208,6 +249,7 @@ async def record_progress(
     body: ProgressEntryRequest = Body(...),
 ) -> ProgressEntryResponse:
     """Append a progress entry to ``task_id`` and roll forward the activity."""
+    await _verify_task_access(session, task_id, user_id)
     service = ScheduleProgressService(session)
     try:
         entry = await service.record(
@@ -240,13 +282,17 @@ async def record_progress(
     )
 
 
-@schedules_v2_router.get("/tasks/{task_id}/progress-history")
+@schedules_v2_router.get(
+    "/tasks/{task_id}/progress-history",
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
 async def list_progress_history(
     task_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId,
 ) -> list[dict[str, Any]]:
     """Return the append-only progress history for ``task_id``."""
+    await _verify_task_access(session, task_id, user_id)
     service = ScheduleProgressService(session)
     entries = await service.history(task_id)
     return [
@@ -264,7 +310,10 @@ async def list_progress_history(
     ]
 
 
-@schedules_v2_router.get("/{schedule_id}/snapshot")
+@schedules_v2_router.get(
+    "/{schedule_id}/snapshot",
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
 async def get_snapshot(
     schedule_id: uuid.UUID,
     session: SessionDep,
@@ -273,12 +322,7 @@ async def get_snapshot(
     model_version_id: uuid.UUID | None = Query(default=None),
 ) -> dict[str, Any]:
     """Return ``{element_id: status}`` for every linked element on ``as_of_date``."""
-    schedule = await session.get(Schedule, schedule_id)
-    if schedule is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Schedule {schedule_id} not found",
-        )
+    await _verify_schedule_access(session, schedule_id, user_id)
     target = _parse_as_of(as_of_date)
     service = ScheduleSnapshotService(session)
     statuses = await service.snapshot(schedule_id, target, model_version_id)
@@ -290,7 +334,10 @@ async def get_snapshot(
     }
 
 
-@schedules_v2_router.get("/{schedule_id}/dashboard")
+@schedules_v2_router.get(
+    "/{schedule_id}/dashboard",
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
 async def get_dashboard(
     schedule_id: uuid.UUID,
     session: SessionDep,
@@ -298,12 +345,7 @@ async def get_dashboard(
     as_of_date: str | None = Query(default=None),
 ) -> dict[str, Any]:
     """Return the planned-vs-actual dashboard for ``schedule_id``."""
-    schedule = await session.get(Schedule, schedule_id)
-    if schedule is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Schedule {schedule_id} not found",
-        )
+    await _verify_schedule_access(session, schedule_id, user_id)
     target = _parse_as_of(as_of_date)
     service = ScheduleDashboardService(session)
     return (await service.dashboard(schedule_id, target)).to_json()
@@ -316,6 +358,7 @@ async def get_dashboard(
     "",
     response_model=EacScheduleLinkResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def create_link(
     session: SessionDep,
@@ -323,12 +366,7 @@ async def create_link(
     body: EacScheduleLinkCreate = Body(...),
 ) -> EacScheduleLinkResponse:
     """Create an EAC schedule link and run a dry-run for the cached count."""
-    activity = await session.get(Activity, body.task_id)
-    if activity is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Activity {body.task_id} not found",
-        )
+    await _verify_task_access(session, body.task_id, user_id)
 
     service = EacScheduleLinkService(session)
     try:
@@ -348,7 +386,11 @@ async def create_link(
     return _link_to_response(link)
 
 
-@eac_schedule_links_router.get("/{link_id}", response_model=EacScheduleLinkResponse)
+@eac_schedule_links_router.get(
+    "/{link_id}",
+    response_model=EacScheduleLinkResponse,
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
 async def get_link(
     link_id: uuid.UUID,
     session: SessionDep,
@@ -361,10 +403,15 @@ async def get_link(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Link {link_id} not found",
         )
+    await _verify_link_access(session, link, user_id)
     return _link_to_response(link)
 
 
-@eac_schedule_links_router.delete("/{link_id}", status_code=status.HTTP_204_NO_CONTENT)
+@eac_schedule_links_router.delete(
+    "/{link_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
 async def delete_link(
     link_id: uuid.UUID,
     session: SessionDep,
@@ -377,11 +424,16 @@ async def delete_link(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Link {link_id} not found",
         )
+    await _verify_link_access(session, link, user_id)
     await service.delete(link_id)
     await session.commit()
 
 
-@eac_schedule_links_router.post("/{link_id}:dry-run", response_model=DryRunResponse)
+@eac_schedule_links_router.post(
+    "/{link_id}:dry-run",
+    response_model=DryRunResponse,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
 async def dry_run_link(
     link_id: uuid.UUID,
     session: SessionDep,
@@ -396,6 +448,7 @@ async def dry_run_link(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Link {link_id} not found",
         )
+    await _verify_link_access(session, link, user_id)
     outcome = await service.dry_run(link, body.model_version_id)
     link.matched_element_count = outcome.matched_count
     await session.commit()

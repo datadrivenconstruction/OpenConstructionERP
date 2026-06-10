@@ -584,16 +584,23 @@ class ScheduleDashboardService:
         overall = weighted_progress / total_weight if total_weight else 0.0
 
         # ── EVM totals ────────────────────────────────────────────────
+        # PV is the budgeted cost of work SCHEDULED to be complete by the data
+        # date (as_of_date), not the Budget At Completion. Using BAC here makes
+        # an on-schedule project report SPI < 1, so we time-phase PV the same
+        # way the S-curve does: an activity past its planned end contributes its
+        # full cost_planned, one in progress contributes a linear proration over
+        # [start, end], and one not yet started contributes nothing.
         total_pv = 0.0
         total_ev = 0.0
         total_ac = 0.0
         any_cost = False
         for a in activities:
-            pv = _decimal_to_float(a.cost_planned)
+            bac = _decimal_to_float(a.cost_planned)
             ac = _decimal_to_float(a.cost_actual)
             if a.cost_planned is not None or a.cost_actual is not None:
                 any_cost = True
-            ev = pv * (_coerce_progress(a) / 100.0) if pv else 0.0
+            pv = _planned_value_to_date(a, bac, as_of_date)
+            ev = bac * (_coerce_progress(a) / 100.0) if bac else 0.0
             total_pv += pv
             total_ev += ev
             total_ac += ac
@@ -747,6 +754,29 @@ def _decimal_to_float(value: Decimal | None) -> float:
         return float(value)
     except (TypeError, ValueError):  # pragma: no cover - defensive
         return 0.0
+
+
+def _planned_value_to_date(activity: Activity, bac: float, as_of_date: date) -> float:
+    """Return the budgeted cost of work scheduled to be complete by ``as_of_date``.
+
+    Mirrors the proration used by ``_build_s_curve``: an activity whose planned
+    end_date is on or before the data date contributes its full budget; one in
+    progress contributes a linear proration over its planned [start, end] span;
+    one not yet started (or without parseable dates) contributes nothing.
+    """
+    if not bac:
+        return 0.0
+    start = _parse_iso(activity.start_date)
+    end = _parse_iso(activity.end_date)
+    if start is None or end is None:
+        return 0.0
+    if as_of_date >= end:
+        return bac
+    if as_of_date < start:
+        return 0.0
+    duration = max((end - start).days, 1)
+    elapsed = (as_of_date - start).days
+    return bac * (elapsed / duration)
 
 
 # ── CSV importer (FR-6.1 minimal slice) ─────────────────────────────────

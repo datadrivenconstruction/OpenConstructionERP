@@ -1846,9 +1846,7 @@ async def restore_qdrant_snapshot(
             "snapshot_path": local_path,
             "timeout_s": 1800,
         }
-        restored = await asyncio.to_thread(
-            qdrant_snapshot_loader.restore_snapshot_file, **restore_kwargs
-        )
+        restored = await asyncio.to_thread(qdrant_snapshot_loader.restore_snapshot_file, **restore_kwargs)
         if not restored:
             detail = f"Failed to restore Qdrant snapshot for {db_id}. Check Qdrant logs."
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
@@ -4597,12 +4595,13 @@ async def get_cost_item_certainty(
 @router.post(
     "/{item_id}/record-usage/",
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RequirePermission("costs.read"))],
 )
 async def record_cost_item_usage(
     item_id: uuid.UUID,
     body: RecordUsageRequest,
     session: SessionDep,
-    user: OptionalUserPayload,
+    user: CurrentUserPayload,
 ) -> dict[str, object]:
     """‌⁠‍Append one row to the usage ledger.
 
@@ -4613,6 +4612,12 @@ async def record_cost_item_usage(
 
     Returns the new usage row's id + the refreshed certainty band so
     the frontend can update its badge cache in one round-trip.
+
+    Authenticated only. The usage ledger feeds the shared, cross-tenant
+    certainty badge (``CostCertaintyService.compute`` counts every row for
+    an item with no tenant scoping), so an anonymous writer could forge a
+    rate's "proven" status and inflate any project's frequency. We require
+    a usable subject and verify project access for EVERY caller.
     """
     # Verify cost item exists so we can give a precise 404 rather than
     # letting the FK CASCADE constraint do it at commit time.
@@ -4624,24 +4629,26 @@ async def record_cost_item_usage(
         )
 
     recorder = CostUsageRecorder(session)
-    used_by: uuid.UUID | None = None
-    sub = (user or {}).get("sub") if user else None
-    if sub:
-        try:
-            used_by = uuid.UUID(str(sub))
-        except (TypeError, ValueError):
-            # Anonymous / demo-token id may be non-UUID - silently drop.
-            used_by = None
+    sub = (user or {}).get("sub")
+    if not sub:
+        # Authenticated route, but defend against a token without a subject.
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    try:
+        used_by = uuid.UUID(str(sub))
+    except (TypeError, ValueError) as exc:
+        # A non-UUID subject (e.g. malformed token) cannot be attributed or
+        # access-checked, so it must not be allowed to write the shared ledger.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        ) from exc
 
-    # IDOR guard: when the caller is authenticated, verify they can see the
-    # target project before we record a usage row attributed to it. Without
-    # this check, any authenticated user could attribute apply-events to any
-    # project UUID they happen to know. Anonymous callers (no usable sub)
-    # skip the check - the demo / pre-auth analytics path is preserved
-    # (the unauth ledger row has ``used_by = NULL`` so it can't be used to
-    # forge an identity-attributed history).
-    if used_by is not None:
-        await verify_project_access(body.project_id, str(used_by), session)
+    # IDOR guard: verify the caller can see the target project before we
+    # record a usage row attributed to it. Without this check any user could
+    # attribute apply-events to any project UUID they happen to know and bump
+    # the item's shared certainty frequency. verify_project_access raises 404
+    # for both missing and inaccessible projects.
+    await verify_project_access(body.project_id, str(used_by), session)
 
     row = await recorder.record(
         item_id,

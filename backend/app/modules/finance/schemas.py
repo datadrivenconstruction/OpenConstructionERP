@@ -153,7 +153,14 @@ class InvoiceUpdate(BaseModel):
         pattern=r"^(payable|receivable)$",
     )
     invoice_date: str | None = Field(default=None, max_length=20)
-    due_date: str | None = Field(default=None, max_length=20)
+    # Mirror InvoiceCreate.due_date so a PATCH cannot store a malformed (or
+    # blank) due date that later reads as a phantom overdue in the dashboard
+    # KPI. The pattern requires a real ISO date when a value is supplied.
+    due_date: str | None = Field(
+        default=None,
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+        max_length=20,
+    )
     currency_code: str | None = Field(default=None, max_length=10)
     amount_subtotal: str | None = Field(default=None, max_length=50)
     tax_amount: str | None = Field(default=None, max_length=50)

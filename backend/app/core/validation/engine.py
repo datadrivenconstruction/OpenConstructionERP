@@ -38,9 +38,10 @@ class Severity(StrEnum):
 class ValidationStatus(StrEnum):
     """‌⁠‍Overall validation status."""
 
-    PASSED = "passed"  # No errors, no warnings
+    PASSED = "passed"  # No errors, no warnings, no failing info
     WARNINGS = "warnings"  # Warnings only, no errors
     ERRORS = "errors"  # Has errors (may also have warnings)
+    INFO = "info"  # Failing INFO results only, no errors or warnings
     SKIPPED = "skipped"  # Validation was skipped (no applicable rules)
 
 
@@ -167,6 +168,12 @@ class ValidationReport:
             return ValidationStatus.ERRORS
         if self.has_warnings:
             return ValidationStatus.WARNINGS
+        # Failing INFO results are real unresolved findings: a report with a
+        # sub-1.0 score and info_count > 0 must not read as a clean PASSED.
+        # Surface them as INFO (mirrors the BIM service), with errors and
+        # warnings still taking precedence above.
+        if self.infos:
+            return ValidationStatus.INFO
         return ValidationStatus.PASSED
 
     @property

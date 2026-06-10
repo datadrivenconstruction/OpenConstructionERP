@@ -573,6 +573,7 @@ class TenderingService:
         from sqlalchemy import update
 
         from app.modules.boq.models import Position
+        from app.modules.boq.service import _quantize_money_str
 
         updated = 0
         for item in bid.line_items or []:
@@ -595,11 +596,17 @@ class TenderingService:
             if pos.boq_id != package.boq_id:
                 continue
             qty = _to_decimal(pos.quantity)
-            new_total = qty * rate
+            # Quantize at this write boundary the same way every other BOQ
+            # writer does (boq/service.py:_quantize_money_str). Writing the raw
+            # Decimal would store more than 4 fractional digits and break the
+            # money invariant the BOQ engine assumes, forcing a needless rewrite
+            # on the next recompute.
+            rate_str = _quantize_money_str(rate)
+            new_total_str = _quantize_money_str(qty * rate)
             await self.session.execute(
                 update(Position)
                 .where(Position.id == pos.id, Position.boq_id == package.boq_id)
-                .values(unit_rate=str(rate), total=str(new_total))
+                .values(unit_rate=rate_str, total=new_total_str)
             )
             updated += 1
 

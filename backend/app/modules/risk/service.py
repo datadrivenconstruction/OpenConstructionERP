@@ -263,8 +263,12 @@ class RiskService:
         if not fields:
             return item
 
-        # Recalculate risk_score and 5x5 matrix scoring if probability or severity changed
-        probability = fields.get("probability", float(item.probability))
+        # Recalculate risk_score and 5x5 matrix scoring if probability or severity changed.
+        # Stored numerics can be "" on legacy/imported rows (DB-level defaults were
+        # removed), so coerce defensively like the read paths instead of float("").
+        probability = fields.get("probability")
+        if probability is None:
+            probability = _safe_float(item.probability, 0.5)
         severity = fields.get("impact_severity", item.impact_severity)
         if "probability" in fields or "impact_severity" in fields:
             fields["risk_score"] = str(_compute_risk_score(probability, severity))

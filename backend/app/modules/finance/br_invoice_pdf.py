@@ -425,6 +425,18 @@ def render_br_invoice_pdf(
     retention = invoice.get("retention_amount", "0")
     total = invoice.get("amount_total", "0")
 
+    # Net payable = gross (amount_total) - retention_amount. amount_total is
+    # subtotal + tax with retentions NOT subtracted (see _compute_invoice_total
+    # in service.py), so the bold "Valor liquido a pagar" line must deduct the
+    # retentions itemised above it. Guard parse failures the same way _brl does
+    # so the PDF never breaks; on failure net falls back to the gross.
+    try:
+        net = Decimal(str(total).strip() or "0") - Decimal(str(retention).strip() or "0")
+        if not net.is_finite():
+            net = Decimal(str(total).strip() or "0")
+    except (InvalidOperation, ValueError, TypeError):
+        net = total
+
     totals_rows: list[list[Paragraph]] = [
         [
             _safe_para("Valor dos serviços (subtotal)", styles["cell"]),
@@ -459,8 +471,12 @@ def render_br_invoice_pdf(
             _safe_para(_brl(retention), styles["cell_right"]),
         ],
         [
+            _safe_para("Valor bruto", styles["cell"]),
+            _safe_para(_brl(total), styles["cell_right"]),
+        ],
+        [
             _safe_para("<b>Valor líquido a pagar</b>", styles["cell"]),
-            _safe_para(f"<b>{_brl(total)}</b>", styles["cell_right"]),
+            _safe_para(f"<b>{_brl(net)}</b>", styles["cell_right"]),
         ],
     ]
     totals_widths = [usable * 0.70, usable * 0.30]

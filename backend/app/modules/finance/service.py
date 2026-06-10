@@ -602,11 +602,21 @@ class FinanceService:
             )
             paid_invoices = paid_result.scalars().all()
 
-            # key = (wbs_id, cost_category); both None means "uncategorized"
-            bucketed: dict[tuple[str | None, str | None], Decimal] = defaultdict(lambda: Decimal("0"))
+            # key = (wbs_id, cost_category, currency); wbs_id/cost_category both
+            # None means "uncategorized". The currency is part of the key so we
+            # never blend two currencies into one ProjectBudget.actual (FX
+            # never-blend rule): each budget row carries its own currency_code
+            # and only receives the bucket priced in that same currency. A blank
+            # invoice currency is normalised to "" to match a blank budget-row
+            # currency (both treated as base). Mixed-currency invoices on the
+            # same (wbs_id, cost_category) therefore land in separate buckets
+            # and the per-currency dashboard rollup FX-converts them correctly,
+            # instead of summing them as if 1 USD == 1 EUR.
+            bucketed: dict[tuple[str | None, str | None, str], Decimal] = defaultdict(lambda: Decimal("0"))
             total_actual = Decimal("0")
 
             for inv in paid_invoices:
+                inv_currency = (inv.currency_code or "").strip().upper()
                 items = list(inv.line_items or [])
                 if items:
                     for item in items:
@@ -614,16 +624,16 @@ class FinanceService:
                             amt = Decimal(str(item.amount))
                         except (InvalidOperation, ValueError):
                             continue
-                        bucketed[(item.wbs_id, item.cost_category)] += amt
+                        bucketed[(item.wbs_id, item.cost_category, inv_currency)] += amt
                         total_actual += amt
                 else:
                     # No breakdown - attribute the full invoice total to the
-                    # catch-all bucket.
+                    # catch-all bucket for this invoice's currency.
                     try:
                         amt = Decimal(str(inv.amount_total))
                     except (InvalidOperation, ValueError):
                         continue
-                    bucketed[(None, None)] += amt
+                    bucketed[(None, None, inv_currency)] += amt
                     total_actual += amt
 
             budget_result = await self.session.execute(
@@ -637,7 +647,10 @@ class FinanceService:
             # the ORM side; str assignment works on SQLite but triggers a
             # type-coercion warning on PostgreSQL (BUG-FINANCE-ACT01).
             for budget in budgets:
-                key = (budget.wbs_id, budget.category)
+                # Match the bucket priced in the budget row's own currency only,
+                # so a row stamped EUR never absorbs a USD invoice's amount.
+                budget_currency = (budget.currency_code or "").strip().upper()
+                key = (budget.wbs_id, budget.category, budget_currency)
                 budget.actual = bucketed.get(key, Decimal("0"))
 
             logger.info(
@@ -1489,10 +1502,12 @@ class FinanceService:
         spi = (ev / pv) if pv != 0 else Decimal("0")
         cpi = (ev / ac) if ac != 0 else Decimal("0")
 
-        # Round indices to 4 decimal places for readability, then normalize
-        # to remove trailing zeros (e.g. "0.9500" -> "0.95")
-        spi = spi.quantize(Decimal("0.0001")).normalize()
-        cpi = cpi.quantize(Decimal("0.0001")).normalize()
+        # Round indices to 4 decimal places. Do NOT call .normalize(): for
+        # integer-magnitude results normalize() collapses trailing zeros into
+        # exponent form (e.g. Decimal("10") -> "1E+1"), which str() then emits
+        # as scientific notation and breaks the decimal-string API contract.
+        spi = spi.quantize(Decimal("0.0001"))
+        cpi = cpi.quantize(Decimal("0.0001"))
 
         # ── Forecast metrics ────────────────────────────────────────────
         # EAC: CPI-based forecast. Falls back to AC + remaining BAC when CPI==0.
@@ -1517,7 +1532,9 @@ class FinanceService:
         # would flip the sign and report misleading positive performance.
         remaining_budget = bac - ac
         if remaining_budget > 0:
-            tcpi = ((bac - ev) / remaining_budget).quantize(Decimal("0.0001")).normalize()
+            # No .normalize() - see spi/cpi note above; it would render
+            # integer-magnitude indices in scientific notation via str().
+            tcpi = ((bac - ev) / remaining_budget).quantize(Decimal("0.0001"))
         else:
             tcpi = Decimal("0")
 

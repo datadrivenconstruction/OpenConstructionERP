@@ -1733,7 +1733,10 @@ class LumpSumRatio(ValidationRule):
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         locale = _get_locale(context)
-        positions = _get_positions(context)
+        # Count over leaf positions only: section/header rows never carry a
+        # unit, so including them in the denominator dilutes the lump-sum
+        # ratio and under-flags lump-sum-heavy BOQs.
+        positions = _get_leaf_positions(context)
         if not positions:
             return []
 
@@ -2644,7 +2647,10 @@ class DPGFPricingComplete(ValidationRule):
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         locale = _get_locale(context)
-        positions = _get_positions(context)
+        # Use leaf positions only: section/header rows intentionally carry no
+        # unit_rate, so counting them in the denominator understates the
+        # pricing-completeness ratio (matches PositionHasUnitRate).
+        positions = _get_leaf_positions(context)
         if not positions:
             return []
         priced = sum(1 for p in positions if p.get("unit_rate") and (_num(p["unit_rate"], default=0.0) or 0.0) > 0)

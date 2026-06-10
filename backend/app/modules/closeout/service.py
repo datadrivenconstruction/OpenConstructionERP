@@ -583,17 +583,31 @@ class CloseoutService:
 
         # The build is producing the generated artifacts right now, so report
         # them as present for this package's own cover / manifest readiness.
+        # The completeness numbers must use the same treat_built=True basis as
+        # the ready flag, otherwise the cover / manifest contradict themselves
+        # (generated required slots present for ready, absent for the percent).
+        # The persisted package row was last recomputed with has_built=False,
+        # so we derive consistent counts locally here instead of reading it.
+        required_slots = [s for s in slots if s.is_required]
+        required_count = len(required_slots)
+        delivered_count = 0
+        for slot in required_slots:
+            st = self._slot_status(slot, bindings.get(slot.id), has_built=True)
+            if st == "verified" or (slot.source_kind == "generated" and slot.generated_artifact in _GENERATED_KINDS):
+                delivered_count += 1
+        completeness_pct = 100 if required_count == 0 else round(delivered_count * 100 / required_count)
+
         gaps = await self.gaps(package, treat_built=True)
-        ready = len(gaps) == 0 and package.required_slot_count > 0
+        ready = len(gaps) == 0 and required_count > 0
 
         # ── Cover PDF ────────────────────────────────────────────────────
         cover_summary = {
             "project_name": project_name,
             "project_type": package.project_type,
             "title": package.title,
-            "completeness_pct": package.completeness_pct,
-            "required_slot_count": package.required_slot_count,
-            "delivered_slot_count": package.delivered_slot_count,
+            "completeness_pct": completeness_pct,
+            "required_slot_count": required_count,
+            "delivered_slot_count": delivered_count,
             "ready": ready,
             "gaps": gaps,
             "slots": slot_summaries,
@@ -616,9 +630,9 @@ class CloseoutService:
             "project_type": package.project_type,
             "generated": date_iso,
             "completeness": {
-                "required_slot_count": package.required_slot_count,
-                "delivered_slot_count": package.delivered_slot_count,
-                "completeness_pct": package.completeness_pct,
+                "required_slot_count": required_count,
+                "delivered_slot_count": delivered_count,
+                "completeness_pct": completeness_pct,
                 "ready": ready,
                 "gaps": gaps,
             },
@@ -645,11 +659,11 @@ class CloseoutService:
                 total_bytes += len(data)
             zf.writestr("index.json", json.dumps(index, indent=2, ensure_ascii=False))
             zf.writestr("manifest.json", json.dumps(manifest_obj, indent=2, ensure_ascii=False))
-            zf.writestr("README.md", self._readme_md(project_name, package, ready, gaps))
+            zf.writestr("README.md", self._readme_md(project_name, package, completeness_pct, ready, gaps))
 
         build_summary = {
             "size_bytes": total_bytes,
-            "completeness_pct": package.completeness_pct,
+            "completeness_pct": completeness_pct,
             "ready": ready,
             "document_count": len(documents),
             "generated_count": len(generated),
@@ -666,13 +680,19 @@ class CloseoutService:
         }
 
     @staticmethod
-    def _readme_md(project_name: str, package: CloseoutPackage, ready: bool, gaps: list[str]) -> str:
+    def _readme_md(
+        project_name: str,
+        package: CloseoutPackage,
+        completeness_pct: int,
+        ready: bool,
+        gaps: list[str],
+    ) -> str:
         lines = [
             "# Digital handover and closeout package",
             "",
             f"Project: {project_name}",
             f"Project type: {package.project_type}",
-            f"Completeness: {package.completeness_pct}%",
+            f"Completeness: {completeness_pct}%",
             f"Status: {'READY' if ready else 'INCOMPLETE'}",
             "",
             "See manifest.json for the machine-readable index, cover.pdf for the",

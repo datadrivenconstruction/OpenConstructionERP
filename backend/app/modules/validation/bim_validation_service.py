@@ -115,8 +115,10 @@ class BIMValidationService:
         # two "quality scores" are not comparable in the unified dashboard
         # (E-XMOD-015). A passing (rule, element) pair contributes the rule's
         # severity weight to both numerator and denominator (mirrors the core
-        # engine, where a passing ERROR-rule result carries ERROR weight);
-        # each failure contributes its severity weight to the denominator.
+        # engine, where a passing ERROR-rule result carries ERROR weight); a
+        # failed check contributes the rule weight to the denominator exactly
+        # once, even when the check emits several sub-failures, so the
+        # denominator scales with the check count, not the failure count.
         passed_weight = 0.0
         total_weight = 0.0
         results_json: list[dict[str, Any]] = []
@@ -136,8 +138,12 @@ class BIMValidationService:
                     continue
 
                 failed_checks += 1
+                # One weight per check, like the core engine: a failed
+                # (rule, element) check contributes the rule weight to the
+                # denominator exactly once, regardless of how many sub-failures
+                # it emits. Per-severity counts still iterate every failure.
+                total_weight += rule_weight
                 for failure in failures:
-                    total_weight += SEVERITY_WEIGHTS.get(str(failure.severity), 1.0)
                     if failure.severity == "error":
                         error_count += 1
                     elif failure.severity == "warning":

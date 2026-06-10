@@ -62,6 +62,11 @@ async def closeout_build_handler(job_run: JobRun, payload: dict[str, Any]) -> di
         package.last_built_at = datetime.now(UTC).isoformat()
         package.last_built_job_id = job_run.id
         session.add(package)
+        # Now that package_key is set, has_built is True, so generated required
+        # slots count as delivered. Recompute the denormalised counters/status
+        # so a fully delivered, built package can reach ready/100% and the
+        # persisted status no longer contradicts the API ready flag.
+        await service.recompute_completeness(package)
         await session.commit()
 
     result = {

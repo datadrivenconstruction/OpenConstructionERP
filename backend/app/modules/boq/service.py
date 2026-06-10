@@ -1086,7 +1086,7 @@ def _resource_total_in_base(
     resources: list[dict[str, Any]],
     fx_rates_map: dict[str, str] | None,
     base_currency: str,
-) -> float:
+) -> Decimal:
     """Sum resource subtotals in the project's BASE currency.
 
     Issue #88 - each resource dict may carry an optional ``currency``. When
@@ -1098,30 +1098,32 @@ def _resource_total_in_base(
     time (this function silently skips the conversion to keep the rollup
     deterministic and never zero out a row).
 
+    The rollup is accumulated with ``Decimal`` (qty, rate and fx are coerced
+    via ``_to_decimal``) so summing many lines never drifts in binary float
+    before the caller's ``_quantize_money_str`` snaps to 4dp. Returns a
+    ``Decimal``; callers already wrap it via ``_quantize_money_str`` /
+    ``_to_decimal(str(...))``.
+
     Pure function - no DB I/O - so it's cheap to call from update_position
     and reusable from snapshot/export paths.
     """
     if not resources:
-        return 0.0
+        return Decimal("0")
     base = (base_currency or "").upper()
-    total = 0.0
+    total = Decimal("0")
     for r in resources:
         if not isinstance(r, dict):
             continue
-        try:
-            qty = float(r.get("quantity", 0) or 0)
-            rate = float(r.get("unit_rate", 0) or 0)
-        except (TypeError, ValueError):
-            continue
+        qty = _to_decimal(r.get("quantity"))
+        rate = _to_decimal(r.get("unit_rate"))
         sub = qty * rate
         code = str(r.get("currency") or "").strip().upper()
         if code and code != base and fx_rates_map:
             fx = fx_rates_map.get(code)
             if fx:
-                try:
-                    sub = sub * float(fx)
-                except (TypeError, ValueError):
-                    pass
+                fx_dec = _to_decimal(fx)
+                if fx_dec.is_finite() and fx_dec != 0:
+                    sub = sub * fx_dec
         total += sub
     return total
 
@@ -5573,6 +5575,13 @@ class BOQService:
             # lazy-refresh ``editor_position`` afterwards (MissingGreenlet).
             editor_id = editor_position.id
             editor_boq_id = editor_position.boq_id
+            # Resolve the project FX table once so each instance's derived
+            # unit_rate converts foreign-currency resources into the project
+            # BASE currency before summing, exactly as update_position and
+            # recalculate_rates do (Issue #88 / #157). Best-effort: a lookup
+            # failure returns ("", {}) so the rollup degrades to a raw sum
+            # rather than blending currencies into the stored rate.
+            fx_base_ccy, fx_map = await self._resolve_project_fx_by_project(project_id)
             # Oldest-first - the FIRST carrier of a code is its master.
             positions = await self.position_repo.list_for_project(project_id)
 
@@ -5657,15 +5666,13 @@ class BOQService:
                     continue
                 new_meta = dict(meta)
                 new_meta["resources"] = new_res
-                # Recompute the position's derived unit_rate from resources
-                # (mirrors the frontend handleUpdateResourceFields rollup).
-                roll = 0.0
-                for r in new_res:
-                    if isinstance(r, dict):
-                        roll += _str_to_float(r.get("total")) or (
-                            _str_to_float(r.get("quantity")) * _str_to_float(r.get("unit_rate"))
-                        )
-                derived_rate = _quantize_money_str(round(roll, 4))
+                # Recompute the position's derived unit_rate from resources.
+                # Each resource is converted from its own currency to the
+                # project base via the FX table before summing, mirroring
+                # update_position / recalculate_rates so this propagation path
+                # never blends currencies into the stored rate (Issue #88 / #157).
+                res_dicts = [r for r in new_res if isinstance(r, dict)]
+                derived_rate = _quantize_money_str(_resource_total_in_base(res_dicts, fx_map, fx_base_ccy or ""))
                 new_total = _compute_total(s["quantity"], derived_rate)
                 await self.position_repo.update_fields(
                     s["id"],
@@ -6028,8 +6035,16 @@ class BOQService:
 
                     cat = self._normalize_resource_category(res_type)
 
-                    # Scale resource cost by position quantity
-                    scaled_cost = res_total * max(pos_qty, 1.0)
+                    # Scale the per-unit resource subtotal by the real
+                    # position quantity. ``res.total`` is the PER-UNIT
+                    # subtotal (r.quantity * r.unit_rate) and the position's
+                    # authoritative total is pos.quantity * Σ(res.total), so
+                    # scaling by ``pos_qty`` makes this branch sum to the same
+                    # canonical direct cost as the stored ``pos.total`` summed
+                    # everywhere else. Never substitute 1.0 for a legitimate
+                    # fractional or zero quantity (that over-stated 0.5 m3 as
+                    # 1.0 and reported a full subtotal for a 0-qty position).
+                    scaled_cost = res_total * pos_qty
 
                     category_amounts[cat] = category_amounts.get(cat, 0.0) + scaled_cost
                     category_counts[cat] = category_counts.get(cat, 0) + 1

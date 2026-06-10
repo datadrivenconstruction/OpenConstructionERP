@@ -33,46 +33,46 @@ _REGION_FORMAT_RE = re.compile(r"^[A-Z]{2,3}_[A-Z0-9]+$")
 # CWICR ingestion historically stored currency as an empty string because the
 # parquet files don't carry a currency column. We resolve the right ISO 4217
 # code from the region at response time so legacy rows behave correctly
-# without forcing a re-import. Keep the keys aligned with the frontend
-# REGION_MAP (UPPERCASE country prefix).
-_REGION_CURRENCY_FALLBACK: dict[str, str] = {
-    "DE_BERLIN": "EUR",
-    "DE_MUNICH": "EUR",
+# without forcing a re-import.
+#
+# Single source of truth: the v3 catalogue registry (CWICR_V3_CATALOGUES)
+# already declares the ISO currency of every region DDC ships, so we derive
+# the map from it exactly the way the router's search/autocomplete/match
+# paths do. The old hand-kept literal here only had 33 keys and omitted ~20
+# live regions (NGN/KES/GHS/KRW/THB/VND/...), so the single-item read path
+# returned an empty currency for rows the list/match paths labelled
+# correctly. Deriving from the catalogue keeps both paths in lockstep and new
+# catalogue rows are covered automatically.
+#
+# Legacy / alias keys that are NOT in the v3 registry (older parquet ``db_id``
+# tags) are merged on top so they keep resolving. This list is kept identical
+# to ``_REGION_CURRENCY_LEGACY`` in the router so the two maps cover the same
+# region keys.
+_REGION_CURRENCY_LEGACY: dict[str, str] = {
     "DE_HAMBURG": "EUR",
-    "AT_VIENNA": "EUR",
-    "CH_ZURICH": "CHF",
-    "FR_PARIS": "EUR",
-    "ES_MADRID": "EUR",
-    "IT_ROME": "EUR",
-    "NL_AMSTERDAM": "EUR",
     "BE_BRUSSELS": "EUR",
-    "PT_LISBON": "EUR",
-    # NOTE: ``PT_SAOPAULO`` was historically mislabeled (São Paulo is BR,
-    # not PT). Canonical key is ``BR_SAOPAULO`` (below). Removed here so a
-    # bad row would hit the warning path rather than silently resolve.
-    "GB_LONDON": "GBP",
     "IE_DUBLIN": "EUR",
-    "PL_WARSAW": "PLN",
-    "CZ_PRAGUE": "CZK",
-    "RO_BUCHAREST": "RON",
-    "RU_STPETERSBURG": "RUB",
-    "RU_MOSCOW": "RUB",
-    "USA_USD": "USD",
     "USA_NEWYORK": "USD",
-    "CA_TORONTO": "CAD",
-    "MX_MEXICO": "MXN",
-    "BR_SAOPAULO": "BRL",
-    "AR_BUENOSAIRES": "ARS",
-    "CN_SHANGHAI": "CNY",
-    "JP_TOKYO": "JPY",
-    "IN_MUMBAI": "INR",
-    "AE_DUBAI": "AED",
     "SA_RIYADH": "SAR",
-    "TR_ISTANBUL": "TRY",
-    "AU_SYDNEY": "AUD",
-    "NZ_AUCKLAND": "NZD",
-    "ZA_JOHANNESBURG": "ZAR",
+    # NOTE: ``PT_SAOPAULO`` is intentionally NOT registered - it was a
+    # mislabeled tag (São Paulo is Brazil; canonical key is ``BR_SAOPAULO``,
+    # supplied by the v3 registry). A stray ``PT_SAOPAULO`` row should hit the
+    # unknown-region path, not silently resolve.
 }
+
+
+def _build_region_currency_fallback() -> dict[str, str]:
+    """Derive ``{region: ISO currency}`` from the v3 catalogue + legacy aliases."""
+    from app.modules.costs.cwicr_v3_catalogue import CWICR_V3_CATALOGUES
+
+    out: dict[str, str] = {cat.region: cat.currency for cat in CWICR_V3_CATALOGUES if cat.currency}
+    # Legacy/alias keys only fill gaps - never override a canonical v3 entry.
+    for region, currency in _REGION_CURRENCY_LEGACY.items():
+        out.setdefault(region, currency)
+    return out
+
+
+_REGION_CURRENCY_FALLBACK: dict[str, str] = _build_region_currency_fallback()
 
 # ── Create / Update ───────────────────────────────────────────────────────
 
