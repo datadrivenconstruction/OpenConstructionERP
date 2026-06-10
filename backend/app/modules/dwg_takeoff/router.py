@@ -24,13 +24,16 @@ Endpoints:
 import ipaddress
 import logging
 import uuid
+from pathlib import Path
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile, status
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
 
 from app.config import get_settings
+from app.core.demo_placeholders import materialize_placeholder
 from app.core.rate_limiter import upload_limiter
+from app.core.storage import is_within_safe_root
 from app.dependencies import (
     CurrentUserId,
     RequirePermission,
@@ -419,6 +422,79 @@ async def get_thumbnail(
             detail="Thumbnail not available",
         )
     return Response(content=svg_content, media_type="image/svg+xml")
+
+
+_DWG_MEDIA_TYPES = {
+    "dwg": "image/vnd.dwg",
+    "dxf": "image/vnd.dxf",
+}
+
+
+@router.get("/drawings/{drawing_id}/download/")
+async def download_drawing(
+    drawing_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    session: SessionDep = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("dwg_takeoff.read")),
+    service: DwgTakeoffService = Depends(_get_service),
+) -> FileResponse:
+    """Download the source DWG/DXF file for a drawing.
+
+    Access is gated by project membership (``_gate_by_drawing`` 404s on both
+    a missing drawing and a foreign tenant's, never 403). The stored path must
+    resolve inside a directory the platform owns (DWG uploads land under the
+    data dir's ``dwg_uploads/``); we reject symlinks and anything outside the
+    safe roots. When the blob is genuinely absent (demo/showcase rows ship no
+    binaries) we materialize a tiny but valid DXF stub on first access so the
+    /files row downloads something openable instead of a 404.
+    """
+    drawing = await _gate_by_drawing(drawing_id, user_id, service, session)
+
+    fmt = (getattr(drawing, "file_format", "") or "dxf").lower().lstrip(".")
+    media_type = _DWG_MEDIA_TYPES.get(fmt, "application/octet-stream")
+    filename = getattr(drawing, "filename", None) or f"{drawing.id}.{fmt}"
+
+    raw = getattr(drawing, "file_path", "") or ""
+    file_path = Path(raw).resolve() if raw else None
+
+    if file_path is not None and not is_within_safe_root(file_path):
+        logger.warning(
+            "DWG drawing %s file_path %s resolves outside the platform data roots",
+            drawing.id,
+            raw,
+        )
+        file_path = None
+
+    if file_path is not None and file_path.is_symlink():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Symlinks not permitted",
+        )
+
+    if file_path is None or not file_path.exists() or not file_path.is_file():
+        # No shipped blob (demo/showcase row, or a pruned upload). Materialize a
+        # minimal valid DXF stub under a safe, deterministic location so the
+        # download succeeds instead of 404.
+        from app.core.storage import _default_local_base_dir
+
+        ext = f".{fmt}" if fmt in ("dwg", "dxf") else ".dxf"
+        target = (_default_local_base_dir() / "dwg_uploads" / "demo" / f"{drawing.id}{ext}").resolve()
+        try:
+            materialize_placeholder(target, getattr(drawing, "name", None) or filename)
+        except Exception:  # pragma: no cover - degrade to 404 on unexpected failure
+            logger.warning("Failed to materialize DWG placeholder for %s", drawing.id, exc_info=True)
+        if not target.exists() or not target.is_file():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="File not found on disk",
+            )
+        file_path = target
+
+    return FileResponse(
+        path=str(file_path),
+        filename=filename,
+        media_type=media_type,
+    )
 
 
 # ── Revision compare (Item 17) ───────────────────────────────────────────────

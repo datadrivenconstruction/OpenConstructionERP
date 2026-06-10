@@ -1607,15 +1607,22 @@ function QuickUploadCard({ projects }: { projects?: ProjectSummary[] }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
-  // When no project is active globally, let the user pick a target right here
-  // instead of dead-ending the upload. The pick is local to this card and does
-  // not change the global active project.
+  // Inline target picker. Lets the user choose which project the file goes to
+  // without leaving the dashboard. It defaults to the global active project
+  // (oe_active_project) but can be overridden here; the pick is local to this
+  // card and does not change the global active project.
   const [pickedProjectId, setPickedProjectId] = useState<string>('');
 
-  const uploadProjectId = activeProjectId ?? (pickedProjectId || null);
+  const selectableProjects = (projects ?? []).filter((p) => p.id && p.name);
+
+  // Seed the picker from the active project, then fall back to the first
+  // project so a file always has a sensible target even when nothing is active.
+  const defaultProjectId =
+    activeProjectId ?? selectableProjects[0]?.id ?? '';
+  const uploadProjectId = pickedProjectId || defaultProjectId || null;
   const uploadProjectName =
-    activeProjectName ||
-    projects?.find((p) => p.id === uploadProjectId)?.name ||
+    selectableProjects.find((p) => p.id === uploadProjectId)?.name ||
+    (uploadProjectId === activeProjectId ? activeProjectName : '') ||
     '';
 
   const { data: documents } = useQuery({
@@ -1709,8 +1716,7 @@ function QuickUploadCard({ projects }: { projects?: ProjectSummary[] }) {
 
   const documentCount = (documents as DocumentItem[] | undefined)?.length ?? 0;
   const hasProject = !!uploadProjectId;
-  const noActiveProject = !activeProjectId;
-  const selectableProjects = (projects ?? []).filter((p) => p.id && p.name);
+  const hasProjects = selectableProjects.length > 0;
 
   return (
     <div className="animate-card-in" style={{ animationDelay: '120ms' }}>
@@ -1756,29 +1762,22 @@ function QuickUploadCard({ projects }: { projects?: ProjectSummary[] }) {
               })}
             </div>
             <p className="mt-0.5 text-xs text-content-tertiary line-clamp-1">
-              {hasProject
+              {hasProjects
                 ? t('dashboard.upload_desc', {
                     defaultValue: 'Upload to {{project}} - PDF, DWG, IFC, RVT, images.',
                     project: uploadProjectName || t('dashboard.active_project', { defaultValue: 'active project' }),
                   })
-                : selectableProjects.length > 0
-                  ? t('dashboard.upload_pick_project', {
-                      defaultValue: 'Pick a project to upload into.',
-                    })
-                  : t('dashboard.upload_need_project', {
-                      defaultValue: 'Create a project first, then upload files here.',
-                    })}
+                : t('dashboard.upload_need_project', {
+                    defaultValue: 'Create a project first, then upload files here.',
+                  })}
             </p>
-            {noActiveProject && selectableProjects.length > 0 && (
+            {hasProjects && (
               <select
-                value={pickedProjectId}
+                value={uploadProjectId ?? ''}
                 onChange={(e) => setPickedProjectId(e.target.value)}
                 className="mt-2 h-8 w-full max-w-xs rounded-lg border border-border bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue"
                 aria-label={t('dashboard.upload_pick_project', { defaultValue: 'Pick a project to upload into.' })}
               >
-                <option value="">
-                  {t('dashboard.upload_choose_project', { defaultValue: 'Choose a project' })}
-                </option>
                 {selectableProjects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -1786,7 +1785,7 @@ function QuickUploadCard({ projects }: { projects?: ProjectSummary[] }) {
                 ))}
               </select>
             )}
-            {noActiveProject && selectableProjects.length === 0 && (
+            {!hasProjects && (
               <button
                 type="button"
                 className="mt-2 inline-flex items-center gap-1 text-2xs font-medium text-oe-blue hover:text-oe-blue-text transition-colors"

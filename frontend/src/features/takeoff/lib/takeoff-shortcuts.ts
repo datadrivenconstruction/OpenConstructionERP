@@ -3,9 +3,9 @@
  *
  * Mapping (Q1 UX spec):
  *   V → Select          D → Distance     P → Polyline
- *   A → Area            O → Volume       C → Count
- *   R → Rectangle       T → Text         H → Highlight
- *   W → Cloud           X → Arrow        Esc → cancel
+ *   A → Area            E → Rect area    O → Volume
+ *   C → Count           R → Rectangle    T → Text
+ *   H → Highlight       W → Cloud        X → Arrow     Esc → cancel
  */
 
 import type { MeasureTool } from './takeoff-types';
@@ -16,6 +16,7 @@ export const TOOL_SHORTCUT_MAP: Readonly<Record<string, MeasureTool>> = {
   d: 'distance',
   p: 'polyline',
   a: 'area',
+  e: 'rectarea',
   o: 'volume',
   c: 'count',
   r: 'rectangle',
@@ -31,6 +32,7 @@ export const SHORTCUT_LETTER: Readonly<Record<MeasureTool, string>> = {
   distance: 'D',
   polyline: 'P',
   area: 'A',
+  rectarea: 'E',
   volume: 'O',
   count: 'C',
   rectangle: 'R',

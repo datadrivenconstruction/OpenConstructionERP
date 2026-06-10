@@ -115,9 +115,7 @@ async def project_id(client: AsyncClient, auth: dict[str, str]) -> str:
 
 
 @pytest.mark.asyncio
-async def test_import_ids_endpoint_creates_rules(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_import_ids_endpoint_creates_rules(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     """Uploading the multi-spec fixture creates 3 rules in the registry."""
     fixture = FIXTURES / "ids_10_multi_specification.xml"
     files = {
@@ -145,9 +143,7 @@ async def test_import_ids_endpoint_creates_rules(
 
 
 @pytest.mark.asyncio
-async def test_import_ids_rejects_garbage(
-    client: AsyncClient, auth: dict[str, str], project_id: str
-) -> None:
+async def test_import_ids_rejects_garbage(client: AsyncClient, auth: dict[str, str], project_id: str) -> None:
     """Malformed payload returns 422 with a helpful detail."""
     files = {"file": ("not_ids.xml", b"<<<not xml>>>", "application/xml")}
     resp = await client.post(

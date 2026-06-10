@@ -28,8 +28,10 @@ from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query
 from fastapi.responses import FileResponse
 
 from app.core.bulk_ops import BulkDeleteRequest
+from app.core.demo_placeholders import materialize_placeholder
 from app.core.i18n import get_locale
 from app.core.rate_limiter import upload_limiter
+from app.core.storage import is_within_safe_root
 from app.core.validation.messages import translate
 from app.dependencies import (
     CurrentUserId,
@@ -1439,51 +1441,51 @@ async def download_document(
     await verify_project_access(doc.project_id, user_id, session)
     upload_base = Path(UPLOAD_BASE).resolve()
     meta = getattr(doc, "metadata_", None) or {}
-    is_demo_pdf = bool(meta.get("is_demo")) and (doc.mime_type or "").lower() == "application/pdf"
+    is_demo = bool(meta.get("is_demo"))
+    # A document is "placeholder-eligible" when its real blob may legitimately
+    # be absent on this box: curated demo rows, and /files mirror documents
+    # that point back at another module's upload (dwg-takeoff, takeoff) whose
+    # blob can be pruned independently. For those we materialize a typed stub
+    # on demand rather than 404, so every /files row downloads something valid.
+    is_mirror = bool(meta.get("source_module"))
+    placeholder_eligible = is_demo or is_mirror
 
     # file_path stored in DB may be relative (demo seed records) or absolute
     # (real uploads). Normalize relatives against UPLOAD_BASE before resolving
     # so they don't escape the base via CWD.
     raw = Path(doc.file_path) if doc.file_path else None
     if raw is None:
-        file_path = (upload_base / "demo" / f"{doc.id}.pdf").resolve()
+        file_path = (upload_base / "demo" / f"{doc.id}{_placeholder_suffix(doc)}").resolve()
     else:
         file_path = (raw if raw.is_absolute() else upload_base / raw).resolve()
 
-    # Security: path must be STRICTLY inside upload_base after full resolution.
-    # ``str.startswith`` can be fooled on Windows case-insensitive FS and by
-    # symlinks; ``relative_to`` rejects both cases explicitly.
-    contained = True
-    try:
-        file_path.relative_to(upload_base)
-    except ValueError:
-        contained = False
+    # Security: path must resolve inside a directory the platform owns. The
+    # blob may legitimately live under a sibling root (a /files mirror document
+    # points at the dwg-takeoff or takeoff upload dir, not UPLOAD_BASE), so we
+    # accept UPLOAD_BASE plus the platform-wide safe data roots. ``relative_to``
+    # (not ``str.startswith``) defeats Windows case-fold and symlink escapes.
+    contained = is_within_safe_root(file_path, extra_roots=[upload_base])
 
     if not contained:
-        # v2.9.31: demo seed records that were ingested under a different
-        # UPLOAD_BASE (e.g. the user moved the upload dir between releases,
-        # or the wheel ran a demo seeded with absolute Windows paths from
-        # the developer's machine) used to 403 here. The doc IS accessible
-        # to this user (project_access already verified), the failed leg is
-        # only that the *stored* path no longer lands inside the current
-        # upload_base. For demo PDFs we re-anchor the path to a deterministic
-        # safe location and materialize the placeholder there. For real
-        # uploads we degrade to 404 ("file is missing") rather than 403
-        # ("access denied"), which is the truthful error and unblocks the
-        # /files → /takeoff cross-module open the user reported.
-        if is_demo_pdf:
-            file_path = (upload_base / "demo" / f"{doc.id}.pdf").resolve()
+        # The stored absolute path resolves outside every directory the
+        # platform writes to (e.g. a demo seeded with another machine's paths,
+        # or an upload dir moved between releases). The doc IS accessible to
+        # this user (project_access already verified); only the stored path is
+        # stale. For placeholder-eligible docs we re-anchor to a deterministic
+        # safe location and materialize a stub there. For real uploads we
+        # degrade to 404 ("file is missing"), the truthful error.
+        if placeholder_eligible:
+            file_path = (upload_base / "demo" / f"{doc.id}{_placeholder_suffix(doc)}").resolve()
             logger.info(
-                "Re-anchored demo doc %s to %s (stored path outside upload_base)",
+                "Re-anchored demo/mirror doc %s to %s (stored path outside safe roots)",
                 doc.id,
                 file_path,
             )
         else:
             logger.warning(
-                "Document %s file_path %s resolves outside upload_base %s",
+                "Document %s file_path %s resolves outside the platform data roots",
                 doc.id,
                 doc.file_path,
-                upload_base,
             )
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -1497,15 +1499,15 @@ async def download_document(
         )
 
     if not file_path.exists() or not file_path.is_file():
-        # Demo seed records are inserted without a real file on disk because
-        # we don't ship multi-MB PDFs in the wheel.  When a user clicks
-        # "Open in Module" → /takeoff for a demo document, materialize a
-        # minimal placeholder PDF on first download so the cross-module
-        # deeplink lands on a real preview instead of a raw 404.
-        if is_demo_pdf:
+        # Demo/mirror records may reference a blob that was never shipped in
+        # the wheel or has been pruned. Materialize a minimal, type-correct
+        # placeholder on first download so /files deeplinks land on a real
+        # file (PDF for PDFs, a tiny valid DWG/IFC stub for CAD, a text note
+        # otherwise) instead of a raw 404.
+        if placeholder_eligible:
             try:
-                _materialize_demo_pdf_placeholder(file_path, doc.name, meta.get("demo_id"))
-            except Exception:  # pragma: no cover - degrade to 404 if reportlab missing
+                _materialize_demo_placeholder(file_path, doc.name, meta.get("demo_id"))
+            except Exception:  # pragma: no cover - degrade to 404 on unexpected failure
                 logger.warning("Failed to materialize demo placeholder for %s", doc.id, exc_info=True)
         if not file_path.exists() or not file_path.is_file():
             raise HTTPException(
@@ -1520,38 +1522,37 @@ async def download_document(
     )
 
 
-def _materialize_demo_pdf_placeholder(target: Path, name: str, demo_id: str | None) -> None:
-    """Write a minimal one-page PDF to ``target`` for demo seed documents.
+def _placeholder_suffix(doc: object) -> str:
+    """Return the file extension to give a re-anchored placeholder for ``doc``.
 
-    Why: demo projects ship without bundled binaries, so seeded ``Document``
-    rows reference paths that don't exist on disk.  Generating a placeholder
-    on first download keeps ``/files`` deeplinks honest (PDF takeoff opens,
-    file manager preview works) without bloating the wheel.
+    Prefer the document's own name extension (so a .dwg row stays .dwg, a .ifc
+    row stays .ifc); fall back to .pdf for PDFs or anything without a usable
+    extension. This keeps the materialized stub type-correct for the viewer
+    the /files row links to.
     """
-    target.parent.mkdir(parents=True, exist_ok=True)
-    from reportlab.lib.pagesizes import A4  # type: ignore[import-untyped]
-    from reportlab.pdfgen import canvas as pdf_canvas  # type: ignore[import-untyped]
+    name = getattr(doc, "name", "") or ""
+    suffix = Path(name).suffix.lower()
+    if suffix and len(suffix) <= 6:
+        return suffix
+    mime = (getattr(doc, "mime_type", "") or "").lower()
+    if "pdf" in mime:
+        return ".pdf"
+    return ".pdf"
 
-    from app.core.pdf_fonts import BODY_FONT, BOLD_FONT, register_pdf_fonts
 
-    register_pdf_fonts()
+def _materialize_demo_placeholder(target: Path, name: str, demo_id: str | None) -> None:
+    """Write a minimal, type-correct placeholder file to ``target``.
 
-    width, height = A4
-    c = pdf_canvas.Canvas(str(target), pagesize=A4)
-    c.setTitle(name)
-    c.setFont(BOLD_FONT, 18)
-    c.drawString(72, height - 90, name[:90])
-    c.setFont(BODY_FONT, 11)
-    c.drawString(72, height - 130, "Demo placeholder document")
-    if demo_id:
-        c.drawString(72, height - 150, f"Project: {demo_id}")
-    c.setFont(BODY_FONT, 10)
-    c.drawString(72, height - 200, "This file is auto-generated for the demo project.")
-    c.drawString(72, height - 215, "Upload your own document to replace it.")
-    c.setFont(BODY_FONT, 9)
-    c.drawString(72, 60, "OpenConstructionERP - open-source construction cost platform")
-    c.showPage()
-    c.save()
+    Why: demo and showcase projects ship without bundled binaries, so seeded
+    ``Document`` rows (and /files mirror rows pointing at another module's
+    pruned upload) reference paths that may not exist on disk. Generating a
+    placeholder of the right type on first download keeps ``/files`` deeplinks
+    honest (PDF takeoff opens, the CAD/IFC viewer gets a real file) without
+    bloating the wheel. Dispatch by extension lives in
+    :mod:`app.core.demo_placeholders`.
+    """
+    note = f"Project: {demo_id}" if demo_id else None
+    materialize_placeholder(target, name, note)
 
 
 # ── Update ───────────────────────────────────────────────────────────────────

@@ -21,6 +21,7 @@ import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import { useToastStore } from '@/stores/useToastStore';
 import { copyToClipboard } from '../lib/tauri';
+import { downloadProtectedFile } from '../api';
 import { primaryModule } from '../kindModule';
 import type { FileRow } from '../types';
 
@@ -78,6 +79,20 @@ export function FileContextMenu({
   const target = primaryModule(row.kind, row.extension);
   const moduleLabel = t(target.i18nKey, { defaultValue: target.label });
 
+  async function handleDownload() {
+    if (!row.download_url) return;
+    onClose();
+    try {
+      await downloadProtectedFile(row.download_url, row.name);
+    } catch (e) {
+      addToast({
+        type: 'error',
+        title: t('files.actions.download_failed', { defaultValue: 'Could not download the file' }),
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
   async function handleCopyLink() {
     if (!row.download_url) return;
     const absolute = row.download_url.startsWith('http')
@@ -119,10 +134,7 @@ export function FileContextMenu({
         <MenuItem
           icon={<Download size={13} />}
           label={t('files.context.download', { defaultValue: 'Download' })}
-          onClick={() => {
-            window.open(row.download_url ?? undefined, '_blank', 'noopener,noreferrer');
-            onClose();
-          }}
+          onClick={handleDownload}
         />
       )}
       {row.download_url && (

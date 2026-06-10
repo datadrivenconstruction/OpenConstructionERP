@@ -43,6 +43,7 @@ from app.core.file_signature import (
 )
 from app.dependencies import (
     CurrentUserId,
+    CurrentUserPayload,
     OptionalUserPayload,
     RequirePermission,
     RequireRole,
@@ -62,6 +63,8 @@ from app.modules.costs.matcher import (
 )
 from app.modules.costs.models import CostItem
 from app.modules.costs.schemas import (
+    BenchmarkRequest,
+    BenchmarkResponse,
     CategoryTreeNode,
     CertaintyBadge,
     CostAutocompleteItem,
@@ -77,7 +80,7 @@ from app.modules.costs.schemas import (
     RegionalIndexResponse,
     SuggestCostsForElementRequest,
 )
-from app.modules.costs.service import CostItemService
+from app.modules.costs.service import CostBenchmarkService, CostItemService
 from app.modules.costs.translations import localize_cost_row
 
 # Round-7 upload safety: cap incoming bulk imports at 25 MB so a renamed
@@ -4658,3 +4661,51 @@ async def record_cost_item_usage(
         "used_at": row.used_at.isoformat() if row.used_at else None,
         "certainty": CertaintyBadge.model_validate(certainty).model_dump(mode="json"),
     }
+
+
+# ── Cost benchmarks: own-portfolio distribution (Phase 2) ──────────────────
+
+
+@router.post(
+    "/benchmark/",
+    response_model=BenchmarkResponse,
+    dependencies=[Depends(RequirePermission("costs.read"))],
+)
+async def cost_benchmark_portfolio(
+    body: BenchmarkRequest,
+    session: SessionDep,
+    user: CurrentUserPayload,
+) -> BenchmarkResponse:
+    """Position a cost-per-m2 value against the tenant's OWN real projects.
+
+    Each of the caller's projects contributes a cost-per-m2 figure derived
+    from its real data: the BOQ grand total divided by the recorded gross
+    floor area. The endpoint returns the min / p25 / median / p75 / max of
+    that distribution plus, when ``cost_per_m2`` is supplied, where the
+    user value sits within it.
+
+    Industry reference ranges are NOT returned here; the client owns the
+    richer static benchmark table and computes the industry percentile
+    locally. This endpoint adds only the tenant-specific portfolio the
+    client cannot compute, keeping it thin.
+
+    Degrades gracefully: when the caller has no project with both a cost
+    and an area, ``own_portfolio`` and ``percentile_vs_own`` are null and
+    the response is still 200 so the client falls back to industry-only.
+    """
+    sub = (user or {}).get("sub")
+    if not sub:
+        # Authenticated route, but defend against a token without a subject.
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    owner_id = uuid.UUID(str(sub))
+    is_admin = (user or {}).get("role") == "admin"
+
+    result = await CostBenchmarkService(session).portfolio_distribution(
+        owner_id=owner_id,
+        is_admin=is_admin,
+        building_type=body.building_type,
+        region=body.region,
+        currency=body.currency,
+        cost_per_m2=body.cost_per_m2,
+    )
+    return BenchmarkResponse.model_validate(result)

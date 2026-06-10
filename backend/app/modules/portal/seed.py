@@ -145,7 +145,10 @@ async def seed_portal_demo(
                 permission=permission,
                 granted_at=now - timedelta(days=10 - r_idx),
             )
-            session.add(rule)
+            # merge (not add) so reruns are genuinely idempotent: the IDs are
+            # deterministic, so a second boot would otherwise re-INSERT the same
+            # primary key and raise a UniqueViolation that aborts the seed.
+            await session.merge(rule)
             rules_created += 1
     await session.flush()
 
@@ -164,7 +167,7 @@ async def seed_portal_demo(
             payload={"seq": n_idx, "kind": kind},
             read_at=read_at,
         )
-        session.add(notif)
+        await session.merge(notif)
         notifications_created += 1
     await session.flush()
 
@@ -181,7 +184,7 @@ async def seed_portal_demo(
             occurred_at=now - timedelta(minutes=l_idx * 7),
             ip_address=f"10.0.{l_idx // 256}.{l_idx % 256}",
         )
-        session.add(entry)
+        await session.merge(entry)
         access_logs_created += 1
     await session.flush()
 

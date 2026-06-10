@@ -16,6 +16,7 @@ import json as _json
 import logging
 import re
 import uuid
+from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -663,3 +664,277 @@ class CostItemService:
             reasons.append(f"+{extra_hits - 1} keyword hits")
 
         return score, reasons
+
+
+# ── Cost benchmarks: own-portfolio distribution (Phase 2) ──────────────────
+
+
+def _parse_decimal(raw: object) -> Decimal | None:
+    """Parse a money / area string into a positive Decimal, or None.
+
+    Project money and area columns and BOQ position totals are stored as
+    locale-independent decimal strings. Blank, missing, non-numeric or
+    non-positive values are treated as "no data" so they never poison the
+    aggregation - the goal is honest real numbers, not invented ones.
+    """
+    from decimal import Decimal, InvalidOperation
+
+    if raw is None:
+        return None
+    try:
+        value = Decimal(str(raw).strip())
+    except (InvalidOperation, ValueError):
+        return None
+    if value <= 0:
+        return None
+    return value
+
+
+def _percentile(sorted_values: list[Decimal], pct: float) -> Decimal:
+    """Linear-interpolation percentile over a pre-sorted list (pct in 0..100).
+
+    Matches the numpy "linear" method so the median (pct=50) of an even-length
+    list is the average of the two middle elements. Caller guarantees the list
+    is non-empty and sorted ascending.
+    """
+    from decimal import Decimal
+
+    if len(sorted_values) == 1:
+        return sorted_values[0]
+    rank = (pct / 100.0) * (len(sorted_values) - 1)
+    low = int(rank)
+    high = min(low + 1, len(sorted_values) - 1)
+    frac = Decimal(str(rank - low))
+    return sorted_values[low] + (sorted_values[high] - sorted_values[low]) * frac
+
+
+def _position_in_distribution(value: Decimal, sorted_values: list[Decimal]) -> float:
+    """Return where ``value`` sits in ``sorted_values`` as a 0-100 percentile.
+
+    Uses the fraction of portfolio values at or below ``value`` (the
+    empirical CDF). Returns 0 when below everything, 100 when at or above
+    everything.
+    """
+    n = len(sorted_values)
+    if n == 0:
+        return 0.0
+    below = sum(1 for v in sorted_values if v <= value)
+    return round((below / n) * 100.0, 1)
+
+
+class CostBenchmarkService:
+    """Computes the tenant's own cost-per-m2 portfolio distribution.
+
+    The industry reference ranges live on the client (the static benchmark
+    table). This service supplies only the part the client cannot compute:
+    a real distribution derived from the user's own projects, where each
+    project's cost-per-m2 is its BOQ grand total divided by its recorded
+    gross floor area. Projects without both a cost and an area are skipped.
+
+    Multi-tenant scoping mirrors the project list endpoint: a non-admin
+    caller only sees projects they own or are a team member of, and the
+    active partner-pack scope is honoured.
+    """
+
+    # Confidence thresholds on the usable-project count. A thin portfolio is
+    # honestly labelled low so the UI never overstates how solid the
+    # comparison is - the same spirit as CostCertaintyService.
+    _CONF_HIGH_MIN = 8
+    _CONF_MEDIUM_MIN = 3
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def portfolio_distribution(
+        self,
+        *,
+        owner_id: uuid.UUID,
+        is_admin: bool = False,
+        building_type: str | None = None,
+        region: str | None = None,
+        currency: str | None = None,
+        cost_per_m2: Decimal | None = None,
+    ) -> dict[str, Any]:
+        """Build the own-portfolio distribution payload.
+
+        Returns a plain dict shaped for ``BenchmarkResponse``. ``own_portfolio``
+        is None and ``percentile_vs_own`` is None when fewer than one project
+        has both a cost and an area in the filtered set.
+        """
+        from app.modules.boq.models import BOQ, Position
+
+        # ── 1. Resolve the candidate projects (tenant-scoped + filtered) ──
+        projects = await self._candidate_projects(
+            owner_id=owner_id,
+            is_admin=is_admin,
+            building_type=building_type,
+            region=region,
+        )
+        if not projects:
+            return self._empty(cost_per_m2)
+
+        project_ids = [p.id for p in projects]
+
+        # ── 2. One grouped query for each project's BOQ direct-cost total ──
+        # Sum the per-position totals across every BOQ of the project. The
+        # totals are decimal-strings; we cast in Python (below) so a stray
+        # non-numeric legacy value is skipped rather than aborting the query.
+        rows = (
+            await self.session.execute(
+                select(BOQ.project_id, Position.total)
+                .join(Position, Position.boq_id == BOQ.id)
+                .where(BOQ.project_id.in_(project_ids))
+            )
+        ).all()
+        totals_by_project: dict[uuid.UUID, Decimal] = {}
+        for proj_id, raw_total in rows:
+            amount = _parse_decimal(raw_total)
+            if amount is None:
+                continue
+            totals_by_project[proj_id] = totals_by_project.get(proj_id, Decimal("0")) + amount
+
+        # ── 3. Per-project cost/m2, currency-scoped, never blending ───────
+        # Each entry: (cost_per_m2, project_currency). We compute a per-unit
+        # figure only when the project has BOTH a positive total cost AND a
+        # positive recorded area.
+        per_project: list[tuple[Decimal, str]] = []
+        for proj in projects:
+            total = totals_by_project.get(proj.id)
+            area = _parse_decimal(self._project_area(proj))
+            if total is None or area is None:
+                continue
+            proj_currency = (getattr(proj, "currency", "") or "").strip().upper()
+            per_project.append((total / area, proj_currency))
+
+        if not per_project:
+            return self._empty(cost_per_m2)
+
+        # ── 4. Pick the currency bucket (never mix currencies) ────────────
+        target_currency = (currency or "").strip().upper()
+        if not target_currency:
+            # Use the dominant currency among the usable projects.
+            counts: dict[str, int] = {}
+            for _, cur in per_project:
+                counts[cur] = counts.get(cur, 0) + 1
+            target_currency = max(counts, key=lambda c: counts[c])
+
+        values = sorted(v for v, cur in per_project if cur == target_currency)
+        if not values:
+            return self._empty(cost_per_m2)
+
+        # ── 5. Distribution statistics ────────────────────────────────────
+        count = len(values)
+        portfolio = {
+            "project_count": count,
+            "min": values[0],
+            "p25": _percentile(values, 25),
+            "median": _percentile(values, 50),
+            "p75": _percentile(values, 75),
+            "max": values[-1],
+            "confidence": self._confidence(count),
+            "note": (f"Based on {count} of your {'project' if count == 1 else 'projects'} with cost and area."),
+        }
+
+        percentile_vs_own: float | None = None
+        explanation = ""
+        if cost_per_m2 is not None:
+            percentile_vs_own = _position_in_distribution(cost_per_m2, values)
+            explanation = self._explain(cost_per_m2, portfolio["median"], percentile_vs_own)
+
+        return {
+            "currency": target_currency,
+            "own_portfolio": portfolio,
+            "percentile_vs_own": percentile_vs_own,
+            "explanation": explanation,
+        }
+
+    # ── Internal helpers ──────────────────────────────────────────────────
+
+    async def _candidate_projects(
+        self,
+        *,
+        owner_id: uuid.UUID,
+        is_admin: bool,
+        building_type: str | None,
+        region: str | None,
+    ) -> list[Any]:
+        """Tenant-scoped, filtered project rows (no relationships loaded)."""
+        from sqlalchemy.orm import noload
+
+        from app.core.partner_pack.scope import scope_project_query
+        from app.modules.projects.models import Project
+        from app.modules.teams.access import member_project_ids_subquery
+
+        base = select(Project)
+        # Honour the active partner-pack workspace scope, fail-soft.
+        try:
+            base = scope_project_query(base, Project)
+        except Exception:  # noqa: BLE001 - scoping must never break the read
+            logger.debug("Benchmark: partner-pack scoping skipped", exc_info=True)
+        if not is_admin:
+            base = base.where((Project.owner_id == owner_id) | (Project.id.in_(member_project_ids_subquery(owner_id))))
+        base = base.where(Project.status != "archived")
+        if building_type:
+            base = base.where(_func_lower(Project.project_type) == building_type.strip().lower())
+        if region:
+            base = base.where(_func_lower(Project.region) == region.strip().lower())
+
+        stmt = base.options(
+            noload(Project.wbs_nodes),
+            noload(Project.milestones),
+            noload(Project.children),
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    @staticmethod
+    def _project_area(proj: Any) -> object:
+        """Resolve a project's gross floor area from the column or metadata.
+
+        Preference order: the real ``gross_floor_area`` column, then a
+        ``gross_floor_area`` key in ``metadata_`` or ``custom_fields`` so
+        projects that stored area before the column existed still count.
+        """
+        direct = getattr(proj, "gross_floor_area", None)
+        if direct not in (None, ""):
+            return direct
+        for container_name in ("metadata_", "custom_fields"):
+            container = getattr(proj, container_name, None)
+            if isinstance(container, dict):
+                for key in ("gross_floor_area", "gfa", "area_m2"):
+                    val = container.get(key)
+                    if val not in (None, ""):
+                        return val
+        return None
+
+    @classmethod
+    def _confidence(cls, count: int) -> str:
+        if count >= cls._CONF_HIGH_MIN:
+            return "high"
+        if count >= cls._CONF_MEDIUM_MIN:
+            return "medium"
+        return "low"
+
+    @staticmethod
+    def _explain(value: Decimal, median: Decimal, percentile: float) -> str:
+        if value < median:
+            return "Your value sits below your own portfolio median."
+        if value > median:
+            return "Your value sits above your own portfolio median."
+        return "Your value sits right at your own portfolio median."
+
+    @staticmethod
+    def _empty(cost_per_m2: Decimal | None) -> dict[str, Any]:
+        return {
+            "currency": "",
+            "own_portfolio": None,
+            "percentile_vs_own": None,
+            "explanation": "",
+        }
+
+
+def _func_lower(column: Any) -> Any:
+    """Case-insensitive comparison helper that tolerates NULL columns."""
+    from sqlalchemy import func as _func
+
+    return _func.lower(_func.coalesce(column, ""))

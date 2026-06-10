@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import logging
 import os
+import uuid
 from typing import Any
 
 from fastapi import FastAPI
@@ -235,6 +236,23 @@ async def apply_pack(
                     "already present" if demo_res.get("already_installed") else "installed",
                     m.slug,
                 )
+
+                # Run the rich per-module enrichment (photos, takeoff, clash,
+                # carbon, qms, variations, costmodel, moc, markups, catalog, BIM
+                # grouping) over the freshly installed project. Without this an
+                # in-app pack apply opens with those modules empty, since
+                # install_demo_project only seeds BOQ / budget / schedule /
+                # tender / BIM model / PDFs. Fail-soft: enrichment errors never
+                # abort the apply, and each seeder isolates itself per session.
+                try:
+                    from app.core.demo_enrichment import enrich_projects
+
+                    _pid_raw = demo_res.get("project_id")
+                    if _pid_raw:
+                        _pid = _pid_raw if isinstance(_pid_raw, uuid.UUID) else uuid.UUID(str(_pid_raw))
+                        await enrich_projects([_pid])
+                except Exception as enrich_exc:  # noqa: BLE001 - enrichment never aborts apply
+                    logger.warning("Partner-pack apply: demo enrichment failed: %s", enrich_exc)
         except Exception as exc:  # noqa: BLE001 - a demo failure must not abort the apply
             effects["demo_project_failed"] = {"error": str(exc)}
             logger.warning("Partner-pack apply: demo project install failed: %s", exc)

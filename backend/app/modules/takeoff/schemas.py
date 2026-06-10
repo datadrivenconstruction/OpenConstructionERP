@@ -65,6 +65,27 @@ class ExtractTablesResponse(BaseModel):
     summary: dict
 
 
+class RecognizeCandidate(BaseModel):
+    """One detected, unconfirmed measurement proposed by vector recognition."""
+
+    type: str  # "area" | "distance" | "count"
+    points: list[dict] = Field(default_factory=list)
+    value: float | None = None
+    dimension: str = ""  # "area" | "length" | "count"
+    count: int | None = None
+    confidence: float = 0.0
+    reason: str = ""
+
+
+class RecognizeResponse(BaseModel):
+    """Result of offline vector recognition for one page (nothing persisted)."""
+
+    candidates: list[RecognizeCandidate] = Field(default_factory=list)
+    page: int
+    source: str = "vector_recognize"
+    notes: str | None = None
+
+
 # ── CAD quantity extraction schemas ──────────────────────────────────────
 
 

@@ -68,6 +68,7 @@ from app.modules.takeoff.schemas import (
     CreateVariationFromCompareRequest,
     CreateVariationFromCompareResponse,
     LinkToBoqRequest,
+    RecognizeResponse,
     TakeoffCompareResponse,
     TakeoffMeasurementBulkCreate,
     TakeoffMeasurementCreate,
@@ -4409,6 +4410,45 @@ async def analyze_document(
             "categories": categories,
         },
     }
+
+
+# ── Recognize (offline vector detection, issue #194) ───────────────────────
+
+
+@router.post(
+    "/documents/{doc_id}/recognize/",
+    response_model=RecognizeResponse,
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def recognize_document(
+    doc_id: str,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    page: int = Query(1, ge=1, description="1-indexed page to scan"),
+    scale_pixels_per_unit: float = Query(
+        0.0,
+        ge=0.0,
+        description="Calibration in pixels per linear unit; 0 returns geometry without a value preview",
+    ),
+    service: TakeoffService = Depends(_get_service),
+) -> RecognizeResponse:
+    """Detect candidate measurements from a page's vector layer (offline).
+
+    The deterministic, offline complement to ``analyze`` (which sends text to
+    an LLM): scans the PDF's vector drawings with PyMuPDF and proposes
+    confidence-scored area / length / count candidates. Nothing is persisted -
+    the user confirms or rejects each candidate on the canvas, then the
+    accepted ones flow through the normal bulk-create path where the server
+    re-derives the billed quantity (Audit B8).
+    """
+    doc = await service.get_document(doc_id)
+    if doc is None:
+        raise HTTPException(status_code=404, detail=translate("errors.document_not_found", locale=get_locale()))
+    # Audit B5 - IDOR: a document's geometry is as sensitive as its text.
+    await _verify_takeoff_doc_access(doc, str(user_id) if user_id else "", session)
+
+    result = await service.recognize_candidates(doc_id, page, scale_pixels_per_unit or None)
+    return RecognizeResponse(**result)
 
 
 # ── Delete ────────────────────────────────────────────────────────────────

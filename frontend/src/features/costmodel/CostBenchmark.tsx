@@ -317,7 +317,8 @@ export const CostBenchmark = memo(function CostBenchmark({ totalBudget, currency
                     {t('costmodel.benchmark_range_label', { defaultValue: 'Benchmark Range' })}
                   </div>
                   <div className="text-sm font-semibold tabular-nums text-content-primary">
-                    {formatCurrencyValue(benchmark.range.min, currency)} &ndash;{' '}
+                    {formatCurrencyValue(benchmark.range.min, currency)}{' '}
+                    {t('costmodel.benchmark_range_to', { defaultValue: 'to' })}{' '}
                     {formatCurrencyValue(benchmark.range.max, currency)}
                   </div>
                   <div className="mt-1 text-2xs text-content-tertiary">

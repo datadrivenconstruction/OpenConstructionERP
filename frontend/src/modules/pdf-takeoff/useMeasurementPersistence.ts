@@ -33,6 +33,11 @@ interface Measurement {
   linkedPositionOrdinal?: string;
   linkedBoqId?: string;
   linkedPositionLabel?: string;
+  /** AI-suggested but unconfirmed (issue #194): excluded from server sync
+   *  and localStorage until the user accepts it (which clears the flag). */
+  suggested?: boolean;
+  /** Recognition confidence 0..1 on AI-sourced measurements. */
+  confidence?: number;
 }
 
 interface ScaleConfig {
@@ -188,6 +193,37 @@ function toApiFormat(
   };
 }
 
+/**
+ * Geometry signature for a synced measurement: the set of fields a
+ * reshape can change that feed the server-side recompute (Audit B8). When
+ * this string changes for a row that already has a `serverId`, the row was
+ * edited in-canvas and must be PATCHed so the server re-derives the billed
+ * quantity. Annotation / color / group edits are intentionally excluded -
+ * those are handled by the existing flows and do not move the quantity.
+ */
+function geometrySignature(m: Measurement): string {
+  return JSON.stringify({
+    p: m.points,
+    d: m.depth ?? null,
+    c: m.type === 'count' ? Math.round(m.value) : null,
+    t: m.type,
+  });
+}
+
+/** Build the reshape PATCH body: just the geometry-bearing fields. The
+ *  server recomputes `measurement_value` / `volume` / `perimeter` from
+ *  these, so a client cannot inflate a quantity through this path. */
+function toApiUpdate(m: Measurement, scale?: ScaleConfig): Partial<MeasurementCreate> {
+  const ppu = scale && scale.pixelsPerUnit > 0 ? scale.pixelsPerUnit : null;
+  return {
+    points: m.points,
+    type: m.type,
+    scale_pixels_per_unit: ppu,
+    depth: m.depth ?? null,
+    count_value: m.type === 'count' ? Math.round(m.value) : null,
+  };
+}
+
 function fromApiFormat(r: MeasurementResponse): Measurement {
   const meta = r.metadata || {};
   return {
@@ -256,6 +292,14 @@ export function useMeasurementPersistence({
   const [syncing, setSyncing] = useState(false);
   const [syncedToServer, setSyncedToServer] = useState(false);
   const serverSyncRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Reshape-PATCH tracking (#194 Feature 1). `geometrySigRef` remembers the
+  // last geometry we know the server has for each `serverId`, so we only
+  // PATCH a row whose geometry actually changed. `patchTimerRef` debounces
+  // and `inFlightPatchRef` coalesces rapid reshapes of the same row
+  // (last-write-wins) so mid-drag churn never floods the network.
+  const geometrySigRef = useRef<Map<string, string>>(new Map());
+  const patchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inFlightPatchRef = useRef<Set<string>>(new Set());
   // Read the QueryClient directly from context — ``useContext`` returns
   // ``undefined`` instead of throwing when the provider is absent (e.g. in
   // unit tests that render the hook in isolation). When present, we use
@@ -277,7 +321,15 @@ export function useMeasurementPersistence({
           if (!cancelled && serverData.length > 0) {
             hasPersistedRef.current = true;
             setSyncedToServer(true);
-            setMeasurements(serverData.map(fromApiFormat));
+            const mapped = serverData.map(fromApiFormat);
+            // Seed the geometry baseline so a fresh load never re-PATCHes
+            // rows that already match the server (#194).
+            geometrySigRef.current = new Map(
+              mapped
+                .filter((m) => m.serverId)
+                .map((m) => [m.serverId as string, geometrySignature(m)]),
+            );
+            setMeasurements(mapped);
             return;
           }
         } catch {
@@ -307,7 +359,12 @@ export function useMeasurementPersistence({
     if (!fileName) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      saveToStorage(fileName, { measurements, scale, savedAt: Date.now() });
+      // Never persist AI suggestions: only confirmed measurements are saved.
+      saveToStorage(fileName, {
+        measurements: measurements.filter((m) => !m.suggested),
+        scale,
+        savedAt: Date.now(),
+      });
     }, 500);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -326,7 +383,9 @@ export function useMeasurementPersistence({
       setSyncing(true);
       try {
         const toCreate = serverMeasurements
-          .filter((m) => !m.serverId)
+          // Suggested-but-unconfirmed measurements are excluded; accepting a
+          // suggestion clears `suggested` and the next tick syncs it (#194).
+          .filter((m) => !m.serverId && !m.suggested)
           .map((m) => toApiFormat(m, projectId, fileName, scale));
 
         if (toCreate.length > 0) {
@@ -337,7 +396,11 @@ export function useMeasurementPersistence({
             const match = created.find((c) =>
               (c.metadata?.frontend_id as string) === m.id
             );
-            return match ? { ...m, serverId: match.id } : m;
+            if (!match) return m;
+            // Seed the reshape baseline for the freshly-synced row so a
+            // later in-canvas edit PATCHes, but a no-op tick does not (#194).
+            geometrySigRef.current.set(match.id, geometrySignature(m));
+            return { ...m, serverId: match.id };
           }));
           // Surface the new measurements in the unified Markups hub.
           qc?.invalidateQueries({ queryKey: ['unified-markups'] });
@@ -354,6 +417,85 @@ export function useMeasurementPersistence({
       if (serverSyncRef.current) clearTimeout(serverSyncRef.current);
     };
   }, [fileName, projectId, measurements, setMeasurements, scale.pixelsPerUnit]);
+
+  // Reshape PATCH (#194 Feature 1). When a measurement that already has a
+  // `serverId` has its geometry changed in-canvas, PATCH just that row so
+  // the server re-derives the billed quantity (Audit B8). Debounced 400ms
+  // off the last change; mid-drag churn never reaches the network because
+  // the viewer only commits points on mouseup. Coalesced per `serverId`:
+  // if a row is already in-flight we skip it this tick and the changed
+  // signature keeps it dirty for the next pass (last-write-wins per row).
+  useEffect(() => {
+    if (!projectId) return;
+    if (measurements.length === 0) return;
+
+    // Find synced rows whose geometry drifted from the server baseline.
+    const dirty = measurements.filter((m) => {
+      if (!m.serverId || m.suggested) return false;
+      const prevSig = geometrySigRef.current.get(m.serverId);
+      // No baseline yet (e.g. a row hydrated before its baseline seeded)
+      // -> record the current signature without firing a PATCH.
+      if (prevSig === undefined) {
+        geometrySigRef.current.set(m.serverId, geometrySignature(m));
+        return false;
+      }
+      return prevSig !== geometrySignature(m);
+    });
+    if (dirty.length === 0) return;
+
+    if (patchTimerRef.current) clearTimeout(patchTimerRef.current);
+    patchTimerRef.current = setTimeout(async () => {
+      const reconciled: { frontendId: string; value: number; area?: number }[] = [];
+      await Promise.all(
+        dirty.map(async (m) => {
+          const serverId = m.serverId!;
+          if (inFlightPatchRef.current.has(serverId)) return; // coalesce
+          inFlightPatchRef.current.add(serverId);
+          const sig = geometrySignature(m);
+          try {
+            const updated = await takeoffApi.update(serverId, toApiUpdate(m, scale));
+            // Mark this geometry as known-on-server so we don't re-PATCH it.
+            geometrySigRef.current.set(serverId, sig);
+            // Overwrite the optimistic value with the server-authoritative
+            // recompute so the displayed quantity can never exceed what the
+            // geometry justifies.
+            const serverValue =
+              updated.measurement_value ?? updated.volume ?? updated.count_value ?? m.value;
+            reconciled.push({
+              frontendId: m.id,
+              value: serverValue,
+              area: (updated.metadata?.area as number) ?? updated.measurement_value ?? undefined,
+            });
+          } catch {
+            // PATCH failed - keep the optimistic value + the localStorage
+            // copy (the 500ms effect above already persisted it). Leave the
+            // signature stale so the next tick retries.
+          } finally {
+            inFlightPatchRef.current.delete(serverId);
+          }
+        }),
+      );
+
+      if (reconciled.length > 0) {
+        setMeasurements(
+          measurements.map((m) => {
+            const r = reconciled.find((x) => x.frontendId === m.id);
+            if (!r) return m;
+            return {
+              ...m,
+              value: r.value,
+              ...(m.type === 'volume' && r.area !== undefined ? { area: r.area } : {}),
+            };
+          }),
+        );
+        qc?.invalidateQueries({ queryKey: ['unified-markups'] });
+      }
+    }, 400);
+
+    return () => {
+      if (patchTimerRef.current) clearTimeout(patchTimerRef.current);
+    };
+  }, [projectId, measurements, setMeasurements, scale, qc]);
 
   const saveNow = useCallback(() => {
     if (!fileName) return;

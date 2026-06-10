@@ -1069,6 +1069,22 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
         })
       : null;
 
+  // Zero-elements is NOT a converter-availability problem: the file was
+  // read fine, it simply yielded no convertible building elements (empty
+  // model, only spatial containers like project/site/building, or geometry
+  // the converter does not extract). The generic "converter unavailable"
+  // copy below would be actively misleading here (issue #197), so we lead
+  // with a specific, honest explanation and still surface the raw backend
+  // detail through the disclosure toggle.
+  const zeroElementsDescription =
+    !isProcessing && errorCode === 'zero_elements'
+      ? t('bim.overlay_zero_elements_clean', {
+          defaultValue:
+            'We read this {{format}} file but found no building elements to convert. The model may be empty, contain only spatial containers (project, site, building) or hold geometry the converter does not extract. Open it in your authoring tool to confirm it has modelled elements, then re-upload.',
+          format: fmt || 'BIM',
+        })
+      : null;
+
   // We deliberately do NOT dump the raw backend error into the headline
   // paragraph any more. A failed CAD conversion typically means the DDC
   // cad2data converter is not installed in this environment (it is a
@@ -1076,9 +1092,12 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
   // dev machines). We lead with that calm explanation and tuck the raw
   // backend string — e.g. "CAD conversion failed for .rvt file. Ensure the
   // converter is properly installed and the file is valid." — behind the
-  // collapsible "Show details" toggle below.
+  // collapsible "Show details" toggle below. This generic copy must never
+  // fire for a code with its own tailored message (e.g. zero_elements).
   const calmFailureDescription =
-    !isProcessing && (errorCode === 'ddc_not_found' || !!backendMessage)
+    !isProcessing
+    && errorCode !== 'zero_elements'
+    && (errorCode === 'ddc_not_found' || !!backendMessage)
       ? t('bim.overlay_converter_unavailable_calm', {
           defaultValue:
             "We couldn't convert this {{format}} file. The CAD converter (DDC cad2data) isn't available in this environment - it's an optional, separate install. Add it, then retry the conversion.",
@@ -1087,7 +1106,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
       : null;
 
   const description =
-    cleanDescription ?? calmFailureDescription ?? c.desc;
+    cleanDescription ?? zeroElementsDescription ?? calmFailureDescription ?? c.desc;
   // The raw backend message is now ALWAYS surfaced through the collapsible
   // disclosure (when present) rather than inline — both for the outdated
   // case and the generic failure case.

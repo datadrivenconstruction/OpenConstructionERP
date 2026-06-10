@@ -1364,6 +1364,75 @@ def _default_local_base_dir() -> Path:
     return Path(__file__).resolve().parents[3] / "data"
 
 
+def safe_data_roots() -> list[Path]:
+    """Return the set of directories the platform is allowed to serve files from.
+
+    A single download route in one module frequently has to serve a blob that a
+    different module wrote (a /files mirror document pointing at a takeoff PDF,
+    a dwg upload, or a bim artifact). Those files live under sibling roots, not
+    just the one module's own upload base, so a route that only whitelists its
+    own base 404s perfectly valid files.
+
+    The roots returned here are every place the platform itself writes blobs:
+
+    * the active storage base dir (``OE_CLI_DATA_DIR`` / ``DATA_DIR`` / repo
+      ``data/``) - this is where dwg uploads and bim artifacts land,
+    * both brand-namespace home dirs ``~/.openestimate`` and
+      ``~/.openestimator`` - takeoff PDFs and document uploads land here,
+    * any operator-supplied ``OE_DATA_DIR``.
+
+    Callers use :func:`is_within_safe_root` to gate a resolved path before
+    streaming it. This never widens access beyond directories the platform
+    owns; it does not accept arbitrary absolute paths.
+    """
+    roots: list[Path] = []
+
+    def _add(candidate: Path | None) -> None:
+        if candidate is None:
+            return
+        try:
+            resolved = candidate.resolve()
+        except OSError:
+            return
+        if resolved not in roots:
+            roots.append(resolved)
+
+    _add(_default_local_base_dir())
+    home = Path.home()
+    _add(home / ".openestimate")
+    _add(home / ".openestimator")
+    for env_name in ("OE_DATA_DIR", "DATA_DIR", "OE_CLI_DATA_DIR"):
+        value = os.environ.get(env_name)
+        if value:
+            _add(Path(value))
+    return roots
+
+
+def is_within_safe_root(path: Path, *, extra_roots: list[Path] | None = None) -> bool:
+    """Return True iff ``path`` is contained in one of the safe data roots.
+
+    ``path`` must already be resolved by the caller. Containment is checked
+    with ``Path.relative_to`` (not ``str.startswith``) so a sibling directory
+    whose name merely shares a prefix cannot pass, and symlink escapes are
+    defeated because the caller resolves first. ``extra_roots`` lets a caller
+    add its own already-resolved base (e.g. the documents upload base) without
+    re-deriving the platform-wide set.
+    """
+    roots = list(safe_data_roots())
+    if extra_roots:
+        for root in extra_roots:
+            if root not in roots:
+                roots.append(root)
+    for root in roots:
+        try:
+            path.relative_to(root)
+        except ValueError:
+            continue
+        else:
+            return True
+    return False
+
+
 def build_storage_backend(settings: Settings) -> StorageBackend:
     """Build a backend from ``settings`` without consulting any cache.
 

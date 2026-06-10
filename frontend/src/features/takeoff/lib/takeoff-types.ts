@@ -11,6 +11,9 @@ export type MeasureTool =
   | 'distance'
   | 'polyline'
   | 'area'
+  // Measured rectangle: a 2-click area tool that produces a `type: 'area'`
+  // measurement (it is a tool, never a stored measurement type).
+  | 'rectarea'
   | 'volume'
   | 'count'
   | 'cloud'
@@ -59,6 +62,11 @@ export interface Measurement {
   linkedPositionOrdinal?: string;
   linkedBoqId?: string;
   linkedPositionLabel?: string;
+  /** AI-suggested but unconfirmed (issue #194 Recognize); never persisted
+   *  until accepted (which clears the flag). */
+  suggested?: boolean;
+  /** Recognition confidence 0..1 on AI-sourced measurements. */
+  confidence?: number;
 }
 
 /** Describes a reversible measurement operation for the undo stack. */

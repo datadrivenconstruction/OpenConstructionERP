@@ -115,6 +115,63 @@ export async function downloadBundle(
   return { filename, sizeBytes: blob.size };
 }
 
+/**
+ * Save a bearer-protected file URL by fetching it WITH the Authorization
+ * header and downloading the resulting blob.
+ *
+ * The file download endpoints (`/documents/*`, `/bim_hub/*`,
+ * `/dwg-takeoff/*`) authenticate with the JWT bearer token, which lives in
+ * localStorage, not a cookie. A plain `<a href download>`, `window.open`, or
+ * an `<iframe src>` is a top-level browser navigation that does NOT carry the
+ * Authorization header, so the request 401s ("Not authenticated") and the
+ * user sees a "log in / file not available" error. Routing the download
+ * through `fetch` lets us attach the header and hand the browser a blob.
+ */
+export async function downloadProtectedFile(url: string, filename: string): Promise<void> {
+  const res = await fetch(url, { headers: buildAuthHeaders() });
+  if (!res.ok) {
+    let detail = `Download failed (${res.status})`;
+    try {
+      const body = await res.json();
+      if (typeof body?.detail === 'string') detail = body.detail;
+    } catch {
+      /* not JSON */
+    }
+    throw new Error(detail);
+  }
+  const blob = await res.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = objectUrl;
+  a.download = filename;
+  a.rel = 'noopener';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    a.remove();
+    URL.revokeObjectURL(objectUrl);
+  }, 1000);
+}
+
+/**
+ * Fetch a bearer-protected file and return an object URL for inline preview
+ * (e.g. a PDF `<iframe>`). The caller owns the returned URL and MUST revoke
+ * it with `URL.revokeObjectURL` when the preview unmounts. Returns null on
+ * any failure so the caller can fall back to an icon instead of a broken
+ * frame.
+ */
+export async function fetchProtectedObjectUrl(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { headers: buildAuthHeaders() });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+  } catch {
+    return null;
+  }
+}
+
 export async function validateImport(file: File): Promise<ImportPreview> {
   const form = new FormData();
   form.append('file', file);

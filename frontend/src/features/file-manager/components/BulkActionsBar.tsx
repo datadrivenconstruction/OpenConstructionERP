@@ -23,7 +23,7 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { Trash2, X, Loader2, Tag, Send, Download } from 'lucide-react';
 import { useToastStore } from '@/stores/useToastStore';
 import { fileManagerKeys } from '../hooks';
-import { bulkDeleteDocuments, deleteByKind } from '../api';
+import { bulkDeleteDocuments, deleteByKind, downloadProtectedFile } from '../api';
 import type { FileKind, FileRow } from '../types';
 import { softDelete } from '@/features/file-trash/api';
 import { useRestoreFromTrash } from '@/features/file-trash/hooks';
@@ -201,38 +201,30 @@ export async function dispatchHardBulkDelete(rows: FileRow[]): Promise<DispatchS
  *  rapid-fire programmatic downloads, so we pace them out. */
 const DOWNLOAD_STAGGER_MS = 350;
 
-/** Trigger a browser download for one URL via a hidden ``<a download>``.
- *  Mirrors the single-file download anchor the preview pane already relies
- *  on (same auth path), so it works without any new endpoint. */
-function clickDownload(url: string, filename: string): void {
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.rel = 'noopener';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    a.remove();
-  }, 1000);
-}
-
 /** Download every selected row that carries an addressable ``download_url``,
- *  staggered so the browser doesn't drop the burst. Returns how many were
- *  dispatched and how many had no URL to download. */
+ *  staggered so the browser doesn't drop the burst. Each file is fetched WITH
+ *  the bearer token (see ``downloadProtectedFile``) because the file endpoints
+ *  are bearer-protected and a plain anchor navigation 401s. Returns how many
+ *  were dispatched and how many had no URL to download. */
 export async function dispatchBulkDownload(
   rows: FileRow[],
 ): Promise<{ dispatched: number; skipped: number }> {
   const downloadable = rows.filter((r) => Boolean(r.download_url));
   const skipped = rows.length - downloadable.length;
+  let dispatched = 0;
   for (let i = 0; i < downloadable.length; i += 1) {
     const row = downloadable[i]!;
-    clickDownload(row.download_url as string, row.name);
+    try {
+      await downloadProtectedFile(row.download_url as string, row.name);
+      dispatched += 1;
+    } catch {
+      /* one failed file shouldn't abort the rest of the batch */
+    }
     if (i < downloadable.length - 1) {
       await new Promise((resolve) => setTimeout(resolve, DOWNLOAD_STAGGER_MS));
     }
   }
-  return { dispatched: downloadable.length, skipped };
+  return { dispatched, skipped: skipped + (downloadable.length - dispatched) };
 }
 
 export function BulkActionsBar({ selectedRows, projectId, onClear }: BulkActionsBarProps) {

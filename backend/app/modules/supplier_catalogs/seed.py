@@ -10,6 +10,7 @@ import logging
 import uuid
 from decimal import Decimal
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.supplier_catalogs.models import (
@@ -44,6 +45,17 @@ async def seed_supplier_catalogs(
     """
     project_id = project_id or uuid.uuid4()
     counts: dict[str, int] = {}
+
+    # Idempotency guard. This seed inserts vendors with fixed codes
+    # (V001..V005) plus other fixed-key rows, and vendor.code is unique. On a
+    # second boot the blind insert hit that constraint, raised an
+    # IntegrityError that aborted the seed transaction, and slowed startup. If
+    # the marker vendor V001 is already present the demo set has been seeded,
+    # so skip silently (mirrors the marker-check pattern used by other seeds).
+    existing = await session.scalar(select(Vendor.id).where(Vendor.code == "V001"))
+    if existing is not None:
+        logger.info("supplier_catalogs seed skipped: marker vendor V001 already present")
+        return {"skipped": 1}
 
     # --- 5 vendors ---
     vendor_specs = [

@@ -1489,9 +1489,7 @@ class AiEstimatorService:
             )
         return out
 
-    async def _ensure_resources(
-        self, grp: Any, qty: Decimal, unit_rate: Decimal
-    ) -> list[dict[str, Any]]:
+    async def _ensure_resources(self, grp: Any, qty: Decimal, unit_rate: Decimal) -> list[dict[str, Any]]:
         """Guarantee a non-empty resource buildup for an applied position.
 
         Founder principle: every position carries resources. Prefers the chosen

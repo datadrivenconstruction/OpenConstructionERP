@@ -1399,7 +1399,27 @@ class PhotoService:
         if not accessible_ids:
             return []
 
-        return await self.repo.recent_across_projects(accessible_ids, limit=limit)
+        # Fetch a wider window than requested so we can collapse visually
+        # identical photos. Demo seeding shares the same build-stage shots
+        # across several projects, so a naive "newest first" feed shows the
+        # same image and caption a dozen times. Dedupe by caption (keeping the
+        # newest occurrence) so the dashboard strip reads as a diverse set of
+        # site photos. Photos without a caption fall back to their own id, so
+        # genuinely distinct caption-less uploads are never collapsed together.
+        fetch_limit = max(limit * 8, 48)
+        rows = await self.repo.recent_across_projects(accessible_ids, limit=fetch_limit)
+
+        seen: set[str] = set()
+        deduped: list[tuple[ProjectPhoto, str]] = []
+        for photo, project_name in rows:
+            key = (photo.caption or "").strip().lower() or f"__id::{photo.id}"
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append((photo, project_name))
+            if len(deduped) >= limit:
+                break
+        return deduped
 
     # ── Update ─────────────────────────────────────────────────────────────
 

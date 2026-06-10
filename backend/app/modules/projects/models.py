@@ -135,6 +135,11 @@ class Project(Base):
     actual_end_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
     budget_estimate: Mapped[str | None] = mapped_column(String(50), nullable=True)
     contingency_pct: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    # ── Cost Benchmarks portfolio input (migration v3174) ────────────────
+    # Gross floor area in m2 GFA, decimal-string to match the project money
+    # columns (full precision, no JSON Number rounding). NULL means area is
+    # not recorded; the benchmark portfolio aggregation skips such projects.
+    gross_floor_area: Mapped[str | None] = mapped_column(String(50), nullable=True)
     custom_fields: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=True
     )

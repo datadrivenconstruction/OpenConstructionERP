@@ -1193,9 +1193,9 @@ class ProcurementService:
         for gr_item in gr.items:
             if gr_item.po_item_id is None:
                 continue
-            this_receipt[gr_item.po_item_id] = this_receipt.get(
-                gr_item.po_item_id, Decimal("0")
-            ) + _to_decimal(gr_item.quantity_received)
+            this_receipt[gr_item.po_item_id] = this_receipt.get(gr_item.po_item_id, Decimal("0")) + _to_decimal(
+                gr_item.quantity_received
+            )
         for po_item_id, new_received in this_receipt.items():
             po_item = po_items_by_id.get(po_item_id)
             if po_item is None:

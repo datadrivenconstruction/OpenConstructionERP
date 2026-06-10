@@ -1,6 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BarChart3, Info } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { BarChart3, Info, FolderOpen, X } from 'lucide-react';
+import { projectsApi } from '@/features/projects/api';
 import {
   BUILDING_TYPES,
   BENCHMARK_REGIONS,
@@ -11,6 +13,8 @@ import {
   type BuildingType,
   type BenchmarkRegion,
 } from './data/benchmarks';
+import { useProjectBenchmarkData } from './hooks/useProjectBenchmarkData';
+import { fetchOwnPortfolio, type BenchmarkResponse } from './api';
 
 /* ── Helpers ───────────────────────────────────────────────────────── */
 
@@ -72,6 +76,32 @@ export default function BenchmarkModule() {
   const [gfa, setGfa] = useState(5000);
   const [totalCost, setTotalCost] = useState(13250000);
 
+  // ── Project picker (Phase 2): auto-fill inputs from a real project ──
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+
+  // List the tenant's projects. Hidden entirely when the call fails or there
+  // are none, so the page behaves exactly as today (manual mode).
+  const projectsQuery = useQuery({
+    queryKey: ['cost-benchmark', 'projects'],
+    queryFn: () => projectsApi.list(),
+    staleTime: 60_000,
+  });
+  const projects = projectsQuery.data ?? [];
+
+  const projectData = useProjectBenchmarkData(selectedProjectId);
+
+  // When a project resolves, auto-fill the four inputs. They stay editable;
+  // the user can tweak any value or clear the picker to return to manual mode.
+  // GFA is only pre-filled when the project actually records an area.
+  useEffect(() => {
+    const d = projectData.data;
+    if (!d) return;
+    setRegion(d.region);
+    setBuildingType(d.buildingType);
+    if (d.totalCost > 0) setTotalCost(d.totalCost);
+    if (d.gfa && d.gfa > 0) setGfa(d.gfa);
+  }, [projectData.data]);
+
   const regionInfo = BENCHMARK_REGIONS.find((r) => r.id === region)!;
   const buildingInfo = BUILDING_TYPES.find((b) => b.id === buildingType)!;
   const benchmarkRange = BENCHMARKS[region][buildingType];
@@ -83,6 +113,25 @@ export default function BenchmarkModule() {
     const diffPct = benchmarkRange.median > 0 ? (diffFromMedian / benchmarkRange.median) * 100 : 0;
     return { costPerM2, percentile, diffFromMedian, diffPct };
   }, [totalCost, gfa, benchmarkRange]);
+
+  // ── Your own portfolio (Phase 3): real distribution from your projects ──
+  // The endpoint enriches the page; the static industry table above is the
+  // offline fallback. Round the user value so tiny input jitter does not
+  // refetch. Any failure resolves to null and only the industry view shows.
+  const roundedCostPerM2 = Math.round(analysis.costPerM2);
+  const portfolioQuery = useQuery<BenchmarkResponse | null>({
+    queryKey: ['cost-benchmark', 'portfolio', buildingType, region, regionInfo.currency, roundedCostPerM2],
+    queryFn: () =>
+      fetchOwnPortfolio({
+        building_type: buildingType,
+        region,
+        currency: regionInfo.currency,
+        cost_per_m2: roundedCostPerM2 > 0 ? roundedCostPerM2 : undefined,
+      }),
+    staleTime: 30_000,
+  });
+  const ownPortfolio = portfolioQuery.data?.own_portfolio ?? null;
+  const percentileVsOwn = portfolioQuery.data?.percentile_vs_own ?? null;
 
   // KG300 vs KG400 split of the user's own cost/m2 (sums to the user value).
   const kgSplit = useMemo(
@@ -148,6 +197,57 @@ export default function BenchmarkModule() {
 
       {/* Input controls */}
       <div className="rounded-xl border border-border bg-surface-primary p-5">
+        {/* Project picker (Phase 2): auto-fill from a real project.
+            Hidden entirely when the tenant has no projects, so the page
+            behaves exactly as the manual-only flow. */}
+        {projects.length > 0 && (
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-medium text-content-tertiary">
+                <span className="inline-flex items-center gap-1.5">
+                  <FolderOpen className="h-3.5 w-3.5" />
+                  {t('benchmarks.pick_project', { defaultValue: 'Compare a project' })}
+                </span>
+              </label>
+              <select
+                value={selectedProjectId ?? ''}
+                onChange={(e) => setSelectedProjectId(e.target.value || null)}
+                className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary"
+              >
+                <option value="">
+                  {t('benchmarks.pick_project_manual', { defaultValue: 'Manual entry' })}
+                </option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {selectedProjectId && (
+              <button
+                type="button"
+                onClick={() => setSelectedProjectId(null)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-content-secondary hover:bg-surface-secondary"
+              >
+                <X className="h-3.5 w-3.5" />
+                {t('benchmarks.pick_project_clear', { defaultValue: 'Clear' })}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Auto-fill hint: when a project is selected but has no recorded
+            area, tell the user the area is theirs to enter. */}
+        {selectedProjectId && projectData.data && !projectData.data.gfa && (
+          <p className="mb-3 text-xs text-amber-600 dark:text-amber-400">
+            {t('benchmarks.no_area_hint', {
+              defaultValue:
+                'This project has no recorded floor area yet. Enter the area below to complete the comparison.',
+            })}
+          </p>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Building type */}
           <div>
@@ -210,7 +310,7 @@ export default function BenchmarkModule() {
       </div>
 
       {/* Results */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Cost per m2 */}
         <div className="rounded-xl border border-border bg-surface-primary p-5">
           <p className="text-xs text-content-tertiary mb-1">
@@ -224,10 +324,10 @@ export default function BenchmarkModule() {
           </p>
         </div>
 
-        {/* Percentile */}
+        {/* Percentile vs industry */}
         <div className="rounded-xl border border-border bg-surface-primary p-5">
           <p className="text-xs text-content-tertiary mb-1">
-            {t('benchmarks.percentile', { defaultValue: 'Percentile Position' })}
+            {t('benchmarks.percentile_industry', { defaultValue: 'Percentile vs Industry' })}
           </p>
           <p className={`text-2xl font-bold ${getPercentileColor(analysis.percentile)}`}>
             P{analysis.percentile.toFixed(0)}
@@ -235,6 +335,39 @@ export default function BenchmarkModule() {
           <p className="text-xs text-content-tertiary mt-1">
             {(() => { const lbl = getPercentileLabelKey(analysis.percentile); return t(lbl.key, { defaultValue: lbl.defaultValue }); })()}
           </p>
+        </div>
+
+        {/* Percentile vs your own portfolio (Phase 3). Degrades to a quiet
+            placeholder when the tenant has no projects with cost and area. */}
+        <div className="rounded-xl border border-border bg-surface-primary p-5">
+          <p className="text-xs text-content-tertiary mb-1">
+            {t('benchmarks.percentile_portfolio', { defaultValue: 'Percentile vs Your Portfolio' })}
+          </p>
+          {ownPortfolio && percentileVsOwn !== null ? (
+            <>
+              <p className={`text-2xl font-bold ${getPercentileColor(percentileVsOwn)}`}>
+                P{percentileVsOwn.toFixed(0)}
+              </p>
+              <p className="text-xs text-content-tertiary mt-1">
+                {t('benchmarks.portfolio_basis', {
+                  defaultValue: 'Across {{count}} of your projects',
+                  count: ownPortfolio.project_count,
+                })}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-2xl font-bold text-content-quaternary">—</p>
+              <p className="text-xs text-content-tertiary mt-1">
+                {portfolioQuery.isLoading
+                  ? t('benchmarks.portfolio_loading', { defaultValue: 'Loading your projects...' })
+                  : t('benchmarks.portfolio_empty', {
+                      defaultValue:
+                        'Your portfolio comparison appears once you have projects with both a cost and an area.',
+                    })}
+              </p>
+            </>
+          )}
         </div>
 
         {/* Diff from median */}
@@ -312,6 +445,66 @@ export default function BenchmarkModule() {
           </div>
         </div>
       </div>
+
+      {/* Your own portfolio distribution (Phase 3). Real numbers from your
+          projects, shown only when there is enough data. The static industry
+          bar above always renders, so an empty portfolio just hides this. */}
+      {ownPortfolio && (() => {
+        const pMin = Number(ownPortfolio.min);
+        const pMax = Number(ownPortfolio.max);
+        const pP25 = Number(ownPortfolio.p25);
+        const pMed = Number(ownPortfolio.median);
+        const pP75 = Number(ownPortfolio.p75);
+        const span = pMax - pMin;
+        const pos = (v: number) => (span > 0 ? Math.max(0, Math.min(100, ((v - pMin) / span) * 100)) : 50);
+        const youPct = pos(analysis.costPerM2);
+        const cur = portfolioQuery.data?.currency || regionInfo.currency;
+        const confMeta = getConfidenceMeta(ownPortfolio.confidence);
+        return (
+          <div className="rounded-xl border border-border bg-surface-primary p-5">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-content-primary">
+                {t('benchmarks.portfolio_title', { defaultValue: 'Your own portfolio distribution' })}
+              </h3>
+              <span className={`text-xs font-medium ${confMeta.className}`}>
+                {t('benchmarks.data_confidence', { defaultValue: 'Data confidence' })}:{' '}
+                {t(confMeta.key, { defaultValue: confMeta.defaultValue })}
+              </span>
+            </div>
+            <p className="mb-4 text-xs text-content-tertiary">{ownPortfolio.note}</p>
+
+            {/* Distribution bar: P25-P75 band with a median tick and your marker */}
+            <div className="relative">
+              <div className="relative h-4 w-full overflow-hidden rounded-full bg-surface-secondary">
+                <div
+                  className="absolute h-full rounded-full bg-oe-blue/30"
+                  style={{ left: `${pos(pP25)}%`, width: `${Math.max(0, pos(pP75) - pos(pP25))}%` }}
+                />
+                <div className="absolute h-full w-0.5 bg-oe-blue" style={{ left: `${pos(pMed)}%` }} />
+              </div>
+              {/* Your value marker */}
+              <div className="absolute top-0 h-4 w-0.5 bg-content-primary" style={{ left: `${youPct}%` }}>
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-content-primary px-2 py-0.5 text-2xs font-bold text-white">
+                  {formatCurrency(analysis.costPerM2, cur)}
+                </div>
+              </div>
+              <div className="mt-2 flex justify-between text-2xs text-content-quaternary">
+                <span>{formatCurrency(pMin, cur)}</span>
+                <span>{t('benchmarks.q1_short', { defaultValue: 'Q1' })}: {formatCurrency(pP25, cur)}</span>
+                <span>{t('benchmarks.median', { defaultValue: 'Median' })}: {formatCurrency(pMed, cur)}</span>
+                <span>{t('benchmarks.q3_short', { defaultValue: 'Q3' })}: {formatCurrency(pP75, cur)}</span>
+                <span>{formatCurrency(pMax, cur)}</span>
+              </div>
+            </div>
+
+            {portfolioQuery.data?.explanation && (
+              <p className="mt-3 text-xs font-medium text-content-secondary">
+                {t('benchmarks.portfolio_reading', { defaultValue: portfolioQuery.data.explanation })}
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       {/* KG300 / KG400 split strip + optional secondary metric */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

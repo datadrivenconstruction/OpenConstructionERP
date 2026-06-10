@@ -11,6 +11,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet } from '@/shared/lib/api';
 import type { FileRow, FileKind } from '../types';
+import { downloadProtectedFile, fetchProtectedObjectUrl } from '../api';
 import { isTauri, openInOSFinder, copyToClipboard } from '../lib/tauri';
 import { modulesForKind, primaryModule } from '../kindModule';
 import { useSetDocumentCdeState } from '../hooks';
@@ -85,6 +86,33 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
     staleTime: 5 * 60_000,
   });
   const [pathCopied, setPathCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  // Authenticated inline PDF preview. The download endpoint is bearer-protected,
+  // so a raw `<iframe src>` navigation 401s (no Authorization header); fetch the
+  // bytes with the header and preview the resulting blob URL instead.
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const previewDownloadUrl = row && isPdf(row) ? row.download_url : null;
+  useEffect(() => {
+    if (!previewDownloadUrl) {
+      setPdfPreviewUrl(null);
+      return;
+    }
+    let cancelled = false;
+    let created: string | null = null;
+    setPdfPreviewUrl(null);
+    void fetchProtectedObjectUrl(previewDownloadUrl).then((objUrl) => {
+      if (cancelled) {
+        if (objUrl) URL.revokeObjectURL(objUrl);
+        return;
+      }
+      created = objUrl;
+      setPdfPreviewUrl(objUrl);
+    });
+    return () => {
+      cancelled = true;
+      if (created) URL.revokeObjectURL(created);
+    };
+  }, [previewDownloadUrl]);
   // Slide-over drawer with the full audit timeline. Opens on demand so
   // we don't fire the activity request for every previewed file —
   // unlike the inline ``ActivityLogSection`` below which renders a
@@ -130,6 +158,22 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
   // doesn't carry that narrowing into nested function declarations —
   // capture it in a const so closures see the non-null type.
   const file = row;
+
+  async function handleDownload() {
+    if (!file.download_url) return;
+    setDownloading(true);
+    try {
+      await downloadProtectedFile(file.download_url, file.name);
+    } catch (e) {
+      addToast({
+        type: 'error',
+        title: t('files.actions.download_failed', { defaultValue: 'Could not download the file' }),
+        message: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   function navigateToModule(target: typeof primary) {
     // Clash Detection / CAD-BIM BI Explorer read the project from the
@@ -197,12 +241,15 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
         />
         <div className="flex items-center justify-center overflow-hidden bg-surface-secondary/60 rounded-lg aspect-[4/3]">
           {isPdf(row) && row.download_url ? (
-            <iframe
-              src={`${row.download_url}#toolbar=0&navpanes=0&view=FitH`}
-              title={row.name}
-              className="h-full w-full border-0 rounded-lg"
-              loading="lazy"
-            />
+            pdfPreviewUrl ? (
+              <iframe
+                src={`${pdfPreviewUrl}#toolbar=0&navpanes=0&view=FitH`}
+                title={row.name}
+                className="h-full w-full border-0 rounded-lg"
+              />
+            ) : (
+              <Loader2 size={28} className="animate-spin text-content-tertiary" />
+            )
           ) : row.thumbnail_url ? (
             <img
               src={row.thumbnail_url}
@@ -286,15 +333,15 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
           )}
 
           {row.download_url && (
-            <a
-              href={row.download_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-border-light text-content-primary hover:bg-surface-secondary transition-colors"
+            <button
+              type="button"
+              onClick={handleDownload}
+              disabled={downloading}
+              className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-border-light text-content-primary hover:bg-surface-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Download size={13} />
+              {downloading ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
               {t('files.actions.download', { defaultValue: 'Download' })}
-            </a>
+            </button>
           )}
           {/* W1 — version history. Renders <V## · Current> chip + dropdown
               with a "Make current" action for every superseded row. */}

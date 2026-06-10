@@ -67,7 +67,11 @@ _UNIQUES = [
 # (table, column name, column factory)
 _COLUMNS = [
     ("oe_procurement_requisition", "req_number", lambda: sa.Column("req_number", sa.String(length=50), nullable=True)),
-    ("oe_approval_routes_step", "required_approver_count", lambda: sa.Column("required_approver_count", sa.Integer(), nullable=True)),
+    (
+        "oe_approval_routes_step",
+        "required_approver_count",
+        lambda: sa.Column("required_approver_count", sa.Integer(), nullable=True),
+    ),
 ]
 
 

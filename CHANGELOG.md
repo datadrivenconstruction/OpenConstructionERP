@@ -5,6 +5,23 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.5.0] - 2026-06-10
+
+### Added
+
+- Recognition on scanned drawings. The takeoff Recognize tool now reads scanned floor plans that have no vector layer, detecting room outlines and wall lines from the image, so a paper-scan PDF returns usable measurement candidates instead of nothing. Vector PDFs keep using the precise vector path, so nothing changes for drawings that already carry geometry.
+- Edit measurements directly on the drawing. You can select a placed measurement and reshape it on the canvas: drag a vertex, pull an edge to add a point, move the whole shape, or reposition a count marker, with the value updating live as you drag. The server re-derives the billed quantity on save, so an on-canvas edit can never inflate a number.
+- Save the marked-up PDF. A new Save PDF button in the takeoff toolbar exports the drawing with your measurements and annotations baked into the file.
+- Cost Benchmarks from your own projects. The benchmarks page now compares a project against the real distribution of your own portfolio, cost per square metre by currency, and shows where the project sits as a percentile. It falls back to the industry reference when you do not yet have enough priced projects, and it never mixes currencies or invents a number.
+- A project picker on the dashboard quick-upload, so a dropped file can go to any project without leaving the dashboard.
+
+### Fixed
+
+- Downloads in the file manager work again. Files are now fetched with your sign-in, so a download no longer fails with a "you need to log in" or "file not available" message. Every file in a project downloads, including DWG and IFC files and the entries that previously returned a not-found error.
+- The Estimate Builder is clearly marked as beta, in the menu and inside the module, with a short note that its grouping and matching are still maturing while every rate still comes from your own cost database.
+- A clearer message when a CAD or BIM file converts but contains no building elements, in place of the misleading "converter not available" text.
+- Faster, quieter startup. Two demo seeders that re-ran on every boot and logged an error are now properly idempotent, so a restart is quicker and the log stays clean.
+
 ## [7.4.0] - 2026-06-10
 
 ### Added

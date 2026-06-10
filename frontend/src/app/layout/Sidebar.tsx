@@ -209,7 +209,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_takeoff',
     labelKey: 'sidebar.group.takeoff',
     defaultLabel: 'Takeoff',
-    defaultOpen: false,
+    defaultOpen: true,
     items: [
       { labelKey: 'nav.quantities', to: '/quantities', icon: Ruler },
       { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
@@ -224,10 +224,10 @@ const navGroups: NavGroup[] = [
     id: 'grp_estimating',
     labelKey: 'sidebar.group.estimating',
     defaultLabel: 'Estimating',
-    defaultOpen: false,
+    defaultOpen: true,
     items: [
       { labelKey: 'boq.title', to: '/boq', icon: Table2, tourId: 'boq' },
-      { labelKey: 'nav.ai_estimator', to: '/ai-estimator', icon: Wand2 },
+      { labelKey: 'nav.ai_estimator', to: '/ai-estimator', icon: Wand2, badge: 'BETA' },
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles, badge: 'BETA' },
       { labelKey: 'nav.match_elements', to: '/match-elements', icon: Link2, badge: 'BETA' },
       { labelKey: 'nav.estimation_dashboard', to: '/project-intelligence', icon: BrainCircuit },
@@ -240,7 +240,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_cost_data',
     labelKey: 'sidebar.group.cost_data',
     defaultLabel: 'Cost Data',
-    defaultOpen: false,
+    defaultOpen: true,
     items: [
       { labelKey: 'costs.title', to: '/costs', icon: Database, tourId: 'costs' },
       { labelKey: 'catalog.title', to: '/catalog', icon: Boxes },
@@ -264,7 +264,7 @@ const navGroups: NavGroup[] = [
     labelKey: 'sidebar.group.reality',
     defaultLabel: 'Reality Capture & 3D',
     dynamicGroupKey: 'reality',
-    defaultOpen: false,
+    defaultOpen: true,
     items: [
       { labelKey: 'sidebar.geo_hub', to: '/geo', icon: Globe },
       { labelKey: 'nav.point_cloud', to: '/pointcloud', icon: ScanLine, badge: 'BETA' },
@@ -278,7 +278,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_coordination',
     labelKey: 'sidebar.group.coordination',
     defaultLabel: 'Model Coordination',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'nav.coordination_hub', to: '/coordination', icon: LayoutDashboard },
@@ -294,7 +294,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_scheduling',
     labelKey: 'sidebar.group.scheduling',
     defaultLabel: 'Scheduling',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'schedule.title', to: '/schedule', icon: CalendarDays, moduleKey: 'schedule' },
@@ -310,7 +310,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_cost_control',
     labelKey: 'sidebar.group.cost_control',
     defaultLabel: 'Cost Control & Risk',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'nav.5d_cost_model', to: '/5d', icon: TrendingUp, moduleKey: '5d', advancedOnly: true },
@@ -326,7 +326,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_commercial',
     labelKey: 'sidebar.group.commercial',
     defaultLabel: 'Commercial',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'nav.crm', to: '/crm', icon: Briefcase },
@@ -342,7 +342,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_procurement',
     labelKey: 'sidebar.group.procurement',
     defaultLabel: 'Procurement & Change',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'nav.variations', to: '/variations', icon: GitBranch },
@@ -363,7 +363,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_field',
     labelKey: 'sidebar.group.field',
     defaultLabel: 'Field Operations',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'nav.daily_diary', to: '/daily-diary', icon: BookOpen },
@@ -378,7 +378,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_resources',
     labelKey: 'sidebar.group.resources',
     defaultLabel: 'Resources & Assets',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'nav.equipment', to: '/equipment', icon: Truck },
@@ -393,7 +393,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_quality',
     labelKey: 'sidebar.group.quality',
     defaultLabel: 'Quality',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'validation.title', to: '/validation', icon: ShieldCheck, moduleKey: 'validation' },
@@ -410,7 +410,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_safety',
     labelKey: 'sidebar.group.safety',
     defaultLabel: 'Safety & ESG',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'safety.title', to: '/safety', icon: HardHat },
@@ -427,7 +427,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_communication',
     labelKey: 'sidebar.group.communication',
     defaultLabel: 'Communication',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'contacts.title', to: '/contacts', icon: Users },
@@ -443,7 +443,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_documents',
     labelKey: 'sidebar.group.documents',
     defaultLabel: 'Documents',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'submittals.title', to: '/submittals', icon: FileCheck, advancedOnly: true },
@@ -460,7 +460,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_real_estate',
     labelKey: 'sidebar.group.real_estate',
     defaultLabel: 'Real Estate',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'nav.property_dev', to: '/property-dev', icon: Building2 },
@@ -476,7 +476,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_finance',
     labelKey: 'sidebar.group.finance',
     defaultLabel: 'Finance',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'finance.title', to: '/finance', icon: Wallet, advancedOnly: true },
@@ -492,7 +492,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_controls_bi',
     labelKey: 'sidebar.group.controls_bi',
     defaultLabel: 'Controls & BI',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'nav.project_controls', to: '/project-controls', icon: Gauge, advancedOnly: true },
@@ -512,7 +512,7 @@ const navGroups: NavGroup[] = [
     id: 'grp_automation_ai',
     labelKey: 'sidebar.group.automation_ai',
     defaultLabel: 'Automation & AI',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     items: [
       { labelKey: 'nav.ai_agents', to: '/ai-agents', icon: Bot, badge: 'BETA' },
@@ -531,7 +531,7 @@ const navGroups: NavGroup[] = [
     id: 'regional',
     labelKey: 'modules.cat_regional',
     descriptionKey: 'modules.cat_regional_desc',
-    defaultOpen: false,
+    defaultOpen: true,
     hideInSimple: true,
     separator: true,
     items: [
@@ -813,7 +813,7 @@ const ROUTE_MODULE_KEY: Record<string, string> = {
 };
 
 // localStorage key for collapsed state
-const COLLAPSED_KEY = 'oe_sidebar_collapsed';
+const COLLAPSED_KEY = 'oe_sidebar_collapsed_v2';
 const PINNED_KEY = 'oe_sidebar_pinned';
 // Hidden-modules persistence is owned by `useHiddenModules()` — it stores
 // the per-user list server-side under `metadata_.sidebar_hidden_modules`

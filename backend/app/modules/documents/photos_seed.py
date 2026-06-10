@@ -166,19 +166,22 @@ async def seed_photos(
         logger.info("photos seed skipped: no committed photo assets at %s", _ASSET_DIR)
         return {}
 
-    # Prefer the flagship project for the idempotency guard so the check lands
-    # where users browse first.
-    guard_id = _FLAGSHIP_ID if _FLAGSHIP_ID in project_ids else project_ids[0]
-    existing = (
-        await session.execute(select(ProjectPhoto.id).where(ProjectPhoto.project_id == guard_id).limit(1))
-    ).scalar_one_or_none()
-    if existing is not None:
-        return {}
-
     total = len(captions)
     counts = {"photos": 0}
 
     for slot, project_id in enumerate(project_ids):
+        # Per-project idempotency: seed photos only for projects that have none
+        # yet, and skip those that already do. This keeps each project's seed
+        # independent so a newly applied partner-pack project still receives its
+        # photo set even though other projects (e.g. the flagship) are already
+        # seeded. A global guard would short-circuit the whole run and leave new
+        # pack projects empty.
+        existing = (
+            await session.execute(select(ProjectPhoto.id).where(ProjectPhoto.project_id == project_id).limit(1))
+        ).scalar_one_or_none()
+        if existing is not None:
+            continue
+
         owner_id = await _resolve_owner_id(session, project_id)
         if owner_id is None:
             logger.info("photos seed: skipping %s (no owner user)", project_id)

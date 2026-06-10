@@ -549,3 +549,99 @@ class RecordUsageRequest(BaseModel):
     project_id: UUID
     context: Literal["boq", "assembly", "tender"] = "boq"
     unit_rate_at_use: DecimalMoney = Field(..., ge=0, description="Rate as it was at the moment of apply.")
+
+
+# ── Cost benchmarks: own-portfolio distribution (Cost Benchmarks Phase 2) ──
+
+
+class BenchmarkRequest(BaseModel):
+    """Request body for ``POST /v1/costs/benchmark/``.
+
+    Positions a user's cost-per-m2 figure against the tenant's OWN real
+    projects. Every field is optional: with no filters the endpoint
+    returns the distribution across all of the tenant's projects that
+    carry both a cost (BOQ grand total) and a recorded gross floor area.
+    The industry reference numbers are owned by the client (it holds the
+    richer static benchmark table); this endpoint only adds what the
+    client cannot compute - the user's own portfolio.
+    """
+
+    building_type: str | None = Field(
+        default=None,
+        max_length=64,
+        description=(
+            "Optional building type filter, matched against "
+            "``Project.project_type`` (case-insensitive). When set, only "
+            "projects of that type contribute to the distribution."
+        ),
+    )
+    region: str | None = Field(
+        default=None,
+        max_length=64,
+        description="Optional region filter, matched against ``Project.region``.",
+    )
+    currency: str | None = Field(
+        default=None,
+        max_length=10,
+        description=(
+            "Optional currency to scope the distribution to. The endpoint "
+            "never blends currencies: when set, only same-currency projects "
+            "are included. When omitted, the dominant project currency in "
+            "the filtered set is used and reported back."
+        ),
+    )
+    cost_per_m2: DecimalMoney | None = Field(
+        default=None,
+        ge=0,
+        description=(
+            "Optional user value to position against the portfolio. When "
+            "supplied, the response carries ``percentile_vs_own``."
+        ),
+    )
+
+
+class OwnPortfolio(BaseModel):
+    """The tenant's own cost-per-m2 distribution for the benchmark request.
+
+    All money figures are emitted as decimal strings per the money rule so
+    a JS client never rounds a precision-critical value through Number.
+    """
+
+    project_count: int = Field(..., ge=0, description="Projects with both a cost and an area in the filtered set.")
+    min: DecimalMoney
+    p25: DecimalMoney
+    median: DecimalMoney
+    p75: DecimalMoney
+    max: DecimalMoney
+    confidence: Literal["high", "medium", "low"] = Field(
+        ...,
+        description="Confidence in the distribution, derived from the project count.",
+    )
+    note: str = Field(
+        ..., description="Plain-language basis line, e.g. 'Based on 7 of your projects with cost and area.'"
+    )
+
+
+class BenchmarkResponse(BaseModel):
+    """Response for ``POST /v1/costs/benchmark/``.
+
+    ``own_portfolio`` and ``percentile_vs_own`` are null when the tenant
+    has no usable projects (none with both a cost and an area), in which
+    case the client falls back to industry-only output. The endpoint still
+    returns 200 in that case - an empty portfolio is an honest state, not
+    an error.
+    """
+
+    currency: str = Field(
+        default="",
+        description="Currency the portfolio distribution is denominated in. Empty when no portfolio.",
+    )
+    own_portfolio: OwnPortfolio | None = None
+    percentile_vs_own: float | None = Field(
+        default=None,
+        description="Where the user value sits in the own-portfolio distribution (0-100). Null when no portfolio.",
+    )
+    explanation: str = Field(
+        default="",
+        description="Short plain-language reading of the position, e.g. 'Your value sits below your own portfolio median.'",
+    )

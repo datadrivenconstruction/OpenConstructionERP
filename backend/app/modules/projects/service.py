@@ -237,6 +237,7 @@ class ProjectService:
             actual_end_date=data.actual_end_date,
             budget_estimate=data.budget_estimate,
             contingency_pct=data.contingency_pct,
+            gross_floor_area=data.gross_floor_area,
             custom_fields=data.custom_fields,
             work_calendar_id=data.work_calendar_id,
             # ── v2.6.0 multi-currency / VAT (RFC 37) ────────────────────
@@ -313,9 +314,7 @@ class ProjectService:
                 )
                 self.session.add(default_team)
                 await self.session.flush()
-                self.session.add(
-                    TeamMembership(team_id=default_team.id, user_id=owner_id, role="lead")
-                )
+                self.session.add(TeamMembership(team_id=default_team.id, user_id=owner_id, role="lead"))
                 await self.session.flush()
             logger.info("Default team created for project %s", project.id)
         except Exception:
@@ -672,6 +671,7 @@ class ProjectService:
             actual_end_date=source.actual_end_date,
             budget_estimate=source.budget_estimate,
             contingency_pct=source.contingency_pct,
+            gross_floor_area=source.gross_floor_area,
             custom_fields=(dict(source.custom_fields) if source.custom_fields else None),
             work_calendar_id=source.work_calendar_id,
             # v2.6.0 multi-currency / VAT

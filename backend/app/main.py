@@ -841,128 +841,17 @@ async def _seed_demo_account() -> None:
 
             # ── Remaining feature-module demos ──────────────────────────────
             # bid management, carbon, CRM, HSE-Advanced, portal, QMS, advanced
-            # scheduling (Last Planner), service management, supplier catalogs
-            # and variations each ship a demo seeder that was never wired into
-            # startup, so those modules opened empty. Run them across the demo
-            # projects so every module arrives populated. Each runs in its own
-            # session (one failure cannot poison the rest); the seeders that are
-            # not internally idempotent are gated on a marker table so a restart
-            # never duplicates their rows.
-            try:
-                from sqlalchemy import func as _func
-                from sqlalchemy import select as _msel
+            # scheduling (Last Planner), service management, supplier catalogs,
+            # variations, photos, takeoff, clash, costmodel, moc, markups,
+            # catalog and BIM grouping each ship a demo seeder. They used to be
+            # inlined here; the same list now lives in a reusable, fail-soft
+            # coroutine so the in-app partner-pack apply paths run the exact same
+            # enrichment instead of opening with empty modules. ``enrich_all``
+            # enriches every project that exists at boot, each seeder in its own
+            # session so one failure cannot poison the rest.
+            from app.core.demo_enrichment import enrich_all
 
-                from app.modules.accommodation.seed import seed_accommodation
-                from app.modules.bid_management.seed import seed_bid_management_demo
-                from app.modules.bim_hub.seed import seed_bim_hub
-                from app.modules.carbon.models import CarbonInventory
-                from app.modules.carbon.seed import seed_carbon_demo
-                from app.modules.catalog.seed import seed_catalog
-                from app.modules.clash.seed import seed_clash
-                from app.modules.costmodel.seed import seed_costmodel
-                from app.modules.crm.seed import seed_crm_demo
-                from app.modules.documents.photos_seed import seed_photos
-                from app.modules.hse_advanced.seed import seed_hse_advanced_demo
-                from app.modules.markups.seed import seed_markups
-                from app.modules.moc.seed import seed_moc
-                from app.modules.portal.seed import seed_portal_demo
-                from app.modules.projects.models import Project as _Proj2
-                from app.modules.qms.models import ITPPlan
-                from app.modules.qms.seed import seed_qms
-                from app.modules.schedule_advanced.models import MasterSchedule
-                from app.modules.schedule_advanced.seed import seed_schedule_advanced_demo
-                from app.modules.service.seed import seed_service_demo
-                from app.modules.supplier_catalogs.seed import seed_supplier_catalogs
-                from app.modules.takeoff.seed import seed_takeoff_demo
-                from app.modules.tendering.seed import seed_tendering
-                from app.modules.variations.models import Notice
-                from app.modules.variations.seed import seed_variations_demo
-
-                async with async_session_factory() as _pid_s:
-                    _all_pids = list((await _pid_s.execute(_msel(_Proj2.id))).scalars().all())
-                # Keep the flagship reference project first so seeders that cap
-                # at a few projects (advanced scheduling, QMS, supplier catalog)
-                # always cover the project users land on.
-                _flagship_id = uuid.UUID("f1a95000-0001-4a00-8b00-000000000001")
-                _all_pids.sort(key=lambda _p: 0 if _p == _flagship_id else 1)
-                _first_pid = _all_pids[0] if _all_pids else None
-
-                # (name, marker model gating a restart-safe skip, coroutine builder).
-                # A None marker means the seeder self-guards against duplicates.
-                _module_seeders = [
-                    ("crm", None, lambda s: seed_crm_demo(s)),
-                    ("service", None, lambda s: seed_service_demo(s)),
-                    ("bid_management", None, lambda s: seed_bid_management_demo(s, _all_pids)),
-                    ("hse_advanced", None, lambda s: seed_hse_advanced_demo(s, _all_pids)),
-                    ("portal", None, lambda s: seed_portal_demo(s, _all_pids)),
-                    ("supplier_catalogs", None, lambda s: seed_supplier_catalogs(s, _first_pid)),
-                    ("carbon", CarbonInventory, lambda s: seed_carbon_demo(s, _all_pids)),
-                    (
-                        "schedule_advanced",
-                        MasterSchedule,
-                        lambda s: seed_schedule_advanced_demo(s, _all_pids),
-                    ),
-                    ("variations", Notice, lambda s: seed_variations_demo(s, _all_pids)),
-                    # ── Modules that shipped without any startup seeder at all ──
-                    # Each new seeder below is internally idempotent (it returns
-                    # an empty dict once its own marker rows already exist), so
-                    # they are wired with a None marker and re-checked cheaply on
-                    # every restart. A None marker is required here rather than a
-                    # global row-count gate because several of these (takeoff,
-                    # tendering, markups) legitimately share their table with
-                    # rows seeded elsewhere or by users, so a table-wide count
-                    # would skip the projects that are still empty.
-                    ("costmodel", None, lambda s: seed_costmodel(s, _all_pids)),
-                    ("moc", None, lambda s: seed_moc(s, _all_pids)),
-                    ("tendering", None, lambda s: seed_tendering(s, _all_pids)),
-                    ("takeoff", None, lambda s: seed_takeoff_demo(s, _all_pids)),
-                    ("accommodation", None, lambda s: seed_accommodation(s, _all_pids)),
-                    ("markups", None, lambda s: seed_markups(s, _all_pids)),
-                    ("catalog", None, lambda s: seed_catalog(s, _all_pids)),
-                    # Site photos drop real JPEGs into the gallery so the Photos
-                    # module and the dashboard "latest photos" widget are never
-                    # empty on a fresh install. Self-guards on an existing seeded
-                    # photo for the flagship project.
-                    ("photos", None, lambda s: seed_photos(s, _all_pids)),
-                    # bim_hub groups the BIM models that already exist for a
-                    # project, so it runs near the end (after every other
-                    # seeder). clash runs right after it so its clash results
-                    # reference the freshly grouped models; clash also feeds the
-                    # coordination_hub dashboard's clash rollup.
-                    ("bim_hub", None, lambda s: seed_bim_hub(s, _all_pids)),
-                    ("clash", None, lambda s: seed_clash(s, _all_pids)),
-                ]
-                for _name, _marker, _build in _module_seeders:
-                    try:
-                        if _marker is not None:
-                            async with async_session_factory() as _chk:
-                                _n = (await _chk.execute(_msel(_func.count()).select_from(_marker))).scalar_one()
-                            if _n:
-                                continue
-                        async with async_session_factory() as _ms:
-                            _counts = await _build(_ms)
-                            await _ms.commit()
-                            if isinstance(_counts, dict) and any(_counts.values()):
-                                logger.info("%s demo seed: %s", _name, _counts)
-                    except Exception:
-                        logger.warning("%s demo seed skipped (non-fatal)", _name, exc_info=True)
-
-                # QMS seeds one project at a time and is not internally
-                # idempotent; loop the demo projects, skipping any that already
-                # carry an ITP plan so a restart never duplicates.
-                for _pid in _all_pids:
-                    try:
-                        async with async_session_factory() as _qs:
-                            _has = (
-                                await _qs.execute(_msel(ITPPlan.id).where(ITPPlan.project_id == _pid).limit(1))
-                            ).scalar_one_or_none()
-                            if _has is None:
-                                await seed_qms(_qs, project_id=_pid)
-                                await _qs.commit()
-                    except Exception:
-                        logger.warning("qms demo seed skipped for %s (non-fatal)", _pid, exc_info=True)
-            except Exception:
-                logger.warning("Feature-module demo seeds skipped (non-fatal)", exc_info=True)
+            await enrich_all()
     except Exception:
         logger.exception("Failed to seed demo account (non-fatal)")
 
@@ -1793,6 +1682,11 @@ def create_app() -> FastAPI:
             return {
                 "network_ok": True,
                 "any_outdated": False,
+                # `converters` is the canonical key the Settings UI maps over;
+                # it must be present on every platform or the panel crashes
+                # with "Cannot read properties of undefined (reading 'map')".
+                # `results` stays as a back-compat alias for older clients.
+                "converters": [],
                 "results": [],
                 "platform": sys.platform,
                 "note": (
@@ -1888,6 +1782,8 @@ def create_app() -> FastAPI:
 
         response = {
             "converters": results,
+            # Back-compat alias so any client still reading `results` keeps working.
+            "results": results,
             "any_outdated": any_outdated,
             "network_ok": network_ok,
             "checked_at": _dt.now(UTC).isoformat(),

@@ -55,6 +55,8 @@ export { Toast } from './Toast';
 
 export { ToastContainer } from './ToastContainer';
 
+export { BackgroundInstallBanner } from './BackgroundInstallBanner';
+
 export { CommandPalette } from './CommandPalette';
 
 export { InfoHint } from './InfoHint';

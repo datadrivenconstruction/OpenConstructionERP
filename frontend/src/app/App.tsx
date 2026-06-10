@@ -19,7 +19,7 @@ import { syncCustomUnitsFromServer } from '@/features/boq/boqHelpers';
 import { NlRuleBuilderPanel } from '@/features/compliance';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
 import { DatabaseSetupPage } from '@/features/setup';
-import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, PWAInstallPrompt } from '@/shared/ui';
+import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, PWAInstallPrompt } from '@/shared/ui';
 import { AdminOnly } from '@/shared/auth/AdminOnly';
 import GlobalSearchModal from '@/features/search/GlobalSearchModal';
 import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
@@ -1144,6 +1144,11 @@ export default function App() {
         </Route>
       </Routes>
       <ToastContainer />
+      {/* Non-blocking progress for a ready-made pack that keeps provisioning
+          (cost databases, modules, sample projects) in the background after the
+          user has already entered the app from onboarding. Mounted at the root
+          so it survives navigation; no-op until an install is in flight. */}
+      <BackgroundInstallBanner />
       <FloatingQueuePanel />
       {/* Mobile PWA — Slice 1.  Single, discrete install nudge handled
           entirely inside <PWAInstallPrompt /> (cooldown, iOS branch,

@@ -40,6 +40,11 @@ import {
 import { Logo, Button, CountryFlag, Badge } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useToastStore } from '@/stores/useToastStore';
+import {
+  useBackgroundInstallStore,
+  type BgInstallStep,
+  type BackgroundInstall,
+} from '@/stores/useBackgroundInstallStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -325,6 +330,152 @@ export function isOnboardingCompleted(): boolean {
   } catch {
     return false;
   }
+}
+
+// ── Background ready-pack install driver ────────────────────────────────────
+//
+// The ready-made pack install used to BLOCK: it streamed every step server-side
+// (apply pack -> language -> cost databases -> sample projects) and only let the
+// user continue once everything finished, which spun for a long time with no
+// useful status. The founder wants the LANGUAGE applied first and fast, the user
+// continuing into the app the moment language + a minimal workspace are ready,
+// and the heavy provisioning to keep running in the BACKGROUND with a small,
+// non-blocking progress indicator.
+//
+// ``startBackgroundReadyPackInstall`` drives the SAME fail-soft SSE stream the
+// blocking path used, but: (1) it is module-scoped, not tied to any component,
+// so it survives the navigation into the app; (2) it writes live progress into
+// the global ``useBackgroundInstallStore`` so the root-mounted
+// ``BackgroundInstallBanner`` can render it from anywhere; and (3) it resolves a
+// "language is ready" promise the instant the ``locale`` step lands, so the
+// caller can route the user in immediately while the rest keeps loading.
+
+/** Turn a finished step's detail payload into a short human string for the banner. */
+function bgStepDetail(step: string, detail: Record<string, unknown>): string | undefined {
+  const num = (k: string): number | undefined => {
+    const v = detail[k];
+    return typeof v === 'number' && Number.isFinite(v) ? v : undefined;
+  };
+  if (step === 'cost_db') {
+    const items = num('items');
+    if (items && items > 0) return items.toLocaleString();
+  }
+  if (step === 'resources') {
+    const resources = num('resources');
+    if (resources && resources > 0) return resources.toLocaleString();
+  }
+  if (step === 'demos') {
+    const installed = detail['installed'];
+    if (Array.isArray(installed) && installed.length > 0) return String(installed.length);
+  }
+  return undefined;
+}
+
+/**
+ * Start a ready-made pack install that keeps provisioning in the background.
+ *
+ * Resolves the returned promise as soon as the LANGUAGE step lands (the critical
+ * fast piece) so the caller can route the user into the app, then keeps the SSE
+ * stream running on its own. ``onLanguageReady`` fires with the resolved locale
+ * the moment language is applied. The global background-install store is updated
+ * throughout so the banner reflects live progress; the stream is fail-soft and
+ * always reaches a terminal state, so the banner never spins forever.
+ *
+ * @returns A promise that resolves ``true`` once language is ready (the user may
+ *   continue), or ``false`` if the install failed before language was applied
+ *   (apply step errored) so the caller can fall back to the step-by-step flow.
+ */
+function startBackgroundReadyPackInstall(
+  slug: string,
+  country: string,
+  opts: {
+    onLanguageReady: (locale: string) => void;
+    demoCount?: number;
+  },
+): Promise<boolean> {
+  const store = useBackgroundInstallStore.getState();
+  // Seed a minimal checklist up front so the banner has rows before the stream's
+  // ``start`` frame arrives; the real labels replace these on ``start``.
+  const seed: BgInstallStep[] = [
+    { step: 'apply_pack', label: i18n.t('onboarding.pp_step_apply', { defaultValue: 'Apply pack' }), status: 'pending' },
+    { step: 'locale', label: i18n.t('onboarding.pp_step_locale', { defaultValue: 'Language' }), status: 'pending' },
+    { step: 'cost_db', label: i18n.t('onboarding.pp_step_cost_db', { defaultValue: 'Cost database' }), status: 'pending' },
+    { step: 'demos', label: i18n.t('onboarding.pp_step_demos', { defaultValue: 'Example projects' }), status: 'pending' },
+  ];
+  store.begin(slug, country, seed);
+
+  return new Promise<boolean>((resolve) => {
+    let settled = false;
+    let applyFailed = false;
+    let localeApplied = false;
+
+    const finishLanguage = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      resolve(ok);
+    };
+
+    void fullInstallPackStream(
+      slug,
+      (evt) => {
+        const s = useBackgroundInstallStore.getState();
+        if (evt.type === 'start') {
+          // Replace the seed with the server's real, localized step list.
+          const steps: BgInstallStep[] = evt.steps.map((d) => ({
+            step: d.step,
+            label: i18n.t(d.label_key, { defaultValue: d.label }),
+            status: 'pending',
+          }));
+          s.begin(slug, country, steps);
+        } else if (evt.type === 'step_start') {
+          s.markRunning(evt.step);
+        } else if (evt.type === 'step_done') {
+          s.markDone(evt.step, evt.status, bgStepDetail(evt.step, evt.detail));
+          if (evt.step === 'apply_pack' && evt.status === 'error') {
+            // Apply failed before language could be applied -- the whole install
+            // cannot proceed. Tell the caller to fall back to step-by-step.
+            applyFailed = true;
+          }
+          if (evt.step === 'locale') {
+            // Language is the fast critical piece. Apply it client-side and let
+            // the caller route the user in, even though cost DBs / demos are
+            // still loading in the background.
+            if (!applyFailed) {
+              const locale =
+                typeof evt.detail['locale'] === 'string' ? (evt.detail['locale'] as string) : null;
+              if (locale && !localeApplied) {
+                localeApplied = true;
+                opts.onLanguageReady(locale);
+              }
+              finishLanguage(true);
+            }
+          }
+        } else if (evt.type === 'done') {
+          const hadError = evt.steps.some((st) => st.status === 'error');
+          s.finish(hadError);
+          // If the stream ended without ever applying language (e.g. a pack with
+          // no locale, or an early apply error), release the caller now so it is
+          // never left awaiting forever.
+          finishLanguage(!applyFailed && evt.ok);
+        }
+      },
+      { demoCount: opts.demoCount ?? 2 },
+    ).catch(() => {
+      // Transport failure: mark any still-running rows as errored and release
+      // the caller so onboarding does not hang.
+      const s = useBackgroundInstallStore.getState();
+      const inst = s.install;
+      if (inst) {
+        for (const row of inst.steps) {
+          if (row.status === 'running' || row.status === 'pending') {
+            s.markDone(row.step, 'error');
+          }
+        }
+        s.finish(true);
+      }
+      finishLanguage(localeApplied);
+    });
+  });
 }
 
 /** Get the suggested region for the current language */
@@ -772,10 +923,12 @@ function ReadyPackPicker({
 
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [installing, setInstalling] = useState(false);
-  const [stepStates, setStepStates] = useState<Record<FullInstallStepName, ChecklistState>>(
-    () => ({ apply_pack: 'pending', locale: 'pending', cost_db: 'pending', vector_db: 'pending', demos: 'pending' }),
-  );
   const [installedSlug, setInstalledSlug] = useState<string | null>(null);
+  // Live progress for the in-flight install, mirrored from the global
+  // background-install store the driver writes to. The picker renders the
+  // prominent progress UI from this while it waits for language to be ready;
+  // the same store keeps driving the root banner after the user routes in.
+  const bgInstall = useBackgroundInstallStore((s) => s.install);
 
   // Default-select the first pack once they load.
   useEffect(() => {
@@ -799,51 +952,39 @@ function ReadyPackPicker({
       if (installing) return;
       setInstalling(true);
       setInstalledSlug(null);
-      // Reset the live checklist to pending; the SSE stream flips each row to
-      // running and then to its final status as the server works through the
-      // steps, so the user sees real per-step progress instead of one long
-      // frozen spinner.
-      setStepStates({
-        apply_pack: 'pending',
-        locale: 'pending',
-        cost_db: 'pending',
-        vector_db: 'skipped',
-        demos: 'pending',
-      });
 
-      let ok = false;
+      // Kick off the background install. This applies the pack and the LANGUAGE
+      // first and fast, then keeps loading the cost databases and sample
+      // projects on its own while the user is already in the app. The promise
+      // resolves the moment language is ready, so we route the user in
+      // immediately instead of making them wait for everything. Live progress
+      // for the heavy steps shows in the root-mounted background banner.
       try {
-        await fullInstallPackStream(
-          pack.slug,
-          (evt) => {
-            if (evt.type === 'step_start') {
-              const k = evt.step as FullInstallStepName;
-              setStepStates((prev) => (k in prev ? { ...prev, [k]: 'running' } : prev));
-            } else if (evt.type === 'step_done') {
-              const k = evt.step as FullInstallStepName;
-              setStepStates((prev) => (k in prev ? { ...prev, [k]: evt.status } : prev));
-            } else if (evt.type === 'done') {
-              ok = evt.ok;
-            }
-          },
-          { demoCount: 2 },
-        );
+        const ready = await startBackgroundReadyPackInstall(pack.slug, packCountryName(pack), {
+          demoCount: 2,
+          onLanguageReady: (locale) => onActivateLocale(locale),
+        });
 
-        if (ok) {
+        if (ready) {
           setInstalledSlug(pack.slug);
+          // Fallback: if the stream finished before it could report a locale,
+          // still surface the pack's declared default locale.
           onActivateLocale(pack.default_locale);
           addToast({
             type: 'success',
-            title: t('onboarding.pp_install_success', {
-              defaultValue: '{{country}} workspace installed',
+            title: t('onboarding.pp_language_ready', {
+              defaultValue: '{{country}} is ready, finishing setup in the background',
               country: packCountryName(pack),
             }),
           });
-          // Brief pause so the green checklist is visible, then hand control
-          // back to the wizard which records the slug and jumps to Finish.
-          window.setTimeout(() => onInstalled(pack.slug), 900);
+          // Brief pause so the language/checklist tick is visible, then hand
+          // control back to the wizard which records the slug and jumps to
+          // Finish. The rest of the install keeps running in the background.
+          window.setTimeout(() => onInstalled(pack.slug), 700);
         } else {
-          // Partial failure -- fall back to the normal multi-step flow.
+          // Apply failed before language could be applied -- fall back to the
+          // normal multi-step flow. The background banner already shows the
+          // failed step.
           addToast({
             type: 'error',
             title: t('onboarding.ready_pack_failed', {
@@ -853,6 +994,9 @@ function ReadyPackPicker({
               defaultValue: 'Continuing with step-by-step setup instead.',
             }),
           });
+          // Abandon the pack: clear the background banner so it does not linger
+          // with a failed install while the user does step-by-step setup.
+          useBackgroundInstallStore.getState().dismiss();
           setInstalling(false);
           onFallback();
         }
@@ -866,6 +1010,7 @@ function ReadyPackPicker({
             defaultValue: 'Continuing with step-by-step setup instead.',
           }),
         });
+        useBackgroundInstallStore.getState().dismiss();
         setInstalling(false);
         onFallback();
       }
@@ -967,34 +1112,19 @@ function ReadyPackPicker({
         </div>
       )}
 
-      {/* Install confirm / progress for the chosen pack. */}
+      {/* Install confirm / progress for the chosen pack. The progress block is
+          deliberately large and legible (tall progress bar, prominent percent,
+          big step rows) so setup status is unmistakable. It reads live from the
+          background-install store, so it keeps showing real per-step progress
+          even though the heavy steps finish in the background. */}
       {!isLoading && selectedPack && (
-        <div className="mt-6 w-full max-w-md">
+        <div className="mt-6 w-full max-w-lg">
           {installing && (
-            <div className="mb-4 rounded-xl bg-surface-secondary/50 p-3">
-              <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-content-secondary">
-                <Loader2 size={13} className="animate-spin text-oe-blue" />
-                {installedSlug
-                  ? t('onboarding.pp_checklist_done', { defaultValue: 'Workspace ready' })
-                  : t('onboarding.pp_checklist_running', {
-                      defaultValue: 'Setting up {{country}}…',
-                      country: packCountryName(selectedPack),
-                    })}
-              </div>
-              <ul className="space-y-1.5">
-                {FULL_INSTALL_STEPS.filter((step) => step !== 'vector_db').map((step) => {
-                  const StepIcon = FULL_INSTALL_STEP_ICONS[step];
-                  const state = stepStates[step];
-                  return (
-                    <li key={step} className="flex items-center gap-2.5 text-xs">
-                      <ChecklistGlyph state={state} />
-                      <StepIcon size={13} className="shrink-0 text-content-quaternary" />
-                      <span className="flex-1 text-content-secondary">{packStepLabel(t, step)}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+            <ReadyPackProgressPanel
+              install={bgInstall}
+              country={packCountryName(selectedPack)}
+              languageReady={installedSlug !== null}
+            />
           )}
 
           <Button
@@ -1006,13 +1136,13 @@ function ReadyPackPicker({
             className="w-full"
           >
             {installedSlug
-              ? t('onboarding.pp_installed', {
-                  defaultValue: '{{country}} workspace installed',
+              ? t('onboarding.pp_continue_to_app', {
+                  defaultValue: 'Continue to {{country}}',
                   country: packCountryName(selectedPack),
                 })
               : installing
-                ? t('onboarding.pp_installing', {
-                    defaultValue: 'Installing {{country}} workspace…',
+                ? t('onboarding.pp_preparing', {
+                    defaultValue: 'Preparing {{country}}…',
                     country: packCountryName(selectedPack),
                   })
                 : t('onboarding.ready_pack_install', {
@@ -1023,8 +1153,9 @@ function ReadyPackPicker({
 
           {!installing && (
             <p className="mt-2 text-center text-2xs text-content-tertiary">
-              {t('onboarding.ready_pack_install_hint', {
-                defaultValue: 'This may take a few seconds while everything is provisioned.',
+              {t('onboarding.ready_pack_install_hint_bg', {
+                defaultValue:
+                  'The language is applied first so you can start right away. Cost databases and sample projects keep loading in the background.',
               })}
             </p>
           )}
@@ -1042,23 +1173,136 @@ function ReadyPackPicker({
   );
 }
 
-/** Localized label for one full-install step (shared by both pack pickers). */
-function packStepLabel(
-  t: ReturnType<typeof useTranslation>['t'],
-  step: FullInstallStepName,
-): string {
+/** Lucide icon for any stream step id (superset of the five §5 steps). */
+function streamStepIcon(step: string): LucideIcon {
   switch (step) {
     case 'apply_pack':
-      return t('onboarding.pp_step_apply', { defaultValue: 'Apply pack' });
+      return Package;
     case 'locale':
-      return t('onboarding.pp_step_locale', { defaultValue: 'Language' });
+      return Languages;
     case 'cost_db':
-      return t('onboarding.pp_step_cost_db', { defaultValue: 'Cost database' });
+      return Database;
+    case 'resources':
+      return Layers;
     case 'vector_db':
-      return t('onboarding.pp_step_vector_db', { defaultValue: 'Vector database' });
+      return Boxes;
     case 'demos':
-      return t('onboarding.pp_step_demos', { defaultValue: 'Example projects' });
+      return FolderOpen;
+    default:
+      return Package;
   }
+}
+
+/**
+ * Prominent, large progress panel shown while a ready-made pack is being set up
+ * on the onboarding step. Renders a tall determinate progress bar, a big
+ * percent + status line, and a legible per-step checklist that flips each row
+ * to its final state as the server works through it.
+ *
+ * It reads from the live ``useBackgroundInstallStore`` snapshot (``install``),
+ * so it keeps reflecting real progress for the steps that finish in the
+ * background after the user has continued into the app.
+ */
+function ReadyPackProgressPanel({
+  install,
+  country,
+  languageReady,
+}: {
+  install: BackgroundInstall | null;
+  country: string;
+  languageReady: boolean;
+}) {
+  const { t } = useTranslation();
+
+  const steps = install?.steps ?? [];
+  const total = steps.length;
+  const finished = steps.filter(
+    (s) => s.status === 'ok' || s.status === 'skipped' || s.status === 'error',
+  ).length;
+  const pct = total > 0 ? Math.round((finished / total) * 100) : languageReady ? 100 : 5;
+  const runningStep = steps.find((s) => s.status === 'running');
+
+  return (
+    <div className="mb-5 rounded-2xl border border-border-light/70 bg-surface-secondary/40 p-5 dark:border-white/10">
+      {/* Big status headline + prominent percent. */}
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          {languageReady ? (
+            <CheckCircle2 size={20} className="shrink-0 text-semantic-success" />
+          ) : (
+            <Loader2 size={20} className="shrink-0 animate-spin text-oe-blue" />
+          )}
+          <span className="truncate text-base font-semibold text-content-primary">
+            {languageReady
+              ? t('onboarding.pp_language_ready_short', {
+                  defaultValue: '{{country}} is ready',
+                  country,
+                })
+              : t('onboarding.pp_checklist_running', {
+                  defaultValue: 'Setting up {{country}}…',
+                  country,
+                })}
+          </span>
+        </div>
+        <span className="shrink-0 text-2xl font-bold tabular-nums text-content-primary">
+          {pct}%
+        </span>
+      </div>
+
+      {/* Tall determinate progress bar. */}
+      <div className="h-3 w-full overflow-hidden rounded-full bg-surface-secondary">
+        <div
+          className="h-full rounded-full bg-oe-blue transition-all duration-500 ease-out"
+          style={{ width: `${Math.max(pct, 5)}%` }}
+        />
+      </div>
+
+      {/* Current-step caption. */}
+      <p className="mt-2 min-h-[1.25rem] text-sm text-content-secondary">
+        {languageReady
+          ? t('onboarding.pp_continue_hint', {
+              defaultValue: 'You can continue now. The rest keeps loading in the background.',
+            })
+          : runningStep
+            ? runningStep.label
+            : t('onboarding.pp_starting', { defaultValue: 'Starting setup…' })}
+      </p>
+
+      {/* Large, legible per-step checklist. */}
+      {steps.length > 0 && (
+        <ul className="mt-4 space-y-2.5">
+          {steps.map((s) => {
+            const StepIcon = streamStepIcon(s.step);
+            return (
+              <li key={s.step} className="flex items-center gap-3 text-sm">
+                <ChecklistGlyph state={s.status} />
+                <StepIcon size={16} className="shrink-0 text-content-quaternary" />
+                <span
+                  className={clsx(
+                    'flex-1',
+                    s.status === 'ok'
+                      ? 'font-medium text-content-primary'
+                      : s.status === 'error'
+                        ? 'text-semantic-error'
+                        : s.status === 'running'
+                          ? 'font-medium text-content-primary'
+                          : 'text-content-secondary',
+                  )}
+                >
+                  {s.label}
+                </span>
+                {s.detail && (
+                  <span className="shrink-0 text-xs text-content-tertiary tabular-nums">
+                    {s.detail}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 // ── Step 3: Company Profile (industry cards) ────────────────────────────────

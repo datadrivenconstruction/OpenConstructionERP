@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import json
 import logging
+import uuid
 from collections.abc import AsyncIterator
 from typing import Any
 
@@ -389,16 +390,41 @@ async def _step_demos(slug: str, demo_count: int) -> StepResult:
 
     installed: list[str] = []
     errors: list[dict[str, str]] = []
+    installed_project_ids: list[uuid.UUID] = []
 
     for demo_id in install_ids:
         try:
             async with async_session_factory() as session:
-                await install_demo_project(session, demo_id, partner_pack=slug)
+                demo_res = await install_demo_project(session, demo_id, partner_pack=slug)
                 await session.commit()
             installed.append(demo_id)
+            _pid_raw = demo_res.get("project_id") if isinstance(demo_res, dict) else None
+            if _pid_raw:
+                try:
+                    installed_project_ids.append(
+                        _pid_raw if isinstance(_pid_raw, uuid.UUID) else uuid.UUID(str(_pid_raw))
+                    )
+                except (ValueError, TypeError):
+                    pass
         except Exception as exc:  # noqa: BLE001 - one bad demo never aborts the rest
             logger.warning("full-install demos: demo %s failed: %s", demo_id, exc)
             errors.append({"demo_id": demo_id, "error": str(exc)})
+
+    # Run the rich per-module enrichment (photos, takeoff, clash, carbon, qms,
+    # variations, costmodel, moc, markups, catalog, BIM grouping) over the
+    # freshly installed demo projects. install_demo_project only seeds BOQ /
+    # budget / schedule / tender / BIM model / PDFs, so without this the pack
+    # opens with those modules empty. This is the slow "sample data loads later"
+    # phase and correctly runs as part of the demos step (the background stream
+    # phase in the SSE variant). Fail-soft: an enrichment error never flips the
+    # demos step or aborts the install.
+    if installed_project_ids:
+        try:
+            from app.core.demo_enrichment import enrich_projects
+
+            await enrich_projects(installed_project_ids)
+        except Exception as exc:  # noqa: BLE001 - enrichment never aborts the demos step
+            logger.warning("full-install demos: enrichment failed: %s", exc)
 
     detail: dict[str, Any] = {"installed": installed}
     if errors:

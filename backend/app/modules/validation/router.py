@@ -305,9 +305,7 @@ async def import_ids(
     user_id: CurrentUserId,
     session: SessionDep,
     file: UploadFile = File(..., description="An IDS XML file (.ids or .xml)"),
-    project_id: uuid.UUID = Query(
-        ..., description="Project the imported rules belong to"
-    ),
+    project_id: uuid.UUID = Query(..., description="Project the imported rules belong to"),
     rule_set: str = Query(
         default="ids_custom",
         description="Rule set name to register the imported rules under.",

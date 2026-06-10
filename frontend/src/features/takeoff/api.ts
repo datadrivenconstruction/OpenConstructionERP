@@ -58,6 +58,24 @@ export interface MeasurementResponse {
   updated_at: string;
 }
 
+/** One unconfirmed measurement proposed by offline vector recognition (#194). */
+export interface RecognizeCandidate {
+  type: 'area' | 'distance' | 'count';
+  points: MeasurementPoint[];
+  value: number | null;
+  dimension: string;
+  count?: number | null;
+  confidence: number;
+  reason: string;
+}
+
+export interface RecognizeResult {
+  candidates: RecognizeCandidate[];
+  page: number;
+  source: string;
+  notes: string | null;
+}
+
 export interface MeasurementSummary {
   total_measurements: number;
   by_type: Record<string, number>;
@@ -149,6 +167,17 @@ export const takeoffApi = {
     apiPost<MeasurementResponse>(`/v1/takeoff/measurements/${id}/link-to-boq/`, {
       boq_position_id: boqPositionId,
     }),
+
+  /** Recognize candidate measurements from a page's vector layer (offline,
+   *  issue #194). Returns confidence-scored area/length/count candidates that
+   *  the user confirms on the canvas; nothing is persisted server-side. */
+  recognize: (docId: string, page: number, scalePixelsPerUnit?: number) => {
+    const sp = scalePixelsPerUnit && scalePixelsPerUnit > 0 ? scalePixelsPerUnit : 0;
+    return apiPost<RecognizeResult>(
+      `/v1/takeoff/documents/${encodeURIComponent(docId)}/recognize/?page=${page}&scale_pixels_per_unit=${sp}`,
+      {},
+    );
+  },
 
   /** Get measurement summary stats for a project. */
   summary: (projectId: string) =>

@@ -364,6 +364,15 @@ class ProjectCreate(BaseModel):
     actual_end_date: str | None = Field(default=None, max_length=20)
     budget_estimate: str | None = Field(default=None, max_length=50)
     contingency_pct: str | None = Field(default=None, max_length=10)
+    gross_floor_area: str | None = Field(
+        default=None,
+        max_length=50,
+        description=(
+            "Gross floor area in m2 GFA as a decimal-string (e.g. '5400'). "
+            "Used by the Cost Benchmarks module to derive a real cost-per-m2 "
+            "figure for the project portfolio distribution."
+        ),
+    )
     custom_fields: dict[str, Any] | None = None
     work_calendar_id: str | None = Field(default=None, max_length=36)
 
@@ -429,10 +438,10 @@ class ProjectCreate(BaseModel):
         # " DACH " and "DACH" don't fork into two distinct values.
         return v.strip()
 
-    @field_validator("contract_value", "budget_estimate", mode="after")
+    @field_validator("contract_value", "budget_estimate", "gross_floor_area", mode="after")
     @classmethod
     def _validate_money_fields(cls, v: str | None, info: Any) -> str | None:
-        # A-PROJ-03: monetary fields must be non-negative numbers.
+        # A-PROJ-03: monetary and area fields must be non-negative numbers.
         return _validate_money(v, info.field_name)
 
     @field_validator("contingency_pct", mode="after")
@@ -504,6 +513,11 @@ class ProjectUpdate(BaseModel):
     actual_end_date: str | None = Field(default=None, max_length=20)
     budget_estimate: str | None = Field(default=None, max_length=50)
     contingency_pct: str | None = Field(default=None, max_length=10)
+    gross_floor_area: str | None = Field(
+        default=None,
+        max_length=50,
+        description="Gross floor area in m2 GFA as a decimal-string. Empty string clears it.",
+    )
     custom_fields: dict[str, Any] | None = None
     work_calendar_id: str | None = Field(default=None, max_length=36)
     status: str | None = None
@@ -562,7 +576,7 @@ class ProjectUpdate(BaseModel):
     def _trim_region_std(cls, v: str | None) -> str | None:
         return None if v is None else v.strip()
 
-    @field_validator("contract_value", "budget_estimate", mode="after")
+    @field_validator("contract_value", "budget_estimate", "gross_floor_area", mode="after")
     @classmethod
     def _validate_money_fields(cls, v: str | None, info: Any) -> str | None:
         return _validate_money(v, info.field_name)
@@ -622,6 +636,7 @@ class ProjectResponse(BaseModel):
     actual_end_date: str | None = None
     budget_estimate: str | None = None
     contingency_pct: str | None = None
+    gross_floor_area: str | None = None
     custom_fields: dict[str, Any] | None = None
     work_calendar_id: str | None = None
 

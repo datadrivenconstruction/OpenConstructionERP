@@ -1253,6 +1253,137 @@ class TakeoffService:
             limit=limit,
         )
 
+    async def recognize_candidates(
+        self,
+        doc_id: str,
+        page: int,
+        scale_pixels_per_unit: float | None,
+    ) -> dict[str, Any]:
+        """Detect candidate measurements from a PDF page's vector layer.
+
+        Offline, deterministic complement to ``analyze_document`` (which
+        sends text to an LLM): reads the stored PDF off disk, harvests the
+        page's vector drawings with PyMuPDF ``page.get_drawings()`` and runs
+        the pure :mod:`app.modules.takeoff.recognize` detectors. Nothing is
+        persisted - the candidates carry a confidence and a reason and are
+        confirmed by the user on the canvas (CLAUDE.md rule 7).
+
+        Returns ``{candidates, page, source, notes}``. Honest failure modes:
+        PyMuPDF absent -> a 400 pointing at the optional ``cv`` extra; no
+        vector layer (a scanned/raster PDF) -> an empty candidate set with
+        ``notes='no_vector_layer'`` rather than fabricated geometry, with a
+        pointer to the online ``analyze`` path.
+        """
+        from app.modules.takeoff import recognize as _recognize
+
+        doc = await self.repo.get_by_id(uuid.UUID(doc_id))
+        if doc is None:
+            raise HTTPException(status_code=404, detail="Takeoff document not found")
+        validate_page_for_document(doc, page)
+
+        file_path = Path(doc.file_path) if doc.file_path else _TAKEOFF_DOCUMENTS_DIR / f"{doc_id}.pdf"
+        if not file_path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail="The stored PDF for this document is no longer on disk. Re-upload it to recognize.",
+            )
+
+        try:
+            import pymupdf  # noqa: PLC0415 - lazy: optional 'cv' extra, absent on default installs
+        except ImportError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Vector recognition needs PyMuPDF, which is part of the optional 'cv' "
+                    "extra. Install it with `pip install openconstructionerp[cv]`, or use the "
+                    "online AI analysis instead."
+                ),
+            ) from exc
+
+        # Render DPI for the raster fallback. The raster detector's morphology
+        # kernel is tuned in absolute pixels for ~150 DPI, so keep this in sync
+        # with app.modules.takeoff.raster_recognize.
+        raster_dpi = 150
+        raster_payload: tuple[bytes, int, int, int] | None = None
+        page_w_pt = page_h_pt = 0.0
+        try:
+            content = file_path.read_bytes()
+            pdf = pymupdf.open(stream=content, filetype="pdf")
+            try:
+                pg = pdf[page - 1]
+                drawings = pg.get_drawings()
+                page_w_pt = float(pg.rect.width)
+                page_h_pt = float(pg.rect.height)
+                # No vector layer => scanned/raster page. Rasterise it so the
+                # OpenCV-based detector can still find rooms and walls.
+                if not drawings:
+                    try:
+                        pix = pg.get_pixmap(dpi=raster_dpi, alpha=False)
+                        raster_payload = (pix.samples, pix.h, pix.w, pix.n)
+                    except Exception:
+                        logger.exception("takeoff.recognize raster render failed for doc %s page %s", doc_id, page)
+                        raster_payload = None
+            finally:
+                pdf.close()
+        except HTTPException:
+            raise
+        except Exception:
+            logger.exception("takeoff.recognize failed to read page for doc %s page %s", doc_id, page)
+            raise HTTPException(
+                status_code=422,
+                detail="Could not read this page. The PDF may be corrupt or password-protected.",
+            ) from None
+
+        # Vector layer present -> deterministic vector detector.
+        if drawings:
+            candidates = _recognize.recognize_candidates(drawings, scale_pixels_per_unit)
+            return {
+                "candidates": candidates,
+                "page": page,
+                "source": "vector_recognize",
+                "notes": None if candidates else "no_features",
+            }
+
+        # Scanned / raster page -> OpenCV room + wall detection (cv extra).
+        if raster_payload is not None:
+            try:
+                import numpy as np  # noqa: PLC0415 - lazy: optional 'cv' extra
+
+                from app.modules.takeoff import raster_recognize as _raster  # noqa: PLC0415
+
+                samples, height, width, channels = raster_payload
+                arr = np.frombuffer(samples, dtype=np.uint8).reshape(height, width, channels)
+                # PyMuPDF pixmaps are RGB(A); OpenCV wants contiguous BGR.
+                if channels >= 3:
+                    image_bgr = np.ascontiguousarray(arr[:, :, 2::-1])
+                else:
+                    image_bgr = arr.reshape(height, width)
+                candidates = _raster.recognize_raster(image_bgr, page_w_pt, page_h_pt, scale_pixels_per_unit)
+                return {
+                    "candidates": candidates,
+                    "page": page,
+                    "source": "raster_recognize",
+                    "notes": None if candidates else "raster_no_features",
+                }
+            except ImportError:
+                # OpenCV / numpy (the 'cv' extra) is not installed - degrade
+                # honestly instead of pretending nothing was found.
+                return {
+                    "candidates": [],
+                    "page": page,
+                    "source": "raster_recognize",
+                    "notes": "raster_no_cv",
+                }
+            except Exception:
+                logger.exception("takeoff.recognize raster detection failed for doc %s page %s", doc_id, page)
+
+        return {
+            "candidates": [],
+            "page": page,
+            "source": "vector_recognize",
+            "notes": "no_vector_layer",
+        }
+
     async def update_measurement(
         self,
         measurement_id: uuid.UUID,
@@ -1309,6 +1440,29 @@ class TakeoffService:
                 client_value=client_value,
             )
             fields["measurement_value"] = recomputed
+
+        # Recompute the ``perimeter`` column server-side on any geometry
+        # change (issue #194 - in-canvas reshape). A reshape that changes
+        # the vertices must not leave a stale perimeter on the row, and the
+        # client perimeter cannot be trusted any more than the area can be.
+        # Polyline length / closed-polygon perimeter are both reconstructed
+        # from points x scale, mirroring the create-time derivation.
+        perimeter_triggers = {"points", "scale_pixels_per_unit", "type"}
+        if perimeter_triggers & fields.keys():
+            effective_type = (fields.get("type") if "type" in fields else item.type) or ""
+            effective_points = fields.get("points") if "points" in fields else (item.points or [])
+            effective_scale = (
+                fields.get("scale_pixels_per_unit") if "scale_pixels_per_unit" in fields else item.scale_pixels_per_unit
+            )
+            mtype = effective_type.strip().lower()
+            xy = _points_to_xy(effective_points or [])
+            scale_ppu = effective_scale or 0.0
+            if scale_ppu > 0 and len(xy) >= 2:
+                if mtype in {"area", "volume", "cloud"}:
+                    # Closed boundary: include the wrap edge back to the start.
+                    fields["perimeter"] = _polyline_length([*xy, xy[0]]) / scale_ppu
+                elif mtype in {"distance", "polyline"}:
+                    fields["perimeter"] = _polyline_length(xy) / scale_ppu
 
         # B8 - recompute the volume column (area × depth) server-side
         # whenever any input that feeds it is touched, so a PATCH cannot be

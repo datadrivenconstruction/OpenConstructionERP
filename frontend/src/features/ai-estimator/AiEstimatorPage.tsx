@@ -27,7 +27,7 @@ import { projectsApi, type Project } from '@/features/projects/api';
 import { matchElementsApi } from '@/features/match-elements/api';
 import { fetchDocuments, uploadDocument } from '@/features/documents/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
-import { Button, Card, DismissibleInfo } from '@/shared/ui';
+import { BetaBanner, Button, Card, DismissibleInfo } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 
 import {
@@ -665,6 +665,7 @@ export function AiEstimatorPage() {
               'A full AI-driven estimate from any source. The agent groups quantities and finds catalogue rates, and you confirm every step.',
           })}
         />
+        <BetaNotice />
         <IntroBanner />
         <AiStatusBanner readiness={readiness} />
         <RunsList
@@ -703,6 +704,7 @@ export function AiEstimatorPage() {
           </Button>
         }
       />
+      <BetaNotice />
       <AiStatusBanner readiness={readiness} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_1fr_300px]">
@@ -919,6 +921,26 @@ export function AiEstimatorPage() {
 }
 
 // ── Small local presentational helpers ───────────────────────────────
+
+// Beta warning shown at the top of the module (both the runs list and the
+// wizard). Estimate Builder is still maturing, so it carries an honest
+// amber notice with an AI-specific message on top of the shared BetaBanner.
+// Dismissible per browser, same as every other beta module.
+function BetaNotice() {
+  const { t } = useTranslation();
+  return (
+    <BetaBanner
+      moduleKey="ai-estimator"
+      title={t('ai-estimator.beta_title', {
+        defaultValue: 'Estimate Builder is in beta',
+      })}
+      description={t('ai-estimator.beta_desc', {
+        defaultValue:
+          'This AI workflow is still maturing. Treat every grouped quantity and matched rate as a draft and review it before you rely on the estimate. Rates always come from your cost database and are never invented, but the grouping and matching can still miss or misread things.',
+      })}
+    />
+  );
+}
 
 function IntroBanner() {
   const { t } = useTranslation();

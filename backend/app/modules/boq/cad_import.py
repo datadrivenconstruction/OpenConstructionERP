@@ -1617,8 +1617,7 @@ async def convert_cad_to_excel(
         # self-healing within the same request, no service restart needed.
         first_err = (result.stderr or b"").decode(errors="replace")
         logger.warning(
-            "Converter first attempt failed for %s (exit %d): %s - re-probing "
-            "CLI shape and retrying once.",
+            "Converter first attempt failed for %s (exit %d): %s - re-probing CLI shape and retrying once.",
             input_path.name,
             result.returncode,
             first_err[:300],

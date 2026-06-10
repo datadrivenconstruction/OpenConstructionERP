@@ -44,6 +44,10 @@ export interface Project {
    */
   is_aia_eligible?: boolean;
   metadata: Record<string, unknown>;
+  /** Building type, e.g. "office" / "hospital" - maps to a benchmark cell. */
+  project_type?: string | null;
+  /** Gross floor area in m2 GFA as a decimal-string. Used by Cost Benchmarks. */
+  gross_floor_area?: string | null;
   /** RFC 37 #88 — additional currencies + FX rate to project.currency. */
   fx_rates?: ProjectFxRate[];
   /** RFC 37 #89 — per-project VAT override (percentage string, e.g. "21"). */
