@@ -704,7 +704,7 @@ export async function uploadBIMData(
     // Re-throw AbortError as-is so callers can distinguish cancellation
     if (networkErr instanceof DOMException && networkErr.name === 'AbortError') throw networkErr;
     throw new Error(
-      'Cannot connect to server. Please check that the backend is running and try again.',
+      'Upload failed before it reached the server. If this is a very large file, a proxy in front of the app may be blocking it.',
     );
   }
 
@@ -1325,7 +1325,7 @@ export async function uploadCADFile(
     // Re-throw AbortError as-is so callers can distinguish cancellation
     if (networkErr instanceof DOMException && networkErr.name === 'AbortError') throw networkErr;
     throw new Error(
-      'Cannot connect to server. Please check that the backend is running and try again.',
+      'Upload failed before it reached the server. If this is a very large file, a proxy in front of the app may be blocking it.',
     );
   }
 

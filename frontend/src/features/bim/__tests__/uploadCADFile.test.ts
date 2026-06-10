@@ -24,4 +24,14 @@ describe('uploadCADFile', () => {
 
     expect(fetchMock).toHaveBeenCalledOnce();
   });
+
+  it('explains that a network-style failure may be a proxy body-size block', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
+
+    await expect(
+      uploadCADFile('project-1', 'Model', 'architecture', new File(['ifc'], 'model.ifc')),
+    ).rejects.toThrow(
+      'Upload failed before it reached the server. If this is a very large file, a proxy in front of the app may be blocking it.',
+    );
+  });
 });
