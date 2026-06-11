@@ -13,10 +13,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+from app.modules.finance import gaap
 from app.modules.finance.models import (
     EVMSnapshot,
     Invoice,
     InvoiceLineItem,
+    LedgerAccount,
     LedgerEntry,
     Payment,
     ProjectBudget,
@@ -26,6 +28,8 @@ from app.modules.finance.repository import (
     EVMSnapshotRepository,
     InvoiceLineItemRepository,
     InvoiceRepository,
+    LedgerAccountRepository,
+    LedgerRepository,
     PaymentRepository,
 )
 from app.modules.finance.schemas import (
@@ -34,6 +38,9 @@ from app.modules.finance.schemas import (
     EVMSnapshotCreate,
     InvoiceCreate,
     InvoiceUpdate,
+    JournalEntryCreate,
+    LedgerAccountCreate,
+    LedgerAccountUpdate,
     LedgerEntryCreate,
     PaymentCreate,
     RecordClaimPaymentRequest,
@@ -208,6 +215,8 @@ class FinanceService:
         self.payments_repo = PaymentRepository(session)
         self.budgets = BudgetRepository(session)
         self.evm = EVMSnapshotRepository(session)
+        self.accounts = LedgerAccountRepository(session)
+        self.ledger = LedgerRepository(session)
 
     # ── Invoices ─────────────────────────────────────────────────────────────
 
@@ -1854,3 +1863,466 @@ class FinanceService:
 
         logger.info("Ledger reversal created: %s → %s", transaction_ref, reversal_ref)
         return rev_debit, rev_credit
+
+    # ── GAAP: chart of accounts ───────────────────────────────────────────────
+
+    async def seed_default_chart(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+        force: bool = False,
+    ) -> list[LedgerAccount]:
+        """Seed the default construction chart of accounts into a scope.
+
+        Idempotent: when the scope already has any account and ``force`` is
+        False, nothing is written and the existing accounts are returned. The
+        parent links are resolved in a second pass so a sub-account points at the
+        ``LedgerAccount`` row of its parent code (not the seed code).
+        """
+        existing, _ = await self.accounts.list(
+            project_id=project_id,
+            include_workspace=False,
+        )
+        if existing and not force:
+            return existing
+
+        existing_codes = {a.account_code for a in existing}
+        chart = gaap.default_chart_of_accounts()
+        created: dict[str, LedgerAccount] = {a.account_code: a for a in existing}
+
+        # Pass 1: insert every missing account (parents first - the chart is
+        # ordered by code so a parent code sorts before its children).
+        for code, acc in chart.items():
+            if code in existing_codes:
+                continue
+            row = LedgerAccount(
+                project_id=project_id,
+                account_code=acc.code,
+                name=acc.name,
+                account_type=acc.account_type.value,
+                normal_balance=acc.normal_balance.value,
+                statement_section=acc.statement_section,
+                is_cash=acc.is_cash,
+                is_active=True,
+                currency_code="",
+                metadata_={},
+            )
+            created[code] = await self.accounts.create(row)
+
+        # Pass 2: wire parent_id from the seed's parent_code.
+        for code, acc in chart.items():
+            if acc.parent_code and code in created and acc.parent_code in created:
+                child = created[code]
+                parent = created[acc.parent_code]
+                if child.parent_id != parent.id:
+                    await self.accounts.update(child.id, parent_id=parent.id)
+                    child.parent_id = parent.id
+
+        logger.info(
+            "Seeded default chart of accounts: scope=%s accounts=%d",
+            project_id or "workspace",
+            len(created),
+        )
+        return list(created.values())
+
+    async def list_accounts(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+        include_workspace: bool = True,
+        account_type: str | None = None,
+        active_only: bool = False,
+    ) -> tuple[list[LedgerAccount], int]:
+        """List chart-of-accounts rows for a scope."""
+        return await self.accounts.list(
+            project_id=project_id,
+            include_workspace=include_workspace,
+            account_type=account_type,
+            active_only=active_only,
+        )
+
+    async def create_account(self, data: LedgerAccountCreate) -> LedgerAccount:
+        """Create a chart-of-accounts account.
+
+        The ``normal_balance`` is derived from ``account_type`` when omitted;
+        when supplied it must match the type's GAAP normal balance (e.g. you
+        cannot declare an asset credit-normal).
+        """
+        derived = gaap.normal_balance_for(data.account_type).value
+        if data.normal_balance and data.normal_balance != derived:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"normal_balance '{data.normal_balance}' contradicts the GAAP "
+                    f"normal balance for a {data.account_type} account ('{derived}')."
+                ),
+            )
+
+        # Reject a duplicate code in the same scope with a clean 409.
+        clash = await self.accounts.get_by_code(data.account_code, project_id=data.project_id)
+        if clash is not None and clash.project_id == data.project_id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Account code '{data.account_code}' already exists in this scope.",
+            )
+
+        account = LedgerAccount(
+            project_id=data.project_id,
+            account_code=data.account_code,
+            name=data.name,
+            account_type=data.account_type,
+            normal_balance=data.normal_balance or derived,
+            parent_id=data.parent_id,
+            statement_section=data.statement_section,
+            is_cash=data.is_cash,
+            is_active=data.is_active,
+            currency_code=data.currency_code,
+            metadata_=data.metadata,
+        )
+        try:
+            account = await self.accounts.create(account)
+        except IntegrityError as exc:
+            await self.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Account code '{data.account_code}' already exists in this scope.",
+            ) from exc
+        logger.info("Ledger account created: %s (%s)", account.account_code, account.account_type)
+        return account
+
+    async def get_account(self, account_id: uuid.UUID) -> LedgerAccount:
+        """Get a chart-of-accounts account by id. 404 when missing."""
+        account = await self.accounts.get(account_id)
+        if account is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Ledger account not found",
+            )
+        return account
+
+    async def update_account(
+        self,
+        account_id: uuid.UUID,
+        data: LedgerAccountUpdate,
+    ) -> LedgerAccount:
+        """Update mutable fields on a chart-of-accounts account.
+
+        Code and type are immutable (changing them would orphan posted ledger
+        rows and silently flip a statement's sign), so only descriptive fields,
+        the active flag and the cash/section hints can be patched.
+        """
+        await self.get_account(account_id)  # 404 check
+        fields = data.model_dump(exclude_unset=True)
+        if "metadata" in fields:
+            fields["metadata_"] = fields.pop("metadata")
+        if fields:
+            await self.accounts.update(account_id, **fields)
+        updated = await self.accounts.get(account_id)
+        if updated is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Ledger account not found",
+            )
+        return updated
+
+    async def _chart_lookup(self, project_id: uuid.UUID | None) -> dict[str, gaap.AccountDef]:
+        """Build a ``{code: AccountDef}`` lookup for a scope.
+
+        Prefers DB rows (project-scoped override the shared workspace chart by
+        code). Falls back to the in-code default chart for any standard code not
+        yet persisted, so the statements work even before the chart is seeded.
+        """
+        chart: dict[str, gaap.AccountDef] = dict(gaap.default_chart_of_accounts())
+        rows, _ = await self.accounts.list(project_id=project_id, include_workspace=True)
+        # Project-scoped rows win over workspace rows for the same code.
+        rows.sort(key=lambda r: r.project_id is not None)
+        for row in rows:
+            chart[row.account_code] = gaap.AccountDef(
+                code=row.account_code,
+                name=row.name,
+                account_type=gaap.AccountType(row.account_type),
+                parent_code=None,
+                statement_section=row.statement_section,
+                is_cash=bool(row.is_cash),
+            )
+        return chart
+
+    # ── GAAP: journal posting ─────────────────────────────────────────────────
+
+    async def post_journal_entry(
+        self,
+        data: JournalEntryCreate,
+    ) -> tuple[list[LedgerEntry], Decimal, Decimal]:
+        """Post a balanced, multi-line journal entry atomically.
+
+        Invariants enforced before any row is written:
+        * every line is a pure debit OR pure credit (> 0 on exactly one side);
+        * ``sum(debit) == sum(credit)`` (unbalanced is rejected 400);
+        * a single currency for the whole entry (never blended);
+        * every ``account_code`` resolves to a real, active chart account.
+
+        Each line becomes one :class:`LedgerEntry` row sharing the entry's
+        ``transaction_ref``. All rows are written inside one SAVEPOINT so a
+        failure rolls the whole entry back.
+        """
+        currency = data.currency_code or ""
+        chart = await self._chart_lookup(data.project_id)
+
+        total_debits = Decimal("0")
+        total_credits = Decimal("0")
+        prepared: list[tuple[str, Decimal, Decimal, str | None]] = []
+
+        for idx, line in enumerate(data.lines):
+            debit = _safe_decimal(line.debit)
+            credit = _safe_decimal(line.credit)
+            if debit < 0 or credit < 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Line {idx}: amounts must be non-negative.",
+                )
+            # Exactly one side may be non-zero.
+            if (debit > 0) == (credit > 0):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Line {idx} for account '{line.account_code}' must be either a "
+                        f"debit OR a credit (exactly one side > 0), got debit={debit} credit={credit}."
+                    ),
+                )
+            # Account must exist in the resolved chart.
+            account = await self.accounts.get_by_code(line.account_code, project_id=data.project_id)
+            if account is None and line.account_code not in chart:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Line {idx}: account_code '{line.account_code}' is not in the "
+                        f"chart of accounts. Seed the chart or create the account first."
+                    ),
+                )
+            if account is not None and not account.is_active:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Line {idx}: account '{line.account_code}' is inactive and cannot be posted to.",
+                )
+            total_debits += debit
+            total_credits += credit
+            prepared.append((line.account_code, debit, credit, line.description))
+
+        if gaap.q2(total_debits) != gaap.q2(total_credits):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Unbalanced journal entry: sum(debit)={gaap.q2(total_debits)} "
+                    f"!= sum(credit)={gaap.q2(total_credits)}. Rejected."
+                ),
+            )
+        if total_debits <= 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Journal entry has zero total value; nothing to post.",
+            )
+
+        posted_at = data.posted_at or _utcnow_iso()
+        rows: list[LedgerEntry] = []
+        async with self.session.begin_nested():
+            for account_code, debit, credit, line_desc in prepared:
+                row = LedgerEntry(
+                    project_id=data.project_id,
+                    transaction_ref=data.transaction_ref,
+                    account_code=account_code,
+                    description=line_desc or data.description,
+                    debit_amount=debit,
+                    credit_amount=credit,
+                    currency_code=currency,
+                    posted_at=posted_at,
+                    source_type=data.source_type,
+                    source_id=data.source_id,
+                    is_reversal=False,
+                )
+                self.session.add(row)
+                rows.append(row)
+            await self.session.flush()
+
+        logger.info(
+            "Journal entry posted: ref=%s lines=%d dr=%s cr=%s",
+            data.transaction_ref,
+            len(rows),
+            gaap.q2(total_debits),
+            gaap.q2(total_credits),
+        )
+        return rows, gaap.q2(total_debits), gaap.q2(total_credits)
+
+    # ── GAAP: statement derivations ───────────────────────────────────────────
+
+    async def _ledger_lines(
+        self,
+        *,
+        project_id: uuid.UUID | None,
+        currency_code: str | None,
+        date_from: str | None,
+        date_to: str | None,
+    ) -> tuple[list[gaap.LedgerLine], list[LedgerEntry]]:
+        """Load posted ledger entries and map them to pure ``gaap.LedgerLine``.
+
+        Returns the lines and the raw entries (the cash-flow derivation needs the
+        raw rows to pair cash legs with their counter-accounts).
+        """
+        entries = await self.ledger.list_entries(
+            project_id=project_id,
+            currency_code=currency_code,
+            date_from=date_from,
+            date_to=date_to,
+        )
+        lines = [
+            gaap.LedgerLine(
+                account_code=e.account_code,
+                debit=_safe_decimal(e.debit_amount),
+                credit=_safe_decimal(e.credit_amount),
+                currency_code=e.currency_code or "",
+                posted_at=e.posted_at or "",
+            )
+            for e in entries
+        ]
+        return lines, entries
+
+    async def trial_balance(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+        currency_code: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> gaap.TrialBalance:
+        """Compute the trial balance for a scope and period."""
+        lines, _ = await self._ledger_lines(
+            project_id=project_id,
+            currency_code=currency_code,
+            date_from=date_from,
+            date_to=date_to,
+        )
+        chart = await self._chart_lookup(project_id)
+        return gaap.trial_balance(lines, chart)
+
+    async def income_statement(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+        currency_code: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> gaap.IncomeStatement:
+        """Derive the income statement (P&L) for a period."""
+        lines, _ = await self._ledger_lines(
+            project_id=project_id,
+            currency_code=currency_code,
+            date_from=date_from,
+            date_to=date_to,
+        )
+        chart = await self._chart_lookup(project_id)
+        tb = gaap.trial_balance(lines, chart)
+        return gaap.income_statement(tb, chart)
+
+    async def balance_sheet(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+        currency_code: str | None = None,
+        as_of: str | None = None,
+    ) -> gaap.BalanceSheet:
+        """Derive the balance sheet as of a date (cumulative through ``as_of``)."""
+        lines, _ = await self._ledger_lines(
+            project_id=project_id,
+            currency_code=currency_code,
+            date_from=None,
+            date_to=as_of,
+        )
+        chart = await self._chart_lookup(project_id)
+        tb = gaap.trial_balance(lines, chart)
+        return gaap.balance_sheet(tb, chart)
+
+    async def cash_flow(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+        currency_code: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> gaap.CashFlowStatement:
+        """Derive the direct-method cash flow statement for a period.
+
+        The opening cash balance is the net movement on the cash accounts BEFORE
+        ``date_from`` (so the closing cash ties to the cumulative ledger). Within
+        the period, each cash leg of a transaction is paired with the non-cash
+        legs of the same ``transaction_ref`` to classify the movement into
+        operating / investing / financing.
+        """
+        chart = await self._chart_lookup(project_id)
+        cash_codes = {code for code, acc in chart.items() if acc.is_cash}
+
+        # Opening cash: net cash movement strictly before the period start.
+        opening_cash = Decimal("0")
+        if date_from:
+            prior, _ = await self._ledger_lines(
+                project_id=project_id,
+                currency_code=currency_code,
+                date_from=None,
+                date_to=None,
+            )
+            for ln in prior:
+                if ln.account_code in cash_codes and ln.posted_at and ln.posted_at < date_from:
+                    opening_cash += ln.debit - ln.credit
+
+        _, entries = await self._ledger_lines(
+            project_id=project_id,
+            currency_code=currency_code,
+            date_from=date_from,
+            date_to=date_to,
+        )
+
+        # Group entries by transaction_ref so a cash leg can find its counter
+        # legs (the non-cash accounts of the same transaction).
+        by_ref: dict[str, list[LedgerEntry]] = {}
+        for e in entries:
+            by_ref.setdefault(e.transaction_ref, []).append(e)
+
+        currency = currency_code or ""
+        movements: list[gaap.CashMovement] = []
+        for ref_entries in by_ref.values():
+            cash_legs = [e for e in ref_entries if e.account_code in cash_codes]
+            non_cash = [e for e in ref_entries if e.account_code not in cash_codes]
+            if not cash_legs:
+                continue
+            # Dominant counter-account: the non-cash leg with the largest
+            # magnitude classifies the whole cash movement (a single-counter
+            # transaction, the common case, classifies exactly).
+            counter_type: gaap.AccountType | None = None
+            counter_section: str | None = None
+            if non_cash:
+                dominant = max(
+                    non_cash,
+                    key=lambda e: abs(_safe_decimal(e.debit_amount) - _safe_decimal(e.credit_amount)),
+                )
+                acc = chart.get(dominant.account_code)
+                if acc is not None:
+                    counter_type = acc.account_type
+                    counter_section = acc.statement_section
+            for leg in cash_legs:
+                # Cash in = debit to a cash account; cash out = credit.
+                amount = _safe_decimal(leg.debit_amount) - _safe_decimal(leg.credit_amount)
+                if amount == 0:
+                    continue
+                if currency_code is None and not currency:
+                    currency = leg.currency_code or ""
+                movements.append(
+                    gaap.CashMovement(
+                        amount=amount,
+                        counter_type=counter_type,
+                        counter_section=counter_section,
+                    )
+                )
+
+        return gaap.cash_flow_direct(
+            movements,
+            currency=currency,
+            opening_cash=opening_cash,
+        )

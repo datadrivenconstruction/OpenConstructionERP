@@ -725,3 +725,208 @@ class LedgerListResponse(BaseModel):
 
     items: list[LedgerEntryResponse]
     total: int
+
+
+# ── GAAP: chart of accounts ───────────────────────────────────────────────
+
+
+_ACCOUNT_TYPE_PATTERN = r"^(asset|liability|equity|revenue|expense)$"
+_NORMAL_BALANCE_PATTERN = r"^(debit|credit)$"
+
+
+class LedgerAccountCreate(BaseModel):
+    """Create a chart-of-accounts account.
+
+    ``normal_balance`` may be omitted - the service derives it from
+    ``account_type`` (assets/expenses debit-normal, the rest credit-normal) and
+    rejects a value that contradicts the type.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID | None = Field(default=None)
+    account_code: str = Field(..., min_length=1, max_length=100, examples=["1000"])
+    name: str = Field(..., min_length=1, max_length=255, examples=["Cash and Cash Equivalents"])
+    account_type: str = Field(..., pattern=_ACCOUNT_TYPE_PATTERN, examples=["asset"])
+    normal_balance: str | None = Field(default=None, pattern=_NORMAL_BALANCE_PATTERN)
+    parent_id: UUID | None = Field(default=None)
+    statement_section: str | None = Field(default=None, max_length=50)
+    is_cash: bool = Field(default=False)
+    is_active: bool = Field(default=True)
+    currency_code: str = Field(default="", max_length=10)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class LedgerAccountUpdate(BaseModel):
+    """Patch a chart-of-accounts account (code and type are immutable)."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    statement_section: str | None = Field(default=None, max_length=50)
+    is_cash: bool | None = Field(default=None)
+    is_active: bool | None = Field(default=None)
+    currency_code: str | None = Field(default=None, max_length=10)
+    parent_id: UUID | None = Field(default=None)
+    metadata: dict[str, Any] | None = Field(default=None)
+
+
+class LedgerAccountResponse(BaseModel):
+    """A chart-of-accounts row returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    project_id: UUID | None = None
+    account_code: str
+    name: str
+    account_type: str
+    normal_balance: str
+    parent_id: UUID | None = None
+    statement_section: str | None = None
+    is_cash: bool = False
+    is_active: bool = True
+    currency_code: str = ""
+    created_at: datetime
+    updated_at: datetime
+
+
+class LedgerAccountListResponse(BaseModel):
+    """Paginated chart-of-accounts list."""
+
+    items: list[LedgerAccountResponse]
+    total: int
+
+
+# ── GAAP: journal entry (multi-line, balanced) ────────────────────────────
+
+
+class JournalLineInput(BaseModel):
+    """One line of a journal entry: a debit or credit against an account.
+
+    Exactly one of ``debit`` / ``credit`` must be > 0 (the other 0). Both are
+    Decimal-as-string on the wire.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    account_code: str = Field(..., min_length=1, max_length=100)
+    debit: str = Field(default="0", max_length=50)
+    credit: str = Field(default="0", max_length=50)
+    description: str | None = Field(default=None, max_length=2000)
+
+    @field_validator("debit", "credit")
+    @classmethod
+    def _check_non_negative(cls, v: str) -> str:
+        return _validate_non_negative_decimal(v)
+
+
+class JournalEntryCreate(BaseModel):
+    """Post a balanced journal entry of two or more lines.
+
+    The service enforces ``sum(debit) == sum(credit)`` and a single currency
+    before any row is written; an unbalanced or single-line entry is rejected.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    transaction_ref: str = Field(..., min_length=1, max_length=100)
+    lines: list[JournalLineInput] = Field(..., min_length=2)
+    description: str | None = Field(default=None, max_length=2000)
+    currency_code: str = Field(default="", max_length=10)
+    posted_at: str = Field(default="", max_length=30)
+    source_type: str | None = Field(default=None, max_length=50)
+    source_id: str | None = Field(default=None, max_length=36)
+
+
+class JournalEntryResponse(BaseModel):
+    """The posted ledger rows that make up a journal entry."""
+
+    transaction_ref: str
+    lines: list[LedgerEntryResponse]
+    total_debits: str
+    total_credits: str
+
+
+# ── GAAP: trial balance + statements ──────────────────────────────────────
+
+
+class TrialBalanceRow(BaseModel):
+    """One account's debit/credit totals and signed balance in a trial balance."""
+
+    account_code: str
+    name: str
+    account_type: str
+    normal_balance: str
+    debit_total: str
+    credit_total: str
+    balance: str
+
+
+class TrialBalanceResponse(BaseModel):
+    """Trial balance with the grand debit == credit tie-out check."""
+
+    currency: str
+    as_of: str | None = None
+    date_from: str | None = None
+    rows: list[TrialBalanceRow]
+    total_debits: str
+    total_credits: str
+    is_balanced: bool
+    out_of_balance: str
+
+
+class StatementLineResponse(BaseModel):
+    """One line on a financial statement (Decimal-as-string amount)."""
+
+    code: str
+    name: str
+    amount: str
+    account_type: str = ""
+    section: str = ""
+
+
+class IncomeStatementResponse(BaseModel):
+    """Income statement (P&L) for a period."""
+
+    currency: str
+    date_from: str | None = None
+    date_to: str | None = None
+    revenue_lines: list[StatementLineResponse]
+    expense_lines: list[StatementLineResponse]
+    total_revenue: str
+    total_expenses: str
+    net_income: str
+
+
+class BalanceSheetResponse(BaseModel):
+    """Balance sheet as of a date with the assets = L + E tie-out check."""
+
+    currency: str
+    as_of: str | None = None
+    asset_lines: list[StatementLineResponse]
+    liability_lines: list[StatementLineResponse]
+    equity_lines: list[StatementLineResponse]
+    total_assets: str
+    total_liabilities: str
+    total_equity: str
+    liabilities_plus_equity: str
+    is_balanced: bool
+    out_of_balance: str
+
+
+class CashFlowResponse(BaseModel):
+    """Direct-method cash flow with the bucket-sum tie-out check."""
+
+    currency: str
+    date_from: str | None = None
+    date_to: str | None = None
+    method: str = "direct"
+    operating: str
+    investing: str
+    financing: str
+    opening_cash: str
+    net_change: str
+    closing_cash: str
+    ties_out: bool

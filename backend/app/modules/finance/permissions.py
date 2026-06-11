@@ -42,5 +42,16 @@ def register_finance_permissions() -> None:
             "finance.connector.read": Role.VIEWER,
             "finance.connector.manage": Role.MANAGER,
             "finance.connector.sync": Role.MANAGER,
+            # Task #77: GAAP general ledger + financial reporting.
+            # Reading the chart of accounts, the trial balance and the
+            # financial statements is VIEWER. Managing the chart (which shapes
+            # how every statement is classified) and posting a journal entry
+            # (a binding double-entry ledger write) are MANAGER, consistent
+            # with the R7 escalation that put record_payment / approve / pay at
+            # MANAGER. Statements are derived read models, so they sit at
+            # finance.read.
+            "finance.gl.read": Role.VIEWER,
+            "finance.gl.manage_accounts": Role.MANAGER,
+            "finance.gl.post_journal": Role.MANAGER,
         },
     )

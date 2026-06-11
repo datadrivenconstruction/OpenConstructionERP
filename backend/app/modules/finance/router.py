@@ -62,22 +62,35 @@ from app.modules.finance.connector_service import ConnectorService
 from app.modules.finance.connectors.registry import connector_registry
 from app.modules.finance.models import EVMSnapshot, Invoice, Payment, ProjectBudget
 from app.modules.finance.schemas import (
+    BalanceSheetResponse,
     BudgetCreate,
     BudgetListResponse,
     BudgetResponse,
     BudgetUpdate,
+    CashFlowResponse,
     ClaimInvoiceRequest,
     EVMListResponse,
     EVMSnapshotCreate,
     EVMSnapshotResponse,
+    IncomeStatementResponse,
     InvoiceCreate,
     InvoiceListResponse,
     InvoiceResponse,
     InvoiceUpdate,
+    JournalEntryCreate,
+    JournalEntryResponse,
+    LedgerAccountCreate,
+    LedgerAccountListResponse,
+    LedgerAccountResponse,
+    LedgerAccountUpdate,
+    LedgerEntryResponse,
     PaymentCreate,
     PaymentListResponse,
     PaymentResponse,
     RecordClaimPaymentRequest,
+    StatementLineResponse,
+    TrialBalanceResponse,
+    TrialBalanceRow,
 )
 from app.modules.finance.service import FinanceService
 
@@ -1633,3 +1646,325 @@ async def pay_invoice(
     )
     names = await _fetch_counterparty_names(session, [invoice.contact_id])
     return _invoice_to_response(invoice, names)
+
+
+# ── GAAP general ledger + financial reporting (task #77) ────────────────────
+#
+# Mounted under ``/gaap`` so the static segment never collides with the
+# parametric ``/{invoice_id}`` route above. Endpoints:
+#   GET    /gaap/accounts                  - list chart of accounts
+#   POST   /gaap/accounts                  - create an account (MANAGER)
+#   POST   /gaap/accounts/seed-defaults    - seed the default chart (MANAGER)
+#   PATCH  /gaap/accounts/{id}             - update an account (MANAGER)
+#   POST   /gaap/journal-entries           - post a balanced journal (MANAGER)
+#   GET    /gaap/trial-balance             - trial balance (debits == credits)
+#   GET    /gaap/statements/income         - income statement (P&L)
+#   GET    /gaap/statements/balance-sheet  - balance sheet (A = L + E)
+#   GET    /gaap/statements/cash-flow      - direct-method cash flow
+
+gaap_router = APIRouter(prefix="/gaap", tags=["finance-gaap"])
+
+
+def _ledger_entry_to_response(row: Any) -> LedgerEntryResponse:
+    return LedgerEntryResponse.model_validate(row)
+
+
+@gaap_router.get(
+    "/accounts",
+    response_model=LedgerAccountListResponse,
+    summary="List chart of accounts",
+    description="List chart-of-accounts rows for a scope. With a project_id the shared "
+    "workspace chart is unioned with the project's own accounts.",
+)
+async def list_ledger_accounts(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    account_type: str | None = Query(default=None),
+    active_only: bool = Query(default=False),
+    _perm: None = Depends(RequirePermission("finance.gl.read")),
+    service: FinanceService = Depends(_get_service),
+) -> LedgerAccountListResponse:
+    """List chart-of-accounts rows."""
+    await _require_project_access(session, project_id, user_id)
+    items, total = await service.list_accounts(
+        project_id=project_id,
+        account_type=account_type,
+        active_only=active_only,
+    )
+    return LedgerAccountListResponse(
+        items=[LedgerAccountResponse.model_validate(a) for a in items],
+        total=total,
+    )
+
+
+@gaap_router.post(
+    "/accounts",
+    response_model=LedgerAccountResponse,
+    status_code=201,
+    summary="Create a ledger account",
+    description="Create a chart-of-accounts account. normal_balance is derived from "
+    "account_type when omitted. MANAGER-only - the chart shapes every statement.",
+)
+async def create_ledger_account(
+    data: LedgerAccountCreate,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("finance.gl.manage_accounts")),
+    service: FinanceService = Depends(_get_service),
+) -> LedgerAccountResponse:
+    """Create a chart-of-accounts account."""
+    await _require_project_access(session, data.project_id, user_id)
+    account = await service.create_account(data)
+    return LedgerAccountResponse.model_validate(account)
+
+
+@gaap_router.post(
+    "/accounts/seed-defaults",
+    response_model=LedgerAccountListResponse,
+    summary="Seed the default construction chart of accounts",
+    description="Idempotently seed the default chart into a scope (workspace when no project_id). MANAGER-only.",
+)
+async def seed_default_chart(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("finance.gl.manage_accounts")),
+    service: FinanceService = Depends(_get_service),
+) -> LedgerAccountListResponse:
+    """Seed the default chart of accounts."""
+    await _require_project_access(session, project_id, user_id)
+    accounts = await service.seed_default_chart(project_id=project_id)
+    return LedgerAccountListResponse(
+        items=[LedgerAccountResponse.model_validate(a) for a in accounts],
+        total=len(accounts),
+    )
+
+
+@gaap_router.patch(
+    "/accounts/{account_id}",
+    response_model=LedgerAccountResponse,
+    summary="Update a ledger account",
+    description="Patch descriptive fields on a chart-of-accounts account. Code and type are immutable. MANAGER-only.",
+)
+async def update_ledger_account(
+    account_id: uuid.UUID,
+    data: LedgerAccountUpdate,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("finance.gl.manage_accounts")),
+    service: FinanceService = Depends(_get_service),
+) -> LedgerAccountResponse:
+    """Update a chart-of-accounts account."""
+    account = await service.get_account(account_id)
+    await _require_project_access(session, account.project_id, user_id)
+    updated = await service.update_account(account_id, data)
+    return LedgerAccountResponse.model_validate(updated)
+
+
+@gaap_router.post(
+    "/journal-entries",
+    response_model=JournalEntryResponse,
+    status_code=201,
+    summary="Post a balanced journal entry",
+    description="Post a balanced double-entry journal of two or more lines. The service "
+    "rejects an unbalanced entry, a blended-currency entry, and posting to an "
+    "unknown account. MANAGER-only - a binding ledger write.",
+)
+async def post_journal_entry(
+    data: JournalEntryCreate,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("finance.gl.post_journal")),
+    service: FinanceService = Depends(_get_service),
+) -> JournalEntryResponse:
+    """Post a balanced journal entry."""
+    await _require_project_access(session, data.project_id, user_id)
+    rows, total_debits, total_credits = await service.post_journal_entry(data)
+    return JournalEntryResponse(
+        transaction_ref=data.transaction_ref,
+        lines=[_ledger_entry_to_response(r) for r in rows],
+        total_debits=format(total_debits, "f"),
+        total_credits=format(total_credits, "f"),
+    )
+
+
+@gaap_router.get(
+    "/trial-balance",
+    response_model=TrialBalanceResponse,
+    summary="Trial balance",
+    description="Per-account debit/credit totals and signed balance, with the grand "
+    "debit == credit tie-out check, for a scope and period.",
+)
+async def get_trial_balance(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    currency_code: str | None = Query(default=None),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("finance.gl.read")),
+    service: FinanceService = Depends(_get_service),
+) -> TrialBalanceResponse:
+    """Compute the trial balance."""
+    await _require_project_access(session, project_id, user_id)
+    tb = await service.trial_balance(
+        project_id=project_id,
+        currency_code=currency_code,
+        date_from=date_from,
+        date_to=date_to,
+    )
+    return TrialBalanceResponse(
+        currency=tb.currency,
+        as_of=date_to,
+        date_from=date_from,
+        rows=[
+            TrialBalanceRow(
+                account_code=r.code,
+                name=r.name,
+                account_type=r.account_type.value,
+                normal_balance=r.normal_balance.value,
+                debit_total=format(r.debit_total, "f"),
+                credit_total=format(r.credit_total, "f"),
+                balance=format(r.signed_balance, "f"),
+            )
+            for r in tb.accounts
+        ],
+        total_debits=format(tb.total_debits, "f"),
+        total_credits=format(tb.total_credits, "f"),
+        is_balanced=tb.is_balanced,
+        out_of_balance=format(tb.out_of_balance, "f"),
+    )
+
+
+def _statement_lines(lines: Any) -> list[StatementLineResponse]:
+    return [
+        StatementLineResponse(
+            code=line.code,
+            name=line.name,
+            amount=format(line.amount, "f"),
+            account_type=line.account_type,
+            section=line.section,
+        )
+        for line in lines
+    ]
+
+
+@gaap_router.get(
+    "/statements/income",
+    response_model=IncomeStatementResponse,
+    summary="Income statement (P&L)",
+    description="Revenue minus expenses over a period, derived from the ledger.",
+)
+async def get_income_statement(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    currency_code: str | None = Query(default=None),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("finance.gl.read")),
+    service: FinanceService = Depends(_get_service),
+) -> IncomeStatementResponse:
+    """Derive the income statement."""
+    await _require_project_access(session, project_id, user_id)
+    inc = await service.income_statement(
+        project_id=project_id,
+        currency_code=currency_code,
+        date_from=date_from,
+        date_to=date_to,
+    )
+    return IncomeStatementResponse(
+        currency=inc.currency,
+        date_from=date_from,
+        date_to=date_to,
+        revenue_lines=_statement_lines(inc.revenue_lines),
+        expense_lines=_statement_lines(inc.expense_lines),
+        total_revenue=format(inc.total_revenue, "f"),
+        total_expenses=format(inc.total_expenses, "f"),
+        net_income=format(inc.net_income, "f"),
+    )
+
+
+@gaap_router.get(
+    "/statements/balance-sheet",
+    response_model=BalanceSheetResponse,
+    summary="Balance sheet",
+    description="Assets, liabilities and equity as of a date, with the assets = "
+    "liabilities + equity tie-out check. Period net income is folded into "
+    "equity as retained earnings so a live (pre-close) ledger still balances.",
+)
+async def get_balance_sheet(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    currency_code: str | None = Query(default=None),
+    as_of: str | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("finance.gl.read")),
+    service: FinanceService = Depends(_get_service),
+) -> BalanceSheetResponse:
+    """Derive the balance sheet."""
+    await _require_project_access(session, project_id, user_id)
+    bs = await service.balance_sheet(
+        project_id=project_id,
+        currency_code=currency_code,
+        as_of=as_of,
+    )
+    return BalanceSheetResponse(
+        currency=bs.currency,
+        as_of=as_of,
+        asset_lines=_statement_lines(bs.asset_lines),
+        liability_lines=_statement_lines(bs.liability_lines),
+        equity_lines=_statement_lines(bs.equity_lines),
+        total_assets=format(bs.total_assets, "f"),
+        total_liabilities=format(bs.total_liabilities, "f"),
+        total_equity=format(bs.total_equity, "f"),
+        liabilities_plus_equity=format(bs.liabilities_plus_equity, "f"),
+        is_balanced=bs.is_balanced,
+        out_of_balance=format(bs.out_of_balance, "f"),
+    )
+
+
+@gaap_router.get(
+    "/statements/cash-flow",
+    response_model=CashFlowResponse,
+    summary="Cash flow statement (direct method)",
+    description="Direct-method cash flow derived from movements on cash accounts, "
+    "classified into operating / investing / financing by their counter-account. "
+    "See the design doc for the honest scope of this derivation.",
+)
+async def get_cash_flow(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    currency_code: str | None = Query(default=None),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("finance.gl.read")),
+    service: FinanceService = Depends(_get_service),
+) -> CashFlowResponse:
+    """Derive the direct-method cash flow statement."""
+    await _require_project_access(session, project_id, user_id)
+    cf = await service.cash_flow(
+        project_id=project_id,
+        currency_code=currency_code,
+        date_from=date_from,
+        date_to=date_to,
+    )
+    return CashFlowResponse(
+        currency=cf.currency,
+        date_from=date_from,
+        date_to=date_to,
+        method="direct",
+        operating=format(cf.operating, "f"),
+        investing=format(cf.investing, "f"),
+        financing=format(cf.financing, "f"),
+        opening_cash=format(cf.opening_cash, "f"),
+        net_change=format(cf.net_change, "f"),
+        closing_cash=format(cf.closing_cash, "f"),
+        ties_out=cf.ties_out,
+    )
+
+
+# Mount the GAAP sub-router onto the module router so the loader picks it up.
+router.include_router(gaap_router)

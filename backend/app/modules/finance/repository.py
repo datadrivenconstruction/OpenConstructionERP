@@ -16,6 +16,8 @@ from app.modules.finance.models import (
     EVMSnapshot,
     Invoice,
     InvoiceLineItem,
+    LedgerAccount,
+    LedgerEntry,
     Payment,
     ProjectBudget,
 )
@@ -524,3 +526,137 @@ class EVMSnapshotRepository:
         self.session.add(snapshot)
         await self.session.flush()
         return snapshot
+
+
+class LedgerAccountRepository:
+    """Data access for the chart of accounts (:class:`LedgerAccount`)."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def get(self, account_id: uuid.UUID) -> LedgerAccount | None:
+        """Get a chart-of-accounts row by id."""
+        return await self.session.get(LedgerAccount, account_id)
+
+    async def get_by_code(
+        self,
+        account_code: str,
+        *,
+        project_id: uuid.UUID | None = None,
+    ) -> LedgerAccount | None:
+        """Resolve an account by code within a scope.
+
+        A project-scoped account (``project_id`` set) takes precedence; when no
+        project-scoped row exists the workspace account (``project_id IS NULL``)
+        with the same code is returned. This lets a project override a shared
+        account while still inheriting the default chart.
+        """
+        if project_id is not None:
+            stmt = select(LedgerAccount).where(
+                LedgerAccount.project_id == project_id,
+                LedgerAccount.account_code == account_code,
+            )
+            row = (await self.session.execute(stmt)).scalar_one_or_none()
+            if row is not None:
+                return row
+        stmt = select(LedgerAccount).where(
+            LedgerAccount.project_id.is_(None),
+            LedgerAccount.account_code == account_code,
+        )
+        return (await self.session.execute(stmt)).scalar_one_or_none()
+
+    async def list(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+        include_workspace: bool = True,
+        account_type: str | None = None,
+        active_only: bool = False,
+    ) -> tuple[list[LedgerAccount], int]:
+        """List chart-of-accounts rows for a scope.
+
+        When ``include_workspace`` is True the project-scoped accounts are
+        unioned with the shared workspace accounts (``project_id IS NULL``), so
+        a project sees the default chart plus its own overrides.
+        """
+        base = select(LedgerAccount)
+        if project_id is not None:
+            if include_workspace:
+                base = base.where((LedgerAccount.project_id == project_id) | (LedgerAccount.project_id.is_(None)))
+            else:
+                base = base.where(LedgerAccount.project_id == project_id)
+        elif not include_workspace:
+            base = base.where(LedgerAccount.project_id.isnot(None))
+        if account_type is not None:
+            base = base.where(LedgerAccount.account_type == account_type)
+        if active_only:
+            base = base.where(LedgerAccount.is_active.is_(True))
+
+        count_stmt = select(func.count()).select_from(base.subquery())
+        total = (await self.session.execute(count_stmt)).scalar_one()
+
+        stmt = base.order_by(LedgerAccount.account_code.asc())
+        items = list((await self.session.execute(stmt)).scalars().all())
+        return items, total
+
+    async def create(self, account: LedgerAccount) -> LedgerAccount:
+        """Insert a new chart-of-accounts row."""
+        self.session.add(account)
+        await self.session.flush()
+        return account
+
+    async def update(self, account_id: uuid.UUID, **fields: object) -> None:
+        """Update specific fields on a chart-of-accounts row."""
+        stmt = update(LedgerAccount).where(LedgerAccount.id == account_id).values(**fields)
+        await self.session.execute(stmt)
+        await self.session.flush()
+        self.session.expire_all()
+
+    async def count_for_scope(self, project_id: uuid.UUID | None) -> int:
+        """Count accounts in exactly one scope (used to decide whether to seed)."""
+        stmt = select(func.count()).select_from(LedgerAccount)
+        if project_id is None:
+            stmt = stmt.where(LedgerAccount.project_id.is_(None))
+        else:
+            stmt = stmt.where(LedgerAccount.project_id == project_id)
+        return (await self.session.execute(stmt)).scalar_one()
+
+
+class LedgerRepository:
+    """Read access to posted :class:`LedgerEntry` rows for the GAAP statements."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def list_entries(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+        currency_code: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        include_reversals: bool = True,
+    ) -> list[LedgerEntry]:
+        """Return posted ledger rows for a scope and (optional) period.
+
+        ``date_from`` / ``date_to`` filter on ``posted_at`` (ISO strings, so a
+        lexical comparison matches chronological order). ``date_to`` is
+        inclusive of the whole day: a bare ``YYYY-MM-DD`` is bumped to the end
+        of that day so an entry posted at ``...T14:00`` is not dropped.
+        Reversals are included by default so corrected transactions net to zero
+        in every derivation.
+        """
+        stmt = select(LedgerEntry)
+        if project_id is not None:
+            stmt = stmt.where(LedgerEntry.project_id == project_id)
+        if currency_code is not None:
+            stmt = stmt.where(LedgerEntry.currency_code == currency_code)
+        if date_from:
+            stmt = stmt.where(LedgerEntry.posted_at >= date_from)
+        if date_to:
+            upper = date_to if "T" in date_to else f"{date_to}T23:59:59.999999"
+            stmt = stmt.where(LedgerEntry.posted_at <= upper)
+        if not include_reversals:
+            stmt = stmt.where(LedgerEntry.is_reversal.is_(False))
+        stmt = stmt.order_by(LedgerEntry.posted_at.asc())
+        return list((await self.session.execute(stmt)).scalars().all())

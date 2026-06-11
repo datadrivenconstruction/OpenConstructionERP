@@ -304,6 +304,62 @@ class LedgerEntry(Base):
         return f"<LedgerEntry ref={self.transaction_ref} dr={self.debit_amount} cr={self.credit_amount}>"
 
 
+class LedgerAccount(Base):
+    """A chart-of-accounts account (GAAP general ledger).
+
+    Task #77: the master record every :class:`LedgerEntry.account_code` must map
+    to. Accounts are tenant/project-scoped consistent with the rest of finance:
+    ``project_id`` is nullable so an account can be shared across a workspace
+    (``project_id IS NULL``) or pinned to one project. ``account_code`` is unique
+    within a scope so a project never carries two "1000" accounts.
+
+    Sign conventions live in :mod:`app.modules.finance.gaap`:
+    ``account_type`` is one of asset / liability / equity / revenue / expense
+    and ``normal_balance`` is debit | credit (assets/expenses debit-normal,
+    liabilities/equity/revenue credit-normal). ``parent_id`` gives the hierarchy
+    (a sub-account points at its roll-up parent).
+    """
+
+    __tablename__ = "oe_finance_ledger_account"
+    __table_args__ = (
+        # One account code per scope. The project_id participates so a workspace
+        # account (NULL project) and a project-pinned account can share a code.
+        UniqueConstraint("project_id", "account_code", name="uq_ledger_account_scope_code"),
+        Index("ix_ledger_account_project_type", "project_id", "account_type"),
+    )
+
+    # NULL = workspace/tenant-scoped account shared by every project; a value
+    # pins the account to one project. Mirrors the nullable-scope pattern used
+    # by saved views.
+    project_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    account_code: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    account_type: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
+    normal_balance: Mapped[str] = mapped_column(String(10), nullable=False)
+    parent_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_finance_ledger_account.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    # Statement-line grouping hint (e.g. "current_asset", "cogs", "revenue").
+    statement_section: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    # Whether movements on this account are cash (for the direct cash-flow
+    # statement). True only for cash / bank accounts.
+    is_cash: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False, server_default="0")
+    is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True, server_default="1")
+    currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="", server_default="")
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+
+    def __repr__(self) -> str:
+        return f"<LedgerAccount {self.account_code} {self.name} ({self.account_type})>"
+
+
 # ── Connector models ───────────────────────────────────────────────────────
 # Re-exported from connector_models so the startup model-discovery (which
 # scans each module's ``models.py``) registers the connector tables for
