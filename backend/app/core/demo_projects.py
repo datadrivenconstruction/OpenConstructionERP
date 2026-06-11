@@ -8460,7 +8460,10 @@ async def _seed_module_data(
                 ProjectBudget(
                     id=_id(),
                     project_id=project_id,
-                    category=bl["category"],
+                    # ProjectBudget.category is VARCHAR(100); a longer LV
+                    # section label would roll back the whole demo install, so
+                    # clip it defensively here.
+                    category=bl["category"][:100],
                     original_budget=bl["original_budget"],
                     revised_budget=bl["revised_budget"],
                     committed=bl["committed"],

@@ -144,7 +144,7 @@ _VE_SECTIONS: list[_VeSection] = [
     (
         "20",
         "VE-20",
-        "LV 20 - Ladeneinrichtung, Kassenzone, Drive-in-Backstation (Store fit-out, checkout, drive-through bake-off)",
+        "LV 20 - Ladeneinrichtung, Kassenzone, Drive-in-Backstation (Store fit-out, checkout, bake-off)",
         "610",
         700_000.00,
     ),
