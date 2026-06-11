@@ -36,7 +36,7 @@ DEFAULT_PDF_DPI: int = 200
 # Cap the rasterisation surface so a malicious PDF page with absurd
 # dimensions (some surveying tools emit 2 m × 2 m PDFs) can't OOM the
 # worker. 16 megapixels is still ~4000 × 4000 - plenty.
-MAX_RASTER_PIXELS: int = 16 * 1024 * 1024
+MAX_RASTER_PIXELS: int = 64 * 1024 * 1024
 
 
 def pdf_to_png(

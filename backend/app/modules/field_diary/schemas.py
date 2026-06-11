@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 DIARY_STATUSES = ("draft", "submitted", "approved")
 ACTIVITY_TYPES = ("work", "delay", "inspection", "visit", "incident")
-MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024  # 25 MB
+MAX_ATTACHMENT_BYTES = 200 * 1024 * 1024  # 200 MB
 
 _ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _E164_PHONE = re.compile(r"^\+?[1-9]\d{6,14}$")

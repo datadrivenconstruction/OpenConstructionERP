@@ -4595,7 +4595,7 @@ _DOC_TEMPLATE_CATALOGUE: list[dict[str, Any]] = [
 
 
 _CUSTOM_TEMPLATES_DIR = Path("uploads/property_dev/custom_templates")
-_CUSTOM_TEMPLATE_MAX_MB = 10
+_CUSTOM_TEMPLATE_MAX_MB = 50
 _CUSTOM_TEMPLATE_MAX_BYTES = _CUSTOM_TEMPLATE_MAX_MB * 1024 * 1024
 _ALLOWED_CUSTOM_TEMPLATE_EXTENSIONS: tuple[str, ...] = (
     ".docx",
@@ -5281,7 +5281,7 @@ async def download_custom_document_template(
 # Max body for the JSON-content path. Mirrors the multipart cap so we
 # can't be tricked into storing oversized HTML by going through this
 # door instead of the upload form.
-_CUSTOM_TEMPLATE_TEXT_MAX_CHARS = _CUSTOM_TEMPLATE_MAX_BYTES  # 10 MB
+_CUSTOM_TEMPLATE_TEXT_MAX_CHARS = _CUSTOM_TEMPLATE_MAX_BYTES  # 50 MB
 
 _TEXT_EXT_FOR_CONTENT_TYPE: dict[str, str] = {
     "text/html": ".html",

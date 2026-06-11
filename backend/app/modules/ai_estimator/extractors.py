@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 # Hard cap so a pathological 100k-element model or photo gallery cannot
 # materialise the whole table into one analyze pass. Mirrors the
 # match-elements BIM adapter cap; the grouping pass collapses duplicates.
-_MAX_ELEMENTS = 50_000
+_MAX_ELEMENTS = 250_000
 
 # Canonical quantity keys we keep on a serialised envelope. Mirrors the
 # match_service envelope contract so the grouping / matching path is identical

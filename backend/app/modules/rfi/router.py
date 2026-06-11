@@ -65,7 +65,7 @@ ALLOWED_ATTACHMENT_TYPES = frozenset({"pdf", "png", "jpeg", "gif", "webp", "heic
 # Cap on a single upload's size. Construction site photos run large; 25 MB
 # covers multi-page PDF transmittals and modern smartphone HEICs. Beyond
 # this we 413 before reading the body end-to-end.
-_MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024
+_MAX_ATTACHMENT_BYTES = 100 * 1024 * 1024
 
 # On-disk storage for RFI attachments. Path layout mirrors correspondence
 # (``uploads/<module>/<bucket>/``) so the prod backup script picks it up

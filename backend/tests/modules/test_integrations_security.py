@@ -34,7 +34,7 @@ credential-bearing connectors (chat / webhook / email):
 
 4. **Rate limit on test endpoints** — the
    ``/configs/{id}/test/`` and ``/webhooks/{id}/test/`` endpoints are
-   gated through ``approval_limiter`` (20/min/user). Without the
+   gated through ``approval_limiter`` (40/min/user). Without the
    cap, a single compromised account could fan-out test deliveries
    against arbitrary third-party hosts and turn the platform into a
    DoS amplifier. The unit test imports the limiter and asserts the
@@ -362,9 +362,9 @@ class TestRateLimiterWired:
         from app.core.rate_limiter import RateLimiter, approval_limiter
 
         assert isinstance(approval_limiter, RateLimiter)
-        # Default cap is 20/min — tight enough to refuse a flood, wide
+        # Default cap is 40/min — tight enough to refuse a flood, wide
         # enough that a developer iterating in the UI doesn't trip it.
-        assert approval_limiter.max_requests == 20
+        assert approval_limiter.max_requests == 40
         assert approval_limiter.window_seconds == 60
 
     def test_approval_limiter_blocks_after_n_calls(self) -> None:

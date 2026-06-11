@@ -81,7 +81,7 @@ logger = logging.getLogger(__name__)
 
 # Cap upload bytes - 10 MiB is well above any realistic lien waiver scan
 # (typical 1-2 pages PDF / phone photo) and below the proxy default.
-LIEN_WAIVER_MAX_BYTES: int = 10 * 1024 * 1024
+LIEN_WAIVER_MAX_BYTES: int = 50 * 1024 * 1024
 
 # Per-subcontractor folder under uploads/. Mirrors the per-module
 # convention used elsewhere (punchlist/photos, geo_hub/rasters, …).

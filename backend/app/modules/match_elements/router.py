@@ -72,7 +72,7 @@ _MATCH_IMAGES_DIR: Path = Path.home() / ".openestimator" / "match_images"
 # this, and a 10 MB photo already exceeds the resolution any model uses
 # internally, so we reject earlier to give the user a clear error rather
 # than a downstream provider 4xx. Mirrors the design's 10 MB limit.
-_MAX_IMAGE_BYTES: int = 10 * 1024 * 1024
+_MAX_IMAGE_BYTES: int = 50 * 1024 * 1024
 
 # Accepted upload MIME types and their magic-byte signatures. We gate on
 # the actual bytes (not just the Content-Type header or extension) so a

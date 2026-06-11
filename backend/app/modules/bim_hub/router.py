@@ -3295,7 +3295,7 @@ async def list_elements(
     # because each row fans out to six relation joins (boq_links, docs,
     # tasks, activities, requirements, validation). Skeleton mode returns
     # plain BIMElement rows with no joins and is safe at 50000/page.
-    limit: int = Query(default=500, ge=1, le=50000),
+    limit: int = Query(default=2000, ge=1, le=200000),
     skeleton: bool = Query(
         default=False,
         description=(

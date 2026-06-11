@@ -21,7 +21,7 @@ async def activity_feed(
     session: SessionDep,
     _user_id: CurrentUserId,
     project_id: str | None = Query(default=None, description="Filter to a specific project"),
-    limit: int = Query(default=20, ge=1, le=100, description="Maximum entries to return"),
+    limit: int = Query(default=50, ge=1, le=1000, description="Maximum entries to return"),
     offset: int = Query(default=0, ge=0, description="Pagination offset"),
 ) -> list[dict[str, Any]]:
     """‌⁠‍Get a chronological feed of recent actions across all modules.

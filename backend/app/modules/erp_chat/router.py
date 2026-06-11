@@ -195,7 +195,7 @@ async def chat_message_similar(
     message_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId,
-    limit: int = Query(default=5, ge=1, le=20),
+    limit: int = Query(default=10, ge=1, le=100),
     cross_project: bool = Query(default=True),
 ) -> dict[str, Any]:
     """Return chat messages semantically similar to the given one.

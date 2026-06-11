@@ -93,7 +93,7 @@ ATTACHMENTS_DIR = Path("uploads/submittals/attachments")
 # Per-file upload cap - submittal attachments occasionally include large
 # RVT exports / BIM glTF files. 50 MB matches the documents-module cap
 # in v4.2.3 and bounds memory at a couple of attachments per request.
-_MAX_UPLOAD_BYTES = 50 * 1024 * 1024
+_MAX_UPLOAD_BYTES = 200 * 1024 * 1024
 
 
 def _get_service(session: SessionDep) -> SubmittalService:

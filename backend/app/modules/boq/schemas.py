@@ -1558,7 +1558,7 @@ class ClassifyElementsRequest(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    elements: list[CADElementInput] = Field(..., min_length=1, max_length=10000)
+    elements: list[CADElementInput] = Field(..., min_length=1, max_length=50000)
     # Epic - Brazil (2026-05-27): widened to accept ``nbr`` (ABNT NBR 12721)
     # and ``sinapi`` so a CAD/BIM upload on a BR project can map to the
     # Brazilian classification systems instead of defaulting to DIN 276.

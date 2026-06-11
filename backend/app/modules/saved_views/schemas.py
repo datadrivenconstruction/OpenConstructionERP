@@ -31,8 +31,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 FIELD_NAME_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 
 # Caps mirrored by the complexity ceiling in ``query_builder.estimate_cost``.
-MAX_CONDITIONS_PER_GROUP = 20
-MAX_GROUP_NESTING_DEPTH = 3
+MAX_CONDITIONS_PER_GROUP = 50
+MAX_GROUP_NESTING_DEPTH = 5
 MAX_SORT_FIELDS = 3
 MAX_GROUP_BY_FIELDS = 2
 MAX_IN_LIST = 200

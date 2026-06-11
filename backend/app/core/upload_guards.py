@@ -21,7 +21,7 @@ from fastapi import HTTPException, status
 # 50 MB decompressed is well above any realistic CWICR / GAEB / procurement
 # spreadsheet and still small enough to keep a worker from OOM-ing. Tune
 # per endpoint via the ``max_uncompressed`` kwarg if needed.
-DEFAULT_MAX_UNCOMPRESSED_XLSX = 50 * 1024 * 1024
+DEFAULT_MAX_UNCOMPRESSED_XLSX = 200 * 1024 * 1024
 
 
 def reject_if_xlsx_bomb(

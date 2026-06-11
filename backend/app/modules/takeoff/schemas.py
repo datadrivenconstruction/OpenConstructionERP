@@ -268,7 +268,7 @@ class TakeoffMeasurementResponse(BaseModel):
 class TakeoffMeasurementBulkCreate(BaseModel):
     """Bulk create measurements (e.g. importing from localStorage)."""
 
-    measurements: list[TakeoffMeasurementCreate] = Field(..., min_length=1, max_length=500)
+    measurements: list[TakeoffMeasurementCreate] = Field(..., min_length=1, max_length=2000)
 
 
 class TakeoffMeasurementSummary(BaseModel):

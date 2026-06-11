@@ -61,7 +61,7 @@ router = APIRouter(tags=["BCF"])
 # the BCFReader's ``DEFAULT_MAX_TOTAL_BYTES``. A typical coordination
 # round-trip is markup + small PNG snapshots, but federated models with
 # hundreds of viewpoints can legitimately exceed 25 MiB.
-_MAX_UPLOAD_BYTES = 100 * 1024 * 1024
+_MAX_UPLOAD_BYTES = 500 * 1024 * 1024
 
 
 def _get_service(session: SessionDep) -> BCFService:
@@ -627,7 +627,7 @@ async def export_clashes_bcfzip(
 #     503 emitted by /export/clashes for the same condition)
 
 
-_BCF_IMPORT_MAX_BYTES = 100 * 1024 * 1024  # 100 MiB - matches reader default
+_BCF_IMPORT_MAX_BYTES = 500 * 1024 * 1024  # 500 MiB - matches reader default
 
 
 @router.post(

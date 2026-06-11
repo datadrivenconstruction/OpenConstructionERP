@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 # Cap the request body a little above the largest allowed chunk so an
 # oversized body is refused before it is buffered. ``MAX_CHUNK_SIZE`` is
 # 64 MiB; allow a small multipart/header slack on top.
-_MAX_CHUNK_BODY_BYTES: int = 65 * 1024 * 1024
+_MAX_CHUNK_BODY_BYTES: int = 270 * 1024 * 1024
 
 
 def _get_service(session: SessionDep) -> ResumableUploadService:

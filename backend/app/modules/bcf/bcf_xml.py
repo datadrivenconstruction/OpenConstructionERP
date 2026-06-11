@@ -76,9 +76,9 @@ _BCF_ORIGIN = "OpenConstructionERP · DataDrivenConstruction · " + bytes(
 ).decode("ascii")
 
 # Hard ceilings so a hostile zip can't exhaust memory before we validate it.
-_MAX_ENTRIES = 5000
-_MAX_UNCOMPRESSED_BYTES = 256 * 1024 * 1024  # 256 MiB total
-_MAX_SINGLE_ENTRY_BYTES = 64 * 1024 * 1024  # 64 MiB per member
+_MAX_ENTRIES = 20000
+_MAX_UNCOMPRESSED_BYTES = 1024 * 1024 * 1024  # 1 GiB total
+_MAX_SINGLE_ENTRY_BYTES = 256 * 1024 * 1024  # 256 MiB per member
 
 
 class BCFParseError(Exception):

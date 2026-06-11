@@ -88,7 +88,7 @@ from app.modules.costs.translations import localize_cost_row
 # magic-byte gate has a chance to reject it. A real-world CWICR
 # CSV/Excel of 55K rows is ~8 MB; 25 MB leaves comfortable headroom for
 # annotated columns without exposing the parser to multi-GB blobs.
-_MAX_COST_UPLOAD_BYTES = 25 * 1024 * 1024
+_MAX_COST_UPLOAD_BYTES = 100 * 1024 * 1024
 
 # Magic-byte allow-list for the /import/file/ endpoint. ZIP covers OOXML
 # (xlsx); OLE covers legacy .xls; pure CSV has no magic so we accept the
@@ -400,7 +400,7 @@ async def autocomplete_cost_items(
     service: CostItemService = Depends(_get_service),
     q: str = Query(..., min_length=2, max_length=200, description="Search text (min 2 chars)"),
     region: str | None = Query(default=None, description="Filter by region (e.g. DE_BERLIN)"),
-    limit: int = Query(default=8, ge=1, le=20, description="Max results to return"),
+    limit: int = Query(default=20, ge=1, le=200, description="Max results to return"),
     semantic: bool = Query(default=False, description="Use vector semantic search if available"),
     locale: str | None = Query(
         default=None,
@@ -1270,7 +1270,7 @@ async def embedder_status() -> dict[str, Any]:
 async def qdrant_smoke_search(
     q: str = Query(..., min_length=1, description="Query text - passed verbatim as the CORE query"),
     country: str = Query("DE", description="Region or country code, e.g. DE, DE_BERLIN, USA_USD"),
-    limit: int = Query(10, ge=1, le=50),
+    limit: int = Query(10, ge=1, le=500),
     is_abstract: bool | None = Query(False, description="Drop aggregator headers (None to leave open)"),
     department_code: str | None = Query(None, description="DIN-276-derived trade bucket (optional)"),
     unit_dim: str | None = Query(None, description="volume / area / length / count (optional)"),
@@ -2230,7 +2230,7 @@ async def install_v3_catalogue(
 async def semantic_search(
     q: str = Query(..., min_length=2, max_length=500, description="Natural language query"),
     region: str | None = Query(default=None, description="Filter by region"),
-    limit: int = Query(default=10, ge=1, le=50),
+    limit: int = Query(default=25, ge=1, le=500),
 ) -> list[dict]:
     """Semantic search using vector similarity.
 

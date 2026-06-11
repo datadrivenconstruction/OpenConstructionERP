@@ -72,7 +72,7 @@ from fastapi import HTTPException, status
 # ── Constants ──────────────────────────────────────────────────────────────
 
 MAX_DEPTH = 6
-MAX_LEAVES = 100
+MAX_LEAVES = 200
 MAX_REGEX_LEN = 200
 MAX_STRING_LEN = 80
 MAX_VALUE_LIST = 200

@@ -50,7 +50,7 @@ _GROUP_BY_KEY_ORDER = (
 # evaluates per row, so the cap is "the first N matching rows" - paired
 # with element_count desc grouping, the cap rarely matters in practice
 # but protects against OOM on pathological imports.
-_MAX_ELEMENTS_PER_SESSION = 200_000
+_MAX_ELEMENTS_PER_SESSION = 1_000_000
 # Stream rows in chunks so SQLAlchemy doesn't buffer the whole result
 # set into a list before we touch the first row.
 _YIELD_PER = 2_000

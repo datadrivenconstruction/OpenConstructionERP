@@ -539,7 +539,7 @@ async def import_field_reports_file(
     # then again by openpyxl. 25 MB is well above any legitimate field-
     # report import (a 10K-row sheet is ~2 MB) and keeps a malicious
     # caller from forcing arbitrarily large allocations.
-    _IMPORT_MAX_BYTES = 25 * 1024 * 1024
+    _IMPORT_MAX_BYTES = 100 * 1024 * 1024
     if len(content) > _IMPORT_MAX_BYTES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

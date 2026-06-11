@@ -292,7 +292,7 @@ async def kpi_history(
     session: SessionDep,
     service: BIDashboardsService = Depends(_service),
     project_id: uuid.UUID | None = Query(default=None),
-    limit: int = Query(default=12, ge=1, le=120),
+    limit: int = Query(default=24, ge=1, le=500),
 ) -> KPIHistoryResponse:
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)

@@ -75,8 +75,8 @@ __all__ = [
 
 # ── safety limits ──────────────────────────────────────────────────────────
 
-DEFAULT_MAX_TOTAL_BYTES: int = 100 * 1024 * 1024  # 100 MiB total uncompressed
-DEFAULT_MAX_ENTRIES: int = 10_000
+DEFAULT_MAX_TOTAL_BYTES: int = 1024 * 1024 * 1024  # 1 GiB total uncompressed
+DEFAULT_MAX_ENTRIES: int = 50000
 
 # Match writer.py's GUID rules exactly so a writer-→-reader round-trip
 # carries every emitted folder name through without a rename.

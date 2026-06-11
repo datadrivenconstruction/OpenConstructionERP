@@ -1649,7 +1649,7 @@ async def uninstall_converter(
 
 # ── CAD quantity extraction (no AI) ──────────────────────────────────────
 
-MAX_CAD_SIZE = 100 * 1024 * 1024  # 100 MB
+MAX_CAD_SIZE = 500 * 1024 * 1024  # 500 MB
 
 _SUPPORTED_CAD_EXTS = {"rvt", "ifc", "dwg", "dgn", "rfa", "dxf"}
 
@@ -3820,7 +3820,7 @@ async def save_session_to_project(
     }
 
 
-MAX_PDF_SIZE = 50 * 1024 * 1024  # 50 MB
+MAX_PDF_SIZE = 200 * 1024 * 1024  # 200 MB
 
 
 def _get_service(session: SessionDep) -> TakeoffService:

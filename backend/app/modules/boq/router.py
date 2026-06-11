@@ -7705,7 +7705,7 @@ async def boq_position_similar(
     position_id: uuid.UUID,
     session: SessionDep,
     _user_id: CurrentUserId,
-    limit: int = Query(default=5, ge=1, le=20),
+    limit: int = Query(default=10, ge=1, le=100),
     cross_project: bool = Query(default=True),
 ) -> dict[str, Any]:
     """Return BOQ positions semantically similar to the given one.

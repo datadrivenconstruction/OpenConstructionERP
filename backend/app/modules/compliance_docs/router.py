@@ -47,7 +47,7 @@ _ALLOWED_ATTACHMENT_TYPES = ALLOWED_DOCUMENT_TYPES
 # Hard cap to keep a runaway upload from filling the disk before the
 # request body limit on the reverse proxy catches it. 50 MiB matches the
 # documents-module ceiling.
-_MAX_ATTACHMENT_BYTES = 50 * 1024 * 1024
+_MAX_ATTACHMENT_BYTES = 200 * 1024 * 1024
 
 # Local storage root for direct uploads. Service-level metadata stores
 # the relative path; absolute path lives only inside this router.

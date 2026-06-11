@@ -462,7 +462,7 @@ async def import_requirements_file(
     # cap, so a 500 MB CSV would OOM the worker before we even start parsing.
     # 50 MB is generous for requirement spreadsheets - typical real-world
     # files are <2 MB. Streaming + chunked parse is a future improvement.
-    MAX_IMPORT_BYTES = 50 * 1024 * 1024  # 50 MB
+    MAX_IMPORT_BYTES = 100 * 1024 * 1024  # 100 MB
     payload = await file.read()
     if len(payload) > MAX_IMPORT_BYTES:
         raise HTTPException(

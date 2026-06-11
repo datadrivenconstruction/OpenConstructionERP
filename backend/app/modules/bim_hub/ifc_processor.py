@@ -1678,7 +1678,7 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
     # RVT through DDC) it routinely OOMs or thrashes for 5+ minutes.
     # Skip the conversion and let the frontend ColladaLoader stream the
     # DAE directly - slower over the wire, but it actually works.
-    MAX_DAE_FOR_GLB_BYTES = 250 * 1024 * 1024  # 250 MB
+    MAX_DAE_FOR_GLB_BYTES = 1000 * 1024 * 1024  # 1000 MB
     try:
         dae_size = dae_path.stat().st_size
     except OSError:

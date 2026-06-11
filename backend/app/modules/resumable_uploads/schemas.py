@@ -12,9 +12,9 @@ from pydantic import BaseModel, ConfigDict, Field
 # Bounds shared by the schema validation and the service. Kept here so the
 # request layer rejects nonsense before the service ever runs, and the
 # service can re-assert the same limits as defence in depth.
-MAX_TOTAL_SIZE: int = 2 * 1024 * 1024 * 1024  # 2 GiB hard ceiling
+MAX_TOTAL_SIZE: int = 10 * 1024 * 1024 * 1024  # 10 GiB hard ceiling
 MIN_CHUNK_SIZE: int = 256 * 1024  # 256 KiB
-MAX_CHUNK_SIZE: int = 64 * 1024 * 1024  # 64 MiB
+MAX_CHUNK_SIZE: int = 256 * 1024 * 1024  # 256 MiB
 MAX_TOTAL_CHUNKS: int = 100_000  # guards against a tiny chunk_size DoS
 DEFAULT_CHUNK_SIZE: int = 8 * 1024 * 1024  # 8 MiB
 

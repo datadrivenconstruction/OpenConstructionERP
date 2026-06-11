@@ -57,7 +57,7 @@ router = APIRouter(tags=["Direct Uploads"])
 # Bodies up to this size are read in one shot via ``await request.body()``
 # (cheap, simple). Anything larger is streamed chunk-by-chunk so the
 # event loop never holds the full payload in memory at once.
-_INLINE_BODY_LIMIT_BYTES: int = 10 * 1024 * 1024  # 10 MiB
+_INLINE_BODY_LIMIT_BYTES: int = 50 * 1024 * 1024  # 50 MiB
 
 
 async def _read_body(request: Request) -> bytes:

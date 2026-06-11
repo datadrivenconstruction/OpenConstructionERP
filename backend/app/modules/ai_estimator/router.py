@@ -309,7 +309,7 @@ async def list_runs(
     session: SessionDep,
     current_user_id: CurrentUserId,
     project_id: uuid.UUID | None = Query(None),
-    limit: int = Query(50, ge=1, le=200),
+    limit: int = Query(50, ge=1, le=1000),
     offset: int = Query(0, ge=0),
 ) -> schemas.RunListResponse:
     if project_id is not None:

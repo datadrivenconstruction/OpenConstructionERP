@@ -33,27 +33,27 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class BulkDeleteRequest(BaseModel):
     """‌⁠‍IDs of records to delete in a single transaction."""
 
-    ids: list[uuid.UUID] = Field(..., min_length=1, max_length=500)
+    ids: list[uuid.UUID] = Field(..., min_length=1, max_length=2000)
 
 
 class BulkStatusRequest(BaseModel):
     """‌⁠‍IDs to update + new status string."""
 
-    ids: list[uuid.UUID] = Field(..., min_length=1, max_length=500)
+    ids: list[uuid.UUID] = Field(..., min_length=1, max_length=2000)
     status: str = Field(..., min_length=1, max_length=50)
 
 
 class BulkAssignRequest(BaseModel):
     """IDs to assign + new responsible/owner identifier."""
 
-    ids: list[uuid.UUID] = Field(..., min_length=1, max_length=500)
+    ids: list[uuid.UUID] = Field(..., min_length=1, max_length=2000)
     assignee_id: str = Field(..., min_length=1, max_length=255)
 
 
 class BulkUpdateRequest(BaseModel):
     """IDs + arbitrary fields to set (validated by the calling endpoint)."""
 
-    ids: list[uuid.UUID] = Field(..., min_length=1, max_length=500)
+    ids: list[uuid.UUID] = Field(..., min_length=1, max_length=2000)
     fields: dict[str, Any] = Field(default_factory=dict)
 
 

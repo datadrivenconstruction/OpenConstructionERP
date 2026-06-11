@@ -84,8 +84,8 @@ def _create_limiters() -> tuple[RateLimiter, RateLimiter, RateLimiter]:
         login_max = settings.login_rate_limit
     except Exception:
         # Fallback: config not available yet (e.g. during testing or import)
-        ai_max = 10
-        api_max = 100
+        ai_max = 20
+        api_max = 200
         login_max = 10
 
     return (
@@ -100,7 +100,7 @@ ai_limiter, api_limiter, login_limiter = _create_limiters()
 
 # Rate limiter for approval / financial mutation endpoints.
 # Tighter window to limit potential abuse of state-changing actions.
-approval_limiter = RateLimiter(max_requests=20, window_seconds=60)
+approval_limiter = RateLimiter(max_requests=40, window_seconds=60)
 
 # Rate limiter for file uploads (documents, BIM, CAD, takeoff).
 # Each upload buffers the full body server-side and may kick off background

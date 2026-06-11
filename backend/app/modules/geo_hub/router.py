@@ -1102,7 +1102,7 @@ async def get_tileset_artifact(
 
 @router.get("/projects", response_model=list[AnchoredProjectResponse])
 async def list_anchored_projects(
-    limit: int = Query(default=500, ge=1, le=2000),
+    limit: int = Query(default=1000, ge=1, le=50000),
     service: GeoHubService = Depends(_svc),
     payload: CurrentUserPayload = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("geo_hub.read")),

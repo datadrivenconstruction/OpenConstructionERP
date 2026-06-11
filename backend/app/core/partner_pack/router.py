@@ -208,7 +208,7 @@ def rescan() -> dict[str, Any]:
 # Cap an uploaded pack at 25 MiB. A declarative pack is a tiny JSON manifest
 # plus a logo/favicon and a few locale files; anything larger is almost
 # certainly wrong (or hostile), and rejecting early bounds memory use.
-_MAX_PACK_UPLOAD_BYTES = 25 * 1024 * 1024
+_MAX_PACK_UPLOAD_BYTES = 100 * 1024 * 1024
 
 
 @router.post(

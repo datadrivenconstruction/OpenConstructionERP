@@ -207,7 +207,7 @@ class Settings(BaseSettings):
     # pool_pre_ping in ``app.database``. Ignored on SQLite. Env:
     # ``OE_DATABASE_POOL_RECYCLE`` / ``DATABASE_POOL_RECYCLE``.
     database_pool_recycle: int = 1800
-    max_batch_size: int = 443
+    max_batch_size: int = 1000
     # Slow-query threshold (milliseconds). Statements exceeding this elapsed
     # wall time are logged at WARNING level via SQLAlchemy ``before_cursor_execute``
     # / ``after_cursor_execute`` listeners - see ``app.database``. Set to 0 to
@@ -251,7 +251,7 @@ class Settings(BaseSettings):
     # or worker-less deployment cannot push a multi-GB body through the 2 GB
     # core and OOM the box. Default 512 MiB. Env:
     # ``OE_POINTCLOUD_MAX_PROXIED_BYTES``.
-    pointcloud_max_proxied_bytes: int = Field(default=512 * 1024 * 1024, ge=0)
+    pointcloud_max_proxied_bytes: int = Field(default=2 * 1024 * 1024 * 1024, ge=0)
     # Maximum number of ingest init requests allowed in flight at once
     # (back-pressure). Each init touches object storage to open a multipart
     # upload; on a small VPS a flood of inits would exhaust connections, so
@@ -320,7 +320,7 @@ class Settings(BaseSettings):
     # Hard ceiling (seconds) on the first-time embedder load. Set lower
     # on workstations that should fail fast rather than block the boot
     # for minutes while a 2 GB model trickles over a slow link.
-    embedding_download_timeout_seconds: int = 300
+    embedding_download_timeout_seconds: int = 600
     # ── Match backend ────────────────────────────────────────────────────
     # The CWICR migration to Qdrant (BAAI/bge-m3, 30 per-language
     # collections, hard/soft filter split, BGE local reranker) is the
@@ -431,7 +431,7 @@ class Settings(BaseSettings):
 
     # ── Rate Limiting ────────────────────────────────────────────────────
     api_rate_limit: int = Field(
-        default=100,
+        default=200,
         description="Maximum API requests per minute per user/IP",
     )
     login_rate_limit: int = Field(
@@ -439,7 +439,7 @@ class Settings(BaseSettings):
         description="Maximum login attempts per minute per IP",
     )
     ai_rate_limit: int = Field(
-        default=10,
+        default=20,
         description="Maximum AI requests per minute per user",
     )
 

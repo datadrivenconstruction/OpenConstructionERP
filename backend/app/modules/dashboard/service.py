@@ -536,7 +536,7 @@ async def compute_schedule_critical(
         .join(Schedule, Schedule.id == Activity.schedule_id)
         .where(Schedule.project_id.in_(project_ids))
         .order_by(Activity.is_critical.desc())
-        .limit(1000)
+        .limit(10000)
     )
     rows = (await session.execute(stmt)).all()
 

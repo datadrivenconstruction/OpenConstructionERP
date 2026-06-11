@@ -281,19 +281,22 @@ def test_alias_import_rejects_binary_payload() -> None:
         assert exc_info.value.status_code == 415, f"{label} prefix should produce 415; got {exc_info.value.status_code}"
 
 
-def test_alias_import_rejects_oversize_payload() -> None:
-    """A body larger than the 8 MB cap must be rejected with 413."""
+def test_alias_import_rejects_oversize_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A body larger than the cap must be rejected with 413.
+
+    The real cap is 50 MB; we patch it down to a tiny value so the test
+    stays cheap instead of allocating a 50 MB payload.
+    """
     from fastapi import HTTPException
 
-    from app.modules.eac.aliases.router import (
-        ALIAS_UPLOAD_MAX_BYTES,
-        validate_alias_upload_bytes,
-    )
+    from app.modules.eac.aliases import router as alias_router
 
-    # Just past the limit.
-    oversized = b"a" * (ALIAS_UPLOAD_MAX_BYTES + 1)
+    monkeypatch.setattr(alias_router, "ALIAS_UPLOAD_MAX_BYTES", 64)
+
+    # Just past the (patched) limit.
+    oversized = b"a" * (alias_router.ALIAS_UPLOAD_MAX_BYTES + 1)
     with pytest.raises(HTTPException) as exc_info:
-        validate_alias_upload_bytes(oversized)
+        alias_router.validate_alias_upload_bytes(oversized)
     assert exc_info.value.status_code == 413, f"Oversized payload should produce 413; got {exc_info.value.status_code}"
 
 

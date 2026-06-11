@@ -92,9 +92,9 @@ except Exception:  # noqa: BLE001 - fall back to a structural stub for tests
 logger = logging.getLogger(__name__)
 
 # Safety rails: a single sync run will not chew unbounded CPU/RAM.
-_MAX_ELEMENTS = 60_000
+_MAX_ELEMENTS = 250_000
 _MAX_PAIRS = 3_000_000
-_MAX_RESULTS = 25_000
+_MAX_RESULTS = 100_000
 # Bounding the cells an element can occupy stops one floor-sized slab from
 # being inserted into tens of thousands of buckets.
 _MAX_CELLS_PER_ELEMENT = 512

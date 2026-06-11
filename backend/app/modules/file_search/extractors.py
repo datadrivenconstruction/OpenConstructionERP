@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 # row past 1 MB. Truncation is plain Python slicing - UTF-8 boundaries
 # are preserved by the slice falling on a codepoint boundary (we cut
 # *after* decoding, so individual codepoints are atomic).
-MAX_CONTENT_BYTES: int = 1 * 1024 * 1024
+MAX_CONTENT_BYTES: int = 10 * 1024 * 1024
 MAX_CONTENT_CHARS: int = MAX_CONTENT_BYTES  # 1 char per byte upper bound
 
 # A scanned PDF can sometimes carry a few stray characters in embedded

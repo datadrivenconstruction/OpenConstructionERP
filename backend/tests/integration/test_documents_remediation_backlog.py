@@ -339,8 +339,8 @@ def test_size_constants_kept_and_enforced() -> None:
     """A-DOC-13: MAX_FILE_SIZE / MAX_PHOTO_SIZE remain the documented caps."""
     from app.modules.documents.service import MAX_FILE_SIZE, MAX_PHOTO_SIZE
 
-    assert MAX_FILE_SIZE == 100 * 1024 * 1024
-    assert MAX_PHOTO_SIZE == 50 * 1024 * 1024
+    assert MAX_FILE_SIZE == 500 * 1024 * 1024
+    assert MAX_PHOTO_SIZE == 200 * 1024 * 1024
 
 
 @pytest.mark.asyncio
@@ -366,15 +366,22 @@ async def test_exe_disguised_as_png_is_rejected(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_oversize_document_upload_413(client: AsyncClient) -> None:
-    """A-DOC-13: a 200MB document upload returns 413 (defence in depth)."""
-    from app.modules.documents.service import MAX_FILE_SIZE
+async def test_oversize_document_upload_413(client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A-DOC-13: an oversize document upload returns 413 (defence in depth).
+
+    The real cap is 500MB; allocating that here would slow or OOM the
+    runner, so we monkeypatch the service cap down to a tiny value and send
+    a small payload that still trips the size check before magic-byte
+    validation.
+    """
+    from app.modules.documents import service as documents_service
+
+    monkeypatch.setattr(documents_service, "MAX_FILE_SIZE", 1024)
 
     headers, _ = await _register_admin(client)
     pid = await _make_project(client, headers)
-    # PDF magic header + filler bytes to exceed MAX_FILE_SIZE without
-    # allocating a 200MB literal in the source.
-    oversize = b"%PDF-1.7\n" + (b"\x00" * (MAX_FILE_SIZE + 1024))
+    # PDF magic header + filler bytes to exceed the (patched) cap.
+    oversize = b"%PDF-1.7\n" + (b"\x00" * (1024 + 64))
     r = await client.post(
         f"/api/v1/documents/upload/?project_id={pid}&category=other",
         files={"file": ("huge.pdf", io.BytesIO(oversize), "application/pdf")},
@@ -405,16 +412,22 @@ async def test_photo_49mb_accepted(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_oversize_photo_upload_413(client: AsyncClient) -> None:
-    """A-DOC-13: a 200MB photo upload returns 413."""
-    from app.modules.documents.service import MAX_PHOTO_SIZE
+async def test_oversize_photo_upload_413(client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A-DOC-13: an oversize photo upload returns 413.
+
+    The real cap is 200MB; we monkeypatch the service cap down to a tiny
+    value and send a small payload rather than allocate a huge literal.
+    """
+    from app.modules.documents import service as documents_service
+
+    monkeypatch.setattr(documents_service, "MAX_PHOTO_SIZE", 1024)
 
     headers, _ = await _register_admin(client)
     pid = await _make_project(client, headers)
     png_head = (
         b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89"
     )
-    oversize = png_head + (b"\x00" * (MAX_PHOTO_SIZE + 1024))
+    oversize = png_head + (b"\x00" * (1024 + 64))
     r = await client.post(
         f"/api/v1/documents/photos/upload/?project_id={pid}",
         files={"file": ("huge.png", io.BytesIO(oversize), "image/png")},

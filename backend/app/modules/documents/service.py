@@ -155,8 +155,8 @@ PHOTO_THUMB_MAX_SIDE = 512
 PHOTO_THUMB_QUALITY = 82
 
 # Security constants
-MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
-MAX_PHOTO_SIZE = 50 * 1024 * 1024  # 50MB
+MAX_FILE_SIZE = 500 * 1024 * 1024  # 500MB
+MAX_PHOTO_SIZE = 200 * 1024 * 1024  # 200MB
 VALID_CATEGORIES = {"drawing", "contract", "specification", "photo", "correspondence", "other"}
 VALID_PHOTO_CATEGORIES = {"site", "progress", "defect", "delivery", "safety", "other"}
 ALLOWED_IMAGE_TYPES = {

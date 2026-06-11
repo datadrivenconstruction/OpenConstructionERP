@@ -56,10 +56,10 @@ from app.modules.ai.service import AIService
 
 router = APIRouter(tags=["ai"])
 
-# Maximum upload size for photos: 10 MB
-MAX_PHOTO_SIZE = 10 * 1024 * 1024
-# Maximum upload size for documents: 50 MB
-MAX_FILE_SIZE = 50 * 1024 * 1024
+# Maximum upload size for photos: 50 MB
+MAX_PHOTO_SIZE = 50 * 1024 * 1024
+# Maximum upload size for documents: 200 MB
+MAX_FILE_SIZE = 200 * 1024 * 1024
 
 ALLOWED_IMAGE_TYPES = {
     "image/jpeg",

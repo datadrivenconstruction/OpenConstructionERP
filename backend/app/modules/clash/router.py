@@ -80,7 +80,7 @@ _MAX_EXPORT_ROWS = 25_000
 # Upper bound on the BCF import payload. 100 MiB matches the BCF
 # module's own gate and the BCFReader default - federated coordination
 # packages with hundreds of viewpoints can legitimately exceed 25 MiB.
-_MAX_BCF_UPLOAD_BYTES = 100 * 1024 * 1024
+_MAX_BCF_UPLOAD_BYTES = 500 * 1024 * 1024
 
 logger = logging.getLogger(__name__)
 

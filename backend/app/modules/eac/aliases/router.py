@@ -50,7 +50,7 @@ ALIAS_UPLOAD_BANNED_PREFIXES: tuple[bytes, ...] = (
 # Hard cap on alias-import body size. Aliases are tiny rows; an 8 MB
 # limit comfortably covers tens of thousands of synonyms while preventing
 # a worker OOM via a multi-GB upload.
-ALIAS_UPLOAD_MAX_BYTES = 8 * 1024 * 1024
+ALIAS_UPLOAD_MAX_BYTES = 50 * 1024 * 1024
 
 
 def validate_alias_upload_bytes(raw: bytes) -> None:

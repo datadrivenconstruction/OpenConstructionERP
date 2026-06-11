@@ -146,7 +146,7 @@ def fallback_models_for(provider: str, attempted: str) -> list[str]:
 
 
 # Timeout for AI API calls (2 minutes - large BOQ generation can be slow)
-AI_TIMEOUT = 120.0
+AI_TIMEOUT = 240.0
 
 
 # ── Anthropic Claude ─────────────────────────────────────────────────────────

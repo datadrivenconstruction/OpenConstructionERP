@@ -829,7 +829,7 @@ async def list_automated_runs(
 async def project_insights(
     user_id: CurrentUserId,
     project_id: uuid.UUID = Query(..., description="Project to surface insights for"),
-    limit: int = Query(2, ge=1, le=10),
+    limit: int = Query(2, ge=1, le=50),
     service: AgentService = Depends(_get_service),
 ) -> list[AgentInsightResponse]:
     """Recent AI insights for a project, distilled from the caller's runs.

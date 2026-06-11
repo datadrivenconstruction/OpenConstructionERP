@@ -587,7 +587,7 @@ async def get_cascade_row_count(
 # ── Dashboard Presets & Collections (T05) ──────────────────────────────────
 
 
-_PRESET_UPLOAD_MAX_BYTES = 16 * 1024 * 1024  # 16 MB cap on import payloads
+_PRESET_UPLOAD_MAX_BYTES = 50 * 1024 * 1024  # 50 MB cap on import payloads
 
 
 @router.post(
@@ -1050,7 +1050,7 @@ async def export_snapshot(
     columns: Annotated[str | None, Query(max_length=2000)] = None,
     filters: Annotated[str | None, Query(max_length=4000)] = None,
     order_by: Annotated[str | None, Query(max_length=200)] = None,
-    limit: Annotated[int, Query(ge=1, le=100000)] = 10000,
+    limit: Annotated[int, Query(ge=1, le=1000000)] = 10000,
     offset: Annotated[int, Query(ge=0)] = 0,
     locale: Annotated[str, Query()] = "en",
 ) -> Response:
