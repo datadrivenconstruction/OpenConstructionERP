@@ -6,3 +6,5 @@
 *.x84 -text
 *.x85 -text
 *.x86 -text
+# Official GAEB XSD schema set - keep byte-exact, no EOL normalisation.
+*.xsd -text

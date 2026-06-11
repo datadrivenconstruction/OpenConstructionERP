@@ -393,17 +393,24 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     grand_row = next((r for r in rows if len(r) > 1 and "Grand Total" in r[1]), None)
     assert grand_row is not None, "Grand Total row not found in CSV export"
 
-    # ── Step 10: Export to GAEB XML -- verify valid XML ──────────────────
+    # ── Step 10: Export to GAEB XML (priced X84) -- verify valid XML ──────
+    # The default phase is X83 (Angebotsaufforderung, unpriced); the priced
+    # grand total lives in X84 (Angebotsabgabe). We export X84 here so the
+    # total assertion has money to check.
 
-    resp = await client.get(f"/api/v1/boq/boqs/{boq_id}/export/gaeb", headers=auth)
+    resp = await client.get(
+        f"/api/v1/boq/boqs/{boq_id}/export/gaeb",
+        params={"format": "x84"},
+        headers=auth,
+    )
     assert resp.status_code == 200
     assert "xml" in resp.headers.get("content-type", "")
 
     root = ET.fromstring(resp.text)
     assert root.tag.endswith("GAEB"), f"Root tag should be GAEB, got {root.tag}"
 
-    # Use the full namespace for element lookup
-    gns = "{http://www.gaeb.de/GAEB_DA_XML/200407}"
+    # GAEB DA XML 3.3 X84 namespace (version-correct, not the legacy 3.0 URI).
+    gns = "{http://www.gaeb.de/GAEB_DA_XML/DA84/3.3}"
     gaeb_info = root.find(f"{gns}GAEBInfo")
     assert gaeb_info is not None, "Missing GAEBInfo element"
 
@@ -411,20 +418,21 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     assert award is not None, "Missing Award element"
     dp = award.find(f"{gns}DP")
     assert dp is not None, "Missing DP element"
-    assert dp.text == "83"
+    assert dp.text == "84"
 
-    cur = award.find(f"{gns}Cur")
-    assert cur is not None, "Missing Cur element"
+    # Cur lives under AwardInfo per the 3.3 schema (never directly under Award).
+    cur = award.find(f"{gns}AwardInfo/{gns}Cur")
+    assert cur is not None, "Missing AwardInfo/Cur element"
     assert cur.text == "EUR"
 
     # Positions exist
     xml_str = resp.text
     assert "Item" in xml_str, "GAEB XML should contain Item elements"
 
-    # TotPr (grand total) exists and is > 0
-    tot_pr = root.find(f".//{gns}TotPr")
-    assert tot_pr is not None, "GAEB XML should contain TotPr element"
-    assert float(tot_pr.text) > 0
+    # Grand total: TotalNet in the BoQInfo/Totals block is > 0.
+    total_net = root.find(f".//{gns}BoQInfo/{gns}Totals/{gns}TotalNet")
+    assert total_net is not None, "GAEB XML should contain BoQInfo/Totals/TotalNet"
+    assert float(total_net.text) > 0
 
     # ── Step 11: Lock BOQ -- verify mutations blocked ────────────────────
 
@@ -625,17 +633,23 @@ async def test_export_data_integrity(shared_client: AsyncClient, shared_auth: di
     )
     wb.close()
 
-    # GAEB grand total
-    resp = await client.get(f"/api/v1/boq/boqs/{bid}/export/gaeb", headers=auth)
+    # GAEB grand total (priced X84). The 3.3 schema carries the
+    # markup-inclusive net total in BoQInfo/Totals/TotalNet.
+    structured_net = float(structured_data["net_total"])
+    resp = await client.get(
+        f"/api/v1/boq/boqs/{bid}/export/gaeb",
+        params={"format": "x84"},
+        headers=auth,
+    )
     assert resp.status_code == 200
     root = ET.fromstring(resp.text)
-    gns = "{http://www.gaeb.de/GAEB_DA_XML/200407}"
-    tot_pr = root.find(f".//{gns}TotPr")
-    assert tot_pr is not None, "GAEB XML should contain TotPr element"
-    gaeb_total = float(tot_pr.text)
-    # GAEB uses the structured grand_total (which includes markups if any)
-    assert abs(gaeb_total - structured_grand) < 0.01, (
-        f"GAEB grand total {gaeb_total} != structured grand total {structured_grand}"
+    gns = "{http://www.gaeb.de/GAEB_DA_XML/DA84/3.3}"
+    total_net = root.find(f".//{gns}BoQInfo/{gns}Totals/{gns}TotalNet")
+    assert total_net is not None, "GAEB XML should contain BoQInfo/Totals/TotalNet"
+    gaeb_total = float(total_net.text)
+    # TotalNet == structured net_total (direct cost + active markups).
+    assert abs(gaeb_total - structured_net) < 0.01, (
+        f"GAEB TotalNet {gaeb_total} != structured net total {structured_net}"
     )
 
 
