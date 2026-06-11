@@ -432,7 +432,6 @@ def get_pack_by_slug(slug: str) -> PartnerPackManifest | None:
     return None
 
 
-@lru_cache(maxsize=1)
 def get_active_pack() -> PartnerPackManifest | None:
     """Pick the active pack.
 
@@ -442,20 +441,38 @@ def get_active_pack() -> PartnerPackManifest | None:
     never co-brands the app.
 
     Precedence:
-      1. in-app applied pack (``partner_pack_state.json``)
+      1. in-app applied pack (``partner_pack_state.json`` in the ACTIVE
+         data dir - see ``state._resolve_state_dir``)
       2. env ``OE_PARTNER_PACK=<slug>``
       3. None
 
-    Cached for the process lifetime; ``reset_cache()`` is called by the apply
+    Cached per resolved state dir, so two instances resolving different data
+    dirs never share an answer; ``reset_cache()`` is called by the apply
     service after an apply / un-apply so the change takes effect immediately.
     """
-    # 1. In-app applied pack. Imported lazily to avoid any import-order issues.
+    # Resolve the state dir HERE (live, uncached) and key the cache on it.
+    # Imported lazily to avoid any import-order issues.
     try:
-        from app.core.partner_pack.state import get_applied_slug
+        from app.core.partner_pack.state import _resolve_state_dir
 
-        applied = get_applied_slug()
-    except Exception:  # noqa: BLE001 - state file is best-effort
-        applied = None
+        state_dir = str(_resolve_state_dir())
+    except Exception:  # noqa: BLE001 - state resolution is best-effort
+        state_dir = ""
+    return _get_active_pack_cached(state_dir)
+
+
+@lru_cache(maxsize=8)
+def _get_active_pack_cached(state_dir: str) -> PartnerPackManifest | None:
+    """Resolve the active pack for one specific state dir (cached per path)."""
+    # 1. In-app applied pack, read from the keyed state dir only.
+    applied = None
+    if state_dir:
+        try:
+            from app.core.partner_pack.state import get_applied_slug
+
+            applied = get_applied_slug(Path(state_dir))
+        except Exception:  # noqa: BLE001 - state file is best-effort
+            applied = None
     if applied:
         m = get_pack_by_slug(applied)
         if m:
@@ -635,6 +652,6 @@ def read_pack_file(slug: str, relpath: str) -> bytes | None:
 
 
 def reset_cache() -> None:
-    """Reset the discovery caches. Used by tests."""
+    """Reset the discovery caches. Used by tests and the apply service."""
     discover_packs.cache_clear()
-    get_active_pack.cache_clear()
+    _get_active_pack_cached.cache_clear()
