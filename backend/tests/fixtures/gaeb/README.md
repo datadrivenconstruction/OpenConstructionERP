@@ -16,6 +16,21 @@ Used by `tests/unit/test_gaeb_x84_import_money.py` to pin that the importer
 preserves every cent of an X84 bid (the file declares a 2,000,000.00 EUR LV),
 and by `tests/unit/test_gaeb_export_xsd.py` to pin the XSD oracle.
 
+## pruefdatei_3.3_x83.x83
+
+Official GAEB Pruefdatei for GAEB DA XML 3.3, exchange phase DP 83 (X83
+Angebotsaufforderung / tender request, unpriced), namespace
+`http://www.gaeb.de/GAEB_DA_XML/DA83/3.3`, 100,152 bytes. Same provenance as
+the X84 above: taken from the test fixtures of the MIT-licensed open-source
+parser `meindonut/gaeb-parser` (pinned commit dc31d83), file
+`tests/official_tests_gaeb_da_xml_3_3/bauausfuehrung/Pruefdatei GAEB DA XML 3.3 - Bauausfuehrung - V 04 04 2024.x83`.
+
+It uses a 3.3.4 OZ-Maske with alphabetic RNoIndex values (`001.001.0010.A`)
+and carries Bedarfspositionen (`<Provis>WithTotal</Provis>`) with a 0.00
+Einheitspreis - exactly the shape that used to trip the GAEB validators. Used
+by `tests/unit/test_gaeb_rules.py` to pin that importing the official Pruefdatei
+and running the GAEB rule set scores above 0.9 with no false-positive errors.
+
 ## xsd/
 
 Official GAEB DA XML 3.2 (2012-01) schema set published by the Gemeinsamer

@@ -2738,6 +2738,9 @@ async def _run_import_validation(
                 "classification": pos.classification,
                 "source": getattr(pos, "source", None),
                 "type": _row_type(pos),
+                # Carry metadata so GAEB rules can read the imported OZ-Maske,
+                # phase and Provis flags right after a GAEB import.
+                "metadata": getattr(pos, "metadata_", None) or getattr(pos, "metadata", None) or {},
             }
             for pos in boq_data.positions
         ]
@@ -2873,6 +2876,10 @@ async def validate_boq(
             "classification": pos.classification,
             "source": getattr(pos, "source", None),
             "type": _row_type(pos),
+            # Carry the position metadata so GAEB-aware rules can read the
+            # imported OZ-Maske, phase and Provis flags (a Bedarfsposition may
+            # legitimately be unpriced) instead of re-deriving them.
+            "metadata": getattr(pos, "metadata_", None) or getattr(pos, "metadata", None) or {},
         }
         for pos in boq_data.positions
     ]

@@ -99,16 +99,17 @@
   },
   "gaeb": {
     "ordinal_format": {
-      "fail": "Ordnungszahl '{ordinal}' entspricht nicht dem GAEB-Format XX.XX.XXXX",
-      "suggestion": "Format wie 01.02.0030 verwenden"
+      "fail": "Ordnungszahl '{ordinal}' entspricht nicht der OZ-Maske dieser Datei",
+      "suggestion": "Die OZ-Maske der Datei verwenden, z.B. 001.001.0010 oder 01.02.0030"
     },
     "lv_structure": {
       "fail": "Position {ordinal}: Endposition ohne übergeordneten Abschnitt - GAEB-LV-Hierarchie erfordert eine Leistungsgruppe als Elternteil",
       "suggestion": "Position einem übergeordneten Abschnitt zuweisen (Leistungsgruppe / Titel)"
     },
     "einheitspreis_sanity": {
-      "fail": "Position {ordinal}: Einheitspreis {rate} muss > 0 sein bei nicht-pauschalen Positionen (Einheit='{unit}')",
-      "suggestion": "Positiven Einheitspreis angeben oder Position als Pauschale kennzeichnen (Einheit='lsum')"
+      "negative": "Position {ordinal}: Einheitspreis {rate} ist negativ (Einheit='{unit}') - ein negativer Preis kann in GAEB nicht übertragen werden",
+      "zero": "Position {ordinal}: Einheitspreis ist 0,00 (Einheit='{unit}') - bitte bestätigen, dass es sich um einen angebotenen Nullpreis und nicht um einen fehlenden Preis handelt",
+      "suggestion": "Positiven Einheitspreis angeben oder Position als Bedarfsposition (optionaler Umfang) bzw. Pauschale kennzeichnen (Einheit='lsum')"
     },
     "trade_section_code": {
       "fail": "Übergeordneter Abschnitt '{ordinal}' hat keinen GAEB-Leistungsbereich-Code (erwarteter 3-stelliger Gewerkecode, z.B. '012')",

@@ -289,7 +289,7 @@ class TestRuleLocaleWiring:
         )
         with caplog.at_level(logging.WARNING, logger="app.core.validation.messages"):
             results = await rule.validate(ctx)
-        assert results[0].message == "Ordinal 'BAD' doesn't match GAEB format XX.XX.XXXX"
+        assert results[0].message == "Ordinal 'BAD' does not match the GAEB OZ-Maske of this file"
         assert any("falling back" in r.message.lower() for r in caplog.records)
 
     @pytest.mark.asyncio

@@ -394,6 +394,9 @@ class GAEBXMLImporter:
         da_kind = _detect_da_kind(root)
         priced_phase = da_kind in ("x84", "x86")
         mask_lengths, _index_align = _ozmask_separators(root)
+        # Integer view of the mask widths for validation threading; only the
+        # all-numeric prefix is meaningful as level widths.
+        oz_mask_widths: list[int] = [int(w) for w in mask_lengths if w.isdigit()]
 
         # Locate the top-level <BoQBody> directly inside <BoQ>.
         top_body: ET.Element | None = None
@@ -531,6 +534,14 @@ class GAEBXMLImporter:
                 "gaeb_currency": currency,
                 "gaeb_da_kind": da_kind,
             }
+            if oz_mask_widths:
+                metadata["gaeb_oz_mask"] = oz_mask_widths
+            # Provis = Bedarfs-/Eventualposition (optional scope). Such a line
+            # may legitimately carry a zero or missing Einheitspreis, so flag
+            # it for the validators (FA-STD-044).
+            provis = _text_of(item, "Provis").strip()
+            if provis:
+                metadata["gaeb_provis"] = provis
             if it_dec is not None:
                 # Authoritative binding total straight from the file.
                 metadata["gaeb_it"] = str(it_dec)
@@ -649,5 +660,8 @@ class GAEBXMLImporter:
             "markup_items": markup_items,
             "derived_quantity_count": derived_qty,
             "unmapped_money_count": unmapped_money,
+            # OZ-Maske level widths so downstream validation checks the OZ
+            # against the file's real mask instead of a single hardcoded shape.
+            "gaeb_oz_mask": oz_mask_widths,
         }
         return result
