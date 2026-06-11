@@ -47,7 +47,17 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from app.core.demo_packs._retail_heilbronn_geometry import CANONICAL_GEOMETRY
 from app.core.demo_projects import DemoTemplate, SectionDef
+
+# Canonical building geometry is the single source of truth for both the LV
+# quantities below and the procedural 3D model emitted by
+# ``app.scripts.gen_retail_heilbronn_assets``. It lives in a dependency-free
+# companion module so the generator can import it offline (no DB engine), and
+# is re-exported here so the bill and the model read identical numbers: element
+# sums in the canonical BIM model equal the corresponding BOQ quantities to the
+# unit (R-01..R-06 hold in 3D as well as in the bill).
+__all__ = ["CANONICAL_GEOMETRY", "TEMPLATE"]
 
 # (oz, description, unit, quantity, unit_rate_eur, din276_code)
 _PositionRow = tuple[str, str, str, float, float, str]

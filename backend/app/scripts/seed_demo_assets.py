@@ -52,6 +52,16 @@ logger = logging.getLogger(__name__)
 ASSETS = Path(__file__).resolve().parent / "flagship_assets"
 SPEC_PATH = ASSETS / "flagship.json"
 
+# Procedural showcase spec for the Retail Market Heilbronn demo. Unlike the
+# flagship (a real DDC-converted mesh shared by every demo), this project ships
+# its own purpose-built procedural model: one IFC-format BIM model whose
+# elements and ``.glb`` geometry are generated from the building's canonical
+# geometry by ``app.scripts.gen_retail_heilbronn_assets``. Both files are
+# committed next to this module.
+RETAIL_HEILBRONN_DEMO_ID = "retail-market-heilbronn"
+RETAIL_SPEC_PATH = ASSETS / "retail_heilbronn.json"
+RETAIL_GLB_PATH = ASSETS / "retail_heilbronn.glb.gz"
+
 # Monorepo root (backend/app/scripts/seed_demo_assets.py -> parents[3]). Used to
 # resolve ``kind="repo"`` document sources - committed sample files that always
 # ship with the package, unlike the optional ``kind="sample"`` CAD folder. When
@@ -243,6 +253,35 @@ BUNDLES: dict[str, dict[str, Any]] = {
             *(dict(d) for d in _NATIVE_SOURCE_DOCS),
         ],
     },
+    # Procedural showcase: the Retail Market Heilbronn demo ships its OWN
+    # purpose-built model and geometry (see RETAIL_SPEC_PATH), not the shared
+    # flagship mesh, so it is attached by a dedicated path
+    # (``_attach_retail_heilbronn``). ``link_groups`` selects the structural and
+    # facade element groups (KG 320/330/360/470) whose leaf BOQ positions get
+    # ``cad_element_ids`` links. Documents reuse the committed reference PDFs.
+    "retail_heilbronn": {
+        "source_format": "ifc",
+        "link_groups": [
+            "retail_columns",
+            "retail_foundations",
+            "retail_binders",
+            "retail_facade",
+            "retail_tga",
+        ],
+        "documents": [
+            {
+                **_DRAWINGS_PDF,
+                "name": "Lageplan und Grundriss.pdf",
+                "description": "Reference site plan and floor plan",
+            },
+            {
+                **_SPEC_PDF,
+                "name": "Baubeschreibung und Standards.pdf",
+                "description": "Reference building description and standards",
+            },
+            *(dict(d) for d in _NATIVE_SOURCE_DOCS),
+        ],
+    },
 }
 
 
@@ -280,6 +319,7 @@ BUNDLE_MAP: dict[str, str] = {
     "office-rio": "commercial_rvt",
     "rc-structure-formwork": "commercial_rvt",
     "residential-saopaulo": "residential_ifc",
+    "retail-market-heilbronn": "retail_heilbronn",
     "school-christchurch": "commercial_rvt",
     "solar-bess-epc": "commercial_rvt",
     "tower-abudhabi": "commercial_rvt",
@@ -491,114 +531,80 @@ async def _attach_dwg_drawing(
     return True
 
 
-async def _attach_demo_assets_inner(
+async def _link_positions_to_pool(
     session: AsyncSession,
-    project_id: uuid.UUID,
-    owner_id: str | uuid.UUID,
+    pid: uuid.UUID,
+    pooled_elem_ids: list[uuid.UUID],
     bundle_key: str,
-) -> dict:
-    bundle = BUNDLES.get(bundle_key)
-    if bundle is None:
-        return {"status": "skipped", "reason": f"unknown bundle {bundle_key}"}
+) -> int:
+    """Link the first few leaf BOQ positions to a pool of BIM element ids.
 
-    spec = _load_spec()
-    if not spec:
-        return {"status": "skipped", "reason": "no flagship assets"}
-
+    Writes ``cad_element_ids`` on each position plus a ``BOQElementLink`` row per
+    element, so BIM<->BOQ navigation is demonstrable. Only runs on a first
+    install: the pool is empty on an idempotent re-run (elements already
+    attached), so this self-skips and never double-links. Returns the link count.
+    """
+    if not pooled_elem_ids:
+        return 0
     from app.modules.bim_hub.models import BOQElementLink
     from app.modules.boq.models import BOQ, Position
-    from app.modules.documents.models import Document
 
-    pid = project_id
-    owner = str(owner_id)
-
-    # ── 1+2. Both 3D BIM models (RVT + IFC) with elements + geometry ─────
-    # Every project carries BOTH so /bim shows a Revit AND an IFC model. We
-    # remember the primary model's element map (chosen by the bundle's
-    # ``source_format``) for the BOQ<->BIM link demo below.
-    primary_format = bundle["source_format"]
-    primary_model_id: uuid.UUID | None = None
-    primary_src_model_id: str | None = None
-    primary_elem_uuid: dict[str, uuid.UUID] = {}
-    bim_geometry = False
-    bim_models_attached = 0
-    for model_def in _BIM_MODELS:
-        mid, elem_uuid, geom = await _attach_one_bim_model(session, pid, spec, model_def)
-        if mid is not None:
-            bim_models_attached += 1
-            bim_geometry = bim_geometry or geom
-        if model_def["source_format"] == primary_format and mid is not None:
-            primary_model_id = mid
-            primary_elem_uuid = elem_uuid
-            src = _source_model(spec, primary_format)
-            primary_src_model_id = str(src["id"]) if src else None
-
-    # ── 2b. The 2D DWG drawing (DWG Takeoff module, never the BIM 3D hub) ─
-    dwg_attached = await _attach_dwg_drawing(session, pid, owner, spec)
-
-    # ── 3. Link a few EXISTING demo BOQ positions to the primary model ───
-    # Build the candidate element-id pool from the bundle's link groups, in
-    # order, so links are deterministic and concentrated on real groups. Only
-    # runs on a first install (primary_elem_uuid is empty on an idempotent
-    # re-run, so this block self-skips and never double-links).
-    groups = spec.get("groups", {})
-    pooled_elem_ids: list[uuid.UUID] = []
-    if primary_src_model_id is not None:
-        for gk in bundle.get("link_groups", []):
-            grp = groups.get(gk)
-            if not grp or grp.get("model_id") != primary_src_model_id:
-                continue
-            for sid in grp.get("stable_ids", []):
-                eu = primary_elem_uuid.get(sid)
-                if eu is not None:
-                    pooled_elem_ids.append(eu)
+    # Pick the project's detailed BOQ (the one with the most leaf positions).
+    boqs = list((await session.execute(select(BOQ).where(BOQ.project_id == pid))).scalars().all())
+    leaf_positions: list[Position] = []
+    if boqs:
+        best_boq = max(boqs, key=lambda b: len(b.positions))
+        leaf_positions = [
+            p for p in sorted(best_boq.positions, key=lambda x: x.sort_order or 0) if (p.unit or "") != ""
+        ]
 
     n_links = 0
-    if pooled_elem_ids:
-        # Pick the project's detailed BOQ (the one with the most leaf
-        # positions) and link its first few leaf positions.
-        boqs = list((await session.execute(select(BOQ).where(BOQ.project_id == pid))).scalars().all())
-        leaf_positions: list[Position] = []
-        if boqs:
-            best_boq = max(boqs, key=lambda b: len(b.positions))
-            leaf_positions = [
-                p for p in sorted(best_boq.positions, key=lambda x: x.sort_order or 0) if (p.unit or "") != ""
-            ]
-
-        cursor = 0
-        for pos in leaf_positions[:_MAX_LINKED_POSITIONS]:
-            chunk = pooled_elem_ids[cursor : cursor + _ELEMS_PER_POSITION]
-            if not chunk:
-                break
-            cursor += _ELEMS_PER_POSITION
-            existing_ids = list(pos.cad_element_ids or [])
-            pos.cad_element_ids = existing_ids + [str(eu) for eu in chunk]
-            for eu in chunk:
-                session.add(
-                    BOQElementLink(
-                        boq_position_id=pos.id,
-                        bim_element_id=eu,
-                        link_type="auto_matched",
-                        confidence="high",
-                        rule_id="demo_asset_seed",
-                        metadata_={"bundle": bundle_key},
-                    )
+    cursor = 0
+    for pos in leaf_positions[:_MAX_LINKED_POSITIONS]:
+        chunk = pooled_elem_ids[cursor : cursor + _ELEMS_PER_POSITION]
+        if not chunk:
+            break
+        cursor += _ELEMS_PER_POSITION
+        existing_ids = list(pos.cad_element_ids or [])
+        pos.cad_element_ids = existing_ids + [str(eu) for eu in chunk]
+        for eu in chunk:
+            session.add(
+                BOQElementLink(
+                    boq_position_id=pos.id,
+                    bim_element_id=eu,
+                    link_type="auto_matched",
+                    confidence="high",
+                    rule_id="demo_asset_seed",
+                    metadata_={"bundle": bundle_key},
                 )
-                n_links += 1
-        await session.flush()
+            )
+            n_links += 1
+    await session.flush()
+    return n_links
 
-    # ── 4. Real downloadable documents (best-effort, per entry) ──────────
-    # Every bundle declares a ``documents`` list. We materialize each one as
-    # real bytes on disk plus a Document row pointing at the absolute path, so
-    # the Documents screen offers genuine HTTP-200 downloads (no byte-less
-    # stubs). Each entry is isolated: a missing or unreadable source skips
-    # THAT entry only and never aborts the rest of the install.
+
+async def _attach_documents(
+    session: AsyncSession,
+    pid: uuid.UUID,
+    owner: str,
+    documents: list[dict[str, Any]],
+    bundle_key: str,
+) -> int:
+    """Materialize a bundle's ``documents`` list as real bytes + Document rows.
+
+    Each entry is written to disk and a Document row points at the absolute
+    path, so the Documents screen offers genuine HTTP-200 downloads (no
+    byte-less stubs). Each entry is isolated: a missing or unreadable source
+    skips THAT entry only and never aborts the rest of the install. Idempotent
+    on a deterministic doc id. Returns the number of documents present afterwards.
+    """
+    from app.modules.documents.models import Document
     from app.modules.documents.service import UPLOAD_BASE  # type: ignore
 
     samples_base = _samples_base()
     up = Path(UPLOAD_BASE) / str(pid)
     docs_written = 0
-    for entry in bundle.get("documents", []):
+    for entry in documents:
         try:
             kind = entry.get("kind", "asset")
             src = entry.get("src", "")
@@ -652,6 +658,227 @@ async def _attach_demo_assets_inner(
                 entry.get("name") or entry.get("src"),
                 exc_info=True,
             )
+    return docs_written
+
+
+def _load_retail_spec() -> dict | None:
+    """Read the procedural Retail Market Heilbronn canonical spec, or None."""
+    if not RETAIL_SPEC_PATH.exists():
+        return None
+    try:
+        return json.loads(RETAIL_SPEC_PATH.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001 - a corrupt spec must not break installs
+        logger.warning("seed_demo_assets: failed to read retail Heilbronn spec", exc_info=True)
+        return None
+
+
+async def _attach_retail_procedural_model(
+    session: AsyncSession,
+    pid: uuid.UUID,
+    spec: dict,
+) -> tuple[uuid.UUID | None, dict[str, uuid.UUID], bool]:
+    """Attach the procedural Heilbronn BIM model (one IFC model + GLB geometry).
+
+    Mirrors :func:`_attach_one_bim_model` but reads the model from the procedural
+    spec and persists each element's canonical ``classification`` and
+    ``geometry`` into ``properties``/``metadata`` so the BIM hub keeps the DIN
+    276 mapping and the box geometry. Idempotent on a deterministic model id.
+    Returns ``(model_id, {stable_id: element_uuid}, geometry_present)``.
+    """
+    from app.modules.bim_hub.file_storage import save_geometry
+    from app.modules.bim_hub.models import BIMElement, BIMModel
+
+    models = spec.get("models", [])
+    if not models:
+        return None, {}, False
+    src = models[0]
+
+    mid = _u(str(pid), "bim", "retail_procedural")
+    if await session.get(BIMModel, mid) is not None:
+        return mid, {}, True  # already attached on a previous run
+
+    canonical_key: str | None = None
+    if RETAIL_GLB_PATH.exists():
+        content = gzip.decompress(RETAIL_GLB_PATH.read_bytes())
+        canonical_key = await save_geometry(pid, mid, ".glb", content)
+
+    session.add(
+        BIMModel(
+            id=mid,
+            project_id=pid,
+            name=src.get("name", "Procedural model"),
+            discipline=src.get("discipline"),
+            model_format=src.get("model_format", "ifc"),
+            version="1",
+            status="ready" if canonical_key else "needs_converter",
+            element_count=src.get("element_count", len(src.get("elements", []))),
+            storey_count=src.get("storey_count", 1),
+            canonical_file_path=canonical_key,
+            metadata_={
+                "geometry_quality": src.get("geometry_quality", "procedural"),
+                "geometry_type": "procedural" if canonical_key else "none",
+                "converter_source": "procedural",
+                "source": "retail_heilbronn_seed",
+            },
+        )
+    )
+    await session.flush()
+
+    elem_uuid: dict[str, uuid.UUID] = {}
+    for e in src.get("elements", []):
+        sid = e["stable_id"]
+        eu = _u(str(mid), "el", sid)
+        elem_uuid[sid] = eu
+        props = dict(e.get("props") or {})
+        if e.get("classification"):
+            props["classification"] = e["classification"]
+        if e.get("geometry"):
+            props["geometry"] = e["geometry"]
+        session.add(
+            BIMElement(
+                id=eu,
+                model_id=mid,
+                stable_id=sid,
+                element_type=e.get("element_type"),
+                name=e.get("name"),
+                storey=e.get("storey"),
+                discipline=e.get("discipline"),
+                quantities=e.get("quantities") or {},
+                properties=props,
+                bounding_box=e.get("bounding_box"),
+                metadata_={"source": "retail_heilbronn_seed"},
+            )
+        )
+    await session.flush()
+    return mid, elem_uuid, bool(canonical_key)
+
+
+async def _attach_retail_heilbronn(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    owner_id: str | uuid.UUID,
+    bundle_key: str,
+) -> dict:
+    """Attach the procedural Retail Market Heilbronn model, links and documents.
+
+    This showcase ships its OWN procedural model (not the shared flagship mesh):
+    one IFC-format BIM model whose 232 canonical elements and ``.glb`` geometry
+    are generated from the building's canonical geometry. A handful of leaf BOQ
+    positions in the structural / facade / refrigeration groups (KG 320/330/360/
+    470) are linked to real elements, and the reference PDFs are attached. Fully
+    idempotent and resilient.
+    """
+    bundle = BUNDLES.get(bundle_key)
+    if bundle is None:
+        return {"status": "skipped", "reason": f"unknown bundle {bundle_key}"}
+    spec = _load_retail_spec()
+    if not spec:
+        return {"status": "skipped", "reason": "no retail Heilbronn assets"}
+
+    pid = project_id
+    owner = str(owner_id)
+
+    model_id, elem_uuid, geom = await _attach_retail_procedural_model(session, pid, spec)
+
+    # Pool element ids from the bundle's link groups, in order.
+    groups = spec.get("groups", {})
+    src_model_id = str(spec["models"][0]["id"]) if spec.get("models") else None
+    pooled_elem_ids: list[uuid.UUID] = []
+    if model_id is not None and src_model_id is not None:
+        for gk in bundle.get("link_groups", []):
+            grp = groups.get(gk)
+            if not grp or grp.get("model_id") != src_model_id:
+                continue
+            for sid in grp.get("stable_ids", []):
+                eu = elem_uuid.get(sid)
+                if eu is not None:
+                    pooled_elem_ids.append(eu)
+
+    n_links = await _link_positions_to_pool(session, pid, pooled_elem_ids, bundle_key)
+    docs_written = await _attach_documents(session, pid, owner, bundle.get("documents", []), bundle_key)
+
+    result = {
+        "status": "ok",
+        "project_id": str(pid),
+        "bim_models": 1 if model_id else 0,
+        "primary_model_id": str(model_id) if model_id else None,
+        "dwg": False,
+        "elements": len(elem_uuid),
+        "links": n_links,
+        "geometry": geom,
+        "documents": docs_written,
+        "bundle": bundle_key,
+    }
+    logger.info("Retail Heilbronn assets attached: %s", result)
+    return result
+
+
+async def _attach_demo_assets_inner(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    owner_id: str | uuid.UUID,
+    bundle_key: str,
+) -> dict:
+    # The Retail Market Heilbronn showcase ships its own procedural model.
+    if bundle_key == "retail_heilbronn":
+        return await _attach_retail_heilbronn(session, project_id, owner_id, bundle_key)
+
+    bundle = BUNDLES.get(bundle_key)
+    if bundle is None:
+        return {"status": "skipped", "reason": f"unknown bundle {bundle_key}"}
+
+    spec = _load_spec()
+    if not spec:
+        return {"status": "skipped", "reason": "no flagship assets"}
+
+    pid = project_id
+    owner = str(owner_id)
+
+    # ── 1+2. Both 3D BIM models (RVT + IFC) with elements + geometry ─────
+    # Every project carries BOTH so /bim shows a Revit AND an IFC model. We
+    # remember the primary model's element map (chosen by the bundle's
+    # ``source_format``) for the BOQ<->BIM link demo below.
+    primary_format = bundle["source_format"]
+    primary_model_id: uuid.UUID | None = None
+    primary_src_model_id: str | None = None
+    primary_elem_uuid: dict[str, uuid.UUID] = {}
+    bim_geometry = False
+    bim_models_attached = 0
+    for model_def in _BIM_MODELS:
+        mid, elem_uuid, geom = await _attach_one_bim_model(session, pid, spec, model_def)
+        if mid is not None:
+            bim_models_attached += 1
+            bim_geometry = bim_geometry or geom
+        if model_def["source_format"] == primary_format and mid is not None:
+            primary_model_id = mid
+            primary_elem_uuid = elem_uuid
+            src = _source_model(spec, primary_format)
+            primary_src_model_id = str(src["id"]) if src else None
+
+    # ── 2b. The 2D DWG drawing (DWG Takeoff module, never the BIM 3D hub) ─
+    dwg_attached = await _attach_dwg_drawing(session, pid, owner, spec)
+
+    # ── 3. Link a few EXISTING demo BOQ positions to the primary model ───
+    # Build the candidate element-id pool from the bundle's link groups, in
+    # order, so links are deterministic and concentrated on real groups. Only
+    # runs on a first install (primary_elem_uuid is empty on an idempotent
+    # re-run, so this block self-skips and never double-links).
+    groups = spec.get("groups", {})
+    pooled_elem_ids: list[uuid.UUID] = []
+    if primary_src_model_id is not None:
+        for gk in bundle.get("link_groups", []):
+            grp = groups.get(gk)
+            if not grp or grp.get("model_id") != primary_src_model_id:
+                continue
+            for sid in grp.get("stable_ids", []):
+                eu = primary_elem_uuid.get(sid)
+                if eu is not None:
+                    pooled_elem_ids.append(eu)
+
+    n_links = await _link_positions_to_pool(session, pid, pooled_elem_ids, bundle_key)
+
+    # ── 4. Real downloadable documents (best-effort, per entry) ──────────
+    docs_written = await _attach_documents(session, pid, owner, bundle.get("documents", []), bundle_key)
 
     result = {
         "status": "ok",

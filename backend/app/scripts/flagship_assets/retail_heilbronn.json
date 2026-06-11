@@ -1,0 +1,7476 @@
+{
+ "schema": 1,
+ "format_version": "1.0",
+ "source": {
+  "type": "procedural",
+  "generator": "gen_retail_heilbronn_assets/1.0"
+ },
+ "project": {
+  "id": "ef924501-60db-5176-9b0f-fa60a5183ed7",
+  "name": "Lebensmittelmarkt Heilbronn",
+  "demo_id": "retail-market-heilbronn"
+ },
+ "models": [
+  {
+   "id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "name": "Lebensmittelmarkt Heilbronn - prozedurales Modell",
+   "discipline": "architecture",
+   "model_format": "ifc",
+   "geometry_asset": "retail_heilbronn.glb.gz",
+   "geometry_quality": "procedural",
+   "element_count": 232,
+   "storey_count": 1,
+   "elements": [
+    {
+     "stable_id": "004de12a-b23f-5c17-9fe1-50c51b5716f3",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W13",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       38.4615,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "00889b8f-98ea-592d-a560-0f348c23644a",
+     "element_type": "Spaces",
+     "name": "Pfandraum (2 Leergutautomaten)",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "690"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       42.16,
+       31.8,
+       1.5
+      ],
+      "size_m": [
+       6.4807,
+       6.4807,
+       3.0
+      ]
+     },
+     "quantities": {
+      "area": 42.0
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": true
+     }
+    },
+    {
+     "stable_id": "0132593f-c1af-599f-899b-9f7241d78743",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 7 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       37.09,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "0206a3cf-5171-5ea1-9ffe-31f9069454ce",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W7",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       20.0,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "02fd1287-a02c-54fe-8805-3c810cfdfbef",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 5",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       24.73,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "0393c34d-db1d-527a-9a42-affee3650cb8",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S14",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       39.913,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "04657fc9-4937-58e5-b918-c10953c1de97",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 10 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       55.63,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "05885f0e-68b5-5621-b0c1-3d528f0361b7",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N13",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       36.9565,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "05b8bf4e-2c53-518b-8d5a-473138f6f2a2",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 6 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       39.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "0750e836-24d5-5360-9352-c526eca4e8da",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 2 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       9.28,
+       0.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "07a60d25-2ec5-5bde-bb9e-3c87dc9a9409",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N21",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       60.6087,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "0837ec4c-ff51-547e-994c-946c848c3cbe",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 6",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       30.91,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "094241af-bdcb-5ddb-8fc5-659570f63865",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 10 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       55.63,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "0974b136-0207-5d8a-9a5f-7a3ab6ecff7a",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 9 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       49.45,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "09c91779-738d-5c52-83f3-c157ae566da5",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S22",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       63.5652,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "0aa979eb-0c71-5eb1-927a-6ef6acbc7349",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 3 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       12.37,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "0ccb13ac-1662-50bc-b179-eea65474ebc0",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 7 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       37.09,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "0d3b3f0a-833d-5a72-9a63-4821ada2999a",
+     "element_type": "Roofs",
+     "name": "Trapezblech-Dachdeck Feld 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       3.1,
+       20.0,
+       7.65
+      ],
+      "size_m": [
+       6.18,
+       40.0,
+       0.1
+      ]
+     },
+     "quantities": {
+      "area": 247.2
+     },
+     "props": {
+      "material": "roof",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "0e36a685-8928-5e8f-bcf8-fa1efc9be469",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N3",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       7.3913,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "0ef1a427-5a27-5426-ae6b-64b4129b245c",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W10",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       29.2308,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "104a1db1-dc72-592b-9bea-583d1ff73da7",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 7 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       40.18,
+       39.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "11a55797-c67d-5bee-a96a-bfad051feffe",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       6.19,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "11aa7dc2-0d95-5611-ac44-8fb18c213711",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 8 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       43.27,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "11cefa10-f1d6-5ad3-8a2a-72dcb1a7ddff",
+     "element_type": "Roofs",
+     "name": "NRWG-Lichtkuppel 1.5 x 1.5 m 6",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       46.75,
+       20.0,
+       7.8
+      ],
+      "size_m": [
+       1.5,
+       1.5,
+       0.4
+      ]
+     },
+     "quantities": {
+      "area": 2.25,
+      "count": 1.0
+     },
+     "props": {
+      "material": "rooflight",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "13e3519f-2400-5e2f-aa8c-95b0231af943",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 7",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       37.09,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "145d9e47-7a41-5ae1-a03f-9ee54cf0e05c",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S6",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       16.2609,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "14f46777-e2ab-5c28-8227-18d1dce2f9cd",
+     "element_type": "Roofs",
+     "name": "NRWG-Lichtkuppel 1.5 x 1.5 m 7",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       55.25,
+       20.0,
+       7.8
+      ],
+      "size_m": [
+       1.5,
+       1.5,
+       0.4
+      ]
+     },
+     "quantities": {
+      "area": 2.25,
+      "count": 1.0
+     },
+     "props": {
+      "material": "rooflight",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "16711062-8344-55f9-b10e-838c0c3bfd27",
+     "element_type": "Roofs",
+     "name": "NRWG-Lichtkuppel 1.5 x 1.5 m 2",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       12.75,
+       20.0,
+       7.8
+      ],
+      "size_m": [
+       1.5,
+       1.5,
+       0.4
+      ]
+     },
+     "quantities": {
+      "area": 2.25,
+      "count": 1.0
+     },
+     "props": {
+      "material": "rooflight",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "17b91955-2f71-53eb-abac-8f6ad56121f0",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S10",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       28.087,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "1a621bb4-2b3c-5bd8-9ba6-3fb1eeac6042",
+     "element_type": "Doors",
+     "name": "Stahltuer T30/RC2 3",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       26.0,
+       0.0,
+       1.05
+      ],
+      "size_m": [
+       1.0,
+       0.2,
+       2.1
+      ]
+     },
+     "quantities": {
+      "area": 2.1,
+      "count": 1.0
+     },
+     "props": {
+      "material": "door",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "1ba92221-440a-5d24-a273-1e473545903a",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N23",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       66.5217,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "1d98c13b-e057-5d3c-8600-a588c4aa4b61",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 8 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       46.36,
+       0.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "1eb6bd46-0632-5b06-9759-de51c47a8295",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E10",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       29.2308,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "202e9e8e-c390-56ba-ad2b-9e19164ca436",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N11",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       31.0435,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "2052a742-64aa-5ac5-8d64-01f55407ce6f",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 9",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       49.45,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "24bc94ea-b408-515b-9078-5a8c796d3fab",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E9",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       26.1538,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "24cc41a7-e8cc-573a-9352-ca037a138797",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S19",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       54.6957,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "27381cc1-3295-5472-926f-709959898bb5",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 8 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       43.27,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "27dade91-a9f8-56ac-b493-a95a7f2b4838",
+     "element_type": "Roofs",
+     "name": "NRWG-Lichtkuppel 1.5 x 1.5 m 5",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       38.25,
+       20.0,
+       7.8
+      ],
+      "size_m": [
+       1.5,
+       1.5,
+       0.4
+      ]
+     },
+     "quantities": {
+      "area": 2.25,
+      "count": 1.0
+     },
+     "props": {
+      "material": "rooflight",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "28b4e98e-11c9-57ce-b6fa-ba344f0ccd10",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N9",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       25.1304,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "2ca49a78-3a32-5e75-9cf0-18466bf19f92",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N6",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       16.2609,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "2ca8482c-f8dc-54cd-acbf-cafc40ffccf2",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 8 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       46.36,
+       39.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "2d909fe9-2b7b-5d70-9dbd-82ee892710dc",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 1 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.01,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "2e6ff3dc-e6ce-5993-b7d0-361198822e2a",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 4",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       18.55,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "32600da8-b1ad-5e43-b2ce-a3552f6834f9",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E1",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       1.5385,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "32d0522e-cfe5-5014-835a-56a4b4801ef6",
+     "element_type": "Spaces",
+     "name": "Kuehlzelle +2 C",
+     "storey": "EG",
+     "discipline": "mechanical",
+     "classification": {
+      "din276": "470"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       53.04,
+       27.8,
+       2.2
+      ],
+      "size_m": [
+       6.7082,
+       6.7082,
+       4.4
+      ]
+     },
+     "quantities": {
+      "area": 45.0
+     },
+     "props": {
+      "material": "coldroom",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "33d405a7-4973-5e1f-99a6-b29709c62c08",
+     "element_type": "Roofs",
+     "name": "Trapezblech-Dachdeck Feld 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       15.46,
+       20.0,
+       7.65
+      ],
+      "size_m": [
+       6.18,
+       40.0,
+       0.1
+      ]
+     },
+     "quantities": {
+      "area": 247.2
+     },
+     "props": {
+      "material": "roof",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "37f59069-b27b-5661-8959-92b1c49d25fb",
+     "element_type": "Generic Models",
+     "name": "PV-Anlage 290 kWp (660 Module a 440 Wp)",
+     "storey": "EG",
+     "discipline": "electrical",
+     "classification": {
+      "din276": "440"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       20.0,
+       7.95
+      ],
+      "size_m": [
+       54.4,
+       30.0,
+       0.08
+      ]
+     },
+     "quantities": {
+      "count": 660.0,
+      "kwp": 290.0
+     },
+     "props": {
+      "material": "pv",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "3924c3ca-1750-58a7-b56c-70cd6ca6dbfa",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 2 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       6.19,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "3a787f1f-6815-5993-9a56-cacc84f54814",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 6 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       30.91,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "3c8015f8-7b9f-591c-a2f6-1bced8655afe",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S16",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       45.8261,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "3e3599e8-8a3e-5f6d-9fa9-7bdd99e63543",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 6 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       30.91,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "3f2514b9-e10d-534d-b098-b2735a431c4e",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       12.37,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "3fb35846-691e-5995-9980-507cdd024e1f",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 7 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       37.09,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "3fe43530-6746-5373-bc24-2651a7d05b4d",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W2",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       4.6154,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "3ff51cad-403f-5cc9-92f4-d5a3de6b1496",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E5",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       13.8462,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "4046a063-2bb7-5c92-9738-b61ebb8a5c7b",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S4",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       10.3478,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "42c237ac-15f5-5486-827c-a566873cfa96",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       6.19,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "43d98791-6dc9-5b14-ac5d-bc52272b6ee8",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 9 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       49.45,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "441f6501-7048-5254-9a6e-fb6fd4fd4cf8",
+     "element_type": "Roofs",
+     "name": "NRWG-Lichtkuppel 1.5 x 1.5 m 4",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       29.75,
+       20.0,
+       7.8
+      ],
+      "size_m": [
+       1.5,
+       1.5,
+       0.4
+      ]
+     },
+     "quantities": {
+      "area": 2.25,
+      "count": 1.0
+     },
+     "props": {
+      "material": "rooflight",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "44a81ec7-e51e-556b-abfb-6ba3e62ffa0b",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 3 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       12.37,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "4648d115-d249-579a-99c2-e9aa7be82fce",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E11",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       32.3077,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "4bb75771-a9e7-5092-b42c-a53b1ebfcb37",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S21",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       60.6087,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "4c80ac5a-84ac-518d-b805-262e2ccf4672",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 12",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       67.99,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "4e86d1a8-ed9e-5797-becc-f90dd598fcf2",
+     "element_type": "Roofs",
+     "name": "Trapezblech-Dachdeck Feld 10",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       58.72,
+       20.0,
+       7.65
+      ],
+      "size_m": [
+       6.18,
+       40.0,
+       0.1
+      ]
+     },
+     "quantities": {
+      "area": 247.2
+     },
+     "props": {
+      "material": "roof",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "4f20151a-fee1-5ee9-bb4e-59775b0d6de9",
+     "element_type": "Spaces",
+     "name": "Tiefkuehlzelle -22 C",
+     "storey": "EG",
+     "discipline": "mechanical",
+     "classification": {
+      "din276": "470"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       58.48,
+       27.8,
+       2.2
+      ],
+      "size_m": [
+       5.4772,
+       5.4772,
+       4.4
+      ]
+     },
+     "quantities": {
+      "area": 30.0
+     },
+     "props": {
+      "material": "coldroom",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "518b0ed4-9c65-51f8-9edf-beb4c88e9126",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 10 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       55.63,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "54dd487c-dfbf-5ed3-8d3f-efe88619b006",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 4 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       18.55,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "55bd6363-2bdb-5916-80db-8a8deb15416c",
+     "element_type": "Curtain Wall",
+     "name": "Pfosten-Riegel-Fassade 24.0 x 5.0 m",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       0.1,
+       2.5
+      ],
+      "size_m": [
+       24.0,
+       0.15,
+       5.0
+      ]
+     },
+     "quantities": {
+      "area": 120.0
+     },
+     "props": {
+      "material": "glazing",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "5894c92e-7575-5492-847d-f178913ac272",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W3",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       7.6923,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "5a009b09-ce4f-5fec-85f5-010db505a9de",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S11",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       31.0435,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "5a607979-7f44-53dd-bc60-b2dc46273d26",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 4 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       21.64,
+       39.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "5b5e5b78-7331-5d47-a119-ce0081da822d",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 2 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       6.19,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "5bb76fda-2c6f-58c6-8b19-9b02b7286be3",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E3",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       7.6923,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "5bdab18f-86d4-5c3f-9882-fbdd3ba6993f",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 10",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       55.63,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "5c54bd9f-0f87-5e09-b96b-afbb7110ec9e",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 12 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       67.99,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "60aaab07-7383-563c-a86c-c47f94d7a860",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S15",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       42.8696,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "627f00ec-057b-5859-8ba1-dfa34e779470",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W11",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       32.3077,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "63a7bb19-a41d-50d1-802a-980755ac95eb",
+     "element_type": "Spaces",
+     "name": "Anlieferung / Hof",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "510"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       85.0,
+       14.0,
+       1.5
+      ],
+      "size_m": [
+       9.7468,
+       9.7468,
+       3.0
+      ]
+     },
+     "quantities": {
+      "area": 95.0
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": true
+     }
+    },
+    {
+     "stable_id": "6414cdc6-24e3-58ff-a4d4-0ddc61bf6089",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 7 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       37.09,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "650c99cf-8af6-53b6-91bc-b2774d10220c",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N5",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       13.3043,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "65b9d0a7-fa4f-585b-96ca-ed009b770d05",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E6",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       16.9231,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "67748bf7-db94-5647-9f52-9d94c5a89e0d",
+     "element_type": "Walls",
+     "name": "Laerchenholz-Lattung Eingangsfassade",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       -0.15,
+       4.14
+      ],
+      "size_m": [
+       30.6,
+       0.08,
+       3.45
+      ]
+     },
+     "quantities": {
+      "area": 180.0
+     },
+     "props": {
+      "material": "timber_accent",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "69190369-1ab2-5315-8db0-014ea988936b",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 5 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       24.73,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "694add45-d2cc-5b73-a3d7-9955f5db0923",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N2",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       4.4348,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "6ca14661-0325-55b5-85eb-1954c4742439",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 9 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       49.45,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "6dc42aed-cb29-5b24-8106-a94c610ee258",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S20",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       57.6522,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "6df33bf6-35b2-5ee9-bac7-90b492f539eb",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N16",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       45.8261,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "6e65604b-4425-5b89-9dcb-5710e05d75f8",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N4",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       10.3478,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "711e87a9-d51f-50f2-95a8-e334b23ad85e",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 5 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       24.73,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "72841fb1-4a22-5af6-ba08-e59fe734096f",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W4",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       10.7692,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "72ef27b0-7d82-537d-95b4-9107d2a3ebef",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 5",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       24.73,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "73292214-8f61-56f2-a442-98f483bf379a",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 7 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       37.09,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "75c4986e-b213-5a81-a409-bd5f7c46eeb9",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 5 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       24.73,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "76a1aab4-8bbc-5b6c-a30c-db4a01535fd1",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N8",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       22.1739,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "77dca76c-69b1-5bb2-b045-a7e28fc60578",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 10 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       58.72,
+       39.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "7818fcf5-f05e-59e7-9e9b-0f3a46dd7be0",
+     "element_type": "Doors",
+     "name": "Stahltuer T30/RC2 4",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       35.0,
+       40.0,
+       1.05
+      ],
+      "size_m": [
+       1.0,
+       0.2,
+       2.1
+      ]
+     },
+     "quantities": {
+      "area": 2.1,
+      "count": 1.0
+     },
+     "props": {
+      "material": "door",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "78cc9d04-3c56-595f-ab76-c202090399fd",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W1",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       1.5385,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "78dd449e-9ff2-52de-95f6-b8f5c1d43517",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 1 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.01,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "797e09c3-2221-536b-80d9-71b1a29717c0",
+     "element_type": "Doors",
+     "name": "Ebenerdiges Tor 3.5 x 4.0 m",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       67.9,
+       18.0,
+       2.0
+      ],
+      "size_m": [
+       0.2,
+       3.5,
+       4.0
+      ]
+     },
+     "quantities": {
+      "area": 14.0,
+      "count": 1.0
+     },
+     "props": {
+      "material": "gate",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "7b8ffa41-7bcb-59a4-9cd1-2b4eef520ed3",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 11 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       64.9,
+       0.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "7fa4fa84-48ca-5bcc-ad66-2ac96d702fb6",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E13",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       38.4615,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "81b96a8d-0f40-5524-ae98-8cb180a1d519",
+     "element_type": "StructuralFoundation",
+     "name": "Frostschuerze umlaufend h = 80 cm",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       20.0,
+       -0.4
+      ],
+      "size_m": [
+       68.0,
+       40.0,
+       0.0
+      ]
+     },
+     "quantities": {
+      "length": 216.0,
+      "height": 0.8
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": true
+     }
+    },
+    {
+     "stable_id": "840a6320-25b9-5cf0-85f0-13851ac5c97f",
+     "element_type": "Roofs",
+     "name": "Trapezblech-Dachdeck Feld 5",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       27.82,
+       20.0,
+       7.65
+      ],
+      "size_m": [
+       6.18,
+       40.0,
+       0.1
+      ]
+     },
+     "quantities": {
+      "area": 247.2
+     },
+     "props": {
+      "material": "roof",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "8456fdc8-ed36-5225-aa12-accc092cf019",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S18",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       51.7391,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "871baa34-d2ac-5265-a166-a1235520b3c1",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 11 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       61.81,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "8890b50f-838e-59c4-8270-3431359e7ffb",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S3",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       7.3913,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "88e81a81-a518-504a-a7f2-1026607d8c27",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 8",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       43.27,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "89271e23-8dc4-5c90-a662-e6dcb07d7a40",
+     "element_type": "Roofs",
+     "name": "Trapezblech-Dachdeck Feld 8",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       46.36,
+       20.0,
+       7.65
+      ],
+      "size_m": [
+       6.18,
+       40.0,
+       0.1
+      ]
+     },
+     "quantities": {
+      "area": 247.2
+     },
+     "props": {
+      "material": "roof",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "8a058dcb-06d9-516c-a718-09196dc72dbd",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 9 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       52.54,
+       39.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "8d1ef2a1-766a-5958-9af9-c60022d294b8",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S12",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "8da9185a-93fd-5902-8d89-3f144b858980",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S2",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       4.4348,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "8e2ba10f-833d-5bad-975a-c92f7a620a26",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 12",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       67.99,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9044fa53-8373-544f-a3fe-26ba39cdd963",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 8 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       43.27,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "915c0abd-a1a4-5f02-a698-b7f499550a6b",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 5 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       24.73,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9314cbb0-78b3-5c74-86de-2545659c1a3f",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S23",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       66.5217,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "931f8a47-56e3-55f3-9012-fb9cb6d088ed",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E4",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       10.7692,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "93d6097b-c489-53f1-b640-7e6f771be9fa",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W5",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       13.8462,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "97b2ad23-8e22-592d-802f-12415b8b78f2",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 4 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       18.55,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "981ccda4-f909-531c-9714-2ab5f8ce2421",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 7 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       37.09,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "98b71025-7d69-5b38-9185-aa0f3c5e73a9",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 10 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       55.63,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "995341c2-6ae0-5aa2-be5f-7e0f9cf64efd",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 6 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       30.91,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9970e26a-63c9-5865-8425-bf6eb3435185",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.01,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9999cf16-ee08-5eb2-8998-d00a73f8e35e",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 1 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       3.1,
+       39.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "99e7cb31-0863-569e-85fc-fa0d4476ba5f",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N18",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       51.7391,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9a1859e8-162f-579b-a3e4-96e1b81fa590",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 2 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       6.19,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9a195578-6f13-5f2e-8fc2-9486c8b756ca",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 12 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       67.99,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9ae22251-2416-50f7-8fa9-0cfc06b917d8",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N19",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       54.6957,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9c163910-cb8a-5a7d-a6af-8d2c76d47b79",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 8 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       43.27,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9d2a391b-ecdb-546d-8738-c00a58a5b782",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 8 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       43.27,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9d3d3c5f-8ff6-5a72-969a-01ecdd4d6b1b",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W6",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       16.9231,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9d5c82dc-0910-5c9a-aa3a-4dd959e03841",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N15",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       42.8696,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9d6f40cd-58b9-5549-a00f-9b9736feaed3",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 6",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       30.91,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9fa59d55-2454-5dd3-9a69-e4dd01b505d3",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 9",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       49.45,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "9fe98b1e-3ef3-53d4-bce1-827b5ab15041",
+     "element_type": "Doors",
+     "name": "Stahltuer T30/RC2 6",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       53.0,
+       40.0,
+       1.05
+      ],
+      "size_m": [
+       1.0,
+       0.2,
+       2.1
+      ]
+     },
+     "quantities": {
+      "area": 2.1,
+      "count": 1.0
+     },
+     "props": {
+      "material": "door",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "a16785f5-b29f-5235-964f-68066e11ab31",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 12 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       67.99,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "a1af5a1c-a3c0-50d2-9925-c8752dfa660a",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 5 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       24.73,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "a2367f83-cdd7-5752-9205-e3553990296b",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 9 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       49.45,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "a40dc4d7-f089-5234-bee0-9a1b36dd5095",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 9 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       49.45,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "a4466967-0a43-5cbe-a35c-15cabe8f3256",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S8",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       22.1739,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "a49ccce7-238c-5e13-82c6-2bec0c6fa701",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 10 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       58.72,
+       0.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "a5e6e8ab-3a8b-56c7-9533-0ff78ebb7f22",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 2 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       6.19,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "a73c6db2-7ef4-5942-81c1-7fd7ac41fd8f",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W8",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       23.0769,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "a7dc15f0-f338-54d8-a759-2da926b69a16",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 11 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       61.81,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "a8425e57-ad34-5132-ab67-b7d61acd8cbe",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 10 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       55.63,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "a870ebeb-d865-5a11-8915-76d5d79443b3",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 4 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       18.55,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "ab960fb6-3ad5-5aa1-8933-74e0bfface75",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E12",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       35.3846,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "ae508cb7-01ec-5ab0-b93b-e0383e1fb9f8",
+     "element_type": "Roofs",
+     "name": "Trapezblech-Dachdeck Feld 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       9.28,
+       20.0,
+       7.65
+      ],
+      "size_m": [
+       6.18,
+       40.0,
+       0.1
+      ]
+     },
+     "quantities": {
+      "area": 247.2
+     },
+     "props": {
+      "material": "roof",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "af58abb5-b9e6-5995-a002-ded466e0cb8d",
+     "element_type": "Spaces",
+     "name": "RLT-Mezzanin 120 m2",
+     "storey": "EG",
+     "discipline": "mechanical",
+     "classification": {
+      "din276": "430"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       59.84,
+       33.52,
+       5.6
+      ],
+      "size_m": [
+       12.0,
+       10.0,
+       0.3
+      ]
+     },
+     "quantities": {
+      "area": 120.0
+     },
+     "props": {
+      "material": "ahu",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "af8fb16f-15e5-5b44-b63b-55b45be8987a",
+     "element_type": "Roofs",
+     "name": "Trapezblech-Dachdeck Feld 9",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       52.54,
+       20.0,
+       7.65
+      ],
+      "size_m": [
+       6.18,
+       40.0,
+       0.1
+      ]
+     },
+     "quantities": {
+      "area": 247.2
+     },
+     "props": {
+      "material": "roof",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "afdb0795-11a4-5faa-94a7-8bab3a12c91a",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 4 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       18.55,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "b0265b7e-986c-5fc1-a77b-9972db5019fa",
+     "element_type": "Roofs",
+     "name": "NRWG-Lichtkuppel 1.5 x 1.5 m 1",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       4.25,
+       20.0,
+       7.8
+      ],
+      "size_m": [
+       1.5,
+       1.5,
+       0.4
+      ]
+     },
+     "quantities": {
+      "area": 2.25,
+      "count": 1.0
+     },
+     "props": {
+      "material": "rooflight",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "b088070a-2e0c-5b3e-b957-d5dcc377f6b0",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 6 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       30.91,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "b4feaf4f-99ab-5af5-a9ad-d47929cd623d",
+     "element_type": "Roofs",
+     "name": "Trapezblech-Dachdeck Feld 7",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       40.18,
+       20.0,
+       7.65
+      ],
+      "size_m": [
+       6.18,
+       40.0,
+       0.1
+      ]
+     },
+     "quantities": {
+      "area": 247.2
+     },
+     "props": {
+      "material": "roof",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "b6c8bb72-dc3d-54be-9cee-78ae795baa17",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E7",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       20.0,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "b6ea22bf-4a3f-510d-9579-c33048d785ba",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 11 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       64.9,
+       39.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "b6ef7e7b-2b7c-5e21-8a83-6ac7ba7a3859",
+     "element_type": "Roofs",
+     "name": "Trapezblech-Dachdeck Feld 4",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       21.64,
+       20.0,
+       7.65
+      ],
+      "size_m": [
+       6.18,
+       40.0,
+       0.1
+      ]
+     },
+     "quantities": {
+      "area": 247.2
+     },
+     "props": {
+      "material": "roof",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "b71cbcf3-49fe-52f9-a7a2-4c90aafcd59d",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 5 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       27.82,
+       39.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "b7327295-88ee-5091-8aee-030a291e5986",
+     "element_type": "Spaces",
+     "name": "Backstation / Bake-off",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "610"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       13.6,
+       6.0,
+       1.5
+      ],
+      "size_m": [
+       5.4772,
+       5.4772,
+       3.0
+      ]
+     },
+     "quantities": {
+      "area": 30.0
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": true
+     }
+    },
+    {
+     "stable_id": "b8cda10a-c74a-5196-b5ef-5b4aeaaeb249",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 11",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       61.81,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "bab9d3c6-60ff-5b30-94cd-e8073e272564",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E8",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       23.0769,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "baef41f5-18b0-5f4a-8797-193a2a7bd926",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W12",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       35.3846,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "bb760954-2013-51de-9187-087780506717",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N22",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       63.5652,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "bc299540-4233-5374-86ea-e60130ba6c15",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S1",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       1.4783,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "bcb54714-a3ff-5e07-bd8a-9843d23c1200",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 7",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       37.09,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "bd1dd85b-cf88-552c-9fc8-027d0eac0224",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 1 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.01,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "bd4e79d2-e542-5ae7-bb9b-fc0e1e3c5177",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 3 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       15.46,
+       0.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "be8ef0e9-2a52-538c-ba9c-8d0828e40960",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 5 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       24.73,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c02482f7-b400-576f-a987-88c2c703c04b",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 2 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       6.19,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c0e1c3e6-c221-5e57-aab9-63504e90c8af",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 6 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       30.91,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c0eccd8a-cf20-5b10-a683-540d39783b6c",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 10",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       55.63,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c2922ad3-bd71-516d-bd18-0e8667355035",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 11 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       61.81,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c29b5d2b-a077-51b4-aa90-38dbf0910683",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 4 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       21.64,
+       0.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c3d0b0cf-d709-5fe5-a1f9-31957034fb1f",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N7",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       19.2174,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c3d4e94c-6156-5137-8f1c-87f1d421a33a",
+     "element_type": "Roofs",
+     "name": "Trapezblech-Dachdeck Feld 6",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       20.0,
+       7.65
+      ],
+      "size_m": [
+       6.18,
+       40.0,
+       0.1
+      ]
+     },
+     "quantities": {
+      "area": 247.2
+     },
+     "props": {
+      "material": "roof",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c41f4867-0461-55b4-b860-f06274fdc0e6",
+     "element_type": "Doors",
+     "name": "Stahltuer T30/RC2 1",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       8.0,
+       0.0,
+       1.05
+      ],
+      "size_m": [
+       1.0,
+       0.2,
+       2.1
+      ]
+     },
+     "quantities": {
+      "area": 2.1,
+      "count": 1.0
+     },
+     "props": {
+      "material": "door",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c4582cec-b2fd-5bb4-93ec-2c8daeee0e03",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 4 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       18.55,
+       20.0,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c49a0389-0691-5799-b6b4-91d26f2e1b66",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 4 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       18.55,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c56a16df-efff-5759-bd5a-032c4a571685",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N1",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       1.4783,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c872ef5f-6ddc-5b3e-8362-5041c06e63e3",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S17",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       48.7826,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "c9f73462-e546-5e3d-ab27-acc562bbc157",
+     "element_type": "Generic Models",
+     "name": "Werbepylon h = 8.0 m",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "530"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       -6.0,
+       4.0,
+       4.0
+      ],
+      "size_m": [
+       1.2,
+       0.6,
+       8.0
+      ]
+     },
+     "quantities": {
+      "height": 8.0,
+      "count": 1.0
+     },
+     "props": {
+      "material": "pylon",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "cb72415f-280a-59bb-b5b2-a56d8cbdc860",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N17",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       48.7826,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "cb97918d-1aa2-5400-a17a-82e2eeff9fe6",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 3 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       12.37,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "cd95ecdc-e20a-5354-9c54-4cca59e30eb8",
+     "element_type": "Floors",
+     "name": "Bodenplatte C25/30 d = 20 cm",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       20.0,
+       0.1
+      ],
+      "size_m": [
+       68.0,
+       40.0,
+       0.2
+      ]
+     },
+     "quantities": {
+      "area": 2720.0,
+      "thickness": 0.2,
+      "volume": 544.0
+     },
+     "props": {
+      "material": "slab",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "ce26894d-779a-5a2b-aa9d-e949b81c9cf1",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 11 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       61.81,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "cef407cc-0fc1-53b4-a446-51023d154a8b",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm W9",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.0,
+       26.1538,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "cfd168c5-2d17-5a7f-867e-e5354fee24b8",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 11 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       61.81,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "cfd7b2ee-ce64-5f45-a76a-5548ac9cd143",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N20",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       57.6522,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "cfd9460b-6191-5868-a7a4-8256d1152aeb",
+     "element_type": "Roofs",
+     "name": "Trapezblech-Dachdeck Feld 11",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       64.9,
+       20.0,
+       7.65
+      ],
+      "size_m": [
+       6.18,
+       40.0,
+       0.1
+      ]
+     },
+     "quantities": {
+      "area": 247.2
+     },
+     "props": {
+      "material": "roof",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "d197427c-2d9c-590f-87a4-5d2b8b9c004b",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 3 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       12.37,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "d36dfcf2-6e2f-54ad-94d5-bc7e5acd621d",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 3 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       12.37,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "d893fbbf-b527-53b2-95c8-decf8acb4cf7",
+     "element_type": "Roofs",
+     "name": "NRWG-Lichtkuppel 1.5 x 1.5 m 3",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       21.25,
+       20.0,
+       7.8
+      ],
+      "size_m": [
+       1.5,
+       1.5,
+       0.4
+      ]
+     },
+     "quantities": {
+      "area": 2.25,
+      "count": 1.0
+     },
+     "props": {
+      "material": "rooflight",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "da0b249e-7b32-57da-af19-84561fe79536",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 7 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       40.18,
+       0.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "da5c6bf6-3489-5ee2-9b9c-52011759349a",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 3 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       15.46,
+       39.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "dab6f439-715f-58a1-830c-1f0c1d94e346",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 1 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       3.1,
+       0.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "e1815114-8a1d-53ff-be7a-168a210d43e3",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 9 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       52.54,
+       0.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "e1fdf3a1-cf96-5672-88e5-3f9a5a6af7e5",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 10 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       55.63,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "e2a38003-4aed-59aa-8d0e-9f4a511168a4",
+     "element_type": "Spaces",
+     "name": "Obst/Gemuese-Kuehlraum +8 C",
+     "storey": "EG",
+     "discipline": "mechanical",
+     "classification": {
+      "din276": "470"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       47.6,
+       27.8,
+       2.2
+      ],
+      "size_m": [
+       5.0,
+       5.0,
+       4.4
+      ]
+     },
+     "quantities": {
+      "area": 25.0
+     },
+     "props": {
+      "material": "coldroom",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "e38f0d8a-f7ca-59f3-a2d6-6f9b6b14499c",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 9 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       49.45,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "e449dd22-614c-5734-bacb-c28933d306bb",
+     "element_type": "Doors",
+     "name": "Stahltuer T30/RC2 2",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       17.0,
+       40.0,
+       1.05
+      ],
+      "size_m": [
+       1.0,
+       0.2,
+       2.1
+      ]
+     },
+     "quantities": {
+      "area": 2.1,
+      "count": 1.0
+     },
+     "props": {
+      "material": "door",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "e7f2b535-95d8-58fb-8758-2d4237988c74",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 1 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.01,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "e873a4fc-4e75-507f-8a32-5db9ad05fcf5",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 6 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       0.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "e8820618-c4f0-5723-8839-8a08fc2d2fbd",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S7",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       19.2174,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "e9163af6-bff6-59b0-bc71-1af888d915ac",
+     "element_type": "Roofs",
+     "name": "NRWG-Lichtkuppel 1.5 x 1.5 m 8",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       63.75,
+       20.0,
+       7.8
+      ],
+      "size_m": [
+       1.5,
+       1.5,
+       0.4
+      ]
+     },
+     "quantities": {
+      "area": 2.25,
+      "count": 1.0
+     },
+     "props": {
+      "material": "rooflight",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "e98f3dca-9272-56bd-b423-773d2affe26f",
+     "element_type": "Doors",
+     "name": "Dock-Tor mit Ueberladebruecke 3.0 x 3.2 m",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       67.9,
+       10.0,
+       1.6
+      ],
+      "size_m": [
+       0.2,
+       3.0,
+       3.2
+      ]
+     },
+     "quantities": {
+      "area": 9.6,
+      "count": 1.0
+     },
+     "props": {
+      "material": "gate",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "e9b07397-8145-5164-8514-038cf99d65b0",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 2 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       6.19,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "ea38ae05-b84e-58e9-b935-56932425bc82",
+     "element_type": "Windows",
+     "name": "Fensterband 28.0 x 1.5 m",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       39.9,
+       4.83
+      ],
+      "size_m": [
+       28.0,
+       0.15,
+       1.5
+      ]
+     },
+     "quantities": {
+      "area": 42.0
+     },
+     "props": {
+      "material": "glazing",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "eafef1b8-a58a-5bb1-8b37-370984802034",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h 20/120, l = 23.8 m, Achse 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.01,
+       11.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       23.8,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 23.8,
+      "volume": 5.712
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "eb739cad-6bde-51b4-b4f0-e966fce1e2f8",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 4",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       18.55,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "edbdeab5-0f4b-5945-8dec-740cfba592af",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm E2",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       68.0,
+       4.6154,
+       3.45
+      ],
+      "size_m": [
+       0.2,
+       3.0769,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 18.4046
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "edeebab2-2a69-506e-8483-610cf9df131a",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S13",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       36.9565,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "eeba45f0-825f-525e-b165-3376ee6565ae",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 2 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       9.28,
+       39.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "eed0ccf4-0ab0-5184-ae73-96c2ca5a02d3",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Randtraeger Feld 5 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       27.82,
+       0.5,
+       6.7
+      ],
+      "size_m": [
+       6.18,
+       0.16,
+       0.6
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.18
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "eedad092-8199-5258-a50c-c332c5e662eb",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S5",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       13.3043,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "f1de1001-85bd-5b86-9ede-cee9c25ea696",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       12.37,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "f1df0fd8-4316-5eff-8a82-70ce4dcd05b8",
+     "element_type": "Spaces",
+     "name": "Stellplatzanlage 112 Pkw",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "520"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       -30.0,
+       0.0
+      ],
+      "size_m": [
+       68.0,
+       50.0,
+       0.0
+      ]
+     },
+     "quantities": {
+      "count": 112.0,
+      "marking_m": 952.0
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": true
+     }
+    },
+    {
+     "stable_id": "f2fe899b-f29c-576f-9541-df9c2c1b7534",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 11",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       61.81,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "f4d61c09-488f-5f42-9a3a-dfcd46c6f071",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 11 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       61.81,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "f542ad12-2444-583f-8ef0-e2875688045f",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N12",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       34.0,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "f612f1de-ab9f-55e8-961b-f8a858e9eba4",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm S9",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       25.1304,
+       0.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "f7a5ec8c-a8d1-597d-97ed-9a1d2b532cc3",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 8 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       43.27,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "f87c9eca-c2de-5a62-986f-66811ba547dc",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 3 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       12.37,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "f896eb07-7d7f-5bff-9ff7-98fdeacf5c95",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 12 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       67.99,
+       39.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "f963916a-ec2a-5a9d-bb24-27370ba01bba",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 12 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       67.99,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "fa19a242-cadc-5e2f-87f0-a13944aa3d8f",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 12 Reihe 3",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       67.99,
+       39.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "fb4053ce-ef31-5d85-b118-4da1e483734e",
+     "element_type": "Columns",
+     "name": "FT-Stuetze C40/50 40/40 Achse 6 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       30.91,
+       0.5,
+       3.2
+      ],
+      "size_m": [
+       0.4,
+       0.4,
+       6.4
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 6.4,
+      "volume": 1.024
+     },
+     "props": {
+      "material": "concrete",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "fcf68d32-1b42-50d8-a367-059ebf6fb8bf",
+     "element_type": "StructuralBeam",
+     "name": "BSH-Binder GL24h, l = 16.2 m, Achse 8",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "360"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       43.27,
+       31.9,
+       7.0
+      ],
+      "size_m": [
+       0.2,
+       16.2,
+       1.2
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "length": 16.2,
+      "volume": 3.888
+     },
+     "props": {
+      "material": "timber",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "fd88682e-1b7d-514f-8841-b3dbc63cd7d0",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N14",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       39.913,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "fd91759f-3d19-5866-9f5f-3bffa24cb845",
+     "element_type": "Walls",
+     "name": "Sandwichpaneel MW 200 mm N10",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       28.087,
+       40.0,
+       3.45
+      ],
+      "size_m": [
+       2.9565,
+       0.2,
+       6.9
+      ]
+     },
+     "quantities": {
+      "area": 17.6844
+     },
+     "props": {
+      "material": "facade",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "fdb3632c-9e10-54e9-b73c-c4b19295d1da",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 1 Reihe 1",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.01,
+       0.5,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "fe657670-7edd-551c-b777-58036965da3d",
+     "element_type": "StructuralFoundation",
+     "name": "Koecherfundament 1.8x1.8x1.0 Achse 1 Reihe 2",
+     "storey": "EG",
+     "discipline": "structural",
+     "classification": {
+      "din276": "320"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       0.01,
+       20.0,
+       -0.5
+      ],
+      "size_m": [
+       1.8,
+       1.8,
+       1.0
+      ]
+     },
+     "quantities": {
+      "count": 1.0,
+      "volume": 3.24
+     },
+     "props": {
+      "material": "foundation",
+      "spatial_zone": false
+     }
+    },
+    {
+     "stable_id": "ff814099-a844-57e5-8abb-03b18f07a765",
+     "element_type": "Doors",
+     "name": "Stahltuer T30/RC2 5",
+     "storey": "EG",
+     "discipline": "architectural",
+     "classification": {
+      "din276": "330"
+     },
+     "geometry": {
+      "type": "box",
+      "center_m": [
+       44.0,
+       0.0,
+       1.05
+      ],
+      "size_m": [
+       1.0,
+       0.2,
+       2.1
+      ]
+     },
+     "quantities": {
+      "area": 2.1,
+      "count": 1.0
+     },
+     "props": {
+      "material": "door",
+      "spatial_zone": false
+     }
+    }
+   ]
+  }
+ ],
+ "groups": {
+  "retail_binders": {
+   "model_id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "stable_ids": [
+    "02fd1287-a02c-54fe-8805-3c810cfdfbef",
+    "05b8bf4e-2c53-518b-8d5a-473138f6f2a2",
+    "0750e836-24d5-5360-9352-c526eca4e8da",
+    "0837ec4c-ff51-547e-994c-946c848c3cbe",
+    "104a1db1-dc72-592b-9bea-583d1ff73da7",
+    "11a55797-c67d-5bee-a96a-bfad051feffe",
+    "13e3519f-2400-5e2f-aa8c-95b0231af943",
+    "1d98c13b-e057-5d3c-8600-a588c4aa4b61",
+    "2052a742-64aa-5ac5-8d64-01f55407ce6f",
+    "2ca8482c-f8dc-54cd-acbf-cafc40ffccf2",
+    "2e6ff3dc-e6ce-5993-b7d0-361198822e2a",
+    "3f2514b9-e10d-534d-b098-b2735a431c4e",
+    "42c237ac-15f5-5486-827c-a566873cfa96",
+    "4c80ac5a-84ac-518d-b805-262e2ccf4672",
+    "5a607979-7f44-53dd-bc60-b2dc46273d26",
+    "5bdab18f-86d4-5c3f-9882-fbdd3ba6993f",
+    "72ef27b0-7d82-537d-95b4-9107d2a3ebef",
+    "77dca76c-69b1-5bb2-b045-a7e28fc60578",
+    "7b8ffa41-7bcb-59a4-9cd1-2b4eef520ed3",
+    "88e81a81-a518-504a-a7f2-1026607d8c27",
+    "8a058dcb-06d9-516c-a718-09196dc72dbd",
+    "8e2ba10f-833d-5bad-975a-c92f7a620a26",
+    "9970e26a-63c9-5865-8425-bf6eb3435185",
+    "9999cf16-ee08-5eb2-8998-d00a73f8e35e",
+    "9d6f40cd-58b9-5549-a00f-9b9736feaed3",
+    "9fa59d55-2454-5dd3-9a69-e4dd01b505d3",
+    "a49ccce7-238c-5e13-82c6-2bec0c6fa701",
+    "b6ea22bf-4a3f-510d-9579-c33048d785ba",
+    "b71cbcf3-49fe-52f9-a7a2-4c90aafcd59d",
+    "b8cda10a-c74a-5196-b5ef-5b4aeaaeb249",
+    "bcb54714-a3ff-5e07-bd8a-9843d23c1200",
+    "bd4e79d2-e542-5ae7-bb9b-fc0e1e3c5177",
+    "c0eccd8a-cf20-5b10-a683-540d39783b6c",
+    "c29b5d2b-a077-51b4-aa90-38dbf0910683",
+    "da0b249e-7b32-57da-af19-84561fe79536",
+    "da5c6bf6-3489-5ee2-9b9c-52011759349a",
+    "dab6f439-715f-58a1-830c-1f0c1d94e346",
+    "e1815114-8a1d-53ff-be7a-168a210d43e3",
+    "e873a4fc-4e75-507f-8a32-5db9ad05fcf5",
+    "eafef1b8-a58a-5bb1-8b37-370984802034",
+    "eb739cad-6bde-51b4-b4f0-e966fce1e2f8",
+    "eeba45f0-825f-525e-b165-3376ee6565ae",
+    "eed0ccf4-0ab0-5184-ae73-96c2ca5a02d3",
+    "f1de1001-85bd-5b86-9ede-cee9c25ea696",
+    "f2fe899b-f29c-576f-9541-df9c2c1b7534",
+    "fcf68d32-1b42-50d8-a367-059ebf6fb8bf"
+   ]
+  },
+  "retail_columns": {
+   "model_id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "stable_ids": [
+    "04657fc9-4937-58e5-b918-c10953c1de97",
+    "094241af-bdcb-5ddb-8fc5-659570f63865",
+    "0974b136-0207-5d8a-9a5f-7a3ab6ecff7a",
+    "0aa979eb-0c71-5eb1-927a-6ef6acbc7349",
+    "27381cc1-3295-5472-926f-709959898bb5",
+    "2d909fe9-2b7b-5d70-9dbd-82ee892710dc",
+    "3924c3ca-1750-58a7-b56c-70cd6ca6dbfa",
+    "3fb35846-691e-5995-9980-507cdd024e1f",
+    "43d98791-6dc9-5b14-ac5d-bc52272b6ee8",
+    "44a81ec7-e51e-556b-abfb-6ba3e62ffa0b",
+    "5b5e5b78-7331-5d47-a119-ce0081da822d",
+    "6414cdc6-24e3-58ff-a4d4-0ddc61bf6089",
+    "711e87a9-d51f-50f2-95a8-e334b23ad85e",
+    "75c4986e-b213-5a81-a409-bd5f7c46eeb9",
+    "78dd449e-9ff2-52de-95f6-b8f5c1d43517",
+    "871baa34-d2ac-5265-a166-a1235520b3c1",
+    "9044fa53-8373-544f-a3fe-26ba39cdd963",
+    "981ccda4-f909-531c-9714-2ab5f8ce2421",
+    "995341c2-6ae0-5aa2-be5f-7e0f9cf64efd",
+    "a16785f5-b29f-5235-964f-68066e11ab31",
+    "a1af5a1c-a3c0-50d2-9925-c8752dfa660a",
+    "a7dc15f0-f338-54d8-a759-2da926b69a16",
+    "a8425e57-ad34-5132-ab67-b7d61acd8cbe",
+    "a870ebeb-d865-5a11-8915-76d5d79443b3",
+    "c0e1c3e6-c221-5e57-aab9-63504e90c8af",
+    "c4582cec-b2fd-5bb4-93ec-2c8daeee0e03",
+    "c49a0389-0691-5799-b6b4-91d26f2e1b66",
+    "cfd168c5-2d17-5a7f-867e-e5354fee24b8",
+    "d197427c-2d9c-590f-87a4-5d2b8b9c004b",
+    "e38f0d8a-f7ca-59f3-a2d6-6f9b6b14499c",
+    "e7f2b535-95d8-58fb-8758-2d4237988c74",
+    "e9b07397-8145-5164-8514-038cf99d65b0",
+    "f7a5ec8c-a8d1-597d-97ed-9a1d2b532cc3",
+    "f896eb07-7d7f-5bff-9ff7-98fdeacf5c95",
+    "f963916a-ec2a-5a9d-bb24-27370ba01bba",
+    "fb4053ce-ef31-5d85-b118-4da1e483734e"
+   ]
+  },
+  "retail_facade": {
+   "model_id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "stable_ids": [
+    "004de12a-b23f-5c17-9fe1-50c51b5716f3",
+    "0206a3cf-5171-5ea1-9ffe-31f9069454ce",
+    "0393c34d-db1d-527a-9a42-affee3650cb8",
+    "05885f0e-68b5-5621-b0c1-3d528f0361b7",
+    "07a60d25-2ec5-5bde-bb9e-3c87dc9a9409",
+    "09c91779-738d-5c52-83f3-c157ae566da5",
+    "0e36a685-8928-5e8f-bcf8-fa1efc9be469",
+    "0ef1a427-5a27-5426-ae6b-64b4129b245c",
+    "145d9e47-7a41-5ae1-a03f-9ee54cf0e05c",
+    "17b91955-2f71-53eb-abac-8f6ad56121f0",
+    "1ba92221-440a-5d24-a273-1e473545903a",
+    "1eb6bd46-0632-5b06-9759-de51c47a8295",
+    "202e9e8e-c390-56ba-ad2b-9e19164ca436",
+    "24bc94ea-b408-515b-9078-5a8c796d3fab",
+    "24cc41a7-e8cc-573a-9352-ca037a138797",
+    "28b4e98e-11c9-57ce-b6fa-ba344f0ccd10",
+    "2ca49a78-3a32-5e75-9cf0-18466bf19f92",
+    "32600da8-b1ad-5e43-b2ce-a3552f6834f9",
+    "3c8015f8-7b9f-591c-a2f6-1bced8655afe",
+    "3fe43530-6746-5373-bc24-2651a7d05b4d",
+    "3ff51cad-403f-5cc9-92f4-d5a3de6b1496",
+    "4046a063-2bb7-5c92-9738-b61ebb8a5c7b",
+    "4648d115-d249-579a-99c2-e9aa7be82fce",
+    "4bb75771-a9e7-5092-b42c-a53b1ebfcb37",
+    "5894c92e-7575-5492-847d-f178913ac272",
+    "5a009b09-ce4f-5fec-85f5-010db505a9de",
+    "5bb76fda-2c6f-58c6-8b19-9b02b7286be3",
+    "60aaab07-7383-563c-a86c-c47f94d7a860",
+    "627f00ec-057b-5859-8ba1-dfa34e779470",
+    "650c99cf-8af6-53b6-91bc-b2774d10220c",
+    "65b9d0a7-fa4f-585b-96ca-ed009b770d05",
+    "67748bf7-db94-5647-9f52-9d94c5a89e0d",
+    "694add45-d2cc-5b73-a3d7-9955f5db0923",
+    "6dc42aed-cb29-5b24-8106-a94c610ee258",
+    "6df33bf6-35b2-5ee9-bac7-90b492f539eb",
+    "6e65604b-4425-5b89-9dcb-5710e05d75f8",
+    "72841fb1-4a22-5af6-ba08-e59fe734096f",
+    "76a1aab4-8bbc-5b6c-a30c-db4a01535fd1",
+    "78cc9d04-3c56-595f-ab76-c202090399fd",
+    "7fa4fa84-48ca-5bcc-ad66-2ac96d702fb6",
+    "8456fdc8-ed36-5225-aa12-accc092cf019",
+    "8890b50f-838e-59c4-8270-3431359e7ffb",
+    "8d1ef2a1-766a-5958-9af9-c60022d294b8",
+    "8da9185a-93fd-5902-8d89-3f144b858980",
+    "9314cbb0-78b3-5c74-86de-2545659c1a3f",
+    "931f8a47-56e3-55f3-9012-fb9cb6d088ed",
+    "93d6097b-c489-53f1-b640-7e6f771be9fa",
+    "99e7cb31-0863-569e-85fc-fa0d4476ba5f",
+    "9ae22251-2416-50f7-8fa9-0cfc06b917d8",
+    "9d3d3c5f-8ff6-5a72-969a-01ecdd4d6b1b",
+    "9d5c82dc-0910-5c9a-aa3a-4dd959e03841",
+    "a4466967-0a43-5cbe-a35c-15cabe8f3256",
+    "a73c6db2-7ef4-5942-81c1-7fd7ac41fd8f",
+    "ab960fb6-3ad5-5aa1-8933-74e0bfface75",
+    "b6c8bb72-dc3d-54be-9cee-78ae795baa17",
+    "bab9d3c6-60ff-5b30-94cd-e8073e272564",
+    "baef41f5-18b0-5f4a-8797-193a2a7bd926",
+    "bb760954-2013-51de-9187-087780506717",
+    "bc299540-4233-5374-86ea-e60130ba6c15",
+    "c3d0b0cf-d709-5fe5-a1f9-31957034fb1f",
+    "c56a16df-efff-5759-bd5a-032c4a571685",
+    "c872ef5f-6ddc-5b3e-8362-5041c06e63e3",
+    "cb72415f-280a-59bb-b5b2-a56d8cbdc860",
+    "cef407cc-0fc1-53b4-a446-51023d154a8b",
+    "cfd7b2ee-ce64-5f45-a76a-5548ac9cd143",
+    "e8820618-c4f0-5723-8839-8a08fc2d2fbd",
+    "edbdeab5-0f4b-5945-8dec-740cfba592af",
+    "edeebab2-2a69-506e-8483-610cf9df131a",
+    "eedad092-8199-5258-a50c-c332c5e662eb",
+    "f542ad12-2444-583f-8ef0-e2875688045f",
+    "f612f1de-ab9f-55e8-961b-f8a858e9eba4",
+    "fd88682e-1b7d-514f-8841-b3dbc63cd7d0",
+    "fd91759f-3d19-5866-9f5f-3bffa24cb845"
+   ]
+  },
+  "retail_foundations": {
+   "model_id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "stable_ids": [
+    "0132593f-c1af-599f-899b-9f7241d78743",
+    "0ccb13ac-1662-50bc-b179-eea65474ebc0",
+    "11aa7dc2-0d95-5611-ac44-8fb18c213711",
+    "3a787f1f-6815-5993-9a56-cacc84f54814",
+    "3e3599e8-8a3e-5f6d-9fa9-7bdd99e63543",
+    "518b0ed4-9c65-51f8-9edf-beb4c88e9126",
+    "54dd487c-dfbf-5ed3-8d3f-efe88619b006",
+    "5c54bd9f-0f87-5e09-b96b-afbb7110ec9e",
+    "69190369-1ab2-5315-8db0-014ea988936b",
+    "6ca14661-0325-55b5-85eb-1954c4742439",
+    "73292214-8f61-56f2-a442-98f483bf379a",
+    "81b96a8d-0f40-5524-ae98-8cb180a1d519",
+    "915c0abd-a1a4-5f02-a698-b7f499550a6b",
+    "97b2ad23-8e22-592d-802f-12415b8b78f2",
+    "98b71025-7d69-5b38-9185-aa0f3c5e73a9",
+    "9a1859e8-162f-579b-a3e4-96e1b81fa590",
+    "9a195578-6f13-5f2e-8fc2-9486c8b756ca",
+    "9c163910-cb8a-5a7d-a6af-8d2c76d47b79",
+    "9d2a391b-ecdb-546d-8738-c00a58a5b782",
+    "a2367f83-cdd7-5752-9205-e3553990296b",
+    "a40dc4d7-f089-5234-bee0-9a1b36dd5095",
+    "a5e6e8ab-3a8b-56c7-9533-0ff78ebb7f22",
+    "afdb0795-11a4-5faa-94a7-8bab3a12c91a",
+    "b088070a-2e0c-5b3e-b957-d5dcc377f6b0",
+    "bd1dd85b-cf88-552c-9fc8-027d0eac0224",
+    "be8ef0e9-2a52-538c-ba9c-8d0828e40960",
+    "c02482f7-b400-576f-a987-88c2c703c04b",
+    "c2922ad3-bd71-516d-bd18-0e8667355035",
+    "cb97918d-1aa2-5400-a17a-82e2eeff9fe6",
+    "ce26894d-779a-5a2b-aa9d-e949b81c9cf1",
+    "d36dfcf2-6e2f-54ad-94d5-bc7e5acd621d",
+    "e1fdf3a1-cf96-5672-88e5-3f9a5a6af7e5",
+    "f4d61c09-488f-5f42-9a3a-dfcd46c6f071",
+    "f87c9eca-c2de-5a62-986f-66811ba547dc",
+    "fa19a242-cadc-5e2f-87f0-a13944aa3d8f",
+    "fdb3632c-9e10-54e9-b73c-c4b19295d1da",
+    "fe657670-7edd-551c-b777-58036965da3d"
+   ]
+  },
+  "retail_glazing": {
+   "model_id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "stable_ids": [
+    "55bd6363-2bdb-5916-80db-8a8deb15416c",
+    "ea38ae05-b84e-58e9-b935-56932425bc82"
+   ]
+  },
+  "retail_openings": {
+   "model_id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "stable_ids": [
+    "1a621bb4-2b3c-5bd8-9ba6-3fb1eeac6042",
+    "7818fcf5-f05e-59e7-9e9b-0f3a46dd7be0",
+    "797e09c3-2221-536b-80d9-71b1a29717c0",
+    "9fe98b1e-3ef3-53d4-bce1-827b5ab15041",
+    "c41f4867-0461-55b4-b860-f06274fdc0e6",
+    "e449dd22-614c-5734-bacb-c28933d306bb",
+    "e98f3dca-9272-56bd-b423-773d2affe26f",
+    "ff814099-a844-57e5-8abb-03b18f07a765"
+   ]
+  },
+  "retail_roof": {
+   "model_id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "stable_ids": [
+    "0d3b3f0a-833d-5a72-9a63-4821ada2999a",
+    "11cefa10-f1d6-5ad3-8a2a-72dcb1a7ddff",
+    "14f46777-e2ab-5c28-8227-18d1dce2f9cd",
+    "16711062-8344-55f9-b10e-838c0c3bfd27",
+    "27dade91-a9f8-56ac-b493-a95a7f2b4838",
+    "33d405a7-4973-5e1f-99a6-b29709c62c08",
+    "441f6501-7048-5254-9a6e-fb6fd4fd4cf8",
+    "4e86d1a8-ed9e-5797-becc-f90dd598fcf2",
+    "840a6320-25b9-5cf0-85f0-13851ac5c97f",
+    "89271e23-8dc4-5c90-a662-e6dcb07d7a40",
+    "ae508cb7-01ec-5ab0-b93b-e0383e1fb9f8",
+    "af8fb16f-15e5-5b44-b63b-55b45be8987a",
+    "b0265b7e-986c-5fc1-a77b-9972db5019fa",
+    "b4feaf4f-99ab-5af5-a9ad-d47929cd623d",
+    "b6ef7e7b-2b7c-5e21-8a83-6ac7ba7a3859",
+    "c3d4e94c-6156-5137-8f1c-87f1d421a33a",
+    "cfd9460b-6191-5868-a7a4-8256d1152aeb",
+    "d893fbbf-b527-53b2-95c8-decf8acb4cf7",
+    "e9163af6-bff6-59b0-bc71-1af888d915ac"
+   ]
+  },
+  "retail_site": {
+   "model_id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "stable_ids": [
+    "c9f73462-e546-5e3d-ab27-acc562bbc157"
+   ]
+  },
+  "retail_slab": {
+   "model_id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "stable_ids": [
+    "cd95ecdc-e20a-5354-9c54-4cca59e30eb8"
+   ]
+  },
+  "retail_tga": {
+   "model_id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "stable_ids": [
+    "32d0522e-cfe5-5014-835a-56a4b4801ef6",
+    "37f59069-b27b-5661-8959-92b1c49d25fb",
+    "4f20151a-fee1-5ee9-bb4e-59775b0d6de9",
+    "af58abb5-b9e6-5995-a002-ded466e0cb8d",
+    "e2a38003-4aed-59aa-8d0e-9f4a511168a4"
+   ]
+  },
+  "retail_zones": {
+   "model_id": "d97c9126-5f57-5829-97ca-87f1e53fb849",
+   "stable_ids": [
+    "00889b8f-98ea-592d-a560-0f348c23644a",
+    "63a7bb19-a41d-50d1-802a-980755ac95eb",
+    "b7327295-88ee-5091-8aee-030a291e5986",
+    "f1df0fd8-4316-5eff-8a82-70ce4dcd05b8"
+   ]
+  }
+ }
+}
