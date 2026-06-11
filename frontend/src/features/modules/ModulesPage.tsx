@@ -109,8 +109,13 @@ interface PartnerPackBranding {
   powered_by_text: string;
 }
 
+type PackType = 'country' | 'industry' | 'partner' | 'showcase';
+
 interface PartnerPackManifestAPI {
   slug: string;
+  /** Pack type under the Packs umbrella. Older backends/manifests omit it;
+   *  the card falls back to ``partner`` (the historical type). */
+  type?: PackType;
   partner_name: string;
   partner_url: string | null;
   pack_version: string;
@@ -135,15 +140,44 @@ interface PartnerPacksResponse {
 
 /* ── Tab definitions ───────────────────────────────────────────────────── */
 
+// The Packs tab keeps the internal key ``partner-packs`` so existing deep-links
+// (``/modules?tab=partner-packs``, the dashboard co-brand banner) keep working.
+// ``resolveTabParam`` maps the new ``?tab=packs`` alias onto the same panel.
 const MODULE_TAB_IDS = ['profiles', 'partner-packs', 'data-packages', 'system'] as const;
 type TabKey = (typeof MODULE_TAB_IDS)[number];
 
 const TABS: { key: TabKey; labelKey: string; defaultLabel: string; icon: LucideIcon }[] = [
   { key: 'profiles', labelKey: 'modules.tab_profiles', defaultLabel: 'Company Profiles', icon: Users },
-  { key: 'partner-packs', labelKey: 'modules.tab_partner_packs', defaultLabel: 'Partner Packs', icon: Building2 },
+  { key: 'partner-packs', labelKey: 'modules.tab_packs', defaultLabel: 'Packs', icon: Package },
   { key: 'data-packages', labelKey: 'modules.tab_data_packages', defaultLabel: 'Data Packages', icon: Layers },
   { key: 'system', labelKey: 'modules.tab_system', defaultLabel: 'System Modules', icon: Server },
 ];
+
+/** Map a ``?tab=`` query value to a panel key, accepting the new ``packs``
+ *  alias for the Packs umbrella as well as the legacy ``partner-packs`` id. */
+function resolveTabParam(tab: string | null): TabKey | null {
+  if (!tab) return null;
+  if (tab === 'packs') return 'partner-packs';
+  return (MODULE_TAB_IDS as readonly string[]).includes(tab) ? (tab as TabKey) : null;
+}
+
+/* ── Pack type badge config ────────────────────────────────────────────── */
+
+const PACK_TYPE_META: Record<
+  PackType,
+  { labelKey: string; defaultLabel: string; icon: LucideIcon; variant: 'blue' | 'neutral' | 'success' | 'warning' }
+> = {
+  country: { labelKey: 'modules.pack_type_country', defaultLabel: 'Country', icon: Globe, variant: 'blue' },
+  industry: { labelKey: 'modules.pack_type_industry', defaultLabel: 'Industry', icon: HardHat, variant: 'neutral' },
+  partner: { labelKey: 'modules.pack_type_partner', defaultLabel: 'Partner', icon: Building2, variant: 'success' },
+  showcase: { labelKey: 'modules.pack_type_showcase', defaultLabel: 'Showcase', icon: Sparkles, variant: 'warning' },
+};
+
+/** Pack type with a safe fallback to ``partner`` for older manifests/backends
+ *  that do not send a ``type`` field. */
+function packTypeOf(pack: PartnerPackManifestAPI): PackType {
+  return pack.type ?? 'partner';
+}
 
 /* ── Marketplace category config ───────────────────────────────────────── */
 
@@ -264,14 +298,12 @@ export function ModulesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  // Deep-link support: ``/modules?tab=partner-packs`` opens that tab directly
-  // (used by the dashboard co-brand banner). Falls back to Company Profiles.
-  const [activeTab, setActiveTab] = useState<TabKey>(() => {
-    const tab = searchParams.get('tab');
-    return tab && (MODULE_TAB_IDS as readonly string[]).includes(tab)
-      ? (tab as TabKey)
-      : 'profiles';
-  });
+  // Deep-link support: ``/modules?tab=packs`` (new) and the legacy
+  // ``/modules?tab=partner-packs`` (dashboard co-brand banner) both open the
+  // Packs tab directly. Falls back to Company Profiles.
+  const [activeTab, setActiveTab] = useState<TabKey>(
+    () => resolveTabParam(searchParams.get('tab')) ?? 'profiles',
+  );
   const onTabKeyDown = useTabKeyboardNav<TabKey>({
     ids: MODULE_TAB_IDS,
     activeId: activeTab,
@@ -329,7 +361,7 @@ export function ModulesPage() {
       >
         {t('modules.intro_body', {
           defaultValue:
-            'Switch on a company profile to tailor which modules appear in the sidebar, apply a partner pack to load a branded preset of presets and rules, and install data packages like cost databases, resource catalogues and languages from the marketplace. System modules lists everything currently loaded so you can see what is active and what an install would add.',
+            'Switch on a company profile to tailor which modules appear in the sidebar, apply a pack to load a ready-made preset for a country, industry, partner or showcase, and install data packages like cost databases, resource catalogues and languages from the marketplace. System modules lists everything currently loaded so you can see what is active and what an install would add.',
         })}
       </DismissibleInfo>
 
@@ -661,12 +693,12 @@ function PartnerPacksTab() {
     <div className="animate-card-in" style={{ animationDelay: '60ms' }}>
       <div className="mb-4">
         <h2 className="text-sm font-semibold text-content-secondary uppercase tracking-wider mb-0.5">
-          {t('modules.partner_packs_title', { defaultValue: 'Partner Packs' })}
+          {t('modules.packs_title', { defaultValue: 'Packs' })}
         </h2>
         <p className="text-xs text-content-tertiary">
-          {t('modules.partner_packs_desc_v2', {
+          {t('modules.packs_desc', {
             defaultValue:
-              'Ready-made presets for a country or a partner: currency, tax template, validation standards and co-branding. Press Activate on a pack to apply it, and you can switch back any time.',
+              'A ready-made preset for a country, industry, partner or showcase: currency, tax template, validation standards, default modules and optional co-branding. Press Activate on a pack to apply it, and you can switch back any time.',
           })}
         </p>
         <Link
@@ -674,7 +706,7 @@ function PartnerPacksTab() {
           className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-oe-blue hover:underline"
         >
           <BookOpen size={13} />
-          {t('modules.partner_packs_build_own', {
+          {t('modules.packs_build_own', {
             defaultValue: 'Build your own pack and share it with others',
           })}
         </Link>
@@ -702,10 +734,10 @@ function PartnerPacksTab() {
         <div className="py-16 text-center">
           <AlertTriangle size={40} className="mx-auto mb-3 text-semantic-warning" strokeWidth={1.5} />
           <p className="text-sm font-medium text-content-secondary">
-            {t('modules.partner_packs_load_failed', { defaultValue: 'Failed to load partner packs' })}
+            {t('modules.packs_load_failed', { defaultValue: 'Failed to load packs' })}
           </p>
           <p className="mt-1 text-xs text-content-tertiary">
-            {t('modules.partner_packs_load_failed_hint', {
+            {t('modules.packs_load_failed_hint', {
               defaultValue: 'Check your connection and try again.',
             })}
           </p>
@@ -721,14 +753,14 @@ function PartnerPacksTab() {
         </div>
       ) : packs.length === 0 ? (
         <div className="py-16 text-center">
-          <Building2 size={40} className="mx-auto mb-3 text-content-tertiary" />
+          <Package size={40} className="mx-auto mb-3 text-content-tertiary" />
           <p className="text-sm font-medium text-content-secondary">
-            {t('modules.no_partner_packs', { defaultValue: 'No partner packs available' })}
+            {t('modules.no_packs', { defaultValue: 'No packs available' })}
           </p>
           <p className="mt-1 text-xs text-content-tertiary">
-            {t('modules.no_partner_packs_hint', {
+            {t('modules.no_packs_hint', {
               defaultValue:
-                'Partner packs ship pre-configured regional settings, validation standards, and branding for a specific market or partner.',
+                'Packs ship pre-configured regional settings, validation standards, default modules and branding for a specific country, industry, partner or showcase.',
             })}
           </p>
         </div>
@@ -791,12 +823,12 @@ export function InstallPackPanel({ onChanged }: { onChanged: () => void }) {
       file.name.toLowerCase().endsWith('.zip');
     if (!isZip) {
       return t('modules.pack_install_not_zip', {
-        defaultValue: 'Please choose a .zip file. Partner packs are distributed as a single .zip archive.',
+        defaultValue: 'Please choose a .zip file. Packs are distributed as a single .zip archive.',
       });
     }
     if (file.size > MAX_PACK_UPLOAD_BYTES) {
       return t('modules.pack_install_too_large', {
-        defaultValue: 'That file is {{size}} MB. Partner packs must be 25 MB or smaller.',
+        defaultValue: 'That file is {{size}} MB. Packs must be 25 MB or smaller.',
         size: (file.size / (1024 * 1024)).toFixed(1),
       });
     }
@@ -884,7 +916,7 @@ export function InstallPackPanel({ onChanged }: { onChanged: () => void }) {
             role="button"
             tabIndex={busy ? -1 : 0}
             aria-label={t('modules.pack_install_dropzone_label', {
-              defaultValue: 'Upload a partner pack .zip - click to choose a file or drop one here',
+              defaultValue: 'Upload a pack .zip - click to choose a file or drop one here',
             })}
             aria-describedby={dropDescId}
             aria-disabled={busy}
@@ -922,7 +954,7 @@ export function InstallPackPanel({ onChanged }: { onChanged: () => void }) {
               <p className="text-sm font-medium text-content-primary">
                 {install.isPending
                   ? t('modules.pack_install_uploading', { defaultValue: 'Installing pack…' })
-                  : t('modules.pack_install_cta', { defaultValue: 'Install a partner pack' })}
+                  : t('modules.pack_install_cta', { defaultValue: 'Install a pack' })}
               </p>
               <p id={dropDescId} className="mt-0.5 text-xs text-content-tertiary">
                 {t('modules.pack_install_hint', {
@@ -937,7 +969,7 @@ export function InstallPackPanel({ onChanged }: { onChanged: () => void }) {
               accept=".zip,application/zip,application/x-zip-compressed"
               className="sr-only"
               aria-label={t('modules.pack_install_input_label', {
-                defaultValue: 'Partner pack .zip file',
+                defaultValue: 'Pack .zip file',
               })}
               disabled={busy}
               onChange={onInputChange}
@@ -1057,6 +1089,13 @@ function PartnerPackCard({ pack, index, isActive, activeSource }: PartnerPackCar
 
   const accent = pack.branding.accent_color ?? pack.branding.primary_color;
 
+  const packType = packTypeOf(pack);
+  // Co-branding line stays a property of the ``partner`` type only.
+  const poweredBy =
+    packType === 'partner' && pack.branding.powered_by_text
+      ? pack.branding.powered_by_text
+      : null;
+
   return (
     <Card
       hoverable
@@ -1102,8 +1141,18 @@ function PartnerPackCard({ pack, index, isActive, activeSource }: PartnerPackCar
           </div>
         </div>
 
-        {/* Region / currency badges */}
+        {/* Type / region / currency badges */}
         <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+          {(() => {
+            const meta = PACK_TYPE_META[packType];
+            const TypeIcon = meta.icon;
+            return (
+              <Badge variant={meta.variant} size="sm">
+                <TypeIcon size={10} className="mr-0.5" />
+                {t(meta.labelKey, { defaultValue: meta.defaultLabel })}
+              </Badge>
+            );
+          })()}
           {countryName && (
             <Badge variant="blue" size="sm">
               <Globe size={10} className="mr-0.5" />
@@ -1119,6 +1168,13 @@ function PartnerPackCard({ pack, index, isActive, activeSource }: PartnerPackCar
         {pack.description && (
           <p className="mt-2.5 text-xs text-content-secondary line-clamp-3 leading-relaxed">
             {pack.description}
+          </p>
+        )}
+
+        {/* Co-branding line — partner-type packs only */}
+        {poweredBy && (
+          <p className="mt-2 text-2xs font-medium text-content-tertiary" style={{ color: accent }}>
+            {poweredBy}
           </p>
         )}
 
@@ -1176,7 +1232,7 @@ function PartnerPackCard({ pack, index, isActive, activeSource }: PartnerPackCar
               <span className="inline-flex items-center gap-1.5 text-2xs text-content-tertiary">
                 <Info size={12} />
                 {t('modules.pack_active_via_env', {
-                  defaultValue: 'Active via environment (OE_PARTNER_PACK)',
+                  defaultValue: 'Active via environment (OE_PACK)',
                 })}
               </span>
             ) : (
