@@ -472,9 +472,29 @@ async def update_me(
     """Update current user profile."""
     fields = data.model_dump(exclude_unset=True)
 
-    # Map schema field 'metadata' to model column 'metadata_'
+    # Map schema field 'metadata' to model column 'metadata_'. The
+    # self-service profile update must NOT be able to clobber the whole
+    # metadata blob: it holds admin-managed and security-relevant keys
+    # (per-module access, desktop-owner flag, registration audit). Merge the
+    # user-supplied keys onto the existing blob and strip the protected ones
+    # so a user PATCHing /me cannot wipe admin-set module_access or grant
+    # themselves local_desktop.
     if "metadata" in fields:
-        fields["metadata_"] = fields.pop("metadata")
+        incoming = fields.pop("metadata") or {}
+        _protected = {
+            "module_access",
+            "module_preferences",
+            "local_desktop",
+            "registration",
+            "custom_role_name",
+        }
+        existing_user = await service.get_user(uuid.UUID(user_id))
+        merged = dict(getattr(existing_user, "metadata_", None) or {})
+        for key, value in incoming.items():
+            if key in _protected:
+                continue
+            merged[key] = value
+        fields["metadata_"] = merged
 
     user = await service.update_profile(uuid.UUID(user_id), **fields)
     return UserResponse.model_validate(user)

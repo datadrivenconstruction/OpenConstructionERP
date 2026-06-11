@@ -747,7 +747,11 @@ class MarkupCreate(_MarkupBase):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str = Field(..., min_length=1, max_length=255)
-    markup_type: str = Field(default="percentage", pattern=r"^(percentage|fixed|per_unit)$")
+    # Only "percentage" and "fixed" are computed by the totals engine. A
+    # "per_unit" markup has no well-defined basis across a mixed-unit BOQ
+    # (you cannot sum m + m2 + m3) and previously computed to a silent zero,
+    # so it is rejected at the schema rather than accepted and dropped.
+    markup_type: str = Field(default="percentage", pattern=r"^(percentage|fixed)$")
     category: str = Field(
         default="overhead",
         pattern=r"^(overhead|profit|tax|contingency|insurance|bond|other)$",
@@ -766,7 +770,7 @@ class MarkupUpdate(_MarkupBase):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
-    markup_type: str | None = Field(default=None, pattern=r"^(percentage|fixed|per_unit)$")
+    markup_type: str | None = Field(default=None, pattern=r"^(percentage|fixed)$")
     category: str | None = Field(
         default=None,
         pattern=r"^(overhead|profit|tax|contingency|insurance|bond|other)$",

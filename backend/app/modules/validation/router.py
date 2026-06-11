@@ -351,7 +351,15 @@ async def import_ids(
     scoped_rule_set = f"{rule_set}:{project_id}"
     rule_ids: list[str] = []
     for rule in rules:
-        rule_registry.register(rule, rule_sets=[scoped_rule_set, "IDS"])
+        # Namespace the rule_id by project before registering. The registry
+        # keys rules in a single process-global dict, so two projects that
+        # import IDS files sharing a spec identifier would otherwise overwrite
+        # each other's rule body. Registering ONLY into the project-scoped set
+        # (never a shared global "IDS" set) keeps one tenant's imported rules
+        # from being resolvable - or applied - by another.
+        if not str(rule.rule_id).startswith(f"{project_id}:"):
+            rule.rule_id = f"{project_id}:{rule.rule_id}"
+        rule_registry.register(rule, rule_sets=[scoped_rule_set])
         rule_ids.append(rule.rule_id)
 
     return {

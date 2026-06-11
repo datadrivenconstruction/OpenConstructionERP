@@ -198,21 +198,28 @@ class BIMValidationService:
         # failures was reported as a clean "passed". They are real unresolved
         # findings, so surface them with an "info" status rather than hiding
         # them. errors/warnings still take precedence.
-        if error_count > 0:
+        # When nothing was actually checked (empty model, or a rule set whose
+        # filters matched no elements) we must NOT report a green "passed /
+        # 100%". That is the misleading pass the core engine deliberately
+        # avoids: status "skipped" with a null score so the UI renders "not
+        # checked" rather than a clean bill of health (NEW-VAL-004).
+        score: float | None
+        if total_checks == 0:
+            status_value = "skipped"
+            score = None
+        elif error_count > 0:
             status_value = "errors"
+            score = compute_quality_score(passed_weight, total_weight, error_count)
         elif warning_count > 0:
             status_value = "warnings"
+            score = compute_quality_score(passed_weight, total_weight, error_count)
         elif info_count > 0:
             status_value = "info"
+            score = compute_quality_score(passed_weight, total_weight, error_count)
         else:
             status_value = "passed"
-
-        # Same severity-weighted definition + blocking-error cap as the core
-        # ValidationReport.score (E-XMOD-015). Replaces the old raw
-        # passed_count / total_checks ratio which ignored severity entirely.
-        if total_checks == 0:
-            score = 1.0
-        else:
+            # Same severity-weighted definition + blocking-error cap as the
+            # core ValidationReport.score (E-XMOD-015).
             score = compute_quality_score(passed_weight, total_weight, error_count)
 
         duration_ms = round((time.monotonic() - started) * 1000, 2)
@@ -245,7 +252,7 @@ class BIMValidationService:
             target_id=str(model_id),
             rule_set="bim_universal",
             status=status_value,
-            score=str(round(score, 4)),
+            score=(None if score is None else str(round(score, 4))),
             total_rules=total_checks,
             passed_count=passed_count,
             warning_count=warning_count,

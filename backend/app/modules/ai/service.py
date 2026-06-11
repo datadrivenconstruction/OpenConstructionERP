@@ -10,6 +10,7 @@ Stateless service layer. Handles:
 
 import base64
 import logging
+import math
 import time
 import uuid
 from typing import Any
@@ -94,8 +95,14 @@ def _coerce_confidence(value: Any) -> float | None:
         conf = float(value)
     except (ValueError, TypeError):
         return None
-    if conf > 1.0:
-        # Accept a 0..100 percentage and normalise to 0..1.
+    if not math.isfinite(conf):
+        return None
+    # Only treat a value clearly in the percentage band (>2, up to 100) as a
+    # percentage. A value like 1.5 is neither a valid probability nor a
+    # plausible percentage confidence, so it must fall through to the
+    # out-of-range guard and return None rather than be mangled into a fake
+    # 0.015 by an unconditional ``/100``.
+    if 2.0 < conf <= 100.0:
         conf = conf / 100.0
     if conf < 0.0 or conf > 1.0:
         return None
@@ -389,7 +396,16 @@ def _validate_items(raw_items: Any, currency: str = "") -> list[dict[str, Any]]:
         except (ValueError, TypeError):
             unit_rate = 0.0
 
+        # Reject non-finite values up front. ``float("nan")``/``float("inf")``
+        # parse cleanly and slip past the range checks below (every NaN
+        # comparison is False), then poison BOQ quantity/total and break the
+        # JSON serializers that reject non-finite floats.
+        if not math.isfinite(quantity) or not math.isfinite(unit_rate):
+            continue
+
         if quantity <= 0 or quantity > 10_000_000:
+            continue
+        if unit_rate < 0 or unit_rate > 100_000_000:
             continue
 
         unit = str(item.get("unit", "m2")).strip()
@@ -1806,8 +1822,14 @@ class AIService:
             if not description:
                 continue
 
-            quantity = float(item_data.get("quantity", 0))
-            unit_rate = float(item_data.get("unit_rate", 0))
+            try:
+                quantity = float(item_data.get("quantity", 0))
+                unit_rate = float(item_data.get("unit_rate", 0))
+            except (ValueError, TypeError):
+                continue
+            # Never persist a non-finite quantity/rate into BOQ money.
+            if not math.isfinite(quantity) or not math.isfinite(unit_rate):
+                continue
             unit = str(item_data.get("unit", "m2"))
             classification = dict(item_data.get("classification", {}) or {})
             position_metadata: dict[str, Any] = {
@@ -1830,15 +1852,29 @@ class AIService:
                 )
                 best = cost_matches[0] if cost_matches else None
                 if best:
+                    from app.core.match_service.config import (
+                        CONFIDENCE_MEDIUM_THRESHOLD,
+                    )
+
                     match_currency = (best.get("currency") or "").strip()
                     same_currency = match_currency == "" or match_currency == estimate_currency
-                    applied = bool(same_currency and best.get("rate"))
+                    match_score = float(best.get("score", 0) or 0)
+                    # Only let a catalogue rate override the AI rate when the
+                    # match clears the medium-confidence band. A weak keyword
+                    # fallback (score floor ~0.3) must NOT silently replace the
+                    # rate that drives the persisted total - it stays a
+                    # non-applied suggestion the user can review.
+                    applied = bool(
+                        same_currency
+                        and best.get("rate")
+                        and match_score >= CONFIDENCE_MEDIUM_THRESHOLD
+                    )
                     position_metadata["cwicr_match"] = {
                         "code": best.get("code", ""),
                         "rate": best.get("rate", 0.0),
                         "currency": match_currency,
                         "region": best.get("region", ""),
-                        "score": round(float(best.get("score", 0) or 0), 4),
+                        "score": round(match_score, 4),
                         "applied": applied,
                     }
                     if applied:

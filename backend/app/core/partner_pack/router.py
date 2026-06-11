@@ -33,7 +33,7 @@ from app.core.partner_pack.full_install import (
     full_install,
     full_install_stream,
 )
-from app.dependencies import RequirePermission
+from app.dependencies import RequireRole
 
 _IMAGE_MEDIA_TYPES = {
     "svg": "image/svg+xml",
@@ -106,7 +106,7 @@ def apply_preview(slug: str) -> dict[str, Any]:
 @router.post(
     "/apply",
     summary="Apply a pack to this installation (admin)",
-    dependencies=[Depends(RequirePermission("admin"))],
+    dependencies=[Depends(RequireRole("admin"))],
 )
 async def apply(body: ApplyRequest, request: Request) -> dict[str, Any]:
     """Apply the pack: enable its modules, co-brand, record defaults."""
@@ -124,7 +124,7 @@ async def apply(body: ApplyRequest, request: Request) -> dict[str, Any]:
 @router.post(
     "/full-install",
     summary="One-click install an entire localized workspace for a pack (admin)",
-    dependencies=[Depends(RequirePermission("admin"))],
+    dependencies=[Depends(RequireRole("admin"))],
     response_model=FullInstallResponse,
 )
 async def full_install_pack(body: FullInstallRequest, request: Request) -> FullInstallResponse:
@@ -145,7 +145,7 @@ async def full_install_pack(body: FullInstallRequest, request: Request) -> FullI
 @router.post(
     "/full-install-stream",
     summary="One-click install a pack's workspace with live SSE progress (admin)",
-    dependencies=[Depends(RequirePermission("admin"))],
+    dependencies=[Depends(RequireRole("admin"))],
 )
 async def full_install_pack_stream(body: FullInstallRequest, request: Request) -> StreamingResponse:
     """Stream a pack activation step-by-step as Server-Sent Events.
@@ -182,7 +182,7 @@ async def full_install_pack_stream(body: FullInstallRequest, request: Request) -
 @router.post(
     "/unapply",
     summary="Remove the applied pack (admin)",
-    dependencies=[Depends(RequirePermission("admin"))],
+    dependencies=[Depends(RequireRole("admin"))],
 )
 async def unapply_pack(request: Request) -> dict[str, Any]:
     """Drop co-branding and restore any modules the apply disabled."""
@@ -192,7 +192,7 @@ async def unapply_pack(request: Request) -> dict[str, Any]:
 @router.post(
     "/rescan",
     summary="Re-scan installed packs without a restart (admin)",
-    dependencies=[Depends(RequirePermission("admin"))],
+    dependencies=[Depends(RequireRole("admin"))],
 )
 def rescan() -> dict[str, Any]:
     """Bust the discovery cache so on-disk packs are re-read.
@@ -215,7 +215,7 @@ _MAX_PACK_UPLOAD_BYTES = 100 * 1024 * 1024
 @router.post(
     "/install",
     summary="Upload and install a partner-pack .zip into the data dir (admin)",
-    dependencies=[Depends(RequirePermission("admin"))],
+    dependencies=[Depends(RequireRole("admin"))],
 )
 async def install_pack(file: UploadFile = File(...)) -> dict[str, Any]:
     """Install a declarative partner pack from an uploaded ``.zip``.

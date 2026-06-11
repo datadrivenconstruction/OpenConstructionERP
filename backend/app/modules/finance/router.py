@@ -206,6 +206,43 @@ async def _require_project_access(
         )
 
 
+async def _require_gl_consolidated_scope(
+    session: AsyncSession,
+    project_id: uuid.UUID | None,
+    user_id: str | None,
+) -> None:
+    """Guard the consolidated (cross-project) GL statement endpoints.
+
+    The GAAP statement derivations (trial balance, income statement,
+    balance sheet, cash flow) accept ``project_id=None`` to aggregate the
+    whole workspace ledger. Because ledger entries are not owner-scoped,
+    that consolidated view spans every project on the instance, so a plain
+    ``finance.gl.read`` holder must NOT be able to read it across other
+    people's projects. When a project is supplied we fall back to the
+    normal per-project access check; when it is omitted we require the
+    caller to be an admin (the only role legitimately entitled to the
+    instance-wide books). Non-admins must pass an explicit ``project_id``.
+    """
+    if project_id is not None:
+        await _require_project_access(session, project_id, user_id)
+        return
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+    try:
+        user = await UserRepository(session).get_by_id(user_id)
+    except Exception:  # noqa: BLE001 - best-effort role lookup
+        user = None
+    if user is not None and getattr(user, "role", "") == "admin":
+        return
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="A project_id is required for consolidated financial statements.",
+    )
+
+
 async def _require_invoice_access(
     session: AsyncSession,
     invoice_id: uuid.UUID,
@@ -1807,7 +1844,7 @@ async def get_trial_balance(
     service: FinanceService = Depends(_get_service),
 ) -> TrialBalanceResponse:
     """Compute the trial balance."""
-    await _require_project_access(session, project_id, user_id)
+    await _require_gl_consolidated_scope(session, project_id, user_id)
     tb = await service.trial_balance(
         project_id=project_id,
         currency_code=currency_code,
@@ -1867,7 +1904,7 @@ async def get_income_statement(
     service: FinanceService = Depends(_get_service),
 ) -> IncomeStatementResponse:
     """Derive the income statement."""
-    await _require_project_access(session, project_id, user_id)
+    await _require_gl_consolidated_scope(session, project_id, user_id)
     inc = await service.income_statement(
         project_id=project_id,
         currency_code=currency_code,
@@ -1904,7 +1941,7 @@ async def get_balance_sheet(
     service: FinanceService = Depends(_get_service),
 ) -> BalanceSheetResponse:
     """Derive the balance sheet."""
-    await _require_project_access(session, project_id, user_id)
+    await _require_gl_consolidated_scope(session, project_id, user_id)
     bs = await service.balance_sheet(
         project_id=project_id,
         currency_code=currency_code,
@@ -1944,7 +1981,7 @@ async def get_cash_flow(
     service: FinanceService = Depends(_get_service),
 ) -> CashFlowResponse:
     """Derive the direct-method cash flow statement."""
-    await _require_project_access(session, project_id, user_id)
+    await _require_gl_consolidated_scope(session, project_id, user_id)
     cf = await service.cash_flow(
         project_id=project_id,
         currency_code=currency_code,

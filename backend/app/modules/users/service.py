@@ -389,11 +389,17 @@ class UserService:
         set ``SEED_DEMO=false`` so this shortcut is dead code there.
         """
         email_norm = (data.email or "").strip().lower()
-        if email_norm in _DEMO_EMAIL_WHITELIST and os.environ.get("SEED_DEMO", "true").lower() not in (
-            "false",
-            "0",
-            "no",
-        ):
+        # The password-free demo shortcut is a development/demo convenience
+        # only. Refuse it outright in production even if SEED_DEMO was left
+        # at its default, so a self-host install can never expose a
+        # no-password login to a seeded manager/estimator account by simply
+        # forgetting to set the env flag.
+        from app.config import get_settings as _get_settings
+
+        _demo_allowed = not _get_settings().is_production and os.environ.get(
+            "SEED_DEMO", "true"
+        ).lower() not in ("false", "0", "no")
+        if email_norm in _DEMO_EMAIL_WHITELIST and _demo_allowed:
             return await self.demo_login(email_norm)
 
         user = await self.user_repo.get_by_email(data.email)
