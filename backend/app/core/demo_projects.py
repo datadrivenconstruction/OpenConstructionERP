@@ -3740,6 +3740,410 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
                 ("Drilling rig", "equipment", 0.50, 150.0),
             ],
         )
+    # DACH retail-trade recipes. These German keyword groups are deliberately
+    # placed at the end of the chain so they only catch positions the trade
+    # branches above did not already claim. Each carries a realistic German
+    # crew/material/plant split (2026 hourly rates) so the retail demo BOQs
+    # reflect the actual work instead of a generic placeholder.
+    elif any(
+        k in desc_lower
+        for k in [
+            "ft-stuetzen",
+            "ft-attika",
+            "fertigteil",
+            "koecher",
+            "vergussmoertel",
+            "sichtoberflaechen",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-FTC-001"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-FTC-001",
+            [
+                ("Precast concrete elements", "material", 0.55, None),
+                ("Precast erectors", "labor", 0.30, 54.0),
+                ("Mobile crane", "equipment", 0.15, 135.0),
+            ],
+        )
+        meta["epd_id"] = "concrete-precast"
+        meta["gwp_kgco2e_per_unit"] = 220.0 if unit == "m3" else 60.0
+    elif any(
+        k in desc_lower
+        for k in [
+            "bsh-binder",
+            "gl24h",
+            "brettschichtholz",
+            "auflagerlager",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-GLT-001"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-GLT-001",
+            [
+                ("Glulam beams/connectors", "material", 0.55, None),
+                ("Timber erectors", "labor", 0.30, 54.0),
+                ("Mobile crane", "equipment", 0.15, 135.0),
+            ],
+        )
+        meta["epd_id"] = "timber-glulam"
+        meta["gwp_kgco2e_per_unit"] = -650.0 if unit == "m3" else 8.0
+    elif any(
+        k in desc_lower
+        for k in [
+            "co2",
+            "kuehlraum",
+            "tk-zelle",
+            "luftkuehler",
+            "verdampfer",
+            "enthitzer",
+            "kondensator",
+            "waermerueckgewinnung",
+            "kaeltetechnik",
+            "wartungsvertrag",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-REF-002"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-REF-002",
+            [
+                ("CO2 refrigeration plant", "material", 0.55, None),
+                ("Refrigeration engineers", "labor", 0.35, 68.0),
+                ("Charging/test equipment", "equipment", 0.10, 55.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "nshv",
+            "lichtband",
+            "usv",
+            "bodentank",
+            "einbruchmelde",
+            "m-bus",
+            "energiezaehler",
+            "din vde",
+            "leerrohrtrasse",
+            "trafostation",
+            "na-schutz",
+            "direktvermarktung",
+            "kennlinien",
+            "wallbox",
+            "vde-ar-n",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-ELE-004"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-ELE-004",
+            [
+                ("Electrical/PV equipment", "material", 0.50, None),
+                ("Electricians", "labor", 0.40, 56.0),
+                ("Test equipment", "equipment", 0.10, 45.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "luftdurchla",
+            "weitwurf",
+            "abluftanlage",
+            "zuluftanlage",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-MEC-006"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-MEC-006",
+            [
+                ("Air handling components", "material", 0.50, None),
+                ("HVAC technicians", "labor", 0.40, 56.0),
+                ("Tools/testing", "equipment", 0.10, 45.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "wasserzaehler",
+            "druckminderer",
+            "feinfilter",
+            "spuelung",
+            "desinfektion",
+            "zisterne",
+            "uebergabescha",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-PLB-003"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-PLB-003",
+            [
+                ("Sanitary/water components", "material", 0.50, None),
+                ("Plumbers", "labor", 0.45, 56.0),
+                ("Tools", "equipment", 0.05, 30.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "leergut",
+            "pfandraum",
+            "ballenpresse",
+            "scheuersaug",
+            "wertstoffe",
+            "muellpress",
+            "rvm",
+            "sortieranlage",
+            "verschleisspaket",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-EQP-001"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-EQP-001",
+            [
+                ("Plant and equipment", "material", 0.70, None),
+                ("Commissioning technicians", "labor", 0.22, 58.0),
+                ("Lifting/handling", "equipment", 0.08, 80.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "regalanlage",
+            "regale",
+            "bandkasse",
+            "kassenzone",
+            "warensicherung",
+            "einkaufswagen",
+            "pfandbon",
+            "backstation",
+            "praesentation",
+            "aktionsmoebel",
+            "moebel",
+            "spinde",
+            "gondelkopf",
+            "erstbestueckung",
+            "ladeneinrichtung",
+            "warentrenner",
+            "brotregal",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-FIT-001"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-FIT-001",
+            [
+                ("Shopfitting fixtures/furniture", "material", 0.65, None),
+                ("Shopfitters", "labor", 0.30, 52.0),
+                ("Tools/handling", "equipment", 0.05, 45.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "wartungssteg",
+            "leiteranlage",
+            "steigleiter",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-STL-004"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-STL-004",
+            [
+                ("Steel walkway/ladder components", "material", 0.55, None),
+                ("Steel fitters", "labor", 0.35, 54.0),
+                ("Crane/tools", "equipment", 0.10, 120.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "rasterdecke",
+            "revisionsoeffnung",
+            "unterdecke",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-DRY-003"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-DRY-003",
+            [
+                ("Suspended ceiling system", "material", 0.40, None),
+                ("Ceiling fitters", "labor", 0.55, 50.0),
+                ("Tools", "equipment", 0.05, 30.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "sektionaltor",
+            "dock-tor",
+            "rolltor",
+            "schnelllauftor",
+            "beschlaege",
+            "schliessanlage",
+            "glasreinigung",
+            "einstellarbeiten",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-DOR-002"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-DOR-002",
+            [
+                ("Doors/gates/hardware", "material", 0.60, None),
+                ("Door/gate fitters", "labor", 0.35, 50.0),
+                ("Tools", "equipment", 0.05, 30.0),
+            ],
+        )
+    elif "attika-abdeckung" in desc_lower:
+        meta["cwicr_ref"] = "CWICR-ROF-004"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-ROF-004",
+            [
+                ("Parapet capping/metalwork", "material", 0.50, None),
+                ("Roofers/metalworkers", "labor", 0.40, 50.0),
+                ("Access equipment", "equipment", 0.10, 60.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "bodenaustausch",
+            "tragschicht",
+            "auffuellung",
+            "verdichtet",
+            "ueberschussmassen",
+            "entsorgung",
+            "abfuhr",
+            "frostschutzschicht",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-ERT-004"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-ERT-004",
+            [
+                ("Fill/disposal material", "material", 0.20, None),
+                ("Machine operators/laborers", "labor", 0.30, 42.0),
+                ("Earthmoving plant", "equipment", 0.50, 95.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "aussparung",
+            "einbauteile",
+            "kernbohrung",
+            "industrieboden",
+            "oberflaechenhaert",
+            "trennlage",
+            "pe-folie",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-CON-002"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-CON-002",
+            [
+                ("Concrete/slab materials", "material", 0.45, None),
+                ("Concrete finishers", "labor", 0.45, 50.0),
+                ("Tools/plant", "equipment", 0.10, 60.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "bordstein",
+            "einfassung",
+            "belagsflaechen",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-PAV-002"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-PAV-002",
+            [
+                ("Kerb/paving materials", "material", 0.45, None),
+                ("Pavers/groundworkers", "labor", 0.40, 42.0),
+                ("Paving plant", "equipment", 0.15, 80.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "baumscheibe",
+            "bewaesserung",
+            "pflanzung",
+            "hochbeet",
+            "entwicklungspflege",
+            "fertigstellungspflege",
+            "pflege",
+            "wildkraut",
+            "mulch",
+            "vlies",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-LAN-003"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-LAN-003",
+            [
+                ("Plants/soil/irrigation", "material", 0.45, None),
+                ("Landscapers", "labor", 0.45, 38.0),
+                ("Tools/mini plant", "equipment", 0.10, 55.0),
+            ],
+        )
+    elif any(
+        k in desc_lower
+        for k in [
+            "sozialcontainer",
+            "buerocontainer",
+            "container",
+            "bauschild",
+            "verkehrssicherung",
+            "verkehrslenkung",
+            "bautrocknung",
+            "winterbau",
+            "endreinigung",
+            "gemeinkosten",
+            "bautagesbericht",
+            "schnurgeruest",
+            "absteckung",
+        ]
+    ):
+        meta["cwicr_ref"] = "CWICR-PRE-002"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-PRE-002",
+            [
+                ("Site facilities/consumables", "material", 0.20, None),
+                ("Site team/general laborers", "labor", 0.45, 38.0),
+                ("Site plant/facilities", "equipment", 0.35, 70.0),
+            ],
+        )
     else:
         # Generic fallback
         meta["cwicr_ref"] = "CWICR-GEN-001"
