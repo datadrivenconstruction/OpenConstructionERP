@@ -13,6 +13,9 @@ Thank you to everyone who has contributed.
   bugs ([#159](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/159)),
   COLLADA namespace-prefix serialisation in `ifc_processor`, defence-in-depth regex
   tolerance in `ElementManager`, and `degraded` model status surfacing in the viewer UI.
+  Later raised ideas for driving BOQ quantities from live BIM parameters, surfacing real
+  server errors on Excel paste, and resolving linked elements per model in multi-model
+  setups ([#206](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/206)).
 - **rjohny** ([@rjohny55](https://github.com/rjohny55)): multi-area patch set
   ([#161](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/161)),
   defensive guards for the slow-query SQLAlchemy listener and the module-presence probe
