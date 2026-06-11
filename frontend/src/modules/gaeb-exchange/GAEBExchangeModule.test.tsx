@@ -93,7 +93,7 @@ describe('generateGAEBXML', () => {
     const result = generateGAEBXML(makeOptions());
     expect(result.xml).toContain('<VersMajor>3</VersMajor>');
     expect(result.xml).toContain('<VersMinor>3</VersMinor>');
-    expect(result.xml).toContain('<ProgSystem>OpenEstimate</ProgSystem>');
+    expect(result.xml).toContain('<ProgSystem>OpenConstructionERP</ProgSystem>');
   });
 
   it('includes project info', () => {

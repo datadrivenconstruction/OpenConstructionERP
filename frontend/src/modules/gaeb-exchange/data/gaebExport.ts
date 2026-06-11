@@ -428,7 +428,7 @@ export function generateGAEBXML(options: GAEBExportOptions): GAEBExportResult {
   lines.push(`${indent(2)}<VersMinor>3</VersMinor>`);
   lines.push(`${indent(2)}<VersDate>2013-02</VersDate>`);
   lines.push(`${indent(2)}<Date>${new Date().toISOString().split('T')[0]}</Date>`);
-  lines.push(`${indent(2)}<ProgSystem>OpenEstimate</ProgSystem>`);
+  lines.push(`${indent(2)}<ProgSystem>OpenConstructionERP</ProgSystem>`);
   lines.push(`${indent(2)}<ProgSystemVers>1.0</ProgSystemVers>`);
   lines.push(`${indent(1)}</GAEBInfo>`);
 
