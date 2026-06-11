@@ -343,7 +343,14 @@ curl -s "http://localhost:8000/api/v1/costs/?region=USA_TENNESSEE&limit=1" \
   -H "Authorization: Bearer $TOKEN" | jq '.total'
 
 # Check catalog resources
-sqlite3 openestimate.db "SELECT COUNT(*) FROM oe_catalog_resource WHERE region='USA_TENNESSEE';"
+curl -s "http://localhost:8000/api/v1/catalog/?region=USA_TENNESSEE&limit=1" \
+  -H "Authorization: Bearer $TOKEN" | jq '.total'
+```
+
+For direct SQL, connect to your PostgreSQL instance (the platform is PostgreSQL-only since v6.6.0):
+
+```bash
+psql "$DATABASE_SYNC_URL" -c "SELECT COUNT(*) FROM oe_catalog_resource WHERE region='USA_TENNESSEE';"
 ```
 
 The bulk import API skips duplicate `code` values within the same region, so re-running it is safe. For a clean re-import, delete the region first:

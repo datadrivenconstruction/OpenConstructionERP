@@ -1,5 +1,5 @@
 # Install OpenConstructionERP as a Windows service (autostart on boot).
-# Uses Windows Task Scheduler — no extra tools required (NSSM optional).
+# Uses Windows Task Scheduler - no extra tools required (NSSM optional).
 #
 # Run this script ONCE as Administrator:
 #   powershell -ExecutionPolicy Bypass -File windows-install-service.ps1
@@ -10,24 +10,25 @@
 $ErrorActionPreference = 'Stop'
 
 # === EDIT THESE PATHS ===
-# Where openestimate.exe lives — usually <python-prefix>\Scripts\openestimate.exe
-$openestimatePath = "$env:USERPROFILE\anaconda3\Scripts\openestimate.exe"
+# Where openconstructionerp.exe lives - usually <python-prefix>\Scripts\openconstructionerp.exe
+# (older installs may only have the legacy openestimate.exe launcher - that works too)
+$openconstructionerpPath = "$env:USERPROFILE\anaconda3\Scripts\openconstructionerp.exe"
 # Working directory the server starts in (used for log files)
 $workDir = "$env:USERPROFILE"
-# Bind host: 127.0.0.1 = localhost only · 0.0.0.0 = LAN-accessible (set firewall!)
+# Bind host: 127.0.0.1 = localhost only / 0.0.0.0 = LAN-accessible (set firewall!)
 $bindHost = "127.0.0.1"
 $port = 8000
 # === END EDITS ===
 
-if (-not (Test-Path $openestimatePath)) {
-    Write-Host "ERROR: openestimate.exe not found at $openestimatePath" -ForegroundColor Red
+if (-not (Test-Path $openconstructionerpPath)) {
+    Write-Host "ERROR: openconstructionerp.exe not found at $openconstructionerpPath" -ForegroundColor Red
     Write-Host "Edit the path at the top of this script."
     exit 1
 }
 
 $taskName = "OpenConstructionERP"
 $action = New-ScheduledTaskAction `
-    -Execute $openestimatePath `
+    -Execute $openconstructionerpPath `
     -Argument "serve --host $bindHost --port $port" `
     -WorkingDirectory $workDir
 

@@ -1,18 +1,18 @@
 [Unit]
-Description=OpenConstructionERP — open-source construction cost estimation
+Description=OpenConstructionERP - open-source construction cost estimation
 After=network.target
 
 [Service]
 Type=simple
-User=openestimate
-Group=openestimate
-WorkingDirectory=/home/openestimate
+User=openconstructionerp
+Group=openconstructionerp
+WorkingDirectory=/home/openconstructionerp
 
 # Path to the venv that has `pip install openconstructionerp` in it.
 # Replace with your install location.
-ExecStart=/home/openestimate/.venv/bin/openestimate serve --host 0.0.0.0 --port 8000
+ExecStart=/home/openconstructionerp/.venv/bin/openconstructionerp serve --host 0.0.0.0 --port 8000
 
-# Environment overrides — uncomment what you need.
+# Environment overrides - uncomment what you need.
 # Environment=SEED_DEMO=false
 # Environment=DATABASE_URL=postgresql+asyncpg://oe:CHANGE_ME@localhost:5432/openestimate
 # Environment=ALLOWED_ORIGINS=https://erp.example.com
@@ -28,7 +28,8 @@ StartLimitIntervalSec=60
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/openestimate/.openestimate
+# The data directory keeps its historical name ~/.openestimate on every install.
+ReadWritePaths=/home/openconstructionerp/.openestimate
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelModules=true
@@ -37,7 +38,7 @@ ProtectControlGroups=true
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 LockPersonality=true
 
-# Log to journald (view with `journalctl -u openestimate -f`)
+# Log to journald (view with `journalctl -u openconstructionerp -f`)
 StandardOutput=journal
 StandardError=journal
 

@@ -11,14 +11,14 @@ Tested on Ubuntu 22.04, 24.04, 26.04 and Debian 12.
 ```bash
 sudo apt update
 sudo apt install -y python3.12 python3.12-venv build-essential libpq-dev libjpeg-dev zlib1g-dev libgeos-dev
-python3.12 -m venv ~/openestimate-venv
-source ~/openestimate-venv/bin/activate
+python3.12 -m venv ~/openconstructionerp-venv
+source ~/openconstructionerp-venv/bin/activate
 pip install --upgrade openconstructionerp
-openestimate --version
-openestimate
+openconstructionerp --version
+openconstructionerp
 ```
 
-Open http://localhost:8080. Done.
+Open http://localhost:8080. Done. The legacy `openestimate` command still works as an alias of `openconstructionerp`.
 
 ---
 
@@ -36,12 +36,12 @@ This is intentional and protects your OS. There are two correct fixes - pick one
 ### Fix A: virtual environment (recommended)
 
 ```bash
-python3.12 -m venv ~/openestimate-venv
-source ~/openestimate-venv/bin/activate
+python3.12 -m venv ~/openconstructionerp-venv
+source ~/openconstructionerp-venv/bin/activate
 pip install --upgrade openconstructionerp
 ```
 
-The venv is isolated from the system. Reactivate it in any new shell with `source ~/openestimate-venv/bin/activate`.
+The venv is isolated from the system. Reactivate it in any new shell with `source ~/openconstructionerp-venv/bin/activate`.
 
 ### Fix B: pipx (CLI-only, no venv ceremony)
 
@@ -51,7 +51,7 @@ pipx ensurepath
 pipx install openconstructionerp
 ```
 
-pipx creates a private venv per-tool and exposes the `openestimate` command on your `PATH`. Restart the shell after `ensurepath`.
+pipx creates a private venv per-tool and exposes the `openconstructionerp` command on your `PATH`. Restart the shell after `ensurepath`.
 
 Do **not** use `pip install --break-system-packages` - it can corrupt your system Python.
 
@@ -63,8 +63,8 @@ OpenConstructionERP requires Python 3.12 or newer (`requires-python = ">=3.12"`)
 
 ```bash
 sudo apt install -y python3.12 python3.12-venv
-python3.12 -m venv ~/openestimate-venv
-source ~/openestimate-venv/bin/activate
+python3.12 -m venv ~/openconstructionerp-venv
+source ~/openconstructionerp-venv/bin/activate
 python --version   # Python 3.12.x
 pip install --upgrade openconstructionerp
 ```
@@ -100,18 +100,18 @@ sudo apt install -y \
 ## 4. Verify the install
 
 ```bash
-openestimate --version
-openestimate doctor    # per-check OK / WARN / ERROR report
-openestimate           # starts the server on port 8080
+openconstructionerp --version
+openconstructionerp doctor    # per-check OK / WARN / ERROR report
+openconstructionerp           # starts the server on port 8080
 ```
 
 Then open http://localhost:8080. The first boot creates the embedded PostgreSQL database and seeds the three demo accounts (see the main README).
 
 ---
 
-## 4b. `openestimate: command not found`
+## 4b. `openconstructionerp: command not found`
 
-If the `openestimate` / `openconstructionerp` command is not found, the package installed fine. pip just put the launcher in a per-user scripts folder that is not on your PATH (typically `~/.local/bin`). You do not need to fix PATH at all. Run it through Python instead, which always works from any folder:
+If the `openconstructionerp` command (or its legacy alias `openestimate`) is not found, the package installed fine. pip just put the launcher in a per-user scripts folder that is not on your PATH (typically `~/.local/bin`). You do not need to fix PATH at all. Run it through Python instead, which always works from any folder:
 
 ```bash
 python -m openconstructionerp
@@ -144,16 +144,16 @@ sudo lsof -iTCP:8080 -sTCP:LISTEN
 Run on a different port:
 
 ```bash
-openestimate --port 9090
+openconstructionerp --port 9090
 # or via env var
-OE_PORT=9090 openestimate
+OE_PORT=9090 openconstructionerp
 ```
 
 ---
 
 ## 6. Running as a systemd service (optional)
 
-For a long-running deployment, drop a unit file at `/etc/systemd/system/openestimate.service`:
+For a long-running deployment, drop a unit file at `/etc/systemd/system/openconstructionerp.service`:
 
 ```ini
 [Unit]
@@ -164,7 +164,7 @@ After=network.target
 Type=simple
 User=oe
 WorkingDirectory=/home/oe
-ExecStart=/home/oe/openestimate-venv/bin/openestimate
+ExecStart=/home/oe/openconstructionerp-venv/bin/openconstructionerp
 Restart=on-failure
 Environment=OE_PORT=8080
 
@@ -174,10 +174,12 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now openestimate
-sudo systemctl status openestimate
-journalctl -u openestimate -f
+sudo systemctl enable --now openconstructionerp
+sudo systemctl status openconstructionerp
+journalctl -u openconstructionerp -f
 ```
+
+Note: installs set up before the rename may still run under the legacy unit name `openestimate.service` - those keep working, this template applies to new installs.
 
 ---
 
@@ -188,8 +190,8 @@ journalctl -u openestimate -f
 | `error: externally-managed-environment` | PEP 668 | Use venv or pipx (section 1) |
 | `Could not find a version that satisfies the requirement` | Python <3.12 | Install python3.12 (section 2) |
 | Long compile output, then a `gcc` error | Source build, missing headers | Install apt packages (section 3) |
-| `ModuleNotFoundError` after install | Wrong venv active | Re-run `source ~/openestimate-venv/bin/activate` |
+| `ModuleNotFoundError` after install | Wrong venv active | Re-run `source ~/openconstructionerp-venv/bin/activate` |
 | `Address already in use` | Port 8080 taken | `ss -tlnp \| grep 8080` then `--port 9090` (section 5) |
-| `openestimate: command not found` after pipx | Path not refreshed | `pipx ensurepath` then open a new shell |
+| `openconstructionerp: command not found` after pipx | Path not refreshed | `pipx ensurepath` then open a new shell |
 
-If you still cannot install, run `openestimate doctor` (or `python -m openconstructionerp doctor`) and open an issue with the full output: https://github.com/datadrivenconstruction/OpenConstructionERP/issues
+If you still cannot install, run `openconstructionerp doctor` (or `python -m openconstructionerp doctor`) and open an issue with the full output: https://github.com/datadrivenconstruction/OpenConstructionERP/issues

@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.openestimate.serve</string>
+    <string>com.openconstructionerp.serve</string>
 
     <!-- Replace /Users/USERNAME with your home dir; replace .venv path with
          your actual venv (where `pip install openconstructionerp` ran). -->
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/USERNAME/.venv/bin/openestimate</string>
+        <string>/Users/USERNAME/.venv/bin/openconstructionerp</string>
         <string>serve</string>
         <string>--host</string>
         <string>127.0.0.1</string>
@@ -34,7 +34,7 @@
     <key>ThrottleInterval</key>
     <integer>10</integer>
 
-    <!-- Logs -->
+    <!-- Logs. The data directory keeps its historical name ~/.openestimate. -->
     <key>StandardOutPath</key>
     <string>/Users/USERNAME/.openestimate/logs/serve.log</string>
     <key>StandardErrorPath</key>

@@ -1,6 +1,6 @@
 # Module Development Quickstart
 
-OpenEstimate is **modular by design**. Every feature — projects, BOQ,
+OpenConstructionERP is **modular by design**. Every feature — projects, BOQ,
 takeoff, validation, even the cost database — is a plugin that the
 core loader discovers on boot. Adding a new feature means writing a
 new module, not editing the platform.
@@ -178,7 +178,7 @@ Routes guard with `Depends(require_permission("my_module.item.write"))`.
 The scaffold is small and self-similar. Paste `manifest.py` plus
 `models.py` into your AI chat of choice and prompt:
 
-> "This is one entity in an OpenEstimate module. Add a second entity
+> "This is one entity in an OpenConstructionERP module. Add a second entity
 > called `Comment` that belongs to an Item, with `author_id` (UUID),
 > `body` (text), and a created_at timestamp. Generate the model,
 > schemas, repository, service, and router changes. Match the existing

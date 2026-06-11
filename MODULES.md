@@ -157,7 +157,7 @@ Two supported paths:
 **Zip install** (recommended for distribution):
 
 ```bash
-openestimate module install path/to/my-module-1.0.0.zip
+openconstructionerp module install path/to/my-module-1.0.0.zip
 ```
 
 **Manual install** (development):
