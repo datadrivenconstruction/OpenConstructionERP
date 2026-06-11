@@ -88,13 +88,19 @@ class ValidationModuleService:
         if not positions_data:
             logger.warning("Validation: BOQ %s has no positions", boq_id)
 
-        # 2. Run validation engine
+        # 2. Run validation engine. Pass the request locale so rule messages
+        #    and suggestions resolve in the user's language (the de/ru bundles
+        #    are otherwise unreachable - rules default to "en" when no locale
+        #    is in metadata).
+        from app.core.i18n import get_locale
+
         engine_report: EngineReport = await validation_engine.validate(
             data={"positions": positions_data},
             rule_sets=rule_sets,
             target_type="boq",
             target_id=str(boq_id),
             project_id=str(project_id),
+            metadata={"locale": get_locale()},
         )
 
         # 3. Build results list for storage

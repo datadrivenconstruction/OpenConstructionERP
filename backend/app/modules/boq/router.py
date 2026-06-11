@@ -2759,6 +2759,7 @@ async def _run_import_validation(
             project_id=str(boq_data.project_id),
             region=project.region,
             standard=project.classification_standard,
+            metadata={"locale": get_locale()},
         )
 
         summary = report.summary()
@@ -2905,6 +2906,7 @@ async def validate_boq(
         project_id=str(boq_data.project_id),
         region=project.region,
         standard=project.classification_standard,
+        metadata={"locale": get_locale()},
     )
 
     # Build response: summary + full results
@@ -3681,6 +3683,23 @@ async def export_boq_excel(
     if current_section_id is not None and current_section_id in section_map:
         s_ord, s_desc, s_sub = section_map[current_section_id]
         current_row = _write_subtotal(current_row, s_ord, s_desc, s_sub)
+
+    # ── Direct cost + markup rows ─────────────────────────────────────────
+    # Mirror the CSV exporter: without these the Grand Total below is larger
+    # than the sum of the Total column by the markup delta, with nothing on the
+    # sheet explaining the gap (markups silently vanish from the deliverable).
+    def _write_money_row(row_idx: int, label: str, amount: Any) -> int:
+        lbl = ws.cell(row=row_idx, column=2, value=neutralise_formula(label))
+        lbl.font = bold_font
+        amt = ws.cell(row=row_idx, column=6, value=amount)
+        amt.number_format = number_format
+        amt.alignment = right_align
+        ws.cell(row=row_idx, column=7, value=neutralise_formula(base_ccy or ""))
+        return row_idx + 1
+
+    current_row = _write_money_row(current_row, "Direct Cost", structured_data.direct_cost)
+    for markup in structured_data.markups:
+        current_row = _write_money_row(current_row, f"  {markup.name}", markup.amount)
 
     # ── Grand total row (bold, larger font, top border) ──────────────────
     total_row = current_row

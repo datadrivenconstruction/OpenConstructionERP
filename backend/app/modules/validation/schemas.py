@@ -90,6 +90,12 @@ class RunValidationResponse(BaseModel):
     error_count: int
     info_count: int
     rule_sets: list[str]
+    # Which of the requested rule sets actually executed vs were not
+    # implemented/unknown. Surfacing these lets the dashboard distinguish
+    # "ran and passed" from "never ran" instead of silently treating an
+    # unsupported set as a clean pass.
+    supported_rule_sets: list[str] = Field(default_factory=list)
+    unsupported_rule_sets: list[str] = Field(default_factory=list)
     duration_ms: float
     results: list[ValidationResultItem]
 

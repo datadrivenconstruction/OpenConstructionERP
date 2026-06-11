@@ -1427,15 +1427,24 @@ class DailyDiaryService:
         """
         diary = await self.get_diary(diary_id)
         entries = await self.entry_repo.list_for_diary(diary_id)
-        labour = int(diary.labour_count or 0)
-        equipment = int(diary.equipment_count or 0)
+
+        def _safe_int(value: object) -> int:
+            # Entry metadata is free-form client JSON, so labour/equipment counts
+            # may arrive as "many" or "3.5". Coerce tolerantly rather than 500.
+            try:
+                return int(float(value)) if value not in (None, "") else 0
+            except (TypeError, ValueError):
+                return 0
+
+        labour = _safe_int(diary.labour_count)
+        equipment = _safe_int(diary.equipment_count)
         by_company: dict[str, int] = {}
         for e in entries:
             meta = e.metadata_ or {}
             if not isinstance(meta, dict):
                 continue
-            entry_labour = int(meta.get("labour_count", 0) or 0)
-            entry_equipment = int(meta.get("equipment_count", 0) or 0)
+            entry_labour = _safe_int(meta.get("labour_count", 0))
+            entry_equipment = _safe_int(meta.get("equipment_count", 0))
             labour += entry_labour
             equipment += entry_equipment
             company = meta.get("company")

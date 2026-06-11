@@ -81,6 +81,54 @@ def _validate_entity_type(entity_type: str) -> None:
         )
 
 
+async def _resolve_entity_project_id(
+    entity_type: str,
+    entity_id: str,
+    session: SessionDep,
+) -> uuid.UUID | None:
+    """Map a commentable entity to its owning project, when we can.
+
+    Returns the project UUID for the entity types whose primary model carries
+    a ``project_id`` (the high-traffic comment targets), or ``None`` for types
+    we cannot map here yet. ``None`` is also returned when the id is malformed
+    or the row does not exist - callers treat an unresolvable id as "no gate
+    applied" rather than guessing.
+    """
+    try:
+        eid = uuid.UUID(entity_id)
+    except (ValueError, TypeError):
+        return None
+    try:
+        from sqlalchemy import select
+
+        if entity_type == "boq":
+            from app.modules.boq.models import BOQ
+
+            return (
+                await session.execute(select(BOQ.project_id).where(BOQ.id == eid))
+            ).scalar_one_or_none()
+        if entity_type == "boq_position":
+            from app.modules.boq.models import BOQ, Position
+
+            return (
+                await session.execute(
+                    select(BOQ.project_id)
+                    .join(Position, Position.boq_id == BOQ.id)
+                    .where(Position.id == eid)
+                )
+            ).scalar_one_or_none()
+        if entity_type == "document":
+            from app.modules.documents.models import Document
+
+            return (
+                await session.execute(select(Document.project_id).where(Document.id == eid))
+            ).scalar_one_or_none()
+    except Exception:  # noqa: BLE001 - best-effort resolution, fall back to no gate
+        logger.debug("collaboration entity resolve failed for %s/%s", entity_type, entity_id)
+        return None
+    return None
+
+
 async def _verify_entity_access(
     entity_type: str,
     entity_id: str,
@@ -92,12 +140,12 @@ async def _verify_entity_access(
     When the target IS a project, ``entity_id`` is the project UUID, so we
     gate on project membership exactly like every other single-resource
     handler (``verify_project_access`` -> 404 on missing OR denied, which
-    avoids leaking UUID existence). This closes the IDOR where any user with
-    ``collaboration.read`` could enumerate comments on projects they cannot
-    access. Other ``entity_type`` values (boq, document, task, ...) carry an
-    id from a different module and need a shared (entity_type, entity_id) ->
-    project resolver to gate fully; that helper does not exist yet (see the
-    needs_manual note), so they are left unchanged here rather than guessed.
+    avoids leaking UUID existence). For the high-traffic non-project targets
+    (boq, boq_position, document) we resolve the owning project and gate on
+    it, closing the cross-tenant read where any ``collaboration.read`` holder
+    could enumerate another tenant's comments by entity id. Entity types we
+    cannot yet map to a project (task, rfi, ncr, bim_*, ...) are left
+    ungated here rather than guessed - tracked as residual.
     """
     if entity_type == "project":
         try:
@@ -108,6 +156,11 @@ async def _verify_entity_access(
                 detail="Project not found",
             ) from None
         await verify_project_access(project_uuid, str(user_id), session)
+        return
+
+    resolved = await _resolve_entity_project_id(entity_type, entity_id, session)
+    if resolved is not None:
+        await verify_project_access(resolved, str(user_id), session)
 
 
 # ── Comments ─────────────────────────────────────────────────────────────
@@ -187,11 +240,16 @@ async def delete_comment(
 @router.get("/comments/{comment_id}/thread/", response_model=list[CommentResponse])
 async def get_thread(
     comment_id: uuid.UUID,
-    _user_id: CurrentUserId,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("collaboration.read")),
     service: CollaborationService = Depends(_get_service),
 ) -> list[CommentResponse]:
     """Get the full thread starting from a comment."""
+    # Gate on the root comment's entity before returning the thread - this
+    # endpoint previously loaded purely by comment_id with no access check.
+    root = await service.get_comment(comment_id)
+    await _verify_entity_access(root.entity_type, root.entity_id, str(user_id), session)
     thread = await service.get_thread(comment_id)
     return [CommentResponse.model_validate(c) for c in thread]
 

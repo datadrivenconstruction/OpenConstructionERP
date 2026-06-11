@@ -166,6 +166,8 @@ async def run_validation(
         error_count=result["error_count"],
         info_count=result["info_count"],
         rule_sets=result["rule_sets"],
+        supported_rule_sets=result.get("supported_rule_sets", []),
+        unsupported_rule_sets=result.get("unsupported_rule_sets", []),
         duration_ms=result["duration_ms"],
         results=[
             ValidationResultItem(

@@ -548,7 +548,12 @@ class NoDuplicateOrdinals(ValidationRule):
                     category=self.category,
                     passed=passed,
                     message=message,
-                    element_ref=ids[0] if len(ids) == 1 else None,
+                    # Always point at the first position carrying this ordinal,
+                    # including (especially) the failing duplicate case so the
+                    # dashboard can drill into the offending position. Previously
+                    # the failing result nulled element_ref, breaking drill-down
+                    # on the one finding that needs it most.
+                    element_ref=ids[0] if ids else None,
                     details={"duplicate_ids": ids} if not passed else {},
                 )
             )

@@ -18,6 +18,7 @@ Stateless service layer. Handles:
 """
 
 import logging
+import math
 import uuid
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
@@ -6031,7 +6032,19 @@ class BOQService:
                         continue
                     res_type = str(res.get("type", "other")).lower()
                     res_name = str(res.get("name", "Unknown"))
-                    res_total = float(res.get("total", 0))
+                    # Derive the per-unit subtotal from quantity * unit_rate when
+                    # both are present, so the breakdown self-heals after an
+                    # inline resource edit that updated qty/rate but left a stale
+                    # ``total`` behind. Fall back to the stored ``total`` only
+                    # when the factors are missing.
+                    res_qty = res.get("quantity")
+                    res_rate = res.get("unit_rate")
+                    if res_qty is not None and res_rate is not None:
+                        res_total = (_str_to_float(res_qty)) * (_str_to_float(res_rate))
+                    else:
+                        res_total = float(res.get("total", 0) or 0)
+                    if not math.isfinite(res_total):
+                        res_total = 0.0
 
                     cat = self._normalize_resource_category(res_type)
 

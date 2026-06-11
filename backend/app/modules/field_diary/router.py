@@ -700,7 +700,21 @@ async def sync_batch(
     """
     svc = FieldSyncService(session)
     results: list[FieldCaptureResponse] = []
+    # The offline queue often serializes the whole op, so payload can carry the
+    # same envelope keys we pass explicitly below. Spreading both would raise
+    # "got multiple values for keyword argument" and 500 the entire batch, so
+    # drop the envelope keys from payload before spreading.
+    _envelope_keys = {
+        "client_op_id",
+        "captured_at",
+        "lat",
+        "lon",
+        "accuracy_m",
+        "device_hint",
+        "target_kind",
+    }
     for op in payload.ops:
+        extra = {k: v for k, v in (op.payload or {}).items() if k not in _envelope_keys}
         if op.target_kind == "punch_item":
             body = FieldPunchCreate(
                 client_op_id=op.client_op_id,
@@ -709,7 +723,7 @@ async def sync_batch(
                 lon=op.lon,
                 accuracy_m=op.accuracy_m,
                 device_hint=op.device_hint,
-                **op.payload,
+                **extra,
             )
             results.append(await svc.capture_punch(field_session, body))
         elif op.target_kind == "inspection":
@@ -720,7 +734,7 @@ async def sync_batch(
                 lon=op.lon,
                 accuracy_m=op.accuracy_m,
                 device_hint=op.device_hint,
-                **op.payload,
+                **extra,
             )
             results.append(await svc.capture_inspection(field_session, body))
     return results
