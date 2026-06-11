@@ -83,7 +83,18 @@ export function LoginPage() {
     try {
       const params = new URLSearchParams(location.search);
       const next = params.get('next');
-      if (next && next.startsWith('/') && !next.startsWith('//')) return next;
+      // Never bounce back into an auth route after a successful login - a
+      // next=/login (or /onboarding before completion) would dead-end or
+      // re-loop. Only honour an internal, non-auth path.
+      const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/onboarding'];
+      if (
+        next &&
+        next.startsWith('/') &&
+        !next.startsWith('//') &&
+        !authRoutes.some((r) => next === r || next.startsWith(`${r}/`) || next.startsWith(`${r}?`))
+      ) {
+        return next;
+      }
     } catch { /* ignore */ }
     return '/';
   })();

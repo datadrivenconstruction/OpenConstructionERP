@@ -602,6 +602,14 @@ export class FederatedViewerScene {
     this._onContextStateChange = null;
     this.clear();
     this.controls.dispose();
+    // Release the WebGL context itself, not only GPU resources. The federated
+    // viewer remounts on project/model navigation; without forceContextLoss
+    // the browser's live-context cap is hit and later canvases render black.
+    try {
+      this.renderer.forceContextLoss();
+    } catch {
+      // mocked / headless renderers may not implement it - safe to ignore
+    }
     this.renderer.dispose();
     // Lights / helpers — let them go with the scene reference. Three.js
     // does not reference them after dispose; GC reclaims them once the

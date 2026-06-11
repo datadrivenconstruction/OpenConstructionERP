@@ -253,6 +253,17 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
   const [activeDb, setActiveDb] = useState<string | null>(() => getActiveDatabase());
   const addToast = useToastStore((s) => s.addToast);
 
+  // The timeout-recovery poll below can run for ~a minute after a slow import.
+  // If the user navigates away from /costs/import during that window we must
+  // not keep polling and then setState on an unmounted component.
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   // Region filter — added 2026-04-28 when the registry grew from 11 to 30
   // entries. Without it the grid scrolls past one viewport on small laptops.
   const [regionQuery, setRegionQuery] = useState('');
@@ -381,6 +392,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
         // we show success instead of a misleading timeout (GitHub #171 follow-up).
         const landed = await (async () => {
           for (let attempt = 0; attempt < 7; attempt++) {
+            if (!mountedRef.current) return null;
             try {
               const stats = await apiGet<RegionStat[]>('/v1/costs/regions/stats/');
               const hit = stats.find((s) => s.region === db.id && s.count > 0);
@@ -392,6 +404,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
           }
           return null;
         })();
+        if (!mountedRef.current) return;
         if (landed) {
           setLoaded((prev) => new Set(prev).add(db.id));
           addLoadedDatabase(db.id);
@@ -417,7 +430,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
           message: detail,
         });
       } finally {
-        setLoading(null);
+        if (mountedRef.current) setLoading(null);
       }
     },
     [addToast, t, queryClient],

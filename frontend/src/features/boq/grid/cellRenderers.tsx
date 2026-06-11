@@ -994,17 +994,44 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
   // the estimator sees the cost-driver split without having to expand
   // the resources sub-rows. Skipped silently when the field is absent
   // (manual or non-assembly positions).
-  const breakdownRaw = (meta as { resource_breakdown?: Record<string, { pct?: number }> }).resource_breakdown;
-  const breakdownEntries: Array<{ rt: string; pct: number }> =
-    breakdownRaw && typeof breakdownRaw === 'object'
-      ? Object.entries(breakdownRaw)
-          .map(([rt, v]) => ({
-            rt,
-            pct: typeof v?.pct === 'number' ? Math.round(v.pct) : 0,
-          }))
-          .filter((e) => e.pct > 0)
-          .sort((a, b) => b.pct - a.pct)
-      : [];
+  // Compute the cost-driver split from the LIVE ``resources`` array first so
+  // the pill stays correct after an inline resource edit, mirroring the grid
+  // split-columns. Fall back to the pre-rolled ``resource_breakdown`` only
+  // when a position carries the rollup but no resources list. Skipped
+  // silently when neither is present (manual / non-assembly positions).
+  const liveResources = (meta as { resources?: unknown }).resources;
+  let breakdownEntries: Array<{ rt: string; pct: number }> = [];
+  if (Array.isArray(liveResources) && liveResources.length > 0) {
+    const totals: Record<string, number> = {};
+    let subtotal = 0;
+    for (const r of liveResources) {
+      if (!r || typeof r !== 'object') continue;
+      const rr = r as { type?: string; total?: number; quantity?: number; unit_rate?: number };
+      const ttl =
+        typeof rr.total === 'number'
+          ? rr.total
+          : (Number(rr.quantity) || 0) * (Number(rr.unit_rate) || 0);
+      if (!Number.isFinite(ttl)) continue;
+      const rt = rr.type || 'other';
+      totals[rt] = (totals[rt] || 0) + ttl;
+      subtotal += ttl;
+    }
+    if (subtotal > 0) {
+      breakdownEntries = Object.entries(totals)
+        .map(([rt, ttl]) => ({ rt, pct: Math.round((ttl / subtotal) * 100) }))
+        .filter((e) => e.pct > 0)
+        .sort((a, b) => b.pct - a.pct);
+    }
+  } else {
+    const breakdownRaw = (meta as { resource_breakdown?: Record<string, { pct?: number }> })
+      .resource_breakdown;
+    if (breakdownRaw && typeof breakdownRaw === 'object') {
+      breakdownEntries = Object.entries(breakdownRaw)
+        .map(([rt, v]) => ({ rt, pct: typeof v?.pct === 'number' ? Math.round(v.pct) : 0 }))
+        .filter((e) => e.pct > 0)
+        .sort((a, b) => b.pct - a.pct);
+    }
+  }
   const breakdownPill =
     breakdownEntries.length > 0 && !ctx?.showResourceSplit ? (
       <span

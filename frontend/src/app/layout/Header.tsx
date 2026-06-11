@@ -955,7 +955,6 @@ function LanguageSwitcher({
   onSelect: (code: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  if (!currentLang) return null;
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -974,6 +973,11 @@ function LanguageSwitcher({
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [open]);
+
+  // Guard AFTER all hooks so hook order stays stable across renders (Rules of
+  // Hooks) - a conditional return before the hooks would crash the header the
+  // moment currentLang is ever undefined.
+  if (!currentLang) return null;
 
   return (
     <div className="relative" ref={ref}>

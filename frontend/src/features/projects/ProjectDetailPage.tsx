@@ -1696,10 +1696,10 @@ export function ProjectDetailPage() {
             <RFIInboxWidget projectId={projectId!} />
           )}
           {!isWidgetHidden('change-orders') && (
-            <ChangeOrdersPulseWidget projectId={projectId!} currency={currency ?? 'EUR'} />
+            <ChangeOrdersPulseWidget projectId={projectId!} currency={currency ?? ''} />
           )}
           {!isWidgetHidden('variations') && (
-            <VariationsWidget projectId={projectId!} currency={currency ?? 'EUR'} />
+            <VariationsWidget projectId={projectId!} currency={currency ?? ''} />
           )}
         </WidgetSection>
 
@@ -1750,7 +1750,7 @@ export function ProjectDetailPage() {
             <ScheduleStripWidget projectId={projectId!} />
           )}
           {!isWidgetHidden('budget-burn') && (
-            <BudgetBurnWidget projectId={projectId!} currency={currency ?? 'EUR'} />
+            <BudgetBurnWidget projectId={projectId!} currency={currency ?? ''} />
           )}
         </WidgetSection>
 

@@ -40,6 +40,7 @@ import {
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 
@@ -89,6 +90,7 @@ export function WideModal({
   hideCloseButton = false,
   className,
 }: WideModalProps) {
+  const { t } = useTranslation();
   const panelRef = useRef<HTMLDivElement>(null);
   const headingId = useId();
   const subtitleId = useId();
@@ -190,7 +192,7 @@ export function WideModal({
               type="button"
               onClick={() => !busy && onClose()}
               disabled={busy}
-              aria-label="Close"
+              aria-label={t('common.close', { defaultValue: 'Close' })}
               className={clsx(
                 'shrink-0 -mt-1 -mr-1 inline-flex h-8 w-8 items-center justify-center rounded-lg',
                 'text-content-secondary hover:text-content-primary',

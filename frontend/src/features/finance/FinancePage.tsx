@@ -788,6 +788,10 @@ function BudgetsTab({ projectId }: { projectId: string }) {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['finance-budgets', projectId] });
+      // The summary cards (Total Budget / Remaining / consumed %) read the
+      // dashboard query, so refresh it too - otherwise the top cards stay
+      // stale after adding a budget line while the table below updates.
+      queryClient.invalidateQueries({ queryKey: ['finance', 'dashboard', projectId] });
       setShowCreate(false);
       setBudgetForm(INITIAL_BUDGET_FORM);
       addToast({ type: 'success', title: t('finance.budget_created', { defaultValue: 'Budget line created successfully' }) });

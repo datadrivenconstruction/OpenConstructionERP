@@ -1082,6 +1082,17 @@ export class SceneManager {
       }
     });
 
+    // Release the underlying WebGL context, not just the GPU resources.
+    // renderer.dispose() frees programs/render-targets but leaves the context
+    // alive; the BIM viewer mounts/unmounts on every model navigation and tab
+    // switch, and browsers cap live contexts (~8-16). Without an explicit
+    // forceContextLoss the oldest context gets killed and new canvases render
+    // black ("Too many active WebGL contexts").
+    try {
+      this.renderer.forceContextLoss();
+    } catch {
+      // some headless / mocked renderers don't implement it - safe to ignore
+    }
     this.renderer.dispose();
   }
 }

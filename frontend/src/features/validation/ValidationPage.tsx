@@ -506,6 +506,8 @@ function ResultRow({
     <CheckCircle2 size={16} className="shrink-0 text-semantic-success" />
   ) : result.severity === 'error' ? (
     <XCircle size={16} className="shrink-0 text-semantic-error" />
+  ) : result.severity === 'info' ? (
+    <Info size={16} className="shrink-0 text-blue-500" />
   ) : (
     <AlertTriangle size={16} className="shrink-0 text-semantic-warning" />
   );
@@ -514,13 +516,17 @@ function ResultRow({
     ? 'success'
     : result.severity === 'error'
       ? 'error'
-      : 'warning';
+      : result.severity === 'info'
+        ? 'blue'
+        : 'warning';
 
   const statusLabel = result.passed
     ? t('validation.status_passed', 'Passed')
     : result.severity === 'error'
       ? t('validation.status_error', 'Error')
-      : t('validation.status_warning', 'Warning');
+      : result.severity === 'info'
+        ? t('validation.status_info', 'Info')
+        : t('validation.status_warning', 'Warning');
 
   const tooltip = getRuleDescriptions(t)[result.rule_id] || '';
 
