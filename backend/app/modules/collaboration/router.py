@@ -104,25 +104,19 @@ async def _resolve_entity_project_id(
         if entity_type == "boq":
             from app.modules.boq.models import BOQ
 
-            return (
-                await session.execute(select(BOQ.project_id).where(BOQ.id == eid))
-            ).scalar_one_or_none()
+            return (await session.execute(select(BOQ.project_id).where(BOQ.id == eid))).scalar_one_or_none()
         if entity_type == "boq_position":
             from app.modules.boq.models import BOQ, Position
 
             return (
                 await session.execute(
-                    select(BOQ.project_id)
-                    .join(Position, Position.boq_id == BOQ.id)
-                    .where(Position.id == eid)
+                    select(BOQ.project_id).join(Position, Position.boq_id == BOQ.id).where(Position.id == eid)
                 )
             ).scalar_one_or_none()
         if entity_type == "document":
             from app.modules.documents.models import Document
 
-            return (
-                await session.execute(select(Document.project_id).where(Document.id == eid))
-            ).scalar_one_or_none()
+            return (await session.execute(select(Document.project_id).where(Document.id == eid))).scalar_one_or_none()
     except Exception:  # noqa: BLE001 - best-effort resolution, fall back to no gate
         logger.debug("collaboration entity resolve failed for %s/%s", entity_type, entity_id)
         return None

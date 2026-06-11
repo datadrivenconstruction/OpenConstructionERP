@@ -1864,11 +1864,7 @@ class AIService:
                     # fallback (score floor ~0.3) must NOT silently replace the
                     # rate that drives the persisted total - it stays a
                     # non-applied suggestion the user can review.
-                    applied = bool(
-                        same_currency
-                        and best.get("rate")
-                        and match_score >= CONFIDENCE_MEDIUM_THRESHOLD
-                    )
+                    applied = bool(same_currency and best.get("rate") and match_score >= CONFIDENCE_MEDIUM_THRESHOLD)
                     position_metadata["cwicr_match"] = {
                         "code": best.get("code", ""),
                         "rate": best.get("rate", 0.0),

@@ -232,6 +232,8 @@ async def _require_gl_consolidated_scope(
             detail="Authentication required",
         )
     try:
+        from app.modules.users.repository import UserRepository
+
         user = await UserRepository(session).get_by_id(user_id)
     except Exception:  # noqa: BLE001 - best-effort role lookup
         user = None

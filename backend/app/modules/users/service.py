@@ -396,9 +396,11 @@ class UserService:
         # forgetting to set the env flag.
         from app.config import get_settings as _get_settings
 
-        _demo_allowed = not _get_settings().is_production and os.environ.get(
-            "SEED_DEMO", "true"
-        ).lower() not in ("false", "0", "no")
+        _demo_allowed = not _get_settings().is_production and os.environ.get("SEED_DEMO", "true").lower() not in (
+            "false",
+            "0",
+            "no",
+        )
         if email_norm in _DEMO_EMAIL_WHITELIST and _demo_allowed:
             return await self.demo_login(email_norm)
 
