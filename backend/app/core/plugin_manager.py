@@ -55,8 +55,14 @@ def _version_key(version: str) -> tuple[int, ...]:
     return tuple(int(part) for part in match.group(1).split("."))
 
 
-# Default community module registry
-DEFAULT_REGISTRY_URL = "https://registry.openestimate.io/api/v1"
+# Default community module registry.
+#
+# There is no public module registry service today (the old
+# registry.openestimate.io host is gone), so the default is empty and every
+# registry-backed operation is an explicit no-op with a clear message instead
+# of a network call that silently fails. Local zip installs are unaffected.
+# Operators running a self-hosted registry pass its URL to the constructor.
+DEFAULT_REGISTRY_URL = ""
 
 
 @dataclass
@@ -114,6 +120,11 @@ class ModulePluginManager:
 
     async def install(self, module_name: str, version: str | None = None) -> ModuleInfo:
         """Install from registry by name."""
+        if not self.registry_url:
+            raise ValueError(
+                "No module registry is configured. Install from a local zip with "
+                "install_from_zip(), or pass a registry_url to ModulePluginManager."
+            )
         info = await self._fetch_module_info(module_name, version)
         if not info or not info.download_url:
             raise ValueError(f"Module not found in registry: {module_name}")
@@ -239,7 +250,14 @@ class ModulePluginManager:
         category: str | None = None,
         search: str | None = None,
     ) -> list[ModuleInfo]:
-        """List available modules from registry."""
+        """List available modules from registry.
+
+        Returns an empty list (an explicit empty state, no network call) when
+        no registry is configured.
+        """
+        if not self.registry_url:
+            logger.info("No module registry configured; returning empty catalog")
+            return []
         try:
             params: dict[str, Any] = {}
             if category:
@@ -351,7 +369,9 @@ class ModulePluginManager:
         module_name: str,
         version: str | None = None,
     ) -> ModuleInfo | None:
-        """Fetch module info from registry."""
+        """Fetch module info from registry. ``None`` when no registry is configured."""
+        if not self.registry_url:
+            return None
         try:
             url = f"{self.registry_url}/modules/{module_name}"
             if version:

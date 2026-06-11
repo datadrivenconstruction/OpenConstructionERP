@@ -4,16 +4,23 @@ This directory ships two container layouts. Both work, so pick the one that matc
 
 ## Layout 1: one unified image
 
-This is the fastest way in. A single container runs FastAPI, and FastAPI serves the compiled React frontend itself. The image falls back to SQLite by default, so you need nothing external to get a working instance up.
+This is the fastest way in. A single container runs FastAPI, and FastAPI serves the compiled React frontend itself. The app is PostgreSQL-only (SQLite support was removed in v6.6.0), so the container needs a `DATABASE_URL` pointing at a PostgreSQL server. The simplest path is the quickstart compose at the repo root, which starts this image together with PostgreSQL 16 in one command:
+
+```bash
+docker compose -f docker-compose.quickstart.yml up --build
+```
+
+To run the image standalone against a PostgreSQL you already have:
 
 ```bash
 docker build -t openconstructionerp -f deploy/docker/Dockerfile.unified .
 docker run -d -p 8080:8080 -v oe_data:/data \
+  -e DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dbname \
   -e JWT_SECRET=$(openssl rand -hex 32) \
   openconstructionerp
 ```
 
-After the container starts, the app responds on http://localhost:8080. Anything that has to survive a restart, the SQLite file and the vector store, gets written under the `/data` volume. To run against PostgreSQL instead of the bundled SQLite, hand it your own connection string: `-e DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dbname`.
+After the container starts, the app responds on http://localhost:8080. Anything that has to survive a restart outside the database, like the vector store, gets written under the `/data` volume. If `DATABASE_URL` is missing or not a PostgreSQL URL, the entrypoint exits immediately with a message explaining both options above instead of crash-looping.
 
 `JWT_SECRET` deliberately has no default baked into the image. Without that, every container launched from the same published image would sign tokens with one shared key, so always pass a secret you generated yourself.
 

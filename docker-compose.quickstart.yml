@@ -21,8 +21,12 @@
 #   - Backend (FastAPI, serves API + frontend)
 #   - Accessible at http://localhost:8080
 #
-# For evaluation with SQLite (no PostgreSQL):
-#   docker run -d -p 8080:8080 -v oe_data:/data openconstructionerp
+# PostgreSQL is required (SQLite support was removed in v6.6.0). To run the
+# unified image against your own PostgreSQL instead of the bundled one:
+#   docker run -d -p 8080:8080 -v oe_data:/data \
+#     -e DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dbname \
+#     -e JWT_SECRET=$(openssl rand -hex 32) \
+#     openconstructionerp
 #   (Build first: docker build -t openconstructionerp -f deploy/docker/Dockerfile.unified .)
 
 services:
@@ -54,7 +58,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Override SQLite default with PostgreSQL
+      # PostgreSQL connection - required, the image has no database default
       DATABASE_URL: postgresql+asyncpg://oe:${POSTGRES_PASSWORD}@postgres:5432/openestimate
       DATABASE_SYNC_URL: postgresql://oe:${POSTGRES_PASSWORD}@postgres:5432/openestimate
       # Security — required, no default. Compose fails fast if blank.

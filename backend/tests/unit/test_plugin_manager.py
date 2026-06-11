@@ -309,6 +309,46 @@ async def test_check_updates_picks_highest_registry_version(tmp_path: Path, monk
     ]
 
 
+# ── no registry configured (the default) ────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_list_available_without_registry_is_explicit_empty(tmp_path: Path, monkeypatch) -> None:
+    """No public registry exists; the default must short-circuit, not hit the network."""
+    mgr = ModulePluginManager(tmp_path / "modules")
+    assert mgr.registry_url == ""
+
+    async def boom(*_args, **_kwargs):
+        raise AssertionError("HTTP must not be called when no registry is configured")
+
+    monkeypatch.setattr(mgr._http, "get", boom)
+    try:
+        assert await mgr.list_available() == []
+        # check_updates flows through list_available and stays an empty no-op.
+        assert await mgr.check_updates() == []
+    finally:
+        await mgr.close()
+
+
+@pytest.mark.asyncio
+async def test_install_without_registry_raises_clear_error(tmp_path: Path) -> None:
+    mgr = ModulePluginManager(tmp_path / "modules")
+    try:
+        with pytest.raises(ValueError, match="No module registry is configured"):
+            await mgr.install("oe_anything")
+    finally:
+        await mgr.close()
+
+
+@pytest.mark.asyncio
+async def test_fetch_module_info_without_registry_returns_none(tmp_path: Path) -> None:
+    mgr = ModulePluginManager(tmp_path / "modules")
+    try:
+        assert await mgr._fetch_module_info("oe_anything") is None
+    finally:
+        await mgr.close()
+
+
 @pytest.mark.asyncio
 async def test_list_installed_includes_version(tmp_path: Path) -> None:
     modules_dir = tmp_path / "modules"
