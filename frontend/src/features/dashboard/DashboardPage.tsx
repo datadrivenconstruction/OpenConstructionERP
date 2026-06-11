@@ -1506,9 +1506,12 @@ function ProjectMetricCards({
 function SystemStatusSummary({
   projects,
   boqs,
+  boqsLoading = false,
 }: {
   projects?: ProjectSummary[];
   boqs?: BOQWithTotal[];
+  /** True while the dashboard rollup that feeds `boqs` is still in flight. */
+  boqsLoading?: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -1533,10 +1536,14 @@ function SystemStatusSummary({
     enabled: canListUsers,
   });
 
-  const moduleCount = modules?.modules?.length ?? 0;
-  const projectCount = projects?.length ?? 0;
-  const boqCount = boqs?.length ?? 0;
-  const userCount = usersList?.length ?? 0;
+  // FA-0005: `undefined` data means the query is still PENDING — every
+  // queryFn above settles errors to a concrete fallback ([], {modules: []}),
+  // so we can safely treat `undefined` as "loading" and render a skeleton
+  // pulse instead of a misleading "0" on a cold server. `null` = pending.
+  const moduleCount = modules ? modules.modules?.length ?? 0 : null;
+  const projectCount = projects ? projects.length : null;
+  const boqCount = boqsLoading ? null : boqs?.length ?? 0;
+  const userCount = canListUsers ? (usersList ? usersList.length : null) : 0;
 
   const badges = [
     {
@@ -1584,10 +1591,18 @@ function SystemStatusSummary({
           type="button"
           onClick={() => navigate(b.to)}
           className={`inline-flex items-center gap-1.5 rounded-lg ${b.bg} px-2.5 py-1.5 transition-colors hover:brightness-95 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 cursor-pointer`}
-          aria-label={`${b.value} ${b.label}`}
+          aria-label={b.value === null ? b.label : `${b.value} ${b.label}`}
+          aria-busy={b.value === null || undefined}
         >
           <span className={b.color}>{b.icon}</span>
-          <span className={`text-xs font-bold tabular-nums ${b.color}`}>{b.value}</span>
+          <span className={`text-xs font-bold tabular-nums ${b.color}`}>
+            {b.value ?? (
+              <span
+                className="inline-block h-3 w-4 animate-pulse rounded bg-surface-tertiary align-middle"
+                aria-hidden="true"
+              />
+            )}
+          </span>
           <span className="text-2xs text-content-tertiary">{b.label}</span>
         </button>
       ))}
@@ -2129,7 +2144,11 @@ function DashboardPageInner() {
     projects: (
       <>
         <ProjectMetricCards cards={projectCards} loading={cardsLoading} />
-        {(!projectCards || projectCards.length === 0) && (
+        {/* FA-0005: only fall back to the recent-projects list once the
+            cards query has SETTLED empty — while it is pending the metric
+            cards above already render a skeleton grid, and rendering this
+            block too would flash the first-project welcome state. */}
+        {!cardsLoading && (projectCards?.length ?? 0) === 0 && (
           <div className="animate-card-in" style={{ animationDelay: '150ms' }}>
             <Card padding="none">
               <div className="p-6 pb-0">
@@ -2390,7 +2409,7 @@ function DashboardPageInner() {
         <span aria-hidden className="h-3 w-px bg-border-light" />
 
         {/* System status pills */}
-        <SystemStatusSummary projects={projects} boqs={allBoqs} />
+        <SystemStatusSummary projects={projects} boqs={allBoqs} boqsLoading={rollup.isLoading} />
       </div>
 
       {/* ─── Customize panel (collapsible) — same manager as Settings ─── */}
@@ -2430,7 +2449,33 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
   // BUG-UI01: install-demo mutation removed alongside the 3-tile empty
   // state. Demo installation now lives under Settings → Demo data.
 
-  if (!projects || projects.length === 0) {
+  // FA-0005: `projects === undefined` means the query is still PENDING (the
+  // queryFn settles errors to []). Render placeholder rows instead of
+  // flashing the first-project welcome block at users whose projects simply
+  // have not arrived yet — the welcome CTA is reserved for a SETTLED empty
+  // result below.
+  if (!projects) {
+    return (
+      <div
+        className="divide-y divide-border-light"
+        aria-busy="true"
+        data-testid="dashboard-projects-loading"
+      >
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="flex w-full items-center gap-4 px-6 py-3.5">
+            <Skeleton width={36} height={36} rounded="md" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton height={14} className="w-1/3" />
+              <Skeleton height={12} className="w-1/2" />
+            </div>
+            <Skeleton width={64} height={12} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (projects.length === 0) {
     // BUG-UI01: clean centered empty-state for fresh tenants. The earlier
     // 3-tile grid felt like a chooser; the user just wants a clear
     // "create your first project" CTA with the demo path as a secondary hint.

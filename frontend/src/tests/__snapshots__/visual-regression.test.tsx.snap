@@ -1350,7 +1350,8 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
         style="animation-delay: 40ms;"
       >
         <button
-          aria-label="0 Projects"
+          aria-busy="true"
+          aria-label="Projects"
           class="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue-subtle px-2.5 py-1.5 transition-colors hover:brightness-95 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 cursor-pointer"
           type="button"
         >
@@ -1383,7 +1384,10 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           <span
             class="text-xs font-bold tabular-nums text-oe-blue"
           >
-            0
+            <span
+              aria-hidden="true"
+              class="inline-block h-3 w-4 animate-pulse rounded bg-surface-tertiary align-middle"
+            />
           </span>
           <span
             class="text-2xs text-content-tertiary"
@@ -1392,7 +1396,8 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           </span>
         </button>
         <button
-          aria-label="0 BOQs"
+          aria-busy="true"
+          aria-label="BOQs"
           class="inline-flex items-center gap-1.5 rounded-lg bg-[#7c3aed]/10 px-2.5 py-1.5 transition-colors hover:brightness-95 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 cursor-pointer"
           type="button"
         >
@@ -1434,7 +1439,10 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           <span
             class="text-xs font-bold tabular-nums text-[#7c3aed]"
           >
-            0
+            <span
+              aria-hidden="true"
+              class="inline-block h-3 w-4 animate-pulse rounded bg-surface-tertiary align-middle"
+            />
           </span>
           <span
             class="text-2xs text-content-tertiary"
@@ -1443,7 +1451,8 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           </span>
         </button>
         <button
-          aria-label="0 Modules"
+          aria-busy="true"
+          aria-label="Modules"
           class="inline-flex items-center gap-1.5 rounded-lg bg-[#0891b2]/10 px-2.5 py-1.5 transition-colors hover:brightness-95 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 cursor-pointer"
           type="button"
         >
@@ -1505,7 +1514,10 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           <span
             class="text-xs font-bold tabular-nums text-[#0891b2]"
           >
-            0
+            <span
+              aria-hidden="true"
+              class="inline-block h-3 w-4 animate-pulse rounded bg-surface-tertiary align-middle"
+            />
           </span>
           <span
             class="text-2xs text-content-tertiary"
@@ -1879,160 +1891,6 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           class="animate-shimmer bg-gradient-to-r from-surface-secondary via-surface-tertiary to-surface-secondary bg-[length:200%_100%] rounded-xl w-full"
           style="height: 160px;"
         />
-      </div>
-    </div>
-    <div
-      class="animate-card-in"
-      style="animation-delay: 150ms;"
-    >
-      <div
-        class="rounded-xl border border-border-light bg-surface-elevated shadow-xs transition-all duration-normal ease-oe transform-gpu"
-      >
-        <div
-          class="p-6 pb-0"
-        >
-          <div
-            class="flex items-start justify-between gap-4"
-          >
-            <div
-              class="min-w-0"
-            >
-              <h3
-                class="text-lg font-semibold text-content-primary truncate"
-              >
-                dashboard.recent_projects
-              </h3>
-            </div>
-            <div
-              class="shrink-0"
-            >
-              <button
-                class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-transparent text-content-secondary hover:bg-surface-secondary active:bg-surface-tertiary border border-transparent active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md"
-              >
-                <span
-                  class="inline-flex items-center"
-                >
-                  projects.title
-                </span>
-                <span
-                  class="shrink-0"
-                >
-                  <svg
-                    class="lucide lucide-arrow-right"
-                    fill="none"
-                    height="14"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                    width="14"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M5 12h14"
-                    />
-                    <path
-                      d="m12 5 7 7-7 7"
-                    />
-                  </svg>
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div
-          class="mt-4 !mt-0"
-        >
-          <div
-            class="flex h-full min-h-[60vh] items-center justify-center px-6 py-8"
-          >
-            <div
-              class="flex flex-col items-center justify-center py-16 px-6 text-center"
-            >
-              <div
-                class="mb-4 flex h-14 w-14 items-center justify-center rounded-md bg-surface-secondary text-content-tertiary shadow-[inset_0_2px_4px_rgba(0,0,0,0.06),inset_0_-1px_0_rgba(255,255,255,0.6)]"
-              >
-                <svg
-                  class="lucide lucide-folder-plus"
-                  fill="none"
-                  height="28"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  viewBox="0 0 24 24"
-                  width="28"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 10v6"
-                  />
-                  <path
-                    d="M9 13h6"
-                  />
-                  <path
-                    d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
-                  />
-                </svg>
-              </div>
-              <h3
-                class="text-lg font-semibold text-content-primary"
-              >
-                Welcome - let's start with your first project
-              </h3>
-              <p
-                class="mt-1.5 max-w-sm text-sm text-content-secondary"
-              >
-                Projects organise your BOQs, schedules, and reports.
-              </p>
-              <div
-                class="mt-5"
-              >
-                <div
-                  class="flex flex-col items-center gap-3"
-                >
-                  <button
-                    class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-8 px-3.5 text-sm gap-1.5 rounded-lg"
-                  >
-                    <span
-                      class="inline-flex items-center"
-                    >
-                      <svg
-                        class="lucide lucide-folder-plus"
-                        fill="none"
-                        height="16"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.75"
-                        viewBox="0 0 24 24"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M12 10v6"
-                        />
-                        <path
-                          d="M9 13h6"
-                        />
-                        <path
-                          d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
-                        />
-                      </svg>
-                      Create project
-                    </span>
-                  </button>
-                  <p
-                    class="text-xs text-content-tertiary"
-                  >
-                    Or load a demo project from Settings → Demo data
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
     <div
