@@ -3579,7 +3579,30 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
     abstract_variants_by_pair: dict[tuple[str, str], dict[str, Any]] = {}
     if "price_abstract_resource_variable_parts" in df.columns and "resource_code" in df.columns:
         abs_mask = df["price_abstract_resource_variable_parts"].fillna("").astype(str).str.len() > 0
-        for _, r in df[abs_mask].iterrows():
+        # Narrow to just the columns this loop reads before iterating. Without
+        # it, ``df[abs_mask].iterrows()`` materializes a Series across all ~85
+        # parquet columns per row; selecting the dozen columns actually used
+        # mirrors the scope-of-work index below and trims the per-row overhead.
+        # Same row set, same values - only the unused columns are dropped.
+        _abs_cols = [
+            c
+            for c in (
+                "rate_code",
+                "resource_code",
+                "price_abstract_resource_variable_parts",
+                "price_abstract_resource_est_price_all_values",
+                "price_abstract_resource_est_price_all_values_per_unit",
+                "price_abstract_resource_common_start",
+                "price_abstract_resource_est_price_min",
+                "price_abstract_resource_est_price_max",
+                "price_abstract_resource_est_price_mean",
+                "price_abstract_resource_est_price_median",
+                "price_abstract_resource_unit",
+                "price_abstract_resource_group_per_unit",
+            )
+            if c in df.columns
+        ]
+        for _, r in df.loc[abs_mask, _abs_cols].iterrows():
             rc = _safe_str(r.get("rate_code", ""))
             rescode = _safe_str(r.get("resource_code", ""))
             if not rc or not rescode:

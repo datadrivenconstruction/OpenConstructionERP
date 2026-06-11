@@ -373,6 +373,42 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
           if (import.meta.env.DEV) console.error('Vector indexing failed (non-critical):', err);
         });
       } catch (err: unknown) {
+        // A regional import is a long single request (read parquet, expand to
+        // ~55K items, bulk-load). On a slow machine it can outrun even the
+        // 5-min long-running budget and the client aborts - but the server
+        // keeps going and commits. Before crying failure, poll the backend for
+        // up to ~a minute: if the region lands, the load actually succeeded and
+        // we show success instead of a misleading timeout (GitHub #171 follow-up).
+        const landed = await (async () => {
+          for (let attempt = 0; attempt < 7; attempt++) {
+            try {
+              const stats = await apiGet<RegionStat[]>('/v1/costs/regions/stats/');
+              const hit = stats.find((s) => s.region === db.id && s.count > 0);
+              if (hit) return hit;
+            } catch {
+              // transient - keep polling
+            }
+            if (attempt < 6) await new Promise((r) => setTimeout(r, 10000));
+          }
+          return null;
+        })();
+        if (landed) {
+          setLoaded((prev) => new Set(prev).add(db.id));
+          addLoadedDatabase(db.id);
+          if (getLoadedDatabases().length === 1 || !getActiveDatabase()) {
+            setActiveDatabase(db.id);
+            setActiveDb(db.id);
+          }
+          setResult({ id: db.id, imported: landed.count, skipped: 0, file: '' });
+          addToast({
+            type: 'success',
+            title: t('costs.db_installed', { defaultValue: 'Database installed successfully' }),
+            message: `${landed.count.toLocaleString()} cost items imported`,
+          });
+          queryClient.invalidateQueries({ queryKey: ['costs'] });
+          apiPost('/v1/costs/vector/index/').catch(() => {});
+          return;
+        }
         const detail =
           err instanceof Error ? err.message : 'Failed to load database';
         addToast({
