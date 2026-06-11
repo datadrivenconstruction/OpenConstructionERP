@@ -1,0 +1,52 @@
+{
+  "$schema": "openconstructionerp.partner_pack.rule_pack/v1",
+  "slug": "gaeb_x83_x86",
+  "rule_pack_id": "gaeb_x83_x86",
+  "display_name": "GAEB DA XML 3.3 — X83 / X84 / X86",
+  "name": "GAEB Datenaustausch XML 3.3",
+  "description": "GAEB DA XML 3.2/3.3 — Angebotsabgabe (X83), Nebenangebot (X84) und Auftragserteilung (X86). Validiert Schema-Konformität, LV-Hierarchie (Titel → Position → Teilleistung), OZ-Format, Einheitspreis-Plausibilität und Schluss-Summen-Konsistenz.",
+  "standard": "GAEB DA XML 3.3",
+  "jurisdiction": "DE",
+  "severity_default": "error",
+  "category": "structure",
+  "locale_default": "de",
+  "enables_rule_ids": [
+    "gaeb.ordinal_format",
+    "gaeb.lv_structure",
+    "gaeb.einheitspreis_sanity",
+    "gaeb.trade_section_code",
+    "gaeb.quantity_decimals",
+    "gaeb.xml_schema_valid",
+    "gaeb.x83_award_phase_present",
+    "gaeb.x84_alternate_offer_structure",
+    "gaeb.x86_award_phase_present",
+    "gaeb.lv_hierarchy_well_formed",
+    "gaeb.oz_format_valid",
+    "gaeb.oz_unique_within_lv",
+    "gaeb.unit_code_iso",
+    "gaeb.einheitspreis_present",
+    "gaeb.einheitspreis_positive",
+    "gaeb.einheitspreis_in_eur",
+    "gaeb.gesamtbetrag_consistency",
+    "gaeb.langtext_present_for_priced_positions",
+    "gaeb.kurztext_max_length",
+    "gaeb.no_orphan_unterleistungspositionen",
+    "gaeb.bedarfsposition_marked",
+    "gaeb.eventualposition_marked",
+    "gaeb.stundenlohnarbeiten_marked",
+    "gaeb.nachlass_within_legal_range"
+  ],
+  "metadata": {
+    "supported_phases": [
+      "X81 — Leistungsverzeichnis-Übergabe",
+      "X83 — Angebotsabgabe",
+      "X84 — Nebenangebot",
+      "X86 — Auftragserteilung"
+    ],
+    "schema_versions": ["3.2", "3.3"],
+    "references": [
+      "GAEB DA XML 3.3 Schema (Gemeinsamer Ausschuss Elektronik im Bauwesen)",
+      "VOB/A § 7 Eindeutige und erschöpfende Leistungsbeschreibung"
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "openconstructionerp.partner_pack.rule_pack/v1",
+  "slug": "bki_benchmarks",
+  "rule_pack_id": "bki_benchmarks",
+  "display_name": "BKI Baukosten — Plausibilitäts-Benchmarks",
+  "name": "Baukosteninformationszentrum (BKI) Kennwerte",
+  "description": "Validiert Kostenschätzungen gegen BKI-Kennwerte (€/m² BGF und €/m³ BRI) nach Gebäudetyp, Region und Baujahr. Markiert Ausreißer ober-/unterhalb des 5./95.-Perzentils, prüft typische KG-Anteile (KG 300 / 400 / 500 / 700) und stellt sicher, dass Regional- und Baupreis-Indizes angewendet werden.",
+  "standard": "BKI Baukosten 2024",
+  "jurisdiction": "DE",
+  "severity_default": "warning",
+  "category": "consistency",
+  "locale_default": "de",
+  "enables_rule_ids": [
+    "bki.cost_per_m2_bgf_within_range",
+    "bki.cost_per_m3_bri_within_range",
+    "bki.kg300_share_within_typical_range",
+    "bki.kg400_share_within_typical_range",
+    "bki.kg500_share_within_typical_range",
+    "bki.kg700_planungskosten_share_check",
+    "bki.regional_factor_applied",
+    "bki.regional_factor_de_he_for_hessen",
+    "bki.gebäudetyp_classified",
+    "bki.baujahr_index_applied",
+    "bki.baupreisindex_destatis_referenced",
+    "bki.outlier_flag_against_percentile_95",
+    "bki.outlier_flag_against_percentile_5",
+    "bki.benchmark_source_referenced",
+    "bki.kostenstand_documented"
+  ],
+  "metadata": {
+    "default_indices": {
+      "kostenstand": "BKI 2024-IV",
+      "baupreisindex_source": "Destatis Baupreisindex (BPI)",
+      "regional_factors_for_pack": ["DE-HE", "DE-BE", "DE-BY", "DE-NW"]
+    },
+    "percentile_thresholds": [5, 25, 50, 75, 95],
+    "references": [
+      "BKI Baukosten 2024 (Neubau, Bauelemente, Altbau)",
+      "Destatis Fachserie 17 Reihe 4 (Baupreisindizes)"
+    ]
+  }
+}

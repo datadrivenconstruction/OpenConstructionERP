@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openconstructionerp-retail-grocery-dach"
+version = "0.1.0"
+description = "Industry pack for German-speaking discount food-retail new-builds - three priced DIN 276 example projects (Heilbronn, Heidelberg, Karlsruhe) with full Leistungsverzeichnis, GAEB DA XML 3.3, LV quality and BKI benchmarks."
+readme = "README.md"
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.11"
+authors = [
+    { name = "DataDrivenConstruction", email = "info@datadrivenconstruction.io" },
+]
+keywords = [
+    "openconstructionerp",
+    "ocerp",
+    "pack",
+    "industry",
+    "retail",
+    "grocery",
+    "germany",
+    "dach",
+    "din276",
+    "gaeb",
+    "leistungsverzeichnis",
+    "lv",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Other Audience",
+    "Topic :: Office/Business",
+    "Natural Language :: German",
+]
+dependencies = [
+    "openconstructionerp>=7.7.0",
+]
+
+[project.urls]
+Homepage = "https://datadrivenconstruction.io"
+Source = "https://github.com/DataDrivenConstruction/openconstructionerp"
+
+[project.entry-points."openconstructionerp.packs"]
+retail-grocery-dach = "openconstructionerp_retail_grocery_dach:MANIFEST"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+openconstructionerp_retail_grocery_dach = [
+    "rule_packs/*.json",
+    "locales/*.json",
+]

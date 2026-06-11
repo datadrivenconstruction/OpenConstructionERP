@@ -396,10 +396,17 @@ def _demo_install_list(slug: str, demo_count: int, country_fill: bool = True) ->
 
 async def _step_demos(slug: str, demo_count: int) -> StepResult:
     """Step 5 - install the pack's country demos (idempotent, fail-soft)."""
-    from app.core.demo_projects import install_demo_project
+    from app.core.demo_projects import DEMO_TEMPLATES, install_demo_project
+    from app.core.partner_pack.discovery import get_pack_by_slug
     from app.database import async_session_factory
 
-    install_ids = _demo_install_list(slug, demo_count)
+    # A pack that explicitly pins its own demo_template_ids should install ALL
+    # of them, even when the caller's demo_count default sits below that count.
+    # Packs that rely on the flagship plus country-fill keep the requested cap.
+    pack = get_pack_by_slug(slug)
+    pinned = [d for d in (getattr(pack, "demo_template_ids", []) or []) if d in DEMO_TEMPLATES]
+    effective_count = min(10, max(demo_count, len(pinned)))
+    install_ids = _demo_install_list(slug, effective_count)
     if not install_ids:
         return StepResult(
             step="demos",

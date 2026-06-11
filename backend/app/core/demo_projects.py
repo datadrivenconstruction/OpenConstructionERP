@@ -2084,6 +2084,7 @@ PACK_DEMO_PROJECT: dict[str, str] = {
     "india-cpwd": "govt-building-delhi",
     "modular-prefab": "modular-housing",
     "renewables-epc": "solar-bess-epc",
+    "retail-grocery-dach": "retail-market-heilbronn",
     "saudi-vision2030": "mixed-use-riyadh",
     "uk-jct": "commercial-london",
     "us-rsmeans": "commercial-denver",

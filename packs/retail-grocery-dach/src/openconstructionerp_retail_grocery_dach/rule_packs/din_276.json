@@ -1,0 +1,52 @@
+{
+  "$schema": "openconstructionerp.partner_pack.rule_pack/v1",
+  "slug": "din_276",
+  "rule_pack_id": "din_276",
+  "display_name": "DIN 276 — Kosten im Bauwesen",
+  "name": "DIN 276 Kostengruppen (KG 100–800)",
+  "description": "DIN 276:2018-12 — Validiert die KG-Hierarchie auf Ebene 1 / 2 / 3, prüft die Pflichtfelder pro Kostengruppe und stellt sicher, dass Schätz-/Berechnungs-Phasen die geforderte Detail-Tiefe erreichen.",
+  "standard": "DIN 276:2018-12",
+  "jurisdiction": "DE",
+  "severity_default": "error",
+  "category": "compliance",
+  "locale_default": "de",
+  "enables_rule_ids": [
+    "din276.cost_group_required",
+    "din276.valid_cost_group",
+    "din276.hierarchy",
+    "din276.completeness",
+    "din276.cost_group_hierarchy_valid",
+    "din276.kg_code_format",
+    "din276.kg100_grundstueck_completeness",
+    "din276.kg200_herrichten_completeness",
+    "din276.kg300_bauwerk_baukonstruktion_completeness",
+    "din276.kg400_bauwerk_technische_anlagen_completeness",
+    "din276.kg500_aussenanlagen_freiflaechen_completeness",
+    "din276.kg600_ausstattung_kunstwerke_completeness",
+    "din276.kg700_baunebenkosten_completeness",
+    "din276.kg800_finanzierungskosten_completeness",
+    "din276.level_2_required_for_kostenrahmen",
+    "din276.level_2_required_for_kostenschaetzung",
+    "din276.level_3_required_for_kostenberechnung",
+    "din276.level_3_required_for_kostenanschlag",
+    "din276.no_orphan_positions",
+    "din276.parent_sum_matches_children",
+    "din276.gross_external_area_present_bgf",
+    "din276.gross_external_volume_present_bri"
+  ],
+  "metadata": {
+    "cost_group_count": 8,
+    "max_hierarchy_depth": 3,
+    "phases_supported": [
+      "Kostenrahmen (LP1)",
+      "Kostenschätzung (LP2)",
+      "Kostenberechnung (LP3)",
+      "Kostenanschlag (LP6)",
+      "Kostenfeststellung (LP8)"
+    ],
+    "references": [
+      "DIN 276:2018-12 Kosten im Bauwesen",
+      "BKI Baukosten 2024 Anhang DIN 276 Strukturkonkordanz"
+    ]
+  }
+}
