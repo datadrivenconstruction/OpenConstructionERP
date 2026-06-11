@@ -3,13 +3,21 @@
 """Integrity tests for the Retail Market Heilbronn public showcase demo.
 
 The template (``app/core/demo_packs/retail_market_heilbronn.py``) is the
-ninth showcase project and carries a reconciled DIN 276 cost frame: 16 LV
-sections that map 1:1 to procurement units (Vergabeeinheiten), each section
-summing EXACTLY to its VE budget and the LV grand total landing on
-7,905,000.00 EUR net to the cent. These tests pin that money contract plus
-the registry wiring (DEMO_TEMPLATES / SHOWCASE_DEMO_IDS / catalog), so a
-later densification pass (swapping ``_SAMPLE_POSITIONS``) cannot silently
-drift the section budgets.
+ninth showcase project and carries a reconciled DIN 276 cost frame as a
+FULL LV: 303 positions in 16 sections that map 1:1 to procurement units
+(Vergabeeinheiten). Two exactness invariants hold simultaneously, to the
+cent, and are pinned here as the money contract:
+
+* every LV section sums EXACTLY to its procurement-unit budget, grand
+  total 7,905,000.00 EUR net;
+* every DIN 276 cost group (2nd level) sums EXACTLY to the reconciled
+  cost plan (KG 200-600 without the KG 220 connection fees), including
+  the cross-section groups KG 310/320/330/340/350/360/440.
+
+On top of that, the canonical building geometry drives the quantities
+(consistency rules R-01..R-16 of the design dossier); the spot checks at
+the bottom pin the rule-derived quantities to their OZ rows. The registry
+wiring (DEMO_TEMPLATES / SHOWCASE_DEMO_IDS / catalog) is pinned too.
 """
 
 from __future__ import annotations
@@ -50,6 +58,51 @@ _VE_BUDGETS: dict[str, Decimal] = {
 
 _LV_GRAND_TOTAL = Decimal("7905000.00")
 
+# Reconciled DIN 276 cost plan, 2nd level (net EUR). This is the kg_plan
+# of the design dossier minus KG 220 (185,000 EUR public connection fees,
+# levied by the utilities and not part of any tendered LV) and minus
+# KG 700 (professional fees, not tendered works). Several groups are
+# carried by more than one procurement unit (e.g. KG 320 = VE-02 + VE-04
+# + VE-06, KG 440 = VE-16 + VE-17), so this is a genuinely independent
+# second invariant on top of the per-section budgets.
+_KG2_BUDGETS: dict[str, Decimal] = {
+    "210": Decimal("35000.00"),
+    "230": Decimal("60000.00"),
+    "310": Decimal("270000.00"),
+    "320": Decimal("900000.00"),
+    "330": Decimal("740000.00"),
+    "340": Decimal("280000.00"),
+    "350": Decimal("110000.00"),
+    "360": Decimal("790000.00"),
+    "370": Decimal("60000.00"),
+    "390": Decimal("150000.00"),
+    "410": Decimal("160000.00"),
+    "420": Decimal("250000.00"),
+    "430": Decimal("220000.00"),
+    "440": Decimal("1060000.00"),
+    "450": Decimal("100000.00"),
+    "470": Decimal("830000.00"),
+    "480": Decimal("40000.00"),
+    "510": Decimal("240000.00"),
+    "520": Decimal("540000.00"),
+    "530": Decimal("130000.00"),
+    "540": Decimal("140000.00"),
+    "550": Decimal("100000.00"),
+    "610": Decimal("560000.00"),
+    "690": Decimal("140000.00"),
+}
+
+# Reconciled DIN 276 cost plan, 1st level, restricted to the LV scope.
+# KG 200 appears as 95,000 because the 185,000 KG 220 fees are outside
+# the LV (kg_plan KG 200 = 280,000); KG 300-600 match kg_plan exactly.
+_KG1_BUDGETS: dict[str, Decimal] = {
+    "200": Decimal("95000.00"),
+    "300": Decimal("3300000.00"),
+    "400": Decimal("2660000.00"),
+    "500": Decimal("1150000.00"),
+    "600": Decimal("700000.00"),
+}
+
 _ALLOWED_UNITS = {"m", "m2", "m3", "t", "pcs", "lsum"}
 
 _OZ_PATTERN = re.compile(r"^\d{2}\.\d{2}\.\d{4}$")
@@ -88,7 +141,7 @@ def test_catalog_row() -> None:
     assert row["type"] == "Retail"
     assert _PACK_DEMO_TYPE.get(DEMO_ID) == "Retail"
     assert row["sections"] == len(_VE_BUDGETS)
-    assert row["positions"] >= 80
+    assert row["positions"] >= 300
     assert str(row.get("budget", "")).strip(), "catalog budget label is empty"
 
 
@@ -149,6 +202,123 @@ def test_sections_sum_exactly_to_ve_budgets() -> None:
     assert sum(seen.values(), Decimal("0")) == _LV_GRAND_TOTAL
 
 
+def test_kg_rollups_match_cost_plan_exactly() -> None:
+    """Every DIN 276 cost group reproduces the reconciled KG plan.
+
+    The second half of the money contract: independent of how the scope is
+    cut into procurement units, the per-cost-group sums across ALL
+    sections must equal the kg_plan amounts to the cent, on the 2nd level
+    (KG 210..690) and rolled up to the 1st level (KG 200..600). Decimal
+    arithmetic only.
+    """
+    template = _template()
+    kg_sums: dict[str, Decimal] = {}
+    for _ordinal, _title, _cls, items in template.sections:
+        for oz, _desc, _unit, qty, rate, cls in items:
+            kg = cls.get("din276")
+            assert kg, f"{oz}: missing DIN 276 code"
+            kg_sums[kg] = kg_sums.get(kg, Decimal("0")) + Decimal(str(qty)) * Decimal(str(rate))
+    assert set(kg_sums) == set(_KG2_BUDGETS), (
+        f"cost groups drifted: extra={sorted(set(kg_sums) - set(_KG2_BUDGETS))}, "
+        f"missing={sorted(set(_KG2_BUDGETS) - set(kg_sums))}"
+    )
+    for kg, expected in _KG2_BUDGETS.items():
+        assert kg_sums[kg] == expected, f"KG {kg}: {kg_sums[kg]} != cost plan {expected}"
+    kg1_sums: dict[str, Decimal] = {}
+    for kg, value in kg_sums.items():
+        kg1 = kg[0] + "00"
+        kg1_sums[kg1] = kg1_sums.get(kg1, Decimal("0")) + value
+    assert kg1_sums == _KG1_BUDGETS
+
+
+def test_full_lv_has_no_remainder_rows() -> None:
+    """The LV is fully detailed: no budget-balancing placeholder rows.
+
+    The slice-1 scaffold closed undetailed sections with lump rows marked
+    'Detaillierung folgt'; the full LV must not contain any.
+    """
+    template = _template()
+    for _ordinal, _title, _cls, items in template.sections:
+        for oz, desc, _unit, _qty, _rate, _c in items:
+            assert "Detaillierung folgt" not in desc, f"{oz} is still a remainder placeholder"
+
+
+def test_quantities_derive_from_building_geometry() -> None:
+    """Spot-pin the rule-derived quantities to their LV rows.
+
+    Implements the quantity-consistency rules of the design dossier
+    (R-01..R-16): the same canonical geometry that parameterizes the
+    procedural 3D model must show up as position quantities, so BOQ <->
+    BIM quantity checks come back green. Keyed by OZ; a drifted quantity
+    or a renumbered row fails loudly.
+    """
+    template = _template()
+    rows: dict[str, tuple[str, float]] = {}
+    for _ordinal, _title, _cls, items in template.sections:
+        for oz, _desc, unit, qty, _rate, _c in items:
+            rows[oz] = (unit, qty)
+
+    footprint_m2 = 2720.0  # 68.0 x 40.0 m
+    work_area_m2 = 2774.0  # R-02: footprint x 1.02
+    perimeter_m = 216.0  # R-03
+    expected: dict[str, tuple[str, float]] = {
+        "04.01.0090": ("m3", footprint_m2 * 0.20),  # R-01 slab volume = 544 m3
+        "04.01.0020": ("m2", work_area_m2),  # R-02 sub-base
+        "04.01.0030": ("m2", work_area_m2),  # R-02 blinding
+        "05.01.0010": ("m2", work_area_m2),  # R-03 roof deck = footprint x 1.02
+        "05.01.0030": ("m2", work_area_m2),  # R-03 roof insulation
+        "05.01.0040": ("m2", work_area_m2),  # R-03 roof membrane
+        "05.01.0050": ("m", perimeter_m),  # R-03 parapet capping
+        "04.01.0050": ("m", perimeter_m),  # R-03 frost skirt
+        "06.01.0010": ("m", perimeter_m),  # R-03 precast socket panels
+        "16.02.0090": ("m", perimeter_m),  # R-03 ring earth electrode
+        "07.01.0010": ("m2", 1292.0),  # R-04 sandwich facade share
+        "08.01.0010": ("m2", 120.0),  # R-04 curtain wall 24.0 x 5.0
+        "08.01.0030": ("m2", 42.0),  # R-04 window band 28.0 x 1.5
+        "06.02.0010": ("pcs", 36.0),  # R-05 columns = 12 axes x 3 rows
+        "06.03.0010": ("pcs", 12.0),  # R-05 main binders 23.8 m
+        "06.03.0020": ("pcs", 12.0),  # R-05 side binders 16.2 m
+        "06.03.0030": ("pcs", 22.0),  # R-05 edge beams = (12 - 1) x 2
+        "04.01.0040": ("pcs", 36.0),  # R-06 pocket foundations = columns
+        "06.01.0020": ("pcs", 36.0),  # R-06 one grout joint per column
+        "04.01.0060": ("t", 38.0),  # R-07 rebar foundations
+        "18.01.0020": ("m2", 4590.0),  # R-08 frost layer = asphalt + pavers
+        "18.03.0010": ("m2", 4590.0),  # R-08 geogrid on the same area
+        "18.01.0030": ("m2", 3140.0),  # R-08 asphalt = 2,380 lanes + 760 yard
+        "18.03.0020": ("m2", 3140.0),  # R-08 binder course on the asphalt area
+        "18.01.0040": ("m2", 1450.0),  # R-08/R-09 permeable pavers
+        "18.03.0040": ("m2", 220.0),  # R-09 walkways
+        "02.01.0020": ("m3", footprint_m2 * 0.25),  # R-10 topsoil building field
+        "18.01.0010": ("m3", 2028.0),  # R-10 topsoil external = (9,480 - 2,720) x 0.30
+        "05.01.0070": ("pcs", 22.0),  # R-11 roof drains: 11 gullies + 11 overflows
+        "14.02.0030": ("pcs", 11.0),  # R-11 one internal downpipe per gully
+        "17.01.0010": ("pcs", 660.0),  # R-12 PV modules a 440 Wp = 290.4 kWp
+        "16.01.0030": ("m", 539.0),  # R-13 light band = 1,672 m2 VK / 3.1 m grid
+        "18.01.0090": ("m", 952.0),  # R-16 marking = 112 stalls x 8.5 m
+        "18.03.0090": ("pcs", 24.0),  # special stalls: 6 accessible + 6 parent-child + 12 EV
+        "17.03.0010": ("pcs", 2.0),  # 2 DC chargers a 2 points
+        "17.03.0020": ("pcs", 4.0),  # 4 AC wallboxes a 2 points -> 12 points total
+        "15.02.0010": ("m", 48.0),  # 48 lfm chilled cabinets
+        "15.02.0020": ("m", 22.0),  # 22 lfm frozen cabinets
+        "15.02.0030": ("m", 6.0),  # 6 lfm serve-over
+        "05.01.0060": ("pcs", 8.0),  # 8 NRWG rooflights
+        "08.01.0060": ("pcs", 6.0),  # 6 steel doors T30/RC2
+        "14.02.0050": ("pcs", 4.0),  # 4 wall hydrants type S
+        "18.05.0010": ("pcs", 19.0),  # 19 trees
+        "04.03.0010": ("m2", 120.0),  # plant mezzanine 120 m2
+        "14.01.0020": ("m2", 1650.0),  # underfloor heating 1,650 m2
+        "17.01.0020": ("m2", 1440.0),  # PV-covered roof = 60 % of suitable area
+        "20.01.0030": ("pcs", 4.0),  # 4 self-checkouts (+ 2 belt checkouts = 6)
+        "20.02.0010": ("pcs", 3.0),  # 3 bake-off ovens a 18 kW
+        "21.01.0010": ("pcs", 2.0),  # 2 reverse-vending machines
+    }
+    for oz, (unit, qty) in expected.items():
+        assert oz in rows, f"rule-derived row {oz} missing from the LV"
+        got_unit, got_qty = rows[oz]
+        assert got_unit == unit, f"{oz}: unit {got_unit!r} != {unit!r}"
+        assert got_qty == qty, f"{oz}: quantity {got_qty} != derived {qty}"
+
+
 def test_positions_are_structurally_sound() -> None:
     """OZ scheme, units, money precision and uniqueness across all rows."""
     template = _template()
@@ -177,7 +347,7 @@ def test_positions_are_structurally_sound() -> None:
             assert -rate_dec.as_tuple().exponent <= 2, f"{oz}: rate {rate} has sub-cent digits"
             row_total = Decimal(str(qty)) * rate_dec
             assert row_total == row_total.quantize(Decimal("0.01")), f"{oz}: total {row_total} not exact to the cent"
-    assert total_rows >= 80, f"only {total_rows} positions (pack bar is 80)"
+    assert total_rows >= 300, f"only {total_rows} positions (full-LV bar is 300)"
     assert len(ordinals) == len(set(ordinals)), "duplicate OZ ordinals"
 
 
@@ -218,7 +388,7 @@ async def test_install_is_end_to_end_and_idempotent() -> None:
         result = await install_demo_project(session, DEMO_ID)
         assert result.get("already_installed") is not True
         assert result["sections"] == len(_VE_BUDGETS)
-        assert result["positions"] >= 80
+        assert result["positions"] >= 300
         assert Decimal(str(result["grand_total"])) == _LV_GRAND_TOTAL
 
         project = (
