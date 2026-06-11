@@ -1122,13 +1122,18 @@ function PartnerPackCard({ pack, index, isActive, activeSource }: PartnerPackCar
           </p>
         )}
 
-        {/* Validation standards */}
+        {/* Reference standards.
+            These come from the pack's documentation metadata (regulator_refs
+            or the raw validation_rule_pack slugs) and are NOT proof that the
+            engine enforces them - for most packs none of them map to a
+            registered rule set. Label them as reference-only and point at the
+            apply dialog, which lists the rule packs that genuinely run. */}
         {standards.length > 0 && (
           <div className="mt-3">
             <div className="flex items-center gap-1.5 mb-1.5">
               <ShieldCheck size={12} className="text-content-tertiary" style={{ color: accent }} />
               <span className="text-2xs font-semibold text-content-tertiary uppercase tracking-wider">
-                {t('modules.partner_pack_standards', { defaultValue: 'Standards' })}
+                {t('modules.partner_pack_standards', { defaultValue: 'Reference standards' })}
               </span>
             </div>
             <div className="flex items-center gap-1 flex-wrap">
@@ -1139,6 +1144,12 @@ function PartnerPackCard({ pack, index, isActive, activeSource }: PartnerPackCar
                 <Badge variant="neutral" size="sm">+{standards.length - 6}</Badge>
               )}
             </div>
+            <p className="mt-1.5 text-2xs text-content-tertiary leading-snug">
+              {t('modules.partner_pack_standards_note', {
+                defaultValue:
+                  'Listed for reference. Enforced validation rules are shown when you activate the pack.',
+              })}
+            </p>
           </div>
         )}
 
