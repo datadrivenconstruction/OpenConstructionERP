@@ -1,0 +1,950 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mit XMLSpy v2012 sp1 (x64) (http://www.altova.com) von Bernhard Rath (Ing.-Büro B. Rath) bearbeitet -->
+<!-- 
+GAEB_DA_XML 3.2 2012-01
+
+2013-09-04 Bearbeiter: Bernhard Rath
+Änderungen laut Protokoll Telko 2013.09.02
+- Datentypenänderung in LIB angepasst.
+- AwardInfo.BoQID aktiviert
+
+
+2013-05-23 Bearbeiter: Ladislav Ostry, Martin Hubert
+- tgSubDescr - angepasst auf Lib Änderungen
+
+Bearbeiter: Andreas Schmidt, Ladislav Ostry
+Elemente in die selbe Reihenfolge wie in X81 gebracht.
+
+2012-01-30 Bernhard Rath
+BoQInfo.CostType entfernt
+Item.CostApproach entfernt
+
+2012-01-31 Bernhard Rath
+DP X83Z Angebotsaufforderung (Zeitvertragsarbeiten) eingefügt
+
+2012-02-24 Bearbeiter: Bernhard Rath
+Vorhalteleistungen unter tgItem aktiviert.
+
+2012-06-06 Bearbeiter: Bernhard Rath
+QtyDeterm (Mengenermittlung) in tgItem aktiviert
+
+2012-10-20 Bearbeiter: Bernhard Rath
+QtyDetermInfo (Mengenermittlung) in tgBoQInfo aktiviert
+
+2012-11-13 Bearbeiter: Bernhard Rath
+Unter tgTextComplement die Attribute aus der Lib eingefügt
+Unter tgTextComplement das Attribut Empty auf required gestellt.
+
+2013-04-26 Bearbeiter: Bernhard Rath
+ComplCaption und ComplTail auf Optional gesetzt.
+
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.gaeb.de/GAEB_DA_XML/DA83/3.2" targetNamespace="http://www.gaeb.de/GAEB_DA_XML/DA83/3.2" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:redefine schemaLocation="GAEB_DA_XML_00_3.2_2012-01_Lib.xsd">
+		<xs:simpleType name="tgDP">
+			<xs:restriction base="tgDP">
+				<xs:enumeration value="83">
+					<xs:annotation>
+						<xs:documentation>Angebotsaufforderung</xs:documentation>
+					</xs:annotation>
+				</xs:enumeration>
+			</xs:restriction>
+		</xs:simpleType>
+		<xs:complexType name="tgAward">
+			<xs:complexContent>
+				<xs:restriction base="tgAward">
+					<xs:sequence>
+						<xs:element name="DP" type="tgDP">
+							<xs:annotation>
+								<xs:documentation>GAEB-Datenaustauschphase</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="AwardInfo" type="tgAwardInfo" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Informationen zur Vergabe</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="OWN" type="tgOWN" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Informationen zum Auftraggeber</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="Requester" type="tgRequester" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Informationen zum Bedarfstraeger</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:sequence minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="CnstSite" type="tgCnstSite">
+								<xs:annotation>
+									<xs:documentation>Informationen zum Ausfuehrungsort</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="NotifSite" type="tgNotifSite" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Informationen zum Benachrichtigungsort</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="AddText" type="tgAddText" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Zusaetzlicher Text; Zusätzliche Textinformation können hier abgelegt werden.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="BoQ" type="tgBoQ" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Leistungsverzeichnis</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="WgChange" type="tgWgChange" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Lohnaenderung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgAwardInfo">
+			<xs:complexContent>
+				<xs:restriction base="tgAwardInfo">
+					<xs:sequence>
+						<xs:element name="BoQID" type="tgGUID" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>GUID für das LV</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="Cat" type="tgCat" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Vergabeart</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="SpecialType" type="tgSpecialType" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Besondere Vergabeart</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:sequence minOccurs="0">
+							<xs:element name="Cur" type="tgCur">
+								<xs:annotation>
+									<xs:documentation>Waehrung</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="CurLbl" type="tgCurLbl" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Bezeichnung der Waehrung</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="BidDate" type="tgDate" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Angebotsdatum</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:sequence minOccurs="0">
+							<xs:element name="OpenDate" type="tgDate">
+								<xs:annotation>
+									<xs:documentation>Datum des Eroeffnungstermins</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="OpenTime" type="tgTime" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Uhrzeit des Eroeffnungstermins</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="EvalEnd" type="tgDate" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Ende der Zuschlagsfrist</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="SubmLoc" type="tgNormalizedString60" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Ort der Abgabe</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CnstStart" type="tgDate" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Voraussichtlicher Beginn der Ausfuehrungszeit</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CnstEnd" type="tgDate" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Voraussichtliches Ende der Ausfuehrungszeit</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="ContrNo" type="tgNormalizedString20" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Auftragsnummer</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="ContrDate" type="tgDate" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Auftragsdatum</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="AcceptType" type="tgNormalizedString60" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Art der Abnahme</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="AcceptDate" type="tgDate" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Datum der Abnahme</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="WarrDur" type="tgWarrDur" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Dauer der Gewaehrleistung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="WarrUnit" type="tgWarrUnit" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Einheit der Gewaehrleistung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="WarrEnd" type="tgDate" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Ende der Gewaehrleistung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="PerformPcnt" type="tgDecimal_9_6" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Ausfuehrungsbuergschaft als Anteil der Auftragssumme einschl. Nachtraege in Prozent</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="WarrantPcnt" type="tgDecimal_9_6" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Gewaehrleistungsbuergschaft als Anteil der Abrechnungssumme in Pro-zent</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="COInfo" type="tgCOInfo" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Informationen zum Nachtrag</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="MaintInfo" type="tgMaintInfo" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Nur bei Instandhaltung: Informationen zur Instandhaltung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="MastAgrInfo" type="tgMastAgrInfo" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Nur bei Rahmenvertrag: Informationen zum Rahmenvertrag</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgBoQInfo">
+			<xs:complexContent>
+				<xs:restriction base="tgBoQInfo">
+					<xs:sequence>
+						<xs:element name="Name" type="tgNormalizedString20">
+							<xs:annotation>
+								<xs:documentation>Name des Leistungsverzeichnisses</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="LblBoQ" type="tgNormalizedString60">
+							<xs:annotation>
+								<xs:documentation>Bezeichnung des Leistungsverzeichnisses</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CPVCode" type="tgCPVCode" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>CPV-Nomenklatur</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:sequence minOccurs="0">
+							<xs:element name="CONo" type="tgCONo">
+								<xs:annotation>
+									<xs:documentation>Nachtragsnummer</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="COStatus" type="tgCOStatus">
+								<xs:annotation>
+									<xs:documentation>Status des Nachtrags</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="Date" type="tgDate" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Datum</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="OutlCompl" type="tgOutlCompl">
+							<xs:annotation>
+								<xs:documentation>Kurz- und Langtext</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="BoQBkdn" type="tgBoQBkdn" maxOccurs="7">
+							<xs:annotation>
+								<xs:documentation>Informationen zur Gliederung des LV</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:sequence minOccurs="0">
+							<xs:element name="NoUPComps" type="tgNoUPComps">
+								<xs:annotation>
+									<xs:documentation>Anzahl der Einheitspreisanteile</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="LblUPComp1" type="tgLblUpComp" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Bezeichnung des 1. EP-Anteils</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="LblUPComp2" type="tgLblUpComp" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Bezeichnung des 2. EP-Anteils</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="LblUPComp3" type="tgLblUpComp" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Bezeichnung des 3. EP-Anteils</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="LblUPComp4" type="tgLblUpComp" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Bezeichnung des 4. EP-Anteils</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="LblUPComp5" type="tgLblUpComp" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Bezeichnung des 5. EP-Anteils</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="LblUPComp6" type="tgLblUpComp" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Bezeichnung des 6. EP-Anteils</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="LblTime" type="tgNormalizedString20" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Bezeichnung der Zeiteinheit</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CtlgAssign" type="tgCtlgAssign" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Katalogzuordnung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="Ctlg" type="tgCtlg" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Katalog</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="QtyDetermInfo" type="tgQtyDetermInfo" minOccurs="0"/>
+					</xs:sequence>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgRemark">
+			<xs:complexContent>
+				<xs:restriction base="tgRemark">
+					<xs:sequence>
+						<xs:element name="Description" type="tgDescription">
+							<xs:annotation>
+								<xs:documentation>Textorganisation</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CONo" type="tgCONo" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Nachtragsnummer</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="ID" type="xs:ID" use="required"/>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgPerfDescr">
+			<xs:complexContent>
+				<xs:restriction base="tgPerfDescr">
+					<xs:sequence>
+						<xs:element name="PerfNo" type="tgPerfNo">
+							<xs:annotation>
+								<xs:documentation>Nummer der Ausfuehrungsbeschreibung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="PerfLbl" type="tgNormalizedString55">
+							<xs:annotation>
+								<xs:documentation>Bezeichnung d. Ausfuehrungsbeschreibung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="Description" type="tgDescription" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Textorganisation</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CONo" type="tgCONo" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Nachtragsnummer</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="ID" type="xs:ID" use="required"/>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgBoQCtgy">
+			<xs:complexContent>
+				<xs:restriction base="tgBoQCtgy">
+					<xs:sequence>
+						<xs:element name="LblTx" type="tgMLText">
+							<xs:annotation>
+								<xs:documentation>Bezeichnung des LV-Bereichs</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CPVCode" type="tgCPVCode" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>CPV-Nomenklatur</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:sequence minOccurs="0">
+							<xs:element name="CONo" type="tgCONo">
+								<xs:annotation>
+									<xs:documentation>Nachtragsnummer</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="COStatus" type="tgCOStatus">
+								<xs:annotation>
+									<xs:documentation>Status des Nachtrags</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:sequence minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>nur bei Grund-/Alternativbereich</xs:documentation>
+							</xs:annotation>
+							<xs:element name="ALNBGroupNo" type="tgALNGroupNo">
+								<xs:annotation>
+									<xs:documentation>Gruppennummer der Zuordnungszahl zur Kennzeichnung zusammengehoerender Grund- und alternativer Ausfuehrungen</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="ALNBSerNo" type="tgALNSerNo">
+								<xs:annotation>
+									<xs:documentation>Laufende Nummer der Zuordnungszahl</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="NotApplBoQ" type="tgNotAppl" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>LV-Bereich entfaellt</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CtlgAssign" type="tgCtlgAssign" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Katalogzuordnung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="BoQBody" type="tgBoQBody" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>LV-Hauptteil</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="ID" type="xs:ID" use="required"/>
+					<xs:attribute name="RNoPart" type="tgRNoPart" use="required">
+						<xs:annotation>
+							<xs:documentation>Teil-OZ </xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgLotGrp">
+			<xs:complexContent>
+				<xs:restriction base="tgLotGrp">
+					<xs:sequence>
+						<xs:element name="LotGrNo" type="tgNormalizedString">
+							<xs:annotation>
+								<xs:documentation>Nummer der Losgruppe</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="RefLotNo" type="tgRefBoQCtgy" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Verweis auf Los</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="ID" type="xs:ID" use="required"/>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgItemlist">
+			<xs:complexContent>
+				<xs:restriction base="tgItemlist">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:element name="Remark" type="tgRemark">
+							<xs:annotation>
+								<xs:documentation>Hinweistext</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="PerfDescr" type="tgPerfDescr">
+							<xs:annotation>
+								<xs:documentation>Ausfuehrungsbeschreibung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="Item" type="tgItem">
+							<xs:annotation>
+								<xs:documentation>Position</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="MarkupItem" type="tgMarkupItem">
+							<xs:annotation>
+								<xs:documentation>Zuschlagsposition</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:choice>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgItem">
+			<xs:complexContent>
+				<xs:restriction base="tgItem">
+					<xs:sequence>
+						<xs:sequence minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Nur bei Grund-/Alternativposition.</xs:documentation>
+							</xs:annotation>
+							<xs:element name="ALNGroupNo" type="tgALNGroupNo">
+								<xs:annotation>
+									<xs:documentation>Gruppennummer der Zuordnungszahl zur Kennzeichnung zusammengehoerender Grund- und alternativer Ausfuehrungen.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="ALNSerNo" type="tgALNSerNo">
+								<xs:annotation>
+									<xs:documentation>Laufende Nummer der Zuordnungszahl</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="Provis" type="tgProvis" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Bedarfsposition</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="LumpSumItem" type="tgYesNo" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Kennzeichen Pauschalposition</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="HourIt" type="tgHourIt" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Kennzeichen Stundenlohnarbeiten</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="KeyIt" type="tgKeyIt" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Kennzeichen Schwerpunktposition</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="UPBkdn" type="tgYesNo" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Aufforderung zur EP-Aufgliederung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="MarkupIt" type="tgYesNo" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Kennzeichen fuer zu bezuschlagen</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:sequence minOccurs="0">
+							<xs:element name="CONo" type="tgCONo">
+								<xs:annotation>
+									<xs:documentation>Nachtragsnummer</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="COStatus" type="tgCOStatus">
+								<xs:annotation>
+									<xs:documentation>Status des Nachtrags</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="RefDescr" type="tgRefDescr" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Kennzeichen Bezugs-/ Wiederholungsbeschreibung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:choice minOccurs="0">
+							<xs:element name="RefRNo" type="tgRefItem">
+								<xs:annotation>
+									<xs:documentation>Verweis auf Bezugsposition</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="RefPerfNo" type="tgRefItem">
+								<xs:annotation>
+									<xs:documentation>Verweis auf Ausfuehrungsbeschreibung</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:choice>
+						<xs:sequence minOccurs="0">
+							<xs:element name="HoldOutType" type="tgHoldOutType">
+								<xs:annotation>
+									<xs:documentation>Art der Vorhalteleisutng
+						
+    BaseUseItem = Grundeinsatzposition,
+    ExtUseItem = Verlängerungseinsatzposition 
+    RentUseItem = Vermietposition. 						</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="UseDur" type="tgDecimal_13_2">
+								<xs:annotation>
+									<xs:documentation>Einsatzdauer in Zeiteinheiten</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="UseDurLblTime" type="tgUseDurLblTime">
+								<xs:annotation>
+									<xs:documentation>Bezeichnung der Zeiteinheit der Einsatzdauer</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="RefBaseItem" type="tgRefItem" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Verbindung zu einer Grundeinsatzposition</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:choice minOccurs="0">
+							<xs:sequence>
+								<xs:element name="QtyTBD" type="tgYes">
+									<xs:annotation>
+										<xs:documentation>Kennzeichen Freie Menge</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+							<xs:sequence>
+								<xs:element name="Qty" type="tgDecimal_11_3">
+									<xs:annotation>
+										<xs:documentation>Menge</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="QtySplit" type="tgQtySplit" minOccurs="0" maxOccurs="unbounded">
+									<xs:annotation>
+										<xs:documentation>Zuordnung der Teilmengen</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:choice>
+						<xs:element name="QU" type="tgNormalizedString4">
+							<xs:annotation>
+								<xs:documentation>Mengeneinheit</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CtlgAssign" type="tgCtlgAssign" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Katalogzuordnung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="VAT" type="tgDecimal_5_2" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Falls dieses Element fehlt, gilt die übergeordnete MwSt.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="Description" type="tgDescription" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Textorganisation</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:sequence minOccurs="0">
+							<xs:element name="SumDescr" type="tgYes">
+								<xs:annotation>
+									<xs:documentation>Kennzeichen Leitbeschreibung</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="SubDescr" type="tgSubDescr" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Unterbeschreibung </xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="Product" type="tgProduct" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Produktinformation</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="QtyDeterm" type="tgQtyDeterm" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Mengenermittlung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="ID" type="xs:ID" use="required"/>
+					<xs:attribute name="RNoPart" type="tgRNoPart" use="required">
+						<xs:annotation>
+							<xs:documentation>Teil-OZ </xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+					<xs:attribute name="RNoIndex" type="tgRNoIndex"/>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgSubDescr">
+			<xs:complexContent>
+				<xs:restriction base="tgSubDescr">
+					<xs:sequence>
+						<xs:element name="SubDNo" type="tgSubDNo">
+							<xs:annotation>
+								<xs:documentation>Nummer der Unterbeschreibung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="Description" type="tgDescription">
+							<xs:annotation>
+								<xs:documentation>Textorganisation</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:sequence minOccurs="0">
+							<xs:element name="QtySpec" type="tgYes">
+								<xs:annotation>
+									<xs:documentation>Angabe der Menge erforderlich</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="QtyTBD" type="tgYes" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Kennzeichen Freie Menge</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:sequence minOccurs="0">
+							<xs:element name="Qty" type="tgDecimal_11_3">
+								<xs:annotation>
+									<xs:documentation>Menge</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="QU" type="tgNormalizedString4" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Mengeneinheit</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="UPSpec" type="tgYesNo" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Angabe des Einheitspreises erforderlich</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="UPBkdn" type="tgYesNo" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Aufforderung zur EP-Aufgliederung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgMarkupItem">
+			<xs:complexContent>
+				<xs:restriction base="tgMarkupItem">
+					<xs:sequence>
+						<xs:sequence minOccurs="0">
+							<xs:element name="ALNGroupNo" type="tgALNGroupNo">
+								<xs:annotation>
+									<xs:documentation>Gruppennummer der Zuordnungszahl zur Kennzeichnung zusammengehoerender Grund- und alternativer Ausfuehrungen.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="ALNSerNo" type="tgALNSerNo">
+								<xs:annotation>
+									<xs:documentation>Laufende Nummer der Zuordnungszahl</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="Provis" type="tgProvis" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Bedarfsposition</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="HourIt" type="tgHourIt" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Kennzeichen Stundenlohnarbeiten</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="KeyIt" type="tgKeyIt" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Kennzeichen Schwerpunktposition</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:sequence minOccurs="0">
+							<xs:element name="CONo" type="tgCONo">
+								<xs:annotation>
+									<xs:documentation>Nachtragsnummer</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="COStatus" type="tgCOStatus">
+								<xs:annotation>
+									<xs:documentation>Status des Nachtrags</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:element name="RefDescr" type="tgRefDescr" minOccurs="0"/>
+						<xs:choice minOccurs="0">
+							<xs:element name="RefRNo" type="tgRefItem">
+								<xs:annotation>
+									<xs:documentation>Verweis auf Bezugsposition</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="RefPerfNo" type="tgRefItem">
+								<xs:annotation>
+									<xs:documentation>Verweis auf Ausfuehrungsbeschreibung</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:choice>
+						<xs:element name="MarkupType" type="tgMarkupType">
+							<xs:annotation>
+								<xs:documentation>Zuschlagsart</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="MarkupSubQty" type="tgMarkupSubQty" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Zu bezuschlagende Teilmengen</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="Description" type="tgDescription">
+							<xs:annotation>
+								<xs:documentation>Textorganisation</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CtlgAssign" type="tgCtlgAssign" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Katalogzuordnung</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="ID" type="xs:ID" use="required"/>
+					<xs:attribute name="RNoPart" type="tgRNoPart" use="required">
+						<xs:annotation>
+							<xs:documentation>Teil-OZ </xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+					<xs:attribute name="RNoIndex" type="tgRNoIndex"/>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgDescription">
+			<xs:complexContent>
+				<xs:restriction base="tgDescription">
+					<xs:sequence>
+						<xs:choice minOccurs="0">
+							<xs:element name="STLBBau" type="tgSTLBBau">
+								<xs:annotation>
+									<xs:documentation>Schluessel STLB-Bau</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="StLNo" type="tgStLNo">
+								<xs:annotation>
+									<xs:documentation>Standardleistungsnummer (StLB/STLK)</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:choice>
+						<xs:element name="WICNo" type="tgNormalizedString40" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Katalognummer (Mutter-LV) </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:choice>
+							<xs:element name="CompleteText" type="tgCompleteText">
+								<xs:annotation>
+									<xs:documentation>Kurz- und Langtext</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="OutlineText" type="tgOutlineText">
+								<xs:annotation>
+									<xs:documentation>Kurztext</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:choice>
+					</xs:sequence>
+					<xs:attribute name="ID" type="tgGUID">
+						<xs:annotation>
+							<xs:documentation>Die ID muss in 83 - > 84 Austausch erhalten bleiben. Damit können Descriptions eindeutig Identifiziert werden.</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgTextComplement">
+			<xs:complexContent>
+				<xs:restriction base="tgTextComplement">
+					<xs:sequence>
+						<xs:element name="ComplCaption" type="tgMLText" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Textergaenzung Anfang</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:choice minOccurs="0">
+							<xs:element name="ComplBodyDec" type="tgComplBodyDec">
+								<xs:annotation>
+									<xs:documentation>In ComplBody wird der Inhalt wiederholt</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="ComplBodyInt" type="tgComplBodyInt">
+								<xs:annotation>
+									<xs:documentation>In ComplBody wird der Inhalt wiederholt</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:choice>
+						<xs:element name="ComplBody" type="tgMLText">
+							<xs:annotation>
+								<xs:documentation>Textergaenzung Hauptteil</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="ComplTail" type="tgMLText" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Textergaenzung Ende</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="MarkLbl" type="tgInteger" use="required"/>
+					<xs:attribute name="Kind" type="tgAttKind" use="required"/>
+					<xs:attribute name="Empty" type="tgYes" use="required"/>
+					<xs:attribute name="ArtChrIdent" type="tgInteger">
+						<xs:annotation>
+							<xs:documentation>Identifikator des STLB-Bau Beschreibungsmerkmals</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+		<xs:complexType name="tgGAEB">
+			<xs:annotation>
+				<xs:documentation>Aufgestellt vom Gemeinsamen Ausschuss Elektronik im Bauwesen (GAEB) © 2002 - 2013 by DIN Deutsches Institut fuer Normung e. V.</xs:documentation>
+			</xs:annotation>
+			<xs:complexContent>
+				<xs:restriction base="tgGAEB">
+					<xs:sequence>
+						<xs:element name="GAEBInfo" type="tgGAEBInfo">
+							<xs:annotation>
+								<xs:documentation>Informationen zum GAEB-Datenaustausch</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="PrjInfo" type="tgPrjInfo" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Informationen zum Projekt</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="Award" type="tgAward">
+							<xs:annotation>
+								<xs:documentation>Vergabe
+In diesem Objekt werden die Informationen des Vergabeverfahrens abgelegt. 
+Das Objekt kann in den Datenaustauschphasen D81-D88 verwendet werden.</xs:documentation>
+							</xs:annotation>
+							<!--
+								<xs:unique name="Constraint_Description_ID">
+									<xs:selector xpath=".//Description | PreBoQText | PostBoQText"/>
+									<xs:field xpath="@ID"/>
+								</xs:unique>
+								-->
+						</xs:element>
+						<xs:element name="AddText" type="tgAddText" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Zusaetzlicher Text; Zusätzliche Textinformation können hier abgelegt werden. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:restriction>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:redefine>
+	<!--GAEB-->
+	<xs:element name="GAEB" type="tgGAEB"/>
+	<!--=========================================================================================================-->
+</xs:schema>

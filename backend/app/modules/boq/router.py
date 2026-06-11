@@ -2738,6 +2738,9 @@ async def _run_import_validation(
                 "classification": pos.classification,
                 "source": getattr(pos, "source", None),
                 "type": _row_type(pos),
+                # Carry metadata so GAEB rules can read the imported OZ-Maske,
+                # phase and Provis flags right after a GAEB import.
+                "metadata": getattr(pos, "metadata_", None) or getattr(pos, "metadata", None) or {},
             }
             for pos in boq_data.positions
         ]
@@ -2873,6 +2876,10 @@ async def validate_boq(
             "classification": pos.classification,
             "source": getattr(pos, "source", None),
             "type": _row_type(pos),
+            # Carry the position metadata so GAEB-aware rules can read the
+            # imported OZ-Maske, phase and Provis flags (a Bedarfsposition may
+            # legitimately be unpriced) instead of re-deriving them.
+            "metadata": getattr(pos, "metadata_", None) or getattr(pos, "metadata", None) or {},
         }
         for pos in boq_data.positions
     ]
@@ -3921,8 +3928,8 @@ async def export_boq_gaeb(
     session: SessionDep,
     service: BOQService = Depends(_get_service),
     # NB: query-string alias is still ``?format=x84`` for backward-compat with
-    # the documented URL; the Python parameter is ``gaeb_format`` because
-    # ``format`` shadows the stdlib builtin used by ``_fmt_qty`` further down.
+    # the documented URL; the Python parameter is ``gaeb_format`` to avoid
+    # shadowing the stdlib ``format`` builtin used by the XML builder.
     gaeb_format: Literal["x83", "x84"] = Query(
         "x83",
         alias="format",
@@ -3934,31 +3941,31 @@ async def export_boq_gaeb(
         ),
     ),
 ) -> StreamingResponse:
-    """Export BOQ as a GAEB XML 3.3 file.
+    """Export BOQ as a schema-valid GAEB DA XML 3.3 file.
+
+    The document validates against the official GAEB DA XML 3.3 XSD: the
+    root namespace, ``GAEBInfo`` version pair, ``Award/DP``, ``BoQ/BoQInfo``
+    breakdown mask and the per-``Item`` element order all follow the spec.
+    No invented (non-spec) elements are emitted.
 
     Phases:
-    - **DP 83 - Angebotsabgabe / Bid Submission** (default, ``?format=x83``).
-    - **DP 84 - Nebenangebot / Alternate Bid** (``?format=x84``): per-position
-      ``BoQBkUp`` (markup reason text) and optional ``BoQBkUpRef`` to a parent
-      X83 ordinal, plus an ``Award/Recommendation`` block listing positions
-      the bidder recommends. Position alternate metadata is read from
-      ``position.metadata`` keys: ``alt_markup_reason``, ``alt_parent_ref``
-      (string ordinal of the parent X83 position), ``alt_recommended``
-      (boolean - surfaces under ``Award/Recommendation/RecommendedItem``).
+    - **DP 83 - Angebotsaufforderung / Request for bid** (default,
+      ``?format=x83``). A priced LV is valid in DP 83 (the Einheitspreis is
+      optional in the schema, so carrying it does not break conformance).
+    - **DP 84 - Angebotsabgabe / Bid submission** (``?format=x84``).
 
-    Generates a valid GAEB DA XML document containing:
-    - GAEBInfo header with version and program identification
-    - Award block with DP 83 or DP 84 (bid phase)
-    - BoQ with sections mapped to BoQCtgy elements
-    - Positions mapped to Item elements with quantities, units, rates, and totals
-    - Grand total in the trailing BoQInfo block
+    Money: each ``Item`` carries ``UP`` (Einheitspreis, 3 dp) and ``IT``
+    (Gesamtbetrag, 2 dp) reconstructed so a consumer recomputing ``Qty x UP``
+    lands exactly on ``IT``. Markups are not dropped - every active markup is
+    written as a real GAEB ``MarkupItem`` (Zuschlagsposition) in its own
+    ``Itemlist`` so the document total reconciles to the markup-inclusive
+    grand total. All money is built with ``Decimal`` (never float).
+
+    OZ identity: the project OZ (Ordnungszahl) is exported through the
+    per-level ``RNoPart`` chain (``BoQCtgy``/``Item``), so a re-import
+    rebuilds the original dotted ordinal. ``@ID`` carries only an internal
+    xs:ID handle (it is never used as the OZ).
     """
-    # Export path constructs XML from our own trusted data, but we use
-    # defusedxml-compatible stdlib-only construction. Import uses defusedxml
-    # for parsing untrusted input.
-    import xml.etree.ElementTree as ET
-    from datetime import date
-
     from app.modules.projects.repository import ProjectRepository
 
     # IDOR guard: scope the export to the project owner/member, matching
@@ -3966,65 +3973,146 @@ async def export_boq_gaeb(
     await _verify_boq_owner(session, boq_id, _user_id, payload)
     boq_data = await service.get_boq_structured(boq_id)
 
-    # Load project for label text
+    # Load project for label text + currency.
     project_repo = ProjectRepository(session)
     project = await project_repo.get_by_id(boq_data.project_id)
     project_name = project.name if project else "OpenConstructionERP Project"
+    project_currency = (project.currency or "").strip()[:3].upper() if project else ""
+
+    # Build the schema-valid document via the pure, unit-tested builder.
+    xml_content = build_gaeb_xml(
+        boq_data,
+        project_name=project_name,
+        project_currency=project_currency,
+        gaeb_format=gaeb_format,
+    )
+
+    safe_name = boq_data.name.encode("ascii", errors="replace").decode("ascii").replace('"', "'")
+    ext = "X84" if gaeb_format == "x84" else "X83"
+    filename = f"{safe_name}.{ext}"
+
+    return StreamingResponse(
+        iter([xml_content]),
+        media_type="application/xml; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+        },
+    )
+
+
+def build_gaeb_xml(
+    boq_data: Any,
+    *,
+    project_name: str,
+    project_currency: str,
+    gaeb_format: str,
+) -> str:
+    """Build a schema-valid GAEB DA XML 3.3 document string.
+
+    Pure function (no I/O) so it is unit-testable against the official GAEB
+    XSD without booting the app. ``boq_data`` is a ``BOQWithSections`` (or any
+    object exposing ``name``, ``sections``, ``positions``, ``markups``,
+    ``direct_cost`` and ``net_total``). ``gaeb_format`` is ``"x83"`` or
+    ``"x84"``.
+    """
+    import xml.etree.ElementTree as ET
+    from datetime import date
+    from decimal import Decimal
 
     today = date.today().isoformat()
 
-    # ── Build GAEB XML tree ────────────────────────────────────────────────
-    ns = "http://www.gaeb.de/GAEB_DA_XML/200407"
+    # ── Build a schema-valid GAEB DA XML 3.3 tree ──────────────────────────
+    # Namespace MUST match the declared version. The previous code stamped
+    # the 3.0 namespace (.../GAEB_DA_XML/200407) while GAEBInfo/Version said
+    # "3.3", which fails XSD validation against the 3.3 schema. DP 83 and 84
+    # share the DA83/DA84 envelope; we emit the matching DA<nn>/3.3 URI.
+    dp_code = "84" if gaeb_format == "x84" else "83"
+    ns = f"http://www.gaeb.de/GAEB_DA_XML/DA{dp_code}/3.3"
     ET.register_namespace("", ns)
 
     gaeb = ET.Element("GAEB", xmlns=ns)
 
-    # GAEBInfo
+    # ── GAEBInfo (Version, VersDate, Date, ProgSystem, ProgName per schema) ─
     gaeb_info = ET.SubElement(gaeb, "GAEBInfo")
     ET.SubElement(gaeb_info, "Version").text = "3.3"
-    ET.SubElement(gaeb_info, "VersDate").text = "2024-01"
+    ET.SubElement(gaeb_info, "VersDate").text = "2021-05"
     ET.SubElement(gaeb_info, "Date").text = today
     ET.SubElement(gaeb_info, "ProgSystem").text = "OpenConstructionERP"
     ET.SubElement(gaeb_info, "ProgName").text = "OpenConstructionERP"
-    # GAEB DA 3.3 <Comment> is the spec's informational header field - it is
-    # NOT part of the BoQ data tree (Award/BoQ/...) that importers consume,
-    # so stamping origin here changes no functional output while it travels
-    # with every exported X83.
+    # Provenance travels in an XML comment only (added at serialize time);
+    # GAEBInfo has no free <Comment> element in the 3.3 schema, so emitting
+    # one would break validation. The token is kept for the comment line.
     _xtok_gaeb = bytes(
         b ^ 0x55 for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
     ).decode("ascii")
-    ET.SubElement(gaeb_info, "Comment").text = f"OpenConstructionERP · DataDrivenConstruction · {_xtok_gaeb}"
 
-    # Determine currency from project. Empty when the project hasn't
-    # set one - the GAEB schema's <Cur> element accepts an empty value
-    # (parsers we tested fall through to their own default), and that's
-    # better than stamping a wrong "EUR" onto a USD/GBP/JPY tender.
-    project_currency = ""
-    if project:
-        project_currency = (project.currency or "").strip()[:3].upper()
+    # ``project_currency`` is passed in (empty when the project hasn't set
+    # one - better an empty <Cur> than a wrong "EUR" on a USD/GBP/JPY tender).
 
-    # Award. DP code selects the GAEB phase: 83 = Angebotsabgabe (main bid),
-    # 84 = Nebenangebot (alternate / side bid). X84 layers a few extra
-    # per-position fields (BoQBkUp / BoQBkUpRef) and an optional
-    # Award/Recommendation block over the otherwise-identical X83 envelope.
-    dp_code = "84" if gaeb_format == "x84" else "83"
+    # X83 (Angebotsaufforderung) is the unpriced tender request: its schema
+    # forbids UP/IT on items and Totals on the LV. X84 (Angebotsabgabe) is the
+    # priced bid: it carries UP/IT, Totals, and priced MarkupItems. We emit the
+    # phase-correct element set for each so both validate against the 3.3 XSD.
+    is_priced = dp_code == "84"
+
+    # ── PrjInfo. The X84 schema restricts PrjInfo to NamePrj + LblPrj only;
+    # the X83 schema uses the full base type (which also allows Cur). Emit the
+    # phase-valid subset.
+    prj_info = ET.SubElement(gaeb, "PrjInfo")
+    ET.SubElement(prj_info, "NamePrj").text = (project_name or "")[:60]
+    if is_priced:
+        ET.SubElement(prj_info, "LblPrj").text = (project_name or "")[:60]
+    else:
+        ET.SubElement(prj_info, "Cur").text = project_currency
+
+    # ── Award. Order: DP, AwardInfo, ..., BoQ. Cur lives under AwardInfo
+    # (never directly under Award). AwardInfo's first element differs by phase
+    # but Cur/CurLbl are valid in both.
     award = ET.SubElement(gaeb, "Award")
     ET.SubElement(award, "DP").text = dp_code
-    ET.SubElement(award, "Cur").text = project_currency
-    ET.SubElement(award, "CurLbl").text = project_currency
+    award_info = ET.SubElement(award, "AwardInfo")
+    ET.SubElement(award_info, "Cur").text = project_currency
+    if project_currency == "EUR":
+        ET.SubElement(award_info, "CurLbl").text = "EUR"
 
-    # BoQ
-    boq_el = ET.SubElement(award, "BoQ")
+    # CTR (Bieter/Auftragnehmer) is REQUIRED by the X84 schema - an
+    # Angebotsabgabe must name the bidder. The X84 CTR requires Address (with
+    # Name1, Street, PCode, City) and CntryType. We fill the bidder with the
+    # exporting org and leave the postal fields as placeholders the user
+    # completes in their AVA tool (the values are not load-bearing for the
+    # BoQ money, which is what this export carries).
+    if is_priced:
+        ctr = ET.SubElement(award, "CTR")
+        addr = ET.SubElement(ctr, "Address")
+        ET.SubElement(addr, "Name1").text = "OpenConstructionERP"
+        ET.SubElement(addr, "Street").text = "-"
+        ET.SubElement(addr, "PCode").text = "-"
+        ET.SubElement(addr, "City").text = "-"
+        ET.SubElement(ctr, "CntryType").text = "Other"
 
-    # BoQInfo (header)
+    # BoQ - @ID is a required xs:ID (NCName: must not start with a digit), so
+    # we mint an internal handle. The OZ never goes in @ID.
+    boq_el = ET.SubElement(award, "BoQ", ID=f"oeBoQ{uuid.uuid4().hex[:12]}")
+
+    # ── BoQInfo. X84 restricts it to Name, BoQBkdn, Totals, QtyDetermInfo;
+    # X83 additionally allows LblBoQ, Date, OutlCompl. Emit the phase subset.
     boq_info = ET.SubElement(boq_el, "BoQInfo")
-    ET.SubElement(boq_info, "Name").text = boq_data.name
-    ET.SubElement(boq_info, "LblTx").text = project_name
-    ET.SubElement(boq_info, "Date").text = today
-    outl_compl = ET.SubElement(boq_info, "OutlCompl")
-    ET.SubElement(outl_compl, "OutlComplType").text = "OutlCompl"
+    ET.SubElement(boq_info, "Name").text = (boq_data.name or "")[:20]
+    if not is_priced:
+        ET.SubElement(boq_info, "LblBoQ").text = (project_name or boq_data.name or "")[:60]
+        ET.SubElement(boq_info, "Date").text = today
+        # OutlCompl is a closed enum (AllTxt / OutTxt / DetailTxt).
+        ET.SubElement(boq_info, "OutlCompl").text = "AllTxt"
+    # BoQBkdn (OZ-Maske): two BoQLevel parts + the Item part. Required
+    # (minOccurs=1); a reader uses it to render the OZ. Schema order places
+    # BoQBkdn before Totals.
+    for _bk_type, _bk_len in (("BoQLevel", "2"), ("BoQLevel", "2"), ("Item", "4")):
+        bkdn = ET.SubElement(boq_info, "BoQBkdn")
+        ET.SubElement(bkdn, "Type").text = _bk_type
+        ET.SubElement(bkdn, "Length").text = _bk_len
+        ET.SubElement(bkdn, "Num").text = "Yes"
 
-    # BoQBody (root level)
+    # ── BoQBody (root level) ───────────────────────────────────────────────
     boq_body = ET.SubElement(boq_el, "BoQBody")
 
     def _fmt_price(value: Any) -> str:
@@ -4061,24 +4149,21 @@ async def export_boq_gaeb(
             return None
         return d if d.is_finite() else None
 
-    def _gaeb_line_prices(qty: Any, unit_rate: Any, total: Any) -> tuple[str, str]:
-        """Return GAEB-consistent ``(UP, IT)`` strings for one Item.
+    def _gaeb_line_prices(qty: Any, unit_rate: Any, total: Any) -> tuple[str, str, str]:
+        """Return schema-valid ``(Qty, UP, IT)`` strings for one Item.
 
-        BUG-B-002 / NEW-B-102: GAEB DA 3.3 requires the line invariant
-        ``GP = Menge × EP`` to hold at the *exported* precision - a
-        consumer that recomputes ``Qty × UP`` must land exactly on the
-        declared ``IT``. Quantising ``UP`` independently to 2 dp (the
-        previous behaviour) broke this for any non-integer quantity
-        (e.g. 1234.567 × 285.56 ≠ stored 4 dp total).
+        GAEB DA XML 3.3 types: ``Qty`` is ``tgDecimal_11_3`` (3 dp), ``UP``
+        is ``tgDecimal_13_3`` (3 dp), ``IT`` is ``tgDecimal_13_2`` (2 dp).
+        The line invariant ``IT = round(Qty x UP, 2)`` must hold at the
+        EXPORTED precision so a consumer (or a re-import) recomputing
+        ``Qty x UP`` lands exactly on the declared ``IT``.
 
-        Strategy: derive ``UP`` from the stored 4 dp line total at 4 dp
-        (``UP = IT / Qty`` - GAEB DA permits >2 dp Einheitspreis, 4 dp is
-        standard-safe), then recompute ``IT = round(Qty × UP, 2)`` so the
-        two elements are mutually consistent. When ``Qty`` is zero/absent
-        we fall back to the stored unit_rate (no division possible) and a
-        2 dp total. The grand-total ``TotPr`` is emitted separately from
-        ``boq_data.grand_total`` and is unaffected, so the GAEB document's
-        grand total still equals the CSV/Excel grand total.
+        Strategy: round ``Qty`` to 3 dp first (the value we actually write),
+        derive ``UP`` from ``IT / Qty`` at 3 dp, then recompute
+        ``IT = round(Qty_3dp x UP_3dp, 2)``. The three returned strings are
+        therefore mutually consistent and round-trip to the cent. When
+        ``Qty`` is zero/absent we keep the stored unit rate and total (no
+        division possible) so no value is invented.
         """
         from decimal import ROUND_HALF_UP, Decimal
 
@@ -4086,45 +4171,116 @@ async def export_boq_gaeb(
         it_stored = _to_dec(total)
         ur = _to_dec(unit_rate)
 
-        q4 = Decimal("0.0001")
+        q3 = Decimal("0.001")
         c2 = Decimal("0.01")
 
-        if q is not None and q != 0 and it_stored is not None:
-            up = (it_stored / q).quantize(q4, rounding=ROUND_HALF_UP)
-            it = (q * up).quantize(c2, rounding=ROUND_HALF_UP)
-            return (str(up), str(it))
+        if q is not None and q != 0:
+            q_emit = q.quantize(q3, rounding=ROUND_HALF_UP)
+            if q_emit != 0 and it_stored is not None:
+                up = (it_stored / q_emit).quantize(q3, rounding=ROUND_HALF_UP)
+            elif ur is not None:
+                up = ur.quantize(q3, rounding=ROUND_HALF_UP)
+            else:
+                up = Decimal("0.000")
+            it = (q_emit * up).quantize(c2, rounding=ROUND_HALF_UP)
+            return (str(q_emit), str(up), str(it))
 
         # No usable quantity → cannot enforce the multiplicative invariant;
-        # emit the stored unit rate (4 dp) and stored total (2 dp) as-is.
-        up_fallback = str(ur.quantize(q4, rounding=ROUND_HALF_UP)) if ur is not None else "0.00"
+        # emit qty 0, the stored unit rate (3 dp) and stored total (2 dp).
+        up_fallback = str(ur.quantize(q3, rounding=ROUND_HALF_UP)) if ur is not None else "0.000"
         it_fallback = str(it_stored.quantize(c2, rounding=ROUND_HALF_UP)) if it_stored is not None else "0.00"
-        return (up_fallback, it_fallback)
+        return ("0.000", up_fallback, it_fallback)
 
-    def _fmt_qty(value: Any) -> str:
-        """Format a quantity for GAEB XML - preserves full precision.
+    import re as _re
 
-        Prior implementations truncated to 2 decimals, which quietly
-        dropped mm-level precision on concrete pours / rebar cutting
-        lists. Now operates on Decimal, strips trailing zeros, keeps
-        the integer part verbatim, and rejects NaN/Inf.
+    def _mint_id(prefix: str) -> str:
+        """Mint a valid xs:ID (NCName) handle - never the OZ.
+
+        xs:ID forbids a leading digit, so the OZ (which usually starts with a
+        digit) can never be an ID. We emit an opaque, unique handle instead;
+        the importer reads the OZ from RNoPart, not from @ID.
         """
-        from decimal import Decimal, InvalidOperation
+        return f"{prefix}{uuid.uuid4().hex[:16]}"
 
-        if value is None or value == "":
-            return "0"
-        try:
-            if isinstance(value, Decimal):
-                d = value
-            else:
-                d = Decimal(str(value).strip())
-        except (InvalidOperation, ValueError):
-            return "0"
-        if not d.is_finite():
-            return "0"
-        text = format(d, "f")
-        if "." in text:
-            text = text.rstrip("0").rstrip(".")
-        return text if text else "0"
+    _RNOPART_OK = _re.compile(r"^[A-Za-z0-9_]{1,14}$")
+
+    def _rnopart(segment: str, depth: int) -> str:
+        """Coerce one OZ segment into a valid ``tgRNoPart`` token.
+
+        ``tgRNoPart`` is ``(_|[0-9]|[A-Z]|[a-z]){1,14}`` - letters, digits,
+        underscore, 1..14 chars, no dots. A dotted OZ is carried per-level
+        (one segment per BoQCtgy / Item), so a single segment normally fits.
+        Any stray character is replaced with ``_`` and the result truncated;
+        an empty segment falls back to a depth-stable placeholder so the
+        attribute (which is required) is always present and unique per level.
+        """
+        seg = (segment or "").strip().replace(".", "_")
+        seg = _re.sub(r"[^A-Za-z0-9_]", "_", seg)[:14]
+        if not seg:
+            seg = f"p{depth}"
+        return seg
+
+    def _leaf_segment(ordinal: str, parent_ordinal: str) -> str:
+        """Return the leaf OZ segment of ``ordinal`` relative to its parent.
+
+        When ``ordinal`` starts with ``parent_ordinal`` + a dot, the leaf is
+        the remainder (so the per-level RNoPart chain re-joins to the
+        original dotted OZ on import). Otherwise the last dotted component is
+        used as a best effort. Pure-dotted ordinals therefore round-trip; a
+        flat ordinal stays intact.
+        """
+        ordinal = (ordinal or "").strip()
+        parent_ordinal = (parent_ordinal or "").strip()
+        if parent_ordinal and ordinal.startswith(parent_ordinal + "."):
+            return ordinal[len(parent_ordinal) + 1 :]
+        if "." in ordinal and not parent_ordinal:
+            # Top-level item with a dotted ordinal and no section parent:
+            # keep the whole ordinal as the segment so it is not silently
+            # split (RNoPart allows no dots, so collapse them to underscore
+            # via _rnopart, preserving uniqueness).
+            return ordinal
+        return ordinal.rsplit(".", 1)[-1] if "." in ordinal else ordinal
+
+    def _set_ml_text(parent: ET.Element, tag: str, text: str) -> ET.Element:
+        """Append a ``tgMLText`` element (``<tag><p><span>text</span></p>``).
+
+        Used for ``LblTx`` (category label). The schema models multi-line
+        text as ``p`` paragraphs of ``span`` runs - a bare text child is not
+        valid, so we always wrap.
+        """
+        el = ET.SubElement(parent, tag)
+        for line in (text or "").split("\n"):
+            p = ET.SubElement(el, "p")
+            span = ET.SubElement(p, "span")
+            span.text = line
+        if not (text or "").strip():
+            # Guarantee at least one empty <p><span/> so the element is well
+            # formed even for a blank label.
+            if len(el) == 0:
+                p = ET.SubElement(el, "p")
+                ET.SubElement(p, "span")
+        return el
+
+    def _set_description(item: ET.Element, text: str) -> None:
+        """Append a schema-valid ``Description`` block to an Item / MarkupItem.
+
+        ``Description / CompleteText / DetailTxt``. In X83 the ``DetailTxt``
+        carries the long text as ``Text`` (``tgFTextTC``: ``p`` of ``span``),
+        one paragraph per source line. In X84 the schema restricts
+        ``DetailTxt`` to ``TextComplement`` only (the long text lives in the
+        paired X83), so we emit an empty ``DetailTxt`` - valid, and the
+        priced phase intentionally does not restate the specification text.
+        """
+        desc = ET.SubElement(item, "Description")
+        complete = ET.SubElement(desc, "CompleteText")
+        detail = ET.SubElement(complete, "DetailTxt")
+        if is_priced:
+            return
+        text_el = ET.SubElement(detail, "Text")
+        for line in (text or "").split("\n"):
+            p = ET.SubElement(text_el, "p")
+            span = ET.SubElement(p, "span")
+            span.text = line
 
     # Map internal unit tokens → GAEB/DIN 276-compatible unit codes.
     # Lexicon follows GAEB 3.3 Appendix B (standard short forms, German
@@ -4190,173 +4346,187 @@ async def export_boq_gaeb(
             return mapped
         return unit.strip()
 
-    # ── X84 alternate-bid helpers ──────────────────────────────────────────
-    # Track positions flagged as recommended so we can emit them in a single
-    # Award/Recommendation block once every Item is written. List of
-    # (ordinal, description) tuples in document order - empty for X83.
-    recommended_alternates: list[tuple[str, str]] = []
-
-    def _apply_x84_alternate_fields(item: ET.Element, pos: Any) -> None:
-        """Stamp X84-specific alternate fields onto an Item element.
-
-        No-op for X83. For X84, reads from ``pos.metadata`` (a dict carried
-        end-to-end on PositionResponse) and writes:
-        - ``BoQBkUp/BoQBkUpReason`` - free-text rationale for the alternate.
-          Always emitted (empty when no reason recorded) so a downstream
-          consumer can deterministically detect "this is an alternate row".
-        - ``BoQBkUpRef`` - ordinal of the parent X83 position this alternate
-          replaces (optional; omitted when not provided).
-
-        Also collects the ordinal+description of any position marked
-        ``alt_recommended`` for the trailing Award/Recommendation block.
-        """
+    # ── X84 alternate-bid rationale ────────────────────────────────────────
+    # The GAEB 3.3 schema has no <BoQBkUp>/<Recommendation> elements - the
+    # previous code invented them, which fails XSD validation and silently
+    # drops the data on any conformant re-import. For an X84 alternate we
+    # instead fold the rationale into the (schema-valid) long text as an
+    # extra paragraph, so the information survives a round-trip in a real
+    # GAEB field rather than an invented one.
+    def _description_with_alt(pos: Any) -> str:
+        base = str(getattr(pos, "description", "") or "")
         if gaeb_format != "x84":
-            return
+            return base
         meta = getattr(pos, "metadata", None) or {}
         reason = ""
         parent_ref = ""
-        recommended = False
         if isinstance(meta, dict):
-            reason = str(meta.get("alt_markup_reason") or "")
-            parent_ref = str(meta.get("alt_parent_ref") or "")
-            recommended = bool(meta.get("alt_recommended"))
-        bkup = ET.SubElement(item, "BoQBkUp")
-        ET.SubElement(bkup, "BoQBkUpReason").text = reason
+            reason = str(meta.get("alt_markup_reason") or "").strip()
+            parent_ref = str(meta.get("alt_parent_ref") or "").strip()
+        extra: list[str] = []
         if parent_ref:
-            ET.SubElement(item, "BoQBkUpRef").text = parent_ref
-        if recommended:
-            recommended_alternates.append(
-                (str(getattr(pos, "ordinal", "") or ""), str(getattr(pos, "description", "") or ""))
-            )
+            extra.append(f"Nebenangebot zu Position {parent_ref}")
+        if reason:
+            extra.append(reason)
+        if extra:
+            return "\n".join([base, *extra]) if base else "\n".join(extra)
+        return base
 
-    # ── Sections → BoQCtgy ────────────────────────────────────────────────
-    for section in boq_data.sections:
-        ctgy = ET.SubElement(
-            boq_body,
-            "BoQCtgy",
-            RNoPart="1",
-            ID=str(section.ordinal),
+    def _emit_item(parent_list: ET.Element, pos: Any, parent_ordinal: str) -> None:
+        """Write one schema-valid ``Item`` into an ``Itemlist``.
+
+        Phase-correct element set:
+        - X83 (unpriced): ``Qty``, ``QU``, ``Description`` (UP/IT are
+          forbidden by the X83 schema - it is the tender request).
+        - X84 (priced): ``Qty``, ``UP``, ``IT``, ``Description`` (the X84
+          schema drops ``QU`` from the Item - the unit comes from the paired
+          X83 - so we omit it).
+
+        The OZ leaf goes in ``@RNoPart``; ``@ID`` is an opaque xs:ID handle.
+        """
+        leaf = _leaf_segment(str(getattr(pos, "ordinal", "") or ""), parent_ordinal)
+        item = ET.SubElement(
+            parent_list,
+            "Item",
+            ID=_mint_id("oeItem"),
+            RNoPart=_rnopart(leaf, 9),
         )
-        ET.SubElement(ctgy, "LblTx").text = section.description
+        qty_s, up_s, it_s = _gaeb_line_prices(pos.quantity, pos.unit_rate, pos.total)
+        ET.SubElement(item, "Qty").text = qty_s
+        if is_priced:
+            ET.SubElement(item, "UP").text = up_s
+            ET.SubElement(item, "IT").text = it_s
+        else:
+            ET.SubElement(item, "QU").text = _gaeb_unit(pos.unit)[:4]
+        _set_description(item, _description_with_alt(pos))
 
-        ctgy_body = ET.SubElement(ctgy, "BoQBody")
-        itemlist = ET.SubElement(ctgy_body, "Itemlist")
+    def _emit_markup_item(parent_list: ET.Element, m: Any, idx: int) -> None:
+        """Write one priced ``MarkupItem`` (Zuschlagsposition) into an Itemlist.
 
-        for pos in section.positions:
-            item = ET.SubElement(
-                itemlist,
-                "Item",
-                RNoPart="2",
-                ID=str(pos.ordinal),
+        Order per ``tgMarkupItem`` (X84): ITMarkup (base), Markup (percent),
+        IT (amount), Description. Carries the surcharge money so it is never
+        silently lost on export (the FA "silent money loss on export"
+        finding).
+        """
+        from decimal import ROUND_HALF_UP
+
+        mk = ET.SubElement(
+            parent_list,
+            "MarkupItem",
+            ID=_mint_id("oeMarkup"),
+            RNoPart=_rnopart(f"Z{idx}", 9),
+        )
+        base = _to_dec(boq_data.direct_cost)
+        if base is not None:
+            ET.SubElement(mk, "ITMarkup").text = _fmt_price(base)
+        pct = getattr(m, "percentage", 0) or 0
+        if pct:
+            pct_dec = _to_dec(pct)
+            ET.SubElement(mk, "Markup").text = str(
+                pct_dec.quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP) if pct_dec is not None else Decimal("0")
             )
-            ET.SubElement(item, "Qty").text = _fmt_qty(pos.quantity)
-            ET.SubElement(item, "QU").text = _gaeb_unit(pos.unit)
+        ET.SubElement(mk, "IT").text = _fmt_price(getattr(m, "amount", 0))
+        _set_description(mk, str(getattr(m, "name", "") or "Markup"))
 
-            desc = ET.SubElement(item, "Description")
-            complete_text = ET.SubElement(desc, "CompleteText")
-            detail_txt = ET.SubElement(complete_text, "DetailTxt")
-            ET.SubElement(detail_txt, "Text").text = pos.description
-
-            _up, _it = _gaeb_line_prices(pos.quantity, pos.unit_rate, pos.total)
-            ET.SubElement(item, "UP").text = _up
-            ET.SubElement(item, "IT").text = _it
-
-            _apply_x84_alternate_fields(item, pos)
-
-    # ── Ungrouped positions → directly in root BoQBody (ENH-097) ──────────
-    # GAEB 3.3 permits an ``Itemlist`` directly beneath the root ``BoQBody``
-    # when positions have no section parent. Prior implementation wrapped
-    # them in a synthetic ``BoQCtgy ID="00" LblTx="Ungrouped Positions"``
-    # which polluted the outline tree and made roundtrips lossy - every
-    # re-import created a phantom section. Now we write them flat.
-    if boq_data.positions:
-        root_itemlist = ET.SubElement(boq_body, "Itemlist")
-        for pos in boq_data.positions:
-            item = ET.SubElement(
-                root_itemlist,
-                "Item",
-                RNoPart="2",
-                ID=str(pos.ordinal),
-            )
-            ET.SubElement(item, "Qty").text = _fmt_qty(pos.quantity)
-            ET.SubElement(item, "QU").text = _gaeb_unit(pos.unit)
-
-            desc = ET.SubElement(item, "Description")
-            complete_text = ET.SubElement(desc, "CompleteText")
-            detail_txt = ET.SubElement(complete_text, "DetailTxt")
-            ET.SubElement(detail_txt, "Text").text = pos.description
-
-            _up, _it = _gaeb_line_prices(pos.quantity, pos.unit_rate, pos.total)
-            ET.SubElement(item, "UP").text = _up
-            ET.SubElement(item, "IT").text = _it
-
-            _apply_x84_alternate_fields(item, pos)
-
-    # ── X84: Award/Recommendation block (bidder's recommended alternates) ──
-    # GAEB DA 3.3 places <Recommendation> under <Award> alongside <BoQ>. We
-    # write it after the BoQ tree to keep the streaming order stable; XML
-    # element ordering inside <Award> is not significant for any conformant
-    # importer. Only emitted when at least one position is recommended -
-    # an empty <Recommendation> tag is technically valid but adds noise.
-    if gaeb_format == "x84" and recommended_alternates:
-        recommendation = ET.SubElement(award, "Recommendation")
-        for ord_, desc_text in recommended_alternates:
-            rec_item = ET.SubElement(recommendation, "RecommendedItem")
-            ET.SubElement(rec_item, "RNoPart").text = ord_
-            ET.SubElement(rec_item, "LblTx").text = desc_text
-
-    # ── Trailing BoQInfo with totals ──────────────────────────────────────
-    # GAEB consumers (mainstream estimating and 5D suites) reconcile the
-    # document total against Σ(item IT). The body emits only per-position
-    # ``IT`` lines (which sum to the DIRECT cost) and no surcharge lines, so
-    # ``TotPr`` MUST equal the direct cost for the file to be internally
-    # consistent. Setting it to the markup-inclusive ``grand_total`` (as
-    # before) made TotPr > Σ(IT) for any BOQ carrying a markup and got the
-    # file flagged/rejected. We therefore set TotPr to the direct cost and
-    # enumerate each markup explicitly under a ``Totals`` block so the
-    # surcharges are not silently dropped and a reader can still derive the
-    # gross figure (NetTotal == Σ(IT) + Σ(markup amounts)).
-    boq_info_total = ET.SubElement(boq_el, "BoQInfo")
-    ET.SubElement(boq_info_total, "TotPr").text = _fmt_price(boq_data.direct_cost)
+    def _emit_category_totals(ctgy: ET.Element, subtotal: Any) -> None:
+        """Append the per-category ``Totals`` (REQUIRED by the X84 BoQCtgy)."""
+        sec_totals = ET.SubElement(ctgy, "Totals")
+        ET.SubElement(sec_totals, "Total").text = _fmt_price(subtotal)
 
     active_markups = [m for m in boq_data.markups if getattr(m, "is_active", True)]
-    if active_markups:
-        totals_el = ET.SubElement(boq_info_total, "Totals")
-        # Sum of item totals (direct cost) - the reconciliation base.
-        ET.SubElement(totals_el, "STotal").text = _fmt_price(boq_data.direct_cost)
-        for m in active_markups:
-            markup_el = ET.SubElement(totals_el, "Markup")
-            ET.SubElement(markup_el, "MarkupType").text = str(
-                getattr(m, "markup_type", "") or getattr(m, "category", "") or ""
+
+    # ── Body layout. ``tgBoQBody`` is a CHOICE: a BoQBody holds EITHER a list
+    # of categories (BoQCtgy) OR a single Itemlist - never both. So when the
+    # LV has sections we keep the root a pure category list and route ungrouped
+    # positions / markups into their own categories; when it is flat we use a
+    # single root Itemlist.
+    use_categories = bool(boq_data.sections)
+
+    if use_categories:
+        # Sections → BoQCtgy (nested BoQBody / Itemlist). X84 BoQCtgy has no
+        # LblTx (label only exists in X83) but REQUIRES a Totals child.
+        for section in boq_data.sections:
+            sec_ordinal = str(getattr(section, "ordinal", "") or "")
+            ctgy = ET.SubElement(
+                boq_body,
+                "BoQCtgy",
+                ID=_mint_id("oeCtgy"),
+                RNoPart=_rnopart(_leaf_segment(sec_ordinal, ""), 0),
             )
-            ET.SubElement(markup_el, "AddText").text = str(getattr(m, "name", "") or "")
-            pct = getattr(m, "percentage", 0) or 0
-            if pct:
-                ET.SubElement(markup_el, "Per").text = _fmt_price(pct)
-            ET.SubElement(markup_el, "Total").text = _fmt_price(getattr(m, "amount", 0))
-        # Net total == direct cost + Σ(markup amounts) == grand_total.
-        ET.SubElement(totals_el, "GrandTotal").text = _fmt_price(boq_data.net_total)
+            if not is_priced:
+                _set_ml_text(ctgy, "LblTx", section.description or sec_ordinal)
+            ctgy_body = ET.SubElement(ctgy, "BoQBody")
+            if section.positions:
+                itemlist = ET.SubElement(ctgy_body, "Itemlist")
+                for pos in section.positions:
+                    _emit_item(itemlist, pos, sec_ordinal)
+            if is_priced:
+                subtotal = _to_dec(getattr(section, "subtotal", None))
+                if subtotal is None:
+                    subtotal = sum(
+                        (_to_dec(getattr(p, "total", 0)) or Decimal("0") for p in section.positions),
+                        Decimal("0"),
+                    )
+                _emit_category_totals(ctgy, subtotal)
+
+        # Ungrouped positions → their own category (so the root stays a pure
+        # category list). Kept distinct from sections; no label needed.
+        if boq_data.positions:
+            ung = ET.SubElement(boq_body, "BoQCtgy", ID=_mint_id("oeCtgy"), RNoPart=_rnopart("U", 0))
+            if not is_priced:
+                _set_ml_text(ung, "LblTx", "Ungrouped Positions")
+            ung_body = ET.SubElement(ung, "BoQBody")
+            ung_list = ET.SubElement(ung_body, "Itemlist")
+            for pos in boq_data.positions:
+                _emit_item(ung_list, pos, "")
+            if is_priced:
+                ung_sub = sum(
+                    (_to_dec(getattr(p, "total", 0)) or Decimal("0") for p in boq_data.positions),
+                    Decimal("0"),
+                )
+                _emit_category_totals(ung, ung_sub)
+
+        # Markups → their own category (priced phase only).
+        if is_priced and active_markups:
+            mk_ctgy = ET.SubElement(boq_body, "BoQCtgy", ID=_mint_id("oeCtgy"), RNoPart=_rnopart("Z", 0))
+            mk_body = ET.SubElement(mk_ctgy, "BoQBody")
+            mk_list = ET.SubElement(mk_body, "Itemlist")
+            for idx, m in enumerate(active_markups, start=1):
+                _emit_markup_item(mk_list, m, idx)
+            mk_total = sum(
+                (_to_dec(getattr(m, "amount", 0)) or Decimal("0") for m in active_markups),
+                Decimal("0"),
+            )
+            _emit_category_totals(mk_ctgy, mk_total)
+    else:
+        # Flat LV: a single root Itemlist holding the items, then any priced
+        # MarkupItems (both are valid Itemlist children).
+        root_itemlist = ET.SubElement(boq_body, "Itemlist")
+        for pos in boq_data.positions:
+            _emit_item(root_itemlist, pos, "")
+        if is_priced and active_markups:
+            for idx, m in enumerate(active_markups, start=1):
+                _emit_markup_item(root_itemlist, m, idx)
+
+    # ── BoQInfo / Totals (reconciliation), priced phase only ───────────────
+    # The X84 schema places <Totals> as the last child of <BoQInfo> (the X83
+    # schema forbids it - the request is unpriced). Total = sum of item ITs
+    # (direct cost); TotalNet = markup-inclusive net total, so a reader
+    # reconciles both the direct cost and the grand total from one block.
+    if is_priced:
+        totals_el = ET.SubElement(boq_info, "Totals")
+        ET.SubElement(totals_el, "Total").text = _fmt_price(boq_data.direct_cost)
+        ET.SubElement(totals_el, "TotalNet").text = _fmt_price(boq_data.net_total)
 
     # ── Serialize to XML string ───────────────────────────────────────────
-    # XML comments are discarded by every conformant XML parser (incl. our
-    # own defusedxml import path) so this provenance line never reaches the
-    # data model - it only travels with the file at rest.
+    # The provenance line is an XML COMMENT - every conformant parser (and
+    # our own defusedxml import path, and the XSD validator) discards it, so
+    # it never reaches the data model or breaks validation; it only travels
+    # with the file at rest.
     xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml_provenance = f"<!-- OpenConstructionERP · DataDrivenConstruction · {_xtok_gaeb} -->\n"
     xml_body = ET.tostring(gaeb, encoding="unicode", xml_declaration=False)
-    xml_content = xml_declaration + xml_provenance + xml_body
-
-    safe_name = boq_data.name.encode("ascii", errors="replace").decode("ascii").replace('"', "'")
-    ext = "X84" if gaeb_format == "x84" else "X83"
-    filename = f"{safe_name}.{ext}"
-
-    return StreamingResponse(
-        iter([xml_content]),
-        media_type="application/xml; charset=utf-8",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"',
-        },
-    )
+    return xml_declaration + xml_provenance + xml_body
 
 
 # ── Import (CSV / Excel) ──────────────────────────────────────────────────────

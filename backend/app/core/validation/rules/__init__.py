@@ -114,6 +114,124 @@ def _position_currency(pos: dict[str, Any]) -> str:
     return ""
 
 
+def _position_metadata(pos: dict[str, Any]) -> dict[str, Any]:
+    """Return the position's metadata blob regardless of dict shape.
+
+    API payloads carry ``metadata``; the ORM flattens to ``metadata_``.
+    Returns an empty dict when neither is present so callers can chain
+    ``.get`` without guarding.
+    """
+    for meta_key in ("metadata", "metadata_"):
+        meta = pos.get(meta_key)
+        if isinstance(meta, dict):
+            return meta
+    return {}
+
+
+# GAEB Provis (Bedarfsposition / Eventualposition) markers. These are
+# legitimately offered without a binding unit price - the bidder is not
+# obliged to price optional scope. A zero (or absent) Einheitspreis on such
+# a position is correct per GAEB Fachdok 4.5.3 and must never be flagged as
+# a hard pricing error (FA-STD-044).
+_GAEB_PROVISIONAL_FLAGS: frozenset[str] = frozenset(
+    {
+        "withtotal",
+        "withouttotal",
+        "bedarfsposition",
+        "bedarfsposition mit gesamtbetrag",
+        "bedarfsposition ohne gesamtbetrag",
+        "eventualposition",
+        "provisional",
+    }
+)
+
+# Position-type values (top-level ``type`` or ``metadata.position_type``)
+# that GAEB treats as optional / not-necessarily-priced scope.
+_PROVISIONAL_TYPES: frozenset[str] = frozenset(
+    {"provisional", "bedarf", "bedarfsposition", "eventual", "eventualposition", "optional"}
+)
+
+
+def _is_provisional_position(pos: dict[str, Any]) -> bool:
+    """True when a position is a GAEB Bedarfs-/Eventualposition (optional scope).
+
+    Detected from any of: the importer's ``metadata['gaeb_provis']`` flag, a
+    ``metadata['position_type']``/top-level ``type`` naming an optional kind,
+    or a boolean ``is_provisional`` marker. Such positions may carry a zero or
+    missing Einheitspreis without it being an error.
+    """
+    meta = _position_metadata(pos)
+    provis = str(meta.get("gaeb_provis") or "").strip().lower()
+    if provis and provis in _GAEB_PROVISIONAL_FLAGS:
+        return True
+    if meta.get("is_provisional") is True or pos.get("is_provisional") is True:
+        return True
+    for type_key in (pos.get("type"), meta.get("position_type"), meta.get("gaeb_position_type")):
+        if str(type_key or "").strip().lower() in _PROVISIONAL_TYPES:
+            return True
+    return False
+
+
+# GAEB exchange phases that carry NO bidder prices. In these the unit rate is
+# legitimately 0 / absent for every position, so a zero Einheitspreis must not
+# be flagged (FA-STD-045). X81 (Kostenanschlag) and X83 (Angebotsaufforderung)
+# are the unpriced request phases.
+_UNPRICED_DA_KINDS: frozenset[str] = frozenset({"x80", "x81", "x82", "x83"})
+
+
+def _is_unpriced_phase(context: ValidationContext, pos: dict[str, Any]) -> bool:
+    """True when the BOQ came from an unpriced GAEB phase (X81/X83).
+
+    Reads the DA kind the importer stamped on the result metadata or each
+    position (``gaeb_da_kind``). Defaults to ``False`` (treat as priced) when
+    no phase is recorded, so manually-built priced BOQs still get the zero
+    review nudge.
+    """
+    kind = ""
+    data = context.data
+    if isinstance(data, dict):
+        data_meta = data.get("metadata")
+        if isinstance(data_meta, dict):
+            kind = str(data_meta.get("da_kind") or data_meta.get("gaeb_da_kind") or "")
+    if not kind:
+        kind = str(_position_metadata(pos).get("gaeb_da_kind") or "")
+    return kind.strip().lower() in _UNPRICED_DA_KINDS
+
+
+def _gaeb_oz_mask(context: ValidationContext, pos: dict[str, Any]) -> list[int] | None:
+    """Read the GAEB OZ-Maske (per-level digit widths) if the import recorded it.
+
+    The mask comes from the file's ``BoQBkdn`` and is the only authoritative
+    source for how many dotted levels an OZ has and how wide each is. It may
+    be threaded on the context (``metadata['gaeb_oz_mask']`` or
+    ``data['metadata']['gaeb_oz_mask']``) or carried per-position by the
+    importer. Returns the ordered list of integer widths, or ``None`` when no
+    mask is available (callers then fall back to a structural check).
+    """
+    candidates: list[Any] = []
+    ctx_meta = getattr(context, "metadata", None)
+    if isinstance(ctx_meta, dict):
+        candidates.append(ctx_meta.get("gaeb_oz_mask"))
+    data = context.data
+    if isinstance(data, dict):
+        data_meta = data.get("metadata")
+        if isinstance(data_meta, dict):
+            candidates.append(data_meta.get("gaeb_oz_mask"))
+    candidates.append(_position_metadata(pos).get("gaeb_oz_mask"))
+    for raw in candidates:
+        if isinstance(raw, (list, tuple)) and raw:
+            widths: list[int] = []
+            for part in raw:
+                try:
+                    widths.append(int(part))
+                except (TypeError, ValueError):
+                    widths = []
+                    break
+            if widths:
+                return widths
+    return None
+
+
 def _ok(locale: str) -> str:
     """Shared "OK" string - every rule that emits passing results uses this."""
     return translate("common.ok", locale=locale)
@@ -595,14 +713,60 @@ class DIN276ValidCostGroup(ValidationRule):
 
 
 class GAEBOrdinalFormat(ValidationRule):
+    """Checks that an OZ (Ordnungszahl) is a well-formed GAEB ordinal.
+
+    There is no single hardcoded OZ shape in GAEB. The number of levels and
+    the width of each are declared per file by the OZ-Maske (``BoQBkdn``):
+    the BVBS Pruefdateien use ``3.3.4`` (``001.001.0010``) with an optional
+    one-character index (``001.001.0010.A``), while other files use ``2.2.4``
+    (``01.02.0030``). When the importer recorded the mask we validate each
+    level against it exactly; otherwise we fall back to a structural check
+    that accepts any dotted chain of numeric levels with an optional trailing
+    index. The old rule hardcoded ``XX.XX.XXXX`` and so flagged every level-3
+    Pruefdatei OZ as non-conform (FA-STD-046).
+    """
+
     rule_id = "gaeb.ordinal_format"
     name = "GAEB Ordinal Number Format"
     standard = "gaeb"
     severity = Severity.WARNING
     category = RuleCategory.COMPLIANCE
-    description = "Ordinal numbers should follow GAEB LV structure (e.g., 01.02.0030)"
+    description = "Ordinal numbers should follow the file's GAEB OZ-Maske (e.g. 001.001.0010 or 01.02.0030)"
 
-    _PATTERN = re.compile(r"^\d{2}\.\d{2}\.\d{4}$")  # XX.XX.XXXX
+    # Structural fallback when no OZ-Maske is recorded: one or more numeric
+    # levels joined by dots, with an optional trailing index that is either a
+    # short run of digits or a single A-Z letter (GAEB RNoIndex).
+    _STRUCTURAL = re.compile(r"^\d+(?:\.\d+)*(?:\.(?:\d{1,3}|[A-Za-z]))?$")
+
+    @staticmethod
+    def _matches_mask(ordinal: str, mask: list[int]) -> bool:
+        """True when ``ordinal`` conforms to the recorded OZ-Maske widths.
+
+        Section/group headers carry a partial OZ (a prefix of the mask - e.g.
+        ``001`` at level 1, ``001.001`` at level 2), and leaf items carry the
+        full mask plus an optional RNoIndex (``001.001.0010``,
+        ``001.001.0010.A``). So the first ``len(parts)`` levels (capped at the
+        mask depth) must each be all-digit and exactly the masked width; one
+        extra trailing part beyond the mask may be the RNoIndex (digits or a
+        single letter).
+        """
+        parts = ordinal.split(".")
+        if not parts or len(parts) > len(mask) + 1:
+            return False
+        level_count = min(len(parts), len(mask))
+        for part, width in zip(parts[:level_count], mask[:level_count], strict=True):
+            if not part.isdigit() or len(part) != width:
+                return False
+        if len(parts) == len(mask) + 1:
+            index = parts[-1]
+            if not (index.isdigit() or (len(index) == 1 and index.isalpha())):
+                return False
+        return True
+
+    def _is_valid(self, ordinal: str, mask: list[int] | None) -> bool:
+        if mask:
+            return self._matches_mask(ordinal, mask)
+        return bool(self._STRUCTURAL.match(ordinal))
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         locale = _get_locale(context)
@@ -611,7 +775,8 @@ class GAEBOrdinalFormat(ValidationRule):
             ordinal = pos.get("ordinal", "")
             if not ordinal:
                 continue
-            passed = bool(self._PATTERN.match(ordinal))
+            mask = _gaeb_oz_mask(context, pos)
+            passed = self._is_valid(str(ordinal), mask)
             if passed:
                 message = _ok(locale)
                 suggestion = None
@@ -682,7 +847,15 @@ class GAEBLVStructure(ValidationRule):
             if pos_id and pos_id in parent_ids:
                 continue
             parent_id = pos.get("parent_id")
-            passed = parent_id is not None and str(parent_id) != ""
+            # A GAEB-imported leaf names its enclosing section via the section
+            # OZ (classification/metadata ``gaeb_section``) before the persist
+            # step assigns numeric parent_ids - that is a valid linkage too, so
+            # the rule must not flag a well-formed import as orphaned.
+            classification = pos.get("classification") or {}
+            section_ref = str(
+                classification.get("gaeb_section") or _position_metadata(pos).get("gaeb_section") or ""
+            ).strip()
+            passed = (parent_id is not None and str(parent_id) != "") or bool(section_ref)
             if passed:
                 message = _ok(locale)
                 suggestion = None
@@ -712,22 +885,28 @@ class GAEBLVStructure(ValidationRule):
 
 
 class GAEBEinheitspreisSanity(ValidationRule):
-    """Flags zero/negative Einheitspreis on non-lump-sum positions.
+    """Sanity-checks the Einheitspreis without rejecting legitimate prices.
 
-    GAEB X83 treats an Einheitspreis of 0 as a bid-withdrawal signal.
-    Importing such a position silently is almost always a mistake - the
-    rule forces reviewers to confirm whether they meant a zero-priced
-    lump sum (valid) or a missing rate (invalid).
+    GAEB does not forbid a zero Einheitspreis. An offered 0.00 is a valid
+    transferred price (Fachdok 4.6.4), and a Bedarfs-/Eventualposition may be
+    left unpriced entirely (Fachdok 4.5.3). The old rule raised a blocking
+    ERROR on every 0.00 line, which failed the official BVBS Pruefdatei (it
+    contains a legitimate 0.00 line) and masked real money loss behind noise
+    (FA-STD-045). The rule now only blocks on a genuinely impossible value - a
+    negative Einheitspreis - and merely warns when a normal (non-optional,
+    non-lump-sum) position carries 0.00 so a reviewer can confirm intent.
+    Optional positions and lump sums are passed through.
     """
 
     rule_id = "gaeb.einheitspreis_sanity"
     name = "GAEB Einheitspreis Sanity"
     standard = "gaeb"
-    severity = Severity.ERROR
+    severity = Severity.WARNING
     category = RuleCategory.QUALITY
     description = (
-        "Einheitspreis must be > 0 for every non-lump-sum position. "
-        "Zero or negative values would break GAEB X83 Angebotsabgabe."
+        "Einheitspreis must not be negative. A zero rate is allowed (offered "
+        "0.00, optional or lump-sum positions) but flagged for review on "
+        "ordinary positions so a missing rate is caught without blocking."
     )
 
     LUMP_SUM_UNITS = {"lsum", "ls", "psch", "pausch", "pauschal"}
@@ -752,33 +931,66 @@ class GAEBEinheitspreisSanity(ValidationRule):
                 # GAEB pricing violation - keep signals orthogonal.
                 continue
             rate_val: float = parsed_rate  # type: ignore[assignment]
-            passed = rate_val > 0
-            if passed:
-                message = _ok(locale)
-                suggestion = None
-            else:
-                message = translate(
-                    "gaeb.einheitspreis_sanity.fail",
-                    locale=locale,
-                    ordinal=pos.get("ordinal", "?"),
-                    rate=_fmt_decimal(rate_val),
-                    unit=unit or "-",
+
+            if rate_val < 0:
+                # The only genuinely invalid case: a negative Einheitspreis
+                # cannot be transferred in any GAEB phase. Block it.
+                results.append(
+                    RuleResult(
+                        rule_id=self.rule_id,
+                        rule_name=self.name,
+                        severity=Severity.ERROR,
+                        category=self.category,
+                        passed=False,
+                        message=translate(
+                            "gaeb.einheitspreis_sanity.negative",
+                            locale=locale,
+                            ordinal=pos.get("ordinal", "?"),
+                            rate=_fmt_decimal(rate_val),
+                            unit=unit or "-",
+                        ),
+                        element_ref=pos.get("id"),
+                        details={"unit_rate": rate_val, "unit": unit},
+                        suggestion=translate("gaeb.einheitspreis_sanity.suggestion", locale=locale),
+                    )
                 )
-                suggestion = translate(
-                    "gaeb.einheitspreis_sanity.suggestion",
-                    locale=locale,
+                continue
+
+            if rate_val == 0 and not _is_provisional_position(pos) and not _is_unpriced_phase(context, pos):
+                # A zero on an ordinary position is legal but worth a human
+                # glance (likely a missing rate). WARNING, never ERROR. In an
+                # unpriced phase (X81/X83) a zero is expected, so no finding.
+                results.append(
+                    RuleResult(
+                        rule_id=self.rule_id,
+                        rule_name=self.name,
+                        severity=Severity.WARNING,
+                        category=self.category,
+                        passed=False,
+                        message=translate(
+                            "gaeb.einheitspreis_sanity.zero",
+                            locale=locale,
+                            ordinal=pos.get("ordinal", "?"),
+                            unit=unit or "-",
+                        ),
+                        element_ref=pos.get("id"),
+                        details={"unit_rate": rate_val, "unit": unit},
+                        suggestion=translate("gaeb.einheitspreis_sanity.suggestion", locale=locale),
+                    )
                 )
+                continue
+
+            # Positive rate, or a legitimately-zero optional position.
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
                     rule_name=self.name,
-                    severity=self.severity,
+                    severity=Severity.WARNING,
                     category=self.category,
-                    passed=passed,
-                    message=message,
+                    passed=True,
+                    message=_ok(locale),
                     element_ref=pos.get("id"),
                     details={"unit_rate": rate_val, "unit": unit},
-                    suggestion=suggestion,
                 )
             )
         return results

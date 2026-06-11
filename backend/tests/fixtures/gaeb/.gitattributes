@@ -1,0 +1,10 @@
+# GAEB conformance fixtures are byte-exact reference files - never apply
+# line-ending normalisation so the committed bytes match the official source.
+*.x81 -text
+*.x82 -text
+*.x83 -text
+*.x84 -text
+*.x85 -text
+*.x86 -text
+# Official GAEB XSD schema set - keep byte-exact, no EOL normalisation.
+*.xsd -text

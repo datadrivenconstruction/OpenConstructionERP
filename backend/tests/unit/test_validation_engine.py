@@ -181,11 +181,64 @@ class TestValidationEngine:
         assert report.has_warnings
 
     @pytest.mark.asyncio
-    async def test_no_applicable_rules(self, engine):
+    async def test_unknown_rule_set_is_unsupported_not_passed(self, engine):
+        # A requested rule set with no implemented rules must NOT read as
+        # "ran and passed". The engine reports it as UNSUPPORTED and lists the
+        # unresolved slug so the HTTP/UI layer can distinguish "never ran"
+        # from a clean pass.
         report = await engine.validate(data={}, rule_sets=["nonexistent"])
-        assert report.status == ValidationStatus.SKIPPED
-        # A SKIPPED report has no honest score — None, not a misleading 1.0.
+        assert report.status == ValidationStatus.UNSUPPORTED
+        assert report.status != ValidationStatus.PASSED
+        assert report.status != ValidationStatus.SKIPPED
+        assert report.unsupported_rule_sets == ["nonexistent"]
+        assert report.supported_rule_sets == []
+        # No rules ran, so there is no honest quality signal: None, never 1.0.
         assert report.score is None
+        # The summary echoes both buckets so the API can render them honestly.
+        summary = report.summary()
+        assert summary["status"] == "unsupported"
+        assert summary["unsupported_rule_sets"] == ["nonexistent"]
+        assert summary["supported_rule_sets"] == []
+
+    @pytest.mark.asyncio
+    async def test_known_rule_set_still_runs_and_passes(self, engine):
+        # A supported rule set must still resolve, run, and pass cleanly - the
+        # honesty fix only changes the unknown-set path.
+        engine.registry = RuleRegistry()
+        engine.registry.register(AlwaysPassRule())
+        report = await engine.validate(data={}, rule_sets=["test"])
+        assert report.status == ValidationStatus.PASSED
+        assert report.unsupported_rule_sets == []
+        assert report.supported_rule_sets == ["test"]
+        assert report.score == 1.0
+        summary = report.summary()
+        assert summary["status"] == "passed"
+        assert summary["unsupported_rule_sets"] == []
+        assert summary["supported_rule_sets"] == ["test"]
+
+    @pytest.mark.asyncio
+    async def test_mixed_supported_and_unsupported_runs_supported(self):
+        # When the request mixes a real set with an unimplemented one, the real
+        # rules run and the report carries the supported result while still
+        # disclosing the unsupported slug - it does not collapse to UNSUPPORTED.
+        registry = RuleRegistry()
+        registry.register(AlwaysPassRule())  # standard "test"
+        engine = ValidationEngine(registry)
+        report = await engine.validate(data={}, rule_sets=["test", "nbc_2020"])
+        assert report.status == ValidationStatus.PASSED
+        assert report.supported_rule_sets == ["test"]
+        assert report.unsupported_rule_sets == ["nbc_2020"]
+        # A real check ran, so the score is a real number, not None.
+        assert report.score == 1.0
+
+    def test_registry_resolve_rule_sets(self):
+        registry = RuleRegistry()
+        registry.register(AlwaysPassRule())  # registers under set "test"
+        supported, unsupported = registry.resolve_rule_sets(["test", "ghost", "test"])
+        assert supported == ["test", "test"]
+        assert unsupported == ["ghost"]
+        assert registry.has_rules("test") is True
+        assert registry.has_rules("ghost") is False
 
     @pytest.mark.asyncio
     async def test_boq_validation_with_data(self):

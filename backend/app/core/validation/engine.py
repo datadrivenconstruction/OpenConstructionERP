@@ -43,6 +43,7 @@ class ValidationStatus(StrEnum):
     ERRORS = "errors"  # Has errors (may also have warnings)
     INFO = "info"  # Failing INFO results only, no errors or warnings
     SKIPPED = "skipped"  # Validation was skipped (no applicable rules)
+    UNSUPPORTED = "unsupported"  # Requested rule set(s) have no implemented rules
 
 
 class RuleCategory(StrEnum):
@@ -124,6 +125,10 @@ class ValidationReport:
     target_type: str = ""  # "boq", "cad_import", "tender", etc.
     target_id: str = ""
     rule_sets_applied: list[str] = field(default_factory=list)
+    # Requested rule sets that resolved to zero implemented rules. These did
+    # NOT run - they are recorded so the HTTP/UI layer can distinguish "ran
+    # and passed" from "never ran" instead of silently dropping them.
+    unsupported_rule_sets: list[str] = field(default_factory=list)
     results: list[RuleResult] = field(default_factory=list)
     timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     duration_ms: float = 0.0
@@ -150,6 +155,12 @@ class ValidationReport:
         return [r for r in self.results if r.passed]
 
     @property
+    def supported_rule_sets(self) -> list[str]:
+        """Requested rule sets that did resolve to at least one rule."""
+        unsupported = set(self.unsupported_rule_sets)
+        return [s for s in self.rule_sets_applied if s not in unsupported]
+
+    @property
     def has_errors(self) -> bool:
         return len(self.errors) > 0
 
@@ -163,6 +174,11 @@ class ValidationReport:
         # no compliance signal, so SKIPPED is the honest status (E-VAL-018).
         compliance_results = [r for r in self.results if not r.is_engine_error]
         if not compliance_results:
+            # Nothing was actually checked. If the only reason is that every
+            # requested rule set is unimplemented, say so explicitly instead
+            # of the generic SKIPPED so the caller never reads it as a pass.
+            if self.unsupported_rule_sets and not self.supported_rule_sets:
+                return ValidationStatus.UNSUPPORTED
             return ValidationStatus.SKIPPED
         if self.has_errors:
             return ValidationStatus.ERRORS
@@ -221,6 +237,8 @@ class ValidationReport:
                 "engine_errors": len(self.engine_errors),
             },
             "rule_sets": self.rule_sets_applied,
+            "supported_rule_sets": self.supported_rule_sets,
+            "unsupported_rule_sets": self.unsupported_rule_sets,
             "duration_ms": self.duration_ms,
         }
 
@@ -332,6 +350,34 @@ class RuleRegistry:
             rule_ids.update(self._rule_sets.get(name, []))
         return [self._rules[rid] for rid in rule_ids if rid in self._rules]
 
+    def has_rules(self, set_name: str) -> bool:
+        """True when ``set_name`` resolves to at least one registered rule.
+
+        A rule set name can be referenced (in a project config, a partner
+        pack, or a UI badge) without any rule ever being registered against
+        it - for example a JSON rule pack that the engine cannot load. Such a
+        set must never be treated as "ran and passed"; it simply did not run.
+        """
+        return bool(self._rule_sets.get(set_name))
+
+    def resolve_rule_sets(self, set_names: list[str]) -> tuple[list[str], list[str]]:
+        """Split requested rule set names into supported and unsupported.
+
+        Args:
+            set_names: Rule set names requested by the caller.
+
+        Returns:
+            ``(supported, unsupported)`` - ``supported`` are names that
+            resolve to at least one registered rule, ``unsupported`` are names
+            with no implemented rules. Order and duplicates of the input are
+            preserved within each bucket so callers can echo the request back.
+        """
+        supported: list[str] = []
+        unsupported: list[str] = []
+        for name in set_names:
+            (supported if self.has_rules(name) else unsupported).append(name)
+        return supported, unsupported
+
     def list_rule_sets(self) -> dict[str, int]:
         """List all rule sets with rule counts."""
         return {name: len(ids) for name, ids in self._rule_sets.items()}
@@ -417,15 +463,22 @@ class ValidationEngine:
             metadata=metadata or {},
         )
 
+        _supported, unsupported = self.registry.resolve_rule_sets(rule_sets)
         rules = self.registry.get_rules_for_sets(rule_sets)
-        data_driven_config = metadata or {}
         active_rules = [r for r in rules if r.enabled]
 
         report = ValidationReport(
             target_type=target_type,
             target_id=target_id,
             rule_sets_applied=rule_sets,
+            unsupported_rule_sets=unsupported,
         )
+
+        if unsupported:
+            logger.warning(
+                "Validation requested unimplemented rule set(s): %s (no rules registered)",
+                ", ".join(unsupported),
+            )
 
         for rule in active_rules:
             try:

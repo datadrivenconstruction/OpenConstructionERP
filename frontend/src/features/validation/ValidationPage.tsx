@@ -63,6 +63,10 @@ interface ValidationReportData {
     infos: number;
   };
   rule_sets: string[];
+  // Requested rule sets that resolved to zero implemented rules. These never
+  // ran - rendered as a "not implemented" notice so the dashboard never lets
+  // an unimplemented standard read as silently passed.
+  unsupported_rule_sets?: string[];
   duration_ms: number;
   results: ValidationResultItem[];
 }
@@ -90,6 +94,8 @@ interface RunValidationResponse {
   error_count: number;
   info_count: number;
   rule_sets: string[];
+  supported_rule_sets?: string[];
+  unsupported_rule_sets?: string[];
   duration_ms: number;
   results: RunValidationResultItem[];
 }
@@ -126,7 +132,11 @@ interface ValidationReportResponse {
   warning_count: number;
   results: StoredResultItem[];
   created_at: string | null;
-  metadata: { duration_ms?: number; rule_sets?: string[] } | null;
+  metadata: {
+    duration_ms?: number;
+    rule_sets?: string[];
+    unsupported_rule_sets?: string[];
+  } | null;
 }
 
 type FilterMode = 'all' | 'errors' | 'warnings' | 'info' | 'passed';
@@ -179,6 +189,7 @@ function mapRunResponse(data: RunValidationResponse): ValidationReportData {
       infos: data.info_count,
     },
     rule_sets: data.rule_sets,
+    unsupported_rule_sets: data.unsupported_rule_sets,
     duration_ms: data.duration_ms,
     results: data.results.map((r) => {
       const passed = r.status === 'pass';
@@ -222,6 +233,7 @@ function mapStoredReport(report: ValidationReportResponse): ValidationReportData
       infos,
     },
     rule_sets: report.metadata?.rule_sets ?? (report.rule_set ? report.rule_set.split('+') : []),
+    unsupported_rule_sets: report.metadata?.unsupported_rule_sets,
     duration_ms: report.metadata?.duration_ms ?? 0,
     results,
   };
@@ -435,6 +447,27 @@ function SummaryCard({ report }: { report: ValidationReportData }) {
               </span>
             )}
           </div>
+          {report.unsupported_rule_sets && report.unsupported_rule_sets.length > 0 && (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-content-tertiary">
+                {t('validation.unsupported_rule_sets', {
+                  defaultValue: 'Not implemented (did not run):',
+                })}
+              </span>
+              {report.unsupported_rule_sets.map((rs) => (
+                <span
+                  key={rs}
+                  title={t('validation.unsupported_rule_sets_hint', {
+                    defaultValue:
+                      'No validation rules are implemented for this rule set, so it was not run. It is reported as not implemented rather than passed.',
+                  })}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
+                >
+                  {rs}
+                </span>
+              ))}
+            </div>
+          )}
           <p className="mt-1.5 text-xs text-content-tertiary">
             {t('validation.rule_sets_auto_hint', {
               defaultValue:

@@ -172,7 +172,18 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       minWidth: 180,
       flex: 3,
       editable: true,
-      cellEditor: 'agTextCellEditor',
+      // Multi-line Langtext editor: a popup textarea so a position description
+      // can hold a full LV-style specification with newlines, not just one
+      // line. The value is the same `description` field (stored as TEXT,
+      // newlines preserved); the grid's density toggle controls how much of it
+      // shows at rest.
+      cellEditor: 'agLargeTextCellEditor',
+      cellEditorPopup: true,
+      cellEditorParams: {
+        maxLength: 5000,
+        rows: 14,
+        cols: 64,
+      },
       cellRenderer: 'descriptionCellRenderer',
       // !pl-1 overrides AG Grid's default ~17px cell-horizontal-padding
       // so the position description sits flush-left within the column

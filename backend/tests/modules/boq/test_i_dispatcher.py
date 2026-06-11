@@ -140,14 +140,16 @@ class TestDispatcherParse:
 
         result = await GAEBXMLImporter.parse(_GAEB_X83_MINIMAL)
         assert result.source_format == "gaeb"
-        # 1 partida (item) — section labels are captured as metadata,
-        # not as positions in the dispatcher flow.
-        assert len(result.positions) == 1
-        assert result.positions[0].description == "Aushub Mutterboden"
-        assert result.positions[0].unit == "m3"
-        assert result.positions[0].quantity == 120.5
-        assert result.positions[0].unit_rate == 3.5
+        # The BoQCtgy hierarchy is preserved: each section becomes a header
+        # row mirroring the LV tree, the items follow underneath.
+        items = [p for p in result.positions if not p.is_section]
+        assert len(items) == 1
+        assert items[0].description == "Aushub Mutterboden"
+        assert items[0].unit == "m3"
+        assert items[0].quantity == 120.5
+        assert items[0].unit_rate == 3.5
         assert result.currency == "EUR"
+        assert any(p.is_section for p in result.positions)
 
     @pytest.mark.asyncio
     async def test_excel_parse_yields_positions(self) -> None:

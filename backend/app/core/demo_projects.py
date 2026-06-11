@@ -931,7 +931,7 @@ _US_MEDICAL = DemoTemplate(
     project_metadata={"building_type": "hospital", "area_m2": 25000, "stories": 5},
     boq_name="Downtown Medical Center \u2014 Full Estimate",
     boq_description="Detailed cost estimate for 200-bed medical center, MasterFormat divisions",
-    budget_boq_name="Downtown Medical Center \u2014 Budget Estimate",
+    budget_boq_name="Downtown Medical Center - Budget Estimate",
     boq_metadata={
         "standard": "CSI MasterFormat 2018",
         "phase": "Detailed Estimate",
@@ -9754,7 +9754,7 @@ async def install_demo_project(
 
     # ── 4b. Second BOQ - Budget Estimate (section-level lump sums) ───
     budget_boq_id = _id()
-    budget_boq_name = template.budget_boq_name or f"{template.boq_name} \u2014 Budget"
+    budget_boq_name = template.budget_boq_name or f"{template.boq_name} - Budget"
     budget_boq = BOQ(
         id=budget_boq_id,
         project_id=project.id,

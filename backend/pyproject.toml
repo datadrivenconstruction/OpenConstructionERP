@@ -186,6 +186,10 @@ dev = [
     "pytest-split>=0.8.2",
     "httpx>=0.28.0",
     "factory-boy>=3.3.0",
+    # XSD validation oracle for the GAEB DA XML 3.3 exporter conformance suite
+    # (tests/unit/test_gaeb_export_xsd.py validates exported X83/X84 against the
+    # official GAEB schema). Test-only; the runtime XML path uses defusedxml.
+    "lxml>=5.0.0",
     # Pinned exactly: the CI "ruff format --check" gate compares against the
     # formatter's output, which can shift between ruff releases. A floating
     # spec let CI pick a newer ruff than contributors ran locally, so formatted

@@ -132,6 +132,8 @@ class ValidationModuleService:
             metadata_={
                 "duration_ms": engine_report.duration_ms,
                 "rule_sets": rule_sets,
+                "supported_rule_sets": engine_report.supported_rule_sets,
+                "unsupported_rule_sets": engine_report.unsupported_rule_sets,
             },
         )
         await self.repo.create(db_report)
@@ -202,6 +204,8 @@ class ValidationModuleService:
             "error_count": len(engine_report.errors),
             "info_count": len(engine_report.infos),
             "rule_sets": rule_sets,
+            "supported_rule_sets": engine_report.supported_rule_sets,
+            "unsupported_rule_sets": engine_report.unsupported_rule_sets,
             "duration_ms": engine_report.duration_ms,
             "results": [
                 {
@@ -237,6 +241,13 @@ class ValidationModuleService:
                     "name": name,
                     "description": RULE_SET_DESCRIPTIONS.get(name, f"{name} validation rules"),
                     "rule_count": count,
+                    # Only rule sets that resolve to at least one registered
+                    # rule reach this list, so ``implemented`` is always true
+                    # here. The flag is explicit so callers never have to infer
+                    # "ran for real" from a non-zero count, and so a future
+                    # rule set that is described but unimplemented can be marked
+                    # honestly rather than advertised as working.
+                    "implemented": count > 0,
                     "rules": rule_registry.list_rules(rule_set=name),
                 }
             )

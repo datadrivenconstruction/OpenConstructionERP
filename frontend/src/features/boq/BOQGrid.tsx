@@ -93,6 +93,7 @@ import {
 import { RESOURCE_TYPES, getResourceTypeLabel } from './boqResourceTypes';
 import { CURRENCY_GROUPS } from '@/features/projects/CreateProjectPage';
 import { useToastStore } from '@/stores/useToastStore';
+import { useBoqDescDensityStore, BOQ_DESC_ROW_HEIGHT } from '@/stores/useBoqDescDensityStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { VariantPicker } from '@/features/costs/VariantPicker';
 import type { CostVariant, VariantStats } from '@/features/costs/api';
@@ -525,6 +526,21 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   const gridApiRef = useRef<GridApi | null>(null);
   const gridWrapperRef = useRef<HTMLDivElement>(null);
   const addToast = useToastStore((s) => s.addToast);
+
+  // Description density (compact / comfortable / tall) drives how many lines a
+  // position's description renders at rest, so a one-line Kurztext can become a
+  // full multi-line Langtext view. A ref keeps getRowHeight's identity stable
+  // while still reading the live value; an effect re-measures the rows and
+  // repaints the description column whenever the toolbar toggle changes it.
+  const descDensity = useBoqDescDensityStore((s) => s.density);
+  const descDensityRef = useRef(descDensity);
+  descDensityRef.current = descDensity;
+  useEffect(() => {
+    const api = gridApiRef.current;
+    if (!api) return;
+    api.resetRowHeights();
+    api.refreshCells({ columns: ['description'], force: true });
+  }, [descDensity]);
 
   // Track all setTimeout(..., 0) handles scheduled to refresh AG Grid cells
   // after a state change (toggle resources, open variant picker, position
@@ -1064,8 +1080,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       // values without a network round-trip.
       positions,
       customColumns,
+      descDensity,
     }) as FullGridContext,
-    [currencySymbol, currencyCode, fxRates, onUpsertProjectFxRate, displayCurrency, onOpenFxRateSettings, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition, onAddSubSection,
+    [descDensity, currencySymbol, currencyCode, fxRates, onUpsertProjectFxRate, displayCurrency, onOpenFxRateSettings, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition, onAddSubSection,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource, onUpdateResourceFields,
      onSaveResourceToCatalog, onSaveVariantHeaderToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition, onRepickResourceVariant,
      openVariantPickerSignal, openVariantPickerFor, clearOpenVariantPicker, openPositionVariantPicker, onUpdateVariantHeader,
@@ -1652,7 +1669,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     if (params.data?._isResource) return 28;
     if (params.data?._isAddResource) return 30;
     if (params.data?._isVariantHeader) return 36;
-    return 32;
+    if (params.data?._isFooter) return 32;
+    // Position rows grow with the description-density preference so a long
+    // Langtext is readable inline; compact keeps the historical 32px row.
+    return BOQ_DESC_ROW_HEIGHT[descDensityRef.current] ?? 32;
   }, []);
 
   /* ── Cancel accidental ordinal edits from chevron clicks ─────── */

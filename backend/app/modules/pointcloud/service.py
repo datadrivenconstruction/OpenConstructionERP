@@ -521,27 +521,40 @@ class PointCloudService:
                 },
             ) from exc
 
+        # Read every scan/stored field the event payload and response need NOW,
+        # while the ORM row is still live. update_fields() ends with
+        # session.expire_all(), which marks scan's attributes expired; reading
+        # scan.project_id / scan.tenant_id / scan.upload_key afterwards would
+        # trigger an implicit lazy reload, and an async session forbids implicit
+        # IO outside a greenlet (MissingGreenlet) - that surfaced as a 500 on
+        # ingest/complete. Snapshotting first keeps the finalise path off the
+        # expired row entirely.
+        project_id = scan.project_id
+        tenant_id = scan.tenant_id
+        resolved_key = stored.key or scan.upload_key
+        size_bytes = int(stored.size_bytes)
+
         await self.scans.update_fields(
             scan_id,
-            upload_key=stored.key or scan.upload_key,
+            upload_key=resolved_key,
             status="uploaded",
         )
         await event_bus.publish(
             "pointcloud.upload.completed",
             {
                 "scan_id": str(scan_id),
-                "project_id": str(scan.project_id),
-                "tenant_id": str(scan.tenant_id),
-                "upload_key": stored.key or scan.upload_key,
-                "size_bytes": int(stored.size_bytes),
+                "project_id": str(project_id),
+                "tenant_id": str(tenant_id),
+                "upload_key": resolved_key,
+                "size_bytes": size_bytes,
             },
             source_module="oe_pointcloud",
         )
         return {
             "scan_id": scan_id,
-            "upload_key": stored.key or scan.upload_key,
+            "upload_key": resolved_key,
             "status": "uploaded",
-            "size_bytes": int(stored.size_bytes),
+            "size_bytes": size_bytes,
         }
 
     def _storage_backend_kind(self) -> str:

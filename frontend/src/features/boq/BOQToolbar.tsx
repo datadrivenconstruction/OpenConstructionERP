@@ -33,8 +33,10 @@ import {
   ChevronDown,
   Keyboard,
   Leaf,
+  WrapText,
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
+import { useBoqDescDensityStore, type BoqDescDensity } from '@/stores/useBoqDescDensityStore';
 
 export interface BOQToolbarProps {
   t: (key: string, options?: Record<string, string | number>) => string;
@@ -198,6 +200,15 @@ export function BOQToolbar({
     onExport(format);
   };
 
+  /* ── Description density (single line ↔ multi-line Langtext) ───────── */
+  const descDensity = useBoqDescDensityStore((s) => s.density);
+  const cycleDescDensity = useBoqDescDensityStore((s) => s.cycleDensity);
+  const descDensityLabel: Record<BoqDescDensity, string> = {
+    compact: t('boq.desc_density_compact', { defaultValue: 'Compact' }),
+    comfortable: t('boq.desc_density_comfortable', { defaultValue: 'Comfortable' }),
+    tall: t('boq.desc_density_tall', { defaultValue: 'Langtext' }),
+  };
+
   // Bug 7: stick BELOW the app header (52px / --oe-header-height) — using top-0 collides
   // with the sticky header (z-30), pushing the toolbar out of view when scrolling.
   return (
@@ -271,6 +282,22 @@ export function BOQToolbar({
             </span>
           </Button>
         )}
+        <Button
+          variant={descDensity === 'compact' ? 'ghost' : 'secondary'}
+          size="sm"
+          icon={<WrapText size={15} />}
+          onClick={cycleDescDensity}
+          title={t('boq.desc_density_tooltip', {
+            defaultValue:
+              'Description height: switch between a single line and a multi-line Langtext view. Double-click a description to edit the full text.',
+          })}
+          aria-label={t('boq.desc_density_tooltip', {
+            defaultValue: 'Toggle description height',
+          })}
+          data-testid="boq-desc-density-toggle"
+        >
+          <span className="hidden xl:inline">{descDensityLabel[descDensity]}</span>
+        </Button>
         <div ref={exportRef} className="relative" data-testid="boq-export-button">
           <Button variant="ghost" size="sm" icon={<Download size={15} />} onClick={() => setShowExportMenu((prev) => !prev)} aria-expanded={showExportMenu} aria-haspopup="true">
             {t('boq.export')}

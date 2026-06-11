@@ -99,16 +99,17 @@
   },
   "gaeb": {
     "ordinal_format": {
-      "fail": "Ordinal '{ordinal}' doesn't match GAEB format XX.XX.XXXX",
-      "suggestion": "Use format like 01.02.0030"
+      "fail": "Ordinal '{ordinal}' does not match the GAEB OZ-Maske of this file",
+      "suggestion": "Use the file's OZ-Maske, e.g. 001.001.0010 or 01.02.0030"
     },
     "lv_structure": {
       "fail": "Position {ordinal}: leaf position has no parent section - GAEB LV hierarchy requires a Leistungsgruppe parent",
       "suggestion": "Assign this position to a parent section (Leistungsgruppe / Titel)"
     },
     "einheitspreis_sanity": {
-      "fail": "Position {ordinal}: unit_rate {rate} must be > 0 for non-lump-sum positions (unit='{unit}')",
-      "suggestion": "Provide a positive Einheitspreis or mark the position as lump sum (unit='lsum')"
+      "negative": "Position {ordinal}: Einheitspreis {rate} is negative (unit='{unit}') - a negative price cannot be transferred in GAEB",
+      "zero": "Position {ordinal}: Einheitspreis is 0.00 (unit='{unit}') - confirm this is an offered zero price and not a missing rate",
+      "suggestion": "Provide a positive Einheitspreis, or mark the position as a Bedarfsposition (optional scope) or lump sum (unit='lsum')"
     },
     "trade_section_code": {
       "fail": "Top-level section '{ordinal}' has no GAEB Leistungsbereich code (expected 3-digit trade code, e.g. '012')",

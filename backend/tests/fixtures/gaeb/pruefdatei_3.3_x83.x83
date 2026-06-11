@@ -1,0 +1,1363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GXML Toolbox V3.3 R20210630;  http://www.gaeb-toolbox.de/  -->
+<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA83/3.3">
+ <GAEBInfo>
+  <Version>3.3</Version>
+  <VersDate>2021-05</VersDate>
+  <Date>2024-04-04</Date>
+  <Time>10:06:45</Time>
+  <ProgSystem>GAEB-Zertifizierung / GXML Toolbox V3.3 R20210630</ProgSystem>
+  <ProgName>BVBS</ProgName>
+ </GAEBInfo>
+ <PrjInfo>
+  <NamePrj>BVBS GAEB Muster</NamePrj>
+  <LblPrj>BVBS GAEB Musterdatei 3.3</LblPrj>
+  <Cur>EUR</Cur>
+  <CurLbl/>
+  <BidCommPerm>No</BidCommPerm>
+ </PrjInfo>
+ <Award>
+  <DP>83</DP>
+  <AwardInfo>
+   <Cur>EUR</Cur>
+   <CurLbl/>
+   <OpenDate>2024-04-04</OpenDate>
+   <OpenTime>11:11:00</OpenTime>
+   <ContrNo/>
+  </AwardInfo>
+  <OWN>
+   <DPNo>A-2021-10</DPNo>
+   <AwardNo>BVBS-4711</AwardNo>
+  </OWN>
+  <AddText>
+   <OutlineAddText/>
+   <DetailAddText>
+    <span>Für die Zertifizierung von GAEB DA XML Schnittstellen hat der BVBS Prüfkriterien</span>
+    <br/>
+    <span>herausgegeben.</span>
+    <br/>
+    <span/>
+    <br/>
+    <span/>
+    <br/>
+    <span>Version: GAEB DA XML 3.3 Ausgabedatum: 2021-05 </span>
+    <br/>
+    <span>Die hier abgebildete GAEB-Datei ist für den Bereich Bauausführung für</span>
+    <br/>
+    <span>ausführende Firmen im Bereich Bauhauptgewerbe und Handwerk geeignet.</span>
+    <br/>
+    <span>Weitere Informationen erhalten Sie beim BVBS:</span>
+    <br/>
+    <span>BVBS Bundesverband Software und Digitalisierung im Bauwesen e.V.</span>
+    <br/>
+    <span>10787 Berlin</span>
+    <br/>
+    <span>Tel.: 03025757750 </span>
+    <br/>
+    <span>e-mail: info@bvbs.de</span>
+    <br/>
+    <span>www.bvbs.de</span>
+    <br/>
+   </DetailAddText>
+  </AddText>
+  <BoQ ID="ID0F921988">
+   <BoQInfo>
+    <Name>BVBS GAEB Bauausf.</Name>
+    <LblBoQ>BVBS GAEB Musterdatei Bauausführung</LblBoQ>
+    <Date>2024-04-04</Date>
+    <OutlCompl>AllTxt</OutlCompl>
+    <BoQBkdn>
+     <Type>BoQLevel</Type>
+     <Length>3</Length>
+     <Num>Yes</Num>
+    </BoQBkdn>
+    <BoQBkdn>
+     <Type>BoQLevel</Type>
+     <Length>3</Length>
+     <Num>Yes</Num>
+    </BoQBkdn>
+    <BoQBkdn>
+     <Type>Item</Type>
+     <Length>4</Length>
+     <Num>Yes</Num>
+    </BoQBkdn>
+    <BoQBkdn>
+     <Type>Index</Type>
+     <Length>1</Length>
+     <Num>No</Num>
+     <Alignment>left</Alignment>
+    </BoQBkdn>
+    <NoUPComps>4</NoUPComps>
+    <LblUPComp1 Type="Unknown">Lohn</LblUPComp1>
+    <LblUPComp2 Type="Unknown">Material</LblUPComp2>
+    <LblUPComp3 Type="Unknown">Gerät</LblUPComp3>
+    <LblUPComp4 Type="Unknown">Sonstiges</LblUPComp4>
+    <LblTime>Std</LblTime>
+   </BoQInfo>
+   <BoQBody>
+    <Remark ID="ID0F6780C0">
+     <Description>
+      <CompleteText>
+       <DetailTxt>
+        <Text>
+         <p>
+          <span> </span>
+         </p>
+        </Text>
+       </DetailTxt>
+       <OutlineText>
+        <OutlTxt>
+         <TextOutlTxt>
+          <p>
+           <span>Hinweistext</span>
+          </p>
+          <p>
+           <span>Hinweistext für die Prüfkriterien GAEB DA XML 3.3 - Bauausführung</span>
+          </p>
+          <p>
+           <span> </span>
+          </p>
+         </TextOutlTxt>
+        </OutlTxt>
+       </OutlineText>
+      </CompleteText>
+     </Description>
+    </Remark>
+    <BoQCtgy ID="ID0F6C7760" RNoPart="001">
+     <LblTx>
+      <p>
+       <span>Bauhauptgewerke</span>
+      </p>
+     </LblTx>
+     <BoQBody>
+      <BoQCtgy ID="ID0F6C7A30" RNoPart="001">
+       <LblTx>
+        <p>
+         <span>Baustelleneinrichtung</span>
+        </p>
+       </LblTx>
+       <BoQBody>
+        <Itemlist>
+         <Item ID="ID14EF2450" RNoPart="0010">
+          <Qty>1.000</Qty>
+          <QU>psch</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Baustelleneinrichtung für sämtliche, in der Leistungsbeschreibung </span>
+               <span>aufgeführten Leistungen einrichten, vorhalten und räumen, </span>
+               <span>Vorhaltedauer 12 Wochen, Gerüste mit mehr als 2 m </span>
+               <span>Arbeitsbühnenhöhe über Fußboden oder Gelände werden bauseits gestellt.</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <span>Normalposition</span>
+              </p>
+              <p>
+               <span> </span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Baustelleneinrichtung einrichten, vorhalten, räumen </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID14EF2078" RNoPart="0010" RNoIndex="1">
+          <Provis>WithTotal</Provis>
+          <Qty>1.000</Qty>
+          <QU>Psch</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Betreiben der Wasserhaltungsanlage mit allen Wasserfördereinrichtungen,  </span>
+               <span>als Einheitspreis gilt der Aufwand für 1 St/d. </span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <span>Indexposition mit Index &#x22;1&#x22;</span>
+              </p>
+              <p>
+               <span>Bedarfsposition mit Gesamtbetrag</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <span/>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Betreiben der Wasserhaltungsanlage</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F9E5AE8" RNoPart="0010" RNoIndex="A">
+          <Provis>WithTotal</Provis>
+          <Qty>1.000</Qty>
+          <QU>PSCH</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Betreiben der Wasserhaltungsanlage mit allen Wasserfördereinrichtungen,  </span>
+               <span>als Einheitspreis gilt der Aufwand für 1 St/d. </span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <span>Betrieb der Wasserhaltungsanlage mit kompletter Personenüberwachung</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <span>Indexposition mit Index &#x22;A&#x22;</span>
+              </p>
+              <p>
+               <span>Bedarfsposition mit Gesamtbetrag</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <span/>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Betreiben der Wasserhaltungsanlage mit Überwachung</span>
+               </p>
+               <p>
+                <span> </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+        </Itemlist>
+       </BoQBody>
+      </BoQCtgy>
+      <BoQCtgy ID="ID0F6C7C70" RNoPart="002">
+       <LblTx>
+        <p>
+         <span>Erdarbeiten</span>
+        </p>
+       </LblTx>
+       <BoQBody>
+        <Itemlist>
+         <Item ID="ID0F9E55C8" RNoPart="0010">
+          <Qty>450.000</Qty>
+          <QU>m3</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Boden für Baugruben ab Baugrubensohle profilgerecht lösen und </span>
+               <span>außerhalb der Baugrube lagern, </span>
+               <span>Ausführung mit geböschten Wänden, </span>
+               <span>Aushubtiefe bis 2,8 m, </span>
+               <span>Breite über 3 bis 4 m, Länge </span>
+               <span>über 3 bis 4 m, </span>
+               <span>Bodenklasse 3 DIN 18300.</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <span>Langtext mit Grafik</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <image align="left" width="217" Type="image/jpeg" Name="bagger.jpg">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</image>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Boden für Baugrube, BK 3</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F9E5C30" RNoPart="0020">
+          <Qty>7200.000</Qty>
+          <QU>m3</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Boden der Gräben für Abwasserkanäle, ab Geländeoberfläche, </span>
+               <span>mit geböschten Wänden, Aushubtiefe bis 1,45 m, Sohlenbreite </span>
+               <span>der Gräben über 0,7 bis 0,8 m, profilgerecht lösen, Aushub </span>
+               <span>außerhalb Baugrube lagern, Bodenklasse 3 DIN 18300, </span>
+               <span>schadstoffbelastet gemäß Gutachten.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Boden Graben Kanal Tiefe bis 1,45 m lösen, lagern Bodenklasse 3 </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F9E51F0" RNoPart="0030">
+          <Qty>12345678.012</Qty>
+          <QU>m2</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Oberboden, Bodengruppe 4 DIN 18915, in Streifen abtragen, </span>
+               <span>laden, fördern und geordnet lagern, Arbeiten mit Gerät, </span>
+               <span>Streifenbreite 4,5 m, von Banketten, Abtragdicke im Mittel 30 cm, </span>
+              </p>
+              <p>
+               <span>Förderweg bis 2,5 km, Transport über öffentliche Straßen, </span>
+               <span>Mengenermittlung nach Aufmaß an der Entnahmestelle. </span>
+               <span>REB-Abrechnung ist Pflicht</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <span>Maximale Stellenzahl für eine Menge mit insgesamt 11 Stellen. </span>
+               <span>8 Vorkommastellen und drei Nachkommastellen</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Oberboden abtragen, lagern d= 30 cm Bodengruppe 4 </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F9E5710" RNoPart="0040">
+          <ALNGroupNo>1</ALNGroupNo>
+          <ALNSerNo>0</ALNSerNo>
+          <Qty>1245.000</Qty>
+          <QU>m2</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Pflasterdecke ZTV P-StB, Steine vom Lagerplatz des AG abholen, </span>
+               <span>Förderweg bis 4 km, aus Pflastersteinen aus Beton DIN EN 1338 grau, </span>
+               <span>max. Differenzen J, Witterungswiderstand B, abriebwiderstand H, gefast, </span>
+               <span>Maße L/B 100/100 mm, Höhe 80 mm, in Reihen, in Fußgängerzonen, </span>
+               <span>Bettung aus Kiessand, Körnung 0/4, Dicke 3 bis 5 cm, </span>
+               <span>Pflasterfugen verfüllen mit Sand.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Betonpflaster L/B 100/100 mm H 80 mm  grau</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F9E59A0" RNoPart="0050">
+          <ALNGroupNo>1</ALNGroupNo>
+          <ALNSerNo>1</ALNSerNo>
+          <Qty>1245.000</Qty>
+          <QU>m2</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span> </span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Betonpflaster L/B 100/100 mm H 80 mm  in BVBS-blau</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+        </Itemlist>
+       </BoQBody>
+      </BoQCtgy>
+      <BoQCtgy ID="ID0F6C7910" RNoPart="003">
+       <LblTx>
+        <p>
+         <span>Maurerarbeiten</span>
+        </p>
+       </LblTx>
+       <BoQBody>
+        <Itemlist>
+         <Item ID="ID0F9E50A8" RNoPart="0010">
+          <Qty>440.000</Qty>
+          <QU>m2</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Mauerwerk der Innenwand, zweiseitig als Sichtmauerwerk, </span>
+               <span>mit </span>
+               <span>Stoßfugenvermörtelung, Fugenglattstrich/Ausfugen wird gesondert </span>
+               <span>vergütet,  </span>
+               <span>Kalksandstein, DIN V 106, KS-R, Festigkeitsklasse 20, </span>
+               <span>Rohdichteklasse 1,8, </span>
+               <span>Mauerwerksdicke 11,5 cm, </span>
+               <span>Mauermörtel MG II a DIN V 18580,  </span>
+               <span>Höhe bis 2,75 m.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Kalksandstein-Innenwand KS-R SFK 20 RDK 1,8 D 11,5cm </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F9E5D78" RNoPart="0020">
+          <Qty>350.000</Qty>
+          <QU>m2</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Mauerwerk der Innenwand, zweiseitig als Sichtmauerwerk, </span>
+               <span>mit </span>
+               <span>Stoßfugenvermörtelung, Fugenglattstrich/Ausfugen wird </span>
+               <span>gesondert vergütet,  </span>
+               <span>Kalksandstein, DIN V 106, KS-R,</span>
+              </p>
+              <p>
+               <span>Festigkeitsklasse 20, </span>
+               <span>Rohdichteklasse 1,8, </span>
+               <span>Mauerwerksdicke 17,5 cm, </span>
+               <span>Mauermörtel MG II a, </span>
+               <span>DIN V 18580,  Höhe bis 2,75 m.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Kalksandstein-Innenwand KS-R SFK 20 RDK 1,8 D 17,5cm </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F9E5858" RNoPart="0030">
+          <Qty>750.000</Qty>
+          <QU>m3</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Mauerwerk DIN 1053-1 als Rezeptmauerwerk oder nach Zulassung, </span>
+               <span>der Außenwand, für späteren Putzauftrag, mit Stoßfugenvermörtelung, </span>
+               <span>aus Porenbeton-Planelement gemäß Zulassung - DIBt - PP, </span>
+               <span>Festigkeitsklasse 4, </span>
+               <span>Rohdichteklasse 0,6, Mauerwerksdicke 36,5 cm, </span>
+               <span>Dünnbettmörtel DM DIN V 18580, Wärmeleitfähigkeit, </span>
+               <span>Lambda R 0,15 W/mK, </span>
+               <span>Maße L/H 499/624 mm, </span>
+               <span>Dicke 365 mm, Höhe bis 2,75 m, in Einzelflächen über 3 bis 5 m2.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Außenwand Porenbeton-Planelement SFK 4 D 36,5cm 0,15W/(mK) </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F9E5338" RNoPart="0040">
+          <Qty>783.030</Qty>
+          <QU>m3</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Mauerwerk DIN 1053-1 der Außenwand, einseitig als </span>
+               <span>Sichtmauerwerk, mit Stoßfugenvermörtelung, </span>
+               <span>Mauerziegel, DIN 105 oder nach Zulassung, </span>
+               <span>VHLz, Festigkeitsklasse 28, Rohdichteklasse 1,6, </span>
+               <span>Mauerwerksdicke 36,5 cm, Mauermörtel MG II DIN V 18580, </span>
+               <span>Wärmeleitfähigkeit Lambda R 0,68 W/mK, Höhe bis 2,5 m</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Außenwand VHLz SFK 28 RDK 1,6 D 36,5cm</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+        </Itemlist>
+       </BoQBody>
+      </BoQCtgy>
+      <BoQCtgy ID="ID14EE4C10" RNoPart="004">
+       <LblTx>
+        <p>
+         <span>Betonarbeiten</span>
+        </p>
+       </LblTx>
+       <BoQBody>
+        <Itemlist>
+         <Item ID="ID0F9E5EC0" RNoPart="0010">
+          <Qty>500.000</Qty>
+          <QU>m2</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Schalung der Deckenplatten, als Deckschalung, Schalungshaut für </span>
+               <span>Betonflächen ohne Anforderung, aus GF-Schalungsplatten DIN 68791, </span>
+               <span>einhäuptig, Höhe der Betonunterseite über 2 bis 3 m.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Schalung Deckenplatte GF-Schalungsplatten H 2-3m </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F9E5480" RNoPart="0020">
+          <Qty>500.000</Qty>
+          <QU>m2</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Ortbeton der Deckenplatten, obere Betonfläche waagerecht, </span>
+               <span>als Stahlbeton, Normalbeton C 20/25 DIN EN 206-1, DIN 1045-2, </span>
+               <span>Dicke 20 cm, Erdgeschoss.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Ortbeton Deckenplatte Stahlbeton C20/25 D 20cm </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F980420" RNoPart="0030">
+          <Qty>267.000</Qty>
+          <QU>m3</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Ortbeton der Außenwände, Dicke 24 cm, als Stahlbeton, </span>
+               <span>Normalbeton C 35/45 DIN EN 206-1, DIN 1045-2, </span>
+               <span>Expositionsklasse Betonkorrosion durch Verschleißbeanspruchung XM1, </span>
+               <span>Expositionsklasse Betonkorrosion durch chemischen Angriff XA1, </span>
+               <span>Ausführung im Erdgeschoss.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Ortbeton Außenwand D 24cm Stahlbeton C35/45 </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+        </Itemlist>
+       </BoQBody>
+      </BoQCtgy>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="ID14EE40D0" RNoPart="002">
+     <LblTx>
+      <p>
+       <span>Baunebengewerke</span>
+      </p>
+     </LblTx>
+     <BoQBody>
+      <BoQCtgy ID="ID14EE4E50" RNoPart="000">
+       <LblTx>
+        <p>
+         <span>Baunebengewerk Titel 0</span>
+        </p>
+       </LblTx>
+       <BoQBody>
+        <Itemlist>
+         <Item ID="ID0F980A88" RNoPart="0000">
+          <Qty>1.000</Qty>
+          <QU>Stck</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Überprüfung von Titel 0 und Position 0</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Baunebengewerk Position 0</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+        </Itemlist>
+       </BoQBody>
+      </BoQCtgy>
+      <BoQCtgy ID="ID14EE4670" RNoPart="001">
+       <LblTx>
+        <p>
+         <span>Elektroarbeiten</span>
+        </p>
+       </LblTx>
+       <BoQBody>
+        <Itemlist>
+         <Remark ID="ID15015998">
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Hinweistext für Elektroarbeiten</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <span>Die nachfolgenden Positionen wurden dem Katalog vom ZVEH entnommen</span>
+               <br/>
+              </p>
+              <p>
+               <span style="font-weight:bold;">Katalogbeschreibung:</span>
+               <br/>
+               <span>Elektroinstallation in Wohngebäuden </span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Hinweistext </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Remark>
+         <Item ID="ID0F9807F8" RNoPart="0010">
+          <Qty>450000.000</Qty>
+          <QU>m</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <span style="font-family:arial;">Kabel 0.6/1 kV, als Kunststoffkabel DIN </span>
+              <span style="font-family:arial;">VDE 0271 </span>
+              <span style="font-family:arial;">liefern und in bauseitigen Kabelgraben ver</span>
+              <span style="font-family:arial;">legen oder in Kabelzugsteine einziehen , </span>
+              <span style="font-family:arial;">NYY 3 x 1.5</span>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Kabel 0.6/1 kV einziehen NYY 3x1.5</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F980568" RNoPart="0020">
+          <Qty>200000.000</Qty>
+          <QU>m</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <span style="font-family:arial;">Kabel 0.6/1 kV, als Kunststoffkabel DIN </span>
+              <span style="font-family:arial;">VDE 0271 </span>
+              <span style="font-family:arial;">liefern und in bauseitigen Kabelgraben ver</span>
+              <span style="font-family:arial;">legen oder in Kabelzugsteine einziehen. </span>
+              <span style="font-family:arial;">NYY 4 x 1.5</span>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Kabel 0.6/1 kV einziehen NYY 4x1.5</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <MarkupItem ID="ID0F903EC0" RNoPart="0030">
+          <MarkupType>AllInCat</MarkupType>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span style="">Zuschlag auf die Positionen in der gleichen Gruppe</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Zuschlag auf die vorgenannten Kabelarbeiten</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </MarkupItem>
+         <Item ID="ID0F980048" RNoPart="0040">
+          <Qty>100.000</Qty>
+          <QU>Stck</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span style="font-family:arial;">Untergrund vornässen und mit Putz der </span>
+               <br/>
+               <span style="font-family:arial;">MG PI c fachgerecht beiputzen und der </span>
+               <br/>
+               <span style="font-family:arial;">umgebenden Struktur anpassen.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Hohlliegenden Putz abschlagen, </span>
+               </p>
+               <p>
+                <span>mit Putz MG PI c beiarbeiten. </span>
+               </p>
+               <p>
+                <span>Die Arbeiten sind wie folgt durchzuführen:</span>
+               </p>
+               <p>
+                <span style="font-family:arial;">Hohlliegenden Putz abschlagen, </span>
+               </p>
+               <p>
+                <span style="font-family:arial;">defekte </span>
+                <span style="font-family:arial;">Fugen auskratzen, </span>
+               </p>
+               <p>
+                <span style="font-family:arial;">einen tragfähigen Unter-</span>
+                <br/>
+                <span style="font-family:arial;">grund herstellen. </span>
+               </p>
+               <p>
+                <span style="font-family:arial;">Angefallenen Schutt </span>
+               </p>
+               <p>
+                <span style="font-family:arial;">entsorgen. </span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+        </Itemlist>
+       </BoQBody>
+      </BoQCtgy>
+      <BoQCtgy ID="ID14EE4CA0" RNoPart="002">
+       <LblTx>
+        <p>
+         <span>Maler- und Fensterarbeiten</span>
+        </p>
+       </LblTx>
+       <BoQBody>
+        <Itemlist>
+         <Item ID="ID0F980BD0" RNoPart="0010">
+          <Qty>5.000</Qty>
+          <QU>Stck</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Fenster</span>
+              </p>
+              <p>
+               <span>Kunststoffkippfenster mit Doppel-Verglasung</span>
+              </p>
+              <p>
+               <span>Größe:</span>
+              </p>
+              <p>
+               <span>1000 x 800 mm (BxH)</span>
+              </p>
+              <p>
+               <span>in Farben weiß, braun, anthrazit, 4-Stufen Kippbar</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span style="">Kunststoffkippfenster mit Doppel-Verglasung 1000 x 800 mm</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F980D18" RNoPart="0020">
+          <Qty>8.000</Qty>
+          <QU>Stck</QU>
+          <Description>
+           <CompleteText>
+            <ComplTSB>Yes</ComplTSB>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>In dieser Position sind Textergänzungen des Bieters im Langtext dargestellt. </span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <span>Fenster in hochwertiger Ausfertigung</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+              <p>
+               <span>Angeboten werden Fenster mit einer</span>
+              </p>
+              <p>
+               <span/>
+              </p>
+             </Text>
+             <TextComplement MarkLbl="60" Kind="Bidder">
+              <ComplCaption>
+               <span>Breite von </span>
+              </ComplCaption>
+              <ComplBody>
+               <span>...........</span>
+              </ComplBody>
+              <ComplTail>
+               <span> cm.</span>
+              </ComplTail>
+             </TextComplement>
+             <Text>
+              <p>
+               <span/>
+               <span>u</span>
+               <span>nd einer </span>
+              </p>
+             </Text>
+             <TextComplement MarkLbl="61" Kind="Bidder">
+              <ComplCaption>
+               <span>Höhe von  </span>
+              </ComplCaption>
+              <ComplBody>
+               <span>...........</span>
+              </ComplBody>
+              <ComplTail>
+               <span> cm.</span>
+              </ComplTail>
+             </TextComplement>
+             <Text>
+              <p>
+               <span/>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Fensterarbeiten (Textergänzungen des Bieters)</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F980190" RNoPart="0030">
+          <Qty>3.000</Qty>
+          <QU>Stck</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Fenster</span>
+              </p>
+              <p>
+               <span>Kunststoffkippfenster mit Doppel-Verglasung</span>
+              </p>
+              <p>
+               <span>Größe:</span>
+              </p>
+              <p>
+               <span>800 x 600 mm (BxH)</span>
+              </p>
+              <p>
+               <span>in Farben weiß, braun, anthrazit, 4-Stufen Kippbar</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span style="">Kunststoffkippfenster mit Doppel-Verglasung 800 x 600 mm</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F980E60" RNoPart="0050">
+          <Qty>100.000</Qty>
+          <QU>m2</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span style="font-family:arial;">Hohlliegenden Putz abschlagen, defekte </span>
+               <span style="font-family:arial;">Fugen auskratzen, einen tragfähigen Unter</span>
+               <span style="font-family:arial;">grund herstellen. Angefallenen Schutt </span>
+               <span style="font-family:arial;">entsorgen. </span>
+               <br/>
+               <span style="font-family:arial;">Untergrund vornässen und mit Putz der </span>
+               <span style="font-family:arial;">MG PI c fachgerecht beiputzen und der </span>
+               <span style="font-family:arial;">umgebenden Struktur anpassen.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Hohlliegenden Putz abschlagen, mit Putz MG PI c beiarbeiten</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+        </Itemlist>
+       </BoQBody>
+      </BoQCtgy>
+      <BoQCtgy ID="ID14EE4DC0" RNoPart="003">
+       <LblTx>
+        <p>
+         <span>Heizung</span>
+        </p>
+       </LblTx>
+       <BoQBody>
+        <Itemlist>
+         <Item ID="ID0F9802D8" RNoPart="0010">
+          <Qty>1.000</Qty>
+          <QU>Stck</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <span>Gas-Kombi-Wasserheizer mit Speicher-Wassererwärmer, mit CE-Registrierung und Bauartzulassung, erforderliche Wärmeleistung bis 5 kW, max. zulässiger Betriebsüberdruck 1,5 bar, Speicherinhalt bis 5 l, Warmwasserdauerleistung DIN 4708 bei Erwärmung von 10 auf 45 Grad C bis 85 l/h, max. zulässiger Betriebsüberdruck trinkwasserseitig 6 bar, einzustellende Heizleistung bis 5 kW, zulässige Kesselvorlauf-(Absicherungs-)temperatur bis 110 Grad C, Anlagenabsicherung DIN EN 12828, Bemessungsbetriebsspannung 230 V AC, Heizmedium Wasser, Mindest-Norm-Nutzungsgrad 90 %, DIN 4702-8 bezogen auf eine Systemtemperatur von 75/60 Grad C, mit Heizwasserabsperrarmatur, Entleerung, Sicherheitsventil und Gashahn, mit Warmwasseranschluss und Kaltwasserabsperrarmatur</span>
+              <br/>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Gas-Kombi-Wasserheizer Wassererwärmer bis 5kW bis 5l bis 85l</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+          <SumDescr>Yes</SumDescr>
+          <SubDescr>
+           <SubDNo>01</SubDNo>
+           <Description>
+            <CompleteText>
+             <DetailTxt>
+              <Text>
+               <span>Heizgerät für raumluftunabhängigen Betrieb, kombinierte Luft-Abgas-Führung, über Dach, mit Abgasabführung über eine Abgasleitung, </span>
+               <br/>
+               <span>Brenner für Erdgas E, Brenner mit thermoelektrischer Zündsicherung, Flammenzündung mit Piezozünder, Leistungsregelung modulierend, abgasseitige Grenzwerte gemäß 1. BImSchV, </span>
+              </Text>
+             </DetailTxt>
+             <OutlineText>
+              <OutlTxt>
+               <TextOutlTxt>
+                <p>
+                 <span style="">Heizgerät für raumluftunabhängigen Betrieb</span>
+                </p>
+               </TextOutlTxt>
+              </OutlTxt>
+             </OutlineText>
+            </CompleteText>
+           </Description>
+           <QtySpec>Yes</QtySpec>
+           <Qty>2.000</Qty>
+           <QU>Stck</QU>
+          </SubDescr>
+          <SubDescr>
+           <SubDNo>02</SubDNo>
+           <Description>
+            <CompleteText>
+             <DetailTxt>
+              <Text>
+               <p>
+                <span style="">Membran-Druckausdehnungsgefäß, Mindest-Nennvolumen bis 5 l, Vordruck 0,75 bar, aus Stahl.</span>
+               </p>
+              </Text>
+             </DetailTxt>
+             <OutlineText>
+              <OutlTxt>
+               <TextOutlTxt>
+                <p>
+                 <span style="">Membran-Druckausdehnungsgefäß</span>
+                </p>
+               </TextOutlTxt>
+              </OutlTxt>
+             </OutlineText>
+            </CompleteText>
+           </Description>
+           <QtySpec>Yes</QtySpec>
+           <Qty>3.000</Qty>
+           <QU>Stck</QU>
+          </SubDescr>
+         </Item>
+        </Itemlist>
+       </BoQBody>
+      </BoQCtgy>
+     </BoQBody>
+    </BoQCtgy>
+    <BoQCtgy ID="ID14EE4D30" RNoPart="999">
+     <LblTx>
+      <p>
+       <span>Stundenlohnarbeiten</span>
+      </p>
+     </LblTx>
+     <BoQBody>
+      <BoQCtgy ID="ID14EE4700" RNoPart="999">
+       <LblTx>
+        <p>
+         <span>Stundenlohnarbeiten auf Nachweis</span>
+        </p>
+       </LblTx>
+       <BoQBody>
+        <Itemlist>
+         <Remark ID="ID14F88F00">
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p style="text-align:&#x27;left&#x27;;">
+               <span style="font-family:arial;font-size:10pt;color:rgb(0,0,0);">Die nachfolgenden Positionen sind Stundenlohnarbeiten</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Hinweistexte Stundenlohnarbeiten</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Remark>
+         <Item ID="ID0F9806B0" RNoPart="9999">
+          <Qty>1.000</Qty>
+          <QU>Std</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Stundenlohnarbeiten durch Ingenieur/-in </span>
+               <br/>
+               <span>auf Anordnung des AG ausführen, </span>
+               <br/>
+               <span>der Verrechnungssatz für die jeweilige Arbeitskraft </span>
+               <br/>
+               <span>umfasst sämtliche Aufwendungen wie Lohn- und </span>
+               <br/>
+               <span>Gehaltskosten, Lohn- und Gehaltsnebenkosten, Zuschläge,</span>
+              </p>
+              <p>
+               <span>lohngebundene und lohnabhängige Kosten, sonstige </span>
+               <br/>
+               <span>Sozialkosten, Gemeinkosten, Wagnis und Gewinn.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Ingenieurstunde</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID0F980940" RNoPart="9999" RNoIndex="y">
+          <Qty>10.000</Qty>
+          <QU>Std</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Stundenlohnarbeiten durch Meister/-in </span>
+               <br/>
+               <span>auf Anordnung des AG ausführen, </span>
+               <br/>
+               <span>der Verrechnungssatz für die jeweilige Arbeitskraft </span>
+               <br/>
+               <span>umfasst sämtliche Aufwendungen wie Lohn- und </span>
+               <br/>
+               <span>Gehaltskosten, Lohn- und Gehaltsnebenkosten, Zuschläge,</span>
+              </p>
+              <p>
+               <span>lohngebundene und lohnabhängige Kosten, sonstige </span>
+               <br/>
+               <span>Sozialkosten, Gemeinkosten, Wagnis und Gewinn.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Meisterstunden</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Item ID="ID047F7648" RNoPart="9999" RNoIndex="z">
+          <Qty>10.000</Qty>
+          <QU>Std</QU>
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span>Stundenlohnarbeiten durch Helfer/-in </span>
+               <br/>
+               <span>auf Anordnung des AG ausführen, </span>
+               <br/>
+               <span>der Verrechnungssatz für die jeweilige Arbeitskraft </span>
+               <br/>
+               <span>umfasst sämtliche Aufwendungen wie Lohn- und </span>
+               <br/>
+               <span>Gehaltskosten, Lohn- und Gehaltsnebenkosten, Zuschläge,</span>
+              </p>
+              <p>
+               <span>lohngebundene und lohnabhängige Kosten, sonstige </span>
+               <br/>
+               <span>Sozialkosten, Gemeinkosten, Wagnis und Gewinn.</span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Helferstunden</span>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Item>
+         <Remark ID="ID0F6693D8">
+          <Description>
+           <CompleteText>
+            <DetailTxt>
+             <Text>
+              <p>
+               <span style="">Hier sind die Positionen für die Musterdatei für die GAEB-Zertifizierung im Bereich Bauausführung beendet. </span>
+              </p>
+             </Text>
+            </DetailTxt>
+            <OutlineText>
+             <OutlTxt>
+              <TextOutlTxt>
+               <p>
+                <span>Hinweistext</span>
+               </p>
+               <p>
+                <span/>
+               </p>
+              </TextOutlTxt>
+             </OutlTxt>
+            </OutlineText>
+           </CompleteText>
+          </Description>
+         </Remark>
+        </Itemlist>
+       </BoQBody>
+      </BoQCtgy>
+     </BoQBody>
+    </BoQCtgy>
+   </BoQBody>
+  </BoQ>
+ </Award>
+</GAEB>
