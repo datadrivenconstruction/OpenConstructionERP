@@ -13,7 +13,7 @@ manifest = ModuleManifest(
         "sheets, markups and reports. PyMuPDF + Tesseract extractors, "
         "Postgres tsvector / SQLite LIKE fallback."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_projects", "oe_documents"],
     auto_install=True,

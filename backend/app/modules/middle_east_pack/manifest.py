@@ -15,7 +15,7 @@ manifest = ModuleManifest(
         "Islamic calendar references, Ramadan adjustments, GCC VAT rates, "
         "bilingual PDF support (Arabic + English)."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="regional",
     depends=[],
     auto_install=False,

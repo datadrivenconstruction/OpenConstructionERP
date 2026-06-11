@@ -19,7 +19,7 @@ manifest = ModuleManifest(
         "outputs. Stores rules as JSON definitions and evaluates them "
         "through DuckDB on DDC canonical Parquet (ADR 002 compliant)."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_users", "oe_projects"],
     auto_install=True,

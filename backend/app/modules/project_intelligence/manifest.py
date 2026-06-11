@@ -7,7 +7,7 @@ manifest = ModuleManifest(
     version="1.0.0",
     display_name="Project Intelligence",
     description="AI-powered project completion analysis, scoring, and guided recommendations",
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     # Promoted to "core" so the dashboard at /project-intelligence is always
     # available. Core modules ignore persisted-disable state at boot and cannot
     # be turned off via the /v1/modules/{name}/disable endpoint.

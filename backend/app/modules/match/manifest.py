@@ -13,7 +13,7 @@ manifest = ModuleManifest(
         "element and returns ranked CWICR cost-position candidates "
         "with classification, unit, region, and lex boosts."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_users", "oe_projects", "oe_costs"],
     optional_depends=["oe_ai"],

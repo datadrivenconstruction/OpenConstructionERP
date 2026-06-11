@@ -13,7 +13,7 @@ manifest = ModuleManifest(
         "subscriptions so transmittals, share links and review packages "
         "always go to the right humans."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_projects", "oe_users", "oe_documents"],
     # ``file_search`` is intentionally NOT declared here - the search

@@ -12,7 +12,7 @@ manifest = ModuleManifest(
         "BIM elements, with a discipline×discipline clash matrix, a review "
         "workflow and one-click BCF export - no IfcOpenShell."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_projects", "oe_users", "oe_bim_hub", "oe_bcf"],
     auto_install=True,

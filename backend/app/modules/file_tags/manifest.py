@@ -13,7 +13,7 @@ manifest = ModuleManifest(
         "bulk assign/unassign endpoints and an AECO seed-defaults helper "
         "(disciplines + phases)."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_projects"],
     auto_install=True,

@@ -10,7 +10,7 @@ manifest = ModuleManifest(
         "Composite cost items built from cost database entries with factors. "
         "Supports templates, regional factors, and BOQ integration."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_costs"],
     auto_install=True,

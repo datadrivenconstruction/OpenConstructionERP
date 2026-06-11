@@ -13,7 +13,7 @@ manifest = ModuleManifest(
         "and forwards them to the standard logging pipeline at WARNING level. "
         "Per-IP rate limited at 30/min. No DB storage in v4.2.x."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="infra",
     depends=[],
     auto_install=True,

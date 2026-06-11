@@ -11,7 +11,7 @@ manifest = ModuleManifest(
         "match first, then semantic via Qdrant when [semantic] extra is "
         "installed, then needs-review candidates."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_users", "oe_projects", "oe_costs", "oe_dashboards"],
     optional_depends=["oe_ai"],

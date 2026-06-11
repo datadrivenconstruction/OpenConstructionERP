@@ -14,7 +14,7 @@ manifest = ModuleManifest(
         "restarting. On completion chunks are assembled and handed to the "
         "existing document store and conversion pipeline."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_projects", "oe_users", "oe_documents"],
     auto_install=True,

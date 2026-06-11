@@ -14,7 +14,7 @@ manifest = ModuleManifest(
         "Latin America construction standards: SINAPI (Brazil), NTDIF (Mexico), "
         "multi-currency support (BRL/MXN/ARS), and regional contract forms."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="regional",
     depends=[],
     auto_install=False,

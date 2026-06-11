@@ -10,7 +10,7 @@ manifest = ModuleManifest(
         "Analytical dashboard layer: Parquet snapshots, DuckDB-backed "
         "insight cards, cascade filters, 3D viewer sync, historical diffs."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_users", "oe_projects"],
     auto_install=True,

@@ -14,7 +14,7 @@ manifest = ModuleManifest(
         "when available; non-PDFs (and the no-pypdf fallback) get a "
         "JSON sidecar describing the stamp position + text + approver."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_projects", "oe_users"],
     auto_install=True,

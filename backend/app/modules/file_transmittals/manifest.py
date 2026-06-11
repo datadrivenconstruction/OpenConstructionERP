@@ -15,7 +15,7 @@ manifest = ModuleManifest(
         "reportlab is available, structured plain text otherwise) and "
         "single-use acknowledgement tokens for recipients."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_projects", "oe_users"],
     auto_install=True,

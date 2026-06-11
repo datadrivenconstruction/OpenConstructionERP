@@ -12,7 +12,7 @@ manifest = ModuleManifest(
         "Record-level saved-search engine: save a filter spec against any "
         "registered entity and reuse it as a list, count, tile, or export."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_users", "oe_projects"],
     auto_install=True,

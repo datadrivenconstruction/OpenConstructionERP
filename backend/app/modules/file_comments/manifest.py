@@ -17,7 +17,7 @@ manifest = ModuleManifest(
     description=(
         "Threaded comments + PDF markup pins across all file kinds, with @mention extraction and resolve workflow."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_projects", "oe_users"],
     auto_install=True,

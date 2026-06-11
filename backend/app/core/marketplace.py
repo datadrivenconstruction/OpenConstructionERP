@@ -1,4 +1,4 @@
-"""‌⁠‍Marketplace registry - static catalog of installable OpenEstimate modules.
+"""‌⁠‍Marketplace registry - static catalog of installable OpenConstructionERP modules.
 
 Provides a browsable catalog of add-ons: cost databases, vector indices,
 language packs, CAD converters, analytics, and integrations. Each entry
@@ -58,7 +58,7 @@ class MarketplaceModule:
 # ---------------------------------------------------------------------------
 
 _DDC = "Data Driven Construction"
-_OE = "OpenEstimate Core Team"
+_OE = "OpenConstructionERP Core Team"
 
 MARKETPLACE_MODULES: list[MarketplaceModule] = [
     # ── Cost Databases (11) ──────────────────────────────────────────────

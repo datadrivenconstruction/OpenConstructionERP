@@ -14,7 +14,7 @@ manifest = ModuleManifest(
         "US construction standards: AIA G702 payment applications, "
         "CSI MasterFormat divisions, imperial units, USD, and state sales-tax examples."
     ),
-    author="OpenEstimate Core Team",
+    author="OpenConstructionERP Core Team",
     category="regional",
     depends=[],
     auto_install=False,
