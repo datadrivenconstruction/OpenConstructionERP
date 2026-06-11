@@ -88,7 +88,7 @@ function fakeFile(name: string, type: string, bytes: number): File {
 
 function fileInput(): HTMLInputElement {
   // The dropzone proxies clicks to a hidden <input type=file>.
-  return screen.getByLabelText(/Partner pack .zip file/i) as HTMLInputElement;
+  return screen.getByLabelText(/Pack .zip file/i) as HTMLInputElement;
 }
 
 /* ── Tests ─────────────────────────────────────────────────────────────── */
@@ -115,9 +115,9 @@ describe('<InstallPackPanel />', () => {
   it('renders the dropzone, file input and Rescan button for an admin', () => {
     renderPanel();
     expect(
-      screen.getByRole('button', { name: /Upload a partner pack .zip/i }),
+      screen.getByRole('button', { name: /Upload a pack .zip/i }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/Partner pack .zip file/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Pack .zip file/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Rescan packs/i })).toBeInTheDocument();
   });
 

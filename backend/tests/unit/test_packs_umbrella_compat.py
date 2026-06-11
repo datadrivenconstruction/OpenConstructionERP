@@ -13,6 +13,7 @@ Covers the contract that external packs and existing installs depend on:
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from pathlib import Path
 from unittest.mock import patch
 
@@ -36,6 +37,20 @@ class FakeEP:
 
     def load(self) -> PartnerPackManifest:
         return self._manifest
+
+
+@pytest.fixture(autouse=True)
+def _isolate_pack_discovery_cache() -> Iterator[None]:
+    """Reset the memoized pack discovery around every test in this module.
+
+    Several tests patch ``discovery.entry_points`` to inject a fake pack and then
+    hit routes that call the lru_cached ``discover_packs``. Without a teardown
+    reset the fake pack stays cached after the patch is removed and leaks into
+    unrelated tests (e.g. the demo-project mapping checks), so reset on both ends.
+    """
+    reset_cache()
+    yield
+    reset_cache()
 
 
 class TestPackTypeInference:
