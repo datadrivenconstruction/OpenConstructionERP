@@ -266,7 +266,9 @@ src = ["app", "tests"]
 # into eight or more lines, exploding the files and destroying their tabular
 # readability for no behaviour gain, so they are skipped by the formatter.
 # They are still linted (with N999 ignored below, and E501 is off globally).
-exclude = ["app/core/demo_packs/*-*.py"]
+# retail_market_heilbronn.py is the same kind of data table but carries an
+# importable snake_case name, so it is excluded explicitly.
+exclude = ["app/core/demo_packs/*-*.py", "app/core/demo_packs/retail_market_heilbronn.py"]
 
 [tool.ruff.lint]
 # Pragmatic ruleset: catch real bugs (E/F/W/B), enforce import order (I)

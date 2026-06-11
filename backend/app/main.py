@@ -800,6 +800,33 @@ async def _seed_demo_account() -> None:
             except Exception:
                 logger.warning("Flagship seed skipped (non-fatal)", exc_info=True)
 
+            # Retail Market Heilbronn - the ninth showcase project. Backfilled
+            # flagship-style on EVERY boot (not just project_count == 0) so
+            # existing installs pick it up on upgrade. install_demo_project
+            # dedupes on metadata_["demo_id"], so once the project exists the
+            # re-run is a cheap no-op. Operators who opted out of the showcase
+            # keep their workspace clean.
+            if os.environ.get("OE_SKIP_SHOWCASE", "").lower() in ("1", "true", "yes"):
+                logger.debug("Retail Market Heilbronn backfill skipped (OE_SKIP_SHOWCASE)")
+            else:
+                try:
+                    from app.core.demo_projects import install_demo_project as _install_demo
+
+                    async with async_session_factory() as rh_session:
+                        rh_result = await _install_demo(rh_session, "retail-market-heilbronn")
+                        await rh_session.commit()
+                        if not rh_result.get("already_installed"):
+                            logger.info(
+                                "Retail Market Heilbronn showcase seeded: %s (%s positions)",
+                                rh_result.get("project_id"),
+                                rh_result.get("positions"),
+                            )
+                except Exception:
+                    logger.warning(
+                        "Retail Market Heilbronn showcase backfill skipped (non-fatal)",
+                        exc_info=True,
+                    )
+
             # Equipment & fleet demo - a representative fleet with 90 days of
             # telemetry so the predictive Health & Analytics tab and Fleet
             # Intelligence panel arrive populated (gauge, anomalies, forecast,

@@ -205,6 +205,9 @@ class DemoTemplate:
     # country, lat, lng. lat/lng are supplied so the map/weather render
     # immediately without a Nominatim round-trip (offline-first).
     address: dict | None = None
+    # Optional: human-readable project code shown on documents and the
+    # project header (e.g. "LM-HN-2026-01"). Stored on Project.project_code.
+    project_code: str = ""
     # Optional: multiple tender packages. When set, overrides tender_name/tender_companies.
     tender_packages: list[TenderPackageDef] = field(default_factory=list)
     # Optional: explicit schedule activities. When set, overrides auto-generation from sections.
@@ -1978,13 +1981,15 @@ DEFAULT_DEMO_IDS: tuple[str, ...] = (
     "medical-us",  # international healthcare - US MasterFormat, USD
 )
 
-# Rich generic-install showcase: the eight non-flagship country projects that a
+# Rich generic-install showcase: the nine non-flagship country projects that a
 # normal (no pack) install seeds alongside the flagship reference project so the
 # fresh workspace lands a fully worked-out, globe-spanning portfolio. Ordered to
 # read residential -> industrial -> education -> healthcare -> commercial across
-# DACH, Gulf, FR, US, China, Brazil, India and Canada. Each id resolves to a
-# DemoTemplate (built-in or pack-authored, auto-registered from demo_packs/) so
-# install_demo_project materializes the full module set per project.
+# DACH, Gulf, FR, US, China, Brazil, India and Canada, closed by the German food
+# retail showcase. Each id resolves to a DemoTemplate (built-in or pack-authored,
+# auto-registered from demo_packs/) so install_demo_project materializes the
+# full module set per project. The retail showcase is additionally backfilled
+# flagship-style on every boot (main.py) so existing installs pick it up.
 SHOWCASE_DEMO_IDS: tuple[str, ...] = (
     "residential-berlin",  # Germany - DIN 276, EUR
     "warehouse-dubai",  # UAE - industrial, AED
@@ -1994,6 +1999,7 @@ SHOWCASE_DEMO_IDS: tuple[str, ...] = (
     "residential-saopaulo",  # Brazil - SINAPI, BRL
     "govt-building-delhi",  # India - CPWD, INR
     "condo-toronto",  # Canada - residential, CAD
+    "retail-market-heilbronn",  # Germany - food retail, DIN 276 + GAEB, EUR
 )
 
 # Catalog info for the marketplace / frontend
@@ -2124,6 +2130,7 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "office-rio": "Commercial",
     "it-park-bangalore": "Commercial",
     "hospital-jeddah": "Healthcare",
+    "retail-market-heilbronn": "Retail",
 }
 
 
@@ -5253,6 +5260,31 @@ async def _seed_module_data(
                 "primary_phone": "+971 4 268 9090",
                 "country_code": "AE",
                 "notes": "Fire protection systems",
+            },
+        ],
+        # Retail Market Heilbronn showcase - the two fictional legal entities
+        # behind the project (client/owner and operator/tenant). The full
+        # 18-party stakeholder roster lands in the richness pass.
+        "retail-market-heilbronn": [
+            {
+                "contact_type": "client",
+                "company_name": "Sueddeutsche Handelsimmobilien GmbH",
+                "first_name": "Marion",
+                "last_name": "Roesler",
+                "primary_email": "m.roesler@sueddeutsche-handelsimmobilien.de",
+                "primary_phone": "+49 7131 562300",
+                "country_code": "DE",
+                "notes": "Bauherr / owner (retail real-estate company), Bereichsleitung Expansion Sued",
+            },
+            {
+                "contact_type": "client",
+                "company_name": "Sueddeutsche Lebensmittelmaerkte GmbH",
+                "first_name": "Thomas",
+                "last_name": "Gerlach",
+                "primary_email": "t.gerlach@sueddeutsche-lebensmittelmaerkte.de",
+                "primary_phone": "+49 7131 894120",
+                "country_code": "DE",
+                "notes": "Betreiber und Mieter / operator and tenant (store operations), Verkaufsleitung Region Unterland",
             },
         ],
     }
@@ -9121,6 +9153,7 @@ async def install_demo_project(
         status="active",
         owner_id=owner_id,
         address=template.address,
+        project_code=template.project_code or None,
         metadata_={
             **template.project_metadata,
             "demo_id": demo_id,
@@ -9404,7 +9437,10 @@ async def install_demo_project(
         bl = BudgetLine(
             id=_id(),
             project_id=project.id,
-            category=sec.description or f"Category {i + 1}",
+            # category is String(100); a longer section title would raise
+            # StringDataRightTruncation on PostgreSQL and poison the whole
+            # install transaction, so clamp defensively.
+            category=(sec.description or f"Category {i + 1}")[:100],
             description=f"From BOQ section {sec.ordinal}",
             planned_amount=str(round(planned, 2)),
             committed_amount=str(round(committed, 2)),
