@@ -2,10 +2,29 @@
 
 import math
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
+
+
+# ── Money serialisation helper (mirrors ai_estimator / match_elements / boq) ──
+# v3 §10: dollar amounts cross the wire as a Decimal-rendered string, never a
+# binary float, so a "$0.0023" AI-cost estimate never drifts to "0.00229999".
+# The DB columns stay numeric; only the JSON contract changes.
+def _serialise_money(v: Decimal | None) -> str | None:
+    if v is None:
+        return None
+    if not isinstance(v, Decimal):
+        try:
+            v = Decimal(str(v))
+        except (InvalidOperation, ValueError):
+            return "0"
+    if not v.is_finite():
+        return "0"
+    return format(v, "f")
+
 
 # Round-6 audit (2026-05-22) - hard bound on per-axis coordinates inside a
 # polygon. PDF pages render in PostScript points (72 dpi); ISO A0 at 72 dpi
@@ -436,8 +455,12 @@ class PlanReadResult(BaseModel):
     model_used: str = ""
     provider: str = ""
     tokens_used: int = 0
-    cost_usd_estimate: float = 0.0
+    cost_usd_estimate: Decimal = Decimal("0")
     notes: str | None = None
+
+    @field_serializer("cost_usd_estimate", when_used="json")
+    def _ser_cost(self, v: Decimal | None) -> str | None:
+        return _serialise_money(v)
 
 
 class PlanReadRequest(BaseModel):
@@ -467,13 +490,17 @@ class AiTakeoffRunResponse(BaseModel):
     provider: str | None = None
     model_used: str | None = None
     total_tokens: int = 0
-    cost_usd_estimate: float = 0.0
+    cost_usd_estimate: Decimal = Decimal("0")
     duration_ms: int = 0
     proposal_count: int = 0
     accepted_count: int = 0
     validation_report: dict[str, Any] | None = None
     failure_reason: str | None = None
     created_at: datetime | None = None
+
+    @field_serializer("cost_usd_estimate", when_used="json")
+    def _ser_cost(self, v: Decimal | None) -> str | None:
+        return _serialise_money(v)
 
 
 class PlanReadAcceptRequest(BaseModel):
@@ -511,10 +538,14 @@ class PlanReadMetaResponse(BaseModel):
     confidence_medium_threshold: float = TAKEOFF_CONFIDENCE_MEDIUM_THRESHOLD
     vision_providers: list[str] = Field(default_factory=list)
     max_polygon_vertices: int = MAX_PLAN_POLYGON_VERTICES
-    max_cost_usd: float = 0.0
-    rolling_spend_usd: float = 0.0
+    max_cost_usd: Decimal = Decimal("0")
+    rolling_spend_usd: Decimal = Decimal("0")
     modes: list[str] = Field(default_factory=lambda: ["scale", "rooms", "symbols", "full"])
     vision_available: bool = False
     provider: str | None = None
     model_used: str | None = None
     reason: str | None = None
+
+    @field_serializer("max_cost_usd", "rolling_spend_usd", when_used="json")
+    def _ser_usd(self, v: Decimal | None) -> str | None:
+        return _serialise_money(v)

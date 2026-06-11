@@ -4,13 +4,17 @@
 
 Covers bullet 8 of the R7 hardening sweep:
   * A user's manual correction overrides the AI suggestion.
-  * Manual measurements (TakeoffMeasurement) carry ``confidence=None``
-    (the ORM model has no confidence column) — not 0.0.
+  * Manual measurements (TakeoffMeasurement) carry ``confidence=None``,
+    never a fake 0.0. Since issue #194 the ORM model has a nullable
+    ``confidence`` column (an AI plan-read proposal stamps its model score
+    there); a manual draw leaves it NULL, so NULL still means "no AI score"
+    rather than "AI was very unsure".
   * Updating a measurement with new geometry via PATCH re-computes the
     measurement_value server-side from the new points (Audit B8).
   * The ``ai_confidence`` concept: extractedElement AI output carries
-    confidence; once a user manually edits a measurement, the persisted
-    record has no AI confidence (the field does not exist on the ORM).
+    confidence; a manually drawn measurement persists with ``confidence``
+    NULL, and no alternative score column (ai_confidence / score / certainty)
+    exists on the ORM.
   * After update_measurement, the new measurement_value reflects the
     new geometry, not the old client-submitted value.
 
@@ -83,23 +87,34 @@ def _make_service() -> TakeoffService:
 # ---------------------------------------------------------------------------
 
 
-class TestMeasurementModelHasNoConfidence:
-    def test_takeoff_measurement_no_confidence_column(self) -> None:
-        """TakeoffMeasurement ORM table must NOT have a confidence column.
+class TestMeasurementConfidence:
+    def test_confidence_column_is_nullable_with_no_default(self) -> None:
+        """``confidence`` exists (issue #194) but must stay NULL for manual rows.
 
-        Manual measurements are human-drawn; an AI confidence score has no
-        meaning. If a confidence column existed it would default to 0.0
-        and misrepresent the item as "AI very unsure" instead of "no AI".
+        A plan-read proposal stamps the model score here; a manual draw must
+        leave it NULL, never default to 0.0. So the column has to be nullable
+        and carry no Python/server default that would coerce a human-drawn
+        measurement into looking "AI very unsure".
         """
         from app.modules.takeoff.models import TakeoffMeasurement
 
-        columns = {col.key for col in TakeoffMeasurement.__table__.columns}
-        assert "confidence" not in columns, (
-            "TakeoffMeasurement must not have a confidence column. Manual measurements have no AI score."
-        )
+        col = TakeoffMeasurement.__table__.columns["confidence"]
+        assert col.nullable is True, "confidence must be nullable so manual rows stay NULL"
+        assert col.default is None, "confidence must have no Python default (NULL = no AI score)"
+        assert col.server_default is None, "confidence must have no server default"
 
-    def test_takeoff_measurement_no_ai_confidence_column(self) -> None:
-        """Also check for alternative names sometimes used."""
+    def test_confidence_check_constraint_allows_null_or_unit_range(self) -> None:
+        """The CHECK keeps confidence either NULL or a real 0..1 probability."""
+        from sqlalchemy import CheckConstraint
+
+        from app.modules.takeoff.models import TakeoffMeasurement
+
+        checks = [str(c.sqltext) for c in TakeoffMeasurement.__table__.constraints if isinstance(c, CheckConstraint)]
+        joined = " ".join(checks).lower()
+        assert "confidence is null" in joined, "confidence CHECK must permit NULL (manual measurements carry no score)"
+
+    def test_takeoff_measurement_no_alternative_score_column(self) -> None:
+        """Only the canonical ``confidence`` name is allowed, no synonyms."""
         from app.modules.takeoff.models import TakeoffMeasurement
 
         columns = {col.key for col in TakeoffMeasurement.__table__.columns}

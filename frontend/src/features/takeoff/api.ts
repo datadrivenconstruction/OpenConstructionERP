@@ -97,8 +97,10 @@ export interface PlanReadMeta {
   confidence_medium_threshold: number;
   vision_providers: string[];
   max_polygon_vertices: number;
-  max_cost_usd: number;
-  rolling_spend_usd: number;
+  // Money on the wire is a Decimal-rendered string (v3 §10); coerce with
+  // Number() at any display site.
+  max_cost_usd: number | string;
+  rolling_spend_usd: number | string;
   modes: PlanReadMode[];
   /** False when no vision-capable AI key is configured. The "Read plan with
    *  AI" action is hidden / disabled in that case; the offline Recognize tool
@@ -120,7 +122,8 @@ export interface AiTakeoffRun {
   provider: string | null;
   model_used: string | null;
   total_tokens: number;
-  cost_usd_estimate: number;
+  // Decimal-rendered string on the wire (v3 §10); Number() to display.
+  cost_usd_estimate: number | string;
   duration_ms: number;
   proposal_count: number;
   accepted_count: number;

@@ -2093,8 +2093,35 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             <p
               class="mt-0.5 text-xs text-content-tertiary line-clamp-1"
             >
-              Select an active project to upload files.
+              Create a project first, then upload files here.
             </p>
+            <button
+              class="mt-2 inline-flex items-center gap-1 text-2xs font-medium text-oe-blue hover:text-oe-blue-text transition-colors"
+              type="button"
+            >
+              <span>
+                Create a project
+              </span>
+              <svg
+                class="lucide lucide-arrow-right"
+                fill="none"
+                height="11"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="11"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5 12h14"
+                />
+                <path
+                  d="m12 5 7 7-7 7"
+                />
+              </svg>
+            </button>
             <div
               class="mt-2 flex items-center gap-3 text-2xs text-content-tertiary"
             >
@@ -3436,7 +3463,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
       style="animation-delay: 160ms;"
     >
       <div
-        class="rounded-xl border border-border-light bg-surface-elevated shadow-xs transition-all duration-normal ease-oe transform-gpu p-6"
+        class="rounded-xl border border-border-light bg-surface-elevated shadow-xs transition-all duration-normal ease-oe transform-gpu p-6 !bg-surface-elevated/70"
       >
         <div
           class="px-4 pt-3 pb-1"
@@ -3504,6 +3531,67 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
               style="height: 56px;"
             />
           </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="animate-card-in"
+      style="animation-delay: 160ms;"
+    >
+      <div
+        class="rounded-xl border border-border-light bg-surface-elevated shadow-xs transition-all duration-normal ease-oe transform-gpu p-6"
+      >
+        <div
+          class="mb-4 flex items-center gap-2"
+        >
+          <svg
+            class="lucide lucide-camera text-content-tertiary"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.75"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"
+            />
+            <circle
+              cx="12"
+              cy="13"
+              r="3"
+            />
+          </svg>
+          <h3
+            class="text-sm font-semibold text-content-primary"
+          >
+            Latest site photos
+          </h3>
+        </div>
+        <div
+          class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
+        >
+          <div
+            class="aspect-[3/2] w-full animate-pulse rounded-xl bg-surface-secondary"
+          />
+          <div
+            class="aspect-[3/2] w-full animate-pulse rounded-xl bg-surface-secondary"
+          />
+          <div
+            class="aspect-[3/2] w-full animate-pulse rounded-xl bg-surface-secondary"
+          />
+          <div
+            class="aspect-[3/2] w-full animate-pulse rounded-xl bg-surface-secondary"
+          />
+          <div
+            class="aspect-[3/2] w-full animate-pulse rounded-xl bg-surface-secondary"
+          />
+          <div
+            class="aspect-[3/2] w-full animate-pulse rounded-xl bg-surface-secondary"
+          />
         </div>
       </div>
     </div>
