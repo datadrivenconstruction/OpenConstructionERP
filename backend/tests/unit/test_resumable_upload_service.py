@@ -28,7 +28,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.modules.resumable_uploads.models import ResumableUploadSession
-from app.modules.resumable_uploads.schemas import MIN_CHUNK_SIZE
+from app.modules.resumable_uploads.schemas import MAX_TOTAL_SIZE, MIN_CHUNK_SIZE
 from app.modules.resumable_uploads.service import ResumableUploadService
 
 # Use the production-minimum chunk size so the service's bounds check passes.
@@ -169,7 +169,7 @@ async def test_create_session_rejects_oversize_total() -> None:
         await svc.create_session(
             project_id=uuid.uuid4(),
             filename="x.bin",
-            total_size=5 * 1024 * 1024 * 1024,  # > 2 GiB ceiling
+            total_size=MAX_TOTAL_SIZE + 1,  # just over the hard ceiling
             chunk_size=8 * 1024 * 1024,
             category="other",
             sha256=None,
