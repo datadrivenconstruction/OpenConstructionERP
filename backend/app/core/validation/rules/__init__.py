@@ -554,8 +554,9 @@ class DIN276ValidCostGroup(ValidationRule):
     category = RuleCategory.COMPLIANCE
     description = "DIN 276 cost group code must be a valid 3-digit code"
 
-    # Valid top-level groups (1st digit)
-    VALID_TOP_GROUPS = {"1", "2", "3", "4", "5", "6", "7"}
+    # Valid top-level groups (1st digit) - DIN 276:2018-12 defines KG 100-800
+    # (800 = Finanzierung).
+    VALID_TOP_GROUPS = {"1", "2", "3", "4", "5", "6", "7", "8"}
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         locale = _get_locale(context)
@@ -2065,7 +2066,9 @@ class NRMValidElement(ValidationRule):
     category = RuleCategory.COMPLIANCE
     description = "NRM element code must match NRM 1/2 structure (e.g., 1.1, 2.6.1)"
 
-    VALID_GROUPS = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"}
+    # NRM 1 (3rd ed.) group elements 0-14: 0 = Facilitating works,
+    # 9 = Main contractor's preliminaries ... 14 = Inflation.
+    VALID_GROUPS = {str(n) for n in range(15)}
     _PATTERN = re.compile(r"^\d{1,2}(\.\d{1,2}){0,3}$")
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
