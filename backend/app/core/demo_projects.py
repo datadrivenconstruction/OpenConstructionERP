@@ -205,6 +205,9 @@ class DemoTemplate:
     # country, lat, lng. lat/lng are supplied so the map/weather render
     # immediately without a Nominatim round-trip (offline-first).
     address: dict | None = None
+    # Optional: human-readable project code shown on documents and the
+    # project header (e.g. "LM-HN-2026-01"). Stored on Project.project_code.
+    project_code: str = ""
     # Optional: multiple tender packages. When set, overrides tender_name/tender_companies.
     tender_packages: list[TenderPackageDef] = field(default_factory=list)
     # Optional: explicit schedule activities. When set, overrides auto-generation from sections.
@@ -1978,13 +1981,15 @@ DEFAULT_DEMO_IDS: tuple[str, ...] = (
     "medical-us",  # international healthcare - US MasterFormat, USD
 )
 
-# Rich generic-install showcase: the eight non-flagship country projects that a
+# Rich generic-install showcase: the nine non-flagship country projects that a
 # normal (no pack) install seeds alongside the flagship reference project so the
 # fresh workspace lands a fully worked-out, globe-spanning portfolio. Ordered to
 # read residential -> industrial -> education -> healthcare -> commercial across
-# DACH, Gulf, FR, US, China, Brazil, India and Canada. Each id resolves to a
-# DemoTemplate (built-in or pack-authored, auto-registered from demo_packs/) so
-# install_demo_project materializes the full module set per project.
+# DACH, Gulf, FR, US, China, Brazil, India and Canada, closed by the German food
+# retail showcase. Each id resolves to a DemoTemplate (built-in or pack-authored,
+# auto-registered from demo_packs/) so install_demo_project materializes the
+# full module set per project. The retail showcase is additionally backfilled
+# flagship-style on every boot (main.py) so existing installs pick it up.
 SHOWCASE_DEMO_IDS: tuple[str, ...] = (
     "residential-berlin",  # Germany - DIN 276, EUR
     "warehouse-dubai",  # UAE - industrial, AED
@@ -1994,6 +1999,7 @@ SHOWCASE_DEMO_IDS: tuple[str, ...] = (
     "residential-saopaulo",  # Brazil - SINAPI, BRL
     "govt-building-delhi",  # India - CPWD, INR
     "condo-toronto",  # Canada - residential, CAD
+    "retail-market-heilbronn",  # Germany - food retail, DIN 276 + GAEB, EUR
 )
 
 # Catalog info for the marketplace / frontend
@@ -2124,6 +2130,7 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "office-rio": "Commercial",
     "it-park-bangalore": "Commercial",
     "hospital-jeddah": "Healthcare",
+    "retail-market-heilbronn": "Retail",
 }
 
 
@@ -5255,6 +5262,197 @@ async def _seed_module_data(
                 "notes": "Fire protection systems",
             },
         ],
+        # Retail Market Heilbronn showcase - the two fictional legal entities
+        # behind the project (client/owner and operator/tenant). The full
+        # 18-party stakeholder roster lands in the richness pass.
+        # The full 18-party stakeholder register (S01..S18 of the design
+        # dossier). GU model with owner direct awards, typical for retail
+        # roll-outs. All firms are fictional with descriptive generic names;
+        # only the building authority (S16) is a real public body. Contact
+        # types use the four recognised UI categories plus "authority" for
+        # the permit authority and the (fictional) distribution-grid operator.
+        "retail-market-heilbronn": [
+            {
+                "contact_type": "client",
+                "company_name": "Sueddeutsche Handelsimmobilien GmbH",
+                "first_name": "Marion",
+                "last_name": "Roesler",
+                "primary_email": "m.roesler@sueddeutsche-handelsimmobilien.de",
+                "primary_phone": "+49 7131 562300",
+                "country_code": "DE",
+                "notes": "S01 Bauherr / owner (retail real-estate company), Bereichsleitung Expansion Sued",
+            },
+            {
+                "contact_type": "client",
+                "company_name": "Sueddeutsche Lebensmittelmaerkte GmbH",
+                "first_name": "Thomas",
+                "last_name": "Gerlach",
+                "primary_email": "t.gerlach@sueddeutsche-lebensmittelmaerkte.de",
+                "primary_phone": "+49 7131 894120",
+                "country_code": "DE",
+                "notes": "S02 Betreiber und Mieter / operator and tenant (store operations), Verkaufsleitung Region Unterland",
+            },
+            {
+                "contact_type": "consultant",
+                "company_name": "Architekturbuero Sandweg + Partner Architekten PartG mbB",
+                "first_name": "Jens",
+                "last_name": "Sandweg",
+                "primary_email": "j.sandweg@sandweg-partner.de",
+                "primary_phone": "+49 7131 204510",
+                "country_code": "DE",
+                "notes": "S03 Objektplanung LP 1-5, kuenstlerische Oberleitung, Bauueberwachung Bauherrenseite (architect)",
+            },
+            {
+                "contact_type": "consultant",
+                "company_name": "Trautmann Ingenieure Tragwerksplanung GmbH",
+                "first_name": "Katrin",
+                "last_name": "Trautmann",
+                "primary_email": "k.trautmann@trautmann-ing.de",
+                "primary_phone": "+49 7141 488120",
+                "country_code": "DE",
+                "notes": "S04 Tragwerksplanung (structural engineer), Ludwigsburg",
+            },
+            {
+                "contact_type": "consultant",
+                "company_name": "Dr.-Ing. Carsten Mahler, Pruefingenieur fuer Standsicherheit",
+                "first_name": "Carsten",
+                "last_name": "Mahler",
+                "primary_email": "kontakt@pruefingenieur-mahler.de",
+                "primary_phone": "+49 711 6339400",
+                "country_code": "DE",
+                "notes": "S05 Pruefstatiker (independent checking engineer), Stuttgart",
+            },
+            {
+                "contact_type": "consultant",
+                "company_name": "Klein & Partner TGA-Planung GmbH",
+                "first_name": "Stefan",
+                "last_name": "Klein",
+                "primary_email": "s.klein@klein-tga.de",
+                "primary_phone": "+49 7134 915020",
+                "country_code": "DE",
+                "notes": "S06 TGA-Planung HLSK/ELT, GEG-Nachweis, Entwaesserungsgesuch (MEP design), Weinsberg",
+            },
+            {
+                "contact_type": "consultant",
+                "company_name": "Brandschutzconsult Erler & Partner Ingenieure",
+                "first_name": "Andreas",
+                "last_name": "Erler",
+                "primary_email": "a.erler@erler-brandschutz.de",
+                "primary_phone": "+49 7131 627340",
+                "country_code": "DE",
+                "notes": "S07 Brandschutzkonzept, Fachbauleitung Brandschutz (fire protection), Heilbronn",
+            },
+            {
+                "contact_type": "consultant",
+                "company_name": "Baugrundinstitut Neckartal GmbH",
+                "first_name": "Helmut",
+                "last_name": "Volz",
+                "primary_email": "h.volz@baugrund-neckartal.de",
+                "primary_phone": "+49 7133 209880",
+                "country_code": "DE",
+                "notes": "S08 Baugrundgutachter, geotechnische Pruefungen (geotechnical consultant), Lauffen am Neckar",
+            },
+            {
+                "contact_type": "consultant",
+                "company_name": "Vermessungsbuero Stehle, OebVI",
+                "first_name": "Peter",
+                "last_name": "Stehle",
+                "primary_email": "info@vermessung-stehle.de",
+                "primary_phone": "+49 7131 781220",
+                "country_code": "DE",
+                "notes": "S09 Amtlicher Lageplan, Absteckung, Gebaeudeeinmessung (licensed surveyor), Heilbronn",
+            },
+            {
+                "contact_type": "consultant",
+                "company_name": "Ingenieurbuero Wanner Arbeitssicherheit",
+                "first_name": "Ralf",
+                "last_name": "Wanner",
+                "primary_email": "r.wanner@wanner-sigeko.de",
+                "primary_phone": "+49 7062 915330",
+                "country_code": "DE",
+                "notes": "S10 SiGeKo nach BaustellV (health and safety coordinator), Ilsfeld",
+            },
+            {
+                "contact_type": "contractor",
+                "company_name": "Trautwein Bau GmbH & Co. KG",
+                "first_name": "Dieter",
+                "last_name": "Seybold",
+                "primary_email": "d.seybold@trautwein-bau.de",
+                "primary_phone": "+49 791 946100",
+                "country_code": "DE",
+                "notes": "S11 Generalunternehmer Rohbau, Ausbau, Standard-TGA, Aussenanlagen-Option (general contractor), Schwaebisch Hall",
+            },
+            {
+                "contact_type": "subcontractor",
+                "company_name": "Betonwerk Hohenlohe Fertigteile GmbH",
+                "first_name": "Frank",
+                "last_name": "Schenkel",
+                "primary_email": "f.schenkel@betonwerk-hohenlohe.de",
+                "primary_phone": "+49 7940 922070",
+                "country_code": "DE",
+                "notes": "S12 Nachunternehmer Stahlbeton-Fertigteile und Montage (precast subcontractor), Kuenzelsau",
+            },
+            {
+                "contact_type": "subcontractor",
+                "company_name": "Flachdachtechnik Maurer GmbH",
+                "first_name": "Lukas",
+                "last_name": "Maurer",
+                "primary_email": "l.maurer@flachdach-maurer.de",
+                "primary_phone": "+49 7946 911450",
+                "country_code": "DE",
+                "notes": "S13 Nachunternehmer Dachabdichtung und Trapezblech (roofing subcontractor), Bretzfeld",
+            },
+            {
+                "contact_type": "subcontractor",
+                "company_name": "Sommerfeld Kaeltetechnik GmbH",
+                "first_name": "Patrick",
+                "last_name": "Sommerfeld",
+                "primary_email": "p.sommerfeld@sommerfeld-kaeltetechnik.de",
+                "primary_phone": "+49 7131 396620",
+                "country_code": "DE",
+                "notes": "S14 Direktauftrag Kaeltetechnik CO2-Verbund und Kuehlmoebel (owner direct award refrigeration), Heilbronn",
+            },
+            {
+                "contact_type": "subcontractor",
+                "company_name": "Ladenbau Krettner GmbH",
+                "first_name": "Eva",
+                "last_name": "Krettner",
+                "primary_email": "e.krettner@ladenbau-krettner.de",
+                "primary_phone": "+49 731 880420",
+                "country_code": "DE",
+                "notes": "S15 Bieter / voraussichtlich Direktauftrag Ladeneinrichtung (store fit-out), Ulm",
+            },
+            {
+                "contact_type": "authority",
+                "company_name": "Stadt Heilbronn, Planungs- und Baurechtsamt",
+                "first_name": "Sachgebiet",
+                "last_name": "Gewerbebauten",
+                "primary_email": "baurechtsamt@heilbronn.de",
+                "primary_phone": "+49 7131 562700",
+                "country_code": "DE",
+                "notes": "S16 Untere Baurechtsbehoerde, Genehmigung und Abnahmen (building permit authority), Heilbronn",
+            },
+            {
+                "contact_type": "authority",
+                "company_name": "Neckar Netzgesellschaft mbH",
+                "first_name": "Anschlusswesen",
+                "last_name": "Gewerbe",
+                "primary_email": "netzanschluss@neckar-netz.de",
+                "primary_phone": "+49 7131 624000",
+                "country_code": "DE",
+                "notes": "S17 Verteilnetzbetreiber Strom (fictional DSO): Netzanschluss, Trafostation, PV-Einspeisung",
+            },
+            {
+                "contact_type": "subcontractor",
+                "company_name": "Elektro Haeberlen GmbH",
+                "first_name": "Uwe",
+                "last_name": "Haeberlen",
+                "primary_email": "u.haeberlen@elektro-haeberlen.de",
+                "primary_phone": "+49 7941 920310",
+                "country_code": "DE",
+                "notes": "S18 Nachunternehmer Elektrotechnik unter GU (electrical subcontractor), Oehringen",
+            },
+        ],
     }
 
     try:
@@ -7060,6 +7258,141 @@ async def _seed_module_data(
                 ],
             },
         ],
+        # 4 inspections (I-01..I-04 of the design dossier). I-03 is only
+        # partly passed (defect M-007), with the repeat tightness test
+        # scheduled; I-04 is a coordinator walkthrough, recorded without a
+        # pass/fail result. Dates are the real calendar dates at week 19.
+        "retail-market-heilbronn": [
+            {
+                "inspection_number": "I-01",
+                "inspection_type": "earthworks",
+                "title": "Abnahme Erdplanum mit Lastplattendruckversuchen (subgrade acceptance, plate load tests)",
+                "description": "Ev2 >= 45 MN/m2 nachgewiesen. Pruefberichte D22/D23. Durchgefuehrt durch S08.",
+                "location": "Baufeld, Planum Bauwerk",
+                "status": "completed",
+                "result": "pass",
+                "inspection_date": "2026-03-18",
+                "checklist_data": [
+                    {
+                        "id": "1",
+                        "category": "Tragfaehigkeit",
+                        "question": "Ev2 >= 45 MN/m2 erreicht?",
+                        "response": "yes",
+                        "critical": True,
+                        "notes": "Lastplattendruckversuche bestanden",
+                    },
+                    {
+                        "id": "2",
+                        "category": "Verdichtung",
+                        "question": "Verdichtungsgrad nachgewiesen?",
+                        "response": "yes",
+                    },
+                    {
+                        "id": "3",
+                        "category": "Dokumentation",
+                        "question": "Pruefbericht D22 erstellt?",
+                        "response": "yes",
+                    },
+                ],
+            },
+            {
+                "inspection_number": "I-02",
+                "inspection_type": "rebar",
+                "title": "Bewehrungsabnahme Bodenplatte durch Pruefstatiker (slab rebar inspection by checking engineer)",
+                "description": "Bestanden mit Auflage: Randbewehrung Feld A1 nachgelegt, erledigt 2026-04-16. Durchgefuehrt durch S05. Protokoll D24.",
+                "location": "Bodenplatte, Feld A1",
+                "status": "completed",
+                "result": "pass",
+                "inspection_date": "2026-04-15",
+                "checklist_data": [
+                    {
+                        "id": "1",
+                        "category": "Bewehrung",
+                        "question": "Bewehrung gem. Plan verlegt?",
+                        "response": "yes",
+                        "critical": True,
+                    },
+                    {
+                        "id": "2",
+                        "category": "Randzonen",
+                        "question": "Randbewehrung Feld A1 vollstaendig?",
+                        "response": "no",
+                        "notes": "Auflage: nachgelegt und erledigt 2026-04-16",
+                    },
+                    {
+                        "id": "3",
+                        "category": "Betondeckung",
+                        "question": "Betondeckung mit Abstandhaltern gesichert?",
+                        "response": "yes",
+                    },
+                ],
+            },
+            {
+                "inspection_number": "I-03",
+                "inspection_type": "drainage",
+                "title": "Dichtheitspruefung und Kamerabefahrung Grundleitungen DIN EN 1610 (drainage tightness test and CCTV)",
+                "description": "Teilweise bestanden, Mangel M-007 (Gefaelle 0,3 % statt 0,5 % Abschnitt S3-S4). Wiederholungspruefung geplant 2026-06-26. Pruefprotokoll D25 an S16.",
+                "location": "Grundleitungen unter Bodenplatte, Anlieferzone",
+                "status": "completed",
+                "result": "fail",
+                "inspection_date": "2026-04-22",
+                "checklist_data": [
+                    {
+                        "id": "1",
+                        "category": "Dichtheit",
+                        "question": "Leitungsnetz dicht nach DIN EN 1610?",
+                        "response": "yes",
+                    },
+                    {
+                        "id": "2",
+                        "category": "Gefaelle",
+                        "question": "Mindestgefaelle 0,5 % eingehalten?",
+                        "response": "no",
+                        "critical": True,
+                        "notes": "Abschnitt S3-S4 nur 0,3 %, siehe Mangel M-007",
+                    },
+                    {
+                        "id": "3",
+                        "category": "Kamerabefahrung",
+                        "question": "CCTV-Befahrung dokumentiert?",
+                        "response": "yes",
+                    },
+                ],
+            },
+            {
+                "inspection_number": "I-04",
+                "inspection_type": "safety",
+                "title": "SiGeKo-Baustellenbegehung Nr. 7 (H&S coordinator site walkthrough no. 7)",
+                "description": "3 Feststellungen: Absturzsicherung Dachrandarbeiten nachruesten, Verkehrsweg Fassadengeruest freihalten, Erste-Hilfe-Aushang aktualisieren. Frist 2026-06-16. Durchgefuehrt durch S10.",
+                "location": "Gesamte Baustelle",
+                "status": "completed",
+                "result": None,
+                "inspection_date": "2026-06-09",
+                "checklist_data": [
+                    {
+                        "id": "1",
+                        "category": "Absturzsicherung",
+                        "question": "Dachrandarbeiten gesichert?",
+                        "response": "no",
+                        "notes": "Nachruesten bis 2026-06-16",
+                    },
+                    {
+                        "id": "2",
+                        "category": "Verkehrswege",
+                        "question": "Verkehrsweg am Fassadengeruest frei?",
+                        "response": "no",
+                        "notes": "Freihalten",
+                    },
+                    {
+                        "id": "3",
+                        "category": "Erste Hilfe",
+                        "question": "Erste-Hilfe-Aushang aktuell?",
+                        "response": "no",
+                        "notes": "Aushang aktualisieren",
+                    },
+                ],
+            },
+        ],
     }
 
     try:
@@ -7644,6 +7977,73 @@ async def _seed_module_data(
                 "forecast_final": "2200000",
             },
         ],
+        # Finance snapshot at week 19 of 45 (finance.json of the design
+        # dossier), DIN 276 Kostengruppen, single currency EUR (no FX blend).
+        # Approved frame = KG 200-700 (9,140,000) + reserve (290,000) =
+        # 9,430,000; committed 6,571,400; billed 2,817,800 (29.9 %);
+        # EAC 9,156,300 = 273,700 under budget. The 290,000 reserve carries
+        # 171,300 drawn by change orders N-01..N-04 (in the KG forecasts).
+        # Money as Decimal strings (house rule). revised_budget equals the
+        # approved budget because the frame is fixed; the movement shows in
+        # committed/actual/forecast.
+        "retail-market-heilbronn": [
+            {
+                "category": "KG 200 Vorbereitende Massnahmen / Erschliessung",
+                "original_budget": "280000.00",
+                "revised_budget": "280000.00",
+                "committed": "264500.00",
+                "actual": "238700.00",
+                "forecast_final": "285000.00",
+            },
+            {
+                "category": "KG 300 Bauwerk - Baukonstruktionen",
+                "original_budget": "3300000.00",
+                "revised_budget": "3300000.00",
+                "committed": "3286300.00",
+                "actual": "1648200.00",
+                "forecast_final": "3335000.00",
+            },
+            {
+                "category": "KG 400 Bauwerk - Technische Anlagen",
+                "original_budget": "2660000.00",
+                "revised_budget": "2660000.00",
+                "committed": "2115600.00",
+                "actual": "318500.00",
+                "forecast_final": "2665000.00",
+            },
+            {
+                "category": "KG 500 Aussenanlagen und Freiflaechen",
+                "original_budget": "1150000.00",
+                "revised_budget": "1150000.00",
+                "committed": "0.00",
+                "actual": "0.00",
+                "forecast_final": "1152600.00",
+            },
+            {
+                "category": "KG 600 Ausstattung",
+                "original_budget": "700000.00",
+                "revised_budget": "700000.00",
+                "committed": "0.00",
+                "actual": "0.00",
+                "forecast_final": "668700.00",
+            },
+            {
+                "category": "KG 700 Baunebenkosten",
+                "original_budget": "1050000.00",
+                "revised_budget": "1050000.00",
+                "committed": "905000.00",
+                "actual": "612400.00",
+                "forecast_final": "1050000.00",
+            },
+            {
+                "category": "Unvorhergesehenes / Reserve",
+                "original_budget": "290000.00",
+                "revised_budget": "290000.00",
+                "committed": "0.00",
+                "actual": "0.00",
+                "forecast_final": "0.00",
+            },
+        ],
     }
 
     try:
@@ -7851,6 +8251,112 @@ async def _seed_module_data(
                 "category": "mechanical",
                 "trade": "Dock equipment",
                 "resolution_notes": "Hydraulic seal replaced, tested OK under full load",
+            },
+        ],
+        # 10 punch items (M-001..M-010 of the design dossier), week-19 snapshot
+        # from the interim shell walkthrough (D26) and site supervision.
+        # M-007 (drainage slope) feeds the repeat tightness test I-03; M-003
+        # (slab flatness) links to NCR-02. Severities map to punch priorities.
+        "retail-market-heilbronn": [
+            {
+                "title": "M-001 Betonabplatzung Fertigteilstuetze Achse C/4 (concrete spalling, precast column C/4)",
+                "description": "Abplatzung im Sichtbereich Verkaufsraum, Achse C/4. Aus der Rohbau-Zwischenbegehung D26. Faellig 2026-06-26.",
+                "priority": "medium",
+                "status": "open",
+                "category": "structural",
+                "trade": "Stahlbeton-Fertigteile (precast)",
+                "location_x": 0.45,
+                "location_y": 0.35,
+            },
+            {
+                "title": "M-002 Dachbahn Attika Nord nicht verklebt (roof membrane at north parapet unbonded)",
+                "description": "Dachbahn auf 3 lfm an der Attika Nord nicht verklebt. Meldung Bauleitung GU. Faellig 2026-06-17.",
+                "priority": "high",
+                "status": "in_progress",
+                "category": "roofing",
+                "trade": "Dachabdichtung (roofing)",
+                "location_x": 0.50,
+                "location_y": 0.95,
+            },
+            {
+                "title": "M-003 Ebenheitsabweichung Bodenplatte Kassenzone (slab flatness deviation, checkout zone)",
+                "description": "4 mm/2 m, DIN 18202 Tab. 3 Z. 3 ueberschritten. Ausgleichsspachtelung vor Industrieboden T23. Linked to NCR-02. Faellig 2026-07-10.",
+                "priority": "medium",
+                "status": "open",
+                "category": "structural",
+                "trade": "Rohbau (shell)",
+                "location_x": 0.20,
+                "location_y": 0.15,
+            },
+            {
+                "title": "M-004 Vergussdokumentation Koecherfundament B/7 unvollstaendig (grouting documentation incomplete)",
+                "description": "Nachweis Vergussmoertel-Charge fuer Koecherfundament B/7 nachreichen. Faellig 2026-06-19.",
+                "priority": "low",
+                "status": "open",
+                "category": "structural",
+                "trade": "Stahlbeton-Fertigteile (precast)",
+                "location_x": 0.30,
+                "location_y": 0.60,
+            },
+            {
+                "title": "M-005 Transportkratzer an 2 Sandwichpaneelen Suedfassade (transport scratches, south facade)",
+                "description": "Entscheidung Austausch vs. Ausbesserung nach Bemusterung D21. Faellig 2026-07-03.",
+                "priority": "low",
+                "status": "open",
+                "category": "facade",
+                "trade": "Fassade (facade)",
+                "location_x": 0.55,
+                "location_y": 0.05,
+            },
+            {
+                "title": "M-006 Tuer Technikraum ohne T30 geliefert (plant room door without required T30 rating)",
+                "description": "Brandschutztuer Technikraum EG ohne geforderte Qualitaet T30 geliefert. Feststellung Fachbauleitung Brandschutz S07. Faellig 2026-07-17.",
+                "priority": "high",
+                "status": "open",
+                "category": "fire_protection",
+                "trade": "Tueren (doors)",
+                "location_x": 0.72,
+                "location_y": 0.55,
+            },
+            {
+                "title": "M-007 Grundleitung DN150 Abschnitt S3-S4: Gefaelle 0,3 % statt 0,5 % (drain slope below spec)",
+                "description": "Teilstueck 8 m ausserhalb Bodenplatte neu verlegen, Wiederholungspruefung erforderlich. Aus Dichtheitspruefung D25, feeds repeat test I-03. Faellig 2026-06-24.",
+                "priority": "high",
+                "status": "in_progress",
+                "category": "mep",
+                "trade": "Sanitaer/Entwaesserung (drainage)",
+                "location_x": 0.85,
+                "location_y": 0.50,
+            },
+            {
+                "title": "M-008 Kollision Kabeltrasse mit Lueftungskanal Achse 5 (cable tray clashes with duct at axis 5)",
+                "description": "Umverlegung gem. Koordinationsplan S06 vom 2026-06-09, Lager Achse 5. Faellig 2026-06-22.",
+                "priority": "medium",
+                "status": "open",
+                "category": "mep",
+                "trade": "Elektro (electrical)",
+                "location_x": 0.40,
+                "location_y": 0.70,
+            },
+            {
+                "title": "M-009 Anschlussblech RWA-Lichtkuppel Feld D3 fehlt (flashing for smoke vent rooflight, bay D3, missing)",
+                "description": "Anschlussblech der RWA-Lichtkuppel in Feld D3 fehlt. Faellig 2026-06-19.",
+                "priority": "medium",
+                "status": "open",
+                "category": "roofing",
+                "trade": "Dachabdichtung (roofing)",
+                "location_x": 0.62,
+                "location_y": 0.80,
+            },
+            {
+                "title": "M-010 Anfahrschutz Rampe Anlieferung nicht montiert (impact protection at delivery ramp not installed)",
+                "description": "Anfahrschutz an der Anlieferrampe noch nicht montiert. Faellig 2026-08-14.",
+                "priority": "low",
+                "status": "open",
+                "category": "general",
+                "trade": "Aussenanlagen (external works)",
+                "location_x": 0.90,
+                "location_y": 0.45,
             },
         ],
     }
@@ -8261,6 +8767,40 @@ async def _seed_module_data(
                 "status": "corrective_action",
                 "cost_impact": "8500",
                 "schedule_impact_days": 5,
+            },
+        ],
+        # 2 NCRs (NCR-01 closed, NCR-02 open) of the design dossier. NCR-01
+        # is the precast bearing-corbel deviation that materialized risk R12;
+        # NCR-02 is the open slab concrete-strength case linked to punch item
+        # M-003, with a 15,000 EUR reserve carried in the KG 300 forecast.
+        "retail-market-heilbronn": [
+            {
+                "ncr_number": "NCR-01",
+                "title": "Fertigteil-Dachbinder B-T04: Auflagerkonsole 35 mm ausserhalb Toleranz (precast roof beam bearing corbel out of tolerance)",
+                "description": "Auflagerkonsole am Fertigteil-Dachbinder B-T04 liegt 35 mm ausserhalb der Toleranz. Erhoben durch S03 gegen S12 am 2026-05-06. Materialisierte Risiko R12.",
+                "ncr_type": "workmanship",
+                "severity": "major",
+                "root_cause": "Massabweichung aus der Werksproduktion der Auflagerkonsole",
+                "root_cause_category": "workmanship",
+                "corrective_action": "Sonderloesung Stahlauflagerplatte 250x250x20 mm gem. statischem Nachweis S04, geprueft und freigegeben durch S05 (Pruefbericht Nachtrag 1); Kosten zulasten Betonwerk.",
+                "preventive_action": "Werksabnahme der Auflagerkonsolen vor Lieferung verschaerft, Montagetoleranzkontrolle dokumentiert.",
+                "status": "closed",
+                "cost_impact": "6200",
+                "schedule_impact_days": 0,
+            },
+            {
+                "ncr_number": "NCR-02",
+                "title": "Betoncharge Bodenplatte 2026-04-21: Wuerfeldruckfestigkeit 28d unter Soll C25/30 (slab concrete batch below specified strength)",
+                "description": "Einzelwert 26,1 N/mm2 unter Soll C25/30. Erhoben durch S11 (Eigenueberwachung) gegen den Transportbetonlieferanten am 2026-05-22. Linked to punch item M-003.",
+                "ncr_type": "material",
+                "severity": "major",
+                "root_cause": "Betoncharge vom 2026-04-21 mit zu geringer Wuerfeldruckfestigkeit nach 28 Tagen",
+                "root_cause_category": "material_defect",
+                "corrective_action": "Bohrkernpruefung im Bereich Anlieferzone beauftragt (3 Kerne, Pruefbericht erwartet 2026-06-19); Freigabeentscheidung durch S04/S05; Rueckstellung 15.000 EUR im Forecast KG 300 beruecksichtigt.",
+                "preventive_action": "Erweiterte Eigenueberwachung der Transportbeton-Anlieferung, zusaetzliche Probekoerper je Charge.",
+                "status": "under_review",
+                "cost_impact": "15000",
+                "schedule_impact_days": 0,
             },
         ],
     }
@@ -9121,6 +9661,7 @@ async def install_demo_project(
         status="active",
         owner_id=owner_id,
         address=template.address,
+        project_code=template.project_code or None,
         metadata_={
             **template.project_metadata,
             "demo_id": demo_id,
@@ -9404,7 +9945,10 @@ async def install_demo_project(
         bl = BudgetLine(
             id=_id(),
             project_id=project.id,
-            category=sec.description or f"Category {i + 1}",
+            # category is String(100); a longer section title would raise
+            # StringDataRightTruncation on PostgreSQL and poison the whole
+            # install transaction, so clamp defensively.
+            category=(sec.description or f"Category {i + 1}")[:100],
             description=f"From BOQ section {sec.ordinal}",
             planned_amount=str(round(planned, 2)),
             committed_amount=str(round(committed, 2)),
@@ -9769,6 +10313,169 @@ async def install_demo_project(
                 "open",
             ),
         ],
+        # 13 scored risks (R01..R13 of the design dossier), week-19 snapshot:
+        # one materialized and closed (R01 ground fill), two more closed,
+        # the rest in monitoring or open. Probability is carried as a 0-1
+        # fraction (dossier p of 1-5 divided by 5); schedule impact in days
+        # (dossier weeks x 7). impact_severity reflects the dossier p x i band.
+        "retail-market-heilbronn": [
+            (
+                "R-001",
+                "Ground: non-bearing fill in northern building area",
+                "Nicht tragfaehige Auffuellungen Baufeld Nord; Bodenaustausch ausgefuehrt, Nachtrag N-01 beauftragt, Puffer in P03 verbraucht.",
+                "technical",
+                1.0,
+                86400,
+                7,
+                "high",
+                "Soil replacement executed, change order N-01 placed, schedule float in P03 consumed.",
+                "occurred",
+            ),
+            (
+                "R-002",
+                "Lead time CO2 refrigeration rack over 24 weeks",
+                "Lieferzeit CO2-Kaelteverbundanlage; Fruehvergabe VP-07, Anzahlung geleistet, woechentliches Lieferanten-Tracking, Liefertermin KW 33 bestaetigt.",
+                "procurement",
+                0.8,
+                0,
+                28,
+                "critical",
+                "Early award VP-07, deposit paid, weekly supplier tracking, delivery week 33 confirmed.",
+                "monitoring",
+            ),
+            (
+                "R-003",
+                "Winter working: frost during foundations and slab",
+                "Frostperioden waehrend Gruendung/Bodenplatte; Winterbaumassnahmen im GU-Vertrag eingepreist, nur 3 Ausfalltage.",
+                "environmental",
+                0.6,
+                12500,
+                0,
+                "medium",
+                "Winter-working measures priced into the GC contract; only 3 lost days.",
+                "closed",
+            ),
+            (
+                "R-004",
+                "External works tender above budget",
+                "Vergabeergebnis Aussenanlagen ueber Budget; 3 Bieter, Submission 2026-06-18, Einsparoptionen vorbereitet, Forecast KG 500 mit Risikozuschlag.",
+                "procurement",
+                0.6,
+                35000,
+                0,
+                "medium",
+                "Three bidders, submission 2026-06-18; savings options prepared; KG 500 forecast carries a risk allowance.",
+                "open",
+            ),
+            (
+                "R-005",
+                "Grid connection and transformer: DSO delay",
+                "Verzug Netzbetreiber; Anmeldung 2025-11 erfolgt, Eskalationsgespraech 2026-06-04, Rueckfallebene Baustrom-Provisorium 250 kVA.",
+                "schedule",
+                0.8,
+                18000,
+                21,
+                "high",
+                "Application filed 2025-11, escalation meeting 2026-06-04; fallback 250 kVA temporary site supply for commissioning.",
+                "open",
+            ),
+            (
+                "R-006",
+                "PV feed-in approval delayed (grid compatibility check)",
+                "Netzvertraeglichkeitspruefung laeuft; Eroeffnung nicht PV-abhaengig, ggf. Einspeisebegrenzung 70 %, Batteriespeicher erhoeht Eigenverbrauch.",
+                "regulatory",
+                0.6,
+                9500,
+                0,
+                "medium",
+                "Opening not PV-dependent; if needed run at 70 % feed-in limit and retrofit control; battery raises self-consumption.",
+                "open",
+            ),
+            (
+                "R-007",
+                "Capacity bottleneck industrial flooring contractor",
+                "Kapazitaetsengpass Fachfirma Industrieboden; verbindliche NU-Terminbestaetigung KW 24, Ersatzfirma angefragt, Vertragsstrafe im NU-Vertrag.",
+                "procurement",
+                0.6,
+                0,
+                14,
+                "medium",
+                "Binding subcontractor date for week 24, backup firm enquired, liquidated damages in the sub-contract.",
+                "open",
+            ),
+            (
+                "R-008",
+                "Heavy rain: waterlogging of subgrade before slab",
+                "Vernaessung Baugrube/Planum vor Bodenplatte; offene Wasserhaltung und Pumpensumpf vorgehalten, einmalig genutzt KW 12.",
+                "environmental",
+                0.4,
+                4800,
+                0,
+                "low",
+                "Open dewatering and sump kept on standby; used once in week 12.",
+                "closed",
+            ),
+            (
+                "R-009",
+                "Price escalation steel, concrete, insulation",
+                "Preisgleitung; GU-Pauschalvertrag ohne Gleitklausel, Restrisiko nur bei Direktvergaben mit Festpreisbindung 4 Monate.",
+                "financial",
+                0.4,
+                35000,
+                0,
+                "medium",
+                "GC lump-sum contract without an escalation clause; residual risk only on direct awards, fixed-price for 4 months.",
+                "open",
+            ),
+            (
+                "R-010",
+                "Permit conditions: delivery noise limits at night",
+                "Schallschutz Anlieferung (TA Laerm); Anlieferzeiten 06-22 Uhr im Betriebskonzept, eingehauste Rampe, optional Laermschutzwand 18 m.",
+                "regulatory",
+                0.6,
+                28000,
+                0,
+                "medium",
+                "Delivery window 06-22h fixed in the operations concept; enclosed ramp; optional 18 m noise barrier pre-planned.",
+                "open",
+            ),
+            (
+                "R-011",
+                "Contamination or archaeology in commercial zone",
+                "Historische Recherche und Beprobung im Baugrundgutachten unauffaellig; Erdbau ohne Funde abgeschlossen.",
+                "regulatory",
+                0.2,
+                0,
+                0,
+                "low",
+                "Historic research and sampling in the geotechnical report were clear; earthworks completed with no finds.",
+                "closed",
+            ),
+            (
+                "R-012",
+                "Quality and dimension deviations of precast elements",
+                "Massabweichungen Fertigteile; Werksabnahme vor Lieferung, Montagetoleranzkontrolle, ein Abweichungsfall als NCR-01 dokumentiert und geloest.",
+                "technical",
+                0.6,
+                6200,
+                0,
+                "medium",
+                "Factory acceptance before delivery, erection-tolerance checks; one deviation logged as NCR-01 and resolved.",
+                "occurred",
+            ),
+            (
+                "R-013",
+                "Fixed pre-Christmas opening: refrigeration to fit-out to stocking cascade",
+                "Fixtermin Eroeffnung; 1 Woche Puffer vor M8, Taktplanung P08 mit S14/S15 abgestimmt, 14-taegige Terminkonferenz, Eskalationsplan Wochenendarbeit.",
+                "schedule",
+                0.6,
+                120000,
+                14,
+                "critical",
+                "One week of float before M8, P08 takt planning agreed with S14/S15, fortnightly schedule conference, weekend-work escalation plan.",
+                "open",
+            ),
+        ],
     }
 
     risk_count = 0
@@ -9972,6 +10679,91 @@ async def install_demo_project(
                 ],
             ),
         ],
+        # Four change orders (N-01..N-04 of the design dossier), 171,300 EUR
+        # drawn from the 290,000 reserve by week 19. Each item delta equals
+        # the change-order cost impact so the line and the header agree.
+        "retail-market-heilbronn": [
+            (
+                "N-01",
+                "Soil replacement for fill, northern building area",
+                "Baugrundnachtrag D05: organische Auffuellungen unter Gruendungsniveau, von der GU-Pauschale nicht erfasst (1.450 m3 Mehrmengen Bodenaustausch). Linked to risk R01 and activity T05.",
+                "unforeseen",
+                "approved",
+                86400,
+                7,
+                [
+                    (
+                        "Bodenaustausch Auffuellungen Baufeld Nord, lagenweise verdichtet (soil replacement, compacted in layers)",
+                        "added",
+                        "0",
+                        "1450",
+                        "0",
+                        "59.59",
+                        "m3",
+                    ),
+                ],
+            ),
+            (
+                "N-02",
+                "Relocation of transformer station, longer MV route",
+                "Netzbetreiber-Vorgabe: Stationsstandort an die oeffentliche Zuwegung verschoben, laengere Mittelspannungstrasse. Linked to risk R05 and activity T21.",
+                "regulatory",
+                "approved",
+                24800,
+                0,
+                [
+                    (
+                        "Umverlegung Trafostation und Mehrlaenge Mittelspannungstrasse (transformer relocation and extra MV trench)",
+                        "added",
+                        "0",
+                        "1",
+                        "0",
+                        "24800.00",
+                        "lsum",
+                    ),
+                ],
+            ),
+            (
+                "N-03",
+                "Additional 60 m3 retention trench per drainage permit condition",
+                "Auflage aus D04/D06: Drosselabfluss 12 l/s, urspruenglicher Versickerungsnachweis nicht ausreichend. Linked to risk R04 and activity T27 (to be ordered with VP-09).",
+                "regulatory",
+                "submitted",
+                41200,
+                0,
+                [
+                    (
+                        "Zusaetzliche Retentionsrigole 60 m3, DWA-A 138 (additional 60 m3 retention trench)",
+                        "added",
+                        "0",
+                        "60",
+                        "0",
+                        "686.67",
+                        "m3",
+                    ),
+                ],
+            ),
+            (
+                "N-04",
+                "Deposit-return room redesign and bake-off extension (tenant request)",
+                "Betreiberstandard aktualisiert: 2. Ruecknahmeautomat, groesserer Backofenblock; Planindex D der LP5 in Arbeit (D14). Linked to activity T31.",
+                "client_request",
+                "approved",
+                18900,
+                0,
+                [
+                    (
+                        "Umplanung Pfandraum und Erweiterung Backstation (deposit room redesign and bake-off extension)",
+                        "added",
+                        "0",
+                        "1",
+                        "0",
+                        "18900.00",
+                        "lsum",
+                    ),
+                ],
+            ),
+        ],
     }
 
     co_count = 0
@@ -10161,6 +10953,261 @@ async def install_demo_project(
                 "application/pdf",
                 6_500_000,
                 ["foundation", "geotechnical"],
+            ),
+        ],
+        # 31 project documents (D01..D31 of the design dossier) with German
+        # numbering, issuer references and per-date statuses: permits final,
+        # execution drawings index C (index D pending from N-04), acceptance
+        # protocols partly done, as-builts planned from KW 40. Metadata stubs
+        # (no files), category mapped to the recognised UI buckets.
+        "retail-market-heilbronn": [
+            (
+                "D01_BPL-103-27_Bebauungsplan_Auszug.pdf",
+                "Zoning plan extract 103/27 with written stipulations (issuer S16, valid)",
+                "permit",
+                "application/pdf",
+                3_100_000,
+                ["genehmigung", "bebauungsplan", "S16"],
+            ),
+            (
+                "D02_BA-2025-0841_Bauantrag_LBO-BW.pdf",
+                "Building permit application per LBO BW incl. submission drawings, special-use retail (issuer S03)",
+                "permit",
+                "application/pdf",
+                12_400_000,
+                ["genehmigung", "bauantrag", "S03"],
+            ),
+            (
+                "D03_LP-2025-114_Amtlicher_Lageplan.pdf",
+                "Official site plan for the permit application (issuer S09)",
+                "permit",
+                "application/pdf",
+                2_600_000,
+                ["genehmigung", "lageplan", "S09"],
+            ),
+            (
+                "D04_63-2025-0841_Baugenehmigung_mit_Auflagen.pdf",
+                "Building permit with conditions: delivery hours 06-22, retention trench, green facade north (issuer S16, final and binding since 2026-01-09)",
+                "permit",
+                "application/pdf",
+                4_800_000,
+                ["genehmigung", "baugenehmigung", "auflagen", "S16"],
+            ),
+            (
+                "D05_GB-25-208_Baugrundgutachten.pdf",
+                "Geotechnical investigation report per DIN EN 1997-2, addendum 2026-02-27 on northern fill (issuer S08)",
+                "engineering",
+                "application/pdf",
+                7_900_000,
+                ["gutachten", "baugrund", "S08", "N-01"],
+            ),
+            (
+                "D06_EWG-2025-77_Entwaesserungsgesuch.pdf",
+                "Drainage permit application with infiltration and retention verification per DWA-A 138 (issuer S06, granted 2025-11-28)",
+                "permit",
+                "application/pdf",
+                5_300_000,
+                ["genehmigung", "entwaesserung", "DWA-A138", "S06"],
+            ),
+            (
+                "D07_ST-2025-041_Statische_Berechnung.pdf",
+                "Structural calculations incl. precast type statics (issuer S04, checked)",
+                "engineering",
+                "application/pdf",
+                14_500_000,
+                ["planung", "statik", "fertigteile", "S04"],
+            ),
+            (
+                "D08_PB-ST-2025-203_Pruefbericht_Standsicherheit.pdf",
+                "Independent structural check report (issuer S05, released)",
+                "engineering",
+                "application/pdf",
+                3_400_000,
+                ["pruefung", "standsicherheit", "S05"],
+            ),
+            (
+                "D09_BSK-2025-19_Brandschutzkonzept.pdf",
+                "Fire protection concept (issuer S07, approved with the building permit)",
+                "engineering",
+                "application/pdf",
+                4_200_000,
+                ["planung", "brandschutz", "S07"],
+            ),
+            (
+                "D10_GEG-2025-31_GEG-Nachweis_Energieausweis.pdf",
+                "Energy code (GEG) verification and non-residential energy certificate at EG-40 level (issuer S06)",
+                "engineering",
+                "application/pdf",
+                2_900_000,
+                ["planung", "GEG", "energieausweis", "S06"],
+            ),
+            (
+                "D11_SIP-2025-88_Schallimmissionsprognose.pdf",
+                "Noise emission forecast per TA Laerm: delivery, refrigeration units, parking traffic (external acoustics consultant)",
+                "engineering",
+                "application/pdf",
+                3_600_000,
+                ["gutachten", "schallschutz", "TA-Laerm"],
+            ),
+            (
+                "D12_SIGE-2026-04_SiGe-Plan.pdf",
+                "Health and safety plan per Construction Site Ordinance incl. prior notice (issuer S10, rev. 3 of 2026-05-26)",
+                "safety",
+                "application/pdf",
+                2_300_000,
+                ["arbeitsschutz", "sige-plan", "S10"],
+            ),
+            (
+                "D13_AB-2026-021_Absteckungsprotokoll.pdf",
+                "Setting-out protocol and level definition (issuer S09)",
+                "specification",
+                "application/pdf",
+                1_400_000,
+                ["vermessung", "absteckung", "S09"],
+            ),
+            (
+                "D14_AP-100-148_Ausfuehrungsplaene_Architektur.pdf",
+                "Architectural execution drawings work stage 5, index C valid, index D in progress for deposit room (N-04) (issuer S03)",
+                "drawing",
+                "application/pdf",
+                28_700_000,
+                ["planung", "ausfuehrungsplaene", "architektur", "index-C", "S03"],
+            ),
+            (
+                "D15_TGA-200-261_Ausfuehrungsplaene_HLSK_ELT.pdf",
+                "MEP execution drawings, mechanical and electrical (issuer S06, valid)",
+                "drawing",
+                "application/pdf",
+                24_500_000,
+                ["planung", "ausfuehrungsplaene", "TGA", "S06"],
+            ),
+            (
+                "D16_FT-001-074_Werkplaene_Fertigteile.pdf",
+                "Precast shop and erection drawings, checked (issuer S12, released)",
+                "drawing",
+                "application/pdf",
+                19_200_000,
+                ["planung", "werkplaene", "fertigteile", "S12"],
+            ),
+            (
+                "D17_KS-2026-12_Anlagenschema_CO2-Kaelte.pdf",
+                "CO2 refrigeration system schematic with heat recovery (issuer S14, under review by S06)",
+                "drawing",
+                "application/pdf",
+                5_100_000,
+                ["planung", "kaelte", "CO2", "S14"],
+            ),
+            (
+                "D18_BE-2026-01_BE-Plan_Kranstellplan.pdf",
+                "Site setup and crane positioning plan (issuer S11, valid)",
+                "drawing",
+                "application/pdf",
+                4_600_000,
+                ["ausfuehrung", "BE-plan", "kran", "S11"],
+            ),
+            (
+                "D19_GV-2025-09_Bauvertrag_Generalunternehmer.pdf",
+                "GC construction contract VOB/B incl. schedule annex 4 (issuer S01, in force)",
+                "contract",
+                "application/pdf",
+                6_800_000,
+                ["vertrag", "bauvertrag", "VOB", "S01"],
+            ),
+            (
+                "D20_LV-VP07_Kaeltetechnik_GAEB-X83.pdf",
+                "BoQ refrigeration and cabinets in GAEB X83 (issuer S06, awarded 2026-04-24)",
+                "contract",
+                "application/pdf",
+                2_400_000,
+                ["vergabe", "LV", "GAEB-X83", "VP-07", "S06"],
+            ),
+            (
+                "D21_BEM-2026-01-03_Bemusterungsprotokoll.pdf",
+                "Sampling and approval protocols 1-3: facade colour, floor, light colour 4000K, larch battens (issuer S03, released by client)",
+                "specification",
+                "application/pdf",
+                3_900_000,
+                ["qualitaet", "bemusterung", "S03"],
+            ),
+            (
+                "D22_PB-EB-2026-03_Pruefbericht_Erdbau.pdf",
+                "Earthworks test report: plate load tests Ev2 >= 45 MN/m2 (issuer S08, passed)",
+                "specification",
+                "application/pdf",
+                1_800_000,
+                ["qualitaet", "erdbau", "plattendruck", "S08"],
+            ),
+            (
+                "D23_AN-2026-01_Abnahmeprotokoll_Erdplanum.pdf",
+                "Acceptance protocol subgrade (issuer S08, accepted)",
+                "specification",
+                "application/pdf",
+                1_200_000,
+                ["abnahme", "erdplanum", "S08"],
+            ),
+            (
+                "D24_AN-2026-02_Bewehrungsabnahme_Bodenplatte.pdf",
+                "Rebar inspection protocol ground slab with condition (issuer S05, accepted with condition, done)",
+                "specification",
+                "application/pdf",
+                1_500_000,
+                ["abnahme", "bewehrung", "bodenplatte", "S05"],
+            ),
+            (
+                "D25_AN-2026-03_Dichtheitspruefung_Grundleitungen.pdf",
+                "Drainage tightness test per DIN EN 1610 with CCTV (issuer S11, partly passed, defect M-007 open)",
+                "specification",
+                "application/pdf",
+                2_100_000,
+                ["abnahme", "dichtheitspruefung", "M-007", "S11"],
+            ),
+            (
+                "D26_ML-2026-01_Maengelliste_Rohbau.pdf",
+                "Defect list from the interim shell walkthrough (issuer S03, being worked off, see punch list)",
+                "specification",
+                "application/pdf",
+                1_900_000,
+                ["qualitaet", "maengelliste", "rohbau", "S03"],
+            ),
+            (
+                "D27_BSD-2026_Brandschottungsdokumentation.pdf",
+                "Firestopping documentation, continuously maintained (issuer S11)",
+                "specification",
+                "application/pdf",
+                2_700_000,
+                ["qualitaet", "brandschottung", "S11"],
+            ),
+            (
+                "D28_NAB-2026-1142_Netzanschlussbegehren_PV.pdf",
+                "PV grid connection request 290 kWp with 135 kWh battery and feed-in confirmation (issuer S17, grid compatibility check running, risk R06)",
+                "permit",
+                "application/pdf",
+                3_300_000,
+                ["genehmigung", "PV", "netzanschluss", "R06", "S17"],
+            ),
+            (
+                "D29_AN-2026-09_Abnahmeprotokoll_VOB-GU.pdf",
+                "VOB/B acceptance protocol GC (issuer S01, planned 2026-11-13)",
+                "specification",
+                "application/pdf",
+                900_000,
+                ["abnahme", "VOB", "geplant", "S01"],
+            ),
+            (
+                "D30_REV-2026_Revisionsunterlagen_TGA.pdf",
+                "As-built documentation MEP incl. BMS datapoint list (issuer S11, planned from KW 40)",
+                "specification",
+                "application/pdf",
+                1_000_000,
+                ["dokumentation", "revision", "as-built", "S11"],
+            ),
+            (
+                "D31_WV-2026-01-04_Wartungsvertraege.pdf",
+                "Maintenance contracts refrigeration, HVAC, doors and gates, smoke vents (issuer S02, draft, to be concluded before opening)",
+                "contract",
+                "application/pdf",
+                1_100_000,
+                ["vertrag", "wartung", "S02"],
             ),
         ],
     }
