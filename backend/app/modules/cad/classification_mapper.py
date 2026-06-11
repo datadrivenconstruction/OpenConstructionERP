@@ -73,8 +73,8 @@ REVIT_TO_DIN276: dict[str, str] = {
 # ---------------------------------------------------------------------------
 REVIT_TO_NRM: dict[str, str] = {
     "Walls": "2.5",
-    "Floors": "2.3",
-    "Roofs": "2.7",
+    "Floors": "2.2",
+    "Roofs": "2.3",
     "Doors": "2.6",
     "Windows": "2.6",
     "Stairs": "2.4",
@@ -388,23 +388,25 @@ MATERIAL_AWARE_NRM: dict[tuple[str, str], str] = {
     ("Walls", "masonry"): "2.5.2",
     ("Walls", "timber"): "2.5.3",
     ("Walls", "drywall"): "2.7.1",  # 2.7 = Internal walls and partitions
-    # 2.3 = Floors / Upper floors
-    ("Floors", "concrete"): "2.3.1",
-    # 2.7 = Roofs (NRM 1 element 2.7); 2.7.1 = roof structure
-    ("Roofs", "concrete"): "2.7.1",
-    ("Roofs", "timber"): "2.7.2",
+    # 2.2 = Upper floors; 2.2.1 = floors
+    ("Floors", "concrete"): "2.2.1",
+    # 2.3 = Roof; 2.3.1 = roof structure (sub-elements are functional,
+    # not material splits, so concrete and timber both land on 2.3.1)
+    ("Roofs", "concrete"): "2.3.1",
+    ("Roofs", "timber"): "2.3.1",
     # 1.1 = Substructure
     ("Structural Foundations", "concrete"): "1.1.1",
-    # 2.1 = Frame
-    ("Columns", "concrete"): "2.1.1",
-    ("Columns", "steel"): "2.1.2",
-    ("Structural Framing", "concrete"): "2.1.1",
-    ("Structural Framing", "steel"): "2.1.2",
-    # 2.6 = Windows / external doors
-    ("Doors", "timber"): "2.6.1",
+    # 2.1 = Frame; 2.1.1 = steel frames, 2.1.4 = concrete frames
+    ("Columns", "concrete"): "2.1.4",
+    ("Columns", "steel"): "2.1.1",
+    ("Structural Framing", "concrete"): "2.1.4",
+    ("Structural Framing", "steel"): "2.1.1",
+    # 2.6 = Windows and external doors; 2.6.1 = external windows,
+    # 2.6.2 = external doors
+    ("Doors", "timber"): "2.6.2",
     ("Doors", "steel"): "2.6.2",
-    ("Windows", "aluminium"): "2.6.3",
-    ("Windows", "timber"): "2.6.3",
+    ("Windows", "aluminium"): "2.6.1",
+    ("Windows", "timber"): "2.6.1",
 }
 
 # ---------------------------------------------------------------------------

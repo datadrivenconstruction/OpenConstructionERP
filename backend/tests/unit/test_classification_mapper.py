@@ -284,6 +284,114 @@ class TestMaterialAwareNrm:
         )
 
 
+# ── Canonical category -> code pairs (FA-STD-014 regression) ─────────────
+
+
+class TestCanonicalCategoryPairs:
+    """Regression guard for the audit finding FA-STD-014.
+
+    The CAD-to-NRM coarse map shipped with transposed group elements:
+    Floors -> 2.3 (which is Roof) and Roofs -> 2.7 (which is Internal
+    walls and partitions), so every auto-classified floor and roof
+    landed in the wrong elemental bucket. The material-aware table
+    carried the same transposition one level deeper, plus a doors and
+    windows sub-code swap (Doors -> 2.6.1 = External windows,
+    Windows -> nonexistent 2.6.3) and an inverted frame split
+    (concrete -> 2.1.1 = Steel frames).
+
+    Pin the canonical coarse pair for every core building category
+    across all three standards so a re-transposition cannot ship
+    silently again. NRM 1 group elements for reference: 2.1 Frame,
+    2.2 Upper floors, 2.3 Roof, 2.4 Stairs and ramps, 2.5 External
+    walls, 2.6 Windows and external doors, 2.7 Internal walls and
+    partitions.
+    """
+
+    @pytest.mark.parametrize(
+        ("category", "expected"),
+        [
+            ("wall", "2.5"),  # External walls
+            ("floor", "2.2"),  # Upper floors
+            ("slab", "2.2"),  # slab aliases to Floors
+            ("roof", "2.3"),  # Roof
+            ("column", "2.1"),  # Frame
+            ("beam", "2.1"),  # Frame (Structural Framing)
+            ("door", "2.6"),  # Windows and external doors
+            ("window", "2.6"),  # Windows and external doors
+            ("stair", "2.4"),  # Stairs and ramps
+        ],
+    )
+    def test_nrm_coarse_pairs(self, category: str, expected: str) -> None:
+        assert map_category_to_standard(category, "nrm") == expected
+
+    @pytest.mark.parametrize(
+        ("category", "expected"),
+        [
+            # DIN 276 coarse codes follow the project's fixture
+            # convention documented in the mapper module.
+            ("wall", "330"),
+            ("floor", "350"),
+            ("slab", "350"),
+            ("roof", "360"),
+            ("column", "330"),
+            ("beam", "330"),
+            ("door", "340"),
+            ("window", "340"),
+            ("stair", "340"),
+        ],
+    )
+    def test_din276_coarse_pairs(self, category: str, expected: str) -> None:
+        assert map_category_to_standard(category, "din276") == expected
+
+    @pytest.mark.parametrize(
+        ("category", "expected"),
+        [
+            ("wall", "04 00 00"),
+            ("floor", "03 30 00"),
+            ("slab", "03 30 00"),
+            ("roof", "07 00 00"),
+            ("column", "03 30 00"),
+            ("beam", "05 10 00"),
+            ("door", "08 10 00"),
+            ("window", "08 50 00"),
+            ("stair", "03 40 00"),
+        ],
+    )
+    def test_masterformat_coarse_pairs(self, category: str, expected: str) -> None:
+        assert map_category_to_standard(category, "masterformat") == expected
+
+    def test_nrm_floors_and_roofs_are_not_transposed(self) -> None:
+        # The exact failure mode of FA-STD-014: floors carrying the roof
+        # element and roofs carrying the internal-walls element.
+        assert REVIT_TO_NRM["Floors"] == "2.2"
+        assert REVIT_TO_NRM["Roofs"] == "2.3"
+        assert REVIT_TO_NRM["Floors"] != REVIT_TO_NRM["Roofs"]
+
+    @pytest.mark.parametrize(
+        ("category", "material", "expected"),
+        [
+            ("Floors", "Concrete C30/37", "2.2.1"),  # 2.2.1 = floors
+            ("Roofs", "Concrete C25/30", "2.3.1"),  # 2.3.1 = roof structure
+            ("Roofs", "Timber rafters", "2.3.1"),
+            ("Columns", "Structural steel S355", "2.1.1"),  # steel frames
+            ("Columns", "Reinforced concrete", "2.1.4"),  # concrete frames
+            ("Structural Framing", "Steel S235", "2.1.1"),
+            ("Structural Framing", "Concrete", "2.1.4"),
+            ("Doors", "Solid wood", "2.6.2"),  # 2.6.2 = external doors
+            ("Doors", "Steel", "2.6.2"),
+            ("Windows", "Aluminium", "2.6.1"),  # 2.6.1 = external windows
+            ("Windows", "Timber", "2.6.1"),
+        ],
+    )
+    def test_nrm_material_aware_pairs(
+        self,
+        category: str,
+        material: str,
+        expected: str,
+    ) -> None:
+        assert enrich_classification(category, material=material, standard="nrm") == expected
+
+
 # ── MasterFormat refinement ───────────────────────────────────────────────
 
 
