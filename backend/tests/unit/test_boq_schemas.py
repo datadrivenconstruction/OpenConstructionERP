@@ -253,13 +253,19 @@ class TestMarkupCreate:
             MarkupCreate(name="Test", category="custom_invalid")
 
     def test_valid_markup_types(self):
-        for mt in ("percentage", "fixed", "per_unit"):
+        for mt in ("percentage", "fixed"):
             data = MarkupCreate(name="Test", markup_type=mt)
             assert data.markup_type == mt
 
     def test_invalid_markup_type_rejected(self):
         with pytest.raises(ValidationError):
             MarkupCreate(name="Test", markup_type="absolute")
+
+    def test_per_unit_markup_type_rejected(self):
+        # per_unit has no well-defined basis across a mixed-unit BOQ and used
+        # to compute to a silent zero, so it is rejected at the schema now.
+        with pytest.raises(ValidationError):
+            MarkupCreate(name="Test", markup_type="per_unit")
 
     def test_valid_apply_to(self):
         for apply in ("direct_cost", "subtotal", "cumulative"):
