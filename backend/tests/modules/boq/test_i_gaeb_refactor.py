@@ -104,17 +104,26 @@ _GAEB_X83_WITH_DESCRTXC = b"""<?xml version="1.0" encoding="UTF-8"?>
 
 
 class TestGAEBImporterRegression:
+    @staticmethod
+    def _items(result: object) -> list:
+        """Return only the item rows (drop emitted section headers)."""
+        return [p for p in result.positions if not p.is_section]  # type: ignore[attr-defined]
+
     @pytest.mark.asyncio
     async def test_x83_round_trip(self) -> None:
         result = await GAEBXMLImporter.parse(_GAEB_X83)
         assert result.source_format == "gaeb"
         assert result.currency == "EUR"
-        assert len(result.positions) == 2
-        assert result.positions[0].description == "Aushub Mutterboden"
-        assert result.positions[0].unit == "m3"
-        assert result.positions[0].quantity == 120.5
-        assert result.positions[0].unit_rate == 3.5
-        assert result.positions[0].classification["gaeb_section"] == "01"
+        items = self._items(result)
+        assert len(items) == 2
+        assert items[0].description == "Aushub Mutterboden"
+        assert items[0].unit == "m3"
+        assert items[0].quantity == 120.5
+        assert items[0].unit_rate == 3.5
+        assert items[0].classification["gaeb_section"] == "01"
+        # Hierarchy preserved: a section header row mirrors the BoQCtgy.
+        sections = [p for p in result.positions if p.is_section]
+        assert any(s.ordinal == "01" for s in sections)
 
     @pytest.mark.asyncio
     async def test_namespace_agnostic(self) -> None:
@@ -125,14 +134,14 @@ class TestGAEBImporterRegression:
             b"<GAEB>",
         )
         result = await GAEBXMLImporter.parse(no_ns)
-        assert len(result.positions) == 2
+        assert len(self._items(result)) == 2
 
     @pytest.mark.asyncio
     async def test_currency_captured(self) -> None:
         result = await GAEBXMLImporter.parse(_GAEB_X83)
         assert result.currency == "EUR"
         # Per-position metadata too.
-        assert result.positions[0].metadata["gaeb_currency"] == "EUR"
+        assert self._items(result)[0].metadata["gaeb_currency"] == "EUR"
 
     @pytest.mark.asyncio
     async def test_section_label_collected(self) -> None:
@@ -144,7 +153,7 @@ class TestGAEBImporterRegression:
     async def test_da_kind_x83(self) -> None:
         result = await GAEBXMLImporter.parse(_GAEB_X83)
         assert result.metadata["da_kind"] == "x83"
-        assert result.positions[0].metadata["gaeb_da_kind"] == "x83"
+        assert self._items(result)[0].metadata["gaeb_da_kind"] == "x83"
 
     @pytest.mark.asyncio
     async def test_da_kind_x86_with_award_metadata(self) -> None:
