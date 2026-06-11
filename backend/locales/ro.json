@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "Estimare de costuri în construcții open-source"
   },
   "nav": {
@@ -143,7 +143,7 @@
     "update": "Actualizați"
   },
   "dashboard": {
-    "welcome": "Bine ați venit la OpenEstimator.io",
+    "welcome": "Bine ați venit la OpenConstructionERP",
     "subtitle": "Spațiul dvs. de lucru pentru estimarea în construcții",
     "recent_projects": "Proiecte recente",
     "system_status": "Stare sistem",

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "オープンソース建設コスト見積"
   },
   "nav": {
@@ -139,7 +139,7 @@
     "update": "更新"
   },
   "dashboard": {
-    "welcome": "OpenEstimate へようこそ",
+    "welcome": "OpenConstructionERP へようこそ",
     "subtitle": "オープンソース建設コスト見積プラットフォーム",
     "recent_projects": "最近のプロジェクト",
     "system_status": "システム状態",

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "Open-Source Baukalkulation"
   },
   "nav": {
@@ -164,7 +164,7 @@
     "update": "Aktualisieren"
   },
   "dashboard": {
-    "welcome": "Willkommen bei OpenEstimator.io",
+    "welcome": "Willkommen bei OpenConstructionERP",
     "subtitle": "Open-Source Baukalkulation-Plattform",
     "recent_projects": "Aktuelle Projekte",
     "system_status": "Systemstatus",

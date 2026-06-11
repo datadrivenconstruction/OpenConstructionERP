@@ -684,7 +684,7 @@ def _readme_md(manifest: BundleManifest, attachment_count: int) -> str:
         "## How to open",
         "",
         "1. Install OpenConstructionERP - `pip install openconstructionerp` or download from openconstructionerp.com.",
-        "2. Run `openestimate serve` and sign in.",
+        "2. Run `openconstructionerp serve` and sign in.",
         "3. Use **Files → Import project bundle** and select this `.ocep` file.",
         "",
         "## Compatibility",

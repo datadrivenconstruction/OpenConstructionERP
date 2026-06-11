@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "การประมาณราคาก่อสร้างแบบโอเพนซอร์ส"
   },
   "nav": {
@@ -143,7 +143,7 @@
     "update": "อัปเดต"
   },
   "dashboard": {
-    "welcome": "ยินดีต้อนรับสู่ OpenEstimator.io",
+    "welcome": "ยินดีต้อนรับสู่ OpenConstructionERP",
     "subtitle": "พื้นที่ทำงานประมาณราคาก่อสร้างของคุณ",
     "recent_projects": "โครงการล่าสุด",
     "system_status": "สถานะระบบ",

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "오픈소스 건설 원가 산정"
   },
   "nav": {
@@ -120,7 +120,7 @@
     "update": "업데이트"
   },
   "dashboard": {
-    "welcome": "OpenEstimate에 오신 것을 환영합니다",
+    "welcome": "OpenConstructionERP에 오신 것을 환영합니다",
     "subtitle": "오픈소스 건설 원가 산정 플랫폼",
     "recent_projects": "최근 프로젝트",
     "system_status": "시스템 상태",

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "Open-source сметное дело"
   },
   "nav": {
@@ -166,7 +166,7 @@
     "update": "Обновить"
   },
   "dashboard": {
-    "welcome": "Добро пожаловать в OpenEstimate",
+    "welcome": "Добро пожаловать в OpenConstructionERP",
     "subtitle": "Ваше рабочее пространство сметного дела",
     "recent_projects": "Последние проекты",
     "system_status": "Состояние системы",

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "Open-source construction cost estimation"
   },
   "nav": {
@@ -143,7 +143,7 @@
     "update": "Update"
   },
   "dashboard": {
-    "welcome": "Welcome to OpenEstimator.io",
+    "welcome": "Welcome to OpenConstructionERP",
     "subtitle": "Your construction estimation workspace",
     "recent_projects": "Recent Projects",
     "system_status": "System Status",

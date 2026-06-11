@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "تقدير تكاليف البناء مفتوح المصدر"
   },
   "nav": {
@@ -149,7 +149,7 @@
     "update": "تحديث"
   },
   "dashboard": {
-    "welcome": "مرحباً بك في OpenEstimate",
+    "welcome": "مرحباً بك في OpenConstructionERP",
     "subtitle": "منصة تقدير تكاليف البناء مفتوحة المصدر",
     "recent_projects": "المشاريع الأخيرة",
     "system_status": "حالة النظام",

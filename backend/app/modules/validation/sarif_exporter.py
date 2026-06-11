@@ -319,7 +319,7 @@ def report_to_sarif(report: Any) -> dict[str, Any]:
         "invocations": [invocation],
         "originalUriBaseIds": {
             "%SRCROOT%": {
-                "uri": f"openestimate://{norm['target_type']}/{norm['target_id']}/",
+                "uri": f"openconstructionerp://{norm['target_type']}/{norm['target_id']}/",
                 "description": {"text": f"OpenConstructionERP {norm['target_type']} {norm['target_id']}"},
             }
         },

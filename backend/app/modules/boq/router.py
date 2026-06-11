@@ -3969,7 +3969,7 @@ async def export_boq_gaeb(
     # Load project for label text
     project_repo = ProjectRepository(session)
     project = await project_repo.get_by_id(boq_data.project_id)
-    project_name = project.name if project else "OpenEstimate Project"
+    project_name = project.name if project else "OpenConstructionERP Project"
 
     today = date.today().isoformat()
 
@@ -3984,8 +3984,8 @@ async def export_boq_gaeb(
     ET.SubElement(gaeb_info, "Version").text = "3.3"
     ET.SubElement(gaeb_info, "VersDate").text = "2024-01"
     ET.SubElement(gaeb_info, "Date").text = today
-    ET.SubElement(gaeb_info, "ProgSystem").text = "OpenEstimate.io"
-    ET.SubElement(gaeb_info, "ProgName").text = "OpenEstimate"
+    ET.SubElement(gaeb_info, "ProgSystem").text = "OpenConstructionERP"
+    ET.SubElement(gaeb_info, "ProgName").text = "OpenConstructionERP"
     # GAEB DA 3.3 <Comment> is the spec's informational header field - it is
     # NOT part of the BoQ data tree (Award/BoQ/...) that importers consume,
     # so stamping origin here changes no functional output while it travels

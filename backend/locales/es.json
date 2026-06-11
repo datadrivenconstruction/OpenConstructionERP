@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "Presupuesto de construcción de código abierto"
   },
   "nav": {
@@ -120,7 +120,7 @@
     "update": "Actualizar"
   },
   "dashboard": {
-    "welcome": "Bienvenido a OpenEstimate",
+    "welcome": "Bienvenido a OpenConstructionERP",
     "subtitle": "Plataforma de presupuestos de construcción de código abierto",
     "recent_projects": "Proyectos recientes",
     "system_status": "Estado del sistema",

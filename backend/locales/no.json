@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "Byggekalkyle med åpen kildekode"
   },
   "nav": {
@@ -120,7 +120,7 @@
     "update": "Oppdater"
   },
   "dashboard": {
-    "welcome": "Velkommen til OpenEstimate",
+    "welcome": "Velkommen til OpenConstructionERP",
     "subtitle": "Byggekalkyle med åpen kildekode",
     "recent_projects": "Nylige prosjekter",
     "system_status": "Systemstatus",

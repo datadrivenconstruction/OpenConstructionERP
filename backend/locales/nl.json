@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "Open-source bouwkostencalculatie"
   },
   "nav": {
@@ -120,7 +120,7 @@
     "update": "Bijwerken"
   },
   "dashboard": {
-    "welcome": "Welkom bij OpenEstimate",
+    "welcome": "Welkom bij OpenConstructionERP",
     "subtitle": "Open-source bouwkostencalculatie-platform",
     "recent_projects": "Recente projecten",
     "system_status": "Systeemstatus",

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "Open-source procjena građevinskih troškova"
   },
   "assemblies": {
@@ -177,7 +177,7 @@
     "system_status": "Status sustava",
     "total_value": "Ukupna vrijednost",
     "validation_rules": "Pravila provjere",
-    "welcome": "Dobrodošli u OpenEstimator.io"
+    "welcome": "Dobrodošli u OpenConstructionERP"
   },
   "finance": {
     "actual": "Stvarno",

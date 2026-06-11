@@ -309,7 +309,7 @@ def check_data_dir(data_dir: Path) -> Check:
             "Data directory",
             "error",
             f"cannot write to {data_dir}: {exc}",
-            f"Use --data-dir to pick a writable path, e.g. --data-dir {Path.home() / 'openestimate-data'}",
+            f"Use --data-dir to pick a writable path, e.g. --data-dir {Path.home() / 'openconstructionerp-data'}",
         )
 
 
@@ -834,7 +834,10 @@ def cmd_init_db(args: argparse.Namespace) -> None:
 
     print()
     print(_green(_bold("Ready.")))
-    print(f"  {_dim('Database:')} {data_dir / 'openestimate.db'}")
+    if embedded_pg.is_running():
+        print(f"  {_dim('Database:')} embedded PostgreSQL at {data_dir / 'pgdata'}")
+    else:
+        print(f"  {_dim('Database:')} external PostgreSQL (DATABASE_URL)")
     print(f"  {_dim('Vectors:')}  {data_dir / 'vectors'}")
     print(f"  {_dim('Uploads:')}  {data_dir / 'uploads'}")
     print()
@@ -1608,7 +1611,7 @@ def main() -> None:
     init_db_p.add_argument(
         "--reset",
         action="store_true",
-        help="Delete the existing openestimate.db (and -shm/-wal) before init",
+        help="Delete the existing embedded database cluster (and any legacy SQLite file) before init",
     )
     # Legacy alias - same args, same handler.
     init_p = subparsers.add_parser("init", help="Alias for init-db")
@@ -1620,7 +1623,7 @@ def main() -> None:
     init_p.add_argument(
         "--reset",
         action="store_true",
-        help="Delete the existing openestimate.db (and -shm/-wal) before init",
+        help="Delete the existing embedded database cluster (and any legacy SQLite file) before init",
     )
 
     # doctor

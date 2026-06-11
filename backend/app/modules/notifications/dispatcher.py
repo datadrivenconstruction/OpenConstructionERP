@@ -153,7 +153,7 @@ async def _on_dispatch_email(event: Event) -> None:
             etitle = render_template(etitle_key, ectx) or etype
             lines.append(f"  • {etitle}")
         body_text = (body_text + "\n" + "\n".join(lines)).strip()
-        subject = f"OpenEstimate digest - {len(payload.get('events') or [])} updates"
+        subject = f"OpenConstructionERP digest - {len(payload.get('events') or [])} updates"
 
     html_body = _render_email_html(name, subject, body_text, payload.get("action_url"))
 
@@ -201,7 +201,7 @@ def _render_email_html(
             f'<p style="margin:24px 0"><a href="{safe_url}" '
             f'style="background:#2563eb;color:#fff;padding:10px 18px;'
             f'text-decoration:none;border-radius:6px;display:inline-block">'
-            f"Open in OpenEstimate</a></p>"
+            f"Open in OpenConstructionERP</a></p>"
         )
     return (
         f'<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;'

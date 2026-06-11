@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "OpenEstimator.io",
+    "name": "OpenConstructionERP",
     "tagline": "Estimasi biaya konstruksi sumber terbuka"
   },
   "nav": {
@@ -143,7 +143,7 @@
     "update": "Perbarui"
   },
   "dashboard": {
-    "welcome": "Selamat datang di OpenEstimator.io",
+    "welcome": "Selamat datang di OpenConstructionERP",
     "subtitle": "Ruang kerja estimasi konstruksi Anda",
     "recent_projects": "Proyek terbaru",
     "system_status": "Status sistem",

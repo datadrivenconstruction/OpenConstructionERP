@@ -65,7 +65,7 @@ def get_frontend_dir() -> Path:
         return dev_dist
 
     raise FileNotFoundError(
-        "Frontend dist not found. Run 'npm run build' in frontend/ or install the openestimate wheel."
+        "Frontend dist not found. Run 'npm run build' in frontend/ or install the openconstructionerp wheel."
     )
 
 

@@ -652,7 +652,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "\u041e\u0431\u043d\u043e\u0432\u0438\u0442\u044c",
         },
         "dashboard": {
-            "welcome": "\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u0432 OpenEstimate",
+            "welcome": "\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u0432 OpenConstructionERP",
             "subtitle": "\u0412\u0430\u0448\u0435 \u0440\u0430\u0431\u043e\u0447\u0435\u0435 \u043f\u0440\u043e\u0441\u0442\u0440\u0430\u043d\u0441\u0442\u0432\u043e \u0441\u043c\u0435\u0442\u043d\u043e\u0433\u043e \u0434\u0435\u043b\u0430",
             "recent_projects": "\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0435 \u043f\u0440\u043e\u0435\u043a\u0442\u044b",
             "system_status": "\u0421\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435 \u0441\u0438\u0441\u0442\u0435\u043c\u044b",
@@ -816,7 +816,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "Mettre \u00e0 jour",
         },
         "dashboard": {
-            "welcome": "Bienvenue sur OpenEstimate",
+            "welcome": "Bienvenue sur OpenConstructionERP",
             "subtitle": "Plateforme d\u2019estimation des co\u00fbts de construction open-source",
             "recent_projects": "Projets r\u00e9cents",
             "system_status": "\u00c9tat du syst\u00e8me",
@@ -962,7 +962,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "Actualizar",
         },
         "dashboard": {
-            "welcome": "Bienvenido a OpenEstimate",
+            "welcome": "Bienvenido a OpenConstructionERP",
             "subtitle": "Plataforma de presupuestos de construcci\u00f3n de c\u00f3digo abierto",
             "recent_projects": "Proyectos recientes",
             "system_status": "Estado del sistema",
@@ -1108,7 +1108,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "Atualizar",
         },
         "dashboard": {
-            "welcome": "Bem-vindo ao OpenEstimate",
+            "welcome": "Bem-vindo ao OpenConstructionERP",
             "subtitle": "Plataforma de or\u00e7amenta\u00e7\u00e3o de constru\u00e7\u00e3o open-source",
             "recent_projects": "Projetos recentes",
             "system_status": "Estado do sistema",
@@ -1254,7 +1254,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "Aggiorna",
         },
         "dashboard": {
-            "welcome": "Benvenuto su OpenEstimate",
+            "welcome": "Benvenuto su OpenConstructionERP",
             "subtitle": "Piattaforma open-source per la stima dei costi di costruzione",
             "recent_projects": "Progetti recenti",
             "system_status": "Stato del sistema",
@@ -1400,7 +1400,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "Bijwerken",
         },
         "dashboard": {
-            "welcome": "Welkom bij OpenEstimate",
+            "welcome": "Welkom bij OpenConstructionERP",
             "subtitle": "Open-source bouwkostencalculatie-platform",
             "recent_projects": "Recente projecten",
             "system_status": "Systeemstatus",
@@ -1546,7 +1546,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "Aktualizuj",
         },
         "dashboard": {
-            "welcome": "Witaj w OpenEstimate",
+            "welcome": "Witaj w OpenConstructionERP",
             "subtitle": "Platforma kosztorysowania budowlanego open-source",
             "recent_projects": "Ostatnie projekty",
             "system_status": "Stan systemu",
@@ -1692,7 +1692,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "Aktualizovat",
         },
         "dashboard": {
-            "welcome": "V\u00edtejte v OpenEstimate",
+            "welcome": "V\u00edtejte v OpenConstructionERP",
             "subtitle": "Open-source platforma pro rozpo\u010dtov\u00e1n\u00ed staveb",
             "recent_projects": "Ned\u00e1vn\u00e9 projekty",
             "system_status": "Stav syst\u00e9mu",
@@ -1838,7 +1838,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "G\u00fcncelle",
         },
         "dashboard": {
-            "welcome": "OpenEstimate'e ho\u015f geldiniz",
+            "welcome": "OpenConstructionERP'ye ho\u015f geldiniz",
             "subtitle": "A\u00e7\u0131k kaynak in\u015faat maliyet tahmini platformu",
             "recent_projects": "Son projeler",
             "system_status": "Sistem durumu",
@@ -1984,7 +1984,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "Uppdatera",
         },
         "dashboard": {
-            "welcome": "V\u00e4lkommen till OpenEstimate",
+            "welcome": "V\u00e4lkommen till OpenConstructionERP",
             "subtitle": "Byggkalkylering med \u00f6ppen k\u00e4llkod",
             "recent_projects": "Senaste projekt",
             "system_status": "Systemstatus",
@@ -2130,7 +2130,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "Oppdater",
         },
         "dashboard": {
-            "welcome": "Velkommen til OpenEstimate",
+            "welcome": "Velkommen til OpenConstructionERP",
             "subtitle": "Byggekalkyle med \u00e5pen kildekode",
             "recent_projects": "Nylige prosjekter",
             "system_status": "Systemstatus",
@@ -2276,7 +2276,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "Opdater",
         },
         "dashboard": {
-            "welcome": "Velkommen til OpenEstimate",
+            "welcome": "Velkommen til OpenConstructionERP",
             "subtitle": "Byggekalkulation med \u00e5ben kildekode",
             "recent_projects": "Seneste projekter",
             "system_status": "Systemstatus",
@@ -2422,7 +2422,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "P\u00e4ivit\u00e4",
         },
         "dashboard": {
-            "welcome": "Tervetuloa OpenEstimateen",
+            "welcome": "Tervetuloa OpenConstructionERP-järjestelmään",
             "subtitle": "Avoimen l\u00e4hdekoodin rakennuskustannuslaskenta-alusta",
             "recent_projects": "Viimeisimm\u00e4t projektit",
             "system_status": "J\u00e4rjestelm\u00e4n tila",
@@ -2568,7 +2568,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "\u062a\u062d\u062f\u064a\u062b",
         },
         "dashboard": {
-            "welcome": "\u0645\u0631\u062d\u0628\u0627\u064b \u0628\u0643 \u0641\u064a OpenEstimate",
+            "welcome": "\u0645\u0631\u062d\u0628\u0627\u064b \u0628\u0643 \u0641\u064a OpenConstructionERP",
             "subtitle": "\u0645\u0646\u0635\u0629 \u062a\u0642\u062f\u064a\u0631 \u062a\u0643\u0627\u0644\u064a\u0641 \u0627\u0644\u0628\u0646\u0627\u0621 \u0645\u0641\u062a\u0648\u062d\u0629 \u0627\u0644\u0645\u0635\u062f\u0631",
             "recent_projects": "\u0627\u0644\u0645\u0634\u0627\u0631\u064a\u0639 \u0627\u0644\u0623\u062e\u064a\u0631\u0629",
             "system_status": "\u062d\u0627\u0644\u0629 \u0627\u0644\u0646\u0638\u0627\u0645",
@@ -2736,7 +2736,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "\u66f4\u65b0",
         },
         "dashboard": {
-            "welcome": "\u6b22\u8fce\u4f7f\u7528 OpenEstimate",
+            "welcome": "\u6b22\u8fce\u4f7f\u7528 OpenConstructionERP",
             "subtitle": "\u5f00\u6e90\u5efa\u7b51\u5de5\u7a0b\u9020\u4ef7\u5e73\u53f0",
             "recent_projects": "\u6700\u8fd1\u9879\u76ee",
             "system_status": "\u7cfb\u7edf\u72b6\u6001",
@@ -2882,7 +2882,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "\u66f4\u65b0",
         },
         "dashboard": {
-            "welcome": "OpenEstimate \u3078\u3088\u3046\u3053\u305d",
+            "welcome": "OpenConstructionERP \u3078\u3088\u3046\u3053\u305d",
             "subtitle": "\u30aa\u30fc\u30d7\u30f3\u30bd\u30fc\u30b9\u5efa\u8a2d\u30b3\u30b9\u30c8\u898b\u7a4d\u30d7\u30e9\u30c3\u30c8\u30d5\u30a9\u30fc\u30e0",
             "recent_projects": "\u6700\u8fd1\u306e\u30d7\u30ed\u30b8\u30a7\u30af\u30c8",
             "system_status": "\u30b7\u30b9\u30c6\u30e0\u72b6\u614b",
@@ -3028,7 +3028,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "\uc5c5\ub370\uc774\ud2b8",
         },
         "dashboard": {
-            "welcome": "OpenEstimate\uc5d0 \uc624\uc2e0 \uac83\uc744 \ud658\uc601\ud569\ub2c8\ub2e4",
+            "welcome": "OpenConstructionERP\uc5d0 \uc624\uc2e0 \uac83\uc744 \ud658\uc601\ud569\ub2c8\ub2e4",
             "subtitle": "\uc624\ud508\uc18c\uc2a4 \uac74\uc124 \uc6d0\uac00 \uc0b0\uc815 \ud50c\ub7ab\ud3fc",
             "recent_projects": "\ucd5c\uadfc \ud504\ub85c\uc81d\ud2b8",
             "system_status": "\uc2dc\uc2a4\ud15c \uc0c1\ud0dc",
@@ -3174,7 +3174,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "update": "\u0905\u092a\u0921\u0947\u091f \u0915\u0930\u0947\u0902",
         },
         "dashboard": {
-            "welcome": "OpenEstimate \u092e\u0947\u0902 \u0906\u092a\u0915\u093e \u0938\u094d\u0935\u093e\u0917\u0924 \u0939\u0948",
+            "welcome": "OpenConstructionERP \u092e\u0947\u0902 \u0906\u092a\u0915\u093e \u0938\u094d\u0935\u093e\u0917\u0924 \u0939\u0948",
             "subtitle": "\u0913\u092a\u0928 \u0938\u094b\u0930\u094d\u0938 \u0928\u093f\u0930\u094d\u092e\u093e\u0923 \u0932\u093e\u0917\u0924 \u0905\u0928\u0941\u092e\u093e\u0928 \u092e\u0902\u091a",
             "recent_projects": "\u0939\u093e\u0932 \u0915\u0940 \u092a\u0930\u093f\u092f\u094b\u091c\u0928\u093e\u090f\u0902",
             "system_status": "\u0938\u093f\u0938\u094d\u091f\u092e \u0938\u094d\u0925\u093f\u0924\u093f",

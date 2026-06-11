@@ -90,7 +90,7 @@ async def export_backup(
     path = spool_to_disk(spool)
 
     timestamp = manifest["created_at"].replace("-", "").replace(":", "")[:15]
-    filename = f"openestimate_backup_{timestamp}.zip"
+    filename = f"openconstructionerp_backup_{timestamp}.zip"
 
     return FileResponse(
         path=path,
