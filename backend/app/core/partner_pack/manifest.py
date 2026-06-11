@@ -2,9 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+# The four pack "types" under the Packs umbrella. A pack is one of:
+#   country   - a country/region preset (locale, currency, cost regions, rules)
+#   industry  - a trade/sector preset (formwork, renewables, modular, ...)
+#   partner   - a co-branded preset for a named partner organisation
+#   showcase  - an internal demo/showcase preset
+# The old "Partner Packs" feature is now just the ``partner`` type; ``country``
+# and ``industry`` already shipped as partner packs and keep working unchanged.
+PackType = Literal["country", "industry", "partner", "showcase"]
 
 
 class PartnerBranding(BaseModel):
@@ -67,6 +76,16 @@ class PartnerPackManifest(BaseModel):
     pack_version: str = Field(
         default="0.1.0",
         description="Pack version (semver). Independent of core version.",
+    )
+    pack_type: PackType | None = Field(
+        default=None,
+        description=(
+            "Pack type under the Packs umbrella: 'country', 'industry', "
+            "'partner' or 'showcase'. Optional for backward compatibility: "
+            "old manifests that omit it get a type inferred from their other "
+            "fields (see ``_infer_pack_type``). The resolved value is always "
+            "available via the ``type`` property."
+        ),
     )
     description: str = Field(
         default="",
@@ -155,6 +174,56 @@ class PartnerPackManifest(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     # ------------------------------------------------------------------
+    # Pack type resolution
+    # ------------------------------------------------------------------
+    def _infer_pack_type(self) -> PackType:
+        """Infer a pack type for old manifests that omit ``pack_type``.
+
+        The inference reads only fields old partner packs already author, so a
+        manifest written before the Packs umbrella resolves to a sensible type
+        without any change to the pack. Precedence (first match wins):
+
+          1. ``industry`` - the manifest declares ``metadata.industry`` OR a
+             cross-region marker (``metadata.country == "XX"``, used by the
+             sector packs such as renewables-epc and modular-prefab).
+          2. ``country`` - the manifest carries country metadata: a real
+             ``metadata.country`` ISO code (anything other than the "XX"
+             cross-region marker) or any ``country_name*`` key.
+          3. ``partner`` - the manifest ships partner co-branding
+             (``branding.powered_by_text``).
+          4. ``partner`` (default) - the historical concept name, so a manifest
+             that declares none of the above keeps the original behaviour.
+        """
+        meta = self.metadata
+        country = str(meta.get("country", "")).strip()
+        industry = str(meta.get("industry", "")).strip()
+        has_country_name = any(k == "country" or k.startswith("country_name") for k in meta)
+
+        if industry or country == "XX":
+            return "industry"
+        if (country and country != "XX") or has_country_name:
+            return "country"
+        if self.branding.powered_by_text:
+            return "partner"
+        return "partner"
+
+    @model_validator(mode="after")
+    def _resolve_pack_type(self) -> PartnerPackManifest:
+        """Fill ``pack_type`` from inference when a manifest omits it."""
+        if self.pack_type is None:
+            # ``extra="forbid"`` + assignment validation is off by default, so a
+            # plain attribute set is safe and avoids re-running this validator.
+            object.__setattr__(self, "pack_type", self._infer_pack_type())
+        return self
+
+    @property
+    def type(self) -> PackType:
+        """The resolved pack type. Always one of the four ``PackType`` values."""
+        # ``_resolve_pack_type`` guarantees ``pack_type`` is set post-validation;
+        # fall back to inference defensively if a manifest is built another way.
+        return self.pack_type or self._infer_pack_type()
+
+    # ------------------------------------------------------------------
     # Derived properties
     # ------------------------------------------------------------------
     @property
@@ -173,6 +242,7 @@ class PartnerPackManifest(BaseModel):
         """
         return {
             "slug": self.slug,
+            "type": self.type,
             "partner_name": self.partner_name,
             "partner_url": self.partner_url,
             "pack_version": self.pack_version,

@@ -9,6 +9,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile
 from fastapi.responses import StreamingResponse
+from fastapi.routing import APIRoute
 from pydantic import BaseModel, Field
 
 from app.core.partner_pack._safe_extract import has_zip_magic
@@ -406,3 +407,37 @@ def inspect_pack(slug: str) -> dict[str, Any]:
     if not m:
         raise HTTPException(status_code=404, detail=f"Pack '{slug}' not installed")
     return m.to_public_dict()
+
+
+def _build_alias_router(source: APIRouter, prefix: str, tags: list[str]) -> APIRouter:
+    """Mirror ``source``'s routes onto a new prefix, reusing the same handlers.
+
+    Under the Packs umbrella the canonical surface is ``/api/v1/packs/*``. The
+    legacy ``/api/v1/partner-pack/*`` routes must keep working unchanged for
+    external integrations, so rather than rename anything we mount a second
+    router whose routes point at the exact same endpoint callables. Both URLs
+    therefore always return identical data and can never drift.
+    """
+    alias = APIRouter(prefix=prefix, tags=tags)
+    for route in source.routes:
+        if not isinstance(route, APIRoute):
+            continue
+        # Strip the source prefix so the path is re-prefixed cleanly.
+        sub_path = route.path[len(source.prefix) :] if route.path.startswith(source.prefix) else route.path
+        alias.add_api_route(
+            sub_path,
+            route.endpoint,
+            methods=sorted(route.methods or set()),
+            name=route.name,
+            summary=route.summary,
+            description=route.description,
+            response_model=route.response_model,
+            dependencies=list(route.dependencies),
+            include_in_schema=route.include_in_schema,
+        )
+    return alias
+
+
+# Canonical Packs-umbrella alias. Shares every handler with ``router`` so the
+# old /partner-pack routes and the new /packs routes return the same data.
+alias_router = _build_alias_router(router, prefix="/api/v1/packs", tags=["packs"])

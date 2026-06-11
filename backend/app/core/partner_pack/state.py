@@ -23,7 +23,12 @@ from app.core.module_state import _resolve_data_dir
 
 logger = logging.getLogger(__name__)
 
-STATE_FILENAME = "partner_pack_state.json"
+# Canonical state file under the Packs umbrella, plus the legacy name existing
+# installs already wrote. Writes go to the new name; reads try the new name
+# first and fall back to the legacy one, so an install that applied a pack
+# before the rename keeps its active pack without any migration step.
+STATE_FILENAME = "pack_state.json"
+STATE_FILENAME_LEGACY = "partner_pack_state.json"
 
 
 def _resolve_state_dir(data_dir: Path | None = None) -> Path:
@@ -61,10 +66,25 @@ class AppliedPackState:
     applied_by: str | None = None
 
 
+def _resolve_state_path(data_dir: Path | None = None) -> Path | None:
+    """Return the state file to read: new name if present, else legacy if present.
+
+    Returns ``None`` when neither file exists (nothing applied yet).
+    """
+    state_dir = _resolve_state_dir(data_dir)
+    new_path = state_dir / STATE_FILENAME
+    if new_path.exists():
+        return new_path
+    legacy_path = state_dir / STATE_FILENAME_LEGACY
+    if legacy_path.exists():
+        return legacy_path
+    return None
+
+
 def load_applied_state(data_dir: Path | None = None) -> AppliedPackState | None:
     """Return the applied-pack record, or None if nothing has been applied."""
-    path = _resolve_state_dir(data_dir) / STATE_FILENAME
-    if not path.exists():
+    path = _resolve_state_path(data_dir)
+    if path is None:
         return None
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
@@ -100,13 +120,19 @@ def save_applied_state(state: AppliedPackState, data_dir: Path | None = None) ->
 
 
 def clear_applied_state(data_dir: Path | None = None) -> None:
-    """Remove the applied-pack record (Un-apply)."""
-    path = _resolve_state_dir(data_dir) / STATE_FILENAME
-    try:
-        path.unlink(missing_ok=True)
-        logger.info("Applied partner pack state cleared.")
-    except Exception:
-        logger.exception("Failed to clear applied pack state at %s", path)
+    """Remove the applied-pack record (Un-apply).
+
+    Removes both the new and the legacy file so a legacy record cannot resurrect
+    the applied pack on the next read.
+    """
+    state_dir = _resolve_state_dir(data_dir)
+    for name in (STATE_FILENAME, STATE_FILENAME_LEGACY):
+        path = state_dir / name
+        try:
+            path.unlink(missing_ok=True)
+        except Exception:
+            logger.exception("Failed to clear applied pack state at %s", path)
+    logger.info("Applied pack state cleared.")
 
 
 def get_applied_slug(data_dir: Path | None = None) -> str | None:

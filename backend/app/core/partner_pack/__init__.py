@@ -23,11 +23,12 @@ from app.core.partner_pack.discovery import (
     get_active_pack,
     get_pack_by_slug,
 )
-from app.core.partner_pack.manifest import PartnerPackManifest
+from app.core.partner_pack.manifest import PackType, PartnerPackManifest
 
 __all__ = [
     "discover_packs",
     "get_active_pack",
     "get_pack_by_slug",
+    "PackType",
     "PartnerPackManifest",
 ]

@@ -1233,9 +1233,12 @@ def create_app() -> FastAPI:
     # Partner-pack system - discovers pip-installed packs via entry_points
     # and exposes the active manifest + branded resources.
     from app.core.partner_pack.discovery import get_active_pack
+    from app.core.partner_pack.router import alias_router as packs_alias_router
     from app.core.partner_pack.router import router as partner_pack_router
 
     app.include_router(partner_pack_router)
+    # Canonical Packs-umbrella alias (/api/v1/packs/*) sharing the same handlers.
+    app.include_router(packs_alias_router)
     _active_pack = get_active_pack()
     if _active_pack:
         logger.info(
