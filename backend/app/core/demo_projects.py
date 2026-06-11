@@ -2132,6 +2132,8 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "it-park-bangalore": "Commercial",
     "hospital-jeddah": "Healthcare",
     "retail-market-heilbronn": "Retail",
+    "retail-market-heidelberg": "Retail",
+    "retail-market-karlsruhe": "Retail",
 }
 
 
