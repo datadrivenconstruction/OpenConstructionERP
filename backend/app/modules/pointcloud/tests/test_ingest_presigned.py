@@ -295,6 +295,68 @@ async def test_complete_ingest_finalises_and_marks_uploaded(session: AsyncSessio
 
 
 @pytest.mark.asyncio
+async def test_complete_ingest_publishes_event_off_snapshot_not_expired_row(
+    session: AsyncSession,
+) -> None:
+    """complete fires pointcloud.upload.completed with the scan's ids intact.
+
+    Regression for the ingest/complete 500: ScanRepository.update_fields ends
+    with session.expire_all(), so the scan row complete_ingest fetched earlier is
+    expired by the time the event payload is built. The payload must come from
+    values snapshotted while the row was live - reading project_id / tenant_id /
+    upload_key off the expired row would trigger an implicit async lazy-load and
+    raise MissingGreenlet on the real engine. Asserting the event carries the
+    right ids proves the snapshot path holds.
+    """
+    project_id: uuid.UUID = session.info["project_id"]
+    owner_id: uuid.UUID = session.info["owner_id"]
+    storage = FakeS3Backend(complete_size=42)
+    service = PointCloudService(session, storage=storage)
+
+    init = await service.init_ingest(
+        ScanIngestInit(
+            project_id=project_id,
+            name="Event scan",
+            original_format="las",
+            total_size_bytes=10,
+        ),
+        payload=_payload(owner_id),
+    )
+    await session.commit()
+
+    from app.core.events import event_bus
+
+    captured: list[dict] = []
+
+    async def _capture(event: object) -> None:
+        captured.append(dict(getattr(event, "data", {})))
+
+    event_bus.subscribe("pointcloud.upload.completed", _capture)
+    try:
+        done = await service.complete_ingest(
+            init["scan_id"],
+            ScanIngestComplete(
+                upload_id=init["upload_id"],
+                parts=[CompletedPart(part_number=1, etag="a", size_bytes=42)],
+            ),
+            payload=_payload(owner_id),
+        )
+        await session.commit()
+    finally:
+        event_bus.unsubscribe("pointcloud.upload.completed", _capture)
+
+    assert done["status"] == "uploaded"
+    assert len(captured) == 1
+    payload = captured[0]
+    # owner_id is the single-tenant boundary, so project tenant == owner.
+    assert payload["project_id"] == str(project_id)
+    assert payload["tenant_id"] == str(owner_id)
+    assert payload["scan_id"] == str(init["scan_id"])
+    assert payload["upload_key"] == init["upload_key"]
+    assert payload["size_bytes"] == 42
+
+
+@pytest.mark.asyncio
 async def test_complete_ingest_rejects_non_contiguous_parts(session: AsyncSession) -> None:
     """A gap in the part list is rejected 422 before any storage call."""
     project_id: uuid.UUID = session.info["project_id"]
