@@ -545,6 +545,10 @@ export type FullGridContext = ActionsContext & ResourceGridContext & SectionGrou
    *  at rest (compact = one truncated line, comfortable/tall = multi-line
    *  Langtext with newlines honoured). Driven by the BOQ toolbar toggle. */
   descDensity?: 'compact' | 'comfortable' | 'tall';
+  /** When the dedicated Material/Labor/Equipment % columns are shown, the
+   *  description cell hides its inline cost-driver split pill to avoid
+   *  showing the same figures twice. */
+  showResourceSplit?: boolean;
   onApplyAnomalySuggestion?: (positionId: string, suggestedRate: number) => void;
   /** First ready BIM model ID for the current project (used for mini 3D previews). */
   bimModelId?: string | null;
@@ -1002,7 +1006,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
           .sort((a, b) => b.pct - a.pct)
       : [];
   const breakdownPill =
-    breakdownEntries.length > 0 ? (
+    breakdownEntries.length > 0 && !ctx?.showResourceSplit ? (
       <span
         className="shrink-0 inline-flex items-center gap-0.5 rounded text-[10px] font-medium px-1 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 cursor-help"
         title={t('boq.resource_breakdown_tip', {

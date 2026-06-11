@@ -1788,6 +1788,30 @@ export function BOQEditorPage() {
       else localStorage.removeItem(displayCurrencyKey);
     } catch { /* localStorage unavailable / quota — silently ignore */ }
   }, [displayCurrencyKey]);
+  /* ── Resource cost-driver split columns (Material/Labor/Equipment %) ──
+   *  A view preference, remembered globally in localStorage so the user
+   *  keeps their chosen layout across BOQs. Off by default - the three
+   *  percentage columns only appear once the user enables them from the
+   *  toolbar's Grid Settings menu. */
+  const RESOURCE_SPLIT_KEY = 'oe_boq_show_resource_split';
+  const [showResourceSplit, setShowResourceSplit] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(RESOURCE_SPLIT_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const toggleResourceSplit = useCallback(() => {
+    setShowResourceSplit((prev) => {
+      const next = !prev;
+      try {
+        if (next) localStorage.setItem(RESOURCE_SPLIT_KEY, '1');
+        else localStorage.removeItem(RESOURCE_SPLIT_KEY);
+      } catch { /* localStorage unavailable / quota — silently ignore */ }
+      return next;
+    });
+  }, []);
+
   const displayCurrencyMeta = useMemo(() => {
     if (!displayCurrency) return null;
     const fx = fxRates.find((f) => f.currency === displayCurrency);
@@ -4078,6 +4102,8 @@ export function BOQEditorPage() {
           onAcceptAllAnomalies={anomalyMap.size > 0 ? handleAcceptAllAnomalies : undefined}
           onManageColumns={() => setCustomColumnsOpen(true)}
           customColumnCount={boqCustomColumns.length}
+          showResourceSplit={showResourceSplit}
+          onToggleResourceSplit={toggleResourceSplit}
           onManageVariables={() => setVariablesOpen(true)}
           onRenumber={handleRenumber}
           isRenumbering={renumberMutation.isPending}
@@ -4181,6 +4207,7 @@ export function BOQEditorPage() {
           onApplyAnomalySuggestion={handleApplyAnomalySuggestion}
           onSaveAsAssembly={handleSaveAsAssembly}
           customColumns={boqCustomColumns}
+          showResourceSplit={showResourceSplit}
           boqVariables={boqVariables}
           bimModelId={bimModelId}
           onHighlightBIMElements={(elementIds) => {

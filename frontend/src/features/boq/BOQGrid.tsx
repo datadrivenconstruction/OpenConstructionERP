@@ -432,6 +432,11 @@ export interface BOQGridProps {
   /** Custom column definitions from BOQ metadata */
   customColumns?: import('./grid/columnDefs').CustomColumnDef[];
   /**
+   * Show the Material/Labor/Equipment % cost-driver split columns. Toggled
+   * from the BOQ toolbar's Grid Settings menu; off by default.
+   */
+  showResourceSplit?: boolean;
+  /**
    * BOQ-scoped named variables ($GFA, $LABOR_RATE, …). Used by `calculated`
    * custom columns; safe to omit when no calculated columns are defined.
    */
@@ -509,6 +514,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onApplyAnomalySuggestion,
   onSaveAsAssembly,
   customColumns,
+  showResourceSplit,
   boqVariables,
   bimModelId,
   onHighlightBIMElements,
@@ -1029,6 +1035,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       // through the configured rate. Null when the user is on base.
       displayCurrency: displayCurrency ?? null,
       onOpenFxRateSettings,
+      // When the dedicated Material/Labor/Equipment % columns are on, the
+      // description cell suppresses its inline split pill so the figure is
+      // not shown twice.
+      showResourceSplit: showResourceSplit ?? false,
       locale,
       fmt,
       t,
@@ -1089,12 +1099,12 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
      onDeletePosition, onSaveToDatabase, onAddComment,
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion, bimModelId,
      onUpdatePosition, onHighlightBIMElements, onDeleteSection, onReorderSections, onFormulaApplied,
-     positions, customColumns],
+     positions, customColumns, showResourceSplit],
   );
 
   /* ── Column defs (standard + custom) ─────────────────────────────── */
   const columnDefs = useMemo(() => {
-    const defs = getColumnDefs({ currencySymbol, currencyCode, locale, fmt, t: tRef.current, displayCurrency: displayCurrency ?? null });
+    const defs = getColumnDefs({ currencySymbol, currencyCode, locale, fmt, t: tRef.current, displayCurrency: displayCurrency ?? null, showResourceSplit });
     // Override ordinal column with custom renderer
     const ordinalCol = defs.find((c) => c.field === 'ordinal');
     if (ordinalCol) {
@@ -1131,7 +1141,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       }
     }
     return defs;
-  }, [currencySymbol, currencyCode, locale, fmt, i18n.language, customColumns, positions, boqVariables, displayCurrency]);
+  }, [currencySymbol, currencyCode, locale, fmt, i18n.language, customColumns, positions, boqVariables, displayCurrency, showResourceSplit]);
 
   /* ── Calculated-column refresh on positions change ──────────────────
    * AG Grid re-runs `valueGetter` on every refresh; for cross-position

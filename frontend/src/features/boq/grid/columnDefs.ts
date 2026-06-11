@@ -42,6 +42,15 @@ export interface BOQColumnContext {
    * `null` / undefined ⇒ stick with the project base currency.
    */
   displayCurrency?: { code: string; rate: number } | null;
+  /**
+   * Resource cost-driver split (Material / Labor / Equipment %) columns.
+   * Off by default - the user turns them on from the BOQ toolbar's Grid
+   * Settings menu. When false the three columns are hidden (kept in the
+   * defs so AG Grid can show/hide them without rebuilding the grid). The
+   * percentages come from each position's
+   * ``metadata.resource_breakdown[type].pct`` rollup.
+   */
+  showResourceSplit?: boolean;
 }
 
 // Note: `currencyFormatter` was previously applied to the unit_rate column
@@ -64,6 +73,37 @@ function totalFormatter(params: ValueFormatterParams): string {
   }
   const currencyCode = ctx?.currencyCode ?? 'EUR';
   return fmtWithCurrency(params.value, locale, currencyCode);
+}
+
+/**
+ * Percentage share of one resource type (material / labor / equipment) of a
+ * position's cost. Prefers the pre-rolled ``metadata.resource_breakdown``
+ * (assembly + demo positions carry it), and falls back to computing the share
+ * straight from ``metadata.resources`` - the same grouping the backend rollup
+ * uses - so cost-database and catalog positions show a split too. Returns null
+ * when the position has no resource data, leaving the cell blank.
+ */
+function resourceSplitPct(meta: Record<string, unknown>, resType: string): number | null {
+  const bd = meta.resource_breakdown as Record<string, { pct?: number }> | undefined;
+  const direct = bd?.[resType]?.pct;
+  if (typeof direct === 'number') return Math.round(direct);
+  const resources = meta.resources;
+  if (!Array.isArray(resources) || resources.length === 0) return null;
+  let subtotal = 0;
+  let typeTotal = 0;
+  for (const r of resources) {
+    if (!r || typeof r !== 'object') continue;
+    const rr = r as { type?: string; total?: number; quantity?: number; unit_rate?: number };
+    const ttl =
+      typeof rr.total === 'number'
+        ? rr.total
+        : (Number(rr.quantity) || 0) * (Number(rr.unit_rate) || 0);
+    if (!Number.isFinite(ttl)) continue;
+    subtotal += ttl;
+    if ((rr.type || 'other') === resType) typeTotal += ttl;
+  }
+  if (subtotal <= 0) return null;
+  return Math.round((typeTotal / subtotal) * 100);
 }
 
 export function getColumnDefs(context: BOQColumnContext): ColDef[] {
@@ -425,6 +465,39 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       headerClass: 'ag-right-aligned-header',
       type: 'numericColumn',
     },
+    // ── Resource cost-driver split (Material / Labor / Equipment %) ──────
+    // Hidden until the user enables "Resource split" in the Grid Settings
+    // menu. Each reads the per-type ``pct`` from the position's
+    // ``metadata.resource_breakdown`` rollup (the same figures the inline
+    // "55% MAT · 35% LAB · 10% EQU" pill shows), but as sortable columns so
+    // the estimator can scan and order positions by their cost driver.
+    ...(
+      [
+        ['material', t('boq.split_material', { defaultValue: 'Material %' }), t('boq.split_material_tip', { defaultValue: 'Material share of the unit rate' })],
+        ['labor', t('boq.split_labor', { defaultValue: 'Labor %' }), t('boq.split_labor_tip', { defaultValue: 'Labor share of the unit rate' })],
+        ['equipment', t('boq.split_equipment', { defaultValue: 'Equipment %' }), t('boq.split_equipment_tip', { defaultValue: 'Equipment share of the unit rate' })],
+      ] as const
+    ).map(([resType, header, tip]) => ({
+      headerName: header,
+      headerTooltip: tip,
+      colId: `resource_split_${resType}`,
+      width: 92,
+      hide: !context.showResourceSplit,
+      editable: false,
+      sortable: true,
+      filter: 'agNumberColumnFilter',
+      valueGetter: (params: ValueGetterParams) => {
+        const d = params.data;
+        if (!d || d._isFooter || d._isSection) return null;
+        const meta = (d.metadata || d.metadata_ || {}) as Record<string, unknown>;
+        return resourceSplitPct(meta, resType);
+      },
+      valueFormatter: (params: ValueFormatterParams) =>
+        params.value == null ? '' : `${params.value}%`,
+      cellClass: 'text-right tabular-nums text-xs !pr-2 !pl-2 text-content-secondary',
+      headerClass: 'ag-right-aligned-header',
+      type: 'numericColumn',
+    })),
     {
       headerName: '',
       field: '_actions',

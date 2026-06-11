@@ -34,6 +34,7 @@ import {
   Keyboard,
   Leaf,
   WrapText,
+  PieChart,
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { useBoqDescDensityStore, type BoqDescDensity } from '@/stores/useBoqDescDensityStore';
@@ -88,6 +89,9 @@ export interface BOQToolbarProps {
   // Custom columns
   onManageColumns?: () => void;
   customColumnCount?: number;
+  // Resource cost-driver split (Material/Labor/Equipment %) columns
+  showResourceSplit?: boolean;
+  onToggleResourceSplit?: () => void;
   // Per-BOQ named variables ($GFA, $LABOR_RATE, …)
   onManageVariables?: () => void;
   // Renumber positions (gap-of-10 scheme)
@@ -165,6 +169,8 @@ export function BOQToolbar({
   onToggleSmartPanel,
   onPasteFromExcel,
   onManageColumns,
+  showResourceSplit,
+  onToggleResourceSplit,
   customColumnCount,
   onManageVariables,
   onRenumber,
@@ -324,7 +330,7 @@ export function BOQToolbar({
           )}
         </div>
         {/* ── Grid Settings dropdown (Columns + Renumber) ─────────────── */}
-        {(onManageColumns || onRenumber || onManageVariables) && (
+        {(onManageColumns || onRenumber || onManageVariables || onToggleResourceSplit) && (
           <div ref={gridSettingsRef} className="relative">
             <Button
               variant="ghost"
@@ -383,6 +389,32 @@ export function BOQToolbar({
                     {isRenumbering
                       ? t('boq.renumbering', { defaultValue: 'Renumbering...' })
                       : t('boq.renumber', { defaultValue: 'Renumber Positions' })}
+                  </button>
+                )}
+                {onToggleResourceSplit && (
+                  <button
+                    role="menuitemcheckbox"
+                    aria-checked={!!showResourceSplit}
+                    onClick={() => { setGridSettingsOpen(false); onToggleResourceSplit(); }}
+                    className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors rounded-b-lg ${onManageColumns || onManageVariables || onRenumber ? 'border-t border-border-light' : 'rounded-t-lg'}`}
+                    title={t('boq.resource_split_tip', {
+                      defaultValue: 'Show Material, Labor and Equipment percentage columns for each position',
+                    })}
+                    data-testid="boq-resource-split-toggle"
+                  >
+                    <PieChart size={15} className="text-content-tertiary" />
+                    <span className="flex-1 text-left">
+                      {t('boq.resource_split', { defaultValue: 'Resource split (MAT/LAB/EQU)' })}
+                    </span>
+                    <span
+                      className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                        showResourceSplit
+                          ? 'bg-oe-blue border-oe-blue text-white'
+                          : 'border-border-default bg-surface-primary'
+                      }`}
+                    >
+                      {showResourceSplit && <Check size={11} />}
+                    </span>
                   </button>
                 )}
               </div>
