@@ -38,7 +38,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from lxml import etree
+
+etree = pytest.importorskip("lxml.etree")
 
 from app.modules.boq.router import build_gaeb_xml
 
