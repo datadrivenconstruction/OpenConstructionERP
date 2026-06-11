@@ -351,20 +351,35 @@ def test_positions_are_structurally_sound() -> None:
     assert len(ordinals) == len(set(ordinals)), "duplicate OZ ordinals"
 
 
-def test_tender_factors_reproduce_net_bids() -> None:
-    """The owner direct-award bids price out to their net figures.
+def test_tender_packages_reproduce_net_bids() -> None:
+    """The four procurement packages price out to their exact net bids.
 
-    install_demo_project prices single-package bids as
-    ``round(grand_total * factor, 2)``; the factors are authored as
-    ``bid / grand_total`` so the three VP-07 bids come back exactly.
+    install_demo_project prices multi-package bids as
+    ``round((grand_total / n_packages) * factor, 2)``; the factors are
+    authored as ``net_bid / (grand_total / 4)`` so every dossier bid (VP-07
+    awarded, VP-09/10/11 pending) comes back to the cent. Status reflects the
+    week-19 snapshot using the recognised tender statuses.
     """
     template = _template()
-    expected = [Decimal("812400"), Decimal("858900"), Decimal("901200")]
-    assert len(template.tender_companies) == len(expected)
-    for (_co, email, factor), bid in zip(template.tender_companies, expected, strict=True):
-        assert "@" in email
-        priced = Decimal(str(round(float(_LV_GRAND_TOTAL) * factor, 2)))
-        assert priced == bid, f"factor {factor} prices to {priced}, expected {bid}"
+    # install_demo_project does the pricing in float, the way the template
+    # factors are authored; mirror that here (the bids are whole euros).
+    pkg_share = float(_LV_GRAND_TOTAL) / 4
+    expected: dict[str, tuple[str, list[Decimal]]] = {
+        "VP-07": ("awarded", [Decimal("812400"), Decimal("858900"), Decimal("901200")]),
+        "VP-09": ("collecting", [Decimal("981400"), Decimal("1041200"), Decimal("1118900")]),
+        "VP-10": ("evaluating", [Decimal("528700"), Decimal("559400")]),
+        "VP-11": ("evaluating", [Decimal("497800"), Decimal("534600"), Decimal("562300")]),
+    }
+    assert len(template.tender_packages) == 4
+    for (name, _desc, status, companies), code in zip(template.tender_packages, expected, strict=True):
+        assert name.startswith(code), f"package order drifted at {code}: {name!r}"
+        want_status, want_bids = expected[code]
+        assert status == want_status, f"{code}: status {status!r} != {want_status!r}"
+        assert len(companies) == len(want_bids), f"{code}: bid count drifted"
+        for (_co, email, factor), bid in zip(companies, want_bids, strict=True):
+            assert "@" in email
+            priced = Decimal(str(round(pkg_share * factor, 2)))
+            assert priced == bid, f"{code} factor {factor} prices to {priced}, expected {bid}"
 
 
 async def test_install_is_end_to_end_and_idempotent() -> None:
@@ -381,7 +396,10 @@ async def test_install_is_end_to_end_and_idempotent() -> None:
 
     from app.core.demo_projects import install_demo_project
     from app.modules.contacts.models import Contact
+    from app.modules.finance.models import ProjectBudget
     from app.modules.projects.models import Project
+    from app.modules.schedule.models import Activity, Schedule
+    from app.modules.tendering.models import TenderBid, TenderPackage
     from tests._pg import transactional_session
 
     async with transactional_session() as session:
@@ -390,6 +408,16 @@ async def test_install_is_end_to_end_and_idempotent() -> None:
         assert result["sections"] == len(_VE_BUDGETS)
         assert result["positions"] >= 300
         assert Decimal(str(result["grand_total"])) == _LV_GRAND_TOTAL
+
+        # The hand-authored lifecycle content (slice 4) is seeded in full.
+        assert result["contacts"] == 18, "all 18 stakeholders S01..S18"
+        assert result["risks"] == 13, "all 13 risks R01..R13"
+        assert result["change_orders"] == 4, "all 4 change orders N-01..N-04"
+        assert result["documents"] == 31, "all 31 documents D01..D31"
+        assert result["punchlist"] == 10, "all 10 punch items M-001..M-010"
+        assert result["inspections"] == 4, "all 4 inspections I-01..I-04"
+        assert result["ncrs"] == 2, "both NCRs (NCR-01 closed, NCR-02 open)"
+        assert result["finance_budgets"] == 7, "7 DIN 276 budget lines + reserve"
 
         project = (
             await session.execute(select(Project).where(Project.id == uuid.UUID(result["project_id"])))
@@ -400,15 +428,52 @@ async def test_install_is_end_to_end_and_idempotent() -> None:
         assert project.country_code == "DE"
         assert (project.metadata_ or {}).get("demo_id") == DEMO_ID
 
-        # The two fictional legal entities arrive as contacts.
+        # The two fictional legal entities are among the 18 seeded contacts,
+        # and the GC / direct-award firms are present too.
         contacts = (
             (await session.execute(select(Contact).where(Contact.metadata_["demo_id"].as_string() == DEMO_ID)))
             .scalars()
             .all()
         )
+        assert len(contacts) == 18
         companies = {c.company_name for c in contacts}
         assert "Sueddeutsche Handelsimmobilien GmbH" in companies
         assert "Sueddeutsche Lebensmittelmaerkte GmbH" in companies
+        assert "Trautwein Bau GmbH & Co. KG" in companies
+        assert "Stadt Heilbronn, Planungs- und Baurechtsamt" in companies
+
+        # Finance budget lines respect the single-currency EUR frame and the
+        # Decimal-string money rule (no float drift): the 7 lines sum to the
+        # approved 9,430,000 budget and the committed total matches the story.
+        budget_lines = (
+            (await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project.id))).scalars().all()
+        )
+        assert len(budget_lines) == 7
+        assert sum(Decimal(b.original_budget) for b in budget_lines) == Decimal("9430000.00")
+        assert sum(Decimal(b.committed) for b in budget_lines) == Decimal("6571400.00")
+        assert sum(Decimal(b.actual) for b in budget_lines) == Decimal("2817800.00")
+
+        # Four tender packages with the awarded VP-07 and three pending ones.
+        packages = (
+            (await session.execute(select(TenderPackage).where(TenderPackage.project_id == project.id))).scalars().all()
+        )
+        assert len(packages) == 4
+        statuses = sorted(p.status for p in packages)
+        assert statuses == ["awarded", "collecting", "evaluating", "evaluating"]
+        awarded = next(p for p in packages if p.status == "awarded")
+        awarded_bids = (
+            (await session.execute(select(TenderBid).where(TenderBid.package_id == awarded.id))).scalars().all()
+        )
+        # VP-07 winning bid prices exactly to its 812,400 EUR net figure.
+        assert Decimal("812400.00") in {Decimal(b.total_amount) for b in awarded_bids}
+
+        # 35 schedule activities are seeded on a single active schedule.
+        activities = (
+            (await session.execute(select(Activity).join(Schedule).where(Schedule.project_id == project.id)))
+            .scalars()
+            .all()
+        )
+        assert len(activities) == 35
 
         # Idempotent re-run (the every-boot backfill path).
         again = await install_demo_project(session, DEMO_ID)

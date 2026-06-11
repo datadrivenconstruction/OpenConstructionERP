@@ -2691,10 +2691,13 @@ def _build_sections() -> list[SectionDef]:
 
 
 # Net LV grand total across the 16 priced procurement units (= sum of the
-# VE budgets). The owner direct-award package VP-07 bids below are
-# expressed as factors of this figure, the way install_demo_project prices
-# single-package bids (bid = grand_total * factor).
+# VE budgets). install_demo_project prices bids as a factor of a share of
+# this figure: with four tender packages each package gets an equal share
+# (grand_total / 4) and each bid is priced as ``share * factor``. The
+# factors below are therefore authored as ``net_bid / _PKG_SHARE`` so every
+# bid lands on its exact net amount regardless of the equal-share split.
 _LV_GRAND_TOTAL = 7_905_000.00
+_PKG_SHARE = _LV_GRAND_TOTAL / 4  # = 1,976,250.00
 
 TEMPLATE = DemoTemplate(
     demo_id="retail-market-heilbronn",
@@ -2756,12 +2759,177 @@ TEMPLATE = DemoTemplate(
         ("Mehrwertsteuer (MwSt. / VAT)", 19.0, "tax", "cumulative"),
     ],
     total_months=11,
+    # Legacy single-package fields (required by DemoTemplate). They are
+    # overridden by ``tender_packages`` below, but kept as the VP-07 award so
+    # the descriptor still reads correctly if the multi-package path is ever
+    # disabled.
     tender_name="VP-07 Kaeltetechnik CO2-Verbund und Kuehlmoebel (CO2 refrigeration, owner direct award)",
     tender_companies=[
-        # factor = net bid / LV grand total; bids 812,400 / 858,900 / 901,200 EUR
         ("Sommerfeld Kaeltetechnik GmbH", "vergabe@sommerfeld-kaeltetechnik.de", 812_400 / _LV_GRAND_TOTAL),
         ("NeckarFrost Kaelte- und Klimatechnik GmbH", "angebote@neckarfrost-kaelte.de", 858_900 / _LV_GRAND_TOTAL),
         ("Kuehlanlagenbau Westheimer GmbH", "ausschreibung@kaeltebau-westheimer.de", 901_200 / _LV_GRAND_TOTAL),
+    ],
+    # Four procurement packages (VP-07/09/10/11 of the design dossier), each
+    # mapping to a procurement unit budget. Status reflects the week-19
+    # snapshot: VP-07 awarded, VP-09 out for submission, VP-10 in
+    # negotiation, VP-11 in evaluation pending the grid feed-in approval.
+    # The bid factor is ``net_bid / _PKG_SHARE`` so install_demo_project
+    # (which prices each package off an equal grand_total / 4 share) lands
+    # every bid on its exact net figure.
+    tender_packages=[
+        (
+            "VP-07 Kaeltetechnik CO2-Verbund und Kuehlmoebel (CO2 refrigeration and cabinets, KG 470)",
+            "Bauherren-Direktvergabe, vergeben am 2026-04-24 an Sommerfeld Kaeltetechnik GmbH; 3 Angebote, Spread 10,9 %. Budget 830.000 EUR netto (VE-15).",
+            "awarded",
+            [
+                # bids 812,400 / 858,900 / 901,200 EUR, spread 10.9 %
+                ("Sommerfeld Kaeltetechnik GmbH", "vergabe@sommerfeld-kaeltetechnik.de", 812_400 / _PKG_SHARE),
+                ("NeckarFrost Kaelte- und Klimatechnik GmbH", "angebote@neckarfrost-kaelte.de", 858_900 / _PKG_SHARE),
+                ("Kuehlanlagenbau Westheimer GmbH", "ausschreibung@kaeltebau-westheimer.de", 901_200 / _PKG_SHARE),
+            ],
+        ),
+        (
+            "VP-09 Aussenanlagen, Stellplaetze, Entwaesserung (External works, parking, drainage, KG 510+520+540+550)",
+            "Ausgeschrieben, Submission 2026-06-18; 3 indikative Angebote, Spread 14,0 %. Budget 1.020.000 EUR netto (VE-18).",
+            "collecting",
+            [
+                # indicative bids 981,400 / 1,041,200 / 1,118,900 EUR, spread 14.0 %
+                ("Galabau Ergenzinger GmbH", "angebot@galabau-ergenzinger.de", 981_400 / _PKG_SHARE),
+                ("Tiefbau Krummacher GmbH", "vergabe@tiefbau-krummacher.de", 1_041_200 / _PKG_SHARE),
+                ("Gruenbau Remstal GmbH", "ausschreibung@gruenbau-remstal.de", 1_118_900 / _PKG_SHARE),
+            ],
+        ),
+        (
+            "VP-10 Ladeneinrichtung, Regaltechnik, Kassenzone, Backstation (Store fit-out, KG 610)",
+            "Bauherren-Direktvergabe, in Verhandlung, Zuschlag geplant 2026-06-30; 2 Angebote, Spread 5,8 %. Budget 560.000 EUR netto (VE-20).",
+            "evaluating",
+            [
+                # bids 528,700 / 559,400 EUR, spread 5.8 %
+                ("Ladenbau Krettner GmbH", "e.krettner@ladenbau-krettner.de", 528_700 / _PKG_SHARE),
+                ("Objekteinrichtung Sallinger & Co. KG", "vergabe@sallinger-objekt.de", 559_400 / _PKG_SHARE),
+            ],
+        ),
+        (
+            "VP-11 PV 290 kWp, Batteriespeicher 135 kWh, Ladeinfrastruktur (PV, battery, EV charging, KG 440)",
+            "Bauherren-Direktvergabe, in Wertung, Zuschlag nach Einspeisezusage (Risiko R06); 3 Angebote, Spread 13,0 %. Budget 520.000 EUR netto (VE-17).",
+            "evaluating",
+            [
+                # bids 497,800 / 534,600 / 562,300 EUR, spread 13.0 %
+                ("Sonnfeld Solartechnik GmbH", "angebot@sonnfeld-solar.de", 497_800 / _PKG_SHARE),
+                ("EnergieWerk Hohenlohe GmbH", "vergabe@energiewerk-hohenlohe.de", 534_600 / _PKG_SHARE),
+                ("Elektro Haeberlen GmbH", "u.haeberlen@elektro-haeberlen.de", 562_300 / _PKG_SHARE),
+            ],
+        ),
+    ],
+    # 35 schedule activities (T01..T35 of the design dossier), anchored on the
+    # real calendar so the project reads mid-construction at week 19 of 45
+    # (Mon 2026-02-02 start, opening Thu 2026-12-10). install_demo_project
+    # derives a progress ramp from the activity order; the SPI/CPI overrides
+    # above carry the "slightly behind on roof/facade, under cost" story.
+    schedule_activities=[
+        ("T01 Werk- und Montageplanung Fertigteile (precast shop and erection drawings)", "2026-02-02", "2026-03-06"),
+        (
+            "T02 Baustelleneinrichtung inkl. Baustrom und Bauwasser (site setup incl. power and water)",
+            "2026-02-02",
+            "2026-02-13",
+        ),
+        (
+            "T03 Erschliessung Kanal, Wasser, Strom bis Grundstuecksgrenze (utility connections to plot)",
+            "2026-02-16",
+            "2026-03-06",
+        ),
+        ("T04 Baufeldfreimachung und Oberbodenabtrag (site clearance and topsoil strip)", "2026-02-16", "2026-02-20"),
+        ("T05 Erdaushub und Bodenaustausch (excavation and soil replacement)", "2026-02-23", "2026-03-13"),
+        (
+            "T06 Planumserstellung und Verdichtungsnachweis (subgrade formation and compaction)",
+            "2026-03-16",
+            "2026-03-20",
+        ),
+        ("T07 Koecher- und Streifenfundamente (pocket and strip foundations)", "2026-03-23", "2026-04-03"),
+        ("T08 Grundleitungen unter Bodenplatte (below-slab drainage)", "2026-03-30", "2026-04-10"),
+        (
+            "T09 Bodenplatte: Daemmung, Bewehrung, Betonage (ground slab: insulation, rebar, pour)",
+            "2026-04-06",
+            "2026-04-24",
+        ),
+        ("T10 Fertigteilproduktion im Werk (precast production at plant)", "2026-03-09", "2026-04-24"),
+        ("T11 Montage Stuetzen und BSH-Binder (erection of columns and glulam beams)", "2026-04-27", "2026-05-08"),
+        ("T12 Montage Wand- und Sandwichelemente (erection of wall and sandwich panels)", "2026-05-04", "2026-05-15"),
+        ("T13 Dachtragschale Trapezblech (roof deck trapezoidal sheeting)", "2026-05-11", "2026-05-22"),
+        (
+            "T14 Dachabdichtung, Daemmung, RWA und Lichtkuppeln (roof waterproofing, smoke vents, rooflights)",
+            "2026-05-25",
+            "2026-06-19",
+        ),
+        ("T15 Fassadenarbeiten: Sandwichpaneele, Laerchen-Lattung, Sockel (facade works)", "2026-05-25", "2026-06-26"),
+        (
+            "T16 Fenster, Pfosten-Riegel-Glasfront, Tueren, Sektionaltore (windows, curtain wall, doors, gates)",
+            "2026-06-15",
+            "2026-07-03",
+        ),
+        ("T17 Heizung/Sanitaer Rohinstallation (heating/plumbing rough-in)", "2026-06-01", "2026-07-10"),
+        ("T18 Lueftungskanaele Montage (ventilation ductwork installation)", "2026-06-08", "2026-07-10"),
+        (
+            "T19 Elektro-Rohinstallation und Kabeltrassen (electrical rough-in and cable trays)",
+            "2026-06-01",
+            "2026-07-17",
+        ),
+        ("T20 CO2-Kaelteleitungen Rohmontage (CO2 refrigerant piping rough-in)", "2026-06-29", "2026-07-24"),
+        (
+            "T21 Netzanschluss, Trafostation, NSHV (grid connection, transformer, main LV board)",
+            "2026-06-15",
+            "2026-07-24",
+        ),
+        ("T22 Trockenbau Sozial- und Nebenraeume (drywall for staff and ancillary rooms)", "2026-07-06", "2026-08-07"),
+        ("T23 Industrieboden Verkaufsraum (industrial flooring sales area)", "2026-07-13", "2026-07-24"),
+        ("T24 Fliesen, Maler, Innentueren (tiling, painting, internal doors)", "2026-08-03", "2026-08-28"),
+        ("T25 Akustikdecken und Beleuchtungsmontage (acoustic ceilings and lighting)", "2026-08-10", "2026-08-28"),
+        (
+            "T26 TGA-Endmontage: Waermepumpe, RLT, Verteilungen, GLT (MEP completion incl. BMS)",
+            "2026-08-10",
+            "2026-09-11",
+        ),
+        (
+            "T27 Aussenanlagen: Unterbau, Entwaesserung, Belaege, Pylon, Begruenung (external works)",
+            "2026-08-10",
+            "2026-10-16",
+        ),
+        (
+            "T28 PV-Anlage, Batteriespeicher und Ladeinfrastruktur (PV, battery and EV charging)",
+            "2026-08-24",
+            "2026-09-18",
+        ),
+        ("T29 Kuehlmoebel stellen und anbinden (set and connect refrigerated cabinets)", "2026-08-31", "2026-09-18"),
+        (
+            "T30 Kaelteanlage: Druckprobe, Inbetriebnahme, Kuehlstellen kalt (refrigeration commissioning)",
+            "2026-09-21",
+            "2026-10-02",
+        ),
+        (
+            "T31 Ladeneinrichtung: Regale, Kassenzone, Backstation, Pfandraum (store fit-out)",
+            "2026-09-28",
+            "2026-10-23",
+        ),
+        (
+            "T32 Sachverstaendigen- und behoerdliche Abnahmen (expert and authority acceptance tests)",
+            "2026-10-19",
+            "2026-10-30",
+        ),
+        (
+            "T33 VOB-Abnahme GU und Maengelbeseitigung (VOB acceptance of GC works and snagging)",
+            "2026-11-02",
+            "2026-11-13",
+        ),
+        (
+            "T34 Revisionsunterlagen, Einweisungen, Wartungsvertraege (as-builts, briefings, maintenance)",
+            "2026-11-02",
+            "2026-11-20",
+        ),
+        (
+            "T35 Warenerstbestueckung, Personaleinarbeitung, Pre-Opening (initial stocking, training)",
+            "2026-11-23",
+            "2026-12-10",
+        ),
     ],
     project_metadata={
         "name_en": "Retail Market Heilbronn",
