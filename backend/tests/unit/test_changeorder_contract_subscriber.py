@@ -31,11 +31,13 @@ class _FakeContract:
         total_value: Decimal = Decimal("100000"),
         status: str = "active",
         metadata: dict | None = None,
+        project_id: uuid.UUID | None = None,
     ) -> None:
         self.code = "CT-001"
         self.total_value = total_value
         self.status = status
         self.metadata_ = metadata or {}
+        self.project_id = project_id or _PROJECT_ID
 
 
 class _FakeSession:
@@ -76,10 +78,20 @@ def harness(monkeypatch: pytest.MonkeyPatch):
     return state
 
 
-def _event(contract_id: str | None, co_id: str, cost_impact: str = "2500.00") -> Event:
+#: Shared project id - the fake contract and the event agree by default,
+#: mirroring a CO and its contract living in the same project.
+_PROJECT_ID = uuid.uuid4()
+
+
+def _event(
+    contract_id: str | None,
+    co_id: str,
+    cost_impact: str = "2500.00",
+    project_id: uuid.UUID | None = None,
+) -> Event:
     data = {
         "change_order_id": co_id,
-        "project_id": str(uuid.uuid4()),
+        "project_id": str(project_id or _PROJECT_ID),
         "code": "CO-001",
         "cost_impact": cost_impact,
         "currency": "EUR",
@@ -157,6 +169,38 @@ async def test_negative_delta_reduces_contract_value(harness: dict) -> None:
 
     assert contract.total_value == Decimal("98499.50")
     assert Decimal(contract.metadata_["change_order_total"]) == Decimal("-1500.50")
+
+
+@pytest.mark.asyncio
+async def test_rejects_contract_from_another_project(harness: dict) -> None:
+    """A CO may not move money on a contract outside its own project.
+
+    The contract link arrives via client-supplied CO metadata, so a CO in
+    project A naming a contract in project B must be ignored.
+    """
+    contract = _FakeContract(total_value=Decimal("100000"))
+    harness["contract"] = contract
+
+    await w5._on_changeorder_approved_contract(
+        _event(str(uuid.uuid4()), str(uuid.uuid4()), project_id=uuid.uuid4()),
+    )
+
+    assert contract.total_value == Decimal("100000")
+    assert contract.metadata_ == {}
+    assert all(not s.committed for s in harness["sessions"])
+
+
+@pytest.mark.asyncio
+async def test_rejects_event_without_project_id(harness: dict) -> None:
+    contract = _FakeContract(total_value=Decimal("100000"))
+    harness["contract"] = contract
+    event = _event(str(uuid.uuid4()), str(uuid.uuid4()))
+    event.data.pop("project_id")
+
+    await w5._on_changeorder_approved_contract(event)
+
+    assert contract.total_value == Decimal("100000")
+    assert all(not s.committed for s in harness["sessions"])
 
 
 def test_subscriber_registered() -> None:

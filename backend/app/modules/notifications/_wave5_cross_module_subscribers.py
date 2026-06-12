@@ -667,6 +667,19 @@ async def _on_changeorder_approved_contract(event: Event) -> None:
             contract = await repo.get_by_id(contract_id)
             if contract is None:
                 return
+            # Project guard: the contract link arrives via client-supplied
+            # CO metadata, so a CO in project A could name a contract that
+            # belongs to project B. Only apply when both sides agree.
+            event_project = data.get("project_id")
+            if not event_project or str(contract.project_id) != str(event_project):
+                logger.warning(
+                    "CO %s approved in project %s but linked contract %s belongs to project %s - not applied",
+                    co_id_raw,
+                    event_project,
+                    contract_id,
+                    contract.project_id,
+                )
+                return
             md = dict(contract.metadata_ or {})
             applied = list(md.get("change_order_ids") or [])
             if str(co_id_raw) in {str(v) for v in applied}:

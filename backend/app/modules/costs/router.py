@@ -2982,7 +2982,7 @@ async def preview_cost_file(
     content = await file.read()
     is_csv = _validate_cost_upload(content, filename)
     try:
-        headers, sample = (_csv_headers_and_sample(content) if is_csv else _excel_headers_and_sample(content))
+        headers, sample = _csv_headers_and_sample(content) if is_csv else _excel_headers_and_sample(content)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to read file: {exc}") from exc
     except Exception as exc:  # noqa: BLE001
@@ -3261,8 +3261,21 @@ CWICR_SEARCH_PATHS = [
     str(Path.home() / "Desktop" / "CodeProjects" / "DDC_Toolkit" / "pricing" / "data" / "excel"),
 ]
 
-# Local cache directory for downloaded parquet files
+# Local cache directory for downloaded parquet files. The cache is
+# persistent: a successfully downloaded regional parquet is kept and reused
+# on the next load, so a region survives GitHub being unreachable later
+# (fresh offline installs were left with no rates at all when the runtime
+# download failed).
 _CWICR_CACHE_DIR = Path.home() / ".openestimator" / "cache"
+
+# Optional bundled CWICR parquet files inside the installed package. The
+# regional workitems parquet files are 25-60 MB each (30 regions, ~1 GB
+# total), far beyond any sane wheel budget, so this directory ships empty.
+# It exists as a lookup hook: partner packs, installers or operators can
+# drop ``{db_id}*.parquet`` files here (or in a source checkout) to make
+# regional rates fully offline. The resource *catalog* CSVs, which are
+# small, ARE bundled - see app/data/catalog/regions and the catalog module.
+_BUNDLED_CWICR_DIR = Path(__file__).resolve().parents[2] / "data" / "cwicr"
 
 
 def _download_to_file(url: str, dest: Path, timeout: float = 120.0) -> None:
@@ -3320,11 +3333,11 @@ def _download_cwicr_from_github_sync(db_id: str) -> Path | None:
     cache_dir.mkdir(parents=True, exist_ok=True)
     local_path = cache_dir / f"{db_id}.parquet"
 
-    # No-cache mode: always re-download. Any leftover from a previous run
-    # (whole or partial) is wiped before the fetch so we never serve stale
-    # bytes or get stuck behind a 0-byte file. The caller in
-    # ``load_cwicr_database`` removes the file again after processing,
-    # keeping the cache directory empty.
+    # ``_find_cwicr_file`` already consulted the cache before calling this
+    # helper, so anything still on disk here is a stale or partial leftover
+    # (e.g. a stuck 0-byte file from an interrupted fetch). Wipe it before
+    # the download so we never serve stale bytes. On success the fresh file
+    # STAYS in the cache and is reused by later loads (offline resilience).
     if local_path.exists():
         local_path.unlink(missing_ok=True)
 
@@ -3366,12 +3379,13 @@ async def _download_cwicr_from_github(db_id: str) -> Path | None:
 async def _find_cwicr_file(db_id: str) -> Path | None:
     """Find a CWICR database file by database ID (e.g., DE_BERLIN).
 
-    Priority: Local DDC_Toolkit Parquet > Local Excel SIMPLE > Local Excel any > GitHub download.
-
-    No-cache mode: ``~/.openestimator/cache/`` is no longer consulted on
-    lookup. The download helper writes there as a transient staging area,
-    and ``load_cwicr_database`` deletes the file in its ``finally`` block
-    so nothing accumulates between runs.
+    Lookup order, offline-first so a region only needs the network once:
+      1. Local DDC_Toolkit checkout (Parquet > Excel SIMPLE > Excel any).
+      2. Persistent local cache (``~/.openestimator/cache/{db_id}.parquet``,
+         written by a previous successful GitHub download).
+      3. Parquet bundled/dropped into the installed package at
+         ``app/data/cwicr`` (empty by default - see ``_BUNDLED_CWICR_DIR``).
+      4. GitHub download as the last resort.
     """
     # Priority 1: Parquet files in local DDC_Toolkit (fastest and most reliable)
     for search_path in CWICR_SEARCH_PATHS:
@@ -3399,7 +3413,29 @@ async def _find_cwicr_file(db_id: str) -> Path | None:
             if f.name.startswith(db_id) and f.suffix == ".xlsx":
                 return f
 
-    # Priority 4: Download from GitHub (fallback - runs in thread to not block event loop)
+    # Priority 4: Persistent local cache from a previous download. The 1 KB
+    # floor skips a stuck 0-byte/partial file (the download helper re-fetches
+    # and replaces it in that case).
+    cached = _CWICR_CACHE_DIR / f"{db_id}.parquet"
+    try:
+        if cached.is_file() and cached.stat().st_size > 1000:
+            logger.info("Using cached CWICR parquet for %s: %s", db_id, cached)
+            return cached
+    except OSError:
+        logger.warning("Unreadable cached CWICR parquet at %s, ignoring", cached)
+
+    # Priority 5: Parquet shipped inside (or dropped into) the package data dir.
+    try:
+        if _BUNDLED_CWICR_DIR.is_dir():
+            for f in sorted(_BUNDLED_CWICR_DIR.iterdir()):
+                if f.name.startswith(db_id) and f.suffix == ".parquet":
+                    logger.info("Using bundled CWICR parquet for %s: %s", db_id, f)
+                    return f
+    except OSError:
+        logger.warning("Unreadable bundled CWICR dir at %s, ignoring", _BUNDLED_CWICR_DIR)
+
+    # Priority 6: Download from GitHub (last resort - runs in thread to not
+    # block the event loop; the result is cached for the next run)
     downloaded = await _download_cwicr_from_github(db_id)
     if downloaded:
         return downloaded
@@ -3518,8 +3554,12 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
             detail = f"{detail} {last_error}"
         else:
             detail = (
-                f"{detail} Install DDC_Toolkit at ~/Desktop/CodeProjects/DDC_Toolkit "
-                f"or check your internet connection for GitHub download."
+                f"{detail} No local copy was found (DDC_Toolkit checkout, "
+                f"{_CWICR_CACHE_DIR / (db_id + '.parquet')}, or bundled package data) "
+                f"and the GitHub download did not succeed. Check that this server can "
+                f"reach https://github.com/datadrivenconstruction/"
+                f"OpenConstructionEstimate-DDC-CWICR, or place the regional parquet "
+                f"in the cache directory and retry."
             )
         raise HTTPException(status_code=404, detail=detail)
 
@@ -3562,16 +3602,10 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
             status_code=500,
             detail=f"Failed to import CWICR database '{db_id}'. Check server logs.",
         )
-    finally:
-        # No-cache mode: if this file was downloaded into the transient
-        # cache dir for this request, delete it. A locally-installed
-        # DDC_Toolkit parquet (Priority 1) lives outside the cache dir
-        # and is left untouched.
-        try:
-            if cwicr_path.is_relative_to(_CWICR_CACHE_DIR):
-                cwicr_path.unlink(missing_ok=True)
-        except (OSError, ValueError):
-            logger.debug("Could not delete transient CWICR file %s", cwicr_path)
+    # Note: a parquet downloaded into ~/.openestimator/cache is deliberately
+    # KEPT (persistent cache). Reloading the region - or reinstalling into a
+    # fresh database - then works without the network. The download helper
+    # replaces stale/partial leftovers before each fresh fetch.
 
     duration = round(time.monotonic() - start, 1)
     result_data["duration_seconds"] = duration
@@ -4448,6 +4482,19 @@ async def clear_cost_database(
 # ── Export cost database as Excel ────────────────────────────────────────────
 
 
+def _excel_safe(value: object) -> object:
+    """Neutralize spreadsheet formula injection in exported text cells.
+
+    Imported catalogues are user-supplied, so a cell starting with ``=``,
+    ``+``, ``-``, ``@``, tab or CR would execute as a formula (or DDE
+    payload) when another user opens the export in Excel/LibreOffice.
+    Prefixing with an apostrophe makes Excel render it as literal text.
+    """
+    if isinstance(value, str) and value[:1] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + value
+    return value
+
+
 @router.get(
     "/actions/export-excel/",
     dependencies=[Depends(RequirePermission("costs.list"))],
@@ -4490,13 +4537,13 @@ async def export_cost_database(
                 rate_val = 0
             ws.append(
                 [
-                    item.code,
-                    item.description,
-                    item.unit,
+                    _excel_safe(item.code),
+                    _excel_safe(item.description),
+                    _excel_safe(item.unit),
                     rate_val,
-                    item.currency,
-                    item.source,
-                    getattr(item, "region", ""),
+                    _excel_safe(item.currency),
+                    _excel_safe(item.source),
+                    _excel_safe(getattr(item, "region", "")),
                 ]
             )
 
