@@ -28,6 +28,7 @@ import {
   ShieldCheck,
   Boxes,
   AlertCircle,
+  Eye,
   Loader2,
   UploadCloud,
   CheckCircle2,
@@ -39,6 +40,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi } from '@/features/projects/api';
 import {
   ACCEPTED_SCAN_FORMATS,
+  VIEWABLE_SCAN_STATUSES,
   formatFromFileName,
   listScans,
   uploadScan,
@@ -47,6 +49,7 @@ import {
   type UploadProgress,
 } from './api';
 import { PointCloudBackground } from './PointCloudBackground';
+import { PointCloudViewer } from './PointCloudViewer';
 
 /* The accepted upload containers, mirrored from the backend allow-list
    (backend/app/modules/pointcloud/models.py ACCEPTED_SCAN_FORMATS). Proprietary
@@ -150,6 +153,16 @@ export function PointCloudPage() {
     enabled: Boolean(projectId),
   });
   const scans = data?.items ?? [];
+
+  // ── Viewer selection ──────────────────────────────────────────────────
+  // The explicitly picked scan wins; otherwise auto-open the first scan the
+  // points endpoint can serve so the page lands straight in the viewer.
+  const [selectedScanId, setSelectedScanId] = useState<string | null>(null);
+  const activeScan = useMemo(() => {
+    const picked = selectedScanId ? scans.find((s) => s.id === selectedScanId) : undefined;
+    if (picked && VIEWABLE_SCAN_STATUSES.includes(picked.status)) return picked;
+    return scans.find((s) => VIEWABLE_SCAN_STATUSES.includes(s.status)) ?? null;
+  }, [scans, selectedScanId]);
 
   // ── Upload state ──────────────────────────────────────────────────────
   const [file, setFile] = useState<File | null>(null);
@@ -310,7 +323,7 @@ export function PointCloudPage() {
       >
         {t(
           'pointcloud.intro_body',
-          'Import survey-grade laser scans, photogrammetry and LiDAR clouds, view them, and use them to verify built quantities against the model, feed cut and fill into the estimate, and document site conditions. Phase 0 ships the scan registry and the direct-to-storage ingest; the cloud viewer, model registration and deviation analysis arrive in the next releases.',
+          'Import survey-grade laser scans, photogrammetry and LiDAR clouds, view them, and use them to verify built quantities against the model, feed cut and fill into the estimate, and document site conditions. Upload a scan and open it in the cloud viewer below; model registration and deviation analysis arrive in the next releases.',
         )}
       </DismissibleInfo>
 
@@ -609,32 +622,86 @@ export function PointCloudPage() {
             <span className="ml-2 text-xs text-content-tertiary">{scans.length}</span>
           </div>
           <ul className="divide-y divide-border-light">
-            {scans.map((scan) => (
-              <li key={scan.id} className="flex items-center gap-3 px-4 py-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
-                  <Boxes size={16} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-medium text-content-primary">
-                      {SOURCE_LABEL[scan.source_type] ?? scan.source_type}
-                    </span>
-                    <span className="rounded border border-border-light px-1.5 py-px text-2xs font-medium uppercase text-content-tertiary">
-                      {scan.original_format}
-                    </span>
+            {scans.map((scan) => {
+              const viewable = VIEWABLE_SCAN_STATUSES.includes(scan.status);
+              const isActive = activeScan?.id === scan.id;
+              return (
+                <li
+                  key={scan.id}
+                  className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                    isActive ? 'bg-oe-blue/5' : ''
+                  }`}
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
+                    <Boxes size={16} />
                   </div>
-                  <p className="mt-0.5 truncate text-xs text-content-tertiary">
-                    {ACCURACY_LABEL[scan.accuracy_tier] ?? scan.accuracy_tier}
-                    {' · '}
-                    {formatPointCount(scan.point_count)}
-                  </p>
-                </div>
-                <Badge variant={STATUS_VARIANT[scan.status] ?? 'neutral'} size="sm">
-                  {scan.status}
-                </Badge>
-              </li>
-            ))}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-medium text-content-primary">
+                        {SOURCE_LABEL[scan.source_type] ?? scan.source_type}
+                      </span>
+                      <span className="rounded border border-border-light px-1.5 py-px text-2xs font-medium uppercase text-content-tertiary">
+                        {scan.original_format}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 truncate text-xs text-content-tertiary">
+                      {ACCURACY_LABEL[scan.accuracy_tier] ?? scan.accuracy_tier}
+                      {' · '}
+                      {formatPointCount(scan.point_count)}
+                    </p>
+                  </div>
+                  <Badge variant={STATUS_VARIANT[scan.status] ?? 'neutral'} size="sm">
+                    {scan.status}
+                  </Badge>
+                  {viewable && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedScanId(scan.id)}
+                      data-testid={`pointcloud-view-${scan.id}`}
+                      className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                        isActive
+                          ? 'border-oe-blue/40 bg-oe-blue/10 text-oe-blue'
+                          : 'border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary hover:text-content-primary'
+                      }`}
+                    >
+                      <Eye size={13} />
+                      {isActive
+                        ? t('pointcloud.viewing', { defaultValue: 'Viewing' })
+                        : t('pointcloud.view_scan', { defaultValue: 'View' })}
+                    </button>
+                  )}
+                </li>
+              );
+            })}
           </ul>
+        </Card>
+      )}
+
+      {/* ── Viewer ─────────────────────────────────────────────────────── */}
+      {activeScan && (
+        <Card>
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-sm font-semibold text-content-primary">
+                  {t('pointcloud.viewer_title', { defaultValue: 'Cloud viewer' })}
+                </h2>
+                <p className="mt-0.5 text-xs text-content-tertiary">
+                  {(SOURCE_LABEL[activeScan.source_type] ?? activeScan.source_type) +
+                    ' · ' +
+                    activeScan.original_format.toUpperCase()}
+                </p>
+              </div>
+              <Badge variant={STATUS_VARIANT[activeScan.status] ?? 'neutral'} size="sm">
+                {activeScan.status}
+              </Badge>
+            </div>
+            <PointCloudViewer
+              key={activeScan.id}
+              scanId={activeScan.id}
+              scanLabel={SOURCE_LABEL[activeScan.source_type] ?? activeScan.source_type}
+            />
+          </div>
         </Card>
       )}
 
