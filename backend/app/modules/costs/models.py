@@ -2,6 +2,7 @@
 
 Tables:
     oe_costs_item - cost database entries (CWICR, RSMeans, BKI, custom)
+    oe_costs_catalog - user-owned named cost catalogs (manual or imported)
     oe_regional_indices - region × category cost-factor matrix (v3.12.0)
     oe_cost_item_usage - append-only usage ledger backing the certainty
         badge (v3.12.0)
@@ -75,6 +76,11 @@ class CostItem(Base):
         JSON, nullable=False, default=list, server_default="[]"
     )
     region: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    # Owning user catalog (oe_costs_catalog.id). Kept as a bare indexed UUID
+    # column (no FK constraint) following the cross-table convention used by
+    # ``CostItemUsage.project_id``; detach/delete semantics live in the
+    # service layer so a catalog delete can choose keep-vs-soft-delete.
+    catalog_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -86,6 +92,30 @@ class CostItem(Base):
 
     def __repr__(self) -> str:
         return f"<CostItem {self.code} ({self.unit} @ {self.rate} {self.currency})>"
+
+
+class CostCatalog(Base):
+    """‌⁠‍A user-owned, named cost catalog ("my catalog of works and rates").
+
+    Groups :class:`CostItem` rows under one named entity with a REQUIRED
+    catalog currency. Items reference the catalog through the bare
+    ``CostItem.catalog_id`` column; rows without a currency of their own
+    inherit ``currency`` at ingestion time. ``source`` records how the
+    catalog came to exist ("manual" via the API, "import" via file upload).
+    """
+
+    __tablename__ = "oe_costs_catalog"
+    __table_args__ = (Index("ix_oe_costs_catalog_created_by", "created_by"),)
+
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    currency: Mapped[str] = mapped_column(String(3), nullable=False)
+    # "manual" | "import"
+    source: Mapped[str] = mapped_column(String(20), nullable=False, default="manual", server_default="manual")
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<CostCatalog {self.name} ({self.currency})>"
 
 
 class RegionalIndex(Base):

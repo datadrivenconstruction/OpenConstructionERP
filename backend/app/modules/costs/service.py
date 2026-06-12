@@ -20,7 +20,8 @@ from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
-from sqlalchemy import or_, select
+from sqlalchemy import and_, func, or_, select
+from sqlalchemy import update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -35,9 +36,11 @@ async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
         _logger_ev.debug("Event publish skipped: %s", name)
 
 
-from app.modules.costs.models import CostItem
+from app.modules.costs.models import CostCatalog, CostItem
 from app.modules.costs.repository import CostItemRepository
 from app.modules.costs.schemas import (
+    CostCatalogCreate,
+    CostCatalogUpdate,
     CostItemCreate,
     CostItemUpdate,
     CostSearchQuery,
@@ -105,7 +108,9 @@ class CostItemService:
     async def create_cost_item(self, data: CostItemCreate) -> CostItem:
         """Create a new cost item.
 
-        Raises HTTPException 409 if code already exists.
+        Raises HTTPException 409 if code already exists, 422 when an
+        unknown ``catalog_id`` is referenced. An item created into a
+        catalog without its own currency inherits the catalog currency.
         """
         existing = await self.repo.get_by_code(data.code, region=data.region)
         if existing is not None:
@@ -115,18 +120,30 @@ class CostItemService:
                 detail=f"Cost item with code '{data.code}' already exists for region '{region_label}'",
             )
 
+        currency = data.currency
+        if data.catalog_id is not None:
+            catalog = await self.session.get(CostCatalog, data.catalog_id)
+            if catalog is None:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Cost catalog '{data.catalog_id}' does not exist",
+                )
+            if not currency.strip():
+                currency = catalog.currency
+
         item = CostItem(
             code=data.code,
             description=data.description,
             descriptions=data.descriptions,
             unit=data.unit,
             rate=str(data.rate),
-            currency=data.currency,
+            currency=currency,
             source=data.source,
             classification=data.classification,
             components=data.components,
             tags=data.tags,
             region=data.region,
+            catalog_id=data.catalog_id,
             metadata_=data.metadata,
         )
         item = await self.repo.create(item)
@@ -393,6 +410,7 @@ class CostItemService:
                 components=data.components,
                 tags=data.tags,
                 region=data.region,
+                catalog_id=data.catalog_id,
                 metadata_=data.metadata,
             )
             created.append(item)
@@ -678,6 +696,142 @@ class CostItemService:
             reasons.append(f"+{extra_hits - 1} keyword hits")
 
         return score, reasons
+
+
+# ── User cost catalogs ──────────────────────────────────────────────────────
+
+
+class CostCatalogService:
+    """Business logic for user-owned cost catalogs.
+
+    A catalog is a named, currency-bearing container for :class:`CostItem`
+    rows. Items reference it through the bare ``CostItem.catalog_id``
+    column, so all delete semantics (detach vs soft-delete) are handled
+    here rather than by an FK ON DELETE clause.
+    """
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def create_catalog(
+        self,
+        data: CostCatalogCreate,
+        *,
+        created_by: uuid.UUID | None = None,
+        source: str = "manual",
+    ) -> CostCatalog:
+        """Create a catalog. Currency is validated/uppercased by the schema."""
+        catalog = CostCatalog(
+            name=data.name.strip(),
+            description=data.description,
+            currency=data.currency,
+            source=source,
+            created_by=created_by,
+        )
+        self.session.add(catalog)
+        await self.session.commit()
+        await self.session.refresh(catalog)
+        logger.info("Cost catalog created: %s (%s)", catalog.name, catalog.currency)
+        return catalog
+
+    async def get_catalog(self, catalog_id: uuid.UUID) -> CostCatalog:
+        """Get a catalog by id. Raises 404 if not found."""
+        catalog = await self.session.get(CostCatalog, catalog_id)
+        if catalog is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cost catalog not found",
+            )
+        return catalog
+
+    async def count_items(self, catalog_id: uuid.UUID) -> int:
+        """Count ACTIVE items currently attached to the catalog."""
+        result = await self.session.execute(
+            select(func.count(CostItem.id)).where(
+                CostItem.catalog_id == catalog_id,
+                CostItem.is_active.is_(True),
+            )
+        )
+        return int(result.scalar_one())
+
+    async def list_catalogs(self) -> list[tuple[CostCatalog, int]]:
+        """List all catalogs with their active item count (single query)."""
+        stmt = (
+            select(CostCatalog, func.count(CostItem.id))
+            .outerjoin(
+                CostItem,
+                and_(CostItem.catalog_id == CostCatalog.id, CostItem.is_active.is_(True)),
+            )
+            .group_by(CostCatalog.id)
+            .order_by(CostCatalog.created_at.desc())
+        )
+        result = await self.session.execute(stmt)
+        return [(catalog, int(count)) for catalog, count in result.all()]
+
+    async def update_catalog(self, catalog_id: uuid.UUID, data: CostCatalogUpdate) -> CostCatalog:
+        """Update a catalog. Raises 404 if missing, 409 on unsafe currency change.
+
+        A currency change is REJECTED while the catalog holds items: the
+        stored rates are denominated in the old currency, and silently
+        re-labelling them would corrupt every figure. The caller must
+        create a new catalog (or empty this one) instead.
+        """
+        catalog = await self.get_catalog(catalog_id)
+        fields = data.model_dump(exclude_unset=True)
+
+        new_currency = fields.get("currency")
+        if new_currency is not None and new_currency != catalog.currency:
+            item_count = await self.count_items(catalog_id)
+            if item_count > 0:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"Cannot change catalog currency from {catalog.currency} to "
+                        f"{new_currency}: the catalog has {item_count} items whose rates "
+                        f"are denominated in {catalog.currency}. Re-labelling them would "
+                        f"corrupt the figures. Create a new catalog for the other "
+                        f"currency, or remove the items first."
+                    ),
+                )
+
+        for key, value in fields.items():
+            if key == "name" and isinstance(value, str):
+                value = value.strip()
+            setattr(catalog, key, value)
+        await self.session.commit()
+        await self.session.refresh(catalog)
+        logger.info("Cost catalog updated: %s", catalog.name)
+        return catalog
+
+    async def delete_catalog(self, catalog_id: uuid.UUID, *, mode: str = "keep_items") -> int:
+        """Delete a catalog. Returns the number of affected items.
+
+        ``mode``:
+            * ``keep_items``   - detach items (``catalog_id`` set to NULL);
+              the rows stay in the global cost table.
+            * ``delete_items`` - soft-delete the items (``is_active=False``),
+              consistent with single-item deletion.
+        """
+        catalog = await self.get_catalog(catalog_id)
+        catalog_name = catalog.name
+
+        if mode == "delete_items":
+            stmt = sa_update(CostItem).where(CostItem.catalog_id == catalog_id).values(is_active=False)
+        else:
+            stmt = sa_update(CostItem).where(CostItem.catalog_id == catalog_id).values(catalog_id=None)
+        result = await self.session.execute(stmt)
+        affected = int(result.rowcount or 0)
+
+        await self.session.delete(catalog)
+        await self.session.commit()
+
+        await _safe_publish(
+            "costs.catalog.deleted",
+            {"catalog_id": str(catalog_id), "name": catalog_name, "mode": mode, "items": affected},
+            source_module="oe_costs",
+        )
+        logger.info("Cost catalog deleted: %s (mode=%s, items=%d)", catalog_name, mode, affected)
+        return affected
 
 
 # ── Cost benchmarks: own-portfolio distribution (Phase 2) ──────────────────

@@ -9,7 +9,7 @@ from decimal import Decimal
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, model_validator
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, field_validator, model_validator
 
 # Round-7 audit (2026-05-24): money / rate / factor fields are exchanged as
 # strings on the wire so JSON's float bridge never silently rounds a
@@ -104,6 +104,13 @@ class CostItemCreate(BaseModel):
     )
     tags: list[str] = Field(default_factory=list, description="Searchable tags")
     region: str | None = Field(default=None, max_length=50, description="Regional identifier (e.g. DACH, UK, US)")
+    catalog_id: UUID | None = Field(
+        default=None,
+        description=(
+            "Owning user catalog. When set and ``currency`` is empty, the item "
+            "inherits the catalog currency at creation time."
+        ),
+    )
     metadata: dict[str, Any] = Field(default_factory=dict, description="Arbitrary metadata")
 
 
@@ -150,6 +157,7 @@ class CostItemResponse(BaseModel):
     components: list[dict[str, Any]]
     tags: list[str]
     region: str | None
+    catalog_id: UUID | None = None
     is_active: bool
     metadata: dict[str, Any] = Field(alias="metadata_")
     created_at: datetime
@@ -190,6 +198,73 @@ class CostItemResponse(BaseModel):
                         normalized,
                     )
         return self
+
+
+# ── User cost catalogs ────────────────────────────────────────────────────
+
+# 3-letter ISO 4217 currency code, normalised to UPPERCASE on input.
+_CURRENCY_CODE_RE = re.compile(r"^[A-Z]{3}$")
+
+
+def _normalize_currency_code(value: str) -> str:
+    """Uppercase and validate a 3-letter ISO 4217 currency code."""
+    cleaned = (value or "").strip().upper()
+    if not _CURRENCY_CODE_RE.match(cleaned):
+        raise ValueError("currency must be a 3-letter ISO 4217 code (e.g. EUR, USD)")
+    return cleaned
+
+
+class CostCatalogCreate(BaseModel):
+    """Create a user-owned cost catalog. Currency is REQUIRED."""
+
+    name: str = Field(..., min_length=1, max_length=255, description="Catalog display name")
+    description: str | None = Field(default=None, description="Optional free-text description")
+    currency: str = Field(
+        ...,
+        min_length=3,
+        max_length=3,
+        description="ISO 4217 currency code every item in this catalog defaults to",
+    )
+
+    @field_validator("currency")
+    @classmethod
+    def _validate_currency(cls, v: str) -> str:
+        return _normalize_currency_code(v)
+
+
+class CostCatalogUpdate(BaseModel):
+    """Update a cost catalog (all fields optional).
+
+    A currency change is rejected by the service when the catalog already
+    has items - silently re-labelling existing rates would corrupt them.
+    """
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = Field(default=None)
+    currency: str | None = Field(default=None, min_length=3, max_length=3)
+
+    @field_validator("currency")
+    @classmethod
+    def _validate_currency(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        return _normalize_currency_code(v)
+
+
+class CostCatalogResponse(BaseModel):
+    """Cost catalog in API responses, including its live item count."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    name: str
+    description: str | None
+    currency: str
+    source: str
+    created_by: UUID | None
+    item_count: int = 0
+    created_at: datetime
+    updated_at: datetime
 
 
 # ── Search ────────────────────────────────────────────────────────────────
