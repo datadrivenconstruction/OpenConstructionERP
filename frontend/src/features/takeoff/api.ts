@@ -234,10 +234,19 @@ export const takeoffApi = {
   delete: (id: string) =>
     apiDelete(`/v1/takeoff/measurements/${id}`),
 
-  /** Link a measurement to a BOQ position. */
-  linkToBoq: (id: string, boqPositionId: string) =>
+  /** Link a measurement to a BOQ position.
+   *
+   *  ``pushQuantity: true`` opts into the backend ``push_quantity`` flag:
+   *  the server copies the measurement's (server-recomputed) value into
+   *  the position's quantity and recomputes the total through the
+   *  canonical BOQ recompute path. The push is dimension-guarded server
+   *  side (an area measurement never overwrites an m3 quantity) and a
+   *  measurement with no usable value is a no-op. Default false keeps
+   *  link-only callers backward-compatible. */
+  linkToBoq: (id: string, boqPositionId: string, options?: { pushQuantity?: boolean }) =>
     apiPost<MeasurementResponse>(`/v1/takeoff/measurements/${id}/link-to-boq/`, {
       boq_position_id: boqPositionId,
+      push_quantity: options?.pushQuantity ?? false,
     }),
 
   /** Recognize candidate measurements from a page's vector layer (offline,

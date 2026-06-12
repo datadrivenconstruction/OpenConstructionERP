@@ -105,3 +105,75 @@ export function canonicalizeUnit(raw: string | null | undefined): string {
   if (nospace in UNIT_ALIASES) return UNIT_ALIASES[nospace]!;
   return key;
 }
+
+/* ── Dimension guard (mirrors the backend push_quantity guard) ──────────
+ *
+ * `link_measurement_to_boq(..., push_quantity=True)` refuses to copy a
+ * measurement value into a BOQ position whose unit measures a different
+ * dimension (`_UNIT_DIMENSION` / `_MEASUREMENT_TYPE_DIMENSION` in
+ * `backend/app/modules/takeoff/service.py`) - but it refuses SILENTLY
+ * (HTTP 200, quantity untouched, warning only in the server log). These
+ * mirrors let the UI detect the same mismatch up front and surface it as
+ * a clear toast instead of a quietly-unchanged BOQ total. Unknown units
+ * on either side return null so custom/legacy units stay permissive,
+ * exactly like the backend. */
+
+export type MeasureDimension =
+  | 'length'
+  | 'area'
+  | 'volume'
+  | 'mass'
+  | 'count'
+  | 'lsum'
+  | 'time';
+
+/** Unit code → dimension group. Mirror of backend `_UNIT_DIMENSION`. */
+const UNIT_DIMENSION: Readonly<Record<string, MeasureDimension>> = {
+  m: 'length',
+  lm: 'length',
+  ml: 'length',
+  m2: 'area',
+  m3: 'volume',
+  kg: 'mass',
+  t: 'mass',
+  pcs: 'count',
+  ea: 'count',
+  stk: 'count',
+  lsum: 'lsum',
+  h: 'time',
+};
+
+/** Measurement `type` → dimension. Mirror of backend
+ *  `_MEASUREMENT_TYPE_DIMENSION` - the geometric type is the
+ *  authoritative dimension; the unit is only a fallback. */
+const MEASUREMENT_TYPE_DIMENSION: Readonly<Record<string, MeasureDimension>> = {
+  distance: 'length',
+  polyline: 'length',
+  area: 'area',
+  volume: 'volume',
+  count: 'count',
+};
+
+/** Map a unit code to its dimension group, or null when unknown.
+ *  Folds superscripts (`m²` → `m2`) and case like the backend. */
+export function unitDimension(unit: string | null | undefined): MeasureDimension | null {
+  if (!unit) return null;
+  const cleaned = unit
+    .trim()
+    .toLowerCase()
+    .replace(/²/g, '2')
+    .replace(/³/g, '3')
+    .replace(/\^/g, '')
+    .replace(/\*\*/g, '');
+  return UNIT_DIMENSION[cleaned] ?? null;
+}
+
+/** Dimension of a takeoff measurement from its `type`, then unit.
+ *  Returns null when neither maps so callers stay permissive. */
+export function measurementDimension(
+  type: string | null | undefined,
+  unit: string | null | undefined,
+): MeasureDimension | null {
+  const mtype = (type ?? '').trim().toLowerCase();
+  return MEASUREMENT_TYPE_DIMENSION[mtype] ?? unitDimension(unit);
+}

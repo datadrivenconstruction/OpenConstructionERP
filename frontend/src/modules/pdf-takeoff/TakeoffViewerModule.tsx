@@ -55,9 +55,15 @@ import clsx from 'clsx';
 import { useToastStore } from '../../stores/useToastStore';
 import { useProjectContextStore } from '../../stores/useProjectContextStore';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { useQueryClient } from '@tanstack/react-query';
 import { boqApi, type CreatePositionData, type Position } from '../../features/boq/api';
 import { takeoffApi } from '../../features/takeoff/api';
-import { apiGet } from '../../shared/lib/api';
+import {
+  measurementDimension,
+  unitDimension,
+  type MeasureDimension,
+} from '../../features/takeoff/lib/units';
+import { apiGet, apiPost } from '../../shared/lib/api';
 import { formatFileSize } from '../../shared/lib/formatters';
 import { useMeasurementPersistence } from './useMeasurementPersistence';
 import {
@@ -141,6 +147,19 @@ const isAnnotationType = (type: string): boolean =>
 const boqQuantity = (value: number): number => {
   if (!Number.isFinite(value)) return 0;
   return Math.round(value * 1e4) / 1e4;
+};
+
+/** i18n descriptors for a measure dimension, used by the dimension-guard
+ *  toast (mirrors the backend ``push_quantity`` guard, which refuses the
+ *  push silently - the UI surfaces the mismatch instead). */
+const DIMENSION_LABELS: Readonly<Record<MeasureDimension, { key: string; fallback: string }>> = {
+  length: { key: 'takeoff.dim_length', fallback: 'length' },
+  area: { key: 'takeoff.dim_area', fallback: 'area' },
+  volume: { key: 'takeoff.dim_volume', fallback: 'volume' },
+  mass: { key: 'takeoff.dim_mass', fallback: 'weight' },
+  count: { key: 'takeoff.dim_count', fallback: 'count' },
+  lsum: { key: 'takeoff.dim_lsum', fallback: 'lump sum' },
+  time: { key: 'takeoff.dim_time', fallback: 'time' },
 };
 
 interface Point {
@@ -376,6 +395,7 @@ export default function TakeoffViewerModule({
   const [undoCount, setUndoCount] = useState(0);
   const [redoCount, setRedoCount] = useState(0);
   const addToast = useToastStore((s) => s.addToast);
+  const queryClient = useQueryClient();
 
   // Selected measurement (drives the right-side Properties panel).
   const [selectedMeasurementId, setSelectedMeasurementId] = useState<string | null>(null);
@@ -438,6 +458,10 @@ export default function TakeoffViewerModule({
   const [linkingInProgress, setLinkingInProgress] = useState(false);
   const [linkPickerSearch, setLinkPickerSearch] = useState('');
   const [linkPickerMode, setLinkPickerMode] = useState<'pick' | 'create'>('pick');
+  // Bulk "Add all to BOQ" from the Ledger tab: the eligible (unlinked,
+  // measurable, human-confirmed) measurements awaiting a target BOQ pick.
+  // null = panel closed. Reuses the link-picker project/BOQ state above.
+  const [bulkAddMeasurements, setBulkAddMeasurements] = useState<Measurement[] | null>(null);
 
   // Document persistence + server sync
   const [fileName, setFileName] = useState<string | null>(null);
@@ -2895,6 +2919,33 @@ export default function TakeoffViewerModule({
   const handleLinkToPosition = useCallback(async (measurementId: string, position: Position) => {
     const measurement = measurements.find((m) => m.id === measurementId);
     if (!measurement) return;
+
+    // Dimension guard - mirror of the backend ``push_quantity`` check.
+    // The server refuses a cross-dimension push SILENTLY (HTTP 200, BOQ
+    // quantity untouched), so detect the mismatch up front and tell the
+    // user why nothing would flow instead of leaving a stale total.
+    const mDim = measurementDimension(measurement.type, normalizeUnit(measurement.unit));
+    const pDim = unitDimension(position.unit);
+    if (mDim !== null && pDim !== null && mDim !== pDim) {
+      const mLabel = t(DIMENSION_LABELS[mDim].key, { defaultValue: DIMENSION_LABELS[mDim].fallback });
+      const pLabel = t(DIMENSION_LABELS[pDim].key, { defaultValue: DIMENSION_LABELS[pDim].fallback });
+      addToast({
+        type: 'error',
+        title: t('takeoff.dimension_mismatch_title', { defaultValue: 'Dimension mismatch' }),
+        // "ordinal" is a reserved i18next option (ordinal plurals) -
+        // interpolate the position ordinal as posOrdinal instead.
+        message: t('takeoff.dimension_mismatch_msg', {
+          defaultValue:
+            'This {{measurementDim}} measurement cannot fill position {{posOrdinal}} measured in {{unit}} ({{positionDim}}). Pick a {{measurementDim}} position or create a new one.',
+          measurementDim: mLabel,
+          positionDim: pLabel,
+          posOrdinal: position.ordinal,
+          unit: position.unit,
+        }),
+      });
+      return;
+    }
+
     setLinkingInProgress(true);
     try {
       const sourceLabel = `Takeoff: ${measurement.annotation || measurement.type} (page ${measurement.page})`;
@@ -2915,8 +2966,11 @@ export default function TakeoffViewerModule({
       });
 
       // Link on server (only if the measurement has a real server id).
+      // ``pushQuantity: true`` lets the backend copy its own recomputed
+      // measurement value into the position and re-run the canonical
+      // total recompute, so the server stays the authority on the number.
       if (measurement.serverId) {
-        try { await takeoffApi.linkToBoq(measurement.serverId, position.id); } catch { /* non-critical */ }
+        try { await takeoffApi.linkToBoq(measurement.serverId, position.id, { pushQuantity: true }); } catch { /* non-critical */ }
       }
 
       // Update local measurement so the badge appears immediately.
@@ -2931,6 +2985,11 @@ export default function TakeoffViewerModule({
             }
           : m,
       ));
+
+      // The BOQ editor caches positions under ['boq', <id>] - refresh so
+      // the pushed quantity shows up there without a manual reload.
+      queryClient.invalidateQueries({ queryKey: ['boq', position.boq_id] });
+      queryClient.invalidateQueries({ queryKey: ['all-boqs'] });
 
       addToast({
         type: 'success',
@@ -2947,7 +3006,7 @@ export default function TakeoffViewerModule({
     } finally {
       setLinkingInProgress(false);
     }
-  }, [measurements, addToast, t, normalizeUnit]);
+  }, [measurements, addToast, t, normalizeUnit, queryClient]);
 
   /** Create a brand-new BOQ position from the measurement and link to it.
    *  The ordinal is auto-generated as TK.NNN based on existing TK positions.
@@ -3006,7 +3065,9 @@ export default function TakeoffViewerModule({
       } catch { /* metadata is non-critical */ }
 
       if (measurement.serverId) {
-        try { await takeoffApi.linkToBoq(measurement.serverId, newPos.id); } catch { /* non-critical */ }
+        // pushQuantity keeps the server authoritative on the value (it
+        // re-copies its own recomputed measurement into the new position).
+        try { await takeoffApi.linkToBoq(measurement.serverId, newPos.id, { pushQuantity: true }); } catch { /* non-critical */ }
       }
 
       setMeasurements((prev) => prev.map((m) =>
@@ -3024,6 +3085,10 @@ export default function TakeoffViewerModule({
       // increment correctly without a round-trip.
       setLinkBoqPositions((prev) => [...prev, newPos]);
 
+      // Refresh the react-query cached BOQ editor views.
+      queryClient.invalidateQueries({ queryKey: ['boq', newPos.boq_id] });
+      queryClient.invalidateQueries({ queryKey: ['all-boqs'] });
+
       addToast({
         type: 'success',
         title: t('takeoff.linked_created', { defaultValue: 'Position created & linked' }),
@@ -3039,7 +3104,7 @@ export default function TakeoffViewerModule({
     } finally {
       setLinkingInProgress(false);
     }
-  }, [measurements, linkPickerBoqId, linkBoqPositions, addToast, t, normalizeUnit]);
+  }, [measurements, linkPickerBoqId, linkBoqPositions, addToast, t, normalizeUnit, queryClient]);
 
   /** Remove the link between a measurement and its BOQ position.
    *  We intentionally leave the BOQ position alone — unlinking just
@@ -3104,6 +3169,167 @@ export default function TakeoffViewerModule({
     }
     setSelectedMeasurementId(m.id);
   }, [currentPage, totalPages]);
+
+  /* ── Ledger → BOQ actions ─────────────────────────────────────────── */
+
+  /** Per-row "Add to BOQ" from the Ledger tab. Reuses the inline link
+   *  picker that lives in the Properties-tab measurement list: navigate
+   *  to the measurement's page, select it, switch tabs and open the
+   *  picker on it (pick-existing with push, or create-new). */
+  const handleLedgerAddToBoq = useCallback((m: Measurement) => {
+    setBulkAddMeasurements(null);
+    handleLedgerRowClick(m);
+    setSidebarTab('properties');
+    // The inline picker renders inside the measurement's group section -
+    // make sure that section is expanded or the picker would be invisible.
+    const groupKey = m.group || 'General';
+    setCollapsedGroups((prev) => {
+      if (!prev.has(groupKey)) return prev;
+      const next = new Set(prev);
+      next.delete(groupKey);
+      return next;
+    });
+    void handleOpenLinkToBoq(m.id);
+  }, [handleLedgerRowClick, handleOpenLinkToBoq]);
+
+  /** Bulk "Add all to BOQ" from the Ledger tab: stage the eligible rows
+   *  and open the target-BOQ panel above the ledger. The ledger already
+   *  filtered to linkable rows (measurable type, human-confirmed); here
+   *  we additionally drop already-linked rows and empty values. */
+  const handleLedgerAddAllToBoq = useCallback(async (ms: Measurement[]) => {
+    const eligible = ms.filter(
+      (m) => !m.linkedPositionId && Number.isFinite(m.value) && m.value > 0,
+    );
+    if (eligible.length === 0) {
+      addToast({
+        type: 'info',
+        title: t('takeoff.bulk_add_none_title', { defaultValue: 'Nothing to add' }),
+        message: t('takeoff.bulk_add_none_msg', {
+          defaultValue:
+            'Every filtered measurement is already linked to a BOQ position (or carries no value).',
+        }),
+      });
+      return;
+    }
+    setLinkingMeasurementId(null);
+    setBulkAddMeasurements(eligible);
+
+    // Seed the project/BOQ pickers exactly like the per-measurement picker.
+    const seedProject = selectedProjectId || activeProjectId || '';
+    const seedBoq = (selectedProjectId ? selectedBoqId : '') || (activeProjectId ? activeBoqIdFromStore ?? '' : '') || '';
+    setLinkPickerProjectId(seedProject);
+    setLinkPickerBoqId(seedBoq);
+    try {
+      const projects = await apiGet<{ id: string; name: string }[]>('/v1/projects/');
+      setLinkPickerProjects(projects);
+    } catch {
+      setLinkPickerProjects([]);
+    }
+    if (seedProject) {
+      await loadPickerBoqs(seedProject);
+    } else {
+      setLinkPickerBoqs([]);
+    }
+  }, [addToast, t, selectedProjectId, selectedBoqId, activeProjectId, activeBoqIdFromStore, loadPickerBoqs]);
+
+  /** Confirm the bulk add: one bulk-create call into the picked BOQ (the
+   *  same ``positions/bulk/`` endpoint the Takeoff page uses, returning
+   *  the created positions in input order), then link each measurement to
+   *  its new position with ``pushQuantity`` so the server-side value
+   *  stays authoritative. */
+  const handleBulkAddConfirm = useCallback(async () => {
+    if (!bulkAddMeasurements || bulkAddMeasurements.length === 0 || !linkPickerBoqId) return;
+    setLinkingInProgress(true);
+    try {
+      const items = bulkAddMeasurements.map((m) => ({
+        description: m.annotation || t('takeoff.position_default_desc', {
+          defaultValue: 'Takeoff · {{type}} page {{page}}',
+          type: m.type,
+          page: m.page,
+        }),
+        quantity: boqQuantity(m.value),
+        unit: normalizeUnit(m.unit),
+        source: 'takeoff',
+        metadata: {
+          takeoff_raw_unit: m.unit,
+          pdf_measurement_source: `Takeoff: ${m.annotation || m.type} (page ${m.page})`,
+          pdf_measurement_id: m.serverId ?? m.id,
+          pdf_document_id: fileName ?? undefined,
+          pdf_page: m.page,
+        },
+      }));
+      const created = await apiPost<Position[]>(
+        `/v1/boq/boqs/${linkPickerBoqId}/positions/bulk/`,
+        { items },
+      );
+
+      // Link measurements to their new positions (and push the quantity
+      // server-side). A per-item failure only degrades the back-link -
+      // the position already exists with the measured quantity.
+      let linkFailures = 0;
+      const createdByMeasurement = new Map<string, Position>();
+      for (let i = 0; i < bulkAddMeasurements.length; i += 1) {
+        const m = bulkAddMeasurements[i]!;
+        const pos = created[i];
+        if (!pos) continue;
+        createdByMeasurement.set(m.id, pos);
+        if (m.serverId) {
+          try {
+            await takeoffApi.linkToBoq(m.serverId, pos.id, { pushQuantity: true });
+          } catch {
+            linkFailures += 1;
+          }
+        }
+      }
+
+      // Reflect the new links locally so the ledger badges flip at once.
+      setMeasurements((prev) => prev.map((m) => {
+        const pos = createdByMeasurement.get(m.id);
+        if (!pos) return m;
+        return {
+          ...m,
+          linkedPositionId: pos.id,
+          linkedPositionOrdinal: pos.ordinal,
+          linkedBoqId: pos.boq_id,
+          linkedPositionLabel: pos.description,
+        };
+      }));
+
+      queryClient.invalidateQueries({ queryKey: ['boq', linkPickerBoqId] });
+      queryClient.invalidateQueries({ queryKey: ['all-boqs'] });
+
+      const first = created[0];
+      addToast({
+        type: 'success',
+        title: t('takeoff.bulk_add_success_title', { defaultValue: 'Added to BOQ' }),
+        message: t('takeoff.bulk_add_success_msg', {
+          defaultValue: '{{count}} positions created, starting at {{first}}',
+          count: created.length,
+          first: first ? `${first.ordinal} ${first.description?.slice(0, 30) ?? ''}`.trim() : '',
+        }),
+      });
+      if (linkFailures > 0) {
+        addToast({
+          type: 'warning',
+          title: t('takeoff.bulk_link_partial_title', { defaultValue: 'Some links failed' }),
+          message: t('takeoff.bulk_link_partial_msg', {
+            defaultValue:
+              '{{count}} measurements could not be linked back to their new positions. The positions were still created with the measured quantities.',
+            count: linkFailures,
+          }),
+        });
+      }
+      setBulkAddMeasurements(null);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('takeoff.bulk_add_failed', { defaultValue: 'Add to BOQ failed' }),
+        message: err instanceof Error ? err.message : '',
+      });
+    } finally {
+      setLinkingInProgress(false);
+    }
+  }, [bulkAddMeasurements, linkPickerBoqId, normalizeUnit, fileName, addToast, t, queryClient]);
 
   /* ── Undo ────────────────────────────────────────────────────────── */
 
@@ -4401,12 +4627,88 @@ export default function TakeoffViewerModule({
 
             {/* Ledger view — all measurements, sortable + filterable. */}
             {sidebarTab === 'ledger' && (
-              <MeasurementLedger
-                measurements={measurements}
-                groupColorMap={GROUP_COLOR_MAP}
-                onRowClick={handleLedgerRowClick}
-                selectedMeasurementId={selectedMeasurementId}
-              />
+              <div className="space-y-2">
+                {/* Bulk "Add all to BOQ" target picker. */}
+                {bulkAddMeasurements && (
+                  <div
+                    className="rounded-md border border-oe-blue/40 bg-oe-blue/5 backdrop-blur-sm p-2.5 shadow-sm animate-fade-in"
+                    data-testid="ledger-bulk-add-panel"
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-oe-blue">
+                        {t('takeoff.bulk_add_title', {
+                          defaultValue: 'Add {{count}} measurements to BOQ',
+                          count: bulkAddMeasurements.length,
+                        })}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setBulkAddMeasurements(null)}
+                        className="text-content-tertiary hover:text-content-primary transition-colors"
+                        aria-label={t('common.close', { defaultValue: 'Close' })}
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-content-tertiary mb-1.5">
+                      {t('takeoff.bulk_add_desc', {
+                        defaultValue:
+                          'Each measurement becomes a new position carrying its measured quantity, unit and label.',
+                      })}
+                    </p>
+                    <div className="grid grid-cols-2 gap-1 mb-1.5">
+                      <select
+                        value={linkPickerProjectId}
+                        onChange={(e) => handlePickerProjectChange(e.target.value)}
+                        className="text-[10px] rounded border border-border-subtle bg-surface-primary px-1 py-0.5 text-content-primary"
+                        aria-label={t('takeoff.pick_project', { defaultValue: '- project -' })}
+                      >
+                        <option value="">{t('takeoff.pick_project', { defaultValue: '- project -' })}</option>
+                        {linkPickerProjects.map((p) => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={linkPickerBoqId}
+                        onChange={(e) => handlePickerBoqChange(e.target.value)}
+                        disabled={!linkPickerProjectId || linkBoqsLoading}
+                        className="text-[10px] rounded border border-border-subtle bg-surface-primary px-1 py-0.5 text-content-primary disabled:opacity-60"
+                        aria-label={t('takeoff.pick_boq', { defaultValue: '- BOQ -' })}
+                      >
+                        <option value="">
+                          {linkBoqsLoading
+                            ? t('common.loading', { defaultValue: 'Loading...' })
+                            : t('takeoff.pick_boq', { defaultValue: '- BOQ -' })}
+                        </option>
+                        {linkPickerBoqs.map((b) => (
+                          <option key={b.id} value={b.id}>{b.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleBulkAddConfirm}
+                      disabled={linkingInProgress || !linkPickerBoqId}
+                      className="w-full flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[10px] font-semibold bg-oe-blue text-white hover:bg-oe-blue/90 disabled:opacity-50 transition-colors"
+                      data-testid="ledger-bulk-add-confirm"
+                    >
+                      {linkingInProgress && <Loader2 size={10} className="animate-spin" />}
+                      {t('takeoff.bulk_add_confirm', {
+                        defaultValue: 'Create {{count}} positions',
+                        count: bulkAddMeasurements.length,
+                      })}
+                    </button>
+                  </div>
+                )}
+                <MeasurementLedger
+                  measurements={measurements}
+                  groupColorMap={GROUP_COLOR_MAP}
+                  onRowClick={handleLedgerRowClick}
+                  selectedMeasurementId={selectedMeasurementId}
+                  onAddToBoq={handleLedgerAddToBoq}
+                  onAddAllToBoq={handleLedgerAddAllToBoq}
+                />
+              </div>
             )}
 
             {/* Properties panel — shown when a measurement is selected in the list */}
@@ -4947,6 +5249,13 @@ export default function TakeoffViewerModule({
                                             .map((pos) => {
                                               const measurementUnit = normalizeUnit(m.unit);
                                               const unitMismatch = !!pos.unit && !!measurementUnit && pos.unit !== measurementUnit;
+                                              // True cross-dimension mismatch (area → m3 etc.) -
+                                              // the backend push guard refuses these, and
+                                              // handleLinkToPosition surfaces the refusal as an
+                                              // error toast instead of silently linking.
+                                              const mDim = measurementDimension(m.type, measurementUnit);
+                                              const pDim = unitDimension(pos.unit);
+                                              const dimensionMismatch = mDim !== null && pDim !== null && mDim !== pDim;
                                               const currentQty = typeof pos.quantity === 'number' ? pos.quantity : Number(pos.quantity ?? 0);
                                               return (
                                                 <button
@@ -4956,17 +5265,23 @@ export default function TakeoffViewerModule({
                                                   disabled={linkingInProgress}
                                                   className="w-full text-left px-2 py-1 rounded text-[10px] hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors flex items-center gap-1.5 disabled:opacity-50"
                                                   title={
-                                                    unitMismatch
-                                                      ? t('takeoff.unit_mismatch_warning', {
-                                                          defaultValue: 'Unit mismatch: position is in {{posUnit}}, measurement is in {{measUnit}}. Linking will overwrite the position\'s unit.',
+                                                    dimensionMismatch
+                                                      ? t('takeoff.dimension_mismatch_row_hint', {
+                                                          defaultValue: 'Dimension mismatch: a {{measUnit}} measurement cannot fill a {{posUnit}} position.',
                                                           posUnit: pos.unit,
                                                           measUnit: measurementUnit,
                                                         })
-                                                      : t('takeoff.link_overwrites_qty', {
-                                                          defaultValue: 'Link → overwrites current quantity ({{q}} {{u}}) with the measurement value',
-                                                          q: currentQty,
-                                                          u: pos.unit ?? '',
-                                                        })
+                                                      : unitMismatch
+                                                        ? t('takeoff.unit_mismatch_warning', {
+                                                            defaultValue: 'Unit mismatch: position is in {{posUnit}}, measurement is in {{measUnit}}. Linking will overwrite the position\'s unit.',
+                                                            posUnit: pos.unit,
+                                                            measUnit: measurementUnit,
+                                                          })
+                                                        : t('takeoff.link_overwrites_qty', {
+                                                            defaultValue: 'Link → overwrites current quantity ({{q}} {{u}}) with the measurement value',
+                                                            q: currentQty,
+                                                            u: pos.unit ?? '',
+                                                          })
                                                   }
                                                 >
                                                   <span className="font-mono text-rose-600 dark:text-rose-400 shrink-0">{pos.ordinal}</span>

@@ -15,6 +15,7 @@ import {
   ArrowUpDown,
   FileSpreadsheet,
   Filter,
+  Link2,
   X,
 } from 'lucide-react';
 import type { Measurement } from '../lib/takeoff-types';
@@ -40,6 +41,30 @@ export interface MeasurementLedgerProps {
   onRowClick?: (measurement: Measurement) => void;
   /** Current selection, to highlight the matching row. */
   selectedMeasurementId?: string | null;
+  /** Per-measurement "Add to BOQ" action. When provided, a trailing
+   *  action column appears on measurable rows (distance / polyline /
+   *  area / volume / count) so a calibrated measurement can be pushed
+   *  into a BOQ position straight from the ledger. */
+  onAddToBoq?: (measurement: Measurement) => void;
+  /** Bulk "Add all to BOQ" over the currently filtered, linkable rows
+   *  (unconfirmed AI suggestions and annotation rows are excluded). */
+  onAddAllToBoq?: (measurements: Measurement[]) => void;
+}
+
+/** Measurement types that carry a pushable quantity. Annotation types
+ *  (cloud / arrow / text / rectangle / highlight) have no value to send
+ *  to a BOQ. Mirrors the backend's measurable-type set. */
+const LINKABLE_TYPES: ReadonlySet<string> = new Set([
+  'distance',
+  'polyline',
+  'area',
+  'volume',
+  'count',
+]);
+
+/** A row the BOQ actions apply to: measurable type, human-confirmed. */
+function isLinkable(m: Measurement): boolean {
+  return LINKABLE_TYPES.has(m.type) && !m.suggested;
 }
 
 /** Column definitions — i18n key, sort key, right-alignment.  Labels
@@ -64,6 +89,8 @@ export function MeasurementLedger({
   groupColorMap,
   onRowClick,
   selectedMeasurementId,
+  onAddToBoq,
+  onAddAllToBoq,
 }: MeasurementLedgerProps) {
   const { t } = useTranslation();
   const [sortCol, setSortCol] = useState<LedgerSortColumn>('ordinal');
@@ -85,6 +112,12 @@ export function MeasurementLedger({
 
   const rows = useMemo(() => withOrdinals(sorted), [sorted]);
   const footers = useMemo(() => typeGrandTotals(sorted), [sorted]);
+
+  /** Rows the bulk "Add all to BOQ" action applies to (respects the
+   *  active filters so "add all" means "add everything I'm looking at"). */
+  const linkableRows = useMemo(() => sorted.filter(isLinkable), [sorted]);
+  const hasActionColumn = Boolean(onAddToBoq);
+  const columnCount = COLUMNS.length + (hasActionColumn ? 1 : 0);
 
   // Build a grouped structure so we can slot subtotal rows between groups.
   const rowsByGroup = useMemo(() => {
@@ -203,6 +236,25 @@ export function MeasurementLedger({
             <FileSpreadsheet size={10} />
             CSV
           </button>
+          {onAddAllToBoq && (
+            <button
+              type="button"
+              onClick={() => onAddAllToBoq(linkableRows)}
+              disabled={linkableRows.length === 0}
+              className="flex items-center gap-1 px-1.5 py-1 rounded text-[10px] bg-oe-blue/10 text-oe-blue border border-oe-blue/30 hover:bg-oe-blue/20 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+              title={t('takeoff_viewer.ledger_add_all_to_boq_hint', {
+                defaultValue:
+                  'Send every filtered measurement to a BOQ as new positions',
+              })}
+              data-testid="ledger-add-all-to-boq"
+            >
+              <Link2 size={10} />
+              {t('takeoff_viewer.ledger_add_all_to_boq', {
+                defaultValue: 'Add to BOQ',
+              })}{' '}
+              ({linkableRows.length})
+            </button>
+          )}
         </div>
       </div>
 
@@ -322,13 +374,23 @@ export function MeasurementLedger({
                     </th>
                   );
                 })}
+                {hasActionColumn && (
+                  <th
+                    scope="col"
+                    className="px-1.5 py-1 font-semibold text-content-secondary text-right"
+                    aria-label={t('takeoff_viewer.col_actions', {
+                      defaultValue: 'Actions',
+                    })}
+                    data-testid="ledger-header-actions"
+                  />
+                )}
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 && (
                 <tr>
                   <td
-                    colSpan={COLUMNS.length}
+                    colSpan={columnCount}
                     className="text-center text-content-tertiary py-4"
                     data-testid="ledger-no-matches"
                   >
@@ -350,6 +412,7 @@ export function MeasurementLedger({
                     subtotal={sub}
                     selectedId={selectedMeasurementId ?? null}
                     onRowClick={onRowClick}
+                    onAddToBoq={onAddToBoq}
                   />
                 );
               })}
@@ -378,6 +441,7 @@ export function MeasurementLedger({
                     </td>
                     <td className="px-1.5 py-1 text-content-secondary">{gt.unit}</td>
                     <td className="px-1.5 py-1" />
+                    {hasActionColumn && <td className="px-1.5 py-1" />}
                   </tr>
                 ))}
               </tfoot>
@@ -397,6 +461,7 @@ function GroupRows({
   subtotal,
   selectedId,
   onRowClick,
+  onAddToBoq,
 }: {
   group: string;
   groupRows: { ordinal: number; measurement: Measurement }[];
@@ -404,6 +469,7 @@ function GroupRows({
   subtotal?: { totals: Record<string, number>; count: number };
   selectedId: string | null;
   onRowClick?: (m: Measurement) => void;
+  onAddToBoq?: (m: Measurement) => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -456,6 +522,45 @@ function GroupRows({
             </td>
             <td className="px-1.5 py-1 text-content-secondary">{measurement.unit || ''}</td>
             <td className="px-1.5 py-1 text-right text-content-tertiary">{measurement.page}</td>
+            {onAddToBoq && (
+              <td className="px-1 py-1 text-right">
+                {isLinkable(measurement) && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddToBoq(measurement);
+                    }}
+                    className={clsx(
+                      'p-0.5 rounded transition-colors',
+                      measurement.linkedPositionId
+                        ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30'
+                        : 'text-content-tertiary hover:text-oe-blue hover:bg-oe-blue/10',
+                    )}
+                    aria-label={t('takeoff_viewer.ledger_add_to_boq', {
+                      defaultValue: 'Add to BOQ',
+                    })}
+                    title={
+                      measurement.linkedPositionId
+                        ? t('takeoff_viewer.ledger_relink_to_boq', {
+                            // "ordinal" is a reserved i18next option
+                            // (ordinal plurals) - use posOrdinal.
+                            defaultValue:
+                              'Linked to {{posOrdinal}} - re-link or unlink',
+                            posOrdinal: measurement.linkedPositionOrdinal ?? '',
+                          })
+                        : t('takeoff_viewer.ledger_add_to_boq_hint', {
+                            defaultValue:
+                              "Send this measurement's quantity to a BOQ position",
+                          })
+                    }
+                    data-testid="ledger-add-to-boq"
+                  >
+                    <Link2 size={11} />
+                  </button>
+                )}
+              </td>
+            )}
           </tr>
         );
       })}
@@ -482,6 +587,7 @@ function GroupRows({
               </td>
               <td className="px-1.5 py-1 text-content-secondary">{unit}</td>
               <td />
+              {onAddToBoq && <td />}
             </tr>
           ))}
         </>
