@@ -5,6 +5,7 @@ No network calls — all tests are pure unit tests.
 """
 
 from types import SimpleNamespace
+from typing import Any
 
 import httpx
 import pytest
@@ -470,3 +471,99 @@ class TestModelErrorSurfacing:
         # A provider with no special fallback still offers its built-in
         # default (helps when a user override is the stale id).
         assert ai_client.fallback_models_for("openai", "gpt-stale") == [ai_client.default_model_for("openai")]
+
+
+class TestLocalKeylessProviders:
+    """Self-hosted Ollama/vLLM routing and keyless request headers.
+
+    Reported via community PR 219 (not merged, fix written independently):
+    "ollama" contains the substring "llama", so the Groq keyword row used to
+    capture it, and keyless providers sent an empty bearer token that httpx
+    rejects as an illegal header value.
+    """
+
+    def test_ollama_routes_to_ollama_not_groq(self):
+        from app.modules.ai import ai_client
+
+        settings = SimpleNamespace(groq_api_key="enc-groq-key")
+        provider, key = ai_client.resolve_provider_and_key(settings, "ollama")
+        assert provider == "ollama"
+        assert key == ""
+
+    def test_vllm_routes_to_vllm(self):
+        from app.modules.ai import ai_client
+
+        provider, key = ai_client.resolve_provider_and_key(None, "vllm")
+        assert provider == "vllm"
+        assert key == ""
+
+    def test_groq_and_bare_llama_still_route_to_groq(self, monkeypatch):
+        from app.modules.ai import ai_client
+
+        monkeypatch.setattr("app.core.crypto.decrypt_secret", lambda raw: "groq-key")
+        settings = SimpleNamespace(groq_api_key="enc")
+        assert ai_client.resolve_provider_and_key(settings, "groq")[0] == "groq"
+        assert ai_client.resolve_provider_and_key(settings, "llama-3.3-70b")[0] == "groq"
+
+    @pytest.mark.asyncio
+    async def test_empty_key_omits_authorization_header(self, monkeypatch):
+        from app.modules.ai import ai_client
+
+        captured: dict[str, Any] = {}
+
+        class _FakeResponse:
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return {
+                    "choices": [{"message": {"content": "ok"}}],
+                    "usage": {"total_tokens": 1},
+                }
+
+        class _FakeClient:
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *exc):
+                return False
+
+            async def post(self, url, headers=None, json=None, timeout=None):
+                captured["headers"] = headers or {}
+                return _FakeResponse()
+
+        monkeypatch.setattr(ai_client.httpx, "AsyncClient", _FakeClient)
+        text, _ = await ai_client.call_openai_compatible(provider="ollama", api_key="", system="s", prompt="p")
+        assert text == "ok"
+        assert "Authorization" not in captured["headers"]
+
+    @pytest.mark.asyncio
+    async def test_real_key_sends_authorization_header(self, monkeypatch):
+        from app.modules.ai import ai_client
+
+        captured: dict[str, Any] = {}
+
+        class _FakeResponse:
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return {
+                    "choices": [{"message": {"content": "ok"}}],
+                    "usage": {"total_tokens": 1},
+                }
+
+        class _FakeClient:
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *exc):
+                return False
+
+            async def post(self, url, headers=None, json=None, timeout=None):
+                captured["headers"] = headers or {}
+                return _FakeResponse()
+
+        monkeypatch.setattr(ai_client.httpx, "AsyncClient", _FakeClient)
+        await ai_client.call_openai_compatible(provider="groq", api_key="gsk-test", system="s", prompt="p")
+        assert captured["headers"].get("Authorization") == "Bearer gsk-test"

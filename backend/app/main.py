@@ -1422,12 +1422,20 @@ def create_app() -> FastAPI:
             logger.warning("Alembic head check failed: %s", _exc)
             result["alembic_head_matches"] = None
 
-        # Frontend dist presence - the wheel ships ``app/_frontend_dist/``;
-        # a missing ``index.html`` means the SPA shell will 404 and users
-        # see a blank page even though /api endpoints work.
+        # Frontend dist presence - the wheel ships ``app/_frontend_dist/``,
+        # a repo checkout serves ``frontend/dist``; a missing ``index.html``
+        # in BOTH locations means the SPA shell will 404 and users see a
+        # blank page even though /api endpoints work. Mirror the lookup
+        # order of ``cli_static.get_frontend_dir`` so dev mode is not
+        # falsely reported as degraded.
         try:
-            _dist_index = _Path(__file__).resolve().parent / "_frontend_dist" / "index.html"
-            result["frontend_dist_present"] = _dist_index.is_file()
+            from app.cli_static import get_frontend_dir
+
+            try:
+                get_frontend_dir()
+                result["frontend_dist_present"] = True
+            except FileNotFoundError:
+                result["frontend_dist_present"] = False
             if not result["frontend_dist_present"]:
                 result["status"] = "degraded"
         except Exception:

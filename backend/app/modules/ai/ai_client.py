@@ -543,9 +543,14 @@ async def call_openai_compatible(
         raise ValueError(msg)
 
     headers: dict[str, str] = {
-        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
+    # Keyless self-hosted runtimes (Ollama, vLLM without auth) resolve to an
+    # empty api_key; an "Authorization: Bearer " header with an empty token is
+    # an illegal header value for httpx and gets rejected by some servers, so
+    # only send the header when there is an actual credential.
+    if api_key and api_key.strip():
+        headers["Authorization"] = f"Bearer {api_key}"
     if "extra_headers" in config:
         headers.update(config["extra_headers"])
 
@@ -933,6 +938,11 @@ def resolve_provider_and_key(
         (["gemini", "google"], "gemini", "gemini_api_key"),
         (["openrouter", "router"], "openrouter", "openrouter_api_key"),
         (["mistral"], "mistral", "mistral_api_key"),
+        # Self-hosted keyless runtimes must be matched BEFORE the generic
+        # "llama" keyword below: "ollama" contains "llama", so a user picking
+        # preferred_model=ollama would otherwise be routed to Groq.
+        (["ollama"], "ollama", None),  # self-hosted: no stored key
+        (["vllm"], "vllm", None),  # self-hosted: no stored key
         (["groq", "llama"], "groq", "groq_api_key"),
         (["deepseek"], "deepseek", "deepseek_api_key"),
         (["together"], "together", "together_api_key"),
@@ -945,8 +955,6 @@ def resolve_provider_and_key(
         (["baidu", "ernie"], "baidu", "baidu_api_key"),
         (["yandex"], "yandex", "yandex_api_key"),
         (["gigachat"], "gigachat", "gigachat_api_key"),
-        (["ollama"], "ollama", None),  # self-hosted: no stored key
-        (["vllm"], "vllm", None),  # self-hosted: no stored key
         (["kimi", "moonshot"], "kimi", "kimi_api_key"),  # Moonshot AI
     ]
 
