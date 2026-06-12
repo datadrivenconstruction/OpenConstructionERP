@@ -2770,12 +2770,13 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
     text = str(value).strip()
     if not text:
         return default
-    # Strip currency symbols and whitespace thousands separators. Russian and
-    # French catalogues write "8 500,00" with a space (often a non-breaking or
-    # thin space) between thousands; without this they parsed to 0.
-    # Remove all whitespace (incl. non-breaking/thin spaces) and currency
-    # symbols so "8 500,00" parses; \s is unicode-aware for str patterns.
-    text = _re.sub(r"[\s₽€$£]", "", text)
+    # Strip everything that is not part of the number itself: whitespace
+    # thousands separators ("8 500,00" incl. non-breaking/thin spaces),
+    # apostrophe thousands ("1'250.00", Swiss), ANY currency symbol or
+    # code in any language (₽ € $ £ ₺ ¥ kr zł Kč RUB ...), and percent.
+    # Keeping only digits, separators and sign is locale-agnostic, so no
+    # currency list to maintain.
+    text = _re.sub(r"[^0-9.,+-]", "", text)
     if not text:
         return default
     # Handle European-style numbers: "1.234,56" -> "1234.56"
@@ -2787,7 +2788,17 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
         else:
             text = text.replace(",", "")
     elif "," in text:
-        text = text.replace(",", ".")
+        # Comma-only is ambiguous: "8 500,00" is a decimal comma but
+        # "1,000" / "1,234,567" are English thousands groups. Treat it as
+        # a thousands separator when the digits form exact 3-digit groups,
+        # otherwise as the decimal separator.
+        if _re.fullmatch(r"[+-]?\d{1,3}(,\d{3})+", text):
+            text = text.replace(",", "")
+        else:
+            text = text.replace(",", ".")
+    elif text.count(".") > 1:
+        # Multiple dots can only be thousands groups ("12.345.678").
+        text = text.replace(".", "")
     try:
         return float(text)
     except (ValueError, TypeError):

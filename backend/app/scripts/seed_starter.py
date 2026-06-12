@@ -47,6 +47,25 @@ def _load_payload() -> dict:
         return json.load(fh)
 
 
+def _regional_pack_configured() -> str | None:
+    """Return the active partner/country pack slug, or None.
+
+    The starter rows are English-labelled and EUR-priced. When the install is
+    pinned to a partner/country pack (in-app applied state or the
+    OE_PACK/OE_PARTNER_PACK env var), that pack loads its own regional CWICR
+    catalogue on first boot - force-seeding EUR rows first would leave a
+    non-EUR workspace with a mixed-currency cost database. Best-effort: any
+    resolution error means "no pack" so a plain install still gets seeded.
+    """
+    try:
+        from app.core.partner_pack.discovery import get_active_pack
+
+        pack = get_active_pack()
+        return pack.slug if pack else None
+    except Exception:  # noqa: BLE001 - pack resolution must never break seeding
+        return None
+
+
 async def _count(session: AsyncSession, model: type) -> int:
     result = await session.execute(select(func.count()).select_from(model))
     return result.scalar_one()
@@ -165,6 +184,17 @@ async def seed_starter_data(session: AsyncSession) -> dict[str, int]:
     """
     if os.environ.get("OE_SKIP_STARTER_SEED", "").strip().lower() in {"1", "true", "yes", "on"}:
         logger.info("Starter seed skipped via OE_SKIP_STARTER_SEED.")
+        return {"cost_items": 0, "assemblies": 0}
+
+    # A configured partner/country pack means a regional catalogue is about to
+    # be (or already is) loaded; do not force English/EUR starter rows into
+    # that workspace. Installs without a pack keep the seed-of-last-resort.
+    pack_slug = _regional_pack_configured()
+    if pack_slug:
+        logger.info(
+            "Starter seed skipped: pack '%s' is configured and provides its own regional catalogue.",
+            pack_slug,
+        )
         return {"cost_items": 0, "assemblies": 0}
 
     if not _SEED_FILE.exists():
