@@ -35,7 +35,23 @@ interface ImportResult {
     data: Record<string, string>;
   }>;
   total_rows: number;
+  catalog?: string | null;
 }
+
+// Result of the column-mapping preview endpoint. Drives the mapping panel:
+// the user maps each canonical target field to one of the raw file headers
+// before committing the import.
+interface PreviewResult {
+  headers: string[];
+  sample_rows: string[][];
+  suggested_map: Record<string, string>;
+  target_fields: string[];
+  required_fields: string[];
+}
+
+// Sentinel used by the per-field <select> to mean "this canonical field has
+// no source column". Kept out of the submitted column_map.
+const NOT_MAPPED = '';
 
 // ── Loaded databases localStorage helper ────────────────────────────────────
 
@@ -108,21 +124,68 @@ function setActiveDatabase(dbId: string): void {
 
 // ── API helper for file upload ───────────────────────────────────────────────
 
-async function uploadCostFile(file: File): Promise<ImportResult> {
+function authHeaders(): Record<string, string> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+/**
+ * Ask the backend to inspect the uploaded file: it returns the raw headers, a
+ * few sample rows and a suggested canonical-field -> header mapping. Used to
+ * drive the column-mapping panel before the actual import.
+ */
+async function previewCostFile(file: File): Promise<PreviewResult> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const token = useAuthStore.getState().accessToken;
-  const headers: Record<string, string> = {
-    Accept: 'application/json',
-  };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  const response = await fetch('/api/v1/costs/import/preview/', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let detail = 'Preview failed';
+    try {
+      const body = await response.json();
+      detail = extractErrorMessageFromBody(body) ?? detail;
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(detail);
+  }
+
+  return response.json() as Promise<PreviewResult>;
+}
+
+/**
+ * Import a cost file. When `columnMap` is supplied it is sent as a JSON
+ * `column_map` (canonical field -> raw header) so the backend uses the user's
+ * explicit mapping instead of re-guessing. `catalogName` groups the imported
+ * rows under a findable region/catalog. Both are optional so the legacy
+ * auto-detect path (no map, no name) keeps working as a fallback.
+ */
+async function uploadCostFile(
+  file: File,
+  columnMap?: Record<string, string>,
+  catalogName?: string,
+): Promise<ImportResult> {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (columnMap && Object.keys(columnMap).length > 0) {
+    formData.append('column_map', JSON.stringify(columnMap));
+  }
+  if (catalogName && catalogName.trim()) {
+    formData.append('catalog_name', catalogName.trim());
   }
 
   const response = await fetch('/api/v1/costs/import/file/', {
     method: 'POST',
-    headers,
+    headers: authHeaders(),
     body: formData,
   });
 
@@ -138,6 +201,50 @@ async function uploadCostFile(file: File): Promise<ImportResult> {
   }
 
   return response.json() as Promise<ImportResult>;
+}
+
+// Human-readable label + helper text per canonical target field, all i18n.
+// Used by the mapping panel rows.
+function useTargetFieldMeta() {
+  const { t } = useTranslation();
+  return (field: string): { label: string; hint: string } => {
+    switch (field) {
+      case 'code':
+        return {
+          label: t('costs_import.field_code', { defaultValue: 'Code' }),
+          hint: t('costs_import.field_code_hint', { defaultValue: 'Item / position number' }),
+        };
+      case 'description':
+        return {
+          label: t('costs_import.field_description', { defaultValue: 'Description' }),
+          hint: t('costs_import.field_description_hint', { defaultValue: 'What the cost item is' }),
+        };
+      case 'unit':
+        return {
+          label: t('costs_import.field_unit', { defaultValue: 'Unit' }),
+          hint: t('costs_import.field_unit_hint', { defaultValue: 'm, m2, m3, pcs, h ...' }),
+        };
+      case 'rate':
+        return {
+          label: t('costs_import.field_rate', { defaultValue: 'Rate' }),
+          hint: t('costs_import.field_rate_hint', { defaultValue: 'Unit price / cost' }),
+        };
+      case 'currency':
+        return {
+          label: t('costs_import.field_currency', { defaultValue: 'Currency' }),
+          hint: t('costs_import.field_currency_hint', { defaultValue: 'EUR, USD, GBP ...' }),
+        };
+      case 'classification':
+        return {
+          label: t('costs_import.field_classification', { defaultValue: 'Classification' }),
+          hint: t('costs_import.field_classification_hint', {
+            defaultValue: 'DIN 276 / NRM / MasterFormat code',
+          }),
+        };
+      default:
+        return { label: field, hint: '' };
+    }
+  };
 }
 
 // ── File Preview Info ────────────────────────────────────────────────────────
@@ -1576,6 +1683,207 @@ function VectorDatabaseSection() {
   );
 }
 
+// ── Column Mapping Panel ─────────────────────────────────────────────────────
+
+interface ColumnMappingPanelProps {
+  data: PreviewResult;
+  columnMap: Record<string, string>;
+  onChangeField: (field: string, header: string) => void;
+  catalogName: string;
+  onCatalogNameChange: (value: string) => void;
+  onImport: () => void;
+  onCancel: () => void;
+  importing: boolean;
+}
+
+function ColumnMappingPanel({
+  data,
+  columnMap,
+  onChangeField,
+  catalogName,
+  onCatalogNameChange,
+  onImport,
+  onCancel,
+  importing,
+}: ColumnMappingPanelProps) {
+  const { t } = useTranslation();
+  const fieldMeta = useTargetFieldMeta();
+
+  const requiredFields = data.required_fields.length > 0 ? data.required_fields : ['description'];
+  const isRequired = (field: string) => requiredFields.includes(field);
+
+  // All required fields must be mapped before import is allowed.
+  const unmappedRequired = requiredFields.filter((f) => !columnMap[f]);
+  const canImport = unmappedRequired.length === 0 && !importing;
+
+  // Show up to 3 sample rows under their headers.
+  const sampleRows = data.sample_rows.slice(0, 3);
+
+  return (
+    <Card className="animate-card-in" padding="none">
+      <div className="px-6 pt-5 pb-4">
+        <div className="flex items-start gap-3 mb-1">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle">
+            <FileSpreadsheet size={18} className="text-oe-blue" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-content-primary">
+              {t('costs_import.map_columns_title', { defaultValue: 'Map your columns' })}
+            </h3>
+            <p className="text-xs text-content-tertiary mt-0.5">
+              {t('costs_import.map_columns_subtitle', {
+                defaultValue:
+                  'Tell us which column in your file holds each value. We pre-filled the ones we recognised.',
+              })}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Mapping rows */}
+      <div className="px-6 pb-2">
+        <div className="rounded-xl border border-border-light divide-y divide-border-light overflow-hidden">
+          {data.target_fields.map((field) => {
+            const meta = fieldMeta(field);
+            const required = isRequired(field);
+            const value = columnMap[field] ?? NOT_MAPPED;
+            const missing = required && !value;
+            return (
+              <div
+                key={field}
+                className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-4"
+              >
+                <div className="sm:w-1/3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-medium text-content-primary">{meta.label}</span>
+                    {required && (
+                      <Badge variant="neutral" size="sm" className="text-2xs px-1.5 py-0">
+                        {t('costs_import.required', { defaultValue: 'required' })}
+                      </Badge>
+                    )}
+                  </div>
+                  {meta.hint && (
+                    <p className="text-2xs text-content-tertiary mt-0.5">{meta.hint}</p>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <select
+                    value={value}
+                    onChange={(e) => onChangeField(field, e.target.value)}
+                    className={`w-full rounded-lg border bg-surface-elevated px-3 py-2 text-sm text-content-primary focus:outline-none focus:border-oe-blue/50 transition-colors ${
+                      missing ? 'border-semantic-error/50' : 'border-border-light'
+                    }`}
+                  >
+                    <option value={NOT_MAPPED}>
+                      {t('costs_import.not_mapped', { defaultValue: '— not mapped —' })}
+                    </option>
+                    {data.headers.map((header) => (
+                      <option key={header} value={header}>
+                        {header}
+                      </option>
+                    ))}
+                  </select>
+                  {missing && (
+                    <p className="text-2xs text-semantic-error mt-1">
+                      {t('costs_import.field_required_hint', {
+                        defaultValue: 'Map a column for this field to continue.',
+                      })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Sample preview table */}
+      {sampleRows.length > 0 && (
+        <div className="px-6 pt-3 pb-2">
+          <p className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-2">
+            {t('costs_import.sample_preview', { defaultValue: 'Sample from your file' })}
+          </p>
+          <div className="rounded-xl border border-border-light overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-surface-tertiary text-left">
+                  {data.headers.map((header) => (
+                    <th
+                      key={header}
+                      className="px-3 py-2 font-medium text-content-secondary whitespace-nowrap"
+                    >
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-light">
+                {sampleRows.map((row, ri) => (
+                  <tr key={`sample-${ri}`} className="hover:bg-surface-secondary/40">
+                    {data.headers.map((header, ci) => (
+                      <td
+                        key={`${header}-${ci}`}
+                        className="px-3 py-2 text-content-secondary whitespace-nowrap max-w-[18rem] truncate"
+                      >
+                        {row[ci] ?? ''}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Catalog name */}
+      <div className="px-6 pt-3 pb-2">
+        <label
+          htmlFor="catalog-name"
+          className="block text-sm font-medium text-content-primary mb-1"
+        >
+          {t('costs_import.catalog_name', { defaultValue: 'Catalog name' })}
+        </label>
+        <input
+          id="catalog-name"
+          type="text"
+          value={catalogName}
+          onChange={(e) => onCatalogNameChange(e.target.value)}
+          placeholder={t('costs_import.catalog_name_placeholder', {
+            defaultValue: 'e.g. My price book 2026',
+          })}
+          className="w-full max-w-md rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:border-oe-blue/50 transition-colors"
+        />
+        <p className="text-2xs text-content-tertiary mt-1">
+          {t('costs_import.catalog_name_hint', {
+            defaultValue: 'Imported items are grouped under this name so you can find them later.',
+          })}
+        </p>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light mt-2">
+        <Button variant="secondary" onClick={onCancel} disabled={importing}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button
+          variant="primary"
+          onClick={onImport}
+          disabled={!canImport}
+          loading={importing}
+          icon={
+            importing ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />
+          }
+        >
+          {importing
+            ? t('costs.import_importing', { defaultValue: 'Importing...' })
+            : t('costs_import.import_mapped', { defaultValue: 'Import' })}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 export function ImportDatabasePage() {
@@ -1589,6 +1897,52 @@ export function ImportDatabasePage() {
   const [preview, setPreview] = useState<FilePreview | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
+
+  // Column-mapping panel state. Once a file is previewed we move into the
+  // mapping step: `previewData` holds the headers/sample/suggestions,
+  // `columnMap` is the user-editable canonical-field -> raw-header mapping and
+  // `catalogName` groups the imported rows.
+  const [previewData, setPreviewData] = useState<PreviewResult | null>(null);
+  const [columnMap, setColumnMap] = useState<Record<string, string>>({});
+  const [catalogName, setCatalogName] = useState('');
+
+  // Strip the extension from a filename for a friendly default catalog name.
+  const baseName = useCallback(
+    (name: string) => name.replace(/\.[^.]+$/, '').trim() || name,
+    [],
+  );
+
+  // Preview step — kicked off after a file is chosen. On success we enter the
+  // mapping panel; on failure we fall back to a direct auto-detect import so
+  // the user is never hard-blocked by a preview/parse error.
+  const previewMutation = useMutation({
+    mutationFn: (file: File) => previewCostFile(file),
+    onSuccess: (data, file) => {
+      setPreviewData(data);
+      // Seed the editable map from the backend's suggestions, but only keep
+      // suggestions whose header actually exists in the file.
+      const seeded: Record<string, string> = {};
+      for (const field of data.target_fields) {
+        const suggested = data.suggested_map[field];
+        seeded[field] = suggested && data.headers.includes(suggested) ? suggested : NOT_MAPPED;
+      }
+      setColumnMap(seeded);
+      setCatalogName(baseName(file.name));
+    },
+    onError: (err: Error, file) => {
+      // Preview unavailable (network / parse) — degrade to a direct import so
+      // the flow still completes, and tell the user we skipped mapping.
+      addToast({
+        type: 'warning',
+        title: t('costs_import.preview_failed', { defaultValue: 'Could not preview columns' }),
+        message: t('costs_import.preview_failed_fallback', {
+          defaultValue: 'Importing with automatic column detection instead.',
+        }),
+      });
+      if (import.meta.env.DEV) console.error('Cost-file preview failed:', err);
+      directImportMutation.mutate(file);
+    },
+  });
 
   const handleFile = useCallback(
     (file: File) => {
@@ -1613,8 +1967,13 @@ export function ImportDatabasePage() {
         type,
       });
       setResult(null);
+      setPreviewData(null);
+      setColumnMap({});
+      previewMutation.mutate(file);
     },
-    [addToast, t],
+    // previewMutation is stable across renders (react-query); referencing it
+    // keeps the dependency array honest without re-creating handleFile.
+    [addToast, t, previewMutation],
   );
 
   const handleDrop = useCallback(
@@ -1645,37 +2004,71 @@ export function ImportDatabasePage() {
     [handleFile],
   );
 
-  const importMutation = useMutation({
-    mutationFn: () => {
-      if (!selectedFile) throw new Error('No file selected');
-      return uploadCostFile(selectedFile);
-    },
-    onSuccess: (data) => {
+  // Shared success/error handling for both the mapped import and the
+  // auto-detect fallback.
+  const onImportSuccess = useCallback(
+    (data: ImportResult) => {
       setResult(data);
+      setPreviewData(null);
       queryClient.invalidateQueries({ queryKey: ['costs'] });
       if (data.imported > 0) {
         addToast({
           type: 'success',
-          title: t('costs.import_success', {
-            defaultValue: 'Import complete',
-          }),
-          message: `${data.imported} items imported successfully.`,
+          title: t('costs.import_success', { defaultValue: 'Import complete' }),
+          message: data.catalog
+            ? t('costs_import.import_success_catalog', {
+                defaultValue: '{{count}} items imported into "{{catalog}}".',
+                count: data.imported,
+                catalog: data.catalog,
+              })
+            : `${data.imported} items imported successfully.`,
         });
       }
     },
-    onError: (err: Error) => {
+    [addToast, queryClient, t],
+  );
+
+  const onImportError = useCallback(
+    (err: Error) => {
       addToast({
         type: 'error',
         title: t('costs.import_failed', { defaultValue: 'Import failed' }),
         message: err.message,
       });
     },
+    [addToast, t],
+  );
+
+  // Primary import — uses the user's chosen column map + catalog name.
+  const importMutation = useMutation({
+    mutationFn: () => {
+      if (!selectedFile) throw new Error('No file selected');
+      // Drop unmapped (empty) fields so the backend only receives real columns.
+      const cleanMap: Record<string, string> = {};
+      for (const [field, header] of Object.entries(columnMap)) {
+        if (header) cleanMap[field] = header;
+      }
+      return uploadCostFile(selectedFile, cleanMap, catalogName);
+    },
+    onSuccess: onImportSuccess,
+    onError: onImportError,
+  });
+
+  // Fallback import — no column map, backend auto-detects. Used when preview
+  // fails so the user is never hard-blocked.
+  const directImportMutation = useMutation({
+    mutationFn: (file: File) => uploadCostFile(file),
+    onSuccess: onImportSuccess,
+    onError: onImportError,
   });
 
   const handleReset = useCallback(() => {
     setSelectedFile(null);
     setPreview(null);
     setResult(null);
+    setPreviewData(null);
+    setColumnMap({});
+    setCatalogName('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -1997,25 +2390,54 @@ export function ImportDatabasePage() {
             </div>
           </Card>
 
-          {/* Actions */}
-          {selectedFile && (
+          {/* Previewing columns — brief loading state before the mapping panel */}
+          {selectedFile && previewMutation.isPending && (
+            <div className="flex items-center justify-center gap-2 rounded-xl border border-border-light bg-surface-secondary/40 px-4 py-6 text-sm text-content-secondary animate-fade-in">
+              <Loader2 size={16} className="animate-spin text-oe-blue" />
+              {t('costs_import.analyzing_columns', {
+                defaultValue: 'Reading columns from your file…',
+              })}
+            </div>
+          )}
+
+          {/* Column mapping panel — shown once preview resolves */}
+          {selectedFile && previewData && (
+            <ColumnMappingPanel
+              data={previewData}
+              columnMap={columnMap}
+              onChangeField={(field, header) =>
+                setColumnMap((prev) => ({ ...prev, [field]: header }))
+              }
+              catalogName={catalogName}
+              onCatalogNameChange={setCatalogName}
+              onImport={() => importMutation.mutate()}
+              onCancel={handleReset}
+              importing={importMutation.isPending}
+            />
+          )}
+
+          {/* Fallback actions — only when a file is staged but there is no
+              preview yet and we are not actively previewing (e.g. the
+              auto-detect fallback import is in flight, or preview produced
+              nothing). Keeps a direct import path available. */}
+          {selectedFile && !previewData && !previewMutation.isPending && (
             <div className="flex items-center justify-end gap-3 animate-fade-in">
-              <Button variant="secondary" onClick={handleReset}>
+              <Button variant="secondary" onClick={handleReset} disabled={directImportMutation.isPending}>
                 {t('common.cancel', { defaultValue: 'Cancel' })}
               </Button>
               <Button
                 variant="primary"
-                onClick={() => importMutation.mutate()}
-                loading={importMutation.isPending}
+                onClick={() => directImportMutation.mutate(selectedFile)}
+                loading={directImportMutation.isPending}
                 icon={
-                  importMutation.isPending ? (
+                  directImportMutation.isPending ? (
                     <Loader2 size={16} className="animate-spin" />
                   ) : (
                     <Upload size={16} />
                   )
                 }
               >
-                {importMutation.isPending
+                {directImportMutation.isPending
                   ? t('costs.import_importing', { defaultValue: 'Importing...' })
                   : t('costs.import_all', { defaultValue: 'Import All' })}
               </Button>
