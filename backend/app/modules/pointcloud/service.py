@@ -660,9 +660,7 @@ class PointCloudService:
                 source_path = str(local_path)
 
             try:
-                decoded = await asyncio.to_thread(
-                    decode_points, Path(source_path), fmt, max_points=max_points
-                )
+                decoded = await asyncio.to_thread(decode_points, Path(source_path), fmt, max_points=max_points)
             except PointDecodeUnavailable as exc:
                 raise HTTPException(
                     status_code=status.HTTP_501_NOT_IMPLEMENTED,
