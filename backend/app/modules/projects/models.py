@@ -73,7 +73,10 @@ class Project(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     region: Mapped[str] = mapped_column(String(50), nullable=False, default="DACH")
     classification_standard: Mapped[str] = mapped_column(String(50), nullable=False, default="din276")
-    currency: Mapped[str] = mapped_column(String(10), nullable=False, default="EUR")
+    # No EUR bias: empty string means "not chosen yet", mirroring the
+    # ProjectCreate schema default. API creates always pass an explicit
+    # value; the empty default only applies to bare ORM constructions.
+    currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
     locale: Mapped[str] = mapped_column(String(10), nullable=False, default="de")
     validation_rule_sets: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON,

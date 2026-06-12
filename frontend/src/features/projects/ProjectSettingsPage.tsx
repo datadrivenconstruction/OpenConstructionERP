@@ -482,6 +482,9 @@ export function ProjectSettingsPage() {
 
   // ── Local edit state per section ───────────────────────────────────────
   const [fxRates, setFxRates] = useState<ProjectFxRate[]>([]);
+  // Base currency draft — '__custom__' switches to the free-text code input.
+  const [baseCurrencyDraft, setBaseCurrencyDraft] = useState<string>('');
+  const [baseCurrencyCustom, setBaseCurrencyCustom] = useState<string>('');
   const [vatInput, setVatInput] = useState<string>('');
   const [unitInput, setUnitInput] = useState<string>('');
   const [customUnits, setCustomUnits] = useState<string[]>([]);
@@ -496,6 +499,8 @@ export function ProjectSettingsPage() {
   useEffect(() => {
     if (!project) return;
     setFxRates(project.fx_rates ?? []);
+    setBaseCurrencyDraft(project.currency ?? '');
+    setBaseCurrencyCustom('');
     setVatInput(project.default_vat_rate ?? '');
     setCustomUnits(project.custom_units ?? []);
   }, [project]);
@@ -529,6 +534,8 @@ export function ProjectSettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       // Re-sync local state from server response (authoritative)
       setFxRates(updated.fx_rates ?? []);
+      setBaseCurrencyDraft(updated.currency ?? '');
+      setBaseCurrencyCustom('');
       setVatInput(updated.default_vat_rate ?? '');
       setCustomUnits(updated.custom_units ?? []);
       addToast({
@@ -577,6 +584,40 @@ export function ProjectSettingsPage() {
 
   const baseCurrency = project.currency || '';
   const regionalVatPct = Math.round(getVatRate(project.region) * 100); // e.g. 19, 20
+
+  // ── Base currency edit (#editable base currency) ──────────────────────
+  // The base currency is changeable after creation. Saving it RELABELS
+  // existing amounts (quantities and rates keep their numeric values) —
+  // it never converts them, so the warning below the field is explicit.
+  const effectiveBaseDraft =
+    baseCurrencyDraft === '__custom__'
+      ? baseCurrencyCustom.trim().toUpperCase()
+      : baseCurrencyDraft;
+  const baseDraftValid = /^[A-Z0-9]{3,10}$/.test(effectiveBaseDraft);
+  const baseDraftConflict = fxRates.some((r) => r.code === effectiveBaseDraft);
+  const canSaveBaseCurrency =
+    baseDraftValid &&
+    !baseDraftConflict &&
+    effectiveBaseDraft !== baseCurrency &&
+    !updateMutation.isPending;
+  // Keep a not-in-list current value selectable (custom codes saved earlier).
+  // Plain computation (cheap, static list) — this sits below the early
+  // returns above, so a hook here would break the rules of hooks.
+  const knownCurrencyCodes = new Set(flattenCurrencies().map((o) => o.value));
+
+  const handleBaseCurrencySave = () => {
+    if (!canSaveBaseCurrency) return;
+    // The backend rejects a currency change with 409 once BOQ positions
+    // exist unless the patch acknowledges the impact via
+    // metadata.allow_currency_change. The warning under this field IS that
+    // acknowledgment (relabel, not convert), so pass the flag - merged
+    // into the existing metadata because the PATCH replaces the whole
+    // metadata object (a bare flag would wipe demo/flagship tags).
+    updateMutation.mutate({
+      currency: effectiveBaseDraft,
+      metadata: { ...(project.metadata ?? {}), allow_currency_change: true },
+    } as Partial<Project>);
+  };
 
   // ── Save handlers ─────────────────────────────────────────────────────
 
@@ -739,9 +780,9 @@ export function ProjectSettingsPage() {
       <Card padding="lg" id="fx-rates">
         <CardHeader
           title={t('project.settings.currency.title', { defaultValue: 'Currencies' })}
-          subtitle={t('project.settings.currency.subtitle', {
+          subtitle={t('project.settings.currency.subtitle_editable', {
             defaultValue:
-              'Base currency was set when the project was created. Add additional currencies to use on individual resources - rates convert back to the base for rollup totals.',
+              'Set the base currency for this project, and add additional currencies to use on individual resources - rates convert back to the base for rollup totals.',
           })}
           action={
             <Button
@@ -755,6 +796,89 @@ export function ProjectSettingsPage() {
             </Button>
           }
         />
+
+        {/* ── Base currency (editable) ──────────────────────────────────── */}
+        <div className="mt-4 rounded-lg border border-border-light bg-surface-secondary/20 px-4 py-3">
+          <label
+            htmlFor="base-currency-select"
+            className="block text-sm font-medium text-content-primary"
+          >
+            {t('project.settings.base_currency.field', { defaultValue: 'Base currency' })}
+          </label>
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <select
+              id="base-currency-select"
+              value={baseCurrencyDraft}
+              onChange={(e) => setBaseCurrencyDraft(e.target.value)}
+              className="h-9 min-w-[16rem] rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+            >
+              <option value="" disabled>
+                {t('project.settings.fx.select_currency', {
+                  defaultValue: '-- Select currency --',
+                })}
+              </option>
+              {baseCurrency && !knownCurrencyCodes.has(baseCurrency) && (
+                <option value={baseCurrency}>{baseCurrency}</option>
+              )}
+              {CURRENCY_GROUPS.map((g) => (
+                <optgroup key={g.group} label={g.group}>
+                  {g.options.map((o) =>
+                    o.value === '__custom__' ? (
+                      <option key={o.value} value={o.value}>
+                        {t('project.settings.fx.custom_code', {
+                          defaultValue: 'Custom code...',
+                        })}
+                      </option>
+                    ) : (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ),
+                  )}
+                </optgroup>
+              ))}
+            </select>
+            {baseCurrencyDraft === '__custom__' && (
+              <Input
+                value={baseCurrencyCustom}
+                onChange={(e) => setBaseCurrencyCustom(e.target.value)}
+                placeholder={t('project.settings.base_currency.custom_placeholder', {
+                  defaultValue: 'e.g. CHF',
+                })}
+                maxLength={10}
+                className="w-28"
+                aria-label={t('project.settings.fx.custom_code', {
+                  defaultValue: 'Custom code...',
+                })}
+              />
+            )}
+            <Button
+              size="sm"
+              icon={<Save size={14} />}
+              disabled={!canSaveBaseCurrency}
+              loading={updateMutation.isPending}
+              onClick={handleBaseCurrencySave}
+            >
+              {t('common.save', { defaultValue: 'Save' })}
+            </Button>
+          </div>
+          {baseDraftConflict && (
+            <p className="mt-1.5 text-xs text-semantic-error">
+              {t('project.settings.base_currency.conflict', {
+                defaultValue:
+                  '{{code}} is already listed as an additional currency. Remove it from the list below before making it the base.',
+                code: effectiveBaseDraft,
+              })}
+            </p>
+          )}
+          <p className="mt-1.5 text-xs text-content-tertiary">
+            {t('project.settings.base_currency.warning', {
+              defaultValue:
+                'Changing the base currency relabels existing amounts - it does not convert them. Rates and totals keep their numeric values under the new currency.',
+            })}
+          </p>
+        </div>
+
         <div className="mt-4 overflow-hidden rounded-lg border border-border-light">
           <table className="min-w-full text-sm">
             <thead className="bg-surface-secondary/40">

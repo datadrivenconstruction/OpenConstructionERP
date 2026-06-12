@@ -56,7 +56,12 @@ class User(Base):
     date_format: Mapped[str] = mapped_column(
         String(20), nullable=False, default="DD.MM.YYYY", server_default="DD.MM.YYYY"
     )
-    currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="EUR", server_default="EUR")
+    # No EUR bias for new accounts: empty string means "not chosen yet" and
+    # the UI falls back to the project currency / local preference store.
+    # server_default stays "EUR" on purpose - changing it would alter the
+    # table DDL and require an alembic migration for zero functional gain
+    # (ORM inserts always supply the Python-side default).
+    currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="", server_default="EUR")
 
     # Relationships
     api_keys: Mapped[list["APIKey"]] = relationship(
