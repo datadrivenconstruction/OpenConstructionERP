@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Button, Input, InfoHint } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { AddressAutocomplete } from '@/features/geo-hub/AddressAutocomplete';
 import type { AddressAutocompleteSelection } from '@/features/geo-hub/AddressAutocomplete';
@@ -760,6 +761,15 @@ export function CreateProjectModal({
               defaultValue: 'Project created successfully',
             }),
       });
+      // A freshly created project becomes the active one, so every
+      // project-scoped tab (BOQ, Costs, Finance, Schedule, 5D) shows it
+      // right away instead of the previous selection or the all-projects
+      // mix - new users expect their new project to be "current".
+      if (!isEdit) {
+        useProjectContextStore
+          .getState()
+          .setActiveProject(project.id, trimmedName || project.name || '');
+      }
       // Navigate away — no focus return here (we're leaving the page).
       onClose();
       navigate(`/projects/${project.id}`);
@@ -824,21 +834,39 @@ export function CreateProjectModal({
   // invariants here and names the first missing one for the user.
   const submitBlockReason = (() => {
     if (!trimmedName)
-      return t('project_wizard.need_name', {
-        defaultValue: 'Enter a project name (step 1).',
-      });
-    if (!effectiveRegion)
-      return t('project_wizard.need_region', {
-        defaultValue: 'Pick a region (step 2).',
-      });
-    if (!effectiveCurrency)
-      return t('project_wizard.need_currency', {
-        defaultValue: 'Pick a currency (step 2).',
+      return mode === 'classic'
+        ? t('project_wizard.need_name_quick', {
+            defaultValue: 'Enter a project name.',
+          })
+        : t('project_wizard.need_name', {
+            defaultValue: 'Enter a project name (step 1).',
+          });
+    // Quick create promises "only the name is required" - region and
+    // currency stay optional there and remain editable later. The guided
+    // wizard keeps them as step-2 gates. A "Custom..." pick with an empty
+    // text box blocks both modes (the user explicitly chose custom).
+    if (mode !== 'classic') {
+      if (!effectiveRegion)
+        return t('project_wizard.need_region', {
+          defaultValue: 'Pick a region (step 2).',
+        });
+      if (!effectiveCurrency)
+        return t('project_wizard.need_currency', {
+          defaultValue: 'Pick a currency (step 2).',
+        });
+    }
+    if (form.region === '__custom__' && !effectiveRegion)
+      return t('project_wizard.need_custom_region_quick', {
+        defaultValue: 'Type the custom region or set Region back to none.',
       });
     if (form.classification_standard === '__custom__' && !effectiveStandard)
-      return t('project_wizard.need_standard', {
-        defaultValue: 'Enter the custom classification standard (step 2).',
-      });
+      return mode === 'classic'
+        ? t('project_wizard.need_custom_standard_quick', {
+            defaultValue: 'Type the custom standard or set it back to none.',
+          })
+        : t('project_wizard.need_standard', {
+            defaultValue: 'Enter the custom classification standard (step 2).',
+          });
     return null;
   })();
   const canSubmit = submitBlockReason === null;
