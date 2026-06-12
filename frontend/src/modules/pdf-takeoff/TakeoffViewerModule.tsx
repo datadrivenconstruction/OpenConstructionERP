@@ -3263,6 +3263,20 @@ export default function TakeoffViewerModule({
         { items },
       );
 
+      // The bulk endpoint drops rows that fail validation and returns only
+      // the inserted positions, so when the response is shorter an index
+      // zip would link measurement i to a NEIGHBOR's position - silently
+      // wrong quantities. Match by the measurement id we stamped into each
+      // position's metadata instead; index matching stays only as the
+      // fallback for an equal-length response.
+      const sameLength = created.length === bulkAddMeasurements.length;
+      const createdByMeasurementId = new Map<string, Position>();
+      for (const pos of created) {
+        const meta = (pos.metadata ?? pos.metadata_) as Record<string, unknown> | undefined;
+        const mid = meta?.pdf_measurement_id;
+        if (typeof mid === 'string') createdByMeasurementId.set(mid, pos);
+      }
+
       // Link measurements to their new positions (and push the quantity
       // server-side). A per-item failure only degrades the back-link -
       // the position already exists with the measured quantity.
@@ -3270,7 +3284,7 @@ export default function TakeoffViewerModule({
       const createdByMeasurement = new Map<string, Position>();
       for (let i = 0; i < bulkAddMeasurements.length; i += 1) {
         const m = bulkAddMeasurements[i]!;
-        const pos = created[i];
+        const pos = createdByMeasurementId.get(m.serverId ?? m.id) ?? (sameLength ? created[i] : undefined);
         if (!pos) continue;
         createdByMeasurement.set(m.id, pos);
         if (m.serverId) {
@@ -4661,7 +4675,9 @@ export default function TakeoffViewerModule({
                         value={linkPickerProjectId}
                         onChange={(e) => handlePickerProjectChange(e.target.value)}
                         className="text-[10px] rounded border border-border-subtle bg-surface-primary px-1 py-0.5 text-content-primary"
-                        aria-label={t('takeoff.pick_project', { defaultValue: '- project -' })}
+                        aria-label={t('takeoff.bulk_add_target_project', {
+                          defaultValue: 'Target project',
+                        })}
                       >
                         <option value="">{t('takeoff.pick_project', { defaultValue: '- project -' })}</option>
                         {linkPickerProjects.map((p) => (
@@ -4673,7 +4689,9 @@ export default function TakeoffViewerModule({
                         onChange={(e) => handlePickerBoqChange(e.target.value)}
                         disabled={!linkPickerProjectId || linkBoqsLoading}
                         className="text-[10px] rounded border border-border-subtle bg-surface-primary px-1 py-0.5 text-content-primary disabled:opacity-60"
-                        aria-label={t('takeoff.pick_boq', { defaultValue: '- BOQ -' })}
+                        aria-label={t('takeoff.bulk_add_target_boq', {
+                          defaultValue: 'Target BOQ',
+                        })}
                       >
                         <option value="">
                           {linkBoqsLoading

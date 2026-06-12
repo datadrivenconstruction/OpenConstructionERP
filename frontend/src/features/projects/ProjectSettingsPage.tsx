@@ -482,7 +482,7 @@ export function ProjectSettingsPage() {
 
   // ── Local edit state per section ───────────────────────────────────────
   const [fxRates, setFxRates] = useState<ProjectFxRate[]>([]);
-  // Base currency draft — '__custom__' switches to the free-text code input.
+  // Base currency draft - '__custom__' switches to the free-text code input.
   const [baseCurrencyDraft, setBaseCurrencyDraft] = useState<string>('');
   const [baseCurrencyCustom, setBaseCurrencyCustom] = useState<string>('');
   const [vatInput, setVatInput] = useState<string>('');
@@ -587,7 +587,7 @@ export function ProjectSettingsPage() {
 
   // ── Base currency edit (#editable base currency) ──────────────────────
   // The base currency is changeable after creation. Saving it RELABELS
-  // existing amounts (quantities and rates keep their numeric values) —
+  // existing amounts (quantities and rates keep their numeric values) -
   // it never converts them, so the warning below the field is explicit.
   const effectiveBaseDraft =
     baseCurrencyDraft === '__custom__'
@@ -601,7 +601,7 @@ export function ProjectSettingsPage() {
     effectiveBaseDraft !== baseCurrency &&
     !updateMutation.isPending;
   // Keep a not-in-list current value selectable (custom codes saved earlier).
-  // Plain computation (cheap, static list) — this sits below the early
+  // Plain computation (cheap, static list) - this sits below the early
   // returns above, so a hook here would break the rules of hooks.
   const knownCurrencyCodes = new Set(flattenCurrencies().map((o) => o.value));
 

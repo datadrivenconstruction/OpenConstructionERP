@@ -174,10 +174,18 @@ export function SustainabilityPage() {
   // selectors isn't force-recalculated against the original deep-link.
   const autoCalcDone = useRef(false);
 
-  // Follow the global project switcher. The effect fires only when the top-bar
-  // selection changes, so an in-page pick is preserved; switching project
-  // globally re-scopes this page too (fixes "selection only affects one tab").
+  // Follow the global project switcher. Skip the first run so a
+  // ?project_id= deep link survives mount (the initial state above already
+  // honoured the global selection when there was no deep link); afterwards
+  // the effect fires only when the top-bar selection changes, so an in-page
+  // pick is preserved while switching project globally re-scopes this page
+  // too (fixes "selection only affects one tab").
+  const projectSyncMounted = useRef(false);
   useEffect(() => {
+    if (!projectSyncMounted.current) {
+      projectSyncMounted.current = true;
+      return;
+    }
     if (activeProjectId && activeProjectId !== selectedProjectId) {
       setSelectedProjectId(activeProjectId);
     }

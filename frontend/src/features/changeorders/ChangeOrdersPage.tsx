@@ -1288,6 +1288,9 @@ function DetailView({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['changeorder', orderId] });
       queryClient.invalidateQueries({ queryKey: ['changeorders'] });
+      // Approval may revise a linked contract's total via the backend
+      // subscriber - refresh contract views so the bumped value shows.
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
       addToast({ type: 'success', title: t('changeorders.approved', { defaultValue: 'Change order approved' }) });
     },
     onError: (err: Error) => addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message }),

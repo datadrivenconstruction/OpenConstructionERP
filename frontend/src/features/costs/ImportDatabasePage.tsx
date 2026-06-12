@@ -1719,6 +1719,17 @@ function ColumnMappingPanel({
   // Show up to 3 sample rows under their headers.
   const sampleRows = data.sample_rows.slice(0, 3);
 
+  // Selectable header options: drop empty-string headers (they would collide
+  // with the not-mapped sentinel) and disambiguate duplicate header names in
+  // the visible text with their column number, keeping value=header.
+  const headerNameCounts = new Map<string, number>();
+  for (const header of data.headers) {
+    headerNameCounts.set(header, (headerNameCounts.get(header) ?? 0) + 1);
+  }
+  const headerOptions = data.headers
+    .map((header, index) => ({ header, index }))
+    .filter(({ header }) => header.trim() !== '');
+
   return (
     <Card className="animate-card-in" padding="none">
       <div className="px-6 pt-5 pb-4">
@@ -1770,16 +1781,22 @@ function ColumnMappingPanel({
                   <select
                     value={value}
                     onChange={(e) => onChangeField(field, e.target.value)}
+                    aria-label={meta.label}
                     className={`w-full rounded-lg border bg-surface-elevated px-3 py-2 text-sm text-content-primary focus:outline-none focus:border-oe-blue/50 transition-colors ${
                       missing ? 'border-semantic-error/50' : 'border-border-light'
                     }`}
                   >
                     <option value={NOT_MAPPED}>
-                      {t('costs_import.not_mapped', { defaultValue: '— not mapped —' })}
+                      {t('costs_import.not_mapped', { defaultValue: 'Not mapped' })}
                     </option>
-                    {data.headers.map((header) => (
-                      <option key={header} value={header}>
-                        {header}
+                    {headerOptions.map(({ header, index }) => (
+                      <option key={`opt-${index}`} value={header}>
+                        {(headerNameCounts.get(header) ?? 0) > 1
+                          ? `${header} (${t('costs_import.col_n', {
+                              defaultValue: 'col {{num}}',
+                              num: index + 1,
+                            })})`
+                          : header}
                       </option>
                     ))}
                   </select>
@@ -1807,9 +1824,9 @@ function ColumnMappingPanel({
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-surface-tertiary text-left">
-                  {data.headers.map((header) => (
+                  {data.headers.map((header, ci) => (
                     <th
-                      key={header}
+                      key={`head-${ci}`}
                       className="px-3 py-2 font-medium text-content-secondary whitespace-nowrap"
                     >
                       {header}
@@ -1863,8 +1880,10 @@ function ColumnMappingPanel({
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light mt-2">
+        {/* This action discards the staged file entirely (handleReset), so it
+            is labelled Cancel rather than Back. */}
         <Button variant="secondary" onClick={onCancel} disabled={importing}>
-          {t('common.back', { defaultValue: 'Back' })}
+          {t('costs_import.cancel', { defaultValue: 'Cancel' })}
         </Button>
         <Button
           variant="primary"
@@ -1912,12 +1931,19 @@ export function ImportDatabasePage() {
     [],
   );
 
-  // Preview step — kicked off after a file is chosen. On success we enter the
-  // mapping panel; on failure we fall back to a direct auto-detect import so
-  // the user is never hard-blocked by a preview/parse error.
+  // The file currently staged by the user. Preview results arriving for any
+  // other (stale) file are ignored, so a slow preview response can never
+  // clobber the mapping panel of a file picked later.
+  const currentFileRef = useRef<File | null>(null);
+
+  // Preview step - kicked off after a file is chosen. On success we enter the
+  // mapping panel; on failure the file stays staged and the user can run the
+  // auto-detect "Import All" fallback that renders below the drop zone.
   const previewMutation = useMutation({
     mutationFn: (file: File) => previewCostFile(file),
     onSuccess: (data, file) => {
+      // Stale response for a file that is no longer staged - ignore it.
+      if (currentFileRef.current !== file) return;
       setPreviewData(data);
       // Seed the editable map from the backend's suggestions, but only keep
       // suggestions whose header actually exists in the file.
@@ -1930,17 +1956,19 @@ export function ImportDatabasePage() {
       setCatalogName(baseName(file.name));
     },
     onError: (err: Error, file) => {
-      // Preview unavailable (network / parse) — degrade to a direct import so
-      // the flow still completes, and tell the user we skipped mapping.
+      if (currentFileRef.current !== file) return;
+      // Preview unavailable (network / parse). Keep the staged file and let
+      // the user decide: the "Import All" fallback button below the drop zone
+      // runs the auto-detect import. Never import without an explicit click.
       addToast({
         type: 'warning',
         title: t('costs_import.preview_failed', { defaultValue: 'Could not preview columns' }),
         message: t('costs_import.preview_failed_fallback', {
-          defaultValue: 'Importing with automatic column detection instead.',
+          defaultValue:
+            'Your file is still staged. Use "Import All" below to import it with automatic column detection.',
         }),
       });
       if (import.meta.env.DEV) console.error('Cost-file preview failed:', err);
-      directImportMutation.mutate(file);
     },
   });
 
@@ -1960,6 +1988,7 @@ export function ImportDatabasePage() {
         return;
       }
 
+      currentFileRef.current = file;
       setSelectedFile(file);
       setPreview({
         name: file.name,
@@ -2021,7 +2050,10 @@ export function ImportDatabasePage() {
                 count: data.imported,
                 catalog: data.catalog,
               })
-            : `${data.imported} items imported successfully.`,
+            : t('costs_import.import_success_count', {
+                defaultValue: '{{count}} items imported successfully.',
+                count: data.imported,
+              }),
         });
       }
     },
@@ -2039,7 +2071,7 @@ export function ImportDatabasePage() {
     [addToast, t],
   );
 
-  // Primary import — uses the user's chosen column map + catalog name.
+  // Primary import - uses the user's chosen column map + catalog name.
   const importMutation = useMutation({
     mutationFn: () => {
       if (!selectedFile) throw new Error('No file selected');
@@ -2054,8 +2086,8 @@ export function ImportDatabasePage() {
     onError: onImportError,
   });
 
-  // Fallback import — no column map, backend auto-detects. Used when preview
-  // fails so the user is never hard-blocked.
+  // Fallback import - no column map, backend auto-detects. Triggered only by
+  // the explicit "Import All" button so the user is never hard-blocked.
   const directImportMutation = useMutation({
     mutationFn: (file: File) => uploadCostFile(file),
     onSuccess: onImportSuccess,
@@ -2063,6 +2095,7 @@ export function ImportDatabasePage() {
   });
 
   const handleReset = useCallback(() => {
+    currentFileRef.current = null;
     setSelectedFile(null);
     setPreview(null);
     setResult(null);
@@ -2390,17 +2423,17 @@ export function ImportDatabasePage() {
             </div>
           </Card>
 
-          {/* Previewing columns — brief loading state before the mapping panel */}
+          {/* Previewing columns - brief loading state before the mapping panel */}
           {selectedFile && previewMutation.isPending && (
             <div className="flex items-center justify-center gap-2 rounded-xl border border-border-light bg-surface-secondary/40 px-4 py-6 text-sm text-content-secondary animate-fade-in">
               <Loader2 size={16} className="animate-spin text-oe-blue" />
               {t('costs_import.analyzing_columns', {
-                defaultValue: 'Reading columns from your file…',
+                defaultValue: 'Reading columns from your file...',
               })}
             </div>
           )}
 
-          {/* Column mapping panel — shown once preview resolves */}
+          {/* Column mapping panel - shown once preview resolves */}
           {selectedFile && previewData && (
             <ColumnMappingPanel
               data={previewData}
@@ -2416,10 +2449,10 @@ export function ImportDatabasePage() {
             />
           )}
 
-          {/* Fallback actions — only when a file is staged but there is no
-              preview yet and we are not actively previewing (e.g. the
-              auto-detect fallback import is in flight, or preview produced
-              nothing). Keeps a direct import path available. */}
+          {/* Fallback actions - only when a file is staged but there is no
+              preview yet and we are not actively previewing (e.g. preview
+              failed or produced nothing). Keeps a direct, user-initiated
+              auto-detect import path available. */}
           {selectedFile && !previewData && !previewMutation.isPending && (
             <div className="flex items-center justify-end gap-3 animate-fade-in">
               <Button variant="secondary" onClick={handleReset} disabled={directImportMutation.isPending}>
