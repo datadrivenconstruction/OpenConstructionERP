@@ -213,32 +213,22 @@ async def _purge(session: AsyncSession, pid: uuid.UUID) -> None:
     deterministic-id re-insert would then PK-collide. Delete those rows
     explicitly (links -> elements -> models) before the cascading project delete.
     """
-    from app.modules.bim_hub.models import BIMElement, BIMModel, BOQElementLink
-    from app.modules.boq.models import BOQ, Position
-    from app.modules.dwg_takeoff.models import DwgDrawing
     from app.modules.projects.models import Project
+    from app.modules.projects.service import purge_project_children_without_cascade
     from app.modules.resources.models import Resource
 
-    model_ids = list((await session.execute(select(BIMModel.id).where(BIMModel.project_id == pid))).scalars().all())
-    boq_ids = list((await session.execute(select(BOQ.id).where(BOQ.project_id == pid))).scalars().all())
-    pos_ids: list[uuid.UUID] = []
-    if boq_ids:
-        pos_ids = list((await session.execute(select(Position.id).where(Position.boq_id.in_(boq_ids)))).scalars().all())
-    if pos_ids:
-        await session.execute(delete(BOQElementLink).where(BOQElementLink.boq_position_id.in_(pos_ids)))
-    if model_ids:
-        await session.execute(delete(BIMElement).where(BIMElement.model_id.in_(model_ids)))
-        await session.execute(delete(BIMModel).where(BIMModel.id.in_(model_ids)))
-    # DWG Takeoff drawings cascade on the project delete below, but a prior
-    # install may have seeded the flagship DWG as a BIM model under the same
-    # deterministic id; the BIMModel delete above already cleared that. Drop
-    # any DWG drawing rows explicitly too so a forced re-seed never PK-collides.
-    await session.execute(delete(DwgDrawing).where(DwgDrawing.project_id == pid))
-    # Resources FK is ON DELETE SET NULL, so drop them explicitly.
-    await session.execute(delete(Resource).where(Resource.home_project_id == pid))
+    # Generic sweep: every mapped table with a project_id column, children
+    # first. Covers the bare-FK tables (BIM models/elements, BOQ links, DWG
+    # drawings, procurement POs, ...) whose deterministic ids and unique
+    # business keys would otherwise collide on the re-insert.
+    await purge_project_children_without_cascade(session, [pid])
+    # Resources FK is ON DELETE SET NULL, so a prior project delete already
+    # nulled home_project_id on its resources; match those orphans by their
+    # seed tag as well - they keep their deterministic ids.
+    await session.execute(delete(Resource).where(Resource.metadata_["demo_id"].as_string() == "flagship-house"))
     proj = await session.get(Project, pid)
     if proj is not None:
-        await session.delete(proj)  # cascades BOQ (-> positions), GeoAnchor, Document
+        await session.delete(proj)  # cascades anything left at the DB level
     await session.flush()
 
 
@@ -622,8 +612,11 @@ async def install_flagship(
     existing = await session.get(Project, pid)
     if existing is not None and not force:
         return {"status": "already", "project_id": str(pid)}
-    if existing is not None and force:
-        await _purge(session, pid)
+    # Forced re-seed OR the project row is absent. In both cases clear any
+    # prior install's rows first: children linked by bare FK columns (BIM
+    # models/elements, BOQ links) survive a project delete as orphans, and
+    # their deterministic ids would PK-collide on the re-insert below.
+    await _purge(session, pid)
 
     # ── project + geo anchor ────────────────────────────────────────────
     addr = pj.get("address") or {}

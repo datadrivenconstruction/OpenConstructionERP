@@ -147,10 +147,18 @@ async def reset_demo_data(session: AsyncSession) -> dict:
         logger.info("qa-reset: no demo users present, skipping wipe")
 
     # Delete all projects owned by demo users. CASCADE on FK takes care of
-    # BOQ rows, positions, schedules, finance, etc. - we don't enumerate
-    # every per-module table because the cascades are already set up.
+    # BOQ rows, positions, schedules, finance, etc. for most modules; the
+    # handful of children linked by bare GUID columns (BIM models, groups,
+    # federations, DWG drawings, resources) must be cleared explicitly or
+    # the deterministic-id installers PK-collide on the re-seed below.
     deleted_projects = 0
     if demo_user_ids:
+        from app.modules.projects.service import purge_project_children_without_cascade
+
+        project_ids = list(
+            (await session.execute(select(Project.id).where(Project.owner_id.in_(demo_user_ids)))).scalars().all()
+        )
+        await purge_project_children_without_cascade(session, project_ids)
         result = await session.execute(delete(Project).where(Project.owner_id.in_(demo_user_ids)))
         deleted_projects = result.rowcount or 0
         await session.flush()

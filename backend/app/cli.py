@@ -558,6 +558,17 @@ def run_preflight(
 def cmd_serve(args: argparse.Namespace) -> None:
     """Start the OpenConstructionERP server."""
     data_dir = Path(args.data_dir).expanduser().resolve()
+
+    # ``serve --no-demo``: skip demo accounts / showcase projects for this
+    # start AND remember the choice in the data dir so subsequent bare
+    # starts honour it too (read by app.main's demo seeder when SEED_DEMO
+    # is not set in the environment).
+    if getattr(args, "no_demo", False):
+        from app.core.demo_seed import write_demo_seed_choice
+
+        os.environ["SEED_DEMO"] = "false"
+        write_demo_seed_choice(False, data_dir)
+
     _setup_env(data_dir, args.host, args.port)
 
     # Run only the fatal preflight checks before attempting to start.
@@ -1040,6 +1051,29 @@ def _prompt_open_browser(url: str, default_open: bool = True) -> bool:
     if answer == "":
         return default_open
     return answer.startswith("o") or answer in ("y", "yes", "да", "д")
+
+
+def _prompt_seed_demo() -> bool | None:
+    """Ask on first run whether to load the demo projects.
+
+    Returns ``True`` / ``False`` for an explicit answer (default Yes on a
+    bare Enter), or ``None`` when there is no interactive terminal (CI,
+    piped input, service start) - callers keep the current default
+    behaviour in that case and do not persist anything.
+    """
+    if not sys.stdin.isatty() or not sys.stdout.isatty() or os.environ.get("CI"):
+        return None
+
+    prompt = f"  {_bold('Load demo projects')} {_dim('to explore the app?')} {_dim('[Y/n]')} "
+    try:
+        answer = input(prompt).strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        print()
+        return None
+
+    if answer == "":
+        return True
+    return not (answer.startswith("n") or answer in ("нет", "н"))
 
 
 def cmd_seed(args: argparse.Namespace) -> None:
@@ -1597,6 +1631,15 @@ def main() -> None:
     _add_common_server_args(serve_p)
     serve_p.add_argument("--open", action="store_true", help="Open browser after startup")
     serve_p.add_argument("--quiet", action="store_true", help="Suppress banner and info logs")
+    serve_p.add_argument(
+        "--no-demo",
+        action="store_true",
+        help=(
+            "Start without demo accounts and showcase projects (sets SEED_DEMO=false "
+            "and persists the choice to <data-dir>/demo_seed_choice.json so later "
+            "starts stay clean too)"
+        ),
+    )
 
     # init-db (canonical) + init (alias for backward compat)
     init_db_p = subparsers.add_parser(
@@ -1775,6 +1818,23 @@ def main() -> None:
         if first_run:
             print_welcome(next_command_hint=False)
             url = f"http://{DEFAULT_HOST}:{DEFAULT_PORT}"
+            # First-run demo choice: ask once on a genuinely fresh install
+            # (no embedded cluster initialised yet, no legacy SQLite file)
+            # when SEED_DEMO is not already forced via the environment and
+            # no earlier answer is on record. The answer is persisted to
+            # <data-dir>/demo_seed_choice.json so every later boot (and the
+            # flagship/Heilbronn backfills) respects it.
+            from app.core.demo_seed import read_demo_seed_choice, write_demo_seed_choice
+
+            fresh_install = (
+                not (data_dir / "pgdata" / "PG_VERSION").exists() and not (data_dir / "openestimate.db").exists()
+            )
+            if fresh_install and "SEED_DEMO" not in os.environ and read_demo_seed_choice(data_dir) is None:
+                seed_choice = _prompt_seed_demo()
+                if seed_choice is not None:
+                    write_demo_seed_choice(seed_choice, data_dir)
+                    if not seed_choice:
+                        os.environ["SEED_DEMO"] = "false"
             # Press 'o' (or Enter) to let the server open the browser
             # after it has bound the socket; any other answer keeps the
             # terminal focused (useful for SSH sessions).

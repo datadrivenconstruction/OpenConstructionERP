@@ -36,7 +36,7 @@ import {
   Wrench,
   LayoutGrid,
 } from 'lucide-react';
-import { Card, CardHeader, CardContent, CardFooter, Button, Badge, InfoHint, Skeleton, Breadcrumb, DismissibleInfo, IntroRichText } from '@/shared/ui';
+import { Card, CardHeader, CardContent, CardFooter, Button, Badge, InfoHint, Skeleton, Breadcrumb, DismissibleInfo, IntroRichText, ConfirmDialog } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { DashboardLayoutManager } from '@/features/dashboard/DashboardLayoutManager';
@@ -1112,6 +1112,34 @@ export function SettingsPage() {
     },
   });
 
+  // ── Remove demo data (admin only) ────────────────────────────────────
+  const [showPurgeDemo, setShowPurgeDemo] = useState(false);
+
+  const purgeDemoMutation = useMutation({
+    mutationFn: () => apiPost<{ deleted: number }>('/v1/projects/demo-data/purge/', {}),
+    onSuccess: (data) => {
+      setShowPurgeDemo(false);
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['project'] });
+      addToast({
+        type: 'success',
+        title: t('settings.demo_data_removed_title', { defaultValue: 'Demo data removed' }),
+        message: t('settings.demo_data_removed_message', {
+          defaultValue: '{{count}} demo projects were deleted. They will not be recreated on restart.',
+          count: data.deleted,
+        }),
+      });
+    },
+    onError: (error: Error) => {
+      setShowPurgeDemo(false);
+      addToast({
+        type: 'error',
+        title: t('settings.demo_data_remove_failed', { defaultValue: 'Could not remove demo data' }),
+        message: error.message,
+      });
+    },
+  });
+
   const { data: profile, isPending: profileLoading } = useQuery({
     queryKey: ['me'],
     queryFn: () => apiGet<UserProfile>('/v1/users/me/'),
@@ -1514,6 +1542,29 @@ export function SettingsPage() {
                     </Button>
                   </div>
 
+                  {profile?.role === 'admin' && (
+                    <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-semantic-error/20 bg-surface-elevated px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-content-primary">
+                          {t('settings.remove_demo_title', { defaultValue: 'Remove demo data' })}
+                        </p>
+                        <p className="text-xs text-content-secondary mt-0.5">
+                          {t('settings.remove_demo_desc', {
+                            defaultValue:
+                              'Permanently delete the seeded demo projects and everything inside them (BOQs, documents, schedules). Your own projects and all user accounts are kept, and the demo content will not come back on restart.',
+                          })}
+                        </p>
+                      </div>
+                      <Button
+                        variant="danger"
+                        icon={<Trash2 size={14} />}
+                        onClick={() => setShowPurgeDemo(true)}
+                      >
+                        {t('settings.remove_demo_action', { defaultValue: 'Remove demo data' })}
+                      </Button>
+                    </div>
+                  )}
+
                   <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-semantic-error/20 bg-surface-elevated px-4 py-3">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-content-primary">
@@ -1538,6 +1589,19 @@ export function SettingsPage() {
                     error={deleteError}
                     onCancel={() => { if (!deleteAccountMutation.isPending) setShowDeleteAccount(false); }}
                     onConfirm={(value) => { setDeleteError(null); deleteAccountMutation.mutate(value); }}
+                  />
+
+                  <ConfirmDialog
+                    open={showPurgeDemo}
+                    loading={purgeDemoMutation.isPending}
+                    title={t('settings.remove_demo_confirm_title', { defaultValue: 'Remove demo data?' })}
+                    message={t('settings.remove_demo_confirm_message', {
+                      defaultValue:
+                        'All seeded demo projects and their data will be permanently deleted, including archived ones. This cannot be undone.',
+                    })}
+                    confirmLabel={t('settings.remove_demo_action', { defaultValue: 'Remove demo data' })}
+                    onCancel={() => { if (!purgeDemoMutation.isPending) setShowPurgeDemo(false); }}
+                    onConfirm={() => purgeDemoMutation.mutate()}
                   />
                 </CardContent>
               </Card>

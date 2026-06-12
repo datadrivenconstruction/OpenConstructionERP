@@ -18,7 +18,7 @@ from fastapi.responses import Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep, SettingsDep
+from app.dependencies import CurrentUserId, CurrentUserPayload, RequireRole, SessionDep, SettingsDep
 from app.modules.projects import profile_service
 from app.modules.projects.bundle_export import (
     export_bundle as fm_export_bundle,
@@ -345,6 +345,48 @@ async def restore_project(
         )
     restored = await service.restore_project(project_id)
     return ProjectResponse.model_validate(restored)
+
+
+# ── Demo data purge (Settings → Danger Zone) ─────────────────────────────
+
+
+@router.post(
+    "/demo-data/purge/",
+    dependencies=[Depends(RequireRole("admin"))],
+    summary="Remove demo data",
+    description=(
+        "Hard-delete every seeded demo/showcase project, archived ones "
+        "included (matched on the metadata demo_id tag the seeders write). "
+        "DB-level FK cascades remove the projects' BOQs, documents, "
+        "schedules and other children. Demo user accounts are kept. The "
+        "choice is persisted to the data dir so the startup seeder does "
+        "not recreate the showcase on the next boot. Admin only."
+    ),
+)
+async def purge_demo_data(
+    service: ProjectService = Depends(_get_service),
+) -> dict[str, int]:
+    """Hard-delete all demo projects and remember the opt-out."""
+    try:
+        deleted = await service.purge_demo_projects()
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Demo data purge failed")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to remove demo data. Check server logs for details.",
+        ) from exc
+
+    # Persist the opt-out so the startup seeder (showcase + flagship +
+    # Heilbronn backfills) does not reinstall the demo content on the next
+    # boot. Best-effort - the purge result stands even if the data dir is
+    # read-only. An explicit SEED_DEMO env var still wins over this file.
+    from app.core.demo_seed import write_demo_seed_choice
+
+    write_demo_seed_choice(False)
+
+    return {"deleted": deleted}
 
 
 # ── Duplicate (deep clone) ───────────────────────────────────────────────
