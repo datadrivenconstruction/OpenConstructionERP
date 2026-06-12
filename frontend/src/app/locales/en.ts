@@ -4072,6 +4072,7 @@ const resource = {
     "projects.currency": "Currency",
     "projects.delete_failed": "Failed to delete project",
     "projects.deleted": "Project archived",
+    "projects.demo_banner": "{{count}} of these projects are seeded demo data so you can explore the platform with realistic content. Your own projects are never affected by removing them.",
     "projects.description": "Description",
     "projects.description_placeholder": "Project description, scope, notes...",
     "projects.duplicate_failed": "Failed to duplicate",

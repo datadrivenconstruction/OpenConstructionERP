@@ -8,13 +8,13 @@ import {
   Building2, DollarSign, Euro, PoundSterling, Globe2, MapPin, Layers, AlertTriangle,
 } from 'lucide-react';
 import { formatDistanceToNowStrict, isValid as isValidDate, parseISO } from 'date-fns';
-import { Button, Card, Badge, EmptyState, Skeleton, SkeletonGrid, Breadcrumb, ProjectMap, ProjectWeather, FileTypeChips, type LatLng } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Skeleton, SkeletonGrid, Breadcrumb, ProjectMap, ProjectWeather, FileTypeChips, ConfirmDialog, type LatLng } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { projectsApi, type Project } from './api';
-import { apiGet, apiPatch, apiDelete } from '@/shared/lib/api';
+import { apiGet, apiPatch, apiPost, apiDelete } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useLocalStorage } from '@/shared/hooks/useLocalStorage';
@@ -64,6 +64,8 @@ export function ProjectsPage() {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
 
   // Create project modal
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -93,6 +95,46 @@ export function ProjectsPage() {
     queryKey: ['projects'],
     queryFn: projectsApi.list,
     staleTime: 5 * 60_000,
+  });
+
+  /* Demo-data banner: seeded demo projects carry metadata.demo_id. The
+     purge action lives in Settings > Advanced too, but new users could not
+     find it there ("how do I delete all this pre-created data?"), so the
+     projects list - where the demo cards actually confront the user -
+     offers it directly to admins. */
+  const { data: me } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => apiGet<{ role?: string }>('/v1/users/me/'),
+    retry: false,
+    staleTime: 5 * 60_000,
+  });
+  const demoCount = useMemo(
+    () => (projects ?? []).filter((p) => Boolean((p.metadata as Record<string, unknown> | null)?.demo_id)).length,
+    [projects],
+  );
+  const [showPurgeDemo, setShowPurgeDemo] = useState(false);
+  const purgeDemoMutation = useMutation({
+    mutationFn: () => apiPost<{ deleted: number }>('/v1/projects/demo-data/purge/', {}),
+    onSuccess: (data) => {
+      setShowPurgeDemo(false);
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      addToast({
+        type: 'success',
+        title: t('settings.demo_data_removed_title', { defaultValue: 'Demo data removed' }),
+        message: t('settings.demo_data_removed_message', {
+          defaultValue: '{{count}} demo projects were deleted. They will not be recreated on restart.',
+          count: data.deleted,
+        }),
+      });
+    },
+    onError: (error: Error) => {
+      setShowPurgeDemo(false);
+      addToast({
+        type: 'error',
+        title: t('settings.demo_data_remove_failed', { defaultValue: 'Could not remove demo data' }),
+        message: error.message,
+      });
+    },
   });
 
   /* Map of project_id → uploaded file extensions (rvt/ifc/dwg/pdf/…),
@@ -438,6 +480,40 @@ export function ProjectsPage() {
             'Every project you create lands here as a card carrying its BOQ count, total value in its own currency, region and uploaded file types, so you see the whole portfolio at a glance without opening each one. Open a card to reach the project hub, or pin and filter to keep daily work on top. Totals feed Analytics and the role dashboards in Reporting.',
         })}
       </DismissibleInfo>
+
+      {/* Demo-data notice: admins see how to clear the seeded showcase
+          projects right where those cards live. */}
+      {demoCount > 0 && me?.role === 'admin' && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-border-default bg-surface-elevated px-4 py-3">
+          <p className="text-sm text-content-secondary min-w-0">
+            {t('projects.demo_banner', {
+              defaultValue:
+                '{{count}} of these projects are seeded demo data so you can explore the platform with realistic content. Your own projects are never affected by removing them.',
+              count: demoCount,
+            })}
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowPurgeDemo(true)}
+            data-testid="projects-remove-demo"
+          >
+            {t('settings.remove_demo_action', { defaultValue: 'Remove demo data' })}
+          </Button>
+        </div>
+      )}
+      <ConfirmDialog
+        open={showPurgeDemo}
+        loading={purgeDemoMutation.isPending}
+        title={t('settings.remove_demo_confirm_title', { defaultValue: 'Remove demo data?' })}
+        message={t('settings.remove_demo_confirm_message', {
+          defaultValue:
+            'All seeded demo projects and their data will be permanently deleted, including archived ones. This cannot be undone.',
+        })}
+        confirmLabel={t('settings.remove_demo_action', { defaultValue: 'Remove demo data' })}
+        onCancel={() => { if (!purgeDemoMutation.isPending) setShowPurgeDemo(false); }}
+        onConfirm={() => purgeDemoMutation.mutate()}
+      />
 
       {/* Stats cards — 4-up portfolio summary, each card with primary
           number + sub-line so no card is sparse. */}
