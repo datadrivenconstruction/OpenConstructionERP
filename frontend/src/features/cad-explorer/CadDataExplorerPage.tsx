@@ -2856,6 +2856,13 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
   const [boqId, setBoqId] = React.useState('');
   const [creating, setCreating] = React.useState(false);
 
+  // This modal stays mounted and toggles via `open`, so re-sync to the global
+  // project switcher instead of keeping the project captured at first mount.
+  React.useEffect(() => {
+    if (activeProjectId && activeProjectId !== projectId) setProjectId(activeProjectId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProjectId]);
+
   const { data: projects } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
@@ -3293,6 +3300,12 @@ function SaveDialog({
   const [projectId, setProjectId] = useState(activeProjectId || '');
   const [saving, setSaving] = useState(false);
 
+  // Re-sync to the global project switcher (this dialog persists across opens).
+  useEffect(() => {
+    if (activeProjectId && activeProjectId !== projectId) setProjectId(activeProjectId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProjectId]);
+
   const handleSave = useCallback(async () => {
     if (!name.trim() || !projectId) return;
     setSaving(true);
@@ -3373,6 +3386,12 @@ function SaveToProjectDialog({
   const [modelName, setModelName] = useState(filename.replace(/\.[^.]+$/, ''));
   const [projectId, setProjectId] = useState(activeProjectId || '');
   const [saving, setSaving] = useState(false);
+
+  // Re-sync to the global project switcher (this dialog persists across opens).
+  useEffect(() => {
+    if (activeProjectId && activeProjectId !== projectId) setProjectId(activeProjectId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProjectId]);
 
   const handleSave = useCallback(async () => {
     if (!modelName.trim() || !projectId) return;

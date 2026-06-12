@@ -1540,6 +1540,14 @@ function AddToBOQModal({
   const [boqId, setBoqId] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
+  // Follow the global project switcher. Without this the modal captured the
+  // project once at mount, so switching project in the top bar left it pointed
+  // at the old one (part of the "selection only affects one tab" report).
+  useEffect(() => {
+    if (activeProjectId && activeProjectId !== projectId) setProjectId(activeProjectId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProjectId]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();

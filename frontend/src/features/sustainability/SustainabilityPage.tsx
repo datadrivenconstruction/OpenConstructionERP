@@ -17,6 +17,7 @@ import { Breadcrumb, Card, CardHeader, CardContent, Button, EmptyState, Skeleton
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { apiGet } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
   fetchSustainability,
   enrichCO2,
@@ -155,11 +156,13 @@ export function SustainabilityPage() {
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [searchParams, setSearchParams] = useSearchParams();
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   // Deep-link preselect (e.g. from the BOQ toolbar "Carbon footprint" action:
-  // /sustainability?project_id=&boq_id=). Read once on mount so the user lands
-  // on their BOQ instead of an empty selector.
+  // /sustainability?project_id=&boq_id=) wins on mount; otherwise start from the
+  // globally selected project so the page is never blank for someone who picked
+  // a project in the top bar.
   const [selectedProjectId, setSelectedProjectId] = useState(
-    () => searchParams.get('project_id') ?? '',
+    () => searchParams.get('project_id') ?? activeProjectId ?? '',
   );
   const [selectedBoqId, setSelectedBoqId] = useState(
     () => searchParams.get('boq_id') ?? '',
@@ -170,6 +173,16 @@ export function SustainabilityPage() {
   // Guards the one-shot auto-calculate so a user who later changes the
   // selectors isn't force-recalculated against the original deep-link.
   const autoCalcDone = useRef(false);
+
+  // Follow the global project switcher. The effect fires only when the top-bar
+  // selection changes, so an in-page pick is preserved; switching project
+  // globally re-scopes this page too (fixes "selection only affects one tab").
+  useEffect(() => {
+    if (activeProjectId && activeProjectId !== selectedProjectId) {
+      setSelectedProjectId(activeProjectId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProjectId]);
 
   // Projects & BOQs
   const { data: projects, isLoading: projectsLoading } = useQuery({
