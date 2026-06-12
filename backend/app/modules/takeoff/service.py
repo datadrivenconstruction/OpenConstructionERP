@@ -1684,6 +1684,11 @@ class TakeoffService:
         )
         if push_quantity:
             await self._push_quantity_to_position(boq_position_id, item)
+            # The BOQ update path commits, which expires ``item``; the
+            # router then serializes it synchronously (Pydantic), where a
+            # lazy attribute refresh raises MissingGreenlet. Reload the
+            # row inside the async context before handing it back.
+            await self.session.refresh(item)
         return item
 
     async def _assert_position_in_project(self, boq_position_id: str, project_id: Any) -> None:

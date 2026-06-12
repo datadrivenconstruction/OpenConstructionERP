@@ -881,6 +881,12 @@ async def _seed_demo_account() -> None:
                 _running_version,
             )
         else:
+            # Tracks whether every named seeder below completed. A failed
+            # seeder must NOT stamp the version marker - otherwise a
+            # transient failure (DB hiccup mid-seed) would be skipped on
+            # every subsequent boot until the next app upgrade instead of
+            # self-healing on the next start.
+            _backfill_ok = True
             try:
                 from app.scripts.seed_flagship import install_flagship
 
@@ -888,6 +894,7 @@ async def _seed_demo_account() -> None:
                     fl_result = await install_flagship(fl_session, demo_user_id)
                     logger.info("Flagship seed: %s", fl_result)
             except Exception:
+                _backfill_ok = False
                 logger.warning("Flagship seed skipped (non-fatal)", exc_info=True)
 
             # Retail Market Heilbronn - the ninth showcase project. Backfilled
@@ -912,6 +919,7 @@ async def _seed_demo_account() -> None:
                                 rh_result.get("positions"),
                             )
                 except Exception:
+                    _backfill_ok = False
                     logger.warning(
                         "Retail Market Heilbronn showcase backfill skipped (non-fatal)",
                         exc_info=True,
@@ -931,6 +939,7 @@ async def _seed_demo_account() -> None:
                     if any(eq_counts.values()):
                         logger.info("Equipment demo seed: %s", eq_counts)
             except Exception:
+                _backfill_ok = False
                 logger.warning("Equipment demo seed skipped (non-fatal)", exc_info=True)
 
             # Subcontractor demo - 50 firms with varied prequalification states
@@ -954,6 +963,7 @@ async def _seed_demo_account() -> None:
                     if any(sub_counts.values()):
                         logger.info("Subcontractor demo seed: %s", sub_counts)
             except Exception:
+                _backfill_ok = False
                 logger.warning("Subcontractor demo seed skipped (non-fatal)", exc_info=True)
 
             # ── Remaining feature-module demos ──────────────────────────────
@@ -970,11 +980,14 @@ async def _seed_demo_account() -> None:
 
             await enrich_all()
 
-            # The whole backfill block completed (each seeder above is
-            # fail-soft, so "completed" means the pass ran end to end).
-            # Stamp the sentinel so subsequent boots on this version skip
-            # straight past it.
-            _write_demo_backfill_version(_running_version)
+            # Stamp the sentinel only when every named seeder completed.
+            # On a failed pass the marker stays absent/stale, so the next
+            # boot retries the (idempotent) seeds instead of skipping them
+            # until the next app upgrade.
+            if _backfill_ok:
+                _write_demo_backfill_version(_running_version)
+            else:
+                logger.info("Demo backfill marker not stamped - at least one seeder failed; will retry next boot")
     except Exception:
         logger.exception("Failed to seed demo account (non-fatal)")
 

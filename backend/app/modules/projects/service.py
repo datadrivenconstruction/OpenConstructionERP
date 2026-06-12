@@ -528,6 +528,23 @@ class ProjectService:
                     ),
                 )
 
+        # ``metadata.allow_currency_change`` is a transient command consumed
+        # by the guard above - strip it before the write so it never ends up
+        # persisted in the stored metadata.
+        metadata_payload = fields.get("metadata_")
+        if isinstance(metadata_payload, dict) and "allow_currency_change" in metadata_payload:
+            stripped_metadata = {
+                key: value for key, value in metadata_payload.items() if key != "allow_currency_change"
+            }
+            if stripped_metadata:
+                fields["metadata_"] = stripped_metadata
+            else:
+                # The patch carried only the command flag - drop the metadata
+                # write entirely so the stored metadata is not wiped to {}.
+                fields.pop("metadata_")
+                if not fields:
+                    return project
+
         # Snapshot the prior address so we can detect a meaningful change
         # after the update (and notify the geo_hub auto-anchor subscriber
         # only when the user actually changed it).
@@ -745,7 +762,11 @@ class ProjectService:
             fx_rates=list(source.fx_rates or []),
             default_vat_rate=source.default_vat_rate,
             custom_units=list(source.custom_units or []),
-            metadata_=dict(source.metadata_ or {}),
+            # Drop seed/workspace tags from the copy: a user who duplicates a
+            # showcase project to start real work must not inherit demo_id
+            # (the demo-data purge hard-deletes everything tagged with it)
+            # or the partner_pack workspace tag.
+            metadata_={k: v for k, v in dict(source.metadata_ or {}).items() if k not in ("demo_id", "partner_pack")},
             # v2.9.4 per-project storage override
             storage_path_override=source.storage_path_override,
             storage_uses_default=source.storage_uses_default,
