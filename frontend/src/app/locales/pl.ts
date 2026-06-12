@@ -2871,6 +2871,7 @@ const resource = {
     "projects.currency": "Waluta",
     "projects.delete_failed": "Nie udało się usunąć projektu",
     "projects.deleted": "Projekt zarchiwizowany",
+    "projects.demo_banner": "{{count}} z tych projektów to dane demonstracyjne, dzięki którym poznasz platformę na realistycznej treści. Ich usunięcie nigdy nie wpływa na Twoje własne projekty.",
     "projects.description": "Opis",
     "projects.description_placeholder": "Opis projektu, zakres, notatki...",
     "projects.duplicate_failed": "Duplikowanie nie powiodło się",

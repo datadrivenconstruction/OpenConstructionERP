@@ -4767,6 +4767,7 @@ const resource = {
     "projects.currency": "Valuta",
     "projects.delete_failed": "Kunde inte ta bort projekt",
     "projects.deleted": "Projekt arkiverat",
+    "projects.demo_banner": "{{count}} av dessa projekt är demodata så att du kan utforska plattformen med realistiskt innehåll. Att ta bort dem påverkar aldrig dina egna projekt.",
     "projects.description": "Beskrivning",
     "projects.description_placeholder": "Projektbeskrivning, omfattning, anteckningar...",
     "projects.duplicate_failed": "Kunde inte duplicera",

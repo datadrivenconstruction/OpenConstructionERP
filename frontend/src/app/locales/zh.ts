@@ -2920,6 +2920,7 @@ const resource = {
     "projects.currency": "货币",
     "projects.delete_failed": "删除项目失败",
     "projects.deleted": "项目已归档",
+    "projects.demo_banner": "其中{{count}}个项目是预置的演示数据，便于您通过真实内容了解平台。删除它们绝不会影响您自己的项目。",
     "projects.description": "描述",
     "projects.description_placeholder": "项目描述、范围、备注...",
     "projects.duplicate_failed": "复制失败",

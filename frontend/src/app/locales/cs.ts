@@ -2871,6 +2871,7 @@ const resource = {
     "projects.currency": "Měna",
     "projects.delete_failed": "Smazání projektu selhalo",
     "projects.deleted": "Projekt archivován",
+    "projects.demo_banner": "{{count}} z těchto projektů jsou demo data, abyste si platformu prohlédli s realistickým obsahem. Jejich odstranění se nikdy nedotkne vašich vlastních projektů.",
     "projects.description": "Popis",
     "projects.description_placeholder": "Popis projektu, rozsah, poznámky...",
     "projects.duplicate_failed": "Duplikování selhalo",

@@ -5406,6 +5406,7 @@ const resource = {
     "projects.currency": "Валют",
     "projects.delete_failed": "устгах төсөл амжилтгүй",
     "projects.deleted": "Төсөл архивлагдсан",
+    "projects.demo_banner": "Эдгээр төслөөс {{count}} нь платформыг бодит агуулгатай танилцуулах зорилготой демо өгөгдөл юм. Тэдгээрийг устгах нь таны өөрийн төслүүдэд хэзээ ч нөлөөлөхгүй.",
     "projects.description": "Тайлбар",
     "projects.description_placeholder": "Төсөл тайлбар, хүрээ, тэмдэглэл...",
     "projects.duplicate_failed": "хуулбар амжилтгүй",

@@ -1947,6 +1947,7 @@ const resource = {
     "projects.currency": "Moeda",
     "projects.delete_failed": "Falha ao excluir projeto",
     "projects.deleted": "Projeto arquivado",
+    "projects.demo_banner": "{{count}} desses projetos são dados de demonstração para você explorar a plataforma com conteúdo realista. Removê-los nunca afeta seus próprios projetos.",
     "projects.description": "Descrição",
     "projects.description_placeholder": "Descrição do projeto, escopo, observações...",
     "projects.duplicate_failed": "Falha ao duplicar",

@@ -1914,6 +1914,7 @@ const resource = {
     "projects.currency": "Devise",
     "projects.delete_failed": "Échec de la suppression du projet",
     "projects.deleted": "Projet archivé",
+    "projects.demo_banner": "{{count}} de ces projets sont des données de démonstration pour explorer la plateforme avec un contenu réaliste. Leur suppression n'affecte jamais vos propres projets.",
     "projects.description": "Description",
     "projects.description_placeholder": "Description du projet, périmètre, notes...",
     "projects.duplicate_failed": "Échec de la duplication",

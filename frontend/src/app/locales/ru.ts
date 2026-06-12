@@ -3011,6 +3011,7 @@ const resource = {
     "projects.currency": "Валюта",
     "projects.delete_failed": "Не удалось удалить проект",
     "projects.deleted": "Проект архивирован",
+    "projects.demo_banner": "{{count}} из этих проектов - демо-данные, добавленные для знакомства с платформой на реалистичном наполнении. Их удаление никогда не затрагивает ваши собственные проекты.",
     "projects.description": "Описание",
     "projects.description_placeholder": "Описание проекта, состав работ, заметки...",
     "projects.duplicate_failed": "Не удалось дублировать",

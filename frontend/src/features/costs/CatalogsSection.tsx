@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// CatalogsSection — "My catalogs" management bar on the Cost Database page.
+// CatalogsSection - "My catalogs" management bar on the Cost Database page.
 //
 // A catalog is the user's own named price book with a REQUIRED currency.
 // This bar lists the catalogs as selectable chips (name · currency · item
@@ -526,7 +526,7 @@ export function CatalogsSection({
                 </span>
               </button>
 
-              {/* Per-catalog actions — visible on hover / when active */}
+              {/* Per-catalog actions - visible on hover / when active */}
               <span
                 className={`inline-flex items-center transition-opacity ${
                   isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'

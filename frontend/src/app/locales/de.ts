@@ -2304,6 +2304,7 @@ const resource = {
     "projects.currency": "Währung",
     "projects.delete_failed": "Projekt konnte nicht gelöscht werden",
     "projects.deleted": "Projekt archiviert",
+    "projects.demo_banner": "{{count}} dieser Projekte sind Demo-Daten, damit Sie die Plattform mit realistischen Inhalten erkunden können. Ihre eigenen Projekte bleiben beim Entfernen unberührt.",
     "projects.description": "Beschreibung",
     "projects.description_placeholder": "Projektbeschreibung, Umfang, Notizen...",
     "projects.duplicate_failed": "Duplizieren fehlgeschlagen",

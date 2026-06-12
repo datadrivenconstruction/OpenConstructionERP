@@ -1940,6 +1940,7 @@ const resource = {
     "projects.currency": "Valuta",
     "projects.delete_failed": "Verwijderen van project mislukt",
     "projects.deleted": "Project gearchiveerd",
+    "projects.demo_banner": "{{count}} van deze projecten zijn demogegevens zodat u het platform met realistische inhoud kunt verkennen. Het verwijderen ervan raakt uw eigen projecten nooit.",
     "projects.description": "Omschrijving",
     "projects.description_placeholder": "Projectomschrijving, scope, opmerkingen...",
     "projects.duplicate_failed": "Dupliceren mislukt",

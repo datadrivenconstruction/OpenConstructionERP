@@ -2852,6 +2852,7 @@ const resource = {
     "projects.currency": "Valuutta",
     "projects.delete_failed": "Projektin poistaminen epäonnistui",
     "projects.deleted": "Projekti arkistoitu",
+    "projects.demo_banner": "{{count}} näistä projekteista on demodataa, jotta voit tutustua alustaan realistisella sisällöllä. Niiden poistaminen ei koskaan vaikuta omiin projekteihisi.",
     "projects.description": "Kuvaus",
     "projects.description_placeholder": "Projektin kuvaus, laajuus, muistiinpanot...",
     "projects.duplicate_failed": "Kopiointi epäonnistui",

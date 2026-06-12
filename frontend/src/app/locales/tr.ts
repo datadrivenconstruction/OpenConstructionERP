@@ -2890,6 +2890,7 @@ const resource = {
     "projects.currency": "Para Birimi",
     "projects.delete_failed": "Proje silinemedi",
     "projects.deleted": "Proje arşivlendi",
+    "projects.demo_banner": "Bu projelerden {{count}} tanesi, platformu gerçekçi içerikle keşfedebilmeniz için eklenmiş demo verisidir. Bunları kaldırmak kendi projelerinizi asla etkilemez.",
     "projects.description": "Açıklama",
     "projects.description_placeholder": "Proje açıklaması, kapsam, notlar...",
     "projects.duplicate_failed": "Çoğaltma başarısız oldu",

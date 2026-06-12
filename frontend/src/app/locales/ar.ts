@@ -5681,6 +5681,7 @@ const resource = {
     "projects.currency": "العملة",
     "projects.delete_failed": "فشل حذف المشروع",
     "projects.deleted": "تم أرشفة المشروع",
+    "projects.demo_banner": "{{count}} من هذه المشاريع بيانات تجريبية لاستكشاف المنصة بمحتوى واقعي. إزالتها لا تؤثر أبدًا على مشاريعك الخاصة.",
     "projects.description": "الوصف",
     "projects.description_placeholder": "وصف المشروع، النطاق، الملاحظات...",
     "projects.duplicate_failed": "فشل النسخ",

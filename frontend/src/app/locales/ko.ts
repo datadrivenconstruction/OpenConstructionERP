@@ -2901,6 +2901,7 @@ const resource = {
     "projects.currency": "통화",
     "projects.delete_failed": "프로젝트 삭제 실패",
     "projects.deleted": "프로젝트 보관됨",
+    "projects.demo_banner": "이 프로젝트 중 {{count}}개는 실제와 같은 콘텐츠로 플랫폼을 살펴볼 수 있도록 준비된 데모 데이터입니다. 삭제해도 사용자의 프로젝트에는 영향을 주지 않습니다.",
     "projects.description": "설명",
     "projects.description_placeholder": "프로젝트 설명, 범위, 메모...",
     "projects.duplicate_failed": "복제 실패",

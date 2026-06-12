@@ -2904,6 +2904,7 @@ const resource = {
     "projects.currency": "मुद्रा",
     "projects.delete_failed": "परियोजना हटाना विफल",
     "projects.deleted": "परियोजना संग्रहित",
+    "projects.demo_banner": "इनमें से {{count}} प्रोजेक्ट डेमो डेटा हैं ताकि आप यथार्थ सामग्री के साथ प्लेटफ़ॉर्म देख सकें। इन्हें हटाने से आपके अपने प्रोजेक्ट कभी प्रभावित नहीं होते।",
     "projects.description": "विवरण",
     "projects.description_placeholder": "परियोजना विवरण, दायरा, नोट्स...",
     "projects.duplicate_failed": "डुप्लिकेट करना विफल",

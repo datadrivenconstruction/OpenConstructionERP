@@ -2883,6 +2883,7 @@ const resource = {
     "projects.currency": "Валута",
     "projects.delete_failed": "Неуспешно изтриване на проект",
     "projects.deleted": "Проектът е архивиран",
+    "projects.demo_banner": "{{count}} от тези проекти са демонстрационни данни, за да разгледате платформата с реалистично съдържание. Премахването им никога не засяга вашите собствени проекти.",
     "projects.description": "Описание",
     "projects.description_placeholder": "Описание на проекта, обхват, бележки...",
     "projects.duplicate_failed": "Неуспешно дублиране",

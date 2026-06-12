@@ -3326,6 +3326,7 @@ const resource = {
     "projects.currency": "Tiền tệ",
     "projects.delete_failed": "Không xóa được dự án",
     "projects.deleted": "Đã lưu trữ dự án",
+    "projects.demo_banner": "{{count}} trong số các dự án này là dữ liệu demo để bạn khám phá nền tảng với nội dung thực tế. Việc xóa chúng không bao giờ ảnh hưởng đến dự án của riêng bạn.",
     "projects.description": "Mô tả",
     "projects.description_placeholder": "Mô tả dự án, phạm vi, ghi chú...",
     "projects.duplicate_failed": "Nhân bản thất bại",

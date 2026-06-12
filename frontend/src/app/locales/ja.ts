@@ -2883,6 +2883,7 @@ const resource = {
     "projects.currency": "通貨",
     "projects.delete_failed": "プロジェクトの削除に失敗しました",
     "projects.deleted": "プロジェクトをアーカイブしました",
+    "projects.demo_banner": "これらのプロジェクトのうち{{count}}件は、リアルなコンテンツでプラットフォームを試せるよう用意されたデモデータです。削除してもご自身のプロジェクトには影響しません。",
     "projects.description": "説明",
     "projects.description_placeholder": "プロジェクトの説明、対象範囲、メモ...",
     "projects.duplicate_failed": "複製に失敗しました",

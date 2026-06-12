@@ -3279,6 +3279,7 @@ const resource = {
     "projects.currency": "Monedă",
     "projects.delete_failed": "Ștergerea proiectului a eșuat",
     "projects.deleted": "Proiect arhivat",
+    "projects.demo_banner": "{{count}} dintre aceste proiecte sunt date demo, ca să explorați platforma cu conținut realist. Eliminarea lor nu vă afectează niciodată propriile proiecte.",
     "projects.description": "Descriere",
     "projects.description_placeholder": "Descrierea proiectului, sferă, note...",
     "projects.duplicate_failed": "Duplicarea a eșuat",

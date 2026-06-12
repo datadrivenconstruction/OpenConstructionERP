@@ -3326,6 +3326,7 @@ const resource = {
     "projects.currency": "Mata Uang",
     "projects.delete_failed": "Gagal menghapus proyek",
     "projects.deleted": "Proyek diarsipkan",
+    "projects.demo_banner": "{{count}} dari proyek-proyek ini adalah data demo agar Anda dapat menjelajahi platform dengan konten yang realistis. Menghapusnya tidak pernah memengaruhi proyek Anda sendiri.",
     "projects.description": "Deskripsi",
     "projects.description_placeholder": "Deskripsi proyek, lingkup, catatan...",
     "projects.duplicate_failed": "Duplikasi gagal",

@@ -3246,6 +3246,7 @@ const resource = {
     "projects.currency": "Valuta",
     "projects.delete_failed": "Brisanje projekta nije uspjelo",
     "projects.deleted": "Projekt arhiviran",
+    "projects.demo_banner": "{{count}} od ovih projekata su demo podaci kako biste istražili platformu s realističnim sadržajem. Njihovo uklanjanje nikada ne utječe na vaše vlastite projekte.",
     "projects.description": "Opis",
     "projects.description_placeholder": "Opis projekta, opseg, bilješke...",
     "projects.duplicate_failed": "Dupliciranje nije uspjelo",

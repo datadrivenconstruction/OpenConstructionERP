@@ -4767,6 +4767,7 @@ const resource = {
     "projects.currency": "Valuta",
     "projects.delete_failed": "Kunne ikke slette projekt",
     "projects.deleted": "Projekt arkiveret",
+    "projects.demo_banner": "{{count}} af disse projekter er demodata, så du kan udforske platformen med realistisk indhold. Fjernelse af dem påvirker aldrig dine egne projekter.",
     "projects.description": "Beskrivelse",
     "projects.description_placeholder": "Projektbeskrivelse, omfang, noter...",
     "projects.duplicate_failed": "Duplikering mislykkedes",

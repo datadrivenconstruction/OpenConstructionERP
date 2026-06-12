@@ -1946,6 +1946,7 @@ const resource = {
     "projects.currency": "Valuta",
     "projects.delete_failed": "Eliminazione del progetto non riuscita",
     "projects.deleted": "Progetto archiviato",
+    "projects.demo_banner": "{{count}} di questi progetti sono dati demo per esplorare la piattaforma con contenuti realistici. La loro rimozione non tocca mai i tuoi progetti.",
     "projects.description": "Descrizione",
     "projects.description_placeholder": "Descrizione del progetto, ambito, note...",
     "projects.duplicate_failed": "Duplicazione non riuscita",

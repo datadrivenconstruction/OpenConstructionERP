@@ -3355,6 +3355,7 @@ const resource = {
     "projects.currency": "สกุลเงิน",
     "projects.delete_failed": "ไม่สามารถลบโครงการได้",
     "projects.deleted": "เก็บโครงการเข้าคลังแล้ว",
+    "projects.demo_banner": "{{count}} โครงการเหล่านี้เป็นข้อมูลตัวอย่างที่เตรียมไว้ให้คุณสำรวจแพลตฟอร์มด้วยเนื้อหาเสมือนจริง การลบออกจะไม่กระทบโครงการของคุณเอง",
     "projects.description": "คำอธิบาย",
     "projects.description_placeholder": "คำอธิบายโครงการ ขอบเขต บันทึก...",
     "projects.duplicate_failed": "การทำสำเนาล้มเหลว",
