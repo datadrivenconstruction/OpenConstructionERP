@@ -484,9 +484,10 @@ _OPENAI_COMPAT_CONFIG = {
     # Local LLM runtimes - OpenAI-compatible REST API, no key required.
     # Override base URL via OE_OLLAMA_URL / OE_VLLM_URL env vars to point at
     # a non-default host (default Ollama :11434, default VLLM :8001 to avoid
-    # colliding with our backend on :8000). The "api_key" field stored in
-    # user settings is sent as bearer regardless - Ollama ignores it; VLLM
-    # may require it depending on `--api-key` startup flag.
+    # colliding with our backend on :8000). An "api_key" stored in user
+    # settings is sent as bearer when present; without one the Authorization
+    # header is omitted entirely (vLLM may still require a key depending on
+    # its `--api-key` startup flag).
     "ollama": {
         "url": os.environ.get("OE_OLLAMA_URL", "http://localhost:11434/v1/chat/completions"),
         "model": os.environ.get("OE_OLLAMA_MODEL", "llama3.1"),
