@@ -1387,6 +1387,23 @@ class BIMHubService:
             )
         return element
 
+    async def _reload_element_with_links(self, element_id: uuid.UUID) -> BIMElement:
+        """Re-fetch an element with its ``boq_links`` eagerly loaded.
+
+        A freshly created element (e.g. from ``ensure_element``'s lazy-create
+        branches) has its ``selectin`` ``boq_links`` relationship UNLOADED.
+        Serializing it through ``BIMElementResponse`` (from_attributes) would
+        trigger an emit-on-access lazy load inside Pydantic's validation
+        context, outside the async greenlet, raising ``MissingGreenlet`` →
+        a raw 500. Reloading via an explicit SELECT eager-loads the
+        relationship so serialization never touches the DB.
+        """
+        return (
+            await self.session.execute(
+                select(BIMElement).options(selectinload(BIMElement.boq_links)).where(BIMElement.id == element_id)
+            )
+        ).scalar_one()
+
     # ── Asset Register (v2.3.0) ─────────────────────────────────────────
 
     async def list_tracked_assets(
@@ -1577,7 +1594,7 @@ class BIMHubService:
                 model_id,
                 ref,
             )
-            return element
+            return await self._reload_element_with_links(element.id)
 
         row = rows[0]
         # Split the Parquet row into canonical quantity / property buckets so
@@ -1632,7 +1649,7 @@ class BIMHubService:
             model_id,
             ref,
         )
-        return element
+        return await self._reload_element_with_links(element.id)
 
     async def bulk_import_elements(
         self,
