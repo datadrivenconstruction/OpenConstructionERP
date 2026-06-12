@@ -34,6 +34,7 @@ import logging
 import math
 import uuid
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -599,6 +600,133 @@ class PointCloudService:
                 detail="Scan not found",
             )
         return scan
+
+    async def get_points(
+        self,
+        scan_id: uuid.UUID,
+        *,
+        max_points: int = 1_500_000,
+        payload: dict[str, Any] | None = None,
+    ) -> bytes:
+        """Decode, decimate and pack a scan's points for the viewer.
+
+        Reads the raw upload (E57 / LAS / LAZ) from storage, decimates it to
+        ``max_points`` server-side and returns the compact OEPC binary buffer the
+        browser drops into a ``THREE.Points`` geometry. Backfills ``point_count``
+        and ``bbox_json`` on the row on first read so the list view shows real
+        extents without re-decoding.
+
+        Raises 404 (scan not visible / not uploaded yet), 409 (still uploading),
+        501 (no reader installed for the format) or 422 (file undecodable).
+        """
+        from app.modules.pointcloud.decode import (
+            PointDecodeError,
+            PointDecodeUnavailable,
+            decode_points,
+        )
+        from app.modules.pointcloud.wire import pack_points
+
+        scan = await self.get_scan(scan_id, payload=payload)
+        # Snapshot every field we need BEFORE any update_fields() call: that ends
+        # in expire_all(), and re-reading an expired attribute on an async
+        # session triggers an implicit lazy load (MissingGreenlet -> 500).
+        upload_key = scan.upload_key
+        fmt = (scan.original_format or "").lower()
+        scan_status_value = scan.status
+        existing_point_count = scan.point_count
+        existing_bbox = scan.bbox_json
+
+        if scan_status_value not in ("uploaded", "converting", "ready"):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"reason": "scan_not_ready", "status": scan_status_value},
+            )
+
+        local_path = self._local_path_for(upload_key)
+        tmp_path: str | None = None
+        try:
+            if local_path is None:
+                raw = await self.storage.read_bytes(upload_key)
+                import tempfile
+
+                def _spill(data: bytes, suffix: str) -> str:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as fh:
+                        fh.write(data)
+                        return fh.name
+
+                tmp_path = await asyncio.to_thread(_spill, raw, f".{fmt or 'bin'}")
+                source_path = tmp_path
+            else:
+                source_path = str(local_path)
+
+            try:
+                decoded = await asyncio.to_thread(
+                    decode_points, Path(source_path), fmt, max_points=max_points
+                )
+            except PointDecodeUnavailable as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                    detail={
+                        "reason": "reader_unavailable",
+                        "format": exc.fmt,
+                        "message": (
+                            f"Viewing {exc.fmt.upper()} scans needs the point-cloud reader "
+                            f"({exc.reader}). Install the 'pointcloud' extra to enable it."
+                        ),
+                    },
+                ) from exc
+            except PointDecodeError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail={"reason": "decode_failed", "message": str(exc)},
+                ) from exc
+
+            buffer = await asyncio.to_thread(pack_points, decoded)
+        finally:
+            if tmp_path is not None:
+                import contextlib
+                import os
+
+                with contextlib.suppress(OSError):
+                    await asyncio.to_thread(os.unlink, tmp_path)
+
+        # Backfill real extents on first successful decode so the list view and
+        # the federation transforms have a true bbox without re-decoding.
+        needs_count = not existing_point_count
+        needs_bbox = not existing_bbox
+        if needs_count or needs_bbox:
+            fields: dict[str, object] = {}
+            if needs_count:
+                fields["point_count"] = decoded.total_count
+            if needs_bbox:
+                fields["bbox_json"] = {
+                    "min": list(decoded.bbox_min),
+                    "max": list(decoded.bbox_max),
+                    "center": list(decoded.center),
+                }
+            try:
+                await self.scans.update_fields(scan_id, **fields)
+            except Exception:  # noqa: BLE001 - backfill is best-effort, never fail the read
+                logger.warning("Point-count/bbox backfill failed for scan %s", scan_id, exc_info=True)
+
+        return buffer
+
+    def _local_path_for(self, upload_key: str):
+        """Return the on-disk path for a key when storage is local, else None.
+
+        Lets the decoder read the raw scan in place (no 5-200 GB copy) on the
+        embedded/dev filesystem backend while still working against MinIO/S3 via
+        the temp-file spill path.
+        """
+        from app.core.storage import LocalStorageBackend
+
+        backend = self.storage
+        if isinstance(backend, LocalStorageBackend):
+            try:
+                return backend._path_for(upload_key)  # noqa: SLF001 - same package boundary
+            except ValueError:
+                return None
+        return None
 
     async def list_scans(
         self,
