@@ -120,7 +120,7 @@ def _snapshot_to_response(snap: object) -> SnapshotResponse:
 
 
 def _budget_line_to_response(line: object) -> BudgetLineResponse:
-    """‌⁠‍Convert a BudgetLine ORM model to a BudgetLineResponse."""
+    """Convert a BudgetLine ORM model to a BudgetLineResponse."""
     return BudgetLineResponse(
         id=line.id,  # type: ignore[attr-defined]
         project_id=line.project_id,  # type: ignore[attr-defined]
@@ -132,6 +132,7 @@ def _budget_line_to_response(line: object) -> BudgetLineResponse:
         committed_amount=float(line.committed_amount),  # type: ignore[attr-defined]
         actual_amount=float(line.actual_amount),  # type: ignore[attr-defined]
         forecast_amount=float(line.forecast_amount),  # type: ignore[attr-defined]
+        earned_amount=getattr(line, "earned_amount", None),
         period_start=line.period_start,  # type: ignore[attr-defined]
         period_end=line.period_end,  # type: ignore[attr-defined]
         currency=line.currency,  # type: ignore[attr-defined]
