@@ -156,9 +156,18 @@ async function downloadExcelExport(): Promise<void> {
   const blob = await response.blob();
   const disposition = response.headers.get('Content-Disposition');
   const utf8Name = disposition?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
-  const filename = utf8Name
-    ? decodeURIComponent(utf8Name)
-    : disposition?.match(/filename="?([^";]+)"?/)?.[1] || 'cost_database_export.xlsx';
+  // A malformed filename* (bad percent-encoding) must not turn a successful
+  // download into an error toast - fall back to the plain filename match.
+  let decodedName: string | undefined;
+  try {
+    decodedName = utf8Name ? decodeURIComponent(utf8Name) : undefined;
+  } catch {
+    decodedName = undefined;
+  }
+  const filename =
+    decodedName ||
+    disposition?.match(/filename="?([^";]+)"?/)?.[1] ||
+    'cost_database_export.xlsx';
   triggerDownload(blob, filename);
 }
 
@@ -579,7 +588,15 @@ export function CostsPage() {
     staleTime: 60_000,
   });
 
+  // One-shot latch for the auto-pick below. Without it the effect re-arms
+  // whenever userCatalogs / loadedRegions change identity (every ['costs']
+  // invalidation) and snaps the page back to the first region right after
+  // the user explicitly chose "All regions" or a catalog chip. Any
+  // user-driven choice (including '') also sets the latch.
+  const regionAutoPickDone = useRef(false);
+
   useEffect(() => {
+    if (regionAutoPickDone.current) return;
     if (region) return;
     if (regionFromUrl) return;
     if (activeRegion) return;
@@ -590,6 +607,7 @@ export function CostsPage() {
     const catalogNames = new Set((userCatalogs ?? []).map((c) => c.name));
     const first = loadedRegions?.find((r) => !catalogNames.has(r));
     if (!first) return;
+    regionAutoPickDone.current = true;
     setRegion(first);
     setActiveRegion(first);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -778,7 +796,7 @@ export function CostsPage() {
 
   // Active filter count & clear all
   const activeFilterCount =
-    [query, unit, source, category].filter(Boolean).length +
+    [query, unit, source, category, classificationPath].filter(Boolean).length +
     (region ? 1 : 0) +
     (specialTab ? 1 : 0) +
     (catalogId ? 1 : 0);
@@ -789,13 +807,23 @@ export function CostsPage() {
     setUnit('');
     setSource('');
     setCategory('');
+    setClassificationPath('');
     setOffset(0);
     setSpecialTab('');
     setCatalogId('');
-  }, []);
+    // Region counts as a filter, so "Clear all" drops it too. Latch the
+    // auto-pick so the effect above does not immediately re-pick a region.
+    regionAutoPickDone.current = true;
+    setRegion('');
+    setActiveRegion('');
+  }, [setActiveRegion]);
 
   const handleSelectCatalog = useCallback(
     (id: string) => {
+      // Any user-driven catalog choice (including deselecting a chip)
+      // disarms the region auto-pick - re-picking here would override an
+      // explicit decision.
+      regionAutoPickDone.current = true;
       setCatalogId(id);
       setOffset(0);
       // A catalog and a region tab are alternative scopes over the same
@@ -838,6 +866,9 @@ export function CostsPage() {
 
   const handleRegionChange = useCallback(
     (value: string) => {
+      // Explicit user choice (including "All regions" = '') - disarm the
+      // auto-pick so it cannot snap the page back to the first region.
+      regionAutoPickDone.current = true;
       setRegion(value);
       setOffset(0);
       setActiveRegion(value);

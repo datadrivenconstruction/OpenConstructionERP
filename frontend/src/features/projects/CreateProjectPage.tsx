@@ -688,14 +688,17 @@ export function CreateProjectModal({
       };
       const hasAnyAddress = Object.values(addressParts).some((v) => !!v);
 
+      // Custom picks send the normalized effective values (trimmed, and
+      // uppercased for the currency code) instead of the raw input text.
       const data: CreateProjectData = {
         ...form,
-        region: form.region === '__custom__' ? customRegion : form.region,
+        region: form.region === '__custom__' ? effectiveRegion : form.region,
         classification_standard:
           form.classification_standard === '__custom__'
-            ? customStandard
+            ? effectiveStandard
             : form.classification_standard,
-        currency: form.currency === '__custom__' ? customCurrency : form.currency,
+        currency:
+          form.currency === '__custom__' ? effectiveCurrency.toUpperCase() : form.currency,
         regional_factor: clampFactor(regionalFactorStr),
         address: hasAnyAddress ? addressParts : null,
         // Optional Phase-12 expansion fields — only include when filled
@@ -861,6 +864,10 @@ export function CreateProjectModal({
     if (form.region === '__custom__' && !effectiveRegion)
       return t('project_wizard.need_custom_region_quick', {
         defaultValue: 'Type the custom region or set Region back to none.',
+      });
+    if (form.currency === '__custom__' && !effectiveCurrency)
+      return t('project_wizard.need_custom_currency_quick', {
+        defaultValue: 'Enter the custom currency code.',
       });
     if (form.classification_standard === '__custom__' && !effectiveStandard)
       return mode === 'classic'

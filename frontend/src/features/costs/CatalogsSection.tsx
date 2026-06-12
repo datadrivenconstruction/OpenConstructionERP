@@ -10,7 +10,7 @@
 // Per-catalog actions: edit (rename / description / currency), export to
 // Excel, delete (with an explicit keep-items vs delete-items choice).
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -63,9 +63,18 @@ async function downloadCatalogExcel(catalog: CostCatalog): Promise<void> {
   const blob = await response.blob();
   const disposition = response.headers.get('Content-Disposition');
   const utf8Name = disposition?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
-  const filename = utf8Name
-    ? decodeURIComponent(utf8Name)
-    : disposition?.match(/filename="?([^";]+)"?/)?.[1] || `${catalog.name}.xlsx`;
+  // A malformed filename* (bad percent-encoding) must not turn a successful
+  // download into an error toast - fall back to the plain filename match.
+  let decodedName: string | undefined;
+  try {
+    decodedName = utf8Name ? decodeURIComponent(utf8Name) : undefined;
+  } catch {
+    decodedName = undefined;
+  }
+  const filename =
+    decodedName ||
+    disposition?.match(/filename="?([^";]+)"?/)?.[1] ||
+    `${catalog.name}.xlsx`;
   triggerDownload(blob, filename);
 }
 
@@ -94,14 +103,6 @@ function CatalogFormDialog({
   // Disable the select up front and explain why instead of letting the
   // user hit the error.
   const currencyLocked = isEdit && (catalog?.item_count ?? 0) > 0;
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -146,6 +147,25 @@ function CatalogFormDialog({
 
   const canSave = name.trim().length > 0 && currency.length === 3 && !saveMutation.isPending;
 
+  // Escape closes the dialog - but never while a save is in flight, so the
+  // pending request cannot be silently abandoned mid-spinner.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !saveMutation.isPending) onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose, saveMutation.isPending]);
+
+  // Enter in any text input submits the form when it is valid (selects and
+  // buttons keep their native Enter behaviour).
+  const handleEnterSave = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'Enter' || !canSave) return;
+    if (!(e.target instanceof HTMLElement) || e.target.tagName !== 'INPUT') return;
+    e.preventDefault();
+    saveMutation.mutate();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
       <div
@@ -154,6 +174,7 @@ function CatalogFormDialog({
         aria-labelledby="catalog-form-dialog-title"
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-md mx-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={handleEnterSave}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
@@ -434,7 +455,9 @@ export function CatalogsSection({
   const [showCreate, setShowCreate] = useState(false);
   const [editCatalog, setEditCatalog] = useState<CostCatalog | null>(null);
   const [deleteCatalog, setDeleteCatalog] = useState<CostCatalog | null>(null);
-  const [exportingId, setExportingId] = useState<string | null>(null);
+  // Per-catalog in-flight export ids. A single "exportingId" slot raced:
+  // export A then B, and A settling killed B's spinner while B still ran.
+  const [exportingIds, setExportingIds] = useState<Set<string>>(new Set());
 
   const { data: catalogs } = useQuery({
     queryKey: ['costs', 'catalogs'],
@@ -457,8 +480,21 @@ export function CatalogsSection({
 
   const exportMutation = useMutation({
     mutationFn: (catalog: CostCatalog) => downloadCatalogExcel(catalog),
+    onMutate: (catalog) => {
+      setExportingIds((prev) => {
+        const next = new Set(prev);
+        next.add(catalog.id);
+        return next;
+      });
+    },
+    onSettled: (_data, _err, catalog) => {
+      setExportingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(catalog.id);
+        return next;
+      });
+    },
     onSuccess: () => {
-      setExportingId(null);
       addToast({
         type: 'success',
         title: t('costs.export_success', { defaultValue: 'Export complete' }),
@@ -466,7 +502,6 @@ export function CatalogsSection({
       });
     },
     onError: (err: Error) => {
-      setExportingId(null);
       addToast({
         type: 'error',
         title: t('costs.export_failed', { defaultValue: 'Export failed' }),
@@ -497,7 +532,7 @@ export function CatalogsSection({
 
         {sorted.map((catalog) => {
           const isActive = selectedId === catalog.id;
-          const isExporting = exportingId === catalog.id;
+          const isExporting = exportingIds.has(catalog.id);
           return (
             <div
               key={catalog.id}
@@ -541,10 +576,7 @@ export function CatalogsSection({
                   <Pencil size={12} />
                 </button>
                 <button
-                  onClick={() => {
-                    setExportingId(catalog.id);
-                    exportMutation.mutate(catalog);
-                  }}
+                  onClick={() => exportMutation.mutate(catalog)}
                   disabled={isExporting}
                   title={t('costs_catalogs.export_excel', { defaultValue: 'Export to Excel' })}
                   aria-label={t('costs_catalogs.export_excel', { defaultValue: 'Export to Excel' })}

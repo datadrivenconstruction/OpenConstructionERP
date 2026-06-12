@@ -866,9 +866,18 @@ async function downloadExcelExport(): Promise<void> {
   const blob = await response.blob();
   const disposition = response.headers.get('Content-Disposition');
   const utf8Name = disposition?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
-  const filename = utf8Name
-    ? decodeURIComponent(utf8Name)
-    : disposition?.match(/filename="?([^";]+)"?/)?.[1] || 'cost_database_export.xlsx';
+  // A malformed filename* (bad percent-encoding) must not turn a successful
+  // download into an error toast - fall back to the plain filename match.
+  let decodedName: string | undefined;
+  try {
+    decodedName = utf8Name ? decodeURIComponent(utf8Name) : undefined;
+  } catch {
+    decodedName = undefined;
+  }
+  const filename =
+    decodedName ||
+    disposition?.match(/filename="?([^";]+)"?/)?.[1] ||
+    'cost_database_export.xlsx';
   triggerDownload(blob, filename);
 }
 
@@ -1790,15 +1799,23 @@ function ColumnMappingPanel({
   const sampleRows = data.sample_rows.slice(0, 3);
 
   // Selectable header options: drop empty-string headers (they would collide
-  // with the not-mapped sentinel) and disambiguate duplicate header names in
-  // the visible text with their column number, keeping value=header.
-  const headerNameCounts = new Map<string, number>();
-  for (const header of data.headers) {
-    headerNameCounts.set(header, (headerNameCounts.get(header) ?? 0) + 1);
-  }
-  const headerOptions = data.headers
-    .map((header, index) => ({ header, index }))
-    .filter(({ header }) => header.trim() !== '');
+  // with the not-mapped sentinel). Duplicate header names share the same
+  // option VALUE, so the select cannot tell them apart - picking the second
+  // occurrence would silently map the first. Keep only the FIRST occurrence
+  // of each name (the one the backend's column_map resolves to anyway) and
+  // surface a warning line under the mapping panel.
+  const headerOptions: Array<{ header: string; index: number }> = [];
+  const duplicateHeaders: string[] = [];
+  const seenHeaders = new Set<string>();
+  data.headers.forEach((header, index) => {
+    if (header.trim() === '') return;
+    if (seenHeaders.has(header)) {
+      if (!duplicateHeaders.includes(header)) duplicateHeaders.push(header);
+      return;
+    }
+    seenHeaders.add(header);
+    headerOptions.push({ header, index });
+  });
 
   return (
     <Card className="animate-card-in" padding="none">
@@ -1863,12 +1880,7 @@ function ColumnMappingPanel({
                     </option>
                     {headerOptions.map(({ header, index }) => (
                       <option key={`opt-${index}`} value={header}>
-                        {(headerNameCounts.get(header) ?? 0) > 1
-                          ? `${header} (${t('costs_import.col_n', {
-                              defaultValue: 'col {{num}}',
-                              num: index + 1,
-                            })})`
-                          : header}
+                        {header}
                       </option>
                     ))}
                   </select>
@@ -1884,6 +1896,19 @@ function ColumnMappingPanel({
             );
           })}
         </div>
+        {duplicateHeaders.length > 0 && (
+          <div className="mt-2 space-y-0.5">
+            {duplicateHeaders.map((name) => (
+              <p key={name} className="text-2xs text-amber-700 dark:text-amber-400">
+                {t('costs_import.duplicate_header', {
+                  defaultValue:
+                    'Duplicate column name "{{name}}" - only the first occurrence is used.',
+                  name,
+                })}
+              </p>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Sample preview table */}
@@ -2213,9 +2238,10 @@ export function ImportDatabasePage() {
       setExistingCatalogId('');
       previewMutation.mutate(file);
     },
-    // previewMutation is stable across renders (react-query); referencing it
-    // keeps the dependency array honest without re-creating handleFile.
-    [addToast, t, previewMutation],
+    // The mutation RESULT object is a new reference every render; only the
+    // ``mutate`` function is stable (react-query guarantees it), so depend
+    // on that to keep handleFile from being re-created each render.
+    [addToast, t, previewMutation.mutate],
   );
 
   const handleDrop = useCallback(

@@ -645,6 +645,17 @@ async def _on_changeorder_approved_contract(event: Event) -> None:
     log instead of raising - same amendability guard as
     ``ContractsService.apply_change_order_to_contract``, but a background
     subscriber must never break the foreground approval.
+
+    Money safety (audit M3):
+    * Currency guard - when the event carries a ``currency`` that differs
+      from the contract currency, the value bump is skipped with a warning
+      (never blend currencies). The CO is still recorded in metadata
+      (``change_order_ids`` + a ``skipped_currency_mismatch`` entry with its
+      currency) so it is not silently lost.
+    * Lost-update guard - the contract row is loaded with
+      ``SELECT ... FOR UPDATE`` so the metadata read-modify-write cannot
+      race a concurrent approval, and the value bump itself is an atomic
+      ``UPDATE ... SET total_value = total_value + delta``.
     """
     if not await _can_open_isolated_session():
         return
@@ -661,10 +672,13 @@ async def _on_changeorder_approved_contract(event: Event) -> None:
         return
     try:
         async with async_session_factory() as session:
-            from app.modules.contracts.repository import ContractRepository
+            from sqlalchemy import select as sa_select
+            from sqlalchemy import update as sa_update
 
-            repo = ContractRepository(session)
-            contract = await repo.get_by_id(contract_id)
+            from app.modules.contracts.models import Contract
+
+            stmt = sa_select(Contract).where(Contract.id == contract_id).with_for_update()
+            contract = (await session.execute(stmt)).scalar_one_or_none()
             if contract is None:
                 return
             # Project guard: the contract link arrives via client-supplied
@@ -697,9 +711,41 @@ async def _on_changeorder_approved_contract(event: Event) -> None:
                 return
             applied.append(str(co_id_raw))
             md["change_order_ids"] = applied
+
+            # Currency guard: never blend currencies into total_value. The
+            # CO is still recorded so it is not silently lost - the project
+            # team resolves the mismatch manually.
+            event_currency = str(data.get("currency") or "").strip().upper()
+            contract_currency = str(contract.currency or "").strip().upper()
+            if event_currency and event_currency != contract_currency:
+                skipped = list(md.get("skipped_currency_mismatch") or [])
+                skipped.append(
+                    {
+                        "change_order_id": str(co_id_raw),
+                        "cost_impact": str(delta),
+                        "currency": event_currency,
+                    }
+                )
+                md["skipped_currency_mismatch"] = skipped
+                contract.metadata_ = md
+                await session.commit()
+                logger.warning(
+                    "CO %s approved with currency %s but contract %s is in %s - "
+                    "total_value not bumped (recorded in skipped_currency_mismatch)",
+                    co_id_raw,
+                    event_currency,
+                    contract.code,
+                    contract_currency or "(unset)",
+                )
+                return
+
             md["change_order_total"] = str(Decimal(str(md.get("change_order_total") or 0)) + delta)
             contract.metadata_ = md
-            contract.total_value = Decimal(str(contract.total_value or 0)) + delta
+            # Atomic increment - no read-modify-write on the money column,
+            # so a concurrent bump can never be lost.
+            await session.execute(
+                sa_update(Contract).where(Contract.id == contract_id).values(total_value=Contract.total_value + delta)
+            )
             await session.commit()
             logger.info(
                 "Contract %s total_value bumped by %s (CO=%s)",

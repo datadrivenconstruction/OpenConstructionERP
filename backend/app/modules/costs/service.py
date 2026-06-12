@@ -387,6 +387,19 @@ class CostItemService:
         # IntegrityError that 500s the whole import.
         seen: set[tuple[str, str | None]] = set()
 
+        # Items created into a catalog without their own currency inherit
+        # the catalog currency (same contract as create_cost_item). Resolve
+        # each distinct catalog_id once instead of per row.
+        catalog_currencies: dict[uuid.UUID, str] = {}
+        pending_catalog_ids = {
+            data.catalog_id for data in items_data if data.catalog_id is not None and not data.currency.strip()
+        }
+        if pending_catalog_ids:
+            result = await self.session.execute(
+                select(CostCatalog.id, CostCatalog.currency).where(CostCatalog.id.in_(pending_catalog_ids))
+            )
+            catalog_currencies = {row.id: row.currency for row in result.all()}
+
         for data in items_data:
             key = (data.code, data.region)
             if key in seen:
@@ -400,13 +413,17 @@ class CostItemService:
 
             seen.add(key)
 
+            currency = data.currency
+            if data.catalog_id is not None and not currency.strip():
+                currency = catalog_currencies.get(data.catalog_id, currency)
+
             item = CostItem(
                 code=data.code,
                 description=data.description,
                 descriptions=data.descriptions,
                 unit=data.unit,
                 rate=str(data.rate),
-                currency=data.currency,
+                currency=currency,
                 source=data.source,
                 classification=data.classification,
                 components=data.components,
@@ -715,6 +732,28 @@ class CostCatalogService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
+    async def _assert_name_available(
+        self,
+        name: str,
+        *,
+        exclude_id: uuid.UUID | None = None,
+    ) -> None:
+        """Raise 409 when another catalog already uses the name (case-insensitive).
+
+        The file-import dedup key stamps the catalog name as the items'
+        region tag, so two same-name catalogs would silently dedupe
+        against each other's rows.
+        """
+        stmt = select(CostCatalog.id).where(func.lower(CostCatalog.name) == name.strip().lower()).limit(1)
+        if exclude_id is not None:
+            stmt = stmt.where(CostCatalog.id != exclude_id)
+        existing = (await self.session.execute(stmt)).scalar_one_or_none()
+        if existing is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"A cost catalog named '{name.strip()}' already exists. Choose a different name.",
+            )
+
     async def create_catalog(
         self,
         data: CostCatalogCreate,
@@ -722,7 +761,13 @@ class CostCatalogService:
         created_by: uuid.UUID | None = None,
         source: str = "manual",
     ) -> CostCatalog:
-        """Create a catalog. Currency is validated/uppercased by the schema."""
+        """Create a catalog. Currency is validated/uppercased by the schema.
+
+        Raises 409 when another catalog already uses the name
+        (case-insensitive) - the import dedup key uses the catalog name as
+        region, so same-name catalogs would silently collide.
+        """
+        await self._assert_name_available(data.name)
         catalog = CostCatalog(
             name=data.name.strip(),
             description=data.description,
@@ -771,19 +816,30 @@ class CostCatalogService:
         return [(catalog, int(count)) for catalog, count in result.all()]
 
     async def update_catalog(self, catalog_id: uuid.UUID, data: CostCatalogUpdate) -> CostCatalog:
-        """Update a catalog. Raises 404 if missing, 409 on unsafe currency change.
+        """Update a catalog. Raises 404 if missing, 409 on unsafe changes.
 
-        A currency change is REJECTED while the catalog holds items: the
-        stored rates are denominated in the old currency, and silently
-        re-labelling them would corrupt every figure. The caller must
-        create a new catalog (or empty this one) instead.
+        A currency change is REJECTED while the catalog holds ANY items
+        (soft-deleted included): the stored rates are denominated in the
+        old currency, and silently re-labelling them would corrupt every
+        figure. The caller must create a new catalog (or empty this one)
+        instead. A rename to a name another catalog already uses
+        (case-insensitive) is rejected the same way.
         """
         catalog = await self.get_catalog(catalog_id)
         fields = data.model_dump(exclude_unset=True)
 
+        new_name = fields.get("name")
+        if isinstance(new_name, str) and new_name.strip():
+            await self._assert_name_available(new_name, exclude_id=catalog_id)
+
         new_currency = fields.get("currency")
         if new_currency is not None and new_currency != catalog.currency:
-            item_count = await self.count_items(catalog_id)
+            # Count ALL rows including soft-deleted ones: a restored item
+            # would otherwise come back mislabeled in the new currency.
+            result = await self.session.execute(
+                select(func.count(CostItem.id)).where(CostItem.catalog_id == catalog_id)
+            )
+            item_count = int(result.scalar_one())
             if item_count > 0:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,

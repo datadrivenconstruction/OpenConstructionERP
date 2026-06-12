@@ -1018,6 +1018,10 @@ function BudgetLinesEditor({
 
   const submitProgress = useCallback(
     (boqPositionId: string) => {
+      if (progressMutation.isPending) return;
+      // An empty input must not coerce to 0 - recording 0% is a real write
+      // that wipes the line's earned value.
+      if (progressPct.trim() === '') return;
       const pct = Number(progressPct.replace(',', '.'));
       if (!Number.isFinite(pct) || pct < 0 || pct > 100) {
         addToast({

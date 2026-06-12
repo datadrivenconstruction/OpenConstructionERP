@@ -3697,10 +3697,17 @@ export function BOQEditorPage() {
     const base = { _isFooter: true as const, ordinal: '', unit: '', quantity: 0, unit_rate: 0 };
     // Estimate-wide money per resource type (Material / Labor / Equipment):
     // for every leaf position with a split, money(type) = share(type) x
-    // unit_rate x quantity. Rendered on the DIRECT COST footer row of the
-    // M/L/E split columns so the estimator sees absolute cost-driver totals,
-    // not just per-position percentages.
-    const splitMoney = resourceSplitMoneyTotals(boq?.positions ?? []);
+    // unit_rate x quantity, rebased into the project base currency (same
+    // convertToBase path as directCost) so mixed-currency positions sum
+    // correctly. Rendered on the DIRECT COST footer row of the M/L/E split
+    // columns so the estimator sees absolute cost-driver totals, not just
+    // per-position percentages.
+    const splitMoney = resourceSplitMoneyTotals(
+      boq?.positions ?? [],
+      undefined,
+      currencyCode,
+      fxRates,
+    );
     rows.push({ ...base, _footerType: 'direct_cost', id: '_direct_cost', description: t('boq.direct_cost', { defaultValue: 'DIRECT COST' }), total: directCost, ...(splitMoney ? { _resourceSplitMoney: splitMoney } : {}) });
     for (const m of markupTotals) {
       rows.push({ ...base, _footerType: `markup_${m.id}`, id: `_markup_${m.id}`, description: `${m.name} ${fmt.format(m.percentage)}%`, total: m.amount });
@@ -3711,7 +3718,7 @@ export function BOQEditorPage() {
       rows.push({ ...base, _footerType: 'gross_total', id: '_gross_total', description: t('boq.gross_total', { defaultValue: 'GROSS TOTAL' }), total: grossTotal });
     }
     return rows;
-  }, [hasPositions, boq?.positions, directCost, markupTotals, netTotal, vatRate, vatAmount, grossTotal, t, fmt]);
+  }, [hasPositions, boq?.positions, directCost, markupTotals, netTotal, vatRate, vatAmount, grossTotal, t, fmt, currencyCode, fxRates]);
 
   /** Handle cost suggestion selected from AG Grid autocomplete editor */
   const handleGridSelectSuggestion = useCallback(

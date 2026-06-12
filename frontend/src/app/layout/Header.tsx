@@ -1429,11 +1429,15 @@ function ProjectSwitcher() {
     // Deciding on the stale cache here would clear a perfectly valid
     // selection - wait for the fresh list.
     if (isFetching) return;
+    // A failed refetch leaves ``projects`` pointing at stale cached data -
+    // deciding on it could clear a perfectly valid selection. Bail until a
+    // successful fetch lands.
+    if (isError) return;
     const stillExists = projects.some((p) => p.id === activeProjectId);
     if (!stillExists) {
       clearProject();
     }
-  }, [projects, activeProjectId, clearProject, isFetching]);
+  }, [projects, activeProjectId, clearProject, isFetching, isError]);
 
   return (
     <div className="relative hidden sm:block" ref={ref} data-testid="header-project-picker">

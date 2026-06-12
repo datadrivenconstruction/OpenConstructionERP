@@ -85,12 +85,18 @@ class _FakeBudgetRepo:
                     setattr(line, key, value)
 
 
-def _position(total: str, ordinal: str = "01.001", description: str = "Concrete works") -> SimpleNamespace:
+def _position(
+    total: str,
+    ordinal: str = "01.001",
+    description: str = "Concrete works",
+    metadata: dict | None = None,
+) -> SimpleNamespace:
     return SimpleNamespace(
         id=uuid.uuid4(),
         total=total,
         ordinal=ordinal,
         description=description,
+        metadata_=metadata or {},
     )
 
 
@@ -176,6 +182,28 @@ async def test_generate_budget_skips_only_wired_positions(monkeypatch: pytest.Mo
 
     assert len(created) == 1
     assert created[0].boq_position_id == p2.id
+
+
+@pytest.mark.asyncio
+async def test_generate_budget_stamps_position_native_currency(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A position imported with a foreign currency marker keeps that stamp.
+
+    planned/forecast amounts are raw position totals in the position's
+    NATIVE currency, so stamping the project base currency would mislabel
+    the money (audit M4). Positions without a marker (or matching the
+    project currency) keep the project currency.
+    """
+    p_foreign = _position("1000", metadata={"currency": "usd"})
+    p_same = _position("500", ordinal="01.002", metadata={"currency": "EUR"})
+    p_plain = _position("250", ordinal="01.003")
+    service, repo = _make_service(monkeypatch, positions=[p_foreign, p_same, p_plain], currency="EUR")
+
+    created = await service.generate_budget_from_boq(_PROJECT_ID, _BOQ_ID)
+
+    by_position = {line.boq_position_id: line for line in created}
+    assert by_position[p_foreign.id].currency == "USD"
+    assert by_position[p_same.id].currency == "EUR"
+    assert by_position[p_plain.id].currency == "EUR"
 
 
 # ── Blocker 2: progress -> earned value ───────────────────────────────────
@@ -398,6 +426,59 @@ def test_resource_sum_path_before_fallback() -> None:
     )
     assert source == "resource_sum"
     assert days >= 1
+
+
+def test_lump_sum_with_cost_data_prefers_cost_proportional() -> None:
+    """A big lump-sum subcontract must not collapse to the flat 8h day.
+
+    Audit m10: for lump-sum units with qty > 0, the cost-proportional
+    share wins whenever total cost data is available; the flat allowance
+    is strictly the last resort.
+    """
+    days, source = _calc_duration_from_resources(
+        {},
+        1.0,
+        "lsum",
+        total_cost=50000.0,
+        grand_total=100000.0,
+        total_days=365,
+        hours_per_day=8.0,
+        work_days_per_week=5,
+    )
+    assert source == "cost_proportional"
+    # Half the project cost -> half the project duration, not 1 day.
+    assert days == round(0.5 * 365)
+
+
+def test_lump_sum_without_cost_data_uses_flat_allowance() -> None:
+    days, source = _calc_duration_from_resources(
+        {},
+        1.0,
+        "lsum",
+        total_cost=0.0,
+        grand_total=100000.0,
+        total_days=365,
+        hours_per_day=8.0,
+        work_days_per_week=5,
+    )
+    assert source == "estimated_fallback"
+    assert days == 1  # 8h flat -> 1 day
+
+
+def test_non_lump_sum_units_keep_production_rate_path() -> None:
+    """Cost data present must NOT divert measured units to proportional."""
+    days, source = _calc_duration_from_resources(
+        {},
+        10.0,
+        "m3",
+        total_cost=50000.0,
+        grand_total=100000.0,
+        total_days=365,
+        hours_per_day=8.0,
+        work_days_per_week=5,
+    )
+    assert source == "estimated_fallback"
+    assert days == 5  # 10 m3 x 4 h -> 40h -> 5 days
 
 
 def test_cost_proportional_for_zero_quantity() -> None:

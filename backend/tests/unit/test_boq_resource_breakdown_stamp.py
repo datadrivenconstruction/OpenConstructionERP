@@ -96,6 +96,30 @@ def test_stamp_skips_when_resources_absent_or_zero() -> None:
     assert "resource_breakdown" not in meta_zero
 
 
+def test_stamp_pops_stale_rollup_on_early_return() -> None:
+    """Audit m5: wiping resources must also wipe a previously stamped split.
+
+    Without the pop, a position whose resources were removed (or zeroed)
+    would keep serving the old M/L/E split to the grid forever.
+    """
+    stale = {"material": {"total": 75.0, "pct": 100.0}}
+
+    meta_removed = {"resource_breakdown": dict(stale)}
+    _stamp_resource_breakdown(meta_removed)
+    assert "resource_breakdown" not in meta_removed
+
+    meta_emptied = {"resources": [], "resource_breakdown": dict(stale)}
+    _stamp_resource_breakdown(meta_emptied)
+    assert "resource_breakdown" not in meta_emptied
+
+    meta_zeroed = {
+        "resources": [{"type": "material", "quantity": 0, "unit_rate": 0}],
+        "resource_breakdown": dict(stale),
+    }
+    _stamp_resource_breakdown(meta_zeroed)
+    assert "resource_breakdown" not in meta_zeroed
+
+
 def test_stamp_buckets_unknown_type_as_other() -> None:
     meta = {
         "resources": [

@@ -1091,12 +1091,14 @@ def _stamp_resource_breakdown(metadata: dict[str, Any]) -> None:
     (``assemblies/service.py``) and the demo seeder's
     ``_resource_breakdown_rollup``. Each resource contributes its ``total``
     when present, else ``quantity * unit_rate`` (the per-unit norm convention).
-    No-op when resources are absent/empty or the rolled subtotal is not
-    positive, so positions without resource data keep their metadata clean.
+    When resources are absent/empty or the rolled subtotal is not positive,
+    any previously stamped ``resource_breakdown`` is removed so a stale split
+    never survives a resources wipe (audit m5).
     ``float`` values in JSONB metadata follow the existing convention there.
     """
     resources = metadata.get("resources")
     if not isinstance(resources, list) or not resources:
+        metadata.pop("resource_breakdown", None)
         return
     totals: dict[str, Decimal] = {}
     for res in resources:
@@ -1118,6 +1120,7 @@ def _stamp_resource_breakdown(metadata: dict[str, Any]) -> None:
         totals[rtype] = totals.get(rtype, Decimal("0")) + ttl
     subtotal = sum(totals.values(), Decimal("0"))
     if subtotal <= 0:
+        metadata.pop("resource_breakdown", None)
         return
     metadata["resource_breakdown"] = {
         rtype: {

@@ -5,6 +5,29 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.9.0] - 2026-06-13
+
+### Added
+
+- Your own cost catalogues. You can now keep company price books inside the cost database: create a catalogue with its own required currency, fill it by hand or by importing an Excel or CSV price list, and apply its rates when estimating. The importer understands Russian column headings such as "Цена за ед." and European number formats like 8 450,00, warns when a file mixes currencies, and rows without a currency inherit the catalogue's. Catalogues appear as chips above the cost list for one-click filtering, and each one exports back to Excel with its real name kept intact in the filename, including non-Latin names.
+- Offline regional cost data. Thirty regional reference catalogues, from St. Petersburg to Tokyo, now ship inside the install itself, so loading one takes seconds and works with no internet connection at all.
+- Recording site progress on the 5D cost model. Budget lines that come from estimate positions now carry an earned value column, and you can record percent complete right in the line: the recorded percent becomes earned value at the position's budgeted rate, the column totals across the project, and the figure feeds the EVM analysis. Creating a budget from the estimate also seeds these lines automatically.
+- Estimated activity durations in the 4D schedule. Generating a schedule from an estimate no longer produces zero-day activities when no labour data is available: durations fall back to built-in production rates per unit of work, and every estimated duration is marked with an "Est." badge so you know which bars to refine.
+- Demo data you can actually remove. The projects page tells administrators how many of the visible projects are seeded demo content and offers to remove them in one click, without ever touching your own projects, and they stay gone after a restart.
+- Faster project creation. Quick create now needs only a project name, everything else is optional, and the new project becomes the active one everywhere immediately, so the next page you open is already working on it.
+
+### Fixed
+
+- A European rate with three decimal places, like 0,500, no longer imports a thousand times too large. A single comma in a number is always read as the decimal separator; only multi-group figures like 1,234,567 are treated as thousands.
+- Creating a budget from the estimate twice no longer doubles the finance budget, and the endpoint now checks that you are a member of the project. The material, labour and equipment share columns fill in and sum correctly across the estimate, including right after editing a resource.
+- An approved change order in a different currency than its contract is recorded but no longer silently added into the contract total at face value, and two change orders approved at the same moment can no longer overwrite each other's contract update.
+- Budget lines generated from positions priced in a foreign currency keep that currency label instead of being mislabelled as the project currency.
+- Importing a second price list without a code column into the same catalogue no longer collides with the first one and silently imports nothing.
+- The cost page no longer snaps back to a region filter on its own after you pick a catalogue, choose all regions, or delete an item, and downloaded export files no longer carry a stray underscore at the end of the name.
+- The header project switcher keeps up with project changes: creating, deleting, duplicating, archiving or restoring a project updates the list immediately, and a freshly created project can no longer lose its active status to a stale list.
+- Self-hosted AI models connect properly: an Ollama or vLLM endpoint is routed to the right provider even though the model name contains "llama", and no authorization header is sent when there is no key to send.
+- Spreadsheet imports are hardened against zip bombs, and upgraded desktop installs receive the new database index they need so catalogue filtering stays fast on large cost databases.
+
 ## [7.8.0] - 2026-06-12
 
 ### Added

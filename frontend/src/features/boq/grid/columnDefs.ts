@@ -129,9 +129,14 @@ export function resourceSplitPct(meta: Record<string, unknown>, resType: string)
 /**
  * Estimate-wide money totals per resource type. For each leaf position that
  * carries a split, the money attributable to a type is
- * ``share(type) x unit_rate x quantity``. Sections and positions without any
- * resource data are skipped. Returns null when NO position carried a split,
- * so the footer cells stay blank instead of showing a misleading 0.
+ * ``share(type) x unit_rate x quantity``, rebased into the project base
+ * currency via ``convertToBase`` when the position is priced in a foreign
+ * ``metadata.currency`` (mirrors the Total column / directCost path for
+ * Issue #111 - without the rebase the M/L/E footer mixed currencies while
+ * the adjacent DIRECT COST was already in base). Sections and positions
+ * without any resource data are skipped. Returns null when NO position
+ * carried a split, so the footer cells stay blank instead of showing a
+ * misleading 0.
  */
 export function resourceSplitMoneyTotals(
   positions: Array<Pick<Position, 'quantity' | 'unit_rate' | 'unit'> & {
@@ -139,6 +144,8 @@ export function resourceSplitMoneyTotals(
     metadata_?: Record<string, unknown> | null;
   }>,
   resTypes: readonly string[] = ['material', 'labor', 'equipment'],
+  baseCurrency?: string | null,
+  fxRates?: Array<{ currency: string; rate: number }> | null,
 ): Record<string, number> | null {
   const totals: Record<string, number> = {};
   let any = false;
@@ -147,7 +154,9 @@ export function resourceSplitMoneyTotals(
     // counting them would double the money.
     if (!p.unit || p.unit.trim() === '' || p.unit.trim().toLowerCase() === 'section') continue;
     const meta = (p.metadata || p.metadata_ || {}) as Record<string, unknown>;
-    const money = (Number(p.unit_rate) || 0) * (Number(p.quantity) || 0);
+    const raw = (Number(p.unit_rate) || 0) * (Number(p.quantity) || 0);
+    const sourceCurrency = (meta.currency as string | undefined) || baseCurrency;
+    const money = convertToBase(raw, sourceCurrency, baseCurrency, fxRates);
     for (const rt of resTypes) {
       const frac = resourceSplitFraction(meta, rt);
       if (frac == null) continue;

@@ -215,7 +215,11 @@ def _calc_duration_from_resources(
            metadata - the primary, data-driven path.
         2. Sum of labor-type resources stored in position metadata.
         3. Unit-based fallback production rates when the position has a
-           nonzero quantity but no labor metadata at all.
+           nonzero quantity but no labor metadata at all. Lump-sum units
+           are the exception: their quantity carries no production-rate
+           signal, so when total cost data is available they defer to the
+           cost-proportional path below (audit m10) and only take the flat
+           8h allowance as the last resort.
         4. Cost-proportional share of the total project duration.
 
     Args:
@@ -271,10 +275,16 @@ def _calc_duration_from_resources(
     # ── Try 3: unit-based fallback production rates ──────────────────────
     # No labor metadata at all but a real quantity - estimate from the
     # module-level production-rate table so the activity never gets a
-    # zero / near-zero duration.
+    # zero / near-zero duration. Lump-sum units only carry a flat 8h
+    # allowance regardless of size, which would collapse a big lump-sum
+    # subcontract to 1 day - prefer the cost-proportional share (Try 4)
+    # whenever total cost data is available and keep the flat allowance
+    # strictly as the last resort (audit m10).
     if quantity > 0:
-        days = estimate_fallback_duration_days(unit, quantity, hours_per_day)
-        return max(1, min(days, total_days)), "estimated_fallback"
+        lump_sum_with_cost_data = _normalize_unit(unit) == "lsum" and total_cost > 0 and grand_total > 0
+        if not lump_sum_with_cost_data:
+            days = estimate_fallback_duration_days(unit, quantity, hours_per_day)
+            return max(1, min(days, total_days)), "estimated_fallback"
 
     # ── Try 4: cost-proportional fallback ────────────────────────────────
     if total_cost > 0 and grand_total > 0:

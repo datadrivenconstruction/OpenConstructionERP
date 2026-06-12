@@ -4,13 +4,17 @@ Covers ``_on_changeorder_approved_contract`` in
 ``app.modules.notifications._wave5_cross_module_subscribers``:
 
 * happy path - the linked contract's total_value is bumped by the CO's
-  cost_impact and the CO id / running total land in contract.metadata;
+  cost_impact (via an atomic SQL increment) and the CO id / running total
+  land in contract.metadata;
 * idempotency - re-delivering the same event does not double-apply;
 * amendability guard - terminated / completed contracts are skipped;
+* currency guard - a CO whose currency differs from the contract currency
+  never bumps total_value but is still recorded in metadata;
 * no contract link - the handler returns without opening a session.
 
-The session factory and ContractRepository are faked so no database is
-required (the handler is best-effort and isolated by design).
+The session factory is faked so no database is required (the handler is
+best-effort and isolated by design): SELECT statements return the staged
+contract, UPDATE statements apply the bound total_value delta in memory.
 """
 
 from __future__ import annotations
@@ -19,6 +23,7 @@ import uuid
 from decimal import Decimal
 
 import pytest
+from sqlalchemy.sql import Select, Update
 
 import app.modules.notifications._wave5_cross_module_subscribers as w5
 from app.core.events import Event
@@ -32,17 +37,42 @@ class _FakeContract:
         status: str = "active",
         metadata: dict | None = None,
         project_id: uuid.UUID | None = None,
+        currency: str = "EUR",
     ) -> None:
         self.code = "CT-001"
         self.total_value = total_value
         self.status = status
         self.metadata_ = metadata or {}
         self.project_id = project_id or _PROJECT_ID
+        self.currency = currency
+
+
+class _FakeResult:
+    def __init__(self, contract: _FakeContract | None) -> None:
+        self._contract = contract
+
+    def scalar_one_or_none(self) -> _FakeContract | None:
+        return self._contract
 
 
 class _FakeSession:
-    def __init__(self) -> None:
+    def __init__(self, state: dict) -> None:
         self.committed = False
+        self._state = state
+
+    async def execute(self, stmt):
+        if isinstance(stmt, Select):
+            return _FakeResult(self._state["contract"])
+        if isinstance(stmt, Update):
+            # The handler issues UPDATE ... SET total_value = total_value
+            # + :delta; pull the bound delta out of the compiled params and
+            # apply it to the staged contract.
+            params = stmt.compile().params
+            delta = next(v for k, v in params.items() if k.startswith("total_value"))
+            contract = self._state["contract"]
+            contract.total_value = Decimal(str(contract.total_value)) + Decimal(str(delta))
+            return None
+        raise AssertionError(f"unexpected statement: {stmt!r}")
 
     async def commit(self) -> None:
         self.committed = True
@@ -56,25 +86,15 @@ class _FakeSession:
 
 @pytest.fixture
 def harness(monkeypatch: pytest.MonkeyPatch):
-    """Patch the isolated session + ContractRepository used by the handler."""
-    import app.modules.contracts.repository as contracts_repo_mod
-
+    """Patch the isolated session factory used by the handler."""
     state: dict = {"contract": None, "sessions": []}
 
     def _factory() -> _FakeSession:
-        session = _FakeSession()
+        session = _FakeSession(state)
         state["sessions"].append(session)
         return session
 
-    class _FakeRepo:
-        def __init__(self, session: object) -> None:
-            pass
-
-        async def get_by_id(self, contract_id: uuid.UUID):
-            return state["contract"]
-
     monkeypatch.setattr(w5, "async_session_factory", _factory)
-    monkeypatch.setattr(contracts_repo_mod, "ContractRepository", _FakeRepo)
     return state
 
 
@@ -201,6 +221,58 @@ async def test_rejects_event_without_project_id(harness: dict) -> None:
 
     assert contract.total_value == Decimal("100000")
     assert all(not s.committed for s in harness["sessions"])
+
+
+@pytest.mark.asyncio
+async def test_currency_mismatch_skips_bump_but_records_co(harness: dict) -> None:
+    """A CO in a foreign currency must never blend into total_value.
+
+    The bump is skipped, but the CO is recorded in change_order_ids plus a
+    skipped_currency_mismatch entry so the money is not silently lost.
+    """
+    contract = _FakeContract(total_value=Decimal("100000"), currency="USD")
+    harness["contract"] = contract
+    co_id = str(uuid.uuid4())
+
+    await w5._on_changeorder_approved_contract(_event(str(uuid.uuid4()), co_id))
+
+    assert contract.total_value == Decimal("100000")
+    assert contract.metadata_["change_order_ids"] == [co_id]
+    assert "change_order_total" not in contract.metadata_
+    skipped = contract.metadata_["skipped_currency_mismatch"]
+    assert skipped == [{"change_order_id": co_id, "cost_impact": "2500.00", "currency": "EUR"}]
+    # The metadata record IS committed (otherwise redelivery would retry).
+    assert harness["sessions"][-1].committed is True
+
+
+@pytest.mark.asyncio
+async def test_currency_mismatch_is_idempotent(harness: dict) -> None:
+    contract = _FakeContract(total_value=Decimal("100000"), currency="USD")
+    harness["contract"] = contract
+    co_id = str(uuid.uuid4())
+    event = _event(str(uuid.uuid4()), co_id)
+
+    await w5._on_changeorder_approved_contract(event)
+    await w5._on_changeorder_approved_contract(event)
+
+    assert contract.total_value == Decimal("100000")
+    assert contract.metadata_["change_order_ids"] == [co_id]
+    assert len(contract.metadata_["skipped_currency_mismatch"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_event_without_currency_still_bumps(harness: dict) -> None:
+    """COs that do not carry a currency keep the legacy behaviour."""
+    contract = _FakeContract(total_value=Decimal("100000"), currency="USD")
+    harness["contract"] = contract
+    co_id = str(uuid.uuid4())
+    event = _event(str(uuid.uuid4()), co_id)
+    event.data["currency"] = ""
+
+    await w5._on_changeorder_approved_contract(event)
+
+    assert contract.total_value == Decimal("102500.00")
+    assert Decimal(contract.metadata_["change_order_total"]) == Decimal("2500.00")
 
 
 def test_subscriber_registered() -> None:

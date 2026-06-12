@@ -1839,9 +1839,26 @@ class ContractsService:
             )
         delta = Decimal(str(co_amount or 0))
         new_value = Decimal(str(contract.total_value or 0)) + delta
+        # Mirror the metadata stamps written by the ``changeorder.approved``
+        # subscriber (notifications wave-5) so both application paths feed
+        # the same rollup: append the CO reference to ``change_order_ids``
+        # and accumulate ``change_order_total``. Keeping the key present
+        # also lets AIA G702 trust the tracked rollup even when it nets to
+        # zero (audit m7).
+        md = dict(contract.metadata_ or {})
+        applied = list(md.get("change_order_ids") or [])
+        if co_reference and str(co_reference) not in {str(v) for v in applied}:
+            applied.append(str(co_reference))
+        md["change_order_ids"] = applied
+        try:
+            running = Decimal(str(md.get("change_order_total") or 0))
+        except (InvalidOperation, ValueError, TypeError):
+            running = Decimal("0")
+        md["change_order_total"] = str(running + delta)
         await self.contract_repo.update_fields(
             contract_id,
             total_value=new_value,
+            metadata_=md,
         )
         await self.session.refresh(contract)
         event_bus.publish_detached(
@@ -2268,13 +2285,18 @@ class ContractsService:
 
         # Net change orders: prefer the auto-tracked metadata rollup
         # (change_order_total + variation_total, stamped by the approval
-        # subscribers) and fall back to the manually-entered terms value for
-        # contracts that predate the rollup. Never add the two - a contract
-        # that mirrors the rollup into terms would double-count.
+        # subscribers) and fall back to the manually-entered terms value only
+        # for contracts that predate the rollup, i.e. neither rollup key is
+        # present in metadata. Key PRESENCE decides, not value (audit m7): a
+        # tracked rollup that legitimately nets to zero must not resurrect a
+        # stale manual figure. Never add the two - a contract that mirrors
+        # the rollup into terms would double-count.
         _co_count, meta_change_orders_net = self._change_order_rollup(contract)
+        contract_md = contract.metadata_ if isinstance(contract.metadata_, dict) else {}
+        rollup_tracked = "change_order_total" in contract_md or "variation_total" in contract_md
         change_orders_net = (
             meta_change_orders_net
-            if meta_change_orders_net != 0
+            if rollup_tracked
             else Decimal(str((contract.terms or {}).get("change_orders_net", 0) or 0))
         )
         original_contract_sum = Decimal(str(contract.total_value or 0)) - change_orders_net

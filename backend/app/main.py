@@ -2391,7 +2391,7 @@ def create_app() -> FastAPI:
 
                 migrated = await postgres_auto_migrate(engine, Base)
                 if migrated:
-                    logger.info("PostgreSQL auto-migration: %d columns added", migrated)
+                    logger.info("PostgreSQL auto-migration: %d schema objects (columns + indexes) added", migrated)
 
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)

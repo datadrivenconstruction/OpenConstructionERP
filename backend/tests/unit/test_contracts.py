@@ -573,6 +573,7 @@ async def test_apply_change_order_increments_value_and_emits_event() -> None:
         id=contract_id,
         total_value=Decimal("100000"),
         status="active",
+        metadata_={},
     )
     mock_publish = MagicMock()
     with patch.object(contracts_service.event_bus, "publish_detached", mock_publish):
@@ -582,10 +583,40 @@ async def test_apply_change_order_increments_value_and_emits_event() -> None:
             co_schedule_days=14,
             co_reference="CO-1",
         )
-    assert svc.contract_repo.rows[contract_id].total_value == Decimal("125000")
+    row = svc.contract_repo.rows[contract_id]
+    assert row.total_value == Decimal("125000")
+    # Audit m7: the service path stamps the same rollup metadata as the
+    # changeorder.approved subscriber so both paths stay consistent.
+    assert row.metadata_["change_order_ids"] == ["CO-1"]
+    assert Decimal(row.metadata_["change_order_total"]) == Decimal("25000")
     assert mock_publish.called
     args = mock_publish.call_args
     assert args.args[0] == "contracts.contract.amended"
+
+
+@pytest.mark.asyncio
+async def test_apply_change_order_rollup_key_survives_zero_net() -> None:
+    """Offsetting COs net to zero but keep the rollup key present.
+
+    Audit m7: AIA G702 decides rollup-vs-terms by KEY presence, so a
+    legitimately zero rollup must not resurrect a stale manual figure.
+    """
+    svc = _stub_service()
+    contract_id = uuid.uuid4()
+    svc.contract_repo.rows[contract_id] = SimpleNamespace(
+        id=contract_id,
+        total_value=Decimal("100000"),
+        status="active",
+        metadata_={},
+    )
+    with patch.object(contracts_service.event_bus, "publish_detached", MagicMock()):
+        await svc.apply_change_order_to_contract(contract_id, Decimal("10000"), co_reference="CO-1")
+        await svc.apply_change_order_to_contract(contract_id, Decimal("-10000"), co_reference="CO-2")
+    row = svc.contract_repo.rows[contract_id]
+    assert row.total_value == Decimal("100000")
+    assert row.metadata_["change_order_ids"] == ["CO-1", "CO-2"]
+    assert "change_order_total" in row.metadata_
+    assert Decimal(row.metadata_["change_order_total"]) == Decimal("0")
 
 
 @pytest.mark.asyncio

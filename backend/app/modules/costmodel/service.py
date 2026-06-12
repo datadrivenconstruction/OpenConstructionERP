@@ -1427,13 +1427,22 @@ class CostModelService:
 
         # Budget lines inherit the project base currency so EVM / cash-flow
         # rollups do not have to special-case the empty-string sentinel.
+        # Exception (audit M4): planned/forecast amounts are the raw position
+        # totals in the position's NATIVE currency, so a position imported
+        # with a foreign currency marker keeps that currency stamp instead of
+        # being mislabeled as base. The cash-flow generator converts per-line
+        # currencies to base via the project FX map downstream.
         currency = await self._project_currency(project_id)
+        project_ccy_norm = (currency or "").strip().upper()
 
         lines: list[BudgetLine] = []
         for pos in positions:
             if pos.id in existing:
                 continue
             total = _str_to_decimal(pos.total)
+            pos_meta = getattr(pos, "metadata_", None)
+            pos_ccy = str(pos_meta.get("currency") or "").strip().upper() if isinstance(pos_meta, dict) else ""
+            line_currency = pos_ccy if pos_ccy and pos_ccy != project_ccy_norm else currency
             line = BudgetLine(
                 project_id=project_id,
                 boq_position_id=pos.id,
@@ -1443,7 +1452,7 @@ class CostModelService:
                 committed_amount="0",
                 actual_amount="0",
                 forecast_amount=str(total),
-                currency=currency,
+                currency=line_currency,
             )
             lines.append(line)
 

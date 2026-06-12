@@ -20,9 +20,11 @@ import csv
 import io
 import json
 import logging
+import math as _math
 import re as _re
 import urllib.parse
 import uuid
+import zipfile
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -88,12 +90,19 @@ from app.modules.costs.schemas import (
 from app.modules.costs.service import CostBenchmarkService, CostCatalogService, CostItemService
 from app.modules.costs.translations import localize_cost_row
 
-# Round-7 upload safety: cap incoming bulk imports at 25 MB so a renamed
+# Round-7 upload safety: cap incoming bulk imports at 100 MB so a renamed
 # binary can't waste arbitrary memory on the parse path before the
 # magic-byte gate has a chance to reject it. A real-world CWICR
-# CSV/Excel of 55K rows is ~8 MB; 25 MB leaves comfortable headroom for
+# CSV/Excel of 55K rows is ~8 MB; 100 MB leaves comfortable headroom for
 # annotated columns without exposing the parser to multi-GB blobs.
 _MAX_COST_UPLOAD_BYTES = 100 * 1024 * 1024
+
+# Zip-bomb guard for OOXML (.xlsx) uploads: openpyxl inflates archive
+# entries in memory, so a tiny upload that decompresses to gigabytes
+# would bypass the on-the-wire size cap above. Reject archives whose
+# declared UNCOMPRESSED payload or entry count is absurd for a workbook.
+_MAX_COST_ZIP_UNCOMPRESSED_BYTES = 500 * 1024 * 1024
+_MAX_COST_ZIP_ENTRIES = 10_000
 
 # Magic-byte allow-list for the /import/file/ endpoint. ZIP covers OOXML
 # (xlsx); OLE covers legacy .xls; pure CSV has no magic so we accept the
@@ -2959,6 +2968,17 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
     text = str(value).strip()
     if not text:
         return default
+    # Scientific notation ("1E+05") parses directly but would be mangled by
+    # the separator stripping below ("1E+05" -> "+05" -> 5), so try the raw
+    # string first. Reject non-finite results ("inf", "nan") - those are not
+    # rates and must fall through to the default.
+    try:
+        direct = float(text)
+    except (ValueError, TypeError):
+        pass
+    else:
+        if _math.isfinite(direct):
+            return direct
     # Strip everything that is not part of the number itself: whitespace
     # thousands separators ("8 500,00" incl. non-breaking/thin spaces),
     # apostrophe thousands ("1'250.00", Swiss), ANY currency symbol or
@@ -2977,11 +2997,14 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
         else:
             text = text.replace(",", "")
     elif "," in text:
-        # Comma-only is ambiguous: "8 500,00" is a decimal comma but
-        # "1,000" / "1,234,567" are English thousands groups. Treat it as
-        # a thousands separator when the digits form exact 3-digit groups,
-        # otherwise as the decimal separator.
-        if _re.fullmatch(r"[+-]?\d{1,3}(,\d{3})+", text):
+        # Comma-only: treat commas as thousands separators ONLY when there
+        # are MULTIPLE 3-digit groups ("1,234,567"). A SINGLE comma is
+        # always the decimal separator, even with exactly 3 digits after
+        # it ("0,500", "12,345") - European 3-decimal rates are far more
+        # common in cost files than a lone English thousands group, and
+        # inflating a rate 1000x is the worse failure mode. Mixed
+        # comma+dot inputs ("1,234.56") are handled by the branch above.
+        if text.count(",") > 1 and _re.fullmatch(r"[+-]?\d{1,3}(,\d{3})+", text):
             text = text.replace(",", "")
         else:
             text = text.replace(",", ".")
@@ -3163,6 +3186,34 @@ def _validate_cost_upload(content: bytes, filename: str) -> bool:
             require_signature(head, _ALLOWED_COST_IMPORT_SIGNATURES, filename=filename)
         except FileSignatureMismatch as exc:
             raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=str(exc)) from exc
+        # Zip-bomb gate for OOXML containers: sum the DECLARED uncompressed
+        # sizes before openpyxl inflates anything. Legacy OLE .xls is not a
+        # zip - BadZipFile falls through and the signature gate above stays
+        # the authority for those.
+        try:
+            with zipfile.ZipFile(io.BytesIO(content)) as zf:
+                infos = zf.infolist()
+                if len(infos) > _MAX_COST_ZIP_ENTRIES:
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        detail=(
+                            f"Excel archive contains {len(infos)} entries "
+                            f"(> {_MAX_COST_ZIP_ENTRIES} limit) - not a valid workbook."
+                        ),
+                    )
+                total_uncompressed = sum(info.file_size for info in infos)
+                if total_uncompressed > _MAX_COST_ZIP_UNCOMPRESSED_BYTES:
+                    raise HTTPException(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        detail=(
+                            f"Excel archive decompresses to "
+                            f"{total_uncompressed / (1024 * 1024):.0f} MB "
+                            f"(> {_MAX_COST_ZIP_UNCOMPRESSED_BYTES / (1024 * 1024):.0f} MB limit). "
+                            f"Split the catalogue into smaller batches."
+                        ),
+                    )
+        except zipfile.BadZipFile:
+            pass
     return is_csv
 
 
@@ -3449,7 +3500,12 @@ async def import_cost_file(
     skipped = 0
     errors: list[dict[str, Any]] = []
     auto_code = 1
+    # Auto-generated codes are salted with a request-unique prefix: a bare
+    # counter restarts at 1 per request, so a second code-less file into the
+    # same catalog would dedupe against the first and silently import 0 rows.
+    auto_code_salt = uuid.uuid4().hex[:6]
     mixed_currency_count = 0
+    rate_parse_failures = 0
 
     for row_idx, row in enumerate(rows, start=2):
         try:
@@ -3463,7 +3519,7 @@ async def import_cost_file(
 
             # Auto-generate code if missing
             if not code:
-                code = f"IMPORT-{auto_code:06d}"
+                code = f"IMPORT-{auto_code_salt}-{auto_code:04d}"
             auto_code += 1
 
             # Skip obvious summary rows
@@ -3485,8 +3541,15 @@ async def import_cost_file(
             if not unit:
                 unit = "pcs"
 
-            # Parse rate
-            rate = _safe_float(row.get("rate"), default=0.0)
+            # Parse rate. NaN sentinel distinguishes "value present but
+            # unparseable" from a genuine 0 - _safe_float itself never
+            # returns NaN (non-finite direct parses fall to the default).
+            raw_rate = row.get("rate")
+            rate = _safe_float(raw_rate, default=_math.nan)
+            if _math.isnan(rate):
+                if raw_rate is not None and str(raw_rate).strip():
+                    rate_parse_failures += 1
+                rate = 0.0
 
             # Parse currency - empty if absent, never country-default. Inside
             # a catalog, an empty row currency inherits the CATALOG currency;
@@ -3556,6 +3619,9 @@ async def import_cost_file(
         # Rows whose own currency differs from the catalog currency. Imported
         # as-is (never silently rewritten) - this is a warning, not a block.
         "mixed_currency_count": mixed_currency_count,
+        # Rows whose rate cell held a value that could not be parsed to a
+        # number (imported with rate 0). Surfaced as a warning, not a block.
+        "rate_parse_failures": rate_parse_failures,
     }
 
 
