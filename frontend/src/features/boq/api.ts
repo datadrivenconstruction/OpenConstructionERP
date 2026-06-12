@@ -332,11 +332,20 @@ export function normalizePosition(p: Position): Position {
       resources: res.map((r) => {
         if (!r || typeof r !== 'object') return r;
         const rr = r as Record<string, unknown>;
+        const quantity = toFiniteNumber(rr.quantity);
+        const unit_rate = toFiniteNumber(rr.unit_rate);
+        // Issue #131 contract: resources that DO carry a stored `total`
+        // (string-Decimal from the API) are coerced to a number. Resources
+        // WITHOUT a total key (most seed/import data) must NOT get a literal
+        // 0 injected - that fake 0 made the M/L/E split columns read "all
+        // totals are zero" and render blank. Derive quantity * unit_rate
+        // instead, the same rollup the backend and the grid use.
+        const hasStoredTotal = rr.total != null && rr.total !== '';
         return {
           ...rr,
-          quantity: toFiniteNumber(rr.quantity),
-          unit_rate: toFiniteNumber(rr.unit_rate),
-          total: toFiniteNumber(rr.total),
+          quantity,
+          unit_rate,
+          total: hasStoredTotal ? toFiniteNumber(rr.total) : quantity * unit_rate,
         };
       }),
     };

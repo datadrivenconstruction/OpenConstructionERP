@@ -1083,6 +1083,51 @@ def _is_section(position: Position) -> bool:
     return unit in ("", "section") and qty == 0.0 and rate == 0.0
 
 
+def _stamp_resource_breakdown(metadata: dict[str, Any]) -> None:
+    """Stamp ``metadata['resource_breakdown']`` from ``metadata['resources']``.
+
+    Canonical server-side M/L/E rollup: ``{type: {"total": float, "pct": float}}``
+    mirroring the shape written by the assembly apply path
+    (``assemblies/service.py``) and the demo seeder's
+    ``_resource_breakdown_rollup``. Each resource contributes its ``total``
+    when present, else ``quantity * unit_rate`` (the per-unit norm convention).
+    No-op when resources are absent/empty or the rolled subtotal is not
+    positive, so positions without resource data keep their metadata clean.
+    ``float`` values in JSONB metadata follow the existing convention there.
+    """
+    resources = metadata.get("resources")
+    if not isinstance(resources, list) or not resources:
+        return
+    totals: dict[str, Decimal] = {}
+    for res in resources:
+        if not isinstance(res, dict):
+            continue
+        rtype = str(res.get("type") or "other")
+        if res.get("total") is not None:
+            try:
+                ttl = Decimal(str(res.get("total")))
+            except (ArithmeticError, ValueError):
+                ttl = Decimal("0")
+        else:
+            try:
+                ttl = Decimal(str(res.get("quantity") or 0)) * Decimal(str(res.get("unit_rate") or 0))
+            except (ArithmeticError, ValueError):
+                ttl = Decimal("0")
+        if not ttl.is_finite():
+            ttl = Decimal("0")
+        totals[rtype] = totals.get(rtype, Decimal("0")) + ttl
+    subtotal = sum(totals.values(), Decimal("0"))
+    if subtotal <= 0:
+        return
+    metadata["resource_breakdown"] = {
+        rtype: {
+            "total": float(ttl),
+            "pct": float((ttl / subtotal) * Decimal("100")),
+        }
+        for rtype, ttl in totals.items()
+    }
+
+
 def _resource_total_in_base(
     resources: list[dict[str, Any]],
     fx_rates_map: dict[str, str] | None,
@@ -2588,6 +2633,9 @@ class BOQService:
             merged_metadata,
             position_currency=currency_hint if isinstance(currency_hint, str) else None,
         )
+        # Canonical M/L/E rollup: keep ``resource_breakdown`` in sync with the
+        # resources list so the BOQ grid split columns / pill never go stale.
+        _stamp_resource_breakdown(merged_metadata)
 
         total = _compute_total(data.quantity, data.unit_rate)
         max_order = await self.position_repo.get_max_sort_order(data.boq_id)
@@ -3428,6 +3476,10 @@ class BOQService:
                 fields["metadata_"],
                 position_currency=currency if isinstance(currency, str) else None,
             )
+            # Canonical M/L/E rollup: re-stamp ``resource_breakdown`` whenever
+            # a metadata patch carries resources, so the grid split columns
+            # and the pill read fresh per-type totals/percentages.
+            _stamp_resource_breakdown(fields["metadata_"])
 
         # BUG-B-014: re-evaluate the boq_quality duplicate-content signal
         # whenever the patch touches description / unit / quantity /

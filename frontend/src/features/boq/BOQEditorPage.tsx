@@ -27,6 +27,7 @@ import {
   type CostAutocompleteItem,
   DEFAULT_MAX_NESTING_DEPTH,
 } from './api';
+import { resourceSplitMoneyTotals } from './grid/columnDefs';
 import { ApiError } from '@/shared/lib/api';
 import { projectsApi, type Project, type ProjectFxRate } from '@/features/projects/api';
 import { fetchBIMModels } from '@/features/bim/api';
@@ -3690,11 +3691,17 @@ export function BOQEditorPage() {
   const hasPositions = boq ? boq.positions.length > 0 : false;
 
   const boqFooterRows = useMemo(() => {
-    type FooterRow = { _isFooter: true; _footerType: string; id: string; description: string; total: number; ordinal: string; unit: string; quantity: number; unit_rate: number };
+    type FooterRow = { _isFooter: true; _footerType: string; id: string; description: string; total: number; ordinal: string; unit: string; quantity: number; unit_rate: number; _resourceSplitMoney?: Record<string, number> };
     const rows: FooterRow[] = [];
     if (!hasPositions) return rows;
     const base = { _isFooter: true as const, ordinal: '', unit: '', quantity: 0, unit_rate: 0 };
-    rows.push({ ...base, _footerType: 'direct_cost', id: '_direct_cost', description: t('boq.direct_cost', { defaultValue: 'DIRECT COST' }), total: directCost });
+    // Estimate-wide money per resource type (Material / Labor / Equipment):
+    // for every leaf position with a split, money(type) = share(type) x
+    // unit_rate x quantity. Rendered on the DIRECT COST footer row of the
+    // M/L/E split columns so the estimator sees absolute cost-driver totals,
+    // not just per-position percentages.
+    const splitMoney = resourceSplitMoneyTotals(boq?.positions ?? []);
+    rows.push({ ...base, _footerType: 'direct_cost', id: '_direct_cost', description: t('boq.direct_cost', { defaultValue: 'DIRECT COST' }), total: directCost, ...(splitMoney ? { _resourceSplitMoney: splitMoney } : {}) });
     for (const m of markupTotals) {
       rows.push({ ...base, _footerType: `markup_${m.id}`, id: `_markup_${m.id}`, description: `${m.name} ${fmt.format(m.percentage)}%`, total: m.amount });
     }
@@ -3704,7 +3711,7 @@ export function BOQEditorPage() {
       rows.push({ ...base, _footerType: 'gross_total', id: '_gross_total', description: t('boq.gross_total', { defaultValue: 'GROSS TOTAL' }), total: grossTotal });
     }
     return rows;
-  }, [hasPositions, directCost, markupTotals, netTotal, vatRate, vatAmount, grossTotal, t, fmt]);
+  }, [hasPositions, boq?.positions, directCost, markupTotals, netTotal, vatRate, vatAmount, grossTotal, t, fmt]);
 
   /** Handle cost suggestion selected from AG Grid autocomplete editor */
   const handleGridSelectSuggestion = useCallback(

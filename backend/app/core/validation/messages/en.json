@@ -47,6 +47,10 @@
       "fail": "Position {ordinal}: computed {computed} != stored {stored} (diff={diff})",
       "suggestion": "Recalculate total = quantity × unit_rate"
     },
+    "resource_split_mismatch": {
+      "fail": "Position {ordinal}: resource subtotal {subtotal} differs from unit rate {rate} by {diff}",
+      "suggestion": "Review the resource quantities and rates - their per-unit sum should match the position unit rate"
+    },
     "empty_unit": {
       "fail": "Position {ordinal} has empty or missing unit",
       "suggestion": "Assign a measurement unit (m, m2, m3, kg, pcs, lsum, etc.)"

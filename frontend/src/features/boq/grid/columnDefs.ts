@@ -76,16 +76,20 @@ function totalFormatter(params: ValueFormatterParams): string {
 }
 
 /**
- * Percentage share of one resource type (material / labor / equipment) of a
- * position's cost. Computes the share straight from the LIVE
+ * Fractional share (0..1) of one resource type (material / labor /
+ * equipment) of a position's cost. Computes the share straight from the LIVE
  * ``metadata.resources`` array first - that array is recomputed on every
  * inline resource edit and variant re-pick, so the split stays correct after
- * the user changes a quantity or rate. Only when a position has no resources
- * array does it fall back to the pre-rolled ``metadata.resource_breakdown``
- * (some assembly / AI positions carry the rollup but no resources list).
- * Returns null when the position has no resource data, leaving the cell blank.
+ * the user changes a quantity or rate. When the resources array is absent OR
+ * its totals sum to zero (e.g. zero-rate resources), it falls back to the
+ * pre-rolled ``metadata.resource_breakdown`` (assembly / AI positions and the
+ * server-side rollup carry it). Returns null when the position has no usable
+ * resource data, leaving the cell blank.
  */
-function resourceSplitPct(meta: Record<string, unknown>, resType: string): number | null {
+export function resourceSplitFraction(
+  meta: Record<string, unknown>,
+  resType: string,
+): number | null {
   const resources = meta.resources;
   if (Array.isArray(resources) && resources.length > 0) {
     let subtotal = 0;
@@ -101,13 +105,57 @@ function resourceSplitPct(meta: Record<string, unknown>, resType: string): numbe
       subtotal += ttl;
       if ((rr.type || 'other') === resType) typeTotal += ttl;
     }
-    if (subtotal <= 0) return null;
-    return Math.round((typeTotal / subtotal) * 100);
+    if (subtotal > 0) return typeTotal / subtotal;
+    // subtotal <= 0: defense in depth - fall through to the pre-rolled
+    // breakdown instead of blanking the cell (the live array carried no
+    // usable money, but the server-side rollup may still know the split).
   }
   const bd = meta.resource_breakdown as Record<string, { pct?: number }> | undefined;
   const direct = bd?.[resType]?.pct;
-  if (typeof direct === 'number') return Math.round(direct);
+  if (typeof direct === 'number' && Number.isFinite(direct)) return direct / 100;
   return null;
+}
+
+/**
+ * Percentage share (rounded integer) of one resource type. Thin wrapper over
+ * {@link resourceSplitFraction} - the split columns render this, while the
+ * footer money rollup uses the exact fraction to avoid rounding drift.
+ */
+export function resourceSplitPct(meta: Record<string, unknown>, resType: string): number | null {
+  const frac = resourceSplitFraction(meta, resType);
+  return frac == null ? null : Math.round(frac * 100);
+}
+
+/**
+ * Estimate-wide money totals per resource type. For each leaf position that
+ * carries a split, the money attributable to a type is
+ * ``share(type) x unit_rate x quantity``. Sections and positions without any
+ * resource data are skipped. Returns null when NO position carried a split,
+ * so the footer cells stay blank instead of showing a misleading 0.
+ */
+export function resourceSplitMoneyTotals(
+  positions: Array<Pick<Position, 'quantity' | 'unit_rate' | 'unit'> & {
+    metadata?: Record<string, unknown> | null;
+    metadata_?: Record<string, unknown> | null;
+  }>,
+  resTypes: readonly string[] = ['material', 'labor', 'equipment'],
+): Record<string, number> | null {
+  const totals: Record<string, number> = {};
+  let any = false;
+  for (const p of positions) {
+    // Sections act as group headers (empty unit) and aggregate children -
+    // counting them would double the money.
+    if (!p.unit || p.unit.trim() === '' || p.unit.trim().toLowerCase() === 'section') continue;
+    const meta = (p.metadata || p.metadata_ || {}) as Record<string, unknown>;
+    const money = (Number(p.unit_rate) || 0) * (Number(p.quantity) || 0);
+    for (const rt of resTypes) {
+      const frac = resourceSplitFraction(meta, rt);
+      if (frac == null) continue;
+      any = true;
+      totals[rt] = (totals[rt] || 0) + frac * money;
+    }
+  }
+  return any ? totals : null;
 }
 
 export function getColumnDefs(context: BOQColumnContext): ColDef[] {
@@ -492,12 +540,25 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       filter: 'agNumberColumnFilter',
       valueGetter: (params: ValueGetterParams) => {
         const d = params.data;
-        if (!d || d._isFooter || d._isSection) return null;
+        if (!d) return null;
+        // Footer (DIRECT COST row): estimate-wide money attributable to this
+        // resource type, pre-aggregated by BOQEditorPage's footer builder.
+        if (d._isFooter) {
+          const money = d._resourceSplitMoney as Record<string, number> | undefined;
+          const v = money?.[resType];
+          return typeof v === 'number' && Number.isFinite(v) ? v : null;
+        }
+        if (d._isSection) return null;
         const meta = (d.metadata || d.metadata_ || {}) as Record<string, unknown>;
         return resourceSplitPct(meta, resType);
       },
-      valueFormatter: (params: ValueFormatterParams) =>
-        params.value == null ? '' : `${params.value}%`,
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (params.value == null) return '';
+        // Footer cells carry money (estimate-wide per-type total) and reuse
+        // the grid's currency formatter; position cells stay percentages.
+        if (params.data?._isFooter) return totalFormatter(params);
+        return `${params.value}%`;
+      },
       cellClass: 'text-right tabular-nums text-xs !pr-2 !pl-2 text-content-secondary',
       headerClass: 'ag-right-aligned-header',
       type: 'numericColumn',

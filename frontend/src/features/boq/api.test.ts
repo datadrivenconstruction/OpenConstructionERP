@@ -50,6 +50,54 @@ describe('normalizePosition', () => {
     const result = normalizePosition(pos);
     expect(result.metadata).toEqual({});
   });
+
+  it('derives resource total from quantity * unit_rate when total is absent', () => {
+    // Seed/import resources carry no `total` key - normalize must NOT inject
+    // a literal 0 (that blanked the M/L/E split columns), it must derive the
+    // per-unit money instead.
+    const pos = makePosition({
+      metadata: {
+        resources: [
+          { name: 'Concrete', type: 'material', quantity: 1, unit_rate: 75 },
+          { name: 'Crew', type: 'labor', quantity: 0.7, unit_rate: 30 },
+        ],
+      },
+    });
+    const result = normalizePosition(pos);
+    const resources = result.metadata.resources as Array<{ total: number }>;
+    expect(resources[0].total).toBe(75);
+    expect(resources[1].total).toBeCloseTo(21);
+  });
+
+  it('coerces a stored string-Decimal resource total instead of deriving', () => {
+    // Issue #131 contract: resources that DO carry total keep it (coerced
+    // from the API's exact decimal string to a number).
+    const pos = makePosition({
+      metadata: {
+        resources: [
+          { name: 'Pump', type: 'equipment', quantity: 2, unit_rate: 10, total: '60.0000' },
+        ],
+      },
+    });
+    const result = normalizePosition(pos);
+    const resources = result.metadata.resources as Array<{ total: number }>;
+    expect(resources[0].total).toBe(60); // NOT 20 (quantity * unit_rate)
+  });
+
+  it('derives the total when the stored total is null or empty string', () => {
+    const pos = makePosition({
+      metadata: {
+        resources: [
+          { name: 'A', type: 'material', quantity: 3, unit_rate: 5, total: null },
+          { name: 'B', type: 'labor', quantity: 2, unit_rate: 4, total: '' },
+        ],
+      },
+    });
+    const result = normalizePosition(pos);
+    const resources = result.metadata.resources as Array<{ total: number }>;
+    expect(resources[0].total).toBe(15);
+    expect(resources[1].total).toBe(8);
+  });
 });
 
 /* ── normalizePositions ──────────────────────────────────────────────── */

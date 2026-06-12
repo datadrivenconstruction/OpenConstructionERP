@@ -177,6 +177,12 @@ interface FooterRow {
   unit: string;
   quantity: number;
   unit_rate: number;
+  /**
+   * Estimate-wide money per resource type (material / labor / equipment),
+   * present only on the DIRECT COST row. The M/L/E split columns render
+   * these as currency in their footer cell (columnDefs valueGetter).
+   */
+  _resourceSplitMoney?: Record<string, number>;
 }
 
 interface SectionRow {

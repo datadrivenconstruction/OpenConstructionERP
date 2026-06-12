@@ -1361,6 +1361,95 @@ class TotalMismatch(ValidationRule):
         return results
 
 
+class ResourceSplitMismatch(ValidationRule):
+    """Per-unit resource subtotal should reconcile with the position unit rate.
+
+    Positions carrying ``metadata.resources`` follow the per-unit norm
+    convention: each resource's contribution per 1 unit of the position is
+    its ``total`` when present, else ``quantity * unit_rate``, and the sum
+    over all resources should equal the position's ``unit_rate``. When the
+    two drift apart by more than 5 percent the Material/Labor/Equipment
+    split shown in the BOQ grid no longer describes the money actually
+    priced - flag it for review (WARNING, never blocks).
+    """
+
+    rule_id = "boq_quality.resource_split_mismatch"
+    name = "Resource Split Matches Unit Rate"
+    standard = "boq_quality"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Per-unit resource subtotal should match the position unit rate within 5%"
+
+    REL_TOLERANCE = 0.05
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_leaf_positions(context):
+            meta = _position_metadata(pos)
+            resources = meta.get("resources")
+            if not isinstance(resources, list) or not resources:
+                continue
+            rate_p = _to_number(pos.get("unit_rate"))
+            if rate_p is None or rate_p is _NOT_A_NUMBER:
+                continue
+            rate_val: float = rate_p  # type: ignore[assignment]
+            # Zero/negative rates are covered by position_has_unit_rate /
+            # negative_values - comparing a ratio against them is noise.
+            if rate_val <= 0:
+                continue
+            subtotal = 0.0
+            for res in resources:
+                if not isinstance(res, dict):
+                    continue
+                ttl_p = _to_number(res.get("total")) if res.get("total") is not None else None
+                if ttl_p is None or ttl_p is _NOT_A_NUMBER:
+                    qty_p = _to_number(res.get("quantity"))
+                    rrate_p = _to_number(res.get("unit_rate"))
+                    qty_val = qty_p if isinstance(qty_p, float) else 0.0
+                    rrate_val = rrate_p if isinstance(rrate_p, float) else 0.0
+                    subtotal += qty_val * rrate_val
+                else:
+                    subtotal += ttl_p  # type: ignore[arg-type]
+            diff_ratio = abs(subtotal - rate_val) / rate_val
+            passed = diff_ratio <= self.REL_TOLERANCE
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "boq_quality.resource_split_mismatch.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                    subtotal=_fmt_decimal(subtotal),
+                    rate=_fmt_decimal(rate_val),
+                    diff=_fmt_percent(diff_ratio),
+                )
+                suggestion = translate(
+                    "boq_quality.resource_split_mismatch.suggestion",
+                    locale=locale,
+                )
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=pos.get("id"),
+                    details={
+                        "unit_rate": rate_val,
+                        "resource_subtotal": subtotal,
+                        "difference_ratio": diff_ratio,
+                        "tolerance": self.REL_TOLERANCE,
+                    },
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
 class EmptyUnit(ValidationRule):
     rule_id = "boq_quality.empty_unit"
     name = "Position Has Unit"
@@ -5636,6 +5725,7 @@ def register_builtin_rules() -> None:
         (NegativeValues(), None),
         (UnrealisticRate(), None),
         (TotalMismatch(), None),
+        (ResourceSplitMismatch(), None),
         (EmptyUnit(), None),
         (SectionWithoutItems(), None),
         (RateVsBenchmark(), None),

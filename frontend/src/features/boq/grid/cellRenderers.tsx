@@ -996,9 +996,11 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
   // (manual or non-assembly positions).
   // Compute the cost-driver split from the LIVE ``resources`` array first so
   // the pill stays correct after an inline resource edit, mirroring the grid
-  // split-columns. Fall back to the pre-rolled ``resource_breakdown`` only
-  // when a position carries the rollup but no resources list. Skipped
-  // silently when neither is present (manual / non-assembly positions).
+  // split-columns. Fall back to the pre-rolled ``resource_breakdown`` when a
+  // position carries the rollup but no resources list, OR when the live
+  // array yields a zero subtotal (defense in depth - zero-rate resources
+  // must not blank a pill the server-side rollup can still supply). Skipped
+  // silently when neither source is usable (manual / non-assembly positions).
   const liveResources = (meta as { resources?: unknown }).resources;
   let breakdownEntries: Array<{ rt: string; pct: number }> = [];
   if (Array.isArray(liveResources) && liveResources.length > 0) {
@@ -1022,7 +1024,8 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
         .filter((e) => e.pct > 0)
         .sort((a, b) => b.pct - a.pct);
     }
-  } else {
+  }
+  if (breakdownEntries.length === 0) {
     const breakdownRaw = (meta as { resource_breakdown?: Record<string, { pct?: number }> })
       .resource_breakdown;
     if (breakdownRaw && typeof breakdownRaw === 'object') {

@@ -47,6 +47,10 @@
       "fail": "Position {ordinal}: berechnet {computed} != gespeichert {stored} (Differenz={diff})",
       "suggestion": "Gesamtbetrag neu berechnen = Menge × Einheitspreis"
     },
+    "resource_split_mismatch": {
+      "fail": "Position {ordinal}: Ressourcen-Zwischensumme {subtotal} weicht um {diff} vom Einheitspreis {rate} ab",
+      "suggestion": "Mengen und Preise der Ressourcen prüfen - ihre Summe pro Einheit sollte dem Einheitspreis der Position entsprechen"
+    },
     "empty_unit": {
       "fail": "Position {ordinal} hat keine oder eine leere Einheit",
       "suggestion": "Eine Mengeneinheit zuweisen (m, m2, m3, kg, Stk, Pauschale usw.)"
