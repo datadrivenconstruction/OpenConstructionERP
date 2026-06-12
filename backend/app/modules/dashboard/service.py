@@ -20,7 +20,7 @@ from datetime import UTC, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import Numeric, and_, case, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.partner_pack.scope import scope_project_query
@@ -128,6 +128,21 @@ def _money(value: Decimal) -> str:
     return f"{value.quantize(Decimal('0.01'))}"
 
 
+# BOQ Position money/quantity columns are String(50) (legacy SQLite-era
+# storage kept for migration compatibility). To aggregate them in SQL we
+# guard the CAST with a numeric-shape regex so a malformed value degrades
+# to 0 - mirroring ``_to_decimal`` - instead of aborting the statement.
+# Uses the PostgreSQL ``~`` regex operator; the platform is
+# PostgreSQL-only since v6.6.0 (tests included), so no dialect branch is
+# needed.
+_NUMERIC_SHAPE_RE = r"^[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)$"
+
+
+def _sql_decimal(col: Any) -> Any:
+    """SQL expression: CAST ``col`` to NUMERIC, or 0 when not numeric-shaped."""
+    return case((col.op("~")(_NUMERIC_SHAPE_RE), cast(col, Numeric)), else_=0)
+
+
 # ─── Widget aggregators ─────────────────────────────────────────────────────
 
 
@@ -209,21 +224,36 @@ async def compute_boq_summary(
                 "grand_total": "0.00",
             }
 
-    # Per-project position aggregates - quantity/unit_rate/total stored
-    # as String in SQLite, so we sum in Python. Also collect per-BOQ totals
-    # so we can attach the latest BOQ's own total/position_count.
-    pos_stmt = (
+    # Per-project / per-BOQ position aggregates - computed in SQL (COUNT +
+    # SUM ... GROUP BY) instead of pulling every Position row across every
+    # project into Python. quantity/unit_rate/total are stored as String,
+    # so each goes through the regex-guarded CAST in ``_sql_decimal``
+    # (malformed value -> 0, exactly like ``_to_decimal``). The effective
+    # row total mirrors the previous Python logic: prefer the stored total
+    # unless it is NULL/empty/"0", else quantity * unit_rate.
+    _qty = _sql_decimal(Position.quantity)
+    _rate = _sql_decimal(Position.unit_rate)
+    _row_total = case(
+        (
+            and_(Position.total.is_not(None), Position.total != "", Position.total != "0"),
+            _sql_decimal(Position.total),
+        ),
+        else_=_qty * _rate,
+    )
+    pos_agg_stmt = (
         select(
             BOQ.id,
             BOQ.project_id,
-            Position.quantity,
-            Position.unit_rate,
-            Position.total,
+            func.count(Position.id),
+            func.sum(_row_total),
+            func.sum(case((_qty == 0, 1), else_=0)),
+            func.sum(case((_rate == 0, 1), else_=0)),
         )
         .join(BOQ, BOQ.id == Position.boq_id)
         .where(BOQ.project_id.in_(project_ids))
+        .group_by(BOQ.id, BOQ.project_id)
     )
-    pos_rows = (await session.execute(pos_stmt)).all()
+    pos_agg_rows = (await session.execute(pos_agg_stmt)).all()
 
     per_project: dict[uuid.UUID, dict[str, Any]] = defaultdict(
         lambda: {
@@ -233,24 +263,15 @@ async def compute_boq_summary(
             "zero_price": 0,
         },
     )
-    per_boq: dict[uuid.UUID, dict[str, Any]] = defaultdict(
-        lambda: {"total": Decimal("0"), "positions": 0},
-    )
-    for boq_id, project_id, qty_s, rate_s, total_s in pos_rows:
+    per_boq: dict[uuid.UUID, dict[str, Any]] = {}
+    for boq_id, project_id, positions, total_sum, missing_qty, zero_price in pos_agg_rows:
+        total = _to_decimal(total_sum)
         bucket = per_project[project_id]
-        bucket["positions"] += 1
-        qty = _to_decimal(qty_s)
-        rate = _to_decimal(rate_s)
-        # Prefer stored total; fall back to qty*rate
-        total = _to_decimal(total_s) if total_s and total_s != "0" else qty * rate
+        bucket["positions"] += int(positions or 0)
         bucket["total"] += total
-        if qty == 0:
-            bucket["missing_qty"] += 1
-        if rate == 0:
-            bucket["zero_price"] += 1
-        boq_bucket = per_boq[boq_id]
-        boq_bucket["positions"] += 1
-        boq_bucket["total"] += total
+        bucket["missing_qty"] += int(missing_qty or 0)
+        bucket["zero_price"] += int(zero_price or 0)
+        per_boq[boq_id] = {"total": total, "positions": int(positions or 0)}
 
     by_project: list[dict[str, Any]] = []
     overall_total = Decimal("0")
@@ -435,28 +456,37 @@ async def compute_clash_health(
             "by_project": [],
         }
 
-    stmt = select(
-        ClashIssue.project_id,
-        ClashIssue.status,
-        ClashIssue.priority,
-    ).where(ClashIssue.project_id.in_(project_ids))
+    # Grouped COUNT in SQL instead of pulling one row per clash issue into
+    # Python - the result set is at most (projects x statuses x priorities)
+    # rows regardless of how many issues exist.
+    stmt = (
+        select(
+            ClashIssue.project_id,
+            ClashIssue.status,
+            ClashIssue.priority,
+            func.count(ClashIssue.id),
+        )
+        .where(ClashIssue.project_id.in_(project_ids))
+        .group_by(ClashIssue.project_id, ClashIssue.status, ClashIssue.priority)
+    )
     rows = (await session.execute(stmt)).all()
 
     per_project: dict[uuid.UUID, dict[str, int]] = defaultdict(
         lambda: {"total": 0, "open": 0, "high": 0, "medium": 0, "low": 0},
     )
     closed_statuses = {"resolved", "ignored", "archived"}
-    for project_id, status_, priority in rows:
+    for project_id, status_, priority, count_ in rows:
+        n = int(count_ or 0)
         bucket = per_project[project_id]
-        bucket["total"] += 1
+        bucket["total"] += n
         if status_ not in closed_statuses:
-            bucket["open"] += 1
+            bucket["open"] += n
             if priority in {"high", "critical"}:
-                bucket["high"] += 1
+                bucket["high"] += n
             elif priority == "medium":
-                bucket["medium"] += 1
+                bucket["medium"] += n
             elif priority == "low":
-                bucket["low"] += 1
+                bucket["low"] += n
 
     by_project: list[dict[str, Any]] = []
     total = 0
@@ -875,19 +905,26 @@ async def compute_change_orders(
     # didn't stamp one.
     project_currency_by_id = {p.id: getattr(p, "currency", "") or "" for p in projects}
 
-    stmt = select(
-        ChangeOrder.id,
-        ChangeOrder.project_id,
-        ChangeOrder.code,
-        ChangeOrder.title,
-        ChangeOrder.status,
-        ChangeOrder.cost_impact,
-        ChangeOrder.currency,
-    ).where(ChangeOrder.project_id.in_(project_ids))
-    rows = (await session.execute(stmt)).all()
+    closed_statuses = ("approved", "rejected", "closed")
+    open_filter = ChangeOrder.status.not_in(closed_statuses)
 
-    closed_statuses = {"approved", "rejected", "closed"}
-    open_rows = [r for r in rows if r[4] not in closed_statuses]
+    # Aggregate in SQL (COUNT + SUM ... GROUP BY) instead of pulling every
+    # change-order row across every project into Python. ``cost_impact`` is
+    # MoneyType (NUMERIC on PostgreSQL), so SUM is numeric-safe and comes
+    # back as Decimal. Grouping by (project_id, currency) keeps the per-row
+    # currency-resolution semantics: the row's own currency, else the
+    # owning project's real currency, else the fallback.
+    agg_stmt = (
+        select(
+            ChangeOrder.project_id,
+            ChangeOrder.currency,
+            func.count(ChangeOrder.id),
+            func.sum(ChangeOrder.cost_impact),
+        )
+        .where(ChangeOrder.project_id.in_(project_ids), open_filter)
+        .group_by(ChangeOrder.project_id, ChangeOrder.currency)
+    )
+    agg_rows = (await session.execute(agg_stmt)).all()
 
     # Money bug fix: ChangeOrder.cost_impact rows can be in different ISO
     # currencies (BRL, EUR, USD ...). There is no cross-project FX table
@@ -897,23 +934,41 @@ async def compute_change_orders(
     # ``multi_currency`` so the UI knows not to render it as a headline)
     # and add an FX-correct per-currency breakdown - same shape as
     # ``compute_boq_summary``.
+    open_count = 0
     total_impact = Decimal("0")
     impact_by_currency: dict[str, Decimal] = defaultdict(lambda: Decimal("0"))
-    for r in open_rows:
-        impact = _to_decimal(r[5])
+    for project_id, row_currency, count_, impact_sum in agg_rows:
+        open_count += int(count_ or 0)
+        impact = _to_decimal(impact_sum)
         total_impact += impact
         # Use the row's own currency, else the project's real currency.
-        row_currency = r[6] or project_currency_by_id.get(r[1], "") or fallback_currency
-        impact_by_currency[row_currency] += impact
+        currency = row_currency or project_currency_by_id.get(project_id, "") or fallback_currency
+        impact_by_currency[currency] += impact
 
     by_currency = [
         {"currency": cur, "total_impact": _money(total)} for cur, total in sorted(impact_by_currency.items())
     ]
     multi_currency = len(impact_by_currency) > 1
 
-    top_pending = open_rows[:3]
+    # Detail columns only for the 3 rows the widget actually renders.
+    # (The previous code took the first 3 open rows in DB order - no
+    # explicit ordering existed, so none is added here.)
+    top_stmt = (
+        select(
+            ChangeOrder.id,
+            ChangeOrder.project_id,
+            ChangeOrder.code,
+            ChangeOrder.title,
+            ChangeOrder.status,
+            ChangeOrder.cost_impact,
+            ChangeOrder.currency,
+        )
+        .where(ChangeOrder.project_id.in_(project_ids), open_filter)
+        .limit(3)
+    )
+    top_pending = (await session.execute(top_stmt)).all()
     return {
-        "open_count": len(open_rows),
+        "open_count": open_count,
         # Legacy flat scalar kept for backward compatibility. When
         # ``multi_currency`` is true it mixes ISO currencies and must NOT
         # be rendered as a single headline figure - use ``by_currency``.
