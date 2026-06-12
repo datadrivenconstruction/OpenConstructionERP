@@ -865,7 +865,10 @@ async function downloadExcelExport(): Promise<void> {
 
   const blob = await response.blob();
   const disposition = response.headers.get('Content-Disposition');
-  const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || 'cost_database_export.xlsx';
+  const utf8Name = disposition?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  const filename = utf8Name
+    ? decodeURIComponent(utf8Name)
+    : disposition?.match(/filename="?([^";]+)"?/)?.[1] || 'cost_database_export.xlsx';
   triggerDownload(blob, filename);
 }
 

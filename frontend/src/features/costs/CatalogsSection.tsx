@@ -62,8 +62,10 @@ async function downloadCatalogExcel(catalog: CostCatalog): Promise<void> {
 
   const blob = await response.blob();
   const disposition = response.headers.get('Content-Disposition');
-  const filename =
-    disposition?.match(/filename="?([^";]+)"?/)?.[1] || `${catalog.name}.xlsx`;
+  const utf8Name = disposition?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  const filename = utf8Name
+    ? decodeURIComponent(utf8Name)
+    : disposition?.match(/filename="?([^";]+)"?/)?.[1] || `${catalog.name}.xlsx`;
   triggerDownload(blob, filename);
 }
 

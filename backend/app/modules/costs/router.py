@@ -21,6 +21,7 @@ import io
 import json
 import logging
 import re as _re
+import urllib.parse
 import uuid
 from decimal import Decimal
 from pathlib import Path
@@ -2603,11 +2604,14 @@ async def export_cost_catalog_excel(
     wb.save(output)
     output.seek(0)
 
+    # ASCII slug as the legacy fallback plus RFC 5987 filename* so non-Latin
+    # catalog names ("Моя смета 2026") keep their real name in the download.
     slug = _re.sub(r"[^A-Za-z0-9]+", "-", catalog.name).strip("-").lower() or "catalog"
+    utf8_name = urllib.parse.quote(f"{catalog.name}.xlsx", safe="")
     return StreamingResponse(
         output,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f'attachment; filename="{slug}.xlsx"'},
+        headers={"Content-Disposition": (f"attachment; filename=\"{slug}.xlsx\"; filename*=UTF-8''{utf8_name}")},
     )
 
 

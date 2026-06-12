@@ -155,7 +155,10 @@ async function downloadExcelExport(): Promise<void> {
 
   const blob = await response.blob();
   const disposition = response.headers.get('Content-Disposition');
-  const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || 'cost_database_export.xlsx';
+  const utf8Name = disposition?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  const filename = utf8Name
+    ? decodeURIComponent(utf8Name)
+    : disposition?.match(/filename="?([^";]+)"?/)?.[1] || 'cost_database_export.xlsx';
   triggerDownload(blob, filename);
 }
 
@@ -580,13 +583,17 @@ export function CostsPage() {
     if (region) return;
     if (regionFromUrl) return;
     if (activeRegion) return;
+    // A selected catalog chip intentionally clears the region scope; query
+    // invalidations (edit/delete) re-run this effect, and re-picking a
+    // region here would intersect with catalog_id down to an empty list.
+    if (catalogId) return;
     const catalogNames = new Set((userCatalogs ?? []).map((c) => c.name));
     const first = loadedRegions?.find((r) => !catalogNames.has(r));
     if (!first) return;
     setRegion(first);
     setActiveRegion(first);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadedRegions, userCatalogs]);
+  }, [loadedRegions, userCatalogs, catalogId]);
 
   // Fetch per-region stats (for item counts in tabs)
   const { data: regionStats } = useQuery({

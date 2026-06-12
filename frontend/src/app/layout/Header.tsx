@@ -1362,7 +1362,7 @@ function ProjectSwitcher() {
   // Pre-fetch so the dropdown renders an instant list when the user opens
   // it (no race between open → fetch → render that used to flash
   // "No projects yet" for half a second).
-  const { data: projects, isLoading, isError, refetch } = useQuery({
+  const { data: projects, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['projects-switcher'],
     queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/?limit=500'),
     staleTime: 60_000,
@@ -1424,11 +1424,16 @@ function ProjectSwitcher() {
   useEffect(() => {
     if (!projects) return;
     if (!activeProjectId) return;
+    // A list refetch may be in flight (e.g. right after creating a project,
+    // which activates the new id before the switcher list knows about it).
+    // Deciding on the stale cache here would clear a perfectly valid
+    // selection - wait for the fresh list.
+    if (isFetching) return;
     const stillExists = projects.some((p) => p.id === activeProjectId);
     if (!stillExists) {
       clearProject();
     }
-  }, [projects, activeProjectId, clearProject]);
+  }, [projects, activeProjectId, clearProject, isFetching]);
 
   return (
     <div className="relative hidden sm:block" ref={ref} data-testid="header-project-picker">
