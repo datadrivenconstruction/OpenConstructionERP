@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import csv
 import io
+import json
 import logging
 import re as _re
 import uuid
@@ -25,7 +26,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, UploadFile, status
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -2515,6 +2516,12 @@ async def bulk_import_cost_items(
 # ── File import (CSV / Excel) ────────────────────────────────────────────
 
 # Column name aliases for flexible matching (all lowercased)
+# Header aliases for auto-detecting columns in a user-uploaded catalogue.
+# Covers EN, DE and RU so a Russian estimator's Excel (Наименование / Цена /
+# Ед.изм / Шифр) maps without a manual step. When auto-detection still misses a
+# column (any other language, an unusual header), the import endpoint accepts an
+# explicit ``column_map`` from the mapping UI - so import never silently drops a
+# column the user needs.
 _COST_COLUMN_ALIASES: dict[str, list[str]] = {
     "code": [
         "code",
@@ -2530,6 +2537,14 @@ _COST_COLUMN_ALIASES: dict[str, list[str]] = {
         "#",
         "id",
         "position",
+        # RU
+        "код",
+        "шифр",
+        "артикул",
+        "№",
+        "номер",
+        "позиция",
+        "обоснование",
     ],
     "description": [
         "description",
@@ -2540,6 +2555,13 @@ _COST_COLUMN_ALIASES: dict[str, list[str]] = {
         "item description",
         "name",
         "title",
+        # RU
+        "наименование",
+        "наименование работ",
+        "описание",
+        "работа",
+        "работы",
+        "наименование работ и затрат",
     ],
     "unit": [
         "unit",
@@ -2548,6 +2570,15 @@ _COST_COLUMN_ALIASES: dict[str, list[str]] = {
         "uom",
         "unit of measure",
         "measure",
+        # RU
+        "ед",
+        "ед.",
+        "ед.изм",
+        "ед. изм.",
+        "ед.изм.",
+        "единица",
+        "единица измерения",
+        "изм",
     ],
     "rate": [
         "rate",
@@ -2561,12 +2592,22 @@ _COST_COLUMN_ALIASES: dict[str, list[str]] = {
         "preis",
         "amount",
         "value",
+        # RU
+        "цена",
+        "расценка",
+        "стоимость",
+        "цена за единицу",
+        "стоимость единицы",
+        "сметная стоимость",
+        "тариф",
     ],
     "currency": [
         "currency",
         "währung",
         "curr",
         "cur",
+        # RU
+        "валюта",
     ],
     "classification": [
         "classification",
@@ -2579,8 +2620,26 @@ _COST_COLUMN_ALIASES: dict[str, list[str]] = {
         "class",
         "category",
         "group",
+        # RU
+        "классификация",
+        "класс",
+        "раздел",
+        "гэсн",
+        "фер",
+        "категория",
+        "группа",
     ],
 }
+
+# Canonical column keys the importer understands, in display order.
+_COST_CANONICAL_COLUMNS: tuple[str, ...] = (
+    "code",
+    "description",
+    "unit",
+    "rate",
+    "currency",
+    "classification",
+)
 
 
 def _match_cost_column(header: str) -> str | None:
@@ -2599,6 +2658,40 @@ def _match_cost_column(header: str) -> str | None:
     return None
 
 
+def _resolve_cost_column_map(
+    raw_headers: list[Any],
+    overrides: dict[str, str] | None = None,
+) -> dict[int, str]:
+    """Build a {column_index -> canonical_key} map for a header row.
+
+    ``overrides`` (from the mapping UI) maps a canonical key to the exact raw
+    header text the user chose; it wins over alias auto-detection so any-language
+    columns import correctly. Without an override a column falls back to the
+    EN/DE/RU alias map.
+    """
+    # Normalise overrides to {raw_header_lower -> canonical} for lookup.
+    override_by_header: dict[str, str] = {}
+    if overrides:
+        for canonical, header in overrides.items():
+            if canonical in _COST_CANONICAL_COLUMNS and header:
+                override_by_header[str(header).strip().lower()] = canonical
+
+    column_map: dict[int, str] = {}
+    for idx, hdr in enumerate(raw_headers):
+        if hdr is None:
+            continue
+        key = str(hdr).strip().lower()
+        if not key:
+            continue
+        canonical = override_by_header.get(key) or _match_cost_column(str(hdr))
+        if canonical:
+            # First column wins for a given canonical key (avoid a later
+            # duplicate header silently overwriting the chosen one).
+            if canonical not in column_map.values():
+                column_map[idx] = canonical
+    return column_map
+
+
 def _safe_float(value: Any, default: float = 0.0) -> float:
     """Parse a value to float, returning *default* on failure.
 
@@ -2609,6 +2702,14 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
     if isinstance(value, (int, float)):
         return float(value)
     text = str(value).strip()
+    if not text:
+        return default
+    # Strip currency symbols and whitespace thousands separators. Russian and
+    # French catalogues write "8 500,00" with a space (often a non-breaking or
+    # thin space) between thousands; without this they parsed to 0.
+    # Remove all whitespace (incl. non-breaking/thin spaces) and currency
+    # symbols so "8 500,00" parses; \s is unicode-aware for str patterns.
+    text = _re.sub(r"[\s₽€$£]", "", text)
     if not text:
         return default
     # Handle European-style numbers: "1.234,56" -> "1234.56"
@@ -2627,7 +2728,10 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
         return default
 
 
-def _parse_cost_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
+def _parse_cost_rows_from_csv(
+    content_bytes: bytes,
+    overrides: dict[str, str] | None = None,
+) -> list[dict[str, Any]]:
     """Parse rows from a CSV file for cost import.
 
     Tries UTF-8 first, then Latin-1 as fallback (common for DACH region files).
@@ -2652,11 +2756,7 @@ def _parse_cost_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
     if not raw_headers:
         raise ValueError("CSV file is empty or has no header row")
 
-    column_map: dict[int, str] = {}
-    for idx, hdr in enumerate(raw_headers):
-        canonical = _match_cost_column(hdr)
-        if canonical:
-            column_map[idx] = canonical
+    column_map = _resolve_cost_column_map(list(raw_headers), overrides)
 
     rows: list[dict[str, Any]] = []
     for raw_row in reader:
@@ -2671,7 +2771,37 @@ def _parse_cost_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
     return rows
 
 
-def _parse_cost_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
+def _csv_headers_and_sample(content_bytes: bytes, sample: int = 5) -> tuple[list[str], list[list[str]]]:
+    """Return (raw_headers, first ``sample`` data rows) for the mapping preview."""
+    text = None
+    for encoding in ("utf-8-sig", "utf-8", "latin-1"):
+        try:
+            text = content_bytes.decode(encoding)
+            break
+        except UnicodeDecodeError:
+            continue
+    if text is None:
+        raise ValueError("Unable to decode CSV file -- unsupported encoding")
+    try:
+        dialect = csv.Sniffer().sniff(text[:4096], delimiters=",;\t|")
+    except csv.Error:
+        dialect = csv.excel  # type: ignore[assignment]
+    reader = csv.reader(io.StringIO(text), dialect)
+    raw_headers = next(reader, None)
+    if not raw_headers:
+        raise ValueError("CSV file is empty or has no header row")
+    rows: list[list[str]] = []
+    for raw_row in reader:
+        rows.append([str(c) for c in raw_row])
+        if len(rows) >= sample:
+            break
+    return [str(h) for h in raw_headers], rows
+
+
+def _parse_cost_rows_from_excel(
+    content_bytes: bytes,
+    overrides: dict[str, str] | None = None,
+) -> list[dict[str, Any]]:
     """Parse rows from an Excel (.xlsx) file for cost import."""
     from openpyxl import load_workbook
 
@@ -2685,12 +2815,7 @@ def _parse_cost_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
     if not raw_headers:
         raise ValueError("Excel file is empty or has no header row")
 
-    column_map: dict[int, str] = {}
-    for idx, hdr in enumerate(raw_headers):
-        if hdr is not None:
-            canonical = _match_cost_column(str(hdr))
-            if canonical:
-                column_map[idx] = canonical
+    column_map = _resolve_cost_column_map(list(raw_headers), overrides)
 
     rows: list[dict[str, Any]] = []
     for raw_row in rows_iter:
@@ -2706,6 +2831,117 @@ def _parse_cost_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
     return rows
 
 
+def _excel_headers_and_sample(content_bytes: bytes, sample: int = 5) -> tuple[list[str], list[list[str]]]:
+    """Return (raw_headers, first ``sample`` data rows) for the mapping preview."""
+    from openpyxl import load_workbook
+
+    wb = load_workbook(io.BytesIO(content_bytes), read_only=True, data_only=True)
+    ws = wb.active
+    if ws is None:
+        raise ValueError("Excel file has no worksheets")
+    rows_iter = ws.iter_rows(values_only=True)
+    raw_headers = next(rows_iter, None)
+    if not raw_headers:
+        wb.close()
+        raise ValueError("Excel file is empty or has no header row")
+    rows: list[list[str]] = []
+    for raw_row in rows_iter:
+        rows.append(["" if c is None else str(c) for c in raw_row])
+        if len(rows) >= sample:
+            break
+    wb.close()
+    return ["" if h is None else str(h) for h in raw_headers], rows
+
+
+def _validate_cost_upload(content: bytes, filename: str) -> bool:
+    """Run the size + magic-byte gate on an upload; return True if CSV.
+
+    Shared by preview and import so both reject renamed binaries identically.
+    Raises HTTPException on any violation.
+    """
+    if not content:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded file is empty.")
+    if len(content) > _MAX_COST_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=(
+                f"Uploaded file is too large ({len(content) / (1024 * 1024):.1f} MB > "
+                f"{_MAX_COST_UPLOAD_BYTES / (1024 * 1024):.0f} MB limit). Split the catalogue into smaller batches."
+            ),
+        )
+    head = content[:SIGNATURE_BYTES_REQUIRED]
+    signature = detect_signature(head)
+    is_csv = filename.endswith(".csv")
+    if is_csv:
+        if signature is not None and signature not in {"xml"}:
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail=f"File extension is .csv but the content is a {signature} container. Re-upload as a real CSV.",
+            )
+        if b"\x00" in head:
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail="CSV upload contains NUL bytes - likely a binary file with a renamed extension.",
+            )
+    else:
+        try:
+            require_signature(head, _ALLOWED_COST_IMPORT_SIGNATURES, filename=filename)
+        except FileSignatureMismatch as exc:
+            raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=str(exc)) from exc
+    return is_csv
+
+
+@router.post(
+    "/import/preview/",
+    dependencies=[Depends(RequirePermission("costs.create"))],
+)
+async def preview_cost_file(
+    _user_id: CurrentUserId,
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
+) -> dict[str, Any]:
+    """Inspect an uploaded catalogue and return its columns + a suggested mapping.
+
+    The mapping UI calls this first: it shows the file's real headers and a few
+    sample rows next to a suggested column->field mapping (auto-detected in
+    EN/DE/RU). The user confirms or corrects the mapping, then calls
+    ``/import/file/`` with the chosen ``column_map`` so columns in any language
+    import correctly instead of being silently dropped.
+    """
+    filename = (file.filename or "").lower()
+    if not filename.endswith((".xlsx", ".csv", ".xls")):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported file type. Please upload an Excel (.xlsx) or CSV (.csv) file.",
+        )
+    content = await file.read()
+    is_csv = _validate_cost_upload(content, filename)
+    try:
+        headers, sample = (_csv_headers_and_sample(content) if is_csv else _excel_headers_and_sample(content))
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to read file: {exc}") from exc
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Cost preview parse failed: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not read the file headers. Check that the first row contains column names.",
+        ) from exc
+
+    # Suggested mapping: canonical field -> the raw header we auto-detected.
+    detected = _resolve_cost_column_map(headers, None)
+    suggested: dict[str, str] = {}
+    for idx, canonical in detected.items():
+        if canonical not in suggested and idx < len(headers):
+            suggested[canonical] = headers[idx]
+
+    return {
+        "headers": headers,
+        "sample_rows": sample,
+        "suggested_map": suggested,
+        "target_fields": list(_COST_CANONICAL_COLUMNS),
+        "required_fields": ["description"],
+    }
+
+
 @router.post(
     "/import/file/",
     dependencies=[Depends(RequirePermission("costs.create"))],
@@ -2713,6 +2949,14 @@ def _parse_cost_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
 async def import_cost_file(
     _user_id: CurrentUserId,
     file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
+    column_map: str | None = Form(
+        default=None,
+        description='Optional JSON mapping of canonical field to raw header, e.g. {"description":"Наименование","rate":"Цена"}.',
+    ),
+    catalog_name: str | None = Form(
+        default=None,
+        description="Optional name for the catalogue these rows belong to; stamped as the items' region so they are findable as one database.",
+    ),
     service: CostItemService = Depends(_get_service),
 ) -> dict[str, Any]:
     """Import cost items from an Excel or CSV file upload.
@@ -2747,65 +2991,36 @@ async def import_cost_file(
             detail="Uploaded file is empty.",
         )
 
-    # Round-7 audit: cap upload size BEFORE any parsing so a renamed
-    # binary can't exhaust memory on the openpyxl path. A real-world
-    # CWICR import of 55K rows is well under 10 MB; 25 MB leaves
-    # headroom for richly annotated user catalogs.
-    if len(content) > _MAX_COST_UPLOAD_BYTES:
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=(
-                f"Uploaded file is too large "
-                f"({len(content) / (1024 * 1024):.1f} MB > "
-                f"{_MAX_COST_UPLOAD_BYTES / (1024 * 1024):.0f} MB limit). "
-                "Split the catalogue into smaller batches."
-            ),
-        )
+    # Size cap + magic-byte gate (shared with the preview endpoint): a renamed
+    # binary can't exhaust memory on the openpyxl path or slip past the .csv/.exe
+    # vector.
+    is_csv_request = _validate_cost_upload(content, filename)
 
-    # Round-7 magic-byte gate: filename extension lies; sniff the first
-    # 16 bytes against a hard allow-list. Excel files (xlsx) are ZIP
-    # containers ("PK\x03\x04"); .xls are OLE compound docs; CSVs have
-    # no magic - we accept ``None`` ONLY when the body decodes as text
-    # with a common delimiter.
-    head = content[:SIGNATURE_BYTES_REQUIRED]
-    signature = detect_signature(head)
-    is_csv_request = filename.endswith(".csv")
-    if is_csv_request:
-        # CSV body must decode as text and look like a delimited file.
-        # Reject anything that's actually a binary container masquerading
-        # as ".csv" (the classic .exe → .csv renamed-malware vector).
-        if signature is not None and signature not in {"xml"}:
-            # A real CSV would sniff as None (no magic) - anything we
-            # recognised as a container is a mismatch.
-            raise HTTPException(
-                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=(f"File extension is .csv but the content is a {signature} container. Re-upload as a real CSV."),
-            )
-        if b"\x00" in head:
-            raise HTTPException(
-                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail="CSV upload contains NUL bytes - likely a binary file with a renamed extension.",
-            )
-    else:
-        # .xlsx / .xls - must be a real ZIP or OLE container.
+    # An explicit column_map from the mapping UI overrides alias auto-detection,
+    # so headers in any language (Russian, French, ...) import instead of being
+    # dropped. Tolerate a malformed map by ignoring it rather than 500-ing.
+    overrides: dict[str, str] | None = None
+    if column_map:
         try:
-            require_signature(
-                head,
-                _ALLOWED_COST_IMPORT_SIGNATURES,
-                filename=file.filename,
-            )
-        except FileSignatureMismatch as exc:
-            raise HTTPException(
-                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=str(exc),
-            ) from exc
+            parsed_map = json.loads(column_map)
+            if isinstance(parsed_map, dict):
+                overrides = {str(k): str(v) for k, v in parsed_map.items() if v}
+        except (ValueError, TypeError):
+            logger.warning("Ignoring malformed column_map on cost import")
+
+    # A user-supplied catalogue name groups the imported rows under one findable
+    # region so the user sees their own catalogue (instead of items vanishing
+    # into an unnamed bucket). Sanitised to a short region tag.
+    catalog_region: str | None = None
+    if catalog_name and catalog_name.strip():
+        catalog_region = catalog_name.strip()[:50]
 
     # Parse rows based on file type
     try:
         if filename.endswith(".xlsx") or filename.endswith(".xls"):
-            rows = _parse_cost_rows_from_excel(content)
+            rows = _parse_cost_rows_from_excel(content, overrides)
         else:
-            rows = _parse_cost_rows_from_csv(content)
+            rows = _parse_cost_rows_from_csv(content, overrides)
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -2885,6 +3100,7 @@ async def import_cost_file(
                     currency=currency,
                     source="file_import",
                     classification=classification,
+                    region=catalog_region,
                 )
             )
 
@@ -2919,6 +3135,7 @@ async def import_cost_file(
         "skipped": skipped + skipped_by_duplicate,
         "errors": errors,
         "total_rows": len(rows),
+        "catalog": catalog_region,
     }
 
 
