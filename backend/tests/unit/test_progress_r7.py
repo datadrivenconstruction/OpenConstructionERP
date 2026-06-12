@@ -32,9 +32,28 @@ PROJECT_ID = uuid.uuid4()
 # ── Stubs ─────────────────────────────────────────────────────────────────────
 
 
+class _StubResult:
+    """Empty SQLAlchemy result double - any query answers 'no rows'."""
+
+    def scalars(self) -> _StubResult:
+        return self
+
+    def first(self) -> None:
+        return None
+
+    def all(self) -> list[Any]:
+        return []
+
+
 class _StubSession:
     async def refresh(self, obj: Any) -> None:
         pass
+
+    async def execute(self, stmt: Any) -> _StubResult:
+        # The progress -> costmodel earned-value bridge looks up the budget
+        # line for the recorded position; "no rows" exercises its silent
+        # skip path (budget not generated yet).
+        return _StubResult()
 
 
 class _StubProgressRepo:

@@ -427,6 +427,39 @@ class BudgetLineRepository:
         result = await self.session.execute(stmt)
         return result.scalars().first()
 
+    async def get_by_position(
+        self,
+        project_id: uuid.UUID,
+        boq_position_id: uuid.UUID,
+    ) -> BudgetLine | None:
+        """Return the budget line wired to a BOQ position, if any.
+
+        Used by the progress -> earned-value bridge to find the row that
+        carries ``earned_amount`` for a position. When several rows somehow
+        share the position (legacy data) the oldest by ``created_at`` wins so
+        repeated progress recordings stay deterministic and land on the same
+        row (mirrors :meth:`find_for_actual_posting`).
+
+        Args:
+            project_id: Project the budget line belongs to.
+            boq_position_id: BOQ position the line is wired to.
+
+        Returns:
+            The matching budget line, or ``None`` when the position has no
+            budget line yet (budget may not have been generated).
+        """
+        stmt = (
+            select(BudgetLine)
+            .where(
+                BudgetLine.project_id == project_id,
+                BudgetLine.boq_position_id == boq_position_id,
+            )
+            .order_by(BudgetLine.created_at.asc())
+            .limit(1)
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+
     async def existing_position_ids(self, project_id: uuid.UUID) -> set[uuid.UUID]:
         """Return the set of BOQ position IDs already wired to a budget line.
 

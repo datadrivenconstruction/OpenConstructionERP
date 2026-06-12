@@ -91,6 +91,199 @@ def _str_to_float(value: str | None) -> float:
         return 0.0
 
 
+# ── Fallback production rates for generate-from-BOQ durations ─────────────
+# Labor-hours per 1 unit of quantity, keyed by normalized BOQ unit. Used
+# when a position carries no labor metadata at all (no labor_hours, no
+# resources) so generated activities never end up with a zero duration.
+# Coarse industry averages - enough for a usable first schedule that the
+# planner refines; activities derived this way are flagged with
+# ``duration_source = "estimated_fallback"`` in their metadata.
+_FALLBACK_PRODUCTION_RATES: dict[str, float] = {
+    "m3": 4.0,
+    "m2": 0.8,
+    "m": 0.5,
+    "kg": 0.02,
+    "pcs": 1.0,
+    "stk": 1.0,
+    "t": 8.0,
+}
+
+# Lump-sum positions get a flat labor-hour allowance regardless of quantity.
+_FALLBACK_LUMP_SUM_HOURS = 8.0
+
+# Labor-hours per unit when the unit is unknown.
+_FALLBACK_DEFAULT_RATE = 1.0
+
+# Common unit spellings mapped onto the production-rate keys above.
+_UNIT_ALIASES: dict[str, str] = {
+    "m²": "m2",
+    "qm": "m2",
+    "sqm": "m2",
+    "m³": "m3",
+    "cbm": "m3",
+    "lfm": "m",
+    "lm": "m",
+    "pc": "pcs",
+    "piece": "pcs",
+    "pieces": "pcs",
+    "ea": "pcs",
+    "each": "pcs",
+    "st": "stk",
+    "to": "t",
+    "ton": "t",
+    "tonne": "t",
+    "ls": "lsum",
+    "lump sum": "lsum",
+    "psch": "lsum",
+    "pauschal": "lsum",
+}
+
+
+def _normalize_unit(unit: str | None) -> str:
+    """Normalize a BOQ unit string to a production-rate key."""
+    u = (unit or "").strip().lower()
+    return _UNIT_ALIASES.get(u, u)
+
+
+def fallback_labor_hours(unit: str | None, quantity: float) -> float:
+    """Estimate total labor-hours for a position from unit production rates.
+
+    Args:
+        unit: BOQ position unit (e.g. "m3", "m2", "pcs"); common aliases
+            such as "m³", "Stk" or "psch" are normalized first.
+        quantity: Position quantity (callers guard quantity > 0).
+
+    Returns:
+        Estimated total labor-hours. Lump-sum positions get a flat
+        allowance independent of quantity; unknown units fall back to
+        ``_FALLBACK_DEFAULT_RATE`` hours per unit.
+    """
+    u = _normalize_unit(unit)
+    if u == "lsum":
+        return _FALLBACK_LUMP_SUM_HOURS
+    rate = _FALLBACK_PRODUCTION_RATES.get(u, _FALLBACK_DEFAULT_RATE)
+    return quantity * rate
+
+
+def estimate_fallback_duration_days(
+    unit: str | None,
+    quantity: float,
+    hours_per_day: float = 8.0,
+) -> int:
+    """Derive an activity duration from unit-based production rates.
+
+    Used by :meth:`ScheduleService.generate_from_boq` when a BOQ position
+    has no labor metadata, so the generated activity still gets a usable
+    non-zero duration.
+
+    Args:
+        unit: BOQ position unit (normalized internally).
+        quantity: Position quantity (callers guard quantity > 0).
+        hours_per_day: Crew hours per working day (regional calendar).
+
+    Returns:
+        ``ceil(total_hours / hours_per_day)`` with a minimum of 1 day.
+    """
+    total_hours = fallback_labor_hours(unit, quantity)
+    hpd = hours_per_day if hours_per_day > 0 else 8.0
+    return max(1, math.ceil(total_hours / hpd))
+
+
+def _meta_number(meta: dict, key: str) -> float:
+    """Read a numeric metadata value defensively (string values tolerated)."""
+    try:
+        return float(meta.get(key, 0) or 0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _calc_duration_from_resources(
+    pos_meta: dict,
+    quantity: float,
+    unit: str | None,
+    total_cost: float,
+    grand_total: float,
+    total_days: int,
+    *,
+    hours_per_day: float,
+    work_days_per_week: int,
+) -> tuple[int, str]:
+    """Calculate the calendar-day duration for a BOQ-generated activity.
+
+    Priority:
+        1. Explicit ``labor_hours`` (+ ``workers_per_unit``) in position
+           metadata - the primary, data-driven path.
+        2. Sum of labor-type resources stored in position metadata.
+        3. Unit-based fallback production rates when the position has a
+           nonzero quantity but no labor metadata at all.
+        4. Cost-proportional share of the total project duration.
+
+    Args:
+        pos_meta: BOQ position metadata dict.
+        quantity: Position quantity.
+        unit: Position unit (for the fallback production-rate table).
+        total_cost: Position total cost.
+        grand_total: Grand total across all sections (cost-proportional path).
+        total_days: Total project duration cap in calendar days.
+        hours_per_day: Crew hours per working day (regional calendar).
+        work_days_per_week: Working days per week (regional calendar).
+
+    Returns:
+        ``(duration_days, source)`` where ``source`` is one of
+        ``labor_hours``, ``resource_sum``, ``estimated_fallback``,
+        ``cost_proportional`` or ``default_minimum`` so the UI can
+        distinguish measured from estimated durations.
+    """
+    # ── Try 1: explicit labor_hours + workers_per_unit in metadata ──────
+    labor_hours = _meta_number(pos_meta, "labor_hours")
+    workers = _meta_number(pos_meta, "workers_per_unit")
+
+    if labor_hours > 0 and quantity > 0:
+        total_hours = quantity * labor_hours
+        crew_hours_per_day = max(workers, 1) * hours_per_day
+        working_days = total_hours / crew_hours_per_day
+        # Add 10% for mobilization / demobilization
+        cal_days = working_days * 1.1
+        # Convert working days -> calendar days
+        cal_days = cal_days * 7 / work_days_per_week
+        return max(1, min(int(round(cal_days)), total_days)), "labor_hours"
+
+    # ── Try 2: sum labor-type resources stored in metadata ──────────────
+    resources = pos_meta.get("resources", [])
+    if resources and quantity > 0:
+        labor_hrs_per_unit = 0.0
+        for res in resources:
+            res_type = (res.get("type") or "").lower()
+            res_unit = (res.get("unit") or "").lower()
+            if res_type in ("labor", "operator") or "hrs" in res_unit or "hours" in res_unit:
+                labor_hrs_per_unit += _meta_number(res, "quantity")
+        if labor_hrs_per_unit > 0:
+            total_hours = quantity * labor_hrs_per_unit
+            crew_size = max(
+                sum(1 for r in resources if (r.get("type") or "").lower() in ("labor", "operator")),
+                1,
+            )
+            crew_hours_per_day = crew_size * hours_per_day
+            working_days = total_hours / crew_hours_per_day
+            cal_days = working_days * 1.1 * 7 / work_days_per_week
+            return max(1, min(int(round(cal_days)), total_days)), "resource_sum"
+
+    # ── Try 3: unit-based fallback production rates ──────────────────────
+    # No labor metadata at all but a real quantity - estimate from the
+    # module-level production-rate table so the activity never gets a
+    # zero / near-zero duration.
+    if quantity > 0:
+        days = estimate_fallback_duration_days(unit, quantity, hours_per_day)
+        return max(1, min(days, total_days)), "estimated_fallback"
+
+    # ── Try 4: cost-proportional fallback ────────────────────────────────
+    if total_cost > 0 and grand_total > 0:
+        proportion = total_cost / grand_total
+        return max(1, round(proportion * total_days)), "cost_proportional"
+
+    return 3, "default_minimum"  # minimum default
+
+
 # ── Regional work calendar configuration ─────────────────────────────────
 # Defines hours_per_day, working_days (weekday indices), and typical holidays.
 # weekday(): Monday=0, Tuesday=1, ... Saturday=5, Sunday=6
@@ -1591,62 +1784,11 @@ class ScheduleService:
         )
 
         # ── Duration calculation from real labor data ──────────────────
-        # Priority:
+        # Priority (see module-level _calc_duration_from_resources):
         #   1. labor_hours & workers_per_unit from position metadata
         #   2. Sum labor-type resources from position metadata
-        #   3. Cost-proportional fallback
-
-        def _calc_duration_from_resources(
-            pos_meta: dict,
-            quantity: float,
-            total_cost: float,
-            grand_total: float,
-            total_days: int,
-        ) -> int:
-            """Calculate calendar days from labor_hours and workers.
-
-            Uses regional work calendar for hours_per_day and work_days_per_week.
-            """
-            # ── Try 1: explicit labor_hours + workers_per_unit in metadata ──
-            labor_hours = pos_meta.get("labor_hours", 0)
-            workers = pos_meta.get("workers_per_unit", 0)
-
-            if labor_hours > 0 and quantity > 0:
-                total_hours = quantity * labor_hours
-                crew_hours_per_day = max(workers, 1) * hours_per_day
-                working_days = total_hours / crew_hours_per_day
-                # Add 10% for mobilization / demobilization
-                cal_days = working_days * 1.1
-                # Convert working days → calendar days
-                cal_days = cal_days * 7 / work_days_per_week
-                return max(1, min(int(round(cal_days)), total_days))
-
-            # ── Try 2: sum labor-type resources stored in metadata ──────────
-            resources = pos_meta.get("resources", [])
-            if resources and quantity > 0:
-                labor_hrs_per_unit = 0.0
-                for res in resources:
-                    res_type = (res.get("type") or "").lower()
-                    res_unit = (res.get("unit") or "").lower()
-                    if res_type in ("labor", "operator") or "hrs" in res_unit or "hours" in res_unit:
-                        labor_hrs_per_unit += res.get("quantity", 0)
-                if labor_hrs_per_unit > 0:
-                    total_hours = quantity * labor_hrs_per_unit
-                    crew_size = max(
-                        sum(1 for r in resources if (r.get("type") or "").lower() in ("labor", "operator")),
-                        1,
-                    )
-                    crew_hours_per_day = crew_size * hours_per_day
-                    working_days = total_hours / crew_hours_per_day
-                    cal_days = working_days * 1.1 * 7 / work_days_per_week
-                    return max(1, min(int(round(cal_days)), total_days))
-
-            # ── Try 3: cost-proportional fallback ───────────────────────────
-            if total_cost > 0 and grand_total > 0:
-                proportion = total_cost / grand_total
-                return max(1, round(proportion * total_days))
-
-            return 3  # minimum default
+        #   3. Unit-based fallback production rates (quantity > 0)
+        #   4. Cost-proportional fallback
 
         def _add_working_days(start: date, working_days: int) -> date:
             """Advance a date by N working days, using regional calendar."""
@@ -1794,12 +1936,15 @@ class ScheduleService:
                 child_total = _str_to_float(child_pos["total"])
                 child_meta = child_pos.get("metadata_", {}) or {}
 
-                duration_cal = _calc_duration_from_resources(
+                duration_cal, duration_source = _calc_duration_from_resources(
                     child_meta,
                     child_quantity,
+                    child_unit,
                     child_total,
                     grand_total,
                     total_project_days,
+                    hours_per_day=hours_per_day,
+                    work_days_per_week=work_days_per_week,
                 )
                 # Convert calendar days to working days for date arithmetic.
                 # Use the project's regional work-week (not a hardcoded 5/7)
@@ -1851,11 +1996,12 @@ class ScheduleService:
                         "unit": child_unit,
                         "labor_hours": child_meta.get("labor_hours", 0),
                         "workers_per_unit": child_meta.get("workers_per_unit", 0),
-                        "duration_method": (
-                            "labor_hours"
-                            if child_meta.get("labor_hours", 0) > 0
-                            else ("resource_sum" if child_meta.get("resources") else "cost_proportional")
-                        ),
+                        # Both keys carry the actual branch taken by the
+                        # duration calculator; "estimated_fallback" marks
+                        # durations derived from the unit production-rate
+                        # table so the UI can flag them as estimates.
+                        "duration_method": duration_source,
+                        "duration_source": duration_source,
                     },
                 )
                 child_activity = await self.activity_repo.create(child_activity)

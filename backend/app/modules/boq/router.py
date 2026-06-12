@@ -1508,7 +1508,10 @@ async def create_budget_from_boq(
 
     Groups positions by WBS (if set) or by section, creates a
     ProjectBudget entry for each group with original_budget = section total.
-    Returns the list of created budget IDs.
+    Also creates one costmodel BudgetLine per BOQ position (idempotent -
+    positions already wired to a line are skipped) so the 5D Cost Spine
+    gets its EVM baseline. Returns the created budget IDs plus the number
+    of new costmodel budget lines.
     """
     from decimal import Decimal
 
@@ -1570,25 +1573,43 @@ async def create_budget_from_boq(
             detail="Failed to create budget lines. Finance module may not be available.",
         )
 
+    # 5D Cost Spine baseline: one costmodel BudgetLine per BOQ position so
+    # progress entries have a row to land earned value on. The costmodel
+    # service is idempotent (positions already wired to a budget line are
+    # skipped), so re-running this endpoint never doubles the BAC.
+    try:
+        from app.modules.costmodel.service import CostModelService
+
+        budget_lines = await CostModelService(session).generate_budget_from_boq(boq.project_id, boq_id)
+        budget_lines_created = len(budget_lines)
+    except Exception as exc:
+        _log.exception("Failed to create costmodel budget lines from BOQ %s: %s", boq_id, exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create costmodel budget lines. Cost model module may not be available.",
+        )
+
     await _log_activity(
         service,
         user_id=user_id,
         action="boq.budget_created",
         target_type="boq",
-        description=f"Created {len(created_ids)} budget lines from BOQ",
+        description=(f"Created {len(created_ids)} budgets and {budget_lines_created} costmodel budget lines from BOQ"),
         boq_id=boq_id,
         project_id=boq.project_id,
     )
 
     _log.info(
-        "Created %d budget lines from BOQ %s (project %s)",
+        "Created %d budgets and %d costmodel budget lines from BOQ %s (project %s)",
         len(created_ids),
+        budget_lines_created,
         boq_id,
         boq.project_id,
     )
     return {
         "created": len(created_ids),
         "budget_ids": created_ids,
+        "budget_lines_created": budget_lines_created,
         "project_id": str(boq.project_id),
     }
 

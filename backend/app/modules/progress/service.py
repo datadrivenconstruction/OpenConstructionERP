@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -129,7 +130,56 @@ class ProgressService:
             data.percent_complete,
             user_id,
         )
+
+        # EVM bridge: the freshly recorded percent is the latest reading for
+        # the position (entries are append-only, latest wins), so push it to
+        # the costmodel budget line as earned value (BCWP) in the same
+        # session / transaction. Skips silently when the position has no
+        # budget line yet or the costmodel module is unavailable.
+        if data.boq_position_id is not None:
+            await self._sync_earned_value(
+                data.project_id,
+                data.boq_position_id,
+                Decimal(str(data.percent_complete)),
+            )
         return entry
+
+    async def _sync_earned_value(
+        self,
+        project_id: uuid.UUID,
+        boq_position_id: uuid.UUID,
+        percent_complete: Decimal,
+    ) -> None:
+        """Push the latest progress percent to the costmodel budget line.
+
+        Progress percent is EARNED VALUE (BCWP = position total x percent /
+        100), not actual cost - actuals keep flowing from invoices. The
+        write is synchronous on the same session so it commits (or rolls
+        back) atomically with the progress entry. Re-recording progress
+        overwrites the previous earned value (absolute set, never
+        accumulated).
+
+        Args:
+            project_id: Project the entry belongs to.
+            boq_position_id: Position the entry was recorded for.
+            percent_complete: The just-recorded cumulative percent [0, 100].
+        """
+        try:
+            from app.modules.costmodel.service import CostModelService
+        except ImportError:
+            logger.debug("costmodel module unavailable - earned value not synced")
+            return
+
+        line = await CostModelService(self.session).apply_progress_earned_value(
+            project_id,
+            boq_position_id,
+            percent_complete,
+        )
+        if line is None:
+            logger.debug(
+                "Earned value skipped for position %s (no budget line yet)",
+                boq_position_id,
+            )
 
     # ── Get single entry ──────────────────────────────────────────────────
 

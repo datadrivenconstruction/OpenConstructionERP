@@ -10,8 +10,19 @@ Tables:
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -114,6 +125,18 @@ class BudgetLine(Base):
     committed_amount: Mapped[str] = mapped_column(String(50), nullable=False, default="0", doc="Contracts signed")
     actual_amount: Mapped[str] = mapped_column(String(50), nullable=False, default="0", doc="Invoices paid")
     forecast_amount: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
+    # EVM earned value (BCWP) for the line: position total x latest progress
+    # percent. Maintained by the progress module on every recorded entry
+    # (latest reading wins, never accumulated). NULL means no progress has
+    # been recorded for the linked BOQ position yet. Numeric (not VARCHAR)
+    # because it is a derived figure that EVM rollups aggregate in SQL;
+    # Decimal end-to-end so money is never a float.
+    earned_amount: Mapped[Decimal | None] = mapped_column(
+        Numeric(20, 4),
+        nullable=True,
+        default=None,
+        doc="BCWP - position total x latest percent_complete / 100 (NULL = no progress yet)",
+    )
     period_start: Mapped[str | None] = mapped_column(String(20), nullable=True, doc="ISO date start")
     period_end: Mapped[str | None] = mapped_column(String(20), nullable=True, doc="ISO date end")
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="", doc="From project settings")

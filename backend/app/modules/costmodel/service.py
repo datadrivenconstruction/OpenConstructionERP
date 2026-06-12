@@ -1309,6 +1309,83 @@ class CostModelService:
         sorted_boqs = sorted(boqs, key=lambda b: b.updated_at, reverse=True)
         return sorted_boqs[0].id
 
+    async def _project_currency(self, project_id: uuid.UUID) -> str:
+        """Return the project base currency, or '' when unavailable.
+
+        Lazy-imports the projects module so costmodel does not hard-depend
+        on it at import time (mirrors the BOQ repository imports above).
+        """
+        try:
+            from app.modules.projects.repository import ProjectRepository
+
+            project = await ProjectRepository(self.session).get_by_id(project_id)
+        except Exception:
+            logger.debug("Could not resolve project currency for %s", project_id)
+            return ""
+        return (project.currency or "") if project else ""
+
+    async def apply_progress_earned_value(
+        self,
+        project_id: uuid.UUID,
+        boq_position_id: uuid.UUID,
+        percent_complete: Decimal,
+    ) -> BudgetLine | None:
+        """Persist EVM earned value on the budget line wired to a BOQ position.
+
+        Called synchronously (same session / transaction) by the progress
+        module after a progress entry is recorded. Semantics:
+
+        * Progress percent is EARNED VALUE (BCWP), not actual cost - actuals
+          keep flowing from invoices and are untouched here.
+        * ``earned = position.total * percent_complete / 100`` - an absolute
+          figure derived from the latest reading, so re-recording progress
+          overwrites the previous earned value instead of accumulating.
+        * If the position has no budget line yet (budget not generated), the
+          update is skipped silently with a debug log.
+
+        Args:
+            project_id: Project the progress entry belongs to.
+            boq_position_id: BOQ position the progress entry was recorded for.
+            percent_complete: Latest cumulative percent complete in [0, 100].
+
+        Returns:
+            The updated budget line, or ``None`` when no budget line exists
+            for the position (or the position itself is gone).
+        """
+        line = await self.budget_repo.get_by_position(project_id, boq_position_id)
+        if line is None:
+            logger.debug(
+                "No budget line for position %s (project %s) - earned value skipped",
+                boq_position_id,
+                project_id,
+            )
+            return None
+
+        from app.modules.boq.repository import PositionRepository
+
+        position = await PositionRepository(self.session).get_by_id(boq_position_id)
+        if position is None:
+            logger.debug(
+                "BOQ position %s not found - earned value skipped",
+                boq_position_id,
+            )
+            return None
+
+        total = _str_to_decimal(position.total)
+        pct = max(Decimal("0"), min(Decimal("100"), percent_complete))
+        earned = (total * pct / Decimal("100")).quantize(Decimal("0.01"))
+
+        line_id = line.id
+        await self.budget_repo.update_fields(line_id, earned_amount=earned)
+        logger.info(
+            "Earned value updated: position=%s line=%s pct=%s earned=%s",
+            boq_position_id,
+            line_id,
+            pct,
+            earned,
+        )
+        return await self.budget_repo.get_by_id(line_id)
+
     async def generate_budget_from_boq(self, project_id: uuid.UUID, boq_id: uuid.UUID) -> list[BudgetLine]:
         """Auto-generate budget lines from BOQ positions.
 
@@ -1348,11 +1425,15 @@ class CostModelService:
         # this in-process suspenders.
         existing = await self.budget_repo.existing_position_ids(project_id)
 
+        # Budget lines inherit the project base currency so EVM / cash-flow
+        # rollups do not have to special-case the empty-string sentinel.
+        currency = await self._project_currency(project_id)
+
         lines: list[BudgetLine] = []
         for pos in positions:
             if pos.id in existing:
                 continue
-            total = _str_to_float(pos.total)
+            total = _str_to_decimal(pos.total)
             line = BudgetLine(
                 project_id=project_id,
                 boq_position_id=pos.id,
@@ -1362,7 +1443,7 @@ class CostModelService:
                 committed_amount="0",
                 actual_amount="0",
                 forecast_amount=str(total),
-                currency="",
+                currency=currency,
             )
             lines.append(line)
 

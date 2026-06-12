@@ -199,6 +199,9 @@ class BudgetLineResponse(BaseModel):
     committed_amount: Decimal = Decimal("0")
     actual_amount: Decimal = Decimal("0")
     forecast_amount: Decimal = Decimal("0")
+    # EVM earned value (BCWP) - position total x latest progress percent,
+    # maintained by the progress module. None = no progress recorded yet.
+    earned_amount: Decimal | None = None
     period_start: str | None
     period_end: str | None
     currency: str
@@ -216,9 +219,10 @@ class BudgetLineResponse(BaseModel):
         "committed_amount",
         "actual_amount",
         "forecast_amount",
+        "earned_amount",
         when_used="json",
     )
-    def _ser_money(self, v: Decimal) -> str | None:
+    def _ser_money(self, v: Decimal | None) -> str | None:
         return _serialise_money(v)
 
 
