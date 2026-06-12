@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 
 from app.dependencies import CurrentUserPayload, RequirePermission, SessionDep
 from app.modules.pointcloud.schemas import (
@@ -86,6 +86,45 @@ async def get_scan(
     """Fetch one reality-capture scan, gated by tenant + project access."""
     scan = await service.get_scan(scan_id, payload=payload)
     return ScanDatasetRead.model_validate(scan)
+
+
+@router.get(
+    "/scans/{scan_id}/points",
+    responses={
+        200: {"content": {"application/octet-stream": {}}, "description": "OEPC binary point buffer"},
+        409: {"description": "Scan is still uploading"},
+        501: {"description": "No reader installed for the scan format"},
+    },
+)
+async def get_scan_points(
+    scan_id: uuid.UUID,
+    max_points: int = Query(
+        default=1_500_000,
+        ge=10_000,
+        le=6_000_000,
+        description="Server-side decimation cap. The scan is evenly downsampled to at most this many points.",
+    ),
+    service: PointCloudService = Depends(_svc),
+    payload: CurrentUserPayload = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("pointcloud.read")),
+) -> Response:
+    """Stream a scan's decimated points as a compact binary buffer.
+
+    Decodes E57 / LAS / LAZ server-side, decimates to ``max_points`` and returns
+    the OEPC little-endian buffer the viewer reads in one pass. The body is not
+    JSON; it is ``application/octet-stream``. Gated by tenant + project access.
+    """
+    buffer = await service.get_points(scan_id, max_points=max_points, payload=payload)
+    return Response(
+        content=buffer,
+        media_type="application/octet-stream",
+        headers={
+            "Content-Disposition": f'inline; filename="{scan_id}.oepc"',
+            # Decimated points are immutable for a given (scan, cap); let the
+            # browser cache the buffer so re-opening the viewer is instant.
+            "Cache-Control": "private, max-age=3600",
+        },
+    )
 
 
 # ── Presigned-direct-to-MinIO multipart ingest ─────────────────────────────

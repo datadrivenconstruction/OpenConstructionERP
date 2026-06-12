@@ -96,6 +96,98 @@ export async function listScans(projectId: string): Promise<ScanDatasetList> {
   return apiGet<ScanDatasetList>(`/v1/pointcloud/scans?project_id=${projectId}`);
 }
 
+/** Scan lifecycle states the points endpoint can serve (see service.get_points). */
+export const VIEWABLE_SCAN_STATUSES: readonly string[] = ['uploaded', 'converting', 'ready'];
+
+/** Typed failure from the binary points endpoint so the viewer can map each
+ *  status to a friendly state instead of crashing: 404 scan gone, 409 still
+ *  uploading, 422 undecodable file, 501 reader not installed. */
+export class ScanPointsError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ScanPointsError';
+    this.status = status;
+  }
+}
+
+export interface FetchScanPointsOptions {
+  /** Server-side decimation cap (router accepts 10_000 to 6_000_000). */
+  maxPoints?: number;
+  /** Abort an in-flight download when the viewer unmounts or re-requests. */
+  signal?: AbortSignal;
+  /** Streaming download progress; ``total`` is null without Content-Length. */
+  onProgress?: (loadedBytes: number, totalBytes: number | null) => void;
+}
+
+/**
+ * Download the OEPC binary buffer for a scan from
+ * ``GET /v1/pointcloud/scans/{scan_id}/points``.
+ *
+ * Returns the raw ArrayBuffer for {@link parseOepc}. Streams the body so the
+ * UI can show real download progress, and throws {@link ScanPointsError} with
+ * the backend's detail message on any non-2xx response.
+ */
+export async function fetchScanPoints(
+  scanId: string,
+  options: FetchScanPointsOptions = {},
+): Promise<ArrayBuffer> {
+  const { maxPoints, signal, onProgress } = options;
+  const params = maxPoints ? `?max_points=${maxPoints}` : '';
+  const headers: Record<string, string> = { Accept: 'application/octet-stream' };
+  const token = getAuthToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}/v1/pointcloud/scans/${scanId}/points${params}`, {
+    headers,
+    signal,
+  });
+
+  if (!res.ok) {
+    let message = `Point stream failed (HTTP ${res.status})`;
+    try {
+      const body = (await res.json()) as { detail?: unknown };
+      const detail = body?.detail;
+      if (typeof detail === 'string') {
+        message = detail;
+      } else if (detail && typeof detail === 'object') {
+        const d = detail as { message?: string; reason?: string };
+        message = d.message || d.reason || message;
+      }
+    } catch {
+      /* non-JSON error body - keep the status message */
+    }
+    throw new ScanPointsError(message, res.status);
+  }
+
+  // Stream the body when possible so the loader can show honest progress on
+  // multi-hundred-MB buffers; fall back to one-shot arrayBuffer otherwise.
+  if (!res.body || !onProgress) {
+    return res.arrayBuffer();
+  }
+
+  const lengthHeader = res.headers.get('Content-Length');
+  const total = lengthHeader ? Number(lengthHeader) || null : null;
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let loaded = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    loaded += value.byteLength;
+    onProgress(loaded, total);
+  }
+  const merged = new Uint8Array(loaded);
+  let offset = 0;
+  for (const chunk of chunks) {
+    merged.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return merged.buffer;
+}
+
 /** Derive the accepted upload format from a file name, lower-cased without the
  *  leading dot, or null when the extension is not on the allow-list. */
 export function formatFromFileName(name: string): string | null {
