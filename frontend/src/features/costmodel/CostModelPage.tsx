@@ -979,12 +979,59 @@ function BudgetLinesEditor({
   const addToast = useToastStore((s) => s.addToast);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditingBudgetLine | null>(null);
+  // Inline field-progress recording for lines wired to a BOQ position. The
+  // recorded percent becomes the line's earned value (BCWP) server-side.
+  const [progressId, setProgressId] = useState<string | null>(null);
+  const [progressPct, setProgressPct] = useState('');
 
   const { data: budgetLines, isLoading } = useQuery({
     queryKey: ['costmodel', 'budget-lines', projectId],
     queryFn: () => costModelApi.getBudgetLines(projectId),
     retry: false,
   });
+
+  const progressMutation = useMutation({
+    mutationFn: (data: { boqPositionId: string; pct: number }) =>
+      costModelApi.recordProgress({
+        project_id: projectId,
+        boq_position_id: data.boqPositionId,
+        percent_complete: data.pct,
+        period_label: new Date().toISOString().slice(0, 7),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['costmodel'] });
+      setProgressId(null);
+      setProgressPct('');
+      addToast({
+        type: 'success',
+        title: t('costmodel.progress_recorded', { defaultValue: 'Progress recorded' }),
+      });
+    },
+    onError: (err: Error) => {
+      addToast({
+        type: 'error',
+        title: t('costmodel.progress_record_failed', { defaultValue: 'Failed to record progress' }),
+        message: err.message,
+      });
+    },
+  });
+
+  const submitProgress = useCallback(
+    (boqPositionId: string) => {
+      const pct = Number(progressPct.replace(',', '.'));
+      if (!Number.isFinite(pct) || pct < 0 || pct > 100) {
+        addToast({
+          type: 'error',
+          title: t('costmodel.progress_pct_invalid', {
+            defaultValue: 'Percent complete must be between 0 and 100',
+          }),
+        });
+        return;
+      }
+      progressMutation.mutate({ boqPositionId, pct });
+    },
+    [progressPct, progressMutation, addToast, t],
+  );
 
   const updateMutation = useMutation({
     mutationFn: (data: { id: string; updates: Partial<EditingBudgetLine> }) =>
@@ -1254,7 +1301,7 @@ function BudgetLinesEditor({
                   </span>
                 </td>
                 <td className="py-3.5 px-4 text-content-secondary text-xs">
-                  {line.description || '\u2014'}
+                  {line.description || '-'}
                 </td>
                 <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
                   {formatCurrency(line.planned_amount, currency)}
@@ -1263,7 +1310,47 @@ function BudgetLinesEditor({
                   className="py-3.5 px-4 text-right tabular-nums text-content-secondary cursor-help"
                   title={earnedHint}
                 >
-                  {earned == null ? '-' : formatCurrency(earned, currency)}
+                  {progressId === line.id && line.boq_position_id ? (
+                    <span className="inline-flex items-center justify-end gap-1">
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        step="1"
+                        autoFocus
+                        value={progressPct}
+                        onChange={(e) => setProgressPct(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') submitProgress(line.boq_position_id as string);
+                          if (e.key === 'Escape') setProgressId(null);
+                        }}
+                        placeholder="%"
+                        className="h-7 w-16 rounded border border-oe-blue/40 bg-surface-primary px-1.5 text-right text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                        aria-label={t('costmodel.record_progress', { defaultValue: 'Record progress' })}
+                      />
+                      <button
+                        onClick={() => submitProgress(line.boq_position_id as string)}
+                        disabled={progressMutation.isPending}
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-semantic-success hover:bg-semantic-success-bg transition-colors"
+                        title={t('common.save', { defaultValue: 'Save' })}
+                      >
+                        {progressMutation.isPending ? (
+                          <Loader2 size={13} className="animate-spin" />
+                        ) : (
+                          <Check size={13} />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setProgressId(null)}
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-semantic-error hover:bg-semantic-error-bg transition-colors"
+                        title={t('common.cancel', { defaultValue: 'Cancel' })}
+                      >
+                        <X size={13} />
+                      </button>
+                    </span>
+                  ) : (
+                    (earned == null ? '-' : formatCurrency(earned, currency))
+                  )}
                 </td>
                 <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
                   {formatCurrency(line.actual_amount, currency)}
@@ -1278,13 +1365,27 @@ function BudgetLinesEditor({
                   {formatCurrency(variance, currency)}
                 </td>
                 <td className="py-3.5 pl-4 text-center">
-                  <button
-                    onClick={() => startEditing(line)}
-                    className="invisible group-hover:visible flex h-7 w-7 mx-auto items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 transition-colors"
-                    title={t('common.edit', { defaultValue: 'Edit' })}
-                  >
-                    <Pencil size={13} />
-                  </button>
+                  <span className="flex items-center justify-center gap-0.5">
+                    {line.boq_position_id && (
+                      <button
+                        onClick={() => {
+                          setProgressId(line.id);
+                          setProgressPct('');
+                        }}
+                        className="invisible group-hover:visible flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 transition-colors"
+                        title={t('costmodel.record_progress', { defaultValue: 'Record progress' })}
+                      >
+                        <Activity size={13} />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => startEditing(line)}
+                      className="invisible group-hover:visible flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 transition-colors"
+                      title={t('common.edit', { defaultValue: 'Edit' })}
+                    >
+                      <Pencil size={13} />
+                    </button>
+                  </span>
                 </td>
               </tr>
             );

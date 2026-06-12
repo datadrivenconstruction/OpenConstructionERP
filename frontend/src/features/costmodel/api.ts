@@ -261,6 +261,17 @@ export const costModelApi = {
     apiGet<{ categories: BudgetCategorySummary[] }>(`/v1/costmodel/projects/${projectId}/5d/budget/`),
   getBudgetLines: (projectId: string) =>
     apiGet<BudgetLine[]>(`/v1/costmodel/projects/${projectId}/5d/budget-lines/`),
+  /**
+   * Record field progress for the BOQ position behind a budget line. The
+   * backend progress module turns the percent into EVM earned value on the
+   * same line (BCWP = position total x percent / 100).
+   */
+  recordProgress: (data: {
+    project_id: string;
+    boq_position_id: string;
+    percent_complete: number;
+    period_label: string;
+  }) => apiPost('/v1/progress/entries/', data),
   createBudgetLine: (projectId: string, data: Partial<BudgetLine>) =>
     apiPost<BudgetLine>(`/v1/costmodel/projects/${projectId}/5d/budget-lines/`, data),
   updateBudgetLine: (id: string, data: Partial<BudgetLine>) =>
