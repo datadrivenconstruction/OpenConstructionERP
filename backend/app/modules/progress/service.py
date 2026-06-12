@@ -142,6 +142,11 @@ class ProgressService:
                 data.boq_position_id,
                 Decimal(str(data.percent_complete)),
             )
+            # The earned-value write commits the session, which expires the
+            # just-created entry; serializing the response would then lazy-load
+            # attributes outside the async greenlet and crash. Refresh while we
+            # are still inside the async context.
+            await self.session.refresh(entry)
         return entry
 
     async def _sync_earned_value(

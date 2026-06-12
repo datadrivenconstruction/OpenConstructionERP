@@ -566,16 +566,27 @@ export function CostsPage() {
   // already populated rows — the page just hadn't been told which one to
   // show. We only auto-pick once, and only if the user has not already
   // chosen something via the global store or the URL.
+  // User catalogs (also needed here: items imported into a catalog carry a
+  // region tag named after the catalog, and auto-picking such a tag as the
+  // page-wide region scope silently filters search down to one catalog).
+  const { data: userCatalogs } = useQuery<CostCatalog[]>({
+    queryKey: ['costs', 'catalogs'],
+    queryFn: fetchCostCatalogs,
+    retry: false,
+    staleTime: 60_000,
+  });
+
   useEffect(() => {
     if (region) return;
     if (regionFromUrl) return;
     if (activeRegion) return;
-    const first = loadedRegions?.[0];
+    const catalogNames = new Set((userCatalogs ?? []).map((c) => c.name));
+    const first = loadedRegions?.find((r) => !catalogNames.has(r));
     if (!first) return;
     setRegion(first);
     setActiveRegion(first);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadedRegions]);
+  }, [loadedRegions, userCatalogs]);
 
   // Fetch per-region stats (for item counts in tabs)
   const { data: regionStats } = useQuery({
@@ -776,10 +787,22 @@ export function CostsPage() {
     setCatalogId('');
   }, []);
 
-  const handleSelectCatalog = useCallback((id: string) => {
-    setCatalogId(id);
-    setOffset(0);
-  }, []);
+  const handleSelectCatalog = useCallback(
+    (id: string) => {
+      setCatalogId(id);
+      setOffset(0);
+      // A catalog and a region tab are alternative scopes over the same
+      // list; keeping a stale region filter alongside catalog_id silently
+      // intersects to an empty result (the import flow also tags items
+      // with a region named after the catalog, so the region auto-pick
+      // can land on a DIFFERENT catalog's tag).
+      if (id) {
+        setRegion('');
+        setActiveRegion('');
+      }
+    },
+    [setActiveRegion],
+  );
 
   const handleSearch = useCallback((value: string) => {
     setQuery(value);
@@ -811,6 +834,9 @@ export function CostsPage() {
       setRegion(value);
       setOffset(0);
       setActiveRegion(value);
+      // Mirror of handleSelectCatalog: picking a region drops the catalog
+      // scope so the two filters never intersect to an empty list.
+      if (value) setCatalogId('');
     },
     [setActiveRegion],
   );

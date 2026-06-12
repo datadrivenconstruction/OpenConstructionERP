@@ -44,6 +44,10 @@ class _FakeSession:
     async def flush(self) -> None:
         return None
 
+    async def refresh(self, obj: object) -> None:
+        # record_entry refreshes the entry after the earned-value commit
+        return None
+
 
 class _FakeBudgetRepo:
     """In-memory BudgetLineRepository double."""
