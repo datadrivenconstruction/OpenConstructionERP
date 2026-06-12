@@ -353,6 +353,10 @@ class CostSearchQuery(BaseModel):
             "segments in the middle act as wildcards."
         ),
     )
+    catalog_id: UUID | None = Field(
+        default=None,
+        description="Filter to items in one user-owned cost catalog (exact match).",
+    )
     min_rate: Decimal | None = Field(default=None, ge=0)
     max_rate: Decimal | None = Field(default=None, ge=0)
     limit: int = Field(default=50, ge=1, le=500)

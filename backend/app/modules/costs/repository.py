@@ -175,6 +175,7 @@ class CostItemRepository:
         region: str | None = None,
         category: str | None = None,
         classification_path: str | None = None,
+        catalog_id: uuid.UUID | None = None,
         min_rate: Decimal | float | None = None,
         max_rate: Decimal | float | None = None,
         offset: int = 0,
@@ -206,6 +207,8 @@ class CostItemRepository:
                 (collection/department/section/subsection). Empty middle
                 segments act as wildcards. AND-combined with all other
                 filters.
+            catalog_id: Filter to items belonging to one user-owned cost
+                catalog (exact match on ``CostItem.catalog_id``).
             min_rate: Minimum rate (inclusive). Compares as float via CAST.
             max_rate: Maximum rate (inclusive). Compares as float via CAST.
             offset: Number of items to skip (ignored when *cursor* is set).
@@ -242,6 +245,9 @@ class CostItemRepository:
 
         if region:
             base = base.where(CostItem.region == region)
+
+        if catalog_id is not None:
+            base = base.where(CostItem.catalog_id == catalog_id)
 
         if category:
             # Use database-agnostic JSON access: json_extract for SQLite,

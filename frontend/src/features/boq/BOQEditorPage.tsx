@@ -789,14 +789,21 @@ export function BOQEditorPage() {
   }, [unlockMutation]);
 
   const createBudgetMutation = useMutation({
-    mutationFn: () => apiPost<{ created: number }>(`/v1/boq/boqs/${boqId}/create-budget/`, {}),
+    mutationFn: () =>
+      apiPost<{ created: number; budget_lines_created?: number }>(
+        `/v1/boq/boqs/${boqId}/create-budget/`,
+        {},
+      ),
     onSuccess: (data) => {
       addToast({
         type: 'success',
         title: t('boq.budget_created', { defaultValue: 'Budget created' }),
-        message: t('boq.budget_created_desc', {
-          defaultValue: '{{count}} budget lines created from estimate',
+        // Report both layers: finance budget categories AND the 5D cost-spine
+        // budget lines (one per position) the backend now creates alongside.
+        message: t('boq.budget_created_desc_full', {
+          defaultValue: 'Budget created: {{count}} categories, {{lines}} cost lines',
           count: data.created ?? 0,
+          lines: data.budget_lines_created ?? 0,
         }),
       });
     },

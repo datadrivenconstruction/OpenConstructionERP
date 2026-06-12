@@ -33,6 +33,11 @@ export interface Activity {
   bim_element_ids?: string[] | null;
   color: string;
   sort_order: number;
+  /** Activity metadata passthrough. BOQ-generated activities carry
+   *  `duration_source` / `duration_method` = "estimated_fallback" here when
+   *  the duration was estimated from unit-based production rates rather than
+   *  real labor data. */
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface WorkOrder {

@@ -618,6 +618,10 @@ async def search_cost_items(
             "AND-combined with the other filters."
         ),
     ),
+    catalog_id: uuid.UUID | None = Query(
+        default=None,
+        description="Filter to items in one user-owned cost catalog.",
+    ),
     min_rate: Decimal | None = Query(default=None, ge=0, description="Minimum rate"),
     max_rate: Decimal | None = Query(default=None, ge=0, description="Maximum rate"),
     limit: int = Query(default=50, ge=1, le=100),
@@ -683,6 +687,7 @@ async def search_cost_items(
         region=region,
         category=category,
         classification_path=classification_path,
+        catalog_id=catalog_id,
         min_rate=min_rate,
         max_rate=max_rate,
         limit=limit,
@@ -704,6 +709,7 @@ async def search_cost_items(
         and not description
         and not category
         and not classification_path
+        and catalog_id is None
         and not unit
         and not source
         and min_rate is None

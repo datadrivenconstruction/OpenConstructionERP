@@ -1651,6 +1651,7 @@ class ScheduleService:
                     wbs_code=act.wbs_code,
                     activity_type=act.activity_type,
                     status=effective_status,
+                    metadata=act.metadata_ or {},
                 )
             )
 

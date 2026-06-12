@@ -948,6 +948,16 @@ const EVMDashboard = memo(function EVMDashboard({
 
 /* ── Editable Budget Lines Table ──────────────────────────────────────── */
 
+/**
+ * Coerce a budget line's EVM earned value (Decimal-encoded string from the
+ * backend) to a number. null = no field progress recorded yet.
+ */
+function earnedValueOf(line: { earned_amount?: number | string | null }): number | null {
+  if (line.earned_amount == null) return null;
+  const n = Number(line.earned_amount);
+  return Number.isFinite(n) ? n : null;
+}
+
 interface EditingBudgetLine {
   id: string;
   category: string;
@@ -1053,12 +1063,19 @@ function BudgetLinesEditor({
   }
 
   const lineTotal = budgetLines.reduce(
-    (acc, l) => ({
-      planned: acc.planned + l.planned_amount,
-      actual: acc.actual + l.actual_amount,
-      forecast: acc.forecast + l.forecast_amount,
-    }),
-    { planned: 0, actual: 0, forecast: 0 },
+    (acc, l) => {
+      const earned = earnedValueOf(l);
+      return {
+        // Number() guards against the backend's Decimal-as-string money
+        // encoding (string + string would concatenate, not add).
+        planned: acc.planned + (Number(l.planned_amount) || 0),
+        actual: acc.actual + (Number(l.actual_amount) || 0),
+        forecast: acc.forecast + (Number(l.forecast_amount) || 0),
+        earned: acc.earned + (earned ?? 0),
+        hasEarned: acc.hasEarned || earned != null,
+      };
+    },
+    { planned: 0, actual: 0, forecast: 0, earned: 0, hasEarned: false },
   );
 
   return (
@@ -1074,6 +1091,17 @@ function BudgetLinesEditor({
             </th>
             <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
               {t('costmodel.planned', 'Planned')}
+            </th>
+            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+              <span
+                className="inline-flex items-center gap-1 cursor-help"
+                title={t('costmodel.bl_earned_hint', {
+                  defaultValue: 'Earned value is calculated automatically from recorded field progress',
+                })}
+              >
+                {t('costmodel.bl_earned', 'Earned')}
+                <Activity size={11} className="shrink-0 text-content-tertiary" />
+              </span>
             </th>
             <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
               {t('costmodel.actual', 'Actual')}
@@ -1093,6 +1121,10 @@ function BudgetLinesEditor({
           {budgetLines.map((line) => {
             const isEditing = editingId === line.id;
             const variance = line.planned_amount - line.forecast_amount;
+            const earned = earnedValueOf(line);
+            const earnedHint = t('costmodel.bl_earned_hint', {
+              defaultValue: 'Earned value is calculated automatically from recorded field progress',
+            });
 
             if (isEditing && editForm) {
               return (
@@ -1128,6 +1160,13 @@ function BudgetLinesEditor({
                       }
                       className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
                     />
+                  </td>
+                  {/* Earned value is system-maintained (field progress), not editable. */}
+                  <td
+                    className="py-2 px-4 text-right tabular-nums text-content-tertiary cursor-help"
+                    title={earnedHint}
+                  >
+                    {earned == null ? '-' : formatCurrency(earned, currency)}
                   </td>
                   <td className="py-2 px-4">
                     <input
@@ -1184,7 +1223,7 @@ function BudgetLinesEditor({
                   </td>
                 </tr>
                 <tr className="bg-oe-blue-subtle/10">
-                  <td colSpan={7} className="px-4 pb-3">
+                  <td colSpan={8} className="px-4 pb-3">
                     <BudgetLineThresholdEditor
                       lineId={line.id}
                       initialThresholdPct={line.overrun_alert_threshold_pct}
@@ -1220,6 +1259,12 @@ function BudgetLinesEditor({
                 <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
                   {formatCurrency(line.planned_amount, currency)}
                 </td>
+                <td
+                  className="py-3.5 px-4 text-right tabular-nums text-content-secondary cursor-help"
+                  title={earnedHint}
+                >
+                  {earned == null ? '-' : formatCurrency(earned, currency)}
+                </td>
                 <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
                   {formatCurrency(line.actual_amount, currency)}
                 </td>
@@ -1252,6 +1297,9 @@ function BudgetLinesEditor({
             </td>
             <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
               {formatCurrency(lineTotal.planned, currency)}
+            </td>
+            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+              {lineTotal.hasEarned ? formatCurrency(lineTotal.earned, currency) : '-'}
             </td>
             <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
               {formatCurrency(lineTotal.actual, currency)}
@@ -1900,7 +1948,7 @@ function MonteCarloPanel({ projectId, currency }: { projectId: string; currency:
               <div className="flex flex-wrap gap-3 text-xs text-content-tertiary">
                 <span>{t('costmodel.mc_mean', { defaultValue: 'Mean' })}: {fmt(result.mean)}</span>
                 <span>{t('costmodel.mc_stddev', { defaultValue: 'Std Dev' })}: {fmt(result.std_dev)}</span>
-                <span>{t('costmodel.mc_range', { defaultValue: 'Range' })}: {fmt(result.min)} — {fmt(result.max)}</span>
+                <span>{t('costmodel.mc_range', { defaultValue: 'Range' })}: {fmt(result.min)} - {fmt(result.max)}</span>
                 <span>{result.iterations} {t('costmodel.mc_iterations', { defaultValue: 'iterations' })}</span>
               </div>
             </div>
@@ -2482,7 +2530,7 @@ const ProjectCard = memo(function ProjectCard({
           {project.currency || 'EUR'}
         </Badge>
         <Badge variant="neutral" size="sm">
-          {project.classification_standard === 'din276' ? 'DIN 276' : project.classification_standard?.toUpperCase() || '—'}
+          {project.classification_standard === 'din276' ? 'DIN 276' : project.classification_standard?.toUpperCase() || '-'}
         </Badge>
         <ChevronRight size={16} className="shrink-0 text-content-tertiary" />
       </div>

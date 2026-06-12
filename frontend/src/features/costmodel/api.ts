@@ -41,6 +41,12 @@ export interface BudgetLine {
   committed_amount: number;
   actual_amount: number;
   forecast_amount: number;
+  /**
+   * EVM earned value (BCWP) for this line. Written automatically from
+   * recorded field progress entries; the backend sends it as a
+   * Decimal-encoded string, null = no progress recorded yet.
+   */
+  earned_amount?: number | string | null;
   currency: string;
   period_start: string | null;
   period_end: string | null;

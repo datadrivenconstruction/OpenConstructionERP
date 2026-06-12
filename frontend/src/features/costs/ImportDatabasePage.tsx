@@ -15,6 +15,7 @@ import {
   Star,
   Sparkles,
   Globe,
+  BookOpen,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, ConfirmDialog, CountryFlag, DismissibleInfo, IntroRichText } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -23,6 +24,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { apiGet, apiPost, apiDelete, triggerDownload, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { formatFileSize } from '@/shared/lib/formatters';
+import { COMMON_CURRENCIES } from '@/features/boq/boqHelpers';
+import { fetchCostCatalogs, type CostCatalog } from './api';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,6 +39,13 @@ interface ImportResult {
   }>;
   total_rows: number;
   catalog?: string | null;
+  /** Target catalog the rows landed in (existing or created inline). */
+  catalog_id?: string | null;
+  /** Currency of the target catalog - the default for rows without one. */
+  catalog_currency?: string | null;
+  /** Rows whose own currency differs from the catalog currency. Imported
+   *  as-is (never silently rewritten) - a warning, not a block. */
+  mixed_currency_count?: number;
 }
 
 // Result of the column-mapping preview endpoint. Drives the mapping panel:
@@ -47,6 +57,9 @@ interface PreviewResult {
   suggested_map: Record<string, string>;
   target_fields: string[];
   required_fields: string[];
+  /** Whether the auto-detected mapping found a currency column. When false,
+   *  creating a NEW catalog requires an explicit catalog currency. */
+  has_currency_column?: boolean;
 }
 
 // Sentinel used by the per-field <select> to mean "this canonical field has
@@ -162,25 +175,41 @@ async function previewCostFile(file: File): Promise<PreviewResult> {
   return response.json() as Promise<PreviewResult>;
 }
 
+/** Target-catalog options for `uploadCostFile`. Pass `catalogId` to import
+ *  into an EXISTING catalog, or `catalogName` (+ `catalogCurrency` when the
+ *  file has no mapped currency column) to create one inline. Mutually
+ *  exclusive - the backend rejects both at once. */
+interface UploadCostFileOptions {
+  columnMap?: Record<string, string>;
+  catalogId?: string;
+  catalogName?: string;
+  catalogCurrency?: string;
+}
+
 /**
  * Import a cost file. When `columnMap` is supplied it is sent as a JSON
  * `column_map` (canonical field -> raw header) so the backend uses the user's
- * explicit mapping instead of re-guessing. `catalogName` groups the imported
- * rows under a findable region/catalog. Both are optional so the legacy
- * auto-detect path (no map, no name) keeps working as a fallback.
+ * explicit mapping instead of re-guessing. The catalog options route the
+ * imported rows into a user catalog. Everything is optional so the legacy
+ * auto-detect path (no map, no catalog) keeps working as a fallback.
  */
 async function uploadCostFile(
   file: File,
-  columnMap?: Record<string, string>,
-  catalogName?: string,
+  options: UploadCostFileOptions = {},
 ): Promise<ImportResult> {
+  const { columnMap, catalogId, catalogName, catalogCurrency } = options;
   const formData = new FormData();
   formData.append('file', file);
   if (columnMap && Object.keys(columnMap).length > 0) {
     formData.append('column_map', JSON.stringify(columnMap));
   }
-  if (catalogName && catalogName.trim()) {
+  if (catalogId) {
+    formData.append('catalog_id', catalogId);
+  } else if (catalogName && catalogName.trim()) {
     formData.append('catalog_name', catalogName.trim());
+    if (catalogCurrency && catalogCurrency.trim()) {
+      formData.append('catalog_currency', catalogCurrency.trim().toUpperCase());
+    }
   }
 
   const response = await fetch('/api/v1/costs/import/file/', {
@@ -1685,12 +1714,22 @@ function VectorDatabaseSection() {
 
 // ── Column Mapping Panel ─────────────────────────────────────────────────────
 
+type CatalogTargetMode = 'new' | 'existing';
+
 interface ColumnMappingPanelProps {
   data: PreviewResult;
   columnMap: Record<string, string>;
   onChangeField: (field: string, header: string) => void;
+  catalogMode: CatalogTargetMode;
+  onCatalogModeChange: (mode: CatalogTargetMode) => void;
   catalogName: string;
   onCatalogNameChange: (value: string) => void;
+  catalogCurrency: string;
+  onCatalogCurrencyChange: (value: string) => void;
+  existingCatalogId: string;
+  onExistingCatalogChange: (id: string) => void;
+  /** User catalogs for the "existing catalog" dropdown. */
+  catalogs: CostCatalog[];
   onImport: () => void;
   onCancel: () => void;
   importing: boolean;
@@ -1700,8 +1739,15 @@ function ColumnMappingPanel({
   data,
   columnMap,
   onChangeField,
+  catalogMode,
+  onCatalogModeChange,
   catalogName,
   onCatalogNameChange,
+  catalogCurrency,
+  onCatalogCurrencyChange,
+  existingCatalogId,
+  onExistingCatalogChange,
+  catalogs,
   onImport,
   onCancel,
   importing,
@@ -1714,7 +1760,28 @@ function ColumnMappingPanel({
 
   // All required fields must be mapped before import is allowed.
   const unmappedRequired = requiredFields.filter((f) => !columnMap[f]);
-  const canImport = unmappedRequired.length === 0 && !importing;
+
+  // Currency presence tracks the LIVE mapping (the seeded map mirrors the
+  // preview's auto-detection, and the user may map / unmap the column
+  // here). When the file carries no mapped currency column, a NEW catalog
+  // needs an explicit currency - same rule the backend enforces with 422.
+  const hasCurrencyColumn = Boolean(columnMap['currency']);
+  const newCatalogCurrencyMissing =
+    catalogMode === 'new' && !hasCurrencyColumn && !catalogCurrency;
+  const catalogTargetValid =
+    catalogMode === 'existing'
+      ? Boolean(existingCatalogId)
+      : Boolean(catalogName.trim()) && !newCatalogCurrencyMissing;
+
+  const canImport = unmappedRequired.length === 0 && catalogTargetValid && !importing;
+  const selectedExisting = catalogs.find((c) => c.id === existingCatalogId);
+
+  const modeOptionClass = (active: boolean) =>
+    `flex items-start gap-2.5 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${
+      active
+        ? 'border-oe-blue/50 bg-oe-blue-subtle/15'
+        : 'border-border-light hover:bg-surface-secondary/50'
+    }`;
 
   // Show up to 3 sample rows under their headers.
   const sampleRows = data.sample_rows.slice(0, 3);
@@ -1762,7 +1829,9 @@ function ColumnMappingPanel({
             return (
               <div
                 key={field}
-                className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-4"
+                className={`flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 ${
+                  missing ? 'bg-semantic-error-bg/20' : ''
+                }`}
               >
                 <div className="sm:w-1/3">
                   <div className="flex items-center gap-1.5">
@@ -1853,33 +1922,155 @@ function ColumnMappingPanel({
         </div>
       )}
 
-      {/* Catalog name */}
+      {/* Target catalog step - the imported rows always land in a user
+          catalog: a new one created inline, or an existing one. */}
       <div className="px-6 pt-3 pb-2">
-        <label
-          htmlFor="catalog-name"
-          className="block text-sm font-medium text-content-primary mb-1"
-        >
-          {t('costs_import.catalog_name', { defaultValue: 'Catalog name' })}
-        </label>
-        <input
-          id="catalog-name"
-          type="text"
-          value={catalogName}
-          onChange={(e) => onCatalogNameChange(e.target.value)}
-          placeholder={t('costs_import.catalog_name_placeholder', {
-            defaultValue: 'e.g. My price book 2026',
-          })}
-          className="w-full max-w-md rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:border-oe-blue/50 transition-colors"
-        />
-        <p className="text-2xs text-content-tertiary mt-1">
-          {t('costs_import.catalog_name_hint', {
-            defaultValue: 'Imported items are grouped under this name so you can find them later.',
+        <p className="text-sm font-medium text-content-primary mb-1">
+          {t('costs_catalogs.import_target_title', { defaultValue: 'Where should these items go?' })}
+        </p>
+        <p className="text-2xs text-content-tertiary mb-2">
+          {t('costs_catalogs.import_target_hint', {
+            defaultValue: 'Items are grouped into a catalog so you can manage and export them later.',
           })}
         </p>
+
+        <div className="grid gap-2 sm:grid-cols-2 max-w-2xl">
+          {/* New catalog */}
+          <label className={modeOptionClass(catalogMode === 'new')}>
+            <input
+              type="radio"
+              name="catalog-target-mode"
+              checked={catalogMode === 'new'}
+              onChange={() => onCatalogModeChange('new')}
+              className="mt-0.5"
+            />
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-medium text-content-primary">
+                {t('costs_catalogs.import_new_catalog', { defaultValue: 'Create a new catalog' })}
+              </span>
+              {catalogMode === 'new' && (
+                <span className="block mt-2 space-y-2">
+                  <input
+                    id="catalog-name"
+                    type="text"
+                    value={catalogName}
+                    onChange={(e) => onCatalogNameChange(e.target.value)}
+                    placeholder={t('costs_import.catalog_name_placeholder', {
+                      defaultValue: 'e.g. My price book 2026',
+                    })}
+                    aria-label={t('costs_import.catalog_name', { defaultValue: 'Catalog name' })}
+                    className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:border-oe-blue/50 transition-colors"
+                  />
+                  <select
+                    value={catalogCurrency}
+                    onChange={(e) => onCatalogCurrencyChange(e.target.value)}
+                    aria-label={t('costs_catalogs.currency_label', { defaultValue: 'Currency' })}
+                    className={`w-full rounded-lg border bg-surface-elevated px-3 py-2 text-sm text-content-primary focus:outline-none focus:border-oe-blue/50 transition-colors ${
+                      newCatalogCurrencyMissing
+                        ? 'border-semantic-error/60 ring-1 ring-semantic-error/30'
+                        : 'border-border-light'
+                    }`}
+                  >
+                    <option value="">
+                      {t('costs_catalogs.import_currency_select', { defaultValue: 'Select currency...' })}
+                    </option>
+                    {COMMON_CURRENCIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  {newCatalogCurrencyMissing ? (
+                    <span className="block text-2xs text-semantic-error">
+                      {t('costs_catalogs.import_currency_required', {
+                        defaultValue:
+                          'The file has no currency column, so the new catalog needs an explicit currency.',
+                      })}
+                    </span>
+                  ) : (
+                    <span className="block text-2xs text-content-tertiary">
+                      {hasCurrencyColumn
+                        ? t('costs_catalogs.import_currency_detected', {
+                            defaultValue:
+                              'Currency column detected. Leave empty to derive the catalog currency from the file.',
+                          })
+                        : t('costs_catalogs.currency_hint', {
+                            defaultValue: 'Items without their own currency inherit this code.',
+                          })}
+                    </span>
+                  )}
+                </span>
+              )}
+            </span>
+          </label>
+
+          {/* Existing catalog */}
+          <label className={modeOptionClass(catalogMode === 'existing')}>
+            <input
+              type="radio"
+              name="catalog-target-mode"
+              checked={catalogMode === 'existing'}
+              onChange={() => onCatalogModeChange('existing')}
+              className="mt-0.5"
+            />
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-medium text-content-primary">
+                {t('costs_catalogs.import_existing_catalog', { defaultValue: 'Add to an existing catalog' })}
+              </span>
+              {catalogMode === 'existing' && (
+                <span className="block mt-2 space-y-1.5">
+                  {catalogs.length === 0 ? (
+                    <span className="block text-2xs text-content-tertiary">
+                      {t('costs_catalogs.import_existing_empty', {
+                        defaultValue: 'No catalogs yet. Create a new one instead.',
+                      })}
+                    </span>
+                  ) : (
+                    <>
+                      <select
+                        value={existingCatalogId}
+                        onChange={(e) => onExistingCatalogChange(e.target.value)}
+                        aria-label={t('costs_catalogs.import_existing_catalog', { defaultValue: 'Add to an existing catalog' })}
+                        className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm text-content-primary focus:outline-none focus:border-oe-blue/50 transition-colors"
+                      >
+                        <option value="">
+                          {t('costs_catalogs.import_existing_select', { defaultValue: 'Select a catalog...' })}
+                        </option>
+                        {catalogs.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name} ({c.currency}, {c.item_count})
+                          </option>
+                        ))}
+                      </select>
+                      {selectedExisting && (
+                        <span className="block text-2xs text-content-tertiary">
+                          {t('costs_catalogs.import_into_named', {
+                            defaultValue: 'Items will be imported into "{{name}}" ({{currency}}).',
+                            name: selectedExisting.name,
+                            currency: selectedExisting.currency,
+                          })}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </span>
+              )}
+            </span>
+          </label>
+        </div>
       </div>
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light mt-2">
+        {/* Inline blocker message - explains exactly why Import is disabled
+            instead of leaving a dead button. */}
+        {unmappedRequired.length > 0 && (
+          <span className="mr-auto inline-flex items-center gap-1.5 text-xs text-semantic-error">
+            <AlertTriangle size={13} className="shrink-0" />
+            {t('costs_catalogs.import_required_missing', {
+              defaultValue: 'Map the required columns before importing: {{fields}}.',
+              fields: unmappedRequired.map((f) => fieldMeta(f).label).join(', '),
+            })}
+          </span>
+        )}
         {/* This action discards the staged file entirely (handleReset), so it
             is labelled Cancel rather than Back. */}
         <Button variant="secondary" onClick={onCancel} disabled={importing}>
@@ -1924,6 +2115,22 @@ export function ImportDatabasePage() {
   const [previewData, setPreviewData] = useState<PreviewResult | null>(null);
   const [columnMap, setColumnMap] = useState<Record<string, string>>({});
   const [catalogName, setCatalogName] = useState('');
+  // Target catalog step: create a new catalog inline (name + currency) or
+  // import into an existing one. New is the default - the name is seeded
+  // from the file name, so the zero-decision path keeps working.
+  const [catalogMode, setCatalogMode] = useState<'new' | 'existing'>('new');
+  const [catalogCurrency, setCatalogCurrency] = useState('');
+  const [existingCatalogId, setExistingCatalogId] = useState('');
+
+  // User catalogs for the "existing catalog" dropdown - only needed once
+  // the mapping panel is on screen.
+  const { data: userCatalogs } = useQuery<CostCatalog[]>({
+    queryKey: ['costs', 'catalogs'],
+    queryFn: fetchCostCatalogs,
+    retry: false,
+    staleTime: 60_000,
+    enabled: previewData !== null,
+  });
 
   // Strip the extension from a filename for a friendly default catalog name.
   const baseName = useCallback(
@@ -1998,6 +2205,9 @@ export function ImportDatabasePage() {
       setResult(null);
       setPreviewData(null);
       setColumnMap({});
+      setCatalogMode('new');
+      setCatalogCurrency('');
+      setExistingCatalogId('');
       previewMutation.mutate(file);
     },
     // previewMutation is stable across renders (react-query); referencing it
@@ -2056,6 +2266,21 @@ export function ImportDatabasePage() {
               }),
         });
       }
+      // Mixed-currency rows are imported as-is (never silently rewritten) -
+      // surface a separate non-blocking warning so the user knows some rows
+      // kept a currency different from the catalog currency.
+      if ((data.mixed_currency_count ?? 0) > 0) {
+        addToast({
+          type: 'warning',
+          title: t('costs_catalogs.mixed_currency_label', { defaultValue: 'Mixed currencies' }),
+          message: t('costs_catalogs.mixed_currency_warning', {
+            defaultValue:
+              '{{count}} rows carry a currency different from the catalog currency {{currency}}. They were imported with their own currency, no conversion applied.',
+            count: data.mixed_currency_count,
+            currency: data.catalog_currency ?? '',
+          }),
+        });
+      }
     },
     [addToast, queryClient, t],
   );
@@ -2071,7 +2296,8 @@ export function ImportDatabasePage() {
     [addToast, t],
   );
 
-  // Primary import - uses the user's chosen column map + catalog name.
+  // Primary import - uses the user's chosen column map + target catalog
+  // (existing catalog id, or new-catalog name + currency).
   const importMutation = useMutation({
     mutationFn: () => {
       if (!selectedFile) throw new Error('No file selected');
@@ -2080,7 +2306,12 @@ export function ImportDatabasePage() {
       for (const [field, header] of Object.entries(columnMap)) {
         if (header) cleanMap[field] = header;
       }
-      return uploadCostFile(selectedFile, cleanMap, catalogName);
+      return uploadCostFile(selectedFile, {
+        columnMap: cleanMap,
+        ...(catalogMode === 'existing'
+          ? { catalogId: existingCatalogId }
+          : { catalogName, catalogCurrency }),
+      });
     },
     onSuccess: onImportSuccess,
     onError: onImportError,
@@ -2102,6 +2333,9 @@ export function ImportDatabasePage() {
     setPreviewData(null);
     setColumnMap({});
     setCatalogName('');
+    setCatalogMode('new');
+    setCatalogCurrency('');
+    setExistingCatalogId('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -2237,6 +2471,36 @@ export function ImportDatabasePage() {
                 </div>
               </div>
             </div>
+
+            {/* Target catalog summary */}
+            {result.catalog && (
+              <div className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2 text-xs text-content-secondary">
+                <BookOpen size={14} className="text-oe-blue shrink-0" />
+                {t('costs_catalogs.result_catalog_line', {
+                  defaultValue: 'Imported into catalog "{{name}}"{{currency}}.',
+                  name: result.catalog,
+                  currency: result.catalog_currency ? ` (${result.catalog_currency})` : '',
+                })}
+              </div>
+            )}
+
+            {/* Mixed-currency warning - rows kept their own currency */}
+            {(result.mixed_currency_count ?? 0) > 0 && (
+              <div className="flex items-start gap-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-200">
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                <span>
+                  <span className="font-semibold block mb-0.5">
+                    {t('costs_catalogs.mixed_currency_label', { defaultValue: 'Mixed currencies' })}
+                  </span>
+                  {t('costs_catalogs.mixed_currency_warning', {
+                    defaultValue:
+                      '{{count}} rows carry a currency different from the catalog currency {{currency}}. They were imported with their own currency, no conversion applied.',
+                    count: result.mixed_currency_count,
+                    currency: result.catalog_currency ?? '',
+                  })}
+                </span>
+              </div>
+            )}
 
             {/* Error details (first 5) */}
             {result.errors.length > 0 && (
@@ -2441,8 +2705,15 @@ export function ImportDatabasePage() {
               onChangeField={(field, header) =>
                 setColumnMap((prev) => ({ ...prev, [field]: header }))
               }
+              catalogMode={catalogMode}
+              onCatalogModeChange={setCatalogMode}
               catalogName={catalogName}
               onCatalogNameChange={setCatalogName}
+              catalogCurrency={catalogCurrency}
+              onCatalogCurrencyChange={setCatalogCurrency}
+              existingCatalogId={existingCatalogId}
+              onExistingCatalogChange={setExistingCatalogId}
+              catalogs={userCatalogs ?? []}
               onImport={() => importMutation.mutate()}
               onCancel={handleReset}
               importing={importMutation.isPending}

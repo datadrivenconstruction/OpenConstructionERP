@@ -452,6 +452,11 @@ class GanttActivity(BaseModel):
     wbs_code: str
     activity_type: str
     status: str
+    # Activity metadata passthrough. Generated activities carry provenance
+    # markers here (e.g. duration_source/duration_method = "estimated_fallback"
+    # when the duration was estimated from unit-based production rates), which
+    # the frontend surfaces as an "estimated duration" hint.
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class GanttSummary(BaseModel):

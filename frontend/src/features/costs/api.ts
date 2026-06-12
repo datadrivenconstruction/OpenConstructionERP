@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiDelete, apiGet, apiPatch, apiPost } from '@/shared/lib/api';
 
 /* ── CWICR abstract-resource variant types ─────────────────────────────── */
 
@@ -9,7 +9,7 @@ import { apiGet, apiPost } from '@/shared/lib/api';
  * One concrete price option behind a CWICR rate code.  Imported from the
  * `price_abstract_resource_*` columns of `*_workitems_costs_resources_DDC_CWICR.parquet`.
  *
- * Stored on `CostItem.metadata_['variants']` as a pass-through list — no
+ * Stored on `CostItem.metadata_['variants']` as a pass-through list - no
  * dedicated table, no Alembic migration. Surfaced in the Cost Database
  * browser (variant detail panel) and the BOQ "Apply position" picker.
  */
@@ -17,13 +17,13 @@ export interface CostVariant {
   /** Position in the original bullet-separated list (0-based). */
   index: number;
   /** Variable-part label only (e.g. "C25/30 delivered"). This is what the
-   *  picker renders per row — the shared common base is shown once as a
+   *  picker renders per row - the shared common base is shown once as a
    *  picker header (see ``VariantStats.common_start``). Truncated to 200
    *  chars upstream. */
   label: string;
   /** ``common_start + label`` joined with a space, truncated to 400 chars.
    *  This is what gets stamped onto the BOQ resource row when the variant
-   *  is applied — it replaces the position's default description so the
+   *  is applied - it replaces the position's default description so the
    *  estimator sees the actual chosen material/option, not the abstract
    *  rate-code description. Optional for backward compatibility with
    *  pre-v2.6.30 imports that didn't capture ``common_start``. */
@@ -32,13 +32,13 @@ export interface CostVariant {
   price: number;
   /** Optional per-unit price (rate normalized by unit). `null` when upstream column missing. */
   price_per_unit: number | null;
-  /** Optional grouping key — when the catalog mixes 2+ variant families
+  /** Optional grouping key - when the catalog mixes 2+ variant families
    *  (e.g. concrete grade × reinforcement type) the backend stamps a
    *  per-variant ``group`` so the picker can render an accordion instead
    *  of a single flat list. Absent for single-group catalogs (the common
    *  case today), in which case the picker falls back to flat rendering. */
   group?: string;
-  /** Localized mirror of `group` — same fallback semantics as
+  /** Localized mirror of `group` - same fallback semantics as
    *  `VariantStats.group_localized`. */
   group_localized?: string;
 }
@@ -65,7 +65,7 @@ export interface VariantStats {
   group: string;
   count: number;
   position_count?: number;
-  /** Localized mirror of `unit` — present when the API was called with
+  /** Localized mirror of `unit` - present when the API was called with
    *  a known locale. Falls back to the German source when the locale is
    *  unsupported or the token has no translation. */
   unit_localized?: string;
@@ -73,7 +73,7 @@ export interface VariantStats {
   group_localized?: string;
   /** Shared base name for the abstract resource (e.g. "Ready-mix concrete").
    *  Rendered once as a picker header so each variant row can show only
-   *  the distinguishing variable part. Optional — empty for pre-v2.6.30
+   *  the distinguishing variable part. Optional - empty for pre-v2.6.30
    *  imports that didn't capture this column. */
   common_start?: string;
 }
@@ -119,8 +119,81 @@ export interface CostItemMetadata {
   workers_per_unit?: number;
   variants?: CostVariant[];
   variant_stats?: VariantStats;
-  // Open-ended — module extensions may attach additional keys.
+  // Open-ended - module extensions may attach additional keys.
   [key: string]: unknown;
+}
+
+/* ── User-owned cost catalogs ──────────────────────────────────────────── */
+
+/**
+ * A user-owned cost catalog ("my price book"): a named container with a
+ * REQUIRED currency that imported / manually created cost items belong to.
+ * Mirrors `CostCatalogResponse` in `backend/app/modules/costs/schemas.py`.
+ */
+export interface CostCatalog {
+  id: string;
+  name: string;
+  description: string | null;
+  currency: string;
+  /** Provenance: 'manual' (created in the UI) or 'import' (created inline
+   *  by the file importer). */
+  source: string;
+  created_by: string | null;
+  /** Live count of active items in this catalog. */
+  item_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Body for `POST /v1/costs/catalogs/`. Currency is required (ISO 4217). */
+export interface CostCatalogCreateBody {
+  name: string;
+  currency: string;
+  description?: string | null;
+}
+
+/** Body for `PATCH /v1/costs/catalogs/{id}`. A currency change is rejected
+ *  with 409 while the catalog has items (rates would be silently
+ *  relabelled). */
+export interface CostCatalogUpdateBody {
+  name?: string;
+  description?: string | null;
+  currency?: string;
+}
+
+/** Delete mode for `DELETE /v1/costs/catalogs/{id}`: `keep_items` detaches
+ *  the items (they stay in the global cost table); `delete_items`
+ *  soft-deletes them together with the catalog. */
+export type CatalogDeleteMode = 'keep_items' | 'delete_items';
+
+/** GET /v1/costs/catalogs/ - all catalogs with live item counts. */
+export async function fetchCostCatalogs(): Promise<CostCatalog[]> {
+  return apiGet<CostCatalog[]>('/v1/costs/catalogs/');
+}
+
+/** POST /v1/costs/catalogs/ - create a catalog (name + currency required). */
+export async function createCostCatalog(
+  body: CostCatalogCreateBody,
+): Promise<CostCatalog> {
+  return apiPost<CostCatalog, CostCatalogCreateBody>('/v1/costs/catalogs/', body);
+}
+
+/** PATCH /v1/costs/catalogs/{id} - rename / re-describe / re-currency. */
+export async function updateCostCatalog(
+  id: string,
+  body: CostCatalogUpdateBody,
+): Promise<CostCatalog> {
+  return apiPatch<CostCatalog, CostCatalogUpdateBody>(`/v1/costs/catalogs/${id}`, body);
+}
+
+/** DELETE /v1/costs/catalogs/{id}?mode=... - returns the affected item count. */
+export async function deleteCostCatalog(
+  id: string,
+  mode: CatalogDeleteMode,
+): Promise<{ deleted: string; mode: string; items_affected: number }> {
+  return apiDelete<{ deleted: string; mode: string; items_affected: number }>(
+    `/v1/costs/catalogs/${id}?mode=${mode}`,
+  );
 }
 
 /* ── CWICR matcher types (T12) ─────────────────────────────────────────── */
@@ -133,7 +206,7 @@ export interface CwicrMatchResult {
   unit: string;
   unit_rate: number;
   currency: string;
-  /** 0..1 — higher is a stronger match. */
+  /** 0..1 - higher is a stronger match. */
   score: number;
   /** Channel that produced the score: 'lexical' | 'semantic' | 'hybrid'. */
   source: string;
@@ -144,9 +217,9 @@ export interface CwicrMatchResult {
    * which makes the variant badge in CwicrMatchPanel a no-op.
    */
   variant_count?: number;
-  /** Optional min variant price — used for the badge tooltip. */
+  /** Optional min variant price - used for the badge tooltip. */
   variant_min?: number;
-  /** Optional max variant price — used for the badge tooltip. */
+  /** Optional max variant price - used for the badge tooltip. */
   variant_max?: number;
   /**
    * Set by `CwicrMatchPanel` after the user picks a CWICR variant so the
@@ -162,7 +235,7 @@ export interface CwicrMatchResult {
   };
 }
 
-/** Matcher mode — pure-lexical is always available, semantic requires the
+/** Matcher mode - pure-lexical is always available, semantic requires the
  *  backend `[semantic]` extra.  We default to 'lexical' on the frontend so
  *  unconfigured deployments don't surface "fell back to lexical" warnings. */
 export type CwicrMatchMode = 'lexical' | 'semantic' | 'hybrid';
@@ -184,7 +257,7 @@ export interface CwicrMatchFromPositionRequest {
   region?: string;
 }
 
-/** POST /api/v1/costs/match/ — ranked CWICR matches for a free-form query. */
+/** POST /api/v1/costs/match/ - ranked CWICR matches for a free-form query. */
 export async function matchCwicr(
   body: CwicrMatchRequest,
 ): Promise<CwicrMatchResult[]> {
@@ -194,7 +267,7 @@ export async function matchCwicr(
   );
 }
 
-/** POST /api/v1/costs/match-from-position/ — same matcher, resolves the
+/** POST /api/v1/costs/match-from-position/ - same matcher, resolves the
  *  query from an existing BOQ position.  Returns 404 if the position id
  *  does not exist (the api helper raises). */
 export async function matchCwicrFromPosition(
@@ -206,7 +279,7 @@ export async function matchCwicrFromPosition(
   );
 }
 
-/* ── Cost Intelligence (v3.12.0 — Stream B) ────────────────────────────── */
+/* ── Cost Intelligence (v3.12.0 - Stream B) ────────────────────────────── */
 
 /** Green / yellow / red confidence band on a cost item.  Mirrors
  *  ``backend/app/modules/costs/intelligence.py::classify_certainty``. */

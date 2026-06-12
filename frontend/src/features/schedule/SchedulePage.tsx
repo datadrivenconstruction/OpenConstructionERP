@@ -94,6 +94,15 @@ function daysBetween(start: string, end: string): number {
   return Math.max(1, Math.ceil((e - s) / (1000 * 60 * 60 * 24)));
 }
 
+/** True when the activity's duration was estimated from unit-based production
+ *  rates (`duration_source` / `duration_method` = "estimated_fallback" in the
+ *  activity metadata) instead of real labor data. */
+function hasEstimatedDuration(activity: Activity): boolean {
+  const md = activity.metadata;
+  if (!md) return false;
+  return md.duration_source === 'estimated_fallback' || md.duration_method === 'estimated_fallback';
+}
+
 function statusColor(status: string): {
   bg: string;
   fill: string;
@@ -727,6 +736,17 @@ function GanttChart({
                     <Badge variant={sc.variant} size="sm">
                       {displayProgress}%
                     </Badge>
+                    {hasEstimatedDuration(activity) && (
+                      <span
+                        title={t('schedule.duration_estimated_tooltip', {
+                          defaultValue: 'Duration estimated from production rates',
+                        })}
+                        className="inline-flex shrink-0 cursor-help items-center gap-0.5 rounded border border-border-light bg-surface-secondary px-1 py-0.5 text-[9px] font-semibold text-content-tertiary"
+                      >
+                        <Clock size={9} className="shrink-0" />
+                        {t('schedule.duration_estimated_badge', { defaultValue: 'Est.' })}
+                      </span>
+                    )}
                     <ViewInBIMButton
                       elementIds={activity.bim_element_ids ?? []}
                       iconSize={9}
