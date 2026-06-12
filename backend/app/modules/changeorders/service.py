@@ -1010,6 +1010,13 @@ class ChangeOrderService:
         code_s = order.code
         cost_impact_s = order.cost_impact or "0"
         currency_s = order.currency
+        # Optional contract link stamped onto the CO's metadata JSON by the
+        # create form (``metadata.contract_id``). Snapshot it here - after
+        # update_fields() the instance is expired - so the
+        # ``changeorder.approved`` event can carry it to the contracts
+        # subscriber (contract value revision). No model migration needed.
+        _md = order.metadata_ if isinstance(order.metadata_, dict) else {}
+        contract_id_s = str(_md.get("contract_id")) if _md.get("contract_id") else None
 
         now = datetime.now(UTC).isoformat()[:19]
         from_status_snapshot = order.status
@@ -1085,6 +1092,10 @@ class ChangeOrderService:
                 "project_id": project_id_s,
                 "code": code_s,
                 "cost_impact": str(delta),
+                "currency": currency_s,
+                # None for the vast majority of COs that are not linked to a
+                # commercial contract - subscribers skip silently in that case.
+                "contract_id": contract_id_s,
                 "approved_by": user_id,
                 "project_budget_updated": project_updated,
                 "boq_applied": boq_result.get("applied", False),

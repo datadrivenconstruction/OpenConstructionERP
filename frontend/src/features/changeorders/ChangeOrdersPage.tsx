@@ -39,6 +39,7 @@ import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { listContracts } from '@/features/contracts/api';
 import { ApprovalTimeline } from './ApprovalTimeline';
 import { ImpactSimulator, type SavedScenario } from './ImpactSimulator';
 import { AIDraftModal } from './AIDraftModal';
@@ -261,7 +262,23 @@ function CreateDialog({
   const [description, setDescription] = useState('');
   const [reason, setReason] = useState('client_request');
   const [scheduleDays, setScheduleDays] = useState(0);
+  // Optional link to a commercial contract. Stored as metadata.contract_id
+  // (the CO create schema has a free-form `metadata: dict`); on approval the
+  // backend subscriber revises the linked contract's total_value.
+  const [contractId, setContractId] = useState('');
   const addToast = useToastStore((s) => s.addToast);
+
+  const { data: contracts = [] } = useQuery({
+    queryKey: ['changeorders', 'contract-options', projectId],
+    queryFn: () => listContracts({ project_id: projectId, limit: 200 }),
+    enabled: Boolean(projectId),
+  });
+  // Change orders are only valid on commercially-live contracts (same
+  // amendability rule as the contracts module: active / suspended).
+  const linkableContracts = useMemo(
+    () => contracts.filter((c) => c.status === 'active' || c.status === 'suspended'),
+    [contracts],
+  );
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -272,6 +289,7 @@ function CreateDialog({
         reason_category: reason,
         schedule_impact_days: scheduleDays,
         currency,
+        ...(contractId ? { metadata: { contract_id: contractId } } : {}),
       }),
     onSuccess: () => {
       onCreated();
@@ -371,6 +389,32 @@ function CreateDialog({
             className={fieldCls}
           />
         </WideModalField>
+        {linkableContracts.length > 0 && (
+          <WideModalField
+            label={t('changeorders.apply_to_contract', { defaultValue: 'Apply to contract (optional)' })}
+            hint={t('changeorders.apply_to_contract_hint', {
+              defaultValue: 'On approval, the cost impact also revises the selected contract value.',
+            })}
+            span={2}
+            htmlFor="co-contract"
+          >
+            <select
+              id="co-contract"
+              value={contractId}
+              onChange={(e) => setContractId(e.target.value)}
+              className={fieldCls}
+            >
+              <option value="">
+                {t('changeorders.apply_to_contract_none', { defaultValue: 'None - project budget only' })}
+              </option>
+              {linkableContracts.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.code} - {c.title}
+                </option>
+              ))}
+            </select>
+          </WideModalField>
+        )}
       </WideModalSection>
     </WideModal>
   );
@@ -1628,11 +1672,13 @@ function DetailView({
           origin?: string;
           variation_order_id?: string;
           variation_request_id?: string;
+          contract_id?: string;
         };
         const fromVariation =
           meta.origin === 'variations.convert_vr_to_vo' &&
           (meta.variation_order_id || meta.variation_request_id);
-        if (poIds.length === 0 && rfiIds.length === 0 && !fromVariation) {
+        const linkedContractId = meta.contract_id || '';
+        if (poIds.length === 0 && rfiIds.length === 0 && !fromVariation && !linkedContractId) {
           return null;
         }
         const chipCls =
@@ -1654,6 +1700,17 @@ function DetailView({
                 >
                   <GitBranch size={12} />
                   {t('changeorders.from_variation', { defaultValue: 'From variation' })}
+                </button>
+              )}
+              {linkedContractId && (
+                <button
+                  type="button"
+                  className={chipCls}
+                  onClick={() => navigate('/contracts')}
+                  title={linkedContractId}
+                >
+                  <FileText size={12} />
+                  {t('changeorders.applies_to_contract', { defaultValue: 'Applies to contract' })}
                 </button>
               )}
               {poIds.map((poId, i) => (

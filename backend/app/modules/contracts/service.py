@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -2139,6 +2139,29 @@ class ContractsService:
 
     # ── Dashboard ────────────────────────────────────────────────────────
 
+    @staticmethod
+    def _change_order_rollup(contract: Contract) -> tuple[int, Decimal]:
+        """Count + net value of CO/VO adjustments tracked on the contract.
+
+        The cross-module subscribers (notifications wave-5) stamp every
+        applied adjustment onto ``contract.metadata``: approved change
+        orders append to ``change_order_ids`` / ``change_order_total`` and
+        completed variation orders append to ``variation_ids`` /
+        ``variation_total``. Both totals are stored as Decimal strings;
+        anything missing or unparseable counts as 0.
+        """
+        md = contract.metadata_ if isinstance(contract.metadata_, dict) else {}
+
+        def _safe_decimal(raw: Any) -> Decimal:
+            try:
+                return Decimal(str(raw or 0))
+            except (InvalidOperation, ValueError, TypeError):
+                return Decimal("0")
+
+        count = len(md.get("change_order_ids") or []) + len(md.get("variation_ids") or [])
+        net = _safe_decimal(md.get("change_order_total")) + _safe_decimal(md.get("variation_total"))
+        return count, net
+
     async def contract_dashboard(self, contract_id: uuid.UUID) -> dict[str, Any]:
         contract = await self.get_contract(contract_id)
         paid = await self.claim_repo.paid_total(contract_id)
@@ -2161,6 +2184,7 @@ class ContractsService:
                 )
                 gainshare_estimate = share["savings"] - share["overrun"]
         outstanding = Decimal(str(contract.total_value or 0)) - paid
+        change_orders_count, _change_orders_net = self._change_order_rollup(contract)
         return {
             "contract_id": contract_id,
             "total_value": Decimal(str(contract.total_value or 0)),
@@ -2168,7 +2192,7 @@ class ContractsService:
             "retention_held": retention,
             "outstanding": outstanding if outstanding > DEC_ZERO else DEC_ZERO,
             "claims_count": total_claims,
-            "change_orders_count": 0,  # populated via cross-module query later
+            "change_orders_count": change_orders_count,
             "gainshare_estimate": gainshare_estimate,
             "status": contract.status,
         }
@@ -2242,8 +2266,17 @@ class ContractsService:
         )
         previous_certificates_total = sum(prior_by_line.values(), DEC_ZERO)
 
-        # Net change orders, if the contract tracks them in terms/metadata.
-        change_orders_net = Decimal(str((contract.terms or {}).get("change_orders_net", 0) or 0))
+        # Net change orders: prefer the auto-tracked metadata rollup
+        # (change_order_total + variation_total, stamped by the approval
+        # subscribers) and fall back to the manually-entered terms value for
+        # contracts that predate the rollup. Never add the two - a contract
+        # that mirrors the rollup into terms would double-count.
+        _co_count, meta_change_orders_net = self._change_order_rollup(contract)
+        change_orders_net = (
+            meta_change_orders_net
+            if meta_change_orders_net != 0
+            else Decimal(str((contract.terms or {}).get("change_orders_net", 0) or 0))
+        )
         original_contract_sum = Decimal(str(contract.total_value or 0)) - change_orders_net
 
         g702 = build_g702_summary(

@@ -8,6 +8,8 @@ Wires real cross-module side-effects emitted by the wave-5 deep-dive:
 * ``crm.opportunity.won`` → bid_management BidPackage (draft, pre-populated).
 * ``crm.opportunity.scored`` → notification for opportunity owner.
 * ``carbon.boq_position.assigned`` → notification for project sustainability lead.
+* ``changeorder.approved`` → revise the linked contract's total_value (when
+  the CO carries ``metadata.contract_id``).
 
 All handlers are best-effort: they swallow exceptions so a downstream
 failure never breaks the foreground request. Each subscriber gates on
@@ -19,7 +21,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Callable
 
 from app.core.events import Event, event_bus
@@ -624,6 +626,81 @@ async def _on_variation_completed(event: Event) -> None:
         )
 
 
+# ── Change orders: CO approved → contract sum bump ───────────────────────
+
+
+async def _on_changeorder_approved_contract(event: Event) -> None:
+    """``changeorder.approved`` → bump the linked Contract.total_value.
+
+    A change order can carry an optional ``metadata.contract_id`` link to
+    the commercial contract it amends (stamped by the create form; no
+    dedicated column). On approval the CO's ``cost_impact`` is applied to
+    the contract's running ``total_value`` - previously only the project
+    budget and BOQ moved, leaving the contract value silently stale.
+
+    Most COs have no contract link: skip silently when ``contract_id`` is
+    absent or unparseable. Idempotency is keyed on the CO id stored in
+    ``contract.metadata.change_order_ids`` (mirrors the variation
+    subscriber above). Terminated / completed contracts are skipped with a
+    log instead of raising - same amendability guard as
+    ``ContractsService.apply_change_order_to_contract``, but a background
+    subscriber must never break the foreground approval.
+    """
+    if not await _can_open_isolated_session():
+        return
+    data = event.data or {}
+    contract_id_raw = data.get("contract_id")
+    co_id_raw = data.get("change_order_id")
+    delta_raw = data.get("cost_impact", "0")
+    if not (contract_id_raw and co_id_raw):
+        return
+    try:
+        contract_id = uuid.UUID(str(contract_id_raw))
+        delta = Decimal(str(delta_raw))
+    except (ValueError, TypeError, InvalidOperation):
+        return
+    try:
+        async with async_session_factory() as session:
+            from app.modules.contracts.repository import ContractRepository
+
+            repo = ContractRepository(session)
+            contract = await repo.get_by_id(contract_id)
+            if contract is None:
+                return
+            md = dict(contract.metadata_ or {})
+            applied = list(md.get("change_order_ids") or [])
+            if str(co_id_raw) in {str(v) for v in applied}:
+                # Already applied - idempotent skip.
+                return
+            if contract.status in ("terminated", "completed"):
+                # Same guard as apply_change_order_to_contract: a CO must
+                # not rewrite the final agreed value of a closed contract.
+                logger.info(
+                    "Contract %s is %s - CO %s value not applied (use the final-account amendment workflow)",
+                    contract.code,
+                    contract.status,
+                    co_id_raw,
+                )
+                return
+            applied.append(str(co_id_raw))
+            md["change_order_ids"] = applied
+            md["change_order_total"] = str(Decimal(str(md.get("change_order_total") or 0)) + delta)
+            contract.metadata_ = md
+            contract.total_value = Decimal(str(contract.total_value or 0)) + delta
+            await session.commit()
+            logger.info(
+                "Contract %s total_value bumped by %s (CO=%s)",
+                contract.code,
+                delta,
+                co_id_raw,
+            )
+    except Exception:
+        logger.debug(
+            "notifications: _on_changeorder_approved_contract failed",
+            exc_info=True,
+        )
+
+
 # ── QMS: HSE→QMS NCR mirror → notification ───────────────────────────────
 
 
@@ -727,6 +804,7 @@ _SUBSCRIPTIONS: tuple[tuple[str, Callable[[Event], object]], ...] = (
     ("carbon.boq_position.assigned", _on_boq_position_assigned),
     ("bid_management.package.awarded", _on_bid_package_awarded),
     ("variations.contract_sum.updated", _on_variation_completed),
+    ("changeorder.approved", _on_changeorder_approved_contract),
     ("qms.ncr.mirrored_from_hse", _on_qms_ncr_mirrored_from_hse),
 )
 

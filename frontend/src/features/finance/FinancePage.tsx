@@ -1077,7 +1077,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
             <span className="text-blue-700 dark:text-blue-300">
               {t('finance.boq_tip_desc', {
                 defaultValue:
-                  'Go to your BOQ \u2192 Lock the estimate \u2192 Click "Create Budget from Estimate" to auto-populate budget lines.',
+                  'Lock your BOQ estimate, then use "Create Budget from Estimate" below to generate budget lines on the 5D Cost Model page.',
               })}
             </span>
             <Button
@@ -1096,12 +1096,27 @@ function BudgetsTab({ projectId }: { projectId: string }) {
           title={t('finance.no_budgets', { defaultValue: 'No budget lines yet' })}
           description={t('finance.no_budgets_desc', {
             defaultValue:
-              'Lock your BOQ estimate and click "Create Budget from Estimate" to automatically generate budget lines from your sections. You can also create budget lines manually.',
+              'Generate budget lines from your locked BOQ estimate, or add them manually.',
           })}
-          action={{
-            label: t('finance.new_budget', { defaultValue: 'New Budget Line' }),
-            onClick: () => setShowCreate(true),
-          }}
+          action={
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {/* The estimate→budget generator lives on the 5D Cost Model
+                  page ("Generate Budget from BOQ") — this is a plain
+                  navigation to it, not a second API path. */}
+              <Button
+                variant="primary"
+                onClick={() => navigate('/5d')}
+                data-testid="create-budget-from-estimate"
+              >
+                {t('finance.create_budget_from_estimate', {
+                  defaultValue: 'Create Budget from Estimate',
+                })}
+              </Button>
+              <Button variant="secondary" onClick={() => setShowCreate(true)}>
+                {t('finance.new_budget', { defaultValue: 'New Budget Line' })}
+              </Button>
+            </div>
+          }
         />
 
         {/* New Budget Line Modal (also shown from empty state) */}
