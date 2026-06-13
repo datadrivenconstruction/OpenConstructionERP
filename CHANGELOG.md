@@ -5,6 +5,17 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.10.0] - 2026-06-13
+
+### Changed
+
+- Regional cost catalogues are no longer shipped inside the package. They download on demand from the public CWICR data repository the first time you import one and are then cached locally, so the install is about 15 MB lighter and a catalogue you have imported once keeps working with no internet connection. All thirty regions are still available to import exactly as before, and the resource cost database import is unchanged.
+
+### Fixed
+
+- ERP Chat showed Markdown tables as raw pipe text. Assistant answers that contain a table, for example a list of projects with budgets, now render as a real table with per-column alignment, in both the floating chat and the full-page chat. Reported in [#224](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/224).
+- The quick create and guided project setup windows showed English labels and hints when the interface language was set to something else. Every string in both windows is now translated across all 27 languages.
+
 ## [7.9.0] - 2026-06-13
 
 ### Added

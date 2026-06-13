@@ -32,6 +32,15 @@ export const SAFE_TAGS = [
   'div',
   'span',
   'hr',
+  // Pipe-table output (renderPipeTables). These carry no scriptable
+  // surface; the only attribute they use is the inline ``style`` we emit
+  // ourselves, already on the SAFE_ATTRS list.
+  'table',
+  'thead',
+  'tbody',
+  'tr',
+  'th',
+  'td',
 ] as const;
 export const SAFE_ATTRS = ['href', 'target', 'rel', 'style'] as const;
 export const SANITIZE_CONFIG = {
@@ -59,11 +68,106 @@ function formatTime(d: Date): string {
 }
 
 /**
+ * Render GitHub-style pipe tables to an HTML ``<table>``.
+ *
+ * Runs on the already-HTML-escaped string (cell text is inert) and before
+ * the inline link/emphasis passes, so ``**bold**``, `` `code` `` and
+ * ``[links](…)`` inside cells still get formatted by the later regexes.
+ * Lines inside a ``<pre>`` code block are passed through untouched so a
+ * table written as example code stays literal. A block is recognised when
+ * a header row (``| a | b |``) is immediately followed by a delimiter row
+ * of dashes (``|---|---|``); optional colons in the delimiter set per-column
+ * alignment. The emitted table is newline-free so the later line-anchored
+ * heading/list/rule passes and the final ``\n`` -> ``<br/>`` pass never
+ * reach inside it.
+ */
+export function renderPipeTables(src: string): string {
+  const lines = src.split('\n');
+  const splitCells = (line: string): string[] => {
+    let t = line.trim();
+    if (t.startsWith('|')) t = t.slice(1);
+    if (t.endsWith('|')) t = t.slice(0, -1);
+    // Split on unescaped pipes, then restore escaped ones as literal text.
+    return t.split(/(?<!\\)\|/).map((c) => c.replace(/\\\|/g, '|').trim());
+  };
+  const isDelim = (line: string): boolean => {
+    const t = line.trim();
+    if (!t.includes('-') || !t.includes('|')) return false;
+    return splitCells(line).every((c) => /^:?-{1,}:?$/.test(c));
+  };
+  const isRow = (line: string): boolean => line.includes('|') && line.trim() !== '';
+  const cellStyle = (align: string, head: boolean): string =>
+    `border:1px solid var(--chat-text-tertiary,#ccc);padding:4px 8px;text-align:${align || 'left'}` +
+    (head ? ';font-weight:700;background:var(--chat-surface-3,rgba(0,0,0,.04))' : '');
+
+  const out: string[] = [];
+  let inPre = false;
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? '';
+    if (inPre) {
+      out.push(line);
+      if (line.includes('</pre>')) inPre = false;
+      i += 1;
+      continue;
+    }
+    if (line.includes('<pre')) {
+      inPre = !line.includes('</pre>');
+      out.push(line);
+      i += 1;
+      continue;
+    }
+    const next = lines[i + 1] ?? '';
+    if (isRow(line) && isDelim(next)) {
+      const headers = splitCells(line);
+      const aligns = splitCells(next).map((c) => {
+        const l = c.startsWith(':');
+        const r = c.endsWith(':');
+        if (l && r) return 'center';
+        if (r) return 'right';
+        if (l) return 'left';
+        return '';
+      });
+      const bodyRows: string[][] = [];
+      let j = i + 2;
+      while (j < lines.length) {
+        const rowLine = lines[j] ?? '';
+        if (!isRow(rowLine) || rowLine.includes('<pre')) break;
+        bodyRows.push(splitCells(rowLine));
+        j += 1;
+      }
+      const cols = headers.length;
+      const th = headers
+        .map((c, k) => `<th style="${cellStyle(aligns[k] ?? '', true)}">${c}</th>`)
+        .join('');
+      const body = bodyRows
+        .map((cells) => {
+          const tds: string[] = [];
+          for (let k = 0; k < cols; k += 1) {
+            tds.push(`<td style="${cellStyle(aligns[k] ?? '', false)}">${cells[k] ?? ''}</td>`);
+          }
+          return `<tr>${tds.join('')}</tr>`;
+        })
+        .join('');
+      out.push(
+        `<table style="border-collapse:collapse;margin:6px 0;font-size:13px;max-width:100%">` +
+          `<thead><tr>${th}</tr></thead><tbody>${body}</tbody></table>`,
+      );
+      i = j;
+      continue;
+    }
+    out.push(line);
+    i += 1;
+  }
+  return out.join('\n');
+}
+
+/**
  * Lightweight markdown-to-HTML renderer.
  *
- * Handles bold, italic, inline code, code blocks, bullet/numbered lists,
- * headings, horizontal rules, and line breaks without pulling in a full
- * markdown library.
+ * Handles bold, italic, inline code, code blocks, pipe tables, bullet/
+ * numbered lists, headings, horizontal rules, and line breaks without
+ * pulling in a full markdown library.
  */
 export function renderMarkdown(text: string): string {
   // Escape ALL HTML entities first to prevent XSS injection
@@ -82,6 +186,10 @@ export function renderMarkdown(text: string): string {
   html = html.replace(/`([^`\n]+)`/g, (_m, code) => {
     return `<code style="background:var(--chat-surface-3,rgba(0,0,0,.06));padding:1px 5px;border-radius:4px;font-size:0.9em;font-family:var(--chat-font-mono,monospace)">${code}</code>`;
   });
+
+  // Pipe tables: | a | b | / |---|---| — before the inline link/emphasis and
+  // the line-anchored heading/list passes (see renderPipeTables).
+  html = renderPipeTables(html);
 
   // Links: [text](url) — must run before bold so labels containing "**" are
   // still parsed as bold inside the rendered anchor.  External (http/https)

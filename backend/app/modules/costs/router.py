@@ -3693,8 +3693,8 @@ _CWICR_CACHE_DIR = Path.home() / ".openestimator" / "cache"
 # total), far beyond any sane wheel budget, so this directory ships empty.
 # It exists as a lookup hook: partner packs, installers or operators can
 # drop ``{db_id}*.parquet`` files here (or in a source checkout) to make
-# regional rates fully offline. The resource *catalog* CSVs, which are
-# small, ARE bundled - see app/data/catalog/regions and the catalog module.
+# regional rates fully offline. The resource *catalog* CSVs are likewise not
+# bundled - the catalog module downloads them on demand and caches them.
 _BUNDLED_CWICR_DIR = Path(__file__).resolve().parents[2] / "data" / "cwicr"
 
 

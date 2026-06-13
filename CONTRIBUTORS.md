@@ -50,6 +50,9 @@ Thank you to everyone who has contributed.
 - **leval907** ([@leval907](https://github.com/leval907)): flagged that qdrant-client removed
   its `.search()` API and that the remaining call sites needed migrating to `query_points()`
   ([#201](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/201)).
+- **alikhalilx** ([@alikhalilx](https://github.com/alikhalilx)): reported that ERP Chat
+  rendered Markdown tables as raw pipe text and pointed at the hand-rolled chat renderers
+  ([#224](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/224)).
 
 See the full list of everyone who has contributed:
 

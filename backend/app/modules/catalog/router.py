@@ -35,7 +35,6 @@ Endpoints:
 """
 
 import asyncio
-import gzip
 import logging
 import uuid
 from pathlib import Path
@@ -154,27 +153,24 @@ _GITHUB_BASE = "https://raw.githubusercontent.com/datadrivenconstruction/OpenCon
 
 # Local cache for downloaded catalog CSVs. Shares the parent directory with the
 # CWICR parquet cache in app.modules.costs.router so one folder holds all
-# offline-capable reference data.
+# downloaded reference data, and a region imported once stays available offline.
 _CATALOG_CACHE_DIR = Path.home() / ".openestimator" / "cache" / "catalog"
-
-# Regional catalog CSVs bundled into the wheel as gzip (all 30 REGION_MAP
-# regions, ~0.5 MB each). They make /catalog/import/{region} work on installs
-# with no GitHub access - the runtime customer failure mode behind "catalogs
-# never downloaded" reports.
-_BUNDLED_CATALOG_DIR = Path(__file__).resolve().parents[2] / "data" / "catalog" / "regions"
 
 
 def _read_region_catalog_csv(region: str, folder: str) -> tuple[bytes, str]:
-    """Resolve the catalog CSV bytes for one region, offline-first.
+    """Resolve the catalog CSV bytes for one region.
+
+    The regional CWICR catalogs are not shipped inside the package; they are
+    downloaded on demand from the public CWICR data repository and cached
+    locally, so a region imported once stays available without network.
 
     Lookup order:
       1. Local cache dir (a previous successful download).
-      2. Catalog CSV bundled into the installed package (gzip).
-      3. GitHub download (cached on success for the next offline run).
+      2. GitHub download (cached on success for the next offline run).
 
     Runs in a worker thread (blocking I/O). Returns ``(raw_bytes, source)``
-    where ``source`` is ``cache`` / ``bundled`` / ``github``. Raises
-    ``RuntimeError`` with an actionable message when all three fail.
+    where ``source`` is ``cache`` / ``github``. Raises ``RuntimeError`` with
+    an actionable message when both fail.
     """
     csv_name = f"DDC_CWICR_{region}_Catalog.csv"
 
@@ -187,15 +183,7 @@ def _read_region_catalog_csv(region: str, folder: str) -> tuple[bytes, str]:
     except OSError:
         logger.warning("Unreadable cached catalog CSV at %s, ignoring", cached)
 
-    # 2. Bundled package data (gzip).
-    bundled = _BUNDLED_CATALOG_DIR / f"{csv_name}.gz"
-    try:
-        if bundled.is_file():
-            return gzip.decompress(bundled.read_bytes()), "bundled"
-    except OSError:
-        logger.warning("Unreadable bundled catalog CSV at %s, ignoring", bundled)
-
-    # 3. GitHub download (last resort).
+    # 2. GitHub download (cached on success for the next offline run).
     # Belt-and-braces: `folder` and `region` come from the static REGION_MAP
     # only (already validated by the caller), but URL-quote them anyway and
     # verify the final URL still has the trusted host. This makes the trust
@@ -220,7 +208,7 @@ def _read_region_catalog_csv(region: str, folder: str) -> tuple[bytes, str]:
         logger.error("Failed to download catalog CSV from %s: %s", url, exc)
         raise RuntimeError(
             f"Could not load the '{region}' resource catalog: it is not in the local "
-            f"cache, not bundled with this build, and the GitHub download failed "
+            f"cache and the GitHub download failed "
             f"({exc.__class__.__name__}: {exc}). URL: {url}. Check that this server "
             f"can reach raw.githubusercontent.com, or place the CSV at {cached} "
             f"and retry."
@@ -245,11 +233,11 @@ async def import_catalog_from_github(
     _user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("catalog.create")),
 ) -> dict[str, Any]:
-    """‌⁠‍Import the resource catalog CSV for a region into the DB.
+    """Import the resource catalog CSV for a region into the DB.
 
-    Resolves the CSV offline-first (local cache, then the copy bundled into
-    the package, then GitHub as a last resort) so fresh installs without
-    GitHub access still get their regional catalog.
+    Resolves the CSV from the local cache first, then downloads it from the
+    public CWICR data repository and caches it, so a region imported once
+    stays available without network access.
 
     Accepts any of the 30 region ids in ``REGION_MAP`` (one metro per CWICR
     locale: AR_DUBAI, AU_SYDNEY, BG_SOFIA, CS_PRAGUE, DE_BERLIN, ENG_TORONTO,

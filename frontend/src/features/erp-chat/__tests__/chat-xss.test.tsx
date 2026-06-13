@@ -123,3 +123,69 @@ describe('chat markdown XSS hardening', () => {
     expect(link?.getAttribute('rel') ?? '').toContain('noopener');
   });
 });
+
+describe('chat markdown pipe tables (issue #224)', () => {
+  it('renders a GitHub-style pipe table as a real <table>', () => {
+    const md = [
+      '| Project ID | Project Name | Budget (USD) |',
+      '|------------|--------------|--------------|',
+      '| PRJ-001 | Horizon Tower | $12,500,000 |',
+      '| PRJ-002 | Civic Center | $8,000,000 |',
+    ].join('\n');
+    const frag = parse(sanitiseChatMarkdown(md));
+    const table = frag.querySelector('table');
+    expect(table).not.toBeNull();
+    // Three header cells.
+    const headers = [...frag.querySelectorAll('thead th')].map((c) => c.textContent);
+    expect(headers).toEqual(['Project ID', 'Project Name', 'Budget (USD)']);
+    // Two body rows, three cells each.
+    const bodyRows = frag.querySelectorAll('tbody tr');
+    expect(bodyRows.length).toBe(2);
+    const firstRow = [...(bodyRows[0]?.querySelectorAll('td') ?? [])].map((c) => c.textContent);
+    expect(firstRow).toEqual(['PRJ-001', 'Horizon Tower', '$12,500,000']);
+    // No raw pipe-table source should survive in the rendered text.
+    expect(table?.textContent ?? '').not.toContain('|---');
+  });
+
+  it('honours per-column alignment from delimiter colons', () => {
+    const md = ['| L | C | R |', '|:--|:-:|--:|', '| a | b | c |'].join('\n');
+    const frag = parse(sanitiseChatMarkdown(md));
+    const headerCells = [...frag.querySelectorAll('thead th')];
+    expect(headerCells[0]?.getAttribute('style')).toContain('text-align:left');
+    expect(headerCells[1]?.getAttribute('style')).toContain('text-align:center');
+    expect(headerCells[2]?.getAttribute('style')).toContain('text-align:right');
+  });
+
+  it('formats inline markdown inside table cells', () => {
+    const md = ['| Name | Note |', '|------|------|', '| **Bold** | `code` |'].join('\n');
+    const frag = parse(sanitiseChatMarkdown(md));
+    expect(frag.querySelector('td strong')?.textContent).toBe('Bold');
+    expect(frag.querySelector('td code')?.textContent).toBe('code');
+  });
+
+  it('neutralises XSS injected inside a table cell', () => {
+    const md = [
+      '| Col |',
+      '|-----|',
+      '| <img src=x onerror=alert(1)> |',
+    ].join('\n');
+    const out = sanitiseChatMarkdown(md);
+    const frag = parse(out);
+    expect(frag.querySelector('img')).toBeNull();
+    expect(out.toLowerCase()).not.toContain('<img');
+    const all = frag.querySelectorAll('*');
+    for (const el of all) {
+      for (const attr of el.attributes) {
+        expect(attr.name.toLowerCase().startsWith('on')).toBe(false);
+      }
+    }
+  });
+
+  it('leaves a table written inside a code fence literal', () => {
+    const md = ['```', '| a | b |', '|---|---|', '| 1 | 2 |', '```'].join('\n');
+    const frag = parse(sanitiseChatMarkdown(md));
+    // The fence wins: no <table>, the pipes stay as code text.
+    expect(frag.querySelector('table')).toBeNull();
+    expect(frag.querySelector('pre code')?.textContent ?? '').toContain('| a | b |');
+  });
+});

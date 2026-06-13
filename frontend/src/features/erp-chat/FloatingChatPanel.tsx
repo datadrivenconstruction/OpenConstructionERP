@@ -72,6 +72,14 @@ const SANITIZE_CONFIG = {
     'div',
     'span',
     'hr',
+    // Pipe-table output (renderPipeTables). Only the inline ``style`` we
+    // emit ourselves is used, already on ALLOWED_ATTR.
+    'table',
+    'thead',
+    'tbody',
+    'tr',
+    'th',
+    'td',
   ],
   ALLOWED_ATTR: ['href', 'target', 'rel', 'style'],
   // DOMPurify treats ``target`` / ``rel`` as "additional" attributes that
@@ -253,6 +261,93 @@ function isApiKeyError(message: string): boolean {
 }
 
 // ── Lightweight markdown (shared subset of MessageBubble) ──────────────────
+/**
+ * Render GitHub-style pipe tables to an HTML ``<table>``. Mirrors the helper
+ * in ``full-page/left/MessageBubble.tsx`` (kept inline per the surface-isolation
+ * note above). Operates on the already-escaped string, before the inline
+ * link/emphasis passes, and skips lines inside a ``<pre>`` block. The emitted
+ * table is newline-free so the final ``\n`` -> ``<br/>`` pass never reaches it.
+ */
+function renderPipeTables(src: string): string {
+  const lines = src.split('\n');
+  const splitCells = (line: string): string[] => {
+    let t = line.trim();
+    if (t.startsWith('|')) t = t.slice(1);
+    if (t.endsWith('|')) t = t.slice(0, -1);
+    return t.split(/(?<!\\)\|/).map((c) => c.replace(/\\\|/g, '|').trim());
+  };
+  const isDelim = (line: string): boolean => {
+    const t = line.trim();
+    if (!t.includes('-') || !t.includes('|')) return false;
+    return splitCells(line).every((c) => /^:?-{1,}:?$/.test(c));
+  };
+  const isRow = (line: string): boolean => line.includes('|') && line.trim() !== '';
+  const cellStyle = (align: string, head: boolean): string =>
+    `border:1px solid var(--chat-text-tertiary,#ccc);padding:4px 8px;text-align:${align || 'left'}` +
+    (head ? ';font-weight:700;background:var(--chat-surface-3,rgba(0,0,0,.04))' : '');
+
+  const out: string[] = [];
+  let inPre = false;
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? '';
+    if (inPre) {
+      out.push(line);
+      if (line.includes('</pre>')) inPre = false;
+      i += 1;
+      continue;
+    }
+    if (line.includes('<pre')) {
+      inPre = !line.includes('</pre>');
+      out.push(line);
+      i += 1;
+      continue;
+    }
+    const next = lines[i + 1] ?? '';
+    if (isRow(line) && isDelim(next)) {
+      const headers = splitCells(line);
+      const aligns = splitCells(next).map((c) => {
+        const l = c.startsWith(':');
+        const r = c.endsWith(':');
+        if (l && r) return 'center';
+        if (r) return 'right';
+        if (l) return 'left';
+        return '';
+      });
+      const bodyRows: string[][] = [];
+      let j = i + 2;
+      while (j < lines.length) {
+        const rowLine = lines[j] ?? '';
+        if (!isRow(rowLine) || rowLine.includes('<pre')) break;
+        bodyRows.push(splitCells(rowLine));
+        j += 1;
+      }
+      const cols = headers.length;
+      const th = headers
+        .map((c, k) => `<th style="${cellStyle(aligns[k] ?? '', true)}">${c}</th>`)
+        .join('');
+      const body = bodyRows
+        .map((cells) => {
+          const tds: string[] = [];
+          for (let k = 0; k < cols; k += 1) {
+            tds.push(`<td style="${cellStyle(aligns[k] ?? '', false)}">${cells[k] ?? ''}</td>`);
+          }
+          return `<tr>${tds.join('')}</tr>`;
+        })
+        .join('');
+      out.push(
+        `<table style="border-collapse:collapse;margin:6px 0;font-size:13px;max-width:100%">` +
+          `<thead><tr>${th}</tr></thead><tbody>${body}</tbody></table>`,
+      );
+      i = j;
+      continue;
+    }
+    out.push(line);
+    i += 1;
+  }
+  return out.join('\n');
+}
+
 function renderMarkdown(text: string): string {
   let html = text
     .replace(/&/g, '&amp;')
@@ -265,6 +360,7 @@ function renderMarkdown(text: string): string {
   html = html.replace(/`([^`\n]+)`/g, (_m, code: string) =>
     `<code style="background:var(--chat-surface-3,rgba(0,0,0,.06));padding:1px 4px;border-radius:3px;font-size:0.9em;font-family:var(--chat-font-mono,monospace)">${code}</code>`,
   );
+  html = renderPipeTables(html);
   html = html.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, label: string, href: string) => {
     const isExternal = /^https?:\/\//i.test(href);
     const isInternal = href.startsWith('/') || href.startsWith('#');

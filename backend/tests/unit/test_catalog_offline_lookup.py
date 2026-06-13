@@ -1,11 +1,11 @@
 """Offline-first lookup for regional reference data.
 
-A real customer on a fresh install with no GitHub access ended up with an
-empty workspace because the regional CWICR catalog CSV and workitems parquet
-were only fetched from GitHub at runtime. These tests prove the offline
-lookup chain works with the network hard-disabled:
+The regional CWICR catalog CSVs are not shipped inside the package; they are
+downloaded on demand and cached, so a region imported once stays available
+without network. These tests prove the lookup chains work with the network
+hard-disabled once the data has been cached:
 
-- catalog: local cache -> bundled package data (gz) -> GitHub (blocked here)
+- catalog: local cache -> GitHub (blocked here)
 - costs:   local DDC_Toolkit -> persistent cache -> bundled dir -> GitHub
 
 and that a total miss produces an actionable error, never a silent empty
@@ -14,7 +14,6 @@ catalog.
 
 from __future__ import annotations
 
-import gzip
 from pathlib import Path
 
 import pytest
@@ -39,26 +38,8 @@ def _no_network(monkeypatch: pytest.MonkeyPatch) -> None:
 # ── catalog: /api/v1/catalog/import/{region} resolver ─────────────────────
 
 
-def test_bundled_catalog_csv_exists_for_every_region() -> None:
-    """All 30 REGION_MAP regions ship a bundled gz catalog in the package."""
-    missing = [
-        region
-        for region in catalog_router.REGION_MAP
-        if not (catalog_router._BUNDLED_CATALOG_DIR / f"DDC_CWICR_{region}_Catalog.csv.gz").is_file()
-    ]
-    assert missing == [], f"regions without bundled catalog CSV: {missing}"
-
-
-def test_catalog_resolves_from_bundled_data_without_network(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.setattr(catalog_router, "_CATALOG_CACHE_DIR", tmp_path / "cache")
-    raw, source = catalog_router._read_region_catalog_csv("RU_STPETERSBURG", "RU___DDC_CWICR")
-    assert source == "bundled"
-    header = raw.decode("utf-8-sig").splitlines()[0]
-    assert "resource_code" in header
-    assert len(raw) > 100_000
-
-
-def test_catalog_prefers_local_cache_over_bundled(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_catalog_resolves_from_local_cache(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """A region downloaded once resolves from the local cache, no network."""
     cache_dir = tmp_path / "cache"
     cache_dir.mkdir()
     cached = cache_dir / "DDC_CWICR_DE_BERLIN_Catalog.csv"
@@ -71,7 +52,6 @@ def test_catalog_prefers_local_cache_over_bundled(monkeypatch: pytest.MonkeyPatc
 
 def test_catalog_total_miss_raises_actionable_error(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(catalog_router, "_CATALOG_CACHE_DIR", tmp_path / "cache")
-    monkeypatch.setattr(catalog_router, "_BUNDLED_CATALOG_DIR", tmp_path / "no-bundle")
     with pytest.raises(RuntimeError) as exc_info:
         catalog_router._read_region_catalog_csv("FR_PARIS", "FR___DDC_CWICR")
     message = str(exc_info.value)
@@ -121,13 +101,12 @@ async def test_find_cwicr_file_skips_stuck_zero_byte_cache(monkeypatch: pytest.M
     assert "URL:" in message
 
 
-def test_bundled_catalog_gz_total_size_within_budget() -> None:
-    """Keep the wheel addition honest: all bundled catalogs < 40 MB total."""
-    total = sum(f.stat().st_size for f in catalog_router._BUNDLED_CATALOG_DIR.glob("*.csv.gz"))
-    assert 0 < total < 40 * 1024 * 1024
+def test_catalog_regions_are_not_bundled_in_the_package() -> None:
+    """The custom CWICR catalog CSVs must not ship inside the package.
 
-
-def test_bundled_catalog_gz_decompresses_to_csv() -> None:
-    sample = catalog_router._BUNDLED_CATALOG_DIR / "DDC_CWICR_PL_WARSAW_Catalog.csv.gz"
-    text = gzip.decompress(sample.read_bytes()).decode("utf-8-sig")
-    assert "resource_code" in text.splitlines()[0]
+    They are downloaded on demand instead. This pins the decision so a future
+    change cannot silently re-bundle the proprietary regional data.
+    """
+    data_root = Path(catalog_router.__file__).resolve().parents[2] / "data" / "catalog"
+    assert not data_root.exists(), f"regional catalog data unexpectedly bundled at {data_root}"
+    assert not hasattr(catalog_router, "_BUNDLED_CATALOG_DIR")
