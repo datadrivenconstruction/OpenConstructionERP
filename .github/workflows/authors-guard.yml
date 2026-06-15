@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Verify every commit in the PR is first-party
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const allowLogins = new Set([
