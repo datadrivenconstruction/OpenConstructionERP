@@ -1,6 +1,7 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { QueryClientContext } from '@tanstack/react-query';
 import { takeoffApi, type MeasurementCreate, type MeasurementResponse } from '@/features/takeoff/api';
+import type { MeasurementDocumentSource } from '@/features/takeoff/takeoffRoutes';
 import {
   type PageScales,
   hydratePageScales,
@@ -69,13 +70,24 @@ interface PersistedDocument {
 const STORAGE_PREFIX = 'oe_takeoff_';
 const INDEX_KEY = 'oe_takeoff_index';
 
-function docKey(fileName: string): string {
-  return `${STORAGE_PREFIX}${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+function sanitizeKeyPart(value: string): string {
+  return value.replace(/[^a-zA-Z0-9._-]/g, '_');
 }
 
-function loadFromStorage(fileName: string): PersistedDocument | null {
+function docKey(projectId: string | null | undefined, documentId: string): string {
+  return `${STORAGE_PREFIX}p_${sanitizeKeyPart(projectId || 'local')}__${sanitizeKeyPart(documentId)}`;
+}
+
+function legacyDocKey(fileName: string): string {
+  return `${STORAGE_PREFIX}${sanitizeKeyPart(fileName)}`;
+}
+
+function loadFromStorage(
+  projectId: string | null | undefined,
+  documentId: string,
+): PersistedDocument | null {
   try {
-    const raw = localStorage.getItem(docKey(fileName));
+    const raw = localStorage.getItem(docKey(projectId, documentId));
     if (!raw) return null;
     return JSON.parse(raw) as PersistedDocument;
   } catch {
@@ -83,23 +95,41 @@ function loadFromStorage(fileName: string): PersistedDocument | null {
   }
 }
 
-function saveToStorage(fileName: string, data: PersistedDocument): void {
+function saveToStorage(
+  projectId: string | null | undefined,
+  documentId: string,
+  data: PersistedDocument,
+): boolean {
   try {
-    localStorage.setItem(docKey(fileName), JSON.stringify(data));
+    const key = docKey(projectId, documentId);
+    localStorage.setItem(key, JSON.stringify(data));
     const index = getDocumentIndex();
-    if (!index.includes(fileName)) {
-      index.push(fileName);
+    if (!index.includes(key)) {
+      index.push(key);
       localStorage.setItem(INDEX_KEY, JSON.stringify(index));
     }
+    return true;
   } catch {
     // localStorage full — silently fail
+    return false;
   }
 }
 
-export function removeFromStorage(fileName: string): void {
+export function removeFromStorage(
+  projectId: string | null | undefined,
+  documentId: string,
+  fileName?: string | null,
+): void {
   try {
-    localStorage.removeItem(docKey(fileName));
-    const index = getDocumentIndex().filter((n) => n !== fileName);
+    const key = docKey(projectId, documentId);
+    localStorage.removeItem(key);
+    if (fileName) {
+      localStorage.removeItem(legacyDocKey(fileName));
+    }
+    const legacyKey = fileName ? legacyDocKey(fileName) : null;
+    const index = getDocumentIndex().filter(
+      (n) => n !== key && (!legacyKey || n !== legacyKey),
+    );
     localStorage.setItem(INDEX_KEY, JSON.stringify(index));
   } catch {
     // ignore
@@ -163,6 +193,7 @@ function toApiFormat(
   projectId: string,
   documentId: string,
   pageScales?: PageScales,
+  documentSource?: MeasurementDocumentSource | null,
 ): MeasurementCreate {
   // Area measurements carry the polygon area in `m.value`; volume
   // measurements carry the area separately in `m.area`. Persist the
@@ -209,6 +240,7 @@ function toApiFormat(
       linked_boq_id: m.linkedBoqId,
       linked_position_ordinal: m.linkedPositionOrdinal,
       linked_position_label: m.linkedPositionLabel,
+      document_source: documentSource ?? undefined,
     },
   };
 }
@@ -318,8 +350,12 @@ function pageScalesFromServer(rows: MeasurementResponse[]): PageScales | null {
 
 interface UseMeasurementPersistenceOptions {
   fileName: string | null;
+  documentIdentity?: string | null;
+  documentSource?: MeasurementDocumentSource | null;
   measurements: Measurement[];
-  setMeasurements: (measurements: Measurement[]) => void;
+  setMeasurements: (
+    measurements: Measurement[] | ((prev: Measurement[]) => Measurement[]),
+  ) => void;
   /** Per-page (per-sheet) scale model. Persisted whole; a legacy
    *  single-scale document is migrated into the default on load. */
   pageScales: PageScales;
@@ -345,6 +381,8 @@ interface UseMeasurementPersistenceResult {
 
 export function useMeasurementPersistence({
   fileName,
+  documentIdentity,
+  documentSource,
   measurements,
   setMeasurements,
   pageScales,
@@ -353,8 +391,9 @@ export function useMeasurementPersistence({
   projectId,
 }: UseMeasurementPersistenceOptions): UseMeasurementPersistenceResult {
   const hasPersistedRef = useRef(false);
-  const lastFileRef = useRef<string | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastScopeRef = useRef<string | null>(null);
+  const lastLocalSaveSignatureRef = useRef<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncedToServer, setSyncedToServer] = useState(false);
   const serverSyncRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -366,24 +405,61 @@ export function useMeasurementPersistence({
   const geometrySigRef = useRef<Map<string, string>>(new Map());
   const patchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inFlightPatchRef = useRef<Set<string>>(new Set());
+  const inFlightSyncRef = useRef<Set<string>>(new Set());
   // Read the QueryClient directly from context — ``useContext`` returns
   // ``undefined`` instead of throwing when the provider is absent (e.g. in
   // unit tests that render the hook in isolation). When present, we use
   // it to broadcast a refresh to the unified Markups hub.
   const qc = useContext(QueryClientContext);
 
-  // Load persisted data when file name changes — try server first, fallback to localStorage
+  // Load persisted data when the stable document id or local filename changes.
+  // Server sync uses only stable document ids; localStorage also supports a
+  // filename fallback so local-only PDFs survive remounts without leaking into
+  // the backend measurement namespace.
   useEffect(() => {
-    if (!fileName || fileName === lastFileRef.current) return;
-    lastFileRef.current = fileName;
+    const documentId = documentIdentity?.trim() || fileName?.trim() || null;
+    if (!documentId) {
+      setMeasurements([]);
+      hasPersistedRef.current = false;
+      setSyncedToServer(false);
+      setIsHydrated(false);
+      lastScopeRef.current = null;
+      lastLocalSaveSignatureRef.current = null;
+      inFlightSyncRef.current = new Set();
+      return;
+    }
+    const stableDocumentId = documentId;
+    const stableProjectId = projectId || undefined;
+    const scopeKey = `${stableProjectId || 'local'}:${stableDocumentId}`;
+    if (scopeKey === lastScopeRef.current) return;
+    lastScopeRef.current = scopeKey;
+    setSyncedToServer(false);
+    setIsHydrated(false);
+    lastLocalSaveSignatureRef.current = null;
+    geometrySigRef.current = new Map();
+    inFlightSyncRef.current = new Set();
+    setMeasurements([]);
 
     let cancelled = false;
 
     async function loadData() {
-      // Try server first if project is available
-      if (projectId) {
+      const loadLocalData = (): PersistedDocument | null => {
+        let data = loadFromStorage(stableProjectId, stableDocumentId);
+        if (!data && !stableProjectId && fileName) {
+          try {
+            const raw = localStorage.getItem(legacyDocKey(fileName));
+            data = raw ? (JSON.parse(raw) as PersistedDocument) : null;
+          } catch {
+            data = null;
+          }
+        }
+        return data;
+      };
+
+      // Try server first only when the document has a database identity.
+      if (stableProjectId && documentIdentity?.trim()) {
         try {
-          const serverData = await takeoffApi.list(projectId, fileName ?? undefined);
+          const serverData = await takeoffApi.list(stableProjectId, stableDocumentId);
           if (!cancelled && serverData.length > 0) {
             hasPersistedRef.current = true;
             setSyncedToServer(true);
@@ -395,13 +471,32 @@ export function useMeasurementPersistence({
                 .filter((m) => m.serverId)
                 .map((m) => [m.serverId as string, geometrySignature(m)]),
             );
-            // Reconstruct the per-page scale from the per-measurement ratios
-            // the server stored. The localStorage copy (set below on next
-            // save) is authoritative when present, but for a project loaded
-            // on a fresh device this is the only place the calibration lives.
+            const localData = loadLocalData();
+            const serverIds = new Set(
+              mapped.flatMap((m) => [m.id, m.serverId].filter((id): id is string => Boolean(id))),
+            );
+            // Keep server rows authoritative once they exist, but preserve
+            // local-only rows that were drawn before the debounced server sync
+            // completed. Otherwise a fast reload after two measurements can
+            // hydrate from a one-row server response and overwrite the still
+            // richer local fallback.
+            const unsyncedLocal = (localData?.measurements ?? [])
+              .filter((m) => !m.suggested)
+              .filter((m) => {
+                if (m.serverId) return false; // Synced but missing from server = deleted
+                return !serverIds.has(m.id);
+              });
+            // Reconstruct the per-page scale from localStorage when present;
+            // otherwise fall back to per-measurement ratios stored by the
+            // server for a fresh browser/device.
             const fromServer = pageScalesFromServer(serverData);
-            if (fromServer) setPageScales(fromServer);
-            setMeasurements(mapped);
+            if (localData) {
+              setPageScales(hydratePageScales(localData.pageScales, localData.scale));
+            } else if (fromServer) {
+              setPageScales(fromServer);
+            }
+            setMeasurements([...mapped, ...unsyncedLocal]);
+            setIsHydrated(true);
             return;
           }
         } catch {
@@ -411,7 +506,7 @@ export function useMeasurementPersistence({
 
       // Fallback to localStorage
       if (!cancelled) {
-        const data = loadFromStorage(fileName!);
+        const data = loadLocalData();
         if (data) {
           hasPersistedRef.current = true;
           setMeasurements(data.measurements);
@@ -423,82 +518,135 @@ export function useMeasurementPersistence({
         } else {
           hasPersistedRef.current = false;
         }
+        setIsHydrated(true);
       }
     }
 
     loadData();
     return () => { cancelled = true; };
-  }, [fileName, projectId, setMeasurements, setPageScales]);
+  }, [documentIdentity, fileName, projectId, setMeasurements, setPageScales]);
 
-  // Auto-save to localStorage with debounce (500ms)
-  useEffect(() => {
-    if (!fileName) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      // Never persist AI suggestions: only confirmed measurements are saved.
-      // Persist BOTH the new per-page model and the legacy single ``scale``
-      // (the current page's, as a best-effort default) so a downgrade to an
-      // older build that only reads ``scale`` still finds a usable value.
-      saveToStorage(fileName, {
-        measurements: measurements.filter((m) => !m.suggested),
-        pageScales,
-        scale,
-        savedAt: Date.now(),
-      });
-    }, 500);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [fileName, measurements, pageScales, scale]);
+  // Auto-save to localStorage as soon as React commits measurement state. This
+  // is the reload-safe fallback while server sync is debounced; waiting for
+  // normal effects, or for the initial server hydration request to finish, can
+  // lose a freshly drawn measurement when the user refreshes right after
+  // drawing.
+  useLayoutEffect(() => {
+    const documentId = documentIdentity?.trim() || fileName?.trim() || null;
+    if (!documentId) return;
+    const scopeKey = `${projectId || 'local'}:${documentId}`;
+    if (lastScopeRef.current !== null && scopeKey !== lastScopeRef.current) return;
+    const persistedMeasurements = measurements.filter((m) => !m.suggested);
+    if (!isHydrated && persistedMeasurements.length === 0) return;
+    // Never persist AI suggestions: only confirmed measurements are saved.
+    // Persist BOTH the new per-page model and the legacy single ``scale``
+    // (the current page's, as a best-effort default) so a downgrade to an
+    // older build that only reads ``scale`` still finds a usable value.
+    const localSaveSignature = JSON.stringify({
+      scopeKey,
+      measurements: persistedMeasurements,
+      pageScales,
+      scale,
+    });
+    if (localSaveSignature === lastLocalSaveSignatureRef.current) return;
+    const saved = saveToStorage(projectId, documentId, {
+      measurements: persistedMeasurements,
+      pageScales,
+      scale,
+      savedAt: Date.now(),
+    });
+    if (saved) {
+      lastLocalSaveSignatureRef.current = localSaveSignature;
+    }
+  }, [isHydrated, documentIdentity, fileName, projectId, measurements, pageScales, scale]);
 
   // Auto-sync to server with debounce (3s). Both measurement and annotation
   // types persist now (v2.6.7) — backend schema accepts the full set.
   useEffect(() => {
-    if (!fileName || !projectId) return;
+    const documentId = documentIdentity?.trim() || null;
+    if (!isHydrated || !documentId || !projectId) return;
     if (measurements.length === 0) return;
     const serverMeasurements = measurements;
 
     if (serverSyncRef.current) clearTimeout(serverSyncRef.current);
+    serverSyncRef.current = null;
+    const toCreate = serverMeasurements
+      // Suggested-but-unconfirmed measurements are excluded; accepting a
+      // suggestion clears `suggested` and the next tick syncs it (#194).
+      .filter((m) => !m.serverId && !m.suggested && !inFlightSyncRef.current.has(m.id))
+      // Per-page scale: toApiFormat resolves each row's own page scale
+      // from pageScales, so a multi-sheet set syncs correct ratios.
+      .map((m) => toApiFormat(m, projectId, documentId, pageScales, documentSource));
+    if (toCreate.length === 0) {
+      if (!serverMeasurements.some((m) => !m.serverId && !m.suggested)) {
+        setSyncedToServer(true);
+      }
+      return;
+    }
+
     serverSyncRef.current = setTimeout(async () => {
       setSyncing(true);
       try {
-        const toCreate = serverMeasurements
-          // Suggested-but-unconfirmed measurements are excluded; accepting a
-          // suggestion clears `suggested` and the next tick syncs it (#194).
-          .filter((m) => !m.serverId && !m.suggested)
-          // Per-page scale: toApiFormat resolves each row's own page scale
-          // from pageScales, so a multi-sheet set syncs correct ratios.
-          .map((m) => toApiFormat(m, projectId, fileName, pageScales));
+        toCreate.forEach((m) => {
+          const fid = m.metadata?.frontend_id;
+          if (typeof fid === 'string') {
+            inFlightSyncRef.current.add(fid);
+          }
+        });
 
-        if (toCreate.length > 0) {
+        try {
           const created = await takeoffApi.bulkCreate(toCreate);
-          // Update serverId on created measurements
-          setMeasurements(measurements.map((m) => {
-            if (m.serverId) return m;
-            const match = created.find((c) =>
-              (c.metadata?.frontend_id as string) === m.id
-            );
-            if (!match) return m;
-            // Seed the reshape baseline for the freshly-synced row so a
-            // later in-canvas edit PATCHes, but a no-op tick does not (#194).
-            geometrySigRef.current.set(match.id, geometrySignature(m));
-            return { ...m, serverId: match.id };
-          }));
+          const createdByFrontendId = new Map<string, MeasurementResponse>();
+          for (const c of created) {
+            const fid = c.metadata?.frontend_id;
+            if (typeof fid === 'string') createdByFrontendId.set(fid, c);
+          }
+          const synced = serverMeasurements
+            .map((m) => {
+              if (m.serverId) return null;
+              const match = createdByFrontendId.get(m.id);
+              return match ? { measurement: m, serverId: match.id } : null;
+            })
+            .filter((x): x is { measurement: Measurement; serverId: string } => x !== null);
+          // Update serverId on created measurements using functional updater to avoid stale state races
+          setMeasurements((prev) =>
+            prev.map((m) => {
+              if (m.serverId) return m;
+              const match = createdByFrontendId.get(m.id);
+              return match ? { ...m, serverId: match.id } : m;
+            })
+          );
+          for (const { measurement, serverId } of synced) {
+            // Seed the reshape baseline for the freshly-synced row so a later
+            // in-canvas edit PATCHes, but a no-op tick does not (#194).
+            geometrySigRef.current.set(serverId, geometrySignature(measurement));
+            inFlightSyncRef.current.delete(measurement.id);
+          }
           // Surface the new measurements in the unified Markups hub.
           qc?.invalidateQueries({ queryKey: ['unified-markups'] });
+        } catch (err) {
+          toCreate.forEach((m) => {
+            const fid = m.metadata?.frontend_id;
+            if (typeof fid === 'string') {
+              inFlightSyncRef.current.delete(fid);
+            }
+          });
+          throw err;
         }
         setSyncedToServer(true);
       } catch {
         // Server sync failed — data safe in localStorage
       } finally {
         setSyncing(false);
+        serverSyncRef.current = null;
       }
     }, 3000);
 
     return () => {
       if (serverSyncRef.current) clearTimeout(serverSyncRef.current);
+      serverSyncRef.current = null;
     };
-  }, [fileName, projectId, measurements, setMeasurements, pageScales]);
+  }, [isHydrated, documentIdentity, documentSource, projectId, measurements, setMeasurements, pageScales]);
 
   // Reshape PATCH (#194 Feature 1). When a measurement that already has a
   // `serverId` has its geometry changed in-canvas, PATCH just that row so
@@ -508,6 +656,7 @@ export function useMeasurementPersistence({
   // if a row is already in-flight we skip it this tick and the changed
   // signature keeps it dirty for the next pass (last-write-wins per row).
   useEffect(() => {
+    if (!isHydrated) return;
     if (!projectId) return;
     if (measurements.length === 0) return;
 
@@ -527,9 +676,18 @@ export function useMeasurementPersistence({
 
     if (patchTimerRef.current) clearTimeout(patchTimerRef.current);
     patchTimerRef.current = setTimeout(async () => {
+      // Re-filter dirty rows using the latest geometrySigRef values. This prevents
+      // redundant PATCH requests if a previous in-flight sync resolved while this
+      // timer was waiting.
+      const activeDirty = dirty.filter((m) => {
+        const prevSig = geometrySigRef.current.get(m.serverId!);
+        return prevSig !== geometrySignature(m);
+      });
+      if (activeDirty.length === 0) return;
+
       const reconciled: { frontendId: string; value: number; area?: number }[] = [];
       await Promise.all(
-        dirty.map(async (m) => {
+        activeDirty.map(async (m) => {
           const serverId = m.serverId!;
           if (inFlightPatchRef.current.has(serverId)) return; // coalesce
           inFlightPatchRef.current.add(serverId);
@@ -564,9 +722,12 @@ export function useMeasurementPersistence({
       );
 
       if (reconciled.length > 0) {
-        setMeasurements(
-          measurements.map((m) => {
-            const r = reconciled.find((x) => x.frontendId === m.id);
+        const reconciledByFrontendId = new Map(
+          reconciled.map((r) => [r.frontendId, r]),
+        );
+        setMeasurements((prev) =>
+          prev.map((m) => {
+            const r = reconciledByFrontendId.get(m.id);
             if (!r) return m;
             return {
               ...m,
@@ -582,18 +743,21 @@ export function useMeasurementPersistence({
     return () => {
       if (patchTimerRef.current) clearTimeout(patchTimerRef.current);
     };
-  }, [projectId, measurements, setMeasurements, pageScales, qc]);
+  }, [isHydrated, projectId, measurements, setMeasurements, pageScales, qc]);
 
   const saveNow = useCallback(() => {
-    if (!fileName) return;
-    saveToStorage(fileName, { measurements, pageScales, scale, savedAt: Date.now() });
-  }, [fileName, measurements, pageScales, scale]);
+    const documentId = documentIdentity?.trim() || fileName?.trim() || null;
+    if (!documentId) return;
+    saveToStorage(projectId, documentId, { measurements, pageScales, scale, savedAt: Date.now() });
+  }, [documentIdentity, fileName, projectId, measurements, pageScales, scale]);
 
   const clearPersisted = useCallback(() => {
-    if (!fileName) return;
-    removeFromStorage(fileName);
+    const documentId = documentIdentity?.trim() || fileName?.trim() || null;
+    if (!documentId) return;
+    removeFromStorage(projectId, documentId, fileName);
     hasPersistedRef.current = false;
-  }, [fileName]);
+    lastLocalSaveSignatureRef.current = null;
+  }, [documentIdentity, fileName, projectId]);
 
   return {
     hasPersistedData: hasPersistedRef.current,

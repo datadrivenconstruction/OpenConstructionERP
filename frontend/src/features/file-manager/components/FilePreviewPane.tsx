@@ -190,7 +190,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
           : projects.find((p) => p.id === file.project_id)?.name ?? ctxProjectName;
       setActiveProject(file.project_id, resolved);
     }
-    navigate(target.route(file.project_id, file.id));
+    navigate(target.route(file.project_id, file.id, file));
   }
 
   async function handleCopyPath() {

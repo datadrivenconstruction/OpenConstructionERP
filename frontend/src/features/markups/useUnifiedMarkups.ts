@@ -19,6 +19,7 @@ import { fetchMarkups } from './api';
 import { fetchDrawings, fetchAnnotations } from '@/features/dwg-takeoff/api';
 import { takeoffApi, type MeasurementResponse } from '@/features/takeoff/api';
 import type { DwgAnnotation, DwgDrawing } from '@/features/dwg-takeoff/api';
+import { type MeasurementDocumentSource, parseMeasurementDocumentSource } from '@/features/takeoff/takeoffRoutes';
 
 import {
   fromDwgAnnotation,
@@ -75,6 +76,14 @@ export function useUnifiedMarkups(projectId: string | null | undefined): UseUnif
     staleTime: 60_000,
   });
 
+  // Takeoff documents lookup — let us show friendly names for takeoff documents too.
+  const takeoffDocsQuery = useQuery({
+    queryKey: [...UNIFIED_MARKUPS_QUERY_KEY, projectId, 'takeoff-documents'],
+    queryFn: () => takeoffApi.listDocuments(projectId as string),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  });
+
   // DWG — per-project drawings, then per-drawing annotations.
   const drawingsQuery = useQuery<DwgDrawing[]>({
     queryKey: [...UNIFIED_MARKUPS_QUERY_KEY, projectId, 'dwg-drawings'],
@@ -118,15 +127,18 @@ export function useUnifiedMarkups(projectId: string | null | undefined): UseUnif
   });
 
   const { items, summary } = useMemo(() => {
-    const docNameById = new Map<string, string>();
-    for (const d of documentsQuery.data ?? []) docNameById.set(d.id, d.name);
+    const projectDocNames = new Map<string, string>();
+    for (const d of documentsQuery.data ?? []) projectDocNames.set(d.id, d.name);
+
+    const takeoffDocNames = new Map<string, string>();
+    for (const td of takeoffDocsQuery.data ?? []) takeoffDocNames.set(td.id, td.filename);
 
     const drawingById = new Map<string, DwgDrawing>();
     for (const d of drawingsQuery.data ?? []) drawingById.set(d.id, d);
 
     const hub = (hubQuery.data ?? []).map((m) =>
       fromMarkupsHub(m, {
-        documentName: m.document_id ? docNameById.get(m.document_id) ?? null : null,
+        documentName: m.document_id ? projectDocNames.get(m.document_id) ?? takeoffDocNames.get(m.document_id) ?? null : null,
       }),
     );
 
@@ -138,11 +150,32 @@ export function useUnifiedMarkups(projectId: string | null | undefined): UseUnif
       })
       .filter((x): x is UnifiedMarkup => x !== null);
 
-    const pdf = (pdfQuery.data ?? []).map((m) =>
-      fromPdfMeasurement(m, {
-        documentName: m.document_id ? docNameById.get(m.document_id) ?? m.document_id : null,
-      }),
-    );
+    const pdf = (pdfQuery.data ?? []).map((m) => {
+      const metadataSource = parseMeasurementDocumentSource(m.metadata?.document_source);
+      let documentName = m.document_id || null;
+      let documentSource: MeasurementDocumentSource | null = metadataSource;
+      if (m.document_id) {
+        if (metadataSource === 'document') {
+          documentName = projectDocNames.get(m.document_id) ?? documentName;
+        } else if (metadataSource === 'takeoff') {
+          documentName = takeoffDocNames.get(m.document_id) ?? documentName;
+        } else {
+          const projectDocName = projectDocNames.get(m.document_id);
+          const takeoffDocName = takeoffDocNames.get(m.document_id);
+          if (projectDocName) {
+            documentName = projectDocName;
+            documentSource = 'document';
+          } else if (takeoffDocName) {
+            documentName = takeoffDocName;
+            documentSource = 'takeoff';
+          }
+        }
+      }
+      return fromPdfMeasurement(m, {
+        documentName,
+        documentSource,
+      });
+    });
 
     const merged = mergeUnified(hub, dwg, pdf);
     return { items: merged, summary: summarise(merged) };
@@ -152,6 +185,7 @@ export function useUnifiedMarkups(projectId: string | null | undefined): UseUnif
     pdfQuery.data,
     drawingsQuery.data,
     documentsQuery.data,
+    takeoffDocsQuery.data,
   ]);
 
   const isLoading =
@@ -167,6 +201,8 @@ export function useUnifiedMarkups(projectId: string | null | undefined): UseUnif
     (drawingsQuery.error as Error | undefined) ??
     (dwgAnnotationsQuery.error as Error | undefined) ??
     (pdfQuery.error as Error | undefined) ??
+    (documentsQuery.error as Error | undefined) ??
+    (takeoffDocsQuery.error as Error | undefined) ??
     null;
 
   return { items, summary, isLoading, error };

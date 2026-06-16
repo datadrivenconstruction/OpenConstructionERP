@@ -62,6 +62,7 @@ import { UnifiedMarkupsList } from './UnifiedMarkupsList';
 import { EditMarkupModal } from './EditMarkupModal';
 import { markupsGuide } from './markupsGuide';
 import { ApprovalInstanceCard } from '@/features/approval-routes';
+import { buildTakeoffMeasurementUrl } from '@/features/takeoff/takeoffRoutes';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -1473,28 +1474,19 @@ export function MarkupsPage() {
   );
 
   // Push a measurement markup into PDF Takeoff as a quantity (CONN-67).
-  // Takeoff matches its document by filename, which is exactly the document
-  // name we already resolve for the row, so we hand it ``docId=<name>`` and
-  // open straight on the Measurements tab. The measured value and unit ride
-  // along as ``mv`` / ``mu`` so the takeoff "Add measurement" form can
-  // pre-fill them (that consumer lands with the takeoff batch); the
-  // navigation itself is already useful without it.
+  // Markups hub rows refer to Project Files documents, so route through the
+  // shared takeoff URL builder with source=document and the stable document id.
   const handleUseAsQuantity = useCallback(
     (markup: Markup) => {
-      const params = new URLSearchParams();
-      params.set('tab', 'measurements');
       const docName = markup.document_id
         ? docNameById.get(markup.document_id)
         : undefined;
-      if (docName) params.set('docId', docName);
-      if (markup.measurement_value != null) {
-        params.set('mv', String(markup.measurement_value));
-      }
-      if (markup.measurement_unit) params.set('mu', markup.measurement_unit);
-      if (markup.label || markup.text) {
-        params.set('mdesc', (markup.label || markup.text) as string);
-      }
-      navigate(`/takeoff?${params.toString()}`);
+      const url = buildTakeoffMeasurementUrl({
+        documentId: markup.document_id,
+        documentName: docName,
+        documentSource: markup.document_id ? 'document' : null,
+      });
+      navigate(url);
     },
     [navigate, docNameById],
   );

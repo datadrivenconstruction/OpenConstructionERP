@@ -66,6 +66,7 @@ import {
 import { apiGet, apiPost } from '../../shared/lib/api';
 import { formatFileSize } from '../../shared/lib/formatters';
 import { useMeasurementPersistence } from './useMeasurementPersistence';
+import type { MeasurementDocumentSource } from '@/features/takeoff/takeoffRoutes';
 import {
   type ScaleConfig,
   type CalibrationUnit,
@@ -291,8 +292,14 @@ export interface RecentTakeoffDocument {
 interface TakeoffViewerModuleProps {
   /** URL to pre-load a PDF from (e.g. `/api/v1/takeoff/documents/{id}/download/`). */
   initialPdfUrl?: string;
-  /** Optional filename to associate with the pre-loaded PDF (used for persistence key). */
+  /** Optional filename to display for the pre-loaded PDF. */
   initialPdfName?: string;
+  /** Stable measurement document id. Filename is display-only. */
+  initialMeasurementDocumentId?: string | null;
+  /** Source table for the stable measurement document id. */
+  initialMeasurementDocumentSource?: MeasurementDocumentSource | null;
+  /** Raw takeoff document id for takeoff-document-only operations such as AI plan read. */
+  initialTakeoffDocumentId?: string | null;
   /** Optional measurement id to auto-select + scroll-to once the measurement
    *  list lands (used by the /markups → /takeoff deep-link). Matches either
    *  the frontend id or the server-side UUID. */
@@ -302,14 +309,20 @@ interface TakeoffViewerModuleProps {
   recentDocuments?: RecentTakeoffDocument[];
   /** Open one of the recent documents in the viewer (parent owns navigation). */
   onOpenRecentDocument?: (docId: string) => void;
+  /** Persist newly-selected PDFs through the parent Takeoff upload flow. */
+  onUploadPdf?: (files: File[]) => void;
 }
 
 export default function TakeoffViewerModule({
   initialPdfUrl,
   initialPdfName,
+  initialMeasurementDocumentId,
+  initialMeasurementDocumentSource,
+  initialTakeoffDocumentId,
   initialMeasurementId,
   recentDocuments,
   onOpenRecentDocument,
+  onUploadPdf,
 }: TakeoffViewerModuleProps = {}) {
   const { t } = useTranslation();
 
@@ -496,7 +509,12 @@ export default function TakeoffViewerModule({
   const [bulkAddMeasurements, setBulkAddMeasurements] = useState<Measurement[] | null>(null);
 
   // Document persistence + server sync
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(initialPdfName ?? null);
+  const [measurementDocumentId, setMeasurementDocumentId] = useState<string | null>(
+    initialMeasurementDocumentId ?? null,
+  );
+  const [measurementDocumentSource, setMeasurementDocumentSource] =
+    useState<MeasurementDocumentSource | null>(initialMeasurementDocumentSource ?? null);
   // Per-page text-layer audit (8.2.0). When a document was opened from the
   // server we fetch its metadata to learn how many pages came back with no
   // text layer (likely scanned drawings that need OCR) so the viewer can flag
@@ -512,12 +530,14 @@ export default function TakeoffViewerModule({
   const [isExportingXlsx, setIsExportingXlsx] = useState(false);
   const { hasPersistedData, saveNow, clearPersisted, syncing, syncedToServer } = useMeasurementPersistence({
     fileName,
+    documentIdentity: measurementDocumentId,
+    documentSource: measurementDocumentSource,
     measurements,
-    setMeasurements: (ms) => setMeasurements(ms),
+    setMeasurements,
     // Per-page scale: the hook persists the whole page-scale model and
     // migrates a legacy single-scale document into the default on load.
     pageScales,
-    setPageScales: (ps) => setPageScales(ps),
+    setPageScales,
     // The current page's effective scale is still sent on each measurement
     // (scale_pixels_per_unit) so the server-side B8 recompute uses the same
     // ratio the row was drawn at.
@@ -556,6 +576,11 @@ export default function TakeoffViewerModule({
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (onUploadPdf) {
+      onUploadPdf([file]);
+      e.target.value = '';
+      return;
+    }
     setIsLoading(true);
     try {
       const arrayBuffer = await file.arrayBuffer();
@@ -563,7 +588,9 @@ export default function TakeoffViewerModule({
       setPdfDoc(doc);
       setTotalPages(doc.numPages);
       setCurrentPage(1);
-      setFileName(file.name); // Triggers persistence hook to load saved measurements
+      setFileName(file.name);
+      setMeasurementDocumentId(null);
+      setMeasurementDocumentSource(null);
       setActivePoints([]);
       undoStackRef.current = [];
       redoStackRef.current = [];
@@ -586,7 +613,26 @@ export default function TakeoffViewerModule({
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addToast, onUploadPdf, t]);
+
+  const handleFilesDropped = useCallback((files: File[]) => {
+    const pdf = files.find((f) => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+    if (!pdf) {
+      // Visible feedback so the user isn't left wondering why a non-PDF drop did nothing.
+      addToast({
+        type: 'warning',
+        title: t('takeoff.landing_drop_pdf_only_title', { defaultValue: 'PDF only' }),
+        message: t('takeoff.landing_drop_pdf_only_msg', { defaultValue: 'This viewer measures PDF drawings. Drop a PDF file to get started.' }),
+      });
+      return;
+    }
+    if (onUploadPdf) {
+      onUploadPdf([pdf]);
+      return;
+    }
+    const fakeEvent = { target: { files: [pdf], value: '' } } as unknown as React.ChangeEvent<HTMLInputElement>;
+    handleFileUpload(fakeEvent);
+  }, [addToast, handleFileUpload, onUploadPdf, t]);
 
   /* ── Reset cross-page in-progress state on page change ───────────
    * Without this, an in-progress drawing (one click placed) on page 1,
@@ -653,6 +699,8 @@ export default function TakeoffViewerModule({
         setTotalPages(doc.numPages);
         setCurrentPage(1);
         setFileName(initialPdfName || 'Document.pdf');
+        setMeasurementDocumentId(initialMeasurementDocumentId ?? null);
+        setMeasurementDocumentSource(initialMeasurementDocumentSource ?? null);
         setActivePoints([]);
         undoStackRef.current = [];
         redoStackRef.current = [];
@@ -679,7 +727,7 @@ export default function TakeoffViewerModule({
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialPdfUrl, initialPdfName]);
+  }, [initialPdfUrl, initialPdfName, initialMeasurementDocumentId, initialMeasurementDocumentSource]);
 
   /* ── Fetch server-side document metadata (text-layer audit) ───────── */
   // When a PDF is opened from the server (filmstrip / deep link) the URL is
@@ -690,14 +738,12 @@ export default function TakeoffViewerModule({
   useEffect(() => {
     setNoTextLayer(null);
     setNoTextBannerDismissed(false);
-    if (!initialPdfUrl) return;
-    const match = initialPdfUrl.match(/\/documents\/([^/?#]+)/);
-    const docId = match?.[1];
+    const docId = initialTakeoffDocumentId?.trim();
     if (!docId) return;
     let cancelled = false;
     (async () => {
       try {
-        const meta = await takeoffApi.getDocument(decodeURIComponent(docId));
+        const meta = await takeoffApi.getDocument(docId);
         if (cancelled || !meta) return;
         const count = meta.pages_without_text ?? 0;
         if (count > 0) {
@@ -708,7 +754,7 @@ export default function TakeoffViewerModule({
       }
     })();
     return () => { cancelled = true; };
-  }, [initialPdfUrl]);
+  }, [initialTakeoffDocumentId]);
 
   /* ── Warn on unsaved changes (tab close / navigation) ────────────── */
 
@@ -2593,7 +2639,7 @@ export default function TakeoffViewerModule({
     if (recognizeBusy) return;
     // The server reads the stored PDF off disk, so it needs the document's
     // id, which the deep-link download URL carries.
-    const docId = initialPdfUrl?.match(/\/documents\/([^/?#]+)\/(?:download|recognize)/)?.[1];
+    const docId = initialTakeoffDocumentId;
     if (!docId) {
       addToast({
         type: 'info',
@@ -2658,7 +2704,7 @@ export default function TakeoffViewerModule({
     } finally {
       setRecognizeBusy(false);
     }
-  }, [recognizeBusy, initialPdfUrl, currentPage, scale, activeGroup, nextAnnotation, addToast, t]);
+  }, [recognizeBusy, initialTakeoffDocumentId, currentPage, scale, activeGroup, nextAnnotation, addToast, t]);
 
   /* ── Read plan with AI: vision-LLM plan reading (issue #194) ────────────
    * The opt-in, bring-your-own-key, cost-capped complement to the offline
@@ -2700,7 +2746,7 @@ export default function TakeoffViewerModule({
    *  reviews and accepts (human-confirmed). Never auto-applies. */
   const handleReadWithAi = useCallback(async () => {
     if (planReadBusy) return;
-    const docId = initialPdfUrl?.match(/\/documents\/([^/?#]+)\/(?:download|recognize)/)?.[1];
+    const docId = initialTakeoffDocumentId;
     const projectId = selectedProjectId || activeProjectId || '';
     if (!docId || !projectId) {
       addToast({
@@ -2805,7 +2851,7 @@ export default function TakeoffViewerModule({
     }
   }, [
     planReadBusy,
-    initialPdfUrl,
+    initialTakeoffDocumentId,
     selectedProjectId,
     activeProjectId,
     currentPage,
@@ -3073,7 +3119,8 @@ export default function TakeoffViewerModule({
           ...existingMeta,
           pdf_measurement_source: sourceLabel,
           pdf_measurement_id: measurement.serverId ?? measurement.id,
-          pdf_document_id: fileName ?? undefined,
+          pdf_document_id: measurementDocumentId ?? undefined,
+          pdf_document_source: measurementDocumentSource ?? undefined,
           pdf_page: measurement.page,
         },
       });
@@ -3119,7 +3166,7 @@ export default function TakeoffViewerModule({
     } finally {
       setLinkingInProgress(false);
     }
-  }, [measurements, addToast, t, normalizeUnit, queryClient]);
+  }, [measurements, measurementDocumentId, measurementDocumentSource, addToast, t, normalizeUnit, queryClient]);
 
   /** Create a brand-new BOQ position from the measurement and link to it.
    *  The ordinal is auto-generated as TK.NNN based on existing TK positions.
@@ -3171,7 +3218,8 @@ export default function TakeoffViewerModule({
           metadata: {
             pdf_measurement_source: `Takeoff: ${measurement.annotation || measurement.type} (page ${measurement.page})`,
             pdf_measurement_id: measurement.serverId ?? measurement.id,
-            pdf_document_id: fileName ?? undefined,
+            pdf_document_id: measurementDocumentId ?? undefined,
+            pdf_document_source: measurementDocumentSource ?? undefined,
             pdf_page: measurement.page,
           },
         });
@@ -3217,7 +3265,17 @@ export default function TakeoffViewerModule({
     } finally {
       setLinkingInProgress(false);
     }
-  }, [measurements, linkPickerBoqId, linkBoqPositions, addToast, t, normalizeUnit, queryClient]);
+  }, [
+    measurements,
+    linkPickerBoqId,
+    linkBoqPositions,
+    measurementDocumentId,
+    measurementDocumentSource,
+    addToast,
+    t,
+    normalizeUnit,
+    queryClient,
+  ]);
 
   /** Remove the link between a measurement and its BOQ position.
    *  We intentionally leave the BOQ position alone — unlinking just
@@ -3367,7 +3425,8 @@ export default function TakeoffViewerModule({
           takeoff_raw_unit: m.unit,
           pdf_measurement_source: `Takeoff: ${m.annotation || m.type} (page ${m.page})`,
           pdf_measurement_id: m.serverId ?? m.id,
-          pdf_document_id: fileName ?? undefined,
+          pdf_document_id: measurementDocumentId ?? undefined,
+          pdf_document_source: measurementDocumentSource ?? undefined,
           pdf_page: m.page,
         },
       }));
@@ -3456,7 +3515,16 @@ export default function TakeoffViewerModule({
     } finally {
       setLinkingInProgress(false);
     }
-  }, [bulkAddMeasurements, linkPickerBoqId, normalizeUnit, fileName, addToast, t, queryClient]);
+  }, [
+    bulkAddMeasurements,
+    linkPickerBoqId,
+    normalizeUnit,
+    measurementDocumentId,
+    measurementDocumentSource,
+    addToast,
+    t,
+    queryClient,
+  ]);
 
   /* ── Undo ────────────────────────────────────────────────────────── */
 
@@ -3915,18 +3983,7 @@ export default function TakeoffViewerModule({
                       e.currentTarget.classList.remove('ring-2', 'ring-oe-blue/40');
                       const dropped = Array.from(e.dataTransfer.files);
                       if (dropped.length === 0) return;
-                      const pdf = dropped.find((f) => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
-                      if (pdf) {
-                        const fakeEvent = { target: { files: [pdf] } } as unknown as React.ChangeEvent<HTMLInputElement>;
-                        handleFileUpload(fakeEvent);
-                      } else {
-                        // Visible feedback so the user isn't left wondering why a non-PDF drop did nothing.
-                        addToast({
-                          type: 'warning',
-                          title: t('takeoff.landing_drop_pdf_only_title', { defaultValue: 'PDF only' }),
-                          message: t('takeoff.landing_drop_pdf_only_msg', { defaultValue: 'This viewer measures PDF drawings. Drop a PDF file to get started.' }),
-                        });
-                      }
+                      handleFilesDropped(dropped);
                     }}
                     className="group/drop flex flex-col items-center justify-center gap-3 rounded-xl p-6 text-center cursor-pointer transition-all flex-1 border-2 border-dashed border-border-medium bg-gradient-to-br from-blue-50/60 via-white to-violet-50/40 dark:from-blue-950/20 dark:via-gray-800/40 dark:to-violet-950/20 hover:border-oe-blue/50 hover:shadow-md"
                   >

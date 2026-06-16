@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useMemo, useEffect, useLayoutEffect, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { buildTakeoffMeasurementUrl, parseMeasurementDocumentSource } from '@/features/takeoff/takeoffRoutes';
 import type { ICellRendererParams, Column, GridApi } from 'ag-grid-community';
 import type { Position } from '../api';
 import {
@@ -1236,6 +1237,7 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
   const meta = (data.metadata ?? {}) as Record<string, unknown>;
   const pdfMeasurementId = meta.pdf_measurement_id as string | undefined;
   const pdfDocumentId = meta.pdf_document_id as string | undefined;
+  const pdfDocumentSource = parseMeasurementDocumentSource(meta.pdf_document_source);
   const pdfPage = meta.pdf_page as number | undefined;
   const pdfSource = meta.pdf_measurement_source as string | undefined;
   // Convention: ordinals prefixed "TK." come from the PDF takeoff flow,
@@ -1287,13 +1289,13 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
   /** Build the deep-link URL for the PDF takeoff viewer, focused on the
    *  linked measurement so the user lands on the exact annotation. */
   const pdfDeepLink = useMemo(() => {
-    const params = new URLSearchParams();
-    params.set('tab', 'measurements');
-    if (pdfMeasurementId) params.set('focus', pdfMeasurementId);
-    if (pdfDocumentId) params.set('name', pdfDocumentId);
-    if (pdfPage) params.set('page', String(pdfPage));
-    return `/takeoff?${params.toString()}`;
-  }, [pdfMeasurementId, pdfDocumentId, pdfPage]);
+    return buildTakeoffMeasurementUrl({
+      documentId: pdfDocumentId,
+      documentSource: pdfDocumentSource,
+      measurementId: pdfMeasurementId,
+      page: pdfPage,
+    });
+  }, [pdfMeasurementId, pdfDocumentId, pdfDocumentSource, pdfPage]);
 
   /** Same for DWG. */
   const dwgDeepLink = useMemo(() => {

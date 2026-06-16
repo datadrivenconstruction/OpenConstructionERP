@@ -126,7 +126,7 @@ export function FileContextMenu({
           module: moduleLabel,
         })}
         onClick={() => {
-          navigate(target.route(row.project_id, row.id));
+          navigate(target.route(row.project_id, row.id, row));
           onClose();
         }}
       />

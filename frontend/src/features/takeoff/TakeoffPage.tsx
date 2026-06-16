@@ -42,6 +42,11 @@ import { takeoffApi, type TakeoffDocumentResponse } from './api';
 import { canonicalizeUnit } from './lib/units';
 import { aiApi } from '@/features/ai/api';
 import { hasLlmKey } from '@/features/ai-estimator/useAiReadiness';
+import {
+  resolveProjectDocumentTakeoffTarget,
+  type MeasurementDocumentSource,
+  type ProjectDocumentTakeoffLink,
+} from './takeoffRoutes';
 
 const TakeoffViewerModule = lazy(() => import('@/modules/pdf-takeoff/TakeoffViewerModule'));
 
@@ -91,6 +96,51 @@ interface UploadedDocument {
   extractingTables: boolean;
   uploadError?: string;
   uploading?: boolean;
+}
+
+interface ViewerDocument {
+  url: string;
+  name: string;
+  measurementDocumentId: string;
+  measurementDocumentSource: MeasurementDocumentSource;
+  takeoffDocumentId?: string;
+  projectFileDocumentId?: string;
+}
+
+function takeoffDownloadUrl(docId: string): string {
+  return `/api/v1/takeoff/documents/${encodeURIComponent(docId)}/download/`;
+}
+
+function projectFileDownloadUrl(docId: string): string {
+  return `/api/v1/documents/${encodeURIComponent(docId)}/download/`;
+}
+
+function makeTakeoffViewerDoc(docId: string, name: string): ViewerDocument {
+  return {
+    url: takeoffDownloadUrl(docId),
+    name,
+    measurementDocumentId: docId,
+    measurementDocumentSource: 'takeoff',
+    takeoffDocumentId: docId,
+  };
+}
+
+function makeProjectFileViewerDoc(
+  doc: ProjectDocumentTakeoffLink,
+): ViewerDocument {
+  const target = resolveProjectDocumentTakeoffTarget(doc);
+  const measurementDocumentId = target.documentId || doc.id;
+  const measurementDocumentSource = target.documentSource || 'document';
+  return {
+    url: measurementDocumentSource === 'takeoff'
+      ? takeoffDownloadUrl(measurementDocumentId)
+      : projectFileDownloadUrl(doc.id),
+    name: target.documentName || doc.name,
+    measurementDocumentId,
+    measurementDocumentSource,
+    takeoffDocumentId: measurementDocumentSource === 'takeoff' ? measurementDocumentId : undefined,
+    projectFileDocumentId: doc.id,
+  };
 }
 
 interface QuickMeasurement {
@@ -1163,6 +1213,7 @@ export function TakeoffPage() {
   /* ── State ──────────────────────────────────────────────────────────── */
 
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
   const selectedProjectId = activeProjectId ?? '';
   const [selectedBoqId, setSelectedBoqId] = useState('');
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
@@ -1172,7 +1223,7 @@ export function TakeoffPage() {
   const filmstripUploadRef = useRef<HTMLInputElement>(null);
 
   /** Currently opened document in the Measurements viewer. */
-  const [viewerDoc, setViewerDoc] = useState<{ url: string; name: string } | null>(null);
+  const [viewerDoc, setViewerDoc] = useState<ViewerDocument | null>(null);
 
   /** Revision compare drawer (Item 17) — diffs two takeoff PDFs. */
   const [showCompare, setShowCompare] = useState(false);
@@ -1279,10 +1330,7 @@ export function TakeoffPage() {
     );
     if (!match) return;
     setActiveDocId(match.id);
-    setViewerDoc({
-      url: `/api/v1/takeoff/documents/${match.id}/download/`,
-      name: match.filename,
-    });
+    setViewerDoc(makeTakeoffViewerDoc(match.id, match.filename));
     setActiveTab('measurements');
     const next = new URLSearchParams(searchParams);
     next.delete('name');
@@ -1295,15 +1343,19 @@ export function TakeoffPage() {
   useEffect(() => {
     const docId = searchParams.get('doc');
     const tab = searchParams.get('tab');
+    const source = searchParams.get('source');
     if (!docId || tab !== 'measurements') return;
-    if (viewerDoc) return; // already open
+    if (source === 'document') return;
+    if (
+      viewerDoc?.measurementDocumentId === docId &&
+      viewerDoc.measurementDocumentSource === 'takeoff'
+    ) {
+      return; // already open
+    }
     if (!serverDocuments || serverDocuments.length === 0) return;
     const match = serverDocuments.find((d) => d.id === docId);
     if (!match) return;
-    setViewerDoc({
-      url: `/api/v1/takeoff/documents/${docId}/download/`,
-      name: match.filename,
-    });
+    setViewerDoc(makeTakeoffViewerDoc(docId, match.filename));
     setActiveTab('measurements');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serverDocuments, searchParams]);
@@ -1319,24 +1371,60 @@ export function TakeoffPage() {
     const docId = searchParams.get('doc');
     const source = searchParams.get('source');
     if (!docId || source !== 'document') return;
-    if (viewerDoc) return;
+    if (viewerDoc?.projectFileDocumentId === docId) {
+      setActiveTab('measurements');
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
-        const meta = await apiGet<{ id: string; name: string; filename?: string }>(
+        const meta = await apiGet<{
+          id: string;
+          name: string;
+          filename?: string;
+          project_id?: string | null;
+          metadata?: { source_module?: string; source_id?: string };
+        }>(
           `/v1/documents/${encodeURIComponent(docId)}`,
         );
         if (cancelled) return;
+        const projectId = typeof meta.project_id === 'string' && meta.project_id.trim()
+          ? meta.project_id.trim()
+          : null;
+        if (projectId && useProjectContextStore.getState().activeProjectId !== projectId) {
+          let projectName = projects?.find((p) => p.id === projectId)?.name ?? '';
+          if (!projectName) {
+            try {
+              const project = await apiGet<Pick<Project, 'id' | 'name'>>(
+                `/v1/projects/${encodeURIComponent(projectId)}`,
+              );
+              if (cancelled) return;
+              projectName = project.name ?? '';
+            } catch {
+              if (cancelled) return;
+            }
+          }
+          setActiveProject(projectId, projectName);
+        }
         const displayName =
           meta.filename ||
           meta.name ||
           searchParams.get('name') ||
           t('takeoff.document_placeholder', { defaultValue: 'Document' });
-        setActiveDocId(docId);
-        setViewerDoc({
-          url: `/api/v1/documents/${encodeURIComponent(docId)}/download/`,
+        const nextViewerDoc = makeProjectFileViewerDoc({
+          id: docId,
           name: displayName,
+          metadata: meta.metadata,
         });
+        if (
+          viewerDoc?.measurementDocumentId === nextViewerDoc.measurementDocumentId &&
+          viewerDoc.measurementDocumentSource === nextViewerDoc.measurementDocumentSource
+        ) {
+          setActiveTab('measurements');
+          return;
+        }
+        setActiveDocId(nextViewerDoc.measurementDocumentId);
+        setViewerDoc(nextViewerDoc);
         setActiveTab('measurements');
       } catch {
         // Documents-module fetch failed; leave viewer untouched so the
@@ -1347,17 +1435,14 @@ export function TakeoffPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, viewerDoc, projects, setActiveProject]);
 
   /* ── /markups deep-link: ?docId=<filename|uuid>&measurementId=<uuid> ───
    *
-   * The unified Markups hub builds deep-links from `measurement.document_id`,
-   * which the PDF-takeoff backend stores as the **filename** (see
-   * useMeasurementPersistence — takeoffApi.list is keyed by filename, and
-   * MeasurementCreate.document_id is the same string). So `docId` here is
-   * usually a filename, occasionally a real takeoff_documents UUID. We try
-   * both: exact filename match against the takeoff docs catalogue first,
-   * then UUID id match as a fallback.
+   * The unified Markups hub builds deep-links from `measurement.document_id`.
+   * Current writes use the stable takeoff/document UUID. Older rows can still
+   * carry a filename, so we try exact filename match against the takeoff docs
+   * catalogue first, then UUID id match as a fallback.
    *
    * On hit: open the PDF in the Measurements viewer and stash the
    * measurementId so TakeoffViewerModule can select + scroll-to it once
@@ -1367,7 +1452,7 @@ export function TakeoffPage() {
    * to /markups — far less confusing than the previous silent blank page.
    */
   useEffect(() => {
-    const docId = searchParams.get('docId');
+    const docId = searchParams.get('docId') || searchParams.get('doc');
     const measurementId = searchParams.get('measurementId');
     const tab = searchParams.get('tab');
     // Track the measurementId param so the viewer can act on it once the
@@ -1375,14 +1460,17 @@ export function TakeoffPage() {
     // module fetches its own measurement list keyed by filename).
     setInitialMeasurementId(measurementId);
 
-    if (!docId) {
+    if (!docId || !measurementId) {
       setDeepLinkNotFound(false);
       return;
     }
     if (tab === 'measurements') {
       setActiveTab('measurements');
     }
-    if (viewerDoc) return; // already opened from a prior effect
+    if (searchParams.get('source') === 'document') {
+      setDeepLinkNotFound(false);
+      return;
+    }
     if (!serverDocuments) return; // wait for the catalogue to load
 
     const decodedDocId = decodeURIComponent(docId);
@@ -1397,14 +1485,19 @@ export function TakeoffPage() {
       ) ?? serverDocuments.find((d) => d.id === decodedDocId);
 
     if (match) {
+      if (
+        viewerDoc?.measurementDocumentId === match.id &&
+        viewerDoc.measurementDocumentSource === 'takeoff'
+      ) {
+        setDeepLinkNotFound(false);
+        setActiveTab('measurements');
+        return;
+      }
       setDeepLinkNotFound(false);
       setActiveDocId(match.id);
-      setViewerDoc({
-        url: `/api/v1/takeoff/documents/${match.id}/download/`,
-        name: match.filename,
-      });
+      setViewerDoc(makeTakeoffViewerDoc(match.id, match.filename));
       setActiveTab('measurements');
-    } else if (serverDocuments.length >= 0) {
+    } else {
       // Catalogue is loaded but no row matches — surface a friendly miss.
       setDeepLinkNotFound(true);
     }
@@ -1424,7 +1517,10 @@ export function TakeoffPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`/api/v1/takeoff/documents/upload/`, {
+      const uploadUrl = selectedProjectId
+        ? `/api/v1/takeoff/documents/upload/?project_id=${encodeURIComponent(selectedProjectId)}`
+        : `/api/v1/takeoff/documents/upload/`;
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         headers,
         body: formData,
@@ -1601,6 +1697,7 @@ export function TakeoffPage() {
         // Attempt to upload; on success replace the temp entry
         uploadMutation.mutate(file, {
           onSuccess: (data) => {
+            const filename = data.filename || file.name;
             setDocuments((prev) =>
               prev.map((d) =>
                 d.id === tempId
@@ -1609,20 +1706,25 @@ export function TakeoffPage() {
                       id: data.id,
                       pages: data.pages || d.pages,
                       size_bytes: data.size_bytes || d.size_bytes,
-                      filename: data.filename || d.filename,
+                      filename,
                       uploading: false,
                     }
                   : d,
               ),
             );
             setActiveDocId(data.id);
+            setViewerDoc(makeTakeoffViewerDoc(data.id, filename));
+            setActiveTab('measurements');
             // Persist the newly-opened document in the URL so reload keeps
             // it mounted (prevents the "uploaded project disappears on
             // refresh" bug — backend persistence was already fine).
             setSearchParams(
               (prev) => {
                 const next = new URLSearchParams(prev);
+                next.set('tab', 'measurements');
                 next.set('doc', data.id);
+                next.set('name', filename);
+                next.delete('source');
                 return next;
               },
               { replace: true },
@@ -1645,7 +1747,7 @@ export function TakeoffPage() {
         });
       }
     },
-    [uploadMutation, refetchServerDocuments],
+    [uploadMutation, refetchServerDocuments, setSearchParams],
   );
 
   const handleRemoveDocument = useCallback(
@@ -1841,10 +1943,7 @@ export function TakeoffPage() {
         return;
       }
       setActiveDocId(docId);
-      setViewerDoc({
-        url: `/api/v1/takeoff/documents/${docId}/download/`,
-        name: doc.filename,
-      });
+      setViewerDoc(makeTakeoffViewerDoc(docId, doc.filename));
       setActiveTab('measurements');
       // Pin the current doc to the URL so reload restores the viewer.
       setSearchParams(
@@ -1852,6 +1951,9 @@ export function TakeoffPage() {
           const next = new URLSearchParams(prev);
           next.set('doc', docId);
           next.set('tab', 'measurements');
+          next.delete('source');
+          next.delete('name');
+          next.delete('measurementId');
           return next;
         },
         { replace: true },
@@ -2304,9 +2406,13 @@ export function TakeoffPage() {
                 <TakeoffViewerModule
                   initialPdfUrl={viewerDoc?.url}
                   initialPdfName={viewerDoc?.name}
+                  initialMeasurementDocumentId={viewerDoc?.measurementDocumentId}
+                  initialMeasurementDocumentSource={viewerDoc?.measurementDocumentSource}
+                  initialTakeoffDocumentId={viewerDoc?.takeoffDocumentId}
                   initialMeasurementId={initialMeasurementId}
                   recentDocuments={serverDocuments}
                   onOpenRecentDocument={handleOpenDocInViewer}
+                  onUploadPdf={handleFilesSelected}
                 />
               </Suspense>
             )}

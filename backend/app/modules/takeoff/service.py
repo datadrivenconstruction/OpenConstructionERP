@@ -13,6 +13,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.documents.repository import DocumentRepository
 from app.modules.takeoff.models import AiTakeoffRun, TakeoffDocument, TakeoffMeasurement
 from app.modules.takeoff.repository import (
     AiTakeoffRunRepository,
@@ -1289,6 +1290,43 @@ class TakeoffService:
 
     # ── Measurement CRUD ─────────────────────────────────────────────────
 
+    async def _assert_measurement_document_in_project(
+        self,
+        project_id: uuid.UUID,
+        document_id: str | None,
+    ) -> None:
+        """Validate UUID measurement document ids before persisting rows.
+
+        Legacy filename-keyed rows are left as a compatibility passthrough.
+        New persisted frontend writes use stable UUIDs, and those must point
+        to either a TakeoffDocument or a Project Files Document in the same
+        project.
+        """
+
+        if not document_id:
+            return
+        try:
+            linked_id = uuid.UUID(str(document_id))
+        except (TypeError, ValueError):
+            return
+
+        takeoff_doc = await self.repo.get_by_id(linked_id)
+        if takeoff_doc is not None and takeoff_doc.project_id == project_id:
+            return
+
+        project_file_doc = await DocumentRepository(self.session).get_by_id(linked_id)
+        if project_file_doc is not None and project_file_doc.project_id == project_id:
+            return
+
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "code": "invalid_measurement_document_id",
+                "document_id": document_id,
+                "project_id": str(project_id),
+            },
+        )
+
     async def create_measurement(
         self,
         data: TakeoffMeasurementCreate,
@@ -1302,6 +1340,8 @@ class TakeoffService:
         threat model: prevents client-supplied measurement_value from
         diverging from the actual drawn shape.
         """
+        await self._assert_measurement_document_in_project(data.project_id, data.document_id)
+
         recomputed = recompute_measurement_value(
             measurement_type=data.type,
             points=data.points,
@@ -1548,6 +1588,8 @@ class TakeoffService:
             item = existing
 
         fields = data.model_dump(exclude_unset=True)
+        if "document_id" in fields:
+            await self._assert_measurement_document_in_project(item.project_id, fields["document_id"])
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
         if "points" in fields and fields["points"] is not None:
@@ -1670,6 +1712,14 @@ class TakeoffService:
         the localStorage→server import path can't be used to bypass
         the per-row create guard.
         """
+        checked: set[tuple[uuid.UUID, str | None]] = set()
+        for data in items:
+            key = (data.project_id, data.document_id)
+            if key in checked:
+                continue
+            checked.add(key)
+            await self._assert_measurement_document_in_project(data.project_id, data.document_id)
+
         measurements = [
             TakeoffMeasurement(
                 project_id=data.project_id,

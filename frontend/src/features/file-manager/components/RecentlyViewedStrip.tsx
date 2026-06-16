@@ -23,6 +23,7 @@ export interface RecentItem {
   kind: FileKind;
   name: string;
   extension?: string | undefined;
+  extra?: Record<string, unknown>;
   viewed_at: number;
 }
 
@@ -64,6 +65,7 @@ export function recordRecentlyViewed(row: FileRow) {
       kind: row.kind,
       name: row.name,
       extension: row.extension ?? undefined,
+      extra: row.extra,
       viewed_at: Date.now(),
     },
     ...items.filter((r) => r.id !== row.id),

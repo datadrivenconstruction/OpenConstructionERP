@@ -21,6 +21,7 @@ import { listSessions } from '../cad-explorer/api';
 import { fetchBIMModels } from '../bim/api';
 import { fetchDrawings } from '../dwg-takeoff/api';
 import { takeoffApi } from '../takeoff/api';
+import { buildProjectDocumentTakeoffUrl, buildTakeoffMeasurementUrl } from '../takeoff/takeoffRoutes';
 import { documentsGuide } from './documentsGuide';
 
 /* ── Types ───────────────────────────────────────────────────────────── */
@@ -180,7 +181,7 @@ function routeForDocument(doc: DocItem): { path: string; module: 'takeoff' | 'dw
   }
   if (sourceModule === 'takeoff') {
     return {
-      path: `/takeoff?doc=${encodeURIComponent(doc.id)}&name=${encodeURIComponent(doc.name)}`,
+      path: buildProjectDocumentTakeoffUrl(doc),
       module: 'takeoff',
     };
   }
@@ -1189,7 +1190,15 @@ export function DocumentsPage() {
               <button
                 key={`tk-${td.id}`}
                 type="button"
-                onClick={() => navigate(`/takeoff?tab=measurements&doc=${encodeURIComponent(td.id)}&name=${encodeURIComponent(td.filename)}`)}
+                onClick={() =>
+                  navigate(
+                    buildTakeoffMeasurementUrl({
+                      documentId: td.id,
+                      documentName: td.filename,
+                      documentSource: 'takeoff',
+                    }),
+                  )
+                }
                 className="group text-left rounded-lg border border-border-light bg-surface-primary px-3 py-2 hover:border-oe-blue/30 hover:shadow-sm transition-all"
                 title={td.filename}
               >
@@ -1386,7 +1395,10 @@ export function DocumentsPage() {
                             {previewKind === 'pdf' && (
                               <button
                                 role="menuitem"
-                                onClick={() => { setOpenMenuId(null); navigate(`/takeoff?doc=${doc.id}&name=${encodeURIComponent(doc.name)}`); }}
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  navigate(buildProjectDocumentTakeoffUrl(doc));
+                                }}
                                 className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
                               >
                                 <Ruler size={14} className="text-oe-blue" />

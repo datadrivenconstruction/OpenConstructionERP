@@ -434,7 +434,7 @@ export function FileManagerPage() {
       ctx.setActiveProject(row.project_id, name);
     }
     recordRecentlyViewed(row);
-    navigate(target.route(row.project_id, row.id));
+    navigate(target.route(row.project_id, row.id, row));
   }
 
   function handleOpenRecent(item: RecentItem) {
@@ -447,7 +447,7 @@ export function FileManagerPage() {
           : projectsLite.find((p) => p.id === item.project_id)?.name ?? ctx.activeProjectName;
       ctx.setActiveProject(item.project_id, name);
     }
-    navigate(target.route(item.project_id, item.id));
+    navigate(target.route(item.project_id, item.id, item));
   }
 
   function handleOpenCategory(kind: FileKind) {

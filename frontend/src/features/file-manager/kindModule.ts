@@ -1,4 +1,5 @@
 import { BarChart3, Box, FileBarChart, FileText, Image as ImageIcon, MapPin, Package, Pencil, PenTool, Radar, Ruler, type LucideIcon } from 'lucide-react';
+import { buildProjectDocumentTakeoffUrl } from '@/features/takeoff/takeoffRoutes';
 import type { FileKind } from './types';
 
 // Single source of truth for per-kind accent colours. Both the landing
@@ -105,7 +106,7 @@ export interface ModuleTarget {
   descriptionI18nKey: string;
   icon: LucideIcon;
   /** Path template — `{projectId}` is substituted in by the consumer. */
-  route: (projectId: string, fileId?: string) => string;
+  route: (projectId: string, fileId?: string, file?: FileRouteContext) => string;
   /**
    * Some destinations (Clash Detection, CAD-BIM BI Explorer) resolve the
    * project from the global project-context store rather than from a path
@@ -119,11 +120,28 @@ export interface ModuleTarget {
 
 const PROJECT = (p: string, sub: string) => `/projects/${p}/${sub}`;
 
+export interface FileRouteContext {
+  id: string;
+  name: string;
+  kind: FileKind;
+  extension?: string | null;
+  extra?: Record<string, unknown>;
+}
+
 // Append a deep-link query parameter only when we actually have a file
 // id. Keeping the bare path when it's missing avoids URLs like
 // `/takeoff?doc=` that some routers parse as an empty string.
 const withParam = (path: string, key: string, value?: string): string =>
   value ? `${path}${path.includes('?') ? '&' : '?'}${key}=${encodeURIComponent(value)}` : path;
+
+function pdfTakeoffRoute(_projectId: string, fileId?: string, file?: FileRouteContext): string {
+  if (!fileId) return '/takeoff';
+  return buildProjectDocumentTakeoffUrl({
+    id: fileId,
+    name: file?.name ?? 'Document',
+    metadata: file?.extra,
+  });
+}
 
 export const KIND_MODULES: Record<FileKind, ModuleTarget[]> = {
   document: [
@@ -138,10 +156,7 @@ export const KIND_MODULES: Record<FileKind, ModuleTarget[]> = {
       description: 'Open this PDF and start measuring',
       descriptionI18nKey: 'files.module.pdf_takeoff_desc',
       icon: Ruler,
-      route: (_p, f) =>
-        f
-          ? `/takeoff?doc=${encodeURIComponent(f)}&source=document&tab=measurements`
-          : '/takeoff',
+      route: pdfTakeoffRoute,
     },
     {
       label: 'File Manager',
@@ -179,10 +194,7 @@ export const KIND_MODULES: Record<FileKind, ModuleTarget[]> = {
       icon: Ruler,
       // TakeoffPage reads `doc`/`source`/`tab` (not `sheet`), so mirror the
       // document-kind builder: open the source PDF with the measurements tab.
-      route: (_p, f) =>
-        f
-          ? `/takeoff?doc=${encodeURIComponent(f)}&source=document&tab=measurements`
-          : '/takeoff',
+      route: pdfTakeoffRoute,
     },
     {
       label: 'File Manager',
@@ -270,10 +282,7 @@ export const KIND_MODULES: Record<FileKind, ModuleTarget[]> = {
       icon: Ruler,
       // TakeoffPage reads `doc`/`source`/`tab` (not `session`), so mirror the
       // document-kind builder so the file actually opens in the viewer.
-      route: (_p, f) =>
-        f
-          ? `/takeoff?doc=${encodeURIComponent(f)}&source=document&tab=measurements`
-          : '/takeoff',
+      route: pdfTakeoffRoute,
     },
   ],
   report: [

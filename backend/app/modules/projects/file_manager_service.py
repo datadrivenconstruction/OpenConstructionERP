@@ -198,6 +198,17 @@ async def _collect_documents(
     out: list[FileRow] = []
     for r in rows:
         path = r.file_path or ""
+        row_extra: dict[str, Any] = {
+            "version": r.version,
+            "revision_code": r.revision_code,
+            "drawing_number": r.drawing_number,
+            "cde_state": r.cde_state,
+        }
+        source_metadata = r.metadata_ if isinstance(r.metadata_, dict) else {}
+        for key in ("source_module", "source_id"):
+            value = source_metadata.get(key)
+            if isinstance(value, str) and value.strip():
+                row_extra[key] = value.strip()
         out.append(
             FileRow(
                 id=str(r.id),
@@ -214,12 +225,7 @@ async def _collect_documents(
                 preview_url=None,
                 category=r.category,
                 discipline=r.discipline,
-                extra={
-                    "version": r.version,
-                    "revision_code": r.revision_code,
-                    "drawing_number": r.drawing_number,
-                    "cde_state": r.cde_state,
-                },
+                extra=row_extra,
             ),
         )
     return out

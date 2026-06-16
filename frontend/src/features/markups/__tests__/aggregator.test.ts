@@ -150,6 +150,17 @@ describe('aggregator normalisation', () => {
     expect(u.deepLink).toContain('measurementId=pdf-1');
   });
 
+  it('deep-links Project Files PDF measurements with source=document', () => {
+    const u = fromPdfMeasurement(
+      makePdfMeasurement({ document_id: 'project-file-doc-id' }),
+      { documentName: 'Plans.pdf', documentSource: 'document' },
+    );
+
+    expect(u.deepLink).toBe(
+      '/takeoff?tab=measurements&doc=project-file-doc-id&source=document&name=Plans.pdf&measurementId=pdf-1&page=1',
+    );
+  });
+
   it('coerces unknown type values to "other"', () => {
     const u = fromPdfMeasurement(
       makePdfMeasurement({ type: 'alien_glyph' as MeasurementResponse['type'] }),

@@ -27,6 +27,7 @@
 import type { Markup, MarkupType } from './api';
 import type { DwgAnnotation, DwgDrawing } from '@/features/dwg-takeoff/api';
 import type { MeasurementResponse } from '@/features/takeoff/api';
+import { buildTakeoffMeasurementUrl, type MeasurementDocumentSource } from '@/features/takeoff/takeoffRoutes';
 
 /* ── Source discriminators ───────────────────────────────────────────── */
 
@@ -175,7 +176,7 @@ export function fromDwgAnnotation(
 
 export function fromPdfMeasurement(
   m: MeasurementResponse,
-  opts: { documentName?: string | null } = {},
+  opts: { documentName?: string | null; documentSource?: MeasurementDocumentSource | null } = {},
 ): UnifiedMarkup {
   const docName =
     opts.documentName ?? (m.document_id ? m.document_id : 'PDF takeoff');
@@ -204,9 +205,13 @@ export function fromPdfMeasurement(
     // The takeoff page restores the viewer from ``?doc=`` (not ``docId``)
     // when ``tab=measurements``; ``measurementId`` then selects and scrolls
     // to the row. Emitting ``docId`` left the viewer blank.
-    deepLink: m.document_id
-      ? `/takeoff?tab=measurements&doc=${encodeURIComponent(m.document_id)}&measurementId=${m.id}`
-      : `/takeoff?tab=measurements&measurementId=${m.id}`,
+    deepLink: buildTakeoffMeasurementUrl({
+      documentId: m.document_id,
+      documentName: opts.documentName,
+      documentSource: opts.documentSource,
+      measurementId: m.id,
+      page: m.page,
+    }),
   };
 }
 
