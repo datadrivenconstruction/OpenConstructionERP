@@ -748,7 +748,13 @@ export function BIMViewer({
     onSmartFilter = undefined;
   }
   const { t } = useTranslation();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Holds the GL canvas the mount effect creates (see below). Typed nullable so
+  // it is a mutable ref — the effect assigns/clears `current` directly.
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  /** Empty host div the mount effect appends its freshly-created GL canvas
+   *  into. We deliberately do NOT bind three.js to a React-managed <canvas>
+   *  — see the mount effect for why (StrictMode + forceContextLoss). */
+  const glHostRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<SceneManager | null>(null);
   const elementMgrRef = useRef<ElementManager | null>(null);
   const selectionMgrRef = useRef<SelectionManager | null>(null);
@@ -1118,25 +1124,40 @@ export function BIMViewer({
 
   // Initialize Three.js scene on mount
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const host = glHostRef.current;
+    if (!host) return;
 
-    // Creating the WebGLRenderer can throw from deep inside three.js when the
-    // browser cannot give us a GL context (WebGL disabled, GPU driver
-    // blocklisted, remote desktop, headless without a software rasteriser).
-    // The symptom varies ("Error creating WebGL context" or a null
-    // shader-precision read). Without this guard the throw escapes the effect
-    // and React escalates it to the page-level ErrorBoundary, replacing the
-    // whole page with the generic crash screen. Catch it, flag a fallback, and
-    // bail out BEFORE building any of the dependent managers (each of which
-    // would otherwise dereference the missing scene). We return early without
-    // registering the cleanup below, which is fine because no half-built scene
-    // was ever placed in the refs.
+    // Own the WebGL canvas instead of binding the renderer to a React-managed
+    // <canvas>. dispose() calls renderer.forceContextLoss() to eagerly release
+    // the GL context (browsers cap ~8-16 live contexts); that permanently
+    // poisons the canvas DOM node. React 18 StrictMode reuses the SAME node for
+    // its dev double-mount, so a reused, poisoned canvas makes the second
+    // WebGLRenderer construction read a null GL context and throw ("Cannot read
+    // properties of null (reading 'precision')") — which the catch below used
+    // to mis-report as "WebGL unavailable". Creating a fresh canvas per mount
+    // guarantees a pristine context; the throwaway one is removed on cleanup.
+    // Production is unaffected (effects run once); this also gives clean
+    // recovery if the GPU drops the context for real.
+    const canvas = document.createElement('canvas');
+    canvas.className = 'w-full h-full block';
+    host.appendChild(canvas);
+    canvasRef.current = canvas;
+
+    // Creating the WebGLRenderer can still throw from deep inside three.js when
+    // the browser genuinely cannot give us a GL context (WebGL disabled, GPU
+    // driver blocklisted, remote desktop, headless without a software
+    // rasteriser). Without this guard the throw escapes the effect and React
+    // escalates it to the page-level ErrorBoundary, replacing the whole page
+    // with the generic crash screen. Catch it, drop the dead canvas, flag a
+    // fallback, and bail out BEFORE building any of the dependent managers
+    // (each of which would otherwise dereference the missing scene).
     let scene: SceneManager;
     try {
       scene = new SceneManager(canvas);
     } catch (err) {
       console.warn('[BIMViewer] WebGL unavailable, 3D view disabled:', err);
+      canvas.remove();
+      canvasRef.current = null;
       setWebglError(true);
       return;
     }
@@ -1410,6 +1431,11 @@ export function BIMViewer({
       selectionMgr.dispose();
       elementMgr.dispose();
       scene.dispose();
+      // Drop the GL canvas we created on mount. scene.dispose() force-loses its
+      // context, so the node is dead — removing it means the next mount (incl.
+      // StrictMode's dev double-mount) starts from a pristine canvas.
+      canvas.remove();
+      canvasRef.current = null;
       sceneRef.current = null;
       elementMgrRef.current = null;
       selectionMgrRef.current = null;
@@ -3188,9 +3214,13 @@ export function BIMViewer({
 
   return (
     <div ref={containerRef} className={clsx('relative w-full h-full min-h-[400px] bg-surface-secondary rounded-lg overflow-hidden', className)}>
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full block"
+      {/* Host for the GL canvas. The mount effect creates the actual <canvas>
+          and appends it here (see the effect for why three.js must not bind to
+          a React-managed canvas). role/aria live on this stable node so they
+          survive the canvas being recreated across mounts. */}
+      <div
+        ref={glHostRef}
+        className="w-full h-full"
         role="img"
         aria-label={t('bim.viewer.canvas_aria_label', {
           defaultValue: '3D BIM model viewer - use mouse or touch to orbit, zoom, and pan',
@@ -3198,12 +3228,12 @@ export function BIMViewer({
       />
 
       {/* WebGL-unavailable fallback. The WebGLRenderer constructor threw, so
-          there is no 3D scene to show. Rather than letting that throw crash
-          the whole page to the ErrorBoundary, we keep the (empty) canvas
-          mounted and overlay a calm, theme-tokened panel explaining the
-          environment is missing WebGL. Covers the viewer area; everything
-          below it (compass, badges, banners) is gated on a live scene and so
-          stays hidden in this state. */}
+          there is no 3D scene to show (the dead canvas was already removed).
+          Rather than letting that throw crash the whole page to the
+          ErrorBoundary, we overlay a calm, theme-tokened panel on the empty
+          host explaining the environment is missing WebGL. Covers the viewer
+          area; everything below it (compass, badges, banners) is gated on a
+          live scene and so stays hidden in this state. */}
       {webglError && (
         <div
           data-testid="bim-webgl-unavailable"
