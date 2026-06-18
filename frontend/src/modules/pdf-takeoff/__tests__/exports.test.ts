@@ -135,7 +135,11 @@ const SAMPLE_MEASUREMENTS: Measurement[] = [
 
 describe('buildExportFilename', () => {
   it('produces takeoff-{slug}-{YYYY-MM-DD}.{ext}', () => {
-    const date = new Date('2026-05-20T10:30:00Z');
+    // Local-time constructor: buildExportFilename formats the user's local
+    // date, so a UTC instant here would assert the wrong day on any
+    // machine that isn't running in UTC (e.g. midnight UTC is the
+    // previous evening in the Americas).
+    const date = new Date(2026, 4, 20, 10, 30);
     expect(buildExportFilename('Berlin · Wohnpark Lichtenberg', 'pdf', date)).toBe(
       'takeoff-berlin_wohnpark_lichtenberg-2026-05-20.pdf',
     );
@@ -145,7 +149,7 @@ describe('buildExportFilename', () => {
   });
 
   it('falls back to "untitled" on empty project name', () => {
-    const date = new Date('2026-01-02T00:00:00Z');
+    const date = new Date(2026, 0, 2);
     expect(buildExportFilename('', 'pdf', date)).toBe('takeoff-untitled-2026-01-02.pdf');
     expect(buildExportFilename('   !!!   ', 'xlsx', date)).toBe(
       'takeoff-untitled-2026-01-02.xlsx',
