@@ -1,0 +1,163 @@
+name: Homepage loops (marketing showcase GIFs)
+
+# Re-records the named showcase loops used by marketing-site/index.html (the
+# demo slider + guided tour) against the running app and converts each to an
+# optimized GIF, so the marketing animations always show the shipping UI.
+#
+# The app cannot run on the maintainer's Windows box (it needs Python 3.12) and
+# the production server must never be driven by a recording browser, so the
+# capture runs here in CI where the app boots exactly the way it ships: the
+# backend on embedded PostgreSQL serving the freshly built SPA on :8000, seeded
+# with the demo workspace. The boot sequence mirrors e2e-cross-os.yml.
+#
+# Manual-only (workflow_dispatch). Artifacts (both .webm and .gif) are uploaded
+# as "homepage-loops"; nothing is committed. Output filenames match the existing
+# assets/loops/<name>.gif so they can be dropped into the site in place.
+
+on:
+  workflow_dispatch:
+    inputs:
+      fps:
+        description: "GIF frame rate"
+        default: "14"
+        required: false
+      width:
+        description: "GIF width in px (height auto, aspect preserved)"
+        default: "1280"
+        required: false
+
+concurrency:
+  group: homepage-loops-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  loops:
+    name: Capture homepage loops
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend (single-server SPA)
+        working-directory: frontend
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: npm run build
+
+      - name: Install backend (serves the built SPA + API on :8000)
+        working-directory: backend
+        run: pip install -e .
+
+      - name: Install Playwright chromium (with deps)
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Install ffmpeg
+        shell: bash
+        run: |
+          # ffmpeg is NOT reliably preinstalled on ubuntu-latest runners.
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version | head -1
+
+      - name: Start backend (embedded PostgreSQL + demo seed)
+        working-directory: backend
+        shell: bash
+        env:
+          OE_DATA_DIR: ${{ runner.temp }}/oe-loops-data
+          SEED_DEMO: "true"
+          APP_ENV: development
+        run: |
+          nohup python -m app.cli serve --port 8000 --data-dir "${{ runner.temp }}/oe-loops-data" \
+            > "${{ runner.temp }}/backend.log" 2>&1 &
+          echo $! > "${{ runner.temp }}/backend.pid"
+          echo "backend launched (pid $(cat "${{ runner.temp }}/backend.pid"))"
+
+      - name: Wait for backend health (seed can take a few minutes)
+        shell: bash
+        run: |
+          for i in $(seq 1 72); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/api/health || true)
+            if [ "$code" = "200" ]; then echo "backend healthy after $((i*5))s"; exit 0; fi
+            sleep 5
+          done
+          echo "::error::backend never became healthy"
+          tail -80 "${{ runner.temp }}/backend.log" || true
+          exit 1
+
+      - name: Record homepage loops (chromium)
+        working-directory: frontend
+        shell: bash
+        env:
+          OE_TEST_BASE_URL: http://127.0.0.1:8000
+          OE_TEST_API_URL: http://127.0.0.1:8000
+        run: npx playwright test --config=playwright.homepage-loops.config.ts --project=chromium
+
+      - name: Convert webm loops to optimized GIFs
+        working-directory: frontend
+        shell: bash
+        env:
+          FPS: ${{ github.event.inputs.fps || '14' }}
+          WIDTH: ${{ github.event.inputs.width || '1280' }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          clips=(qa-loops/*.webm)
+          if [ ${#clips[@]} -eq 0 ]; then
+            echo "::warning::no .webm loops were produced; nothing to convert"
+            exit 0
+          fi
+          # Two-pass for quality: palettegen builds an optimal per-clip palette,
+          # paletteuse applies it with Floyd-Steinberg dithering. fps + width
+          # downscale keep GIFs small.
+          for clip in "${clips[@]}"; do
+            base="$(basename "${clip%.webm}")"
+            gif="qa-loops/${base}.gif"
+            palette="$(mktemp --suffix=.png)"
+            vf="fps=${FPS},scale=${WIDTH}:-1:flags=lanczos"
+            echo "converting ${clip} -> ${gif}"
+            ffmpeg -nostdin -y -i "$clip" -vf "${vf},palettegen=stats_mode=diff" "$palette"
+            ffmpeg -nostdin -y -i "$clip" -i "$palette" \
+              -lavfi "${vf} [x]; [x][1:v] paletteuse=dither=floyd_steinberg:diff_mode=rectangle" \
+              "$gif"
+            rm -f "$palette"
+          done
+          echo "GIF sizes:"
+          ls -la qa-loops/*.gif || true
+
+      - name: Upload homepage loops (webm + gif)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: homepage-loops
+          path: |
+            frontend/qa-loops/**/*.webm
+            frontend/qa-loops/**/*.gif
+            frontend/qa-loops/loops.json
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Dump backend log on failure
+        if: failure()
+        shell: bash
+        run: tail -120 "${{ runner.temp }}/backend.log" || true
