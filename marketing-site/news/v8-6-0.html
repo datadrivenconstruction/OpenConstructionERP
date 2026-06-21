@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <!-- Google Analytics with Consent Mode v2 (GDPR-compliant) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JYQXK2652T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    // Default: deny all until user makes a choice
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'analytics_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied',
+      'wait_for_update': 500
+    });
+    // Restore prior consent if user already chose
+    try {
+      var prior = localStorage.getItem('oce-cookie-consent');
+      if (prior === 'granted') {
+        gtag('consent', 'update', { 'analytics_storage': 'granted' });
+      }
+    } catch (e) {}
+    gtag('js', new Date());
+    gtag('config', 'G-JYQXK2652T', { 'anonymize_ip': true });
+  </script>
+
+  <title>v8.6.0 - A data-driven estimating methodology engine you build in the app - OpenConstructionERP</title>
+  <meta name="description" content="OpenConstructionERP v8.6.0 adds a data-driven estimating methodology engine. Instead of one fixed markup chain, a project can follow a named methodology you build and edit in the app: a typed BOQ hierarchy, analytical dimensions, named funding sources and a cascade of markups that build on one another. Country and industry templates ship ready to install, and machinery is now costed separately from installed equipment. Open-source, self-hosted." />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://openconstructionerp.com/news/v8-6-0.html" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="OpenConstructionERP" />
+  <meta property="og:url" content="https://openconstructionerp.com/news/v8-6-0.html" />
+  <meta property="og:title" content="v8.6.0 - A data-driven estimating methodology engine you build in the app" />
+  <meta property="og:description" content="A data-driven estimating methodology engine: a typed BOQ hierarchy, analytical dimensions, named funding sources and a cascade of markups that build on one another, with country and industry templates ready to install. Construction machinery is now costed separately from installed equipment. Open-source, self-hosted." />
+  <meta property="article:published_time" content="2026-06-18T12:00:00Z" />
+  <meta property="article:author" content="Artem Boiko" />
+  <meta property="article:tag" content="Release" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="v8.6.0 - A data-driven estimating methodology engine you build in the app" />
+  <meta name="twitter:description" content="A data-driven estimating methodology engine: a typed BOQ hierarchy, analytical dimensions, named funding sources and a cascade of markups, with country and industry templates ready to install. Machinery is now costed separately from installed equipment. Open-source, self-hosted." />
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#2d5e8e" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <script>
+    (function () { try { var t = localStorage.getItem('oce-theme') || 'light'; document.documentElement.dataset.theme = t; } catch (e) { document.documentElement.dataset.theme = 'light'; } })();
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "v8.6.0 - A data-driven estimating methodology engine you build in the app",
+    "datePublished": "2026-06-18",
+    "dateModified": "2026-06-18",
+    "author": { "@type": "Person", "name": "Artem Boiko" },
+    "publisher": { "@type": "Organization", "name": "DataDrivenConstruction", "logo": { "@type": "ImageObject", "url": "https://openconstructionerp.com/favicon.svg" } },
+    "mainEntityOfPage": "https://openconstructionerp.com/news/v8-6-0.html"
+  }
+  </script>
+
+  <style>
+    :root { --bg-0: #f1f2f3; --bg-1: #ebeced; --bg-2: #e4e5e7; --ink-0: #0b1220; --ink-1: #1e293b; --ink-2: #475569; --ink-3: #94a3b8; --line-0: rgba(15, 23, 42, 0.05); --line-1: rgba(15, 23, 42, 0.09); --line-2: rgba(15, 23, 42, 0.14); --card: #ffffff; --code-bg: #0f172a; --code-fg: #e2e8f0; --accent: #2d5e8e; --accent-2: #3c6fa0; --accent-3: #244c74; --accent-4: #2d5e8e; --accent-5: #3c6fa0; }
+    [data-theme="dark"] { --bg-0: #0b1220; --bg-1: #111a2c; --bg-2: #152238; --ink-0: #eff6ff; --ink-1: #cfe0f5; --ink-2: #94a3b8; --ink-3: #64748b; --line-0: rgba(255,255,255,0.06); --line-1: rgba(255,255,255,0.10); --line-2: rgba(255,255,255,0.16); --card: #111a2c; --code-bg: #0a0f1c; --code-fg: #e2e8f0; --accent: #6ba2d8; --accent-2: #84b3e2; --accent-3: #5a90c8; }
+    *, *::before, *::after { box-sizing: border-box; } html { scroll-behavior: smooth; }
+    body { margin: 0; background: radial-gradient(60% 50% at 50% 0%, color-mix(in oklab, var(--accent) 7%, transparent) 0%, transparent 70%), var(--bg-0); color: var(--ink-0); font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; } a:hover { color: var(--accent); }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+    .narrow { max-width: 720px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+    .nav { position: sticky; top: 0; z-index: 50; background: color-mix(in oklab, var(--bg-0) 88%, transparent); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); border-bottom: 1px solid var(--line-1); }
+    .nav-inner { max-width: 1300px; margin: 0 auto; padding: 12px clamp(20px, 4vw, 48px); display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .nav-left, .nav-right { display: flex; align-items: center; gap: 10px; }
+    .brand { display: inline-flex; align-items: baseline; font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.015em; }
+    .brand-seg-1 { color: var(--ink-0); } .brand-seg-2 { color: var(--ink-2); } .brand-seg-3 { color: var(--accent); font-weight: 800; }
+    .nav-icon-btn { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9px; border: 1px solid var(--line-2); background: transparent; color: var(--ink-2); cursor: pointer; transition: border-color 0.15s ease, color 0.15s ease; }
+    .nav-icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-icon-btn .icon-moon { display: none; }
+    [data-theme="dark"] .nav-icon-btn .icon-sun { display: none; }
+    [data-theme="dark"] .nav-icon-btn .icon-moon { display: block; }
+    .nav-links { display: flex; gap: clamp(10px, 1.6vw, 22px); align-items: center; font-size: 14px; }
+    .nav-links a { color: var(--ink-2); font-weight: 500; padding: 6px 4px; transition: color 0.15s ease; }
+    .nav-links a:hover, .nav-links a.is-active { color: var(--accent); }
+    .nav-links a.is-active { font-weight: 600; }
+    .nav-pill { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease; }
+    .nav-pill.github { border: 1px solid var(--line-2); color: var(--ink-1); background: transparent; }
+    .nav-pill.github:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-pill.cta { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%); color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 8px 18px -8px color-mix(in oklab, var(--accent) 60%, transparent); }
+    .nav-pill.cta:hover { transform: translateY(-1px); color: #fff; }
+    .nav-pill .arrow { transition: transform 0.15s ease; } .nav-pill:hover .arrow { transform: translateX(2px); }
+    @media (max-width: 980px) { .nav-links a:not(.news-link), .nav-pill.github { display: none; } }
+    .article-hero { position: relative; padding: clamp(48px, 7vw, 96px) 0 clamp(32px, 5vw, 48px); overflow: hidden; }
+    .article-hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(to right, color-mix(in oklab, var(--accent) 7%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in oklab, var(--accent) 7%, transparent) 1px, transparent 1px); background-size: 56px 56px; -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 35%, black 30%, transparent 78%); mask-image: radial-gradient(ellipse 75% 60% at 50% 35%, black 30%, transparent 78%); pointer-events: none; opacity: 0.5; }
+    .article-hero > * { position: relative; }
+    .crumbs { font-family: 'Inter Tight', sans-serif; font-size: 13px; color: var(--ink-3); margin-bottom: 18px; }
+    .crumbs a:hover { color: var(--accent); } .crumbs .sep { margin: 0 8px; opacity: 0.5; }
+    .pill-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+    .chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-family: 'Inter Tight', sans-serif; font-size: 11.5px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; }
+    .chip.release { background: color-mix(in oklab, var(--accent) 10%, transparent); color: var(--accent); border: 1px solid color-mix(in oklab, var(--accent) 24%, transparent); }
+    .chip.stable { background: color-mix(in oklab, #16a34a 12%, transparent); color: #16a34a; border: 1px solid color-mix(in oklab, #16a34a 28%, transparent); }
+    [data-theme="dark"] .chip.stable { color: #4ade80; border-color: color-mix(in oklab, #4ade80 32%, transparent); }
+    .pill-meta { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-2); letter-spacing: 0.01em; }
+    .pill-meta + .pill-meta::before { content: "·"; margin: 0 8px; opacity: 0.5; }
+    .article-hero h1 { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: clamp(34px, 5.6vw, 60px); line-height: 1.05; letter-spacing: -0.025em; margin: 0 0 22px; }
+    .article-hero h1 .accent { color: var(--accent); }
+    .article-hero p.lede { font-size: clamp(17px, 1.6vw, 21px); line-height: 1.55; color: var(--ink-2); max-width: 680px; margin: 0 0 28px; }
+    .article { padding: clamp(8px, 2vw, 24px) 0 clamp(48px, 6vw, 80px); }
+    .article p, .article ul, .article ol { font-size: 17px; line-height: 1.7; color: var(--ink-1); margin: 0 0 18px; }
+    .article ul, .article ol { padding-left: 22px; } .article ul li, .article ol li { margin-bottom: 6px; }
+    .article h2 { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: clamp(24px, 2.6vw, 32px); line-height: 1.15; letter-spacing: -0.02em; margin: 56px 0 18px; color: var(--ink-0); }
+    .article h2:first-child { margin-top: 0; }
+    .article h3 { font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 19px; letter-spacing: -0.01em; margin: 28px 0 10px; color: var(--ink-0); }
+    .article a { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in oklab, var(--accent) 32%, transparent); transition: border-color 0.15s ease; }
+    .article a:hover { border-bottom-color: var(--accent); }
+    .article .btn, .article .btn:hover { border-bottom: none; }
+    .article .btn-primary, .article .btn-primary:hover { color: #fff; }
+    .article .btn-ghost { color: var(--ink-0); }
+    .article .btn-ghost:hover { color: var(--accent); }
+    .article strong { color: var(--ink-0); font-weight: 600; }
+    .article code { font-family: 'JetBrains Mono', monospace; font-size: 0.92em; padding: 1px 6px; border-radius: 5px; background: color-mix(in oklab, var(--accent) 8%, var(--bg-1)); border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--line-1)); color: var(--ink-0); }
+    .checklist { list-style: none; padding: 0; margin: 14px 0 28px; display: grid; gap: 12px; }
+    .checklist li { position: relative; padding: 16px 18px 16px 52px; background: var(--card); border: 1px solid var(--line-1); border-radius: 14px; font-size: 16px; line-height: 1.6; color: var(--ink-1); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+    .checklist li:hover { border-color: color-mix(in oklab, var(--accent) 35%, var(--line-1)); box-shadow: 0 14px 28px -16px rgba(2, 90, 160, 0.18); }
+    .checklist li::before { content: ""; position: absolute; left: 16px; top: 18px; width: 22px; height: 22px; border-radius: 7px; background: color-mix(in oklab, var(--accent) 12%, transparent); }
+    .checklist li svg { position: absolute; left: 20px; top: 22px; width: 14px; height: 14px; color: var(--accent); }
+    .statband { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 18px 0 30px; }
+    @media (max-width: 720px) { .statband { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 420px) { .statband { grid-template-columns: 1fr; } }
+    .stat-card { background: var(--card); border: 1px solid var(--line-1); border-radius: 14px; padding: 22px 20px; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+    .stat-card:hover { transform: translateY(-2px); border-color: color-mix(in oklab, var(--accent) 35%, var(--line-1)); box-shadow: 0 14px 28px -16px rgba(2, 90, 160, 0.18); }
+    .stat-card .stat-num { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: clamp(30px, 4vw, 40px); line-height: 1; letter-spacing: -0.03em; color: var(--accent); margin: 0 0 8px; }
+    .stat-card .stat-label { font-size: 14px; line-height: 1.5; color: var(--ink-2); margin: 0; }
+    .codewrap { position: relative; background: var(--code-bg); color: var(--code-fg); border-radius: 14px; padding: 22px 24px; margin: 14px 0 30px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.7; overflow-x: auto; border: 1px solid rgba(107, 162, 216, 0.09); box-shadow: 0 18px 40px -20px rgba(2, 90, 160, 0.25); }
+    .codewrap .cmd::before { content: "$ "; color: #64748b; user-select: none; }
+    .codewrap .tok-cmd { color: #84b3e2; } .codewrap .tok-arg { color: #e2e8f0; } .codewrap .tok-flag { color: #fbbf24; } .codewrap .tok-amp { color: #64748b; padding: 0 4px; }
+    .copy-btn { position: absolute; top: 14px; right: 14px; padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); color: #e2e8f0; font-family: 'Inter Tight', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; }
+    .copy-btn:hover { background: rgba(107, 162, 216, 0.09); border-color: rgba(107, 162, 216, 0.09); }
+    .copy-btn.is-copied { background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.4); color: #86efac; }
+    .cta-block { margin: 56px auto 0; padding: clamp(28px, 4vw, 44px); background: radial-gradient(80% 100% at 0% 0%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 60%), radial-gradient(80% 100% at 100% 100%, color-mix(in oklab, var(--accent-3) 14%, transparent), transparent 60%), var(--card); border: 1px solid color-mix(in oklab, var(--accent) 25%, var(--line-1)); border-radius: 20px; text-align: center; }
+    .cta-block h3 { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: clamp(22px, 2.4vw, 28px); letter-spacing: -0.015em; margin: 0 0 8px; color: var(--ink-0); }
+    .cta-block p { color: var(--ink-2); font-size: 15px; margin: 0 0 22px; }
+    .cta-row { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 12px; font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 14.5px; letter-spacing: -0.005em; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+    .btn .arrow { transition: transform 0.15s ease; } .btn:hover .arrow { transform: translateX(3px); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%); color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 10px 22px -10px color-mix(in oklab, var(--accent) 60%, transparent); }
+    .btn-primary:hover { transform: translateY(-1px); color: #fff; }
+    .btn-ghost { background: transparent; border: 1px solid var(--line-2); color: var(--ink-0); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .pagefoot { border-top: 1px solid var(--line-1); padding: 28px 0; margin-top: 24px; color: var(--ink-2); font-size: 13px; }
+    .pagefoot-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .pagefoot a { color: var(--ink-2); } .pagefoot a:hover { color: var(--accent); }
+    @media (max-width: 540px) { .article p, .article ul, .article ol { font-size: 16px; } .checklist li { font-size: 15px; } }
+
+    /* ================================================================ */
+    /* COOKIE BANNER - GDPR-compliant consent dialog                     */
+    /* ================================================================ */
+    .cookie-banner {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%) translateY(14px);
+      width: min(720px, calc(100vw - 32px));
+      z-index: 9999;
+      background: color-mix(in oklab, #ffffff 88%, transparent);
+      border: 1px solid var(--line-1);
+      border-radius: 18px;
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+      box-shadow: 0 24px 64px -28px rgba(15, 23, 42, 0.35);
+      padding: 18px 22px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    [data-theme="dark"] .cookie-banner {
+      background: color-mix(in oklab, #111a2c 88%, transparent);
+      box-shadow: 0 24px 64px -28px rgba(0, 0, 0, 0.7);
+    }
+    .cookie-banner.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .cookie-banner-inner {
+      display: grid;
+      grid-template-columns: 32px 1fr auto;
+      grid-gap: 16px;
+      align-items: center;
+    }
+    .cookie-banner-icon {
+      font-size: 22px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+    }
+    .cookie-banner-body { min-width: 0; }
+    .cookie-banner-title {
+      font-family: 'Inter Tight', 'Inter', sans-serif;
+      font-weight: 650;
+      font-size: 14px;
+      color: var(--ink-0);
+      margin: 0 0 3px;
+      letter-spacing: -0.01em;
+    }
+    .cookie-banner-text {
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--ink-2);
+      margin: 0;
+    }
+    .cookie-banner-text a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+    }
+    .cookie-banner-text a:hover { border-bottom-color: var(--accent); }
+    .cookie-banner-actions {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    .cookie-btn {
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .cookie-btn-reject {
+      background: transparent;
+      border: 1px solid var(--line-1);
+      color: var(--ink-1);
+    }
+    .cookie-btn-reject:hover {
+      border-color: color-mix(in oklab, var(--ink-0) 30%, var(--line-1));
+      background: color-mix(in oklab, var(--ink-0) 4%, transparent);
+    }
+    .cookie-btn-accept {
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      color: #fff;
+      box-shadow: 0 6px 16px -6px color-mix(in oklab, var(--accent) 55%, transparent);
+    }
+    .cookie-btn-accept:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px -6px color-mix(in oklab, var(--accent) 70%, transparent);
+    }
+    @media (max-width: 640px) {
+      .cookie-banner-inner {
+        grid-template-columns: 28px 1fr;
+        grid-gap: 12px;
+      }
+      .cookie-banner-actions {
+        grid-column: 1 / -1;
+        margin-top: 4px;
+      }
+      .cookie-btn { flex: 1; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <a class="brand" href="/"><span class="brand-name"><span class="brand-seg-1">Open</span><span class="brand-seg-2">Construction</span><span class="brand-seg-3">ERP</span></span></a>
+      <button type="button" class="nav-icon-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/></svg>
+      </button>
+    </div>
+    <div class="nav-links">
+      <a href="/services.html">Practices</a>
+      <a href="/industries.html">Industries</a>
+      <a href="/standards.html">Standards</a>
+      <a href="/maturity.html">Maturity</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/partners.html">Partners</a>
+      <a href="/news.html" class="news-link is-active">News</a>
+      <a href="/docs.html">Docs</a>
+    </div>
+    <div class="nav-right">
+      <a class="nav-pill github" href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+        <span>GitHub</span>
+      </a>
+      <a class="nav-pill cta" href="/demo"><span>Try demo</span><svg class="arrow" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+    </div>
+  </div>
+</nav>
+
+<section class="article-hero">
+  <div class="narrow">
+    <div class="crumbs">
+      <a href="/">Home</a><span class="sep">/</span>
+      <a href="/news.html">News</a><span class="sep">/</span>
+      <span>v8.6.0 - A data-driven estimating methodology engine you build in the app</span>
+    </div>
+    <div class="pill-row">
+      <span class="chip release">Release</span>
+      <span class="chip stable">Stable</span>
+      <span class="pill-meta">June 18, 2026</span>
+      <span class="pill-meta">~4 min read</span>
+    </div>
+    <h1>v8.6.0 - a data-driven <span class="accent">estimating methodology</span> engine you build in the app.</h1>
+    <p class="lede">
+      One fixed markup chain does not fit every country or every kind of work.
+      8.6.0 adds a data-driven methodology engine: a project can follow a named
+      methodology you build and edit in the app - a typed bill-of-quantities
+      hierarchy, analytical dimensions, named funding sources, and a cascade of
+      markups that build on one another - with country and industry templates
+      ready to install, and machinery now costed separately from installed
+      equipment.
+    </p>
+  </div>
+</section>
+
+<article class="article">
+  <div class="narrow">
+
+    <p>
+      Estimating convention is not universal. The way costs are grouped, what
+      counts as overhead, how machinery sits against installed equipment, the
+      order in which markups apply - all of it varies by country, by sector and
+      by company. 8.6.0 stops hard-coding one chain and lets a project follow a
+      named methodology that you can build, edit and switch, while the existing
+      international method stays available for anyone who wants it.
+    </p>
+
+    <h2>What is new in version 8.6.0</h2>
+
+    <ul class="checklist">
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        <strong>A data-driven estimating methodology engine.</strong> Instead of one fixed markup chain, a project can follow a named methodology that you build and edit in the app: a typed bill-of-quantities hierarchy, analytical dimensions, named funding sources, and a cascade of markups that build on one another. Every methodology coexists with, and is switchable against, the existing international method.
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        <strong>Country and industry templates, ready to install.</strong> Templates ship ready to use - including a Uzbekistan cascade and a railway breakdown that price construction machinery inside the works base while keeping installed equipment as a separate base - so a local methodology is a starting point, not a blank page.
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        <strong>A cascade editor that reconciles with the server.</strong> The cascade editor shows a live preview and reconciles its arithmetic against the server, so the figures you see while you build the methodology are exactly the figures that are stored.
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        <strong>Machinery costed separately from equipment.</strong> A resource typed as machinery used to be folded into the equipment category, which understated the works base and overstated equipment for methodologies that price the two differently. The breakdown now reports a distinct Machinery category; a methodology that does not separate the two is unaffected.
+      </li>
+    </ul>
+
+    <h2>A methodology you build, not one you are given</h2>
+    <p>
+      The methodology engine treats an estimating method as data you own rather
+      than logic baked into the product. A methodology is a typed
+      bill-of-quantities hierarchy with analytical dimensions and named funding
+      sources, finished by a cascade of markups that build on one another - each
+      step taking the running total from the one before. You build it in the app,
+      edit it as your practice changes, and switch a project between methodologies
+      without leaving the international method behind for projects that prefer it.
+    </p>
+    <p>
+      Because the cascade editor shows a live preview and reconciles its
+      arithmetic against the server, there is no gap between the figure on screen
+      and the figure that is stored. The numbers you tune are the numbers the
+      estimate uses, which is the whole point of letting you shape the method
+      yourself.
+    </p>
+
+    <h2>Templates that already know the local convention</h2>
+    <p>
+      Nobody wants to rebuild a national costing convention from scratch, so
+      8.6.0 ships country and industry templates ready to install. Among them are
+      a Uzbekistan cascade and a railway breakdown that follow a specific
+      convention: construction machinery is priced inside the works base, while
+      installed equipment stays a separate base. That distinction matters,
+      because folding machinery into equipment understates the works and
+      overstates equipment for methodologies built this way.
+    </p>
+    <p>
+      The breakdown now reports a distinct Machinery category to make that split
+      real, so a resource typed as machinery is costed where the methodology
+      expects it. Methodologies that do not separate the two are unaffected -
+      nothing changes for them.
+    </p>
+
+    <h2>By the numbers</h2>
+    <div class="statband">
+      <div class="stat-card"><p class="stat-num">1</p><p class="stat-label">new methodology engine, switchable against the existing international method.</p></div>
+      <div class="stat-card"><p class="stat-num">2</p><p class="stat-label">ready-to-install templates lead the set: a Uzbekistan cascade and a railway breakdown.</p></div>
+      <div class="stat-card"><p class="stat-num">1</p><p class="stat-label">distinct Machinery category, no longer folded into installed equipment.</p></div>
+    </div>
+
+    <h2>Install or upgrade</h2>
+
+    <div class="codewrap">
+      <button type="button" class="copy-btn" id="copy-upgrade" aria-label="Copy upgrade command">Copy</button>
+<pre><span class="cmd"><span class="tok-cmd">pip</span> <span class="tok-arg">install</span> <span class="tok-flag">--upgrade</span> <span class="tok-arg">openconstructionerp</span></span></pre>
+    </div>
+
+    <p>
+      The desktop installers for Windows, macOS and Linux carry the same
+      one-installer setup, and the Linux build includes the CAD and BIM
+      converters for AutoCAD, Revit and IFC. You can grab the latest installers
+      from
+      <a href="https://openconstructionerp.com/download">openconstructionerp.com/download</a>.
+      If you run an external PostgreSQL through <code>DATABASE_URL</code>,
+      nothing about that connection changes. Questions or trouble upgrading,
+      write to
+      <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a>.
+    </p>
+
+    <div class="cta-block">
+      <h3>Try v8.6.0 today.</h3>
+      <p>Live demo in your browser, or self-host in five minutes. AGPL-3.0, no signup required.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="/demo"><span>Try the demo</span><svg class="arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a class="btn btn-ghost" href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+          <span>View on GitHub</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<footer class="pagefoot">
+  <div class="wrap">
+    <div class="pagefoot-inner">
+      <div>&copy; 2026 Artem Boiko / DataDrivenConstruction &middot; Open source under AGPL-3.0.</div>
+      <div>
+        <a href="/">Home</a> &middot;
+        <a href="/partners.html">Partners</a> &middot;
+        <a href="/news.html">News</a> &middot;
+        <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">GitHub</a> &middot;
+        <a href="https://datadrivenconstruction.io" target="_blank" rel="noopener">DataDrivenConstruction.io</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ================================================================ -->
+<!-- COOKIE CONSENT BANNER                                             -->
+<!-- ================================================================ -->
+<div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookie preferences" aria-live="polite">
+  <div class="cookie-banner-inner">
+    <div class="cookie-banner-icon" aria-hidden="true">🍪</div>
+    <div class="cookie-banner-body">
+      <div class="cookie-banner-title" data-i18n="cookie.title">Cookies &amp; analytics</div>
+      <p class="cookie-banner-text" data-i18n-html="cookie.text">
+        We use essential cookies and anonymised analytics to improve the site. No third-party trackers, no ads. <a href="/privacy-policy.html">Learn more</a>.
+      </p>
+    </div>
+    <div class="cookie-banner-actions">
+      <button type="button" class="cookie-btn cookie-btn-reject" id="cookie-reject" data-i18n="cookie.reject">Reject non-essential</button>
+      <button type="button" class="cookie-btn cookie-btn-accept" id="cookie-accept" data-i18n="cookie.accept">Accept all</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var btn = document.getElementById('theme-toggle'); if (!btn) return;
+    btn.addEventListener('click', function () {
+      var cur = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+      var next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem('oce-theme', next); } catch (e) {}
+    });
+  })();
+  (function () {
+    var btn = document.getElementById('copy-upgrade'); if (!btn) return;
+    var cmd = 'pip install --upgrade openconstructionerp';
+    btn.addEventListener('click', function () {
+      var done = function () { var prev = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('is-copied'); setTimeout(function () { btn.textContent = prev; btn.classList.remove('is-copied'); }, 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cmd).then(done).catch(function () { var ta = document.createElement('textarea'); ta.value = cmd; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta); done(); });
+      } else { var ta = document.createElement('textarea'); ta.value = cmd; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta); done(); }
+    });
+  })();
+  // Cookie consent banner - GDPR Consent Mode v2 integration
+  (function setupCookieBanner() {
+    const banner = document.getElementById('cookie-banner');
+    const accept = document.getElementById('cookie-accept');
+    const reject = document.getElementById('cookie-reject');
+    if (!banner) return;
+    let prior = null;
+    try { prior = localStorage.getItem('oce-cookie-consent'); } catch (e) {}
+    if (!prior) {
+      setTimeout(() => banner.classList.add('is-visible'), 800);
+    }
+    function apply(choice) {
+      try { localStorage.setItem('oce-cookie-consent', choice); } catch (e) {}
+      if (typeof gtag === 'function') {
+        gtag('consent', 'update', {
+          'analytics_storage': choice === 'granted' ? 'granted' : 'denied'
+        });
+      }
+      banner.classList.remove('is-visible');
+    }
+    accept?.addEventListener('click', () => apply('granted'));
+    reject?.addEventListener('click', () => apply('denied'));
+    // Allow re-opening via any element with data-open-cookies
+    document.querySelectorAll('[data-open-cookies]').forEach((el) => {
+      el.addEventListener('click', (e) => { e.preventDefault(); banner.classList.add('is-visible'); });
+    });
+  })();
+</script>
+
+<script src="/news/assets/related-articles.js" defer></script>
+
+</body>
+</html>
