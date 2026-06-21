@@ -14926,6 +14926,15 @@ const resource = {
     "methodology.this_project": "энэ төсөл",
     "methodology.title": "Төсвийн аргачлалууд",
     "nav.methodologies": "Аргачлалууд",
+    "bim.auto_install_failed_body": "Та автомат суулгацыг дахин оролдох эсвэл GitHub-аас гар аргаар суулгаж болно.",
+    "bim.auto_install_failed_title": "{{format}} хувиргагчийг бэлтгэж дуусгаж чадсангүй",
+    "bim.auto_install_hint": "Энэ нь арын дэвсгэрт ажиллана, ямар нэгэн үйлдэл шаардлагагүй. Энэ хооронд таны байршуулалт үргэлжилнэ.",
+    "bim.auto_install_hint_fallback": "Энэ нь арын дэвсгэрт ажиллана, ямар нэгэн үйлдэл шаардлагагүй. IFC файлууд суурилуулсан уншигчаар тэр даруй нээгдэнэ; хувиргагч бэлэн болсон үед тэдгээрийг бүрэн тор болгон шинэчилнэ.",
+    "bim.auto_install_manual_link": "GitHub дээр гар аргаар суулгах",
+    "bim.auto_install_preparing": "{{format}} хувиргагчийг бэлтгэж байна (нэг удаа)…",
+    "bim.auto_install_preparing_sized": "{{format}} хувиргагчийг бэлтгэж байна (нэг удаа, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Суулгацыг дахин оролдох",
+    "dwg_takeoff.auto_install_dxf_note": "DXF файлууд хувиргагчгүйгээр аль хэдийн ажилладаг - энэ нь зөвхөн .dwg-д хамаатай.",
   }
 } as { translation: Record<string, string> };
 

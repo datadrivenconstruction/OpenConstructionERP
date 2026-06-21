@@ -14929,6 +14929,15 @@ const resource = {
     "methodology.this_project": "本项目",
     "methodology.title": "计价方法",
     "nav.methodologies": "计价方法",
+    "bim.auto_install_failed_body": "您可以重试自动安装，或从 GitHub 手动安装。",
+    "bim.auto_install_failed_title": "无法完成 {{format}} 转换器的准备",
+    "bim.auto_install_hint": "该操作在后台运行，无需任何操作。其间您的上传会继续进行。",
+    "bim.auto_install_hint_fallback": "该操作在后台运行，无需任何操作。IFC 文件可立即使用内置读取器打开；转换器准备就绪后会将其升级为完整网格。",
+    "bim.auto_install_manual_link": "在 GitHub 上手动安装",
+    "bim.auto_install_preparing": "正在准备 {{format}} 转换器（一次性）…",
+    "bim.auto_install_preparing_sized": "正在准备 {{format}} 转换器（一次性，约 {{size}} MB）…",
+    "bim.auto_install_retry": "重试安装",
+    "dwg_takeoff.auto_install_dxf_note": "DXF 文件无需转换器即可使用 - 这仅影响 .dwg 文件。",
   }
 } as { translation: Record<string, string> };
 

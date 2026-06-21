@@ -13,6 +13,7 @@ import {
   isSection,
   type Position,
 } from './api';
+import { resourceAwareTotalInBase } from './boqHelpers';
 
 /* ── Types ────────────────────────────────────────────────────────────── */
 
@@ -37,6 +38,16 @@ export interface ExportOptions {
   classificationStandard?: string;
   /** Optional region (e.g. "DACH"). */
   region?: string;
+  /**
+   * Issue #150 — project base currency (ISO 4217) + FX rates. When supplied,
+   * every position/section/direct-cost total is converted into the base
+   * currency using the SAME resource-currency-aware conversion the editor
+   * grid uses, so a foreign-currency resource exports at its base value
+   * instead of being summed as if "1 foreign = 1 base". Omitted ⇒ totals are
+   * exported verbatim (backward compatible, single-currency BOQs unaffected).
+   */
+  baseCurrency?: string;
+  fxRates?: Array<{ currency: string; rate: number }>;
 }
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
@@ -94,6 +105,34 @@ function getResources(pos: Position): Resource[] {
   const meta = pos.metadata ?? (pos as unknown as Record<string, unknown>).metadata_;
   if (!meta || !Array.isArray((meta as Record<string, unknown>).resources)) return [];
   return (meta as Record<string, unknown>).resources as Resource[];
+}
+
+/**
+ * Issue #150 — per-position Total, converted into the project base currency
+ * when FX context is present. Mirrors the editor grid's Total column
+ * (``columnDefs.ts`` valueGetter → ``resourceAwareTotalInBase``) so the
+ * exported figure equals the on-screen one. With no base currency it returns
+ * the raw stored total (coerced), preserving the prior behaviour.
+ */
+function positionTotalForExport(pos: Position, opts: ExportOptions): number {
+  if (!opts.baseCurrency) return Number(pos.total) || 0;
+  return resourceAwareTotalInBase(
+    pos as unknown as {
+      total?: number | string | null;
+      quantity?: number | string | null;
+      metadata?: Record<string, unknown> | null;
+      metadata_?: Record<string, unknown> | null;
+    },
+    opts.baseCurrency,
+    opts.fxRates,
+  );
+}
+
+/** Direct cost (Σ leaf-position totals) in the export's target currency. */
+function directCostForExport(opts: ExportOptions): number {
+  return opts.positions
+    .filter((p) => !isSection(p))
+    .reduce((sum, p) => sum + positionTotalForExport(p, opts), 0);
 }
 
 /* ── Constants ────────────────────────────────────────────────────────── */
@@ -160,7 +199,10 @@ export function buildBOQSheetData(options: ExportOptions): {
   numberFormatStartRow: number;
 } {
   const { positions, boqTitle, markupTotals, netTotal, vatRate, vatAmount, grossTotal } = options;
-  const grouped = groupPositionsIntoSections(positions);
+  const grouped = groupPositionsIntoSections(positions, {
+    baseCurrency: options.baseCurrency,
+    fxRates: options.fxRates,
+  });
   const colCount = BOQ_COLUMNS.length;
   const itemCount = positions.filter((p) => !isSection(p)).length;
   const sectionCount = grouped.sections.length;
@@ -233,7 +275,7 @@ export function buildBOQSheetData(options: ExportOptions): {
         neutraliseFormula(child.unit),
         child.quantity,
         child.unit_rate,
-        child.total,
+        positionTotalForExport(child, options),
         // getVariantCellValue can return number, string, or null; only
         // strings need neutralisation.
         (() => {
@@ -286,7 +328,7 @@ export function buildBOQSheetData(options: ExportOptions): {
       neutraliseFormula(pos.unit),
       pos.quantity,
       pos.unit_rate,
-      pos.total,
+      positionTotalForExport(pos, options),
       (() => {
         const v = getVariantCellValue(pos);
         return typeof v === 'string' ? neutraliseFormula(v) : v;
@@ -328,7 +370,7 @@ export function buildBOQSheetData(options: ExportOptions): {
   rows.push(summaryRow('COST SUMMARY', null));
   merge(rows.length - 1, 1, rows.length - 1, 4);
 
-  const directCost = positions.filter((p) => !isSection(p)).reduce((sum, p) => sum + (Number(p.total) || 0), 0);
+  const directCost = directCostForExport(options);
   rows.push(summaryRow('Direct Cost', directCost));
 
   for (const m of markupTotals) {
@@ -363,7 +405,10 @@ export function buildSummarySheetData(options: ExportOptions): {
   numberFormatStartRow: number;
 } {
   const { positions, markupTotals, netTotal, vatRate, vatAmount, grossTotal } = options;
-  const grouped = groupPositionsIntoSections(positions);
+  const grouped = groupPositionsIntoSections(positions, {
+    baseCurrency: options.baseCurrency,
+    fxRates: options.fxRates,
+  });
   const dateStr = new Date().toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'long',
@@ -389,13 +434,13 @@ export function buildSummarySheetData(options: ExportOptions): {
 
   const ungroupedItems = grouped.ungrouped.filter((p) => !isSection(p));
   if (ungroupedItems.length > 0) {
-    const ungroupedTotal = ungroupedItems.reduce((sum, p) => sum + (Number(p.total) || 0), 0);
+    const ungroupedTotal = ungroupedItems.reduce((sum, p) => sum + positionTotalForExport(p, options), 0);
     rows.push(['Ungrouped Items', ungroupedItems.length, ungroupedTotal]);
   }
 
   rows.push([null, null, null]);
 
-  const directCost = positions.filter((p) => !isSection(p)).reduce((sum, p) => sum + (Number(p.total) || 0), 0);
+  const directCost = directCostForExport(options);
   rows.push(['Direct Cost', null, directCost]);
   for (const m of markupTotals) {
     rows.push([`  + ${m.name} (${m.percentage}%)`, null, m.amount]);

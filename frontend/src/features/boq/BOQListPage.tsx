@@ -13,6 +13,8 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { boqApi, type BOQWithPositions, groupPositionsIntoSections, type SectionGroup } from './api';
+import { resourceAwareTotalInBase, getCurrencyCode } from './boqHelpers';
+import { projectsApi, type ProjectFxRate } from '@/features/projects/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { PresenceAvatars } from '@/modules/collaboration/components/PresenceAvatars';
@@ -100,10 +102,26 @@ function diffColor(diff: number): string {
   return 'text-content-tertiary';
 }
 
+/** Flatten a project's ``fx_rates`` (``{code, rate:string}``) into the
+ *  ``{currency, rate:number}`` shape ``groupPositionsIntoSections`` /
+ *  ``resourceAwareTotalInBase`` expect. Mirrors the BOQ editor's plumbing so
+ *  the compare totals convert foreign-currency resources to base identically
+ *  (Issue #150). */
+function flattenFxRates(rates: ProjectFxRate[] | undefined): Array<{ currency: string; rate: number }> {
+  return (rates ?? [])
+    .map((fx) => ({ currency: fx.code, rate: Number(fx.rate) }))
+    .filter((fx) => fx.currency && Number.isFinite(fx.rate));
+}
+
 function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: CompareModalProps) {
   const { t } = useTranslation();
   const [boqA, setBoqA] = useState<BOQWithPositions | null>(null);
   const [boqB, setBoqB] = useState<BOQWithPositions | null>(null);
+  // Issue #150 — each BOQ's project carries its own base currency + FX rates
+  // (rates are project-scoped). Fetch both so section subtotals convert
+  // foreign-currency resources to each side's base, matching the editor grid.
+  const [fxA, setFxA] = useState<Array<{ currency: string; rate: number }>>([]);
+  const [fxB, setFxB] = useState<Array<{ currency: string; rate: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -113,11 +131,20 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
     setError(null);
 
     Promise.all([boqApi.get(boqIdA), boqApi.get(boqIdB)])
-      .then(([a, b]) => {
-        if (!cancelled) {
-          setBoqA(a);
-          setBoqB(b);
-        }
+      .then(async ([a, b]) => {
+        if (cancelled) return;
+        setBoqA(a);
+        setBoqB(b);
+        // Best-effort FX fetch — if a project read fails (or the BOQ carries
+        // no project_id) we fall back to an empty rate list, which leaves
+        // totals unconverted rather than blocking the comparison.
+        const [pa, pb] = await Promise.all([
+          a.project_id ? projectsApi.get(a.project_id).catch(() => null) : Promise.resolve(null),
+          b.project_id ? projectsApi.get(b.project_id).catch(() => null) : Promise.resolve(null),
+        ]);
+        if (cancelled) return;
+        setFxA(flattenFxRates(pa?.fx_rates));
+        setFxB(flattenFxRates(pb?.fx_rates));
       })
       .catch(() => {
         if (!cancelled) setError(t('boq.compare_load_error', { defaultValue: 'Failed to load BOQ data for comparison' }));
@@ -133,8 +160,18 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
   const comparison = useMemo(() => {
     if (!boqA || !boqB) return null;
 
-    const groupA = groupPositionsIntoSections(boqA.positions);
-    const groupB = groupPositionsIntoSections(boqB.positions);
+    // Issue #150 — convert each side's foreign-currency resources into that
+    // side's own base currency before comparing subtotals (same conversion as
+    // the editor grid). The two sides keep their own currency; a cross-currency
+    // blended diff is still blocked below via ``currencyMismatch``.
+    // ``currencyA/B`` can be a display string ("USD ($) — US Dollar"); extract
+    // the bare ISO code so it matches the resources' / fx_rates' codes.
+    const baseA = getCurrencyCode(currencyA) || currencyA;
+    const baseB = getCurrencyCode(currencyB) || currencyB;
+    const fxOptsA = { baseCurrency: baseA, fxRates: fxA };
+    const fxOptsB = { baseCurrency: baseB, fxRates: fxB };
+    const groupA = groupPositionsIntoSections(boqA.positions, fxOptsA);
+    const groupB = groupPositionsIntoSections(boqB.positions, fxOptsB);
 
     // Build a map of section key -> section data for both sides
     const sectionKey = (sg: SectionGroup) =>
@@ -162,9 +199,11 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
       });
     }
 
-    // Add ungrouped totals if any
-    const ungroupedTotalA = groupA.ungrouped.reduce((s, p) => s + (Number(p.total) || 0), 0);
-    const ungroupedTotalB = groupB.ungrouped.reduce((s, p) => s + (Number(p.total) || 0), 0);
+    // Add ungrouped totals if any (resource-aware base conversion per side).
+    const ungroupedTotalA = groupA.ungrouped.reduce(
+      (s, p) => s + resourceAwareTotalInBase(p, baseA, fxA), 0);
+    const ungroupedTotalB = groupB.ungrouped.reduce(
+      (s, p) => s + resourceAwareTotalInBase(p, baseB, fxB), 0);
     if (ungroupedTotalA > 0 || ungroupedTotalB > 0) {
       paired.push({
         key: '__ungrouped__',
@@ -178,7 +217,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
     }
 
     return { paired };
-  }, [boqA, boqB, t]);
+  }, [boqA, boqB, currencyA, currencyB, fxA, fxB, t]);
 
   // Close on Escape
   useEffect(() => {

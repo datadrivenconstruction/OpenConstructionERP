@@ -14926,6 +14926,15 @@ const resource = {
     "methodology.this_project": "този проект",
     "methodology.title": "Методики на остойностяване",
     "nav.methodologies": "Методики",
+    "bim.auto_install_failed_body": "Можете да опитате отново автоматичното инсталиране или да го инсталирате ръчно от GitHub.",
+    "bim.auto_install_failed_title": "Подготовката на конвертора {{format}} не можа да бъде завършена",
+    "bim.auto_install_hint": "Това се изпълнява във фонов режим, не е необходимо действие. Качването ви продължава междувременно.",
+    "bim.auto_install_hint_fallback": "Това се изпълнява във фонов режим, не е необходимо действие. IFC файловете се отварят веднага с вградения четец; конверторът ги надгражда до пълни мрежи, когато е готов.",
+    "bim.auto_install_manual_link": "Инсталиране ръчно от GitHub",
+    "bim.auto_install_preparing": "Подготовка на конвертора {{format}} (еднократно)…",
+    "bim.auto_install_preparing_sized": "Подготовка на конвертора {{format}} (еднократно, ~{{size}} МБ)…",
+    "bim.auto_install_retry": "Повторен опит за инсталиране",
+    "dwg_takeoff.auto_install_dxf_note": "DXF файловете вече работят без конвертора - това засяга само .dwg.",
   }
 } as { translation: Record<string, string> };
 

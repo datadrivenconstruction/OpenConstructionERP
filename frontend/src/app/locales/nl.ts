@@ -14927,6 +14927,15 @@ const resource = {
     "methodology.this_project": "dit project",
     "methodology.title": "Begrotingsmethodieken",
     "nav.methodologies": "Methodieken",
+    "bim.auto_install_failed_body": "U kunt de automatische installatie opnieuw proberen of hem handmatig vanaf GitHub installeren.",
+    "bim.auto_install_failed_title": "Voorbereiden van de {{format}}-converter kon niet worden voltooid",
+    "bim.auto_install_hint": "Dit gebeurt op de achtergrond, geen actie nodig. Uw upload gaat ondertussen door.",
+    "bim.auto_install_hint_fallback": "Dit gebeurt op de achtergrond, geen actie nodig. IFC-bestanden openen meteen met de ingebouwde lezer; de converter werkt ze bij naar volledige meshes zodra hij klaar is.",
+    "bim.auto_install_manual_link": "Handmatig installeren op GitHub",
+    "bim.auto_install_preparing": "{{format}}-converter wordt voorbereid (eenmalig)…",
+    "bim.auto_install_preparing_sized": "{{format}}-converter wordt voorbereid (eenmalig, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Installatie opnieuw proberen",
+    "dwg_takeoff.auto_install_dxf_note": "DXF-bestanden werken al zonder de converter - dit geldt alleen voor .dwg.",
   }
 } as { translation: Record<string, string> };
 

@@ -14925,6 +14925,15 @@ const resource = {
     "methodology.this_project": "यह परियोजना",
     "methodology.title": "अनुमान पद्धतियाँ",
     "nav.methodologies": "पद्धतियाँ",
+    "bim.auto_install_failed_body": "आप स्वचालित इंस्टॉल फिर से आज़मा सकते हैं, या इसे GitHub से मैन्युअल रूप से इंस्टॉल कर सकते हैं।",
+    "bim.auto_install_failed_title": "{{format}} कन्वर्टर तैयार करना पूरा नहीं हो सका",
+    "bim.auto_install_hint": "यह पृष्ठभूमि में चलता है, किसी कार्रवाई की आवश्यकता नहीं है। इस बीच आपका अपलोड जारी रहता है।",
+    "bim.auto_install_hint_fallback": "यह पृष्ठभूमि में चलता है, किसी कार्रवाई की आवश्यकता नहीं है। IFC फ़ाइलें अंतर्निहित रीडर से तुरंत खुलती हैं; तैयार होने पर कन्वर्टर उन्हें पूर्ण मेश में अपग्रेड कर देता है।",
+    "bim.auto_install_manual_link": "GitHub से मैन्युअल रूप से इंस्टॉल करें",
+    "bim.auto_install_preparing": "{{format}} कन्वर्टर तैयार किया जा रहा है (एक बार)…",
+    "bim.auto_install_preparing_sized": "{{format}} कन्वर्टर तैयार किया जा रहा है (एक बार, ~{{size}} MB)…",
+    "bim.auto_install_retry": "इंस्टॉल फिर से आज़माएँ",
+    "dwg_takeoff.auto_install_dxf_note": "DXF फ़ाइलें कन्वर्टर के बिना भी काम करती हैं - इसका असर केवल .dwg पर पड़ता है।",
   }
 } as { translation: Record<string, string> };
 

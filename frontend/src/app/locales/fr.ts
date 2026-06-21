@@ -14973,6 +14973,15 @@ const resource = {
     "methodology.this_project": "ce projet",
     "methodology.title": "Méthodologies d'estimation",
     "nav.methodologies": "Méthodologies",
+    "bim.auto_install_failed_body": "Vous pouvez relancer l'installation automatique ou l'installer manuellement depuis GitHub.",
+    "bim.auto_install_failed_title": "Impossible de terminer la préparation du convertisseur {{format}}",
+    "bim.auto_install_hint": "Cela s'exécute en arrière-plan, aucune action requise. Votre import se poursuit pendant ce temps.",
+    "bim.auto_install_hint_fallback": "Cela s'exécute en arrière-plan, aucune action requise. Les fichiers IFC s'ouvrent immédiatement avec le lecteur intégré ; le convertisseur les met à niveau en maillages complets une fois prêt.",
+    "bim.auto_install_manual_link": "Installer manuellement depuis GitHub",
+    "bim.auto_install_preparing": "Préparation du convertisseur {{format}} (une seule fois)…",
+    "bim.auto_install_preparing_sized": "Préparation du convertisseur {{format}} (une seule fois, ~{{size}} Mo)…",
+    "bim.auto_install_retry": "Réessayer l'installation",
+    "dwg_takeoff.auto_install_dxf_note": "Les fichiers DXF fonctionnent déjà sans le convertisseur - cela ne concerne que les .dwg.",
   }
 } as { translation: Record<string, string> };
 

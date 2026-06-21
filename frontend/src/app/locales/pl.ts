@@ -14944,6 +14944,15 @@ const resource = {
     "methodology.this_project": "ten projekt",
     "methodology.title": "Metodyki kosztorysowania",
     "nav.methodologies": "Metodyki",
+    "bim.auto_install_failed_body": "Możesz ponowić instalację automatyczną lub zainstalować go ręcznie z GitHuba.",
+    "bim.auto_install_failed_title": "Nie udało się zakończyć przygotowania konwertera {{format}}",
+    "bim.auto_install_hint": "Działa to w tle, nie wymaga żadnych działań. Twoje przesyłanie jest w tym czasie kontynuowane.",
+    "bim.auto_install_hint_fallback": "Działa to w tle, nie wymaga żadnych działań. Pliki IFC otwierają się od razu we wbudowanym czytniku; konwerter zaktualizuje je do pełnych siatek, gdy będzie gotowy.",
+    "bim.auto_install_manual_link": "Zainstaluj ręcznie z GitHuba",
+    "bim.auto_install_preparing": "Przygotowywanie konwertera {{format}} (jednorazowo)…",
+    "bim.auto_install_preparing_sized": "Przygotowywanie konwertera {{format}} (jednorazowo, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Ponów instalację",
+    "dwg_takeoff.auto_install_dxf_note": "Pliki DXF już działają bez konwertera - dotyczy to tylko plików .dwg.",
   }
 } as { translation: Record<string, string> };
 

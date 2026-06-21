@@ -14929,6 +14929,15 @@ const resource = {
     "methodology.this_project": "이 프로젝트",
     "methodology.title": "산정 방법론",
     "nav.methodologies": "방법론",
+    "bim.auto_install_failed_body": "자동 설치를 다시 시도하거나 GitHub에서 수동으로 설치할 수 있습니다.",
+    "bim.auto_install_failed_title": "{{format}} 변환기 준비를 완료할 수 없습니다",
+    "bim.auto_install_hint": "이 작업은 백그라운드에서 실행되며 별도의 조치가 필요하지 않습니다. 그동안 업로드는 계속됩니다.",
+    "bim.auto_install_hint_fallback": "이 작업은 백그라운드에서 실행되며 별도의 조치가 필요하지 않습니다. IFC 파일은 내장 리더로 즉시 열리며, 변환기가 준비되면 전체 메시로 업그레이드합니다.",
+    "bim.auto_install_manual_link": "GitHub에서 수동 설치",
+    "bim.auto_install_preparing": "{{format}} 변환기 준비 중(최초 1회)…",
+    "bim.auto_install_preparing_sized": "{{format}} 변환기 준비 중(최초 1회, 약 {{size}} MB)…",
+    "bim.auto_install_retry": "설치 다시 시도",
+    "dwg_takeoff.auto_install_dxf_note": "DXF 파일은 변환기 없이도 작동합니다 - 이는 .dwg에만 해당됩니다.",
   }
 } as { translation: Record<string, string> };
 

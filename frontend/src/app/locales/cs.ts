@@ -14936,6 +14936,15 @@ const resource = {
     "methodology.this_project": "tento projekt",
     "methodology.title": "Metodiky rozpočtování",
     "nav.methodologies": "Metodiky",
+    "bim.auto_install_failed_body": "Můžete zopakovat automatickou instalaci nebo jej nainstalovat ručně z GitHubu.",
+    "bim.auto_install_failed_title": "Přípravu konvertoru {{format}} se nepodařilo dokončit",
+    "bim.auto_install_hint": "Probíhá na pozadí, není potřeba nic dělat. Nahrávání mezitím pokračuje.",
+    "bim.auto_install_hint_fallback": "Probíhá na pozadí, není potřeba nic dělat. Soubory IFC se otevřou ihned s vestavěnou čtečkou; konvertor je po dokončení převede na úplné sítě.",
+    "bim.auto_install_manual_link": "Nainstalovat ručně z GitHubu",
+    "bim.auto_install_preparing": "Příprava konvertoru {{format}} (jednorázově)…",
+    "bim.auto_install_preparing_sized": "Příprava konvertoru {{format}} (jednorázově, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Zopakovat instalaci",
+    "dwg_takeoff.auto_install_dxf_note": "Soubory DXF fungují i bez konvertoru - toto se týká pouze .dwg.",
   }
 } as { translation: Record<string, string> };
 

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.8.2] - 2026-06-21
+
+### Added
+
+- BIM/CAD converters now install themselves with no manual steps. The first time you upload a `.rvt`, `.ifc`, `.dwg` or `.dgn` file, the matching converter is fetched and provisioned in the background, with an inline notice showing progress; you no longer have to open Settings and click Install. The install tries several methods in turn so it works across the widest range of hosts: a system `apt` install when the service runs as root, a rootless unpack into the app's own data directory otherwise, and a built-in pure-Python `.deb` reader when neither `dpkg` nor `apt` is present (minimal containers, non-Debian distributions). Downloads resume and retry on slow or flaky links, and the binary is self-tested after install. Terminal install steps remain documented for locked-down networks, but only as a genuine last resort.
+
+### Fixed
+
+- Bill-of-quantities exports and side-by-side comparison now convert foreign-currency amounts into the project's base currency before totalling, at both the position and the resource level. An export that mixed currencies previously added the raw figures together; the Excel and PDF exports and the compare view now apply the project exchange rates so the totals reconcile (#150).
+
 ## [8.8.1] - 2026-06-21
 
 ### Fixed

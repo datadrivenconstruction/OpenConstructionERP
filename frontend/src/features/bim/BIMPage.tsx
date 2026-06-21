@@ -77,6 +77,8 @@ import BIMSnapshotsPopover from './BIMSnapshotsPopover';
 import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
 import { BIMConverterStatusBanner } from './BIMConverterStatusBanner';
 import { InstallConverterPrompt } from './InstallConverterPrompt';
+import { AutoInstallConverterNotice } from './AutoInstallConverterNotice';
+import { useAutoInstallConverter, converterIdForFile } from './useAutoInstallConverter';
 import AddToBOQModal from './AddToBOQModal';
 import SaveGroupModal from './SaveGroupModal';
 import CreateTaskFromBIMModal from './CreateTaskFromBIMModal';
@@ -542,6 +544,15 @@ function UploadPanel({
     return active;
   }, [globalJobs, projectId]);
 
+  // Auto-install the matching DDC converter the moment a native CAD/BIM file
+  // is selected and its converter is missing - no extra click. The simple
+  // picker only ever holds .rvt / .ifc here (DWG/DXF are handed off to the
+  // DWG Takeoff module above), so this covers exactly the formats that need
+  // a converter on /bim. The notice + progress render inline below the
+  // dropzone; the upload itself is never blocked by the install.
+  const selectedConverterId = file && !advancedMode ? converterIdForFile(file.name) : null;
+  const autoInstall = useAutoInstallConverter(selectedConverterId, Boolean(selectedConverterId));
+
   const handleUpload = useCallback(async () => {
     if (!projectId) {
       // Without a resolved project the upload silently did nothing before,
@@ -576,16 +587,20 @@ function UploadPanel({
       } else if (file) {
         const name = modelName || file.name.replace(/\.[^.]+$/, '');
         if (isCADFile(file.name)) {
-          // Pre-upload guard: if the dropped file is a format that needs
-          // a converter and the converter isn't installed locally, surface
-          // the install prompt BEFORE wasting an upload roundtrip.  The
-          // query result is cached under `['bim-converters']` so the
-          // banner and the prompt pick up the same data.
+          // Converter readiness: the matching converter now auto-installs in
+          // the background the moment the file is picked (see
+          // useAutoInstallConverter above), so we no longer gate the upload
+          // behind a click-required install modal by default. The modal is
+          // kept strictly as a LAST resort: only surface it when the
+          // automatic attempt has already FAILED (``autoInstall.errored``),
+          // so the user still has a manual path. Otherwise we proceed with
+          // the upload and let the background install + the dock's
+          // converter-required handling finish the job.
           const lowerName = file.name.toLowerCase();
           const needsConverterMatch = (
             ['rvt'] as const
           ).find((c) => lowerName.endsWith('.' + c));
-          if (needsConverterMatch) {
+          if (needsConverterMatch && autoInstall.errored) {
             try {
               const status = await queryClient.fetchQuery({
                 queryKey: ['bim-converters'],
@@ -680,6 +695,7 @@ function UploadPanel({
     resetForm,
     queryClient,
     startGlobalUpload,
+    autoInstall.errored,
     t,
   ]);
 
@@ -876,6 +892,11 @@ function UploadPanel({
             </div>
           </>
         )}
+
+        {/* Auto-install of the matching converter (background, no click). The
+            notice only renders while installing or after a failed attempt;
+            on success it disappears and the upload proceeds normally. */}
+        <AutoInstallConverterNotice state={autoInstall} />
 
         {uploading && (
           <div className="space-y-2">
@@ -1307,6 +1328,12 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
     return active;
   }, [globalJobs, projectId]);
 
+  // Auto-install the matching converter as soon as a native CAD/BIM file is
+  // picked here (landing dropzone holds only .rvt / .ifc; DWG/DXF redirect
+  // to the DWG module). No click required - notice + progress render inline.
+  const landingConverterId = file ? converterIdForFile(file.name) : null;
+  const autoInstall = useAutoInstallConverter(landingConverterId, Boolean(landingConverterId));
+
   const resetForm = useCallback(() => {
     setFile(null);
     setModelName('');
@@ -1537,6 +1564,9 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                         </label>
                       </>
                     )}
+                    {/* Background converter auto-install (no click). Renders
+                        only while installing or after a failed attempt. */}
+                    <AutoInstallConverterNotice state={autoInstall} />
                     {uploading && <div className="h-1.5 rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div>}
                     {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
                     <button onClick={handleUpload} disabled={uploading} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-md hover:shadow-lg">

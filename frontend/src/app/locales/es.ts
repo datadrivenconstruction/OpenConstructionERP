@@ -14972,6 +14972,15 @@ const resource = {
     "methodology.this_project": "este proyecto",
     "methodology.title": "Metodologías de estimación",
     "nav.methodologies": "Metodologías",
+    "bim.auto_install_failed_body": "Puede reintentar la instalación automática o instalarlo manualmente desde GitHub.",
+    "bim.auto_install_failed_title": "No se pudo terminar de preparar el conversor {{format}}",
+    "bim.auto_install_hint": "Esto se ejecuta en segundo plano, no se requiere ninguna acción. Mientras tanto, su carga continúa.",
+    "bim.auto_install_hint_fallback": "Esto se ejecuta en segundo plano, no se requiere ninguna acción. Los archivos IFC se abren de inmediato con el lector integrado; el conversor los actualiza a mallas completas cuando esté listo.",
+    "bim.auto_install_manual_link": "Instalar manualmente desde GitHub",
+    "bim.auto_install_preparing": "Preparando el conversor {{format}} (una sola vez)…",
+    "bim.auto_install_preparing_sized": "Preparando el conversor {{format}} (una sola vez, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Reintentar instalación",
+    "dwg_takeoff.auto_install_dxf_note": "Los archivos DXF ya funcionan sin el conversor - esto solo afecta a los .dwg.",
   }
 } as { translation: Record<string, string> };
 

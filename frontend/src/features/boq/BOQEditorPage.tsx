@@ -2830,7 +2830,13 @@ export function BOQEditorPage() {
             projectName: project?.name,
             classificationStandard: project?.classification_standard,
             region: project?.region,
-            currency: (boq as unknown as Record<string, unknown>)?.currency as string ?? '\u20ac',
+            // Use the project base currency ISO code (was a stray ``boq.currency``
+            // that doesn't exist \u2192 always fell back to "\u20ac"). Issue #150: also
+            // thread the base currency + FX rates so foreign-currency resources
+            // are converted to base in the export exactly as in the grid.
+            currency: currencyCode,
+            baseCurrency: currencyCode,
+            fxRates,
             positions,
             markupTotals: markupTotalsForExport,
             netTotal,
@@ -2861,6 +2867,11 @@ export function BOQEditorPage() {
             projectName: project?.name,
             date: new Date().toISOString(),
             currency: currencySymbol,
+            // Issue #150 — convert foreign-currency resources to the project
+            // base in the PDF totals exactly as the grid does. ``directCost``
+            // (passed above) is already resource-aware base-converted.
+            baseCurrency: currencyCode,
+            fxRates,
             positions,
             markupTotals: markupTotalsForExport,
             directCost,

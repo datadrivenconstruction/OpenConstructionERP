@@ -14933,6 +14933,15 @@ const resource = {
     "methodology.this_project": "acest proiect",
     "methodology.title": "Metodologii de deviz",
     "nav.methodologies": "Metodologii",
+    "bim.auto_install_failed_body": "Puteți reîncerca instalarea automată sau îl puteți instala manual de pe GitHub.",
+    "bim.auto_install_failed_title": "Pregătirea convertorului {{format}} nu a putut fi finalizată",
+    "bim.auto_install_hint": "Aceasta rulează în fundal, nu este necesară nicio acțiune. Încărcarea continuă între timp.",
+    "bim.auto_install_hint_fallback": "Aceasta rulează în fundal, nu este necesară nicio acțiune. Fișierele IFC se deschid imediat cu cititorul încorporat; convertorul le actualizează la rețele complete când este gata.",
+    "bim.auto_install_manual_link": "Instalați manual de pe GitHub",
+    "bim.auto_install_preparing": "Se pregătește convertorul {{format}} (o singură dată)…",
+    "bim.auto_install_preparing_sized": "Se pregătește convertorul {{format}} (o singură dată, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Reîncercați instalarea",
+    "dwg_takeoff.auto_install_dxf_note": "Fișierele DXF funcționează deja fără convertor - acest lucru afectează doar .dwg.",
   }
 } as { translation: Record<string, string> };
 
