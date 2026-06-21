@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The federated BIM viewer no longer throws when the browser or device has no WebGL2 support; it now fails softly so the rest of the page keeps working.
 - Currency amounts in the cost-breakdown and resource-summary panels render reliably from the server's exact values, avoiding occasional malformed totals.
 - Confirming many detected takeoff measurements at once now writes them in a single database operation instead of one round-trip per row.
+- Installing a CAD or BIM converter no longer fails with a "request timed out" error when the download is slow to start. The install always runs in the background and the converters panel updates when it finishes, even if the initial request is dropped by a busy backend or a flaky connection.
 
 ## [8.8.2] - 2026-06-21
 

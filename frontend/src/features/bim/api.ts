@@ -418,11 +418,37 @@ export async function installBIMConverter(
           60_000,
         )
       : undefined;
-  const initial = await apiPost<BIMConverterInstallResult>(
-    `/v1/takeoff/converters/${encodeURIComponent(converterId)}/install/${qs}`,
-    {},
-    signal ? { signal } : undefined,
-  );
+  let initial: BIMConverterInstallResult;
+  try {
+    initial = await apiPost<BIMConverterInstallResult>(
+      `/v1/takeoff/converters/${encodeURIComponent(converterId)}/install/${qs}`,
+      {},
+      signal ? { signal } : undefined,
+    );
+  } catch (err) {
+    // The install POST is meant to return at once, but on a busy single-worker
+    // backend (e.g. the desktop build mid-BIM-load) it can still exceed the
+    // signal, and a flaky link can drop it ("Failed to fetch"). In BOTH cases
+    // the backend has very likely already spawned the background download, so
+    // treating this as a hard failure is wrong - it spammed users with
+    // repeated "signal timed out" toasts. Fall through to the progress poll,
+    // which reports the real outcome (or a calm "still downloading"). Only a
+    // genuine HTTP error (unknown converter, auth) - which carries a status -
+    // is re-thrown.
+    const e = err as { isTimeout?: boolean; name?: string; message?: string; status?: number };
+    const isTransient =
+      e?.isTimeout === true ||
+      e?.name === 'AbortError' ||
+      (typeof e?.status !== 'number' &&
+        /timed out|failed to fetch|networkerror|load failed|aborted/i.test(e?.message ?? ''));
+    if (!isTransient) throw err;
+    initial = {
+      converter_id: converterId,
+      installed: false,
+      async_install: true,
+      message: '',
+    } as BIMConverterInstallResult;
+  }
 
   // Back-compat: an older backend ran the install inline and already returned
   // the terminal result; an "already installed" answer is terminal too.
