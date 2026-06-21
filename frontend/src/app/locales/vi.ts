@@ -14935,6 +14935,15 @@ const resource = {
     "methodology.this_project": "dự án này",
     "methodology.title": "Phương pháp lập dự toán",
     "nav.methodologies": "Phương pháp",
+    "bim.auto_install_failed_body": "Bạn có thể thử lại quá trình cài đặt tự động hoặc cài đặt thủ công từ GitHub.",
+    "bim.auto_install_failed_title": "Không thể hoàn tất việc chuẩn bị bộ chuyển đổi {{format}}",
+    "bim.auto_install_hint": "Quá trình này chạy ở chế độ nền, không cần thao tác gì. Quá trình tải lên của bạn vẫn tiếp tục trong lúc đó.",
+    "bim.auto_install_hint_fallback": "Quá trình này chạy ở chế độ nền, không cần thao tác gì. Tệp IFC mở ngay lập tức bằng trình đọc tích hợp; bộ chuyển đổi sẽ nâng cấp chúng thành lưới đầy đủ khi sẵn sàng.",
+    "bim.auto_install_manual_link": "Cài đặt thủ công trên GitHub",
+    "bim.auto_install_preparing": "Đang chuẩn bị bộ chuyển đổi {{format}} (một lần)…",
+    "bim.auto_install_preparing_sized": "Đang chuẩn bị bộ chuyển đổi {{format}} (một lần, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Thử cài đặt lại",
+    "dwg_takeoff.auto_install_dxf_note": "Tệp DXF vẫn hoạt động mà không cần bộ chuyển đổi - điều này chỉ ảnh hưởng đến .dwg.",
   }
 } as { translation: Record<string, string> };
 

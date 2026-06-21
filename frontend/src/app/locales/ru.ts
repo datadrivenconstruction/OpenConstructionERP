@@ -15044,6 +15044,15 @@ const resource = {
     "methodology.this_project": "этот проект",
     "methodology.title": "Методики сметного расчёта",
     "nav.methodologies": "Методики",
+    "bim.auto_install_failed_body": "Можно повторить автоматическую установку или установить его вручную с GitHub.",
+    "bim.auto_install_failed_title": "Не удалось завершить подготовку конвертера {{format}}",
+    "bim.auto_install_hint": "Выполняется в фоне, ничего делать не нужно. Загрузка тем временем продолжается.",
+    "bim.auto_install_hint_fallback": "Выполняется в фоне, ничего делать не нужно. Файлы IFC открываются сразу со встроенным обработчиком; конвертер обновит их до полноценной геометрии, когда будет готов.",
+    "bim.auto_install_manual_link": "Установить вручную с GitHub",
+    "bim.auto_install_preparing": "Подготовка конвертера {{format}} (один раз)…",
+    "bim.auto_install_preparing_sized": "Подготовка конвертера {{format}} (один раз, ~{{size}} МБ)…",
+    "bim.auto_install_retry": "Повторить установку",
+    "dwg_takeoff.auto_install_dxf_note": "Файлы DXF уже работают без конвертера - это касается только .dwg.",
   }
 } as { translation: Record<string, string> };
 

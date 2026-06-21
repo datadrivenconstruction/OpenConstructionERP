@@ -75,6 +75,8 @@ import { boqApi, normalizePositions, type Position } from '@/features/boq/api';
 import { projectsApi } from '@/features/projects/api';
 import { installBIMConverter } from '@/features/bim/api';
 import { ConverterInstallProgressBar } from '@/features/bim/ConverterInstallProgressBar';
+import { AutoInstallConverterNotice } from '@/features/bim/AutoInstallConverterNotice';
+import { useAutoInstallConverter } from '@/features/bim/useAutoInstallConverter';
 import {
   fetchDrawing,
   fetchDrawings,
@@ -1100,6 +1102,21 @@ export function DwgTakeoffPage() {
     staleTime: 60_000,
     retry: 1,
   });
+
+  // Auto-install the DWG converter in the background the moment the user
+  // picks a .dwg file and the local converter is missing - no click. DXF
+  // files parse without a converter, so this is scoped to .dwg only. The
+  // notice + progress render inline in the upload modal below; the manual
+  // "Install converter" CTA stays as a fallback only.
+  const uploadNeedsDwgConverter =
+    !!uploadFile &&
+    uploadFile.name.toLowerCase().endsWith('.dwg') &&
+    !!offlineReadiness &&
+    !offlineReadiness.converter_available;
+  const dwgAutoInstall = useAutoInstallConverter(
+    uploadNeedsDwgConverter ? 'dwg' : null,
+    uploadNeedsDwgConverter,
+  );
 
   /** Strip the deep-link params off the URL after one shot so a refresh
    *  doesn't re-trigger selection / import. */
@@ -4685,29 +4702,24 @@ export function DwgTakeoffPage() {
               )}
             </button>
 
-            {/* Install-hint banner — shown when user picks a .dwg but the
-                local converter isn't installed. DXF uploads bypass it. */}
-            {uploadFile
-              && uploadFile.name.toLowerCase().endsWith('.dwg')
-              && offlineReadiness
-              && !offlineReadiness.converter_available && (
-              <div
-                className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-[11px] text-amber-700 dark:text-amber-300"
-                data-testid="dwg-upload-install-hint"
-              >
-                <WifiOff size={14} className="shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="font-semibold">
-                    {t('dwg_takeoff.offline_install', { defaultValue: 'Install converter' })}
-                  </p>
-                  <p className="leading-relaxed">
-                    {offlineReadiness.message
-                      || t('dwg_takeoff.offline_install_hint', {
-                        defaultValue:
-                          'Upload DXF files to continue without the converter, or install it to enable .dwg support.',
-                      })}
-                  </p>
-                </div>
+            {/* Auto-install of the local DWG converter (background, no click).
+                Shown when the user picks a .dwg and the converter is missing;
+                DXF uploads bypass it entirely. The notice renders only while
+                installing or after a failed attempt - on success it clears and
+                the upload proceeds. Manual install stays a fallback (the
+                OfflineReadyBadge CTA + the error-state link in the notice). */}
+            {uploadNeedsDwgConverter && (
+              <div className="space-y-1.5" data-testid="dwg-upload-install-hint">
+                <p className="flex items-start gap-1.5 text-[10px] text-content-tertiary leading-relaxed">
+                  <WifiOff size={12} className="shrink-0 mt-0.5" />
+                  <span>
+                    {t('dwg_takeoff.auto_install_dxf_note', {
+                      defaultValue:
+                        'DXF files already work without the converter - this only affects .dwg.',
+                    })}
+                  </span>
+                </p>
+                <AutoInstallConverterNotice state={dwgAutoInstall} variant="dark" />
               </div>
             )}
 

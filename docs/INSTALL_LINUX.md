@@ -192,14 +192,29 @@ published). IFC also has a built-in text fallback parser, so `.ifc` files still
 import without the binary - just with simplified placeholder geometry instead of
 real meshes.
 
-The app installs the converter automatically the first time you need it (or via
-**Settings -> BIM Converters -> Install**). The download runs in the background
-and the panel updates when it finishes. On a slow server link a large download
-can take several minutes - that is expected; let it run.
+**You normally do not need this section.** The app installs the converter
+automatically the first time you upload a CAD/BIM file (and you can also trigger
+it from **Settings -> BIM Converters -> Install**). The download runs in the
+background and the panel updates when it finishes. It tries several methods so it
+works on the widest range of hosts:
 
-If the automatic download cannot complete (locked-down network, proxy, very slow
-link), install it from the terminal instead. **amd64 only.** Check your arch with
-`uname -m` (`x86_64` = amd64).
+- it does **not** require root - the packages are unpacked into the app's own
+  data directory (`~/.openestimator/converters/`), so an unprivileged service
+  account can provision the converter on its own;
+- it does **not** require `dpkg`/`apt` - it unpacks the `.deb` payload with a
+  built-in pure-Python reader when those tools are absent (minimal containers,
+  non-Debian distros);
+- it resumes interrupted downloads and retries slow or flaky links
+  automatically, and self-tests the binary after install.
+
+On a slow server link the first download (the IFC chain is ~114 MB) can take a
+few minutes - that is expected; let it run.
+
+Only if the automatic install genuinely cannot complete (no outbound network, a
+blocking proxy, or an unsupported CPU architecture) install it from the terminal
+as a fallback. **amd64 only** - check your arch with `uname -m` (`x86_64` =
+amd64). On arm64 the binary converter is not yet published, so `.ifc` files fall
+back to the built-in placeholder parser.
 
 ### Option A - signed apt source (recommended; auto-updates)
 
@@ -251,6 +266,6 @@ ls -l /usr/bin/IfcExporter        # should exist and be > 1 KB
 | `ModuleNotFoundError` after install | Wrong venv active | Re-run `source ~/openconstructionerp-venv/bin/activate` |
 | `Address already in use` | Port 8080 taken | `ss -tlnp \| grep 8080` then `--port 9090` (section 5) |
 | `openconstructionerp: command not found` after pipx | Path not refreshed | `pipx ensurepath` then open a new shell |
-| BIM converter install "signal timed out", stuck on placeholder geometry | Slow link aborted the download | Install the converter from the terminal (section 7) |
+| BIM converter install "signal timed out", stuck on placeholder geometry | A slow link aborted an older build's blocking download | Fixed in 8.8.0+: the install now runs in the background, resumes, and unpacks without root or dpkg. Retry **Settings -> BIM Converters -> Install**; only if it still fails, install from the terminal (section 7) |
 
 If you still cannot install, run `openconstructionerp doctor` (or `python -m openconstructionerp doctor`) and open an issue with the full output: https://github.com/datadrivenconstruction/OpenConstructionERP/issues

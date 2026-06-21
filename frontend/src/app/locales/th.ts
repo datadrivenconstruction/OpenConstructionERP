@@ -14927,6 +14927,15 @@ const resource = {
     "methodology.this_project": "โครงการนี้",
     "methodology.title": "วิธีการประมาณราคา",
     "nav.methodologies": "วิธีการประมาณราคา",
+    "bim.auto_install_failed_body": "คุณสามารถลองติดตั้งอัตโนมัติอีกครั้ง หรือติดตั้งด้วยตนเองจาก GitHub",
+    "bim.auto_install_failed_title": "ไม่สามารถเตรียมตัวแปลง {{format}} ให้เสร็จสมบูรณ์ได้",
+    "bim.auto_install_hint": "การดำเนินการนี้ทำงานอยู่เบื้องหลัง ไม่ต้องดำเนินการใด ๆ การอัปโหลดของคุณจะดำเนินต่อไปในระหว่างนี้",
+    "bim.auto_install_hint_fallback": "การดำเนินการนี้ทำงานอยู่เบื้องหลัง ไม่ต้องดำเนินการใด ๆ ไฟล์ IFC จะเปิดทันทีด้วยตัวอ่านในตัว ตัวแปลงจะอัปเกรดเป็นเมชแบบเต็มเมื่อพร้อม",
+    "bim.auto_install_manual_link": "ติดตั้งด้วยตนเองบน GitHub",
+    "bim.auto_install_preparing": "กำลังเตรียมตัวแปลง {{format}} (ครั้งเดียว)…",
+    "bim.auto_install_preparing_sized": "กำลังเตรียมตัวแปลง {{format}} (ครั้งเดียว, ~{{size}} MB)…",
+    "bim.auto_install_retry": "ลองติดตั้งอีกครั้ง",
+    "dwg_takeoff.auto_install_dxf_note": "ไฟล์ DXF ใช้งานได้อยู่แล้วโดยไม่ต้องใช้ตัวแปลง - สิ่งนี้มีผลกับ .dwg เท่านั้น",
   }
 } as { translation: Record<string, string> };
 

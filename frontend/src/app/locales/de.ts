@@ -15031,6 +15031,15 @@ const resource = {
     "methodology.this_project": "dieses Projekt",
     "methodology.title": "Kalkulationsmethodiken",
     "nav.methodologies": "Methodiken",
+    "bim.auto_install_failed_body": "Sie können die automatische Installation erneut versuchen oder ihn manuell von GitHub installieren.",
+    "bim.auto_install_failed_title": "Vorbereitung des {{format}}-Konverters konnte nicht abgeschlossen werden",
+    "bim.auto_install_hint": "Dies läuft im Hintergrund, keine Aktion erforderlich. Ihr Upload wird währenddessen fortgesetzt.",
+    "bim.auto_install_hint_fallback": "Dies läuft im Hintergrund, keine Aktion erforderlich. IFC-Dateien öffnen sich sofort mit dem integrierten Reader; der Konverter rüstet sie auf vollständige Meshes auf, sobald er bereit ist.",
+    "bim.auto_install_manual_link": "Manuell auf GitHub installieren",
+    "bim.auto_install_preparing": "{{format}}-Konverter wird vorbereitet (einmalig)…",
+    "bim.auto_install_preparing_sized": "{{format}}-Konverter wird vorbereitet (einmalig, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Installation wiederholen",
+    "dwg_takeoff.auto_install_dxf_note": "DXF-Dateien funktionieren bereits ohne den Konverter - das betrifft nur .dwg.",
   }
 } as { translation: Record<string, string> };
 

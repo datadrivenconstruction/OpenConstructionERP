@@ -15021,6 +15021,15 @@ const resource = {
     "methodology.this_project": "هذا المشروع",
     "methodology.title": "منهجيات التقدير",
     "nav.methodologies": "المنهجيات",
+    "bim.auto_install_failed_body": "يمكنك إعادة محاولة التثبيت التلقائي أو تثبيته يدويًا من GitHub.",
+    "bim.auto_install_failed_title": "تعذّر إكمال تجهيز محول {{format}}",
+    "bim.auto_install_hint": "يتم تشغيل هذا في الخلفية، ولا يلزم أي إجراء. يستمر تحميلك في هذه الأثناء.",
+    "bim.auto_install_hint_fallback": "يتم تشغيل هذا في الخلفية، ولا يلزم أي إجراء. تُفتح ملفات IFC على الفور باستخدام القارئ المدمج؛ ويقوم المحول بترقيتها إلى شبكات كاملة عند جاهزيته.",
+    "bim.auto_install_manual_link": "التثبيت يدويًا من GitHub",
+    "bim.auto_install_preparing": "جارٍ تجهيز محول {{format}} (لمرة واحدة)…",
+    "bim.auto_install_preparing_sized": "جارٍ تجهيز محول {{format}} (لمرة واحدة، ~{{size}} ميغابايت)…",
+    "bim.auto_install_retry": "إعادة محاولة التثبيت",
+    "dwg_takeoff.auto_install_dxf_note": "ملفات DXF تعمل بالفعل بدون المحول - هذا يؤثر فقط على ملفات .dwg.",
   }
 } as { translation: Record<string, string> };
 

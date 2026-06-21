@@ -14929,6 +14929,15 @@ const resource = {
     "methodology.this_project": "este projeto",
     "methodology.title": "Metodologias de orçamentação",
     "nav.methodologies": "Metodologias",
+    "bim.auto_install_failed_body": "Você pode tentar a instalação automática novamente ou instalá-lo manualmente pelo GitHub.",
+    "bim.auto_install_failed_title": "Não foi possível concluir a preparação do conversor {{format}}",
+    "bim.auto_install_hint": "Isso é executado em segundo plano, nenhuma ação necessária. Seu envio continua enquanto isso.",
+    "bim.auto_install_hint_fallback": "Isso é executado em segundo plano, nenhuma ação necessária. Os arquivos IFC abrem imediatamente com o leitor integrado; o conversor os atualiza para malhas completas quando estiver pronto.",
+    "bim.auto_install_manual_link": "Instalar manualmente pelo GitHub",
+    "bim.auto_install_preparing": "Preparando o conversor {{format}} (uma única vez)…",
+    "bim.auto_install_preparing_sized": "Preparando o conversor {{format}} (uma única vez, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Tentar instalação novamente",
+    "dwg_takeoff.auto_install_dxf_note": "Os arquivos DXF já funcionam sem o conversor - isto afeta apenas os .dwg.",
   }
 } as { translation: Record<string, string> };
 

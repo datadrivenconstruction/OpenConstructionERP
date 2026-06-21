@@ -212,4 +212,82 @@ describe('groupPositionsIntoSections', () => {
     expect(result.sections).toHaveLength(0);
     expect(result.ungrouped).toHaveLength(0);
   });
+
+  /* ── Issue #150 — FX conversion in section subtotals ───────────────── */
+
+  it('leaves subtotals unconverted when no fxOpts are passed (back-compat)', () => {
+    // A child priced in a foreign currency must roll up VERBATIM with no FX
+    // context — exactly the prior export/compare behaviour we must preserve.
+    const section = makePosition({
+      id: 'sec-1', ordinal: '01', description: 'S', unit: '', quantity: 0, unit_rate: 0, total: 0,
+    });
+    const child = makePosition({
+      id: 'p1', parent_id: 'sec-1', ordinal: '01.001', total: 1000,
+      metadata: { currency: 'USD' },
+    });
+    const result = groupPositionsIntoSections([section, child]);
+    expect(result.sections[0].subtotal).toBe(1000);
+  });
+
+  it('converts a position-level foreign currency into base in the subtotal', () => {
+    const section = makePosition({
+      id: 'sec-1', ordinal: '01', description: 'S', unit: '', quantity: 0, unit_rate: 0, total: 0,
+    });
+    const child = makePosition({
+      id: 'p1', parent_id: 'sec-1', ordinal: '01.001', total: 1000,
+      metadata: { currency: 'USD' }, // 1 USD = 0.9 EUR
+    });
+    const result = groupPositionsIntoSections([section, child], {
+      baseCurrency: 'EUR',
+      fxRates: [{ currency: 'USD', rate: 0.9 }],
+    });
+    // 1000 USD × 0.9 = 900 EUR
+    expect(result.sections[0].subtotal).toBeCloseTo(900);
+  });
+
+  it('converts a foreign-currency RESOURCE (no position currency) into base — Issue #150', () => {
+    // The exact shape the contributor reported: the position has NO
+    // metadata.currency, but its resource is priced in USD. Its stored total
+    // was built from Σ(qty×rate) with no FX, so a naive sum would add it as
+    // if "1 USD = 1 EUR". The resource-aware path must convert it.
+    const section = makePosition({
+      id: 'sec-1', ordinal: '01', description: 'S', unit: '', quantity: 0, unit_rate: 0, total: 0,
+    });
+    const child = makePosition({
+      id: 'p1', parent_id: 'sec-1', ordinal: '01.001',
+      quantity: 2,
+      total: 200, // 2 × (1 × 100 USD), no FX baked in
+      metadata: {
+        // NOTE: no top-level currency here — the bug only bites this shape.
+        resources: [
+          { name: 'Imported pump', type: 'equipment', quantity: 1, unit_rate: 100, currency: 'USD' },
+        ],
+      },
+    });
+    const result = groupPositionsIntoSections([section, child], {
+      baseCurrency: 'EUR',
+      fxRates: [{ currency: 'USD', rate: 0.9 }],
+    });
+    // per-unit 100 USD × 0.9 = 90 EUR, × qty 2 = 180 EUR (NOT 200).
+    expect(result.sections[0].subtotal).toBeCloseTo(180);
+  });
+
+  it('does not convert a base-currency resource', () => {
+    const section = makePosition({
+      id: 'sec-1', ordinal: '01', description: 'S', unit: '', quantity: 0, unit_rate: 0, total: 0,
+    });
+    const child = makePosition({
+      id: 'p1', parent_id: 'sec-1', ordinal: '01.001', quantity: 2, total: 200,
+      metadata: {
+        resources: [
+          { name: 'Local pump', type: 'equipment', quantity: 1, unit_rate: 100, currency: 'EUR' },
+        ],
+      },
+    });
+    const result = groupPositionsIntoSections([section, child], {
+      baseCurrency: 'EUR',
+      fxRates: [{ currency: 'USD', rate: 0.9 }],
+    });
+    expect(result.sections[0].subtotal).toBeCloseTo(200);
+  });
 });

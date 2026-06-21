@@ -1,5 +1,6 @@
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from '@/shared/lib/api';
 import type { CostVariant, VariantStats } from '@/features/costs/api';
+import { resourceAwareTotalInBase } from './boqHelpers';
 
 /* ── Core BOQ types ──────────────────────────────────────────────────── */
 
@@ -435,11 +436,16 @@ export interface SectionGroup {
 export function groupPositionsIntoSections(
   positions: Position[],
   /**
-   * Optional FX context (Issue #111). When supplied, child positions
-   * priced in a non-base currency (``metadata.currency``) are converted
-   * into ``baseCurrency`` before being added to the section subtotal.
-   * Without this, mixed-currency BOQs sum foreign-currency totals
-   * directly into base subtotals, producing nonsensical figures.
+   * Optional FX context (Issue #111 / #150). When supplied, child positions
+   * priced in a non-base currency are converted into ``baseCurrency`` before
+   * being added to the section subtotal. This covers BOTH a position-level
+   * ``metadata.currency`` AND the harder case the contributor's data hits:
+   * a position with NO ``metadata.currency`` but whose ``metadata.resources``
+   * are priced in a foreign currency (its stored ``total`` was built from
+   * ``Σ(r.qty × r.rate)`` with no FX applied). Without this, mixed-currency
+   * BOQs sum foreign-currency totals directly into base subtotals, producing
+   * nonsensical figures — and the Excel/PDF exports + version-compare were
+   * doing exactly that because they called this helper with no fxOpts.
    */
   fxOpts?: {
     baseCurrency?: string;
@@ -456,19 +462,24 @@ export function groupPositionsIntoSections(
   const fxRates = fxOpts?.fxRates;
 
   const rebase = (pos: Position): number => {
-    // Coerce defensively — ``pos.total`` may still be a decimal string
-    // here if the list wasn't run through ``normalizePosition`` first;
-    // adding a raw string into ``subtotal`` concatenates → NaN (#131).
-    const total = toFiniteNumber(pos.total);
-    if (!baseCurrency) return total;
-    const meta = ((pos as { metadata?: Record<string, unknown> }).metadata
-      ?? {}) as Record<string, unknown>;
-    const sourceCurrency = (meta.currency as string | undefined) || baseCurrency;
-    if (sourceCurrency === baseCurrency || !fxRates) return total;
-    const fx = fxRates.find((r) => r.currency === sourceCurrency);
-    const fxRate = fx ? Number(fx.rate) : NaN;
-    if (!fx || !Number.isFinite(fxRate) || fxRate <= 0) return total;
-    return total * fxRate;
+    // Backward-compatible: with no FX context, return the raw (coerced)
+    // position total exactly as before. ``toFiniteNumber`` guards against a
+    // decimal string slipping through unnormalized (adding a raw string into
+    // ``subtotal`` concatenates → NaN, #131).
+    if (!baseCurrency) return toFiniteNumber(pos.total);
+    // Resource-currency-aware roll-up — the SAME conversion the editor grid
+    // (columnDefs ``totalFormatter`` / ``directCost``) uses, so exported and
+    // compared subtotals match what the user sees on screen (#150).
+    return resourceAwareTotalInBase(
+      pos as unknown as {
+        total?: number | string | null;
+        quantity?: number | string | null;
+        metadata?: Record<string, unknown> | null;
+        metadata_?: Record<string, unknown> | null;
+      },
+      baseCurrency,
+      fxRates,
+    );
   };
 
   // First pass: identify sections

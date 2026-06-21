@@ -14929,6 +14929,15 @@ const resource = {
     "methodology.this_project": "このプロジェクト",
     "methodology.title": "積算方式",
     "nav.methodologies": "積算方式",
+    "bim.auto_install_failed_body": "自動インストールを再試行するか、GitHub から手動でインストールできます。",
+    "bim.auto_install_failed_title": "{{format}} コンバーターの準備を完了できませんでした",
+    "bim.auto_install_hint": "これはバックグラウンドで実行され、操作は不要です。その間もアップロードは続行されます。",
+    "bim.auto_install_hint_fallback": "これはバックグラウンドで実行され、操作は不要です。IFC ファイルは組み込みリーダーですぐに開きます。準備が整うと、コンバーターが完全なメッシュにアップグレードします。",
+    "bim.auto_install_manual_link": "GitHub で手動インストール",
+    "bim.auto_install_preparing": "{{format}} コンバーターを準備中（初回のみ）…",
+    "bim.auto_install_preparing_sized": "{{format}} コンバーターを準備中（初回のみ、約 {{size}} MB）…",
+    "bim.auto_install_retry": "インストールを再試行",
+    "dwg_takeoff.auto_install_dxf_note": "DXF ファイルはコンバーターなしでも動作します - これは .dwg のみに影響します。",
   }
 } as { translation: Record<string, string> };
 

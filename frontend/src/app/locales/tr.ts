@@ -14926,6 +14926,15 @@ const resource = {
     "methodology.this_project": "bu proje",
     "methodology.title": "Keşif metodolojileri",
     "nav.methodologies": "Metodolojiler",
+    "bim.auto_install_failed_body": "Otomatik kurulumu yeniden deneyebilir veya GitHub'dan elle kurabilirsiniz.",
+    "bim.auto_install_failed_title": "{{format}} dönüştürücüsünün hazırlanması tamamlanamadı",
+    "bim.auto_install_hint": "Bu, arka planda çalışır, herhangi bir işlem gerekmez. Yüklemeniz bu sırada devam eder.",
+    "bim.auto_install_hint_fallback": "Bu, arka planda çalışır, herhangi bir işlem gerekmez. IFC dosyaları yerleşik okuyucuyla hemen açılır; dönüştürücü hazır olduğunda bunları tam ağ modellerine yükseltir.",
+    "bim.auto_install_manual_link": "GitHub'dan elle kur",
+    "bim.auto_install_preparing": "{{format}} dönüştürücüsü hazırlanıyor (tek seferlik)…",
+    "bim.auto_install_preparing_sized": "{{format}} dönüştürücüsü hazırlanıyor (tek seferlik, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Kurulumu yeniden dene",
+    "dwg_takeoff.auto_install_dxf_note": "DXF dosyaları dönüştürücü olmadan zaten çalışır - bu yalnızca .dwg dosyalarını etkiler.",
   }
 } as { translation: Record<string, string> };
 

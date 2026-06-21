@@ -14925,6 +14925,15 @@ const resource = {
     "methodology.this_project": "proyek ini",
     "methodology.title": "Metodologi estimasi",
     "nav.methodologies": "Metodologi",
+    "bim.auto_install_failed_body": "Anda dapat mencoba lagi pemasangan otomatis, atau memasangnya secara manual dari GitHub.",
+    "bim.auto_install_failed_title": "Tidak dapat menyelesaikan penyiapan konverter {{format}}",
+    "bim.auto_install_hint": "Ini berjalan di latar belakang, tidak perlu tindakan. Unggahan Anda tetap berlanjut sementara itu.",
+    "bim.auto_install_hint_fallback": "Ini berjalan di latar belakang, tidak perlu tindakan. File IFC langsung terbuka dengan pembaca bawaan; konverter akan meningkatkannya menjadi mesh lengkap saat siap.",
+    "bim.auto_install_manual_link": "Pasang manual di GitHub",
+    "bim.auto_install_preparing": "Menyiapkan konverter {{format}} (sekali saja)…",
+    "bim.auto_install_preparing_sized": "Menyiapkan konverter {{format}} (sekali saja, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Coba pasang lagi",
+    "dwg_takeoff.auto_install_dxf_note": "File DXF sudah berfungsi tanpa konverter - ini hanya memengaruhi .dwg.",
   }
 } as { translation: Record<string, string> };
 

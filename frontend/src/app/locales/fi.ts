@@ -14926,6 +14926,15 @@ const resource = {
     "methodology.this_project": "tämä projekti",
     "methodology.title": "Kustannusarviomenetelmät",
     "nav.methodologies": "Menetelmät",
+    "bim.auto_install_failed_body": "Voit yrittää automaattista asennusta uudelleen tai asentaa sen manuaalisesti GitHubista.",
+    "bim.auto_install_failed_title": "{{format}}-muuntimen valmistelua ei voitu viimeistellä",
+    "bim.auto_install_hint": "Tämä suoritetaan taustalla, mitään toimia ei tarvita. Lataus jatkuu sillä välin.",
+    "bim.auto_install_hint_fallback": "Tämä suoritetaan taustalla, mitään toimia ei tarvita. IFC-tiedostot avautuvat heti sisäänrakennetulla lukijalla; muunnin päivittää ne täysiksi verkoiksi, kun se on valmis.",
+    "bim.auto_install_manual_link": "Asenna manuaalisesti GitHubista",
+    "bim.auto_install_preparing": "Valmistellaan {{format}}-muunninta (kertaluonteinen)…",
+    "bim.auto_install_preparing_sized": "Valmistellaan {{format}}-muunninta (kertaluonteinen, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Yritä asennusta uudelleen",
+    "dwg_takeoff.auto_install_dxf_note": "DXF-tiedostot toimivat jo ilman muunninta - tämä koskee vain .dwg-tiedostoja.",
   }
 } as { translation: Record<string, string> };
 

@@ -612,8 +612,9 @@ def _download_converter_files_linux(converter_id: str) -> Path:
 
     The Linux mirror of :func:`_download_converter_files_windows`: resolve the
     converter's transitive ``ddc-*`` `.deb` set from the signed apt repo, stream
-    each package (host allow-listed, size-capped), then ``dpkg-deb -x`` it into
-    a per-arch, user-writable root under
+    each package (host allow-listed, size-capped), then unpack each (via
+    ``dpkg-deb`` when present, else a pure-Python ``ar`` + :mod:`tarfile`
+    reader) into a per-arch, user-writable root under
     ``~/.openestimator/converters/_ddc_linux_<arch>`` - preserving the
     ``usr/bin`` + ``usr/lib/datadrivenconstruction`` layout so the binary's
     ``$ORIGIN`` RUNPATH resolves (``LD_LIBRARY_PATH`` is also set at launch by
@@ -623,22 +624,19 @@ def _download_converter_files_linux(converter_id: str) -> Path:
     Returns the extracted ``usr/bin/{Format}Exporter`` path. Raises
     ``RuntimeError`` with an actionable message on any failure.
     """
-    import shutil
-    import subprocess
     import tempfile
+
+    from app.modules.takeoff.deb_extract import DebExtractError, extract_deb
 
     binary_name = _LINUX_CONVERTER_BINARIES.get(converter_id)
     apt_pkg = _LINUX_APT_PACKAGES.get(converter_id)
     if not binary_name or not apt_pkg:
         raise RuntimeError(f"No Linux converter package is defined for '{converter_id}'.")
 
-    if shutil.which("dpkg-deb") is None:
-        raise RuntimeError(
-            "dpkg-deb is required to unpack the Linux converter packages but was "
-            "not found. It ships with every Debian/Ubuntu base image; install the "
-            f"`dpkg` package, or run `sudo apt install -y {apt_pkg}` once the DDC "
-            "apt source (pkg.datadrivenconstruction.io) is configured."
-        )
+    # No hard dependency on dpkg-deb: extract_deb() unpacks each package with
+    # dpkg-deb when it is present and falls back to a pure-Python ar + tarfile
+    # reader otherwise, so the install also works on minimal containers and
+    # non-Debian hosts where dpkg is absent.
 
     arch = _deb_arch()
     root = _ddc_linux_root(arch)
@@ -720,24 +718,143 @@ def _download_converter_files_linux(converter_id: str) -> Path:
             bytes_done=completed_total,
             file=None,
         )
+
+        # Method 1 (root only): install the downloaded packages system-wide with
+        # apt. apt additionally pulls any base-system libraries the converter
+        # needs, and lands the binary on the system PATH. Any problem here falls
+        # straight through to the universal rootless extraction below, so this is
+        # a safe best-effort upgrade, not a new hard requirement.
+        if _system_apt_available():
+            deb_files = [str(tmpdir / f"{i:02d}_{pkg}.deb") for i, (pkg, _r) in enumerate(plan, 1)]
+            try:
+                sys_bin = _apt_install_local_debs(deb_files, binary_name, timeout=600)
+            except Exception as exc:  # noqa: BLE001 - fall back to rootless extract
+                logger.warning(
+                    "Linux converter %s: system apt install failed (%s); using rootless extract",
+                    converter_id,
+                    exc,
+                )
+                sys_bin = None
+            if sys_bin is not None:
+                _linux_converter_self_test(converter_id, sys_bin)
+                logger.info("Linux converter %s installed system-wide at %s", converter_id, sys_bin)
+                return sys_bin
+
+        # Method 2 (universal, no root needed): unpack each package into the
+        # per-user converter dir with extract_deb (dpkg-deb when present, else a
+        # pure-Python ar + tarfile reader).
         for i, (pkg, _rel) in enumerate(plan, 1):
             deb = tmpdir / f"{i:02d}_{pkg}.deb"
-            proc = subprocess.run(  # noqa: S603 - fixed argv, no shell
-                ["dpkg-deb", "-x", str(deb), str(root)],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                timeout=180,
-            )
-            if proc.returncode != 0:
-                raise RuntimeError(
-                    f"dpkg-deb extraction of {pkg} failed: {proc.stderr.decode('utf-8', 'replace')[:300]}"
-                )
+            try:
+                method = extract_deb(deb, root, timeout=180)
+            except DebExtractError as exc:
+                raise RuntimeError(f"Could not unpack {pkg}: {exc}") from exc
+            logger.info("Linux converter %s: unpacked %s (%s)", converter_id, pkg, method)
 
     if not bin_path.exists():
         raise RuntimeError(f"Converter binary {binary_name} was not found after extraction (expected at {bin_path}).")
     bin_path.chmod(0o755)
+    _linux_converter_self_test(converter_id, bin_path)
     logger.info("Linux converter %s ready at %s", converter_id, bin_path)
     return bin_path
+
+
+def _linux_converter_self_test(converter_id: str, bin_path: Path) -> None:
+    """Best-effort post-install launch check (Linux).
+
+    Runs the freshly extracted binary with a harmless flag to confirm its
+    shared libraries load. This is purely diagnostic - it never raises and
+    never removes the install - but when the dynamic loader is missing a
+    *system* library it logs an actionable warning, so an operator can see
+    *why* a later conversion falls back to placeholder geometry instead of it
+    failing silently. The binary's own bundled libs are covered by
+    ``_converter_subprocess_env`` (LD_LIBRARY_PATH); this catches the rarer
+    case of a missing base-system library on a very slim host.
+    """
+    import subprocess
+
+    try:
+        from app.modules.boq.cad_import import _converter_subprocess_env
+
+        env = _converter_subprocess_env(bin_path)
+    except Exception:  # noqa: BLE001 - diagnostics must never break the install
+        env = None
+    try:
+        proc = subprocess.run(  # noqa: S603 - fixed argv, no shell
+            [str(bin_path), "--version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env,
+            timeout=30,
+            input=b"\n",
+        )
+    except OSError as exc:
+        logger.warning(
+            "Linux converter %s self-test could not launch %s: %s",
+            converter_id,
+            bin_path.name,
+            exc,
+        )
+        return
+    except subprocess.TimeoutExpired:
+        # It started and is waiting on input - that means the libraries loaded.
+        logger.info("Linux converter %s self-test: %s launched, libraries OK", converter_id, bin_path.name)
+        return
+    blob = (proc.stdout + b"\n" + proc.stderr).decode("utf-8", "replace")
+    low = blob.lower()
+    if "error while loading shared libraries" in low or "cannot open shared object" in low:
+        logger.warning(
+            "Linux converter %s installed but a system library is missing: %s. Real "
+            "geometry conversion will fall back to placeholder until it is present "
+            "(on Debian/Ubuntu try `sudo apt-get install -f`).",
+            converter_id,
+            blob.strip()[:200],
+        )
+    else:
+        logger.info("Linux converter %s self-test OK (%s)", converter_id, bin_path.name)
+
+
+def _system_apt_available() -> bool:
+    """True when we may install ``.deb`` files system-wide (Linux, root, apt-get)."""
+    import shutil
+    import sys
+
+    if not sys.platform.startswith("linux"):
+        return False
+    geteuid = getattr(os, "geteuid", None)
+    if geteuid is None or geteuid() != 0:
+        return False
+    return shutil.which("apt-get") is not None
+
+
+def _apt_install_local_debs(deb_files: list[str], binary_name: str, *, timeout: int) -> Path | None:
+    """Install already-downloaded ``.deb`` files with the system apt (as root).
+
+    Runs ``apt-get install`` on the local files so apt resolves both the
+    package order AND any base-system libraries the packages depend on (libGL,
+    fontconfig, ...) - something a bare extraction cannot do. No apt *source*
+    is added; only the supplied files plus their system dependencies are
+    installed. Returns the system binary path on success, ``None`` if the
+    binary did not appear; raises on a non-zero apt exit so the caller can
+    fall back to the rootless extraction.
+    """
+    import subprocess
+
+    env = {**os.environ, "DEBIAN_FRONTEND": "noninteractive"}
+    proc = subprocess.run(  # noqa: S603 - fixed argv, no shell
+        ["apt-get", "install", "-y", "--no-install-recommends", *deb_files],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        timeout=timeout,
+        env=env,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(proc.stderr.decode("utf-8", "replace").strip()[:300] or f"apt-get exited {proc.returncode}")
+    sys_bin = Path("/usr/bin") / binary_name
+    if sys_bin.exists() and sys_bin.stat().st_size > 1024:
+        sys_bin.chmod(0o755)
+        return sys_bin
+    return None
 
 
 _CONVERTER_CACHE_DIR = Path.home() / ".openestimator" / "cache" / "converters"

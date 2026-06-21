@@ -14933,6 +14933,15 @@ const resource = {
     "methodology.this_project": "questo progetto",
     "methodology.title": "Metodologie di stima",
     "nav.methodologies": "Metodologie",
+    "bim.auto_install_failed_body": "Puoi riprovare l'installazione automatica oppure installarlo manualmente da GitHub.",
+    "bim.auto_install_failed_title": "Impossibile completare la preparazione del convertitore {{format}}",
+    "bim.auto_install_hint": "Viene eseguito in background, nessuna azione necessaria. Nel frattempo il caricamento prosegue.",
+    "bim.auto_install_hint_fallback": "Viene eseguito in background, nessuna azione necessaria. I file IFC si aprono subito con il lettore integrato; il convertitore li aggiorna a mesh complete quando è pronto.",
+    "bim.auto_install_manual_link": "Installa manualmente da GitHub",
+    "bim.auto_install_preparing": "Preparazione del convertitore {{format}} (una tantum)…",
+    "bim.auto_install_preparing_sized": "Preparazione del convertitore {{format}} (una tantum, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Riprova installazione",
+    "dwg_takeoff.auto_install_dxf_note": "I file DXF funzionano già senza il convertitore - questo riguarda solo i .dwg.",
   }
 } as { translation: Record<string, string> };
 

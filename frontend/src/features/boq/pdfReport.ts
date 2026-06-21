@@ -5,6 +5,7 @@ import {
   isSection,
   type Position,
 } from './api';
+import { resourceAwareTotalInBase } from './boqHelpers';
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 
@@ -39,6 +40,42 @@ export interface PdfReportOptions {
   grossTotal: number;
   /** BCP-47 locale tag for number formatting (e.g. "en-US", "de-DE"). */
   locale?: string;
+  /**
+   * Issue #150 — project base currency (ISO 4217) + FX rates. When supplied,
+   * every section subtotal and per-position Total is converted into the base
+   * currency using the SAME resource-currency-aware conversion the editor
+   * grid uses (so a foreign-currency resource prints at its base value, not
+   * summed as "1 foreign = 1 base"). Omitted ⇒ totals print verbatim
+   * (backward compatible — single-currency BOQs are unaffected).
+   */
+  baseCurrency?: string;
+  fxRates?: Array<{ currency: string; rate: number }>;
+}
+
+/** FX context shared between {@link buildSectionGroups} and the renderers. */
+interface PdfFxOpts {
+  baseCurrency?: string;
+  fxRates?: Array<{ currency: string; rate: number }>;
+}
+
+/**
+ * Issue #150 — per-position Total converted into the project base currency
+ * when FX context is present. Mirrors the editor grid's Total column and the
+ * Excel export so all three surfaces agree. With no base currency it returns
+ * the raw stored total (coerced), preserving the prior PDF behaviour.
+ */
+function positionTotalForPdf(pos: Position, fx: PdfFxOpts): number {
+  if (!fx.baseCurrency) return Number(pos.total) || 0;
+  return resourceAwareTotalInBase(
+    pos as unknown as {
+      total?: number | string | null;
+      quantity?: number | string | null;
+      metadata?: Record<string, unknown> | null;
+      metadata_?: Record<string, unknown> | null;
+    },
+    fx.baseCurrency,
+    fx.fxRates,
+  );
 }
 
 /* ── Internal section data ──────────────────────────────────────────────── */
@@ -57,11 +94,14 @@ interface SectionEntry {
  * computes per-section subtotals. Also returns any ungrouped line items.
  * This is a pure function and is exported for unit testing.
  */
-export function buildSectionGroups(positions: Position[]): {
+export function buildSectionGroups(
+  positions: Position[],
+  fxOpts?: PdfFxOpts,
+): {
   sections: Array<{ ordinal: string; description: string; children: Position[]; subtotal: number }>;
   ungrouped: Position[];
 } {
-  const grouped = groupPositionsIntoSections(positions);
+  const grouped = groupPositionsIntoSections(positions, fxOpts);
   return {
     sections: grouped.sections.map((g) => ({
       ordinal: g.section.ordinal,
@@ -307,7 +347,8 @@ function renderBOQTables(
   locale: string,
   sectionEntries: SectionEntry[],
 ): void {
-  const { sections, ungrouped } = buildSectionGroups(options.positions);
+  const fxOpts: PdfFxOpts = { baseCurrency: options.baseCurrency, fxRates: options.fxRates };
+  const { sections, ungrouped } = buildSectionGroups(options.positions, fxOpts);
   const pageW = doc.internal.pageSize.getWidth();
 
   // Section heading bar
@@ -352,7 +393,8 @@ function renderBOQTables(
         p.unit,
         formatNumber(p.quantity, locale),
         formatCurrency(p.unit_rate, options.currency, locale),
-        formatCurrency(p.total, options.currency, locale),
+        // Issue #150 — Total converted to base currency (mirrors grid).
+        formatCurrency(positionTotalForPdf(p, fxOpts), options.currency, locale),
       ]);
       // Add resource sub-rows
       const meta = p.metadata ?? (p as unknown as Record<string, unknown>).metadata_;
@@ -428,7 +470,7 @@ function renderBOQTables(
 
   // Ungrouped positions (if any)
   if (ungrouped.length > 0) {
-    const ungroupedSubtotal = ungrouped.reduce((sum, p) => sum + (Number(p.total) || 0), 0);
+    const ungroupedSubtotal = ungrouped.reduce((sum, p) => sum + positionTotalForPdf(p, fxOpts), 0);
     renderSection('', 'Ungrouped Items', ungrouped, ungroupedSubtotal);
   }
 }
@@ -452,13 +494,14 @@ function renderSummary(
   doc.text('Cost Summary', 20, 12);
 
   // Section subtotals table
-  const { sections, ungrouped } = buildSectionGroups(options.positions);
+  const fxOpts: PdfFxOpts = { baseCurrency: options.baseCurrency, fxRates: options.fxRates };
+  const { sections, ungrouped } = buildSectionGroups(options.positions, fxOpts);
   const sectionRows = sections.map((s) => [
     `${s.ordinal}  ${s.description}`.trim(),
     formatCurrency(s.subtotal, options.currency, locale),
   ]);
   if (ungrouped.length > 0) {
-    const ungroupedTotal = ungrouped.reduce((sum, p) => sum + (Number(p.total) || 0), 0);
+    const ungroupedTotal = ungrouped.reduce((sum, p) => sum + positionTotalForPdf(p, fxOpts), 0);
     sectionRows.push(['Ungrouped Items', formatCurrency(ungroupedTotal, options.currency, locale)]);
   }
 
@@ -565,7 +608,10 @@ export function generateBOQPdf(options: PdfReportOptions): void {
   renderCoverPage(doc, options, locale);
 
   // ── 2. Prepare section entries for TOC ────────────────────────────────
-  const { sections } = buildSectionGroups(options.positions);
+  const { sections } = buildSectionGroups(options.positions, {
+    baseCurrency: options.baseCurrency,
+    fxRates: options.fxRates,
+  });
   const sectionEntries: SectionEntry[] = sections.map((s) => ({
     ordinal: s.ordinal,
     description: s.description,

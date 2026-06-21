@@ -14935,6 +14935,15 @@ const resource = {
     "methodology.this_project": "ovaj projekt",
     "methodology.title": "Metodologije procjene",
     "nav.methodologies": "Metodologije",
+    "bim.auto_install_failed_body": "Možete ponoviti automatsku instalaciju ili ga ručno instalirati s GitHuba.",
+    "bim.auto_install_failed_title": "Pripremu pretvarača {{format}} nije moguće dovršiti",
+    "bim.auto_install_hint": "Ovo se izvodi u pozadini, nije potrebna nikakva radnja. Vaše učitavanje se u međuvremenu nastavlja.",
+    "bim.auto_install_hint_fallback": "Ovo se izvodi u pozadini, nije potrebna nikakva radnja. IFC datoteke otvaraju se odmah s ugrađenim čitačem; pretvarač ih nadograđuje na potpune mreže kada bude spreman.",
+    "bim.auto_install_manual_link": "Instaliraj ručno s GitHuba",
+    "bim.auto_install_preparing": "Priprema pretvarača {{format}} (jednokratno)…",
+    "bim.auto_install_preparing_sized": "Priprema pretvarača {{format}} (jednokratno, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Ponovi instalaciju",
+    "dwg_takeoff.auto_install_dxf_note": "DXF datoteke već rade bez pretvarača - ovo se odnosi samo na .dwg.",
   }
 } as { translation: Record<string, string> };
 

@@ -14922,6 +14922,15 @@ const resource = {
     "methodology.this_project": "dette prosjektet",
     "methodology.title": "Kalkylemetodikker",
     "nav.methodologies": "Metodikker",
+    "bim.auto_install_failed_body": "Du kan prøve den automatiske installasjonen på nytt eller installere den manuelt fra GitHub.",
+    "bim.auto_install_failed_title": "Kunne ikke fullføre klargjøringen av {{format}}-konverteren",
+    "bim.auto_install_hint": "Dette kjører i bakgrunnen, ingen handling nødvendig. Opplastingen fortsetter i mellomtiden.",
+    "bim.auto_install_hint_fallback": "Dette kjører i bakgrunnen, ingen handling nødvendig. IFC-filer åpnes umiddelbart med den innebygde leseren; konverteren oppgraderer dem til fulle masker når den er klar.",
+    "bim.auto_install_manual_link": "Installer manuelt fra GitHub",
+    "bim.auto_install_preparing": "Klargjør {{format}}-konverteren (engangs)…",
+    "bim.auto_install_preparing_sized": "Klargjør {{format}}-konverteren (engangs, ~{{size}} MB)…",
+    "bim.auto_install_retry": "Prøv installasjon på nytt",
+    "dwg_takeoff.auto_install_dxf_note": "DXF-filer fungerer allerede uten konverteren - dette gjelder bare .dwg.",
   }
 } as { translation: Record<string, string> };
 
