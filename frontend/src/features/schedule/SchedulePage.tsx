@@ -30,6 +30,7 @@ import {
   Network,
   ArrowRight,
   ListPlus,
+  Pencil,
 } from 'lucide-react';
 import { Button, Card, Badge, Input, SkeletonTable, Breadcrumb, DismissibleInfo, IntroRichText, GanttChart as SVGGanttChart, ViewInBIMButton, ConfirmDialog, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -86,13 +87,32 @@ interface CreateScheduleForm {
   end_date: string;
 }
 
+type DependencyType = 'FS' | 'SS' | 'FF' | 'SF';
+
+interface ActivityDependencyDraft {
+  activity_id: string;
+  type: DependencyType;
+  lag_days: number;
+}
+
 interface CreateActivityForm {
   name: string;
   wbs_code: string;
   start_date: string;
   end_date: string;
   activity_type: 'task' | 'milestone' | 'summary';
+  /** Predecessor links (FS/SS/FF/SF + lag). Projected into the canonical
+   *  ScheduleRelationship table server-side via the activity create/update
+   *  payload, so editing them here is atomic with the rest of the activity. */
+  dependencies: ActivityDependencyDraft[];
 }
+
+const DEPENDENCY_TYPES: DependencyType[] = ['FS', 'SS', 'FF', 'SF'];
+
+/** Shared tailwind classes for the native selects/inputs in the activity
+ *  modal, mirroring the date inputs used elsewhere on this page. */
+const FIELD_CLS =
+  'h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
@@ -427,11 +447,13 @@ const ROW_HEIGHT = 44;
 function GanttChart({
   activities,
   onUpdateProgress,
+  onEditActivity,
   criticalActivityIds,
   zoomLevel = 'week',
 }: {
   activities: Activity[];
   onUpdateProgress: (activityId: string, progress: number) => void;
+  onEditActivity?: (activity: Activity) => void;
   criticalActivityIds?: Set<string>;
   zoomLevel?: ZoomLevel;
 }) {
@@ -815,6 +837,20 @@ function GanttChart({
                         {t('schedule.view_in_boq_short', { defaultValue: 'BOQ' })}
                       </button>
                     )}
+                    {onEditActivity && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditActivity(activity);
+                        }}
+                        title={t('schedule.edit_activity', { defaultValue: 'Edit activity & dependencies' })}
+                        className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-semibold bg-surface-secondary text-content-secondary border border-border-light hover:bg-surface-tertiary transition-colors"
+                      >
+                        <Pencil size={9} className="shrink-0" />
+                        {t('schedule.edit_short', { defaultValue: 'Edit' })}
+                      </button>
+                    )}
                   </div>
                 </div>
                 {/* Progress slider */}
@@ -1112,7 +1148,10 @@ function ScheduleDetail({
     start_date: '',
     end_date: '',
     activity_type: 'task',
+    dependencies: [],
   });
+  // When set, the activity modal edits this activity instead of creating one.
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
 
   // Fetch project data for region / work calendar / currency
   const { data: projectData } = useQuery({
@@ -1188,31 +1227,89 @@ function ScheduleDetail({
     return new Set(cpmResult.critical_path.map((a) => a.activity_id));
   }, [cpmResult]);
 
-  const addActivity = useMutation({
-    mutationFn: (data: CreateActivityForm) =>
-      scheduleApi.createActivity(schedule.id, {
+  const closeActivityModal = useCallback(() => {
+    setShowAddActivity(false);
+    setEditingActivityId(null);
+    setActivityForm({
+      name: '',
+      wbs_code: '',
+      start_date: '',
+      end_date: '',
+      activity_type: 'task',
+      dependencies: [],
+    });
+  }, []);
+
+  // Open the activity modal in create mode (blank form, no editing target).
+  const openCreateActivity = useCallback(() => {
+    setEditingActivityId(null);
+    setActivityForm({
+      name: '',
+      wbs_code: '',
+      start_date: '',
+      end_date: '',
+      activity_type: 'task',
+      dependencies: [],
+    });
+    setShowAddActivity(true);
+  }, []);
+
+  const saveActivity = useMutation({
+    mutationFn: ({ id, data }: { id: string | null; data: CreateActivityForm }) => {
+      // Drop half-filled dependency rows (no predecessor chosen yet) before
+      // sending. The backend reconciles this list into the canonical
+      // ScheduleRelationship table (create/update/delete), so it is the full
+      // desired predecessor set for the activity.
+      const payload = {
         name: data.name,
         wbs_code: data.wbs_code,
         start_date: data.start_date,
         end_date: data.end_date,
         activity_type: data.activity_type,
-      }),
+        dependencies: data.dependencies.filter((d) => d.activity_id),
+      };
+      return id
+        ? scheduleApi.updateActivity(id, payload)
+        : scheduleApi.createActivity(schedule.id, payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
-      setShowAddActivity(false);
-      setActivityForm({
-        name: '',
-        wbs_code: '',
-        start_date: '',
-        end_date: '',
-        activity_type: 'task',
+      // Dependencies/dates changed → any computed critical path is now stale.
+      setCpmResult(null);
+      const wasEditing = editingActivityId != null;
+      closeActivityModal();
+      addToast({
+        type: 'success',
+        title: wasEditing
+          ? t('toasts.activity_updated', { defaultValue: 'Activity updated' })
+          : t('toasts.activity_created', { defaultValue: 'Activity created' }),
       });
-      addToast({ type: 'success', title: t('toasts.activity_created', { defaultValue: 'Activity created' }) });
     },
     onError: (error: Error) => {
       addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
     },
   });
+
+  // Open the activity modal in edit mode, prefilled from an existing activity.
+  const openEditActivity = useCallback(
+    (activity: Activity) => {
+      setEditingActivityId(activity.id);
+      setActivityForm({
+        name: activity.name,
+        wbs_code: activity.wbs_code,
+        start_date: (activity.start_date ?? '').slice(0, 10),
+        end_date: (activity.end_date ?? '').slice(0, 10),
+        activity_type: (activity.activity_type as CreateActivityForm['activity_type']) || 'task',
+        dependencies: (activity.dependencies ?? []).map((d) => ({
+          activity_id: d.activity_id,
+          type: (String(d.type || 'FS').toUpperCase() as DependencyType),
+          lag_days: d.lag_days ?? 0,
+        })),
+      });
+      setShowAddActivity(true);
+    },
+    [],
+  );
 
   const generateFromBOQ = useMutation({
     mutationFn: async (boqId: string) => {
@@ -1369,6 +1466,35 @@ function ScheduleDetail({
     }
     return activities;
   }, [ganttData, activityFilter, criticalActivityIds]);
+
+  // Candidate predecessors for the dependency editor: every other activity
+  // except the one being edited and its descendants (so the picker can't be
+  // used to build an obvious cycle; the backend CPM engine is the final guard).
+  const candidatePredecessors = useMemo<Activity[]>(() => {
+    const all = ganttData?.activities ?? [];
+    if (!editingActivityId) return all;
+    // successor adjacency: predecessor id -> [successor ids]
+    const succ = new Map<string, string[]>();
+    for (const a of all) {
+      for (const d of a.dependencies ?? []) {
+        const arr = succ.get(d.activity_id) ?? [];
+        arr.push(a.id);
+        succ.set(d.activity_id, arr);
+      }
+    }
+    const blocked = new Set<string>([editingActivityId]);
+    const stack = [editingActivityId];
+    while (stack.length) {
+      const cur = stack.pop() as string;
+      for (const s of succ.get(cur) ?? []) {
+        if (!blocked.has(s)) {
+          blocked.add(s);
+          stack.push(s);
+        }
+      }
+    }
+    return all.filter((a) => !blocked.has(a.id));
+  }, [ganttData, editingActivityId]);
 
   // Map activities to SVG Gantt format
   const svgGanttActivities = useMemo<SVGGanttActivity[]>(() => {
@@ -1577,7 +1703,7 @@ function ScheduleDetail({
           <Button
             variant="primary"
             icon={<Plus size={16} />}
-            onClick={() => setShowAddActivity(true)}
+            onClick={openCreateActivity}
           >
             {t('schedule.add_activity', 'Add Activity')}
           </Button>
@@ -1757,11 +1883,16 @@ function ScheduleDetail({
                   showCriticalPath={!!cpmResult}
                   todayLine={true}
                   onActivityResize={handleActivityResize}
+                  onActivityClick={(id) => {
+                    const act = ganttData.activities.find((a) => a.id === id);
+                    if (act) openEditActivity(act);
+                  }}
                 />
               ) : (
                 <GanttChart
                   activities={filteredActivities}
                   onUpdateProgress={handleUpdateProgress}
+                  onEditActivity={openEditActivity}
                   criticalActivityIds={criticalActivityIds}
                   zoomLevel={zoomLevel}
                 />
@@ -1808,7 +1939,7 @@ function ScheduleDetail({
                     </div>
                   </button>
                   <button
-                    onClick={() => setShowAddActivity(true)}
+                    onClick={openCreateActivity}
                     className="group flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border-light bg-surface-secondary/30 p-6 transition-all hover:border-oe-blue/50 hover:bg-oe-blue-subtle/30"
                   >
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary transition-transform group-hover:scale-110">
@@ -1850,16 +1981,20 @@ function ScheduleDetail({
         </div>
       )}
 
-      {/* Add Activity Modal */}
+      {/* Add / Edit Activity Modal */}
       <Modal
         open={showAddActivity}
-        onClose={() => setShowAddActivity(false)}
-        title={t('schedule.add_activity', 'Add Activity')}
+        onClose={closeActivityModal}
+        title={
+          editingActivityId
+            ? t('schedule.edit_activity', { defaultValue: 'Edit activity & dependencies' })
+            : t('schedule.add_activity', 'Add Activity')
+        }
       >
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            addActivity.mutate(activityForm);
+            saveActivity.mutate({ id: editingActivityId, data: activityForm });
           }}
           className="space-y-4"
         >
@@ -1913,12 +2048,125 @@ function ScheduleDetail({
               ))}
             </div>
           </div>
+
+          {/* Dependencies (predecessors): FS/SS/FF/SF + lag. Projected into the
+              ScheduleRelationship table by the activity create/update endpoint. */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-content-primary">
+              {t('schedule.dependencies', { defaultValue: 'Dependencies (predecessors)' })}
+            </label>
+            {candidatePredecessors.length === 0 ? (
+              <p className="text-xs text-content-tertiary">
+                {t('schedule.dependencies_none', {
+                  defaultValue: 'Add at least one other activity first to link predecessors.',
+                })}
+              </p>
+            ) : (
+              <>
+                {activityForm.dependencies.map((dep, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <select
+                      aria-label={t('schedule.predecessor', { defaultValue: 'Predecessor' })}
+                      value={dep.activity_id}
+                      onChange={(e) =>
+                        setActivityForm((f) => ({
+                          ...f,
+                          dependencies: f.dependencies.map((d, i) =>
+                            i === idx ? { ...d, activity_id: e.target.value } : d,
+                          ),
+                        }))
+                      }
+                      className={`${FIELD_CLS} min-w-0 flex-1`}
+                    >
+                      <option value="">
+                        {t('schedule.select_predecessor', { defaultValue: 'Select activity…' })}
+                      </option>
+                      {candidatePredecessors.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.name}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      aria-label={t('schedule.dependency_type', { defaultValue: 'Link type' })}
+                      value={dep.type}
+                      onChange={(e) =>
+                        setActivityForm((f) => ({
+                          ...f,
+                          dependencies: f.dependencies.map((d, i) =>
+                            i === idx ? { ...d, type: e.target.value as DependencyType } : d,
+                          ),
+                        }))
+                      }
+                      className={`${FIELD_CLS} w-20 shrink-0`}
+                    >
+                      {DEPENDENCY_TYPES.map((tp) => (
+                        <option key={tp} value={tp}>
+                          {tp}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      aria-label={t('schedule.lag_days', { defaultValue: 'Lag (days)' })}
+                      title={t('schedule.lag_days', { defaultValue: 'Lag (days)' })}
+                      value={dep.lag_days}
+                      onChange={(e) =>
+                        setActivityForm((f) => ({
+                          ...f,
+                          dependencies: f.dependencies.map((d, i) =>
+                            i === idx ? { ...d, lag_days: Number(e.target.value) || 0 } : d,
+                          ),
+                        }))
+                      }
+                      className={`${FIELD_CLS} w-20 shrink-0`}
+                    />
+                    <button
+                      type="button"
+                      aria-label={t('schedule.remove_dependency', { defaultValue: 'Remove dependency' })}
+                      onClick={() =>
+                        setActivityForm((f) => ({
+                          ...f,
+                          dependencies: f.dependencies.filter((_, i) => i !== idx),
+                        }))
+                      }
+                      className="shrink-0 rounded-lg border border-border p-2 text-content-tertiary hover:bg-surface-secondary hover:text-semantic-error"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActivityForm((f) => ({
+                      ...f,
+                      dependencies: [...f.dependencies, { activity_id: '', type: 'FS', lag_days: 0 }],
+                    }))
+                  }
+                  className="self-start inline-flex items-center gap-1 text-xs font-medium text-oe-blue hover:underline"
+                >
+                  <Plus size={12} />
+                  {t('schedule.add_dependency', { defaultValue: 'Add dependency' })}
+                </button>
+                <p className="text-2xs leading-relaxed text-content-tertiary">
+                  {t('schedule.dependencies_hint', {
+                    defaultValue:
+                      'FS = Finish→Start, SS = Start→Start, FF = Finish→Finish, SF = Start→Finish. Lag in days (negative = lead).',
+                  })}
+                </p>
+              </>
+            )}
+          </div>
+
           <div className="flex items-center justify-end gap-3 pt-2">
-            <Button variant="ghost" type="button" onClick={() => setShowAddActivity(false)}>
+            <Button variant="ghost" type="button" onClick={closeActivityModal}>
               {t('common.cancel', 'Cancel')}
             </Button>
-            <Button variant="primary" type="submit" loading={addActivity.isPending}>
-              {t('schedule.create_activity', 'Create Activity')}
+            <Button variant="primary" type="submit" loading={saveActivity.isPending}>
+              {editingActivityId
+                ? t('schedule.save_activity', { defaultValue: 'Save changes' })
+                : t('schedule.create_activity', 'Create Activity')}
             </Button>
           </div>
         </form>
