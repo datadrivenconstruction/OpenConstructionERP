@@ -14,6 +14,78 @@
   // for "draw the on-brand SVG placeholder".
   var ARTICLES = [
     {
+      slug: 'v8-8-2',
+      href: '/news/v8-8-2.html',
+      title: 'v8.8.2 - BIM and CAD converters that install themselves, and currency-correct BOQ totals.',
+      date: '2026-06-21',
+      tag: 'Release',
+      tagClass: 'release',
+      thumb: null
+    },
+    {
+      slug: 'v8-8-1',
+      href: '/news/v8-8-1.html',
+      title: 'v8.8.1 - A takeoff PDF now stays attached to its project after a reload.',
+      date: '2026-06-21',
+      tag: 'Release',
+      tagClass: 'release',
+      thumb: null
+    },
+    {
+      slug: 'v8-8-0',
+      href: '/news/v8-8-0.html',
+      title: 'v8.8.0 - Monte-Carlo cost-risk for a bill of quantities, and an in-app How it works hub.',
+      date: '2026-06-21',
+      tag: 'Release',
+      tagClass: 'release',
+      thumb: null
+    },
+    {
+      slug: 'v8-7-1',
+      href: '/news/v8-7-1.html',
+      title: 'v8.7.1 - A calmer screen on a busy server, and several takeoff and estimator fixes.',
+      date: '2026-06-20',
+      tag: 'Release',
+      tagClass: 'release',
+      thumb: null
+    },
+    {
+      slug: 'v8-7-0',
+      href: '/news/v8-7-0.html',
+      title: 'v8.7.0 - Packs that carry their own estimating methodology, and a broad hardening pass.',
+      date: '2026-06-20',
+      tag: 'Release',
+      tagClass: 'release',
+      thumb: null
+    },
+    {
+      slug: 'v8-6-0',
+      href: '/news/v8-6-0.html',
+      title: 'v8.6.0 - A data-driven estimating methodology engine you build in the app.',
+      date: '2026-06-18',
+      tag: 'Release',
+      tagClass: 'release',
+      thumb: null
+    },
+    {
+      slug: 'v8-5-0',
+      href: '/news/v8-5-0.html',
+      title: 'v8.5.0 - A full vector takeoff for CAD drawings, and a drawing-tool PDF viewer.',
+      date: '2026-06-18',
+      tag: 'Release',
+      tagClass: 'release',
+      thumb: null
+    },
+    {
+      slug: 'v8-4-0',
+      href: '/news/v8-4-0.html',
+      title: 'v8.4.0 - PDF takeoff measurements scoped to the document, and a one-click resource expand.',
+      date: '2026-06-17',
+      tag: 'Release',
+      tagClass: 'release',
+      thumb: null
+    },
+    {
       slug: 'v8-3-0',
       href: '/news/v8-3-0.html',
       title: 'v8.3.0 - A South Africa construction pack, the first of our African coverage.',
