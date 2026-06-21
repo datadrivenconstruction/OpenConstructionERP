@@ -1496,6 +1496,16 @@ function ScheduleDetail({
     return all.filter((a) => !blocked.has(a.id));
   }, [ganttData, editingActivityId]);
 
+  // Short reference (WBS code, else name) for each activity, used to label
+  // predecessors in the Gantt grid's Predecessors column.
+  const activityLabel = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const a of ganttData?.activities ?? []) {
+      map.set(a.id, a.wbs_code || a.name);
+    }
+    return map;
+  }, [ganttData]);
+
   // Map activities to SVG Gantt format
   const svgGanttActivities = useMemo<SVGGanttActivity[]>(() => {
     return filteredActivities.map((a) => ({
@@ -1510,8 +1520,15 @@ function ScheduleDetail({
       parentId: a.parent_id,
       dependencies: a.dependencies?.map((d) => d.activity_id) ?? [],
       color: a.color || undefined,
+      wbsCode: a.wbs_code || undefined,
+      durationDays: a.duration_days,
+      predecessors: (a.dependencies ?? []).map((d) => ({
+        label: activityLabel.get(d.activity_id) ?? '?',
+        type: String(d.type || 'FS').toUpperCase(),
+        lag: d.lag_days ?? 0,
+      })),
     }));
-  }, [filteredActivities, criticalActivityIds]);
+  }, [filteredActivities, criticalActivityIds, activityLabel]);
 
   return (
     <div className="animate-fade-in">

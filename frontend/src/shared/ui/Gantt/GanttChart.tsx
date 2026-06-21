@@ -658,22 +658,37 @@ export function GanttChart({
           className="flex shrink-0 border-b border-r border-border-light bg-surface-secondary/60"
           style={{ height: HEADER_HEIGHT }}
         >
-          <div className="flex flex-1 items-end px-3 pb-1.5">
+          <div className="flex w-[60px] shrink-0 items-end px-2 pb-1.5">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              {t('gantt.wbs', 'WBS')}
+            </span>
+          </div>
+          <div className="flex flex-1 items-end px-2 pb-1.5">
             <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               {t('gantt.activity_name', 'Activity')}
             </span>
           </div>
-          <div className="flex w-[70px] items-end justify-end px-2 pb-1.5">
+          <div className="flex w-[44px] shrink-0 items-end justify-end px-1 pb-1.5">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              {t('gantt.duration', 'Dur.')}
+            </span>
+          </div>
+          <div className="flex w-[64px] shrink-0 items-end justify-end px-2 pb-1.5">
             <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               {t('gantt.start', 'Start')}
             </span>
           </div>
-          <div className="flex w-[70px] items-end justify-end px-2 pb-1.5">
+          <div className="flex w-[64px] shrink-0 items-end justify-end px-2 pb-1.5">
             <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               {t('gantt.end', 'End')}
             </span>
           </div>
-          <div className="flex w-[36px] items-end justify-end px-1 pb-1.5">
+          <div className="flex w-[88px] shrink-0 items-end px-2 pb-1.5">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              {t('gantt.predecessors', 'Pred.')}
+            </span>
+          </div>
+          <div className="flex w-[34px] shrink-0 items-end justify-end px-1 pb-1.5">
             <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               %
             </span>
@@ -703,7 +718,15 @@ export function GanttChart({
                 style={{ height: ROW_HEIGHT }}
                 onClick={() => onActivityClick?.(a.id)}
               >
-                <div className="flex min-w-0 flex-1 items-center gap-1.5 px-3">
+                <div className="w-[60px] shrink-0 px-2">
+                  <span
+                    className="block truncate text-2xs tabular-nums text-content-tertiary"
+                    title={a.wbsCode || undefined}
+                  >
+                    {a.wbsCode || '—'}
+                  </span>
+                </div>
+                <div className="flex min-w-0 flex-1 items-center gap-1.5 px-2">
                   {a.isMilestone && (
                     <svg width="10" height="10" viewBox="0 0 10 10" className="shrink-0">
                       <polygon
@@ -731,17 +754,42 @@ export function GanttChart({
                     </span>
                   )}
                 </div>
-                <div className="w-[70px] shrink-0 px-2 text-right">
+                <div className="w-[44px] shrink-0 px-1 text-right">
+                  <span className="text-2xs tabular-nums text-content-tertiary">
+                    {a.isMilestone
+                      ? '—'
+                      : `${a.durationDays ?? daysBetween(startD, endD)}${t('gantt.day_suffix', 'd')}`}
+                  </span>
+                </div>
+                <div className="w-[64px] shrink-0 px-2 text-right">
                   <span className="text-2xs tabular-nums text-content-tertiary">
                     {fmtShort(startD, locale)}
                   </span>
                 </div>
-                <div className="w-[70px] shrink-0 px-2 text-right">
+                <div className="w-[64px] shrink-0 px-2 text-right">
                   <span className="text-2xs tabular-nums text-content-tertiary">
                     {fmtShort(endD, locale)}
                   </span>
                 </div>
-                <div className="w-[36px] shrink-0 px-1 text-right">
+                <div className="w-[88px] shrink-0 px-2">
+                  {(() => {
+                    const predText = (a.predecessors ?? [])
+                      .map(
+                        (p) =>
+                          `${p.label} ${p.type}${p.lag > 0 ? `+${p.lag}` : p.lag < 0 ? p.lag : ''}`,
+                      )
+                      .join(', ');
+                    return (
+                      <span
+                        className="block truncate text-2xs tabular-nums text-content-tertiary"
+                        title={predText || undefined}
+                      >
+                        {predText || '—'}
+                      </span>
+                    );
+                  })()}
+                </div>
+                <div className="w-[34px] shrink-0 px-1 text-right">
                   <span
                     className={`text-2xs font-medium tabular-nums ${
                       a.progress >= 100

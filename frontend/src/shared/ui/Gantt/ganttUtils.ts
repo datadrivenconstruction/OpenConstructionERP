@@ -23,7 +23,7 @@ export const ROW_HEIGHT = 40;
 export const HEADER_HEIGHT = 48;
 
 /** Width of the left activity table panel */
-export const TABLE_WIDTH = 300;
+export const TABLE_WIDTH = 500;
 
 /* ── Date helpers ───────────────────────────────────────────────── */
 
@@ -369,6 +369,14 @@ export interface GanttActivity {
   color?: string;
   /** When set and non-empty, indicates the activity is linked to BIM elements (4D). */
   bim_element_ids?: string[];
+  /** WBS code shown in the left grid's WBS column. */
+  wbsCode?: string;
+  /** Working-day duration shown in the left grid's Duration column. Falls back
+   *  to the calendar span between start/end when omitted. */
+  durationDays?: number;
+  /** Predecessor links shown in the left grid's Predecessors column. ``label``
+   *  is a short reference (WBS code or name) of the predecessor activity. */
+  predecessors?: Array<{ label: string; type: string; lag: number }>;
 }
 
 /**
