@@ -7030,6 +7030,8 @@ const resource = {
     "gantt.wbs": "WBS",
     "gantt.duration": "Dur.",
     "gantt.predecessors": "Pred.",
+    "gantt.lag": "Lag",
+    "gantt.resize_column": "Resize column",
     "gantt.day_suffix": "d",
     "gantt.chart_label": "Gantt chart with {{count}} activities",
     "gantt.complete": "complete",

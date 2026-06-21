@@ -1419,6 +1419,28 @@ function ScheduleDetail({
     [resizeActivity],
   );
 
+  // Inline edit of a label (activity name / WBS) straight from the Gantt grid.
+  const patchActivityField = useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: { name?: string; wbs_code?: string } }) =>
+      scheduleApi.updateActivity(id, patch),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.update_failed', { defaultValue: 'Update failed' }), message: error.message });
+    },
+  });
+
+  const handleActivityFieldChange = useCallback(
+    (id: string, p: { name?: string; wbsCode?: string }) => {
+      const patch: { name?: string; wbs_code?: string } = {};
+      if (p.name !== undefined) patch.name = p.name;
+      if (p.wbsCode !== undefined) patch.wbs_code = p.wbsCode;
+      patchActivityField.mutate({ id, patch });
+    },
+    [patchActivityField],
+  );
+
   const resetSchedule = useMutation({
     mutationFn: () => scheduleApi.clearActivities(schedule.id),
     onSuccess: () => {
@@ -1900,6 +1922,7 @@ function ScheduleDetail({
                   showCriticalPath={!!cpmResult}
                   todayLine={true}
                   onActivityResize={handleActivityResize}
+                  onActivityFieldChange={handleActivityFieldChange}
                   onActivityClick={(id) => {
                     const act = ganttData.activities.find((a) => a.id === id);
                     if (act) openEditActivity(act);

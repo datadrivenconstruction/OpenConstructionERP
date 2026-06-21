@@ -7306,6 +7306,8 @@ const resource = {
     "gantt.wbs": "WBS",
     "gantt.duration": "Durée",
     "gantt.predecessors": "Préd.",
+    "gantt.lag": "Décalage",
+    "gantt.resize_column": "Redimensionner la colonne",
     "gantt.day_suffix": "j",
     "gantt.chart_label": "Diagramme de Gantt avec {{count}} activités",
     "gantt.complete": "terminé",

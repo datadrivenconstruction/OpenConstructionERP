@@ -25,6 +25,7 @@ import {
   useCallback,
   useEffect,
   type MouseEvent as ReactMouseEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getIntlLocale } from '@/shared/lib/formatters';
@@ -33,7 +34,6 @@ import {
   type ViewMode,
   ROW_HEIGHT,
   HEADER_HEIGHT,
-  TABLE_WIDTH,
   dateToPx,
   pxToDate,
   daysBetween,
@@ -56,6 +56,9 @@ export interface GanttProps {
   onActivityClick?: (id: string) => void;
   onActivityDrag?: (id: string, newStart: string, newEnd: string) => void;
   onActivityResize?: (id: string, newStart: string, newEnd: string) => void | Promise<void>;
+  /** Commit an inline edit of a text label (activity name or WBS code) from
+   *  the left grid. When omitted, those cells are read-only. */
+  onActivityFieldChange?: (id: string, patch: { name?: string; wbsCode?: string }) => void;
   className?: string;
   showBaseline?: boolean;
   showDependencies?: boolean;
@@ -71,6 +74,34 @@ const BASELINE_HEIGHT = 6;
 const MILESTONE_SIZE = 10;
 const MIN_BAR_WIDTH = 4;
 const RESIZE_HANDLE_WIDTH = 7;
+
+/* ── Left-grid columns ──────────────────────────────────────────── */
+
+type ColId = 'wbs' | 'name' | 'duration' | 'start' | 'end' | 'predecessors' | 'lag' | 'progress';
+
+interface GridColumn {
+  id: ColId;
+  labelKey: string;
+  labelDefault: string;
+  align: 'left' | 'right';
+  /** Minimum width (px) the column can be dragged to. */
+  min: number;
+  /** Default width (px) before the user resizes it. */
+  def: number;
+}
+
+const GRID_COLUMNS: GridColumn[] = [
+  { id: 'wbs', labelKey: 'gantt.wbs', labelDefault: 'WBS', align: 'left', min: 40, def: 60 },
+  { id: 'name', labelKey: 'gantt.activity_name', labelDefault: 'Activity', align: 'left', min: 100, def: 170 },
+  { id: 'duration', labelKey: 'gantt.duration', labelDefault: 'Dur.', align: 'right', min: 42, def: 52 },
+  { id: 'start', labelKey: 'gantt.start', labelDefault: 'Start', align: 'right', min: 54, def: 66 },
+  { id: 'end', labelKey: 'gantt.end', labelDefault: 'End', align: 'right', min: 54, def: 66 },
+  { id: 'predecessors', labelKey: 'gantt.predecessors', labelDefault: 'Pred.', align: 'left', min: 60, def: 96 },
+  { id: 'lag', labelKey: 'gantt.lag', labelDefault: 'Lag', align: 'right', min: 42, def: 58 },
+  { id: 'progress', labelKey: 'gantt.progress_short', labelDefault: '%', align: 'right', min: 32, def: 40 },
+];
+
+const COL_WIDTHS_LS_KEY = 'oe-gantt-col-widths-v1';
 
 /* ── Date formatting helpers ────────────────────────────────────── */
 
@@ -100,6 +131,7 @@ export function GanttChart({
   onActivityClick,
   onActivityDrag,
   onActivityResize,
+  onActivityFieldChange,
   className = '',
   showBaseline = false,
   showDependencies = true,
@@ -108,6 +140,93 @@ export function GanttChart({
 }: GanttProps) {
   const { t } = useTranslation();
   const locale = getIntlLocale();
+
+  // ── Resizable column widths (persisted) ──────────────────────────
+  const [colWidths, setColWidths] = useState<Record<string, number>>(() => {
+    const base = Object.fromEntries(GRID_COLUMNS.map((c) => [c.id, c.def]));
+    try {
+      const saved = JSON.parse(localStorage.getItem(COL_WIDTHS_LS_KEY) || '{}');
+      return { ...base, ...saved };
+    } catch {
+      return base;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(COL_WIDTHS_LS_KEY, JSON.stringify(colWidths));
+    } catch {
+      /* storage unavailable — keep in-memory widths only */
+    }
+  }, [colWidths]);
+  const tableWidth = GRID_COLUMNS.reduce((sum, c) => sum + (colWidths[c.id] ?? c.def), 0);
+
+  const colResize = useRef<{ id: string; startX: number; startW: number } | null>(null);
+  const startColResize = useCallback(
+    (e: ReactMouseEvent, id: string) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const col = GRID_COLUMNS.find((c) => c.id === id);
+      colResize.current = { id, startX: e.clientX, startW: colWidths[id] ?? col?.def ?? 60 };
+      const onMove = (ev: globalThis.MouseEvent) => {
+        const r = colResize.current;
+        if (!r) return;
+        const min = GRID_COLUMNS.find((c) => c.id === r.id)?.min ?? 32;
+        setColWidths((prev) => ({ ...prev, [r.id]: Math.max(min, r.startW + (ev.clientX - r.startX)) }));
+      };
+      const onUp = () => {
+        colResize.current = null;
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+      };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    },
+    [colWidths],
+  );
+
+  // ── Inline label editing (name / WBS) ────────────────────────────
+  const [editingCell, setEditingCell] = useState<{ id: string; col: 'name' | 'wbs' } | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const cancelEdit = useRef(false);
+
+  const beginEdit = useCallback(
+    (e: ReactMouseEvent, id: string, col: 'name' | 'wbs', current: string) => {
+      if (!onActivityFieldChange) return;
+      e.stopPropagation();
+      cancelEdit.current = false;
+      setEditingCell({ id, col });
+      setEditValue(current);
+    },
+    [onActivityFieldChange],
+  );
+  const commitEdit = useCallback(() => {
+    if (!editingCell) return;
+    if (cancelEdit.current) {
+      cancelEdit.current = false;
+      setEditingCell(null);
+      return;
+    }
+    const act = activities.find((a) => a.id === editingCell.id);
+    const orig = editingCell.col === 'name' ? act?.name ?? '' : act?.wbsCode ?? '';
+    const val = editValue.trim();
+    if (val !== orig && !(editingCell.col === 'name' && val === '')) {
+      onActivityFieldChange?.(
+        editingCell.id,
+        editingCell.col === 'name' ? { name: val } : { wbsCode: val },
+      );
+    }
+    setEditingCell(null);
+  }, [editingCell, editValue, activities, onActivityFieldChange]);
+  const handleEditKey = useCallback((e: ReactKeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.currentTarget.blur();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelEdit.current = true;
+      e.currentTarget.blur();
+    }
+  }, []);
 
   // Refs for scroll sync
   const tableBodyRef = useRef<HTMLDivElement>(null);
@@ -651,48 +770,35 @@ export function GanttChart({
       className={`flex overflow-hidden rounded-xl border border-border-light bg-surface-primary ${className}`}
       style={{ height: Math.min(bodyHeight + HEADER_HEIGHT + 2, 800) }}
     >
-      {/* ── Left panel: activity table ──────────────────────────── */}
-      <div className="flex flex-col" style={{ width: TABLE_WIDTH, minWidth: TABLE_WIDTH }}>
+      {/* ── Left panel: activity table (resizable columns) ──────────── */}
+      <div className="flex flex-col" style={{ width: tableWidth, minWidth: tableWidth }}>
         {/* Table header */}
         <div
           className="flex shrink-0 border-b border-r border-border-light bg-surface-secondary/60"
           style={{ height: HEADER_HEIGHT }}
         >
-          <div className="flex w-[60px] shrink-0 items-end px-2 pb-1.5">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              {t('gantt.wbs', 'WBS')}
-            </span>
-          </div>
-          <div className="flex flex-1 items-end px-2 pb-1.5">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              {t('gantt.activity_name', 'Activity')}
-            </span>
-          </div>
-          <div className="flex w-[44px] shrink-0 items-end justify-end px-1 pb-1.5">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              {t('gantt.duration', 'Dur.')}
-            </span>
-          </div>
-          <div className="flex w-[64px] shrink-0 items-end justify-end px-2 pb-1.5">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              {t('gantt.start', 'Start')}
-            </span>
-          </div>
-          <div className="flex w-[64px] shrink-0 items-end justify-end px-2 pb-1.5">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              {t('gantt.end', 'End')}
-            </span>
-          </div>
-          <div className="flex w-[88px] shrink-0 items-end px-2 pb-1.5">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              {t('gantt.predecessors', 'Pred.')}
-            </span>
-          </div>
-          <div className="flex w-[34px] shrink-0 items-end justify-end px-1 pb-1.5">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-              %
-            </span>
-          </div>
+          {GRID_COLUMNS.map((col) => (
+            <div
+              key={col.id}
+              className="relative flex shrink-0 items-end px-2 pb-1.5"
+              style={{
+                width: colWidths[col.id] ?? col.def,
+                justifyContent: col.align === 'right' ? 'flex-end' : 'flex-start',
+              }}
+            >
+              <span className="truncate text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                {t(col.labelKey, col.labelDefault)}
+              </span>
+              <span
+                role="separator"
+                aria-orientation="vertical"
+                aria-label={t('gantt.resize_column', 'Resize column')}
+                onMouseDown={(e) => startColResize(e, col.id)}
+                onClick={(e) => e.stopPropagation()}
+                className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-oe-blue/40"
+              />
+            </div>
+          ))}
         </div>
 
         {/* Table body (scroll synced) */}
@@ -706,6 +812,138 @@ export function GanttChart({
             const startD = new Date(a.start);
             const endD = new Date(a.end);
             const isCritical = showCriticalPath && a.isCritical;
+            const predText = (a.predecessors ?? [])
+              .map((p) => `${p.label} ${p.type}`)
+              .join(', ');
+            const lagText = (a.predecessors ?? [])
+              .map((p) => `${p.lag > 0 ? `+${p.lag}` : p.lag}${t('gantt.day_suffix', 'd')}`)
+              .join(', ');
+            const editable = !!onActivityFieldChange;
+
+            const renderCell = (col: GridColumn) => {
+              switch (col.id) {
+                case 'wbs':
+                  return editingCell?.id === a.id && editingCell.col === 'wbs' ? (
+                    <input
+                      autoFocus
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      onBlur={commitEdit}
+                      onKeyDown={handleEditKey}
+                      className="w-full min-w-0 rounded border border-oe-blue bg-surface-primary px-1 py-0.5 text-2xs"
+                    />
+                  ) : (
+                    <span
+                      className={`block w-full truncate text-2xs tabular-nums text-content-tertiary ${
+                        editable ? 'cursor-text rounded px-0.5 hover:bg-surface-secondary/70' : ''
+                      }`}
+                      title={a.wbsCode || undefined}
+                      onClick={(e) => beginEdit(e, a.id, 'wbs', a.wbsCode ?? '')}
+                    >
+                      {a.wbsCode || '—'}
+                    </span>
+                  );
+                case 'name':
+                  return (
+                    <div className="flex w-full min-w-0 items-center gap-1.5">
+                      {a.isMilestone && (
+                        <svg width="10" height="10" viewBox="0 0 10 10" className="shrink-0">
+                          <polygon
+                            points="5,0 10,5 5,10 0,5"
+                            fill={isCritical ? '#ef4444' : '#3b82f6'}
+                          />
+                        </svg>
+                      )}
+                      {a.isGroup && (
+                        <span className="shrink-0 text-content-tertiary text-[10px] font-bold">[G]</span>
+                      )}
+                      {editingCell?.id === a.id && editingCell.col === 'name' ? (
+                        <input
+                          autoFocus
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          onBlur={commitEdit}
+                          onKeyDown={handleEditKey}
+                          className="min-w-0 flex-1 rounded border border-oe-blue bg-surface-primary px-1 py-0.5 text-xs"
+                        />
+                      ) : (
+                        <span
+                          className={`min-w-0 truncate text-xs ${
+                            a.isGroup ? 'font-bold' : 'font-medium'
+                          } text-content-primary ${
+                            editable ? 'cursor-text rounded px-0.5 hover:bg-surface-secondary/70' : ''
+                          }`}
+                          title={a.name}
+                          onClick={(e) => beginEdit(e, a.id, 'name', a.name)}
+                        >
+                          {a.name}
+                        </span>
+                      )}
+                      {isCritical && (
+                        <span className="shrink-0 rounded bg-red-500 px-1 py-0.5 text-[8px] font-bold leading-none text-white">
+                          CP
+                        </span>
+                      )}
+                    </div>
+                  );
+                case 'duration':
+                  return (
+                    <span className="block w-full truncate text-right text-2xs tabular-nums text-content-tertiary">
+                      {a.isMilestone
+                        ? '—'
+                        : `${a.durationDays ?? daysBetween(startD, endD)}${t('gantt.day_suffix', 'd')}`}
+                    </span>
+                  );
+                case 'start':
+                  return (
+                    <span className="block w-full truncate text-right text-2xs tabular-nums text-content-tertiary">
+                      {fmtShort(startD, locale)}
+                    </span>
+                  );
+                case 'end':
+                  return (
+                    <span className="block w-full truncate text-right text-2xs tabular-nums text-content-tertiary">
+                      {fmtShort(endD, locale)}
+                    </span>
+                  );
+                case 'predecessors':
+                  return (
+                    <span
+                      className="block w-full truncate text-2xs tabular-nums text-content-tertiary"
+                      title={predText || undefined}
+                    >
+                      {predText || '—'}
+                    </span>
+                  );
+                case 'lag':
+                  return (
+                    <span
+                      className="block w-full truncate text-right text-2xs tabular-nums text-content-tertiary"
+                      title={lagText || undefined}
+                    >
+                      {lagText || '—'}
+                    </span>
+                  );
+                case 'progress':
+                  return (
+                    <span
+                      className={`block w-full truncate text-right text-2xs font-medium tabular-nums ${
+                        a.progress >= 100
+                          ? 'text-green-600'
+                          : a.progress > 0
+                            ? 'text-blue-600'
+                            : 'text-content-tertiary'
+                      }`}
+                    >
+                      {a.progress}
+                    </span>
+                  );
+                default:
+                  return null;
+              }
+            };
 
             return (
               <div
@@ -718,90 +956,15 @@ export function GanttChart({
                 style={{ height: ROW_HEIGHT }}
                 onClick={() => onActivityClick?.(a.id)}
               >
-                <div className="w-[60px] shrink-0 px-2">
-                  <span
-                    className="block truncate text-2xs tabular-nums text-content-tertiary"
-                    title={a.wbsCode || undefined}
+                {GRID_COLUMNS.map((col) => (
+                  <div
+                    key={col.id}
+                    className="flex min-w-0 shrink-0 items-center px-2"
+                    style={{ width: colWidths[col.id] ?? col.def }}
                   >
-                    {a.wbsCode || '—'}
-                  </span>
-                </div>
-                <div className="flex min-w-0 flex-1 items-center gap-1.5 px-2">
-                  {a.isMilestone && (
-                    <svg width="10" height="10" viewBox="0 0 10 10" className="shrink-0">
-                      <polygon
-                        points="5,0 10,5 5,10 0,5"
-                        fill={isCritical ? '#ef4444' : '#3b82f6'}
-                      />
-                    </svg>
-                  )}
-                  {a.isGroup && (
-                    <span className="shrink-0 text-content-tertiary text-[10px] font-bold">
-                      [G]
-                    </span>
-                  )}
-                  <span
-                    className={`truncate text-xs ${
-                      a.isGroup ? 'font-bold' : 'font-medium'
-                    } text-content-primary`}
-                    title={a.name}
-                  >
-                    {a.name}
-                  </span>
-                  {isCritical && (
-                    <span className="shrink-0 rounded bg-red-500 px-1 py-0.5 text-[8px] font-bold leading-none text-white">
-                      CP
-                    </span>
-                  )}
-                </div>
-                <div className="w-[44px] shrink-0 px-1 text-right">
-                  <span className="text-2xs tabular-nums text-content-tertiary">
-                    {a.isMilestone
-                      ? '—'
-                      : `${a.durationDays ?? daysBetween(startD, endD)}${t('gantt.day_suffix', 'd')}`}
-                  </span>
-                </div>
-                <div className="w-[64px] shrink-0 px-2 text-right">
-                  <span className="text-2xs tabular-nums text-content-tertiary">
-                    {fmtShort(startD, locale)}
-                  </span>
-                </div>
-                <div className="w-[64px] shrink-0 px-2 text-right">
-                  <span className="text-2xs tabular-nums text-content-tertiary">
-                    {fmtShort(endD, locale)}
-                  </span>
-                </div>
-                <div className="w-[88px] shrink-0 px-2">
-                  {(() => {
-                    const predText = (a.predecessors ?? [])
-                      .map(
-                        (p) =>
-                          `${p.label} ${p.type}${p.lag > 0 ? `+${p.lag}` : p.lag < 0 ? p.lag : ''}`,
-                      )
-                      .join(', ');
-                    return (
-                      <span
-                        className="block truncate text-2xs tabular-nums text-content-tertiary"
-                        title={predText || undefined}
-                      >
-                        {predText || '—'}
-                      </span>
-                    );
-                  })()}
-                </div>
-                <div className="w-[34px] shrink-0 px-1 text-right">
-                  <span
-                    className={`text-2xs font-medium tabular-nums ${
-                      a.progress >= 100
-                        ? 'text-green-600'
-                        : a.progress > 0
-                          ? 'text-blue-600'
-                          : 'text-content-tertiary'
-                    }`}
-                  >
-                    {a.progress}
-                  </span>
-                </div>
+                    {renderCell(col)}
+                  </div>
+                ))}
               </div>
             );
           })}
