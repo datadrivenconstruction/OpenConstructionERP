@@ -114,6 +114,24 @@ const DEPENDENCY_TYPES: DependencyType[] = ['FS', 'SS', 'FF', 'SF'];
 const FIELD_CLS =
   'h-10 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
+/** Resolve the end date for an inline duration edit. The backend stores
+ *  duration as *working* days (compute_duration), so a duration of N means the
+ *  Nth working day on/after the start. We approximate with a Mon–Fri week here;
+ *  the server recomputes the authoritative duration from the dates on save, so
+ *  any regional-calendar nuance is reconciled on refetch. */
+function addWorkingDays(startISO: string, workingDays: number): string {
+  const d = new Date(`${startISO}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return startISO;
+  let counted = 0;
+  for (;;) {
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6) counted++;
+    if (counted >= Math.max(1, workingDays)) break;
+    d.setDate(d.getDate() + 1);
+  }
+  return d.toISOString().slice(0, 10);
+}
+
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
 function formatDate(dateStr: string): string {
@@ -1419,26 +1437,66 @@ function ScheduleDetail({
     [resizeActivity],
   );
 
-  // Inline edit of a label (activity name / WBS) straight from the Gantt grid.
+  // Inline edit of any grid cell straight from the Gantt left grid.
   const patchActivityField = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: { name?: string; wbs_code?: string } }) =>
+    mutationFn: ({ id, patch }: { id: string; patch: Partial<Activity> }) =>
       scheduleApi.updateActivity(id, patch),
-    onSuccess: () => {
+    onSuccess: (_data, { patch }) => {
       queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
+      // Timing/links changed → any computed critical path is stale.
+      if ('start_date' in patch || 'end_date' in patch || 'dependencies' in patch) {
+        setCpmResult(null);
+      }
     },
     onError: (error: Error) => {
+      // Completing an activity with an open predecessor returns 409.
+      if ((error as { status?: number }).status === 409) {
+        addToast({
+          type: 'warning',
+          title: t('schedule.complete_blocked', { defaultValue: 'Blocked by predecessor' }),
+          message: error.message,
+        });
+        return;
+      }
       addToast({ type: 'error', title: t('toasts.update_failed', { defaultValue: 'Update failed' }), message: error.message });
     },
   });
 
   const handleActivityFieldChange = useCallback(
-    (id: string, p: { name?: string; wbsCode?: string }) => {
-      const patch: { name?: string; wbs_code?: string } = {};
+    (
+      id: string,
+      p: {
+        name?: string;
+        wbsCode?: string;
+        durationDays?: number;
+        start?: string;
+        end?: string;
+        progress?: number;
+        lag?: number;
+      },
+    ) => {
+      const patch: Partial<Activity> = {};
       if (p.name !== undefined) patch.name = p.name;
       if (p.wbsCode !== undefined) patch.wbs_code = p.wbsCode;
-      patchActivityField.mutate({ id, patch });
+      if (p.start !== undefined) patch.start_date = p.start;
+      if (p.end !== undefined) patch.end_date = p.end;
+      if (p.progress !== undefined) patch.progress_pct = p.progress;
+      if (p.durationDays !== undefined) {
+        const act = ganttData?.activities.find((x) => x.id === id);
+        if (act) patch.end_date = addWorkingDays((act.start_date ?? '').slice(0, 10), p.durationDays);
+      }
+      if (p.lag !== undefined) {
+        // Inline lag edit only fires for a single-predecessor activity; rebuild
+        // that one edge with the new lag (multi-predecessor edits go via modal).
+        const deps = ganttData?.activities.find((x) => x.id === id)?.dependencies ?? [];
+        const dep = deps.length === 1 ? deps[0] : undefined;
+        if (dep) {
+          patch.dependencies = [{ activity_id: dep.activity_id, type: dep.type, lag_days: p.lag }];
+        }
+      }
+      if (Object.keys(patch).length > 0) patchActivityField.mutate({ id, patch });
     },
-    [patchActivityField],
+    [ganttData, patchActivityField],
   );
 
   const resetSchedule = useMutation({

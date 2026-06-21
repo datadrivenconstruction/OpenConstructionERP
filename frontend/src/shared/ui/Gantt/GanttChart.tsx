@@ -56,9 +56,22 @@ export interface GanttProps {
   onActivityClick?: (id: string) => void;
   onActivityDrag?: (id: string, newStart: string, newEnd: string) => void;
   onActivityResize?: (id: string, newStart: string, newEnd: string) => void | Promise<void>;
-  /** Commit an inline edit of a text label (activity name or WBS code) from
-   *  the left grid. When omitted, those cells are read-only. */
-  onActivityFieldChange?: (id: string, patch: { name?: string; wbsCode?: string }) => void;
+  /** Commit an inline edit of a grid cell. Each call carries exactly one
+   *  changed field. ``start``/``end`` are ISO ``YYYY-MM-DD`` strings,
+   *  ``durationDays`` is a working-day count, ``lag`` applies to the activity's
+   *  single predecessor. When omitted, all cells are read-only. */
+  onActivityFieldChange?: (
+    id: string,
+    patch: {
+      name?: string;
+      wbsCode?: string;
+      durationDays?: number;
+      start?: string;
+      end?: string;
+      progress?: number;
+      lag?: number;
+    },
+  ) => void;
   className?: string;
   showBaseline?: boolean;
   showDependencies?: boolean;
@@ -184,13 +197,14 @@ export function GanttChart({
     [colWidths],
   );
 
-  // ── Inline label editing (name / WBS) ────────────────────────────
-  const [editingCell, setEditingCell] = useState<{ id: string; col: 'name' | 'wbs' } | null>(null);
+  // ── Inline cell editing ──────────────────────────────────────────
+  type EditableCol = 'name' | 'wbs' | 'duration' | 'start' | 'end' | 'progress' | 'lag';
+  const [editingCell, setEditingCell] = useState<{ id: string; col: EditableCol } | null>(null);
   const [editValue, setEditValue] = useState('');
   const cancelEdit = useRef(false);
 
   const beginEdit = useCallback(
-    (e: ReactMouseEvent, id: string, col: 'name' | 'wbs', current: string) => {
+    (e: ReactMouseEvent, id: string, col: EditableCol, current: string) => {
       if (!onActivityFieldChange) return;
       e.stopPropagation();
       cancelEdit.current = false;
@@ -206,15 +220,35 @@ export function GanttChart({
       setEditingCell(null);
       return;
     }
-    const act = activities.find((a) => a.id === editingCell.id);
-    const orig = editingCell.col === 'name' ? act?.name ?? '' : act?.wbsCode ?? '';
-    const val = editValue.trim();
-    if (val !== orig && !(editingCell.col === 'name' && val === '')) {
-      onActivityFieldChange?.(
-        editingCell.id,
-        editingCell.col === 'name' ? { name: val } : { wbsCode: val },
-      );
+    const { id, col } = editingCell;
+    const act = activities.find((a) => a.id === id);
+    const raw = editValue.trim();
+    const num = Number(raw);
+    let patch: Parameters<NonNullable<typeof onActivityFieldChange>>[1] | null = null;
+    switch (col) {
+      case 'name':
+        if (raw && raw !== (act?.name ?? '')) patch = { name: raw };
+        break;
+      case 'wbs':
+        if (raw !== (act?.wbsCode ?? '')) patch = { wbsCode: raw };
+        break;
+      case 'start':
+        if (raw && raw !== (act?.start ?? '').slice(0, 10)) patch = { start: raw };
+        break;
+      case 'end':
+        if (raw && raw !== (act?.end ?? '').slice(0, 10)) patch = { end: raw };
+        break;
+      case 'duration':
+        if (raw && Number.isFinite(num) && num >= 1) patch = { durationDays: Math.round(num) };
+        break;
+      case 'progress':
+        if (raw && Number.isFinite(num)) patch = { progress: Math.min(100, Math.max(0, Math.round(num))) };
+        break;
+      case 'lag':
+        if (raw !== '' && Number.isFinite(num)) patch = { lag: Math.round(num) };
+        break;
     }
+    if (patch) onActivityFieldChange?.(id, patch);
     setEditingCell(null);
   }, [editingCell, editValue, activities, onActivityFieldChange]);
   const handleEditKey = useCallback((e: ReactKeyboardEvent<HTMLInputElement>) => {
@@ -227,6 +261,13 @@ export function GanttChart({
       e.currentTarget.blur();
     }
   }, []);
+
+  // Shared classNames for the inline edit inputs. Date inputs need more room
+  // than a narrow date column, so they overflow the cell (cells aren't clipped).
+  const EDIT_INPUT_CLS =
+    'w-full min-w-0 rounded border border-oe-blue bg-surface-primary px-1 py-0.5 text-2xs';
+  const DATE_INPUT_CLS =
+    'relative z-20 w-[128px] rounded border border-oe-blue bg-surface-primary px-1 py-0.5 text-2xs';
 
   // Refs for scroll sync
   const tableBodyRef = useRef<HTMLDivElement>(null);
@@ -795,8 +836,14 @@ export function GanttChart({
                 aria-label={t('gantt.resize_column', 'Resize column')}
                 onMouseDown={(e) => startColResize(e, col.id)}
                 onClick={(e) => e.stopPropagation()}
-                className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-oe-blue/40"
-              />
+                title={t('gantt.resize_column', 'Resize column')}
+                className="group absolute right-0 top-0 flex h-full w-2 cursor-col-resize justify-center hover:bg-oe-blue/10"
+              >
+                <span
+                  aria-hidden="true"
+                  className="h-full w-px bg-border group-hover:w-0.5 group-hover:bg-oe-blue"
+                />
+              </span>
             </div>
           ))}
         </div>
@@ -819,25 +866,38 @@ export function GanttChart({
               .map((p) => `${p.lag > 0 ? `+${p.lag}` : p.lag}${t('gantt.day_suffix', 'd')}`)
               .join(', ');
             const editable = !!onActivityFieldChange;
+            const isEditing = (col: EditableCol) =>
+              editingCell?.id === a.id && editingCell.col === col;
+            const durationVal = a.durationDays ?? daysBetween(startD, endD);
+            const startISO = (a.start ?? '').slice(0, 10);
+            const endISO = (a.end ?? '').slice(0, 10);
+            const singlePred = (a.predecessors?.length ?? 0) === 1;
+            const hover = editable ? ' cursor-text rounded px-0.5 hover:bg-surface-secondary/70' : '';
+            const editor = (type: 'text' | 'number' | 'date', cls: string, min?: number, max?: number) => (
+              <input
+                autoFocus
+                type={type}
+                value={editValue}
+                min={min}
+                max={max}
+                step={type === 'number' ? 1 : undefined}
+                inputMode={type === 'number' ? 'numeric' : undefined}
+                onChange={(e) => setEditValue(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                onBlur={commitEdit}
+                onKeyDown={handleEditKey}
+                className={cls}
+              />
+            );
 
             const renderCell = (col: GridColumn) => {
               switch (col.id) {
                 case 'wbs':
-                  return editingCell?.id === a.id && editingCell.col === 'wbs' ? (
-                    <input
-                      autoFocus
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                      onBlur={commitEdit}
-                      onKeyDown={handleEditKey}
-                      className="w-full min-w-0 rounded border border-oe-blue bg-surface-primary px-1 py-0.5 text-2xs"
-                    />
+                  return isEditing('wbs') ? (
+                    editor('text', EDIT_INPUT_CLS)
                   ) : (
                     <span
-                      className={`block w-full truncate text-2xs tabular-nums text-content-tertiary ${
-                        editable ? 'cursor-text rounded px-0.5 hover:bg-surface-secondary/70' : ''
-                      }`}
+                      className={`block w-full truncate text-2xs tabular-nums text-content-tertiary${hover}`}
                       title={a.wbsCode || undefined}
                       onClick={(e) => beginEdit(e, a.id, 'wbs', a.wbsCode ?? '')}
                     >
@@ -858,23 +918,16 @@ export function GanttChart({
                       {a.isGroup && (
                         <span className="shrink-0 text-content-tertiary text-[10px] font-bold">[G]</span>
                       )}
-                      {editingCell?.id === a.id && editingCell.col === 'name' ? (
-                        <input
-                          autoFocus
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                          onBlur={commitEdit}
-                          onKeyDown={handleEditKey}
-                          className="min-w-0 flex-1 rounded border border-oe-blue bg-surface-primary px-1 py-0.5 text-xs"
-                        />
+                      {isEditing('name') ? (
+                        editor(
+                          'text',
+                          'min-w-0 flex-1 rounded border border-oe-blue bg-surface-primary px-1 py-0.5 text-xs',
+                        )
                       ) : (
                         <span
                           className={`min-w-0 truncate text-xs ${
                             a.isGroup ? 'font-bold' : 'font-medium'
-                          } text-content-primary ${
-                            editable ? 'cursor-text rounded px-0.5 hover:bg-surface-secondary/70' : ''
-                          }`}
+                          } text-content-primary${hover}`}
                           title={a.name}
                           onClick={(e) => beginEdit(e, a.id, 'name', a.name)}
                         >
@@ -889,22 +942,41 @@ export function GanttChart({
                     </div>
                   );
                 case 'duration':
-                  return (
-                    <span className="block w-full truncate text-right text-2xs tabular-nums text-content-tertiary">
-                      {a.isMilestone
-                        ? '—'
-                        : `${a.durationDays ?? daysBetween(startD, endD)}${t('gantt.day_suffix', 'd')}`}
+                  if (a.isMilestone)
+                    return (
+                      <span className="block w-full truncate text-right text-2xs tabular-nums text-content-tertiary">
+                        —
+                      </span>
+                    );
+                  return isEditing('duration') ? (
+                    editor('number', `${EDIT_INPUT_CLS} text-right`, 1)
+                  ) : (
+                    <span
+                      className={`block w-full truncate text-right text-2xs tabular-nums text-content-tertiary${hover}`}
+                      onClick={(e) => beginEdit(e, a.id, 'duration', String(durationVal))}
+                    >
+                      {`${durationVal}${t('gantt.day_suffix', 'd')}`}
                     </span>
                   );
                 case 'start':
-                  return (
-                    <span className="block w-full truncate text-right text-2xs tabular-nums text-content-tertiary">
+                  return isEditing('start') ? (
+                    editor('date', DATE_INPUT_CLS)
+                  ) : (
+                    <span
+                      className={`block w-full truncate text-right text-2xs tabular-nums text-content-tertiary${hover}`}
+                      onClick={(e) => beginEdit(e, a.id, 'start', startISO)}
+                    >
                       {fmtShort(startD, locale)}
                     </span>
                   );
                 case 'end':
-                  return (
-                    <span className="block w-full truncate text-right text-2xs tabular-nums text-content-tertiary">
+                  return isEditing('end') ? (
+                    editor('date', DATE_INPUT_CLS)
+                  ) : (
+                    <span
+                      className={`block w-full truncate text-right text-2xs tabular-nums text-content-tertiary${hover}`}
+                      onClick={(e) => beginEdit(e, a.id, 'end', endISO)}
+                    >
                       {fmtShort(endD, locale)}
                     </span>
                   );
@@ -918,16 +990,27 @@ export function GanttChart({
                     </span>
                   );
                 case 'lag':
-                  return (
+                  return isEditing('lag') ? (
+                    editor('number', `${EDIT_INPUT_CLS} text-right`)
+                  ) : (
                     <span
-                      className="block w-full truncate text-right text-2xs tabular-nums text-content-tertiary"
+                      className={`block w-full truncate text-right text-2xs tabular-nums text-content-tertiary${
+                        singlePred ? hover : ''
+                      }`}
                       title={lagText || undefined}
+                      onClick={
+                        singlePred
+                          ? (e) => beginEdit(e, a.id, 'lag', String(a.predecessors?.[0]?.lag ?? 0))
+                          : undefined
+                      }
                     >
                       {lagText || '—'}
                     </span>
                   );
                 case 'progress':
-                  return (
+                  return isEditing('progress') ? (
+                    editor('number', `${EDIT_INPUT_CLS} text-right`, 0, 100)
+                  ) : (
                     <span
                       className={`block w-full truncate text-right text-2xs font-medium tabular-nums ${
                         a.progress >= 100
@@ -935,7 +1018,8 @@ export function GanttChart({
                           : a.progress > 0
                             ? 'text-blue-600'
                             : 'text-content-tertiary'
-                      }`}
+                      }${hover}`}
+                      onClick={(e) => beginEdit(e, a.id, 'progress', String(a.progress))}
                     >
                       {a.progress}
                     </span>
