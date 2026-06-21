@@ -104,6 +104,15 @@ jobs:
           OE_TEST_API_URL: http://127.0.0.1:8000
         run: npx playwright test --config=playwright.captures.config.ts --project=chromium
 
+      - name: Install ffmpeg
+        shell: bash
+        run: |
+          # ffmpeg is NOT reliably preinstalled on ubuntu-latest runners, so
+          # install it explicitly before the webm -> gif conversion below.
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version | head -1
+
       - name: Convert webm clips to optimized GIFs
         working-directory: frontend
         shell: bash
@@ -118,7 +127,7 @@ jobs:
             echo "::warning::no .webm clips were produced; nothing to convert"
             exit 0
           fi
-          # ffmpeg is preinstalled on ubuntu-latest. Two-pass for quality:
+          # Two-pass for quality:
           # palettegen builds an optimal per-clip palette, paletteuse applies it
           # with Floyd-Steinberg dithering. fps + width downscale keep GIFs small.
           for clip in "${clips[@]}"; do
