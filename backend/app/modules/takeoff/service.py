@@ -1799,7 +1799,17 @@ class TakeoffService:
         if "document_id" in fields:
             await self._validate_document_id(fields["document_id"], item.project_id)
         if "metadata" in fields:
-            fields["metadata_"] = fields.pop("metadata")
+            # MERGE incoming metadata over the stored value rather than
+            # replacing the whole JSON column. A blind overwrite drops
+            # server-stamped keys (ai_takeoff_run_id, verdict, compare_key)
+            # that the client never echoes back. Mirrors the metadata-merge
+            # pattern used elsewhere (e.g. boq add_custom_column):
+            # new = {**existing, **incoming}. ``update_fields`` persists this
+            # fresh dict via an explicit UPDATE ... VALUES, so no in-place
+            # ORM mutation / flag_modified is needed here.
+            incoming_meta = fields.pop("metadata") or {}
+            existing_meta = item.metadata_ if isinstance(item.metadata_, dict) else {}
+            fields["metadata_"] = {**existing_meta, **incoming_meta}
         if "points" in fields and fields["points"] is not None:
             fields["points"] = [p.model_dump() for p in data.points]  # type: ignore[union-attr]
 
@@ -2920,6 +2930,7 @@ class TakeoffService:
         wanted = {str(m) for m in measurement_ids} if measurement_ids else None
 
         confirmed_ids: list[str] = []
+        confirmed_uuids: list[uuid.UUID] = []
         skipped = 0
         blocked = 0
         for prop in proposals:
@@ -2935,8 +2946,25 @@ class TakeoffService:
             if verdict == "error":
                 blocked += 1
                 continue
-            await self.measurement_repo.update_fields(prop.id, review_status="confirmed")
+            # The per-row decision (skip / block) stays in the loop, but the
+            # DB write is identical for every confirmed row, so we collect the
+            # ids and flip them all in ONE bulk UPDATE below instead of issuing
+            # an UPDATE + flush + expire_all per proposal (the former N+1).
+            confirmed_uuids.append(prop.id)
             confirmed_ids.append(mid)
+
+        if confirmed_uuids:
+            from sqlalchemy import update
+
+            await self.session.execute(
+                update(TakeoffMeasurement)
+                .where(TakeoffMeasurement.id.in_(confirmed_uuids))
+                .values(review_status="confirmed")
+            )
+            await self.session.flush()
+            # Expire cached ORM instances so subsequent reads see the new
+            # review_status (mirrors MeasurementRepository.update_fields).
+            self.session.expire_all()
 
         if confirmed_ids:
             run = await self.plan_read_repo.get_by_id(run_id)

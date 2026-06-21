@@ -6559,7 +6559,7 @@ const resource = {
     "match_elements.loading_groups": "グループを読み込み中…",
     "match_elements.no_groups": "グループはまだありません、BIM モデルをインポートしてください。",
     "match_elements.loading_detail": "詳細を読み込み中…",
-    "match_elements.footer": "フェーズ A.10–A.12、複数選択の一括操作、しきい値による確認、ノーマッチフロー、テナント別テンプレートライブラリが稼働中。ドラッグ可能なチップと 3D ハイライトはフェーズ B で。",
+    "match_elements.footer": "フェーズ A.10-A.12、複数選択の一括操作、しきい値による確認、ノーマッチフロー、テナント別テンプレートライブラリが稼働中。ドラッグ可能なチップと 3D ハイライトはフェーズ B で。",
     "match_elements.aria.select_all": "表示中のすべてのグループを選択",
     "match_elements.aria.select_group": "{{key}} を選択",
     "match_elements.col.group": "グループ",
@@ -8293,7 +8293,7 @@ const resource = {
     "clash.n_selected": "{{n}} 件選択中",
     "clash.clear_selection": "選択解除",
     "clash.clear_filter_short": "解除",
-    "clash.page_range": "{{from}}–{{to}} / {{total}}",
+    "clash.page_range": "{{from}}-{{to}} / {{total}}",
     "clash.page_of": "ページ {{p}} / {{n}}",
     "clash.prev": "前へ",
     "clash.next": "次へ",
@@ -9304,7 +9304,7 @@ const resource = {
     "sidebar.admin_grid.modules": "モジュール",
     "sidebar.admin_grid.settings": "設定",
     "sidebar.admin_grid.about": "情報",
-    "audit.page_of_total": "{{total}}件中{{start}}–{{end}}件を表示",
+    "audit.page_of_total": "{{total}}件中{{start}}-{{end}}件を表示",
     "audit.page_size": "行数",
     "audit.search_label": "検索",
     "audit.search_placeholder": "アクター、エンティティ、IP、ペイロードを検索…",
@@ -9442,7 +9442,7 @@ const resource = {
     "audit.after": "変更後",
     "audit.raw_payload": "ローペイロード",
     "audit.drawer_title": "監査エントリ詳細",
-    "audit.page_of": "{{start}}–{{end}}件を表示",
+    "audit.page_of": "{{start}}-{{end}}件を表示",
     "audit.page_empty": "このページにエントリはありません",
     "geo.overlays.empty_cta": "最初のオーバーレイを追加",
     "geo.overlays.hide_overlay_aria": "オーバーレイ {{name}} を非表示",
@@ -12717,7 +12717,7 @@ const resource = {
     // header
     "aiest.title": "見積ビルダー（AI）",
     "aiest.subtitle": "あらゆるソースからの、完全にAI主導の精密見積。エージェントが数量をまとめ、正確なカタログ単価を見つけ、あなたが各ステップを確認します。",
-    // AI Estimate Builder — dynamic enum labels (band / run status / match method / group status / validation status)
+    // AI Estimate Builder - dynamic enum labels (band / run status / match method / group status / validation status)
     "aiest.band.high": "高",
     "aiest.band.medium": "中",
     "aiest.band.low": "低",
@@ -12745,7 +12745,7 @@ const resource = {
     "aiest.validation.status_warnings": "警告",
     "aiest.validation.status_errors": "エラー",
     "aiest.validation.status_pending": "保留中",
-    // AI Estimate Builder — construction stage filter labels
+    // AI Estimate Builder - construction stage filter labels
     "aiest.stage_all": "すべての工程",
     "aiest.stage_02_Demolition": "解体",
     "aiest.stage_03_Earthwork": "土工事",

@@ -1678,44 +1678,55 @@ async def safety_trir_kpi(
     **_: Any,
 ) -> KPIComputation:
     incidents = 0
-    hours_worked = Decimal("200000")  # Industry-standard normaliser
+    hours_worked = Decimal("200000")  # Industry-standard normaliser fallback
     try:
-        from app.modules.safety.models import Incident  # type: ignore
+        # The model is ``SafetyIncident`` (there is no ``Incident`` alias);
+        # importing the wrong name silently zeroed this KPI. Mirror the
+        # working ``incident_count_kpi`` / ``SafetyService.get_stats``.
+        from app.modules.safety.models import SafetyIncident as Incident  # type: ignore
 
         stmt = select(Incident)
         if project_id is not None:
             stmt = stmt.where(Incident.project_id == project_id)
         stmt = _scope_portfolio(stmt, Incident.project_id, project_id, allowed_project_ids)
         rows = (await session.execute(stmt)).scalars().all()
+        # Exposure hours follow the documented convention used by the safety
+        # service: each incident carries man-hours in
+        # ``metadata.man_hours_total``. Summed here as the rate denominator.
+        total_hours = Decimal("0")
+        # OSHA 300 recordable treatment types - mirrors SafetyService's
+        # ``_RECORDABLE_TREATMENTS`` ({"medical", "hospital", "fatality"}).
+        recordable_treatments = {"medical", "hospital", "fatality"}
         for row in rows:
-            # Recordable = not "first_aid_only"
+            # Recordable gate: the first-class ``osha_recordable`` flag is the
+            # documented OSHA-300 gate, with a treatment-type fallback so
+            # flagged medical / hospital / fatality cases still count.
+            # Fall back to the severity taxonomy when neither is populated so
+            # legacy rows that only set severity are not silently dropped.
             severity = (getattr(row, "severity", "") or "").lower()
-            if severity in (
-                "minor",
-                "major",
-                "fatal",
-                "lost_time",
-                "recordable",
-                "medical_treatment",
+            treatment = (getattr(row, "treatment_type", "") or "").lower()
+            if (
+                bool(getattr(row, "osha_recordable", False))
+                or treatment in recordable_treatments
+                or severity
+                in (
+                    "minor",
+                    "major",
+                    "fatal",
+                    "lost_time",
+                    "recordable",
+                    "medical_treatment",
+                )
             ):
                 incidents += 1
-        # Try to find actual hours-worked records - gracefully fall back
-        try:
-            from app.modules.safety.models import WorkHours  # type: ignore
 
-            stmt2 = select(WorkHours)
-            if project_id is not None:
-                stmt2 = stmt2.where(WorkHours.project_id == project_id)
-            stmt2 = _scope_portfolio(stmt2, WorkHours.project_id, project_id, allowed_project_ids)
-            wh_rows = (await session.execute(stmt2)).scalars().all()
-            total_hours = sum(
-                (_to_decimal(getattr(r, "hours", 0)) for r in wh_rows),
-                Decimal("0"),
-            )
-            if total_hours > 0:
-                hours_worked = total_hours
-        except Exception:
-            pass
+            raw_hours = (getattr(row, "metadata_", None) or {}).get("man_hours_total")
+            if raw_hours is not None:
+                hrs = _to_decimal(raw_hours)
+                if hrs > 0:
+                    total_hours += hrs
+        if total_hours > 0:
+            hours_worked = total_hours
     except ImportError:
         pass
     except Exception:
@@ -2669,7 +2680,10 @@ async def _safety_trir_records(
 ) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     try:
-        from app.modules.safety.models import Incident  # type: ignore
+        # ``SafetyIncident`` is the real model (no ``Incident`` alias); the
+        # date column is ``incident_date`` (there is no ``occurred_at``).
+        # Mirrors the working ``_incident_records`` drilldown.
+        from app.modules.safety.models import SafetyIncident as Incident  # type: ignore
 
         stmt = select(Incident)
         if project_id is not None:
@@ -2681,8 +2695,10 @@ async def _safety_trir_records(
                 {
                     "kind": "incident",
                     "id": str(row.id),
+                    "incident_number": getattr(row, "incident_number", "") or "",
                     "severity": getattr(row, "severity", "") or "",
-                    "occurred_at": str(getattr(row, "occurred_at", "") or ""),
+                    "incident_date": str(getattr(row, "incident_date", "") or ""),
+                    "status": getattr(row, "status", "") or "",
                     "project_id": str(getattr(row, "project_id", "") or ""),
                 },
             )

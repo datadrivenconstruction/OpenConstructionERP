@@ -53,6 +53,20 @@ function createRSFormatter(locale: string) {
   });
 }
 
+/**
+ * Coerce a money field to a finite number. Backend monetary ``Decimal``
+ * fields (``total_cost``, ``avg_unit_rate``, ...) serialise to JSON as
+ * *strings* even though the TS types claim ``number``, so they must be
+ * coerced before any arithmetic or formatting (a raw string would
+ * concatenate under ``+`` or throw under ``.toFixed``). Mirrors the
+ * existing convention (see the ``Number(r.total_cost) || 0`` reduce below
+ * and ``boqHelpers``' ``num``).
+ */
+function toNum(value: number | string | null | undefined): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
 /* ── Component ───────────────────────────────────────────────────────── */
 
 export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; locale?: string }) {
@@ -62,7 +76,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
   const [expanded, setExpanded] = useState(false);
   const [typeFilter, setTypeFilter] = useState<ResourceTypeFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  // Issue #106 — Pareto / ABC analysis sort modes.
+  // Issue #106 - Pareto / ABC analysis sort modes.
   // 'cost' = the canonical order the backend returns (descending total_cost).
   // 'name' = ascending alphabetical.
   // 'abc'  = same shape as 'cost' but the user's intent is "show me the
@@ -204,7 +218,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
       );
     }
 
-    // Issue #106 — apply user's sort selection. The backend always returns
+    // Issue #106 - apply user's sort selection. The backend always returns
     // by descending total_cost (so abc_class assignments stay consistent),
     // so we only need to override when the user picks 'name'.  We slice
     // before sorting so we don't mutate the cached query data in place.
@@ -305,7 +319,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
                   {typeFilterLabel(type as ResourceTypeFilter)}
                 </span>
                 <span className="text-xs font-medium tabular-nums ml-1">
-                  {fmt.format(info.total_cost)}
+                  {fmt.format(toNum(info.total_cost))}
                 </span>
               </div>
             ))}
@@ -383,7 +397,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
                     <table className="w-full text-xs border-collapse">
                       <thead>
                         <tr className="border-t border-border-light/50 text-content-quaternary bg-surface-secondary/20">
-                          {/* Sortable name header — clicking toggles between
+                          {/* Sortable name header - clicking toggles between
                               'name' and 'cost'. Issue #106 spec: "ordenarse
                               por nombre / por precio / por porcentaje ABC". */}
                           <th className="px-4 py-2 text-left font-medium">
@@ -409,7 +423,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
                           <th className="px-3 py-2 text-right font-medium w-24">
                             {t('boq.rs_col_avg_rate', { defaultValue: 'Avg Rate' })}
                           </th>
-                          {/* Sortable cost header — toggles back to 'cost'
+                          {/* Sortable cost header - toggles back to 'cost'
                               from any other mode. Default sort. */}
                           <th className="px-3 py-2 text-right font-medium w-28">
                             <button
@@ -422,7 +436,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
                               {sortBy === 'cost' && <span aria-hidden="true">↓</span>}
                             </button>
                           </th>
-                          {/* Issue #106 — ABC% column. Click toggles 'abc' /
+                          {/* Issue #106 - ABC% column. Click toggles 'abc' /
                               'cost' (both descending), with the abc mode
                               also drawing visible separator rules between
                               the A/B/C buckets so the Pareto split is
@@ -452,7 +466,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
                       </thead>
                       <tbody>
                         {visibleResources.map((res, idx) => {
-                          // Issue #106 — when sorted by ABC and the user is
+                          // Issue #106 - when sorted by ABC and the user is
                           // viewing the full list (not the preview), draw a
                           // separator above the first row of each bucket to
                           // visualise the 80/15/5 split. We compare the
@@ -493,7 +507,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
                             <td />
                             <td className="px-3 py-2 text-right text-xs font-bold text-content-primary tabular-nums">
                               {fmt.format(
-                                filteredResources.reduce((sum, r) => sum + (Number(r.total_cost) || 0), 0),
+                                filteredResources.reduce((sum, r) => sum + toNum(r.total_cost), 0),
                               )}
                             </td>
                             <td className="px-3 py-2 text-right text-xs font-bold text-content-primary tabular-nums">
@@ -567,7 +581,7 @@ function ResourceRow({
   onSaveToCatalog: (resource: ResourceSummaryItem) => void;
   isSaved: boolean;
   onRepickVariant: (resource: ResourceSummaryItem, chosen: CostVariant) => void;
-  /** Issue #106 — when true, draw a thicker top border to visualise the
+  /** Issue #106 - when true, draw a thicker top border to visualise the
    *  A→B or B→C boundary in ABC sort mode. */
   abcDividerAbove?: boolean;
 }) {
@@ -575,7 +589,7 @@ function ResourceRow({
   const badgeStyle = TYPE_BADGE_STYLES[resource.type] || TYPE_BADGE_STYLES.other;
 
   /* ── Variant re-pick (mirrors EditableResourceRow on the BOQ grid) ───
-   *  Variants are intrinsic to one abstract resource — a swap here fans
+   *  Variants are intrinsic to one abstract resource - a swap here fans
    *  the chosen variant out to every position_ref the backend recorded
    *  for this aggregated row, so every BOQ position using this resource
    *  flips together.  No-op when fewer than 2 variants are cached. */
@@ -635,7 +649,7 @@ function ResourceRow({
     });
   })();
 
-  // Issue #106 — colour the ABC bucket pill consistently with other
+  // Issue #106 - colour the ABC bucket pill consistently with other
   // dashboards: A = red (drives most cost, watch closely),
   // B = amber (moderate impact), C = green (long tail, lower priority).
   const abcClass = resource.abc_class ?? null;
@@ -685,11 +699,11 @@ function ResourceRow({
         {resource.unit}
       </td>
       <td className="px-3 py-2 text-right text-content-primary tabular-nums">
-        {fmt.format(resource.total_quantity)}
+        {fmt.format(toNum(resource.total_quantity))}
       </td>
       <td className="px-3 py-2 text-right text-content-secondary tabular-nums">
         <div className="inline-flex items-center justify-end gap-1.5">
-          <span>{fmt.format(resource.avg_unit_rate)}</span>
+          <span>{fmt.format(toNum(resource.avg_unit_rate))}</span>
           {canRepick && (
             <>
               <button
@@ -738,7 +752,7 @@ function ResourceRow({
         </div>
       </td>
       <td className="px-3 py-2 text-right text-content-primary font-semibold tabular-nums">
-        {fmt.format(resource.total_cost)}
+        {fmt.format(toNum(resource.total_cost))}
       </td>
       <td className="px-3 py-2 text-right tabular-nums">
         <span

@@ -1298,7 +1298,11 @@ def _position_total_in_base(
     if code and code != base and fx_rates_map:
         fx = fx_rates_map.get(code)
         if fx:
-            converted = _to_decimal(fx, default=Decimal("1"))
+            # Default 0 (not 1) so a present-but-unparseable rate
+            # ("n/a", "1,5", ...) fails the > 0 guard below and the amount
+            # stays in its own units instead of silently converting at 1:1.
+            # Matches _resource_total_in_base's bad-rate handling.
+            converted = _to_decimal(fx)
             if converted > 0:
                 amount = amount * converted
     return amount
@@ -2576,9 +2580,18 @@ class BOQService:
         boq = await self.get_boq(boq_id)
 
         fields = data.model_dump(exclude_unset=True)
-        # Map 'metadata' key to the model's 'metadata_' column
+        # Map 'metadata' key to the model's 'metadata_' column.
+        # MERGE the incoming metadata into the row's existing JSON instead of
+        # replacing the whole column - a PATCH that carries only a couple of
+        # keys must not wipe every other key (silent JSON data loss). Mirrors
+        # the merge pattern used in update_position above.
         if "metadata" in fields:
-            fields["metadata_"] = fields.pop("metadata")
+            incoming_meta = fields.pop("metadata")
+            existing_meta = boq.metadata_ if isinstance(boq.metadata_, dict) else {}
+            if isinstance(incoming_meta, dict):
+                fields["metadata_"] = {**existing_meta, **incoming_meta}
+            else:
+                fields["metadata_"] = incoming_meta
 
         if fields:
             await self.boq_repo.update_fields(boq_id, **fields)
@@ -5019,9 +5032,18 @@ class BOQService:
         if "fixed_amount" in fields:
             fields["fixed_amount"] = str(fields["fixed_amount"])
 
-        # Map 'metadata' key to the model's 'metadata_' column
+        # Map 'metadata' key to the model's 'metadata_' column.
+        # MERGE the incoming metadata into the row's existing JSON instead of
+        # replacing the whole column - a PATCH that carries only a couple of
+        # keys must not wipe every other key (silent JSON data loss). Mirrors
+        # the merge pattern used in update_position above.
         if "metadata" in fields:
-            fields["metadata_"] = fields.pop("metadata")
+            incoming_meta = fields.pop("metadata")
+            existing_meta = markup.metadata_ if isinstance(markup.metadata_, dict) else {}
+            if isinstance(incoming_meta, dict):
+                fields["metadata_"] = {**existing_meta, **incoming_meta}
+            else:
+                fields["metadata_"] = incoming_meta
 
         if fields:
             refreshed = await self.markup_repo.update_fields(markup_id, **fields)

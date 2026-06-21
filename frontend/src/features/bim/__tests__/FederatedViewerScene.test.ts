@@ -1,6 +1,6 @@
 // @ts-nocheck
 /**
- * FederatedViewerScene tests — BIM Federations Slice 3.
+ * FederatedViewerScene tests - BIM Federations Slice 3.
  *
  * Counter-intuitive design note
  * -----------------------------
@@ -134,16 +134,35 @@ function makeMember(ifcClasses: string[]): THREE.Group {
   return root;
 }
 
+// jsdom returns null from canvas.getContext('webgl2'), which the scene's
+// canUseWebGL2() guard reads as "no WebGL2" and would make the constructor
+// throw WebGLUnavailableError. The WebGLRenderer itself is already mocked, so
+// stub getContext to report a usable context for the webgl2 probe and keep the
+// happy-path tests exercising the real construction flow.
+let _origGetContext: typeof HTMLCanvasElement.prototype.getContext;
+
 // Force-stub rAF so animate() loop does not retain timers across tests.
 beforeEach(() => {
   vi.stubGlobal('requestAnimationFrame', (() => 0) as unknown as typeof requestAnimationFrame);
   vi.stubGlobal('cancelAnimationFrame', (() => undefined) as unknown as typeof cancelAnimationFrame);
+  _origGetContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function getContext(
+    this: HTMLCanvasElement,
+    contextId: string,
+    ...rest: unknown[]
+  ) {
+    if (contextId === 'webgl2' || contextId === 'webgl') {
+      return {} as unknown as RenderingContext;
+    }
+    return _origGetContext.call(this, contextId, ...rest);
+  } as typeof HTMLCanvasElement.prototype.getContext;
   nextGltfScene = null;
   nextParseError = null;
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  HTMLCanvasElement.prototype.getContext = _origGetContext;
   document.body.innerHTML = '';
 });
 
@@ -199,7 +218,7 @@ describe('FederatedViewerScene', () => {
       originOffset: { x: 0, y: 0, z: 0 },
     });
 
-    // Turn on discipline coloring — that's when materials get CLONED per
+    // Turn on discipline coloring - that's when materials get CLONED per
     // the lazy-clone contract.
     scene.setDisciplineColoringEnabled(true);
 
@@ -351,7 +370,7 @@ describe('FederatedViewerScene', () => {
     expect(member.visible).toBe(false);
     scene.setMemberVisible('mod-a', true);
     expect(member.visible).toBe(true);
-    // No-op on unknown id — must NOT throw.
+    // No-op on unknown id - must NOT throw.
     expect(() => scene.setMemberVisible('does-not-exist', false)).not.toThrow();
     scene.dispose();
   });

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.8.3] - 2026-06-21
+
+### Security
+
+- Rebuilding the bill-of-quantities semantic-search index now enforces the same access rules as the rest of the module. You can re-index a single bill or a single project only when you can already open it, and a full re-index of every project is restricted to administrators. Previously any account permitted to edit a bill could rebuild - or, with the purge option, wipe - another tenant's search index by supplying its project or bill id.
+
+### Fixed
+
+- The bill-of-quantities resource summary now converts foreign-currency resources into the project's base currency before adding them up, so the per-type subtotals and the grand total no longer blend different currencies. A resource priced in a currency that has no configured exchange rate is kept in its own units rather than dropped, matching how the cost breakdown already behaves.
+- Editing a bill of quantities, a markup line or a takeoff measurement now merges your change into the record's saved metadata instead of replacing the whole block, so values the server stamps in the background (for example takeoff-run, comparison and verdict markers) are no longer lost when you save an unrelated edit.
+- The safety total-recordable-incident-rate (TRIR) indicator and its drill-down now read the safety incident records correctly. The metric previously always reported zero and the drill-down was always empty.
+- A bill-of-quantities position priced in a foreign currency whose exchange rate is present but unreadable is now kept in its own units instead of being converted one-to-one, matching the resource-level behaviour.
+- The federated BIM viewer no longer throws when the browser or device has no WebGL2 support; it now fails softly so the rest of the page keeps working.
+- Currency amounts in the cost-breakdown and resource-summary panels render reliably from the server's exact values, avoiding occasional malformed totals.
+- Confirming many detected takeoff measurements at once now writes them in a single database operation instead of one round-trip per row.
+
 ## [8.8.2] - 2026-06-21
 
 ### Added

@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * FederatedViewerScene — framework-agnostic Three.js scene that composes
+ * FederatedViewerScene - framework-agnostic Three.js scene that composes
  * N BIM model GLBs into a single shared-origin scene, color-coded by
  * discipline. Slice 3 of BIM Federations.
  *
@@ -15,7 +15,7 @@
  *    double the GPU memory cost before the user even toggled discipline
  *    coloring on. The cloned material reference is stamped on the mesh
  *    so we can restore the original later.
- * 3) Isolation walks meshes via ``userData.ifcClass`` — set by
+ * 3) Isolation walks meshes via ``userData.ifcClass`` - set by
  *    ``addMember`` based on the GLB node names. We do NOT depend on
  *    a separate per-element database lookup; the GLB ships the IFC
  *    class as a node-name suffix from the DDC converter.
@@ -26,7 +26,7 @@
  *    geometries + materials disposed, renderer + GLTFLoader released.
  *    Slice-3 lifecycle audit confirmed zero retained-mesh leaks across
  *    100 add/remove cycles in dev (verified via Chrome devtools heap
- *    snapshot — see __tests__/FederatedViewerScene.test.ts:test_dispose).
+ *    snapshot - see __tests__/FederatedViewerScene.test.ts:test_dispose).
  */
 
 import * as THREE from 'three';
@@ -49,6 +49,36 @@ function paletteColor(discipline: string): THREE.Color {
   return new THREE.Color(hex);
 }
 
+/** Error thrown by the constructor when no usable WebGL2 context is available.
+ *  Callers can catch this specific type to render a friendly fallback state
+ *  rather than letting an opaque three.js throw trip a React error boundary. */
+export class WebGLUnavailableError extends Error {
+  constructor(message = 'WebGL2 is not available in this browser/environment') {
+    super(message);
+    this.name = 'WebGLUnavailableError';
+  }
+}
+
+/**
+ * Feature-detect a usable WebGL2 context before constructing a
+ * THREE.WebGLRenderer. three.js (r163+) requires WebGL2 and THROWS
+ * synchronously when a context cannot be created - on headless Firefox /
+ * WebKit (no GPU, no software fallback) that throw would escape the React
+ * effect and trip the page's error boundary. Probing first lets the viewer
+ * fail soft with a friendly notice instead. Mirrors the guard in
+ * PointCloudBackground.tsx.
+ */
+export function canUseWebGL2(): boolean {
+  if (typeof document === 'undefined') return false;
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl2');
+    return gl != null;
+  } catch {
+    return false;
+  }
+}
+
 /** Heuristic to extract the IfcClass from a GLB node name. DDC's cad2data
  * pipeline names nodes ``IfcWall_{guid}`` / ``IfcDoor_{guid}`` / etc.
  * Falls back to scanning ``userData.ifc_class`` (set by some exporters)
@@ -60,7 +90,7 @@ export function deriveIfcClass(obj: THREE.Object3D): string | null {
   const name = obj.name ?? '';
   const m = name.match(/^(Ifc[A-Za-z0-9_]+?)(?:[_:-]|$)/);
   if (m) return m[1] ?? null;
-  // Walk up the parent chain — DDC nests meshes under
+  // Walk up the parent chain - DDC nests meshes under
   // ``IfcWall_xxx/Body/Mesh``; the leaf is "Mesh" with no class.
   let cursor: THREE.Object3D | null = obj.parent;
   while (cursor) {
@@ -93,7 +123,7 @@ export class FederatedViewerScene {
   readonly camera: THREE.PerspectiveCamera;
   readonly renderer: THREE.WebGLRenderer;
   readonly controls: OrbitControls;
-  /** Root group all federation members hang off — single transform pivot
+  /** Root group all federation members hang off - single transform pivot
    * for the entire federated scene. */
   readonly root: THREE.Group;
 
@@ -113,7 +143,7 @@ export class FederatedViewerScene {
   private _onContextLost: ((e: Event) => void) | null = null;
   private _onContextRestored: (() => void) | null = null;
   /** Optional host callback fired with `true` on context loss / `false` on
-   *  restore — wired to a non-fatal recovery banner (pdf11). */
+   *  restore - wired to a non-fatal recovery banner (pdf11). */
   private _onContextStateChange: ((lost: boolean) => void) | null = null;
 
   /** modelId → member root group. */
@@ -124,7 +154,7 @@ export class FederatedViewerScene {
    * key is the mesh ``uuid``; we never reuse meshes across federations so
    * a plain Map is safe. */
   private meshOverrides = new WeakMap<THREE.Mesh, MeshOverride>();
-  /** Live mesh registry — WeakMaps aren't iterable, so we also keep a Set
+  /** Live mesh registry - WeakMaps aren't iterable, so we also keep a Set
    * of meshes-with-overrides for sweep operations (toggle off, restore). */
   private overriddenMeshes = new Set<THREE.Mesh>();
 
@@ -138,12 +168,28 @@ export class FederatedViewerScene {
     this.canvas = canvas;
     this.container = parent;
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: false,
-      logarithmicDepthBuffer: true,
-    });
+    // Fail soft when WebGL2 is unavailable. three.js throws synchronously from
+    // the WebGLRenderer constructor in that case; without this guard the throw
+    // escapes the caller's React effect and trips the page error boundary
+    // (same failure class fixed in PointCloudBackground.tsx). We feature-detect
+    // first and additionally wrap the construction in try/catch so a non-fatal
+    // WebGLUnavailableError surfaces, which FederatedViewer renders as a
+    // friendly notice instead of crashing the page.
+    if (!canUseWebGL2()) {
+      throw new WebGLUnavailableError();
+    }
+    try {
+      this.renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: false,
+        logarithmicDepthBuffer: true,
+      });
+    } catch (err) {
+      throw new WebGLUnavailableError(
+        err instanceof Error ? err.message : undefined,
+      );
+    }
     // Cap at min(2, devicePixelRatio) per Slice-3 perf budget. Higher DPRs
     // quadruple fragment cost on multi-discipline federations.
     const dpr = typeof window !== 'undefined' && window.devicePixelRatio
@@ -155,7 +201,7 @@ export class FederatedViewerScene {
     this.renderer.shadowMap.enabled = false;
     this.updateSize();
 
-    // WebGL context-loss handling — a federated scene composes several fat
+    // WebGL context-loss handling - a federated scene composes several fat
     // IFC/RVT GLBs and is a prime candidate for a driver reset / VRAM-pressure
     // context drop. preventDefault() on the loss event lets the browser
     // restore the context; we pause rendering until it does (pdf11).
@@ -260,7 +306,7 @@ export class FederatedViewerScene {
     if (this._disposed) return;
     this.animationId = requestAnimationFrame(this.animate);
     if (!this._isVisible) return;
-    // Skip while the GL context is lost — render() would throw against a
+    // Skip while the GL context is lost - render() would throw against a
     // dead context. Resumes on `webglcontextrestored`.
     if (this._contextLost) return;
     const dampingDirty = this.controls.update();
@@ -315,7 +361,7 @@ export class FederatedViewerScene {
     root.userData.discipline = args.discipline;
 
     // Walk every mesh and stamp ifcClass / discipline. We do NOT clone
-    // materials here — that happens lazily on the first colour mutation.
+    // materials here - that happens lazily on the first colour mutation.
     root.traverse((obj) => {
       if (obj instanceof THREE.Mesh) {
         const ifcClass = deriveIfcClass(obj);
@@ -447,7 +493,7 @@ export class FederatedViewerScene {
       const state = this.meshOverrides.get(mesh);
       if (!state) continue;
       mesh.material = state.originalMaterial;
-      // Drop the cloned override — we'll re-clone on the next toggle.
+      // Drop the cloned override - we'll re-clone on the next toggle.
       if (state.override) {
         const mats = Array.isArray(state.override) ? state.override : [state.override];
         for (const m of mats) m.dispose();
@@ -455,14 +501,14 @@ export class FederatedViewerScene {
       // Fully evict the per-mesh state from the WeakMap, not just null out its
       // fields. If the stale state object lingered, applyOverrideColor's
       // `if (!state)` branch would be skipped on the next enable, so the mesh
-      // would be re-tinted but never re-added to overriddenMeshes — leaving the
+      // would be re-tinted but never re-added to overriddenMeshes - leaving the
       // sweep set empty and breaking the following disable (off→on→off would
       // get stuck tinted). Deleting the entry makes re-enabling rebuild state
       // from scratch, so repeated toggling is idempotent.
       this.meshOverrides.delete(mesh);
     }
     // Clear the sweep set now that all overrides are reverted. Without this
-    // the set would accumulate stale mesh refs across add/remove cycles —
+    // the set would accumulate stale mesh refs across add/remove cycles -
     // each removeMember() call already deletes entries via disposeGroup(),
     // but meshes from members that were never removed (just uncolored)
     // would stay until the next disposeGroup / dispose(). Clearing here
@@ -557,7 +603,7 @@ export class FederatedViewerScene {
           const mats = Array.isArray(state.override) ? state.override : [state.override];
           for (const m of mats) m.dispose();
         }
-        // Original materials — only dispose if we cloned. Otherwise the
+        // Original materials - only dispose if we cloned. Otherwise the
         // user might still need them; in practice we own them (loaded
         // from the GLB) so disposing is safe and prevents leaks.
         const orig = state ? state.originalMaterial : obj.material;
@@ -611,14 +657,14 @@ export class FederatedViewerScene {
       // mocked / headless renderers may not implement it - safe to ignore
     }
     this.renderer.dispose();
-    // Lights / helpers — let them go with the scene reference. Three.js
+    // Lights / helpers - let them go with the scene reference. Three.js
     // does not reference them after dispose; GC reclaims them once the
     // scene itself is unreachable.
     this.overriddenMeshes.clear();
   }
 
   /* ── Test/inspection helpers (intentionally not on the public API
-   *    spec — needed for the unit tests to make assertions about
+   *    spec - needed for the unit tests to make assertions about
    *    internal state without poking at private fields directly). */
 
   /** Number of registered members. */

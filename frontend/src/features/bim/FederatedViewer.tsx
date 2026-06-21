@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * FederatedViewer — React wrapper around FederatedViewerScene. Slice 3
+ * FederatedViewer - React wrapper around FederatedViewerScene. Slice 3
  * of BIM Federations.
  *
  * Mounts a <canvas>, instantiates one FederatedViewerScene, loads the
@@ -26,6 +26,7 @@ import { Button } from '@/shared/ui';
 
 import {
   FederatedViewerScene,
+  WebGLUnavailableError,
   type FederatedMemberAdd,
 } from './FederatedViewerScene';
 import {
@@ -68,7 +69,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const sceneRef = useRef<FederatedViewerScene | null>(null);
-    /** Members we've already pushed into the scene — keyed by modelId so
+    /** Members we've already pushed into the scene - keyed by modelId so
      * a re-render with the same data is a no-op. */
     const loadedMemberIds = useRef<Set<string>>(new Set());
 
@@ -76,6 +77,10 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
     const [memberVisibility, setMemberVisibility] = useState<
       Record<string, boolean>
     >({});
+    /** Set when the Three.js scene cannot start because WebGL2 is unavailable
+     *  (headless / no-GPU environments). We render a friendly notice instead of
+     *  letting the constructor throw crash the page. */
+    const [webglUnavailable, setWebglUnavailable] = useState(false);
 
     const { detail, members, errors, isLoading, detailError } =
       useFederatedGeometryLoader(federationId);
@@ -84,7 +89,24 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
     useEffect(() => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const scene = _sceneFactory(canvas);
+      // The scene constructor throws WebGLUnavailableError when WebGL2 is not
+      // available (or three.js fails to acquire a context). Fail soft: surface
+      // a friendly notice rather than letting the throw escape and trip the
+      // page error boundary. Any other error is genuinely unexpected, so it is
+      // re-thrown for the error boundary to report.
+      let scene: FederatedViewerScene;
+      try {
+        scene = _sceneFactory(canvas);
+      } catch (err) {
+        if (err instanceof WebGLUnavailableError) {
+          // eslint-disable-next-line no-console
+          console.warn('FederatedViewer: WebGL unavailable, viewer disabled', err);
+          setWebglUnavailable(true);
+          return;
+        }
+        throw err;
+      }
+      setWebglUnavailable(false);
       sceneRef.current = scene;
       return () => {
         scene.dispose();
@@ -105,7 +127,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
       return () => observer.disconnect();
     // sceneRef.current is a stable object; we only need to re-run when the
     // scene itself changes (i.e., never after mount). Empty dep array is
-    // intentional here — the MutationObserver keeps it live.
+    // intentional here - the MutationObserver keeps it live.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -138,7 +160,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
               m.modelId in prev ? prev : { ...prev, [m.modelId]: true },
             );
           } catch (err) {
-            // Swallowed — the member is reported via the errors[] surface
+            // Swallowed - the member is reported via the errors[] surface
             // upstream and we don't want one bad GLB to break the loop.
             // eslint-disable-next-line no-console
             console.warn('FederatedViewer: addMember failed', m.modelId, err);
@@ -243,7 +265,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
           })}
         />
 
-        {/* Toolbar — top-left */}
+        {/* Toolbar - top-left */}
         <div
           data-testid="federated-viewer-toolbar"
           className="absolute left-3 top-3 z-10 flex flex-wrap items-center gap-1.5 rounded-lg border border-slate-200 bg-white/95 px-2 py-1.5 shadow-md backdrop-blur"
@@ -279,7 +301,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
           </Button>
         </div>
 
-        {/* Legend — top-right */}
+        {/* Legend - top-right */}
         <FederatedViewerLegend
           disciplines={legendRows}
           onToggleVisible={onToggleMemberVisible}
@@ -297,7 +319,30 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
           </div>
         ) : null}
 
-        {/* Detail error overlay — fatal, blocks the viewer */}
+        {/* WebGL-unavailable overlay - non-fatal. The 3D scene could not start
+            (no WebGL2 / no GPU), so we show a friendly notice instead of a
+            blank canvas or a crashed page. */}
+        {webglUnavailable ? (
+          <div
+            data-testid="federated-viewer-webgl-unavailable"
+            role="status"
+            className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-1 bg-slate-50 px-6 text-center"
+          >
+            <div className="text-sm font-semibold text-slate-700">
+              {t('bim.federation.viewer.webgl_unavailable_title', {
+                defaultValue: '3D viewer not available',
+              })}
+            </div>
+            <div className="max-w-md text-xs text-slate-500">
+              {t('bim.federation.viewer.webgl_unavailable_body', {
+                defaultValue:
+                  'This browser or device does not support WebGL2, which is required to display the federated 3D model. Try a hardware-accelerated browser or update your graphics drivers.',
+              })}
+            </div>
+          </div>
+        ) : null}
+
+        {/* Detail error overlay - fatal, blocks the viewer */}
         {detailError ? (
           <div
             data-testid="federated-viewer-detail-error"
@@ -311,7 +356,7 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
           </div>
         ) : null}
 
-        {/* Per-member state — non-fatal. We split genuine load failures
+        {/* Per-member state - non-fatal. We split genuine load failures
             (red) from "no geometry yet" members (neutral/informational) so
             a model that simply hasn't been converted doesn't look broken.
             One member's problem never blocks the others from rendering. */}

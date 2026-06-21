@@ -12859,7 +12859,7 @@ const resource = {
     // header
     "aiest.title": "منشئ التقديرات (ذكاء اصطناعي)",
     "aiest.subtitle": "تقدير دقيق مدفوع بالكامل بالذكاء الاصطناعي من أي مصدر. يجمّع الوكيل الكميات ويعثر على أسعار الكتالوج الدقيقة - وأنت تؤكد كل خطوة.",
-    // AI Estimate Builder — dynamic enum labels (band / run status / match method / group status / validation status)
+    // AI Estimate Builder - dynamic enum labels (band / run status / match method / group status / validation status)
     "aiest.band.high": "مرتفعة",
     "aiest.band.medium": "متوسطة",
     "aiest.band.low": "منخفضة",
@@ -12887,7 +12887,7 @@ const resource = {
     "aiest.validation.status_warnings": "تحذيرات",
     "aiest.validation.status_errors": "أخطاء",
     "aiest.validation.status_pending": "قيد الانتظار",
-    // AI Estimate Builder — construction stage filter labels
+    // AI Estimate Builder - construction stage filter labels
     "aiest.stage_all": "كل المراحل",
     "aiest.stage_02_Demolition": "الهدم",
     "aiest.stage_03_Earthwork": "الأعمال الترابية",

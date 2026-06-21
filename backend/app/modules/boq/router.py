@@ -6813,6 +6813,14 @@ async def get_resource_summary(
     await _verify_boq_owner(session, boq_id, _user_id, payload)
     boq_data = await service.get_boq_with_positions(boq_id)
 
+    # Resolve the project's base currency + FX table so resources priced in a
+    # foreign currency are converted to the base before they are aggregated.
+    # Without this the per-type totals and grand_total would blend currencies
+    # (adding raw EUR and USD numbers). Mirrors BOQService.get_cost_breakdown;
+    # a foreign currency with no FX rate is left in its own units (never zeroed).
+    base_currency, fx_map = await service.get_export_fx(boq_id)
+    _base_cur = (base_currency or "").strip().upper()
+
     # Aggregation key: (name_lower, type_lower) → accumulator
     agg: dict[tuple[str, str], dict[str, Any]] = {}
 
@@ -6842,6 +6850,21 @@ async def get_resource_summary(
             return
 
         cost = qty * rate * max(pos_qty, 1.0)
+        # Convert this resource's subtotal into the project base currency
+        # before aggregating, so mixed-currency BOQs never blend raw numbers.
+        # A foreign currency whose rate is missing/non-positive is left in its
+        # own units (deterministic, never zeroed) - same policy as
+        # BOQService._resource_total_in_base.
+        rcur = str(raw.get("currency") or "").strip().upper()
+        if rcur and _base_cur and rcur != _base_cur and fx_map:
+            _fx = fx_map.get(rcur)
+            if _fx is not None:
+                try:
+                    _fxf = float(_fx)
+                except (ValueError, TypeError):
+                    _fxf = 0.0
+                if _fxf > 0.0 and _fxf < float("inf"):
+                    cost = cost * _fxf
         key = (name.lower(), rtype)
 
         if key not in agg:
@@ -6983,7 +7006,10 @@ async def get_resource_summary(
                 variant_stats=entry["variant_stats"],
                 current_variant_label=current_label,
                 variant_default=variant_default,
-                currency=entry["currency"],
+                # Totals are now base-currency denominated (foreign resources
+                # were converted above), so report the base currency; fall back
+                # to the first-seen resource currency when no base is set.
+                currency=_base_cur or entry["currency"],
                 resource_code=entry["resource_code"],
                 position_refs=entry["position_refs"],
             )
@@ -8342,6 +8368,7 @@ async def boq_vector_status() -> dict[str, Any]:
 async def boq_vector_reindex(
     session: SessionDep,
     _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
     project_id: uuid.UUID | None = Query(default=None),
     boq_id: uuid.UUID | None = Query(default=None),
     purge_first: bool = Query(default=False),
@@ -8353,6 +8380,23 @@ async def boq_vector_reindex(
     ``purge_first=true`` to wipe the matching subset before re-encoding -
     useful when the embedding model has changed.
     """
+    # Cross-tenant guard. Reindexing - and especially ``purge_first=true``,
+    # which wipes the matching subset before re-encoding - must be scoped to
+    # data the caller owns, otherwise any holder of the "boq.update" permission
+    # could re-embed or purge another tenant's vectors by guessing ids:
+    #   - boq_id     -> must own that BOQ (or be a project member / admin)
+    #   - project_id -> must have access to that project
+    #   - neither    -> a full-tenant reindex; administrators only
+    if boq_id is not None:
+        await _verify_boq_owner(session, boq_id, _user_id, payload)
+    elif project_id is not None:
+        await verify_project_access(project_id, _user_id, session)
+    elif not (payload and payload.get("role") == "admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="A full vector reindex requires an administrator.",
+        )
+
     from sqlalchemy import select
     from sqlalchemy.orm import selectinload
 

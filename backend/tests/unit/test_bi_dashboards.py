@@ -920,6 +920,43 @@ async def test_evm_kpis_registered_and_compute_safely(
     assert isinstance(result.value, Decimal)
 
 
+def test_evm_kpi_formulas_are_async() -> None:
+    """Every registered KPI formula must be an async function.
+
+    Regression guard for the EAC bug where ``@register_kpi("eac")`` sat on the
+    pure helper ``_eac_from_primitives`` instead of the async ``eac_kpi``: the
+    registry then called ``fn(session, project_id=...)`` on a sync helper that
+    only accepts four primitives, raising a TypeError that ``compute`` swallowed
+    so EAC silently returned 0. If a decorator ever lands on a sync helper
+    again this fails loudly.
+    """
+    import inspect
+
+    from app.modules.bi_dashboards import kpis
+
+    for code, fn in kpis.KPI_FORMULAS.items():
+        assert inspect.iscoroutinefunction(fn), f"KPI '{code}' formula is not async: {fn!r}"
+
+
+def test_eac_from_primitives_overrun_exceeds_bac() -> None:
+    """A project running over both cost and schedule must forecast EAC > BAC."""
+    from app.modules.bi_dashboards import kpis
+
+    eac = kpis._eac_from_primitives(bac=Decimal("1000"), pv=Decimal("500"), ev=Decimal("400"), ac=Decimal("500"))
+    assert isinstance(eac, Decimal)
+    # CPI = SPI = 0.8 -> EAC = 500 + (1000 - 400) / 0.64 = 1437.5
+    assert eac > Decimal("1000")
+    assert abs(eac - Decimal("1437.5")) < Decimal("1")
+
+
+def test_eac_from_primitives_no_progress_falls_back_to_bac() -> None:
+    """With no actuals / no progress the perf indices are undefined; EAC = BAC."""
+    from app.modules.bi_dashboards import kpis
+
+    eac = kpis._eac_from_primitives(bac=Decimal("1000"), pv=Decimal("0"), ev=Decimal("0"), ac=Decimal("0"))
+    assert eac == Decimal("1000")
+
+
 @pytest.mark.asyncio
 async def test_evm_drilldown_provider_registered(
     session: AsyncSession,
